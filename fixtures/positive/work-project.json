@@ -1,0 +1,8 @@
+{
+  "id": "urn:project:a",
+  "kind": "project",
+  "createdAt": "2026-08-26T10:00:00Z",
+  "estate": "urn:estate:one",
+  "name": "Project A",
+  "dataPolicy": { "id": "urn:policy:data:project-a", "revision": 1, "contentHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777" }
+}

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/runners.schema.json",
+  "title": "Runner catalogue (installed coding agents)",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "$ref": "#/$defs/runner"
+  },
+  "$defs": {
+    "argv": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      }
+    },
+    "drive": {
+      "enum": [
+        "claude-headless",
+        "codex-app-server",
+        "codex-exec",
+        "acp"
+      ]
+    },
+    "runner": {
+      "type": "object",
+      "required": [
+        "kind",
+        "name",
+        "binaries",
+        "version",
+        "drive",
+        "drives",
+        "mcpConfig"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "binaries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+          }
+        },
+        "version": {
+          "type": "object",
+          "required": [
+            "argv",
+            "pattern",
+            "timeoutMs"
+          ],
+          "properties": {
+            "argv": {
+              "$ref": "#/$defs/argv"
+            },
+            "pattern": {
+              "type": "string",
+              "format": "regex",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 5000
+            }
+          },
+          "additionalProperties": false
+        },
+        "drive": {
+          "$ref": "#/$defs/drive"
+        },
+        "drives": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/drive"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "argv"
+            ],
+            "properties": {
+              "argv": {
+                "$ref": "#/$defs/argv"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "mcpConfig": {
+          "type": "object",
+          "required": [
+            "file",
+            "format"
+          ],
+          "properties": {
+            "file": {
+              "$ref": "service-common.schema.json#/$defs/localPath"
+            },
+            "format": {
+              "enum": [
+                "claude-json",
+                "codex-toml",
+                "cursor-json",
+                "gemini-json",
+                "opencode-json",
+                "kiro-json",
+                "none"
+              ]
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "additionalProperties": false
+        },
+        "skillsDir": {
+          "$ref": "service-common.schema.json#/$defs/localPath"
+        },
+        "docs": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

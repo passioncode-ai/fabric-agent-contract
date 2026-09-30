@@ -1,0 +1,29 @@
+{
+  "job": {
+    "id": "j1",
+    "status": "input_required",
+    "updatedAt": "2026-09-30T08:05:00Z",
+    "inputRequests": {
+      "x": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Fill the address.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

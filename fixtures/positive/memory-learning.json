@@ -1,0 +1,12 @@
+{
+  "kind": "learning-proposal",
+  "meta": { "id": "urn:learning:project-a:1", "revision": 1, "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "createdAt": "2026-08-26T10:04:00Z", "createdBy": "urn:agent:qa:a" },
+  "project": "urn:project:a",
+  "retro": "urn:retro:project-a:1",
+  "scope": "project",
+  "target": "checker",
+  "basisRevision": { "id": "urn:policy:checker:project-a", "revision": 1, "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999" },
+  "proposedPayloadHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "state": "proposed",
+  "selfApply": false
+}

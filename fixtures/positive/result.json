@@ -1,0 +1,12 @@
+{
+  "id": "urn:result:run-a:node-1",
+  "contractVersion": "0.1.0",
+  "outcome": "succeeded",
+  "done": [{ "claimId": "KEYWORDS_ANALYZED", "statement": "Keyword set was ranked with source evidence" }],
+  "proof": [{ "claimIds": ["KEYWORDS_ANALYZED"], "kind": "test", "uri": "urn:evidence:test:keyword:1", "producer": { "id": "https://agents.example/providers/seo", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" }, "capturedAt": "2026-08-26T10:03:00Z", "classification": "project-internal" }],
+  "scope": { "project": "urn:project:a", "run": "urn:run:a", "node": "urn:node:a:1", "binding": { "id": "urn:binding:project-a:seo", "revision": 1, "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444" }, "writeScopes": [] },
+  "notVerified": [],
+  "artifacts": [],
+  "createdAt": "2026-08-26T10:03:00Z",
+  "producer": { "id": "https://agents.example/providers/seo", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" }
+}

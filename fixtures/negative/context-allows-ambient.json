@@ -1,0 +1,11 @@
+{
+  "kind": "execution-context",
+  "meta": { "id": "urn:context:invalid", "revision": 1, "contentHash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "createdAt": "2026-08-26T10:00:00Z", "createdBy": "urn:agent:pm" },
+  "project": "urn:project:a",
+  "provider": { "id": "urn:provider:a", "revision": 1, "contentHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" },
+  "workingDirectory": { "repository": "https://github.com/example/a", "mode": "worktree" },
+  "environment": { "ambient": "allow", "entries": [] },
+  "accountPool": { "id": "urn:pool:a", "revision": 1, "contentHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" },
+  "limits": { "wallSeconds": 60, "concurrency": 1 },
+  "cleanup": { "revokeSecrets": true, "stopChildren": true, "preserveResidueUntilReconciled": true }
+}

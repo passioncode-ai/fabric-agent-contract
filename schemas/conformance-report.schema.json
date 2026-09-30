@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/conformance-report.schema.json",
+  "title": "Conformance report",
+  "type": "object",
+  "required": ["id", "contractVersion", "subject", "catalogue", "tool", "startedAt", "finishedAt", "status", "checks"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/uri" },
+    "contractVersion": { "const": "0.1.0" },
+    "subject": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "catalogue": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "tool": { "type": "string", "minLength": 1 },
+    "startedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "finishedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "status": { "enum": ["passed", "failed", "blocked"] },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "required", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_-]+$" },
+          "required": { "type": "boolean" },
+          "status": { "enum": ["passed", "failed", "skipped", "blocked"] },
+          "instancePath": { "type": "string" },
+          "diagnostic": { "type": "string" },
+          "evidence": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

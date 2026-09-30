@@ -1,0 +1,18 @@
+{
+  "protocol": "fabric-provider/0.1",
+  "id": "example-agent",
+  "name": "Example Agent",
+  "summary": "Drafts reports on request; runs as a stdio MCP server.",
+  "manifest": "~/.local/share/example-agent/fabric-agent.json",
+  "run": {
+    "mcp": {
+      "url": "http://192.168.1.20:47201/mcp"
+    }
+  },
+  "source": {
+    "repository": "https://github.com/example/example-agent"
+  },
+  "installedAt": "2026-09-30T08:00:00Z",
+  "installedBy": "example-agent install 1.0.0",
+  "providerId": "https://agents.example/providers/example-agent"
+}

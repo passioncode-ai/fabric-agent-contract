@@ -1,0 +1,10 @@
+{
+  "id": "urn:coordination:event:1",
+  "kind": "claim",
+  "work": "urn:node:a:1",
+  "owner": { "id": "urn:agent:developer:a:1", "revision": 1, "contentHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" },
+  "idempotencyKey": "project-a-node-1-claim-0001",
+  "occurredAt": "2026-08-26T10:06:00Z",
+  "expiresAt": "2026-08-26T10:21:00Z",
+  "writeScopes": ["git:path:src/feature-a"]
+}

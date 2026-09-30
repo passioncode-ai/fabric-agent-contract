@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# agent-sync
+.env.agent-sync
+
+.agent-sync/

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/memory.schema.json",
+  "title": "Project memory, promotion, retrospective and learning",
+  "oneOf": [
+    { "$ref": "#/$defs/memoryRecord" },
+    { "$ref": "#/$defs/promotion" },
+    { "$ref": "#/$defs/retro" },
+    { "$ref": "#/$defs/learningProposal" }
+  ],
+  "$defs": {
+    "memoryRecord": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "statement", "state", "classification", "evidence", "freshness"],
+      "properties": {
+        "kind": { "const": "memory-record" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "statement": { "type": "string", "minLength": 1 },
+        "state": { "enum": ["observed", "supported", "contested", "stale", "archived"] },
+        "classification": { "$ref": "common.schema.json#/$defs/dataClass" },
+        "evidence": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" } },
+        "conflicts": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" } },
+        "freshness": { "type": "object", "required": ["observedAt", "reviewAfter"], "properties": { "observedAt": { "$ref": "common.schema.json#/$defs/timestamp" }, "reviewAfter": { "$ref": "common.schema.json#/$defs/timestamp" } }, "additionalProperties": false }
+      },
+      "additionalProperties": false
+    },
+    "promotion": {
+      "type": "object",
+      "required": ["kind", "meta", "sourceProject", "insight", "classification", "evidenceGroups", "conflictCheck", "state"],
+      "properties": {
+        "kind": { "const": "promotion" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "sourceProject": { "$ref": "common.schema.json#/$defs/uri" },
+        "insight": { "type": "string", "minLength": 1 },
+        "classification": { "enum": ["public", "project-internal", "confidential"] },
+        "anonymized": { "const": true },
+        "evidenceGroups": { "type": "array", "minItems": 2, "items": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/uri" } } },
+        "conflictCheck": { "type": "object", "required": ["performedAt", "conflicts"], "properties": { "performedAt": { "$ref": "common.schema.json#/$defs/timestamp" }, "conflicts": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" } } }, "additionalProperties": false },
+        "state": { "enum": ["proposed", "approved", "rejected"] },
+        "approvedBy": { "$ref": "common.schema.json#/$defs/uri" }
+      },
+      "allOf": [
+        { "if": { "properties": { "state": { "const": "approved" } } }, "then": { "properties": { "approvedBy": { "$ref": "common.schema.json#/$defs/uri" } }, "required": ["approvedBy"] } }
+      ],
+      "additionalProperties": false
+    },
+    "retro": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "run", "node", "goal", "outcome", "failedAttempt", "verifiedCorrection", "causalHypothesis", "evidence"],
+      "properties": {
+        "kind": { "const": "retro" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "run": { "$ref": "common.schema.json#/$defs/uri" },
+        "node": { "$ref": "common.schema.json#/$defs/uri" },
+        "goal": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "failedAttempt": { "$ref": "common.schema.json#/$defs/uri" },
+        "verifiedCorrection": { "$ref": "common.schema.json#/$defs/uri" },
+        "causalHypothesis": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 2, "items": { "$ref": "common.schema.json#/$defs/uri" } },
+        "recurrenceSignal": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "learningProposal": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "retro", "scope", "target", "basisRevision", "proposedPayloadHash", "state", "selfApply"],
+      "properties": {
+        "kind": { "const": "learning-proposal" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "retro": { "$ref": "common.schema.json#/$defs/uri" },
+        "scope": { "enum": ["project", "global"] },
+        "target": { "enum": ["prompt", "pipeline", "policy", "binding", "schedule", "checker"] },
+        "basisRevision": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "proposedPayloadHash": { "$ref": "common.schema.json#/$defs/sha256" },
+        "state": { "enum": ["proposed", "approved", "rejected"] },
+        "approvedBy": { "$ref": "common.schema.json#/$defs/uri" },
+        "selfApply": { "const": false }
+      },
+      "allOf": [
+        { "if": { "properties": { "state": { "const": "approved" } } }, "then": { "properties": { "approvedBy": { "$ref": "common.schema.json#/$defs/uri" } }, "required": ["approvedBy"] } }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

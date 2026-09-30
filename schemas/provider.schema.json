@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/provider.schema.json",
+  "title": "Provider entry (fabric-provider/0.1)",
+  "type": "object",
+  "required": [
+    "protocol",
+    "id",
+    "providerId",
+    "name",
+    "manifest",
+    "run",
+    "installedAt",
+    "installedBy"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "fabric-provider/0.1"
+    },
+    "id": {
+      "$ref": "service-common.schema.json#/$defs/serviceId"
+    },
+    "providerId": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "manifest": {
+      "allOf": [
+        {
+          "$ref": "service-common.schema.json#/$defs/localPath"
+        },
+        {
+          "type": "string",
+          "pattern": "(^|/)fabric-agent\\.json$"
+        }
+      ]
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "mcp"
+      ],
+      "properties": {
+        "mcp": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "stdio"
+              ],
+              "properties": {
+                "stdio": {
+                  "type": "object",
+                  "required": [
+                    "command"
+                  ],
+                  "properties": {
+                    "command": {
+                      "$ref": "service-common.schema.json#/$defs/argv"
+                    },
+                    "env": {
+                      "type": "object",
+                      "maxProperties": 64,
+                      "propertyNames": {
+                        "pattern": "^[A-Z_][A-Z0-9_]*$"
+                      },
+                      "additionalProperties": {
+                        "$ref": "#/$defs/secretRef"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "pattern": "^http://127\\.0\\.0\\.1:([1-9][0-9]{2,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])/mcp$"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "$ref": "common.schema.json#/$defs/uri"
+        }
+      },
+      "additionalProperties": false
+    },
+    "installedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "installedBy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "secretRef": {
+      "type": "string",
+      "pattern": "^secret-ref:[A-Za-z0-9][A-Za-z0-9._/:@-]{0,255}$"
+    }
+  }
+}

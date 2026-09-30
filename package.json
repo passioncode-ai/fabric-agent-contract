@@ -1,0 +1,28 @@
+{
+  "name": "fabric-agent-contract",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only OR LicenseRef-PassionCode-Commercial",
+  "description": "Fabric Agent Contract: schemas, profiles and conformance for Fabric-compatible agents",
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "ux:lint": "python3 docs/ux/lint.py",
+    "docs:check": "tsx src/docs-check.ts && markdownlint-cli2 '**/*.md' '#node_modules'",
+    "pin:check": "tsx src/pin-check.ts",
+    "check": "pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "markdownlint-cli2": "^0.18.1",
+    "mermaid": "^11.12.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

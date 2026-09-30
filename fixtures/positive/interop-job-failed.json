@@ -1,0 +1,11 @@
+{
+  "job": {
+    "id": "job_7f3a2c",
+    "status": "failed",
+    "updatedAt": "2026-09-30T08:05:00Z",
+    "error": {
+      "code": -32603,
+      "message": "The drafting model was unavailable."
+    }
+  }
+}

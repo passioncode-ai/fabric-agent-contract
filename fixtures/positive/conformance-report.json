@@ -1,0 +1,11 @@
+{
+  "id": "urn:conformance:seo:1",
+  "contractVersion": "0.1.0",
+  "subject": { "id": "https://agents.example/providers/seo", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+  "catalogue": { "id": "urn:fabric:check-catalogue", "revision": 1, "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515" },
+  "tool": "fabric-agent-contract/0.1.0",
+  "startedAt": "2026-08-26T10:09:00Z",
+  "finishedAt": "2026-08-26T10:09:01Z",
+  "status": "passed",
+  "checks": [{ "id": "SCHEMA_MANIFEST", "required": true, "status": "passed", "evidence": ["urn:evidence:schema:manifest:1"] }]
+}

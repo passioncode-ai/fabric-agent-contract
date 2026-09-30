@@ -1,0 +1,8 @@
+{
+  "estate": "urn:estate:one",
+  "assignments": [
+    { "id": "urn:role:ceo:1", "role": "ceo", "principal": { "id": "urn:agent:ceo", "revision": 1, "contentHash": "sha256:1313131313131313131313131313131313131313131313131313131313131313" }, "scope": { "estate": "urn:estate:one" }, "active": true },
+    { "id": "urn:role:pm:a", "role": "product-manager", "principal": { "id": "urn:agent:pm:a", "revision": 1, "contentHash": "sha256:1414141414141414141414141414141414141414141414141414141414141414" }, "scope": { "project": "urn:project:a" }, "active": true },
+    { "id": "urn:role:dev:a", "role": "developer", "principal": { "id": "urn:agent:developer:a:1", "revision": 1, "contentHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" }, "scope": { "project": "urn:project:a" }, "active": true }
+  ]
+}

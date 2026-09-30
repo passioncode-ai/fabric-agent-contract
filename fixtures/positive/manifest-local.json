@@ -1,0 +1,45 @@
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "urn:fabric:provider:claude-code-local",
+    "revision": 1,
+    "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "createdAt": "2026-08-26T10:00:00Z",
+    "createdBy": "urn:fabric:operator:local",
+    "name": "Claude Code local runner",
+    "identity": { "subject": "urn:fabric:provider:claude-code-local", "method": "local-install" },
+    "supportedContractVersions": ["0.1.0"]
+  },
+  "capabilities": [
+    {
+      "id": "urn:fabric:capability:software-development",
+      "name": "development.repository-change",
+      "inputSchema": "https://fabric.example/schemas/work-node.json",
+      "outputSchema": "https://fabric.example/schemas/result.json",
+      "effect": "draft",
+      "idempotency": "none",
+      "dataClasses": ["project-internal", "confidential"],
+      "profile": {
+        "kind": "local-runner",
+        "profileVersion": "fabric-local-runner/0.1",
+        "runnerKind": "claude-code",
+        "executableRef": "urn:executable:claude",
+        "args": ["--print", "{inputFile}"],
+        "inputMode": "file-json",
+        "resultUriTemplate": "file:{worktree}/.fabric/result.json",
+        "cancellation": "signal",
+        "heartbeatSeconds": 30,
+        "probes": [
+          {
+            "id": "dry-run-result",
+            "inputFixture": "urn:fixture:local-runner:dry-run",
+            "outputSchema": "https://fabric.example/schemas/result.json",
+            "timeoutMs": 120000,
+            "sideEffectCeiling": "draft",
+            "assertions": ["writes a valid result envelope without external effects"]
+          }
+        ]
+      }
+    }
+  ]
+}

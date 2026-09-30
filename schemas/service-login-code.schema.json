@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-login-code.schema.json",
+  "title": "Local service one-time login code (fabric-service/0.1)",
+  "type": "object",
+  "required": ["url", "expiresAt"],
+  "properties": {
+    "url": { "type": "string", "pattern": "^/fabric/v1/login\\?code=[A-Za-z0-9_-]{16,256}$" },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+  },
+  "additionalProperties": false
+}

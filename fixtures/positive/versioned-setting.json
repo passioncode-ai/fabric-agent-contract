@@ -1,0 +1,8 @@
+{
+  "meta": { "id": "urn:policy:checker:project-a", "revision": 2, "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "createdAt": "2026-08-26T10:05:00Z", "createdBy": "urn:agent:pm:a" },
+  "kind": "checker",
+  "parents": [{ "id": "urn:policy:checker:project-a", "revision": 1, "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999" }],
+  "reason": "Adopt verified correction from retro urn:retro:project-a:1",
+  "payload": { "requiredChecks": ["schema", "source-receipts"] },
+  "approvals": ["urn:approval:pm:a:1"]
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/coordination.schema.json",
+  "title": "Coordination command or event",
+  "type": "object",
+  "required": ["id", "kind", "work", "owner", "idempotencyKey", "occurredAt"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/uri" },
+    "kind": { "enum": ["claim", "renew", "release", "reserve-id", "record-as-built", "reconcile", "account-switched"] },
+    "work": { "$ref": "common.schema.json#/$defs/uri" },
+    "owner": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "claim": { "$ref": "common.schema.json#/$defs/uri" },
+    "idempotencyKey": { "type": "string", "minLength": 16, "maxLength": 200 },
+    "occurredAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "writeScopes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "namespace": { "type": "string", "minLength": 1 },
+    "count": { "type": "integer", "minimum": 1, "maximum": 1000 },
+    "revision": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "artifacts": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/artifact" } },
+    "outcome": { "enum": ["succeeded", "failed", "cancelled", "expired", "abandoned"] },
+    "residue": { "type": "array", "items": { "enum": ["none", "uncommitted-files", "unpushed-commit", "open-pr", "merged-unreconciled", "external-effect"] } },
+    "switch": {
+      "type": "object",
+      "required": ["from", "to", "reason", "pool"],
+      "properties": {
+        "from": { "$ref": "common.schema.json#/$defs/uri" },
+        "to": { "$ref": "common.schema.json#/$defs/uri" },
+        "reason": { "enum": ["rate-limit", "provider-unavailable", "expired-session", "transient-health"] },
+        "pool": { "$ref": "common.schema.json#/$defs/revisionRef" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "kind": { "const": "claim" } } }, "then": { "properties": { "expiresAt": {}, "writeScopes": {} }, "required": ["expiresAt", "writeScopes"] } },
+    { "if": { "properties": { "kind": { "const": "reserve-id" } } }, "then": { "properties": { "namespace": {}, "count": {}, "expiresAt": {} }, "required": ["namespace", "count", "expiresAt"] } },
+    { "if": { "properties": { "kind": { "const": "record-as-built" } } }, "then": { "properties": { "claim": {}, "revision": {}, "artifacts": {} }, "required": ["claim", "revision", "artifacts"] } },
+    { "if": { "properties": { "kind": { "const": "release" } } }, "then": { "properties": { "claim": {}, "outcome": {} }, "required": ["claim", "outcome"] } },
+    { "if": { "properties": { "kind": { "const": "reconcile" } } }, "then": { "properties": { "claim": {}, "residue": {} }, "required": ["claim", "residue"] } },
+    { "if": { "properties": { "kind": { "const": "account-switched" } } }, "then": { "properties": { "switch": {} }, "required": ["switch"] } }
+  ],
+  "additionalProperties": false
+}

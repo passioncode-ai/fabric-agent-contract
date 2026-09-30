@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/work.schema.json",
+  "title": "Storage-agnostic work graph objects",
+  "oneOf": [
+    { "$ref": "#/$defs/project" },
+    { "$ref": "#/$defs/run" },
+    { "$ref": "#/$defs/node" },
+    { "$ref": "#/$defs/observation" },
+    { "$ref": "#/$defs/evidence" }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": ["id", "kind", "createdAt"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/uri" },
+        "kind": { "type": "string" },
+        "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["kind", "estate", "name", "dataPolicy"],
+          "properties": {
+            "kind": { "const": "project" },
+            "estate": { "$ref": "common.schema.json#/$defs/uri" },
+            "name": { "type": "string", "minLength": 1 },
+            "dataPolicy": { "$ref": "common.schema.json#/$defs/revisionRef" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "run": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["kind", "project", "state", "pins"],
+          "properties": {
+            "kind": { "const": "run" },
+            "project": { "$ref": "common.schema.json#/$defs/uri" },
+            "state": { "enum": ["planned", "running", "blocked", "completed", "cancelled", "failed"] },
+            "pins": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/revisionRef" } }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "node": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["kind", "project", "run", "state", "binding", "dependencies", "acceptanceClaims"],
+          "properties": {
+            "kind": { "const": "node" },
+            "project": { "$ref": "common.schema.json#/$defs/uri" },
+            "run": { "$ref": "common.schema.json#/$defs/uri" },
+            "state": { "enum": ["planned", "runnable", "claimed", "running", "checking", "blocked", "completed", "cancelled", "failed", "loop-guarded"] },
+            "binding": { "$ref": "common.schema.json#/$defs/revisionRef" },
+            "dependencies": { "type": "array", "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/uri" } },
+            "acceptanceClaims": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["kind", "project", "node", "statement", "classification", "provenance"],
+          "properties": {
+            "kind": { "const": "observation" },
+            "project": { "$ref": "common.schema.json#/$defs/uri" },
+            "node": { "$ref": "common.schema.json#/$defs/uri" },
+            "statement": { "type": "string", "minLength": 1 },
+            "classification": { "$ref": "common.schema.json#/$defs/dataClass" },
+            "provenance": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/uri" } }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["kind", "project", "node", "evidenceKind", "uri", "contentHash", "classification", "capturedBy"],
+          "properties": {
+            "kind": { "const": "evidence" },
+            "project": { "$ref": "common.schema.json#/$defs/uri" },
+            "node": { "$ref": "common.schema.json#/$defs/uri" },
+            "evidenceKind": { "type": "string", "pattern": "^[a-z][a-z0-9./-]+$" },
+            "uri": { "$ref": "common.schema.json#/$defs/uri" },
+            "contentHash": { "$ref": "common.schema.json#/$defs/sha256" },
+            "classification": { "$ref": "common.schema.json#/$defs/dataClass" },
+            "capturedBy": { "$ref": "common.schema.json#/$defs/revisionRef" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/admission.schema.json",
+  "title": "Provider admission record",
+  "type": "object",
+  "required": ["meta", "provider", "capability", "state", "trustTier", "checks"],
+  "properties": {
+    "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+    "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "capability": { "$ref": "common.schema.json#/$defs/uri" },
+    "state": { "enum": ["discovered", "declared", "identity-verified", "probing", "admitted", "rejected", "incompatible", "probe-failed", "suspended", "replaced"] },
+    "trustTier": { "enum": ["untrusted", "verified", "admitted", "privileged"] },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["gate", "status", "evidence"],
+        "properties": {
+          "gate": { "enum": ["shape", "identity", "protocol", "semantic-probe", "policy"] },
+          "status": { "enum": ["passed", "failed", "blocked", "skipped"] },
+          "evidence": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" } },
+          "finding": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "replaces": { "$ref": "common.schema.json#/$defs/revisionRef" }
+  },
+  "additionalProperties": false
+}

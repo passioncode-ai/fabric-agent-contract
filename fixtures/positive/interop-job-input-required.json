@@ -1,0 +1,48 @@
+{
+  "job": {
+    "id": "job_7f3a2c",
+    "status": "input_required",
+    "statusMessage": "Two title variants are ready.",
+    "updatedAt": "2026-09-30T08:05:00Z",
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "title_choice": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Pick the title for the article.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "title": "Title",
+                "oneOf": [
+                  {
+                    "const": "a",
+                    "title": "Choosing a title"
+                  },
+                  {
+                    "const": "b",
+                    "title": "How titles work"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "title"
+            ]
+          }
+        }
+      },
+      "connect_account": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "url",
+          "message": "Connect the publishing account.",
+          "url": "https://publish.example/connect?session=abc"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "meta": { "id": "urn:admission:seo:1", "revision": 1, "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333", "createdAt": "2026-08-26T10:01:00Z", "createdBy": "urn:fabric:host" },
+  "provider": { "id": "https://agents.example/providers/seo", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+  "capability": "https://agents.example/capabilities/keyword-analysis",
+  "state": "admitted",
+  "trustTier": "admitted",
+  "checks": [
+    { "gate": "shape", "status": "passed", "evidence": ["urn:evidence:shape:1"] },
+    { "gate": "identity", "status": "passed", "evidence": ["urn:evidence:identity:1"] },
+    { "gate": "protocol", "status": "passed", "evidence": ["urn:evidence:protocol:1"] },
+    { "gate": "semantic-probe", "status": "passed", "evidence": ["urn:evidence:probe:1"] }
+  ],
+  "expiresAt": "2026-09-26T10:01:00Z"
+}

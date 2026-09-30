@@ -1,0 +1,71 @@
+[
+  {
+    "kind": "claude-code",
+    "name": "Claude Code",
+    "binaries": [
+      "claude"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "claude-headless",
+    "drives": {
+      "claude-headless": {
+        "argv": [
+          "-p",
+          "--output-format",
+          "stream-json",
+          "--verbose",
+          "--strict-mcp-config",
+          "--mcp-config",
+          "{mcpConfig}"
+        ]
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.claude.json",
+      "format": "claude-json",
+      "key": "mcpServers"
+    },
+    "skillsDir": "~/.claude/skills",
+    "docs": "https://code.claude.com/docs/en/headless"
+  },
+  {
+    "kind": "codex",
+    "name": "Codex",
+    "binaries": [
+      "codex"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "codex-app-server",
+    "drives": {
+      "codex-app-server": {
+        "argv": [
+          "app-server"
+        ]
+      },
+      "codex-exec": {
+        "argv": [
+          "exec",
+          "--json"
+        ]
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.codex/config.toml",
+      "format": "codex-toml",
+      "key": "mcp_servers"
+    },
+    "skillsDir": "~/.codex/skills"
+  }
+]

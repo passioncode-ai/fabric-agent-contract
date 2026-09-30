@@ -1,0 +1,1 @@
+{ "events": [ { "id": "1", "at": "2026-09-28T17:55:10Z", "kind": "job.failed", "level": "critical", "text": "The job failed." } ], "cursor": "1" }

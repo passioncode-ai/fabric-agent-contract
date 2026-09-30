@@ -1,0 +1,43 @@
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "https://agents.example/providers/researcher",
+    "revision": 1,
+    "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "createdAt": "2026-08-26T10:00:00Z",
+    "createdBy": "https://agents.example/authors/team",
+    "name": "Research peer",
+    "identity": { "subject": "https://agents.example/providers/researcher", "method": "oauth2" },
+    "supportedContractVersions": ["0.1.0"]
+  },
+  "capabilities": [
+    {
+      "id": "https://agents.example/capabilities/trend-research",
+      "name": "research.trends",
+      "inputSchema": "https://agents.example/schemas/research-input.json",
+      "outputSchema": "https://agents.example/schemas/research-output.json",
+      "effect": "none",
+      "idempotency": "supported",
+      "dataClasses": ["public", "project-internal"],
+      "profile": {
+        "kind": "a2a",
+        "protocolVersion": "1.0",
+        "agentCardUrl": "https://agents.example/.well-known/agent-card.json",
+        "skillIds": ["trend-research"],
+        "binding": "REST",
+        "streaming": true,
+        "pushNotifications": false,
+        "probes": [
+          {
+            "id": "research-citations",
+            "inputFixture": "https://agents.example/fixtures/research.json",
+            "outputSchema": "https://agents.example/schemas/research-output.json",
+            "timeoutMs": 60000,
+            "sideEffectCeiling": "none",
+            "assertions": ["every trend claim cites a retrievable source"]
+          }
+        ]
+      }
+    }
+  ]
+}

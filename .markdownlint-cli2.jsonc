@@ -1,0 +1,20 @@
+{
+  // agent-sync lease records are git-ignored runtime files, not documentation.
+  "ignores": [".agent-sync/**"],
+  "config": {
+    "default": true,
+    "MD001": false,
+    "MD012": false,
+    "MD013": false,
+    "MD024": { "siblings_only": true },
+    "MD033": false,
+    // The organization's licence templates (LICENSE's companions COMMERCIAL-LICENSE.md and CLA.md),
+    // the knowledge base's README licensing wording and the AGENTS.md read-first block carry bare
+    // addresses (contact@passioncode.ai, wiki.passioncode.ai) and are copied byte for byte.
+    "MD034": false,
+    "MD032": false,
+    "MD036": false,
+    "MD040": false,
+    "MD041": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "job_7f3a2c",
+  "inputResponses": {
+    "title_choice": {
+      "action": "accept",
+      "content": {
+        "title": "a"
+      }
+    }
+  }
+}

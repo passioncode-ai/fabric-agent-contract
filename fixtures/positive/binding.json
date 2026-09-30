@@ -1,0 +1,16 @@
+{
+  "meta": { "id": "urn:binding:project-a:seo", "revision": 1, "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "createdAt": "2026-08-26T10:02:00Z", "createdBy": "urn:agent:pm:a" },
+  "project": "urn:project:a",
+  "capability": "https://agents.example/capabilities/keyword-analysis",
+  "provider": { "id": "https://agents.example/providers/seo", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+  "admission": { "id": "urn:admission:seo:1", "revision": 1, "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333" },
+  "profileKind": "mcp",
+  "executionContext": { "id": "urn:context:project-a:seo", "revision": 1, "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555" },
+  "accountPool": { "id": "urn:pool:project-a:seo", "revision": 1, "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666" },
+  "grants": [],
+  "dataPolicy": { "id": "urn:policy:data:project-a", "revision": 1, "contentHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777" },
+  "coordinationPolicy": { "id": "urn:policy:coord:project-a", "revision": 1, "contentHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888" },
+  "checkerPolicy": { "id": "urn:policy:checker:project-a", "revision": 1, "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999" },
+  "role": "fabric.example/seo-analyst",
+  "state": "active"
+}

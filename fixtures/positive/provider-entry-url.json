@@ -1,0 +1,22 @@
+{
+  "protocol": "fabric-provider/0.1",
+  "id": "example-writer",
+  "providerId": "https://agents.example/providers/example-writer",
+  "name": "Example Writer",
+  "manifest": "~/.local/share/example-agent/fabric-agent.json",
+  "run": {
+    "mcp": {
+      "url": "http://127.0.0.1:47201/mcp"
+    }
+  },
+  "source": {
+    "repository": "https://github.com/example/example-agent"
+  },
+  "installedAt": "2026-09-30T08:00:00Z",
+  "installedBy": "example-agent install 1.0.0",
+  "extensions": {
+    "https://example.com/fabric/ext/notes/1": {
+      "kept": true
+    }
+  }
+}

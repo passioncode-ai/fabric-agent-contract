@@ -1,0 +1,65 @@
+{
+  "id": "urn:example-agent:result:r-12",
+  "contractVersion": "0.1.0",
+  "outcome": "partial",
+  "done": [
+    {
+      "claimId": "DRAFT",
+      "statement": "A 900-word draft was written for the selected topic."
+    }
+  ],
+  "proof": [
+    {
+      "claimIds": [
+        "DRAFT"
+      ],
+      "kind": "file-revision",
+      "uri": "urn:example-agent:artifact:draft-12",
+      "producer": {
+        "id": "https://agents.example/providers/example-agent",
+        "revision": 1,
+        "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "capturedAt": "2026-09-30T08:10:00Z",
+      "classification": "project-internal"
+    }
+  ],
+  "scope": {
+    "project": "urn:fabric:project:example",
+    "run": "urn:fabric:run:r-1",
+    "node": "urn:fabric:node:draft",
+    "binding": {
+      "id": "urn:fabric:binding:copy-write",
+      "revision": 1,
+      "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "writeScopes": []
+  },
+  "notVerified": [
+    {
+      "claim": "DRAFT",
+      "reason": "no checker has read the draft yet"
+    }
+  ],
+  "artifacts": [],
+  "createdAt": "2026-09-30T08:10:02Z",
+  "producer": {
+    "id": "https://agents.example/providers/example-agent",
+    "revision": 1,
+    "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "output": {
+    "title": "Choosing a title",
+    "body": "..."
+  },
+  "usage": {
+    "inputTokens": 1820,
+    "outputTokens": 640,
+    "cacheReadTokens": 12000,
+    "costUsd": 0.0183,
+    "wallMs": 42110
+  },
+  "trace": {
+    "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+  }
+}

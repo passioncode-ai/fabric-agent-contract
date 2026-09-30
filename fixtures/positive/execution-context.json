@@ -1,0 +1,12 @@
+{
+  "kind": "execution-context",
+  "meta": { "id": "urn:context:project-a:dev", "revision": 1, "contentHash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "createdAt": "2026-08-26T10:07:00Z", "createdBy": "urn:agent:pm:a" },
+  "project": "urn:project:a",
+  "provider": { "id": "urn:fabric:provider:claude-code-local", "revision": 1, "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222" },
+  "workingDirectory": { "repository": "https://github.com/passioncode-ai/project-a", "mode": "worktree" },
+  "environment": { "ambient": "deny", "entries": [{ "name": "ANTHROPIC_API_KEY", "secretRef": "urn:secret:project-a:claude-primary" }, { "name": "FABRIC_PROJECT", "value": "project-a" }] },
+  "accountPool": { "id": "urn:pool:project-a:claude", "revision": 1, "contentHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" },
+  "selectedAccount": "urn:account:project-a:claude-primary",
+  "limits": { "wallSeconds": 3600, "costMicrounits": 1000000, "concurrency": 1 },
+  "cleanup": { "revokeSecrets": true, "stopChildren": true, "preserveResidueUntilReconciled": true }
+}

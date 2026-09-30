@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/contract-pin.schema.json",
+  "title": "A consumer's one pin of the Fabric Agent Contract (fabric-contract.lock.json)",
+  "type": "object",
+  "required": [
+    "contract",
+    "version",
+    "repository",
+    "commit"
+  ],
+  "properties": {
+    "contract": {
+      "const": "fabric-agent-contract"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "repository": {
+      "const": "https://github.com/passioncode-ai/fabric-agent-contract"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "profile": {
+      "enum": [
+        "mcp",
+        "a2a",
+        "local-runner"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

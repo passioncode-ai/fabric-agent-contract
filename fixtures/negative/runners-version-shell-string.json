@@ -1,0 +1,35 @@
+[
+  {
+    "kind": "claude-code",
+    "name": "Claude Code",
+    "binaries": [
+      "claude"
+    ],
+    "version": {
+      "argv": "claude --version",
+      "pattern": "^(\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "claude-headless",
+    "drives": {
+      "claude-headless": {
+        "argv": [
+          "-p",
+          "--output-format",
+          "stream-json",
+          "--verbose",
+          "--strict-mcp-config",
+          "--mcp-config",
+          "{mcpConfig}"
+        ]
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.claude.json",
+      "format": "claude-json",
+      "key": "mcpServers"
+    },
+    "skillsDir": "~/.claude/skills",
+    "docs": "https://code.claude.com/docs/en/headless"
+  }
+]

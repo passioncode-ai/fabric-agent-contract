@@ -1,0 +1,8 @@
+{
+  "estate": "urn:estate:one",
+  "assignments": [
+    { "id": "urn:role:ceo", "role": "ceo", "principal": { "id": "urn:agent:ceo", "revision": 1, "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111" }, "scope": { "estate": "urn:estate:one" }, "active": true },
+    { "id": "urn:role:pm", "role": "project-manager", "principal": { "id": "urn:agent:pm", "revision": 1, "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222" }, "scope": { "project": "urn:project:a" }, "active": true },
+    { "id": "urn:role:dev", "role": "developer", "principal": { "id": "urn:agent:dev", "revision": 1, "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333" }, "scope": { "project": "urn:project:a" }, "active": true }
+  ]
+}

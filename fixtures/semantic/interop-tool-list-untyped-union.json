@@ -1,0 +1,73 @@
+{
+  "tools": [
+    {
+      "name": "example.echo",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "example.draft",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "contractVersion",
+              "outcome",
+              "done",
+              "proof",
+              "scope",
+              "notVerified",
+              "artifacts",
+              "createdAt",
+              "producer",
+              "output",
+              "usage"
+            ],
+            "properties": {
+              "output": {
+                "type": "object"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "job"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "job": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9._:-]+$"
+                  },
+                  "status": {
+                    "const": "working"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

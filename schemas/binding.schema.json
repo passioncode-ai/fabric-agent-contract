@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/binding.schema.json",
+  "title": "Project capability binding revision",
+  "type": "object",
+  "required": ["meta", "project", "capability", "provider", "admission", "profileKind", "executionContext", "accountPool", "grants", "dataPolicy", "coordinationPolicy", "checkerPolicy", "state"],
+  "properties": {
+    "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+    "project": { "$ref": "common.schema.json#/$defs/uri" },
+    "capability": { "$ref": "common.schema.json#/$defs/uri" },
+    "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "admission": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "profileKind": { "enum": ["mcp", "a2a", "local-runner"] },
+    "executionContext": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "accountPool": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "grants": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/revisionRef" } },
+    "dataPolicy": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "coordinationPolicy": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "checkerPolicy": { "$ref": "common.schema.json#/$defs/revisionRef" },
+    "role": { "type": "string", "pattern": "^[a-z][a-z0-9./-]+$" },
+    "nodeScope": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/uri" }, "uniqueItems": true },
+    "state": { "enum": ["proposed", "active", "rejected", "suspended", "superseded"] },
+    "extensions": { "$ref": "common.schema.json#/$defs/extensions" }
+  },
+  "additionalProperties": false
+}

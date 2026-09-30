@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/governance.schema.json",
+  "title": "Standing grant or data policy",
+  "oneOf": [{ "$ref": "#/$defs/grant" }, { "$ref": "#/$defs/dataPolicy" }],
+  "$defs": {
+    "grant": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "principal", "effects", "resourcePatterns", "dataClasses", "startsAt", "expiresAt", "idempotency", "issuer", "state"],
+      "properties": {
+        "kind": { "const": "standing-grant" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "principal": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "effects": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/effectClass" }, "not": { "contains": { "const": "none" } } },
+        "resourcePatterns": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "channels": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "recipientConstraints": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "dataClasses": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/dataClass" } },
+        "startsAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "rateLimit": { "type": "integer", "minimum": 1 },
+        "idempotency": { "enum": ["required", "provider-native"] },
+        "issuer": { "$ref": "common.schema.json#/$defs/uri" },
+        "state": { "enum": ["active", "expired", "revoked"] }
+      },
+      "additionalProperties": false
+    },
+    "dataPolicy": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "rules"],
+      "properties": {
+        "kind": { "const": "data-policy" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "rules": {
+          "type": "array",
+          "minItems": 6,
+          "items": {
+            "type": "object",
+            "required": ["classification", "purpose", "retention", "deletionMode", "owner", "globalPromotion"],
+            "properties": {
+              "classification": { "$ref": "common.schema.json#/$defs/dataClass" },
+              "purpose": { "type": "string", "minLength": 1 },
+              "retention": { "type": "string", "minLength": 1 },
+              "deletionMode": { "enum": ["delete", "tombstone", "durable"] },
+              "owner": { "$ref": "common.schema.json#/$defs/uri" },
+              "globalPromotion": { "enum": ["allowed", "anonymized-only", "forbidden"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

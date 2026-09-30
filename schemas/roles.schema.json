@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/roles.schema.json",
+  "title": "Estate and project role assignments",
+  "type": "object",
+  "required": ["estate", "assignments"],
+  "properties": {
+    "estate": { "$ref": "common.schema.json#/$defs/uri" },
+    "assignments": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "principal", "scope", "active"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/uri" },
+          "role": { "type": "string", "pattern": "^(ceo|product-manager|developer|[a-z][a-z0-9.-]*/[a-z][a-z0-9.-]*)$" },
+          "principal": { "$ref": "common.schema.json#/$defs/revisionRef" },
+          "scope": { "type": "object", "properties": { "estate": { "$ref": "common.schema.json#/$defs/uri" }, "project": { "$ref": "common.schema.json#/$defs/uri" } }, "oneOf": [{ "properties": { "estate": {} }, "required": ["estate"] }, { "properties": { "project": {} }, "required": ["project"] }], "additionalProperties": false },
+          "active": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "learning-proposal",
+  "meta": { "id": "urn:learning:invalid", "revision": 1, "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "createdAt": "2026-08-26T10:00:00Z", "createdBy": "urn:agent:failing" },
+  "project": "urn:project:a",
+  "retro": "urn:retro:a",
+  "scope": "project",
+  "target": "checker",
+  "basisRevision": { "id": "urn:checker:a", "revision": 1, "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+  "proposedPayloadHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "state": "proposed",
+  "selfApply": true
+}

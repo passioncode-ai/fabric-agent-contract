@@ -1,0 +1,9 @@
+{
+  "id": "urn:coordination:invalid",
+  "kind": "claim",
+  "work": "urn:node:a",
+  "owner": { "id": "urn:agent:dev", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+  "idempotencyKey": "claim-without-expiry-0001",
+  "occurredAt": "2026-08-26T10:00:00Z",
+  "writeScopes": ["git:path:src"]
+}

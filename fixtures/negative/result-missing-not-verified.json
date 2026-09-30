@@ -1,0 +1,11 @@
+{
+  "id": "urn:result:invalid",
+  "contractVersion": "0.1.0",
+  "outcome": "succeeded",
+  "done": [],
+  "proof": [],
+  "scope": { "project": "urn:project:a", "run": "urn:run:a", "node": "urn:node:a", "binding": { "id": "urn:binding:a", "revision": 1, "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000" }, "writeScopes": [] },
+  "artifacts": [],
+  "createdAt": "2026-08-26T10:00:00Z",
+  "producer": { "id": "urn:provider:a", "revision": 1, "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111" }
+}

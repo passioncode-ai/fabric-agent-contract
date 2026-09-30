@@ -1,0 +1,32 @@
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "urn:provider:unsafe-local",
+    "revision": 1,
+    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "createdAt": "2026-08-26T10:00:00Z",
+    "createdBy": "urn:author:one",
+    "name": "Unsafe shell runner",
+    "identity": { "subject": "urn:provider:unsafe-local", "method": "local-install" },
+    "supportedContractVersions": ["0.1.0"]
+  },
+  "capabilities": [{
+    "id": "urn:capability:unsafe",
+    "name": "development.unsafe",
+    "inputSchema": "urn:schema:input",
+    "outputSchema": "urn:schema:output",
+    "effect": "draft",
+    "idempotency": "none",
+    "dataClasses": ["project-internal"],
+    "profile": {
+      "kind": "local-runner",
+      "profileVersion": "fabric-local-runner/0.1",
+      "runnerKind": "unsafe-shell",
+      "executableRef": "urn:executable:unsafe",
+      "args": "--run $(untrusted)",
+      "inputMode": "file-json",
+      "resultUriTemplate": "file:result.json",
+      "probes": [{ "id": "dry-run", "inputFixture": "urn:fixture:dry", "outputSchema": "urn:schema:output", "timeoutMs": 1000, "sideEffectCeiling": "none", "assertions": ["returns result"] }]
+    }
+  }]
+}

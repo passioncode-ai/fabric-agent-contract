@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/execution-context.schema.json",
+  "title": "Execution context or project account pool",
+  "oneOf": [
+    { "$ref": "#/$defs/context" },
+    { "$ref": "#/$defs/pool" }
+  ],
+  "$defs": {
+    "context": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "provider", "workingDirectory", "environment", "accountPool", "limits", "cleanup"],
+      "properties": {
+        "kind": { "const": "execution-context" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "agent": { "$ref": "common.schema.json#/$defs/uri" },
+        "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "workingDirectory": { "type": "object", "required": ["repository", "mode"], "properties": { "repository": { "$ref": "common.schema.json#/$defs/uri" }, "mode": { "enum": ["project-root", "worktree", "temporary"] } }, "additionalProperties": false },
+        "environment": {
+          "type": "object",
+          "required": ["ambient", "entries"],
+          "properties": {
+            "ambient": { "const": "deny" },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "pattern": "^[A-Z_][A-Z0-9_]*$" },
+                  "value": { "type": "string" },
+                  "secretRef": { "$ref": "common.schema.json#/$defs/uri" }
+                },
+                "oneOf": [{ "properties": { "value": {} }, "required": ["value"] }, { "properties": { "secretRef": {} }, "required": ["secretRef"] }],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "accountPool": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "selectedAccount": { "$ref": "common.schema.json#/$defs/uri" },
+        "networkScopes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "filesystemScopes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "toolScopes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "limits": { "type": "object", "required": ["wallSeconds", "concurrency"], "properties": { "wallSeconds": { "type": "integer", "minimum": 1 }, "costMicrounits": { "type": "integer", "minimum": 0 }, "concurrency": { "type": "integer", "minimum": 1 } }, "additionalProperties": false },
+        "cleanup": { "type": "object", "required": ["revokeSecrets", "stopChildren", "preserveResidueUntilReconciled"], "properties": { "revokeSecrets": { "const": true }, "stopChildren": { "const": true }, "preserveResidueUntilReconciled": { "const": true } }, "additionalProperties": false }
+      },
+      "additionalProperties": false
+    },
+    "pool": {
+      "type": "object",
+      "required": ["kind", "meta", "project", "providerFamily", "accounts", "fallbackReasons"],
+      "properties": {
+        "kind": { "const": "account-pool" },
+        "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "providerFamily": { "type": "string", "minLength": 1 },
+        "accounts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["accountRef", "secretRef", "priority", "enabled"],
+            "properties": {
+              "accountRef": { "$ref": "common.schema.json#/$defs/uri" },
+              "secretRef": { "$ref": "common.schema.json#/$defs/uri" },
+              "priority": { "type": "integer", "minimum": 1 },
+              "enabled": { "type": "boolean" },
+              "cooldownSeconds": { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "fallbackReasons": { "type": "array", "uniqueItems": true, "items": { "enum": ["rate-limit", "provider-unavailable", "expired-session", "transient-health"] } }
+      },
+      "additionalProperties": false
+    }
+  }
+}
