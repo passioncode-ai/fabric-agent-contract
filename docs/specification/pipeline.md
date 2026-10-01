@@ -1,7 +1,7 @@
 # Pipelines `pipeline/0.1`
 
 `covers:` Fabric agent-registry REQ-08 — DEC-0016, rulings DEC-0017 · locked in Fabric's
-[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/062895d/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
+[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/main/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
 §C4 (2026-09-29)
 
 A pipeline is a versioned graph of stages. A stage binds a **capability**, never an

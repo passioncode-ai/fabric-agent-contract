@@ -4,6 +4,14 @@
   "private": true,
   "license": "AGPL-3.0-only OR LicenseRef-PassionCode-Commercial",
   "description": "Fabric Agent Contract: schemas, profiles and conformance for Fabric-compatible agents",
+  "homepage": "https://github.com/passioncode-ai/fabric-agent-contract#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/passioncode-ai/fabric-agent-contract.git"
+  },
+  "bugs": {
+    "url": "https://github.com/passioncode-ai/fabric-agent-contract/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@11.21.0",
   "engines": { "node": ">=20" },
