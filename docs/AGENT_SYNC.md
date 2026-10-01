@@ -1,4 +1,4 @@
-<!-- agent-sync:generated source=fabric-agent-contract@1eeb5a3 cfg=8f89b69d6810 at=2026-09-28T18:19:50Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
+<!-- agent-sync:generated source=fabric-agent-contract@b7d7e4c cfg=bfae18664adf at=2026-10-01T15:52:09Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
 
 # How documentation and coordination work in fabric-agent-contract
 
@@ -19,7 +19,7 @@ them is the finding.** Reconcile before starting a task and after finishing it.
 
 - record plane: **fs** · lease: **git** — exclusive across machines · runs recorded **gated**
 - lease TTL 2700s, renewed every 300s
-- credentials read from `.env.agent-sync` — gitignored, never committed
+- credentials read from `(none found)` — gitignored, never committed
 
 ### Id registers — reserve before you write
 
@@ -29,11 +29,15 @@ them is the finding.** Reconcile before starting a task and after finishing it.
 
 Reading a *next free id* line is **not** reserving it — two agents read the same number.
 
+Ids are allocated by compare-and-swap on refs/agent-sync/ids/* at 'origin'.
+
 ### Guarded files — a live lease is required to write these
 
 - `docs/DECISIONS.md`
 - `docs/OPEN_QUESTIONS.md`
 - `docs/evidence/specs/*-modules.md`
+- `docs/backlog-sources.json`
+- `docs/backlog.md`
 
 ### Gates run before a change is considered done
 
