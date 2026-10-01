@@ -1,7 +1,7 @@
 # Provider entries `fabric-provider/0.1`
 
 `covers:` Fabric agent-registry REQ-01 — DEC-0016, rulings DEC-0017 · locked in Fabric's
-[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/062895d/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
+[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/main/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
 §C1 (2026-09-29)
 
 An agent that is not a service — a CLI or a stdio MCP server — is announced by a

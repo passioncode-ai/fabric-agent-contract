@@ -1,7 +1,7 @@
 # Runner catalogue
 
 `covers:` Fabric agent-registry REQ-01, REQ-02 — DEC-0016 · locked in Fabric's
-[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/062895d/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
+[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/main/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
 §C2 (2026-09-29)
 
 A **runner** is an installed coding agent a host can drive. A host finds runners from a

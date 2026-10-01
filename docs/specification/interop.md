@@ -1,7 +1,7 @@
 # Interop extension `fabric-interop/0.1`
 
 `covers:` Fabric agent-registry REQ-04, REQ-05, REQ-11 — DEC-0016, rulings DEC-0017, DEC-0018 · locked in Fabric's
-[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/062895d/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
+[agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/main/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
 §C3 (2026-09-29)
 
 How agents are called: every capability is an MCP tool, long work is a job, a question
