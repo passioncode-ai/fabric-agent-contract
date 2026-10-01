@@ -39,8 +39,9 @@ token line is empty even on the operator's machine (`agent_sync.py check`, 2026-
 "AGENT_SYNC_NOTION_TOKEN is empty — runs will degrade to `fs`"), so runs are
 recorded locally and the generated snapshot says `record plane: fs`. Run
 `agent_sync.py status` before a session and report the guarantee it prints,
-never a stronger one. Its register problem "backend 'fs' cannot reserve ids" is
-wrong for a git lease: `reserve` allocates through `refs/agent-sync/ids/` then.
+never a stronger one. `DEC` ids are allocated by compare-and-swap on
+`refs/agent-sync/ids/` at `origin` whatever the record plane; `check` says so since
+agent-sync 1.21.1 (1.21.0 reported "backend 'fs' cannot reserve ids" here, wrongly).
 
 Every normative claim must resolve to a schema, a test, a decision ID, or a
 version-pinned external specification. Protocol revisions are recorded explicitly.
