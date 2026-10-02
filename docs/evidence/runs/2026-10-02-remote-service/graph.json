@@ -1,0 +1,369 @@
+{
+ "goal": "An online agent or dashboard (https origin, no launchd) becomes a Fabric service and appears in Fabric Dashboards as a global service; the first one is the operator's existing dashboard.",
+ "requirements": [
+  "REQ-R01",
+  "REQ-R02",
+  "REQ-R03",
+  "REQ-R04",
+  "REQ-R05",
+  "REQ-R06",
+  "REQ-R07",
+  "REQ-R08",
+  "REQ-R09",
+  "REQ-R10",
+  "REQ-R11",
+  "REQ-R12",
+  "REQ-R13",
+  "REQ-R14",
+  "REQ-R15",
+  "REQ-R16"
+ ],
+ "nodes": [
+  {
+   "id": "N-001",
+   "title": "M1 spec text: placement remote in service.md",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [],
+   "serves": "REQ-R01",
+   "check": "pnpm run check (docs gate) in fabric-agent-contract",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-contract:docs/specification/service.md"
+   ]
+  },
+  {
+   "id": "N-002",
+   "title": "M1 descriptor schema: placement + conditional https origin; fixtures incl. planted incompatible",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-001"
+   ],
+   "serves": "REQ-R02",
+   "check": "test/fixtures.test.ts; plants (remote+http, remote+launchd) seen rejected",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-contract:schemas/service-descriptor.schema.json",
+    "fabric-agent-contract:schemas/service-common.schema.json",
+    "fabric-agent-contract:fixtures/service/"
+   ]
+  },
+  {
+   "id": "N-003",
+   "title": "M1 semantic rules: FAC-SEM-010 local-only, FAC-SEM-022 remote shape",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-002"
+   ],
+   "serves": "REQ-R03",
+   "check": "test/service-rules.test.ts; one plant per rule",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-contract:src/semantic-rules.ts",
+    "fabric-agent-contract:test/service-rules.test.ts"
+   ]
+  },
+  {
+   "id": "N-004",
+   "title": "M1 backward compatibility: every existing fixture unchanged and valid",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-002"
+   ],
+   "serves": "REQ-R04",
+   "check": "existing fixture set green with no edits (git diff --stat fixtures/ shows additions only)",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-contract:test/fixtures.test.ts"
+   ]
+  },
+  {
+   "id": "N-005",
+   "title": "M1 DEC-0019 under lease; CONTEXT, DOCMAP, README, sources",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-001"
+   ],
+   "serves": "REQ-R05",
+   "check": "pnpm run check; agent_sync lease journal",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-contract:docs/DECISIONS.md",
+    "fabric-agent-contract:CONTEXT.md",
+    "fabric-agent-contract:docs/DOCMAP.md",
+    "fabric-agent-contract:README.md",
+    "fabric-agent-contract:docs/evidence/sources.md"
+   ]
+  },
+  {
+   "id": "N-006",
+   "title": "M2 kits Python+Node: remote guard, token-gated well-known, __Host- cookie, remote descriptor writer; probe for remote; TLS sample",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-003"
+   ],
+   "serves": "REQ-R10",
+   "check": "kit tests + check_service.py PASS against the TLS sample",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-adapter:plugins/fabric-agent-adapter/skills/building-fabric-services/scripts/",
+    "fabric-agent-adapter:test/"
+   ]
+  },
+  {
+   "id": "N-007",
+   "title": "M2 skill standard + npm release + local copies",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-006"
+   ],
+   "serves": "REQ-R11",
+   "check": "validator exit 0; npm view version; family launcher update",
+   "evidence": null,
+   "touches": [
+    "fabric-agent-adapter:plugins/fabric-agent-adapter/skills/building-fabric-services/SKILL.md",
+    "fabric-agent-adapter:package.json",
+    "fabric-agent-adapter:CHANGELOG.md"
+   ]
+  },
+  {
+   "id": "N-008",
+   "title": "M3 service-host: remote descriptors, https probe with token, remote states, vectors",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-003"
+   ],
+   "serves": "REQ-R06",
+   "check": "packages/service-host tests + state-precedence.json cases",
+   "evidence": null,
+   "touches": [
+    "fabric-dashboards:packages/service-host/src/",
+    "fabric-dashboards:packages/service-host/test-vectors/state-precedence.json"
+   ]
+  },
+  {
+   "id": "N-009",
+   "title": "M3 UX scenarios + copy for the global group",
+   "owner": "ui",
+   "status": "pending",
+   "blocked_by": [
+    "N-008"
+   ],
+   "serves": "REQ-R16",
+   "check": "fabric-dashboards UX lint inside npm run check",
+   "evidence": null,
+   "touches": [
+    "fabric-dashboards:docs/ux/scenarios.md"
+   ]
+  },
+  {
+   "id": "N-010",
+   "title": "M3 app: global group, open via login code, no controls, honest states",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-008",
+    "N-009",
+    "N-006"
+   ],
+   "serves": "REQ-R07",
+   "check": "npm run check + e2e against the TLS sample; browser look",
+   "evidence": null,
+   "touches": [
+    "fabric-dashboards:src/renderer/",
+    "fabric-dashboards:src/electron/views.ts",
+    "fabric-dashboards:src/core/",
+    "fabric-dashboards:test/"
+   ]
+  },
+  {
+   "id": "N-011",
+   "title": "M3 MCP: placement in list_services; link/open for remote",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-010"
+   ],
+   "serves": "REQ-R08",
+   "check": "real MCP client call (claude -p list_services)",
+   "evidence": null,
+   "touches": [
+    "fabric-dashboards:src/mcp/server.ts",
+    "fabric-dashboards:src/core/deeplink.ts"
+   ]
+  },
+  {
+   "id": "N-012",
+   "title": "M3 Fabric reads the vectors with a remote descriptor present",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-008"
+   ],
+   "serves": "REQ-R09",
+   "check": "Fabric's own vectors run",
+   "evidence": null,
+   "touches": [
+    "fabric:package.json"
+   ]
+  },
+  {
+   "id": "N-013",
+   "title": "M3 Fabric Dashboards release signed/notarized + installed",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-010",
+    "N-011"
+   ],
+   "serves": "REQ-R12",
+   "check": "RUNBOOK release checks; installed version",
+   "evidence": null,
+   "touches": [
+    "fabric-dashboards:package.json",
+    "fabric-dashboards:CHANGELOG.md"
+   ]
+  },
+  {
+   "id": "N-014",
+   "title": "M4 operator dashboard serves the four routes; token on platform; deployed",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-006"
+   ],
+   "serves": "REQ-R13",
+   "check": "its tests + check_service.py PASS against production",
+   "evidence": null,
+   "touches": [
+    "private:apps/adops-bot/src/opshub/"
+   ]
+  },
+  {
+   "id": "N-015",
+   "title": "M4 local descriptor; visible in global group; opens signed in",
+   "owner": "implementer",
+   "status": "pending",
+   "blocked_by": [
+    "N-014",
+    "N-013"
+   ],
+   "serves": "REQ-R14",
+   "check": "list_services shows it ready; app opened",
+   "evidence": null,
+   "touches": [
+    "local:~/Library/Application Support/ai.passioncode.fabric/services/"
+   ]
+  },
+  {
+   "id": "N-016",
+   "title": "Public-name gate on every public diff",
+   "owner": "verifier",
+   "status": "pending",
+   "blocked_by": [],
+   "serves": "REQ-R15",
+   "check": "grep for operator names over each public PR diff exits 1",
+   "evidence": null,
+   "touches": []
+  }
+ ],
+ "edges": [
+  {
+   "from": "N-001",
+   "to": "N-002",
+   "payload": "the normative remote rules the schema encodes"
+  },
+  {
+   "from": "N-002",
+   "to": "N-003",
+   "payload": "the descriptor shape (placement, origin) the rules read"
+  },
+  {
+   "from": "N-002",
+   "to": "N-004",
+   "payload": "the widened schema the unchanged fixtures must still pass"
+  },
+  {
+   "from": "N-001",
+   "to": "N-005",
+   "payload": "the spec text DEC-0019 records and CONTEXT/DOCMAP point at"
+  },
+  {
+   "from": "N-003",
+   "to": "N-006",
+   "payload": "the rule codes and remote shape the kits and probe enforce"
+  },
+  {
+   "from": "N-006",
+   "to": "N-007",
+   "payload": "the kit and skill files the validator and release ship"
+  },
+  {
+   "from": "N-003",
+   "to": "N-008",
+   "payload": "the remote descriptor rules service-host validates"
+  },
+  {
+   "from": "N-008",
+   "to": "N-009",
+   "payload": "the remote state set and reasons the scenarios describe"
+  },
+  {
+   "from": "N-008",
+   "to": "N-010",
+   "payload": "the snapshot with placement and remote states the app renders"
+  },
+  {
+   "from": "N-009",
+   "to": "N-010",
+   "payload": "the scenarios and copy the global group implements"
+  },
+  {
+   "from": "N-006",
+   "to": "N-010",
+   "payload": "the TLS remote sample service the e2e drives"
+  },
+  {
+   "from": "N-010",
+   "to": "N-011",
+   "payload": "the app-side placement field the MCP list exposes"
+  },
+  {
+   "from": "N-008",
+   "to": "N-012",
+   "payload": "the updated state-precedence vectors Fabric runs"
+  },
+  {
+   "from": "N-010",
+   "to": "N-013",
+   "payload": "the app build the release signs"
+  },
+  {
+   "from": "N-011",
+   "to": "N-013",
+   "payload": "the MCP binary shipped inside the release"
+  },
+  {
+   "from": "N-006",
+   "to": "N-014",
+   "payload": "the Node kit functions the operator dashboard imports"
+  },
+  {
+   "from": "N-014",
+   "to": "N-015",
+   "payload": "the deployed origin and token the local descriptor names"
+  },
+  {
+   "from": "N-013",
+   "to": "N-015",
+   "payload": "the installed host version that shows remote services"
+  }
+ ]
+}
