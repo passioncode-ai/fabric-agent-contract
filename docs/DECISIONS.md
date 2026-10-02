@@ -244,3 +244,32 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** the operator's follow-up ruling of 2026-09-30, relayed by the coordinator, with
   the Observatory agent's measurement (its fix: Observatory v0.9.1). Id reserved through
   `agent_sync.py reserve DEC`; register edited under the git lease.
+
+### DEC-0019 — A service may be online: `placement: "remote"` in `fabric-service/0.1`
+
+- **Date:** 2026-10-02
+- **Status:** Accepted
+- **Decision:** A descriptor gains the optional field `placement`, `local` by default. A
+  `remote` placement is an online agent or dashboard at an `https://<dns-name>[:<port>]` origin,
+  supervised by its platform (`lifecycle.manager: "none"`, no launchd fields, `doctor` only). It
+  speaks the same well-known document, events feed and login code, with three changes: the
+  well-known document requires the service token and answers `401` with an empty body
+  otherwise; the session cookie is `__Host-`-prefixed and `Secure`; the port claim
+  (`FAC-SEM-010`) covers local placements only. A host sends the token only to the descriptor's
+  own `https` origin with the certificate verified, follows no redirect, offers no lifecycle
+  control, and gives a remote probe a longer budget. New rule `FAC-SEM-024` refuses a remote
+  placement on a reserved name or with a launchd field. Under the DEC-0016 policy nothing
+  required changes: `contractVersion` stays `0.1.0`, the protocol id stays `fabric-service/0.1`,
+  every existing descriptor stays valid, and a host written against the local text treats a
+  remote descriptor as invalid instead of contacting it.
+- **Consequences / affects:** `docs/specification/service.md` (*Remote placement*),
+  `schemas/service-descriptor.schema.json`, `src/semantic-rules.ts`, `fixtures/` (one positive,
+  eight negative), `test/service-rules.test.ts`, `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`,
+  `docs/evidence/sources.md`; consumers — the `building-fabric-services` skill and its kits,
+  `@passioncode-ai/fabric-service-host`, Fabric Dashboards, Fabric.
+- **Source:** operator decision 2026-10-02 (a remote service kind, not a local bridge; optional
+  field in `0.1`; the well-known document behind the token), run brief
+  `docs/evidence/specs/2026-10-02-remote-service-brief.md`, design
+  `docs/evidence/specs/2026-10-02-remote-service-design.md`. Id reserved through
+  `agent_sync.py reserve DEC` under the git lease on this file (run `r-12c7d2e0b`, backend
+  `fs` — the record plane is degraded as `AGENTS.md` describes).

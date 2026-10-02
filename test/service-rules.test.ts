@@ -37,6 +37,31 @@ describe("fabric-service/0.1 semantic rules", () => {
     expect(codes("service-descriptor", descriptor("plan-board", "default", 47110, { commands: { doctor: ["brandctl", "check"] } }))).toContain("FAC-SEM-012");
   });
 
+  it("FAC-SEM-010 lets a remote service share a port number with a local one (DEC-0019)", () => {
+    const remote = { protocol: "fabric-service/0.1", id: "example-agent", instance: "default", placement: "remote", origin: "https://agent.example.com:47191" };
+    expect(codes("service-directory", { descriptors: [descriptor("maker", "default", 47191), remote] })).not.toContain("FAC-SEM-010");
+  });
+
+  it("FAC-SEM-010 still refuses one id.instance declared twice when one copy is remote", () => {
+    const remote = { protocol: "fabric-service/0.1", id: "maker", instance: "default", placement: "remote", origin: "https://agent.example.com" };
+    expect(codes("service-directory", { descriptors: [descriptor("maker", "default", 47191), remote] })).toContain("FAC-SEM-010");
+  });
+
+  it("FAC-SEM-024 refuses a remote service on a reserved name", () => {
+    for (const origin of ["https://agent.localhost", "https://box.local", "https://api.internal", "https://nas.home.arpa"]) {
+      expect(codes("service-descriptor", { placement: "remote", origin, lifecycle: { manager: "none" } })).toContain("FAC-SEM-024");
+    }
+  });
+
+  it("FAC-SEM-024 refuses launchd fields on a remote service", () => {
+    const value = { placement: "remote", origin: "https://agent.example.com", lifecycle: { manager: "none", label: "com.example.agent" } };
+    expect(codes("service-descriptor", value)).toContain("FAC-SEM-024");
+  });
+
+  it("FAC-SEM-024 accepts a remote service on a public name", () => {
+    expect(codes("service-descriptor", { placement: "remote", origin: "https://agent.example.com", lifecycle: { manager: "none" } })).toEqual([]);
+  });
+
   it("accepts a consistent machine", () => {
     const a = descriptor("maker", "default", 47187, { commands: { doctor: ["~/.local/bin/foundry", "doctor"] } });
     const b = descriptor("maker", "preview", 47191);

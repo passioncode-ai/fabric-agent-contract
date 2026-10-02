@@ -24,7 +24,7 @@ and recorded as DEC-0001.
 | Provider author and operator onboarding | `docs/guides/connecting-compatible-agents.md` |
 | Memory control-plane semantics | `docs/specification/memory-and-learning.md` |
 | Concrete memory backend mapping | `docs/reference-architecture/mcp-memory-service-adapter.md` |
-| Local service extension (`fabric-service/0.1`) | `docs/specification/service.md` |
+| Service extension (`fabric-service/0.1`), local and remote placement | `docs/specification/service.md` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |
 | Runner catalogue shape | `docs/specification/runners.md` |
@@ -41,6 +41,7 @@ and recorded as DEC-0001.
 | Memory architecture run scope | `docs/evidence/specs/2026-08-26-memory-kernel-brief.md` |
 | Acceptance receipts | `docs/evidence/acceptance.md` |
 | Local service extension run scope | `docs/evidence/specs/2026-09-28-fabric-service-brief.md` |
+| Remote placement run scope and design | `docs/evidence/specs/2026-10-02-remote-service-brief.md`, `docs/evidence/specs/2026-10-02-remote-service-design.md` |
 | Memory architecture acceptance | `docs/evidence/specs/2026-08-27-memory-kernel-acceptance.md` |
 | Provider guide acceptance | `docs/evidence/specs/2026-08-27-agent-provider-guide-acceptance.md` |
 | Deferred or dropped work | adjacent carry-over ledger |

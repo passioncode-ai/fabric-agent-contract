@@ -71,16 +71,23 @@ claimed piece of shared work.
 **Standing grant**: A named, scoped, expiring authorization for a class of
 otherwise approval-bound external actions.
 
-**Service**: A long-running agent process on the operator's own computer,
-supervised by the operating system and following the `fabric-service/0.1`
-extension.
+**Service**: A long-running agent process following the `fabric-service/0.1`
+extension — on the operator's own computer, supervised by the operating system
+(a **local placement**), or online at an `https` origin, supervised by its
+platform (a **remote placement**, DEC-0019).
+
+**Placement**: Where a service runs, as its descriptor declares it: `local`
+(`http://127.0.0.1:<port>`, the default) or `remote` (`https://<dns-name>`). It
+changes reachability, supervision and the trust anchor, never the objects a
+host reads.
 
 **Service descriptor**: The file an installer writes to announce one installed
 service instance: identity, origin, token location, supervisor and paths. It
 describes an installation, not a run.
 
-**Well-known document**: The unauthenticated answer a running service gives about
-itself: build, process, status, degraded sources and surfaces.
+**Well-known document**: The answer a running service gives about itself: build,
+process, status, degraded sources and surfaces — unauthenticated for a local
+placement, behind the service token for a remote one.
 
 **Activity event**: One record in a service's events feed — when, what kind, which
 level, one sentence a person can read, and optionally a subject, a link and a

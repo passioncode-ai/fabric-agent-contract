@@ -87,5 +87,14 @@
   {"name": "interop-job-tool-output-envelope", "schema": "interop-job-tool-output.schema.json", "path": "positive/interop-job-tool-output-envelope.json", "valid": true},
   {"name": "interop-job-tool-output-malformed-handle", "schema": "interop-job-tool-output.schema.json", "path": "negative/interop-job-tool-output-malformed.json", "valid": false, "keyword": "oneOf"},
   {"name": "provider-entry-without-provider-id", "schema": "provider.schema.json", "path": "negative/provider-entry-no-provider-id.json", "valid": false, "keyword": "required"},
-  {"name": "interop-job-tool-output-not-an-object", "schema": "interop-job-tool-output.schema.json", "path": "negative/interop-job-tool-output-array.json", "valid": false, "keyword": "type"}
+  {"name": "interop-job-tool-output-not-an-object", "schema": "interop-job-tool-output.schema.json", "path": "negative/interop-job-tool-output-array.json", "valid": false, "keyword": "type"},
+  {"name": "service-descriptor-remote", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-remote.json", "valid": true},
+  {"name": "service-remote-origin-not-https", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-http.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-remote-under-launchd", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-launchd.json", "valid": false, "keyword": "const"},
+  {"name": "service-remote-origin-ip-literal", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-ip-literal.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-remote-origin-with-path", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-remote-update-command", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-update.json", "valid": false, "keyword": "false schema"},
+  {"name": "service-https-origin-without-remote-placement", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-https-without-placement.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-local-without-paths", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-local-without-paths.json", "valid": false, "keyword": "required"},
+  {"name": "service-remote-origin-loopback", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-loopback.json", "valid": false, "keyword": "pattern"}
 ]
