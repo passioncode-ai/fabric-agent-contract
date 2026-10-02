@@ -1,9 +1,11 @@
 # Local service extension `fabric-service/0.1`
 
 `covers: REQ-S01, REQ-S02, REQ-S03, REQ-S04, REQ-S05` — see the
-[run brief](../evidence/specs/2026-09-28-fabric-service-brief.md) · DEC-0015
+[run brief](../evidence/specs/2026-09-28-fabric-service-brief.md) · DEC-0015;
+`covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019
 
-A **service** is a long-running agent process on the operator's own computer: it keeps
+A **service** is a long-running agent process — on the operator's own computer (a **local**
+placement) or online at an `https` origin (a **remote** placement, [below](#remote-placement)): it keeps
 state, answers other agents, and usually shows a dashboard. This extension says how a
 service is found, how it reports that it is alive, how it is started and stopped, how
 an operator is let into its dashboard, and how it reports what it did. It lets a host
@@ -56,9 +58,13 @@ descriptor describes an installation, not a run.
   `fsync`, rename) with mode `0600`.
 - `id` and `instance` together MUST be unique on the machine. A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
-- `origin` MUST be `http://127.0.0.1:<port>`. **A port is a claim:** before writing, an
-  installer MUST read every descriptor in the directory and refuse a port that another
-  `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a directory.
+- `placement` is `local` (the default when absent) or `remote`. Every rule in this document
+  applies to a local placement; [Remote placement](#remote-placement) states what changes for a
+  remote one.
+- For a local placement `origin` MUST be `http://127.0.0.1:<port>`. **A port is a claim:**
+  before writing, an installer MUST read every descriptor in the directory and refuse a port
+  that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
+  directory; a remote origin claims no port here.
 - Paths MAY start with `~/`. Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)).
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
@@ -70,7 +76,8 @@ descriptor describes an installation, not a run.
 Schema: [`service-well-known.schema.json`](../../schemas/service-well-known.schema.json).
 
 `GET /.well-known/fabric-service` MUST answer without authentication, from memory, in
-under 100 ms. Host and Origin checks (below) still apply.
+under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote
+placement requires the token here too ([Remote placement](#remote-placement)).
 
 - `service.id` and `service.instance` MUST equal the descriptor's. A different answer
   means another program holds the port; a host MUST report it as `foreign` and MUST NOT
@@ -128,6 +135,9 @@ When `surfaces.dashboard.login` is `true`, the dashboard requires an operator se
 
 ## Authentication and network
 
+These rules are the local placement's; a remote one replaces the first two
+([Remote placement](#remote-placement)).
+
 - A service MUST bind `127.0.0.1` only.
 - It MUST reject a `Host` header other than `127.0.0.1:<port>`, `localhost:<port>` or
   `[::1]:<port>`, an `Origin` other than its own, and `Sec-Fetch-Site: cross-site`.
@@ -140,6 +150,67 @@ When `surfaces.dashboard.login` is `true`, the dashboard requires an operator se
 Loopback reachability is not authorization: any process running as the same user can
 read the token file. This extension protects against a web page and against a mistake,
 not against a hostile process of the same user.
+
+## Remote placement
+
+A **remote** service is an online agent or dashboard that runs outside the operator's computer
+— on a platform, a server, a hosted app — and is shown by a host beside the local ones. It is the
+same protocol: the well-known document, the events feed and the login code are the same objects
+at the same paths. Only reachability, supervision and the trust anchor change (DEC-0019).
+
+| | Local placement | Remote placement |
+|---|---|---|
+| `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
+| Trust anchor | loopback and the Host/Origin guard | the origin's TLS certificate and the service token |
+| Supervisor | launchd, or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
+| Well-known document | unauthenticated, under 100 ms | the token is required |
+| Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
+| Commands | `doctor`, `update` | `doctor` only |
+| Session cookie | `HttpOnly; SameSite=Strict` | `__Host-` name, `Secure; HttpOnly; SameSite=Strict; Path=/` |
+
+**Descriptor.** A remote descriptor MUST carry `placement: "remote"`. Its `origin` MUST be
+`https://` followed by a DNS name and an optional port — no path, query, fragment or userinfo,
+and never an IP literal. The name MUST NOT be a reserved one (`localhost`, `*.local`,
+`*.internal`, `*.home.arpa`, `*.lan`, `*.localdomain`; `FAC-SEM-024`). `lifecycle.manager` MUST be
+`none` and the descriptor MUST NOT carry `label` or `plist`. `paths` is optional. `commands`
+MAY carry `doctor` (a local executable, `FAC-SEM-012`) and MUST NOT carry `update`. The token
+file is local, as for every placement: the installer writes it on the operator's computer with
+mode `0600`, and the same value lives on the hosting platform as a secret.
+
+**The service.**
+
+- It MUST be reachable only over `https` at its origin. Behind a platform that ends TLS before
+  the process, it MUST refuse a request whose platform-set forwarded scheme is not `https`.
+- It MUST refuse a `Host` other than its origin's host (and port, where the origin names one),
+  a foreign `Origin`, and `Sec-Fetch-Site: cross-site` on every protocol route.
+- `GET /.well-known/fabric-service` MUST require the service token. Without it — or with a
+  wrong one, compared in constant time — the answer MUST be `401` with an empty body: no build,
+  pid, status or tiles. With it, the document is the one this extension defines.
+- The events feed, the login code and the login redirect are as for a local placement. The
+  session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
+  `SameSite=Strict` and `Path=/` and no `Domain`.
+- `process.pid` and `process.startedAt` describe the answering process; on a platform with
+  several processes behind one origin they MAY differ between answers, and a host MUST NOT read
+  a changed pid as a second copy for a remote placement.
+
+**The host.**
+
+- A host MUST send the token only to the descriptor's own `https` origin, MUST verify the
+  certificate against the system trust store, and MUST NOT follow a redirect from any protocol
+  route; a redirect is reported as the service's state, never followed.
+- A host MUST NOT offer start, stop or restart, and MUST NOT run `update`, for a remote
+  placement. It MAY run `doctor`.
+- A `401` is reported as the service refusing the token — not as `foreign`, because nothing was
+  disclosed. A well-known answer naming another `id.instance` is `foreign`, and the host MUST NOT
+  send the token again until the descriptor changes (`FAC-SEM-009`).
+- The 100 ms budget is a local rule. A host SHOULD give a remote probe several seconds and MUST
+  NOT report one missed probe as an outage.
+- A host that does not implement this section MUST treat a remote descriptor as invalid rather
+  than contact it — which hosts written against the local text already do, because the origin
+  does not match `http://127.0.0.1:<port>`.
+
+Discovery still grants nothing: a remote descriptor makes an online service visible to the
+operator who installed it, on that operator's computer only.
 
 ## Lifecycle
 
@@ -168,7 +239,8 @@ not against a hostile process of the same user.
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
-| `FAC-SEM-010` | `service-directory` | no two descriptors claim one port or one `id.instance` |
+| `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port; no two descriptors claim one `id.instance` |
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or `~/` executable path |
+| `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no launchd field |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |

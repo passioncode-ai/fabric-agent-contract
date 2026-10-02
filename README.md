@@ -30,7 +30,7 @@ package ships in this version.
 - [Memory, retrospectives and learning](docs/specification/memory-and-learning.md)
 - [`mcp-memory-service` reference adapter](docs/reference-architecture/mcp-memory-service-adapter.md)
 - [Governance and roles](docs/specification/governance-and-roles.md)
-- [Local services and their dashboards (`fabric-service/0.1`)](docs/specification/service.md)
+- [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
 - [The runner catalogue of installed coding agents](docs/specification/runners.md)

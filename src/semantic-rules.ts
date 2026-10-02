@@ -44,7 +44,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known" && value.status === "ready" && Array.isArray(value.degraded) && value.degraded.length > 0) {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
-  if (kind === "service-descriptor") findings.push(...serviceCommands(value));
+  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
 
   return findings;
 }
@@ -65,10 +65,14 @@ function serviceClaims(value: JsonObject): Finding[] {
   const byKey = new Set<string>();
   descriptors.forEach((descriptor, index) => {
     const key = serviceKey(descriptor);
-    const port = /:(\d+)$/.exec(String(descriptor.origin))?.[1] ?? "";
-    const holder = byPort.get(port);
-    if (holder !== undefined && holder !== key) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}/origin`, message: `port ${port} is claimed by both ${holder} and ${key}` });
-    else byPort.set(port, key);
+    // DEC-0019: a port is a claim on THIS computer, so only local placements claim one. A remote
+    // origin's port belongs to another host and collides with nothing here.
+    if (descriptor.placement !== "remote") {
+      const port = /:(\d+)$/.exec(String(descriptor.origin))?.[1] ?? "";
+      const holder = byPort.get(port);
+      if (holder !== undefined && holder !== key) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}/origin`, message: `port ${port} is claimed by both ${holder} and ${key}` });
+      else byPort.set(port, key);
+    }
     if (byKey.has(key)) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}`, message: `${key} is declared more than once` });
     byKey.add(key);
   });
@@ -80,4 +84,22 @@ function serviceCommands(value: JsonObject): Finding[] {
   return Object.entries(commands)
     .filter(([, argv]) => Array.isArray(argv) && !/^(~\/|\/)/.test(String(argv[0])))
     .map(([name]) => ({ code: "FAC-SEM-012", instancePath: `/commands/${name}/0`, message: `command ${name} must start with an absolute or home-relative executable path` }));
+}
+
+// DEC-0019: names that never reach the open internet. A remote origin on one of them is a local
+// service wearing the remote placement — it would skip the loopback guard it actually needs.
+const RESERVED_HOST = /(^|\.)(localhost|local|internal|home\.arpa|lan|localdomain)$/;
+
+/** FAC-SEM-024: a remote placement is an https origin on a public name, with nothing of launchd. */
+function remoteShape(value: JsonObject): Finding[] {
+  if (value.placement !== "remote") return [];
+  const findings: Finding[] = [];
+  let host = "";
+  try { host = new URL(String(value.origin)).hostname; } catch { /* the schema reports the shape */ }
+  if (host && RESERVED_HOST.test(host)) findings.push({ code: "FAC-SEM-024", instancePath: "/origin", message: `a remote service cannot live on the reserved name ${host}` });
+  const lifecycle = isObject(value.lifecycle) ? value.lifecycle : {};
+  for (const field of ["label", "plist"]) {
+    if (lifecycle[field] !== undefined) findings.push({ code: "FAC-SEM-024", instancePath: `/lifecycle/${field}`, message: `a remote service has no launchd ${field}` });
+  }
+  return findings;
 }
