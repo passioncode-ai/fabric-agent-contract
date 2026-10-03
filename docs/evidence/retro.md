@@ -6,6 +6,7 @@
 - A compatibility check must be observed rejecting a planted incompatible fixture before its green result counts.
 - A learning is created from a failed attempt beside a verified correction, never from a successful run alone.
 - A run may propose a prompt, pipeline, or policy change but may not mutate the rules governing itself.
+- A conformance probe for a placement reached through a platform is accepted only after it has run against a real instance behind that platform, not only against a sample the run itself wrote.
 
 ## Run stamps
 
@@ -17,6 +18,9 @@
   publication receipt is recorded by the private repository workflow.
 - `2026-08-27-provider-guide` — compatible provider guide committed at `cb638b1`;
   no new executable mechanism or failure/correction contrast was introduced.
+- `2026-10-02-remote-service` — contract `2ce3922` (DEC-0019); adapter `447b558` v0.6.0 and
+  `d3a4c67` v0.6.1; Fabric Dashboards `f6cde69` v0.4.0 and `75eba78` v0.4.1; acceptance in
+  `docs/evidence/runs/2026-10-02-remote-service/acceptance.md`.
 
 ## Recent log
 
@@ -92,3 +96,27 @@
   largest consumer; and a plant proves a test only when it restores the whole defect.
 - **Loop correction:** the record of this run is
   [2026-09-30-ar1-contract.md](plans/2026-09-30-ar1-contract.md).
+
+### 2026-10-03 — Remote service placement (DEC-0019)
+
+- **Goal:** let an online agent or dashboard become a `fabric-service/0.1` service and appear in
+  the host beside the local ones.
+- **Failed attempt 1 (stage 8, surfaced; owned by stage 5 of the adapter):** the probe passed the
+  shipped TLS sample but failed the first real service: `network.host-check` got `404` because a
+  platform router answers a foreign `Host` before the process does. The sample terminates its own
+  TLS, so no test ever met a router.
+- **Failed attempt 2 (stage 8; owned by stage 3 of the host):** MCP `link` without a path pointed
+  at the origin root, where a panel served under a path answers `404`. The spec named the
+  dashboard surface but not the path-less default.
+- **Failed attempt 3 (stage 7; owned by the operator's own command discipline):** a public push
+  chained the name gate with `;` instead of `&&`. One private path reached a public branch and was
+  squashed out before merge.
+- **Failed attempt 4 (stage 9; owned by stage 1):** ADR-0011 cited Fabric ADR-0083 as saying
+  «loopback only» from memory. It does not.
+- **Verified corrections:** adapter 0.6.1 `guard_verdict` (4 tests, 4 mutations killed;
+  production 0 FAIL); host 0.4.1 `http_url` follows the dashboard surface (a test plus a
+  mutation); `public-name-gate && git push` on every public push (it blocked one more leak during
+  0.4.1); ADR-0011 corrected after reading ADR-0083.
+- **Learning:** a sample written by the same run shares its blind spots. The platform in front of
+  a remote service is part of the protocol's reality, so the gate is the real instance — now a
+  standing instruction above.
