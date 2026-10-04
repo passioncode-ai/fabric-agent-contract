@@ -5,8 +5,9 @@
 Operator behavior is SCN-007 and SCN-008. DEC-0004 fixes project-first memory,
 DEC-0012 fixes contrast-based learning, and DEC-0014 fixes the control-plane and
 replaceable-backend boundary. This document is normative for architecture. The
-existing contract `0.1.0` JSON schema remains the machine-readable shape; wire
-activation of the conceptual API below requires a future versioned change.
+existing contract `0.1.0` JSON schema remains the machine-readable shape. The
+conceptual API below is activated on the wire as `memory/0.1` (DEC-0023, section
+[Wire: memory/0.1](#wire-memory01)).
 
 ## Invariants
 
@@ -315,3 +316,31 @@ retention APIs.
 
 The first concrete mapping and alternatives are documented in the
 [`mcp-memory-service` adapter](../reference-architecture/mcp-memory-service-adapter.md).
+
+## Wire: memory/0.1
+
+DEC-0023 activates agent memory on the wire. The shape is
+`schemas/memory-capability.schema.json`, and the first provider is Project Observatory (Fabric
+ADR-0105).
+
+| Capability | What it does | Observatory tool |
+|---|---|---|
+| `memory.checkpoint.write` | Write a workflow checkpoint after a step. The lease holder writes; a stale lease is refused and kept as an episode (`keptAs`). | `observatory_checkpoint_write` |
+| `memory.checkpoint.latest` | Read the latest checkpoint, the lease and the credentials the workflow needs (names only). | `observatory_checkpoint_latest` |
+| `memory.handoff.create` | Offer the workflow to another executor; the provider assembles the pack. | `observatory_handoff_create` |
+| `memory.handoff.accept` | Take the workflow. The answer carries the new lease, the pack and its constraints. | `observatory_handoff_accept` |
+| `memory.handoff.get` | Read a handoff pack. | `observatory_handoff_get` |
+| `memory.workflow.list` | List workflows by project and status. | `observatory_workflow_list` |
+| `memory.record` | Append a record as a proposal. | `observatory_record` |
+| `memory.search` | Search current revisions, with conflicts together, an honest `abstain` and `degraded`. | `observatory_search` |
+| `memory.recall` | Page through current records. | `observatory_recall` |
+
+**Rules:**
+- A provider serves all nine capabilities. The names `memory.learning.propose`,
+  `memory.explain` and `memory.forget` are reserved until a later revision defines them.
+- Inputs refuse unknown fields. An unknown capability or family revision is refused, never
+  ignored.
+- Identity comes from the transport, never from `owner`. On Fabric's hub hop the provider
+  intersects `X-Fabric-Projects` with the binding's projects and never widens them.
+- Memory text is data, never instructions. A write is a proposal, and only the operator or an
+  independent corroboration promotes it.

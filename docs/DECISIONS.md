@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0022`
+**Next free ID:** `DEC-0024`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -112,7 +112,7 @@ annotate only the old status; decision bodies are never rewritten.
 ### DEC-0014 — Fabric owns the Memory Kernel; retrieval backends are replaceable
 
 - **Date:** 2026-08-27
-- **Status:** Accepted
+- **Status:** Accepted · **superseded for agent memory by DEC-0023** (its `mcp-memory-service` pilot is replaced; Fabric's own domain memory is unchanged)
 - **Refines:** DEC-0003, DEC-0004, DEC-0012
 - **Decision:** Fabric owns authenticated memory scope, canonical revisions,
   evidence links, conflicts, retention, promotion and context assembly. Agents
@@ -338,3 +338,62 @@ annotate only the old status; decision bodies are never rewritten.
   git CAS (`agent_sync.py reserve DEC`); decision file edited under the git lease, record plane
   `fs`.
 
+### DEC-0023 — Agent memory is served as `memory/0.1`, first by Project Observatory
+
+- **Date:** 2026-10-04
+- **Status:** Accepted source change; provider and consumer adoption pending
+- **Supersedes:** DEC-0014's pilot, for agent memory only (Fabric ADR-0105). DEC-0014 still
+  governs Fabric's own domain memory.
+- **Decision:** `memory/0.1` is the capability family for agent memory, with extension key
+  `https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1` and schema
+  `schemas/memory-capability.schema.json`.
+  - **Capabilities.** It has nine, and all nine are required of a provider:
+    - `memory.checkpoint.write` and `memory.checkpoint.latest`;
+    - `memory.handoff.create`, `memory.handoff.accept` and `memory.handoff.get`;
+    - `memory.workflow.list`;
+    - `memory.record`;
+    - `memory.search` and `memory.recall`.
+  - **Reserved names.** `memory.learning.propose`, `memory.explain` and `memory.forget` are
+    reserved. They are not served under these names until a later revision gives them a schema.
+  - **Strictness.** Inputs refuse unknown fields. Outputs require their core fields and may
+    carry more. A refusal is a typed answer (`error`, `detail`, optional `code`, `hint`,
+    `remedy`, `keptAs`, `degraded`). A wire write is a proposal (`memory.record` answers
+    `state: proposed`).
+  - **Provider declaration.** A provider declares the family, all nine capabilities and a
+    `compatibility` map to its existing tool names. Project Observatory maps them to
+    `observatory_*`.
+- **Identity:** `owner` is a writer label, never authority. Who the caller is comes from the
+  transport: stdio is the operator's local agent, and an HTTP call carries a bearer that the
+  provider resolves to a binding (Observatory `access-bindings/1`). On Fabric's hub hop
+  (ADR-0115), the provider intersects an `X-Fabric-Projects` narrowing header with the
+  binding's projects. The header is a comma list that never widens. When it is absent, the
+  call is workspace-level and runs only when the grant names the capability itself.
+- **Why:** Fabric ADR-0105 (operator, 2026-10-03) moved agent memory into Project
+  Observatory and made Fabric its client. `docs/specification/memory-and-learning.md` said
+  wire activation needed a versioned change, and this is that change.
+- **Compatibility:** It is an additive extension, as DEC-0016 allows. `contractVersion`
+  `0.1.0` is unchanged. A consumer must review and repin the exact source commit before
+  relying on it.
+- **Consequences / affects:**
+  - `schemas/memory-capability.schema.json`;
+  - `src/extensions.ts` (`memory` key);
+  - `fixtures/` (`memory-*`, built from the outputs Observatory actually served on
+    2026-10-04);
+  - `test/schema-compilation.test.ts`;
+  - `docs/specification/memory-and-learning.md` (Wire: `memory/0.1`).
+  - **Consumers:**
+    - the Observatory engine's `memory.*` entry points and repin (PB-137 N-025);
+    - Fabric's local memory client (N-023);
+    - the task-pipeline stage writer (N-024);
+    - transport conformance over stdio and HTTP (N-021).
+- **Not decided here:** `memory.forget`, `memory.explain` and `memory.learning.propose`
+  schemas; the HTTP endpoint itself (Observatory N-016); the Fabric hub's Observatory
+  connector (ADR-0105 M8).
+- **Source:**
+  - Fabric ADR-0105 and ADR-0115 at fabric `9e7f54e6`;
+  - the Fabric session's reading of the hub hop, 2026-10-04: standing product connection,
+    `X-Fabric-Projects`;
+  - PB-137 N-017.
+
+  DEC-0023 was reserved by git CAS (`agent_sync.py reserve DEC`); DEC-0022 is held by
+  PR #11. This file was edited under the git lease.

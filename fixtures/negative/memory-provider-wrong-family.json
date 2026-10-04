@@ -1,0 +1,17 @@
+{
+  "kind": "memory-provider",
+  "family": "memory/0.2",
+  "provider": "future",
+  "capabilities": [
+    "memory.checkpoint.write",
+    "memory.checkpoint.latest",
+    "memory.handoff.create",
+    "memory.handoff.accept",
+    "memory.handoff.get",
+    "memory.workflow.list",
+    "memory.record",
+    "memory.search",
+    "memory.recall"
+  ],
+  "compatibility": {}
+}

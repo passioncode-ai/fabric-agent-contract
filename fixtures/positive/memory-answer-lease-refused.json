@@ -1,0 +1,10 @@
+{
+  "kind": "memory-answer",
+  "capability": "memory.checkpoint.write",
+  "output": {
+    "error": "LeaseLost",
+    "detail": "wf_7c92bf9880071bbb: the token does not hold the active lease — the workflow was handed to another executor. Your step was kept as mem:10bf622c772043f6; read the workflow's latest checkpoint before continuing. A retry needs a new idempotency key: this one now answers with this refusal.",
+    "remedy": "another executor holds this workflow now, or your token is gone. Read it with `observatory_checkpoint_latest` before doing anything else; your step was kept as `keptAs` and is not lost. If you lost your own token, hand the workflow to yourself with reason `restart`. A retry takes a new `idempotencyKey`",
+    "keptAs": "mem:10bf622c772043f6"
+  }
+}
