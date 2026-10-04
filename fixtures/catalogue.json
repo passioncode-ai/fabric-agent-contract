@@ -96,5 +96,10 @@
   {"name": "service-remote-update-command", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-update.json", "valid": false, "keyword": "false schema"},
   {"name": "service-https-origin-without-remote-placement", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-https-without-placement.json", "valid": false, "keyword": "pattern"},
   {"name": "service-local-without-paths", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-local-without-paths.json", "valid": false, "keyword": "required"},
-  {"name": "service-remote-origin-loopback", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-loopback.json", "valid": false, "keyword": "pattern"}
+  {"name": "service-remote-origin-loopback", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-remote-loopback.json", "valid": false, "keyword": "pattern"},
+  {"name": "interop-agent-call-underscore", "schema": "interop-agent-call.schema.json", "path": "positive/interop-agent-call-underscore.json", "valid": true},
+  {"name": "manifest-capability-underscore", "schema": "manifest.schema.json", "path": "positive/manifest-capability-underscore.json", "valid": true},
+  {"name": "service-capability-underscore", "schema": "service-well-known.schema.json", "path": "positive/service-capability-underscore.json", "valid": true},
+  {"name": "pipeline-capability-underscore", "schema": "pipeline.schema.json", "path": "positive/pipeline-capability-underscore.json", "valid": true},
+  {"name": "interop-agent-call-leading-underscore", "schema": "interop-agent-call.schema.json", "path": "negative/interop-agent-call-leading-underscore.json", "valid": false, "keyword": "pattern"}
 ]

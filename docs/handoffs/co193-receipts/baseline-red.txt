@@ -1,0 +1,141 @@
+
+ RUN  v4.1.11 /Users/sshlg/DATA/_worktrees/fabric-agent-contract-co193-20261004
+
+ ❯ test/capability-names.test.ts (77 tests | 17 failed) 80ms
+     × accepts product tool name read_message 6ms
+     × accepts product tool name list_messages 1ms
+     × accepts product tool name a_ 0ms
+     × accepts product tool name a_______________________________________________________________________________________________________________________________ 0ms
+     × accepts product tool name read_message 29ms
+     × accepts product tool name list_messages 0ms
+     × accepts product tool name a_ 0ms
+     × accepts product tool name a_______________________________________________________________________________________________________________________________ 0ms
+     × accepts product tool name read_message 27ms
+     × accepts product tool name list_messages 0ms
+     × accepts product tool name a_ 0ms
+     × accepts product tool name a_______________________________________________________________________________________________________________________________ 0ms
+     × accepts product tool name read_message 3ms
+     × accepts product tool name list_messages 0ms
+     × accepts product tool name a_ 0ms
+     × accepts product tool name a_______________________________________________________________________________________________________________________________ 0ms
+   × all four name-bearing schema surfaces reference the shared definition 7ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'interop-agent-call.schema.json' > accepts product tool name read_message
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'interop-agent-call.schema.json' > accepts product tool name list_messages
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'interop-agent-call.schema.json' > accepts product tool name a_
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'interop-agent-call.schema.json' > accepts product tool name a_______________________________________________________________________________________________________________________________
+AssertionError: [{"instancePath":"/capability","schemaPath":"common.schema.json#/$defs/capabilityName/pattern","keyword":"pattern","params":{"pattern":"^[a-z][a-z0-9.-]{1,127}$"},"message":"must match pattern \"^[a-z][a-z0-9.-]{1,127}$\""}]: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/capability-names.test.ts:26:57
+     24|   it.each(["read_message", "list_messages", "a_", "a" + "_".repeat(127…
+     25|     const result = check(name);
+     26|     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+       |                                                         ^
+     27|   });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'manifest.schema.json' > accepts product tool name read_message
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'manifest.schema.json' > accepts product tool name list_messages
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'manifest.schema.json' > accepts product tool name a_
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'manifest.schema.json' > accepts product tool name a_______________________________________________________________________________________________________________________________
+AssertionError: [{"instancePath":"/capabilities/0/name","schemaPath":"#/properties/capabilities/items/properties/name/pattern","keyword":"pattern","params":{"pattern":"^[a-z][a-z0-9.-]{1,127}$"},"message":"must match pattern \"^[a-z][a-z0-9.-]{1,127}$\""}]: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/capability-names.test.ts:26:57
+     24|   it.each(["read_message", "list_messages", "a_", "a" + "_".repeat(127…
+     25|     const result = check(name);
+     26|     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+       |                                                         ^
+     27|   });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'service-well-known.schema.json' > accepts product tool name read_message
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'service-well-known.schema.json' > accepts product tool name list_messages
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'service-well-known.schema.json' > accepts product tool name a_
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'service-well-known.schema.json' > accepts product tool name a_______________________________________________________________________________________________________________________________
+AssertionError: [{"instancePath":"/surfaces/mcp/capabilities/0","schemaPath":"common.schema.json#/$defs/capabilityName/pattern","keyword":"pattern","params":{"pattern":"^[a-z][a-z0-9.-]{1,127}$"},"message":"must match pattern \"^[a-z][a-z0-9.-]{1,127}$\""}]: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/capability-names.test.ts:26:57
+     24|   it.each(["read_message", "list_messages", "a_", "a" + "_".repeat(127…
+     25|     const result = check(name);
+     26|     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+       |                                                         ^
+     27|   });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'pipeline.schema.json' > accepts product tool name read_message
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'pipeline.schema.json' > accepts product tool name list_messages
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'pipeline.schema.json' > accepts product tool name a_
+ FAIL  test/capability-names.test.ts > capability-name compatibility through 'pipeline.schema.json' > accepts product tool name a_______________________________________________________________________________________________________________________________
+AssertionError: [{"instancePath":"/stages/0/capability","schemaPath":"common.schema.json#/$defs/capabilityName/pattern","keyword":"pattern","params":{"pattern":"^[a-z][a-z0-9.-]{1,127}$"},"message":"must match pattern \"^[a-z][a-z0-9.-]{1,127}$\""}]: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/capability-names.test.ts:26:57
+     24|   it.each(["read_message", "list_messages", "a_", "a" + "_".repeat(127…
+     25|     const result = check(name);
+     26|     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+       |                                                         ^
+     27|   });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  test/capability-names.test.ts > all four name-bearing schema surfaces reference the shared definition
+AssertionError: expected [ …(3) ] to deeply equal [ …(4) ]
+
+- Expected
++ Received
+
+  [
+    "interop-agent-call.schema.json/properties/capability",
+-   "manifest.schema.json/properties/capabilities/items/properties/name",
+    "pipeline.schema.json/$defs/stage/properties/capability",
+    "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/capabilities/items",
+  ]
+
+ ❯ test/capability-names.test.ts:52:23
+     50|   };
+     51|   for (const schema of await loadSchemas()) visit(schema, schema.$id.s…
+     52|   expect(uses.sort()).toEqual([
+       |                       ^
+     53|     "interop-agent-call.schema.json/properties/capability",
+     54|     "manifest.schema.json/properties/capabilities/items/properties/nam…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 60 passed (77)
+   Start at  12:01:16
+   Duration  448ms (transform 78ms, setup 0ms, import 191ms, tests 80ms, environment 0ms)
+

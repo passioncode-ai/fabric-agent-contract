@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0019`
+**Next free ID:** `DEC-0021`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -273,3 +273,35 @@ annotate only the old status; decision bodies are never rewritten.
   `docs/evidence/specs/2026-10-02-remote-service-design.md`. Id reserved through
   `agent_sync.py reserve DEC` under the git lease on this file (run `r-12c7d2e0b`, backend
   `fs` — the record plane is degraded as `AGENTS.md` describes).
+
+### DEC-0020 — Capability names admit product tool underscores through one shared definition
+
+- **Date:** 2026-10-04
+- **Status:** Accepted source change; consumer adoption pending
+- **Amends:** DEC-0016; C3.1/C3.6 naming in the interop specification
+- **Decision:** `common.schema.json#/$defs/capabilityName` admits
+  `^[a-z][a-z0-9._-]{1,127}$`. The manifest capability name, hub argument,
+  service MCP advertisement and pipeline stage reference that definition.
+  Names remain 2–128 characters with a leading lowercase ASCII letter;
+  existing dotted and hyphenated names remain valid. Product tools such as
+  `read_message` are called by their own names without a required new field.
+- **Compatibility:** This widens accepted names without changing required fields,
+  authority, URI identities, protocol ids or immutable past commits/tags.
+  `contractVersion` remains `0.1.0` under DEC-0016's additive extension policy;
+  consumers must review and repin the exact source commit before they accept
+  underscores. A source PR is not consumer adoption or a release receipt.
+- **Consequences / affects:** `schemas/common.schema.json`,
+  `schemas/manifest.schema.json`, existing references in
+  `interop-agent-call.schema.json`, `service-well-known.schema.json` and
+  `pipeline.schema.json`; `docs/specification/interop.md`, `README.md`,
+  `docs/DOCMAP.md`, `fixtures/`, `test/capability-names.test.ts`;
+  Fabric CO-193 and consumers with a contract pin.
+- **Evidence:** The compiled-schema regression on unchanged `71cdd6e` failed
+  17 of 77 cases: 16 underscore acceptances across four surfaces and the
+  missing manifest shared reference. Existing-name and negative cases passed.
+  [Baseline receipt](handoffs/co193-receipts/baseline-red.txt).
+- **Source:** [owner issue #8](https://github.com/passioncode-ai/fabric-agent-contract/issues/8),
+  [Fabric CO-193 at published main](https://github.com/passioncode-ai/fabric/blob/8ff1450ba3b2845a9162cc2fb183a04b895ad363/docs/evidence/specs/2026-08-16-software-fabric-carryover.md).
+  DEC-0020 reserved by git CAS under key `capability-underscore-co193-20261004`;
+  decision file edited under the git lease (`r-codexco19320`), record plane
+  degraded to local `fs` because no Notion environment is configured here.

@@ -26,6 +26,7 @@ and recorded as DEC-0001.
 | Concrete memory backend mapping | `docs/reference-architecture/mcp-memory-service-adapter.md` |
 | Service extension (`fabric-service/0.1`), local and remote placement | `docs/specification/service.md` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
+| Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |
 | Runner catalogue shape | `docs/specification/runners.md` |
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |

@@ -32,6 +32,7 @@ package ships in this version.
 - [Governance and roles](docs/specification/governance-and-roles.md)
 - [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
+- [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
 - [The runner catalogue of installed coding agents](docs/specification/runners.md)
 - [Pipelines and their compatibility rules (`pipeline/0.1`)](docs/specification/pipeline.md)
