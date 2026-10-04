@@ -1,0 +1,20 @@
+$ pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check
+$ tsc --noEmit
+$ vitest run
+
+ RUN  v4.1.11 /Users/sshlg/DATA/_worktrees/fabric-agent-contract-co193-20261004
+
+
+ Test Files  10 passed (10)
+      Tests  258 passed (258)
+   Start at  12:03:07
+   Duration  1.37s (transform 1.33s, setup 0ms, import 3.95s, tests 1.01s, environment 9ms)
+
+$ python3 docs/ux/lint.py
+UX lint passed: 5 stories, 4 flows, 8 screens, 8 scenarios
+$ tsx src/docs-check.ts && markdownlint-cli2 '**/*.md' '#node_modules'
+Documentation checks passed
+markdownlint-cli2 v0.18.1 (markdownlint v0.38.0)
+Finding: **/*.md !node_modules !.agent-sync/**
+Linting: 58 file(s)
+Summary: 0 error(s)

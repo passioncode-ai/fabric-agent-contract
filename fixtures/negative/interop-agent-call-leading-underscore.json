@@ -1,0 +1,5 @@
+{
+  "agentId": "example-agent",
+  "capability": "_read_message",
+  "input": {}
+}

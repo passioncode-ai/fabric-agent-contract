@@ -81,6 +81,32 @@ reported under FAC-SEM-017 as well, because it is part of serving the capability
 declared. `expectedAnnotations` in [`src/interop-rules.ts`](../../src/interop-rules.ts)
 is the derivation.
 
+## Capability names
+
+**Amendment (DEC-0020).** A capability name MUST conform to
+[`common.schema.json#/$defs/capabilityName`](../../schemas/common.schema.json):
+`^[a-z][a-z0-9._-]{1,127}$`. It starts with a lowercase ASCII letter, contains
+2–128 characters, and permits lowercase letters, digits, dot, underscore and
+hyphen after that first letter. `read_message` and `list_messages` are valid
+product tool names; `_read_message`, `Read_message`, `read/message` and a
+129-character name are not.
+
+The manifest capability `name`, hub `agent.call.capability`, service
+`surfaces.mcp.capabilities[]` and pipeline stage `capability` use that one shared
+definition. C3.1's equality between the manifest capability name and served MCP
+tool name still applies; this amendment does not rename a product's tool or add
+an alternative `toolName` field. Binding capability identity remains a URI, and
+an allowed name still grants no admission, binding or access authority.
+
+This is an additive acceptance change under DEC-0016: `contractVersion` remains
+`0.1.0`, with the source revision selected by the consumer's
+[contract pin](versioning.md#one-contract-pin). All formerly valid names remain
+valid. A consumer pinned before DEC-0020 still rejects underscore names and MUST
+review and repin before relying on them; an unmerged source branch is not a
+published or adopted revision. The shared-ref and compiled-document regressions
+are [`capability-names.test.ts`](../../test/capability-names.test.ts); positive
+and negative conformance fixtures are in the [catalogue](../../fixtures/catalogue.json).
+
 ## C3.2 Jobs
 
 A capability whose work may outlive one request declares `"job": true` in its
