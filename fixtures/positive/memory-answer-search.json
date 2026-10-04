@@ -1,0 +1,103 @@
+{
+  "kind": "memory-answer",
+  "capability": "memory.search",
+  "output": {
+    "query": "exporter batches",
+    "projectId": "project:alpha",
+    "count": 4,
+    "abstain": false,
+    "floor": {
+      "coverage": 0.5,
+      "keys": 2,
+      "belowFloor": 0
+    },
+    "total": 4,
+    "truncated": false,
+    "results": [
+      {
+        "memoryId": "mem:254338ff60cd43ba",
+        "revision": 1,
+        "rank": -1.141529,
+        "coverage": 1.0,
+        "matched": [
+          "lexical"
+        ],
+        "projectId": "project:alpha",
+        "state": "proposed",
+        "owner": "agent:fixture-a",
+        "confidence": 0.5,
+        "statement": "the exporter streams rows in batches of 500",
+        "why": null,
+        "createdAt": "2026-10-04T20:06:18Z",
+        "conflictsWith": [],
+        "score": 0.01639344
+      },
+      {
+        "memoryId": "ckpt:wf_7c92bf9880071bbb",
+        "revision": 1,
+        "rank": -2e-06,
+        "coverage": 0.5,
+        "matched": [
+          "lexical"
+        ],
+        "projectId": "project:alpha",
+        "state": "observed",
+        "owner": "agent:fixture-a",
+        "confidence": null,
+        "statement": "checkpoint wf_7c92bf9880071bbb step S1 done: ship the exporter — next: write the exporter",
+        "why": null,
+        "createdAt": "2026-10-04T20:06:18Z",
+        "conflictsWith": [],
+        "score": 0.01612903
+      },
+      {
+        "memoryId": "handoff:15bfa12aaab1e814",
+        "revision": 1,
+        "rank": -1e-06,
+        "coverage": 0.5,
+        "matched": [
+          "lexical"
+        ],
+        "projectId": "project:alpha",
+        "state": "observed",
+        "owner": "agent:fixture-a",
+        "confidence": null,
+        "statement": "handoff of wf_7c92bf9880071bbb at step S1 to openai/? (limit): ship the exporter",
+        "why": null,
+        "createdAt": "2026-10-04T20:06:18Z",
+        "conflictsWith": [],
+        "score": 0.01587302
+      },
+      {
+        "memoryId": "mem:10bf622c772043f6",
+        "revision": 1,
+        "rank": -1e-06,
+        "coverage": 0.5,
+        "matched": [
+          "lexical"
+        ],
+        "projectId": "project:alpha",
+        "state": "proposed",
+        "owner": "agent:fixture-a",
+        "confidence": 0.5,
+        "statement": "step S2 of wf_7c92bf9880071bbb written without the workflow's lease (the token does not hold the active lease — the workflow was handed to another executor): ship the exporter",
+        "why": "kept so a session that did not learn of a handoff does not lose its work",
+        "createdAt": "2026-10-04T20:06:18Z",
+        "conflictsWith": [],
+        "score": 0.015625
+      }
+    ],
+    "contested": [],
+    "degraded": [
+      {
+        "source": "vector",
+        "reason": "embedding policy keeps this query on the machine (untrusted-authority); lexical only"
+      },
+      {
+        "source": "projection",
+        "reason": "4 committed revision(s) are not indexed yet, the oldest committed 2026-10-04T20:06:18Z; this answer cannot include them"
+      }
+    ],
+    "note": "conflicting records are returned together and are not ranked; absence from this result is not proof that a record does not exist, and `degraded` names every path that could not run"
+  }
+}
