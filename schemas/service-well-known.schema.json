@@ -221,6 +221,18 @@
             }
           },
           "additionalProperties": false
+        },
+        "usage": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "service-common.schema.json#/$defs/originPath"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

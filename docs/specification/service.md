@@ -96,6 +96,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.mcp.capabilities` MAY list the capability names the MCP surface serves, so
   a host can show them without the token; the manifest remains the authority
   ([interop C3.6](interop.md#c36-discovery-surface)).
+- `surfaces.usage` MAY name the path of the service's usage report
+  ([Usage report](#usage-report), DEC-0021).
 
 ## Events feed
 
@@ -118,6 +120,34 @@ Schema: [`service-events-page.schema.json`](../../schemas/service-events-page.sc
 - An event about work that was traced carries `traceId` and `spanId` together
   ([interop C3.4](interop.md#c34-trace)); an event about untraced work MUST NOT invent
   them (DEC-0017).
+
+## Usage report
+
+Schema: [`service-usage.schema.json`](../../schemas/service-usage.schema.json). Optional; a
+service that calls paid models or tools SHOULD offer it (DEC-0021).
+
+`GET <surfaces.usage.path>` (conventionally `/fabric/v1/usage`) MUST require the service token
+and answers what the service spent, self-reported from its own usage receipts, so a host can
+show every agent's spend beside its health without knowing any provider.
+
+- `days` covers at most the last 31 UTC days, oldest first, one entry per date, today last if
+  there was activity today. A day without calls MAY be omitted. There is no paging and no query.
+- Each day carries totals and `byModel` rows (`provider`, `model`); the totals are the sums of
+  the rows (`FAC-SEM-025`). Tokens follow the interop `usage` block
+  ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
+  result and here is counted with the same numbers.
+- **An unknown cost is `null`, never `0`.** `unpricedCalls` counts calls whose cost the service
+  could not establish. A row whose calls are all unpriced has `costUsd: null`; a row with some
+  priced calls carries the known part, and a host MUST show it as a lower bound while
+  `unpricedCalls > 0` (`FAC-SEM-025`).
+- `costBasis` says where a row's cost came from: `provider` (the provider reported the charge),
+  `price-list` (computed from a published price list), `mixed`, or `unknown`.
+- `budget` MAY state the service's own spending limit for the current day or UTC month and what
+  it has spent against it; the service enforces its limit, the host only shows it.
+- The report is the provider-side cost of running the service. It is not a customer's bill: a
+  commercial agent's quotes and settlements are a separate ledger.
+- A service SHOULD compute the report from the log it already keeps rather than a second store,
+  and MUST NOT put prompts, outputs or caller identities in it.
 
 ## Operator login
 
@@ -243,4 +273,5 @@ operator who installed it, on that operator's computer only.
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or `~/` executable path |
 | `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no launchd field |
+| `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |

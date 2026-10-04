@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 const descriptor = (id: string, instance: string, port: number, extra: Record<string, unknown> = {}) => ({
@@ -70,5 +73,45 @@ describe("fabric-service/0.1 semantic rules", () => {
     expect(codes("service-well-known", { status: "degraded", degraded: [{ source: "llm", reason: "no key" }] })).toEqual([]);
     expect(codes("service-well-known", { status: "ready", degraded: [] })).toEqual([]);
     expect(codes("service-descriptor", a)).toEqual([]);
+  });
+
+  // DEC-0021: a usage report adds up, and an unknown cost is null — never 0.
+  const usage = () => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage.json"), "utf8")) as { days: Record<string, unknown>[] & { byModel: Record<string, unknown>[] }[] };
+
+  it("FAC-SEM-025 accepts the positive usage fixture", () => {
+    expect(codes("service-usage", usage())).toEqual([]);
+  });
+
+  it("FAC-SEM-025 flags a zero where every call is unpriced", () => {
+    const u = usage();
+    (u.days[1]!.byModel as Record<string, unknown>[])[1]!.costUsd = 0;
+    expect(codes("service-usage", u)).toContain("FAC-SEM-025");
+  });
+
+  it("FAC-SEM-025 flags null where calls were priced", () => {
+    const u = usage();
+    u.days[0]!.costUsd = null;
+    expect(codes("service-usage", u)).toContain("FAC-SEM-025");
+  });
+
+  it("FAC-SEM-025 flags a day whose tokens or cost are not the sum of its models", () => {
+    const u = usage();
+    u.days[0]!.inputTokens = 1;
+    expect(evaluateSemanticRules("service-usage", u).map((f) => f.instancePath)).toContain("/days/0/inputTokens");
+    const v = usage();
+    v.days[0]!.costUsd = 9.99;
+    expect(evaluateSemanticRules("service-usage", v).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+  });
+
+  it("FAC-SEM-025 flags days out of order or repeated", () => {
+    const u = usage();
+    u.days[1]!.date = "2026-10-03";
+    expect(codes("service-usage", u)).toContain("FAC-SEM-025");
+  });
+
+  it("FAC-SEM-025 flags more unpriced calls than calls", () => {
+    const u = usage();
+    (u.days[0]!.byModel as Record<string, unknown>[])[0]!.unpricedCalls = 13;
+    expect(codes("service-usage", u)).toContain("FAC-SEM-025");
   });
 });

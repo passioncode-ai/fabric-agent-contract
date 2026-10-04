@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0021`
+**Next free ID:** `DEC-0022`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -305,3 +305,36 @@ annotate only the old status; decision bodies are never rewritten.
   DEC-0020 reserved by git CAS under key `capability-underscore-co193-20261004`;
   decision file edited under the git lease (`r-codexco19320`), record plane
   degraded to local `fs` because no Notion environment is configured here.
+
+### DEC-0021 — A service reports its own spend in a usage report
+
+- **Date:** 2026-10-04
+- **Status:** Accepted source change; consumer adoption pending
+- **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
+- **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
+  answer there, behind the service token, a `service-usage.schema.json` report. The report gives
+  up to 31 UTC days of calls, tokens and USD cost, per day and per provider/model. A cost the
+  service could not establish is `null` with `unpricedCalls` counting the calls, never `0`. An
+  optional `budget` states the service's own day or month limit. `FAC-SEM-025` checks that the
+  report adds up.
+- **Why:** The operator asked on 2026-10-04 for one place to see which agents exist and what
+  each one spent, collected by the agents themselves at the protocol level. Usage existed only
+  per job (`common.schema.json#/$defs/usage` on interop results). Agents put spend into ad-hoc
+  summary tiles («Spend today, $»), which a host cannot add up or compare.
+- **Compatibility:** It is an optional surface and a new schema. Required fields, authority and
+  `contractVersion` `0.1.0` are unchanged. A host that does not know `surfaces.usage` ignores it.
+  A consumer must review and repin the exact source commit before relying on it.
+- **Consequences / affects:** `schemas/service-usage.schema.json`,
+  `schemas/service-well-known.schema.json` (`surfaces.usage`), `docs/specification/service.md`
+  (Usage report, `FAC-SEM-025`), `src/semantic-rules.ts`, `fixtures/` (`service-usage*`,
+  `service-well-known-usage`), `test/service-rules.test.ts`,
+  `test/schema-compilation.test.ts`. Consumers: `@passioncode-ai/fabric-service-host` and
+  Fabric Dashboards (reader and spend view), the `building-fabric-services` kits, and Fabric's
+  estate rollups (they sum receipts and keep unknown as unknown).
+- **Not decided here:** the customer-facing commerce ledger (fabric-workspace draft
+  `fabric-commerce/0.1-draft`, PR #34), and organization-wide aggregation across machines
+  (Fabric hub).
+- **Source:** operator request 2026-10-04 in the fabric-dashboards session. DEC-0021 reserved by
+  git CAS (`agent_sync.py reserve DEC`); decision file edited under the git lease, record plane
+  `fs`.
+

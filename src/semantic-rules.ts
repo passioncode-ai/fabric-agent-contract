@@ -45,6 +45,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
+  if (kind === "service-usage") findings.push(...usageArithmetic(value));
 
   return findings;
 }
@@ -103,3 +104,39 @@ function remoteShape(value: JsonObject): Finding[] {
   }
   return findings;
 }
+
+// #region usage-arithmetic — docs: docs/specification/service.md#usage-report
+/** FAC-SEM-025 (DEC-0021): a usage report adds up, an unknown cost is null rather than 0, and the
+ *  days run forward without a repeat — so a host may sum days without double-counting. */
+function usageArithmetic(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const days = Array.isArray(value.days) ? value.days.filter(isObject) : [];
+  const money = (x: unknown) => (typeof x === "number" ? x : null);
+  const close = (a: number, b: number) => Math.abs(a - b) <= 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+  const priced = (row: JsonObject, at: string) => {
+    const calls = Number(row.calls ?? 0), unpriced = Number(row.unpricedCalls ?? 0);
+    if (unpriced > calls) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/unpricedCalls`, message: "more unpriced calls than calls" });
+    if (calls > 0 && unpriced === calls && row.costUsd !== null) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "every call is unpriced, so the cost is unknown (null), not a number" });
+    if (unpriced < calls && row.costUsd === null) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "priced calls carry a cost; null is only for a row with no priced call" });
+  };
+  let previous = "";
+  days.forEach((day, i) => {
+    const at = `/days/${i}`;
+    const date = String(day.date ?? "");
+    if (date <= previous) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/date`, message: `days must run forward without a repeat (${date} after ${previous})` });
+    previous = date;
+    priced(day, at);
+    const models = Array.isArray(day.byModel) ? day.byModel.filter(isObject) : [];
+    models.forEach((m, j) => priced(m, `${at}/byModel/${j}`));
+    if (!models.length) return;
+    for (const field of ["calls", "unpricedCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
+      const sum = models.reduce((n, m) => n + Number(m[field] ?? 0), 0);
+      if (Number(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${String(day[field] ?? 0)} ≠ ${sum})` });
+    }
+    const known = models.map((m) => money(m.costUsd)).filter((x): x is number => x !== null);
+    const dayCost = money(day.costUsd);
+    if (dayCost !== null && !close(dayCost, known.reduce((n, x) => n + x, 0))) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "the day's cost is not the sum of its models' known costs" });
+  });
+  return findings;
+}
+// #endregion usage-arithmetic
