@@ -114,4 +114,13 @@ describe("fabric-service/0.1 semantic rules", () => {
     (u.days[0]!.byModel as Record<string, unknown>[])[0]!.unpricedCalls = 13;
     expect(codes("service-usage", u)).toContain("FAC-SEM-025");
   });
+
+  it("FAC-SEM-025 flags a day with totals but no model rows, and accepts an empty day", () => {
+    const u = usage();
+    (u.days[0] as Record<string, unknown>).byModel = [];
+    expect(evaluateSemanticRules("service-usage", u).map((f) => f.instancePath)).toContain("/days/0/byModel");
+    const v = usage();
+    Object.assign(v.days[0]!, { byModel: [], calls: 0, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, costUsd: 0 });
+    expect(codes("service-usage", v)).toEqual([]);
+  });
 });

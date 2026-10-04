@@ -128,7 +128,12 @@ function usageArithmetic(value: JsonObject): Finding[] {
     priced(day, at);
     const models = Array.isArray(day.byModel) ? day.byModel.filter(isObject) : [];
     models.forEach((m, j) => priced(m, `${at}/byModel/${j}`));
-    if (!models.length) return;
+    if (!models.length) {
+      // No rows means nothing to sum: such a day can only be empty.
+      const spent = ["calls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"].some((f) => Number(day[f] ?? 0) > 0) || Number(day.costUsd ?? 0) > 0;
+      if (spent) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/byModel`, message: "a day with calls, tokens or cost names the models they belong to" });
+      return;
+    }
     for (const field of ["calls", "unpricedCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
       const sum = models.reduce((n, m) => n + Number(m[field] ?? 0), 0);
       if (Number(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${String(day[field] ?? 0)} ≠ ${sum})` });

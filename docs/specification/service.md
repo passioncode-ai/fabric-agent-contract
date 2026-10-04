@@ -133,7 +133,7 @@ show every agent's spend beside its health without knowing any provider.
 - `days` covers at most the last 31 UTC days, oldest first, one entry per date, today last if
   there was activity today. A day without calls MAY be omitted. There is no paging and no query.
 - Each day carries totals and `byModel` rows (`provider`, `model`); the totals are the sums of
-  the rows (`FAC-SEM-025`). Tokens follow the interop `usage` block
+  the rows, and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
   ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
   result and here is counted with the same numbers.
 - **An unknown cost is `null`, never `0`.** `unpricedCalls` counts calls whose cost the service
