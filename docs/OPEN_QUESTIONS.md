@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0008`
+**Next free ID:** `OQ-0009`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -88,4 +88,29 @@ ruling; DEC-0017 states what holds now.
   caused (it started, a schedule fired).
 - **Meanwhile:** the pair is optional in the events schema and required, as a pair, on an
   event about traced work.
+
+### OQ-0008 — Which project-communication choices does Fabric accept (DEC-0022)?
+
+- **Status:** Open
+- **Raised:** 2026-10-04, COM-01 (fabric-dashboards session, carrying the Codex coordinator's
+  draft, fabric branch `codex/com01-contract-candidate-20261004`)
+- **Owner of the answer:** the operator and Fabric (COM-01 is owned by Fabric and this repository).
+- **Question:** `fabric-project-comms/0.1` (DEC-0022) is written with these choices. Accept,
+  amend or reject each:
+  - **C1** — the protocol is an opt-in extension, separate from `fabric-service/0.1`;
+  - **C2** — a thread's participant Projects are immutable, and the whole history of a Project's
+    threads needs an explicit grant;
+  - **C3** — cursors are private to their principal, and no estate ordinal reaches a reader;
+  - **C4** — a responder is fenced by generation, attempt and effect, and accepted work is held
+    on expiry;
+  - **C5** — no background helper by default; claims are short 60 s tool bursts, and there is no
+    attention guarantee;
+  - **C6** — namespace admission is finite, with a retired-epoch floor and durable unknown facts;
+  - **C7** — a restore brings back archived history only, and a new restore epoch excludes all
+    execution authority;
+  - **C8** — Telegram is off by default, the user mapping is private, and causal loops are bounded;
+  - **C9** — short MCP calls only, with no Tasks or A2A claim without negotiated acceptance.
+- **Meanwhile:** the schemas, the semantic rules `FAC-SEM-026`/`FAC-SEM-027` and the fixtures
+  exist and are tested, so the choices can be reviewed on a real wire. No consumer may claim
+  conformance, and no Fabric migration is reserved for them.
 

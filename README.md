@@ -31,6 +31,7 @@ package ships in this version.
 - [`mcp-memory-service` reference adapter](docs/reference-architecture/mcp-memory-service-adapter.md)
 - [Governance and roles](docs/specification/governance-and-roles.md)
 - [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
+- [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`, proposed)](docs/specification/project-comms.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)

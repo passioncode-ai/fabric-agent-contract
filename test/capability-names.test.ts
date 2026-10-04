@@ -50,6 +50,9 @@ it("all four name-bearing schema surfaces reference the shared definition", asyn
   };
   for (const schema of await loadSchemas()) visit(schema, schema.$id.split("/").at(-1)!);
   expect(uses.sort()).toEqual([
+    "comms-message.schema.json/properties/request/properties/capability",
+    "comms-status.schema.json/properties/responders/items/properties/capability",
+    "comms-submit.schema.json/properties/request/properties/capability",
     "interop-agent-call.schema.json/properties/capability",
     "manifest.schema.json/properties/capabilities/items/properties/name",
     "pipeline.schema.json/$defs/stage/properties/capability",

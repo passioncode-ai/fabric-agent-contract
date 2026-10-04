@@ -46,6 +46,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   }
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value));
+  if (kind === "comms-submit") findings.push(...commsSubmit(value));
+  if (kind === "comms-transition") findings.push(...commsTransition(value));
 
   return findings;
 }
@@ -145,3 +147,51 @@ function usageArithmetic(value: JsonObject): Finding[] {
   return findings;
 }
 // #endregion usage-arithmetic
+
+// #region comms-rules — docs: docs/specification/project-comms.md#semantic-rules
+/** FAC-SEM-026 (DEC-0022, proposed): a submit is coherent — a request's target can read the new
+ *  thread, participants name no Project twice, and a reply answers a message. Identity is never in
+ *  the payload: the schema already refuses estate, sender, principal and session fields. */
+function commsSubmit(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const thread = isObject(value.thread) ? value.thread : {};
+  const fresh = isObject(thread.new) ? thread.new : null;
+  const request = isObject(value.request) ? value.request : null;
+  if (fresh && request && Array.isArray(fresh.participants) && !fresh.participants.includes(request.target)) {
+    findings.push({ code: "FAC-SEM-026", instancePath: "/request/target", message: "a request's target Project must be a participant of the new thread" });
+  }
+  if (value.kind === "reply" && value.replyTo === undefined) findings.push({ code: "FAC-SEM-026", instancePath: "/replyTo", message: "a reply names the message it answers" });
+  if (value.kind !== "request" && request) findings.push({ code: "FAC-SEM-026", instancePath: "/request", message: "only a request carries request details" });
+  return findings;
+}
+
+/** The request lifecycle (DEC-0022, proposed). Request state and effect state are separate facts:
+ *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
+ *  `outcome_unknown`. Accepted work is held on expiry and on responder replacement. */
+export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {
+  claim: [["queued", "claimed"], ["claimed", "claimed"]],
+  accept: [["claimed", "accepted"]],
+  effect_begin: [["accepted", "in_progress"]],
+  complete: [["accepted", "completed"], ["accepted", "failed_known"], ["in_progress", "completed"], ["in_progress", "failed_known"]],
+  cancel: [["queued", "cancelled"], ["claimed", "cancelled"], ["accepted", "cancelled"], ["in_progress", "outcome_unknown"]],
+  expire: [["queued", "expired"], ["claimed", "expired"]],
+  replace: [["claimed", "queued"], ["accepted", "accepted"]],
+  lost_result: [["in_progress", "outcome_unknown"]],
+  reconcile: [["outcome_unknown", "completed"], ["outcome_unknown", "failed_known"]],
+};
+
+/** FAC-SEM-027: a transition `{from, op, to}` is in the table; `complete` after an effect began needs `observed`. */
+function commsTransition(value: JsonObject): Finding[] {
+  const op = String(value.op ?? "");
+  const pair = [String(value.from ?? ""), String(value.to ?? "")];
+  const allowed = COMMS_TRANSITIONS[op] ?? [];
+  if (!allowed.some(([from, to]) => from === pair[0] && to === pair[1])) {
+    return [{ code: "FAC-SEM-027", instancePath: "/to", message: `${op || "(no op)"} cannot move a request from ${pair[0]} to ${pair[1]}` }];
+  }
+  if ((op === "complete" && pair[0] === "in_progress" || op === "reconcile") && value.observed !== true) {
+    return [{ code: "FAC-SEM-027", instancePath: "/observed", message: "an effect that began is settled only by an observed result" }];
+  }
+  return [];
+}
+// #endregion comms-rules
+

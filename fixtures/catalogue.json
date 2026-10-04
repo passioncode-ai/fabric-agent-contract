@@ -108,5 +108,22 @@
   {"name": "manifest-capability-underscore", "schema": "manifest.schema.json", "path": "positive/manifest-capability-underscore.json", "valid": true},
   {"name": "service-capability-underscore", "schema": "service-well-known.schema.json", "path": "positive/service-capability-underscore.json", "valid": true},
   {"name": "pipeline-capability-underscore", "schema": "pipeline.schema.json", "path": "positive/pipeline-capability-underscore.json", "valid": true},
-  {"name": "interop-agent-call-leading-underscore", "schema": "interop-agent-call.schema.json", "path": "negative/interop-agent-call-leading-underscore.json", "valid": false, "keyword": "pattern"}
+  {"name": "interop-agent-call-leading-underscore", "schema": "interop-agent-call.schema.json", "path": "negative/interop-agent-call-leading-underscore.json", "valid": false, "keyword": "pattern"},
+  {"name": "comms-submit-request", "schema": "comms-submit.schema.json", "path": "positive/comms-submit-request.json", "valid": true},
+  {"name": "comms-submit-reply", "schema": "comms-submit.schema.json", "path": "positive/comms-submit-reply.json", "valid": true},
+  {"name": "comms-page", "schema": "comms-page.schema.json", "path": "positive/comms-page.json", "valid": true},
+  {"name": "comms-fence", "schema": "comms-fence.schema.json", "path": "positive/comms-fence.json", "valid": true},
+  {"name": "comms-complete", "schema": "comms-complete.schema.json", "path": "positive/comms-complete.json", "valid": true},
+  {"name": "comms-status", "schema": "comms-status.schema.json", "path": "positive/comms-status.json", "valid": true},
+  {"name": "comms-refusal", "schema": "comms-refusal.schema.json", "path": "positive/comms-refusal.json", "valid": true},
+  {"name": "comms-submit-forged-sender", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-forged-sender.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "comms-submit-forged-estate", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-forged-estate.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "comms-submit-request-without-details", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-request-without-details.json", "valid": false, "keyword": "required"},
+  {"name": "comms-submit-reply-without-target", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-reply-without-target.json", "valid": false, "keyword": "required"},
+  {"name": "comms-submit-body-too-long", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-body-too-long.json", "valid": false, "keyword": "maxLength"},
+  {"name": "comms-submit-too-many-artifacts", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-too-many-artifacts.json", "valid": false, "keyword": "maxItems"},
+  {"name": "comms-page-redacted-with-body", "schema": "comms-page.schema.json", "path": "negative/comms-page-redacted-with-body.json", "valid": false},
+  {"name": "comms-fence-without-generation", "schema": "comms-fence.schema.json", "path": "negative/comms-fence-without-generation.json", "valid": false, "keyword": "required"},
+  {"name": "comms-status-bad-state", "schema": "comms-status.schema.json", "path": "negative/comms-status-bad-state.json", "valid": false, "keyword": "enum"},
+  {"name": "comms-refusal-unknown-code", "schema": "comms-refusal.schema.json", "path": "negative/comms-refusal-unknown-code.json", "valid": false, "keyword": "enum"}
 ]

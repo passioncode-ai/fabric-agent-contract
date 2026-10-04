@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0022`
+**Next free ID:** `DEC-0023`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -337,4 +337,40 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** operator request 2026-10-04 in the fabric-dashboards session. DEC-0021 reserved by
   git CAS (`agent_sync.py reserve DEC`); decision file edited under the git lease, record plane
   `fs`.
+
+### DEC-0022 — Agents exchange information and requests through a Project board (`fabric-project-comms/0.1`)
+
+- **Date:** 2026-10-04
+- **Status:** **Proposed**; the operator and Fabric decide the choices C1–C9 in OQ-0008
+- **Decision (proposed):** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
+  board on which messages are addressed to a Project, and through a request to a capability of
+  that Project. Identity comes from the authenticated endpoint and never from the payload. A
+  thread's participants are fixed at creation, and reads go through a private cursor. A request
+  keeps its state and its effect state apart. Responders are fenced by slot generation, attempt,
+  digest and database lease, atomically with each transition. Idempotency uses a board-issued
+  epoch and key with a SHA-256 digest over canonical JSON. Every refusal is typed. The tools are
+  `com.submit`, `com.list`, `com.get`, `com.read_ack`, `com.reply`, `com.cancel` and `com.status`
+  for participants, and `com.enroll`, `com.claim`, `com.renew`, `com.accept`, `com.progress`,
+  `com.effect_begin`, `com.complete`, `com.reconcile` and `com.responder_replace` for responders.
+  A service advertises them in `surfaces.mcp.capabilities`. `com.status` is what a host reads for
+  communication health.
+- **Why:** Fabric COM-01 (the project-communications plan, fabric `3b2878fc`) needs versioned
+  message, query, claim, ack and reply schemas and capability negotiation before the board
+  (COM-02), consumer identity (COM-03), the adapters (COM-04), the Telegram mirror (COM-08/09)
+  and service monitoring (COM-11) can start. The operator asked on 2026-10-04 for the place where
+  agents exchange information and requests to be worked out.
+- **Compatibility:** It is additive: eight new schemas and no change to an existing one.
+  `contractVersion` stays `0.1.0`. Clients without the extension keep every tool.
+- **Consequences / affects:** `docs/specification/project-comms.md`; `schemas/comms-common`,
+  `comms-submit`, `comms-message`, `comms-page`, `comms-fence`, `comms-complete`, `comms-status`
+  and `comms-refusal`; `src/semantic-rules.ts` (`FAC-SEM-026`, `FAC-SEM-027`,
+  `COMMS_TRANSITIONS`); `fixtures/` (`comms-*`); `test/comms-rules.test.ts`,
+  `test/schema-compilation.test.ts`. Consumers once accepted: Fabric (board, COM-02/03),
+  fabric-agent-adapter (COM-04, COM-08), Fabric Dashboards (COM-11 reads `com.status`), Fabric
+  Switchboard.
+- **Source:** the Codex coordinator's draft, preserved unchanged at fabric
+  `codex/com01-contract-candidate-20261004` `ac230309` (README and reference model; the files
+  it names were never written); the architecture proposal on fabric
+  `codex/project-comms-architecture-20261004`. DEC-0022 was reserved by git CAS, and the decision
+  file was edited under the git lease.
 
