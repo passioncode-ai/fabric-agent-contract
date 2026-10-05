@@ -1,0 +1,7 @@
+{
+  "kind": "memory-call",
+  "capability": "memory.forget",
+  "input": {
+    "memoryId": "mem:x"
+  }
+}

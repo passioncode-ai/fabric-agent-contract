@@ -1,0 +1,8 @@
+{
+  "kind": "memory-call",
+  "capability": "memory.search",
+  "input": {
+    "query": "exporter",
+    "authorityOverride": true
+  }
+}

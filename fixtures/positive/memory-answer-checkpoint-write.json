@@ -1,0 +1,22 @@
+{
+  "kind": "memory-answer",
+  "capability": "memory.checkpoint.write",
+  "output": {
+    "workflowId": "wf_7c92bf9880071bbb",
+    "memoryId": "ckpt:wf_7c92bf9880071bbb",
+    "revision": 1,
+    "stepId": "S1",
+    "status": "done",
+    "closed": false,
+    "consistencyCursor": 1,
+    "createdAt": "2026-10-04T20:06:18Z",
+    "redacted": {
+      "shapes": 0,
+      "knownValues": 0,
+      "knownValuesChecked": true,
+      "knownNames": [],
+      "fields": []
+    },
+    "leaseId": "wl_C35hMgofxS2GvlnhLSyh8jUrhUdlkwfw"
+  }
+}

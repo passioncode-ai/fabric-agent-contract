@@ -1,0 +1,29 @@
+{
+  "kind": "memory-call",
+  "capability": "memory.checkpoint.write",
+  "input": {
+    "owner": "agent:example-agent",
+    "idempotencyKey": "example-0001",
+    "stepId": "S1",
+    "status": "done",
+    "projectId": "project:alpha",
+    "body": {
+      "goal": "ship the exporter",
+      "done": [
+        {
+          "step_id": "S1",
+          "result": "schema read"
+        }
+      ],
+      "open": [
+        {
+          "step_id": "S2",
+          "next_action": "write the exporter"
+        }
+      ],
+      "constraints": [
+        "read-only: do not push"
+      ]
+    }
+  }
+}

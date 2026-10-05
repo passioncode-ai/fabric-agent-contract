@@ -79,6 +79,8 @@
   {"name": "service-well-known-capabilities", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-capabilities.json", "valid": true},
   {"name": "service-well-known-bad-capability", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-bad-capability.json", "valid": false, "keyword": "pattern"},
   {"name": "service-well-known-usage", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-usage.json", "valid": true},
+  {"name": "service-well-known-mcp-own-auth", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-mcp-own-auth.json", "valid": true},
+  {"name": "service-well-known-mcp-bad-auth", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-mcp-bad-auth.json", "valid": false, "keyword": "enum"},
   {"name": "service-usage", "schema": "service-usage.schema.json", "path": "positive/service-usage.json", "valid": true},
   {"name": "service-usage-negative-cost", "schema": "service-usage.schema.json", "path": "negative/service-usage-negative-cost.json", "valid": false, "keyword": "minimum"},
   {"name": "service-usage-not-usd", "schema": "service-usage.schema.json", "path": "negative/service-usage-not-usd.json", "valid": false, "keyword": "const"},
@@ -125,5 +127,16 @@
   {"name": "comms-page-redacted-with-body", "schema": "comms-page.schema.json", "path": "negative/comms-page-redacted-with-body.json", "valid": false},
   {"name": "comms-fence-without-generation", "schema": "comms-fence.schema.json", "path": "negative/comms-fence-without-generation.json", "valid": false, "keyword": "required"},
   {"name": "comms-status-bad-state", "schema": "comms-status.schema.json", "path": "negative/comms-status-bad-state.json", "valid": false, "keyword": "enum"},
-  {"name": "comms-refusal-unknown-code", "schema": "comms-refusal.schema.json", "path": "negative/comms-refusal-unknown-code.json", "valid": false, "keyword": "enum"}
+  {"name": "comms-refusal-unknown-code", "schema": "comms-refusal.schema.json", "path": "negative/comms-refusal-unknown-code.json", "valid": false, "keyword": "enum"},
+  {"name": "memory-provider-observatory", "schema": "memory-capability.schema.json", "path": "positive/memory-provider-observatory.json", "valid": true},
+  {"name": "memory-call-checkpoint-write", "schema": "memory-capability.schema.json", "path": "positive/memory-call-checkpoint-write.json", "valid": true},
+  {"name": "memory-answer-checkpoint-write", "schema": "memory-capability.schema.json", "path": "positive/memory-answer-checkpoint-write.json", "valid": true},
+  {"name": "memory-answer-handoff-accept", "schema": "memory-capability.schema.json", "path": "positive/memory-answer-handoff-accept.json", "valid": true},
+  {"name": "memory-answer-search", "schema": "memory-capability.schema.json", "path": "positive/memory-answer-search.json", "valid": true},
+  {"name": "memory-answer-lease-refused", "schema": "memory-capability.schema.json", "path": "positive/memory-answer-lease-refused.json", "valid": true},
+  {"name": "memory-call-unknown-field", "schema": "memory-capability.schema.json", "path": "negative/memory-call-unknown-field.json", "valid": false, "keyword": "oneOf"},
+  {"name": "memory-call-unsupported-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-call-unsupported-capability.json", "valid": false, "keyword": "oneOf"},
+  {"name": "memory-provider-missing-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-missing-capability.json", "valid": false, "keyword": "oneOf"},
+  {"name": "memory-provider-wrong-family", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-wrong-family.json", "valid": false, "keyword": "oneOf"},
+  {"name": "memory-answer-record-self-promoted", "schema": "memory-capability.schema.json", "path": "negative/memory-answer-record-self-promoted.json", "valid": false, "keyword": "oneOf"}
 ]

@@ -1,0 +1,13 @@
+{
+  "kind": "memory-answer",
+  "capability": "memory.record",
+  "output": {
+    "memoryId": "mem:254338ff60cd43ba",
+    "revision": 1,
+    "state": "supported",
+    "owner": "agent:fixture-a",
+    "supersedes": [],
+    "consistencyCursor": 4,
+    "createdAt": "2026-10-04T20:06:18Z"
+  }
+}
