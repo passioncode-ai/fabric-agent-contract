@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0024`
+**Next free ID:** `DEC-0025`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -397,3 +397,33 @@ annotate only the old status; decision bodies are never rewritten.
 
   DEC-0023 was reserved by git CAS (`agent_sync.py reserve DEC`); DEC-0022 is held by
   PR #11. This file was edited under the git lease.
+
+### DEC-0024 — A service may keep its MCP credential apart from the host's token
+
+- **Date:** 2026-10-05
+- **Status:** Accepted source change; consumer adoption pending
+- **Amends:** the `fabric-service/0.1` Surfaces table (additive, DEC-0016 extension policy)
+- **Decision:** `surfaces.mcp.auth` is optional, with the values `descriptor` (default) and `own`.
+  With `descriptor`, the MCP surface takes the descriptor's token in its header, as before. With
+  `own`, the MCP surface authenticates its callers with credentials of its own (a token per
+  agent, or a gateway's caller identity) and refuses the descriptor's token. A host or a probe
+  then neither calls MCP with the descriptor's token nor reports the refusal as nonconformance.
+  The descriptor's token stays the host's credential for the well-known document of a remote
+  placement, the events feed, the usage report and the operator login code.
+- **Why:** An MCP credential sits in every client's configuration (`~/.claude.json`), and
+  minting an operator login code with it is an escalation. Two installed services already keep
+  the roles apart on purpose. Mobile Publisher has done so since its 2026-10-01 review (ADR-0010
+  there): `host.token` for the host and `service.token` for agents. The Local Lifecycle broker
+  takes callers through its gateway only. Against them the probe reported `interop.tools-match`
+  FAIL (401 and 403 on 2026-10-05), which flags a safer design as broken.
+- **Compatibility:** It is additive: an optional field with a default that means today's
+  behaviour. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/service-well-known.schema.json`,
+  `docs/specification/service.md` (Surfaces, *MCP credentials*), and the fixtures
+  `service-well-known-mcp-own-auth` and `service-well-known-mcp-bad-auth`. Consumers: the
+  fabric-agent-adapter probe (`check_service.py` leaves the MCP rules NOT_RUN for `own`),
+  Mobile Publisher and Local Lifecycle (declare `own`), and hosts that call MCP.
+- **Source:** the probe sweep of the 16 installed services on 2026-10-05, run by the
+  fabric-dashboards session. DEC-0024 was reserved by git CAS. DEC-0022 is the proposed COM-01
+  (PR #11) and DEC-0023 is memory/0.1.
+

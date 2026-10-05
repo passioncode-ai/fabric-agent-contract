@@ -79,6 +79,8 @@
   {"name": "service-well-known-capabilities", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-capabilities.json", "valid": true},
   {"name": "service-well-known-bad-capability", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-bad-capability.json", "valid": false, "keyword": "pattern"},
   {"name": "service-well-known-usage", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-usage.json", "valid": true},
+  {"name": "service-well-known-mcp-own-auth", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-mcp-own-auth.json", "valid": true},
+  {"name": "service-well-known-mcp-bad-auth", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-mcp-bad-auth.json", "valid": false, "keyword": "enum"},
   {"name": "service-usage", "schema": "service-usage.schema.json", "path": "positive/service-usage.json", "valid": true},
   {"name": "service-usage-negative-cost", "schema": "service-usage.schema.json", "path": "negative/service-usage-negative-cost.json", "valid": false, "keyword": "minimum"},
   {"name": "service-usage-not-usd", "schema": "service-usage.schema.json", "path": "negative/service-usage-not-usd.json", "valid": false, "keyword": "const"},

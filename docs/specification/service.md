@@ -259,10 +259,29 @@ operator who installed it, on that operator's computer only.
 
 | Caller | Surface |
 |---|---|
-| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header |
+| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` ([below](#mcp-credentials)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
 | A remote agent | A2A `1.0` over HTTPS, or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header |
+
+<a id="mcp-credentials"></a>
+
+### MCP credentials (DEC-0024)
+
+The descriptor's token is the **host's** credential: the well-known document of a remote
+placement, the events feed, the usage report and the operator login code. By default
+(`surfaces.mcp.auth` absent or `descriptor`) the MCP surface takes the same token in the declared
+header.
+
+A service MAY declare `surfaces.mcp.auth: "own"` when its MCP surface authenticates callers with
+credentials of its own. Examples are a token per calling agent, or a gateway's caller identity.
+The reason is that an MCP credential sits in every client's configuration, and such a credential
+must not be able to mint an operator login code. When a service declares `own`:
+
+- a host and a probe MUST NOT call the MCP surface with the descriptor's token, and MUST NOT
+  report its refusal (`401`/`403`) as nonconformance;
+- the MCP surface MUST NOT accept the descriptor's token either, so the two roles stay apart;
+- the capability list in `surfaces.mcp.capabilities` is still what a host shows without any token.
 
 ## Semantic rules
 
