@@ -100,7 +100,7 @@ admission decision before a project binding can grant access.
 ## License
 
 Open source under the [GNU AGPL-3.0](LICENSE). A [commercial license](COMMERCIAL-LICENSE.md) is
-available for use that does not meet the AGPL's terms — contact@passioncode.ai.
+available for use that does not meet the AGPL's terms — [passioncode.ai/business](https://passioncode.ai/business/).
 Earlier commits carried no licence: the repository was private and unlicensed
 ([design](docs/evidence/specs/2026-08-26-fabric-agent-contract-design.md)), and the contract has
 no `vX.Y.Z` release.
