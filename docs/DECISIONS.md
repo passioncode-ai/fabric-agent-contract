@@ -412,17 +412,18 @@ annotate only the old status; decision bodies are never rewritten.
   placement, the events feed, the usage report and the operator login code.
 - **Why:** An MCP credential sits in every client's configuration (`~/.claude.json`), and
   minting an operator login code with it is an escalation. Two installed services already keep
-  the roles apart on purpose. Mobile Publisher has done so since its 2026-10-01 review (ADR-0010
-  there): `host.token` for the host and `service.token` for agents. The Local Lifecycle broker
-  takes callers through its gateway only. Against them the probe reported `interop.tools-match`
-  FAIL (401 and 403 on 2026-10-05), which flags a safer design as broken.
+  the roles apart on purpose. One has a host token named by the descriptor and a separate token
+  for agents. The other is a lifecycle broker that takes callers through its gateway only.
+  Against them the probe reported `interop.tools-match` FAIL (401 and 403 on 2026-10-05), which
+  flags a safer design as broken. (Corrected 2026-10-05: the services are described, not named;
+  they are private.)
 - **Compatibility:** It is additive: an optional field with a default that means today's
   behaviour. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/service-well-known.schema.json`,
   `docs/specification/service.md` (Surfaces, *MCP credentials*), and the fixtures
   `service-well-known-mcp-own-auth` and `service-well-known-mcp-bad-auth`. Consumers: the
   fabric-agent-adapter probe (`check_service.py` leaves the MCP rules NOT_RUN for `own`),
-  Mobile Publisher and Local Lifecycle (declare `own`), and hosts that call MCP.
+  the two services above (declare `own`, done 2026-10-05), and hosts that call MCP.
 - **Source:** the probe sweep of the 16 installed services on 2026-10-05, run by the
   fabric-dashboards session. DEC-0024 was reserved by git CAS. DEC-0022 is the proposed COM-01
   (PR #11) and DEC-0023 is memory/0.1.
