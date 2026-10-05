@@ -1,8 +1,7 @@
-# Project communication `fabric-project-comms/0.1` (proposed)
+# Project communication `fabric-project-comms/0.1`
 
-**Status: proposed (DEC-0022).** Nothing here is normative until the operator and Fabric accept
-the open choices in [OQ-0008](../OPEN_QUESTIONS.md). The schemas are complete and tested so a
-host can review a real wire, but no consumer may claim conformance until DEC-0022 is accepted.
+**Status: accepted (DEC-0022, 2026-10-05).** The operator accepted the choices C1–C9 recorded in
+[OQ-0008](../OPEN_QUESTIONS.md). Hosts and consumers adopt it by repinning this revision.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`

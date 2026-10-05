@@ -91,7 +91,7 @@ ruling; DEC-0017 states what holds now.
 
 ### OQ-0008 — Which project-communication choices does Fabric accept (DEC-0022)?
 
-- **Status:** Open
+- **Status:** Resolved→DEC-0022 (2026-10-05: the operator accepted C1–C9 as written)
 - **Raised:** 2026-10-04, COM-01 (fabric-dashboards session, carrying the Codex coordinator's
   draft, fabric branch `codex/com01-contract-candidate-20261004`)
 - **Owner of the answer:** the operator and Fabric (COM-01 is owned by Fabric and this repository).

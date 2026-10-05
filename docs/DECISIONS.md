@@ -341,8 +341,8 @@ annotate only the old status; decision bodies are never rewritten.
 ### DEC-0022 — Agents exchange information and requests through a Project board (`fabric-project-comms/0.1`)
 
 - **Date:** 2026-10-04
-- **Status:** **Proposed**; the operator and Fabric decide the choices C1–C9 in OQ-0008
-- **Decision (proposed):** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
+- **Status:** Accepted 2026-10-05 — the operator accepted C1–C9 as written (OQ-0008); consumer adoption pending
+- **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
   thread's participants are fixed at creation, and reads go through a private cursor. A request
