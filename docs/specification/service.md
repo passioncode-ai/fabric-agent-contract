@@ -162,6 +162,14 @@ When `surfaces.dashboard.login` is `true`, the dashboard requires an operator se
   redirect to `surfaces.dashboard.path`.
 - A host MUST read the token in a privileged process and MUST NOT expose it to a page,
   a URL or a log.
+- **An ended session is answered on the page.** When the operator session has ended, a request
+  for a dashboard page (a top-level navigation under `surfaces.dashboard.path`) SHOULD answer
+  `401`. The body can be a page that explains the state. A host that sees `401` on a page it
+  embeds MAY sign in again with a new login code and reopen the same page, at most once a minute
+  per page, so a service that refuses every code cannot loop. A `401` on the page's own API calls
+  does not tell a host to reload the page: that would discard what the operator is doing. A
+  single-page dashboard whose shell answers `200` therefore also answers `401` for the page itself
+  once its session is gone.
 
 ## Authentication and network
 
