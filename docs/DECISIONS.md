@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0025`
+**Next free ID:** `DEC-0026`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -464,3 +464,58 @@ annotate only the old status; decision bodies are never rewritten.
   fabric-dashboards session. DEC-0024 was reserved by git CAS. DEC-0022 is the proposed COM-01
   (PR #11) and DEC-0023 is memory/0.1.
 
+### DEC-0025 — A service keeps settings backups (`fabric-settings-backup/1`), and a feed client sends the token where the descriptor says
+
+- **Date:** 2026-10-05
+- **Status:** Accepted source change; consumer adoption pending
+- **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
+- **Decision:**
+  - **Settings backup.** A service whose store holds operator decisions SHOULD keep snapshots of
+    them in `fabric-settings-backup/1` files at
+    `<root>/settings-backups/<service-id>/<instance>/settings-<UTC stamp>.json`, outside its data
+    directory. `<root>` is `~/Library/Application Support/PassionCode` on macOS,
+    `%APPDATA%\PassionCode` on Windows, and `$XDG_CONFIG_HOME/PassionCode` (default
+    `~/.config/PassionCode`) on Linux. Directories are `0700`, files `0600`, and writes are
+    atomic. A file carries `format`, `service`, `created_at`, `reason`, `sha256`, `counts` and
+    `tables`. `sha256` is the SHA-256 of the canonical JSON of `tables`, and a reader MUST refuse
+    a file it does not match (`FAC-SEM-028`). Values are JSON scalars, with fractions as strings.
+    A backup holds decisions and bindings only, and names secrets without holding them. Snapshots
+    are taken daily, at a start when the newest is older than 24 hours, and read-only on
+    uninstall. An unchanged snapshot is not rewritten, and at least 14 are kept. Restore only adds
+    rows missing by primary key and names everything it dropped, defaulted or was refused.
+    Automatic restore runs only on a fresh database, from the newest intact snapshot that has
+    content. Applying a manual restore is the operator's act.
+  - **Feed client.** A client of `GET /fabric/v1/events` (and of every token-protected route)
+    MUST send the token in the header named by the descriptor's `auth.header`, in the form named
+    by `auth.scheme`: the raw token for `none`, `Bearer <token>` for `Bearer`. It MUST NOT assume
+    `Authorization: Bearer` (`FAC-SEM-029`).
+- **Why:** A service's data directory can be lost, purged or migrated wrongly. What the operator
+  decided — which projects it serves, how each is bound, which secret slot each binding uses —
+  then has to be decided again, and nothing in the contract said where a copy could live or how a
+  restore may treat it. One service built backups first. This decision makes its rules the
+  shared format, so every service and host reads the same files. The feed rule comes from a
+  failure: a feed client that ignored a custom header was refused on every poll and silently
+  dropped every notify event. The descriptor schema already said which header and scheme to use
+  (`auth.header`, `auth.scheme`); nothing said the client must honour them.
+- **Compatibility:** It is additive: a new optional practice with a new schema, and a client rule
+  that the descriptor schema already implied. Required fields and `contractVersion` `0.1.0` are
+  unchanged. The canonical JSON equals Python's `json.dumps(sort_keys=True, ensure_ascii=False)`,
+  so a writer that already computes the checksum that way keeps its files valid, provided it
+  stores no fractions. A consumer must review and repin the exact source commit before relying
+  on it.
+- **Consequences / affects:** `schemas/settings-backup.schema.json`;
+  `docs/specification/service.md` (Events feed *feed client*, Lifecycle, Settings backup,
+  Semantic rules); `docs/specification/conformance.md` (Clients and readers);
+  `src/settings-backup.ts` (`canonicalJson`, `settingsBackupDigest`, `FAC-SEM-028`),
+  `src/service-feed.ts` (`tokenHeader`, `FAC-SEM-029`), `src/semantic-rules.ts`; `fixtures/`
+  (`settings-backup*`, `semantic/service-feed-request-*`); `test/settings-backup.test.ts`,
+  `test/service-feed.test.ts`, `test/schema-compilation.test.ts`; `CONTEXT.md`
+  (**Settings backup**); `docs/DOCMAP.md`. Consumers: services that keep operator settings,
+  the `building-fabric-services` kits, and every feed client (Fabric Dashboards and the service
+  host).
+- **Not decided here:** an organisation-wide lifecycle pointer (fabric-workspace, LC-16), backups
+  for a remote placement, and encrypting backups at rest.
+- **Source:** the first service implementation of settings backups and its review on
+  2026-10-05; the feed failure observed the same day. DEC-0025 was reserved by
+  git CAS (`agent_sync.py reserve DEC`, key `settings-backup-standard`). The decision file was
+  edited under the git lease, record plane `fs`.

@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/settings-backup.schema.json",
+  "title": "Settings backup file (fabric-settings-backup/1, DEC-0025)",
+  "description": "One snapshot of a service's operator decisions and bindings, kept outside its data directory. Secrets appear only by name. The checksum, the counts and the row widths are checked by FAC-SEM-028; the schema checks the shape and refuses table and column names that can only hold a credential value.",
+  "type": "object",
+  "required": [
+    "format",
+    "service",
+    "created_at",
+    "reason",
+    "sha256",
+    "counts",
+    "tables"
+  ],
+  "properties": {
+    "format": {
+      "const": "fabric-settings-backup/1"
+    },
+    "service": {
+      "type": "object",
+      "required": [
+        "id",
+        "instance",
+        "version",
+        "schema"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "service-common.schema.json#/$defs/serviceId"
+        },
+        "instance": {
+          "$ref": "service-common.schema.json#/$defs/instance"
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "The service release that wrote the snapshot; empty when the release does not know its own version."
+        },
+        "schema": {
+          "description": "The version of the database schema the rows were read from, as the service numbers its migrations.",
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "reason": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$",
+      "description": "Why the snapshot was taken. The spec names start, daily, uninstall and manual; a service may use another lowercase word."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256, in lowercase hex, of the canonical JSON of `tables` (docs/specification/service.md#settings-backup)."
+    },
+    "counts": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/tableName"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "tables": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/tableName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/table"
+      }
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "tableName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,62}$",
+      "not": {
+        "pattern": "^((.+_)?(account_connections?|account_connection_drafts?|tokens?|secrets?|credentials?|passwords?|login_codes?)|(operator_)?sessions?)$"
+      },
+      "description": "A table holding connections, drafts of them, tokens, secrets, credentials, passwords, login codes or operator sessions is never backed up."
+    },
+    "columnName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+      "not": {
+        "pattern": "^(?:.+_)?(?:[Tt]oken|[Ss]ecret|[Pp]assword|[Pp]assphrase|[Aa]pi_?[Kk]ey|[Pp]rivate_[Kk]ey|[Cc]ookie|[Ll]ogin_[Cc]ode|[Oo]tp|[Cc]redential)s?$"
+      },
+      "description": "A column whose name says it holds a credential value is refused. A secret is named, never stored: `secret_name` or `token_slot` is allowed, `access_token` is not."
+    },
+    "scalar": {
+      "description": "A JSON scalar. A number is an integer in the range both JSON and IEEE-754 doubles carry exactly; a fraction is stored as its decimal string, so that every language computes the same checksum.",
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 1048576
+        },
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "table": {
+      "type": "object",
+      "required": [
+        "columns",
+        "rows"
+      ],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/columnName"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "maxItems": 512,
+            "items": {
+              "$ref": "#/$defs/scalar"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

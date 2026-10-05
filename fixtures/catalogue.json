@@ -138,5 +138,11 @@
   {"name": "memory-call-unsupported-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-call-unsupported-capability.json", "valid": false, "keyword": "oneOf"},
   {"name": "memory-provider-missing-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-missing-capability.json", "valid": false, "keyword": "oneOf"},
   {"name": "memory-provider-wrong-family", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-wrong-family.json", "valid": false, "keyword": "oneOf"},
-  {"name": "memory-answer-record-self-promoted", "schema": "memory-capability.schema.json", "path": "negative/memory-answer-record-self-promoted.json", "valid": false, "keyword": "oneOf"}
+  {"name": "memory-answer-record-self-promoted", "schema": "memory-capability.schema.json", "path": "negative/memory-answer-record-self-promoted.json", "valid": false, "keyword": "oneOf"},
+  {"name": "settings-backup", "schema": "settings-backup.schema.json", "path": "positive/settings-backup.json", "valid": true},
+  {"name": "settings-backup-wrong-format", "schema": "settings-backup.schema.json", "path": "negative/settings-backup-wrong-format.json", "valid": false, "keyword": "const"},
+  {"name": "settings-backup-without-checksum", "schema": "settings-backup.schema.json", "path": "negative/settings-backup-no-checksum.json", "valid": false, "keyword": "required"},
+  {"name": "settings-backup-account-connections-table", "schema": "settings-backup.schema.json", "path": "negative/settings-backup-account-connections.json", "valid": false, "keyword": "not"},
+  {"name": "settings-backup-token-value-column", "schema": "settings-backup.schema.json", "path": "negative/settings-backup-token-column.json", "valid": false, "keyword": "not"},
+  {"name": "settings-backup-fraction-value", "schema": "settings-backup.schema.json", "path": "negative/settings-backup-fraction.json", "valid": false, "keyword": "oneOf"}
 ]

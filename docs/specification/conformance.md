@@ -46,6 +46,19 @@ substitutes for semantic review of prose. Before release, at least one planted
 negative fixture is temporarily inverted and observed failing; the restored green
 run is recorded in the retrospective.
 
+## Clients and readers
+
+Conformance binds the side that reads as well as the side that serves. These rules are checked
+on what a client sends or a reader accepts, not on a provider's own documents:
+
+| Rule | Who | Requirement | Checked by |
+|---|---|---|---|
+| `FAC-SEM-029` | a client of a service's token-protected routes, the events feed first | sends the token only in the header the descriptor's `auth.header` names, in the form `auth.scheme` names (`none`: the raw token; `Bearer`: `Bearer <token>`), and never assumes `Authorization: Bearer` | `test/service-feed.test.ts`, fixtures `fixtures/semantic/service-feed-request-*.json` ([service](service.md#feed-client), DEC-0025) |
+| `FAC-SEM-028` | a reader of a settings backup | refuses a file whose checksum, counts or row widths do not match its tables | `test/settings-backup.test.ts`, fixtures `settings-backup*` ([service](service.md#settings-backup), DEC-0025) |
+
+A client that fails `FAC-SEM-029` breaks without an error: the service refuses every poll, and
+the client shows an empty feed and drops every `notify: true` event.
+
 ## Compatibility policy
 
 Contract `0.x` minor versions may add optional fields, new schemas and new
