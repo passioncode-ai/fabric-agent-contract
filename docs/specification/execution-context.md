@@ -33,7 +33,11 @@ project's session.
 
 The operator chooses a default terminal provider per project. A binding MAY
 override it for one agent. The selected provider and account MUST be present in
-the project's admitted-provider allowlist and account pool.
+the project's admitted-provider allowlist and account pool. When the bound
+capability is served by the local-runner profile, the host first resolves the
+pinned runner route to one concrete provider
+([Runner routes](runners.md#runner-routes)); account selection then proceeds as
+below.
 
 ```mermaid
 flowchart TD
@@ -59,8 +63,10 @@ revoked or invalid credential suspends that account and requires operator action
 unless another already-approved account is eligible.
 
 Every switch records from/to account references, reason, pool revision, run/node,
-time and evidence. A switch MUST NOT change provider profile, model requirement or
-write scope implicitly.
+time and evidence. Runner switches under a pinned runner route record the same
+facts for from/to candidate, runner kind and route revision
+([Runner routes](runners.md#runner-routes)). A switch MUST NOT change provider
+profile, model requirement or write scope implicitly.
 
 ## Cleanup
 

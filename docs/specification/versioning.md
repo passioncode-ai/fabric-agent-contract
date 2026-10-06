@@ -5,8 +5,9 @@
 ## Versioned surfaces
 
 Prompts, pipelines, policies, bindings, execution contexts, account pools,
-schedules, grants and checker rules are immutable revisioned objects. A run MUST
-pin every revision it can observe before its first node becomes runnable.
+runner routes, schedules, grants and checker rules are immutable revisioned
+objects. A run MUST pin every revision it can observe before its first node
+becomes runnable.
 
 ## Revision shape
 

@@ -29,7 +29,7 @@ and recorded as DEC-0001.
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |
-| Runner catalogue shape | `docs/specification/runners.md` |
+| Runner catalogue shape and runner routes | `docs/specification/runners.md`, `schemas/runner-route.schema.json` (DEC-0026) |
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |
 | Extension key spellings | `src/extensions.ts` |
 | A consumer's contract pin | `docs/specification/versioning.md#one-contract-pin` |

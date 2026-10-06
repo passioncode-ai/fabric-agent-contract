@@ -59,6 +59,15 @@ The profile MUST declare:
 The project chooses a default local runner. An agent binding MAY override it only
 with a provider admitted to that project. The provider owns model choice.
 
+A project MAY pin an ordered runner route per capability served by this
+profile (see [Runner routes](runners.md#runner-routes)): the host tries each
+admitted terminal runner in preference order — attaching to a live terminal
+session before spawning a new one — and falls back to the next candidate when
+one is unavailable. A binding MAY pin a route revision (`runnerRoute`) to
+override the project default for one agent. A route changes which runner
+serves a request, never the capability semantics, the profile, or the
+provider's model choice.
+
 Commands MUST be represented as an executable plus an argument array. Shell
 strings are non-conforming because quoting and command substitution cannot be
 validated safely.

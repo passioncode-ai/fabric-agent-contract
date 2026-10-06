@@ -1,6 +1,7 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
+import { routeRules } from "./route-rules.js";
 
 export type { Finding } from "./findings.js";
 
@@ -10,6 +11,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (!isObject(value)) return [{ code: "FAC-SEM-000", instancePath: "", message: "value must be an object" }];
   const interop = interopRules(kind, value);
   if (interop) return interop;
+  const route = routeRules(kind, value);
+  if (route) return route;
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {

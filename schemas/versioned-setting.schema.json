@@ -6,7 +6,7 @@
   "required": ["meta", "kind", "parents", "reason", "payload"],
   "properties": {
     "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
-    "kind": { "enum": ["prompt", "pipeline", "policy", "binding", "execution-context", "account-pool", "schedule", "grant", "checker"] },
+    "kind": { "enum": ["prompt", "pipeline", "policy", "binding", "execution-context", "account-pool", "runner-route", "schedule", "grant", "checker"] },
     "parents": { "type": "array", "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/revisionRef" } },
     "reason": { "type": "string", "minLength": 1 },
     "payload": { "type": "object" },
