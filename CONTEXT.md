@@ -101,6 +101,12 @@ MCP. Like a service descriptor, it describes an installation and grants nothing.
 known from a catalogue entry that names its binaries, its version command and the
 modes (drives) it can be run in. A binary no entry names is never executed.
 
+**Runner route**: The project-pinned, ordered preference list of admitted runner
+candidates for one capability served by the local-runner profile, with an
+attach/spawn session policy per candidate and fallback semantics: attach to a live
+terminal session first, spawn the next available candidate otherwise, and record
+every switch. It selects which runner serves a request; it grants nothing.
+
 **Interop**: The `fabric-interop/0.1` extension: how agents are called over MCP —
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.
 
@@ -140,6 +146,8 @@ version and commit a consuming repository builds against.
   **Provider**; being described grants it no project access.
 - A **Provider entry** names one **Provider** that is not a **Service**; an id belongs
   to one of the two, never both.
+- A **Runner route** orders admitted **Runner** candidates for one **Capability**;
+  a run pins one route revision per local-runner binding, and every switch is recorded.
 - A **Pipeline** stage binds a **Capability**; the **Provider** serving it is resolved
   to one admitted **Binding** when a run starts.
 - Every call routed through the **Hub** carries **Trace context**; a **Job** keeps its

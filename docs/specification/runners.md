@@ -51,15 +51,69 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
   replaces with the MCP configuration it generates for that run.
 - `mcpConfig.file` and `skillsDir` are absolute or `~/` paths; `docs` is an HTTPS URL.
 
+## Runner routes
+
+`covers:` operator preference for terminal agents — DEC-0026 · operator behavior
+follows SCN-004 and SCN-006 (versioned fallback, recorded switch).
+
+A **runner route** is the ordered preference list a project pins for one
+capability served by the local-runner profile — an agent chat, a repository
+change, any task a terminal agent runs. It answers three questions: which
+installed runner serves this request now; may an existing terminal session be
+attached; what happens when the preferred runner is unavailable.
+
+Schema: [`runner-route.schema.json`](../../schemas/runner-route.schema.json) —
+an immutable revision (DEC-0007); `runner-route` is a versioned-setting kind
+whose `payload` carries the same shape, and a binding MAY pin one revision as
+`runnerRoute` to override the project default for one agent.
+
+- `candidates` is the preference order, first to last. Each candidate names a
+  `runnerKind` (a catalogue kind) and an admitted provider revision.
+- `session.attach` `preferred` asks the host to reuse a live terminal session
+  of that runner before starting anything new; `never` always starts a fresh
+  process.
+- `session.spawn` `allowed` permits the host to start a new terminal process
+  when no session is attached or attach is `never`; `never` forbids it.
+- Detection and availability use only the catalogue's version probe — a host
+  never runs anything the catalogue does not name (see above).
+- `exhausted` (default `capability-unavailable`) says what happens when every
+  candidate fails: return an explicit capability-unavailable result with every
+  probe result attached, or `hold` the request until a candidate recovers,
+  bounded by the execution context's limits.
+- `recovery` (default `sticky`) says whether a running conversation stays on
+  the runner it fell back to until that runner fails (`sticky`), or is
+  re-probed and moved back to the highest-preference available candidate
+  (`reprobe`).
+
+Selection walks the candidates in order: attach to a live session when
+`attach` is `preferred` and one exists; otherwise spawn when `spawn` is
+`allowed` and the catalogue probe passes; otherwise record the probe result
+and reason, and try the next candidate. When no Claude Code session is open,
+the route answers from the next available candidate — Hermes starts and
+replies — instead of failing the chat.
+
+Every selection and every switch records from/to candidate, runner kind,
+reason, route revision, run/node and time — the runner analogue of the account
+switch event ([execution-context.md](execution-context.md)). A route never
+changes the capability's semantics, profile, model requirement or write scope;
+the provider owns model choice, and admission (DEC-0010) is untouched —
+candidates must be admitted providers (FAC-SEM-030).
+
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-016` | `runner` (and each entry of `runner-catalogue`) | the default `drive` is present in `drives` |
 | `FAC-SEM-021` | `runner-catalogue` | one entry per runner kind |
+| `FAC-SEM-028` | `runner-route` | one candidate per runner kind |
+| `FAC-SEM-029` | `runner-route` | a candidate must be able to run: attach or spawn |
+| `FAC-SEM-030` | `route-bundle` | every candidate names an admitted provider revision |
 
 `FAC-SEM-021` states the locked "one entry per runner kind" as a rule; it is new in this
-revision because JSON Schema cannot express uniqueness by a property.
+revision because JSON Schema cannot express uniqueness by a property. The same limit shapes
+`FAC-SEM-028` and `FAC-SEM-029`; `FAC-SEM-030` keeps a route honest about admission without
+making the route a grant (DEC-0010).
 
-Fixtures: the `runners-*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json);
-rule tests: [`test/registry-rules.test.ts`](../../test/registry-rules.test.ts).
+Fixtures: the `runners-*` and `runner-route*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json);
+rule tests: [`test/registry-rules.test.ts`](../../test/registry-rules.test.ts) and
+[`test/route-rules.test.ts`](../../test/route-rules.test.ts).

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0025`
+**Next free ID:** `DEC-0027`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -463,4 +463,53 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** the probe sweep of the 16 installed services on 2026-10-05, run by the
   fabric-dashboards session. DEC-0024 was reserved by git CAS. DEC-0022 is the proposed COM-01
   (PR #11) and DEC-0023 is memory/0.1.
+
+### DEC-0026 — Agent chats route through an ordered runner route with recorded fallback
+
+- **Date:** 2026-10-07
+- **Status:** Accepted source change; consumer adoption pending
+- **Refines:** DEC-0016 (additive extension policy); DEC-0010 (admission lifecycle unchanged)
+- **Decision:** A project pins, per capability served by the local-runner profile,
+  an immutable **runner route**: an ordered list of candidates, each naming a
+  catalogue runner kind, an admitted provider revision, and a session policy —
+  `attach: preferred|never` (reuse a live terminal session first) and
+  `spawn: allowed|never` (start a new terminal process otherwise). The host walks
+  the candidates in order: attach to a live session when preferred and present;
+  spawn when allowed and the catalogue probe passes; otherwise record the probe
+  result and reason and move to the next candidate. So when no Claude Code session
+  exists, the next available candidate answers — Hermes starts and replies —
+  instead of failing the chat. `exhausted` (default `capability-unavailable`)
+  declares the all-candidates-failed behavior, with `hold` as the bounded
+  alternative; `recovery` (default `sticky`) declares whether a conversation
+  returns to the higher-preference candidate when one becomes available again.
+  Every selection and switch records from/to candidate, runner kind, reason, route
+  revision, run/node and time — the runner analogue of the account switch event.
+  `runner-route` is a versioned-setting kind, and a binding MAY pin a route
+  revision as `runnerRoute`, overriding the project default for one agent. A route
+  changes which runner serves a request, never the capability semantics, profile,
+  model requirement or write scope; it grants nothing — candidates must be admitted
+  providers (FAC-SEM-030).
+- **Compatibility:** Additive under DEC-0016: one new schema, one new
+  versioned-setting kind value, one optional binding field, three new rule codes
+  (FAC-SEM-028…030). `contractVersion` stays `0.1.0`; every existing manifest and
+  binding stays valid.
+- **Consequences / affects:** `schemas/runner-route.schema.json` (new),
+  `schemas/versioned-setting.schema.json` (kind), `schemas/binding.schema.json`
+  (`runnerRoute`), `docs/specification/runners.md` (Runner routes),
+  `docs/specification/profiles.md`, `docs/specification/execution-context.md`,
+  `docs/specification/versioning.md`, `CONTEXT.md`, `docs/DOCMAP.md`,
+  `src/route-rules.ts`, `src/semantic-rules.ts`, `fixtures/` (`runner-route*`,
+  `versioned-setting-runner-route`), `test/route-rules.test.ts`,
+  `test/schema-compilation.test.ts`; run brief
+  `docs/evidence/specs/2026-10-07-runner-route-brief.md`. Consumers: Fabric (host
+  route resolution for agent chats; `registry/runners.json` catalogue data),
+  fabric-agent-adapter (route-aware probes), Fabric Dashboards (route state and
+  switch events).
+- **Source:** operator request 2026-10-07 — everywhere an agent chat exists,
+  prefer terminal agents under an operator setting with availability fallback
+  (no Claude Code session → a started Hermes answers). DEC-0026 reserved by git
+  CAS (`agent_sync.py reserve DEC --key runner-route-20261007`); DEC-0025 is held
+  by another run. The decision file was edited under the git lease (run
+  `r-f0052c6f2`); the record plane is degraded to `fs` because no Notion token is
+  configured, as `AGENTS.md` describes.
 

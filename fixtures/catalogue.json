@@ -138,5 +138,11 @@
   {"name": "memory-call-unsupported-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-call-unsupported-capability.json", "valid": false, "keyword": "oneOf"},
   {"name": "memory-provider-missing-capability", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-missing-capability.json", "valid": false, "keyword": "oneOf"},
   {"name": "memory-provider-wrong-family", "schema": "memory-capability.schema.json", "path": "negative/memory-provider-wrong-family.json", "valid": false, "keyword": "oneOf"},
-  {"name": "memory-answer-record-self-promoted", "schema": "memory-capability.schema.json", "path": "negative/memory-answer-record-self-promoted.json", "valid": false, "keyword": "oneOf"}
+  {"name": "memory-answer-record-self-promoted", "schema": "memory-capability.schema.json", "path": "negative/memory-answer-record-self-promoted.json", "valid": false, "keyword": "oneOf"},
+  {"name": "runner-route", "schema": "runner-route.schema.json", "path": "positive/runner-route.json", "valid": true},
+  {"name": "versioned-setting-runner-route", "schema": "versioned-setting.schema.json", "path": "positive/versioned-setting-runner-route.json", "valid": true},
+  {"name": "runner-route-no-candidates", "schema": "runner-route.schema.json", "path": "negative/runner-route-no-candidates.json", "valid": false, "keyword": "minItems"},
+  {"name": "runner-route-bad-attach", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-attach.json", "valid": false, "keyword": "enum"},
+  {"name": "runner-route-bad-recovery", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-recovery.json", "valid": false, "keyword": "enum"},
+  {"name": "runner-route-bad-kind", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-kind.json", "valid": false, "keyword": "const"}
 ]
