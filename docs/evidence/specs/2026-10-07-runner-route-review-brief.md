@@ -60,10 +60,10 @@ rewritten in the implementation branch.
 
 | Step | Repository | Work | Gate |
 |---|---|---|---|
-| P-1 | fabric-agent-contract | R-01…R-12 as DEC-0029 | `pnpm run check` |
-| P-2 | fabric-dashboards | FD-30 defects: login-shell `PATH`, pinned checked version, publisher check, short pins, error state, docs | that repository's `npm run check` |
-| P-3 | fabric | ADR-0125 aligned with DEC-0029; host route resolution at the launch seam | that repository's `scripts/ci.sh fast` |
-| P-4 | all | handoff with remotes, branches, commits and the next task | branches pushed |
+| P-1 | fabric-agent-contract | R-01…R-20 as DEC-0029 — done, PR #19 `058fb789` | `pnpm run check` |
+| P-2 | fabric-dashboards | FD-30 defects (17) — done, PR #45 `9862e53d`; FD-34 left to the operator | that repository's `npm run check` |
+| P-3 | fabric | ADR-0125 rewritten and implemented — done, PR #19 `277add0c`; pinned route remains (CO-223) | that repository's `scripts/ci.sh fast` |
+| P-4 | all | handoff with remotes, commits and the next task — done; backlog rows SB-82, FAA-10, B-61 | merged |
 
 ## Coordination
 
