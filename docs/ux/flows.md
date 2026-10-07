@@ -139,13 +139,13 @@ flowchart TD
   B -->|none left| X[Screen: Result and evidence - capability-unavailable with probes]
   B -->|yes| C{Admitted, catalogued, responding, connected?}
   C -->|no| P[Record probe result] --> B
-  C -->|yes| D{attach preferred and a held session?}
+  C -->|yes| G{Unattended and quota unknown?}
+  G -->|yes| P
+  G -->|no| D{attach preferred and a held session?}
   D -->|yes| E[Attach]
   D -->|no| F{spawn allowed?}
   F -->|no| P
-  F -->|yes| G{Unattended and quota unknown?}
-  G -->|yes| P
-  G -->|no| H[Spawn under the derived context]
+  F -->|yes| H[Spawn under the derived context]
   E --> R[Screen: Version history - route event]
   H --> R
 ```

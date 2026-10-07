@@ -88,7 +88,7 @@ function catalogueAgreement(catalogue: JsonObject[], route: JsonObject): Finding
       findings.push({ code: "FAC-SEM-033", instancePath: `/route/candidates/${index}/runnerKind`, message: `runner kind ${kind} has no entry in the host's catalogue` });
       return;
     }
-    if (candidate.drive !== undefined && !(String(candidate.drive) in objectAt(entry, "drives"))) {
+    if (candidate.drive !== undefined && !Object.hasOwn(objectAt(entry, "drives"), String(candidate.drive))) {
       findings.push({ code: "FAC-SEM-033", instancePath: `/route/candidates/${index}/drive`, message: `the catalogue entry for ${kind} offers no drive ${String(candidate.drive)}` });
     }
   });
@@ -115,9 +115,10 @@ function routeEvent(value: JsonObject): Finding[] {
   if (event.project !== route.project) wrong("/project", `the event is for ${String(event.project)}, the route for ${String(route.project)}`);
   if (event.capability !== route.capability) wrong("/capability", `the event names ${String(event.capability)}, the route orders ${String(route.capability)}`);
 
+  const indexOf = (ref: JsonObject) => (typeof ref.index === "number" && Number.isInteger(ref.index) ? ref.index : -1);
   const candidateAt = (ref: JsonObject, path: string): JsonObject | undefined => {
-    const index = Number(ref.index);
-    const candidate = Number.isInteger(index) ? list[index] : undefined;
+    const index = indexOf(ref);
+    const candidate = index >= 0 ? list[index] : undefined;
     if (!candidate || candidate.runnerKind !== ref.runnerKind || (ref.provider !== undefined && !sameRef(candidate.provider, ref.provider))) {
       wrong(path, `candidate ${String(ref.index)} (${String(ref.runnerKind)}) is not that position of the route`);
       return undefined;
@@ -131,9 +132,12 @@ function routeEvent(value: JsonObject): Finding[] {
     if (candidate && probe.result === "no-held-session" && objectAt(candidate, "session").spawn !== "never") {
       wrong(`/probes/${position}/result`, `${String(probe.runnerKind)} may spawn, so finding no held session does not pass it over`);
     }
+    if (candidate && probe.result === "spawn-failed" && objectAt(candidate, "session").spawn !== "allowed") {
+      wrong(`/probes/${position}/result`, `${String(probe.runnerKind)} has spawn: never, so it cannot have failed to spawn`);
+    }
   });
   const expectProbes = (count: number) => {
-    const indexes = probes.map((probe) => Number(probe.index));
+    const indexes = probes.map(indexOf);
     const expected = Array.from({ length: count }, (_, index) => index);
     if (indexes.length !== expected.length || indexes.some((index, position) => index !== expected[position])) {
       wrong("/probes", `the walk must record candidates ${expected.join(", ") || "none"} in order; it records ${indexes.join(", ") || "none"}`);
@@ -153,16 +157,21 @@ function routeEvent(value: JsonObject): Finding[] {
     if (selected.session === "attached" && session.attach !== "preferred") wrong("/selected/session", `${String(selected.runnerKind)} has attach: never, so the host cannot attach it`);
     if (selected.session === "spawned" && session.spawn !== "allowed") wrong("/selected/session", `${String(selected.runnerKind)} has spawn: never, so the host cannot spawn it`);
     if (chosen.drive !== undefined && selected.drive !== undefined && selected.drive !== chosen.drive) wrong("/selected/drive", `the route runs ${String(selected.runnerKind)} through ${String(chosen.drive)}, not ${String(selected.drive)}`);
-    expectProbes(Number(selected.index));
+    if (event.sticky === true) {
+      // A sticky relaunch keeps the conversation's runner and walks nothing above it.
+      if (route.recovery === "reprobe") wrong("/sticky", "a route with recovery: reprobe walks from the top at every launch");
+      if (event.conversation === undefined) wrong("/sticky", "only a conversation can keep its runner");
+      expectProbes(0);
+    } else expectProbes(indexOf(selected));
   }
 
   if (event.kind === "runner-switched") {
     const from = objectAt(event, "from");
     candidateAt(from, "/from");
-    if (Number(from.index) === Number(selected.index)) wrong("/from", "a switch moves to another candidate");
+    if (indexOf(from) === indexOf(selected)) wrong("/from", "a switch moves to another candidate");
     if (event.reason === "preferred-available") {
       if (route.recovery !== "reprobe") wrong("/reason", "only a route with recovery: reprobe moves a conversation back to a preferred runner");
-      if (!(Number(selected.index) < Number(from.index))) wrong("/reason", "preferred-available moves to a higher-preference candidate");
+      if (!(indexOf(selected) < indexOf(from))) wrong("/reason", "preferred-available moves to a higher-preference candidate");
     }
   }
   return findings;

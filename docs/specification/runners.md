@@ -75,7 +75,8 @@ the host already holds be attached; what happens when the preferred runner is un
 
 Schemas: [`runner-route.schema.json`](../../schemas/runner-route.schema.json) — an immutable
 revision (DEC-0007); `runner-route` is also a versioned-setting kind, whose `payload` is the
-route's body (`$defs/body`: the same fields without `kind` and `meta`) and is validated as such.
+route's body (`$defs/body`: the same fields without `kind` and `meta`) and is validated as such. A
+`route-bundle` and a `route-event` carry the route in its revision form, with `meta`.
 [`runner-route-event.schema.json`](../../schemas/runner-route-event.schema.json) — the record of
 every selection, switch and exhausted walk.
 
@@ -84,8 +85,9 @@ every selection, switch and exhausted walk.
 - `candidates` is the preference order, first to last, at most 16. Each candidate names a
   `runnerKind` (a kind of the host's runner catalogue, `FAC-SEM-033`), an admitted provider
   revision (`FAC-SEM-030`) and a `session` policy. A candidate MAY name the catalogue `drive` the
-  host runs it through (absent: the entry's default `drive`) and an `accountPool` (absent: the
-  binding's pool applies).
+  host runs it through (absent: the entry's default `drive`) and an `accountPool` of the route's
+  project (absent: the binding's pool, which the host uses only when it serves the candidate's
+  provider family — otherwise the candidate is passed over as `refused`).
 - `session.attach: preferred` lets the host reuse a session it already holds (below) before it
   starts anything; `never` never attaches. `session.spawn: allowed` lets the host start a new
   process when nothing was attached; `never` forbids it. A candidate that can do neither is
@@ -150,8 +152,14 @@ it records names no route revision.
 
 The **derived execution context** of a selected candidate is the binding's pinned execution
 context with `provider` replaced by the candidate's provider and, when the candidate names one,
-`accountPool` by the candidate's pool — every scope, limit, environment entry and the working
-directory stay as pinned. The host pins it as its own revision and names it in the event. So a
+`accountPool` by the candidate's pool. Every scope, limit and the working directory stay as pinned,
+and so do the environment entries with a literal `value`. Two things do not cross to another
+provider: `selectedAccount`, which account selection chooses again from the candidate's pool
+([execution-context.md](execution-context.md)), and environment entries with a `secretRef`, because a
+credential pinned for one runner is not handed to another — a candidate's credentials come from its
+own pool. The host pins the derived context as its own revision, with the binding's context as its
+parent, and names it in the event; it is the one revision a run creates after it starts, and it is
+fully determined by revisions the run pinned before its first node ([versioning.md](versioning.md)). So a
 route never widens write scope, never changes the model requirement, and never moves the run to
 another project: the provider still owns model choice, and admission (DEC-0010) is untouched.
 
@@ -175,16 +183,19 @@ candidate.
 ### Events
 
 Every walk ends in one event ([schema](../../schemas/runner-route-event.schema.json)):
-`runner-selected` (which candidate, attached or spawned, its session, derived execution context
-and the permission mode it received),
-`runner-switched` (the same, plus `from` and a closed `reason`, for a conversation that moved), or
+`runner-selected` (which candidate, attached or spawned — an attached one names its `sessionRef` —
+its derived execution context and the permission mode it received; `sticky: true` when a conversation
+kept its runner and nothing above it was walked),
+`runner-switched` (the same, plus `from` and a closed `reason`, for a conversation that moved; a
+switch for `runner-unavailable` carries the `from` runner's own probe result as `fromProbe`), or
 `runner-exhausted` (the `answer` and no selection). Each carries the route revision, project,
-capability, run, node, conversation, whether the launch was operator-started or unattended, and the
-probe result of every candidate the walk passed over — each candidate above the selected one
+capability and run, the node and conversation where the launch has them, whether the launch was
+operator-started or unattended, and the probe result of every candidate the walk passed over — each candidate above the selected one
 exactly once, in order, or every candidate for an exhausted walk (`FAC-SEM-034`). It is the runner
-analogue of the account switch event ([execution-context.md](execution-context.md)). A host records
-transitions, not repeated probes of an unchanged state; Fabric journals them as `runner.selected@1`
-and `runner.switched@1` (Fabric ADR-0125).
+analogue of the account switch event ([execution-context.md](execution-context.md)), with the probe
+results as its evidence. A host records one event per launch's walk, exhausted walks included, and
+never a record per repeated probe of an unchanged state; how its journal names the events is the
+host's own vocabulary (Fabric: ADR-0125).
 
 ## Semantic rules
 
@@ -197,7 +208,7 @@ and `runner.switched@1` (Fabric ADR-0125).
 | `FAC-SEM-030` | `route-bundle` | every candidate names a provider revision — id, revision and content hash — admitted for the route's capability |
 | `FAC-SEM-032` | `route-bundle` | the binding that pins the route has its project, capability and the local-runner profile, a candidate as its provider, and this route as `runnerRoute` |
 | `FAC-SEM-033` | `route-bundle` | every candidate's kind is in the host's runner catalogue, and a named drive is one its entry offers |
-| `FAC-SEM-034` | `route-event` | the event names this route; every candidate it names is that position of the route; the probes cover every candidate above the selection, in order (all of them when exhausted); attach and spawn obey the session policy; `held` only under `exhausted: hold`; `preferred-available` only under `recovery: reprobe`, moving up |
+| `FAC-SEM-034` | `route-event` | the event names this route; every candidate it names is that position of the route, by an integer index; the probes cover every candidate above the selection, in order (all of them when exhausted, none for a sticky relaunch, which needs a conversation and sticky recovery); attach, spawn, `no-held-session` and `spawn-failed` obey the session policy; `held` only under `exhausted: hold`; `preferred-available` only under `recovery: reprobe`, moving up |
 
 `FAC-SEM-021` states the locked "one entry per runner kind" as a rule; it is new in this
 revision because JSON Schema cannot express uniqueness by a property. The same limit shapes

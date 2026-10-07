@@ -131,7 +131,30 @@
           "pattern": "^[a-z][a-z0-9-]{0,39}$"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "session": {
+                "const": "attached"
+              }
+            },
+            "required": [
+              "session"
+            ]
+          },
+          "then": {
+            "properties": {
+              "sessionRef": true
+            },
+            "required": [
+              "sessionRef"
+            ]
+          }
+        }
+      ]
     },
     "probe": {
       "type": "object",
@@ -184,6 +207,9 @@
         },
         "selected": {
           "$ref": "#/$defs/selection"
+        },
+        "sticky": {
+          "const": true
         }
       },
       "unevaluatedProperties": false
@@ -215,9 +241,59 @@
             "preferred-available"
           ]
         },
-        "conversation": true
+        "conversation": true,
+        "fromProbe": {
+          "type": "object",
+          "required": [
+            "result"
+          ],
+          "properties": {
+            "result": {
+              "enum": [
+                "not-catalogued",
+                "not-admitted",
+                "not-installed",
+                "not-responding",
+                "not-connected",
+                "no-held-session",
+                "quota-unknown",
+                "refused",
+                "spawn-failed"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        }
       },
-      "unevaluatedProperties": false
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "const": "runner-unavailable"
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "properties": {
+              "fromProbe": true
+            },
+            "required": [
+              "fromProbe"
+            ]
+          }
+        }
+      ]
     },
     "exhausted": {
       "type": "object",

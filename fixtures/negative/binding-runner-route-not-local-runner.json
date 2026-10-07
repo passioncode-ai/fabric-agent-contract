@@ -7,11 +7,11 @@
     "createdBy": "urn:agent:pm:a"
   },
   "project": "urn:project:a",
-  "capability": "https://agents.example/capabilities/keyword-analysis",
+  "capability": "urn:fabric:capability:agent-chat",
   "provider": {
-    "id": "https://agents.example/providers/seo",
+    "id": "urn:fabric:provider:claude-code-local",
     "revision": 1,
-    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
   },
   "admission": {
     "id": "urn:admission:seo:1",

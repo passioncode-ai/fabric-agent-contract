@@ -172,4 +172,42 @@ describe("route-event semantic rules (DEC-0029)", async () => {
     same.from = { index: same.selected.index, runnerKind: same.selected.runnerKind, provider: same.selected.provider };
     expect(check(same)).toContain("FAC-SEM-034");
   });
+
+  it("FAC-SEM-034 flags spawn-failed for a candidate that may not spawn", () => {
+    const event = clone(selected) as { probes: Array<{ result: string }> };
+    const first = event.probes[0];
+    if (first) first.result = "spawn-failed";
+    expect(check(event)).toContain("FAC-SEM-034");
+  });
+
+  it("FAC-SEM-034 reads indexes as integers only", () => {
+    const event = clone(selected) as { probes: Array<Record<string, unknown>> };
+    const second = event.probes[1];
+    if (second) second.index = "1";
+    expect(check(event)).toContain("FAC-SEM-034");
+  });
+
+  it("FAC-SEM-034 accepts a sticky relaunch that walks nothing, only under sticky recovery and in a conversation", () => {
+    const sticky = { ...clone(selected), sticky: true, probes: [] };
+    expect(check(sticky)).toEqual([]);
+    expect(check(sticky, { ...pinned, recovery: "reprobe" })).toContain("FAC-SEM-034");
+    const { conversation: _dropped, ...alone } = sticky as Record<string, unknown>;
+    expect(check(alone)).toContain("FAC-SEM-034");
+  });
+});
+
+describe("the positive fixtures agree as one bundle (DEC-0029)", async () => {
+  const pinned = await fixture("positive/runner-route.json");
+  const binding = await fixture("positive/binding-runner-route.json");
+  const catalogue = JSON.parse(await readFile(path.join(projectRoot(), "fixtures/positive/runners-catalogue.json"), "utf8")) as unknown[];
+  const admissions = (pinned.candidates as Array<{ provider: unknown }>).map((candidate) => ({ provider: candidate.provider, capability: pinned.capability, state: "admitted" }));
+
+  it("the operator's route, its binding and the catalogue pass every route-bundle rule", () => {
+    expect(codes("route-bundle", { route: pinned, admissions, binding, catalogue })).toEqual([]);
+  });
+
+  it("a drive the catalogue entry lacks is refused even when it is an Object.prototype name", () => {
+    const odd = { ...pinned, candidates: [{ ...(pinned.candidates as object[])[0], drive: "toString" }] };
+    expect(codes("route-bundle", { route: odd, admissions, catalogue })).toContain("FAC-SEM-033");
+  });
 });

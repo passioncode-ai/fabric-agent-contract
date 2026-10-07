@@ -1,33 +1,33 @@
 {
   "meta": {
-    "id": "urn:binding:project-a:seo",
+    "id": "urn:binding:project-a:agent-chat",
     "revision": 1,
     "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
     "createdAt": "2026-08-26T10:02:00Z",
     "createdBy": "urn:agent:pm:a"
   },
   "project": "urn:project:a",
-  "capability": "https://agents.example/capabilities/keyword-analysis",
+  "capability": "urn:fabric:capability:agent-chat",
   "provider": {
-    "id": "https://agents.example/providers/seo",
+    "id": "urn:fabric:provider:claude-code-local",
     "revision": 1,
-    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
   },
   "admission": {
-    "id": "urn:admission:seo:1",
+    "id": "urn:admission:claude-code:1",
     "revision": 1,
-    "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   },
   "profileKind": "local-runner",
   "executionContext": {
-    "id": "urn:context:project-a:seo",
+    "id": "urn:context:project-a:agent-chat",
     "revision": 1,
-    "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   },
   "accountPool": {
-    "id": "urn:pool:project-a:seo",
+    "id": "urn:pool:project-a:claude",
     "revision": 1,
-    "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    "contentHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
   },
   "grants": [],
   "dataPolicy": {
@@ -45,7 +45,7 @@
     "revision": 1,
     "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
   },
-  "role": "fabric.example/seo-analyst",
+  "role": "fabric.example/agent-chat",
   "state": "active",
   "runnerRoute": {
     "id": "urn:route:project-a:agent-chat",

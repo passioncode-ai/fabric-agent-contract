@@ -51,52 +51,56 @@ run is recorded in the retrospective.
 
 Every semantic rule has one `FAC-SEM-NNN` code, and this table is where a code is allocated.
 A code is never reused or renumbered. A new code is reserved race-free with
-`agent_sync.py reserve SEM` (DEC-0029), which reads the marker below as its floor: on 2026-10-07
+`agent_sync.py reserve SEM` (DEC-0029), which reads the marker below as its floor and prints its
+receipt as `SEM-0NNN` — the number of `FAC-SEM-NNN`. The row keeps that receipt in its last column,
+which is also what agent-sync looks for when it reports reserved ids that never reached git: on 2026-10-07
 main (DEC-0026) and an open branch (DEC-0025) each defined their own `FAC-SEM-028` and
 `FAC-SEM-029`, numbered by hand. A rule is defined in one place: the codes `FAC-SEM-000`…`FAC-SEM-008` here, every
 other code in the semantic-rules table of the specification this table names.
-`test/consistency.test.ts` (G-13) fails when a code is allocated twice, defined in two tables,
-emitted by `src/` without a row here, or listed here without being checked.
+`test/consistency.test.ts` (G-13) fails when a code is allocated twice, defined in two rows anywhere
+in the specifications, given other kinds there than here, named by `src/` without a row here, named by
+two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
+register and carry no receipt.
 
 **Next free rule code:** `FAC-SEM-035`
 
-| Code | Kind | Defined in |
-|---|---|---|
-| `FAC-SEM-000` | any | here: the value checked is a JSON object |
-| `FAC-SEM-001` | `result` | here: a `succeeded` result keeps no unverified required claim |
-| `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool |
-| `FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself |
-| `FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally |
-| `FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO |
-| `FAC-SEM-006` | `roles` | here: each project has exactly one active product manager |
-| `FAC-SEM-007` | `coordination` | here: a renew names the claim it renews |
-| `FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound |
-| `FAC-SEM-009` | `service-observation` | [service](service.md#semantic-rules) |
-| `FAC-SEM-010` | `service-directory` | [service](service.md#semantic-rules) |
-| `FAC-SEM-011` | `service-well-known` | [service](service.md#semantic-rules) |
-| `FAC-SEM-012` | `service-descriptor` | [service](service.md#semantic-rules) |
-| `FAC-SEM-013` | `provider-directory` | [provider](provider.md#semantic-rules) |
-| `FAC-SEM-014` | `provider-observation` | [provider](provider.md#semantic-rules) |
-| `FAC-SEM-015` | `provider-entry` | [provider](provider.md#semantic-rules) |
-| `FAC-SEM-016` | `runner`, `runner-catalogue` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-017` | `interop-tool` | [interop](interop.md#semantic-rules) |
-| `FAC-SEM-018` | `interop-input-requests` | [interop](interop.md#semantic-rules) |
-| `FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | [interop](interop.md#semantic-rules) |
-| `FAC-SEM-020` | `service-manifest` | [service](service.md#semantic-rules) |
-| `FAC-SEM-021` | `runner-catalogue` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | [interop](interop.md#semantic-rules) |
-| `FAC-SEM-023` | `interop-tool-list`, `interop-tool` | [interop](interop.md#semantic-rules) |
-| `FAC-SEM-024` | `service-descriptor` | [service](service.md#semantic-rules) |
-| `FAC-SEM-025` | `service-usage` | [service](service.md#semantic-rules) |
-| `FAC-SEM-026` | `comms-submit` | [project-comms](project-comms.md#semantic-rules) |
-| `FAC-SEM-027` | `comms-transition` | [project-comms](project-comms.md#semantic-rules) |
-| `FAC-SEM-028` | `runner-route` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-029` | `runner-route` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-030` | `route-bundle` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-031` | `service-usage` | [service](service.md#semantic-rules) |
-| `FAC-SEM-032` | `route-bundle` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-033` | `route-bundle` | [runners](runners.md#semantic-rules) |
-| `FAC-SEM-034` | `route-event` | [runners](runners.md#semantic-rules) |
+| Code | Kind | Defined in | Receipt |
+|---|---|---|---|
+| `FAC-SEM-000` | any | here: the value checked is a JSON object | — |
+| `FAC-SEM-001` | `result` | here: a `succeeded` result keeps no unverified required claim | — |
+| `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool | — |
+| `FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself | — |
+| `FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally | — |
+| `FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO | — |
+| `FAC-SEM-006` | `roles` | here: each project has exactly one active product manager | — |
+| `FAC-SEM-007` | `coordination` | here: a renew names the claim it renews | — |
+| `FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound | — |
+| `FAC-SEM-009` | `service-observation` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-010` | `service-directory` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-011` | `service-well-known` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-012` | `service-descriptor` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-013` | `provider-directory` | [provider](provider.md#semantic-rules) | — |
+| `FAC-SEM-014` | `provider-observation` | [provider](provider.md#semantic-rules) | — |
+| `FAC-SEM-015` | `provider-entry` | [provider](provider.md#semantic-rules) | — |
+| `FAC-SEM-016` | `runner`, `runner-catalogue` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-017` | `interop-tool` | [interop](interop.md#semantic-rules) | — |
+| `FAC-SEM-018` | `interop-input-requests` | [interop](interop.md#semantic-rules) | — |
+| `FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | [interop](interop.md#semantic-rules) | — |
+| `FAC-SEM-020` | `service-manifest` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-021` | `runner-catalogue` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | [interop](interop.md#semantic-rules) | — |
+| `FAC-SEM-023` | `interop-tool-list`, `interop-tool` | [interop](interop.md#semantic-rules) | — |
+| `FAC-SEM-024` | `service-descriptor` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-025` | `service-usage` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-026` | `comms-submit` | [project-comms](project-comms.md#semantic-rules) | — |
+| `FAC-SEM-027` | `comms-transition` | [project-comms](project-comms.md#semantic-rules) | — |
+| `FAC-SEM-028` | `runner-route` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-029` | `runner-route` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-030` | `route-bundle` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-031` | `service-usage` | [service](service.md#semantic-rules) | — |
+| `FAC-SEM-032` | `route-bundle` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-033` | `route-bundle` | [runners](runners.md#semantic-rules) | — |
+| `FAC-SEM-034` | `route-event` | [runners](runners.md#semantic-rules) | — |
 
 ## Compatibility policy
 

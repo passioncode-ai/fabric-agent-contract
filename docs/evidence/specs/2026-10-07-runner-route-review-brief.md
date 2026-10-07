@@ -33,6 +33,14 @@ started: CO-223 is an epic and ADR-0125 a proposal.
 | R-10 | `exhausted: hold` unbounded in practice; defaults stated in prose only | minor | bound by `limits.wallSeconds`; schema `default` |
 | R-11 | The run brief cites SCN-004 for fallback (it is "Reject an unsafe project context"); no scenario covers routes | doc | ST-006, FLW-05, SCN-009; errata in the run brief |
 | R-12 | `FAC-SEM-000`…`008` are defined nowhere but in code | doc | the register defines them |
+| R-13 | The catalogue has no drive for the interactive terminal a host actually opens, and no way to tell a signed-out runner (found by the Fabric review) | major | drive `tui`, optional `auth` probe |
+| R-14 | Failures had no classes: an authority refusal or a possibly-live process could move to the next runner | major | three classes in the walk |
+| R-15 | A host could append "the remaining catalogue rows" or a plain shell to the walk, and record its own ordering as a route | major | walk only named candidates; `host-order` names no route |
+| R-16 | Kind names differ across hosts (`kimi` vs Switchboard's `kimi-code`) | minor | shared kind names in runners.md |
+| R-17 | The derived context carried the binding's pool, `selectedAccount` and secret refs to another provider (found by the verifier) | major | re-selected account, no `secretRef` across providers, pool by family |
+| R-18 | G-13 could be passed by deleting the other branch's rows; one code could be checked by two modules | major | definitions anywhere, one checker per code, kinds compared |
+| R-19 | FAC-SEM-034 accepted `spawn-failed` on `spawn: never`, string indexes, an unprovable `runner-unavailable`, `attached` without a session; a sticky relaunch could not be recorded | minor | rule and schema fixes, `sticky`, `fromProbe` |
+| R-20 | DEC-0029's compatibility sentence claimed no document changes validity | doc | the exception is stated with its reason |
 
 ## Findings in the other repositories
 
@@ -42,8 +50,11 @@ every skills check fails with `spawn npm ENOENT` (`~/Library/Logs/Fabric Dashboa
 02:35, 03:20 and 08:34 on 2026-10-07). The full list and its fixes live with that repository's
 change (its `docs/backlog.md` row FD-30).
 
-`fabric` (CO-223, ADR-0125): reviewed against the host code; the ADR is aligned with DEC-0029 in
-its own pull request, and the implementation follows there.
+`fabric` (CO-223, ADR-0125 at `a655b068`): 15 findings. The proposed seam sat below the routine's
+Claude quota gate, the synthesis order made the Settings list unreachable and overrode the person's
+pick, the fallback reached `shell`, managed launches cannot attach, failure classes were undefined, the
+planned journal events had no migration or ingress owner, and Fabric has no Kimi row. ADR-0125 is
+rewritten in the implementation branch.
 
 ## Plan
 

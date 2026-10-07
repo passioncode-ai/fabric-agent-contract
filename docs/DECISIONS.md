@@ -585,14 +585,21 @@ annotate only the old status; decision bodies are never rewritten.
      never attaches.
   3. **The derived execution context:** the selected candidate runs under the binding's pinned
      context with `provider` (and, when the candidate names one, `accountPool`) replaced — every
-     scope, limit, environment entry and the working directory unchanged — pinned as its own
-     revision. A candidate MAY name a catalogue `drive` and an `accountPool`.
+     scope, limit, literal environment value and the working directory unchanged; `selectedAccount`
+     is chosen again from the candidate's pool, and `secretRef` entries never cross to another
+     provider. It is pinned as its own revision with the binding's context as parent — the one
+     revision a run creates after it starts (`versioning.md`). A candidate MAY name a catalogue
+     `drive` and an `accountPool` of the route's project; without one, the binding's pool serves it
+     only when it serves its provider family.
   4. **No switch mid-turn,** and no runner-private state crosses runners. A switch happens at a
      launch only, for a closed reason: `runner-failed`, `runner-unavailable`, or — under
      `recovery: reprobe` only — `preferred-available`. `exhausted: hold` waits at most the context's
      `limits.wallSeconds`; a host that cannot wait answers capability-unavailable.
-  5. **Every walk is recorded on the wire:** `runner-route-event.schema.json` — `runner-selected`,
-     `runner-switched`, `runner-exhausted` — with every passed-over candidate's probe result.
+  5. **Every walk is recorded on the wire, once per launch:** `runner-route-event.schema.json` —
+     `runner-selected` (an attached session names its `sessionRef`; `sticky: true` for a
+     conversation that kept its runner, with nothing walked), `runner-switched` (a
+     `runner-unavailable` switch carries the `from` runner's own `fromProbe`), `runner-exhausted` —
+     with every passed-over candidate's probe result as the evidence.
   6. **A binding that pins a route agrees with it:** the schema allows `runnerRoute` only on the
      local-runner profile, and the binding's own `provider` is one of the candidates, so a reader
      that ignores routes still binds an admitted candidate. The `versioned-setting` payload of kind
@@ -618,11 +625,17 @@ annotate only the old status; decision bodies are never rewritten.
   type into a terminal it does not own; its `reprobe` contradicted the host's "never mid-
   conversation"; its "every switch is recorded" had no shape a consumer could read; and its
   admission rule matched an id and a number, not the revision's bytes.
-- **Compatibility:** Additive under DEC-0016. New: one schema, optional candidate fields `drive`
-  and `accountPool`, the optional catalogue `auth` probe, the drive value `tui`, three rule codes. Tightened, on DEC-0026 surfaces adopted by no consumer yet
-  (its status is "consumer adoption pending"): `runnerRoute` only with `profileKind: local-runner`,
-  a validated `runner-route` payload, unknown route fields refused, at most 16 candidates.
-  `contractVersion` stays `0.1.0`; no existing manifest or binding changes validity.
+- **Compatibility:** Additive under DEC-0016 for everything that existed before 2026-10-07: new are
+  one schema, the optional candidate fields `drive` and `accountPool`, the optional catalogue `auth`
+  probe, the drive value `tui` and three rule codes, and no document that was valid at `94b1829`
+  outside DEC-0026's surfaces changes validity. Three documents that DEC-0026 (`6e3c3f7`, the same
+  day) made valid become invalid: a binding with `runnerRoute` on the `mcp` or `a2a` profile, a
+  `runner-route` versioned setting whose payload is not a route body, and a route with more than 16
+  candidates. That is a change of semantics `conformance.md`'s compatibility policy would put in a
+  new major version; it is made in `0.1.0` as a recorded exception, because no consumer had adopted
+  DEC-0026 (Fabric's pin `d4c88315` predates it; the adapter and Fabric Dashboards carry no route
+  code) and a route without those limits would be the version every later consumer has to accept.
+  `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/runner-route.schema.json` (`$defs/body`,
   `$defs/candidate`, defaults), `schemas/runner-route-event.schema.json` (new),
   `schemas/versioned-setting.schema.json`, `schemas/binding.schema.json`,

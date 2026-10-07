@@ -67,7 +67,7 @@ unless another already-approved account is eligible.
 Every switch records from/to account references, reason, pool revision, run/node,
 time and evidence. Runner switches under a pinned runner route record the same
 facts for from/to candidate, runner kind and route revision as a
-`runner-route-event` ([Runner routes](runners.md#events)). A switch MUST NOT change provider
+`runner-route-event`, whose probe results are the evidence ([Runner routes](runners.md#events)). A switch MUST NOT change provider
 profile, model requirement or write scope implicitly.
 
 ## Cleanup
