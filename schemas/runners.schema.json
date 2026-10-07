@@ -22,7 +22,8 @@
         "claude-headless",
         "codex-app-server",
         "codex-exec",
-        "acp"
+        "acp",
+        "tui"
       ]
     },
     "runner": {
@@ -72,6 +73,24 @@
               "format": "regex",
               "minLength": 1,
               "maxLength": 256
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 5000
+            }
+          },
+          "additionalProperties": false
+        },
+        "auth": {
+          "type": "object",
+          "required": [
+            "argv",
+            "timeoutMs"
+          ],
+          "properties": {
+            "argv": {
+              "$ref": "#/$defs/argv"
             },
             "timeoutMs": {
               "type": "integer",

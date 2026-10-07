@@ -10,6 +10,10 @@
     "DEC": {
       "file": "docs/DECISIONS.md",
       "nextFreeIdPattern": "\\*\\*Next free ID:\\*\\* `DEC-(\\d{4})`"
+    },
+    "SEM": {
+      "file": "docs/specification/conformance.md",
+      "nextFreeIdPattern": "\\*\\*Next free rule code:\\*\\* `FAC-SEM-(\\d{3})`"
     }
   },
   "guardedFiles": [
@@ -17,7 +21,8 @@
     "docs/OPEN_QUESTIONS.md",
     "docs/evidence/specs/*-modules.md",
     "docs/backlog-sources.json",
-    "docs/backlog.md"
+    "docs/backlog.md",
+    "docs/specification/conformance.md"
   ],
   "claimTags": {},
   "gates": [

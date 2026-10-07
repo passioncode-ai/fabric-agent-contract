@@ -1,5 +1,5 @@
 {
-  "description": "A feed client that assumed Authorization: Bearer. The service refuses every poll and the client drops its notify events (FAC-SEM-029).",
+  "description": "A feed client that assumed Authorization: Bearer. The service refuses every poll and the client drops its notify events (FAC-SEM-036).",
   "descriptor": {
     "protocol": "fabric-service/0.1",
     "id": "example-agent",

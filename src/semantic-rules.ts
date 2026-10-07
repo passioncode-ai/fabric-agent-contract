@@ -3,6 +3,7 @@ import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { settingsBackupRules } from "./settings-backup.js";
+import { routeRules } from "./route-rules.js";
 
 export type { Finding } from "./findings.js";
 
@@ -12,6 +13,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (!isObject(value)) return [{ code: "FAC-SEM-000", instancePath: "", message: "value must be an object" }];
   const interop = interopRules(kind, value);
   if (interop) return interop;
+  const route = routeRules(kind, value);
+  if (route) return route;
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {
@@ -47,7 +50,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
-  if (kind === "service-usage") findings.push(...usageArithmetic(value));
+  if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
@@ -151,6 +154,64 @@ function usageArithmetic(value: JsonObject): Finding[] {
   return findings;
 }
 // #endregion usage-arithmetic
+
+// #region usage-limits — docs: docs/specification/service.md#limits
+/** FAC-SEM-031 (DEC-0027): every limit in `budgets[]` is readable on its own — a unique id, a subject
+ *  exactly when the scope names one, one window that agrees with its kind, no spend against a
+ *  per-order limit, and a legacy `budget` that repeats one enforced machine limit, so a reader of
+ *  `budget` and a reader of `budgets[]` never disagree. A breach is not a finding: a report may
+ *  truthfully show one, and a host shows it first. */
+const PER_ORDER_KINDS = new Set(["per_job", "approval"]);
+const MONTH_SECONDS = [28 * 86400, 31 * 86400] as const;
+
+function usageLimits(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const limits = Array.isArray(value.budgets) ? value.budgets.filter(isObject) : [];
+  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-031", instancePath, message });
+  const seen = new Set<string>();
+  limits.forEach((limit, i) => {
+    const at = `/budgets/${i}`;
+    const id = String(limit.id ?? "");
+    if (seen.has(id)) flag(`${at}/id`, `limit id ${id} appears twice`);
+    seen.add(id);
+
+    const named = limit.scope === "project" || limit.scope === "pool";
+    if (named && limit.subject === undefined) flag(`${at}/subject`, `a ${String(limit.scope)} limit names its ${String(limit.scope)} in subject`);
+    if (!named && limit.subject !== undefined) flag(`${at}/subject`, `a ${String(limit.scope)} limit has no subject`);
+
+    const windows = (["period", "windowSeconds", "since"] as const).filter((f) => limit[f] !== undefined);
+    if (windows.length > 1) flag(`${at}/${windows[1]}`, `a limit has one window, not ${windows.join(" and ")}`);
+    const kind = String(limit.kind ?? "");
+    const seconds = typeof limit.windowSeconds === "number" ? limit.windowSeconds : null;
+    if (PER_ORDER_KINDS.has(kind)) {
+      if (windows.length) flag(`${at}/${windows[0]}`, `${kind} bounds one order and has no window`);
+      if (limit.spentUsd !== null) flag(`${at}/spentUsd`, `${kind} bounds one order, so nothing is spent against it (null)`);
+    } else if (kind === "daily") {
+      if (!(limit.period === "day" || seconds === 86400)) flag(`${at}/period`, "a daily limit counts the UTC day (period day) or the last 24 hours (windowSeconds 86400)");
+    } else if (kind === "monthly") {
+      if (!(limit.period === "month" || (seconds !== null && seconds >= MONTH_SECONDS[0] && seconds <= MONTH_SECONDS[1]))) {
+        flag(`${at}/period`, "a monthly limit counts the UTC month (period month) or a rolling 28–31 days (windowSeconds)");
+      }
+    } else if (kind === "velocity") {
+      if (seconds === null) flag(`${at}/windowSeconds`, "a velocity limit counts a rolling window (windowSeconds)");
+    } else if (kind === "pool" || kind === "emergency") {
+      if (!windows.length) flag(`${at}/period`, `a ${kind} limit names the window it counts (period, windowSeconds or since)`);
+    }
+    const known = PER_ORDER_KINDS.has(kind) || ["daily", "monthly", "pool", "emergency"].includes(kind);
+    if (known && limit.limitUsd === null) flag(`${at}/limitUsd`, `a ${kind} limit is a dollar amount; only a relative limit (velocity) may leave it null`);
+    if (limit.tripped === true && limit.enforced !== true) flag(`${at}/tripped`, "a limit that is not enforced cannot have stopped work");
+  });
+
+  if (isObject(value.budget) && limits.length) {
+    const b = value.budget;
+    const kind = b.period === "day" ? "daily" : "monthly";
+    const same = (x: unknown, y: unknown) => (x === null || y === null ? x === y : typeof x === "number" && typeof y === "number" && Math.abs(x - y) <= 0.000001);
+    const twin = limits.some((l) => l.scope === "machine" && l.enforced === true && l.kind === kind && l.period === b.period && same(l.limitUsd, b.limitUsd) && same(l.spentUsd, b.spentUsd));
+    if (!twin) flag("/budget", `budget repeats one enforced machine ${kind} limit with period ${String(b.period)} in budgets[], so old and new readers agree`);
+  }
+  return findings;
+}
+// #endregion usage-limits
 
 // #region comms-rules — docs: docs/specification/project-comms.md#semantic-rules
 /** FAC-SEM-026 (DEC-0022, proposed): a submit is coherent — a request's target can read the new

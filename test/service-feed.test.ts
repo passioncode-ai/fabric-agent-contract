@@ -14,7 +14,7 @@ const load = (name: string) => JSON.parse(readFileSync(path.join(projectRoot(), 
 const validator = await createValidator();
 const findings = (value: unknown) => evaluateSemanticRules("service-feed-request", value);
 
-describe("feed client token header (DEC-0025, FAC-SEM-029)", () => {
+describe("feed client token header (DEC-0025, FAC-SEM-036)", () => {
   it("sends the raw token in the declared custom header when the scheme is none", () => {
     const ok = load("service-feed-request-custom-header");
     expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/service-descriptor.schema.json`, ok.descriptor).valid).toBe(true);
@@ -26,13 +26,13 @@ describe("feed client token header (DEC-0025, FAC-SEM-029)", () => {
     const bad = load("service-feed-request-assumed-bearer");
     const found = findings(bad);
     expect(found.map((finding) => finding.instancePath)).toEqual(["/request/headers", "/request/headers/Authorization"]);
-    expect(found.every((finding) => finding.code === "FAC-SEM-029" && !finding.message.includes(bad.token))).toBe(true);
+    expect(found.every((finding) => finding.code === "FAC-SEM-036" && !finding.message.includes(bad.token))).toBe(true);
   });
 
   it("flags the declared header carrying the wrong form", () => {
     const wrong = load("service-feed-request-custom-header");
     wrong.request.headers = { "X-Example-Token": `Bearer ${wrong.token}` };
-    expect(findings(wrong)).toEqual([expect.objectContaining({ code: "FAC-SEM-029", instancePath: "/request/headers/X-Example-Token" })]);
+    expect(findings(wrong)).toEqual([expect.objectContaining({ code: "FAC-SEM-036", instancePath: "/request/headers/X-Example-Token" })]);
   });
 
   it("reads header names case-insensitively", () => {

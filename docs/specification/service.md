@@ -129,7 +129,7 @@ header that the descriptor's `auth.header` names (default `Authorization`), in t
 `auth.scheme` names (default `Bearer`): with `none` the header carries the raw token, with `Bearer`
 it carries `Bearer <token>`. It MUST NOT assume `Authorization: Bearer`, MUST NOT send the token
 in any other header or in the URL, and reads the header name case-insensitively
-(`FAC-SEM-029`; [`src/service-feed.ts`](../../src/service-feed.ts) `tokenHeader`). A client that
+(`FAC-SEM-036`; [`src/service-feed.ts`](../../src/service-feed.ts) `tokenHeader`). A client that
 ignored a custom header was refused on every poll and silently dropped every `notify: true`
 event, so a client SHOULD also report a refused poll as the service refusing its token rather
 than as an empty feed. The same rule holds for every route that requires the service token.
@@ -157,10 +157,57 @@ show every agent's spend beside its health without knowing any provider.
   `price-list` (computed from a published price list), `mixed`, or `unknown`.
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
+- `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),
+  DEC-0027).
 - The report is the provider-side cost of running the service. It is not a customer's bill: a
   commercial agent's quotes and settlements are a separate ledger.
 - A service SHOULD compute the report from the log it already keeps rather than a second store,
   and MUST NOT put prompts, outputs or caller identities in it.
+
+### Limits
+
+`budgets` (DEC-0027) lists every spending limit the service applies — up to 64 entries, each
+`{id, scope, subject?, kind, period? | windowSeconds? | since?, limitUsd, spentUsd, enforced,
+tripped?}` — so a host can show all of them, not one. The service enforces its limits; the host
+only shows them.
+
+- `id` is unique in the report (`FAC-SEM-031`) and stable across reports, so a host can follow
+  one limit over time.
+- `scope` is closed: `machine` (every subject the service serves), `project`, `pool`, `job`.
+  `subject` names the project or pool and is required exactly for those two scopes; a `machine`
+  or `job` limit has none (`FAC-SEM-031`).
+- `kind` is an open vocabulary. Known kinds:
+
+  | kind | what it bounds | window |
+  |---|---|---|
+  | `per_job` | the cost of one order | none — `spentUsd` is `null` |
+  | `approval` | a threshold above which an order waits for a person; **not a ceiling** | none — `spentUsd` is `null` |
+  | `daily` | spend in a day | `period: "day"` (the current UTC day) or `windowSeconds: 86400` (the last 24 hours) |
+  | `monthly` | spend in a month | `period: "month"` (the current UTC month) or a rolling `windowSeconds` of 28–31 days |
+  | `velocity` | spend rate in a short rolling window | `windowSeconds`, required; `limitUsd` MAY be `null` when the line is relative (for example a multiple of the recent rate) |
+  | `pool` | a named allowance shared by several projects | one of `period`, `windowSeconds`, `since` |
+  | `emergency` | a stop that halts all work when spend crosses it | one of `period`, `windowSeconds`, `since` |
+
+  A host shows an unknown `kind` generically — limit, spent, window, enforced — and never
+  rejects the report for it. A limit across every project is `scope: "machine"`, not a kind of
+  its own; a cumulative allowance counts from `since`.
+- A limit has at most one window: `period` is a calendar UTC day or month, `windowSeconds` a
+  rolling window ending at `generatedAt`, `since` a cumulative count from that instant. The window
+  agrees with the kind as in the table (`FAC-SEM-031`).
+- `limitUsd` is a positive dollar amount; only a relative limit (`velocity`, or an unknown kind)
+  may leave it `null`. `spentUsd` is what was spent in the window, `null` when unknown — never
+  `0` for unknown, as in the rest of the report.
+- `enforced: false` means the operator chose not to apply this limit; a host still shows it,
+  marked "not enforced". `tripped: true` means the limit has stopped work right now and requires
+  `enforced: true` (`FAC-SEM-031`). Only spend-triggered stops belong here; a stop with no dollar
+  line (an operator switch, an empty account) is reported in `degraded`, not in `budgets`.
+- **A breach is shown, not refused.** An enforced ceiling (every known kind except `approval`)
+  whose `spentUsd` exceeds `limitUsd` is a breach; a host lists breaches first. Crossing an
+  `approval` threshold means orders wait for a person, not a breach.
+- **`budget` and `budgets` never disagree.** When both are present, `budget` repeats one
+  `budgets` entry with `scope: "machine"`, `enforced: true`, kind `daily` or `monthly`, the same
+  `period`, `limitUsd` and `spentUsd` (`FAC-SEM-031`). A service whose machine limit counts a
+  rolling window, not a calendar period, omits `budget`.
 
 ## Operator login
 
@@ -280,7 +327,7 @@ operator who installed it, on that operator's computer only.
 ## Settings backup
 
 Schema: [`settings-backup.schema.json`](../../schemas/settings-backup.schema.json) · format
-`fabric-settings-backup/1` · DEC-0025 · `FAC-SEM-028`.
+`fabric-settings-backup/1` · DEC-0025 · `FAC-SEM-035`.
 
 A service whose store holds what the operator decided — which projects it serves, how each is
 bound, which secret slot each binding uses, the operator's overrides — SHOULD keep settings
@@ -341,7 +388,7 @@ decided. A service that keeps them MUST follow this section.
   [`src/settings-backup.ts`](../../src/settings-backup.ts). The positive fixture's checksum was
   computed by the former and is checked against the latter.
 - **A reader MUST refuse a file** whose checksum does not match, whose counts or row widths
-  disagree with its tables, or which carries a value with no canonical form (`FAC-SEM-028`). It
+  disagree with its tables, or which carries a value with no canonical form (`FAC-SEM-035`). It
   also refuses a file whose `format` it does not know.
 
 ### What it holds
@@ -423,6 +470,7 @@ must not be able to mint an operator login code. When a service declares `own`:
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or `~/` executable path |
 | `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no launchd field |
 | `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
+| `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
-| `FAC-SEM-028` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
-| `FAC-SEM-029` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
+| `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
+| `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |

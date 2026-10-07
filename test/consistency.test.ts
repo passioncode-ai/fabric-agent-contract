@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS, foreignExtensionKeys } from "../src/extensions.js";
 import { findPinDrift } from "../src/pin-check.js";
-import { contextProfileNames, schemaProfileKinds } from "../src/docs-check.js";
+import { checkRuleCodes, contextProfileNames, schemaProfileKinds } from "../src/docs-check.js";
+import { ruleCodeFindings } from "../src/rule-codes.js";
 
 const PIN = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "a5a27092ba0dcc5facfbeae8b359146dfb403e9a" };
 
@@ -66,5 +67,55 @@ describe("G-12: CONTEXT profile names are the schema's profile kinds", () => {
 
   it("fails a glossary that names a profile the schema does not have", () => {
     expect(contextProfileNames("**Profile**: A mode: `peer-agent`, `mcp` or `local-runner`.")).toEqual(["local-runner", "mcp", "peer-agent"]);
+  });
+});
+
+describe("G-13: one allocation and one definition of every semantic rule code", () => {
+  const register = (rows: string, next = "FAC-SEM-003") =>
+    ({ path: "conformance.md", text: `## Semantic rule codes\n\n**Next free rule code:** \`${next}\`\n\n| Code | Kind | Defined in |\n|---|---|---|\n${rows}\n## Compatibility policy\n` });
+  const spec = (name: string, codes: string[]) =>
+    ({ path: `docs/specification/${name}`, text: `## Semantic rules\n\n| Code | Kind | Rule |\n|---|---|---|\n${codes.map((code) => `| \`${code}\` | \`x\` | a rule |`).join("\n")}\n` });
+  const source = (codes: string[]) => ({ path: "src/rules.ts", text: codes.map((code) => `push({ code: "${code}", instancePath: "" })`).join("\n") });
+  const rows = "| `FAC-SEM-000` | any | here: an object |\n| `FAC-SEM-001` | `x` | [runners](runners.md#semantic-rules) |\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
+
+  it("passes the repository's own register, specifications and checkers", async () => {
+    expect(await checkRuleCodes()).toEqual([]);
+  });
+
+  it("accepts a register whose every code is defined once and emitted", () => {
+    expect(ruleCodeFindings(register(rows), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])])).toEqual([]);
+  });
+
+  it("refuses one code with two meanings: two specifications define it", () => {
+    const findings = ruleCodeFindings(register(rows), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-001", "FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]);
+    expect(findings.some((finding) => finding.includes("FAC-SEM-001 is defined in 2"))).toBe(true);
+  });
+
+  it("refuses a code allocated twice, a stale next-free marker and a code emitted without a row", () => {
+    const doubled = rows + "\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
+    expect(ruleCodeFindings(register(doubled), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("allocated twice");
+    expect(ruleCodeFindings(register(rows, "FAC-SEM-002"), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("not above");
+    expect(ruleCodeFindings(register(rows), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009, which has no row");
+  });
+
+  it("refuses a row whose named table does not define the code, and a row no checker emits", () => {
+    expect(ruleCodeFindings(register(rows), [spec("runners.md", []), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("FAC-SEM-001: the register names runners.md");
+    expect(ruleCodeFindings(register(rows), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001"])]).join("\n")).toContain("FAC-SEM-002 is allocated but no checker");
+  });
+  it("refuses one code checked by two modules, even when the second meaning's table rows were deleted", () => {
+    const two = [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"]), { path: "src/other.ts", text: `const CODE = "FAC-SEM-001";` }];
+    expect(ruleCodeFindings(register(rows), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], two).join("\n")).toContain("FAC-SEM-001 is checked by 2 modules");
+  });
+
+  it("reads a definition in any table of any specification, the register file's other sections included", () => {
+    const elsewhere = { path: "conformance.md", text: register(rows).text + "\n## Clients\n\n| Code | Kind | Rule |\n|---|---|---|\n| `FAC-SEM-001` | `x` | another meaning |\n" };
+    expect(ruleCodeFindings(elsewhere, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("FAC-SEM-001 is defined in 2 rows");
+  });
+
+  it("refuses a register kind that disagrees with the specification, and a late code defined in the register", () => {
+    const wrongKind = rows.replace("| `FAC-SEM-002` | `x` |", "| `FAC-SEM-002` | `y` |");
+    expect(ruleCodeFindings(register(wrongKind), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("the register says y");
+    const late = register(rows + "\n| `FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
+    expect(ruleCodeFindings(late, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009 must be defined in a specification");
   });
 });

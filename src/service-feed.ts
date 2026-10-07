@@ -20,7 +20,7 @@ export function tokenHeader(auth: unknown, token: string): TokenHeader {
 }
 
 /**
- * FAC-SEM-029: a client of `GET /fabric/v1/events` sends the token in the header the descriptor
+ * FAC-SEM-036: a client of `GET /fabric/v1/events` sends the token in the header the descriptor
  * declares, in the declared form, and nowhere else. Input: `{ descriptor, token, request: { path,
  * headers } }`. Messages name headers and forms, never the token.
  */
@@ -34,16 +34,16 @@ export function feedRequestRules(value: JsonObject): Finding[] {
   const sent = Object.entries(headers).find(([name]) => name.toLowerCase() === expected.name.toLowerCase());
   const form = expected.value === token ? "the raw token (scheme none)" : "`Bearer <token>`";
   if (!sent) {
-    findings.push({ code: "FAC-SEM-029", instancePath: "/request/headers", message: `the feed request does not carry the declared header ${expected.name}` });
+    findings.push({ code: "FAC-SEM-036", instancePath: "/request/headers", message: `the feed request does not carry the declared header ${expected.name}` });
   } else if (sent[1] !== expected.value) {
-    findings.push({ code: "FAC-SEM-029", instancePath: `/request/headers/${sent[0]}`, message: `${expected.name} must carry ${form}` });
+    findings.push({ code: "FAC-SEM-036", instancePath: `/request/headers/${sent[0]}`, message: `${expected.name} must carry ${form}` });
   }
   for (const [name, carried] of Object.entries(headers)) {
     if (name.toLowerCase() === expected.name.toLowerCase() || !token || typeof carried !== "string" || !carried.includes(token)) continue;
-    findings.push({ code: "FAC-SEM-029", instancePath: `/request/headers/${name}`, message: `the token travels only in ${expected.name}; it was also sent in ${name}` });
+    findings.push({ code: "FAC-SEM-036", instancePath: `/request/headers/${name}`, message: `the token travels only in ${expected.name}; it was also sent in ${name}` });
   }
   if (token && typeof request.path === "string" && request.path.includes(encodeURIComponent(token))) {
-    findings.push({ code: "FAC-SEM-029", instancePath: "/request/path", message: "the token never travels in the URL" });
+    findings.push({ code: "FAC-SEM-036", instancePath: "/request/path", message: "the token never travels in the URL" });
   }
   return findings;
 }

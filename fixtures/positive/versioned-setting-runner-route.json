@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "id": "urn:route:project-a:agent-chat",
+    "revision": 2,
+    "contentHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "createdAt": "2026-10-07T10:30:00Z",
+    "createdBy": "urn:agent:pm:a"
+  },
+  "kind": "runner-route",
+  "parents": [
+    {
+      "id": "urn:route:project-a:agent-chat",
+      "revision": 1,
+      "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  ],
+  "reason": "Answer from a held Claude Code session, otherwise start Hermes",
+  "payload": {
+    "project": "urn:project:a",
+    "capability": "urn:fabric:capability:agent-chat",
+    "candidates": [
+      {
+        "runnerKind": "claude-code",
+        "provider": {
+          "id": "urn:fabric:provider:claude-code-local",
+          "revision": 1,
+          "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "session": {
+          "attach": "preferred",
+          "spawn": "never"
+        }
+      },
+      {
+        "runnerKind": "hermes",
+        "provider": {
+          "id": "urn:fabric:provider:hermes-local",
+          "revision": 2,
+          "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        "session": {
+          "attach": "never",
+          "spawn": "allowed"
+        }
+      }
+    ],
+    "exhausted": "capability-unavailable",
+    "recovery": "sticky"
+  },
+  "approvals": [
+    "urn:approval:pm:a:7"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "id": "urn:binding:project-a:agent-chat",
+    "revision": 1,
+    "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "createdAt": "2026-08-26T10:02:00Z",
+    "createdBy": "urn:agent:pm:a"
+  },
+  "project": "urn:project:a",
+  "capability": "urn:fabric:capability:agent-chat",
+  "provider": {
+    "id": "urn:fabric:provider:claude-code-local",
+    "revision": 1,
+    "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "admission": {
+    "id": "urn:admission:claude-code:1",
+    "revision": 1,
+    "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "profileKind": "local-runner",
+  "executionContext": {
+    "id": "urn:context:project-a:agent-chat",
+    "revision": 1,
+    "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "accountPool": {
+    "id": "urn:pool:project-a:claude",
+    "revision": 1,
+    "contentHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "grants": [],
+  "dataPolicy": {
+    "id": "urn:policy:data:project-a",
+    "revision": 1,
+    "contentHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  },
+  "coordinationPolicy": {
+    "id": "urn:policy:coord:project-a",
+    "revision": 1,
+    "contentHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  },
+  "checkerPolicy": {
+    "id": "urn:policy:checker:project-a",
+    "revision": 1,
+    "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+  },
+  "role": "fabric.example/agent-chat",
+  "state": "active",
+  "runnerRoute": {
+    "id": "urn:route:project-a:agent-chat",
+    "revision": 1,
+    "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  }
+}

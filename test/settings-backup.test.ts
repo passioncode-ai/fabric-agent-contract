@@ -15,8 +15,8 @@ const schemaValid = (value: unknown) => validateDocument(validator, `${SCHEMA_PR
 const findings = (value: unknown) => evaluateSemanticRules("settings-backup", value);
 const codes = (value: unknown) => findings(value).map((finding) => finding.code);
 
-describe("fabric-settings-backup/1 (DEC-0025, FAC-SEM-028)", () => {
-  it("accepts the positive fixture by schema and by FAC-SEM-028", () => {
+describe("fabric-settings-backup/1 (DEC-0025, FAC-SEM-035)", () => {
+  it("accepts the positive fixture by schema and by FAC-SEM-035", () => {
     const backup = load("positive/settings-backup.json");
     expect(schemaValid(backup).valid).toBe(true);
     expect(codes(backup)).toEqual([]);
@@ -36,7 +36,7 @@ describe("fabric-settings-backup/1 (DEC-0025, FAC-SEM-028)", () => {
   it("refuses a file whose rows changed after the checksum was written", () => {
     const damaged = load("semantic/settings-backup-bad-checksum.json");
     expect(schemaValid(damaged).valid).toBe(true);
-    expect(findings(damaged)).toContainEqual(expect.objectContaining({ code: "FAC-SEM-028", instancePath: "/sha256" }));
+    expect(findings(damaged)).toContainEqual(expect.objectContaining({ code: "FAC-SEM-035", instancePath: "/sha256" }));
   });
 
   it("refuses counts that do not match the rows or name a table that is not there", () => {
@@ -58,7 +58,7 @@ describe("fabric-settings-backup/1 (DEC-0025, FAC-SEM-028)", () => {
   it("refuses a value without a canonical form: a fraction or a lone surrogate", () => {
     const fraction = load("negative/settings-backup-fraction.json");
     expect(schemaValid(fraction).valid).toBe(false);
-    expect(codes(fraction)).toContain("FAC-SEM-028");
+    expect(codes(fraction)).toContain("FAC-SEM-035");
     expect(() => canonicalJson(0.2)).toThrow(TypeError);
     const surrogate = load("positive/settings-backup.json");
     surrogate.tables.projects!.rows[0]![1] = "half \uD800 a pair";

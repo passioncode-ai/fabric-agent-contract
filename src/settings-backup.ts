@@ -48,7 +48,7 @@ export function settingsBackupDigest(tables: unknown): string {
 const wellFormed = (text: string) => !/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(text);
 
 /**
- * FAC-SEM-028 (DEC-0025): a settings backup is intact — its checksum is the digest of its tables,
+ * FAC-SEM-035 (DEC-0025): a settings backup is intact — its checksum is the digest of its tables,
  * its counts name exactly its tables and their row counts, every row is as wide as its columns,
  * and every value has a canonical form. A reader MUST refuse a file this rule flags.
  */
@@ -64,25 +64,25 @@ export function settingsBackupRules(value: JsonObject): Finding[] {
     rows.forEach((row, i) => {
       const at = `/tables/${name}/rows/${i}`;
       if (!Array.isArray(row)) return;
-      if (row.length !== width) findings.push({ code: "FAC-SEM-028", instancePath: at, message: `row has ${row.length} values for ${width} columns` });
+      if (row.length !== width) findings.push({ code: "FAC-SEM-035", instancePath: at, message: `row has ${row.length} values for ${width} columns` });
       row.forEach((cell, j) => {
         if (typeof cell === "number" && !Number.isSafeInteger(cell)) {
           canonical = false;
-          findings.push({ code: "FAC-SEM-028", instancePath: `${at}/${j}`, message: "a fraction or an unsafe integer has no canonical form; store it as a string" });
+          findings.push({ code: "FAC-SEM-035", instancePath: `${at}/${j}`, message: "a fraction or an unsafe integer has no canonical form; store it as a string" });
         }
         if (typeof cell === "string" && !wellFormed(cell)) {
           canonical = false;
-          findings.push({ code: "FAC-SEM-028", instancePath: `${at}/${j}`, message: "a string with a lone surrogate cannot be encoded as UTF-8" });
+          findings.push({ code: "FAC-SEM-035", instancePath: `${at}/${j}`, message: "a string with a lone surrogate cannot be encoded as UTF-8" });
         }
       });
     });
-    if (counts[name] !== rows.length) findings.push({ code: "FAC-SEM-028", instancePath: `/counts/${name}`, message: `counts says ${String(counts[name] ?? "nothing")} for ${rows.length} rows` });
+    if (counts[name] !== rows.length) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts says ${String(counts[name] ?? "nothing")} for ${rows.length} rows` });
   }
   for (const name of Object.keys(counts)) {
-    if (!Object.hasOwn(tables, name)) findings.push({ code: "FAC-SEM-028", instancePath: `/counts/${name}`, message: `counts names ${name}, which the backup does not carry` });
+    if (!Object.hasOwn(tables, name)) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts names ${name}, which the backup does not carry` });
   }
   if (canonical && value.sha256 !== settingsBackupDigest(tables)) {
-    findings.push({ code: "FAC-SEM-028", instancePath: "/sha256", message: "the checksum does not match the tables: the file is damaged and a reader refuses it" });
+    findings.push({ code: "FAC-SEM-035", instancePath: "/sha256", message: "the checksum does not match the tables: the file is damaged and a reader refuses it" });
   }
   return findings;
 }

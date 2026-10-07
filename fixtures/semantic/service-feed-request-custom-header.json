@@ -1,5 +1,5 @@
 {
-  "description": "A feed client sends the token in the header the descriptor declares, in the declared form: X-Example-Token carries the raw token because the scheme is none (FAC-SEM-029).",
+  "description": "A feed client sends the token in the header the descriptor declares, in the declared form: X-Example-Token carries the raw token because the scheme is none (FAC-SEM-036).",
   "descriptor": {
     "protocol": "fabric-service/0.1",
     "id": "example-agent",

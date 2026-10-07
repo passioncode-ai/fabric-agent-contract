@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/settings-backup.schema.json",
   "title": "Settings backup file (fabric-settings-backup/1, DEC-0025)",
-  "description": "One snapshot of a service's operator decisions and bindings, kept outside its data directory. Secrets appear only by name. The checksum, the counts and the row widths are checked by FAC-SEM-028; the schema checks the shape and refuses table and column names that can only hold a credential value.",
+  "description": "One snapshot of a service's operator decisions and bindings, kept outside its data directory. Secrets appear only by name. The checksum, the counts and the row widths are checked by FAC-SEM-035; the schema checks the shape and refuses table and column names that can only hold a credential value.",
   "type": "object",
   "required": [
     "format",

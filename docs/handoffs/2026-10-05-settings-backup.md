@@ -10,8 +10,8 @@ client's token header a conformance rule.
   Values are JSON scalars, with integers bounded and fractions refused. It also refuses table
   and column names that can only hold a credential value.
 - [`src/settings-backup.ts`](../../src/settings-backup.ts): `canonicalJson`,
-  `settingsBackupDigest` and `FAC-SEM-028` (checksum, counts, row widths, canonical values).
-- [`src/service-feed.ts`](../../src/service-feed.ts): `tokenHeader` and `FAC-SEM-029`.
+  `settingsBackupDigest` and `FAC-SEM-035` (checksum, counts, row widths, canonical values).
+- [`src/service-feed.ts`](../../src/service-feed.ts): `tokenHeader` and `FAC-SEM-036`.
 - [Service spec](../specification/service.md#settings-backup) (Settings backup, the
   [feed client](../specification/service.md#feed-client), Lifecycle rows, Semantic rules);
   [conformance](../specification/conformance.md#clients-and-readers);
