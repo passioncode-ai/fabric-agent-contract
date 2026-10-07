@@ -1,6 +1,8 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
+import { feedRequestRules } from "./service-feed.js";
+import { settingsBackupRules } from "./settings-backup.js";
 import { routeRules } from "./route-rules.js";
 
 export type { Finding } from "./findings.js";
@@ -49,6 +51,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   }
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
+  if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
+  if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
   if (kind === "comms-transition") findings.push(...commsTransition(value));
 

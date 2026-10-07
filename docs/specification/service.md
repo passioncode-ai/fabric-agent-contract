@@ -2,7 +2,8 @@
 
 `covers: REQ-S01, REQ-S02, REQ-S03, REQ-S04, REQ-S05` — see the
 [run brief](../evidence/specs/2026-09-28-fabric-service-brief.md) · DEC-0015;
-`covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019
+`covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019;
+settings backup and the feed client's token header · DEC-0025
 
 A **service** is a long-running agent process — on the operator's own computer (a **local**
 placement) or online at an `https` origin (a **remote** placement, [below](#remote-placement)): it keeps
@@ -120,6 +121,18 @@ Schema: [`service-events-page.schema.json`](../../schemas/service-events-page.sc
 - An event about work that was traced carries `traceId` and `spanId` together
   ([interop C3.4](interop.md#c34-trace)); an event about untraced work MUST NOT invent
   them (DEC-0017).
+
+<a id="feed-client"></a>
+
+**The feed client (DEC-0025).** A client of `GET /fabric/v1/events` MUST send the token in the
+header that the descriptor's `auth.header` names (default `Authorization`), in the form that
+`auth.scheme` names (default `Bearer`): with `none` the header carries the raw token, with `Bearer`
+it carries `Bearer <token>`. It MUST NOT assume `Authorization: Bearer`, MUST NOT send the token
+in any other header or in the URL, and reads the header name case-insensitively
+(`FAC-SEM-036`; [`src/service-feed.ts`](../../src/service-feed.ts) `tokenHeader`). A client that
+ignored a custom header was refused on every poll and silently dropped every `notify: true`
+event, so a client SHOULD also report a refused poll as the service refusing its token rather
+than as an empty feed. The same rule holds for every route that requires the service token.
 
 ## Usage report
 
@@ -308,7 +321,116 @@ operator who installed it, on that operator's computer only.
 | Off | A host stops a service with `bootout` then `disable`, so it stays off across logins, and starts it with `enable` then `bootstrap`. A host MUST NOT start a service process itself. |
 | Code | Code runs from an immutable release directory. An upgrade rewrites the plist and restarts. |
 | State | Data and configuration live in `~/Library/Application Support/<id>/`, logs in `~/Library/Logs/<id>/`, cache in `~/Library/Caches/<id>/` — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | `bootout`, delete the plist, delete the descriptor. Data stays unless the operator asks to purge it. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then `bootout`, delete the plist, delete the descriptor. Data stays unless the operator asks to purge it. |
+| Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
+
+## Settings backup
+
+Schema: [`settings-backup.schema.json`](../../schemas/settings-backup.schema.json) · format
+`fabric-settings-backup/1` · DEC-0025 · `FAC-SEM-035`.
+
+A service whose store holds what the operator decided — which projects it serves, how each is
+bound, which secret slot each binding uses, the operator's overrides — SHOULD keep settings
+backups. A lost, purged or wrongly migrated data directory then costs the operator nothing they
+decided. A service that keeps them MUST follow this section.
+
+### Where
+
+```text
+<root>/settings-backups/<service-id>/<instance>/settings-<UTC %Y%m%dT%H%M%S%fZ>.json
+```
+
+| Platform | `<root>` |
+|---|---|
+| macOS | `~/Library/Application Support/PassionCode` |
+| Windows | `%APPDATA%\PassionCode` |
+| Linux | `$XDG_CONFIG_HOME/PassionCode`, default `~/.config/PassionCode` |
+
+- The directory is outside the service's data directory, so removing or replacing the data
+  directory leaves the backups in place.
+- `<service-id>` and `<instance>` are the descriptor's `id` and `instance`. The time stamp is UTC
+  with microseconds (`settings-20261005T020000123456Z.json`), so the names sort in time order.
+- Directories are created with mode `0700` and files with mode `0600`. A file is written
+  atomically: a temporary file in the same directory, `fsync`, then rename. A temporary file
+  left by an interrupted write is removed before the next write.
+- A service MAY offer an environment variable that replaces the instance directory, for example
+  `EXAMPLE_AGENT_SETTINGS_BACKUP_DIR`. It then sets the permissions only of that leaf directory,
+  never of its parents.
+
+### The file
+
+```json
+{
+  "format": "fabric-settings-backup/1",
+  "service": { "id": "example-agent", "instance": "default", "version": "0.4.0", "schema": 7 },
+  "created_at": "2026-10-05T02:00:00.123456Z",
+  "reason": "daily",
+  "sha256": "<64 lowercase hex>",
+  "counts": { "<table>": 2 },
+  "tables": { "<table>": { "columns": ["id", "name"], "rows": [["p-001", "Quarterly report"]] } }
+}
+```
+
+- `service.version` is the release that wrote the file; `service.schema` is the version of the
+  database schema the rows were read from. `reason` is `start`, `daily`, `uninstall`, `manual` or
+  another lowercase word.
+- `counts` names exactly the tables in `tables`, each with its number of rows. Every row has one
+  value per column, and every value is a JSON scalar: a string, an integer within ±(2^53 − 1),
+  `true`, `false` or `null`. Binary data is never stored. A fraction is stored as its decimal
+  string, because the checksum must come out the same in every language.
+- **The checksum.** `sha256` is the SHA-256, in lowercase hex, of the UTF-8 bytes of the
+  *canonical JSON* of `tables`. In canonical JSON, object keys are sorted by Unicode code point
+  at every level. Members and elements are separated by a comma and one space, and a key is
+  followed by a colon and one space (`{"a": [1, 2]}`). A string is escaped as JSON requires (`"`, `\` and the control
+  characters, these as `\b \f \n \r \t` or `\u00xx`) and nothing else; every other character is
+  written as itself. Integers are written in decimal. This is the output of Python's
+  `json.dumps(tables, sort_keys=True, ensure_ascii=False)`, and of `canonicalJson` in
+  [`src/settings-backup.ts`](../../src/settings-backup.ts). The positive fixture's checksum was
+  computed by the former and is checked against the latter.
+- **A reader MUST refuse a file** whose checksum does not match, whose counts or row widths
+  disagree with its tables, or which carries a value with no canonical form (`FAC-SEM-035`). It
+  also refuses a file whose `format` it does not know.
+
+### What it holds
+
+- Operator decisions and bindings only.
+- It MUST NOT hold a secret value, a token, an operator session or login code, or a draft of
+  an account connection. A secret appears only by its **name**: the slot a binding uses, never
+  what the slot holds.
+- The schema refuses table names that can only hold such things (`account_connections`,
+  `operator_sessions`, `login_codes`, `*_tokens`, `*_credentials`, …). It also refuses column
+  names that can only hold a credential value (`access_token`, `password`, `client_secret`, …).
+  `secret_name` and `token_slot` pass. The schema cannot see values, so a service backs up the
+  tables on an explicit allow-list rather than everything except a deny-list.
+
+### When
+
+- At least once a day, and at service start when the newest snapshot is older than 24 hours.
+- On uninstall, a final snapshot. It is taken read-only: the uninstaller opens the store without
+  migrating it and without writing to it.
+- A snapshot whose checksum equals the newest file's is not written again.
+- At least the 14 newest snapshots are kept; older ones MAY be removed after a successful write.
+
+### Restore
+
+Restore adds and never overwrites.
+
+- A row whose primary key is missing from the database is inserted. A row that already exists is
+  never modified.
+- Columns are the intersection of the snapshot's and the current schema's. The restore report
+  names the snapshot columns it dropped, the current columns it left to their defaults, and the
+  required columns the snapshot lacks; a row that needs one of these is refused.
+- Every row the database refuses (a constraint, a missing parent, a missing required column) is
+  named in the report with its key and reason, and is not counted as inserted.
+
+**Automatic restore** runs only on a *fresh* database: one with no domain records **and** on which
+the service has never started. Removing the last record does not make a database fresh, so a
+restart never undoes a deletion. The source is the newest intact snapshot that has content.
+Damaged snapshots are skipped and named in the report. A fresh, empty database writes no snapshot,
+because that snapshot would become the newest and hide the good one before it is restored.
+
+**Manual restore** shows a preview first: what each table would gain, and what would be dropped,
+defaulted or refused. Applying it is an operator action, never an agent's.
 
 ## Surfaces
 
@@ -350,3 +472,5 @@ must not be able to mint an operator login code. When a service declares `own`:
 | `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
 | `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
+| `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
+| `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |

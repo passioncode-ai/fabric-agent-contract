@@ -93,6 +93,10 @@ placement, behind the service token for a remote one.
 level, one sentence a person can read, and optionally a subject, a link and a
 request to notify the operator.
 
+**Settings backup**: A checksummed snapshot (`fabric-settings-backup/1`) of a service's
+operator decisions and bindings, kept outside its data directory. A restore only adds missing
+rows. It names secrets and never holds them (DEC-0025).
+
 **Provider entry**: The file an installer writes to announce an agent that is not
 a service (`fabric-provider/0.1`): its id, its manifest and how to reach it over
 MCP. Like a service descriptor, it describes an installation and grants nothing.

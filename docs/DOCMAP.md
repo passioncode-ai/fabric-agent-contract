@@ -25,6 +25,8 @@ and recorded as DEC-0001.
 | Memory control-plane semantics | `docs/specification/memory-and-learning.md` |
 | Concrete memory backend mapping | `docs/reference-architecture/mcp-memory-service-adapter.md` |
 | Service extension (`fabric-service/0.1`), local and remote placement | `docs/specification/service.md` |
+| Settings backups (`fabric-settings-backup/1`) and the feed client's token header | `docs/specification/service.md#settings-backup`, `#feed-client`, `schemas/settings-backup.schema.json` (DEC-0025) |
+| Client and reader conformance | `docs/specification/conformance.md#clients-and-readers` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
@@ -36,6 +38,7 @@ and recorded as DEC-0001.
 | A consumer's contract pin | `docs/specification/versioning.md#one-contract-pin` |
 | Agent-registry run (AR-1) record and handoff | `docs/evidence/plans/2026-09-30-ar1-contract.md` |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
+| Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |
 | Licence text, commercial terms, contributor agreement | `LICENSE`, `COMMERCIAL-LICENSE.md`, `CLA.md` (knowledge base templates) |
 | Machine-readable shapes | `schemas/` |
 | User and integration behavior | `docs/ux/` |
