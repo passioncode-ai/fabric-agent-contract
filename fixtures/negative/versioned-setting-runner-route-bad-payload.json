@@ -27,7 +27,7 @@
           "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
         },
         "session": {
-          "attach": "preferred",
+          "attach": "always",
           "spawn": "never"
         }
       },

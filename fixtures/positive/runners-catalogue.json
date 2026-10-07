@@ -24,6 +24,12 @@
           "--mcp-config",
           "{mcpConfig}"
         ]
+      },
+      "tui": {
+        "argv": [
+          "--mcp-config",
+          "{mcpConfig}"
+        ]
       }
     },
     "mcpConfig": {
@@ -32,7 +38,15 @@
       "key": "mcpServers"
     },
     "skillsDir": "~/.claude/skills",
-    "docs": "https://code.claude.com/docs/en/headless"
+    "docs": "https://code.claude.com/docs/en/headless",
+    "auth": {
+      "argv": [
+        "auth",
+        "status",
+        "--json"
+      ],
+      "timeoutMs": 5000
+    }
   },
   {
     "kind": "codex",
@@ -67,5 +81,71 @@
       "key": "mcp_servers"
     },
     "skillsDir": "~/.codex/skills"
+  },
+  {
+    "kind": "kimi-code",
+    "name": "Kimi Code",
+    "binaries": [
+      "kimi-code"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "acp",
+    "drives": {
+      "acp": {
+        "argv": [
+          "acp"
+        ]
+      },
+      "tui": {
+        "argv": []
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.kimi-code/mcp.json",
+      "format": "claude-json",
+      "key": "mcpServers"
+    }
+  },
+  {
+    "kind": "hermes",
+    "name": "Hermes Agent",
+    "binaries": [
+      "hermes"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "v(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "auth": {
+      "argv": [
+        "auth",
+        "list"
+      ],
+      "timeoutMs": 5000
+    },
+    "drive": "acp",
+    "drives": {
+      "acp": {
+        "argv": [
+          "acp"
+        ]
+      },
+      "tui": {
+        "argv": []
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.hermes/config.yaml",
+      "format": "none"
+    }
   }
 ]

@@ -10,9 +10,9 @@
 | SCR-02 | Profile contract | FLW-01 | disabled | designed | none yet |
 | SCR-03 | Conformance report | FLW-01 | disabled | designed | none yet |
 | SCR-04 | Admission record | FLW-01, FLW-02 | disabled | designed | none yet |
-| SCR-05 | Binding contract | FLW-02, FLW-03 | disabled | designed | none yet |
-| SCR-06 | Version history | FLW-02, FLW-03, FLW-04 | disabled | designed | none yet |
-| SCR-07 | Result and evidence | FLW-03, FLW-04 | disabled | designed | none yet |
+| SCR-05 | Binding contract | FLW-02, FLW-03, FLW-05 | disabled | designed | none yet |
+| SCR-06 | Version history | FLW-02, FLW-03, FLW-04, FLW-05 | disabled | designed | none yet |
+| SCR-07 | Result and evidence | FLW-03, FLW-04, FLW-05 | disabled | designed | none yet |
 | SCR-08 | Retro record | FLW-04 | disabled | designed | none yet |
 
 ## Design system
@@ -75,34 +75,34 @@
 
 ### SCR-05: Binding contract
 
-- **Used by:** FLW-02, FLW-03
-- **Purpose:** pin an admitted capability to project scope, context, grant and checker.
+- **Used by:** FLW-02, FLW-03, FLW-05
+- **Purpose:** pin an admitted capability to project scope, context, grant and checker — and, for the local-runner profile, a runner route.
 - **Elements:** revision references, allowlist, validation findings (primary action: validate new revision).
 - **States:** error — each invalid reference named; success — content hash and activation boundary shown.
 - **Coverage:** none yet
-- **Scenarios:** SCN-003, SCN-004, SCN-005
-- **Resources:** binding and execution-context schemas
+- **Scenarios:** SCN-003, SCN-004, SCN-005, SCN-009
+- **Resources:** binding, execution-context and runner-route schemas
 - **Status:** designed
 
 ### SCR-06: Version history
 
-- **Used by:** FLW-02, FLW-03, FLW-04
-- **Purpose:** compare immutable revisions and create a rollback-as-new-revision.
+- **Used by:** FLW-02, FLW-03, FLW-04, FLW-05
+- **Purpose:** compare immutable revisions and create a rollback-as-new-revision; list route events.
 - **Elements:** hash, parents, diff summary, run pins (primary action: create proposed revision).
 - **States:** empty — no prior revision and a creation link; success — history and provenance visible.
 - **Coverage:** none yet
-- **Scenarios:** SCN-005, SCN-006
-- **Resources:** versioned-setting schema
+- **Scenarios:** SCN-005, SCN-006, SCN-009
+- **Resources:** versioned-setting and runner-route-event schemas
 - **Status:** designed
 
 ### SCR-07: Result and evidence
 
-- **Used by:** FLW-03, FLW-04
+- **Used by:** FLW-03, FLW-04, FLW-05
 - **Purpose:** separate claimed completion, proof, scope and unknowns.
 - **Elements:** DONE, PROOF, SCOPE, NOT VERIFIED, artifacts, checker outcome (primary action: inspect failed or unverified claim).
 - **States:** partial — known and unknown items separated; error — checker failure and retry boundary; success — verified claims linked to evidence.
 - **Coverage:** none yet
-- **Scenarios:** SCN-006, SCN-007
+- **Scenarios:** SCN-006, SCN-007, SCN-009
 - **Resources:** result schema
 - **Status:** designed
 

@@ -57,3 +57,17 @@ route never widens that; detection stays inside the catalogue probes.
 | Coordination | git lease on `docs/DECISIONS.md` acquired (run `r-f0052c6f2`); DEC-0026 reserved by git CAS; record plane degraded to `fs` (no Notion token) — reported, work proceeds |
 | Consumer repos | not touched; adoption is each consumer's repin per DEC-0016 (Fabric host, fabric-agent-adapter, Fabric Dashboards) |
 | Merge | PR to `main`; merge conditional on `pnpm run check` exit 0 in the same command |
+
+## Errata (DEC-0029, 2026-10-07)
+
+A review of this run, recorded as DEC-0029 and its
+[brief](2026-10-07-runner-route-review-brief.md), corrected four things this brief states:
+
+- The source ledger cites SCN-004 and SCN-006 as the operator's fallback behaviour. SCN-004 is
+  "Reject an unsafe project context"; the route's scenario is SCN-009, added by DEC-0029.
+- The positive route let `claude-code` spawn, so "no Claude Code session → Hermes answers" could
+  not happen as written; the fixture now gives `claude-code` `{attach: preferred, spawn: never}`.
+- D-5 numbered rules `FAC-SEM-028`…`030` by hand; the open DEC-0025 branch already used `028` and
+  `029`. Rule codes now have a register (conformance.md, `reserve SEM`).
+- "Contradictions: none" missed that `recovery: reprobe` moved a running conversation, which the
+  host design (Fabric ADR-0125) forbids; DEC-0029 moves switches to launches only.

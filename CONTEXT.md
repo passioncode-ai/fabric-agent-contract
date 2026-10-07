@@ -103,9 +103,14 @@ modes (drives) it can be run in. A binary no entry names is never executed.
 
 **Runner route**: The project-pinned, ordered preference list of admitted runner
 candidates for one capability served by the local-runner profile, with an
-attach/spawn session policy per candidate and fallback semantics: attach to a live
-terminal session first, spawn the next available candidate otherwise, and record
-every switch. It selects which runner serves a request; it grants nothing.
+attach/spawn session policy per candidate and fallback semantics: attach to a
+session the host already holds first, spawn the next available candidate
+otherwise, and record every selection and switch as a **Runner route event**. It
+selects which runner serves a request; it grants nothing.
+
+**Runner route event**: The record of one walk of a runner route — a selection, a
+switch of a conversation to another candidate, or an exhausted route — with the
+probe result of every candidate the walk passed over.
 
 **Interop**: The `fabric-interop/0.1` extension: how agents are called over MCP —
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.

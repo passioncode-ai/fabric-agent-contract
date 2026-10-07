@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/runner-route-event.schema.json",
+  "title": "Runner route event: a selection, a switch or an exhausted route",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/selected"
+    },
+    {
+      "$ref": "#/$defs/switched"
+    },
+    {
+      "$ref": "#/$defs/exhausted"
+    }
+  ],
+  "$defs": {
+    "common": {
+      "type": "object",
+      "required": [
+        "id",
+        "at",
+        "route",
+        "project",
+        "capability",
+        "run",
+        "launch",
+        "probes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "route": {
+          "$ref": "common.schema.json#/$defs/revisionRef"
+        },
+        "project": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "capability": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "run": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "node": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "conversation": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "launch": {
+          "enum": [
+            "operator",
+            "unattended"
+          ]
+        },
+        "probes": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/probe"
+          }
+        }
+      }
+    },
+    "candidateRef": {
+      "type": "object",
+      "required": [
+        "index",
+        "runnerKind",
+        "provider"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "runnerKind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}$"
+        },
+        "provider": {
+          "$ref": "common.schema.json#/$defs/revisionRef"
+        }
+      },
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "required": [
+        "index",
+        "runnerKind",
+        "provider",
+        "session",
+        "executionContext"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "runnerKind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}$"
+        },
+        "provider": {
+          "$ref": "common.schema.json#/$defs/revisionRef"
+        },
+        "drive": {
+          "$ref": "runners.schema.json#/$defs/drive"
+        },
+        "session": {
+          "enum": [
+            "attached",
+            "spawned"
+          ]
+        },
+        "sessionRef": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "executionContext": {
+          "$ref": "common.schema.json#/$defs/revisionRef"
+        },
+        "permissionMode": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "session": {
+                "const": "attached"
+              }
+            },
+            "required": [
+              "session"
+            ]
+          },
+          "then": {
+            "properties": {
+              "sessionRef": true
+            },
+            "required": [
+              "sessionRef"
+            ]
+          }
+        }
+      ]
+    },
+    "probe": {
+      "type": "object",
+      "required": [
+        "index",
+        "runnerKind",
+        "result"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "runnerKind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}$"
+        },
+        "result": {
+          "enum": [
+            "not-catalogued",
+            "not-admitted",
+            "not-installed",
+            "not-responding",
+            "not-connected",
+            "no-held-session",
+            "quota-unknown",
+            "refused",
+            "spawn-failed"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "additionalProperties": false
+    },
+    "selected": {
+      "type": "object",
+      "$ref": "#/$defs/common",
+      "required": [
+        "kind",
+        "selected"
+      ],
+      "properties": {
+        "kind": {
+          "const": "runner-selected"
+        },
+        "selected": {
+          "$ref": "#/$defs/selection"
+        },
+        "sticky": {
+          "const": true
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "switched": {
+      "type": "object",
+      "$ref": "#/$defs/common",
+      "required": [
+        "kind",
+        "conversation",
+        "from",
+        "selected",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "const": "runner-switched"
+        },
+        "from": {
+          "$ref": "#/$defs/candidateRef"
+        },
+        "selected": {
+          "$ref": "#/$defs/selection"
+        },
+        "reason": {
+          "enum": [
+            "runner-failed",
+            "runner-unavailable",
+            "preferred-available"
+          ]
+        },
+        "conversation": true,
+        "fromProbe": {
+          "type": "object",
+          "required": [
+            "result"
+          ],
+          "properties": {
+            "result": {
+              "enum": [
+                "not-catalogued",
+                "not-admitted",
+                "not-installed",
+                "not-responding",
+                "not-connected",
+                "no-held-session",
+                "quota-unknown",
+                "refused",
+                "spawn-failed"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "const": "runner-unavailable"
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "properties": {
+              "fromProbe": true
+            },
+            "required": [
+              "fromProbe"
+            ]
+          }
+        }
+      ]
+    },
+    "exhausted": {
+      "type": "object",
+      "$ref": "#/$defs/common",
+      "required": [
+        "kind",
+        "answer"
+      ],
+      "properties": {
+        "kind": {
+          "const": "runner-exhausted"
+        },
+        "answer": {
+          "enum": [
+            "capability-unavailable",
+            "held"
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    }
+  },
+  "type": "object"
+}

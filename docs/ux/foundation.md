@@ -130,6 +130,18 @@ delegation across several agents and developers.
 - **Status:** validated
 - **Product:** unobserved
 
+### ST-006: Operator routes terminal work through preferred runners
+
+- **Story:** As P-02, I want each project to pin an ordered list of the terminal agents I run, so that a request is served by the first one that can serve it and I can see why the others were passed over.
+- **Traces:** JTBD-02, JTBD-03, JRN-02/#2, JRN-02/#5
+- **Acceptance criteria:**
+  - Given a route whose first candidate only attaches, when the host holds no session of it, then the next available candidate starts and the event names why the first was passed over.
+  - Given an unattended launch, when a candidate's quota basis is unknown, then it is passed over as `quota-unknown` and never runs unattended.
+  - Given every candidate unavailable, when the route is walked, then the request is answered capability-unavailable with every probe result attached.
+- **Priority:** must
+- **Status:** validated
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

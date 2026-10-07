@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-07T09:40:00Z",
+  "route": {
+    "id": "urn:route:project-a:agent-chat",
+    "revision": 1,
+    "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  },
+  "project": "urn:project:a",
+  "capability": "urn:fabric:capability:agent-chat",
+  "run": "urn:run:project-a:42",
+  "conversation": "urn:conversation:project-a:7",
+  "launch": "operator",
+  "id": "urn:event:route:2",
+  "kind": "runner-switched",
+  "from": {
+    "index": 3,
+    "runnerKind": "hermes",
+    "provider": {
+      "id": "urn:fabric:provider:hermes-local",
+      "revision": 2,
+      "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    }
+  },
+  "selected": {
+    "index": 2,
+    "runnerKind": "kimi-code",
+    "provider": {
+      "id": "urn:fabric:provider:kimi-code-local",
+      "revision": 1,
+      "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "drive": "acp",
+    "session": "spawned",
+    "executionContext": {
+      "id": "urn:context:project-a:agent-chat:kimi-code",
+      "revision": 1,
+      "contentHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+    }
+  },
+  "reason": "runner-failed",
+  "probes": [
+    {
+      "index": 0,
+      "runnerKind": "claude-code",
+      "result": "no-held-session"
+    },
+    {
+      "index": 1,
+      "runnerKind": "codex",
+      "result": "not-installed"
+    }
+  ]
+}

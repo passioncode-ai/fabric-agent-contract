@@ -1,4 +1,4 @@
-<!-- agent-sync:generated source=fabric-agent-contract@b7d7e4c cfg=bfae18664adf at=2026-10-01T15:52:09Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
+<!-- agent-sync:generated source=fabric-agent-contract@94b1829 cfg=29e28bf679d2 at=2026-10-07T12:50:44Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
 
 # How documentation and coordination work in fabric-agent-contract
 
@@ -26,6 +26,7 @@ them is the finding.** Reconcile before starting a task and after finishing it.
 | Register | File | Reserve with |
 |---|---|---|
 | `DEC` | `docs/DECISIONS.md` | `agent_sync.py reserve DEC` |
+| `SEM` | `docs/specification/conformance.md` | `agent_sync.py reserve SEM` |
 
 Reading a *next free id* line is **not** reserving it — two agents read the same number.
 
@@ -38,6 +39,7 @@ Ids are allocated by compare-and-swap on refs/agent-sync/ids/* at 'origin'.
 - `docs/evidence/specs/*-modules.md`
 - `docs/backlog-sources.json`
 - `docs/backlog.md`
+- `docs/specification/conformance.md`
 
 ### Gates run before a change is considered done
 

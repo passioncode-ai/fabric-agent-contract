@@ -3,36 +3,49 @@
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/runner-route.schema.json",
   "title": "Runner route revision",
   "type": "object",
-  "required": ["kind", "meta", "project", "capability", "candidates"],
+  "required": ["kind", "meta"],
   "properties": {
     "kind": { "const": "runner-route" },
-    "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
-    "project": { "$ref": "common.schema.json#/$defs/uri" },
-    "capability": { "$ref": "common.schema.json#/$defs/uri" },
-    "candidates": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["runnerKind", "provider", "session"],
-        "properties": {
-          "runnerKind": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$" },
-          "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
-          "session": {
-            "type": "object",
-            "required": ["attach", "spawn"],
-            "properties": {
-              "attach": { "enum": ["preferred", "never"] },
-              "spawn": { "enum": ["allowed", "never"] }
-            },
-            "additionalProperties": false
-          }
+    "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" }
+  },
+  "$ref": "#/$defs/body",
+  "unevaluatedProperties": false,
+  "$defs": {
+    "body": {
+      "type": "object",
+      "required": ["project", "capability", "candidates"],
+      "properties": {
+        "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "capability": { "$ref": "common.schema.json#/$defs/uri" },
+        "candidates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/candidate" }
         },
-        "additionalProperties": false
+        "exhausted": { "enum": ["capability-unavailable", "hold"], "default": "capability-unavailable" },
+        "recovery": { "enum": ["sticky", "reprobe"], "default": "sticky" }
       }
     },
-    "exhausted": { "enum": ["capability-unavailable", "hold"] },
-    "recovery": { "enum": ["sticky", "reprobe"] }
-  },
-  "additionalProperties": false
+    "candidate": {
+      "type": "object",
+      "required": ["runnerKind", "provider", "session"],
+      "properties": {
+        "runnerKind": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$" },
+        "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "drive": { "$ref": "runners.schema.json#/$defs/drive" },
+        "accountPool": { "$ref": "common.schema.json#/$defs/revisionRef" },
+        "session": {
+          "type": "object",
+          "required": ["attach", "spawn"],
+          "properties": {
+            "attach": { "enum": ["preferred", "never"] },
+            "spawn": { "enum": ["allowed", "never"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

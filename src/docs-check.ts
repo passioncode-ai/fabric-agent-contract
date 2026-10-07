@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import mermaid from "mermaid";
 import { CONTRACT_VERSION, SCHEMA_PREFIX, loadSchemas, projectRoot } from "./contract.js";
 import { foreignExtensionKeys } from "./extensions.js";
+import { ruleCodeFindings } from "./rule-codes.js";
 
 mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 
@@ -71,6 +72,18 @@ export function schemaProfileKinds(manifest: unknown): string[] {
 }
 // #endregion glossary-profiles
 
+/** G-13: one allocation and one definition of every semantic rule code (src/rule-codes.ts). */
+export async function checkRuleCodes(root = projectRoot()): Promise<string[]> {
+  const read = async (file: string) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") });
+  const specDir = path.join(root, "docs", "specification");
+  const specs = await Promise.all((await readdir(specDir)).filter((name) => name.endsWith(".md")).map((name) => read(path.join(specDir, name))));
+  const sourceDir = path.join(root, "src");
+  const sources = await Promise.all((await readdir(sourceDir)).filter((name) => name.endsWith(".ts")).map((name) => read(path.join(sourceDir, name))));
+  const register = specs.find((spec) => spec.path.endsWith("conformance.md"));
+  if (!register) return ["docs/specification/conformance.md: the semantic rule code register is missing (G-13)"];
+  return ruleCodeFindings(register, specs.filter((spec) => spec !== register), sources);
+}
+
 export async function runDocsCheck(): Promise<string[]> {
   const root = projectRoot();
   const files = (await walk(root)).filter((file) => file.endsWith(".md"));
@@ -87,6 +100,7 @@ export async function runDocsCheck(): Promise<string[]> {
   const context = contextProfileNames(await readFile(path.join(root, "CONTEXT.md"), "utf8"));
   const kinds = schemaProfileKinds(JSON.parse(await readFile(path.join(root, "schemas/manifest.schema.json"), "utf8")));
   if (context.join(",") !== kinds.join(",")) findings.push(`CONTEXT.md: profile names ${context.join(", ")} differ from manifest.schema.json ${kinds.join(", ")} (G-12)`);
+  findings.push(...await checkRuleCodes(root));
   const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")) as { version?: string };
   if (packageJson.version !== CONTRACT_VERSION) findings.push(`package.json: expected version ${CONTRACT_VERSION}`);
   for (const schema of await loadSchemas()) {
