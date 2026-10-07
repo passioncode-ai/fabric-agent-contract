@@ -20,7 +20,8 @@
       "session": {
         "attach": "preferred",
         "spawn": "never"
-      }
+      },
+      "drive": "tmux"
     },
     {
       "runnerKind": "codex",

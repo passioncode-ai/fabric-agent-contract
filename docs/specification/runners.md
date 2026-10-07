@@ -53,51 +53,105 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
 
 ## Runner routes
 
-`covers:` operator preference for terminal agents — DEC-0026 · operator behavior
-follows SCN-004 and SCN-006 (versioned fallback, recorded switch).
+`covers:` operator preference for terminal agents — DEC-0026, refined by DEC-0029 · operator
+behavior: SCN-009 (served by the next available runner) and SCN-006 (a recorded switch).
 
-A **runner route** is the ordered preference list a project pins for one
-capability served by the local-runner profile — an agent chat, a repository
-change, any task a terminal agent runs. It answers three questions: which
-installed runner serves this request now; may an existing terminal session be
-attached; what happens when the preferred runner is unavailable.
+A **runner route** is the ordered preference list a project pins for one capability served by
+the local-runner profile — an agent chat, a repository change, any task a terminal agent runs. It
+answers three questions: which installed runner serves this request now; may a terminal session
+the host already holds be attached; what happens when the preferred runner is unavailable.
 
-Schema: [`runner-route.schema.json`](../../schemas/runner-route.schema.json) —
-an immutable revision (DEC-0007); `runner-route` is a versioned-setting kind
-whose `payload` carries the same shape, and a binding MAY pin one revision as
-`runnerRoute` to override the project default for one agent.
+Schemas: [`runner-route.schema.json`](../../schemas/runner-route.schema.json) — an immutable
+revision (DEC-0007); `runner-route` is also a versioned-setting kind, whose `payload` is the
+route's body (`$defs/body`: the same fields without `kind` and `meta`) and is validated as such.
+[`runner-route-event.schema.json`](../../schemas/runner-route-event.schema.json) — the record of
+every selection, switch and exhausted walk.
 
-- `candidates` is the preference order, first to last. Each candidate names a
-  `runnerKind` (a catalogue kind) and an admitted provider revision.
-- `session.attach` `preferred` asks the host to reuse a live terminal session
-  of that runner before starting anything new; `never` always starts a fresh
-  process.
-- `session.spawn` `allowed` permits the host to start a new terminal process
-  when no session is attached or attach is `never`; `never` forbids it.
-- Detection and availability use only the catalogue's version probe — a host
-  never runs anything the catalogue does not name (see above).
-- `exhausted` (default `capability-unavailable`) says what happens when every
-  candidate fails: return an explicit capability-unavailable result with every
-  probe result attached, or `hold` the request until a candidate recovers,
-  bounded by the execution context's limits.
-- `recovery` (default `sticky`) says whether a running conversation stays on
-  the runner it fell back to until that runner fails (`sticky`), or is
-  re-probed and moved back to the highest-preference available candidate
-  (`reprobe`).
+### The route
 
-Selection walks the candidates in order: attach to a live session when
-`attach` is `preferred` and one exists; otherwise spawn when `spawn` is
-`allowed` and the catalogue probe passes; otherwise record the probe result
-and reason, and try the next candidate. When no Claude Code session is open,
-the route answers from the next available candidate — Hermes starts and
-replies — instead of failing the chat.
+- `candidates` is the preference order, first to last, at most 16. Each candidate names a
+  `runnerKind` (a kind of the host's runner catalogue, `FAC-SEM-033`), an admitted provider
+  revision (`FAC-SEM-030`) and a `session` policy. A candidate MAY name the catalogue `drive` the
+  host runs it through (absent: the entry's default `drive`) and an `accountPool` (absent: the
+  binding's pool applies).
+- `session.attach: preferred` lets the host reuse a session it already holds (below) before it
+  starts anything; `never` never attaches. `session.spawn: allowed` lets the host start a new
+  process when nothing was attached; `never` forbids it. A candidate that can do neither is
+  refused (`FAC-SEM-029`).
+- `exhausted` (default `capability-unavailable`) is the answer when every candidate is passed
+  over: an explicit capability-unavailable that carries every probe result, or `hold` — wait for
+  a candidate to recover, at most the pinned execution context's `limits.wallSeconds`, then answer
+  capability-unavailable. A host that cannot wait answers capability-unavailable under `hold` too;
+  it never pretends to hold.
+- `recovery` (default `sticky`) decides what the next launch of a conversation does: `sticky`
+  keeps the runner that served it while that runner can serve, `reprobe` walks the route from the
+  top again and may move the conversation back to a higher-preference candidate.
 
-Every selection and every switch records from/to candidate, runner kind,
-reason, route revision, run/node and time — the runner analogue of the account
-switch event ([execution-context.md](execution-context.md)). A route never
-changes the capability's semantics, profile, model requirement or write scope;
-the provider owns model choice, and admission (DEC-0010) is untouched —
-candidates must be admitted providers (FAC-SEM-030).
+So the operator's request — "when no Claude Code session is open, a started Hermes answers" — is
+this route ([fixture](../../fixtures/positive/runner-route.json)): `claude-code` with
+`{attach: preferred, spawn: never}`, then the other runners with `spawn: allowed`, Hermes last. A
+`claude-code` candidate with `spawn: allowed` would start a new Claude Code instead, which is the
+right route for an operator who wants Claude Code whenever it is installed.
+
+### The walk
+
+A host resolves the route at the launch, from the first candidate down; for each one:
+
+1. **Admitted, catalogued, installed, responding, connected.** The candidate's provider revision is
+   still admitted for the capability, its kind is in the catalogue, and the catalogue's version
+   probe — the only thing a host runs to find a runner, with its 5-second bound — answers. A probe
+   that answers but shows the runner signed out is `not-connected`, never available.
+2. **Attach** when `attach` is `preferred` and the host holds a live session of that candidate:
+   same runner kind and provider revision, same project and capability, started by this host under
+   an execution context equal to the derived one (below). A host never attaches to a process it did
+   not start and still holds — an operator's own terminal, a tmux pane, another application's
+   session: injecting a request into a terminal the host does not own is outside this contract.
+3. **Spawn** when nothing was attached and `spawn` is `allowed`.
+4. Otherwise the candidate is **passed over** with one probe result — `not-catalogued`,
+   `not-admitted`, `not-installed`, `not-responding`, `not-connected`, `no-held-session` (attach
+   preferred, nothing held, spawn never), `quota-unknown`, `refused` or `spawn-failed` — and the
+   walk tries the next.
+
+An **unattended** launch (a routine, a chain, a schedule) passes over a candidate whose quota or
+account basis is unknown (`quota-unknown`); an operator-started launch may use it under the usual
+checks. Permissions, the permission mode and grants belong to the launch, never to the route: a
+switch carries no permission the launch did not have.
+
+The **derived execution context** of a selected candidate is the binding's pinned execution
+context with `provider` replaced by the candidate's provider and, when the candidate names one,
+`accountPool` by the candidate's pool — every scope, limit, environment entry and the working
+directory stay as pinned. The host pins it as its own revision and names it in the event. So a
+route never widens write scope, never changes the model requirement, and never moves the run to
+another project: the provider still owns model choice, and admission (DEC-0010) is untouched.
+
+A **conversation never switches runner mid-turn**, and no runner-private session state is carried
+from one runner to another. A switch happens only at a launch: when the runner serving the
+conversation failed (`runner-failed`), when it is unavailable at the next launch
+(`runner-unavailable`), or — under `recovery: reprobe` only — when a higher-preference candidate
+is available again (`preferred-available`). The host MAY hand the new runner the conversation's
+visible transcript, which is the host's own record.
+
+### Binding a route
+
+A binding pins a route with `runnerRoute`, overriding the project default for that agent. The
+binding then MUST use the local-runner profile (the schema refuses `runnerRoute` on another
+profile), and agree with the route (`FAC-SEM-032`): same project and capability, its `provider`
+one of the candidates, its `runnerRoute` this route's revision. A reader that does not know routes
+still finds a valid single-provider binding; the convention is that `provider` names the first
+candidate.
+
+### Events
+
+Every walk ends in one event ([schema](../../schemas/runner-route-event.schema.json)):
+`runner-selected` (which candidate, attached or spawned, its session and derived execution context),
+`runner-switched` (the same, plus `from` and a closed `reason`, for a conversation that moved), or
+`runner-exhausted` (the `answer` and no selection). Each carries the route revision, project,
+capability, run, node, conversation, whether the launch was operator-started or unattended, and the
+probe result of every candidate the walk passed over — each candidate above the selected one
+exactly once, in order, or every candidate for an exhausted walk (`FAC-SEM-034`). It is the runner
+analogue of the account switch event ([execution-context.md](execution-context.md)). A host records
+transitions, not repeated probes of an unchanged state; Fabric journals them as `runner.selected@1`
+and `runner.switched@1` (Fabric ADR-0125).
 
 ## Semantic rules
 
@@ -107,13 +161,19 @@ candidates must be admitted providers (FAC-SEM-030).
 | `FAC-SEM-021` | `runner-catalogue` | one entry per runner kind |
 | `FAC-SEM-028` | `runner-route` | one candidate per runner kind |
 | `FAC-SEM-029` | `runner-route` | a candidate must be able to run: attach or spawn |
-| `FAC-SEM-030` | `route-bundle` | every candidate names an admitted provider revision |
+| `FAC-SEM-030` | `route-bundle` | every candidate names a provider revision — id, revision and content hash — admitted for the route's capability |
+| `FAC-SEM-032` | `route-bundle` | the binding that pins the route has its project, capability and the local-runner profile, a candidate as its provider, and this route as `runnerRoute` |
+| `FAC-SEM-033` | `route-bundle` | every candidate's kind is in the host's runner catalogue, and a named drive is one its entry offers |
+| `FAC-SEM-034` | `route-event` | the event names this route; every candidate it names is that position of the route; the probes cover every candidate above the selection, in order (all of them when exhausted); attach and spawn obey the session policy; `held` only under `exhausted: hold`; `preferred-available` only under `recovery: reprobe`, moving up |
 
 `FAC-SEM-021` states the locked "one entry per runner kind" as a rule; it is new in this
 revision because JSON Schema cannot express uniqueness by a property. The same limit shapes
-`FAC-SEM-028` and `FAC-SEM-029`; `FAC-SEM-030` keeps a route honest about admission without
-making the route a grant (DEC-0010).
+`FAC-SEM-028` and `FAC-SEM-029`. `FAC-SEM-030` keeps a route honest about admission without
+making the route a grant (DEC-0010); a `route-bundle` is `{route, admissions, binding?,
+catalogue?}`, and `FAC-SEM-032`/`FAC-SEM-033` run when the optional parts are present. A
+`route-event` is `{route, event}`.
 
-Fixtures: the `runners-*` and `runner-route*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json);
-rule tests: [`test/registry-rules.test.ts`](../../test/registry-rules.test.ts) and
+Fixtures: the `runners-*`, `runner-route*` and `binding-runner-route*` entries of
+[`fixtures/catalogue.json`](../../fixtures/catalogue.json); rule tests:
+[`test/registry-rules.test.ts`](../../test/registry-rules.test.ts) and
 [`test/route-rules.test.ts`](../../test/route-rules.test.ts).

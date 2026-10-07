@@ -121,6 +121,37 @@ flowchart TD
 
 - **Screens traversed:** SCR-07 error/success; SCR-08 empty/error/success; SCR-06 success.
 
+### FLW-05: Host serves a request through a runner route
+
+- **Traces:** ST-006 (JTBD-02, JTBD-03, JRN-02/#2, JRN-02/#5)
+- **Goal:** the first runner that can serve a request serves it, and every pass-over is explained
+- **Entry points:** agent chat; managed task start; unattended routine or chain
+- **Success exit:** `runner-selected` or `runner-switched` recorded with the derived execution context
+- **Task analysis:** read pinned route → probe candidate → attach held session or spawn → record
+  pass-over and try next → answer capability-unavailable when exhausted.
+- **Rejected shape:** attach to whatever terminal is running the runner — rejected because the
+  host would inject work into a session it does not own and cannot scope to the project.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A[Screen: Binding contract - pinned route] --> B{Next candidate?}
+  B -->|none left| X[Screen: Result and evidence - capability-unavailable with probes]
+  B -->|yes| C{Admitted, catalogued, responding, connected?}
+  C -->|no| P[Record probe result] --> B
+  C -->|yes| D{attach preferred and a held session?}
+  D -->|yes| E[Attach]
+  D -->|no| F{spawn allowed?}
+  F -->|no| P
+  F -->|yes| G{Unattended and quota unknown?}
+  G -->|yes| P
+  G -->|no| H[Spawn under the derived context]
+  E --> R[Screen: Version history - route event]
+  H --> R
+```
+
+- **Screens traversed:** SCR-05 success; SCR-06 success; SCR-07 error.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

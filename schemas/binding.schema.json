@@ -23,5 +23,11 @@
     "state": { "enum": ["proposed", "active", "rejected", "suspended", "superseded"] },
     "extensions": { "$ref": "common.schema.json#/$defs/extensions" }
   },
+  "allOf": [
+    {
+      "if": { "type": "object", "properties": { "runnerRoute": true }, "required": ["runnerRoute"] },
+      "then": { "properties": { "profileKind": { "const": "local-runner" } } }
+    }
+  ],
   "additionalProperties": false
 }

@@ -14,6 +14,7 @@
 | SCN-006 | Recover through a new revision | recovery | P-02 | ST-004, FLW-03 | validated | not audited |
 | SCN-007 | Produce a governed learning proposal | learning | P-02 | ST-005, FLW-04 | validated | not audited |
 | SCN-008 | Deny unsafe global promotion | learning | P-02 | ST-005, FLW-04 | validated | not audited |
+| SCN-009 | Serve a request through the next available runner | routing | P-02 | ST-006, FLW-05 | validated | not audited |
 
 ## Personas
 
@@ -186,4 +187,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** personal, credential or regulated raw content -> promotion denied; author may propose a new anonymized insight revision.
 - **Status:** validated
 - **Coverage:** none yet
+- **Product:** unobserved
+
+## Routing
+
+### SCN-009: Serve a request through the next available runner
+
+- **Persona:** P-02
+- **Feature:** routing
+- **Traces:** ST-006, FLW-05 (JTBD-02, JTBD-03, JRN-02/#2, JRN-02/#5)
+- **Entry point:** an agent chat or a task bound to a capability of the local-runner profile
+- **Preconditions:** the project pins a runner route whose candidates are admitted and catalogued
+- **Steps:**
+  1. Operator starts a chat -> the host walks the route from the first candidate.
+  2. The first candidate is `claude-code` with `{attach: preferred, spawn: never}` and the host holds no session of it -> it is passed over as `no-held-session`.
+  3. The next candidates are probed with the catalogue's version argv -> a signed-out runner is `not-connected`, a missing one `not-installed`.
+  4. Hermes answers its probe and `spawn` is `allowed` -> the host spawns it under the derived execution context and records `runner-selected`.
+- **Expected result:** the chat is answered by Hermes; the event names the route revision, the selection and why each candidate above it was passed over; scopes, limits and permissions are those of the binding.
+- **Alt paths:** a held Claude Code session of this project exists -> it is attached and no process starts; the running runner fails later -> the next launch walks again and records `runner-switched` with `runner-failed`.
+- **UI elements:** route revision, candidate list with session policy, selection, probe results, switch event.
+- **States covered:** empty, partial, error, success
+- **Errors & recovery:** every candidate passed over -> capability-unavailable with every probe result, under `exhausted: hold` after waiting at most `limits.wallSeconds`; the operator signs a runner in or edits the route as a new revision.
+- **Status:** validated
+- **Coverage:** `test/route-rules.test.ts` (FAC-SEM-028…034), fixtures `runner-route*`
 - **Product:** unobserved

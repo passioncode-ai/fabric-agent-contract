@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-07T09:05:00Z",
+  "route": {
+    "id": "urn:route:project-a:agent-chat",
+    "revision": 1,
+    "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  },
+  "project": "urn:project:a",
+  "capability": "urn:fabric:capability:agent-chat",
+  "run": "urn:run:project-a:42",
+  "conversation": "urn:conversation:project-a:7",
+  "launch": "operator",
+  "id": "urn:event:route:1",
+  "kind": "runner-selected",
+  "selected": {
+    "index": 3,
+    "runnerKind": "hermes",
+    "provider": {
+      "id": "urn:fabric:provider:hermes-local",
+      "revision": 2,
+      "contentHash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "drive": "acp",
+    "session": "spawned",
+    "sessionRef": "urn:session:project-a:hermes:1",
+    "executionContext": {
+      "id": "urn:context:project-a:agent-chat:hermes",
+      "revision": 1,
+      "contentHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+    }
+  },
+  "probes": [
+    {
+      "index": 0,
+      "runnerKind": "claude-code",
+      "result": "no-held-session"
+    },
+    {
+      "index": 1,
+      "runnerKind": "codex",
+      "result": "not-installed",
+      "detail": "no catalogued binary codex on PATH"
+    },
+    {
+      "index": 2,
+      "runnerKind": "kimi",
+      "result": "not-connected",
+      "detail": "kimi answered its version probe but is signed out"
+    }
+  ]
+}

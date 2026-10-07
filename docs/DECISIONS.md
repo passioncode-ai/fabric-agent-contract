@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0029`
+**Next free ID:** `DEC-0030`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -467,7 +467,8 @@ annotate only the old status; decision bodies are never rewritten.
 ### DEC-0026 — Agent chats route through an ordered runner route with recorded fallback
 
 - **Date:** 2026-10-07
-- **Status:** Accepted source change; consumer adoption pending
+- **Status:** Accepted source change; refined by DEC-0029 (attach boundary, derived context, route
+  event, rule-code register); consumer adoption pending
 - **Refines:** DEC-0016 (additive extension policy); DEC-0010 (admission lifecycle unchanged)
 - **Decision:** A project pins, per capability served by the local-runner profile,
   an immutable **runner route**: an ordered list of candidates, each naming a
@@ -556,3 +557,74 @@ annotate only the old status; decision bodies are never rewritten.
   run allocated DEC-0028, which was returned with `release-id` and is not written; the next free
   id is therefore DEC-0029. The decision file was edited under the git lease (run
   `r-8afd2c0d4`); the record plane is `fs`, as `AGENTS.md` describes.
+
+### DEC-0029 — Runner routes: the attach boundary, the derived context, the route event, and one register for rule codes
+
+- **Date:** 2026-10-07
+- **Status:** Accepted source change; consumer adoption pending
+- **Refines:** DEC-0026 (runner routes — additive, under the DEC-0016 extension policy); DEC-0010
+  (admission unchanged); DEC-0013 (execution contexts unchanged)
+- **Decision:** A review of DEC-0026 against the operator's request and Fabric's host design
+  (ADR-0125) found the route under-specified where a host must decide, and states it:
+  1. **Attach is bounded.** A host attaches only to a session it started and still holds, of the
+     same runner kind and provider revision, project and capability, under an equal derived
+     execution context. It never attaches to a process it did not start — an operator's own
+     terminal, a tmux pane, another application. Foreign attach needs its own later decision.
+  2. **The walk is defined, step by step,** with closed probe results (`not-catalogued`,
+     `not-admitted`, `not-installed`, `not-responding`, `not-connected`, `no-held-session`,
+     `quota-unknown`, `refused`, `spawn-failed`). Signed out is `not-connected`, never available.
+     An unattended launch passes over a candidate whose quota basis is unknown. Permissions belong
+     to the launch, never to the route.
+  3. **The derived execution context:** the selected candidate runs under the binding's pinned
+     context with `provider` (and, when the candidate names one, `accountPool`) replaced — every
+     scope, limit, environment entry and the working directory unchanged — pinned as its own
+     revision. A candidate MAY name a catalogue `drive` and an `accountPool`.
+  4. **No switch mid-turn,** and no runner-private state crosses runners. A switch happens at a
+     launch only, for a closed reason: `runner-failed`, `runner-unavailable`, or — under
+     `recovery: reprobe` only — `preferred-available`. `exhausted: hold` waits at most the context's
+     `limits.wallSeconds`; a host that cannot wait answers capability-unavailable.
+  5. **Every walk is recorded on the wire:** `runner-route-event.schema.json` — `runner-selected`,
+     `runner-switched`, `runner-exhausted` — with every passed-over candidate's probe result.
+  6. **A binding that pins a route agrees with it:** the schema allows `runnerRoute` only on the
+     local-runner profile, and the binding's own `provider` is one of the candidates, so a reader
+     that ignores routes still binds an admitted candidate. The `versioned-setting` payload of kind
+     `runner-route` is validated as the route body.
+  7. **Rules:** `FAC-SEM-030` compares the whole revision reference (id, revision, content hash) and
+     needs the admission for the route's capability; new `FAC-SEM-032` (binding agreement),
+     `FAC-SEM-033` (kinds and drives are catalogued), `FAC-SEM-034` (an event tells the truth about
+     its route).
+  8. **Rule codes get one register.** `FAC-SEM` codes had no allocator, and DEC-0025 (open
+     branch `agent/settings-backup-standard`) and DEC-0026 (main) each defined their own
+     `FAC-SEM-028` and `FAC-SEM-029`. The register in `docs/specification/conformance.md` allocates
+     every code, with a **Next free rule code** marker that `agent_sync.py reserve SEM` reads;
+     `test/consistency.test.ts` (G-13) refuses a code allocated twice, defined in two tables,
+     emitted without a row or listed without a checker. Main keeps `FAC-SEM-028`…`030` for routes;
+     DEC-0025's rules take reserved codes when that branch is rebased.
+- **Why:** The operator asked that every agent chat prefer the terminal agents they run, with
+  fallback — "no Claude Code session, Hermes starts and answers". DEC-0026's own example could not
+  produce that: its fixture let `claude-code` spawn, so a missing session started a new Claude Code
+  instead of falling to Hermes. Its "live terminal session" named no owner, which would let a host
+  type into a terminal it does not own; its `reprobe` contradicted the host's "never mid-
+  conversation"; its "every switch is recorded" had no shape a consumer could read; and its
+  admission rule matched an id and a number, not the revision's bytes.
+- **Compatibility:** Additive under DEC-0016. New: one schema, optional candidate fields `drive`
+  and `accountPool`, three rule codes. Tightened, on DEC-0026 surfaces adopted by no consumer yet
+  (its status is "consumer adoption pending"): `runnerRoute` only with `profileKind: local-runner`,
+  a validated `runner-route` payload, unknown route fields refused, at most 16 candidates.
+  `contractVersion` stays `0.1.0`; no existing manifest or binding changes validity.
+- **Consequences / affects:** `schemas/runner-route.schema.json` (`$defs/body`,
+  `$defs/candidate`, defaults), `schemas/runner-route-event.schema.json` (new),
+  `schemas/versioned-setting.schema.json`, `schemas/binding.schema.json`,
+  `docs/specification/runners.md` (Runner routes), `profiles.md`, `execution-context.md`,
+  `conformance.md` (Semantic rule codes, gate 13), `CONTEXT.md`, `docs/DOCMAP.md`, `docs/ux/`
+  (ST-006, FLW-05, SCN-009), `.claude/agent-sync.json` (register `SEM`; `conformance.md`
+  guarded), `src/route-rules.ts`, `src/rule-codes.ts`, `src/docs-check.ts`, `fixtures/`
+  (`runner-route*`, `binding-runner-route*`), `test/route-rules.test.ts`,
+  `test/consistency.test.ts`. Run brief: `docs/evidence/specs/2026-10-07-runner-route-review-brief.md`.
+  Consumers: Fabric (ADR-0125 adopts the event and the attach boundary as written), the adapter
+  (probe results), Fabric Dashboards (route events, when the host emits them).
+- **Source:** operator request 2026-10-07 to review the Kimi Code session's runner-route work and
+  finish it. DEC-0029 reserved by git CAS (`agent_sync.py reserve DEC --key
+  runner-route-amendment-20261007`, run `r-c6109cd37`); this file, `docs/backlog.md` and
+  `conformance.md` were edited under the git lease of that run; the record plane is `fs`, as
+  `AGENTS.md` describes.

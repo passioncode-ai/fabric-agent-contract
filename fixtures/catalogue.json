@@ -148,5 +148,17 @@
   {"name": "runner-route-no-candidates", "schema": "runner-route.schema.json", "path": "negative/runner-route-no-candidates.json", "valid": false, "keyword": "minItems"},
   {"name": "runner-route-bad-attach", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-attach.json", "valid": false, "keyword": "enum"},
   {"name": "runner-route-bad-recovery", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-recovery.json", "valid": false, "keyword": "enum"},
-  {"name": "runner-route-bad-kind", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-kind.json", "valid": false, "keyword": "const"}
+  {"name": "runner-route-bad-kind", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-kind.json", "valid": false, "keyword": "const"},
+  {"name": "binding-runner-route", "schema": "binding.schema.json", "path": "positive/binding-runner-route.json", "valid": true},
+  {"name": "binding-runner-route-not-local-runner", "schema": "binding.schema.json", "path": "negative/binding-runner-route-not-local-runner.json", "valid": false, "keyword": "const"},
+  {"name": "runner-route-bad-drive", "schema": "runner-route.schema.json", "path": "negative/runner-route-bad-drive.json", "valid": false, "keyword": "enum"},
+  {"name": "runner-route-unknown-field", "schema": "runner-route.schema.json", "path": "negative/runner-route-unknown-field.json", "valid": false, "keyword": "unevaluatedProperties"},
+  {"name": "versioned-setting-runner-route-bad-payload", "schema": "versioned-setting.schema.json", "path": "negative/versioned-setting-runner-route-bad-payload.json", "valid": false, "keyword": "enum"},
+  {"name": "runner-route-event-selected", "schema": "runner-route-event.schema.json", "path": "positive/runner-route-event-selected.json", "valid": true},
+  {"name": "runner-route-event-switched", "schema": "runner-route-event.schema.json", "path": "positive/runner-route-event-switched.json", "valid": true},
+  {"name": "runner-route-event-exhausted", "schema": "runner-route-event.schema.json", "path": "positive/runner-route-event-exhausted.json", "valid": true},
+  {"name": "runner-route-event-bad-session", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-bad-session.json", "valid": false, "keyword": "enum"},
+  {"name": "runner-route-event-switch-without-from", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-switch-without-from.json", "valid": false, "keyword": "required"},
+  {"name": "runner-route-event-exhausted-with-selection", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-exhausted-with-selection.json", "valid": false, "keyword": "unevaluatedProperties"},
+  {"name": "runner-route-event-bad-probe", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-bad-probe.json", "valid": false, "keyword": "enum"}
 ]
