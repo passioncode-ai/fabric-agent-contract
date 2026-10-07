@@ -43,7 +43,7 @@
     },
     {
       "index": 2,
-      "runnerKind": "kimi",
+      "runnerKind": "kimi-code",
       "result": "not-connected",
       "detail": "kimi answered its version probe but is signed out"
     }

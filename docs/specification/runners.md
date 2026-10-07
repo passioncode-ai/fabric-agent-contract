@@ -33,9 +33,17 @@ contract (`runners.schema.json`). One entry per runner kind:
 }
 ```
 
-`drive` ∈ `claude-headless | codex-app-server | codex-exec | acp`. Initial catalogue: `claude-code`
+`drive` ∈ `claude-headless | codex-app-server | codex-exec | acp | tui`. `tui` (DEC-0029) is the
+runner's own interactive terminal interface in a terminal the host holds — what a host opens when
+the conversation is the runtime's console. Initial catalogue: `claude-code`
 (claude-headless), `codex` (codex-app-server; ADR-0081), `gemini-cli`, `goose`, `opencode`,
-`cursor-agent`, `kiro` (acp). `mcpConfig.format` ∈ `claude-json | codex-toml | cursor-json |
+`cursor-agent`, `kiro` (acp).
+
+**Kind names are shared.** A host that catalogues one of these runners uses this kind, so a route,
+an account chain and an event mean the same runner on every host: `claude-code`, `codex`,
+`cursor-agent`, `gemini-cli`, `goose`, `hermes` (Hermes Agent), `kilo`, `kimi-code` (Kimi Code
+CLI), `kiro`, `opencode`, `cline`. A runner that is not listed takes a new name here before a host
+ships it. `mcpConfig.format` ∈ `claude-json | codex-toml | cursor-json |
 gemini-json | opencode-json | kiro-json | none`. Detection runs **only** the catalogued version
 argv, without a shell, with the timeout; a binary not in the catalogue is never executed.
 **FAC-SEM-016** a runner entry names exactly one default `drive` present in `drives`.
@@ -47,6 +55,10 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
 - `version.argv` and every `drives.*.argv` are argument arrays; a shell string is
   invalid. `version.pattern` is a regular expression whose first group is the version.
 - `version.timeoutMs` is at most 5000 — the design's "version answered within 5 s".
+- `auth` (optional, DEC-0029) is the runner's own signed-in check: an argument array run like the
+  version probe, with the same bound, whose exit status 0 means signed in. It is the only way a
+  host may report a runner `not-connected`; a runner without `auth` is judged by its version probe
+  alone.
 - `drives` keys are drive names; `{mcpConfig}` in an argv is the placeholder a host
   replaces with the MCP configuration it generates for that run.
 - `mcpConfig.file` and `skillsDir` are absolute or `~/` paths; `docs` is an HTTPS URL.
@@ -98,12 +110,15 @@ right route for an operator who wants Claude Code whenever it is installed.
 A host resolves the route at the launch, from the first candidate down; for each one:
 
 1. **Admitted, catalogued, installed, responding, connected.** The candidate's provider revision is
-   still admitted for the capability, its kind is in the catalogue, and the catalogue's version
-   probe — the only thing a host runs to find a runner, with its 5-second bound — answers. A probe
-   that answers but shows the runner signed out is `not-connected`, never available.
-2. **Attach** when `attach` is `preferred` and the host holds a live session of that candidate:
-   same runner kind and provider revision, same project and capability, started by this host under
-   an execution context equal to the derived one (below). A host never attaches to a process it did
+   still admitted for the capability, its kind is in the catalogue, the catalogue's version probe
+   answers, and the entry's `auth` probe, when it has one, exits 0 — the only commands a host runs
+   to judge a runner, each with its 5-second bound. A runner that answers but is signed out is
+   `not-connected`, never available. A host MAY cache a probe result for the length of one walk.
+2. **Attach** when `attach` is `preferred` and the host holds a live, idle session of that
+   candidate: same runner kind and provider revision, same project and capability, started by this
+   host under an execution context equal to the derived one (below), and not bound to another run,
+   task or lease. A launch that needs a new session identity — a managed task start — never
+   attaches; it spawns or passes the candidate over. A host never attaches to a process it did
    not start and still holds — an operator's own terminal, a tmux pane, another application's
    session: injecting a request into a terminal the host does not own is outside this contract.
 3. **Spawn** when nothing was attached and `spawn` is `allowed`.
@@ -114,8 +129,24 @@ A host resolves the route at the launch, from the first candidate down; for each
 
 An **unattended** launch (a routine, a chain, a schedule) passes over a candidate whose quota or
 account basis is unknown (`quota-unknown`); an operator-started launch may use it under the usual
-checks. Permissions, the permission mode and grants belong to the launch, never to the route: a
-switch carries no permission the launch did not have.
+checks. A quota or account gate is the walk's step for each candidate, never a gate before the walk
+that judges only the first one. Permissions, the permission mode and grants belong to the launch,
+never to the route: a candidate that cannot run under the launch's permission mode is passed over
+as `refused`, never run with a looser or unknown mode, and the event names the mode the selected
+runner actually received (`selected.permissionMode`).
+
+A failure passes a candidate over only when it says that candidate cannot serve. Three classes:
+
+| Class | Examples | The walk |
+|---|---|---|
+| candidate unavailable | not catalogued, not installed, not responding, signed out, quota unknown, the mode refused, a spawn that started no process | records the probe result, tries the next candidate |
+| request invalid | the launch's own authority changed, the binding or grant no longer admits the request | stops; no other candidate is tried, the launch reports its own refusal |
+| outcome unknown | a process may have started — a failure after spawn, a lost answer | stops and never starts a second process for the same request; the host reconciles first |
+
+A host walks only the candidates the route names. It never appends others — the remaining rows of
+its catalogue, a plain shell, an agent that cannot reach the capability's surface. Before a host
+adopts routes it MAY order runners by a setting of its own; that ordering is not a route, and what
+it records names no route revision.
 
 The **derived execution context** of a selected candidate is the binding's pinned execution
 context with `provider` replaced by the candidate's provider and, when the candidate names one,
@@ -124,7 +155,8 @@ directory stay as pinned. The host pins it as its own revision and names it in t
 route never widens write scope, never changes the model requirement, and never moves the run to
 another project: the provider still owns model choice, and admission (DEC-0010) is untouched.
 
-A **conversation never switches runner mid-turn**, and no runner-private session state is carried
+A **conversation** is the host's one continuing exchange — a chat thread, a task's session — and
+its events share one `conversation` id. A **conversation never switches runner mid-turn**, and no runner-private session state is carried
 from one runner to another. A switch happens only at a launch: when the runner serving the
 conversation failed (`runner-failed`), when it is unavailable at the next launch
 (`runner-unavailable`), or — under `recovery: reprobe` only — when a higher-preference candidate
@@ -143,7 +175,8 @@ candidate.
 ### Events
 
 Every walk ends in one event ([schema](../../schemas/runner-route-event.schema.json)):
-`runner-selected` (which candidate, attached or spawned, its session and derived execution context),
+`runner-selected` (which candidate, attached or spawned, its session, derived execution context
+and the permission mode it received),
 `runner-switched` (the same, plus `from` and a closed `reason`, for a conversation that moved), or
 `runner-exhausted` (the `answer` and no selection). Each carries the route revision, project,
 capability, run, node, conversation, whether the launch was operator-started or unattended, and the

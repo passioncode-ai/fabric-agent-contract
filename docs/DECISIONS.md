@@ -572,9 +572,17 @@ annotate only the old status; decision bodies are never rewritten.
      terminal, a tmux pane, another application. Foreign attach needs its own later decision.
   2. **The walk is defined, step by step,** with closed probe results (`not-catalogued`,
      `not-admitted`, `not-installed`, `not-responding`, `not-connected`, `no-held-session`,
-     `quota-unknown`, `refused`, `spawn-failed`). Signed out is `not-connected`, never available.
-     An unattended launch passes over a candidate whose quota basis is unknown. Permissions belong
-     to the launch, never to the route.
+     `quota-unknown`, `refused`, `spawn-failed`). Signed out is `not-connected`, judged only by the
+     catalogue entry's new optional `auth` probe (argv, at most 5 s, exit 0 = signed in). A quota
+     gate is a per-candidate step of the walk, and an unattended launch passes over a candidate
+     whose quota basis is unknown. Permissions belong to the launch: a candidate that cannot run
+     under its mode is `refused`, and the event names the mode actually received. Failures fall in
+     three classes — candidate unavailable (try the next), request invalid (stop), outcome unknown
+     (stop; never a second process for one request). A host walks only the candidates the route
+     names, never the rest of its catalogue or a plain shell; a host-side ordering used before
+     routes are adopted is not a route and names no route revision. An attached session is idle
+     and bound to no other run, task or lease; a managed start that needs a new session identity
+     never attaches.
   3. **The derived execution context:** the selected candidate runs under the binding's pinned
      context with `provider` (and, when the candidate names one, `accountPool`) replaced — every
      scope, limit, environment entry and the working directory unchanged — pinned as its own
@@ -593,7 +601,10 @@ annotate only the old status; decision bodies are never rewritten.
      needs the admission for the route's capability; new `FAC-SEM-032` (binding agreement),
      `FAC-SEM-033` (kinds and drives are catalogued), `FAC-SEM-034` (an event tells the truth about
      its route).
-  8. **Rule codes get one register.** `FAC-SEM` codes had no allocator, and DEC-0025 (open
+  8. **The catalogue gains the `tui` drive** — the runner's own interactive interface in a terminal
+     the host holds — **and shared kind names**: `hermes`, `kilo`, `kimi-code` and `cline` join the
+     listed kinds, so a route, an account chain and an event name the same runner on every host.
+  9. **Rule codes get one register.** `FAC-SEM` codes had no allocator, and DEC-0025 (open
      branch `agent/settings-backup-standard`) and DEC-0026 (main) each defined their own
      `FAC-SEM-028` and `FAC-SEM-029`. The register in `docs/specification/conformance.md` allocates
      every code, with a **Next free rule code** marker that `agent_sync.py reserve SEM` reads;
@@ -608,14 +619,15 @@ annotate only the old status; decision bodies are never rewritten.
   conversation"; its "every switch is recorded" had no shape a consumer could read; and its
   admission rule matched an id and a number, not the revision's bytes.
 - **Compatibility:** Additive under DEC-0016. New: one schema, optional candidate fields `drive`
-  and `accountPool`, three rule codes. Tightened, on DEC-0026 surfaces adopted by no consumer yet
+  and `accountPool`, the optional catalogue `auth` probe, the drive value `tui`, three rule codes. Tightened, on DEC-0026 surfaces adopted by no consumer yet
   (its status is "consumer adoption pending"): `runnerRoute` only with `profileKind: local-runner`,
   a validated `runner-route` payload, unknown route fields refused, at most 16 candidates.
   `contractVersion` stays `0.1.0`; no existing manifest or binding changes validity.
 - **Consequences / affects:** `schemas/runner-route.schema.json` (`$defs/body`,
   `$defs/candidate`, defaults), `schemas/runner-route-event.schema.json` (new),
   `schemas/versioned-setting.schema.json`, `schemas/binding.schema.json`,
-  `docs/specification/runners.md` (Runner routes), `profiles.md`, `execution-context.md`,
+  `schemas/runners.schema.json` (`tui`, `auth`), `docs/specification/runners.md` (catalogue kinds, Runner
+  routes), `profiles.md`, `execution-context.md`,
   `conformance.md` (Semantic rule codes, gate 13), `CONTEXT.md`, `docs/DOCMAP.md`, `docs/ux/`
   (ST-006, FLW-05, SCN-009), `.claude/agent-sync.json` (register `SEM`; `conformance.md`
   guarded), `src/route-rules.ts`, `src/rule-codes.ts`, `src/docs-check.ts`, `fixtures/`

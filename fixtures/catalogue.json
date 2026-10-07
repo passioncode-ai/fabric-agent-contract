@@ -160,5 +160,6 @@
   {"name": "runner-route-event-bad-session", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-bad-session.json", "valid": false, "keyword": "enum"},
   {"name": "runner-route-event-switch-without-from", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-switch-without-from.json", "valid": false, "keyword": "required"},
   {"name": "runner-route-event-exhausted-with-selection", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-exhausted-with-selection.json", "valid": false, "keyword": "unevaluatedProperties"},
-  {"name": "runner-route-event-bad-probe", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-bad-probe.json", "valid": false, "keyword": "enum"}
+  {"name": "runner-route-event-bad-probe", "schema": "runner-route-event.schema.json", "path": "negative/runner-route-event-bad-probe.json", "valid": false, "keyword": "enum"},
+  {"name": "runners-auth-timeout-too-long", "schema": "runners.schema.json", "path": "negative/runners-auth-timeout-too-long.json", "valid": false, "keyword": "maximum"}
 ]

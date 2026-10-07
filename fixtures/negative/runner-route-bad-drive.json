@@ -37,9 +37,9 @@
       }
     },
     {
-      "runnerKind": "kimi",
+      "runnerKind": "kimi-code",
       "provider": {
-        "id": "urn:fabric:provider:kimi-local",
+        "id": "urn:fabric:provider:kimi-code-local",
         "revision": 1,
         "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
       },

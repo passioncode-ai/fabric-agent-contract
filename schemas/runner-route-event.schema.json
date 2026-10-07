@@ -125,6 +125,10 @@
         },
         "executionContext": {
           "$ref": "common.schema.json#/$defs/revisionRef"
+        },
+        "permissionMode": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
         }
       },
       "additionalProperties": false

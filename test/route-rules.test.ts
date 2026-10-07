@@ -94,7 +94,7 @@ describe("route-bundle semantic rules (DEC-0026, DEC-0029)", () => {
   });
 
   it("FAC-SEM-033 flags an uncatalogued kind and a drive the entry does not offer", () => {
-    const uncatalogued = { ...pinned, candidates: [candidate("claude-code"), candidate("kimi", undefined, "urn:fabric:provider:hermes-local")] };
+    const uncatalogued = { ...pinned, candidates: [candidate("claude-code"), candidate("kimi-code", undefined, "urn:fabric:provider:hermes-local")] };
     const wrongDrive = { ...pinned, candidates: [{ ...candidate("claude-code"), drive: "acp" }, candidate("hermes")] };
     expect(codes("route-bundle", { route: uncatalogued, admissions, catalogue })).toContain("FAC-SEM-033");
     expect(codes("route-bundle", { route: wrongDrive, admissions, catalogue })).toContain("FAC-SEM-033");

@@ -27,7 +27,8 @@
       "id": "urn:context:project-a:agent-chat:hermes",
       "revision": 1,
       "contentHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
-    }
+    },
+    "permissionMode": "ask"
   },
   "probes": [
     {
@@ -43,7 +44,7 @@
     },
     {
       "index": 2,
-      "runnerKind": "kimi",
+      "runnerKind": "kimi-code",
       "result": "not-connected",
       "detail": "kimi answered its version probe but is signed out"
     }
