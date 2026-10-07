@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0027`
+**Next free ID:** `DEC-0029`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -513,3 +513,46 @@ annotate only the old status; decision bodies are never rewritten.
   `r-f0052c6f2`); the record plane is degraded to `fs` because no Notion token is
   configured, as `AGENTS.md` describes.
 
+### DEC-0027 — A usage report lists every spending limit the service applies
+
+- **Date:** 2026-10-07
+- **Status:** Accepted source change; consumer adoption pending
+- **Amends:** the `fabric-service/0.1` usage report of DEC-0021 (additive, DEC-0016 extension
+  policy)
+- **Decision:** `service-usage.schema.json` gains an optional `budgets` array, at most 64
+  entries: `{id, scope, subject?, kind, period? | windowSeconds? | since?, limitUsd, spentUsd,
+  enforced, tripped?}`. `scope` is closed (`machine`, `project`, `pool`, `job`); `kind` is an
+  open string whose known values are `per_job`, `approval`, `daily`, `monthly`, `velocity`,
+  `pool`, `emergency`, and a host shows an unknown kind generically, never rejecting it. A limit
+  has at most one window — a calendar UTC `period`, a rolling `windowSeconds`, or a cumulative
+  `since` — and the window agrees with the kind. Per-order limits (`per_job`, `approval`) carry
+  no window and `spentUsd: null`. `approval` is a threshold, not a ceiling, and is never a
+  breach. `enforced: false` is shown as "not enforced"; `tripped: true` (work stopped by this
+  limit now) requires `enforced: true`. Only spend-triggered stops belong in `budgets`. When
+  `budget` and `budgets` are both present, `budget` repeats one enforced machine `daily` or
+  `monthly` entry with the same calendar `period`, so old and new readers never disagree.
+  `FAC-SEM-031` checks all of this; a breach is shown first, not refused.
+- **Why:** The operator asked on 2026-10-07 that every limit an agent applies is always visible
+  in the agents' spend view, including limits the operator chose to skip. DEC-0021's single
+  `budget` can state one day or month line; a service that enforces per-order, daily, monthly,
+  rate, pool and emergency limits could show only one, and a rolling-window limit could not be
+  stated truthfully at all.
+- **Compatibility:** Optional field. Required fields, authority and `contractVersion` `0.1.0`
+  are unchanged; a report without `budgets` is unchanged, and a reader that does not know
+  `budgets` ignores it. A service whose machine limit counts a rolling window omits `budget`
+  rather than restating a rolling sum as a calendar period.
+- **Consequences / affects:** `schemas/service-usage.schema.json` (`budgets`, `$defs/limit`),
+  `docs/specification/service.md` (Limits, `FAC-SEM-031`), `src/semantic-rules.ts`,
+  `fixtures/` (`service-usage-budgets*`), `test/service-rules.test.ts`. Consumers:
+  `@passioncode-ai/fabric-service-host` and Fabric Dashboards (reader; Spend lists each agent's
+  limits, breaches and the closest to their line first, and its summary shows the tightest
+  enforced limit), and services that already enforce several limits.
+- **Not decided here:** limits on things other than money (call counts, concurrent jobs), and
+  aggregation across machines (Fabric hub).
+- **Source:** operator request 2026-10-07, carried by the Fabric Dashboards session and the
+  session of a media-generation service; shape proposed by the Dashboards session, review points
+  by the fabric-workspace session. DEC-0027 reserved by git CAS (`agent_sync.py reserve DEC --key
+  usage-budgets-20261007`, run `r-c2ef61050`). A second reserve under the same key from another
+  run allocated DEC-0028, which was returned with `release-id` and is not written; the next free
+  id is therefore DEC-0029. The decision file was edited under the git lease (run
+  `r-8afd2c0d4`); the record plane is `fs`, as `AGENTS.md` describes.
