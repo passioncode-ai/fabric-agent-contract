@@ -123,4 +123,77 @@ describe("fabric-service/0.1 semantic rules", () => {
     Object.assign(v.days[0]!, { byModel: [], calls: 0, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, costUsd: 0 });
     expect(codes("service-usage", v)).toEqual([]);
   });
+
+  // DEC-0027: every limit a service applies, each readable on its own.
+  const budgets = () => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-budgets.json"), "utf8")) as { budget?: Record<string, unknown>; budgets: Record<string, unknown>[] };
+  const paths = (u: unknown) => evaluateSemanticRules("service-usage", u as Record<string, unknown>).map((f) => `${f.code} ${f.instancePath}`);
+
+  it("FAC-SEM-031 accepts the positive limits fixture, including an unknown kind", () => {
+    expect(codes("service-usage", budgets())).toEqual([]);
+  });
+
+  it("FAC-SEM-031 flags a repeated limit id", () => {
+    const u = budgets();
+    u.budgets[1]!.id = u.budgets[0]!.id;
+    expect(paths(u)).toContain("FAC-SEM-031 /budgets/1/id");
+  });
+
+  it("FAC-SEM-031 requires a subject exactly when the scope names a project or pool", () => {
+    const u = budgets();
+    delete u.budgets[2]!.subject;
+    u.budgets[0]!.subject = "demo";
+    expect(paths(u)).toEqual(expect.arrayContaining(["FAC-SEM-031 /budgets/2/subject", "FAC-SEM-031 /budgets/0/subject"]));
+  });
+
+  it("FAC-SEM-031 allows one window, and a window that agrees with the kind", () => {
+    const u = budgets();
+    u.budgets[2]!.period = "day";
+    expect(paths(u)).toContain("FAC-SEM-031 /budgets/2/windowSeconds");
+    const v = budgets();
+    v.budgets[2]!.windowSeconds = 3600;
+    expect(paths(v)).toContain("FAC-SEM-031 /budgets/2/period");
+    const w = budgets();
+    delete w.budgets[5]!.windowSeconds;
+    expect(paths(w)).toContain("FAC-SEM-031 /budgets/5/windowSeconds");
+    const x = budgets();
+    delete x.budgets[1]!.windowSeconds;
+    expect(paths(x)).toContain("FAC-SEM-031 /budgets/1/period");
+  });
+
+  it("FAC-SEM-031 keeps per-order limits windowless and without spend", () => {
+    const u = budgets();
+    u.budgets[3]!.spentUsd = 1.2;
+    u.budgets[4]!.period = "day";
+    expect(paths(u)).toEqual(expect.arrayContaining(["FAC-SEM-031 /budgets/3/spentUsd", "FAC-SEM-031 /budgets/4/period"]));
+  });
+
+  it("FAC-SEM-031 lets only a relative limit leave limitUsd null", () => {
+    const u = budgets();
+    u.budgets[2]!.limitUsd = null;
+    expect(paths(u)).toContain("FAC-SEM-031 /budgets/2/limitUsd");
+  });
+
+  it("FAC-SEM-031 refuses a tripped limit that is not enforced", () => {
+    const u = budgets();
+    Object.assign(u.budgets[1]!, { enforced: false, tripped: true });
+    expect(paths(u)).toContain("FAC-SEM-031 /budgets/1/tripped");
+  });
+
+  it("FAC-SEM-031 keeps the legacy budget equal to one enforced machine limit", () => {
+    const u = budgets();
+    u.budget!.limitUsd = 99;
+    expect(paths(u)).toContain("FAC-SEM-031 /budget");
+    const v = budgets();
+    v.budgets[0]!.enforced = false;
+    expect(paths(v)).toContain("FAC-SEM-031 /budget");
+    const w = budgets();
+    delete w.budget;
+    expect(codes("service-usage", w)).toEqual([]);
+  });
+
+  it("FAC-SEM-031 does not treat a breach as invalid", () => {
+    const u = budgets();
+    u.budgets[2]!.spentUsd = 7.5;
+    expect(codes("service-usage", u)).toEqual([]);
+  });
 });

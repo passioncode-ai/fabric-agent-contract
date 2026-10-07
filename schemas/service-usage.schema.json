@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-usage.schema.json",
-  "title": "Service usage report (fabric-service/0.1, DEC-0021)",
+  "title": "Service usage report (fabric-service/0.1, DEC-0021, DEC-0027)",
   "description": "What a service spent on model and paid-tool calls, self-reported from its own usage receipts, in UTC days. An unknown cost is null, never 0.",
   "type": "object",
   "required": [
@@ -46,6 +46,14 @@
     },
     "budget": {
       "$ref": "#/$defs/budget"
+    },
+    "budgets": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/limit"
+      },
+      "description": "Every spending limit the service applies, enforced or not (DEC-0027). Ids are unique (FAC-SEM-031)."
     }
   },
   "additionalProperties": false,
@@ -180,6 +188,76 @@
         },
         "spentUsd": {
           "$ref": "#/$defs/money"
+        }
+      },
+      "additionalProperties": false
+    },
+    "limit": {
+      "type": "object",
+      "description": "One spending limit and what was spent against it in its window (DEC-0027).",
+      "required": [
+        "id",
+        "scope",
+        "kind",
+        "limitUsd",
+        "spentUsd",
+        "enforced"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]{0,63}$"
+        },
+        "scope": {
+          "enum": [
+            "machine",
+            "project",
+            "pool",
+            "job"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "description": "Open vocabulary. Known values: per_job, approval, daily, monthly, velocity, pool, emergency. A reader shows an unknown kind generically and never rejects it."
+        },
+        "period": {
+          "enum": [
+            "day",
+            "month"
+          ]
+        },
+        "windowSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "since": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "limitUsd": {
+          "oneOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spentUsd": {
+          "$ref": "#/$defs/money"
+        },
+        "enforced": {
+          "type": "boolean"
+        },
+        "tripped": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
