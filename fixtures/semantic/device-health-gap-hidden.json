@@ -1,0 +1,153 @@
+{
+  "description": "Seqs 38…40 vanished: the check-in says everything below 45 was sent or dropped, names no dropped range, and no overflow arrived — yet the device is called healthy (FAC-SEM-043).",
+  "kind": "device-health-observation",
+  "expect": [
+    "FAC-SEM-043"
+  ],
+  "input": {
+    "known": {
+      "deviceId": "dev-01j9a",
+      "epochs": [
+        1,
+        2
+      ],
+      "policyBaseline": {
+        "mdm": 3,
+        "server": 12
+      },
+      "streams": [
+        {
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "held": [
+            [
+              1,
+              37
+            ],
+            [
+              41,
+              43
+            ]
+          ],
+          "accounted": []
+        },
+        {
+          "collector": {
+            "id": "switchboard",
+            "epoch": 2
+          },
+          "held": [
+            [
+              1,
+              7
+            ]
+          ],
+          "accounted": []
+        }
+      ]
+    },
+    "batch": null,
+    "checkIn": {
+      "protocol": "fabric-device/0.1",
+      "kind": "check-in",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "sequenceNum": 288,
+      "at": "2026-10-07T09:32:05Z",
+      "agent": {
+        "version": "0.4.0",
+        "buildChannel": "official"
+      },
+      "health": {
+        "state": "healthy",
+        "since": "2026-10-07T08:30:10Z"
+      },
+      "logging": {
+        "enabled": true
+      },
+      "collectors": [
+        {
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "source": "claude_code.otel",
+          "lastSeq": 44,
+          "bufferedFrom": 45,
+          "dropped": [],
+          "healthy": true
+        },
+        {
+          "collector": {
+            "id": "switchboard",
+            "epoch": 2
+          },
+          "source": "switchboard",
+          "lastSeq": 7,
+          "bufferedFrom": 8,
+          "dropped": [],
+          "healthy": true
+        }
+      ],
+      "policy": {
+        "layers": [
+          {
+            "source": "mdm",
+            "revision": 3,
+            "status": "applied"
+          },
+          {
+            "source": "server",
+            "revision": 12,
+            "status": "applied"
+          }
+        ]
+      },
+      "certificate": {
+        "serial": "7b6578616d706c65",
+        "notAfter": "2026-10-14T08:30:05Z"
+      }
+    },
+    "effective": {
+      "logging.required": {
+        "value": true,
+        "from": "server"
+      },
+      "build_channel.allowed": {
+        "value": "official",
+        "from": "server"
+      },
+      "telemetry.endpoint": {
+        "value": "https://telemetry.example.org/mdm",
+        "from": "mdm"
+      },
+      "telemetry.git_branch": {
+        "value": "plain",
+        "from": "server"
+      },
+      "retention.raw_days": {
+        "value": 14,
+        "from": "mdm"
+      },
+      "x-example.banner": {
+        "value": "quiet",
+        "from": "user"
+      }
+    },
+    "health": {
+      "protocol": "fabric-device/0.1",
+      "kind": "health",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "state": "healthy",
+      "since": "2026-10-07T08:30:10Z",
+      "observedAt": "2026-10-07T09:32:06Z",
+      "lastCheckIn": "2026-10-07T09:32:05Z",
+      "reasons": []
+    }
+  }
+}

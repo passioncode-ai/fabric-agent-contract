@@ -4,6 +4,8 @@ import { registryRules } from "./registry-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { settingsBackupRules } from "./settings-backup.js";
 import { routeRules } from "./route-rules.js";
+import { activityRules } from "./activity-rules.js";
+import { deviceRules } from "./device-rules.js";
 
 export type { Finding } from "./findings.js";
 
@@ -15,6 +17,10 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (interop) return interop;
   const route = routeRules(kind, value);
   if (route) return route;
+  const activity = activityRules(kind, value);
+  if (activity) return activity;
+  const device = deviceRules(kind, value);
+  if (device) return device;
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {

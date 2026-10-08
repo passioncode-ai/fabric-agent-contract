@@ -34,6 +34,8 @@ package ships in this version.
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
+- [Activity telemetry — sessions, usage, summaries and access logs (`fabric-activity/0.1`)](docs/specification/activity.md)
+- [Devices — enrollment, signed policy, check-in and health (`fabric-device/0.1`)](docs/specification/devices.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
 - [The runner catalogue of installed coding agents](docs/specification/runners.md)
 - [Pipelines and their compatibility rules (`pipeline/0.1`)](docs/specification/pipeline.md)

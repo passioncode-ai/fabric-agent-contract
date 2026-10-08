@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0009`
+**Next free ID:** `OQ-0011`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -114,3 +114,35 @@ ruling; DEC-0017 states what holds now.
   exist and are tested, so the choices can be reviewed on a real wire. No consumer may claim
   conformance, and no Fabric migration is reserved for them.
 
+### OQ-0009 — Activity telemetry: a minimum summary cell, raw-retention expiry and an OTLP transport (DEC-0030)
+
+- **Status:** Resolved→DEC-0030 (2026-10-08: the operator answered all three parts)
+- **Raised:** 2026-10-08, with DEC-0030. Narrowed the same day by the review of PR #22, which
+  resolved inside DEC-0030 that a device never produces a summary.
+- **Owner of the answer:** the operator.
+- **Question:** (a) Does `activity-summary/1` need a minimum cell size? (b) When `retention.raw_days`
+  expires, does a receiver delete raw events, or keep them under a stricter scope? (c) Should a
+  receiver also accept the same records as OTLP logs?
+- **Answer (2026-10-08, DEC-0030 item 10):**
+  - (a) Yes, k = 3. A cell is published only when its population is at least 3 — distinct
+    `user.id` where events carry one, else distinct sessions. Smaller cells fold into the day's
+    other cell or are suppressed (`FAC-SEM-040`).
+  - (b) Delete; only summaries already built remain.
+  - (c) OTLP logs MAY be accepted as a second intake, through the mapping table, under the same
+    rules and deduplication.
+
+### OQ-0010 — Devices: attestation formats (DEC-0031)
+
+- **Status:** Open, deferred by the operator on 2026-10-08 until the first real organization server
+  adopts DEC-0031
+- **Raised:** 2026-10-08, with DEC-0031. Narrowed twice the same day:
+  - The review of PR #22 resolved in DEC-0031 how a reinstall is told from tampering.
+  - The operator answered the other parts (DEC-0031 item 7):
+    - trusted policy keys arrive as a key set signed by the root key from enrollment, with
+      overlapping rotation (`FAC-SEM-046`);
+    - a device is `inactive` after 7 days without events by default, and a server MAY change that.
+- **Owner of the answer:** the operator, with the first organization server that adopts DEC-0031.
+- **Question:** Which platform attestation formats prove `build_channel.allowed: attested`, and a
+  non-exportable key at enrollment?
+- **Meanwhile:** `attestation` is an optional opaque field in the enrollment request. No consumer is
+  required to produce or verify one.

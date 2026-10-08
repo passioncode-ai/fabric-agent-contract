@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-enrollment.schema.json",
+  "title": "Device enrollment request and response (fabric-device/0.1, DEC-0031)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "org",
+        "device",
+        "key",
+        "csr",
+        "auth",
+        "requestedAt"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "enrollment-request"
+        },
+        "org": {
+          "$ref": "device-common.schema.json#/$defs/org"
+        },
+        "device": {
+          "type": "object",
+          "required": [
+            "id",
+            "platform"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "platform": {
+              "enum": [
+                "macos",
+                "windows",
+                "linux",
+                "other"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "key": {
+          "type": "object",
+          "required": [
+            "algorithm",
+            "storage",
+            "exportable",
+            "publicKeySha256"
+          ],
+          "properties": {
+            "algorithm": {
+              "enum": [
+                "ecdsa-p256",
+                "ed25519"
+              ]
+            },
+            "storage": {
+              "enum": [
+                "secure-enclave",
+                "tpm",
+                "platform-keystore"
+              ]
+            },
+            "exportable": {
+              "const": false
+            },
+            "publicKeySha256": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it against the CSR, and it is the key on record for re-enrollment (FAC-SEM-044)."
+            },
+            "attestation": {
+              "$ref": "device-common.schema.json#/$defs/base64",
+              "type": "string",
+              "maxLength": 16384
+            }
+          },
+          "additionalProperties": false
+        },
+        "csr": {
+          "$ref": "device-common.schema.json#/$defs/base64",
+          "type": "string",
+          "maxLength": 8192,
+          "description": "A PKCS#10 request (RFC 2986), DER, base64, signed by the device key."
+        },
+        "auth": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "method"
+              ],
+              "properties": {
+                "method": {
+                  "const": "sso"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "method",
+                "tokenId"
+              ],
+              "properties": {
+                "method": {
+                  "const": "enrollment-token"
+                },
+                "tokenId": {
+                  "$ref": "activity-common.schema.json#/$defs/opaqueId"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "How the request is authenticated. The proof itself (the SSO session or the enrollment token's secret) travels in the Authorization header, never in the body."
+        },
+        "requestedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "certificate",
+        "streamEpoch",
+        "policyRootKey",
+        "checkIn"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "enrollment-response"
+        },
+        "certificate": {
+          "type": "object",
+          "required": [
+            "der",
+            "serial",
+            "notBefore",
+            "notAfter",
+            "binding",
+            "issuer"
+          ],
+          "properties": {
+            "der": {
+              "$ref": "device-common.schema.json#/$defs/base64",
+              "type": "string",
+              "maxLength": 16384
+            },
+            "serial": {
+              "$ref": "device-common.schema.json#/$defs/serial"
+            },
+            "notBefore": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "notAfter": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "binding": {
+              "type": "object",
+              "required": [
+                "org",
+                "device"
+              ],
+              "properties": {
+                "org": {
+                  "$ref": "device-common.schema.json#/$defs/org"
+                },
+                "user": {
+                  "$ref": "activity-common.schema.json#/$defs/user"
+                },
+                "device": {
+                  "$ref": "activity-common.schema.json#/$defs/device"
+                }
+              },
+              "additionalProperties": false
+            },
+            "issuer": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            }
+          },
+          "additionalProperties": false
+        },
+        "streamEpoch": {
+          "$ref": "activity-common.schema.json#/$defs/epoch",
+          "description": "The epoch every collector on the device uses from now on; greater than every epoch issued to this device before."
+        },
+        "policyRootKey": {
+          "$ref": "device-key-set.schema.json#/$defs/publicKey",
+          "description": "The organization's root key. It signs policy key sets only, never a policy (FAC-SEM-046)."
+        },
+        "checkIn": {
+          "type": "object",
+          "required": [
+            "intervalSeconds"
+          ],
+          "properties": {
+            "intervalSeconds": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 86400
+            }
+          },
+          "additionalProperties": false
+        },
+        "keySet": {
+          "$ref": "device-key-set.schema.json"
+        },
+        "policy": {
+          "allOf": [
+            {
+              "$ref": "device-policy.schema.json"
+            },
+            {
+              "not": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "const": "user"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

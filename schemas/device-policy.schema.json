@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-policy.schema.json",
+  "title": "Signed device policy (fabric-device/0.1, DEC-0031)",
+  "description": "One layer of device policy. Precedence is mdm > server > user; a locked key cannot be overridden by a lower layer (FAC-SEM-042). Unknown keys are kept and ignored.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "kind",
+    "org",
+    "source",
+    "revision",
+    "issuedAt",
+    "keys"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "device-common.schema.json#/$defs/protocol"
+    },
+    "kind": {
+      "const": "policy"
+    },
+    "org": {
+      "$ref": "device-common.schema.json#/$defs/org"
+    },
+    "source": {
+      "$ref": "device-common.schema.json#/$defs/source"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "issuedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "keys": {
+      "type": "object",
+      "maxProperties": 128,
+      "propertyNames": {
+        "pattern": "^(x-[a-z][a-z0-9-]{0,31}\\.)?[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$"
+      },
+      "properties": {
+        "logging.required": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "boolean"
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "build_channel.allowed": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "enum": [
+                "any",
+                "official",
+                "attested"
+              ]
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "telemetry.endpoint": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^https://[^\\s/?#@]+(/[^\\s?#]*)?$",
+              "maxLength": 512
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "telemetry.git_branch": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "enum": [
+                "omit",
+                "hash",
+                "plain"
+              ]
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "retention.raw_days": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3650
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "$ref": "device-common.schema.json#/$defs/canonicalValue"
+          },
+          "locked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "alg",
+        "keyId",
+        "value"
+      ],
+      "properties": {
+        "alg": {
+          "const": "ed25519"
+        },
+        "keyId": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "const": "server"
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "signature": true
+        },
+        "required": [
+          "signature"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "const": "user"
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "signature": false,
+          "keys": {
+            "type": "object",
+            "patternProperties": {
+              "^": {
+                "type": "object",
+                "properties": {
+                  "locked": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

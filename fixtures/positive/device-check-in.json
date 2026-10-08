@@ -1,0 +1,62 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "check-in",
+  "device": {
+    "id": "dev-01j9a"
+  },
+  "sequenceNum": 288,
+  "at": "2026-10-07T09:32:05Z",
+  "agent": {
+    "version": "0.4.0",
+    "buildChannel": "official"
+  },
+  "health": {
+    "state": "healthy",
+    "since": "2026-10-07T08:30:10Z"
+  },
+  "logging": {
+    "enabled": true
+  },
+  "collectors": [
+    {
+      "collector": {
+        "id": "cc-otel",
+        "epoch": 2
+      },
+      "source": "claude_code.otel",
+      "lastSeq": 44,
+      "bufferedFrom": 45,
+      "dropped": [],
+      "healthy": true
+    },
+    {
+      "collector": {
+        "id": "switchboard",
+        "epoch": 2
+      },
+      "source": "switchboard",
+      "lastSeq": 7,
+      "bufferedFrom": 8,
+      "dropped": [],
+      "healthy": true
+    }
+  ],
+  "policy": {
+    "layers": [
+      {
+        "source": "mdm",
+        "revision": 3,
+        "status": "applied"
+      },
+      {
+        "source": "server",
+        "revision": 12,
+        "status": "applied"
+      }
+    ]
+  },
+  "certificate": {
+    "serial": "7b6578616d706c65",
+    "notAfter": "2026-10-14T08:30:05Z"
+  }
+}

@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/telemetry-event.schema.json",
+  "title": "Telemetry event (fabric-activity/0.1, DEC-0030)",
+  "description": "One record of when an agent session worked or waited and what one model call used, without content and without any person attribute. A reader ignores a kind it does not know.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "eventId",
+    "kind",
+    "source",
+    "collector",
+    "seq",
+    "occurred",
+    "bootId",
+    "monotonicNs",
+    "data"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "activity-common.schema.json#/$defs/protocol"
+    },
+    "eventId": {
+      "$ref": "activity-common.schema.json#/$defs/eventId"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        {
+          "type": "string",
+          "pattern": "^x-[a-z][a-z0-9-]{0,31}\\.[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$"
+        }
+      ]
+    },
+    "source": {
+      "$ref": "activity-common.schema.json#/$defs/name"
+    },
+    "sourceKey": {
+      "$ref": "activity-common.schema.json#/$defs/sourceKey"
+    },
+    "collector": {
+      "$ref": "activity-common.schema.json#/$defs/collector"
+    },
+    "seq": {
+      "$ref": "activity-common.schema.json#/$defs/seq"
+    },
+    "occurred": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "bootId": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId"
+    },
+    "monotonicNs": {
+      "$ref": "activity-common.schema.json#/$defs/monotonicNs"
+    },
+    "received": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "Set by the receiver when it stores the event; a device never sends it."
+    },
+    "user": {
+      "$ref": "activity-common.schema.json#/$defs/user"
+    },
+    "session": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "parent": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "skill": {
+      "$ref": "activity-common.schema.json#/$defs/skill"
+    },
+    "launch": {
+      "type": "object",
+      "required": [
+        "via"
+      ],
+      "properties": {
+        "via": {
+          "$ref": "activity-common.schema.json#/$defs/launchVia"
+        }
+      },
+      "additionalProperties": false
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "branch"
+      ],
+      "properties": {
+        "branch": {
+          "$ref": "activity-common.schema.json#/$defs/branch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "activity-common.schema.json#/$defs/taskRef"
+        }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "task"
+      ],
+      "properties": {
+        "task": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "pattern": "^sha256:"
+          }
+        },
+        "required": [
+          "eventId"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "sourceKey": true
+        },
+        "required": [
+          "sourceKey"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "sourceKey": false
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "session.interval"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "session": true,
+          "project": true,
+          "runtime": true,
+          "data": {
+            "$ref": "#/$defs/interval"
+          }
+        },
+        "required": [
+          "session",
+          "project",
+          "runtime"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "usage.line"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "session": true,
+          "project": true,
+          "runtime": true,
+          "data": {
+            "$ref": "#/$defs/usageLine"
+          }
+        },
+        "required": [
+          "session",
+          "project",
+          "runtime"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "buffer.overflow"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/overflow"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "session.interval",
+              "usage.line",
+              "buffer.overflow"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "activity-common.schema.json#/$defs/extData"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "interval": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "state",
+        "method"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "end": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "state": {
+          "$ref": "activity-common.schema.json#/$defs/state"
+        },
+        "method": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "idleThresholdSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "attended": {
+          "type": "boolean",
+          "description": "An estimate: whether the session's interface reported a person present, as the method can tell."
+        },
+        "outcome": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "On the last interval of a session: how the session ended (completed, failed, abandoned, interrupted, unknown)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "usageLine": {
+      "type": "object",
+      "required": [
+        "model",
+        "tokens",
+        "cost",
+        "dedupeKey"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}$"
+        },
+        "tokens": {
+          "$ref": "activity-common.schema.json#/$defs/tokens"
+        },
+        "cost": {
+          "$ref": "activity-common.schema.json#/$defs/cost"
+        },
+        "dedupeKey": {
+          "$ref": "activity-common.schema.json#/$defs/sourceKey"
+        }
+      },
+      "additionalProperties": false
+    },
+    "overflow": {
+      "type": "object",
+      "required": [
+        "dropped"
+      ],
+      "properties": {
+        "dropped": {
+          "type": "object",
+          "required": [
+            "events",
+            "ranges"
+          ],
+          "properties": {
+            "events": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ranges": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "$ref": "activity-common.schema.json#/$defs/range"
+              }
+            },
+            "byKind": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "count"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "pattern": "^(x-[a-z][a-z0-9-]{0,31}\\.)?[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

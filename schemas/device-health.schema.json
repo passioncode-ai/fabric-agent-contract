@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-health.schema.json",
+  "title": "Device health as the organization server judges it (fabric-device/0.1, DEC-0031)",
+  "type": "object",
+  "required": [
+    "protocol",
+    "kind",
+    "device",
+    "state",
+    "since",
+    "observedAt",
+    "reasons"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "device-common.schema.json#/$defs/protocol"
+    },
+    "kind": {
+      "const": "health"
+    },
+    "device": {
+      "$ref": "activity-common.schema.json#/$defs/device"
+    },
+    "state": {
+      "$ref": "device-common.schema.json#/$defs/healthState"
+    },
+    "since": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "observedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "lastCheckIn": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "reasons": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "activity-common.schema.json#/$defs/name"
+          },
+          "detail": {
+            "$ref": "device-common.schema.json#/$defs/detail"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,120 @@
+{
+  "description": "A certificate that lives a year: FAC-SEM-044.",
+  "kind": "device-enrollment",
+  "expect": [
+    "FAC-SEM-044"
+  ],
+  "input": {
+    "request": {
+      "protocol": "fabric-device/0.1",
+      "kind": "enrollment-request",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "device": {
+        "id": "dev-01j9a",
+        "platform": "macos"
+      },
+      "key": {
+        "algorithm": "ecdsa-p256",
+        "storage": "secure-enclave",
+        "exportable": false,
+        "publicKeySha256": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+      },
+      "csr": "MIIBDzCBtgIBADBUMQ8wDQYDVQQKDAZvcmctN2YzYTESMBAGA1UEAwwJZGV2LTAxajlh",
+      "auth": {
+        "method": "sso"
+      },
+      "requestedAt": "2026-10-07T08:30:00Z"
+    },
+    "response": {
+      "protocol": "fabric-device/0.1",
+      "kind": "enrollment-response",
+      "certificate": {
+        "der": "MIIBlTCCATugAwIBAgIUe2xhbXBsZS1jZXJ0aWZpY2F0ZS0wMDAx",
+        "serial": "7b6578616d706c65",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2027-10-07T08:30:05Z",
+        "binding": {
+          "org": {
+            "id": "org-7f3a"
+          },
+          "user": {
+            "id": "m-4821"
+          },
+          "device": {
+            "id": "dev-01j9a"
+          }
+        },
+        "issuer": "org-7f3a.device-ca"
+      },
+      "streamEpoch": 2,
+      "policyRootKey": {
+        "keyId": "org-7f3a.root",
+        "publicKey": "/cIb8A4yomk2RBpWp/A3VRYAj+Fyu5cXs4kU4VimWaQ="
+      },
+      "checkIn": {
+        "intervalSeconds": 300
+      },
+      "keySet": {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy-key-set",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "revision": 1,
+        "issuedAt": "2026-09-01T00:00:00Z",
+        "keys": [
+          {
+            "keyId": "org-7f3a.policy-2026",
+            "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": "2026-12-31T23:59:59Z"
+          }
+        ],
+        "signature": {
+          "alg": "ed25519",
+          "keyId": "org-7f3a.root",
+          "value": "CienWJzCIdTAL3G5XUwJuS7ty0yOe5GN2VI3VnGJpdVCAKf6YWkPm7FyPxOLQR0innfAV5bCuBPkeHZJHTh9BA=="
+        }
+      },
+      "policy": {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "source": "server",
+        "revision": 12,
+        "issuedAt": "2026-10-07T08:00:00Z",
+        "keys": {
+          "logging.required": {
+            "value": true,
+            "locked": true
+          },
+          "build_channel.allowed": {
+            "value": "official",
+            "locked": true
+          },
+          "telemetry.endpoint": {
+            "value": "https://telemetry.example.org/v1/activity"
+          },
+          "telemetry.git_branch": {
+            "value": "plain"
+          },
+          "retention.raw_days": {
+            "value": 30
+          },
+          "x-example.banner": {
+            "value": "pilot"
+          }
+        },
+        "signature": {
+          "alg": "ed25519",
+          "keyId": "org-7f3a.policy-2026",
+          "value": "GJo5WdOsi8UwG0vysB+GiGNvIXHNr8LwAQvRzFj6zaEcqRi4I2vlSXfxyV0/wN8f3EZUdJRXe4Z1bFa4xajAAw=="
+        }
+      }
+    }
+  }
+}

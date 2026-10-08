@@ -1,0 +1,91 @@
+{
+  "description": "A locked key flipped after signing: the signature no longer verifies (FAC-SEM-041).",
+  "kind": "device-policy-update",
+  "expect": [
+    "FAC-SEM-041"
+  ],
+  "input": {
+    "current": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "source": "server",
+      "revision": 11,
+      "issuedAt": "2026-10-01T08:00:00Z",
+      "keys": {
+        "logging.required": {
+          "value": true,
+          "locked": true
+        },
+        "build_channel.allowed": {
+          "value": "official",
+          "locked": true
+        },
+        "telemetry.endpoint": {
+          "value": "https://telemetry.example.org/v1/activity"
+        },
+        "telemetry.git_branch": {
+          "value": "plain"
+        },
+        "retention.raw_days": {
+          "value": 30
+        },
+        "x-example.banner": {
+          "value": "pilot"
+        }
+      },
+      "signature": {
+        "alg": "ed25519",
+        "keyId": "org-7f3a.policy-2026",
+        "value": "0EOXYBuyaTJMu+ep/jkDI54ZqE8GSeXzV+TnxqNwE4qYX1p55SE5rjtR1iZPVDNs3k7rPba2j2T/4Q4qEMFWDw=="
+      }
+    },
+    "next": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "source": "server",
+      "revision": 12,
+      "issuedAt": "2026-10-07T08:00:00Z",
+      "keys": {
+        "logging.required": {
+          "value": false,
+          "locked": true
+        },
+        "build_channel.allowed": {
+          "value": "official",
+          "locked": true
+        },
+        "telemetry.endpoint": {
+          "value": "https://telemetry.example.org/v1/activity"
+        },
+        "telemetry.git_branch": {
+          "value": "plain"
+        },
+        "retention.raw_days": {
+          "value": 30
+        },
+        "x-example.banner": {
+          "value": "pilot"
+        }
+      },
+      "signature": {
+        "alg": "ed25519",
+        "keyId": "org-7f3a.policy-2026",
+        "value": "GJo5WdOsi8UwG0vysB+GiGNvIXHNr8LwAQvRzFj6zaEcqRi4I2vlSXfxyV0/wN8f3EZUdJRXe4Z1bFa4xajAAw=="
+      }
+    },
+    "trustedKeys": [
+      {
+        "keyId": "org-7f3a.policy-2026",
+        "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+        "notBefore": "2026-01-01T00:00:00Z",
+        "notAfter": "2026-12-31T23:59:59Z"
+      }
+    ]
+  }
+}

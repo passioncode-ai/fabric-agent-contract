@@ -1,0 +1,81 @@
+{
+  "description": "A cell covering two subjects is published: below the minimum of 3, it is folded into the day's other cell or suppressed (FAC-SEM-040).",
+  "kind": "activity-summary",
+  "expect": [
+    "FAC-SEM-040"
+  ],
+  "input": {
+    "format": "activity-summary/1",
+    "generatedAt": "2026-10-08T00:10:00Z",
+    "from": "2026-10-07",
+    "to": "2026-10-07",
+    "producer": {
+      "id": "org-7f3a.summarizer"
+    },
+    "idleThresholdSeconds": 300,
+    "minPopulation": 3,
+    "suppressedCells": 0,
+    "cells": [
+      {
+        "agent": "claude_code",
+        "skill": "code-review",
+        "project": "example-project",
+        "day": "2026-10-07",
+        "outcome": "completed",
+        "counts": {
+          "population": 2,
+          "sessions": 2,
+          "intervals": 4,
+          "usageLines": 31,
+          "unpricedLines": 0
+        },
+        "durations": {
+          "agentSeconds": 2140,
+          "waitHumanSeconds": 698,
+          "waitAgentSeconds": 120,
+          "attendedSeconds": 1900
+        },
+        "method": "otel",
+        "usage": {
+          "tokens": {
+            "input": 412000,
+            "output": 51800,
+            "cacheRead": 2210000,
+            "cacheWrite": 64000
+          },
+          "cost": {
+            "usd": 3.92,
+            "basis": "client-estimate"
+          }
+        }
+      },
+      {
+        "other": true,
+        "day": "2026-10-07",
+        "counts": {
+          "population": 3,
+          "sessions": 3,
+          "intervals": 7,
+          "usageLines": 6,
+          "unpricedLines": 6
+        },
+        "durations": {
+          "agentSeconds": 410,
+          "waitHumanSeconds": 95,
+          "waitAgentSeconds": 0,
+          "attendedSeconds": 300
+        },
+        "method": "mixed",
+        "usage": {
+          "tokens": {
+            "input": 64000,
+            "output": 9100
+          },
+          "cost": {
+            "usd": null
+          }
+        }
+      }
+    ]
+  }
+}

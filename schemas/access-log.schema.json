@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/access-log.schema.json",
+  "title": "Access log access-log/1 (DEC-0030)",
+  "description": "Who read which scope of one subject's data — keyed by their user id or by a device bound to them — when and why, so the subject can see every read of their own data.",
+  "type": "object",
+  "required": [
+    "format",
+    "generatedAt",
+    "subject",
+    "entries"
+  ],
+  "properties": {
+    "format": {
+      "const": "access-log/1"
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "subject": {
+      "type": "object",
+      "required": [
+        "user"
+      ],
+      "properties": {
+        "user": {
+          "$ref": "activity-common.schema.json#/$defs/user"
+        }
+      },
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": [
+        "at",
+        "reader",
+        "scope",
+        "purpose"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "reader": {
+          "type": "object",
+          "required": [
+            "role"
+          ],
+          "properties": {
+            "user": {
+              "$ref": "activity-common.schema.json#/$defs/user"
+            },
+            "service": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "role": {
+              "$ref": "activity-common.schema.json#/$defs/name"
+            }
+          },
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "user": true
+              },
+              "required": [
+                "user"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "service": true
+              },
+              "required": [
+                "service"
+              ]
+            }
+          ]
+        },
+        "scope": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "device": {
+          "$ref": "activity-common.schema.json#/$defs/device",
+          "description": "Set when the read was of a device bound to the subject (health, check-ins, policy)."
+        },
+        "range": {
+          "type": "object",
+          "required": [
+            "from",
+            "to"
+          ],
+          "properties": {
+            "from": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "to": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          },
+          "additionalProperties": false
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        },
+        "requestId": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

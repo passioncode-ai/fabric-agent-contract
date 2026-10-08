@@ -1,0 +1,77 @@
+{
+  "description": "The receiver already holds 5…1004 from earlier batches; the overflow at 1005 accounts for 1…4, so the ack jumps to 1005.",
+  "kind": "activity-ack",
+  "expect": [],
+  "input": {
+    "known": [
+      {
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "held": [
+          [
+            5,
+            1004
+          ]
+        ],
+        "accounted": []
+      }
+    ],
+    "batch": {
+      "protocol": "fabric-activity/0.1",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
+      "sent": "2026-10-07T09:32:00Z",
+      "events": [
+        {
+          "protocol": "fabric-activity/0.1",
+          "eventId": "01K6Z3W1A2B3C4D5E6F7G8H9JK",
+          "kind": "buffer.overflow",
+          "source": "claude_code.otel",
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "seq": 1005,
+          "occurred": "2026-10-07T09:31:41Z",
+          "bootId": "boot-7c41e2",
+          "monotonicNs": "184824500000000",
+          "data": {
+            "dropped": {
+              "events": 4,
+              "ranges": [
+                {
+                  "fromSeq": 1,
+                  "toSeq": 4
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ack": {
+      "protocol": "fabric-activity/0.1",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
+      "received": "2026-10-07T09:32:01Z",
+      "accepted": 1,
+      "duplicates": 0,
+      "rejected": [],
+      "acks": [
+        {
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "seq": 1005
+        }
+      ]
+    }
+  }
+}

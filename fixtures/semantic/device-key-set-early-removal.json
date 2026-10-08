@@ -1,0 +1,57 @@
+{
+  "description": "Revision 2 drops the 2026 key months before its notAfter without revoking it: no overlap window (FAC-SEM-046).",
+  "kind": "device-key-set",
+  "expect": [
+    "FAC-SEM-046"
+  ],
+  "input": {
+    "root": {
+      "keyId": "org-7f3a.root",
+      "publicKey": "/cIb8A4yomk2RBpWp/A3VRYAj+Fyu5cXs4kU4VimWaQ="
+    },
+    "current": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy-key-set",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "revision": 1,
+      "issuedAt": "2026-09-01T00:00:00Z",
+      "keys": [
+        {
+          "keyId": "org-7f3a.policy-2026",
+          "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+          "notBefore": "2026-01-01T00:00:00Z",
+          "notAfter": "2026-12-31T23:59:59Z"
+        }
+      ],
+      "signature": {
+        "alg": "ed25519",
+        "keyId": "org-7f3a.root",
+        "value": "CienWJzCIdTAL3G5XUwJuS7ty0yOe5GN2VI3VnGJpdVCAKf6YWkPm7FyPxOLQR0innfAV5bCuBPkeHZJHTh9BA=="
+      }
+    },
+    "next": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy-key-set",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "revision": 2,
+      "issuedAt": "2026-10-07T00:00:00Z",
+      "keys": [
+        {
+          "keyId": "org-7f3a.policy-2027",
+          "publicKey": "x6LottHlLXvMNePzR0VULfgmR0mWUC9CiF0abgRUaPA=",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-12-31T23:59:59Z"
+        }
+      ],
+      "signature": {
+        "alg": "ed25519",
+        "keyId": "org-7f3a.root",
+        "value": "1jx9fIok6hIDjgya5A6pM5vRc6WXnT0wsqih5qAvDwpuSByI6bDUns1EmZEvO4yy631F/wxWa6Im7mt05FoyDg=="
+      }
+    }
+  }
+}

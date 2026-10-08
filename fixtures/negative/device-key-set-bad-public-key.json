@@ -1,0 +1,22 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "policy-key-set",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "revision": 2,
+  "issuedAt": "2026-10-07T00:00:00Z",
+  "keys": [
+    {
+      "keyId": "org-7f3a.policy-2026",
+      "publicKey": "not-a-key",
+      "notBefore": "2026-01-01T00:00:00Z",
+      "notAfter": "2026-12-31T23:59:59Z"
+    }
+  ],
+  "signature": {
+    "alg": "ed25519",
+    "keyId": "org-7f3a.root",
+    "value": "dA/TpLE0x4fWxcimbcd87ulHxDSTCPHakf9bEp8/WC9XmYy1AkPqgqh7HqqYZhKnJWJnE1ac8/U9eaSawYbTAg=="
+  }
+}

@@ -15,6 +15,8 @@
 | SCN-007 | Produce a governed learning proposal | learning | P-02 | ST-005, FLW-04 | validated | not audited |
 | SCN-008 | Deny unsafe global promotion | learning | P-02 | ST-005, FLW-04 | validated | not audited |
 | SCN-009 | Serve a request through the next available runner | routing | P-02 | ST-006, FLW-05 | validated | not audited |
+| SCN-010 | Read who read my data | telemetry | P-03 | ST-007, FLW-06 | draft | not audited |
+| SCN-011 | A locked setting is refused and shown | telemetry | P-03 | ST-008, FLW-07 | draft | not audited |
 
 ## Personas
 
@@ -210,4 +212,46 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** every candidate passed over -> capability-unavailable with every probe result, under `exhausted: hold` after waiting at most `limits.wallSeconds`; the operator signs a runner in or edits the route as a new revision.
 - **Status:** validated
 - **Coverage:** `test/route-rules.test.ts` (FAC-SEM-028…034), fixtures `runner-route*`
+- **Product:** unobserved
+
+## Telemetry
+
+### SCN-010: Read who read my data
+
+- **Persona:** P-03
+- **Feature:** telemetry
+- **Traces:** ST-007, FLW-06 (JTBD-04, JRN-03/#3)
+- **Entry point:** the organization's member page
+- **Preconditions:** the member's device is enrolled; an administrator read the member's raw events and their device's health this week
+- **Steps:**
+  1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id` and bound devices.
+  2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.
+  3. The second entry is `device.health` with the device id -> the member sees the read of their device's state.
+- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose; reads of summaries are not listed, because summaries carry no person.
+- **Alt paths:** no read in the range -> the empty state says so.
+- **UI elements:** entry list, reader role, scope, device, purpose.
+- **States covered:** empty, success
+- **Errors & recovery:** a read without a logged entry is a receiver defect against DEC-0030; the member raises it with the organization under its notice.
+- **Status:** draft
+- **Coverage:** `access-log.schema.json`, fixtures `access-log*`
+- **Product:** unobserved
+
+### SCN-011: A locked setting is refused and shown
+
+- **Persona:** P-03
+- **Feature:** telemetry
+- **Traces:** ST-008, FLW-07 (JTBD-04, JRN-03/#2)
+- **Entry point:** the device's settings
+- **Preconditions:** the server layer locks `logging.required: true`; MDM locks `retention.raw_days: 14`; the server sets an unlocked default `x-example.banner`
+- **Steps:**
+  1. Member opens device settings -> each key shows its effective value, its source layer and its lock.
+  2. Member switches logging off -> the device refuses: locked by the server.
+  3. Member sets `x-example.banner` to `quiet` -> the user value becomes effective.
+- **Expected result:** the effective settings equal the resolution of the layers (lock, then the user's value, then the highest default); no locked key changes locally.
+- **Alt paths:** a new server policy whose signature does not verify -> the device keeps the held revision and reports `failed`.
+- **UI elements:** key, value, source layer, lock, held revision.
+- **States covered:** success, error
+- **Errors & recovery:** a refused change names the locking layer; the member asks the organization to change the policy.
+- **Status:** draft
+- **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042), fixtures `device-policy*`
 - **Product:** unobserved

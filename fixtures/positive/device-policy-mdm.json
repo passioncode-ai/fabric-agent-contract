@@ -1,0 +1,19 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "policy",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "source": "mdm",
+  "revision": 3,
+  "issuedAt": "2026-09-20T10:00:00Z",
+  "keys": {
+    "retention.raw_days": {
+      "value": 14,
+      "locked": true
+    },
+    "telemetry.endpoint": {
+      "value": "https://telemetry.example.org/mdm"
+    }
+  }
+}
