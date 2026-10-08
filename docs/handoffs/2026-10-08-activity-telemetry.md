@@ -32,7 +32,7 @@ check-in, health, and attribution by client certificate.
   - UX: persona P-03, JTBD-04, JRN-03, ST-007/008, FLW-06/07, SCR-09/10, SCN-010/011;
   - `CONTEXT.md` ("Telemetry event", "Collector node"), `docs/DOCMAP.md`, `README.md`,
     `docs/evidence/sources.md`.
-- Fixtures: 44 catalogued (positive and schema-negative) plus 29 rule inputs under
+- Fixtures: 46 catalogued (positive and schema-negative) plus 40 rule inputs under
   `fixtures/semantic/`, each with its expected codes. The signed policy fixtures were signed by a key
   generated for the purpose and not kept.
 
@@ -50,11 +50,41 @@ finding. In short:
 - Fields are camelCase, and `activity-event` was renamed `telemetry-event`.
 - The operator's purpose clause replaces any rule about persons.
 
+## Re-review of `19e2b58` — what changed
+
+The contract owner verified the first round and found four more problems, all fixed before merge:
+
+- **N1:** a device id on record is re-enrolled only with a CSR from its key on record
+  (`publicKeySha256`) or a device-management token issued for that id (`FAC-SEM-044`).
+- **N2:** acks are computed from the same cross-batch stream state as tamper evidence
+  (`mergeStreams`), and name `held` ranges above the ack; the spec says what the device keeps and
+  where the next batch starts.
+- **N3:** a path-derived `sourceKey` is `hmac-sha256:` under the device's telemetry key
+  (`pathSourceKey`), and encoded home directories (`-Users-<name>-`, `C--Users-`, `-home-`) are
+  refused by the schema and by `FAC-SEM-037`.
+- **N4:** events are attributed by the binding recorded per (device, epoch) (`FAC-SEM-045`).
+
+The nits are fixed as well:
+
+- key-filter gaps and false positives;
+- the server layer is always reported in a check-in;
+- a buffer floor that goes back is evidence;
+- the branch hash is keyed;
+- the presence wording is aligned;
+- the rule modules are in the DOCMAP;
+- the 1001-event fixture is now generated in a test;
+- `sources.md` says `eventId`.
+
 ## Checks run
 
-- `pnpm install --frozen-lockfile && pnpm run check` passed: typecheck, 16 test files with 505
-  tests, UX lint (8 stories, 7 flows, 10 screens, 11 scenarios), documentation check, and
-  markdownlint with 0 errors.
+- The gate's four steps passed at the final commit: typecheck, 16 test files with 525 tests, UX lint
+  (8 stories, 7 flows, 10 screens, 11 scenarios), and the documentation check with markdownlint at 0
+  errors.
+- The disk was full (144 MiB free), and the pnpm wrapper failed to link its binary. So the steps of
+  `pnpm run check` were run directly from `node_modules/.bin`. CI runs `pnpm run check` itself.
+- Re-review mutations, each killed and then restored: acks ignoring earlier batches (5 tests
+  failed), the re-enrollment proof disabled (2 failed), attribution by the certificate instead of
+  the epoch (4 failed).
 - Planted mutations, each killed and then restored:
   - the gap check below `bufferedFrom` disabled (2 tests failed);
   - the camelCase split removed (3 failed);

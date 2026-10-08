@@ -151,6 +151,17 @@
             "layers": {
               "type": "array",
               "maxItems": 2,
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "const": "server"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              },
               "items": {
                 "type": "object",
                 "required": [

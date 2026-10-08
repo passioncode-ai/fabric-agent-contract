@@ -39,7 +39,7 @@
       "signature": {
         "alg": "ed25519",
         "keyId": "org-7f3a.policy-2026",
-        "value": "GHBugIecjbs7SRIimmx6g8txal2EWooQf3+0YaXYsbOShy+enLkVrSJmE2mOvq6UkqGfzzfiKyEO8n5fNwMdDQ=="
+        "value": "0MPBIGI4Xi6IF6WWHoUdfD3PCE4cDsB2vIWAf3ot74c4Y3ueZYcSlmp4eUoS3ivYwlnLc08i/7I9L7rYCWBlCw=="
       }
     },
     "next": {
@@ -76,13 +76,13 @@
       "signature": {
         "alg": "ed25519",
         "keyId": "org-7f3a.policy-2026",
-        "value": "VXNsYFNKfJA7LVJQeMVk4uns+BD+lZNaH+FEnIR8qwAyKFohuv8XawOHMt1xRGOM5iRczYvbG7vSaPbsLkNbAg=="
+        "value": "By43b/dDGVDITtk3thak4HxS24NlMXJPOqqKI4ZxteP9oD8z/8/fh0t9ePYAdXjB0a2RsaXcuqRorvjhTSCHAg=="
       }
     },
     "trustedKeys": [
       {
         "keyId": "org-7f3a.policy-2026",
-        "publicKey": "bW5bWG/ZU3u5j3oU1FOJVLmz0JtapIuQZJLBSjsYuIs="
+        "publicKey": "126Gt1ef4DF4JZd0SzTWjNmYgwMbMHTRL8WIWViUOS8="
       }
     ]
   }

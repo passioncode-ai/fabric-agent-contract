@@ -1,7 +1,7 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { canonicalJson } from "./settings-backup.js";
-import { type SeqRange, contiguousFrom, mergeRanges, rangesOf } from "./seq-ranges.js";
+import { type SeqRange, contiguousFrom, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region activity-rules — docs: docs/specification/activity.md#semantic-rules
 /**
@@ -17,7 +17,8 @@ import { type SeqRange, contiguousFrom, mergeRanges, rangesOf } from "./seq-rang
 export const CONTENT_WORDS: ReadonlySet<string> = new Set([
   "prompt", "prompts", "response", "responses", "completion", "completions", "content", "contents", "text", "body",
   "message", "messages", "transcript", "stdin", "stdout", "stderr", "argv", "args", "cmd", "command", "diff", "patch",
-  "snippet", "note", "notes", "comment", "comments", "title", "cwd", "clipboard", "screenshot"
+  "snippet", "note", "notes", "comment", "comments", "title", "cwd", "clipboard", "screenshot", "query", "queries",
+  "search", "keystroke", "keystrokes", "url", "urls"
 ]);
 /** Adjacent word pairs that name content. */
 export const CONTENT_PAIRS: ReadonlySet<string> = new Set(["tool_input", "tool_output", "command_line", "file_content", "window_title"]);
@@ -25,15 +26,29 @@ export const CONTENT_PAIRS: ReadonlySet<string> = new Set(["tool_input", "tool_o
 /** Words that describe a person or rank one. `user` is handled apart: an event's own `/user` is the one opaque reference allowed. */
 export const PERSON_WORDS: ReadonlySet<string> = new Set([
   "person", "persons", "people", "email", "mail", "phone", "team", "teams", "department", "dept", "manager", "author",
-  "username", "login", "score", "scores", "rating", "ratings", "rank", "ranking", "review", "reviewer", "salary", "hr"
+  "username", "login", "score", "scores", "rating", "ratings", "rank", "ranking", "reviewer", "reviewers", "salary", "hr",
+  "fullname", "realname", "nickname", "surname", "displayname", "owner", "owners", "assignee", "assignees"
 ]);
 /** Adjacent word pairs that describe a person. */
-export const PERSON_PAIRS: ReadonlySet<string> = new Set(["display_name", "full_name", "first_name", "last_name", "given_name", "family_name", "job_title", "org_unit", "reports_to", "real_name"]);
-/** Word prefixes that describe a person's standing or output: matched against the start of a word. */
-export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "perform", "assess", "apprais"];
+export const PERSON_PAIRS: ReadonlySet<string> = new Set(["display_name", "full_name", "first_name", "last_name", "given_name", "family_name", "nick_name", "job_title", "org_unit", "reports_to", "real_name"]);
+/** Word prefixes that describe a person's standing or output: matched against the start of a word. A measurement such as
+ *  `performanceMs` or a count such as `reviewCount` names no person and is not matched. */
+export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "assess", "apprais"];
 
-/** A home or absolute path inside a value: never sent, whatever the key. */
-const HOME_PATH = /(^|[\s"'=:])(\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)/;
+/**
+ * A home directory inside a value, plain or encoded: `/Users/<name>`, `/home/<name>`, `~/`, `C:\\Users\\<name>`,
+ * and the forms runtimes write into file names — `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, `%2FUsers%2F<name>`.
+ * A branch such as `feature/home-page` is not a home directory and is not matched.
+ * Never sent, whatever the key.
+ */
+export const HOME_PATH: readonly RegExp[] = [
+  /(?:^|[\/\\\-_.:\s"'=]|%2[fF])Users(?:[\/\\\-_.:]|%2[fF])+[A-Za-z0-9]/,
+  /[\/\\]home[\/\\][A-Za-z0-9]/,
+  /(?:^|[\/\\])-home-[A-Za-z0-9]/,
+  /%2[fF]home%2[fF]/,
+  /(?:^|[\s"'=])~[\/\\]/
+];
+export const hasHomePath = (value: string) => HOME_PATH.some((pattern) => pattern.test(value));
 
 /** The words of a key: split at `.`, `_`, `-`, whitespace and camelCase boundaries, lower-cased. */
 export function keyWords(key: string): string[] {
@@ -55,7 +70,7 @@ function classify(key: string): "content" | "person" | "user" | null {
 export function forbiddenKeys(value: unknown, at: string, userAllowedAt: ReadonlySet<string>): Forbidden[] {
   const found: Forbidden[] = [];
   const walk = (node: unknown, path: string, key: string) => {
-    if (typeof node === "string") { if (HOME_PATH.test(node)) found.push({ path, kind: "path", key }); return; }
+    if (typeof node === "string") { if (hasHomePath(node)) found.push({ path, kind: "path", key }); return; }
     if (Array.isArray(node)) { node.forEach((item, i) => walk(item, `${path}/${i}`, key)); return; }
     if (!isObject(node)) return;
     for (const [child, inner] of Object.entries(node)) {
@@ -73,6 +88,21 @@ export function forbiddenKeys(value: unknown, at: string, userAllowedAt: Readonl
 /** The `eventId` of an event read from a source that can be read again: `sha256:` of the canonical `{source, key}`. */
 export function activityEventId(source: string, sourceKey: string): string {
   return `sha256:${createHash("sha256").update(canonicalJson({ key: sourceKey, source }), "utf8").digest("hex")}`;
+}
+
+/**
+ * The `sourceKey` of a record identified by its place in a file: `hmac-sha256:` of the canonical
+ * `{offset, path}` (path relative to the runtime's own directory) under the device's telemetry key —
+ * 32 random bytes the collector keeps and never sends. A plain path would carry the person's home
+ * directory; the key keeps a dictionary of common paths from reversing it.
+ */
+export function pathSourceKey(telemetryKey: Uint8Array, relativePath: string, offset: number): string {
+  return `hmac-sha256:${createHmac("sha256", telemetryKey).update(canonicalJson({ offset, path: relativePath }), "utf8").digest("hex")}`;
+}
+
+/** `git.branch` when the policy asks for a hash: `hmac-sha256:` of the name under the device's telemetry key. */
+export function hashedBranch(telemetryKey: Uint8Array, branch: string): string {
+  return `hmac-sha256:${createHmac("sha256", telemetryKey).update(branch, "utf8").digest("hex")}`;
 }
 
 const events = (value: JsonObject) => (Array.isArray(value.events) ? value.events.filter(isObject) : []);
@@ -93,7 +123,7 @@ function noContentOrPerson(value: JsonObject, roots: string[]): Finding[] {
       ? `${key} names content; activity telemetry records when and how much, never what was said or shown`
       : kind === "person"
         ? `${key} describes a person; activity telemetry names a person only by the opaque /user reference`
-        : "a value carries an absolute or home path, which names the person whose home it is"
+        : "a value carries a home directory, plain or encoded, which names the person whose home it is: hash a path-derived key under the device's telemetry key"
   }));
 }
 
@@ -199,30 +229,61 @@ function batchIntegrity(value: JsonObject): Finding[] {
   return findings;
 }
 
-export interface StreamPosition { collector: { id: string; epoch: number }; seq: number }
+/** What a receiver holds about one stream of one device, across batches: seqs held (received, accepted or rejected), seqs
+ *  accounted for by overflows or a check-in's `dropped`, and the last `bufferedFrom` the device reported. */
+export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; bufferedFrom?: number }
 
-/**
- * The ack of each stream after `batch`, from the receiver's `known` positions: the highest seq up to
- * which every seq is consumed — held, rejected (consumed with a rejection, never resent) or named by an
- * overflow's dropped ranges.
- */
-export function contiguousAcks(known: readonly StreamPosition[], batch: JsonObject): StreamPosition[] {
-  const device = deviceId(batch);
-  const covered = new Map<string, SeqRange[]>();
-  const start = new Map<string, StreamPosition>();
-  for (const position of known) start.set(streamKey(device, position.collector as unknown as JsonObject), { collector: position.collector, seq: position.seq });
-  for (const event of events(batch)) {
-    const collector = collectorOf(event);
-    const key = streamKey(device, collector);
-    if (!start.has(key)) start.set(key, { collector: { id: String(collector.id), epoch: num(collector.epoch) }, seq: 0 });
-    covered.set(key, [...(covered.get(key) ?? []), [num(event.seq), num(event.seq)], ...overflowRanges(event)]);
+const stateKey = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
+
+/** The streams of one device after `batch` and `checkIn`, merged into what the receiver already holds. Ranges stay merged. */
+export function mergeStreams(known: readonly StreamState[], batch: JsonObject | null, checkIn: JsonObject | null): StreamState[] {
+  const streams = new Map<string, StreamState>();
+  for (const s of known) streams.set(stateKey(s.collector as unknown as JsonObject), { ...s, held: [...s.held], accounted: [...s.accounted] });
+  const stream = (collector: JsonObject) => {
+    const key = stateKey(collector);
+    let s = streams.get(key);
+    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [] }; streams.set(key, s); }
+    return s;
+  };
+  for (const event of batch ? events(batch) : []) {
+    const s = stream(collectorOf(event));
+    s.held.push([num(event.seq), num(event.seq)]);
+    s.accounted.push(...overflowRanges(event));
   }
-  return [...start.entries()].map(([key, position]) => ({ collector: position.collector, seq: contiguousFrom(covered.get(key) ?? [], position.seq) }));
+  for (const c of checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : []) {
+    const s = stream(isObject(c.collector) ? c.collector : {});
+    s.accounted.push(...rangesOf(c.dropped));
+    if (typeof c.bufferedFrom === "number") s.bufferedFrom = Math.max(s.bufferedFrom ?? 0, c.bufferedFrom);
+  }
+  return [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted) }));
 }
 
-/** FAC-SEM-039 for an acknowledgement: `{known?, batch, ack}` — the counts add up, and each ack is the stream's contiguous position, no more and no less. */
+export interface StreamAck { collector: { id: string; epoch: number }; seq: number; held: SeqRange[] }
+
+/**
+ * The ack of each stream after `batch`, over everything the receiver holds for it across batches: `seq` is the highest
+ * seq up to which every seq is consumed — held, rejected (consumed with a rejection, never resent) or accounted for by an
+ * overflow — and `held` the consumed ranges above it, which the device may drop as well.
+ */
+export function contiguousAcks(known: readonly StreamState[], batch: JsonObject): StreamAck[] {
+  return mergeStreams(known, batch, null).map((s) => {
+    const covered = mergeRanges([...s.held, ...s.accounted]);
+    const seq = contiguousFrom(covered, 0);
+    return { collector: s.collector, seq, held: covered.filter(([from]) => from > seq + 1) };
+  });
+}
+
+const asStreams = (value: unknown): StreamState[] => (Array.isArray(value) ? value.filter(isObject) : []).map((s) => ({
+  collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"],
+  held: rangesOf(s.held),
+  accounted: rangesOf(s.accounted),
+  ...(typeof s.bufferedFrom === "number" ? { bufferedFrom: s.bufferedFrom } : {})
+}));
+
+/** FAC-SEM-039 for an acknowledgement: `{known?, batch, ack}` — `known` is the receiver's stream state before the batch;
+ *  the counts add up, each ack is the stream's consumed position over all batches, and `held` claims only consumed seqs. */
 function ackIntegrity(value: JsonObject): Finding[] {
-  const known = Array.isArray(value.known) ? value.known.filter(isObject) as unknown as StreamPosition[] : [];
+  const known = asStreams(value.known);
   const batch = isObject(value.batch) ? value.batch : {};
   const ack = isObject(value.ack) ? value.ack : {};
   const acks = Array.isArray(ack.acks) ? ack.acks.filter(isObject) : [];
@@ -236,12 +297,16 @@ function ackIntegrity(value: JsonObject): Finding[] {
   const ids = new Set(list.map((event) => String(event.eventId)));
   rejected.forEach((entry, i) => { if (!ids.has(String(entry.eventId))) flag(`/ack/rejected/${i}/eventId`, "a rejection names an event the batch did not carry"); });
   const device = deviceId(batch);
-  const expected = new Map(contiguousAcks(known, batch).map((p) => [streamKey(device, p.collector as unknown as JsonObject), p.seq]));
+  const expected = new Map(contiguousAcks(known, batch).map((p) => [streamKey(device, p.collector as unknown as JsonObject), p]));
   acks.forEach((entry, i) => {
     const key = streamKey(device, isObject(entry.collector) ? entry.collector : {});
     const want = expected.get(key);
-    if (want === undefined) flag(`/ack/acks/${i}`, `the ack names ${key}, a stream the receiver never saw`);
-    else if (num(entry.seq) !== want) flag(`/ack/acks/${i}/seq`, `every seq of ${key} up to ${want} is consumed, so the ack is ${want}, not ${String(entry.seq)}`);
+    if (want === undefined) { flag(`/ack/acks/${i}`, `the ack names ${key}, a stream the receiver never saw`); return; }
+    if (num(entry.seq) !== want.seq) flag(`/ack/acks/${i}/seq`, `every seq of ${key} up to ${want.seq} is consumed, so the ack is ${want.seq}, not ${String(entry.seq)}`);
+    const claimed = rangesOf(entry.held);
+    if (claimed.some(([from, to]) => from <= want.seq || uncovered(want.held, from, to).length > 0)) {
+      flag(`/ack/acks/${i}/held`, `held names seqs of ${key} the receiver has not consumed, or seqs at or below the ack`);
+    }
   });
   const named = new Set(acks.map((entry) => streamKey(device, isObject(entry.collector) ? entry.collector : {})));
   for (const event of list) {

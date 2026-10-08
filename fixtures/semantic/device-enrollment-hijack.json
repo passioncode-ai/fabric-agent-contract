@@ -1,5 +1,5 @@
 {
-  "description": "A certificate that lives a year: FAC-SEM-044.",
+  "description": "Another member signs in and enrolls a new key under an enrolled device's id: FAC-SEM-044.",
   "kind": "device-enrollment",
   "expect": [
     "FAC-SEM-044"
@@ -19,7 +19,7 @@
         "algorithm": "ecdsa-p256",
         "storage": "secure-enclave",
         "exportable": false,
-        "publicKeySha256": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+        "publicKeySha256": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2"
       },
       "csr": "MIIBDzCBtgIBADBUMQ8wDQYDVQQKDAZvcmctN2YzYTESMBAGA1UEAwwJZGV2LTAxajlh",
       "auth": {
@@ -34,7 +34,7 @@
         "der": "MIIBlTCCATugAwIBAgIUe2xhbXBsZS1jZXJ0aWZpY2F0ZS0wMDAx",
         "serial": "7b6578616d706c65",
         "notBefore": "2026-10-07T08:30:05Z",
-        "notAfter": "2027-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
         "binding": {
           "org": {
             "id": "org-7f3a"
@@ -89,6 +89,12 @@
           "value": "By43b/dDGVDITtk3thak4HxS24NlMXJPOqqKI4ZxteP9oD8z/8/fh0t9ePYAdXjB0a2RsaXcuqRorvjhTSCHAg=="
         }
       }
+    },
+    "issuedEpochs": [
+      1
+    ],
+    "enrolled": {
+      "keySha256": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
     }
   }
 }

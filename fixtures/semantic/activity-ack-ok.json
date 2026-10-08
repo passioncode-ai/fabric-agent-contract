@@ -9,14 +9,26 @@
           "id": "cc-otel",
           "epoch": 2
         },
-        "seq": 37
+        "held": [
+          [
+            1,
+            37
+          ]
+        ],
+        "accounted": []
       },
       {
         "collector": {
           "id": "switchboard",
           "epoch": 2
         },
-        "seq": 6
+        "held": [
+          [
+            1,
+            6
+          ]
+        ],
+        "accounted": []
       }
     ],
     "batch": {

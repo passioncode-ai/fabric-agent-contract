@@ -67,7 +67,29 @@
       "type": "array",
       "maxItems": 256,
       "items": {
-        "$ref": "activity-common.schema.json#/$defs/stream"
+        "type": "object",
+        "required": [
+          "collector",
+          "seq"
+        ],
+        "properties": {
+          "collector": {
+            "$ref": "activity-common.schema.json#/$defs/collector"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "held": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "activity-common.schema.json#/$defs/range"
+            },
+            "description": "Ranges above seq that the receiver holds or has accounted for; the device may drop them."
+          }
+        },
+        "additionalProperties": false
       }
     }
   },

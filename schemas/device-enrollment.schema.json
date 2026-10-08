@@ -59,7 +59,8 @@
           "required": [
             "algorithm",
             "storage",
-            "exportable"
+            "exportable",
+            "publicKeySha256"
           ],
           "properties": {
             "algorithm": {
@@ -77,6 +78,11 @@
             },
             "exportable": {
               "const": false
+            },
+            "publicKeySha256": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it against the CSR, and it is the key on record for re-enrollment (FAC-SEM-044)."
             },
             "attestation": {
               "$ref": "device-common.schema.json#/$defs/base64",

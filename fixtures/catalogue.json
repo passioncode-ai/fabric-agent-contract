@@ -186,12 +186,13 @@
   {"name": "telemetry-event-derived-id-without-source-key", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-derived-id-without-source-key.json", "valid": false, "keyword": "required"},
   {"name": "telemetry-event-ulid-with-source-key", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-ulid-with-source-key.json", "valid": false, "keyword": "false schema"},
   {"name": "telemetry-event-source-key-home-path", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-source-key-home-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "telemetry-event-source-key-encoded-home", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-source-key-encoded-home.json", "valid": false, "keyword": "pattern"},
+  {"name": "telemetry-event-source-key-encoded-home-no-slash", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-source-key-encoded-home-no-slash.json", "valid": false, "keyword": "pattern"},
   {"name": "telemetry-event-branch-free-text", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-branch-free-text.json", "valid": false, "keyword": "pattern"},
   {"name": "telemetry-event-extension-home-path", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-extension-home-path.json", "valid": false, "keyword": "pattern"},
   {"name": "telemetry-event-extension-long-text", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-extension-long-text.json", "valid": false, "keyword": "pattern"},
   {"name": "telemetry-event-extension-deep-data", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-extension-deep-data.json", "valid": false, "keyword": "anyOf"},
   {"name": "activity-batch-received-set", "schema": "activity-batch.schema.json", "path": "negative/activity-batch-received-set.json", "valid": false, "keyword": "not"},
-  {"name": "activity-batch-too-many-events", "schema": "activity-batch.schema.json", "path": "negative/activity-batch-too-many-events.json", "valid": false, "keyword": "maxItems"},
   {"name": "activity-summary-person-dimension", "schema": "activity-summary.schema.json", "path": "negative/activity-summary-person-dimension.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "activity-summary-device-producer", "schema": "activity-summary.schema.json", "path": "negative/activity-summary-device-producer.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "activity-summary-cost-without-basis", "schema": "activity-summary.schema.json", "path": "negative/activity-summary-cost-without-basis.json", "valid": false, "keyword": "required"},
@@ -213,5 +214,6 @@
   {"name": "device-policy-fraction-value", "schema": "device-policy.schema.json", "path": "negative/device-policy-fraction-value.json", "valid": false, "keyword": "anyOf"},
   {"name": "device-check-in-bad-channel", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-bad-channel.json", "valid": false, "keyword": "enum"},
   {"name": "device-check-in-detail-home-path", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-detail-home-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-check-in-without-server-layer", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-without-server-layer.json", "valid": false, "keyword": "contains"},
   {"name": "device-check-in-response-user-policy", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-response-user-policy.json", "valid": false, "keyword": "not"}
 ]

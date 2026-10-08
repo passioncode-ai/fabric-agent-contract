@@ -718,7 +718,8 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-08
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
-  Revised before merge by the contract owner's review of PR #22 (head `0994981`).
+  Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
+  (head `19e2b58`).
 - **Amends:** nothing — a new protocol beside `fabric-service/0.1`, added under the DEC-0016
   extension policy
 - **Decision:** The contract defines activity telemetry for debugging, work memory and spend
@@ -749,8 +750,12 @@ annotate only the old status; decision bodies are never rewritten.
   3. **`eventId`** has two forms:
      - a ULID, for an event the collector originates;
      - `sha256:` of the canonical `{source, key}`, for an event read from a source that can be read
-       again. Such an event carries its `sourceKey`: an id, a hash or a relative path, never a home
-       path.
+       again. Such an event carries its `sourceKey`: the source's own record id, or — for a key
+       derived from a file — `hmac-sha256:` of `{offset, path}` under the device's telemetry key, a
+       secret the collector never sends. Never a path: a relative path still carries the home
+       directory in the encoded form runtimes write (`-Users-<name>-`).
+
+     `git.branch`, when hashed by policy, uses the same telemetry key.
 
      Delivery is idempotent on (`device.id`, `eventId`).
   4. **Streams** are (`device.id`, `collector.id`, `collector.epoch`).
@@ -759,10 +764,15 @@ annotate only the old status; decision bodies are never rewritten.
      - A batch (`activity-batch.schema.json`, at most 1000 events, no `received`) carries a
        contiguous slice of each stream, oldest first.
      - The ack (`activity-batch-ack.schema.json`) gives `accepted + duplicates + rejected` equal to
-       the batch, and for each stream the highest seq up to which every seq is consumed: held,
-       rejected (consumed with a rejection, never resent) or named by a `buffer.overflow`'s dropped
-       ranges.
-     - The receiver attributes a batch to its client certificate's device and user (DEC-0031).
+       the batch. For each stream it gives, over everything the receiver holds across batches — the
+       same state tamper evidence is judged from — the highest seq up to which every seq is consumed
+       (held, rejected and never resent, or accounted for by a `buffer.overflow`), and the consumed
+       ranges above it (`held`).
+     - The device keeps every event above the ack that is not in a held range, and sends forward
+       from its oldest kept event not yet in flight. So a head gap whose overflow is still buffered
+       does not stall delivery.
+     - The receiver attributes a batch to its client certificate's device, and each event to the user
+       bound to its epoch (DEC-0031).
   5. **`activity-summary/1`** is built by a receiver only, never a device. It has cells of agent ×
      skill × project × UTC day × outcome with counts, durations (`agentSeconds`,
      `waitHumanSeconds`, `waitAgentSeconds`, `attendedSeconds`, estimates under `method` and
@@ -780,7 +790,8 @@ annotate only the old status; decision bodies are never rewritten.
   8. **No content and no person attribute** is the collector's duty. `FAC-SEM-037` is a
      **best-effort key filter**, not a proof: it splits every key into words (camelCase, `_`, `-`,
      `.`), refuses words, pairs and prefixes that name content or a person, refuses `user` anywhere
-     but the event's own `/user`, and refuses home paths in values. The schema's bounds on
+     but the event's own `/user`, and refuses home directories in values, plain or encoded. A
+     measurement such as `performanceMs` or a count such as `reviewCount` is not refused. The schema's bounds on
      extension data are the stronger guard.
   9. **Rules:**
      - `FAC-SEM-037`: no content or person key, and no home path;
@@ -808,6 +819,12 @@ annotate only the old status; decision bodies are never rewritten.
   - the key filter could be passed with other spellings;
   - a device-produced summary was a per-person summary;
   - attribution came from the body.
+
+  The re-review of `19e2b58` found four more, also fixed before merge:
+  - any member could enroll as another person's device;
+  - acks were computed per batch;
+  - a relative path in `sourceKey` still carried the username;
+  - after re-enrollment to another person, earlier events lost their owner.
 - **Compatibility:** Additive under DEC-0016. It adds six new schemas (`activity-common`,
   `telemetry-event`, `activity-batch`, `activity-batch-ack`, `activity-summary`, `access-log`) and
   four rule codes; no existing schema, field or rule changes. `contractVersion` stays `0.1.0`. A
@@ -836,7 +853,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-08
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
-  Revised before merge by the contract owner's review of PR #22.
+  Revised before merge by the contract owner's review of PR #22 and its re-review.
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -848,12 +865,18 @@ annotate only the old status; decision bodies are never rewritten.
        never in the body.
      - The server issues a client certificate of at most 30 days (SHOULD be 7), bound to `org.id`,
        `device.id` and, for SSO, the signed-in `user.id`.
-     - It also issues a **`streamEpoch`** above every epoch issued to the device before.
+     - It also issues a **`streamEpoch`** above every epoch issued to the device before, and records the
+       binding of that epoch.
+     - **A device id on record is proven, not claimed:** re-enrolling it needs a CSR from the key on
+       record (`publicKeySha256`) or a device-management enrollment token issued for that device id.
+       An SSO sign-in alone is not proof.
      - Check-ins ask for rotation before expiry. A device re-enrolls when its certificate expired,
        when told to, or when a collector lost its counter. **Re-enrollment resets the
        policy-revision baseline.**
-  2. **Attribution:** a receiver takes the device and the user of a batch or check-in from the
-     client certificate, never from the body, and refuses a mismatch.
+  2. **Attribution:** a receiver takes the device of a batch or check-in from the client certificate,
+     and each event's user from the binding recorded for the event's epoch — never from the body —
+     and refuses a mismatch. Events buffered before a re-enrollment to another person stay with the
+     person they belong to, and events of an unassigned epoch carry no user.
   3. **Policy** (`device-policy.schema.json`): one document per layer — `mdm`, `server`, `user`.
      - Each has a monotonic `revision` and keys `{value, locked?}`: `logging.required`,
        `build_channel.allowed` (`any` / `official` / `attested`), `telemetry.endpoint`
@@ -869,7 +892,8 @@ annotate only the old status; decision bodies are never rewritten.
      - `sequenceNum` (a gap is answered with `report_full_state`);
      - the agent version and build channel, health, and logging state;
      - each collector's `lastSeq`, `bufferedFrom` and still-unacknowledged `dropped` ranges;
-     - per delivered layer, the policy revision held and its status;
+     - per delivered layer, the policy revision held and its status, always including the server
+       layer;
      - the certificate.
 
      The response carries a newer policy (never a user layer), a certificate action and the next
@@ -884,6 +908,7 @@ annotate only the old status; decision bodies are never rewritten.
      - a gap below a check-in's `bufferedFrom` that nothing accounts for;
      - an epoch never issued to the device;
      - a counter below a held seq;
+     - a `bufferedFrom` below one reported before;
      - a policy revision below the current enrollment's baseline.
 
      A reinstall produces none of these.
@@ -891,9 +916,9 @@ annotate only the old status; decision bodies are never rewritten.
      - `FAC-SEM-041`: a delivered policy verifies and moves forward;
      - `FAC-SEM-042`: precedence and locks;
      - `FAC-SEM-043`: health does not hide tampering or disabled required logging;
-     - `FAC-SEM-044`: the certificate is short-lived and bound to what enrolled, and the epoch is
-       new;
-     - `FAC-SEM-045`: attribution by certificate.
+     - `FAC-SEM-044`: re-enrollment is proven; the certificate is short-lived and bound to what
+       enrolled; and the epoch is new;
+     - `FAC-SEM-045`: attribution by certificate and by epoch binding.
 
      The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0041…SEM-0045).
 - **Why:** This implements the operator decision of 2026-10-08 (organization edition). An
@@ -911,7 +936,8 @@ annotate only the old status; decision bodies are never rewritten.
     a CSR.
   - Locked keys follow the mandatory-versus-recommended split of managed browser policy.
   - A server-issued epoch is how a reinstall stays distinguishable from tampering: a collector that
-    lost its state cannot know its previous epoch.
+    lost its state cannot know its previous epoch. The same epoch is the unit of attribution, so a
+    re-assigned device never moves one person's events to another.
 - **Compatibility:** Additive under DEC-0016. It adds five new schemas (`device-common`,
   `device-enrollment`, `device-policy`, `device-check-in`, `device-health`) and five rule codes;
   nothing existing changes. `contractVersion` stays `0.1.0`, and no extension key is added.

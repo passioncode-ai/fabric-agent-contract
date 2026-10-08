@@ -48,6 +48,8 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
 1. The device generates a key pair in hardware that does not export it, and a PKCS#10 certificate
    signing request (RFC 2986) signed by that key. The key's `storage` is `secure-enclave`, `tpm` or
    `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`.
+   `publicKeySha256` is the SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it
+   against the CSR and records it as the device's key on record.
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
    description, the CSR, and `auth.method`:
    - `sso` — a person signs in through the organization's single sign-on; the server binds the
@@ -71,6 +73,19 @@ The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD 
 names the organization and device of the request, and the signed-in user for an SSO enrollment
 (`FAC-SEM-044`). Every later request — batches and check-ins — is made over mutual TLS with it.
 
+**An enrolled device id is proven, not claimed.** A request for a `device.id` the server already
+has on record is a re-enrollment. The server accepts it only with one of two proofs
+(`FAC-SEM-044`):
+
+- a CSR from the **key on record**: `publicKeySha256` equals the recorded key, and the CSR's own
+  signature proves the device holds it;
+- an **enrollment token issued by device management for that `device.id`**, for a device that lost
+  its key (a wipe, a replaced board).
+
+An SSO sign-in alone is not proof. Without this rule any member of the organization could enroll as
+another person's device and make it look `tampered`. An administrator who retires a device removes
+its record, and the next enrollment of that id is a first enrollment.
+
 **Rotation and re-enrollment.** Before expiry, and SHOULD at two thirds of the lifetime, a check-in
 response asks for `certificate.action: "rotate"`. The device then sends a new CSR from the same
 hardware key and receives a new certificate under the same epoch. The device enrolls again from
@@ -88,15 +103,23 @@ evidence of tampering. Nothing is renewed silently past `notAfter`.
 
 ## Attribution
 
-**A receiver takes the device and the user from the client certificate, never from the body.** For
-a batch or a check-in:
+**A receiver takes the device from the client certificate, and the user from the binding recorded
+for each epoch — never from the body.** The server records, for every epoch it issues, the binding of
+that enrollment (`org`, `device`, `user` when one was bound). For a batch or a check-in:
 
 - `device.id` in the body MUST equal the certificate's device;
-- every event's `user.id` MUST equal the certificate's user, or be absent when the certificate binds
-  none.
+- every event's `user.id` MUST equal the user bound to **the event's epoch**, or be absent when that
+  epoch was issued with no user;
+- an event of an epoch with no recorded binding for this device is refused.
+
+So when a device is re-enrolled to another person:
+
+- events of the earlier epoch, still in the buffer, stay attributable to the person they belong to;
+- events of an unassigned period carry no user;
+- only events of the new epoch belong to the new person.
 
 A mismatch is refused (`attribution` in the batch ack). A receiver that stores `user.id` writes the
-certificate's value (`FAC-SEM-045`). So one device can never make another look `tampered`, or
+epoch's bound value (`FAC-SEM-045`). So one device can never make another look `tampered`, or
 attribute events to another person.
 
 <a id="policy"></a>
@@ -172,7 +195,9 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   - **`dropped`**: the ranges dropped whose `buffer.overflow` event is not yet acknowledged;
   - `healthy`, and an optional `error`.
 - `policy.layers[]`: for each delivered layer (`mdm`, `server`), the revision held (0 for none) and
-  its `status` (`applied`, `applying`, `failed`). This is OpAMP's remote configuration status.
+  its `status` (`applied`, `applying`, `failed`). This is OpAMP's remote configuration status. The
+  `server` layer is always reported, revision 0 when none arrived (schema), so a device cannot hide a
+  revision by omitting the layer.
 - `certificate.serial` and `notAfter`.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, a
@@ -222,6 +247,8 @@ computed by merging ranges, never seq by seq ([`tamperEvidence`](../../src/devic
   pending — its overflow may still be buffered;
 - **an epoch the server never issued** to the device;
 - **a collector counter that went back**: a `lastSeq` below a seq already held;
+- **a buffer floor that went back**: a `bufferedFrom` below one the device reported before. Events
+  leave a buffer only by acknowledgement or by an overflow, so the floor only rises;
 - **a policy revision that went back**: a revision below one the device acknowledged since it last
   enrolled.
 
@@ -236,8 +263,8 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a trusted key, stays in its organization and layer, and moves its revision forward; a user layer is never delivered |
 | `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default — with one layer per source and no lock in the user layer |
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| `FAC-SEM-044` | `device-enrollment` | the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
-| `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device, and every event's user is the certificate's user, or absent when it binds none |
+| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
+| `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
 
 Each kind checks one input:
 
@@ -245,9 +272,9 @@ Each kind checks one input:
 |---|---|
 | `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey}]}`; `publicKey` is the raw 32-byte Ed25519 key in base64 |
 | `device-policy-resolution` | `{layers, effective}` |
-| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted}]}, batch?, checkIn?, effective?, health}` |
-| `device-enrollment` | `{request, response, issuedEpochs?}` |
-| `device-attribution` | `{binding, batch?, checkIn?}` |
+| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
+| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?}}` |
+| `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are
 `fixtures/semantic/device-*`. Tests: `test/device-rules.test.ts`.

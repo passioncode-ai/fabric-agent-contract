@@ -1,8 +1,8 @@
 import { createPublicKey, verify } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
-import { overflowRanges } from "./activity-rules.js";
+import { type StreamState, mergeStreams } from "./activity-rules.js";
 import { canonicalJson } from "./settings-backup.js";
-import { type SeqRange, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
+import { rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
@@ -121,33 +121,16 @@ export interface Evidence { instancePath: string; message: string }
 
 const num = (x: unknown) => (typeof x === "number" ? x : 0);
 
-/** What a receiver holds about one stream across batches: seqs held (received, accepted or rejected) and seqs accounted for by overflows. */
-export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[] }
+export type { StreamState } from "./activity-rules.js";
 
 /** What a receiver knows about one device before a batch or a check-in. The epochs and the policy baseline are reset by each enrollment. */
 export interface DeviceState { deviceId: string; epochs: number[]; policyBaseline: Partial<Record<"mdm" | "server", number>>; streams: StreamState[] }
 
 const keyOf = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
 
-/** The device state after `batch` and `checkIn`: held seqs, overflow ranges and the dropped ranges a check-in reports, merged per stream. */
+/** The device state after `batch` and `checkIn` — the same stream state the batch ack is computed from (`mergeStreams`). */
 export function mergeDeviceState(known: DeviceState, batch: JsonObject | null, checkIn: JsonObject | null): DeviceState {
-  const streams = new Map<string, StreamState>();
-  for (const s of known.streams) streams.set(keyOf(s.collector as unknown as JsonObject), { collector: s.collector, held: [...s.held], accounted: [...s.accounted] });
-  const stream = (collector: JsonObject) => {
-    const key = keyOf(collector);
-    let s = streams.get(key);
-    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [] }; streams.set(key, s); }
-    return s;
-  };
-  for (const event of batch && Array.isArray(batch.events) ? batch.events.filter(isObject) : []) {
-    const s = stream(isObject(event.collector) ? event.collector : {});
-    s.held.push([num(event.seq), num(event.seq)]);
-    s.accounted.push(...overflowRanges(event));
-  }
-  for (const c of checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : []) {
-    stream(isObject(c.collector) ? c.collector : {}).accounted.push(...rangesOf(c.dropped));
-  }
-  return { ...known, streams: [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted) })) };
+  return { ...known, streams: mergeStreams(known.streams, batch, checkIn) };
 }
 
 /**
@@ -157,8 +140,9 @@ export function mergeDeviceState(known: DeviceState, batch: JsonObject | null, c
  * every seq below `bufferedFrom` was sent or dropped, so a seq there that is neither held nor accounted
  * for by an overflow or the check-in's `dropped` ranges is evidence. So are an epoch the server never
  * issued to the device, a collector counter below a seq already held, and a policy revision below the
- * baseline of the current enrollment. A reinstall re-enrolls, takes a new epoch and starts at seq 1,
- * which is none of these.
+ * baseline of the current enrollment, and a `bufferedFrom` below one the device reported before (a
+ * buffer floor only rises). A reinstall re-enrolls, takes a new epoch and starts at seq 1, which is
+ * none of these.
  */
 export function tamperEvidence(known: DeviceState, batch: JsonObject | null, checkIn: JsonObject | null): Evidence[] {
   const evidence: Evidence[] = [];
@@ -173,6 +157,7 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
     if (before !== undefined && num(event.seq) > before + 1) evidence.push({ instancePath: `/batch/events/${index}/seq`, message: `seqs ${before + 1}…${num(event.seq) - 1} of ${key} are missing inside one batch` });
     last.set(key, num(event.seq));
   });
+  const before = new Map(known.streams.map((s) => [keyOf(s.collector as unknown as JsonObject), s.bufferedFrom]));
   const state = mergeDeviceState(known, batch, checkIn);
   const byKey = new Map(state.streams.map((s) => [keyOf(s.collector as unknown as JsonObject), s]));
   const collectors = checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : [];
@@ -183,6 +168,8 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
     const s = byKey.get(key);
     const highest = s && s.held.length ? s.held[s.held.length - 1]![1] : 0;
     if (num(c.lastSeq) < highest) evidence.push({ instancePath: `/checkIn/collectors/${i}/lastSeq`, message: `${key} reports seq ${num(c.lastSeq)}, below ${highest}, which was already received` });
+    const floorBefore = before.get(key);
+    if (typeof floorBefore === "number" && num(c.bufferedFrom) < floorBefore) evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `${key} reports its buffer from ${num(c.bufferedFrom)}, below ${floorBefore} it reported before: a buffer floor only rises` });
     if (num(c.bufferedFrom) > num(c.lastSeq) + 1) evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `${key} reports a buffer that starts after its last seq` });
     const floor = Math.min(num(c.bufferedFrom), num(c.lastSeq) + 1) - 1;
     for (const [from, to] of uncovered([...(s?.held ?? []), ...(s?.accounted ?? [])], 1, floor)) {
@@ -206,7 +193,12 @@ const asState = (value: unknown): DeviceState => {
     deviceId: String(k.deviceId ?? ""),
     epochs: Array.isArray(k.epochs) ? k.epochs.filter((e): e is number => typeof e === "number") : [],
     policyBaseline: isObject(k.policyBaseline) ? k.policyBaseline as DeviceState["policyBaseline"] : {},
-    streams: streams.map((s) => ({ collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"], held: rangesOf(s.held), accounted: rangesOf(s.accounted) }))
+    streams: streams.map((s) => ({
+      collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"],
+      held: rangesOf(s.held),
+      accounted: rangesOf(s.accounted),
+      ...(typeof s.bufferedFrom === "number" ? { bufferedFrom: s.bufferedFrom } : {})
+    }))
   };
 };
 
@@ -233,7 +225,14 @@ const DAY_MS = 86_400_000;
 /** The longest a device certificate may live (DEC-0031). */
 export const MAX_CERTIFICATE_DAYS = 30;
 
-/** FAC-SEM-044: `{request, response, issuedEpochs?}` — the certificate is short-lived and bound to what enrolled, and the epoch is new. */
+/**
+ * FAC-SEM-044: `{request, response, issuedEpochs?, enrolled?, token?}` — the certificate is short-lived and bound to what
+ * enrolled, and the epoch is new. `enrolled` is the record the server holds for the request's `device.id` (`{keySha256}`),
+ * absent for a first enrollment; `token` is the server's record of the enrollment token the request names
+ * (`{tokenId, deviceId?}`). Re-enrolling a device that is already enrolled needs proof that it is that device: a CSR
+ * from the key on record, or a device-management token issued for that device. Otherwise any member could enroll as
+ * another person's device and make it look tampered.
+ */
 function enrollment(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-044", instancePath, message });
@@ -249,32 +248,50 @@ function enrollment(value: JsonObject): Finding[] {
   const from = Date.parse(String(certificate.notBefore ?? "")), to = Date.parse(String(certificate.notAfter ?? ""));
   if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
   else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
+  if (isObject(value.enrolled)) {
+    const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
+    const token = isObject(value.token) ? value.token : {};
+    const sameKey = typeof key === "string" && key === value.enrolled.keySha256;
+    const deviceToken = auth.method === "enrollment-token" && token.tokenId === auth.tokenId && token.deviceId === id(request.device);
+    if (!sameKey && !deviceToken) flag("/request/device/id", "this device is already enrolled: re-enrollment needs a CSR from the key on record or a device-management token issued for this device");
+  }
   const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];
   if (issued.length && num(response.streamEpoch) <= Math.max(...issued)) flag("/response/streamEpoch", `an enrollment issues an epoch above every epoch issued to the device before (${Math.max(...issued)})`);
   return findings;
 }
 
 /**
- * FAC-SEM-045: `{binding, batch? , checkIn?}` — a receiver attributes what a device sends to the client
- * certificate: the body's device is the certificate's device, and every event's user is the
- * certificate's user (or none when the certificate binds none).
+ * FAC-SEM-045: `{binding, epochs, batch?, checkIn?}` — a receiver attributes what a device sends by its client
+ * certificate and by the binding recorded for each epoch. `binding` is the certificate's (`{org, device, user?}`);
+ * `epochs` lists `{epoch, binding}` for every epoch issued to the device. The body's device is the certificate's
+ * device. An event's user is the user bound when its epoch was issued — so events of an earlier epoch, still in the
+ * buffer after the device was re-enrolled to another person, stay with the person they belong to, and events of an
+ * unassigned epoch carry no user.
  */
 function attribution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-045", instancePath, message });
   const binding = isObject(value.binding) ? value.binding : {};
   const device = isObject(binding.device) ? binding.device.id : undefined;
-  const user = isObject(binding.user) ? binding.user.id : undefined;
   for (const doc of ["batch", "checkIn"] as const) {
     const body = isObject(value[doc]) ? value[doc] as JsonObject : null;
     if (!body) continue;
     if (!isObject(body.device) || body.device.id !== device) flag(`/${doc}/device/id`, "the device is the client certificate's device, never the body's word");
   }
+  const epochs = new Map<number, JsonObject>();
+  for (const entry of Array.isArray(value.epochs) ? value.epochs.filter(isObject) : []) {
+    const bound = isObject(entry.binding) ? entry.binding : {};
+    if (isObject(bound.device) && bound.device.id === device) epochs.set(num(entry.epoch), bound);
+  }
   const batch = isObject(value.batch) ? value.batch : {};
   (Array.isArray(batch.events) ? batch.events.filter(isObject) : []).forEach((event, i) => {
+    const epoch = isObject(event.collector) ? num(event.collector.epoch) : 0;
+    const bound = epochs.get(epoch);
+    if (!bound) { flag(`/batch/events/${i}/collector/epoch`, `no binding is recorded for epoch ${epoch} of this device`); return; }
     if (!isObject(event.user)) return;
-    if (user === undefined) flag(`/batch/events/${i}/user`, "the certificate binds no user, so an event names none");
-    else if (event.user.id !== user) flag(`/batch/events/${i}/user/id`, "an event's user is the client certificate's user");
+    const user = isObject(bound.user) ? bound.user.id : undefined;
+    if (user === undefined) flag(`/batch/events/${i}/user`, `epoch ${epoch} was issued with no user bound, so its events name none`);
+    else if (event.user.id !== user) flag(`/batch/events/${i}/user/id`, `an event's user is the user bound when epoch ${epoch} was issued`);
   });
   return findings;
 }

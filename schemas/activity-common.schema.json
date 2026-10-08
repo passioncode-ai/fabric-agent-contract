@@ -23,8 +23,8 @@
     },
     "sourceKey": {
       "type": "string",
-      "pattern": "^(?![/~\\\\])(?![A-Za-z]:[\\\\/])(?!.*(/Users/|/home/|\\\\Users\\\\))[^\\s]{1,256}$",
-      "description": "The source's own id of a record: an id, a hash, or a path relative to the runtime's own directory. Never an absolute or home path."
+      "pattern": "^(hmac-sha256:[a-f0-9]{64}|(?!.*Users[-_./\\\\:%])(?!.*[-_./\\\\:%]home[-_./\\\\:%])[A-Za-z0-9][A-Za-z0-9._:~#-]{0,255})$",
+      "description": "The source's own id of a record (a request id, a line uuid), or hmac-sha256: of a path-derived key under the device's telemetry key. Never a path: no slash, and no encoded home-directory fragment (FAC-SEM-037)."
     },
     "seq": {
       "type": "integer",
@@ -286,8 +286,8 @@
     },
     "branch": {
       "type": "string",
-      "pattern": "^([A-Za-z0-9][A-Za-z0-9._/-]{0,99}|sha256:[a-f0-9]{64})$",
-      "description": "A branch name of at most 100 characters from a fixed set, or its sha256: when the organization's policy asks for hashed branches."
+      "pattern": "^([A-Za-z0-9][A-Za-z0-9._/-]{0,99}|hmac-sha256:[a-f0-9]{64})$",
+      "description": "A branch name of at most 100 characters from a fixed set, or hmac-sha256: of it under the device's telemetry key when the organization's policy asks for hashed branches."
     },
     "state": {
       "enum": [

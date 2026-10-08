@@ -51,9 +51,14 @@ Telemetry events and check-ins that carry a `user.id`, or come from a device bou
   let the person read it.
 
 The contract defines no score, rank or comparison of persons, and no field for one. Presence-derived
-values — `attended`, the `awaiting_input` and `idle` states and the durations summed from them —
-are **estimates** produced by the `method` the event names, with the `idleThresholdSeconds` it used.
-They are not observations of a person.
+values are **estimates**, not observations of a person:
+
+- an interval's `state` (each of `agent_working`, `awaiting_input` and `idle`);
+- its `attended` flag;
+- the durations a summary sums from them.
+
+Each one comes from the `method` the event names, with the `idleThresholdSeconds` it used. The
+[kinds](#kinds) below use the same wording.
 
 ## Telemetry event
 
@@ -68,18 +73,18 @@ policy key names).
 | `eventId` | The idempotency key ([below](#event-id)). |
 | `kind` | `session.interval`, `usage.line`, `buffer.overflow`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
-| `sourceKey` | The source's own id of the record, present exactly when `eventId` is derived. An id, a hash, or a path relative to the runtime's own directory — never an absolute or home path (schema). |
+| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
 | `occurred` | The device's wall clock when it happened. |
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
 | `received` | Set by the receiver when it stores the event. A device never sends it (the batch schema refuses it). |
-| `user.id` | Optional and opaque: an organization membership id or a local profile id. The receiver sets it from the client certificate ([attribution](devices.md#attribution)). The pattern refuses `@` and spaces, so an e-mail address does not fit; a name-like id does, so issuing opaque values is the issuer's duty. |
+| `user.id` | Optional and opaque: an organization membership id or a local profile id. The receiver sets it from the binding recorded for the event's epoch ([attribution](devices.md#attribution)). The pattern refuses `@` and spaces, so an e-mail address does not fit; a name-like id does, so issuing opaque values is the issuer's duty. |
 | `session.id`, `session.parent` | The runtime's session, and the session that launched it when one agent started another. |
 | `project.id` | The project the session worked in, as the organization names it. |
 | `runtime.name`, `runtime.version` | The runtime (open vocabulary: `claude_code`, `codex`, …). |
 | `skill` | The skill the work ran under, when the runtime reports one (Claude Code's `skill.name`). |
 | `launch.via` | How the session was started: `fabric`, `terminal`, `ide`, `desktop`, `switchboard`, `cron`, `agent`, `other`. |
-| `git.branch` | The branch, at most 100 characters from `[A-Za-z0-9._/-]`, or its `sha256:` when the policy key `telemetry.git_branch` says `hash`; omitted when it says `omit`. |
+| `git.branch` | The branch, at most 100 characters from `[A-Za-z0-9._/-]`. When the policy key `telemetry.git_branch` says `hash`, it is `hmac-sha256:` of the name under the device's telemetry key, so a dictionary of common branch names cannot reverse it. When the key says `omit`, the field is absent. |
 | `task.ref.system`, `task.ref.key` | The task the session served, in the tracker that owns it. |
 | `run.task` | The host's run or work-graph node, when a host launched the session. |
 | `data` | The kind's own fields. |
@@ -105,12 +110,13 @@ Three clocks are kept apart on purpose, and a reader never replaces one with ano
 and `runtime`. `data`:
 
 - `start` and `end` (`end` ≥ `start`, `FAC-SEM-039`);
-- `state`: `agent_working`, `awaiting_input` or `idle`;
-- `method`: how the state was estimated (open vocabulary: `otel`, `hook`, `transcript`, `rollout`,
+- `state`: `agent_working`, `awaiting_input` or `idle` — an estimate by `method`
+  ([purpose](#purpose));
+- `method`: what produced the estimate (open vocabulary: `otel`, `hook`, `transcript`, `rollout`,
   `process`, `switchboard`);
 - optional `idleThresholdSeconds`: the silence after which `agent_working` becomes `idle`;
-- optional `attended`: an estimate of whether the session's interface had a person present, sent
-  only when the method can tell;
+- optional `attended`: an estimate by `method` of whether the session's interface reported a person
+  present, sent only when the method can tell;
 - optional `outcome`, on the last interval of a session: how it ended (open vocabulary: `completed`,
   `failed`, `abandoned`, `interrupted`, `unknown`).
 
@@ -158,8 +164,10 @@ depth is split into words — at `camelCase` boundaries, `_`, `-` and `.` — an
 - a word starts with a prefix that ranks a person's standing or output;
 - the key is `user` anywhere but the event's own `/user`.
 
-A value that holds an absolute or home path (`/Users/`, `/home/`, `~/`, `C:\Users\`) is refused
-too. The word lists live in [`src/activity-rules.ts`](../../src/activity-rules.ts)
+A value that holds a home directory is refused too, in plain and in encoded form: `/Users/<name>`,
+`/home/<name>`, `~/`, `C:\Users\<name>`, and the forms runtimes write into file names
+(`-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, `%2FUsers%2F`) — `HOME_PATH` in the same
+module. A branch such as `feature/home-page` is not a home directory. The word lists live in [`src/activity-rules.ts`](../../src/activity-rules.ts)
 (`CONTENT_WORDS`, `PERSON_WORDS`, `PERSON_PAIRS`, `PERSON_PREFIXES`). A receiver MUST refuse such an
 event (`rejected[].reason` `content-field` or `person-field`) rather than strip it, so the collector
 that produced it is fixed.
@@ -180,9 +188,17 @@ A collector MUST drop content and person attributes at the source. Claude Code's
   `{"key": <sourceKey>, "source": <source>}`, using the canonical form of
   [settings backups](service.md#settings-backup). The event carries that `sourceKey` (schema).
   `FAC-SEM-039` checks the derivation ([`activityEventId`](../../src/activity-rules.ts)).
-- When the source has no id of its own, the collector uses the tuple that identifies the record in
-  it as `sourceKey`, relative to the runtime's own directory or hashed. For a rollout line that is
-  the file's relative name and the line's byte offset.
+- When the source has no id of its own, the record is identified by its place in a file. A
+  **path-derived key MUST be hashed**: the `sourceKey` is `hmac-sha256:` and the hex HMAC-SHA-256 of
+  the canonical JSON `{"offset": <byte offset>, "path": <path relative to the runtime's own
+  directory>}`. A plain relative path leaks the person: Claude Code's project directories encode
+  the home directory into the name (`-Users-<name>-…`).
+- The HMAC key is the device's **telemetry key** ([`pathSourceKey`](../../src/activity-rules.ts),
+  [`hashedBranch`](../../src/activity-rules.ts)): 32 random bytes the collector generates once per
+  device, keeps beside its stream state, and never sends. A re-read on the same device yields the
+  same key. The same telemetry key hashes `git.branch`. A collector that loses its telemetry key has
+  lost its stream state too, and re-enrolls. Usage lines it reads again are still counted once by
+  their `dedupeKey`.
 - An event the collector originates itself — an interval it computed, an overflow — carries a ULID
   ([spec](https://github.com/ulid/spec)) and no `sourceKey`. The ULID is persisted with the event
   before the first send.
@@ -219,8 +235,9 @@ A device sends `{protocol, device.id, batchId?, sent, events[1..1000]}` over its
 mutual-TLS channel. **The receiver attributes the batch to the client certificate**, not to the body:
 
 - `device.id` MUST equal the certificate's device;
-- every event's `user.id` MUST equal the certificate's user, or be absent when the certificate binds
-  none.
+- every event's `user.id` MUST equal the user bound when the event's epoch was issued, or be absent
+  when that epoch was issued with no user — so events of an earlier epoch stay with the person they
+  belong to after the device is re-enrolled to someone else.
 
 A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The receiver answers:
 
@@ -231,15 +248,30 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
 - `rejected[]` — `eventId` and `reason`: `schema`, `content-field`, `person-field`, `stream`,
   `attribution`. **A rejected event is consumed with a rejection.** The collector does not resend
   it, and the stream does not stall on it.
-- `acks[]` — for every stream the batch carried, the highest seq up to which every seq is
-  **consumed**: held, rejected, or named by an overflow's dropped ranges. Seq 0 means nothing yet.
-  An ack names no more and no less (`FAC-SEM-039`;
-  [`contiguousAcks`](../../src/activity-rules.ts), which merges ranges and never walks seq by seq).
+- `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
+  **everything the receiver holds for the stream across batches** — the same state it judges tamper
+  evidence from ([`mergeStreams`](../../src/activity-rules.ts),
+  [devices](devices.md#tamper-evidence)):
+  - `seq` is the highest seq up to which every seq is **consumed**: held, rejected, or accounted for
+    by an overflow, whichever batch brought it. Seq 0 means nothing yet.
+  - `held` lists the consumed ranges above `seq`.
 
-A device keeps every event until an ack covers it, then MAY drop it. When its buffer fills, it drops
-the oldest unacknowledged events and emits one `buffer.overflow` naming them. It never renumbers. The
-check-in reports dropped ranges whose overflow is not yet acknowledged, so a receiver can tell a
-pending overflow from a hidden gap ([devices](devices.md#tamper-evidence)).
+  An ack names no more and no less (`FAC-SEM-039`; [`contiguousAcks`](../../src/activity-rules.ts),
+  which merges ranges and never walks seq by seq). Example: a receiver holds 5…1004 from earlier
+  batches and receives the overflow at 1005 that accounts for 1…4. The ack is 1005, not 4.
+
+**What the device keeps, and where the next batch starts.**
+
+- A device keeps every event above `seq` that is not in a `held` range, and MAY drop the rest.
+- The next batch starts at the device's oldest kept event that it has not yet sent on this
+  connection. Events already in flight are not sent again until their batch fails or goes
+  unacknowledged; then the device sends again from its oldest kept event.
+- So a gap at the head of a stream, whose overflow is still buffered behind newer events, does not
+  stall delivery: the device keeps sending forward, and the ack jumps when the overflow arrives.
+- When its buffer fills, a device drops the oldest kept events and emits one `buffer.overflow`
+  naming them. It never renumbers.
+- The check-in reports dropped ranges whose overflow is not yet acknowledged, so a receiver can tell
+  a pending overflow from a hidden gap ([devices](devices.md#tamper-evidence)).
 
 ## Summary
 
@@ -323,13 +355,13 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no absolute or home path in any value |
+| `FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no home directory, plain or encoded, in any value |
 | `FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced |
-| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, and each stream's ack is its highest consumed seq |
+| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; one cell per agent × skill × project × day × outcome; every day inside `from`…`to` |
 
-`activity-ack` checks `{known?, batch, ack}`: the receiver's positions before the batch, the batch,
-and the answer.
+`activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
+batch (`[{collector, held, accounted}]`), then the batch, then the answer.
 
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.

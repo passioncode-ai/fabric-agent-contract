@@ -1,41 +1,13 @@
 {
-  "description": "A batch under another device's id, with an event under another user's id: FAC-SEM-045.",
-  "kind": "device-attribution",
-  "expect": [
-    "FAC-SEM-045"
-  ],
+  "description": "The receiver holds 5…1004 but not 1…4 yet: the ack stays at 0 and names 5…1004 as held, so the device may drop them and sends 1005 next.",
+  "kind": "activity-ack",
+  "expect": [],
   "input": {
-    "binding": {
-      "org": {
-        "id": "org-7f3a"
-      },
-      "user": {
-        "id": "m-4821"
-      },
-      "device": {
-        "id": "dev-01j9a"
-      }
-    },
-    "epochs": [
-      {
-        "epoch": 2,
-        "binding": {
-          "org": {
-            "id": "org-7f3a"
-          },
-          "user": {
-            "id": "m-4821"
-          },
-          "device": {
-            "id": "dev-01j9a"
-          }
-        }
-      }
-    ],
+    "known": [],
     "batch": {
       "protocol": "fabric-activity/0.1",
       "device": {
-        "id": "dev-other"
+        "id": "dev-01j9a"
       },
       "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
       "sent": "2026-10-07T09:32:00Z",
@@ -49,12 +21,12 @@
             "id": "cc-otel",
             "epoch": 2
           },
-          "seq": 41,
+          "seq": 5,
           "occurred": "2026-10-07T09:14:05Z",
           "bootId": "boot-7c41e2",
           "monotonicNs": "183772004511230",
           "user": {
-            "id": "m-9999"
+            "id": "m-4821"
           },
           "session": {
             "id": "cc-sess-5d1e"
@@ -87,6 +59,32 @@
             "idleThresholdSeconds": 300,
             "attended": true
           }
+        }
+      ]
+    },
+    "ack": {
+      "protocol": "fabric-activity/0.1",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
+      "received": "2026-10-07T09:32:01Z",
+      "accepted": 1,
+      "duplicates": 0,
+      "rejected": [],
+      "acks": [
+        {
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "seq": 0,
+          "held": [
+            {
+              "fromSeq": 5,
+              "toSeq": 5
+            }
+          ]
         }
       ]
     }

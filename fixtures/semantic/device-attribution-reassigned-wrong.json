@@ -1,5 +1,5 @@
 {
-  "description": "A batch under another device's id, with an event under another user's id: FAC-SEM-045.",
+  "description": "Old-epoch events attributed to the new person, and an unassigned-epoch event given a user: FAC-SEM-045.",
   "kind": "device-attribution",
   "expect": [
     "FAC-SEM-045"
@@ -10,7 +10,7 @@
         "id": "org-7f3a"
       },
       "user": {
-        "id": "m-4821"
+        "id": "m-5150"
       },
       "device": {
         "id": "dev-01j9a"
@@ -30,12 +30,37 @@
             "id": "dev-01j9a"
           }
         }
+      },
+      {
+        "epoch": 3,
+        "binding": {
+          "org": {
+            "id": "org-7f3a"
+          },
+          "device": {
+            "id": "dev-01j9a"
+          }
+        }
+      },
+      {
+        "epoch": 4,
+        "binding": {
+          "org": {
+            "id": "org-7f3a"
+          },
+          "user": {
+            "id": "m-5150"
+          },
+          "device": {
+            "id": "dev-01j9a"
+          }
+        }
       }
     ],
     "batch": {
       "protocol": "fabric-activity/0.1",
       "device": {
-        "id": "dev-other"
+        "id": "dev-01j9a"
       },
       "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
       "sent": "2026-10-07T09:32:00Z",
@@ -54,7 +79,7 @@
           "bootId": "boot-7c41e2",
           "monotonicNs": "183772004511230",
           "user": {
-            "id": "m-9999"
+            "id": "m-5150"
           },
           "session": {
             "id": "cc-sess-5d1e"
@@ -86,6 +111,45 @@
             "method": "otel",
             "idleThresholdSeconds": 300,
             "attended": true
+          }
+        },
+        {
+          "protocol": "fabric-activity/0.1",
+          "eventId": "01K6Z3W9M8N7P6Q5R4S3T2V1WX",
+          "kind": "session.interval",
+          "source": "claude_code.otel",
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 3
+          },
+          "seq": 1,
+          "occurred": "2026-10-07T09:31:40Z",
+          "bootId": "boot-7c41e2",
+          "monotonicNs": "184823500000000",
+          "user": {
+            "id": "m-5150"
+          },
+          "session": {
+            "id": "cc-sess-77aa",
+            "parent": "cc-sess-5d1e"
+          },
+          "project": {
+            "id": "example-project"
+          },
+          "runtime": {
+            "name": "claude_code",
+            "version": "2.1.287"
+          },
+          "launch": {
+            "via": "agent"
+          },
+          "data": {
+            "start": "2026-10-07T09:20:02Z",
+            "end": "2026-10-07T09:31:40Z",
+            "state": "awaiting_input",
+            "method": "otel",
+            "idleThresholdSeconds": 300,
+            "outcome": "completed"
           }
         }
       ]

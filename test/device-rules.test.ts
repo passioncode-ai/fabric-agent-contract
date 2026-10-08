@@ -142,6 +142,12 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     ]));
   });
 
+  it("does not accept a token issued for another device as proof", () => {
+    const fixture = load("semantic/device-enrollment-mdm-token-for-device.json").input;
+    fixture.token.deviceId = "dev-other";
+    expect(paths("device-enrollment", fixture)).toContain("FAC-SEM-044 /request/device/id");
+  });
+
   it("lets an unattended enrollment token leave the user unbound", () => {
     const fixture = load("semantic/device-enrollment-ok.json").input;
     fixture.request.auth = { method: "enrollment-token", tokenId: "tok-mdm-01" };
@@ -151,10 +157,16 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
 });
 
 describe("FAC-SEM-045: attribution comes from the client certificate", () => {
-  it("refuses a check-in under another device and an event with a user the certificate does not bind", () => {
+  it("refuses a check-in under another device, and an event of an epoch with no recorded binding", () => {
     const fixture = load("semantic/device-attribution-ok.json").input;
     fixture.checkIn.device.id = "dev-other";
-    delete fixture.binding.user;
-    expect(paths("device-attribution", fixture)).toEqual(expect.arrayContaining(["FAC-SEM-045 /checkIn/device/id", "FAC-SEM-045 /batch/events/0/user"]));
+    fixture.epochs = [];
+    expect(paths("device-attribution", fixture)).toEqual(expect.arrayContaining(["FAC-SEM-045 /checkIn/device/id", "FAC-SEM-045 /batch/events/0/collector/epoch"]));
+  });
+
+  it("ignores an epoch binding recorded for another device", () => {
+    const fixture = load("semantic/device-attribution-ok.json").input;
+    fixture.epochs[0].binding.device.id = "dev-other";
+    expect(paths("device-attribution", fixture)).toContain("FAC-SEM-045 /batch/events/0/collector/epoch");
   });
 });

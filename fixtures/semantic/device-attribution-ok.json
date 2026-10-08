@@ -1,5 +1,5 @@
 {
-  "description": "The batch and the check-in name the certificate's device, and every event names the certificate's user or none.",
+  "description": "The batch and the check-in name the certificate's device, and every event names the user bound to its epoch.",
   "kind": "device-attribution",
   "expect": [],
   "input": {
@@ -14,6 +14,22 @@
         "id": "dev-01j9a"
       }
     },
+    "epochs": [
+      {
+        "epoch": 2,
+        "binding": {
+          "org": {
+            "id": "org-7f3a"
+          },
+          "user": {
+            "id": "m-4821"
+          },
+          "device": {
+            "id": "dev-01j9a"
+          }
+        }
+      }
+    ],
     "batch": {
       "protocol": "fabric-activity/0.1",
       "device": {

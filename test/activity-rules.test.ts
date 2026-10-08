@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { activityEventId, contiguousAcks, forbiddenKeys, keyWords } from "../src/activity-rules.js";
+import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, pathSourceKey } from "../src/activity-rules.js";
 import { contiguousFrom, mergeRanges, uncovered } from "../src/seq-ranges.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -37,6 +37,19 @@ describe("activity semantic fixtures (FAC-SEM-037…040)", () => {
 });
 
 describe("FAC-SEM-037: no content, no person, no home path", () => {
+  it("closes the re-review's gaps and spares measurements and counts", () => {
+    const caught = { fullname: 1, owner: 1, query: 1, searchTerms: 1, nickName: 1, assignee: 1 };
+    expect(forbiddenKeys(caught, "", new Set()).map((f) => f.key)).toEqual(Object.keys(caught));
+    expect(forbiddenKeys({ performanceMs: 12, reviewCount: 3, durationMs: 4, focused: true }, "", new Set())).toEqual([]);
+  });
+
+  it("finds a home directory in the encoded forms runtimes write into file names, and not in an ordinary branch", () => {
+    for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes"]) {
+      expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
+    }
+    for (const value of ["feature/home-page", "homework-17", "users-guide", "req_011CT"]) expect(forbiddenKeys({ v: value }, "", new Set()), value).toEqual([]);
+  });
+
   it("splits keys at camelCase, underscores, hyphens and dots", () => {
     expect(keyWords("displayName")).toEqual(["display", "name"]);
     expect(keyWords("user_id")).toEqual(["user", "id"]);
@@ -103,6 +116,22 @@ describe("FAC-SEM-039: event ids, streams and acknowledgements", () => {
     expect(load("positive/telemetry-event-usage.json").eventId).toBe(id);
   });
 
+  it("hashes path-derived keys and branches under the device's telemetry key, so they pass the schema and differ per device", () => {
+    const deviceA = new Uint8Array(32).fill(7), deviceB = new Uint8Array(32).fill(9);
+    const path = "projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl";
+    const keyA = pathSourceKey(deviceA, path, 1024);
+    expect(keyA).toMatch(/^hmac-sha256:[a-f0-9]{64}$/);
+    expect(keyA).toBe(pathSourceKey(deviceA, path, 1024));
+    expect(keyA).not.toBe(pathSourceKey(deviceB, path, 1024));
+    expect(keyA).not.toContain("Users");
+    const event = load("positive/telemetry-event-usage.json");
+    event.sourceKey = keyA;
+    event.eventId = activityEventId(event.source, keyA);
+    event.git = { branch: hashedBranch(deviceA, "fix/ivan-login") };
+    expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/telemetry-event.schema.json`, event).valid).toBe(true);
+    expect(codes("telemetry-event", event)).toEqual([]);
+  });
+
   it("refuses an event whose sourceKey does not derive its id", () => {
     const event = load("positive/telemetry-event-usage.json");
     event.eventId = `sha256:${"0".repeat(64)}`;
@@ -126,12 +155,21 @@ describe("FAC-SEM-039: event ids, streams and acknowledgements", () => {
     expect(paths("activity-batch", batch)).toContain("FAC-SEM-039 /events/2/eventId");
   });
 
-  it("acks the highest consumed seq, counting an overflow's ranges, and keys streams by device", () => {
+  it("acks the highest consumed seq over all batches, counting an overflow's ranges, and names held ranges above it", () => {
     const batch = load("positive/activity-batch.json");
-    const known = [{ collector: { id: "cc-otel", epoch: 2 }, seq: 37 }];
-    expect(contiguousAcks(known, batch)).toEqual([{ collector: { id: "cc-otel", epoch: 2 }, seq: 44 }, { collector: { id: "switchboard", epoch: 2 }, seq: 0 }]);
+    const known = [{ collector: { id: "cc-otel", epoch: 2 }, held: [[1, 37]] as Array<[number, number]>, accounted: [] }];
+    expect(contiguousAcks(known, batch)).toEqual([
+      { collector: { id: "cc-otel", epoch: 2 }, seq: 44, held: [] },
+      { collector: { id: "switchboard", epoch: 2 }, seq: 0, held: [[7, 7]] }
+    ]);
     batch.events.splice(3, 1);
-    expect(contiguousAcks(known, batch)[0]?.seq).toBe(37);
+    expect(contiguousAcks(known, batch)[0]).toMatchObject({ seq: 37, held: [[41, 43]] });
+  });
+
+  it("jumps the ack when a later overflow accounts for the head of the stream (the review's probe)", () => {
+    const batch = load("positive/activity-batch.json");
+    batch.events = [{ ...batch.events[3], seq: 1005, data: { dropped: { events: 4, ranges: [{ fromSeq: 1, toSeq: 4 }] } } }];
+    expect(contiguousAcks([{ collector: { id: "cc-otel", epoch: 2 }, held: [[5, 1004]], accounted: [] }], batch)[0]?.seq).toBe(1005);
   });
 
   it("refuses an ack that omits a stream or names another device", () => {
@@ -139,6 +177,19 @@ describe("FAC-SEM-039: event ids, streams and acknowledgements", () => {
     fixture.input.ack.acks.pop();
     fixture.input.ack.device.id = "dev-other";
     expect(paths("activity-ack", fixture.input)).toEqual(expect.arrayContaining(["FAC-SEM-039 /ack/acks", "FAC-SEM-039 /ack/device/id"]));
+  });
+});
+
+describe("batch size", () => {
+  it("refuses a batch of 1001 events (generated here rather than kept as a fixture)", () => {
+    const batch = load("positive/activity-batch.json");
+    const event = load("positive/telemetry-event-extension.json");
+    batch.events = Array.from({ length: 1001 }, (_, i) => ({ ...event, seq: i + 1 }));
+    const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/activity-batch.schema.json`, batch);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((error) => error.keyword === "maxItems")).toBe(true);
+    batch.events = batch.events.slice(0, 1000);
+    expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/activity-batch.schema.json`, batch).valid).toBe(true);
   });
 });
 

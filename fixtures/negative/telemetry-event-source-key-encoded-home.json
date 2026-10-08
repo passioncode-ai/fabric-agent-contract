@@ -1,0 +1,46 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "sha256:143ffca5ff867511f008058ab8dd756d46acecede30385b604841ad2e5a4959e",
+  "kind": "usage.line",
+  "source": "claude_code.otel",
+  "sourceKey": "projects/-Users-example-DATA-secret-proj/5d1e.jsonl:1024",
+  "collector": {
+    "id": "cc-otel",
+    "epoch": 2
+  },
+  "seq": 42,
+  "occurred": "2026-10-07T09:14:06Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "183773120004417",
+  "user": {
+    "id": "m-4821"
+  },
+  "session": {
+    "id": "cc-sess-5d1e"
+  },
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code",
+    "version": "2.1.287"
+  },
+  "skill": "code-review",
+  "run": {
+    "task": "run-77.node-3"
+  },
+  "data": {
+    "model": "claude-sonnet-5",
+    "tokens": {
+      "input": 18200,
+      "output": 2140,
+      "cacheRead": 120000,
+      "cacheWrite": 0
+    },
+    "cost": {
+      "usd": 0.1284,
+      "basis": "client-estimate"
+    },
+    "dedupeKey": "req_011CTexampleRequest0001"
+  }
+}
