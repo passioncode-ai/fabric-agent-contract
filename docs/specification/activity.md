@@ -49,6 +49,12 @@ Telemetry events and check-ins that carry a `user.id`, or come from a device bou
   retention (`retention.raw_days`, [devices](devices.md#policy)).
 - MUST record every read of a person's raw data in that person's [access log](#access-log) and MUST
   let the person read it.
+- MUST **delete** raw events when `retention.raw_days` expires. Only summaries already built from
+  them remain, and a summary has no person dimension. Raw events are not kept under any other scope
+  past their retention (operator decision 2026-10-08, DEC-0030).
+
+The operator confirmed this shape on 2026-10-08 (DEC-0030): per-person presence estimates, labelled
+by `method`; every read in the person's access log; and no scoring of persons.
 
 The contract defines no score, rank or comparison of persons, and no field for one. Presence-derived
 values are **estimates**, not observations of a person:
@@ -305,7 +311,7 @@ set of **cells** between `from` and `to` inclusive, one per combination of:
 
 A cell carries:
 
-- `counts`: `sessions`, `intervals`, `usageLines`, `unpricedLines`;
+- `counts`: `population`, `sessions`, `intervals`, `usageLines`, `unpricedLines`;
 - `durations`, each an estimate under the cell's `method` and the summary's `idleThresholdSeconds`:
   - `agentSeconds`: time spent `agent_working`;
   - `waitHumanSeconds`: time spent `awaiting_input`;
@@ -318,6 +324,27 @@ A cell carries:
 
 **There is no person dimension.** The schema names every field a cell may carry. `FAC-SEM-040`
 refuses a person key anywhere, two cells for one dimension tuple, and a day outside the range.
+
+<a id="minimum-cell"></a>
+
+**Minimum cell: k = 3** (operator decision 2026-10-08). A cell's **population** is the number of
+distinct subjects among its events. An event's subject is its `user.id` when it carries one, and its
+`session.id` otherwise ([`population`](../../src/activity-rules.ts)). So a cell counts distinct
+people where events name them, and distinct sessions where they do not; a population never exceeds
+the cell's sessions.
+
+- A cell is published only when its population is at least the summary's `minPopulation`. The
+  schema holds `minPopulation` at 3 or more.
+- A receiver folds every cell of a day that falls below the minimum into **one other cell** for that
+  day (`other: true`). The other cell carries counts, durations, method and usage, but no agent,
+  skill, project or outcome.
+- If the other cell is itself below the minimum, it is not published either. The summary counts
+  what it withheld in `suppressedCells`.
+- `FAC-SEM-040` refuses a published cell below the minimum, a population above the session count,
+  and two other cells for one day.
+
+This keeps a project that one person works on alone from identifying them through the project
+dimension.
 
 ## Access log
 
@@ -340,6 +367,22 @@ A receiver that stores activity telemetry MUST record these reads and MUST let t
 their own log. Reads of summaries, which carry no person, are not logged per subject.
 
 ## Mapping to OpenTelemetry
+
+<a id="otlp-intake"></a>
+
+**OTLP intake** (operator decision 2026-10-08). Beside HTTPS batches, a receiver MAY accept the same
+events as OTLP logs, mapped by the table below. The second intake changes no rule:
+
+- events arrive over the same enrolled mutual-TLS channel, attributed by certificate and epoch
+  ([devices](devices.md#attribution));
+- each log record is mapped back to a telemetry event and checked against the same schema and the
+  same `FAC-SEM-037`…`039` rules;
+- deduplication is the same: on (`device.id`, `eventId`), and on `dedupeKey` for usage lines, across
+  both intakes;
+- an OTLP record that does not map to a valid event is refused, as in a batch.
+
+OTLP's own acknowledgement carries no stream position, so a collector that sends over OTLP still
+learns its acks from batches or check-ins.
 
 A collector that also exports events as OpenTelemetry log records
 ([log data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/), stable) maps them as
@@ -373,7 +416,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no home directory, plain or encoded, in any value |
 | `FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced |
 | `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
-| `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; one cell per agent × skill × project × day × outcome; every day inside `from`…`to` |
+| `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted}]`), then the batch, then the answer.
@@ -383,10 +426,10 @@ batch (`[{collector, held, accounted}]`), then the batch, then the answer.
 - Rule inputs: `fixtures/semantic/telemetry-event-*` and `activity-*`.
 - Tests: `test/activity-rules.test.ts`.
 
-## Not decided here
+## Decided after the first draft
 
-- (OQ-0009 a) A minimum cell size for summaries, so that a project one person works on alone does
-  not identify them through the project dimension.
-- (OQ-0009 b) What a receiver does when raw retention expires: delete, or keep under a stricter
-  scope.
-- (OQ-0009 c) An OTLP logs endpoint carrying the same records beside HTTPS batches.
+OQ-0009 is resolved by the operator's decisions of 2026-10-08, recorded in DEC-0030:
+
+- (a) the [minimum cell](#minimum-cell) is k = 3;
+- (b) raw events are [deleted](#purpose) when their retention expires;
+- (c) [OTLP](#otlp-intake) is a permitted second intake.

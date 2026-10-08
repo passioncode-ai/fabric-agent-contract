@@ -7,6 +7,8 @@
     "id": "org-7f3a.summarizer"
   },
   "idleThresholdSeconds": 300,
+  "minPopulation": 3,
+  "suppressedCells": 0,
   "cells": [
     {
       "agent": "claude_code",
@@ -15,7 +17,8 @@
       "day": "2026-10-07",
       "outcome": "completed",
       "counts": {
-        "sessions": 2,
+        "population": 4,
+        "sessions": 6,
         "intervals": 9,
         "usageLines": 31,
         "unpricedLines": 0

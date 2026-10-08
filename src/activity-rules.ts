@@ -119,6 +119,21 @@ export const streamKey = (device: string, collector: JsonObject) => `${device}/$
 const num = (x: unknown) => (typeof x === "number" ? x : 0);
 const data = (event: JsonObject) => (isObject(event.data) ? event.data : {});
 const MAX_U64 = (1n << 64n) - 1n;
+/** The smallest population a published summary cell may cover (operator decision 2026-10-08, DEC-0030). */
+export const MIN_POPULATION = 3;
+
+/**
+ * The population of a set of events: distinct subjects, where an event's subject is its `user.id` when it carries one
+ * and its `session.id` otherwise. A summary cell is published only when its population is at least MIN_POPULATION.
+ */
+export function population(list: readonly JsonObject[]): number {
+  const subjects = new Set<string>();
+  for (const event of list) {
+    if (isObject(event.user) && typeof event.user.id === "string") subjects.add(`user:${event.user.id}`);
+    else if (isObject(event.session) && typeof event.session.id === "string") subjects.add(`session:${event.session.id}`);
+  }
+  return subjects.size;
+}
 
 /** FAC-SEM-037: no content key, no person key and no home path at any depth, extension data included. */
 function noContentOrPerson(value: JsonObject, roots: string[]): Finding[] {
@@ -322,7 +337,8 @@ function ackIntegrity(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** FAC-SEM-040: a summary has no person dimension, one cell per dimension tuple, and its days inside its range. */
+/** FAC-SEM-040: a summary has no person dimension, publishes no cell below its minimum population, has one cell per
+ *  dimension tuple and at most one other cell per day, and keeps its days inside its range. */
 function summaryShape(value: JsonObject): Finding[] {
   const findings: Finding[] = forbiddenKeys(value, "", new Set()).map(({ path, key, kind }) => ({
     code: "FAC-SEM-040", instancePath: path, message: kind === "path" ? "a summary carries no path" : `${key}: a summary has no person dimension and no content`
@@ -332,9 +348,13 @@ function summaryShape(value: JsonObject): Finding[] {
   if (from > to) findings.push({ code: "FAC-SEM-040", instancePath: "/to", message: `the range ends (${to}) before it starts (${from})` });
   const cells = Array.isArray(value.cells) ? value.cells.filter(isObject) : [];
   const tuples = new Set<string>();
+  const k = Math.max(MIN_POPULATION, num(value.minPopulation));
   cells.forEach((cell, i) => {
-    const tuple = JSON.stringify([cell.agent, cell.skill ?? null, cell.project, cell.day, cell.outcome]);
-    if (tuples.has(tuple)) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}`, message: "two cells share agent, skill, project, day and outcome" });
+    const counts = isObject(cell.counts) ? cell.counts : {};
+    if (num(counts.population) < k) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/counts/population`, message: `a cell covering ${num(counts.population)} subjects is below the minimum of ${k}: fold it into the day's other cell or suppress it` });
+    if (num(counts.population) > num(counts.sessions)) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/counts/population`, message: "a cell covers no more subjects than sessions" });
+    const tuple = cell.other === true ? JSON.stringify(["other", cell.day]) : JSON.stringify([cell.agent, cell.skill ?? null, cell.project, cell.day, cell.outcome]);
+    if (tuples.has(tuple)) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}`, message: cell.other === true ? "a day has one other cell" : "two cells share agent, skill, project, day and outcome" });
     tuples.add(tuple);
     const day = String(cell.day ?? "");
     if (day < from || day > to) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/day`, message: `${day} is outside ${from}…${to}` });

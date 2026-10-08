@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-summary.schema.json",
   "title": "Activity summary activity-summary/1 (DEC-0030)",
-  "description": "Cells of agent x skill x project x UTC day x outcome, built by a receiver from many devices' events. There is no person dimension and no device producer (FAC-SEM-040).",
+  "description": "Cells of agent x skill x project x UTC day x outcome, built by a receiver from many devices' events. There is no person dimension and no device producer; a cell is published only when its population reaches minPopulation, and the rest of a day is folded into one other cell or suppressed (FAC-SEM-040).",
   "type": "object",
   "required": [
     "format",
@@ -11,6 +11,7 @@
     "to",
     "producer",
     "idleThresholdSeconds",
+    "minPopulation",
     "cells"
   ],
   "properties": {
@@ -44,16 +45,189 @@
       "minimum": 1,
       "maximum": 86400
     },
+    "minPopulation": {
+      "type": "integer",
+      "minimum": 3,
+      "description": "The smallest population a published cell covers; at least 3 (DEC-0030)."
+    },
+    "suppressedCells": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "description": "Cells below minPopulation that could not be folded into a publishable other cell and were not published."
+    },
     "cells": {
       "type": "array",
       "maxItems": 10000,
       "items": {
-        "$ref": "#/$defs/cell"
+        "oneOf": [
+          {
+            "$ref": "#/$defs/cell"
+          },
+          {
+            "$ref": "#/$defs/otherCell"
+          }
+        ]
       }
     }
   },
   "additionalProperties": false,
   "$defs": {
+    "counts": {
+      "type": "object",
+      "required": [
+        "population",
+        "sessions",
+        "intervals",
+        "usageLines"
+      ],
+      "properties": {
+        "population": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Distinct subjects the cell covers: each event counts its user.id when it carries one, else its session.id."
+        },
+        "sessions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "intervals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "usageLines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unpricedLines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "required": [
+        "tokens",
+        "cost"
+      ],
+      "properties": {
+        "tokens": {
+          "$ref": "activity-common.schema.json#/$defs/tokens"
+        },
+        "cost": {
+          "type": "object",
+          "required": [
+            "usd"
+          ],
+          "properties": {
+            "usd": {
+              "oneOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "basis": {
+              "enum": [
+                "provider",
+                "price-list",
+                "client-estimate",
+                "mixed"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "usd": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "usd"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "basis": true
+                },
+                "required": [
+                  "basis"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "usd": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "usd"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "basis": false
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "otherCell": {
+      "type": "object",
+      "required": [
+        "other",
+        "day",
+        "counts",
+        "durations",
+        "method",
+        "usage"
+      ],
+      "properties": {
+        "other": {
+          "const": true
+        },
+        "day": {
+          "$ref": "activity-common.schema.json#/$defs/day"
+        },
+        "counts": {
+          "$ref": "#/$defs/counts"
+        },
+        "durations": {
+          "$ref": "activity-common.schema.json#/$defs/durations"
+        },
+        "method": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "usage": {
+          "$ref": "#/$defs/usage"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The day's cells below minPopulation, folded together with no agent, skill, project or outcome."
+    },
     "cell": {
       "type": "object",
       "required": [
@@ -83,35 +257,7 @@
           "$ref": "activity-common.schema.json#/$defs/name"
         },
         "counts": {
-          "type": "object",
-          "required": [
-            "sessions",
-            "intervals",
-            "usageLines"
-          ],
-          "properties": {
-            "sessions": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "intervals": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "usageLines": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "unpricedLines": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/counts"
         },
         "durations": {
           "$ref": "activity-common.schema.json#/$defs/durations"
@@ -120,88 +266,7 @@
           "$ref": "activity-common.schema.json#/$defs/name"
         },
         "usage": {
-          "type": "object",
-          "required": [
-            "tokens",
-            "cost"
-          ],
-          "properties": {
-            "tokens": {
-              "$ref": "activity-common.schema.json#/$defs/tokens"
-            },
-            "cost": {
-              "type": "object",
-              "required": [
-                "usd"
-              ],
-              "properties": {
-                "usd": {
-                  "oneOf": [
-                    {
-                      "type": "number",
-                      "minimum": 0
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "basis": {
-                  "enum": [
-                    "provider",
-                    "price-list",
-                    "client-estimate",
-                    "mixed"
-                  ]
-                }
-              },
-              "additionalProperties": false,
-              "allOf": [
-                {
-                  "if": {
-                    "type": "object",
-                    "properties": {
-                      "usd": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "usd"
-                    ]
-                  },
-                  "then": {
-                    "type": "object",
-                    "properties": {
-                      "basis": true
-                    },
-                    "required": [
-                      "basis"
-                    ]
-                  }
-                },
-                {
-                  "if": {
-                    "type": "object",
-                    "properties": {
-                      "usd": {
-                        "type": "null"
-                      }
-                    },
-                    "required": [
-                      "usd"
-                    ]
-                  },
-                  "then": {
-                    "type": "object",
-                    "properties": {
-                      "basis": false
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/usage"
         }
       },
       "additionalProperties": false

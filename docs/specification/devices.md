@@ -1,10 +1,11 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031 · rule codes `FAC-SEM-041`…`FAC-SEM-045` · schemas
+DEC-0031 · rule codes `FAC-SEM-041`…`FAC-SEM-046` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
-[`device-health`](../../schemas/device-health.schema.json), shared definitions in
+[`device-health`](../../schemas/device-health.schema.json),
+[`device-key-set`](../../schemas/device-key-set.schema.json), shared definitions in
 [`device-common`](../../schemas/device-common.schema.json)
 
 A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an
@@ -66,6 +67,8 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
      `org.id`, `device.id` and, when known, `user.id`;
    - **`streamEpoch`**: the epoch every collector on the device uses from now on, greater than every
      epoch issued to this device before (`FAC-SEM-044`);
+   - **`policyRootKey`**: the organization's root key (`keyId` and the raw Ed25519 key), which signs
+     [policy key sets](#key-sets) and nothing else, and optionally the current key set;
    - the check-in interval;
    - optionally the current signed server policy (never a `user` layer, schema).
 
@@ -151,9 +154,9 @@ fractions ([settings backups](service.md#settings-backup)).
 **Signature.** A `server` policy MUST be signed. An `mdm` policy MAY be, since its channel is the
 operating system's managed preferences. A `user` layer is never signed and never delivered. The
 signature is Ed25519 (RFC 8032) over the UTF-8 canonical JSON of the document without `signature`
-([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The device holds the
-organization's trusted public keys **out of band** — through device management or its installer —
-until OQ-0010 decides how a server publishes and rotates them.
+([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The trusted keys are those of
+the device's current [key set](#key-sets) that are valid at the policy's `issuedAt`. A policy signed
+by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
 
 **Revision.** A device applies a delivered policy only when both hold:
 
@@ -173,6 +176,28 @@ It reports the revision it holds for each delivered layer in every check-in.
 An unlocked value above the user layer is therefore a default the person may change; a locked one is
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
 key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`).
+
+<a id="key-sets"></a>
+
+### Key sets
+
+Schema: [`device-key-set.schema.json`](../../schemas/device-key-set.schema.json). Operator decision
+2026-10-08 (DEC-0031, closing OQ-0010 b).
+
+- The enrollment response carries the organization's **root key** (`policyRootKey`). It signs policy
+  key sets only, never a policy.
+- A **key set** (`kind: "policy-key-set"`) lists the policy signing keys, each with `keyId`,
+  `publicKey`, `notBefore` and `notAfter`, under a monotonic `revision`. It is signed by the root key
+  over its canonical JSON without `signature`, as a policy is. It arrives in an enrollment or
+  check-in response.
+- A device applies a key set only when it verifies under the root key, stays in its organization
+  and moves its revision forward.
+- **Rotation overlaps.** A new key is added before the old one expires, so policies signed by either
+  verify during the window. A key of the current set that is still valid at the next set's
+  `issuedAt` stays until its `notAfter`, unless the next set names it in `revoked`.
+- A key set always holds a key valid at its `issuedAt`, names each key once, never lists the root
+  key, and gives each key a window that ends after it starts (`FAC-SEM-046`).
+- How a root key itself is replaced is a re-enrollment: the enrollment response carries the new one.
 
 <a id="check-in"></a>
 
@@ -201,8 +226,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 - `certificate.serial` and `notAfter`.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, a
-newer signed `policy` when there is one (never a `user` layer), and a `certificate.action`
-(`rotate` or `re-enroll`) when one is due.
+newer [key set](#key-sets) and a newer signed `policy` when there are some (never a `user` layer),
+and a `certificate.action` (`rotate` or `re-enroll`) when one is due.
 
 **Free text stays bounded.** Every `detail` and `error` string is one line of at most 200
 characters with no absolute or home path (schema `device-common#/$defs/detail`). It MUST NOT name a
@@ -222,7 +247,7 @@ an open vocabulary; known states:
 | `healthy` | Checking in, logging on, every collector healthy, no tamper evidence. |
 | `degraded` | Checking in, but a collector reports an error or a policy failed to apply. |
 | `offline` | No check-in for more than three intervals. |
-| `inactive` | Checking in, but the collectors have produced no events for the period the server chooses. This says the collector is quiet; it says nothing about a person. |
+| `inactive` | Checking in, but the collectors have produced no events for a period: by default **7 days** (operator decision 2026-10-08); a server MAY set another period. This says the collector is quiet; it says nothing about a person. |
 | `logging_disabled` | The device reports logging off. When the effective policy requires logging, the state is at least this (`FAC-SEM-043`). |
 | `tampered` | Evidence of tampering ([below](#tamper-evidence)). |
 | `never_installed` | Enrolled or assigned, but no check-in ever. |
@@ -265,12 +290,14 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
+| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts, holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 
 Each kind checks one input:
 
 | Kind | Input |
 |---|---|
-| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey}]}`; `publicKey` is the raw 32-byte Ed25519 key in base64 |
+| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?}`; `publicKey` is the raw 32-byte Ed25519 key in base64 |
+| `device-key-set` | `{root: {keyId, publicKey}, current?, next}` |
 | `device-policy-resolution` | `{layers, effective}` |
 | `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
 | `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?}}` |
@@ -281,6 +308,6 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
 
 ## Not decided here
 
-- (OQ-0010 a) Which attestation formats a server accepts for `build_channel.allowed: attested`.
-- (OQ-0010 b) How a server publishes and rotates its trusted policy keys after enrollment.
-- (OQ-0010 c) The period after which a quiet device is `inactive`.
+- (OQ-0010) Which attestation formats a server accepts for `build_channel.allowed: attested`.
+  Deferred by the operator on 2026-10-08: `attestation` stays an opaque field until the first real
+  organization server adopts DEC-0031.

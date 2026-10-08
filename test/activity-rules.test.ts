@@ -242,6 +242,20 @@ describe("FAC-SEM-040: a summary has no person dimension", () => {
     expect(paths("activity-summary", summary)).toEqual(expect.arrayContaining(["FAC-SEM-040 /cells/0/teamName", "FAC-SEM-040 /cells/1/user", "FAC-SEM-040 /producer/kind"]));
   });
 
+  it("counts a population as distinct users, falling back to sessions", async () => {
+    const { population } = await import("../src/activity-rules.js");
+    expect(population([{ user: { id: "a" }, session: { id: "s1" } }, { user: { id: "a" }, session: { id: "s2" } }, { session: { id: "s3" } }, { session: { id: "s3" } }])).toBe(2);
+  });
+
+  it("refuses a population above the session count, and a summary that lowers the minimum below 3", () => {
+    const summary = load("positive/activity-summary.json");
+    summary.cells[0].counts.population = 7;
+    expect(paths("activity-summary", summary)).toContain("FAC-SEM-040 /cells/0/counts/population");
+    const lowered = load("positive/activity-summary.json");
+    lowered.minPopulation = 2;
+    expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/activity-summary.schema.json`, lowered).valid).toBe(false);
+  });
+
   it("refuses a day outside the range and a range that runs backwards", () => {
     const summary = load("positive/activity-summary.json");
     summary.cells[1].day = "2026-10-09";

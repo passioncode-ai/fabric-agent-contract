@@ -32,7 +32,7 @@ check-in, health, and attribution by client certificate.
   - UX: persona P-03, JTBD-04, JRN-03, ST-007/008, FLW-06/07, SCR-09/10, SCN-010/011;
   - `CONTEXT.md` ("Telemetry event", "Collector node"), `docs/DOCMAP.md`, `README.md`,
     `docs/evidence/sources.md`.
-- Fixtures: 46 catalogued (positive and schema-negative) plus 40 rule inputs under
+- Fixtures: 49 catalogued (positive and schema-negative) plus 47 rule inputs under
   `fixtures/semantic/`, each with its expected codes. The signed policy fixtures were signed by a key
   generated for the purpose and not kept.
 
@@ -84,9 +84,27 @@ Follow-ups after the owner verified `d518e09` (non-blocking):
 - The spec says that encoded paths are undetectable by design, and that the HMAC rule is the
   control.
 
+## Operator decisions, 2026-10-08 (encoded before merge)
+
+- **Presence:** confirmed as written; recorded in DEC-0030 item 10.
+- **OQ-0009:** closed.
+  - Minimum cell k = 3: `population`, `minPopulation`, other cells and `suppressedCells`, checked by
+    `FAC-SEM-040`.
+  - Raw events are deleted when retention expires.
+  - OTLP logs are a permitted second intake under the same rules.
+- **OQ-0010:** narrowed to (a).
+  - Attestation formats are deferred: `attestation` stays opaque until the first real organization
+    server adopts DEC-0031.
+  - (b) A signed key set: `policyRootKey` in the enrollment response, and
+    `device-key-set.schema.json` signed by it, in enrollment and check-in responses, with
+    overlapping rotation. New rule `FAC-SEM-046` (reserved by CAS as SEM-0046); `FAC-SEM-041` checks
+    the signing key's window and refuses the root key.
+  - (c) `inactive` defaults to 7 days.
+- Backlog row CT-04 records consumer adoption.
+
 ## Checks run
 
-- `pnpm run check` passed at the final commit: typecheck, 16 test files with 528 tests, UX lint
+- `pnpm run check` passed at the final commit: typecheck, 16 test files with 542 tests, UX lint
   (8 stories, 7 flows, 10 screens, 11 scenarios), and the documentation check with markdownlint at 0
   errors.
 - The disk was full (144 MiB free), and the pnpm wrapper failed to link its binary. So the steps of
@@ -103,10 +121,10 @@ Follow-ups after the owner verified `d518e09` (non-blocking):
 
 ## Open work
 
-1. Review and merge the PR. Ids were reserved by git CAS: DEC-0030, DEC-0031 and
-   SEM-0037…SEM-0045. The registers were edited under git leases of run `r-5fe268ae4`, and the
+1. PR #22 is merged, after the operator decisions above. Ids were reserved by git CAS: DEC-0030,
+   DEC-0031 and SEM-0037…SEM-0046. The registers were edited under git leases of run `r-5fe268ae4`, and the
    record plane is `fs`.
-2. The operator answers OQ-0009 (minimum summary cell, raw-retention expiry, OTLP transport) and
-   OQ-0010 (attestation formats, trusted policy keys, the `inactive` period).
-3. Add a consumer-adoption row to `docs/backlog.md` (collector and organization server repin and
-   implement), under that file's lease. Next task: take the lease and add the row.
+2. OQ-0010 (attestation formats) waits for the first real organization server; OQ-0009 is
+   closed.
+3. Consumer adoption is tracked as backlog row CT-04. Next task: when a collector or an organization
+   server starts, it pins the merge commit of PR #22 and works through CT-04.

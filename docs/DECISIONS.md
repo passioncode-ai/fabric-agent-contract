@@ -801,9 +801,24 @@ annotate only the old status; decision bodies are never rewritten.
      - `FAC-SEM-037`: no content or person key, and no home path;
      - `FAC-SEM-038`: an unknown cost is `null`, never `0`;
      - `FAC-SEM-039`: event ids, clocks, streams, overflows and acks;
-     - `FAC-SEM-040`: a summary has no person dimension and no device producer.
+     - `FAC-SEM-040`: a summary has no person dimension and no device producer, and publishes no
+       cell below its minimum population.
 
      The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0037…SEM-0040).
+  10. **Operator rulings, 2026-10-08** (relayed by the contract owner session; they close OQ-0009):
+      - **Presence: confirmed as written.** Per-person presence estimates, labelled by `method`; every
+        read in the person's access log; no scoring of persons.
+      - **Minimum cell, k = 3 (OQ-0009 a).** A summary cell is published only when its population —
+        distinct subjects, where an event's subject is its `user.id` when present and its
+        `session.id` otherwise — is at least `minPopulation`, which is at least 3. A day's smaller
+        cells fold into one other cell (`other: true`, without agent, skill, project or outcome). An
+        other cell that is still too small is suppressed and counted in `suppressedCells`.
+        `FAC-SEM-040` checks this.
+      - **Retention (OQ-0009 b).** When `retention.raw_days` expires, the receiver deletes raw
+        events; only summaries already built from them remain.
+      - **OTLP (OQ-0009 c).** A receiver MAY accept OTLP logs as a second intake beside HTTPS
+        batches, through the JSON → OpenTelemetry mapping table. The same attribution, schema,
+        `FAC-SEM-037`…`039` rules and deduplication apply.
 - **Why:** This implements the operator decision of 2026-10-08 (organization edition). Agent
   activity across an organization's devices is collected as neutral telemetry: when sessions worked
   or waited, and what they spent. Content is never collected, and a person can see who read their
@@ -846,8 +861,8 @@ annotate only the old status; decision bodies are never rewritten.
     (ST-007, FLW-06, SCN-010).
 
   Consumers are a collector on the device and an organization server, both outside this repository.
-- **Not decided here (OQ-0009):** a minimum cell size for summaries; what a receiver does when raw
-  retention expires; an OTLP transport for the same records.
+- **Not decided here:** nothing from OQ-0009 remains; the operator answered all three parts on
+  2026-10-08 (item 10).
 - **Source:** operator decision 2026-10-08 (organization edition); review of PR #22 by the contract
   owner, same day. DEC-0030 was reserved by git CAS (`agent_sync.py reserve DEC --key
   activity-contracts-20261008-a`, run `r-5fe268ae4`). This file and `conformance.md` were edited
@@ -922,9 +937,25 @@ annotate only the old status; decision bodies are never rewritten.
      - `FAC-SEM-043`: health does not hide tampering or disabled required logging;
      - `FAC-SEM-044`: re-enrollment is proven; the certificate is short-lived and bound to what
        enrolled; and the epoch is new;
-     - `FAC-SEM-045`: attribution by certificate and by epoch binding.
+     - `FAC-SEM-045`: attribution by certificate and by epoch binding;
+     - `FAC-SEM-046`: policy key sets.
 
-     The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0041…SEM-0045).
+     The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0041…SEM-0046).
+  7. **Operator rulings, 2026-10-08** (relayed by the contract owner session; they narrow OQ-0010):
+     - **Signed key set (OQ-0010 b).** The enrollment response carries the organization's root key
+       (`policyRootKey`), which signs policy key sets only. A key set
+       (`device-key-set.schema.json`), signed by the root key, arrives in an enrollment or check-in
+       response. It lists the policy signing keys with their validity windows, under a monotonic
+       revision.
+       - A rotation overlaps: a key still valid stays until its `notAfter` unless it is revoked by
+         name.
+       - A policy verifies only under a key of the current set that is valid at the policy's
+         `issuedAt`, never under the root key.
+       - `FAC-SEM-046` checks key sets, and `FAC-SEM-041` checks the key that signed a policy.
+     - **Attestation formats (OQ-0010 a): deferred.** `attestation` stays opaque until the first real
+       organization server adopts DEC-0031.
+     - **`inactive` (OQ-0010 c):** the recommended default is 7 days without events; a server MAY
+       change it.
 - **Why:** This implements the operator decision of 2026-10-08 (organization edition). An
   organization must know that the telemetry of each device is on and complete. A person must not be
   able to quietly switch off what the organization requires, nor the organization claim more than
@@ -942,8 +973,9 @@ annotate only the old status; decision bodies are never rewritten.
   - A server-issued epoch is how a reinstall stays distinguishable from tampering: a collector that
     lost its state cannot know its previous epoch. The same epoch is the unit of attribution, so a
     re-assigned device never moves one person's events to another.
-- **Compatibility:** Additive under DEC-0016. It adds five new schemas (`device-common`,
-  `device-enrollment`, `device-policy`, `device-check-in`, `device-health`) and five rule codes;
+- **Compatibility:** Additive under DEC-0016. It adds six new schemas (`device-common`,
+  `device-enrollment`, `device-policy`, `device-key-set`, `device-check-in`, `device-health`) and six
+  rule codes;
   nothing existing changes. `contractVersion` stays `0.1.0`, and no extension key is added.
 - **Consequences / affects:**
   - spec: `docs/specification/devices.md` (new);
@@ -956,8 +988,8 @@ annotate only the old status; decision bodies are never rewritten.
     (ST-008, FLW-07, SCN-011).
 
   Consumers are the collector on the device and the organization server.
-- **Not decided here (OQ-0010):** which attestation formats prove `attested`; how trusted policy
-  keys are published and rotated after enrollment; when a quiet device becomes `inactive`.
+- **Not decided here (OQ-0010, narrowed 2026-10-08):** which attestation formats prove `attested` —
+  deferred until the first real organization server adopts DEC-0031.
 - **Source:** operator decision 2026-10-08 (organization edition); review of PR #22 by the contract
   owner. DEC-0031 was reserved by git CAS (`agent_sync.py reserve DEC --key
   activity-contracts-20261008-b`, run `r-5fe268ae4`), and `FAC-SEM-045` by `agent_sync.py reserve

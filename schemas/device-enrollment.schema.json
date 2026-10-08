@@ -144,6 +144,7 @@
         "kind",
         "certificate",
         "streamEpoch",
+        "policyRootKey",
         "checkIn"
       ],
       "properties": {
@@ -207,6 +208,10 @@
           "$ref": "activity-common.schema.json#/$defs/epoch",
           "description": "The epoch every collector on the device uses from now on; greater than every epoch issued to this device before."
         },
+        "policyRootKey": {
+          "$ref": "device-key-set.schema.json#/$defs/publicKey",
+          "description": "The organization's root key. It signs policy key sets only, never a policy (FAC-SEM-046)."
+        },
         "checkIn": {
           "type": "object",
           "required": [
@@ -220,6 +225,9 @@
             }
           },
           "additionalProperties": false
+        },
+        "keySet": {
+          "$ref": "device-key-set.schema.json"
         },
         "policy": {
           "allOf": [

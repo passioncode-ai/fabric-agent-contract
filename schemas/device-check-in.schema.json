@@ -257,6 +257,9 @@
             ]
           }
         },
+        "keySet": {
+          "$ref": "device-key-set.schema.json"
+        },
         "policy": {
           "allOf": [
             {

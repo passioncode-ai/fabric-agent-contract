@@ -1,5 +1,5 @@
 {
-  "description": "Two cells for one agent, skill, project, day and outcome: FAC-SEM-040.",
+  "description": "Two other cells for one day: a day folds into one (FAC-SEM-040).",
   "kind": "activity-summary",
   "expect": [
     "FAC-SEM-040"
@@ -50,35 +50,56 @@
         }
       },
       {
-        "agent": "claude_code",
-        "skill": "code-review",
-        "project": "example-project",
+        "other": true,
         "day": "2026-10-07",
-        "outcome": "completed",
         "counts": {
-          "population": 4,
-          "sessions": 6,
-          "intervals": 9,
-          "usageLines": 31,
-          "unpricedLines": 0
+          "population": 3,
+          "sessions": 3,
+          "intervals": 7,
+          "usageLines": 6,
+          "unpricedLines": 6
         },
         "durations": {
-          "agentSeconds": 2140,
-          "waitHumanSeconds": 698,
-          "waitAgentSeconds": 120,
-          "attendedSeconds": 1900
+          "agentSeconds": 410,
+          "waitHumanSeconds": 95,
+          "waitAgentSeconds": 0,
+          "attendedSeconds": 300
         },
-        "method": "otel",
+        "method": "mixed",
         "usage": {
           "tokens": {
-            "input": 412000,
-            "output": 51800,
-            "cacheRead": 2210000,
-            "cacheWrite": 64000
+            "input": 64000,
+            "output": 9100
           },
           "cost": {
-            "usd": 3.92,
-            "basis": "client-estimate"
+            "usd": null
+          }
+        }
+      },
+      {
+        "other": true,
+        "day": "2026-10-07",
+        "counts": {
+          "population": 3,
+          "sessions": 3,
+          "intervals": 7,
+          "usageLines": 6,
+          "unpricedLines": 6
+        },
+        "durations": {
+          "agentSeconds": 410,
+          "waitHumanSeconds": 95,
+          "waitAgentSeconds": 0,
+          "attendedSeconds": 300
+        },
+        "method": "mixed",
+        "usage": {
+          "tokens": {
+            "input": 64000,
+            "output": 9100
+          },
+          "cost": {
+            "usd": null
           }
         }
       }

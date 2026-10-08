@@ -13,12 +13,12 @@ const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, r
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…045)", () => {
+describe("device semantic fixtures (FAC-SEM-041…046)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {
@@ -153,6 +153,23 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     fixture.request.auth = { method: "enrollment-token", tokenId: "tok-mdm-01" };
     delete fixture.response.certificate.binding.user;
     expect(codes("device-enrollment", fixture)).toEqual([]);
+  });
+});
+
+describe("FAC-SEM-046: policy key sets", () => {
+  it("refuses a key named twice, a key set with no key valid at its issuedAt, and a revision that does not move", () => {
+    const fixture = load("semantic/device-key-set-ok.json").input;
+    fixture.next.keys.push(structuredClone(fixture.next.keys[0]));
+    for (const key of fixture.next.keys) key.notBefore = "2027-06-01T00:00:00Z";
+    fixture.next.revision = 1;
+    const found = paths("device-key-set", fixture);
+    expect(found).toEqual(expect.arrayContaining(["FAC-SEM-046 /next/keys/2/keyId", "FAC-SEM-046 /next/keys", "FAC-SEM-046 /next/revision", "FAC-SEM-046 /next/signature/value"]));
+  });
+
+  it("refuses a policy signed by a key outside its window", () => {
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    fixture.trustedKeys[0].notAfter = "2026-10-01T00:00:00Z";
+    expect(paths("device-policy-update", fixture)).toContain("FAC-SEM-041 /next/signature/keyId");
   });
 });
 

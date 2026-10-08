@@ -8,6 +8,8 @@
     "id": "dev-01j9a"
   },
   "idleThresholdSeconds": 300,
+  "minPopulation": 3,
+  "suppressedCells": 0,
   "cells": [
     {
       "agent": "claude_code",
@@ -16,7 +18,8 @@
       "day": "2026-10-07",
       "outcome": "completed",
       "counts": {
-        "sessions": 2,
+        "population": 4,
+        "sessions": 6,
         "intervals": 9,
         "usageLines": 31,
         "unpricedLines": 0
@@ -42,13 +45,12 @@
       }
     },
     {
-      "agent": "codex",
-      "project": "example-project",
+      "other": true,
       "day": "2026-10-07",
-      "outcome": "unknown",
       "counts": {
-        "sessions": 1,
-        "intervals": 3,
+        "population": 3,
+        "sessions": 3,
+        "intervals": 7,
         "usageLines": 6,
         "unpricedLines": 6
       },
@@ -58,7 +60,7 @@
         "waitAgentSeconds": 0,
         "attendedSeconds": 300
       },
-      "method": "rollout",
+      "method": "mixed",
       "usage": {
         "tokens": {
           "input": 64000,

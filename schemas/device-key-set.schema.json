@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-key-set.schema.json",
+  "title": "Policy key set signed by the organization's root key (fabric-device/0.1, DEC-0031)",
+  "description": "The keys a device trusts for policy signatures, each with its validity window, signed by the root key from enrollment. A rotation overlaps: a key leaves the set only after its notAfter or by an explicit revocation (FAC-SEM-046).",
+  "type": "object",
+  "required": [
+    "protocol",
+    "kind",
+    "org",
+    "revision",
+    "issuedAt",
+    "keys",
+    "signature"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "device-common.schema.json#/$defs/protocol"
+    },
+    "kind": {
+      "const": "policy-key-set"
+    },
+    "org": {
+      "$ref": "device-common.schema.json#/$defs/org"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "issuedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "keyId",
+          "publicKey",
+          "notBefore",
+          "notAfter"
+        ],
+        "properties": {
+          "keyId": {
+            "$ref": "activity-common.schema.json#/$defs/opaqueId"
+          },
+          "publicKey": {
+            "$ref": "#/$defs/rawKey"
+          },
+          "notBefore": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          },
+          "notAfter": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "revoked": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "$ref": "activity-common.schema.json#/$defs/opaqueId"
+      },
+      "description": "Key ids removed before their notAfter."
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "alg",
+        "keyId",
+        "value"
+      ],
+      "properties": {
+        "alg": {
+          "const": "ed25519"
+        },
+        "keyId": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "rawKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{43}=$",
+      "description": "A raw 32-byte Ed25519 public key, base64."
+    },
+    "publicKey": {
+      "type": "object",
+      "required": [
+        "keyId",
+        "publicKey"
+      ],
+      "properties": {
+        "keyId": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "publicKey": {
+          "$ref": "#/$defs/rawKey"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -116,38 +116,33 @@ ruling; DEC-0017 states what holds now.
 
 ### OQ-0009 — Activity telemetry: a minimum summary cell, raw-retention expiry and an OTLP transport (DEC-0030)
 
-- **Status:** Open
+- **Status:** Resolved→DEC-0030 (2026-10-08: the operator answered all three parts)
 - **Raised:** 2026-10-08, with DEC-0030. Narrowed the same day by the review of PR #22, which
-  resolved inside DEC-0030 what was asked about summaries made on a device: a device never produces
-  a summary.
-- **Owner of the answer:** the operator, then the organization server that adopts DEC-0030.
-- **Question:** (a) Does `activity-summary/1` need a minimum cell size — a cell shown only when it
-  covers at least *k* sessions or users — so that a project one person works on alone does not
-  identify them through the project dimension? (b) When `retention.raw_days` expires, does a
-  receiver delete raw events, or keep them under a stricter scope? (c) Should a receiver also accept
-  the same records as OTLP logs, beside HTTPS batches (the mapping table in `activity.md` already
-  names the fields)?
-- **Meanwhile:**
-  - Summaries are built only by a receiver, from many devices, and carry no person dimension
-    (`FAC-SEM-040`).
-  - Raw events are processed only under the purpose and retention the organization's notice states
-    (DEC-0030 §7).
-  - The device policy carries the retention days.
-  - None of (a), (b) or (c) is required of a consumer.
+  resolved inside DEC-0030 that a device never produces a summary.
+- **Owner of the answer:** the operator.
+- **Question:** (a) Does `activity-summary/1` need a minimum cell size? (b) When `retention.raw_days`
+  expires, does a receiver delete raw events, or keep them under a stricter scope? (c) Should a
+  receiver also accept the same records as OTLP logs?
+- **Answer (2026-10-08, DEC-0030 item 10):**
+  - (a) Yes, k = 3. A cell is published only when its population is at least 3 — distinct
+    `user.id` where events carry one, else distinct sessions. Smaller cells fold into the day's
+    other cell or are suppressed (`FAC-SEM-040`).
+  - (b) Delete; only summaries already built remain.
+  - (c) OTLP logs MAY be accepted as a second intake, through the mapping table, under the same
+    rules and deduplication.
 
-### OQ-0010 — Devices: attestation formats and trusted policy keys after enrollment (DEC-0031)
+### OQ-0010 — Devices: attestation formats (DEC-0031)
 
-- **Status:** Open
-- **Raised:** 2026-10-08, with DEC-0031. The review of PR #22 resolved two of the original parts in
-  DEC-0031: how a reinstall is told from tampering (a server-issued epoch, re-enrollment resets the
-  policy baseline), and that `inactive` describes the collector, not a person.
-- **Owner of the answer:** the operator, then the organization server that adopts DEC-0031.
-- **Question:** (a) Which platform attestation formats prove `build_channel.allowed: attested` and a
-  non-exportable key at enrollment? (b) How does a server publish and rotate its trusted policy
-  signing keys after enrollment — in the enrollment response, a signed key set, or a check-in field?
-  (c) After how long without events is a checking-in device `inactive`?
-- **Meanwhile:**
-  - The schemas carry an optional opaque `attestation`.
-  - A policy names its `keyId`; trusted keys reach the device out of band, and `FAC-SEM-041`
-    verifies against them.
-  - The period after which a device is `inactive` is left to the server.
+- **Status:** Open, deferred by the operator on 2026-10-08 until the first real organization server
+  adopts DEC-0031
+- **Raised:** 2026-10-08, with DEC-0031. Narrowed twice the same day:
+  - The review of PR #22 resolved in DEC-0031 how a reinstall is told from tampering.
+  - The operator answered the other parts (DEC-0031 item 7):
+    - trusted policy keys arrive as a key set signed by the root key from enrollment, with
+      overlapping rotation (`FAC-SEM-046`);
+    - a device is `inactive` after 7 days without events by default, and a server MAY change that.
+- **Owner of the answer:** the operator, with the first organization server that adopts DEC-0031.
+- **Question:** Which platform attestation formats prove `build_channel.allowed: attested`, and a
+  non-exportable key at enrollment?
+- **Meanwhile:** `attestation` is an optional opaque field in the enrollment request. No consumer is
+  required to produce or verify one.

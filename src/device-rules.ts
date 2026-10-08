@@ -64,7 +64,8 @@ export function resolvePolicy(layers: readonly JsonObject[]): Record<string, Eff
   return effective;
 }
 
-/** FAC-SEM-041: `{current?, next, trustedKeys}` — a delivered policy verifies and moves its layer forward. */
+/** FAC-SEM-041: `{current?, next, trustedKeys, rootKeyId?}` — trustedKeys are the keys of the device's current key set,
+ *  with their validity windows (FAC-SEM-046) —  — a delivered policy verifies and moves its layer forward. */
 function policyUpdate(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-041", instancePath, message });
@@ -75,7 +76,10 @@ function policyUpdate(value: JsonObject): Finding[] {
   const signature = isObject(next.signature) ? next.signature : null;
   if (signature) {
     const key = keys.find((k) => k.keyId === signature.keyId);
-    if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${String(signature.keyId)}`);
+    const at = Date.parse(String(next.issuedAt ?? ""));
+    if (signature.keyId === value.rootKeyId) flag("/next/signature/keyId", "the root key signs key sets only, never a policy");
+    else if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${String(signature.keyId)}`);
+    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${String(signature.keyId)} is outside its validity window at the policy's issuedAt`);
     else if (!verifyPolicySignature(next, key.publicKey)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
   } else if (next.source === "server") {
     flag("/next/signature", "a server policy is signed");
@@ -296,6 +300,49 @@ function attribution(value: JsonObject): Finding[] {
   return findings;
 }
 
+/**
+ * FAC-SEM-046: `{root: {keyId, publicKey}, current?, next}` — a policy key set is signed by the root key from enrollment,
+ * moves its revision forward in its organization, names each key once with a window that ends after it starts, keeps
+ * a key valid at `issuedAt`, and rotates with overlap: a key of the current set still valid at the next set's
+ * `issuedAt` stays until its `notAfter` unless it is revoked by name.
+ */
+function keySet(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-046", instancePath, message });
+  const root = isObject(value.root) ? value.root : {};
+  const next = isObject(value.next) ? value.next : {};
+  const current = isObject(value.current) ? value.current : null;
+  const signature = isObject(next.signature) ? next.signature : {};
+  if (signature.keyId !== root.keyId) flag("/next/signature/keyId", "a key set is signed by the root key from enrollment");
+  else if (typeof root.publicKey !== "string" || !verifyPolicySignature(next, root.publicKey)) flag("/next/signature/value", "the key set's signature does not verify under the root key");
+  const at = Date.parse(String(next.issuedAt ?? ""));
+  const keys = Array.isArray(next.keys) ? next.keys.filter(isObject) : [];
+  const ids = new Set<unknown>();
+  let validNow = false;
+  keys.forEach((key, i) => {
+    if (ids.has(key.keyId)) flag(`/next/keys/${i}/keyId`, `key ${String(key.keyId)} is named twice`);
+    ids.add(key.keyId);
+    if (key.keyId === root.keyId) flag(`/next/keys/${i}/keyId`, "the root key is never a policy signing key");
+    const from = Date.parse(String(key.notBefore ?? "")), to = Date.parse(String(key.notAfter ?? ""));
+    if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts");
+    if (at >= from && at <= to) validNow = true;
+  });
+  if (!validNow) flag("/next/keys", "a key set holds a key valid at its issuedAt, so a device is never left without one");
+  if (current) {
+    const org = (doc: JsonObject) => (isObject(doc.org) ? doc.org.id : undefined);
+    if (org(current) !== org(next)) flag("/next/org/id", "a key set stays in its organization");
+    if (num(next.revision) <= num(current.revision)) flag("/next/revision", `revision ${num(next.revision)} does not move past ${num(current.revision)}`);
+    const revoked = new Set(Array.isArray(next.revoked) ? next.revoked : []);
+    const kept = new Map(keys.map((key) => [key.keyId, key]));
+    (Array.isArray(current.keys) ? current.keys.filter(isObject) : []).forEach((key) => {
+      if (revoked.has(key.keyId) || Date.parse(String(key.notAfter ?? "")) <= at) return;
+      const same = kept.get(key.keyId);
+      if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${String(key.keyId)} is still valid until ${String(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
+    });
+  }
+  return findings;
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -303,6 +350,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-health-observation") return healthObservation(value);
   if (kind === "device-enrollment") return enrollment(value);
   if (kind === "device-attribution") return attribution(value);
+  if (kind === "device-key-set") return keySet(value);
   return undefined;
 }
 // #endregion device-rules

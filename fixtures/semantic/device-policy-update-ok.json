@@ -1,5 +1,5 @@
 {
-  "description": "Revision 12 replaces revision 11 of the server layer and verifies under the trusted key.",
+  "description": "Revision 12 replaces revision 11 of the server layer and verifies under a key of the current key set, valid at its issuedAt.",
   "kind": "device-policy-update",
   "expect": [],
   "input": {
@@ -37,7 +37,7 @@
       "signature": {
         "alg": "ed25519",
         "keyId": "org-7f3a.policy-2026",
-        "value": "0MPBIGI4Xi6IF6WWHoUdfD3PCE4cDsB2vIWAf3ot74c4Y3ueZYcSlmp4eUoS3ivYwlnLc08i/7I9L7rYCWBlCw=="
+        "value": "0EOXYBuyaTJMu+ep/jkDI54ZqE8GSeXzV+TnxqNwE4qYX1p55SE5rjtR1iZPVDNs3k7rPba2j2T/4Q4qEMFWDw=="
       }
     },
     "next": {
@@ -74,14 +74,17 @@
       "signature": {
         "alg": "ed25519",
         "keyId": "org-7f3a.policy-2026",
-        "value": "By43b/dDGVDITtk3thak4HxS24NlMXJPOqqKI4ZxteP9oD8z/8/fh0t9ePYAdXjB0a2RsaXcuqRorvjhTSCHAg=="
+        "value": "GJo5WdOsi8UwG0vysB+GiGNvIXHNr8LwAQvRzFj6zaEcqRi4I2vlSXfxyV0/wN8f3EZUdJRXe4Z1bFa4xajAAw=="
       }
     },
     "trustedKeys": [
       {
         "keyId": "org-7f3a.policy-2026",
-        "publicKey": "126Gt1ef4DF4JZd0SzTWjNmYgwMbMHTRL8WIWViUOS8="
+        "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+        "notBefore": "2026-01-01T00:00:00Z",
+        "notAfter": "2026-12-31T23:59:59Z"
       }
-    ]
+    ],
+    "rootKeyId": "org-7f3a.root"
   }
 }
