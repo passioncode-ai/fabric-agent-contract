@@ -13,7 +13,7 @@ the host. Plan and findings: [brief](../evidence/specs/2026-10-07-runner-route-r
 | fabric-dashboards | #45 | `9862e53d` | FD-33: the estate updater's 17 review findings — login-shell PATH (the field's `spawn npm ENOENT`), pinned `npx`, publisher check over `--json`, short pins, honest states, docs |
 | fabric | #19 (#18 closed as superseded) | `277add0c` | ADR-0125 rewritten and implemented: Settings → Fallback order, the fallback choice in both launchers, the walk with contract probe results, failure types, `terminal.opened@1` `route`, `kimi-code` row, SCN-135 |
 | fabric-switchboard | #113 | merged | SB-82: adopt runner routes and the shared kind names |
-| fabric-agent-adapter | #40 | merged | FAA-10: probe results, FAC-SEM-028…034, repin to `058fb789` |
+| fabric-agent-adapter | #40, #41 | merged | FAA-11 (renumbered from FAA-10 by #41): probe results, FAC-SEM-028…034, repin to `058fb789` |
 | fabric-inbox | #39 | merged | B-61: decide how cloud chats take part |
 
 Checks actually run: contract `pnpm run check` (377 tests); Dashboards `FD_SKIP_LAUNCHD=1 npm run check`
@@ -28,7 +28,7 @@ all findings were fixed before merge.
 - **CT-02** (here): DEC-0025's branch (PR #16) must renumber its `FAC-SEM-028`/`029` with
   `agent_sync.py reserve SEM` when rebased; G-13 refuses it until then.
 - **CT-03** (here): consumers adopt the pinned contract route — Fabric's CO-223 remainder (repin, journal
-  events with a migration and an ingress owner), SB-82, FAA-10, B-61.
+  events with a migration and an ingress owner), SB-82, FAA-11, B-61.
 - **FD-34** (Dashboards, operator decision): whether the estate watch stays on by default in a public
   product, and where the installed skills version is read from.
 - The Dashboards main checkout still holds another session's uncommitted FD-33 row on branch
