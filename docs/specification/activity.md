@@ -164,10 +164,25 @@ depth is split into words — at `camelCase` boundaries, `_`, `-` and `.` — an
 - a word starts with a prefix that ranks a person's standing or output;
 - the key is `user` anywhere but the event's own `/user`.
 
-A value that holds a home directory is refused too, in plain and in encoded form: `/Users/<name>`,
-`/home/<name>`, `~/`, `C:\Users\<name>`, and the forms runtimes write into file names
-(`-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, `%2FUsers%2F`) — `HOME_PATH` in the same
-module. A branch such as `feature/home-page` is not a home directory. The word lists live in [`src/activity-rules.ts`](../../src/activity-rules.ts)
+A value that holds a home directory is refused too. `HOME_PATH` in the same module matches the
+**user-name segment form**: a home root (`Users`, `users`, `home`) between two separators of the same
+kind, followed by a name. The forms it covers:
+
+- slash forms, absolute or relative: `/Users/<name>`, `users/<name>`, `home/<name>`,
+  `C:\Users\<name>`;
+- URL-encoded slash forms, once or twice: `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
+- the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`,
+  `-home-<name>-`;
+- tilde forms: `~/` and `~<name>/`.
+
+`Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not
+refused.
+
+**`HOME_PATH` is defence in depth, not the control.** A path wrapped in base64, hashed without a key,
+or encoded in any other way is undetectable by design; no pattern can find a name it cannot read. The
+control is the rule that **no field carries a path, and a path-derived key is `hmac-sha256:` under
+the device's telemetry key** ([event id](#event-id)). A collector that sends an encoded path breaks
+that rule whether or not `HOME_PATH` notices. The word lists live in [`src/activity-rules.ts`](../../src/activity-rules.ts)
 (`CONTENT_WORDS`, `PERSON_WORDS`, `PERSON_PAIRS`, `PERSON_PREFIXES`). A receiver MUST refuse such an
 event (`rejected[].reason` `content-field` or `person-field`) rather than strip it, so the collector
 that produced it is fixed.

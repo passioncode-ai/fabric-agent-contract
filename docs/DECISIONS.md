@@ -790,8 +790,12 @@ annotate only the old status; decision bodies are never rewritten.
   8. **No content and no person attribute** is the collector's duty. `FAC-SEM-037` is a
      **best-effort key filter**, not a proof: it splits every key into words (camelCase, `_`, `-`,
      `.`), refuses words, pairs and prefixes that name content or a person, refuses `user` anywhere
-     but the event's own `/user`, and refuses home directories in values, plain or encoded. A
-     measurement such as `performanceMs` or a count such as `reviewCount` is not refused. The schema's bounds on
+     but the event's own `/user`, and refuses home directories in values in the user-name segment
+     form, plain or encoded. A measurement such as `performanceMs`, a count such as `reviewCount`,
+     or a name such as `Users-guide` is not refused. The home-directory check is defence in depth:
+     a base64-wrapped or otherwise encoded path is undetectable by design, and the control is that
+     no field carries a path and a path-derived key is `hmac-sha256:` under the device's telemetry
+     key. The schema's bounds on
      extension data are the stronger guard.
   9. **Rules:**
      - `FAC-SEM-037`: no content or person key, and no home path;

@@ -75,9 +75,18 @@ The nits are fixed as well:
 - the 1001-event fixture is now generated in a test;
 - `sources.md` says `eventId`.
 
+Follow-ups after the owner verified `d518e09` (non-blocking):
+
+- `HOME_PATH` now matches only the user-name segment form. It catches `~<name>/`, double-encoded
+  `%252FUsers%252F` and lowercase relative `users/<name>` or `home/<name>`, and no longer flags
+  `Users-guide`.
+- The `sourceKey` lookahead matches the same forms.
+- The spec says that encoded paths are undetectable by design, and that the HMAC rule is the
+  control.
+
 ## Checks run
 
-- The gate's four steps passed at the final commit: typecheck, 16 test files with 525 tests, UX lint
+- `pnpm run check` passed at the final commit: typecheck, 16 test files with 528 tests, UX lint
   (8 stories, 7 flows, 10 screens, 11 scenarios), and the documentation check with markdownlint at 0
   errors.
 - The disk was full (144 MiB free), and the pnpm wrapper failed to link its binary. So the steps of

@@ -36,17 +36,23 @@ export const PERSON_PAIRS: ReadonlySet<string> = new Set(["display_name", "full_
 export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "assess", "apprais"];
 
 /**
- * A home directory inside a value, plain or encoded: `/Users/<name>`, `/home/<name>`, `~/`, `C:\\Users\\<name>`,
- * and the forms runtimes write into file names — `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, `%2FUsers%2F<name>`.
- * A branch such as `feature/home-page` is not a home directory and is not matched.
- * Never sent, whatever the key.
+ * A home directory inside a value, in the user-name segment form: a home root (`Users`, `users`, `home`) between two
+ * separators of the same kind, followed by a name. Matched forms:
+ * - slash forms, absolute or relative, plain or URL-encoded once or twice: `/Users/<name>`, `users/<name>`,
+ *   `home/<name>`, `C:\Users\<name>`, `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
+ * - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`;
+ * - tilde forms: `~/`, `~<name>/`.
+ * `Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not matched.
+ *
+ * This is defence in depth, not the control: a path wrapped in base64, hashed without a key, or encoded any other way
+ * is undetectable by design. The control is the rule that a path-derived key is `hmac-sha256:` under the device's
+ * telemetry key (`pathSourceKey`) and that no field carries a path (DEC-0030).
  */
+const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [
-  /(?:^|[\/\\\-_.:\s"'=]|%2[fF])Users(?:[\/\\\-_.:]|%2[fF])+[A-Za-z0-9]/,
-  /[\/\\]home[\/\\][A-Za-z0-9]/,
-  /(?:^|[\/\\])-home-[A-Za-z0-9]/,
-  /%2[fF]home%2[fF]/,
-  /(?:^|[\s"'=])~[\/\\]/
+  new RegExp(String.raw`(?:^|[^A-Za-z0-9]|%(?:25)?2[fF])(?:[Uu]sers|home)${SLASH}[A-Za-z0-9_]`),
+  /(?:^|[\/\\:-])-(?:[Uu]sers|home)-[A-Za-z0-9]/,
+  /(?:^|[\s"'=\/\\])~(?:[A-Za-z_][A-Za-z0-9_.-]*)?(?:[\/\\]|$)/
 ];
 export const hasHomePath = (value: string) => HOME_PATH.some((pattern) => pattern.test(value));
 

@@ -3,7 +3,7 @@
   "eventId": "sha256:143ffca5ff867511f008058ab8dd756d46acecede30385b604841ad2e5a4959e",
   "kind": "usage.line",
   "source": "claude_code.otel",
-  "sourceKey": "proj-Users-example-DATA-secret-5d1e.jsonl:1024",
+  "sourceKey": "C--Users-example-DATA-secret-5d1e.jsonl:1024",
   "collector": {
     "id": "cc-otel",
     "epoch": 2

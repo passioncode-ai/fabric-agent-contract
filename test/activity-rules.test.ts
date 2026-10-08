@@ -43,6 +43,30 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
     expect(forbiddenKeys({ performanceMs: 12, reviewCount: 3, durationMs: 4, focused: true }, "", new Set())).toEqual([]);
   });
 
+  it("finds tilde-user, double-encoded and lowercase relative home directories", () => {
+    for (const value of ["~example/x", "~example", "%252FUsers%252Fexample", "%2fusers%2fexample", "users/example/notes", "home/example", "C:\\Users\\example"]) {
+      expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
+    }
+  });
+
+  it("requires the user-name segment form, so Users-guide and its kin are not flagged", () => {
+    for (const value of ["Users-guide", "/Users-guide", "docs/Users-guide.md", "%2FUsers-guide", "my-home-page", "homework", "x~y"]) {
+      expect(forbiddenKeys({ v: value }, "", new Set()), value).toEqual([]);
+    }
+  });
+
+  it("keeps the sourceKey schema in step: Users-guide passes, a dash-encoded home directory does not", () => {
+    const event = load("positive/telemetry-event-usage.json");
+    const valid = (key: string) => {
+      event.sourceKey = key;
+      event.eventId = activityEventId(event.source, key);
+      return validateDocument(validator, `${SCHEMA_PREFIX}schemas/telemetry-event.schema.json`, event).valid;
+    };
+    expect(valid("Users-guide-17")).toBe(true);
+    expect(valid("C--Users-example-work.jsonl:4")).toBe(false);
+    expect(valid("proj--home-example-x:4")).toBe(false);
+  });
+
   it("finds a home directory in the encoded forms runtimes write into file names, and not in an ordinary branch", () => {
     for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes"]) {
       expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
