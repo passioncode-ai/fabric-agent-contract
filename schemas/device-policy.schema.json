@@ -10,7 +10,7 @@
     "org",
     "source",
     "revision",
-    "issued_at",
+    "issuedAt",
     "keys"
   ],
   "properties": {
@@ -31,7 +31,7 @@
       "minimum": 1,
       "maximum": 9007199254740991
     },
-    "issued_at": {
+    "issuedAt": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
     "keys": {
@@ -92,6 +92,25 @@
           },
           "additionalProperties": false
         },
+        "telemetry.git_branch": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "enum": [
+                "omit",
+                "hash",
+                "plain"
+              ]
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
         "retention.raw_days": {
           "type": "object",
           "required": [
@@ -116,25 +135,28 @@
           "value"
         ],
         "properties": {
-          "value": true,
+          "value": {
+            "$ref": "device-common.schema.json#/$defs/canonicalValue"
+          },
           "locked": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "signature": {
       "type": "object",
       "required": [
         "alg",
-        "key_id",
+        "keyId",
         "value"
       ],
       "properties": {
         "alg": {
           "const": "ed25519"
         },
-        "key_id": {
+        "keyId": {
           "$ref": "activity-common.schema.json#/$defs/opaqueId"
         },
         "value": {
@@ -184,7 +206,20 @@
       "then": {
         "type": "object",
         "properties": {
-          "signature": false
+          "signature": false,
+          "keys": {
+            "type": "object",
+            "patternProperties": {
+              "^": {
+                "type": "object",
+                "properties": {
+                  "locked": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

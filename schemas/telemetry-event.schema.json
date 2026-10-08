@@ -1,35 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-event.schema.json",
-  "title": "Activity telemetry event (fabric-activity/0.1, DEC-0030)",
-  "description": "One record of what an agent session did and when, without content and without any person attribute. Kinds named x-<namespace>.<kind> are extensions a reader that does not know them ignores.",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/telemetry-event.schema.json",
+  "title": "Telemetry event (fabric-activity/0.1, DEC-0030)",
+  "description": "One record of when an agent session worked or waited and what one model call used, without content and without any person attribute. A reader ignores a kind it does not know.",
   "type": "object",
   "required": [
     "protocol",
-    "event_id",
+    "eventId",
     "kind",
     "source",
-    "node",
+    "collector",
     "seq",
     "occurred",
-    "monotonic_ns",
+    "bootId",
+    "monotonicNs",
     "data"
   ],
   "properties": {
     "protocol": {
       "$ref": "activity-common.schema.json#/$defs/protocol"
     },
-    "event_id": {
+    "eventId": {
       "$ref": "activity-common.schema.json#/$defs/eventId"
     },
     "kind": {
       "anyOf": [
         {
-          "enum": [
-            "session.interval",
-            "usage.line",
-            "buffer_overflow"
-          ]
+          "$ref": "activity-common.schema.json#/$defs/name"
         },
         {
           "type": "string",
@@ -40,14 +37,11 @@
     "source": {
       "$ref": "activity-common.schema.json#/$defs/name"
     },
-    "source_key": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 256,
-      "description": "The source's own id of the record (a transcript line id, an API request id). With it, event_id is derived (FAC-SEM-039)."
+    "sourceKey": {
+      "$ref": "activity-common.schema.json#/$defs/sourceKey"
     },
-    "node": {
-      "$ref": "activity-common.schema.json#/$defs/node"
+    "collector": {
+      "$ref": "activity-common.schema.json#/$defs/collector"
     },
     "seq": {
       "$ref": "activity-common.schema.json#/$defs/seq"
@@ -55,7 +49,10 @@
     "occurred": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
-    "monotonic_ns": {
+    "bootId": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId"
+    },
+    "monotonicNs": {
       "$ref": "activity-common.schema.json#/$defs/monotonicNs"
     },
     "received": {
@@ -103,11 +100,13 @@
         },
         "version": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 64
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$"
         }
       },
       "additionalProperties": false
+    },
+    "skill": {
+      "$ref": "activity-common.schema.json#/$defs/skill"
     },
     "launch": {
       "type": "object",
@@ -128,9 +127,7 @@
       ],
       "properties": {
         "branch": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 255
+          "$ref": "activity-common.schema.json#/$defs/branch"
         }
       },
       "additionalProperties": false
@@ -169,6 +166,35 @@
       "if": {
         "type": "object",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "pattern": "^sha256:"
+          }
+        },
+        "required": [
+          "eventId"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "sourceKey": true
+        },
+        "required": [
+          "sourceKey"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "sourceKey": false
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
           "kind": {
             "const": "session.interval"
           }
@@ -179,11 +205,6 @@
       },
       "then": {
         "type": "object",
-        "required": [
-          "session",
-          "project",
-          "runtime"
-        ],
         "properties": {
           "session": true,
           "project": true,
@@ -191,7 +212,12 @@
           "data": {
             "$ref": "#/$defs/interval"
           }
-        }
+        },
+        "required": [
+          "session",
+          "project",
+          "runtime"
+        ]
       }
     },
     {
@@ -208,17 +234,19 @@
       },
       "then": {
         "type": "object",
-        "required": [
-          "session",
-          "project"
-        ],
         "properties": {
           "session": true,
           "project": true,
+          "runtime": true,
           "data": {
             "$ref": "#/$defs/usageLine"
           }
-        }
+        },
+        "required": [
+          "session",
+          "project",
+          "runtime"
+        ]
       }
     },
     {
@@ -226,7 +254,7 @@
         "type": "object",
         "properties": {
           "kind": {
-            "const": "buffer_overflow"
+            "const": "buffer.overflow"
           }
         },
         "required": [
@@ -238,6 +266,31 @@
         "properties": {
           "data": {
             "$ref": "#/$defs/overflow"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "session.interval",
+              "usage.line",
+              "buffer.overflow"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "activity-common.schema.json#/$defs/extData"
           }
         }
       }
@@ -265,13 +318,18 @@
         "method": {
           "$ref": "activity-common.schema.json#/$defs/name"
         },
-        "idle_threshold_s": {
+        "idleThresholdSeconds": {
           "type": "integer",
           "minimum": 1,
           "maximum": 86400
         },
         "attended": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "An estimate: whether the session's interface reported a person present, as the method can tell."
+        },
+        "outcome": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "On the last interval of a session: how the session ended (completed, failed, abandoned, interrupted, unknown)."
         }
       },
       "additionalProperties": false
@@ -282,13 +340,12 @@
         "model",
         "tokens",
         "cost",
-        "dedupe_key"
+        "dedupeKey"
       ],
       "properties": {
         "model": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 128
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}$"
         },
         "tokens": {
           "$ref": "activity-common.schema.json#/$defs/tokens"
@@ -296,10 +353,8 @@
         "cost": {
           "$ref": "activity-common.schema.json#/$defs/cost"
         },
-        "dedupe_key": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256
+        "dedupeKey": {
+          "$ref": "activity-common.schema.json#/$defs/sourceKey"
         }
       },
       "additionalProperties": false
@@ -314,26 +369,41 @@
           "type": "object",
           "required": [
             "events",
-            "from_seq",
-            "to_seq"
+            "ranges"
           ],
           "properties": {
             "events": {
               "type": "integer",
               "minimum": 1
             },
-            "from_seq": {
-              "$ref": "activity-common.schema.json#/$defs/seq"
+            "ranges": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "$ref": "activity-common.schema.json#/$defs/range"
+              }
             },
-            "to_seq": {
-              "$ref": "activity-common.schema.json#/$defs/seq"
-            },
-            "by_kind": {
-              "type": "object",
-              "maxProperties": 64,
-              "additionalProperties": {
-                "type": "integer",
-                "minimum": 0
+            "byKind": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "count"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "pattern": "^(x-[a-z][a-z0-9-]{0,31}\\.)?[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "additionalProperties": false
               }
             }
           },

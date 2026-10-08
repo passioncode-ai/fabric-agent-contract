@@ -3,22 +3,22 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature } from "../src/device-rules.js";
+import { type DeviceState, mergeDeviceState, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature } from "../src/device-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// DEC-0031: fabric-device/0.1 — enrollment, signed policy, check-in and health.
+// DEC-0031: fabric-device/0.1 — enrollment, signed policy, check-in, health and attribution.
 type Json = Record<string, any>;
 const fixtures = path.join(projectRoot(), "fixtures");
 const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, relative), "utf8")) as Json;
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…044)", () => {
+describe("device semantic fixtures (FAC-SEM-041…045)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {
@@ -31,8 +31,8 @@ describe("FAC-SEM-041: a delivered policy verifies and moves forward", () => {
   const update = () => load("semantic/device-policy-update-ok.json").input;
 
   it("verifies the fixture's signature under its public key, and only that key", () => {
-    const { next, trusted_keys: keys } = update();
-    expect(verifyPolicySignature(next, keys[0].public_key)).toBe(true);
+    const { next, trustedKeys } = update();
+    expect(verifyPolicySignature(next, trustedKeys[0].publicKey)).toBe(true);
     const other = generateKeyPairSync("ed25519").publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64");
     expect(verifyPolicySignature(next, other)).toBe(false);
   });
@@ -40,7 +40,7 @@ describe("FAC-SEM-041: a delivered policy verifies and moves forward", () => {
   it("signs the canonical document without its signature, so key order does not matter", () => {
     const { privateKey, publicKey } = generateKeyPairSync("ed25519");
     const policy: Json = { revision: 2, source: "server", keys: { "retention.raw_days": { value: 7 } } };
-    policy.signature = { alg: "ed25519", key_id: "k", value: sign(null, policySigningInput(policy), privateKey).toString("base64") };
+    policy.signature = { alg: "ed25519", keyId: "k", value: sign(null, policySigningInput(policy), privateKey).toString("base64") };
     const reordered = { signature: policy.signature, keys: policy.keys, source: "server", revision: 2 };
     const raw = publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64");
     expect(verifyPolicySignature(reordered, raw)).toBe(true);
@@ -48,8 +48,8 @@ describe("FAC-SEM-041: a delivered policy verifies and moves forward", () => {
 
   it("refuses an unknown key id, a server policy without a signature and a change of organization", () => {
     const a = update();
-    a.next.signature.key_id = "someone-else";
-    expect(paths("device-policy-update", a)).toContain("FAC-SEM-041 /next/signature/key_id");
+    a.next.signature.keyId = "someone-else";
+    expect(paths("device-policy-update", a)).toContain("FAC-SEM-041 /next/signature/keyId");
     const b = update();
     delete b.next.signature;
     expect(paths("device-policy-update", b)).toContain("FAC-SEM-041 /next/signature");
@@ -88,29 +88,47 @@ describe("FAC-SEM-042: precedence and locks", () => {
 });
 
 describe("FAC-SEM-043: health does not hide tampering", () => {
-  const observation = () => load("semantic/device-health-ok.json").input;
+  const observation = () => load("semantic/device-health-ok.json").input as { known: DeviceState; batch: Json; checkIn: Json };
 
-  it("counts an overflow's range as accounted and a new, higher epoch as no evidence", () => {
+  it("keeps held and accounted ranges across batches", () => {
     const o = observation();
-    expect(tamperEvidence(o.known, o.batch, o.check_in)).toEqual([]);
-    for (const event of o.batch.events) if (event.node.id === "dev-01j9a.switchboard") { event.node.epoch = 2; event.seq = 1; }
-    o.check_in.collectors[1] = { ...o.check_in.collectors[1], node: { id: "dev-01j9a.switchboard", epoch: 2 }, last_seq: 1 };
-    expect(tamperEvidence(o.known, o.batch, o.check_in)).toEqual([]);
+    const state = mergeDeviceState(o.known, o.batch, null);
+    const cc = state.streams.find((s) => s.collector.id === "cc-otel");
+    expect(cc?.held).toEqual([[1, 37], [41, 44]]);
+    expect(cc?.accounted).toEqual([[38, 40]]);
   });
 
-  it("finds an epoch that went back, a counter that went back and a policy revision that went back", () => {
+  it("judges a gap between batches only once a check-in says the buffer moved past it", () => {
+    const pending = load("semantic/device-health-overflow-pending.json").input;
+    expect(tamperEvidence(pending.known, pending.batch, null)).toEqual([]);
+    const later = load("semantic/device-health-overflow-later-batch.json").input;
+    expect(tamperEvidence(later.known, null, null)).toEqual([]);
+    const where = tamperEvidence(later.known, null, later.checkIn).map((e) => e.message);
+    expect(where.some((m) => m.includes("38…40"))).toBe(true);
+  });
+
+  it("finds a hole inside one batch, a counter that went back and a policy revision below the baseline", () => {
     const o = observation();
-    o.known.streams.push({ node: { id: "dev-01j9a.switchboard", epoch: 3 }, seq: 2 });
-    o.check_in.collectors[0].last_seq = 12;
-    o.check_in.policy.revision = 11;
-    const where = tamperEvidence(o.known, o.batch, o.check_in).map((e) => e.instancePath);
-    expect(where).toEqual(expect.arrayContaining(["/batch/events/4/node/epoch", "/check_in/collectors/1/node/epoch", "/check_in/collectors/0/last_seq", "/check_in/policy/revision"]));
+    o.batch.events.splice(1, 1);
+    o.checkIn.collectors[0].lastSeq = 12;
+    o.checkIn.policy.layers[1].revision = 11;
+    const where = tamperEvidence(o.known, o.batch, o.checkIn).map((e) => e.instancePath);
+    expect(where).toEqual(expect.arrayContaining(["/batch/events/1/seq", "/checkIn/collectors/0/lastSeq", "/checkIn/policy/layers/1/revision"]));
   });
 
   it("accepts tampered as the state when the evidence is there", () => {
     const fixture = load("semantic/device-health-gap-hidden.json").input;
     fixture.health.state = "tampered";
     expect(codes("device-health-observation", fixture)).toEqual([]);
+  });
+
+  it("answers for an overflow of 2^53 seqs without walking them", () => {
+    const o = observation();
+    o.batch.events[3].data.dropped = { events: Number.MAX_SAFE_INTEGER - 1, ranges: [{ fromSeq: 1, toSeq: Number.MAX_SAFE_INTEGER - 1 }] };
+    o.batch.events[3].seq = Number.MAX_SAFE_INTEGER;
+    const started = Date.now();
+    tamperEvidence(o.known, o.batch, o.checkIn);
+    expect(Date.now() - started).toBeLessThan(200);
   });
 });
 
@@ -126,8 +144,17 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
 
   it("lets an unattended enrollment token leave the user unbound", () => {
     const fixture = load("semantic/device-enrollment-ok.json").input;
-    fixture.request.auth = { method: "enrollment-token", token_id: "tok-mdm-01" };
+    fixture.request.auth = { method: "enrollment-token", tokenId: "tok-mdm-01" };
     delete fixture.response.certificate.binding.user;
     expect(codes("device-enrollment", fixture)).toEqual([]);
+  });
+});
+
+describe("FAC-SEM-045: attribution comes from the client certificate", () => {
+  it("refuses a check-in under another device and an event with a user the certificate does not bind", () => {
+    const fixture = load("semantic/device-attribution-ok.json").input;
+    fixture.checkIn.device.id = "dev-other";
+    delete fixture.binding.user;
+    expect(paths("device-attribution", fixture)).toEqual(expect.arrayContaining(["FAC-SEM-045 /checkIn/device/id", "FAC-SEM-045 /batch/events/0/user"]));
   });
 });

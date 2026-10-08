@@ -32,8 +32,8 @@ and recorded as DEC-0001.
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |
 | Runner catalogue shape, runner routes and route events | `docs/specification/runners.md`, `schemas/runner-route.schema.json`, `schemas/runner-route-event.schema.json` (DEC-0026, DEC-0029) |
-| Activity telemetry (`fabric-activity/0.1`), `activity-summary/1`, `access-log/1` | `docs/specification/activity.md`, `schemas/activity-*.schema.json`, `schemas/access-log.schema.json` (DEC-0030, OQ-0009) |
-| Device enrollment, signed policy, check-in and health (`fabric-device/0.1`) | `docs/specification/devices.md`, `schemas/device-*.schema.json` (DEC-0031, OQ-0010) |
+| Activity telemetry (`fabric-activity/0.1`), `activity-summary/1`, `access-log/1` | `docs/specification/activity.md`, `schemas/telemetry-event.schema.json`, `schemas/activity-*.schema.json`, `schemas/access-log.schema.json`, `src/seq-ranges.ts` (DEC-0030, OQ-0009) |
+| Device enrollment, signed policy, check-in and health (`fabric-device/0.1`) | `docs/specification/devices.md`, `schemas/device-*.schema.json`, `FAC-SEM-045` attribution (DEC-0031, OQ-0010) |
 | Activity telemetry and devices handoff | `docs/handoffs/2026-10-08-activity-telemetry.md` |
 | Semantic rule codes: allocation and the next free code | `docs/specification/conformance.md#semantic-rule-codes`, `src/rule-codes.ts` (DEC-0029) |
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |

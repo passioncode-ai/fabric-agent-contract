@@ -18,18 +18,6 @@
       },
       "additionalProperties": false
     },
-    "device": {
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "$ref": "activity-common.schema.json#/$defs/opaqueId"
-        }
-      },
-      "additionalProperties": false
-    },
     "base64": {
       "type": "string",
       "pattern": "^[A-Za-z0-9+/]+={0,2}$"
@@ -49,6 +37,45 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,31}$",
       "description": "Open vocabulary. Known: healthy, degraded, offline, inactive, logging_disabled, tampered, never_installed, outdated. A reader shows an unknown state as it is."
+    },
+    "detail": {
+      "type": "string",
+      "pattern": "^(?![/~\\\\])(?![A-Za-z]:[\\\\/])(?!.*(/Users/|/home/|\\\\Users\\\\))[^\\r\\n]{1,200}$",
+      "description": "One line of at most 200 characters, with no absolute or home path; never a username or content (DEC-0031)."
+    },
+    "canonicalValue": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 1024
+        },
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/canonicalValue"
+          }
+        },
+        {
+          "type": "object",
+          "maxProperties": 64,
+          "additionalProperties": {
+            "$ref": "#/$defs/canonicalValue"
+          }
+        }
+      ],
+      "description": "A value canonical JSON can sign: no fraction (write it as a string)."
     }
   }
 }

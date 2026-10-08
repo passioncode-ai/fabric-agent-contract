@@ -24,6 +24,13 @@ delegation across several agents and developers.
 
 - **Status:** confirmed
 
+### P-03: Organization member with an enrolled device
+
+Works with coding agents on a device the organization enrolled for activity telemetry (DEC-0030,
+DEC-0031). Needs to know what the device reports, who read it, and which settings they may change.
+
+- **Status:** proposed — added with DEC-0030/0031; not yet confirmed in an interview
+
 ## 2. Jobs to Be Done
 
 ### JTBD-01: Prove provider compatibility
@@ -50,6 +57,14 @@ delegation across several agents and developers.
 - **Forces:** push: mutable settings make failures irreproducible; pull: content-addressed revisions and evidence; anxiety: automatic fallback may silently change identity; habit: edit the current config in place.
 - **Success metric:** recovery creates an observable new revision or approved pool switch while prior runs remain reproducible.
 
+### JTBD-04: Know and bound what my device reports
+
+- **Statement:** When my device sends activity telemetry to my organization, I want to see who read my data and which settings are mine to change, so I can trust that it is used as the organization's notice says.
+- **Personas:** P-03
+- **Type:** functional, emotional
+- **Forces:** push: telemetry nobody can see feels like surveillance; pull: a log of every read and visible locks; anxiety: data used beyond its stated purpose; habit: switch the collector off.
+- **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -72,6 +87,14 @@ delegation across several agents and developers.
 | 4 | Diagnose | reads a failed or partial result | result and evidence envelope | 2 | success language can hide unknowns | mandatory `NOT VERIFIED` list (priority 9) |
 | 5 | Recover | replaces provider, falls back account or rolls back config | version and recovery examples | 4 | recovery can erase causal history | new revisions and observable switches (priority 9) |
 | 6 | Learn | approves project or global improvement | retro and promotion records | 4 | agents can reinforce their own mistake | contrast-based learning plus independent approval (priority 9) |
+
+### JRN-03: Member — see and bound telemetry (JTBD-04)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Enroll | signs in once on the device | enrollment | 3 | unclear what is collected | a notice that names purpose and retention (priority 9) |
+| 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason (priority 9) |
+| 3 | Check | reads who read their data | access log | 3 | reads are invisible | every read with reader role and purpose (priority 9) |
 
 ## 4. User stories
 
@@ -140,6 +163,30 @@ delegation across several agents and developers.
   - Given every candidate unavailable, when the route is walked, then the request is answered capability-unavailable with every probe result attached.
 - **Priority:** must
 - **Status:** validated
+- **Product:** unobserved
+
+### ST-007: Member reads who read their data
+
+- **Story:** As P-03, I want to read every access to my raw telemetry and my device's state, so that I can see who looked and why.
+- **Traces:** JTBD-04, JRN-03/#3
+- **Acceptance criteria:**
+  - Given an administrator read my raw events, when I open my access log, then the entry names the reader's role, the scope, the range and the purpose.
+  - Given an administrator read my device's health, when I open my access log, then the entry names the device.
+  - Given only summaries were read, when I open my access log, then no entry appears, because a summary carries no person.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-008: Member sees which settings are locked
+
+- **Story:** As P-03, I want a setting the organization locked to show as locked and refuse my change, so that I know where my choice applies.
+- **Traces:** JTBD-04, JRN-03/#2
+- **Acceptance criteria:**
+  - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
+  - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
+  - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
+- **Priority:** must
+- **Status:** draft
 - **Product:** unobserved
 
 ## Design tooling

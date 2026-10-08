@@ -1,6 +1,6 @@
 {
   "format": "access-log/1",
-  "generated_at": "2026-10-08T00:00:00Z",
+  "generatedAt": "2026-10-08T00:00:00Z",
   "subject": {
     "user": {
       "id": "m-4821"
@@ -15,13 +15,13 @@
         },
         "role": "org.admin"
       },
-      "scope": "activity.summary",
+      "scope": "activity.raw",
       "range": {
         "from": "2026-10-01T00:00:00Z",
         "to": "2026-10-07T23:59:59Z"
       },
-      "purpose": "Monthly spend reconciliation for the example project.",
-      "request_id": "rq-5521"
+      "purpose": "Spend reconciliation for the example project, as the organization's notice states.",
+      "requestId": "rq-5521"
     },
     {
       "at": "2026-10-07T18:40:00Z",
@@ -31,6 +31,20 @@
       },
       "scope": "activity.raw",
       "purpose": "Nightly summary build."
+    },
+    {
+      "at": "2026-10-07T19:05:00Z",
+      "reader": {
+        "user": {
+          "id": "m-0007"
+        },
+        "role": "org.admin"
+      },
+      "scope": "device.health",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "purpose": "Support request about a device that stopped reporting."
     }
   ]
 }

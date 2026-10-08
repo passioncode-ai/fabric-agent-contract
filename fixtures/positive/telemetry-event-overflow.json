@@ -1,0 +1,35 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "01K6Z3W1A2B3C4D5E6F7G8H9JK",
+  "kind": "buffer.overflow",
+  "source": "claude_code.otel",
+  "collector": {
+    "id": "cc-otel",
+    "epoch": 2
+  },
+  "seq": 44,
+  "occurred": "2026-10-07T09:31:41Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "184824500000000",
+  "data": {
+    "dropped": {
+      "events": 3,
+      "ranges": [
+        {
+          "fromSeq": 38,
+          "toSeq": 40
+        }
+      ],
+      "byKind": [
+        {
+          "kind": "session.interval",
+          "count": 2
+        },
+        {
+          "kind": "x-example.review_marker",
+          "count": 1
+        }
+      ]
+    }
+  }
+}

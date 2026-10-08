@@ -6,7 +6,7 @@
   },
   "source": "mdm",
   "revision": 3,
-  "issued_at": "2026-09-20T10:00:00Z",
+  "issuedAt": "2026-09-20T10:00:00Z",
   "keys": {
     "retention.raw_days": {
       "value": 14,

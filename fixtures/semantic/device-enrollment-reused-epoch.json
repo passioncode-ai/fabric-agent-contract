@@ -1,0 +1,97 @@
+{
+  "description": "A re-enrollment that hands out epoch 2 again: FAC-SEM-044.",
+  "kind": "device-enrollment",
+  "expect": [
+    "FAC-SEM-044"
+  ],
+  "input": {
+    "request": {
+      "protocol": "fabric-device/0.1",
+      "kind": "enrollment-request",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "device": {
+        "id": "dev-01j9a",
+        "platform": "macos"
+      },
+      "key": {
+        "algorithm": "ecdsa-p256",
+        "storage": "secure-enclave",
+        "exportable": false
+      },
+      "csr": "MIIBDzCBtgIBADBUMQ8wDQYDVQQKDAZvcmctN2YzYTESMBAGA1UEAwwJZGV2LTAxajlh",
+      "auth": {
+        "method": "sso"
+      },
+      "requestedAt": "2026-10-07T08:30:00Z"
+    },
+    "response": {
+      "protocol": "fabric-device/0.1",
+      "kind": "enrollment-response",
+      "certificate": {
+        "der": "MIIBlTCCATugAwIBAgIUe2xhbXBsZS1jZXJ0aWZpY2F0ZS0wMDAx",
+        "serial": "7b6578616d706c65",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "binding": {
+          "org": {
+            "id": "org-7f3a"
+          },
+          "user": {
+            "id": "m-4821"
+          },
+          "device": {
+            "id": "dev-01j9a"
+          }
+        },
+        "issuer": "org-7f3a.device-ca"
+      },
+      "streamEpoch": 2,
+      "checkIn": {
+        "intervalSeconds": 300
+      },
+      "policy": {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "source": "server",
+        "revision": 12,
+        "issuedAt": "2026-10-07T08:00:00Z",
+        "keys": {
+          "logging.required": {
+            "value": true,
+            "locked": true
+          },
+          "build_channel.allowed": {
+            "value": "official",
+            "locked": true
+          },
+          "telemetry.endpoint": {
+            "value": "https://telemetry.example.org/v1/activity"
+          },
+          "telemetry.git_branch": {
+            "value": "plain"
+          },
+          "retention.raw_days": {
+            "value": 30
+          },
+          "x-example.banner": {
+            "value": "pilot"
+          }
+        },
+        "signature": {
+          "alg": "ed25519",
+          "keyId": "org-7f3a.policy-2026",
+          "value": "VXNsYFNKfJA7LVJQeMVk4uns+BD+lZNaH+FEnIR8qwAyKFohuv8XawOHMt1xRGOM5iRczYvbG7vSaPbsLkNbAg=="
+        }
+      }
+    },
+    "issuedEpochs": [
+      1,
+      2
+    ]
+  }
+}

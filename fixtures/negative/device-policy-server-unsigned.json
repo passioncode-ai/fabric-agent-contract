@@ -6,7 +6,7 @@
   },
   "source": "server",
   "revision": 12,
-  "issued_at": "2026-10-07T08:00:00Z",
+  "issuedAt": "2026-10-07T08:00:00Z",
   "keys": {
     "logging.required": {
       "value": true,
@@ -18,6 +18,9 @@
     },
     "telemetry.endpoint": {
       "value": "https://telemetry.example.org/v1/activity"
+    },
+    "telemetry.git_branch": {
+      "value": "plain"
     },
     "retention.raw_days": {
       "value": 30

@@ -1,13 +1,12 @@
 {
   "format": "activity-summary/1",
-  "generated_at": "2026-10-08T00:10:00Z",
+  "generatedAt": "2026-10-08T00:10:00Z",
   "from": "2026-10-07",
   "to": "2026-10-07",
   "producer": {
-    "kind": "server",
     "id": "org-7f3a.summarizer"
   },
-  "idle_threshold_s": 300,
+  "idleThresholdSeconds": 300,
   "cells": [
     {
       "agent": "claude_code",
@@ -18,22 +17,22 @@
       "counts": {
         "sessions": 2,
         "intervals": 9,
-        "usage_lines": 31,
-        "unpriced_lines": 0
+        "usageLines": 31,
+        "unpricedLines": 0
       },
       "durations": {
-        "agent_s": 2140,
-        "wait_human_s": 698,
-        "wait_agent_s": 120,
-        "attended_s": 1900
+        "agentSeconds": 2140,
+        "waitHumanSeconds": 698,
+        "waitAgentSeconds": 120,
+        "attendedSeconds": 1900
       },
       "method": "otel",
       "usage": {
         "tokens": {
           "input": 412000,
           "output": 51800,
-          "cache_read": 2210000,
-          "cache_write": 64000
+          "cacheRead": 2210000,
+          "cacheWrite": 64000
         },
         "cost": {
           "usd": 3.92,
@@ -49,14 +48,14 @@
       "counts": {
         "sessions": 1,
         "intervals": 3,
-        "usage_lines": 6,
-        "unpriced_lines": 6
+        "usageLines": 6,
+        "unpricedLines": 6
       },
       "durations": {
-        "agent_s": 410,
-        "wait_human_s": 95,
-        "wait_agent_s": 0,
-        "attended_s": 300
+        "agentSeconds": 410,
+        "waitHumanSeconds": 95,
+        "waitAgentSeconds": 0,
+        "attendedSeconds": 300
       },
       "method": "rollout",
       "usage": {

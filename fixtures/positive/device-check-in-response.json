@@ -5,6 +5,43 @@
     "id": "dev-01j9a"
   },
   "at": "2026-10-07T09:32:05Z",
-  "next_check_in_s": 300,
-  "flags": []
+  "nextCheckInSeconds": 300,
+  "flags": [],
+  "policy": {
+    "protocol": "fabric-device/0.1",
+    "kind": "policy",
+    "org": {
+      "id": "org-7f3a"
+    },
+    "source": "server",
+    "revision": 12,
+    "issuedAt": "2026-10-07T08:00:00Z",
+    "keys": {
+      "logging.required": {
+        "value": true,
+        "locked": true
+      },
+      "build_channel.allowed": {
+        "value": "official",
+        "locked": true
+      },
+      "telemetry.endpoint": {
+        "value": "https://telemetry.example.org/v1/activity"
+      },
+      "telemetry.git_branch": {
+        "value": "plain"
+      },
+      "retention.raw_days": {
+        "value": 30
+      },
+      "x-example.banner": {
+        "value": "pilot"
+      }
+    },
+    "signature": {
+      "alg": "ed25519",
+      "keyId": "org-7f3a.policy-2026",
+      "value": "VXNsYFNKfJA7LVJQeMVk4uns+BD+lZNaH+FEnIR8qwAyKFohuv8XawOHMt1xRGOM5iRczYvbG7vSaPbsLkNbAg=="
+    }
+  }
 }

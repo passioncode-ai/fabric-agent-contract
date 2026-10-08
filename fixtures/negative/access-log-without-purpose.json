@@ -1,6 +1,6 @@
 {
   "format": "access-log/1",
-  "generated_at": "2026-10-08T00:00:00Z",
+  "generatedAt": "2026-10-08T00:00:00Z",
   "subject": {
     "user": {
       "id": "m-4821"

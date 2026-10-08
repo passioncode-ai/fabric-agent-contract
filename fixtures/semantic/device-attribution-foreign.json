@@ -1,0 +1,78 @@
+{
+  "description": "A batch under another device's id, with an event under another user's id: FAC-SEM-045.",
+  "kind": "device-attribution",
+  "expect": [
+    "FAC-SEM-045"
+  ],
+  "input": {
+    "binding": {
+      "org": {
+        "id": "org-7f3a"
+      },
+      "user": {
+        "id": "m-4821"
+      },
+      "device": {
+        "id": "dev-01j9a"
+      }
+    },
+    "batch": {
+      "protocol": "fabric-activity/0.1",
+      "device": {
+        "id": "dev-other"
+      },
+      "batchId": "01K6Z3Y4P5Q6R7S8T9V0W1X2YZ",
+      "sent": "2026-10-07T09:32:00Z",
+      "events": [
+        {
+          "protocol": "fabric-activity/0.1",
+          "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Y7",
+          "kind": "session.interval",
+          "source": "claude_code.otel",
+          "collector": {
+            "id": "cc-otel",
+            "epoch": 2
+          },
+          "seq": 41,
+          "occurred": "2026-10-07T09:14:05Z",
+          "bootId": "boot-7c41e2",
+          "monotonicNs": "183772004511230",
+          "user": {
+            "id": "m-9999"
+          },
+          "session": {
+            "id": "cc-sess-5d1e"
+          },
+          "project": {
+            "id": "example-project"
+          },
+          "runtime": {
+            "name": "claude_code",
+            "version": "2.1.287"
+          },
+          "skill": "code-review",
+          "launch": {
+            "via": "terminal"
+          },
+          "git": {
+            "branch": "feature/retry-budget"
+          },
+          "task": {
+            "ref": {
+              "system": "linear",
+              "key": "EX-142"
+            }
+          },
+          "data": {
+            "start": "2026-10-07T09:02:11Z",
+            "end": "2026-10-07T09:14:05Z",
+            "state": "agent_working",
+            "method": "otel",
+            "idleThresholdSeconds": 300,
+            "attended": true
+          }
+        }
+      ]
+    }
+  }
+}

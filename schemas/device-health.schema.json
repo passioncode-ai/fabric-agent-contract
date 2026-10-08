@@ -9,7 +9,7 @@
     "device",
     "state",
     "since",
-    "observed_at",
+    "observedAt",
     "reasons"
   ],
   "properties": {
@@ -20,7 +20,7 @@
       "const": "health"
     },
     "device": {
-      "$ref": "device-common.schema.json#/$defs/device"
+      "$ref": "activity-common.schema.json#/$defs/device"
     },
     "state": {
       "$ref": "device-common.schema.json#/$defs/healthState"
@@ -28,10 +28,10 @@
     "since": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
-    "observed_at": {
+    "observedAt": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
-    "last_check_in": {
+    "lastCheckIn": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
     "reasons": {
@@ -47,9 +47,7 @@
             "$ref": "activity-common.schema.json#/$defs/name"
           },
           "detail": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
+            "$ref": "device-common.schema.json#/$defs/detail"
           }
         },
         "additionalProperties": false

@@ -1,14 +1,16 @@
 import { createPublicKey, verify } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { overflowRanges } from "./activity-rules.js";
 import { canonicalJson } from "./settings-backup.js";
+import { type SeqRange, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
  * Device enrollment, signed policy and check-in (`fabric-device/0.1`; DEC-0031). A schema checks one
  * document; these rules check what only a pair or a set of documents shows: a policy revision that
  * goes back or carries a signature no trusted key made, an effective setting a lower layer took from a
- * locked one, a health state that hides evidence of tampering, and a certificate that is not bound to
- * what was enrolled.
+ * locked one, a health state that hides evidence of tampering, a certificate that is not bound to what
+ * was enrolled, and a body that names another device or user than its client certificate.
  */
 
 /** Precedence of policy layers, highest first. */
@@ -62,19 +64,19 @@ export function resolvePolicy(layers: readonly JsonObject[]): Record<string, Eff
   return effective;
 }
 
-/** FAC-SEM-041: `{current?, next, trusted_keys}` — a delivered policy verifies and moves its layer forward. */
+/** FAC-SEM-041: `{current?, next, trustedKeys}` — a delivered policy verifies and moves its layer forward. */
 function policyUpdate(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-041", instancePath, message });
   const next = isObject(value.next) ? value.next : {};
   const current = isObject(value.current) ? value.current : null;
-  const keys = Array.isArray(value.trusted_keys) ? value.trusted_keys.filter(isObject) : [];
+  const keys = Array.isArray(value.trustedKeys) ? value.trustedKeys.filter(isObject) : [];
   if (next.source === "user") flag("/next/source", "a user layer is set on the device; it is never delivered as an update");
   const signature = isObject(next.signature) ? next.signature : null;
   if (signature) {
-    const key = keys.find((k) => k.key_id === signature.key_id);
-    if (!key || typeof key.public_key !== "string") flag("/next/signature/key_id", `no trusted key ${String(signature.key_id)}`);
-    else if (!verifyPolicySignature(next, key.public_key)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
+    const key = keys.find((k) => k.keyId === signature.keyId);
+    if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${String(signature.keyId)}`);
+    else if (!verifyPolicySignature(next, key.publicKey)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
   } else if (next.source === "server") {
     flag("/next/signature", "a server policy is signed");
   }
@@ -119,74 +121,107 @@ export interface Evidence { instancePath: string; message: string }
 
 const num = (x: unknown) => (typeof x === "number" ? x : 0);
 
+/** What a receiver holds about one stream across batches: seqs held (received, accepted or rejected) and seqs accounted for by overflows. */
+export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[] }
+
+/** What a receiver knows about one device before a batch or a check-in. The epochs and the policy baseline are reset by each enrollment. */
+export interface DeviceState { deviceId: string; epochs: number[]; policyBaseline: Partial<Record<"mdm" | "server", number>>; streams: StreamState[] }
+
+const keyOf = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
+
+/** The device state after `batch` and `checkIn`: held seqs, overflow ranges and the dropped ranges a check-in reports, merged per stream. */
+export function mergeDeviceState(known: DeviceState, batch: JsonObject | null, checkIn: JsonObject | null): DeviceState {
+  const streams = new Map<string, StreamState>();
+  for (const s of known.streams) streams.set(keyOf(s.collector as unknown as JsonObject), { collector: s.collector, held: [...s.held], accounted: [...s.accounted] });
+  const stream = (collector: JsonObject) => {
+    const key = keyOf(collector);
+    let s = streams.get(key);
+    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [] }; streams.set(key, s); }
+    return s;
+  };
+  for (const event of batch && Array.isArray(batch.events) ? batch.events.filter(isObject) : []) {
+    const s = stream(isObject(event.collector) ? event.collector : {});
+    s.held.push([num(event.seq), num(event.seq)]);
+    s.accounted.push(...overflowRanges(event));
+  }
+  for (const c of checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : []) {
+    stream(isObject(c.collector) ? c.collector : {}).accounted.push(...rangesOf(c.dropped));
+  }
+  return { ...known, streams: [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted) })) };
+}
+
 /**
- * Evidence that a device's telemetry or state was tampered with, from the receiver's known positions:
- * a seq gap inside one epoch that no `buffer_overflow` accounts for, an epoch or a collector counter that
- * went back, and a policy revision acknowledged lower than before. A new, higher epoch is not evidence.
+ * Evidence that a device's telemetry or state was tampered with (DEC-0031). A batch is a contiguous
+ * slice of each stream, so a hole inside a batch is evidence at once. A gap between batches is pending —
+ * its overflow may still be in the device's buffer — until a check-in reports `bufferedFrom` above it:
+ * every seq below `bufferedFrom` was sent or dropped, so a seq there that is neither held nor accounted
+ * for by an overflow or the check-in's `dropped` ranges is evidence. So are an epoch the server never
+ * issued to the device, a collector counter below a seq already held, and a policy revision below the
+ * baseline of the current enrollment. A reinstall re-enrolls, takes a new epoch and starts at seq 1,
+ * which is none of these.
  */
-export function tamperEvidence(known: JsonObject, batch: JsonObject | null, checkIn: JsonObject | null): Evidence[] {
+export function tamperEvidence(known: DeviceState, batch: JsonObject | null, checkIn: JsonObject | null): Evidence[] {
   const evidence: Evidence[] = [];
-  const streams = Array.isArray(known.streams) ? known.streams.filter(isObject) : [];
-  const knownSeq = new Map<string, number>();
-  const maxEpoch = new Map<string, number>();
-  for (const s of streams) {
-    const node = isObject(s.node) ? s.node : {};
-    knownSeq.set(`${String(node.id)}#${String(node.epoch)}`, num(s.seq));
-    maxEpoch.set(String(node.id), Math.max(maxEpoch.get(String(node.id)) ?? 0, num(node.epoch)));
-  }
+  const issued = new Set(known.epochs);
   const list = batch && Array.isArray(batch.events) ? batch.events.filter(isObject) : [];
-  const covered = new Map<string, Array<[number, number]>>();
-  const byStream = new Map<string, Array<{ seq: number; index: number }>>();
+  const last = new Map<string, number>();
   list.forEach((event, index) => {
-    const node = isObject(event.node) ? event.node : {};
-    const key = `${String(node.id)}#${String(node.epoch)}`;
-    if (num(node.epoch) < (maxEpoch.get(String(node.id)) ?? 0)) evidence.push({ instancePath: `/batch/events/${index}/node/epoch`, message: `epoch ${num(node.epoch)} of ${String(node.id)} is older than the epoch already received` });
-    byStream.set(key, [...(byStream.get(key) ?? []), { seq: num(event.seq), index }]);
-    const d = isObject(event.data) ? event.data : {};
-    if (event.kind === "buffer_overflow" && isObject(d.dropped)) covered.set(key, [...(covered.get(key) ?? []), [num(d.dropped.from_seq), num(d.dropped.to_seq)]]);
+    const collector = isObject(event.collector) ? event.collector : {};
+    if (!issued.has(num(collector.epoch))) evidence.push({ instancePath: `/batch/events/${index}/collector/epoch`, message: `epoch ${num(collector.epoch)} was never issued to this device` });
+    const key = keyOf(collector);
+    const before = last.get(key);
+    if (before !== undefined && num(event.seq) > before + 1) evidence.push({ instancePath: `/batch/events/${index}/seq`, message: `seqs ${before + 1}…${num(event.seq) - 1} of ${key} are missing inside one batch` });
+    last.set(key, num(event.seq));
   });
-  for (const [key, entries] of byStream) {
-    let expected = knownSeq.get(key) ?? 0;
-    const ranges = covered.get(key) ?? [];
-    const isCovered = (from: number, to: number) => {
-      for (let s = from; s <= to; s += 1) if (!ranges.some(([a, b]) => s >= a && s <= b)) return false;
-      return true;
-    };
-    for (const { seq, index } of [...entries].sort((a, b) => a.seq - b.seq)) {
-      if (seq > expected + 1 && !isCovered(expected + 1, seq - 1)) evidence.push({ instancePath: `/batch/events/${index}/seq`, message: `seqs ${expected + 1}…${seq - 1} of ${key} are missing and no buffer_overflow accounts for them` });
-      expected = Math.max(expected, seq);
+  const state = mergeDeviceState(known, batch, checkIn);
+  const byKey = new Map(state.streams.map((s) => [keyOf(s.collector as unknown as JsonObject), s]));
+  const collectors = checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : [];
+  collectors.forEach((c, i) => {
+    const collector = isObject(c.collector) ? c.collector : {};
+    const key = keyOf(collector);
+    if (!issued.has(num(collector.epoch))) evidence.push({ instancePath: `/checkIn/collectors/${i}/collector/epoch`, message: `epoch ${num(collector.epoch)} was never issued to this device` });
+    const s = byKey.get(key);
+    const highest = s && s.held.length ? s.held[s.held.length - 1]![1] : 0;
+    if (num(c.lastSeq) < highest) evidence.push({ instancePath: `/checkIn/collectors/${i}/lastSeq`, message: `${key} reports seq ${num(c.lastSeq)}, below ${highest}, which was already received` });
+    if (num(c.bufferedFrom) > num(c.lastSeq) + 1) evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `${key} reports a buffer that starts after its last seq` });
+    const floor = Math.min(num(c.bufferedFrom), num(c.lastSeq) + 1) - 1;
+    for (const [from, to] of uncovered([...(s?.held ?? []), ...(s?.accounted ?? [])], 1, floor)) {
+      evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `seqs ${from}…${to} of ${key} were sent or dropped, yet none is held and no overflow accounts for them` });
     }
-  }
-  if (checkIn) {
-    const collectors = Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : [];
-    collectors.forEach((c, i) => {
-      const node = isObject(c.node) ? c.node : {};
-      const id = String(node.id), epoch = num(node.epoch);
-      if (epoch < (maxEpoch.get(id) ?? 0)) evidence.push({ instancePath: `/check_in/collectors/${i}/node/epoch`, message: `collector ${id} reports an older epoch than the receiver holds` });
-      const held = knownSeq.get(`${id}#${epoch}`);
-      if (held !== undefined && num(c.last_seq) < held) evidence.push({ instancePath: `/check_in/collectors/${i}/last_seq`, message: `collector ${id} reports seq ${num(c.last_seq)} below ${held}, which was already received` });
-    });
-    const policy = isObject(checkIn.policy) ? checkIn.policy : {};
-    if (typeof known.policy_revision === "number" && num(policy.revision) < known.policy_revision) {
-      evidence.push({ instancePath: "/check_in/policy/revision", message: `policy revision ${num(policy.revision)} is below ${known.policy_revision}, which the device already acknowledged` });
+  });
+  const layers = checkIn && isObject(checkIn.policy) && Array.isArray(checkIn.policy.layers) ? checkIn.policy.layers.filter(isObject) : [];
+  layers.forEach((layer, i) => {
+    const baseline = known.policyBaseline[layer.source as "mdm" | "server"];
+    if (typeof baseline === "number" && num(layer.revision) < baseline) {
+      evidence.push({ instancePath: `/checkIn/policy/layers/${i}/revision`, message: `${String(layer.source)} policy revision ${num(layer.revision)} is below ${baseline}, which the device acknowledged since it enrolled` });
     }
-  }
+  });
   return evidence;
 }
 
-/** FAC-SEM-043: `{known, batch?, check_in?, effective?, health}` — health does not hide tampering or disabled required logging. */
+const asState = (value: unknown): DeviceState => {
+  const k = isObject(value) ? value : {};
+  const streams = Array.isArray(k.streams) ? k.streams.filter(isObject) : [];
+  return {
+    deviceId: String(k.deviceId ?? ""),
+    epochs: Array.isArray(k.epochs) ? k.epochs.filter((e): e is number => typeof e === "number") : [],
+    policyBaseline: isObject(k.policyBaseline) ? k.policyBaseline as DeviceState["policyBaseline"] : {},
+    streams: streams.map((s) => ({ collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"], held: rangesOf(s.held), accounted: rangesOf(s.accounted) }))
+  };
+};
+
+/** FAC-SEM-043: `{known, batch?, checkIn?, effective?, health}` — health does not hide tampering or disabled required logging. */
 function healthObservation(value: JsonObject): Finding[] {
-  const known = isObject(value.known) ? value.known : {};
   const health = isObject(value.health) ? value.health : {};
-  const checkIn = isObject(value.check_in) ? value.check_in : null;
+  const checkIn = isObject(value.checkIn) ? value.checkIn : null;
   const findings: Finding[] = [];
   if (health.state !== "tampered") {
-    for (const e of tamperEvidence(known, isObject(value.batch) ? value.batch : null, checkIn)) {
+    for (const e of tamperEvidence(asState(value.known), isObject(value.batch) ? value.batch : null, checkIn)) {
       findings.push({ code: "FAC-SEM-043", instancePath: "/health/state", message: `${e.message} (${e.instancePath}): the state is tampered` });
     }
   }
   const effective = isObject(value.effective) ? value.effective : {};
-  const required = isObject(effective["logging.required"]) ? (effective["logging.required"] as JsonObject).value === true : effective["logging.required"] === true;
+  const required = isObject(effective["logging.required"]) && (effective["logging.required"] as JsonObject).value === true;
   const logging = checkIn && isObject(checkIn.logging) ? checkIn.logging : {};
   if (required && logging.enabled === false && !["logging_disabled", "tampered"].includes(String(health.state))) {
     findings.push({ code: "FAC-SEM-043", instancePath: "/health/state", message: "logging is required and the device reports it disabled: the state is logging_disabled" });
@@ -198,7 +233,7 @@ const DAY_MS = 86_400_000;
 /** The longest a device certificate may live (DEC-0031). */
 export const MAX_CERTIFICATE_DAYS = 30;
 
-/** FAC-SEM-044: `{request, response}` — the certificate is short-lived and bound to the organization, device and user that enrolled. */
+/** FAC-SEM-044: `{request, response, issuedEpochs?}` — the certificate is short-lived and bound to what enrolled, and the epoch is new. */
 function enrollment(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-044", instancePath, message });
@@ -211,9 +246,36 @@ function enrollment(value: JsonObject): Finding[] {
   if (id(binding.device) !== id(request.device)) flag("/response/certificate/binding/device/id", "the certificate names another device than the request");
   const auth = isObject(request.auth) ? request.auth : {};
   if (auth.method === "sso" && !isObject(binding.user)) flag("/response/certificate/binding/user", "an SSO enrollment binds the signed-in user");
-  const from = Date.parse(String(certificate.not_before ?? "")), to = Date.parse(String(certificate.not_after ?? ""));
-  if (!(to > from)) flag("/response/certificate/not_after", "a certificate ends after it starts");
-  else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/not_after", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
+  const from = Date.parse(String(certificate.notBefore ?? "")), to = Date.parse(String(certificate.notAfter ?? ""));
+  if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
+  else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
+  const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];
+  if (issued.length && num(response.streamEpoch) <= Math.max(...issued)) flag("/response/streamEpoch", `an enrollment issues an epoch above every epoch issued to the device before (${Math.max(...issued)})`);
+  return findings;
+}
+
+/**
+ * FAC-SEM-045: `{binding, batch? , checkIn?}` — a receiver attributes what a device sends to the client
+ * certificate: the body's device is the certificate's device, and every event's user is the
+ * certificate's user (or none when the certificate binds none).
+ */
+function attribution(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-045", instancePath, message });
+  const binding = isObject(value.binding) ? value.binding : {};
+  const device = isObject(binding.device) ? binding.device.id : undefined;
+  const user = isObject(binding.user) ? binding.user.id : undefined;
+  for (const doc of ["batch", "checkIn"] as const) {
+    const body = isObject(value[doc]) ? value[doc] as JsonObject : null;
+    if (!body) continue;
+    if (!isObject(body.device) || body.device.id !== device) flag(`/${doc}/device/id`, "the device is the client certificate's device, never the body's word");
+  }
+  const batch = isObject(value.batch) ? value.batch : {};
+  (Array.isArray(batch.events) ? batch.events.filter(isObject) : []).forEach((event, i) => {
+    if (!isObject(event.user)) return;
+    if (user === undefined) flag(`/batch/events/${i}/user`, "the certificate binds no user, so an event names none");
+    else if (event.user.id !== user) flag(`/batch/events/${i}/user/id`, "an event's user is the client certificate's user");
+  });
   return findings;
 }
 
@@ -223,6 +285,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-policy-resolution") return policyResolution(value);
   if (kind === "device-health-observation") return healthObservation(value);
   if (kind === "device-enrollment") return enrollment(value);
+  if (kind === "device-attribution") return attribution(value);
   return undefined;
 }
 // #endregion device-rules

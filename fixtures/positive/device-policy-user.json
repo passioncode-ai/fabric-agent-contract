@@ -6,7 +6,7 @@
   },
   "source": "user",
   "revision": 5,
-  "issued_at": "2026-10-06T12:00:00Z",
+  "issuedAt": "2026-10-06T12:00:00Z",
   "keys": {
     "retention.raw_days": {
       "value": 90

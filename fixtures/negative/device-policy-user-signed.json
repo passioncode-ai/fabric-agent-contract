@@ -6,7 +6,7 @@
   },
   "source": "user",
   "revision": 5,
-  "issued_at": "2026-10-06T12:00:00Z",
+  "issuedAt": "2026-10-06T12:00:00Z",
   "keys": {
     "retention.raw_days": {
       "value": 90
@@ -20,7 +20,7 @@
   },
   "signature": {
     "alg": "ed25519",
-    "key_id": "org-7f3a.policy-2026",
-    "value": "P+itG9etsoGKUypzZznHpDqNflvPHKIIEimFSAYlKcghjDZm3/gc3ZMF2nBxIK2FdC7Uwv7tbmQ608cR61FvAQ=="
+    "keyId": "org-7f3a.policy-2026",
+    "value": "VXNsYFNKfJA7LVJQeMVk4uns+BD+lZNaH+FEnIR8qwAyKFohuv8XawOHMt1xRGOM5iRczYvbG7vSaPbsLkNbAg=="
   }
 }

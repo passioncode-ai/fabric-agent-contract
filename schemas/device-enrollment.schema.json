@@ -21,7 +21,7 @@
         "key",
         "csr",
         "auth",
-        "requested_at"
+        "requestedAt"
       ],
       "properties": {
         "protocol": {
@@ -110,13 +110,13 @@
               "type": "object",
               "required": [
                 "method",
-                "token_id"
+                "tokenId"
               ],
               "properties": {
                 "method": {
                   "const": "enrollment-token"
                 },
-                "token_id": {
+                "tokenId": {
                   "$ref": "activity-common.schema.json#/$defs/opaqueId"
                 }
               },
@@ -125,7 +125,7 @@
           ],
           "description": "How the request is authenticated. The proof itself (the SSO session or the enrollment token's secret) travels in the Authorization header, never in the body."
         },
-        "requested_at": {
+        "requestedAt": {
           "$ref": "common.schema.json#/$defs/timestamp"
         }
       },
@@ -137,7 +137,8 @@
         "protocol",
         "kind",
         "certificate",
-        "check_in"
+        "streamEpoch",
+        "checkIn"
       ],
       "properties": {
         "protocol": {
@@ -151,8 +152,8 @@
           "required": [
             "der",
             "serial",
-            "not_before",
-            "not_after",
+            "notBefore",
+            "notAfter",
             "binding",
             "issuer"
           ],
@@ -165,10 +166,10 @@
             "serial": {
               "$ref": "device-common.schema.json#/$defs/serial"
             },
-            "not_before": {
+            "notBefore": {
               "$ref": "common.schema.json#/$defs/timestamp"
             },
-            "not_after": {
+            "notAfter": {
               "$ref": "common.schema.json#/$defs/timestamp"
             },
             "binding": {
@@ -185,7 +186,7 @@
                   "$ref": "activity-common.schema.json#/$defs/user"
                 },
                 "device": {
-                  "$ref": "device-common.schema.json#/$defs/device"
+                  "$ref": "activity-common.schema.json#/$defs/device"
                 }
               },
               "additionalProperties": false
@@ -196,13 +197,17 @@
           },
           "additionalProperties": false
         },
-        "check_in": {
+        "streamEpoch": {
+          "$ref": "activity-common.schema.json#/$defs/epoch",
+          "description": "The epoch every collector on the device uses from now on; greater than every epoch issued to this device before."
+        },
+        "checkIn": {
           "type": "object",
           "required": [
-            "interval_s"
+            "intervalSeconds"
           ],
           "properties": {
-            "interval_s": {
+            "intervalSeconds": {
               "type": "integer",
               "minimum": 30,
               "maximum": 86400
@@ -211,7 +216,24 @@
           "additionalProperties": false
         },
         "policy": {
-          "$ref": "device-policy.schema.json"
+          "allOf": [
+            {
+              "$ref": "device-policy.schema.json"
+            },
+            {
+              "not": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "const": "user"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              }
+            }
+          ]
         }
       },
       "additionalProperties": false

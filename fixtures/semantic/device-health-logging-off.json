@@ -6,35 +6,55 @@
   ],
   "input": {
     "known": {
+      "deviceId": "dev-01j9a",
+      "epochs": [
+        1,
+        2
+      ],
+      "policyBaseline": {
+        "mdm": 3,
+        "server": 12
+      },
       "streams": [
         {
-          "node": {
-            "id": "dev-01j9a.cc-otel",
+          "collector": {
+            "id": "cc-otel",
             "epoch": 2
           },
-          "seq": 40
+          "held": [
+            [
+              1,
+              44
+            ]
+          ],
+          "accounted": []
         },
         {
-          "node": {
-            "id": "dev-01j9a.switchboard",
-            "epoch": 1
+          "collector": {
+            "id": "switchboard",
+            "epoch": 2
           },
-          "seq": 6
+          "held": [
+            [
+              1,
+              7
+            ]
+          ],
+          "accounted": []
         }
-      ],
-      "policy_revision": 12
+      ]
     },
-    "check_in": {
+    "checkIn": {
       "protocol": "fabric-device/0.1",
       "kind": "check-in",
       "device": {
         "id": "dev-01j9a"
       },
-      "sequence_num": 288,
+      "sequenceNum": 288,
       "at": "2026-10-07T09:32:05Z",
       "agent": {
         "version": "0.4.0",
-        "build_channel": "official"
+        "buildChannel": "official"
       },
       "health": {
         "state": "healthy",
@@ -45,31 +65,45 @@
       },
       "collectors": [
         {
-          "node": {
-            "id": "dev-01j9a.cc-otel",
+          "collector": {
+            "id": "cc-otel",
             "epoch": 2
           },
           "source": "claude_code.otel",
-          "last_seq": 46,
+          "lastSeq": 44,
+          "bufferedFrom": 45,
+          "dropped": [],
           "healthy": true
         },
         {
-          "node": {
-            "id": "dev-01j9a.switchboard",
-            "epoch": 1
+          "collector": {
+            "id": "switchboard",
+            "epoch": 2
           },
           "source": "switchboard",
-          "last_seq": 7,
+          "lastSeq": 7,
+          "bufferedFrom": 8,
+          "dropped": [],
           "healthy": true
         }
       ],
       "policy": {
-        "revision": 12,
-        "status": "applied"
+        "layers": [
+          {
+            "source": "mdm",
+            "revision": 3,
+            "status": "applied"
+          },
+          {
+            "source": "server",
+            "revision": 12,
+            "status": "applied"
+          }
+        ]
       },
       "certificate": {
         "serial": "7b6578616d706c65",
-        "not_after": "2026-10-14T08:30:05Z"
+        "notAfter": "2026-10-14T08:30:05Z"
       }
     },
     "effective": {
@@ -84,6 +118,10 @@
       "telemetry.endpoint": {
         "value": "https://telemetry.example.org/mdm",
         "from": "mdm"
+      },
+      "telemetry.git_branch": {
+        "value": "plain",
+        "from": "server"
       },
       "retention.raw_days": {
         "value": 14,
@@ -102,8 +140,8 @@
       },
       "state": "healthy",
       "since": "2026-10-07T08:30:10Z",
-      "observed_at": "2026-10-07T09:32:06Z",
-      "last_check_in": "2026-10-07T09:32:05Z",
+      "observedAt": "2026-10-07T09:32:06Z",
+      "lastCheckIn": "2026-10-07T09:32:05Z",
       "reasons": []
     }
   }

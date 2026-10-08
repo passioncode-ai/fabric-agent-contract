@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-batch-ack.schema.json",
   "title": "Activity batch acknowledgement (fabric-activity/0.1, DEC-0030)",
-  "description": "acks[].seq is the highest contiguous seq the receiver holds for each (node.id, node.epoch) stream; a device may drop its buffer up to it.",
+  "description": "accepted + duplicates + rejected equals the events of the batch; acks[].seq is the highest seq up to which every event of the stream is held, rejected or accounted for by an overflow (FAC-SEM-039).",
   "type": "object",
   "required": [
     "protocol",
@@ -10,6 +10,7 @@
     "received",
     "accepted",
     "duplicates",
+    "rejected",
     "acks"
   ],
   "properties": {
@@ -17,18 +18,9 @@
       "$ref": "activity-common.schema.json#/$defs/protocol"
     },
     "device": {
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "$ref": "activity-common.schema.json#/$defs/opaqueId"
-        }
-      },
-      "additionalProperties": false
+      "$ref": "activity-common.schema.json#/$defs/device"
     },
-    "batch_id": {
+    "batchId": {
       "type": "string",
       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
     },
@@ -37,11 +29,13 @@
     },
     "accepted": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 9007199254740991
     },
     "duplicates": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 9007199254740991
     },
     "rejected": {
       "type": "array",
@@ -49,11 +43,11 @@
       "items": {
         "type": "object",
         "required": [
-          "event_id",
+          "eventId",
           "reason"
         ],
         "properties": {
-          "event_id": {
+          "eventId": {
             "$ref": "activity-common.schema.json#/$defs/eventId"
           },
           "reason": {
@@ -61,7 +55,8 @@
               "schema",
               "content-field",
               "person-field",
-              "stream"
+              "stream",
+              "attribution"
             ]
           }
         },

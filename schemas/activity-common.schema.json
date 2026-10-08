@@ -9,17 +9,22 @@
     "name": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$",
-      "description": "An open-vocabulary dotted name (a source, a runtime, a method, an outcome). A reader shows an unknown name as it is and never rejects it."
+      "description": "An open-vocabulary dotted identifier (a kind, a source, a runtime, a method, an outcome). A reader shows an unknown one as it is and never rejects it."
     },
     "opaqueId": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
-      "description": "An opaque identifier: no spaces and no @, so an e-mail address or a display name never fits."
+      "description": "An opaque identifier: no spaces and no @, so an e-mail address does not fit. The pattern cannot tell a name from a code; issuing opaque values is the issuer's duty (DEC-0030)."
     },
     "eventId": {
       "type": "string",
       "pattern": "^([0-9A-HJKMNP-TV-Z]{26}|sha256:[a-f0-9]{64})$",
-      "description": "A ULID for an event the collector originates and persists once, or sha256: of the canonical {source, key} for an event read from a source that can be read again (FAC-SEM-039)."
+      "description": "A ULID for an event the collector originates and persists once, or sha256: of the canonical {source, key} for an event read from a source that can be read again; a derived id comes with its sourceKey (FAC-SEM-039)."
+    },
+    "sourceKey": {
+      "type": "string",
+      "pattern": "^(?![/~\\\\])(?![A-Za-z]:[\\\\/])(?!.*(/Users/|/home/|\\\\Users\\\\))[^\\s]{1,256}$",
+      "description": "The source's own id of a record: an id, a hash, or a path relative to the runtime's own directory. Never an absolute or home path."
     },
     "seq": {
       "type": "integer",
@@ -34,7 +39,7 @@
     "monotonicNs": {
       "type": "string",
       "pattern": "^(0|[1-9][0-9]{0,19})$",
-      "description": "Nanoseconds of the device's monotonic clock, as a decimal string: the value passes 2^53 after about 104 days of uptime."
+      "description": "Nanoseconds of a monotonic clock that keeps counting during sleep, since the boot named by bootId, as a decimal string (OTLP's JSON encoding writes 64-bit times as strings too). At most 2^64-1 (FAC-SEM-039)."
     },
     "day": {
       "type": "string",
@@ -51,9 +56,21 @@
         }
       },
       "additionalProperties": false,
-      "description": "Opaque: an organization membership id or a local profile id. Never a name or an address."
+      "description": "Opaque: an organization membership id or a local profile id. A receiver sets it from the client certificate (FAC-SEM-045)."
     },
-    "node": {
+    "device": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "collector": {
       "type": "object",
       "required": [
         "id",
@@ -68,17 +85,17 @@
         }
       },
       "additionalProperties": false,
-      "description": "One sequence-emitting collector instance on a device, and the epoch of its counter."
+      "description": "One sequence-emitting collector node on a device, and the stream epoch the organization server issued at the device's enrollment."
     },
     "stream": {
       "type": "object",
       "required": [
-        "node",
+        "collector",
         "seq"
       ],
       "properties": {
-        "node": {
-          "$ref": "#/$defs/node"
+        "collector": {
+          "$ref": "#/$defs/collector"
         },
         "seq": {
           "type": "integer",
@@ -86,7 +103,23 @@
         }
       },
       "additionalProperties": false,
-      "description": "A position in one (node.id, node.epoch) stream; seq 0 means nothing yet."
+      "description": "A position in one (device.id, collector.id, collector.epoch) stream; seq 0 means nothing yet."
+    },
+    "range": {
+      "type": "object",
+      "required": [
+        "fromSeq",
+        "toSeq"
+      ],
+      "properties": {
+        "fromSeq": {
+          "$ref": "#/$defs/seq"
+        },
+        "toSeq": {
+          "$ref": "#/$defs/seq"
+        }
+      },
+      "additionalProperties": false
     },
     "tokens": {
       "type": "object",
@@ -97,19 +130,23 @@
       "properties": {
         "input": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
         "output": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
-        "cache_read": {
+        "cacheRead": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
-        "cache_write": {
+        "cacheWrite": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "additionalProperties": false
@@ -188,25 +225,25 @@
     "durations": {
       "type": "object",
       "required": [
-        "agent_s",
-        "wait_human_s",
-        "wait_agent_s",
-        "attended_s"
+        "agentSeconds",
+        "waitHumanSeconds",
+        "waitAgentSeconds",
+        "attendedSeconds"
       ],
       "properties": {
-        "agent_s": {
+        "agentSeconds": {
           "type": "number",
           "minimum": 0
         },
-        "wait_human_s": {
+        "waitHumanSeconds": {
           "type": "number",
           "minimum": 0
         },
-        "wait_agent_s": {
+        "waitAgentSeconds": {
           "type": "number",
           "minimum": 0
         },
-        "attended_s": {
+        "attendedSeconds": {
           "type": "number",
           "minimum": 0
         }
@@ -238,10 +275,19 @@
         },
         "key": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:#-]{0,63}$"
         }
       },
       "additionalProperties": false
+    },
+    "skill": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"
+    },
+    "branch": {
+      "type": "string",
+      "pattern": "^([A-Za-z0-9][A-Za-z0-9._/-]{0,99}|sha256:[a-f0-9]{64})$",
+      "description": "A branch name of at most 100 characters from a fixed set, or its sha256: when the organization's policy asks for hashed branches."
     },
     "state": {
       "enum": [
@@ -249,6 +295,49 @@
         "awaiting_input",
         "idle"
       ]
+    },
+    "extScalar": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^(?![/~\\\\])(?![A-Za-z]:[\\\\/])(?!.*(/Users/|/home/|\\\\Users\\\\))[^\\s]*$"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "extData": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$"
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/extScalar"
+          },
+          {
+            "type": "object",
+            "maxProperties": 16,
+            "propertyNames": {
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/extScalar"
+            }
+          }
+        ]
+      },
+      "description": "The data of an extension kind or of a kind this reader does not know: at most two levels, scalar values, strings of at most 64 characters with no whitespace and no absolute path."
     }
   }
 }

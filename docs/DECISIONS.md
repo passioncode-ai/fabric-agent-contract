@@ -714,127 +714,222 @@ annotate only the old status; decision bodies are never rewritten.
   `conformance.md` were edited under the git lease of that run; the record plane is `fs`, as
   `AGENTS.md` describes.
 
-### DEC-0030 — Activity telemetry: events, batches, a summary without a person dimension, and an access log (`fabric-activity/0.1`)
+### DEC-0030 — Activity telemetry: events, batches, a receiver-built summary without a person dimension, and an access log (`fabric-activity/0.1`)
 
 - **Date:** 2026-10-08
-- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending
+- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
+  Revised before merge by the contract owner's review of PR #22 (head `0994981`).
 - **Amends:** nothing — a new protocol beside `fabric-service/0.1`, added under the DEC-0016
   extension policy
 - **Decision:** The contract defines activity telemetry for debugging, work memory and spend
   reconciliation ([activity](specification/activity.md)):
-  1. **An event** (`activity-event.schema.json`) records when a coding-agent session worked, waited or
-     idled (`session.interval`: `start`, `end`, `state` `agent_working` / `awaiting_input` / `idle`,
-     `method`, `idle_threshold_s`, `attended`) and what one model call used (`usage.line`: `model`,
-     `tokens.input` / `output` / `cache_read` / `cache_write`, `cost.usd` with `cost.basis` `provider`
-     / `price-list` / `client-estimate`, `dedupe_key`). The envelope carries an open-vocabulary
-     `source` (`claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`,
-     `switchboard`, `process`), `launch.via`, `session.parent`, `git.branch`, `task.ref`, an opaque
-     `user.id`, the stream position `(node.id, node.epoch, seq)` and three clocks — `occurred` (device
-     wall clock), `monotonic_ns` (a decimal string) and `received` (set by the receiver only). Fields
-     are spelled as OpenTelemetry attributes (`snake_case` leaves, dotted paths), unlike the rest of the
-     contract, so an event maps one to one onto an OTel log record.
-  2. **Extension kinds** `x-<namespace>.<kind>` carry any `data`; a reader that does not know one
-     ignores it and never rejects the batch for it. Every other kind is closed.
-  3. **`event_id`** is a ULID for an event the collector originates, or `sha256:` of the canonical
-     `{source, key}` for an event read from a source that can be read again, which then carries its
-     `source_key`; delivery is idempotent on (`device.id`, `event_id`).
-  4. **A batch** (`activity-batch.schema.json`, at most 1000 events, no `received`) is answered by an
-     ack (`activity-batch-ack.schema.json`) whose `acks[]` give the highest contiguous seq of each
-     stream; a duplicate is counted, never an error. A collector that overflows its buffer emits
-     `buffer_overflow` with the dropped range and counts, which is how a gap is accounted for.
-  5. **`activity-summary/1`** has cells of agent × skill × project × UTC day × outcome with counts,
-     durations (`agent_s`, `wait_human_s`, `wait_agent_s`, `attended_s`, with `method` and
-     `idle_threshold_s`) and usage — and **no person dimension**.
-  6. **`access-log/1`** lists who (an opaque `user.id` or a service, and a role) read which scope of a
-     subject's data, when, for which range and purpose, so a person can see every read of their own
-     data. A server that stores activity telemetry records those reads and lets the subject read them.
-  7. **No content and no person attribute** reaches an event or a summary: the schemas close every
-     object they define, and `FAC-SEM-037` scans extension data for content and person keys.
-  8. **Rules:** `FAC-SEM-037` (no content or person key), `FAC-SEM-038` (an unknown cost is `null`,
-     never `0`), `FAC-SEM-039` (event ids, streams and acks), `FAC-SEM-040` (a summary has no person
-     dimension), reserved through `agent_sync.py reserve SEM` (receipts SEM-0037…SEM-0040).
-- **Why:** Operator decision 2026-10-08 (organization edition): agent activity across an
-  organization's devices is collected as neutral telemetry — when sessions worked or waited and what
-  they spent — not as content, and a person can see who read their data. Runtimes already export most
-  of it: Claude Code's OpenTelemetry export carries per-request `cost_usd`, token counts and a
-  `request_id` ([monitoring](https://code.claude.com/docs/en/monitoring-usage)), and it can also carry
-  `user.email`, prompt text and raw API bodies when configured to; a contract that names fields and
-  refuses content and person keys keeps those out by construction rather than by each collector's
-  configuration. The usage report (DEC-0021) already set "unknown is `null`, never `0`" for spend; the
-  same rule holds here.
-- **Compatibility:** Additive under DEC-0016: six new schemas (`activity-common`, `activity-event`,
-  `activity-batch`, `activity-batch-ack`, `activity-summary`, `access-log`), four rule codes, no change
-  to an existing schema, field or rule. `contractVersion` stays `0.1.0`. A manifest declares nothing
-  for it, so no extension key is added (G-08 unchanged).
-- **Consequences / affects:** `docs/specification/activity.md` (new), `schemas/activity-*.schema.json`,
-  `schemas/access-log.schema.json`, `src/activity-rules.ts`, `src/semantic-rules.ts`,
-  `docs/specification/conformance.md` (register, clients and readers), `fixtures/` (`activity-*`,
-  `access-log*`), `fixtures/catalogue.json`, `test/activity-rules.test.ts`,
-  `test/schema-compilation.test.ts`, `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
-  `docs/evidence/sources.md`. Consumers: a collector on the device and an organization server, both
-  outside this repository.
-- **Not decided here:** a minimum cell size for summaries; what a server does when raw retention
-  expires; an OTLP transport for the same records (OQ-0009).
-- **Source:** operator decision 2026-10-08 (organization edition). DEC-0030 reserved by git CAS
-  (`agent_sync.py reserve DEC --key activity-contracts-20261008-a`, run `r-5fe268ae4`); this file and
-  `conformance.md` edited under the git lease of that run; the record plane is `fs`, as `AGENTS.md`
-  describes.
+  1. **A telemetry event** (`telemetry-event.schema.json`) has two core kinds.
+     - `session.interval` records when a coding-agent session worked, waited or idled: `start`,
+       `end`, `state` (`agent_working` / `awaiting_input` / `idle`), `method`,
+       `idleThresholdSeconds`, an `attended` estimate, and the session's `outcome` on its last
+       interval.
+     - `usage.line` records what one model call used: `model`, `tokens.input` / `output` /
+       `cacheRead` / `cacheWrite`, `cost.usd` with `cost.basis` (`provider` / `price-list` /
+       `client-estimate`), and `dedupeKey`.
 
-### DEC-0031 — Devices: enrollment, signed policy with locks, and OpAMP-shaped check-in and health (`fabric-device/0.1`)
+     Both kinds require `runtime`. The envelope carries:
+     - an open-vocabulary `source`, a `skill`, `launch.via`, `session.parent`, `git.branch`
+       (bounded, hashable by policy), `task.ref`, and an opaque `user.id`;
+     - the stream position (`collector.id`, `collector.epoch`, `seq`);
+     - three clocks: `occurred` (device wall clock), `bootId` with `monotonicNs` (a sleep-counting
+       monotonic clock as a decimal string of at most 2^64 − 1), and `received` (set by the
+       receiver only).
+
+     Fields are `camelCase` like the rest of the contract. Dots appear only in identifiers (`kind`,
+     `source`, policy keys). A table maps every field onto OpenTelemetry log records.
+  2. **Forward compatibility:** a receiver accepts, stores and counts an event of any kind it does
+     not know — an extension `x-<namespace>.<kind>`, or a core kind a later revision adds — and never
+     interprets its `data`, which the schema bounds to two levels of short scalar tokens. A new core
+     kind is therefore additive within `0.1`.
+  3. **`eventId`** has two forms:
+     - a ULID, for an event the collector originates;
+     - `sha256:` of the canonical `{source, key}`, for an event read from a source that can be read
+       again. Such an event carries its `sourceKey`: an id, a hash or a relative path, never a home
+       path.
+
+     Delivery is idempotent on (`device.id`, `eventId`).
+  4. **Streams** are (`device.id`, `collector.id`, `collector.epoch`).
+     - **The epoch is issued by the server at enrollment.** A collector that loses its counter
+       re-enrolls and starts at seq 1 under the new epoch.
+     - A batch (`activity-batch.schema.json`, at most 1000 events, no `received`) carries a
+       contiguous slice of each stream, oldest first.
+     - The ack (`activity-batch-ack.schema.json`) gives `accepted + duplicates + rejected` equal to
+       the batch, and for each stream the highest seq up to which every seq is consumed: held,
+       rejected (consumed with a rejection, never resent) or named by a `buffer.overflow`'s dropped
+       ranges.
+     - The receiver attributes a batch to its client certificate's device and user (DEC-0031).
+  5. **`activity-summary/1`** is built by a receiver only, never a device. It has cells of agent ×
+     skill × project × UTC day × outcome with counts, durations (`agentSeconds`,
+     `waitHumanSeconds`, `waitAgentSeconds`, `attendedSeconds`, estimates under `method` and
+     `idleThresholdSeconds`) and usage — and **no person dimension**.
+  6. **`access-log/1`** lists every read of a subject's data, keyed by their `user.id` or by a device
+     bound to them. Each entry records who read it (an opaque `user.id` or a service, and a role),
+     the scope, the device, the range, the time and the purpose. A receiver records those reads and
+     lets the subject read them.
+  7. **Personal data and purpose:** events and check-ins that carry a `user.id` are personal data.
+     - A receiver processes them only for the purposes, and keeps them only for the retention, that
+       the organization's notice or policy states.
+     - It records every read of a person's data in that person's access log.
+     - The contract defines no scoring of persons.
+     - Presence-derived values are estimates labelled by `method`.
+  8. **No content and no person attribute** is the collector's duty. `FAC-SEM-037` is a
+     **best-effort key filter**, not a proof: it splits every key into words (camelCase, `_`, `-`,
+     `.`), refuses words, pairs and prefixes that name content or a person, refuses `user` anywhere
+     but the event's own `/user`, and refuses home paths in values. The schema's bounds on
+     extension data are the stronger guard.
+  9. **Rules:**
+     - `FAC-SEM-037`: no content or person key, and no home path;
+     - `FAC-SEM-038`: an unknown cost is `null`, never `0`;
+     - `FAC-SEM-039`: event ids, clocks, streams, overflows and acks;
+     - `FAC-SEM-040`: a summary has no person dimension and no device producer.
+
+     The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0037…SEM-0040).
+- **Why:** This implements the operator decision of 2026-10-08 (organization edition). Agent
+  activity across an organization's devices is collected as neutral telemetry: when sessions worked
+  or waited, and what they spent. Content is never collected, and a person can see who read their
+  data.
+
+  Runtimes already export most of this. Claude Code's OpenTelemetry export carries per-request
+  `cost_usd`, token counts and a `request_id`
+  ([monitoring](https://code.claude.com/docs/en/monitoring-usage)). It can also carry `user.email`,
+  prompt text and raw API bodies when configured to. So the contract names its fields, bounds what
+  it cannot name, and filters what slips through.
+
+  The usage report (DEC-0021) already set "unknown is `null`, never `0`" for spend; the same rule
+  holds here.
+
+  The contract owner's review of PR #22 found five problems, fixed before merge:
+  - a legitimate overflow and a reinstall were judged `tampered`;
+  - the key filter could be passed with other spellings;
+  - a device-produced summary was a per-person summary;
+  - attribution came from the body.
+- **Compatibility:** Additive under DEC-0016. It adds six new schemas (`activity-common`,
+  `telemetry-event`, `activity-batch`, `activity-batch-ack`, `activity-summary`, `access-log`) and
+  four rule codes; no existing schema, field or rule changes. `contractVersion` stays `0.1.0`. A
+  manifest declares nothing for the protocol, so no extension key is added (G-08 is unchanged).
+- **Consequences / affects:**
+  - spec: `docs/specification/activity.md` (new);
+  - schemas: `schemas/activity-*.schema.json`, `schemas/telemetry-event.schema.json`,
+    `schemas/access-log.schema.json`;
+  - source: `src/activity-rules.ts`, `src/seq-ranges.ts`, `src/semantic-rules.ts`;
+  - `docs/specification/conformance.md` (register, clients and readers);
+  - fixtures: `fixtures/` (`telemetry-event-*`, `activity-*`, `access-log*`) and
+    `fixtures/catalogue.json`;
+  - tests: `test/activity-rules.test.ts`, `test/schema-compilation.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md`, `docs/ux/`
+    (ST-007, FLW-06, SCN-010).
+
+  Consumers are a collector on the device and an organization server, both outside this repository.
+- **Not decided here (OQ-0009):** a minimum cell size for summaries; what a receiver does when raw
+  retention expires; an OTLP transport for the same records.
+- **Source:** operator decision 2026-10-08 (organization edition); review of PR #22 by the contract
+  owner, same day. DEC-0030 was reserved by git CAS (`agent_sync.py reserve DEC --key
+  activity-contracts-20261008-a`, run `r-5fe268ae4`). This file and `conformance.md` were edited
+  under the git leases of that run; the record plane is `fs`, as `AGENTS.md` describes.
+
+### DEC-0031 — Devices: enrollment with a server-issued stream epoch, signed policy with locks, OpAMP-shaped check-in and health, attribution by certificate (`fabric-device/0.1`)
 
 - **Date:** 2026-10-08
-- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending
+- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
+  Revised before merge by the contract owner's review of PR #22.
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
-  1. **Enrollment** (`device-enrollment.schema.json`): the device generates a non-exportable hardware
-     key (`secure-enclave`, `tpm`, `platform-keystore`; `exportable: false`) and a PKCS#10 request,
-     authenticated by an SSO sign-in or, for unattended creation by device management, an enrollment
-     token — the proof always in the `Authorization` header, never in the body. The server issues a
-     client certificate of at most 30 days (SHOULD 7) bound to `org.id`, `device.id` and, for SSO,
-     the signed-in `user.id`; check-ins ask for rotation before expiry, and an expired device
-     re-enrolls.
-  2. **Policy** (`device-policy.schema.json`): one document per layer — `mdm`, `server`, `user` — with
-     a monotonic `revision` and keys `{value, locked?}`: `logging.required`, `build_channel.allowed`
-     (`any` / `official` / `attested`), `telemetry.endpoint`, `retention.raw_days`; unknown keys are
-     kept and ignored. A server policy is signed with Ed25519 over its canonical JSON; a user layer is
-     never signed or delivered. Precedence is `mdm` > `server` > `user`: a locked key takes the value
-     of the highest layer that locks it, else the user's own value, else the highest default; the user
-     layer cannot lock.
-  3. **Check-in** (`device-check-in.schema.json`), shaped after OpAMP's `AgentToServer` and
-     `ServerToAgent`: `sequence_num` (a gap is answered with `report_full_state`), agent version and
-     build channel, health, logging state, each collector's stream position, the policy revision held
-     and its status, and the certificate; the response carries a newer policy, a certificate action
-     and the next interval.
-  4. **Health** (`device-health.schema.json`): an open vocabulary whose known states are `healthy`,
-     `degraded`, `offline`, `inactive`, `logging_disabled`, `tampered`, `never_installed`, `outdated`.
-     A seq gap in a stream that no `buffer_overflow` accounts for, an epoch, collector counter or
-     policy revision that went back, makes the state `tampered`; a new, higher epoch does not.
-  5. **Rules:** `FAC-SEM-041` (a delivered policy verifies and moves forward), `FAC-SEM-042` (precedence
-     and locks), `FAC-SEM-043` (health does not hide tampering or disabled required logging),
-     `FAC-SEM-044` (the certificate is short-lived and bound to what enrolled), reserved through
-     `agent_sync.py reserve SEM` (receipts SEM-0041…SEM-0044).
-- **Why:** Operator decision 2026-10-08 (organization edition): an organization must know that the
-  telemetry of each device is on and complete, and a person must not be able to quietly switch off what
-  the organization requires — nor the organization claim more than the device reports. Enrollment with
-  a hardware-bound short-lived certificate follows the agent-enrollment pattern of fleet managers
-  (Fleet, Elastic Fleet): a token for unattended enrollment, a per-device credential afterwards. The
-  check-in follows OpenTelemetry's agent-management protocol
-  ([OpAMP](https://opentelemetry.io/docs/specs/opamp/)): sequence numbers with a full-state request on
-  a gap, a remote configuration acknowledged by status, certificate offers through a CSR. Locked keys
-  follow the mandatory-versus-recommended split of managed browser policy: a default a person may
-  change, or a value they may not.
-- **Compatibility:** Additive under DEC-0016: five new schemas (`device-common`, `device-enrollment`,
-  `device-policy`, `device-check-in`, `device-health`), four rule codes, nothing existing changes.
-  `contractVersion` stays `0.1.0`; no extension key is added.
-- **Consequences / affects:** `docs/specification/devices.md` (new), `schemas/device-*.schema.json`,
-  `src/device-rules.ts`, `src/semantic-rules.ts`, `docs/specification/conformance.md` (register,
-  clients and readers), `fixtures/` (`device-*`), `fixtures/catalogue.json`,
-  `test/device-rules.test.ts`, `test/schema-compilation.test.ts`, `CONTEXT.md`, `docs/DOCMAP.md`,
-  `README.md`, `docs/evidence/sources.md`. Consumers: the collector on the device and the
-  organization server.
-- **Not decided here:** which attestation formats prove `attested`; how trusted policy keys are
-  published and rotated after enrollment (OQ-0010); when a quiet device becomes `inactive`.
-- **Source:** operator decision 2026-10-08 (organization edition). DEC-0031 reserved by git CAS
-  (`agent_sync.py reserve DEC --key activity-contracts-20261008-b`, run `r-5fe268ae4`); this file and
-  `conformance.md` edited under the git lease of that run; the record plane is `fs`.
+  1. **Enrollment** (`device-enrollment.schema.json`):
+     - The device generates a non-exportable hardware key (`secure-enclave`, `tpm`,
+       `platform-keystore`; `exportable: false`) and a PKCS#10 request.
+     - The request is authenticated by an SSO sign-in or, for unattended creation by device
+       management, an enrollment token. The proof always travels in the `Authorization` header,
+       never in the body.
+     - The server issues a client certificate of at most 30 days (SHOULD be 7), bound to `org.id`,
+       `device.id` and, for SSO, the signed-in `user.id`.
+     - It also issues a **`streamEpoch`** above every epoch issued to the device before.
+     - Check-ins ask for rotation before expiry. A device re-enrolls when its certificate expired,
+       when told to, or when a collector lost its counter. **Re-enrollment resets the
+       policy-revision baseline.**
+  2. **Attribution:** a receiver takes the device and the user of a batch or check-in from the
+     client certificate, never from the body, and refuses a mismatch.
+  3. **Policy** (`device-policy.schema.json`): one document per layer — `mdm`, `server`, `user`.
+     - Each has a monotonic `revision` and keys `{value, locked?}`: `logging.required`,
+       `build_channel.allowed` (`any` / `official` / `attested`), `telemetry.endpoint`
+       (`https://`), `telemetry.git_branch` (`omit` / `hash` / `plain`) and `retention.raw_days`.
+     - Unknown keys are kept and ignored. Values carry no fraction.
+     - A server policy is signed with Ed25519 over its canonical JSON. A user layer is never signed,
+       never delivered and cannot lock.
+     - Trusted keys reach the device out of band until OQ-0010.
+     - Precedence is `mdm` > `server` > `user`. A locked key takes the value of the highest layer
+       that locks it; otherwise the user's own value applies; otherwise the highest default.
+  4. **Check-in** (`device-check-in.schema.json`), shaped after OpAMP's `AgentToServer` and
+     `ServerToAgent`. It carries:
+     - `sequenceNum` (a gap is answered with `report_full_state`);
+     - the agent version and build channel, health, and logging state;
+     - each collector's `lastSeq`, `bufferedFrom` and still-unacknowledged `dropped` ranges;
+     - per delivered layer, the policy revision held and its status;
+     - the certificate.
+
+     The response carries a newer policy (never a user layer), a certificate action and the next
+     interval. Detail and error strings are one bounded line without paths.
+  5. **Health** (`device-health.schema.json`) is an open vocabulary. Its known states are
+     `healthy`, `degraded`, `offline`, `inactive` (the collectors are quiet — a statement about the
+     collector, not a person), `logging_disabled`, `tampered`, `never_installed` and `outdated`.
+
+     The server keeps held and accounted ranges per stream across batches. Any of the following is
+     tamper evidence and makes the state `tampered`:
+     - a hole inside one batch;
+     - a gap below a check-in's `bufferedFrom` that nothing accounts for;
+     - an epoch never issued to the device;
+     - a counter below a held seq;
+     - a policy revision below the current enrollment's baseline.
+
+     A reinstall produces none of these.
+  6. **Rules:**
+     - `FAC-SEM-041`: a delivered policy verifies and moves forward;
+     - `FAC-SEM-042`: precedence and locks;
+     - `FAC-SEM-043`: health does not hide tampering or disabled required logging;
+     - `FAC-SEM-044`: the certificate is short-lived and bound to what enrolled, and the epoch is
+       new;
+     - `FAC-SEM-045`: attribution by certificate.
+
+     The codes were reserved through `agent_sync.py reserve SEM` (receipts SEM-0041…SEM-0045).
+- **Why:** This implements the operator decision of 2026-10-08 (organization edition). An
+  organization must know that the telemetry of each device is on and complete. A person must not be
+  able to quietly switch off what the organization requires, nor the organization claim more than
+  the device reports.
+
+  The design borrows four known patterns:
+  - Enrollment with a hardware-bound, short-lived certificate follows the agent-enrollment pattern
+    of fleet managers (Fleet, Elastic Fleet): a token for unattended enrollment, then a per-device
+    credential.
+  - The check-in follows OpenTelemetry's agent-management protocol
+    ([OpAMP](https://opentelemetry.io/docs/specs/opamp/)): sequence numbers with a full-state
+    request on a gap, a remote configuration acknowledged by status, and certificate offers through
+    a CSR.
+  - Locked keys follow the mandatory-versus-recommended split of managed browser policy.
+  - A server-issued epoch is how a reinstall stays distinguishable from tampering: a collector that
+    lost its state cannot know its previous epoch.
+- **Compatibility:** Additive under DEC-0016. It adds five new schemas (`device-common`,
+  `device-enrollment`, `device-policy`, `device-check-in`, `device-health`) and five rule codes;
+  nothing existing changes. `contractVersion` stays `0.1.0`, and no extension key is added.
+- **Consequences / affects:**
+  - spec: `docs/specification/devices.md` (new);
+  - schemas: `schemas/device-*.schema.json`;
+  - source: `src/device-rules.ts`, `src/seq-ranges.ts`, `src/semantic-rules.ts`;
+  - `docs/specification/conformance.md` (register, clients and readers);
+  - fixtures: `fixtures/` (`device-*`) and `fixtures/catalogue.json`;
+  - tests: `test/device-rules.test.ts`, `test/schema-compilation.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md`, `docs/ux/`
+    (ST-008, FLW-07, SCN-011).
+
+  Consumers are the collector on the device and the organization server.
+- **Not decided here (OQ-0010):** which attestation formats prove `attested`; how trusted policy
+  keys are published and rotated after enrollment; when a quiet device becomes `inactive`.
+- **Source:** operator decision 2026-10-08 (organization edition); review of PR #22 by the contract
+  owner. DEC-0031 was reserved by git CAS (`agent_sync.py reserve DEC --key
+  activity-contracts-20261008-b`, run `r-5fe268ae4`), and `FAC-SEM-045` by `agent_sync.py reserve
+  SEM --key activity-contracts-20261008-sem-9`. This file and `conformance.md` were edited under the
+  git leases of that run; the record plane is `fs`.

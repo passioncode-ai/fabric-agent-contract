@@ -2,11 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/access-log.schema.json",
   "title": "Access log access-log/1 (DEC-0030)",
-  "description": "Who read which scope of one subject's activity data, when and why, so the subject can see every read of their own data.",
+  "description": "Who read which scope of one subject's data — keyed by their user id or by a device bound to them — when and why, so the subject can see every read of their own data.",
   "type": "object",
   "required": [
     "format",
-    "generated_at",
+    "generatedAt",
     "subject",
     "entries"
   ],
@@ -14,7 +14,7 @@
     "format": {
       "const": "access-log/1"
     },
-    "generated_at": {
+    "generatedAt": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
     "subject": {
@@ -92,6 +92,10 @@
         "scope": {
           "$ref": "activity-common.schema.json#/$defs/name"
         },
+        "device": {
+          "$ref": "activity-common.schema.json#/$defs/device",
+          "description": "Set when the read was of a device bound to the subject (health, check-ins, policy)."
+        },
         "range": {
           "type": "object",
           "required": [
@@ -113,7 +117,7 @@
           "minLength": 1,
           "maxLength": 280
         },
-        "request_id": {
+        "requestId": {
           "$ref": "activity-common.schema.json#/$defs/opaqueId"
         }
       },

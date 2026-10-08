@@ -114,28 +114,40 @@ ruling; DEC-0017 states what holds now.
   exist and are tested, so the choices can be reviewed on a real wire. No consumer may claim
   conformance, and no Fabric migration is reserved for them.
 
-
 ### OQ-0009 — Activity telemetry: a minimum summary cell, raw-retention expiry and an OTLP transport (DEC-0030)
 
 - **Status:** Open
-- **Raised:** 2026-10-08, with DEC-0030
+- **Raised:** 2026-10-08, with DEC-0030. Narrowed the same day by the review of PR #22, which
+  resolved inside DEC-0030 what was asked about summaries made on a device: a device never produces
+  a summary.
 - **Owner of the answer:** the operator, then the organization server that adopts DEC-0030.
 - **Question:** (a) Does `activity-summary/1` need a minimum cell size — a cell shown only when it
   covers at least *k* sessions or users — so that a project one person works on alone does not
-  identify them through the project dimension? (b) When `retention.raw_days` expires, does a server
-  delete raw events, or keep them under a stricter scope? (c) Should a receiver also accept the same
-  records as OTLP logs, beside HTTPS batches?
-- **Meanwhile:** summaries carry no person dimension (`FAC-SEM-040`), and the device policy carries
-  the retention days; neither (a), (b) nor (c) is required of a consumer.
+  identify them through the project dimension? (b) When `retention.raw_days` expires, does a
+  receiver delete raw events, or keep them under a stricter scope? (c) Should a receiver also accept
+  the same records as OTLP logs, beside HTTPS batches (the mapping table in `activity.md` already
+  names the fields)?
+- **Meanwhile:**
+  - Summaries are built only by a receiver, from many devices, and carry no person dimension
+    (`FAC-SEM-040`).
+  - Raw events are processed only under the purpose and retention the organization's notice states
+    (DEC-0030 §7).
+  - The device policy carries the retention days.
+  - None of (a), (b) or (c) is required of a consumer.
 
 ### OQ-0010 — Devices: attestation formats and trusted policy keys after enrollment (DEC-0031)
 
 - **Status:** Open
-- **Raised:** 2026-10-08, with DEC-0031
+- **Raised:** 2026-10-08, with DEC-0031. The review of PR #22 resolved two of the original parts in
+  DEC-0031: how a reinstall is told from tampering (a server-issued epoch, re-enrollment resets the
+  policy baseline), and that `inactive` describes the collector, not a person.
 - **Owner of the answer:** the operator, then the organization server that adopts DEC-0031.
 - **Question:** (a) Which platform attestation formats prove `build_channel.allowed: attested` and a
   non-exportable key at enrollment? (b) How does a server publish and rotate its trusted policy
   signing keys after enrollment — in the enrollment response, a signed key set, or a check-in field?
-  (c) After how long without activity is a checking-in device `inactive`?
-- **Meanwhile:** the schemas carry an optional opaque `attestation`, a policy names its `key_id`, and
-  `FAC-SEM-041` verifies against the trusted keys a device holds; `inactive` is left to the server.
+  (c) After how long without events is a checking-in device `inactive`?
+- **Meanwhile:**
+  - The schemas carry an optional opaque `attestation`.
+  - A policy names its `keyId`; trusted keys reach the device out of band, and `FAC-SEM-041`
+    verifies against them.
+  - The period after which a device is `inactive` is left to the server.

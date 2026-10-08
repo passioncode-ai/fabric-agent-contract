@@ -152,6 +152,48 @@ flowchart TD
 
 - **Screens traversed:** SCR-05 success; SCR-06 success; SCR-07 error.
 
+### FLW-06: Member reads their access log
+
+- **Traces:** ST-007 (JTBD-04, JRN-03/#3)
+- **Goal:** every read of the member's data is visible with its purpose
+- **Entry points:** the organization's member page; a link in the notice
+- **Success exit:** the access log lists reads of raw events and of devices bound to the member
+- **Task analysis:** sign in → the receiver resolves the member's `user.id` and bound devices → list `access-log/1` entries newest first.
+- **Rejected shape:** log only reads keyed by `user.id` — rejected because device health and check-ins reveal a person's device state too.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A[Screen: Access log] --> B{Entries?}
+  B -->|none| E[Empty: no one read your data in this range]
+  B -->|some| L[Entries with role, scope, device, range, purpose]
+```
+
+- **Screens traversed:** SCR-09 empty; SCR-09 success.
+
+### FLW-07: Device applies policy layers
+
+- **Traces:** ST-008 (JTBD-04, JRN-03/#2)
+- **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally
+- **Entry points:** a policy in a check-in response; a local settings change
+- **Success exit:** effective settings shown with the layer each came from and its lock
+- **Task analysis:** verify signature and revision → resolve lock, then the user's value, then the highest default → show each key's source → refuse a local change to a locked key.
+- **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  P[Policy arrives] --> V{Signature verifies and revision is newer?}
+  V -->|no| K[Keep the held revision; report failed]
+  V -->|yes| R[Resolve layers]
+  R --> S[Screen: Device settings]
+  S --> C{Member changes a key}
+  C -->|locked| X[Refused: locked by mdm or server]
+  C -->|unlocked| U[User value becomes effective]
+```
+
+- **Screens traversed:** SCR-10 success; SCR-10 error.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

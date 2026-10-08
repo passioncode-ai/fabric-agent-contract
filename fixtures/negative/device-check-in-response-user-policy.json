@@ -1,0 +1,31 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "check-in-response",
+  "device": {
+    "id": "dev-01j9a"
+  },
+  "at": "2026-10-07T09:32:05Z",
+  "nextCheckInSeconds": 300,
+  "flags": [],
+  "policy": {
+    "protocol": "fabric-device/0.1",
+    "kind": "policy",
+    "org": {
+      "id": "org-7f3a"
+    },
+    "source": "user",
+    "revision": 5,
+    "issuedAt": "2026-10-06T12:00:00Z",
+    "keys": {
+      "retention.raw_days": {
+        "value": 90
+      },
+      "build_channel.allowed": {
+        "value": "any"
+      },
+      "x-example.banner": {
+        "value": "quiet"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "01K6Z3X1C1D2E3F4G5H6J7K8MP",
+  "kind": "session.focus",
+  "source": "switchboard",
+  "collector": {
+    "id": "switchboard",
+    "epoch": 2
+  },
+  "seq": 8,
+  "occurred": "2026-10-07T09:15:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "183826000000000",
+  "user": {
+    "id": "m-4821"
+  },
+  "session": {
+    "id": "cc-sess-5d1e"
+  },
+  "data": {
+    "focused": false,
+    "pane": {
+      "index": 2
+    }
+  }
+}

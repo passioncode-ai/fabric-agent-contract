@@ -17,7 +17,7 @@
         "protocol",
         "kind",
         "device",
-        "sequence_num",
+        "sequenceNum",
         "at",
         "agent",
         "health",
@@ -34,9 +34,10 @@
           "const": "check-in"
         },
         "device": {
-          "$ref": "device-common.schema.json#/$defs/device"
+          "$ref": "activity-common.schema.json#/$defs/device",
+          "description": "Checked against the client certificate (FAC-SEM-045)."
         },
-        "sequence_num": {
+        "sequenceNum": {
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
@@ -48,13 +49,13 @@
           "type": "object",
           "required": [
             "version",
-            "build_channel"
+            "buildChannel"
           ],
           "properties": {
             "version": {
               "$ref": "common.schema.json#/$defs/semver"
             },
-            "build_channel": {
+            "buildChannel": {
               "enum": [
                 "official",
                 "attested",
@@ -77,9 +78,7 @@
               "$ref": "common.schema.json#/$defs/timestamp"
             },
             "detail": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 500
+              "$ref": "device-common.schema.json#/$defs/detail"
             }
           },
           "additionalProperties": false
@@ -102,28 +101,42 @@
           "items": {
             "type": "object",
             "required": [
-              "node",
-              "last_seq",
+              "collector",
+              "lastSeq",
+              "bufferedFrom",
+              "dropped",
               "healthy"
             ],
             "properties": {
-              "node": {
-                "$ref": "activity-common.schema.json#/$defs/node"
+              "collector": {
+                "$ref": "activity-common.schema.json#/$defs/collector"
               },
               "source": {
                 "$ref": "activity-common.schema.json#/$defs/name"
               },
-              "last_seq": {
+              "lastSeq": {
                 "type": "integer",
-                "minimum": 0
+                "minimum": 0,
+                "description": "The highest seq assigned in this stream."
+              },
+              "bufferedFrom": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "The lowest seq still in the buffer, or lastSeq + 1 when the buffer is empty: every seq below it was sent or dropped."
+              },
+              "dropped": {
+                "type": "array",
+                "maxItems": 32,
+                "items": {
+                  "$ref": "activity-common.schema.json#/$defs/range"
+                },
+                "description": "Ranges dropped whose buffer.overflow event is not yet acknowledged."
               },
               "healthy": {
                 "type": "boolean"
               },
               "error": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 500
+                "$ref": "device-common.schema.json#/$defs/detail"
               }
             },
             "additionalProperties": false
@@ -132,25 +145,43 @@
         "policy": {
           "type": "object",
           "required": [
-            "revision",
-            "status"
+            "layers"
           ],
           "properties": {
-            "revision": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "status": {
-              "enum": [
-                "applied",
-                "applying",
-                "failed"
-              ]
-            },
-            "error": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 500
+            "layers": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "revision",
+                  "status"
+                ],
+                "properties": {
+                  "source": {
+                    "enum": [
+                      "mdm",
+                      "server"
+                    ]
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "status": {
+                    "enum": [
+                      "applied",
+                      "applying",
+                      "failed"
+                    ]
+                  },
+                  "error": {
+                    "$ref": "device-common.schema.json#/$defs/detail"
+                  }
+                },
+                "additionalProperties": false
+              }
             }
           },
           "additionalProperties": false
@@ -159,19 +190,19 @@
           "type": "object",
           "required": [
             "serial",
-            "not_after"
+            "notAfter"
           ],
           "properties": {
             "serial": {
               "$ref": "device-common.schema.json#/$defs/serial"
             },
-            "not_after": {
+            "notAfter": {
               "$ref": "common.schema.json#/$defs/timestamp"
             }
           },
           "additionalProperties": false
         },
-        "full_state": {
+        "fullState": {
           "type": "boolean"
         }
       },
@@ -184,7 +215,7 @@
         "kind",
         "device",
         "at",
-        "next_check_in_s",
+        "nextCheckInSeconds",
         "flags"
       ],
       "properties": {
@@ -195,12 +226,12 @@
           "const": "check-in-response"
         },
         "device": {
-          "$ref": "device-common.schema.json#/$defs/device"
+          "$ref": "activity-common.schema.json#/$defs/device"
         },
         "at": {
           "$ref": "common.schema.json#/$defs/timestamp"
         },
-        "next_check_in_s": {
+        "nextCheckInSeconds": {
           "type": "integer",
           "minimum": 30,
           "maximum": 86400
@@ -216,7 +247,24 @@
           }
         },
         "policy": {
-          "$ref": "device-policy.schema.json"
+          "allOf": [
+            {
+              "$ref": "device-policy.schema.json"
+            },
+            {
+              "not": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "const": "user"
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              }
+            }
+          ]
         },
         "certificate": {
           "type": "object",

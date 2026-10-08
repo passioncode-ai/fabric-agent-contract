@@ -24,7 +24,7 @@
       "auth": {
         "method": "sso"
       },
-      "requested_at": "2026-10-07T08:30:00Z"
+      "requestedAt": "2026-10-07T08:30:00Z"
     },
     "response": {
       "protocol": "fabric-device/0.1",
@@ -32,8 +32,8 @@
       "certificate": {
         "der": "MIIBlTCCATugAwIBAgIUe2xhbXBsZS1jZXJ0aWZpY2F0ZS0wMDAx",
         "serial": "7b6578616d706c65",
-        "not_before": "2026-10-07T08:30:05Z",
-        "not_after": "2027-10-07T08:30:05Z",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2027-10-07T08:30:05Z",
         "binding": {
           "org": {
             "id": "org-7f3a"
@@ -47,8 +47,9 @@
         },
         "issuer": "org-7f3a.device-ca"
       },
-      "check_in": {
-        "interval_s": 300
+      "streamEpoch": 2,
+      "checkIn": {
+        "intervalSeconds": 300
       },
       "policy": {
         "protocol": "fabric-device/0.1",
@@ -58,7 +59,7 @@
         },
         "source": "server",
         "revision": 12,
-        "issued_at": "2026-10-07T08:00:00Z",
+        "issuedAt": "2026-10-07T08:00:00Z",
         "keys": {
           "logging.required": {
             "value": true,
@@ -71,6 +72,9 @@
           "telemetry.endpoint": {
             "value": "https://telemetry.example.org/v1/activity"
           },
+          "telemetry.git_branch": {
+            "value": "plain"
+          },
           "retention.raw_days": {
             "value": 30
           },
@@ -80,8 +84,8 @@
         },
         "signature": {
           "alg": "ed25519",
-          "key_id": "org-7f3a.policy-2026",
-          "value": "P+itG9etsoGKUypzZznHpDqNflvPHKIIEimFSAYlKcghjDZm3/gc3ZMF2nBxIK2FdC7Uwv7tbmQ608cR61FvAQ=="
+          "keyId": "org-7f3a.policy-2026",
+          "value": "VXNsYFNKfJA7LVJQeMVk4uns+BD+lZNaH+FEnIR8qwAyKFohuv8XawOHMt1xRGOM5iRczYvbG7vSaPbsLkNbAg=="
         }
       }
     }

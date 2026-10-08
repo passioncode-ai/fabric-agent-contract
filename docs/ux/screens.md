@@ -14,6 +14,8 @@
 | SCR-06 | Version history | FLW-02, FLW-03, FLW-04, FLW-05 | disabled | designed | none yet |
 | SCR-07 | Result and evidence | FLW-03, FLW-04, FLW-05 | disabled | designed | none yet |
 | SCR-08 | Retro record | FLW-04 | disabled | designed | none yet |
+| SCR-09 | Access log | FLW-06 | disabled | proposed | none yet |
+| SCR-10 | Device settings | FLW-07 | disabled | proposed | none yet |
 
 ## Design system
 
@@ -116,3 +118,25 @@
 - **Scenarios:** SCN-007, SCN-008
 - **Resources:** learning and promotion schemas
 - **Status:** designed
+
+### SCR-09: Access log
+
+- **Used by:** FLW-06
+- **Purpose:** show a member every read of their raw telemetry and of devices bound to them.
+- **Elements:** time, reader role, scope, device, range, purpose (primary action: open the organization's notice).
+- **States:** empty — no read in the range; success — entries newest first.
+- **Coverage:** `access-log.schema.json`, fixture `positive/access-log.json`
+- **Scenarios:** SCN-010
+- **Resources:** access-log schema; activity specification, Access log
+- **Status:** proposed
+
+### SCR-10: Device settings
+
+- **Used by:** FLW-07
+- **Purpose:** show each effective policy key, the layer it came from and whether it is locked.
+- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key).
+- **States:** success — effective settings; error — a change to a locked key refused, or a policy that failed to verify.
+- **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042)
+- **Scenarios:** SCN-011
+- **Resources:** device-policy schema; devices specification, Policy
+- **Status:** proposed
