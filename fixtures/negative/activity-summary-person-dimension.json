@@ -1,0 +1,48 @@
+{
+  "format": "activity-summary/1",
+  "generated_at": "2026-10-08T00:10:00Z",
+  "from": "2026-10-07",
+  "to": "2026-10-07",
+  "producer": {
+    "kind": "server",
+    "id": "org-7f3a.summarizer"
+  },
+  "idle_threshold_s": 300,
+  "cells": [
+    {
+      "agent": "claude_code",
+      "skill": "code-review",
+      "project": "example-project",
+      "day": "2026-10-07",
+      "outcome": "completed",
+      "counts": {
+        "sessions": 2,
+        "intervals": 9,
+        "usage_lines": 31,
+        "unpriced_lines": 0
+      },
+      "durations": {
+        "agent_s": 2140,
+        "wait_human_s": 698,
+        "wait_agent_s": 120,
+        "attended_s": 1900
+      },
+      "method": "otel",
+      "usage": {
+        "tokens": {
+          "input": 412000,
+          "output": 51800,
+          "cache_read": 2210000,
+          "cache_write": 64000
+        },
+        "cost": {
+          "usd": 3.92,
+          "basis": "client-estimate"
+        }
+      },
+      "user": {
+        "id": "m-4821"
+      }
+    }
+  ]
+}

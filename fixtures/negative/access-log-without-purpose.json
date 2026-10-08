@@ -1,0 +1,21 @@
+{
+  "format": "access-log/1",
+  "generated_at": "2026-10-08T00:00:00Z",
+  "subject": {
+    "user": {
+      "id": "m-4821"
+    }
+  },
+  "entries": [
+    {
+      "at": "2026-10-07T16:02:00Z",
+      "reader": {
+        "user": {
+          "id": "m-0007"
+        },
+        "role": "org.admin"
+      },
+      "scope": "activity.raw"
+    }
+  ]
+}

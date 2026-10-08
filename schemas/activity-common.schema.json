@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-common.schema.json",
+  "title": "Shared definitions of activity telemetry (fabric-activity/0.1, DEC-0030)",
+  "$defs": {
+    "protocol": {
+      "const": "fabric-activity/0.1"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$",
+      "description": "An open-vocabulary dotted name (a source, a runtime, a method, an outcome). A reader shows an unknown name as it is and never rejects it."
+    },
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
+      "description": "An opaque identifier: no spaces and no @, so an e-mail address or a display name never fits."
+    },
+    "eventId": {
+      "type": "string",
+      "pattern": "^([0-9A-HJKMNP-TV-Z]{26}|sha256:[a-f0-9]{64})$",
+      "description": "A ULID for an event the collector originates and persists once, or sha256: of the canonical {source, key} for an event read from a source that can be read again (FAC-SEM-039)."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "monotonicNs": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,19})$",
+      "description": "Nanoseconds of the device's monotonic clock, as a decimal string: the value passes 2^53 after about 104 days of uptime."
+    },
+    "day": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "user": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Opaque: an organization membership id or a local profile id. Never a name or an address."
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "epoch"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/opaqueId"
+        },
+        "epoch": {
+          "$ref": "#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false,
+      "description": "One sequence-emitting collector instance on a device, and the epoch of its counter."
+    },
+    "stream": {
+      "type": "object",
+      "required": [
+        "node",
+        "seq"
+      ],
+      "properties": {
+        "node": {
+          "$ref": "#/$defs/node"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "description": "A position in one (node.id, node.epoch) stream; seq 0 means nothing yet."
+    },
+    "tokens": {
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_read": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_write": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "required": [
+        "usd"
+      ],
+      "properties": {
+        "usd": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basis": {
+          "enum": [
+            "provider",
+            "price-list",
+            "client-estimate"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "An unknown cost is null and carries no basis; a known cost names its basis (FAC-SEM-038).",
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "usd": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "usd"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "basis": true
+            },
+            "required": [
+              "basis"
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "usd": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "usd"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "basis": false
+            }
+          }
+        }
+      ]
+    },
+    "durations": {
+      "type": "object",
+      "required": [
+        "agent_s",
+        "wait_human_s",
+        "wait_agent_s",
+        "attended_s"
+      ],
+      "properties": {
+        "agent_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wait_human_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wait_agent_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "attended_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "launchVia": {
+      "enum": [
+        "fabric",
+        "terminal",
+        "ide",
+        "desktop",
+        "switchboard",
+        "cron",
+        "agent",
+        "other"
+      ]
+    },
+    "taskRef": {
+      "type": "object",
+      "required": [
+        "system",
+        "key"
+      ],
+      "properties": {
+        "system": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,127}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "enum": [
+        "agent_working",
+        "awaiting_input",
+        "idle"
+      ]
+    }
+  }
+}

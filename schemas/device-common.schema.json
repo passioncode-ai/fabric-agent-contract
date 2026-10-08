@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-common.schema.json",
+  "title": "Shared definitions of device enrollment, policy and check-in (fabric-device/0.1, DEC-0031)",
+  "$defs": {
+    "protocol": {
+      "const": "fabric-device/0.1"
+    },
+    "org": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "base64": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+    },
+    "serial": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{2,40}$"
+    },
+    "source": {
+      "enum": [
+        "mdm",
+        "server",
+        "user"
+      ]
+    },
+    "healthState": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,31}$",
+      "description": "Open vocabulary. Known: healthy, degraded, offline, inactive, logging_disabled, tampered, never_installed, outdated. A reader shows an unknown state as it is."
+    }
+  }
+}

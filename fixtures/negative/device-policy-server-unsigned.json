@@ -1,0 +1,29 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "policy",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "source": "server",
+  "revision": 12,
+  "issued_at": "2026-10-07T08:00:00Z",
+  "keys": {
+    "logging.required": {
+      "value": true,
+      "locked": true
+    },
+    "build_channel.allowed": {
+      "value": "official",
+      "locked": true
+    },
+    "telemetry.endpoint": {
+      "value": "https://telemetry.example.org/v1/activity"
+    },
+    "retention.raw_days": {
+      "value": 30
+    },
+    "x-example.banner": {
+      "value": "pilot"
+    }
+  }
+}

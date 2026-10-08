@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-batch-ack.schema.json",
+  "title": "Activity batch acknowledgement (fabric-activity/0.1, DEC-0030)",
+  "description": "acks[].seq is the highest contiguous seq the receiver holds for each (node.id, node.epoch) stream; a device may drop its buffer up to it.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "device",
+    "received",
+    "accepted",
+    "duplicates",
+    "acks"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "activity-common.schema.json#/$defs/protocol"
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "batch_id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "received": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "accepted": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "duplicates": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rejected": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "reason"
+        ],
+        "properties": {
+          "event_id": {
+            "$ref": "activity-common.schema.json#/$defs/eventId"
+          },
+          "reason": {
+            "enum": [
+              "schema",
+              "content-field",
+              "person-field",
+              "stream"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "acks": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "activity-common.schema.json#/$defs/stream"
+      }
+    }
+  },
+  "additionalProperties": false
+}

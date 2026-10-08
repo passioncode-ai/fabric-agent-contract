@@ -1,0 +1,26 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "policy",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "source": "user",
+  "revision": 5,
+  "issued_at": "2026-10-06T12:00:00Z",
+  "keys": {
+    "retention.raw_days": {
+      "value": 90
+    },
+    "build_channel.allowed": {
+      "value": "any"
+    },
+    "x-example.banner": {
+      "value": "quiet"
+    }
+  },
+  "signature": {
+    "alg": "ed25519",
+    "key_id": "org-7f3a.policy-2026",
+    "value": "P+itG9etsoGKUypzZznHpDqNflvPHKIIEimFSAYlKcghjDZm3/gc3ZMF2nBxIK2FdC7Uwv7tbmQ608cR61FvAQ=="
+  }
+}

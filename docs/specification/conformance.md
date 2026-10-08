@@ -56,6 +56,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 |---|---|---|---|
 | a client of a service's token-protected routes, the events feed first | sends the token only in the header the descriptor's `auth.header` names, in the form `auth.scheme` names (`none`: the raw token; `Bearer`: `Bearer <token>`), and never assumes `Authorization: Bearer` | `FAC-SEM-036` | `test/service-feed.test.ts`, fixtures `fixtures/semantic/service-feed-request-*.json` ([service](service.md#feed-client), DEC-0025) |
 | a reader of a settings backup | refuses a file whose checksum, counts or row widths do not match its tables | `FAC-SEM-035` | `test/settings-backup.test.ts`, fixtures `settings-backup*` ([service](service.md#settings-backup), DEC-0025) |
+| a receiver of activity batches | refuses an event that carries a content or person key instead of stripping it, and acknowledges only the highest contiguous seq of each stream | `FAC-SEM-037`, `FAC-SEM-039` | `test/activity-rules.test.ts`, fixtures `fixtures/semantic/activity-*` ([activity](activity.md#batch-and-acknowledgement), DEC-0030) |
+| a device applying policy | applies a delivered policy only when it verifies and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` ([devices](devices.md#policy), DEC-0031) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
@@ -75,7 +77,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-037`
+**Next free rule code:** `FAC-SEM-045`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -116,6 +118,14 @@ register and carry no receipt.
 | `FAC-SEM-034` | `route-event` | [runners](runners.md#semantic-rules) | — |
 | `FAC-SEM-035` | `settings-backup` | [service](service.md#semantic-rules) | SEM-0035 |
 | `FAC-SEM-036` | `service-feed-request` | [service](service.md#semantic-rules) | SEM-0036 |
+| `FAC-SEM-037` | `activity-event`, `activity-batch` | [activity](activity.md#semantic-rules) | SEM-0037 |
+| `FAC-SEM-038` | `activity-batch`, `activity-event`, `activity-summary` | [activity](activity.md#semantic-rules) | SEM-0038 |
+| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `activity-event` | [activity](activity.md#semantic-rules) | SEM-0039 |
+| `FAC-SEM-040` | `activity-summary` | [activity](activity.md#semantic-rules) | SEM-0040 |
+| `FAC-SEM-041` | `device-policy-update` | [devices](devices.md#semantic-rules) | SEM-0041 |
+| `FAC-SEM-042` | `device-policy-resolution` | [devices](devices.md#semantic-rules) | SEM-0042 |
+| `FAC-SEM-043` | `device-health-observation` | [devices](devices.md#semantic-rules) | SEM-0043 |
+| `FAC-SEM-044` | `device-enrollment` | [devices](devices.md#semantic-rules) | SEM-0044 |
 
 ## Compatibility policy
 

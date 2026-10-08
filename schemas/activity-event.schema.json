@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-event.schema.json",
+  "title": "Activity telemetry event (fabric-activity/0.1, DEC-0030)",
+  "description": "One record of what an agent session did and when, without content and without any person attribute. Kinds named x-<namespace>.<kind> are extensions a reader that does not know them ignores.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "event_id",
+    "kind",
+    "source",
+    "node",
+    "seq",
+    "occurred",
+    "monotonic_ns",
+    "data"
+  ],
+  "properties": {
+    "protocol": {
+      "$ref": "activity-common.schema.json#/$defs/protocol"
+    },
+    "event_id": {
+      "$ref": "activity-common.schema.json#/$defs/eventId"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "session.interval",
+            "usage.line",
+            "buffer_overflow"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^x-[a-z][a-z0-9-]{0,31}\\.[a-z][a-z0-9_]{0,31}(\\.[a-z][a-z0-9_]{0,31}){0,3}$"
+        }
+      ]
+    },
+    "source": {
+      "$ref": "activity-common.schema.json#/$defs/name"
+    },
+    "source_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "The source's own id of the record (a transcript line id, an API request id). With it, event_id is derived (FAC-SEM-039)."
+    },
+    "node": {
+      "$ref": "activity-common.schema.json#/$defs/node"
+    },
+    "seq": {
+      "$ref": "activity-common.schema.json#/$defs/seq"
+    },
+    "occurred": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "monotonic_ns": {
+      "$ref": "activity-common.schema.json#/$defs/monotonicNs"
+    },
+    "received": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "Set by the receiver when it stores the event; a device never sends it."
+    },
+    "user": {
+      "$ref": "activity-common.schema.json#/$defs/user"
+    },
+    "session": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "parent": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false
+    },
+    "launch": {
+      "type": "object",
+      "required": [
+        "via"
+      ],
+      "properties": {
+        "via": {
+          "$ref": "activity-common.schema.json#/$defs/launchVia"
+        }
+      },
+      "additionalProperties": false
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "branch"
+      ],
+      "properties": {
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      },
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "activity-common.schema.json#/$defs/taskRef"
+        }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "task"
+      ],
+      "properties": {
+        "task": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "session.interval"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "session",
+          "project",
+          "runtime"
+        ],
+        "properties": {
+          "session": true,
+          "project": true,
+          "runtime": true,
+          "data": {
+            "$ref": "#/$defs/interval"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "usage.line"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "session",
+          "project"
+        ],
+        "properties": {
+          "session": true,
+          "project": true,
+          "data": {
+            "$ref": "#/$defs/usageLine"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "buffer_overflow"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/overflow"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "interval": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "state",
+        "method"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "end": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "state": {
+          "$ref": "activity-common.schema.json#/$defs/state"
+        },
+        "method": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "idle_threshold_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "attended": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "usageLine": {
+      "type": "object",
+      "required": [
+        "model",
+        "tokens",
+        "cost",
+        "dedupe_key"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tokens": {
+          "$ref": "activity-common.schema.json#/$defs/tokens"
+        },
+        "cost": {
+          "$ref": "activity-common.schema.json#/$defs/cost"
+        },
+        "dedupe_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    },
+    "overflow": {
+      "type": "object",
+      "required": [
+        "dropped"
+      ],
+      "properties": {
+        "dropped": {
+          "type": "object",
+          "required": [
+            "events",
+            "from_seq",
+            "to_seq"
+          ],
+          "properties": {
+            "events": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "from_seq": {
+              "$ref": "activity-common.schema.json#/$defs/seq"
+            },
+            "to_seq": {
+              "$ref": "activity-common.schema.json#/$defs/seq"
+            },
+            "by_kind": {
+              "type": "object",
+              "maxProperties": 64,
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-check-in.schema.json",
+  "title": "Device check-in and its response, OpAMP-shaped (fabric-device/0.1, DEC-0031)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/checkIn"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ],
+  "$defs": {
+    "checkIn": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "device",
+        "sequence_num",
+        "at",
+        "agent",
+        "health",
+        "logging",
+        "collectors",
+        "policy",
+        "certificate"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "check-in"
+        },
+        "device": {
+          "$ref": "device-common.schema.json#/$defs/device"
+        },
+        "sequence_num": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "agent": {
+          "type": "object",
+          "required": [
+            "version",
+            "build_channel"
+          ],
+          "properties": {
+            "version": {
+              "$ref": "common.schema.json#/$defs/semver"
+            },
+            "build_channel": {
+              "enum": [
+                "official",
+                "attested",
+                "unofficial"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "health": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "$ref": "device-common.schema.json#/$defs/healthState"
+            },
+            "since": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "detail": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        },
+        "logging": {
+          "type": "object",
+          "required": [
+            "enabled"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "collectors": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "required": [
+              "node",
+              "last_seq",
+              "healthy"
+            ],
+            "properties": {
+              "node": {
+                "$ref": "activity-common.schema.json#/$defs/node"
+              },
+              "source": {
+                "$ref": "activity-common.schema.json#/$defs/name"
+              },
+              "last_seq": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "healthy": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "policy": {
+          "type": "object",
+          "required": [
+            "revision",
+            "status"
+          ],
+          "properties": {
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "status": {
+              "enum": [
+                "applied",
+                "applying",
+                "failed"
+              ]
+            },
+            "error": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        },
+        "certificate": {
+          "type": "object",
+          "required": [
+            "serial",
+            "not_after"
+          ],
+          "properties": {
+            "serial": {
+              "$ref": "device-common.schema.json#/$defs/serial"
+            },
+            "not_after": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          },
+          "additionalProperties": false
+        },
+        "full_state": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "device",
+        "at",
+        "next_check_in_s",
+        "flags"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "check-in-response"
+        },
+        "device": {
+          "$ref": "device-common.schema.json#/$defs/device"
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "next_check_in_s": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 86400
+        },
+        "flags": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 4,
+          "items": {
+            "enum": [
+              "report_full_state"
+            ]
+          }
+        },
+        "policy": {
+          "$ref": "device-policy.schema.json"
+        },
+        "certificate": {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "enum": [
+                "rotate",
+                "re-enroll"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

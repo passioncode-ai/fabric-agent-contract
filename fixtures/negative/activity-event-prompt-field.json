@@ -1,0 +1,47 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "event_id": "01K6Z3V8Q4M2N7P5R9T1W3X5Y7",
+  "kind": "session.interval",
+  "source": "claude_code.otel",
+  "node": {
+    "id": "dev-01j9a.cc-otel",
+    "epoch": 2
+  },
+  "seq": 41,
+  "occurred": "2026-10-07T09:14:05Z",
+  "monotonic_ns": "183772004511230",
+  "user": {
+    "id": "m-4821"
+  },
+  "session": {
+    "id": "cc-sess-5d1e"
+  },
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code",
+    "version": "2.1.287"
+  },
+  "launch": {
+    "via": "terminal"
+  },
+  "git": {
+    "branch": "feature/retry-budget"
+  },
+  "task": {
+    "ref": {
+      "system": "linear",
+      "key": "EX-142"
+    }
+  },
+  "data": {
+    "start": "2026-10-07T09:02:11Z",
+    "end": "2026-10-07T09:14:05Z",
+    "state": "agent_working",
+    "method": "otel",
+    "idle_threshold_s": 300,
+    "attended": true,
+    "prompt": "fix the retry loop"
+  }
+}

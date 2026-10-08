@@ -1,0 +1,10 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "check-in-response",
+  "device": {
+    "id": "dev-01j9a"
+  },
+  "at": "2026-10-07T09:32:05Z",
+  "next_check_in_s": 300,
+  "flags": []
+}

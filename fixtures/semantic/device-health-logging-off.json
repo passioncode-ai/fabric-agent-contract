@@ -1,0 +1,110 @@
+{
+  "description": "Logging is required and locked, the device reports it disabled, and the device is still called healthy: FAC-SEM-043.",
+  "kind": "device-health-observation",
+  "expect": [
+    "FAC-SEM-043"
+  ],
+  "input": {
+    "known": {
+      "streams": [
+        {
+          "node": {
+            "id": "dev-01j9a.cc-otel",
+            "epoch": 2
+          },
+          "seq": 40
+        },
+        {
+          "node": {
+            "id": "dev-01j9a.switchboard",
+            "epoch": 1
+          },
+          "seq": 6
+        }
+      ],
+      "policy_revision": 12
+    },
+    "check_in": {
+      "protocol": "fabric-device/0.1",
+      "kind": "check-in",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "sequence_num": 288,
+      "at": "2026-10-07T09:32:05Z",
+      "agent": {
+        "version": "0.4.0",
+        "build_channel": "official"
+      },
+      "health": {
+        "state": "healthy",
+        "since": "2026-10-07T08:30:10Z"
+      },
+      "logging": {
+        "enabled": false
+      },
+      "collectors": [
+        {
+          "node": {
+            "id": "dev-01j9a.cc-otel",
+            "epoch": 2
+          },
+          "source": "claude_code.otel",
+          "last_seq": 46,
+          "healthy": true
+        },
+        {
+          "node": {
+            "id": "dev-01j9a.switchboard",
+            "epoch": 1
+          },
+          "source": "switchboard",
+          "last_seq": 7,
+          "healthy": true
+        }
+      ],
+      "policy": {
+        "revision": 12,
+        "status": "applied"
+      },
+      "certificate": {
+        "serial": "7b6578616d706c65",
+        "not_after": "2026-10-14T08:30:05Z"
+      }
+    },
+    "effective": {
+      "logging.required": {
+        "value": true,
+        "from": "server"
+      },
+      "build_channel.allowed": {
+        "value": "official",
+        "from": "server"
+      },
+      "telemetry.endpoint": {
+        "value": "https://telemetry.example.org/mdm",
+        "from": "mdm"
+      },
+      "retention.raw_days": {
+        "value": 14,
+        "from": "mdm"
+      },
+      "x-example.banner": {
+        "value": "quiet",
+        "from": "user"
+      }
+    },
+    "health": {
+      "protocol": "fabric-device/0.1",
+      "kind": "health",
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "state": "healthy",
+      "since": "2026-10-07T08:30:10Z",
+      "observed_at": "2026-10-07T09:32:06Z",
+      "last_check_in": "2026-10-07T09:32:05Z",
+      "reasons": []
+    }
+  }
+}

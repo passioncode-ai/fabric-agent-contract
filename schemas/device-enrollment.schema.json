@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-enrollment.schema.json",
+  "title": "Device enrollment request and response (fabric-device/0.1, DEC-0031)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "org",
+        "device",
+        "key",
+        "csr",
+        "auth",
+        "requested_at"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "enrollment-request"
+        },
+        "org": {
+          "$ref": "device-common.schema.json#/$defs/org"
+        },
+        "device": {
+          "type": "object",
+          "required": [
+            "id",
+            "platform"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "platform": {
+              "enum": [
+                "macos",
+                "windows",
+                "linux",
+                "other"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "key": {
+          "type": "object",
+          "required": [
+            "algorithm",
+            "storage",
+            "exportable"
+          ],
+          "properties": {
+            "algorithm": {
+              "enum": [
+                "ecdsa-p256",
+                "ed25519"
+              ]
+            },
+            "storage": {
+              "enum": [
+                "secure-enclave",
+                "tpm",
+                "platform-keystore"
+              ]
+            },
+            "exportable": {
+              "const": false
+            },
+            "attestation": {
+              "$ref": "device-common.schema.json#/$defs/base64",
+              "type": "string",
+              "maxLength": 16384
+            }
+          },
+          "additionalProperties": false
+        },
+        "csr": {
+          "$ref": "device-common.schema.json#/$defs/base64",
+          "type": "string",
+          "maxLength": 8192,
+          "description": "A PKCS#10 request (RFC 2986), DER, base64, signed by the device key."
+        },
+        "auth": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "method"
+              ],
+              "properties": {
+                "method": {
+                  "const": "sso"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "method",
+                "token_id"
+              ],
+              "properties": {
+                "method": {
+                  "const": "enrollment-token"
+                },
+                "token_id": {
+                  "$ref": "activity-common.schema.json#/$defs/opaqueId"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "How the request is authenticated. The proof itself (the SSO session or the enrollment token's secret) travels in the Authorization header, never in the body."
+        },
+        "requested_at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "certificate",
+        "check_in"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "device-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "enrollment-response"
+        },
+        "certificate": {
+          "type": "object",
+          "required": [
+            "der",
+            "serial",
+            "not_before",
+            "not_after",
+            "binding",
+            "issuer"
+          ],
+          "properties": {
+            "der": {
+              "$ref": "device-common.schema.json#/$defs/base64",
+              "type": "string",
+              "maxLength": 16384
+            },
+            "serial": {
+              "$ref": "device-common.schema.json#/$defs/serial"
+            },
+            "not_before": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "not_after": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "binding": {
+              "type": "object",
+              "required": [
+                "org",
+                "device"
+              ],
+              "properties": {
+                "org": {
+                  "$ref": "device-common.schema.json#/$defs/org"
+                },
+                "user": {
+                  "$ref": "activity-common.schema.json#/$defs/user"
+                },
+                "device": {
+                  "$ref": "device-common.schema.json#/$defs/device"
+                }
+              },
+              "additionalProperties": false
+            },
+            "issuer": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            }
+          },
+          "additionalProperties": false
+        },
+        "check_in": {
+          "type": "object",
+          "required": [
+            "interval_s"
+          ],
+          "properties": {
+            "interval_s": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 86400
+            }
+          },
+          "additionalProperties": false
+        },
+        "policy": {
+          "$ref": "device-policy.schema.json"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

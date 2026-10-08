@@ -116,6 +116,30 @@ selects which runner serves a request; it grants nothing.
 switch of a conversation to another candidate, or an exhausted route — with the
 probe result of every candidate the walk passed over.
 
+**Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
+agent session worked, waited or idled and what each model call used, sent by a collector on a
+device in batches. It carries no content and no person attribute; a person appears only as an
+opaque `user.id`.
+
+**Telemetry event**: One record of activity telemetry — a `session.interval`, a `usage.line`, a
+`buffer_overflow` or an extension kind `x-<namespace>.<kind>` — positioned in a stream by
+`(node.id, node.epoch, seq)`.
+
+**Node**: One sequence-emitting collector instance on a device; `(node.id, node.epoch)` names its
+stream, and the epoch increases when the collector loses its counter.
+
+**Activity summary**: An `activity-summary/1` document: cells of agent × skill × project × UTC day ×
+outcome, with no person dimension.
+
+**Access log**: An `access-log/1` document: who read which scope of one subject's data, when and
+why, readable by that subject.
+
+**Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
+a hardware-bound short-lived certificate, signed policy layers and periodic check-ins.
+
+**Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
+order, and a locked key is never overridden by a lower layer.
+
 **Interop**: The `fabric-interop/0.1` extension: how agents are called over MCP —
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.
 
@@ -157,6 +181,9 @@ version and commit a consuming repository builds against.
   to one of the two, never both.
 - A **Runner route** orders admitted **Runner** candidates for one **Capability**;
   a run pins one route revision per local-runner binding, and every switch is recorded.
+- A **Device** hosts one or more **Nodes**; each emits **Telemetry events** in its own stream, and
+  an **Activity summary** aggregates them without a person dimension.
+- Every read of a subject's raw telemetry is an entry in that subject's **Access log**.
 - A **Pipeline** stage binds a **Capability**; the **Provider** serving it is resolved
   to one admitted **Binding** when a run starts.
 - Every call routed through the **Hub** carries **Trace context**; a **Job** keeps its
@@ -170,3 +197,6 @@ version and commit a consuming repository builds against.
   product manager owns each project's backlog and execution graph.
 - `Runtime` and `model` are separate concerns. Contract `0.1.0` selects a runtime;
   model selection remains internal to the agent.
+- `Activity event` (a service's events feed, `fabric-service/0.1`) and **Telemetry event**
+  (`fabric-activity/0.1`) are different records: the first is one sentence a service tells its
+  operator, the second a measured interval or call. Specifications qualify which one they mean.

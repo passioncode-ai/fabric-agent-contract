@@ -1,0 +1,12 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "health",
+  "device": {
+    "id": "dev-01j9a"
+  },
+  "state": "healthy",
+  "since": "2026-10-07T08:30:10Z",
+  "observed_at": "2026-10-07T09:32:06Z",
+  "last_check_in": "2026-10-07T09:32:05Z",
+  "reasons": []
+}

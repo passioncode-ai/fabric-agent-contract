@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-summary.schema.json",
+  "title": "Activity summary activity-summary/1 (DEC-0030)",
+  "description": "Cells of agent x skill x project x UTC day x outcome. There is no person dimension: the schema names every field a cell may carry (FAC-SEM-040).",
+  "type": "object",
+  "required": [
+    "format",
+    "generated_at",
+    "from",
+    "to",
+    "producer",
+    "idle_threshold_s",
+    "cells"
+  ],
+  "properties": {
+    "format": {
+      "const": "activity-summary/1"
+    },
+    "generated_at": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "from": {
+      "$ref": "activity-common.schema.json#/$defs/day"
+    },
+    "to": {
+      "$ref": "activity-common.schema.json#/$defs/day"
+    },
+    "producer": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "device",
+            "server"
+          ]
+        },
+        "id": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "idle_threshold_s": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    },
+    "cells": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/cell"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "cell": {
+      "type": "object",
+      "required": [
+        "agent",
+        "project",
+        "day",
+        "outcome",
+        "counts",
+        "durations",
+        "method",
+        "usage"
+      ],
+      "properties": {
+        "agent": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "skill": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"
+        },
+        "project": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "day": {
+          "$ref": "activity-common.schema.json#/$defs/day"
+        },
+        "outcome": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "counts": {
+          "type": "object",
+          "required": [
+            "sessions",
+            "intervals",
+            "usage_lines"
+          ],
+          "properties": {
+            "sessions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "intervals": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "usage_lines": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unpriced_lines": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "durations": {
+          "$ref": "activity-common.schema.json#/$defs/durations"
+        },
+        "method": {
+          "$ref": "activity-common.schema.json#/$defs/name"
+        },
+        "usage": {
+          "type": "object",
+          "required": [
+            "tokens",
+            "cost"
+          ],
+          "properties": {
+            "tokens": {
+              "$ref": "activity-common.schema.json#/$defs/tokens"
+            },
+            "cost": {
+              "type": "object",
+              "required": [
+                "usd"
+              ],
+              "properties": {
+                "usd": {
+                  "oneOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "basis": {
+                  "enum": [
+                    "provider",
+                    "price-list",
+                    "client-estimate",
+                    "mixed"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

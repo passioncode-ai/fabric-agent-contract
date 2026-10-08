@@ -1,0 +1,105 @@
+{
+  "description": "MDM locks retention, the server locks logging and the build channel, the user's own value wins over unlocked defaults.",
+  "kind": "device-policy-resolution",
+  "expect": [],
+  "input": {
+    "layers": [
+      {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "source": "mdm",
+        "revision": 3,
+        "issued_at": "2026-09-20T10:00:00Z",
+        "keys": {
+          "retention.raw_days": {
+            "value": 14,
+            "locked": true
+          },
+          "telemetry.endpoint": {
+            "value": "https://telemetry.example.org/mdm"
+          }
+        }
+      },
+      {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "source": "server",
+        "revision": 12,
+        "issued_at": "2026-10-07T08:00:00Z",
+        "keys": {
+          "logging.required": {
+            "value": true,
+            "locked": true
+          },
+          "build_channel.allowed": {
+            "value": "official",
+            "locked": true
+          },
+          "telemetry.endpoint": {
+            "value": "https://telemetry.example.org/v1/activity"
+          },
+          "retention.raw_days": {
+            "value": 30
+          },
+          "x-example.banner": {
+            "value": "pilot"
+          }
+        },
+        "signature": {
+          "alg": "ed25519",
+          "key_id": "org-7f3a.policy-2026",
+          "value": "P+itG9etsoGKUypzZznHpDqNflvPHKIIEimFSAYlKcghjDZm3/gc3ZMF2nBxIK2FdC7Uwv7tbmQ608cR61FvAQ=="
+        }
+      },
+      {
+        "protocol": "fabric-device/0.1",
+        "kind": "policy",
+        "org": {
+          "id": "org-7f3a"
+        },
+        "source": "user",
+        "revision": 5,
+        "issued_at": "2026-10-06T12:00:00Z",
+        "keys": {
+          "retention.raw_days": {
+            "value": 90
+          },
+          "build_channel.allowed": {
+            "value": "any"
+          },
+          "x-example.banner": {
+            "value": "quiet"
+          }
+        }
+      }
+    ],
+    "effective": {
+      "logging.required": {
+        "value": true,
+        "from": "server"
+      },
+      "build_channel.allowed": {
+        "value": "official",
+        "from": "server"
+      },
+      "telemetry.endpoint": {
+        "value": "https://telemetry.example.org/mdm",
+        "from": "mdm"
+      },
+      "retention.raw_days": {
+        "value": 14,
+        "from": "mdm"
+      },
+      "x-example.banner": {
+        "value": "quiet",
+        "from": "user"
+      }
+    }
+  }
+}

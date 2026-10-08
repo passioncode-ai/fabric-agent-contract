@@ -1,0 +1,83 @@
+{
+  "description": "Revision 11 offered over revision 12: a device applies only a newer revision (FAC-SEM-041).",
+  "kind": "device-policy-update",
+  "expect": [
+    "FAC-SEM-041"
+  ],
+  "input": {
+    "current": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "source": "server",
+      "revision": 12,
+      "issued_at": "2026-10-07T08:00:00Z",
+      "keys": {
+        "logging.required": {
+          "value": true,
+          "locked": true
+        },
+        "build_channel.allowed": {
+          "value": "official",
+          "locked": true
+        },
+        "telemetry.endpoint": {
+          "value": "https://telemetry.example.org/v1/activity"
+        },
+        "retention.raw_days": {
+          "value": 30
+        },
+        "x-example.banner": {
+          "value": "pilot"
+        }
+      },
+      "signature": {
+        "alg": "ed25519",
+        "key_id": "org-7f3a.policy-2026",
+        "value": "P+itG9etsoGKUypzZznHpDqNflvPHKIIEimFSAYlKcghjDZm3/gc3ZMF2nBxIK2FdC7Uwv7tbmQ608cR61FvAQ=="
+      }
+    },
+    "next": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "source": "server",
+      "revision": 11,
+      "issued_at": "2026-10-01T08:00:00Z",
+      "keys": {
+        "logging.required": {
+          "value": true,
+          "locked": true
+        },
+        "build_channel.allowed": {
+          "value": "official",
+          "locked": true
+        },
+        "telemetry.endpoint": {
+          "value": "https://telemetry.example.org/v1/activity"
+        },
+        "retention.raw_days": {
+          "value": 30
+        },
+        "x-example.banner": {
+          "value": "pilot"
+        }
+      },
+      "signature": {
+        "alg": "ed25519",
+        "key_id": "org-7f3a.policy-2026",
+        "value": "wPX+mEI3ZquR2JE6znn7IDK0qNtczAvCpBrWX0xPEWoDpdT3cOTYruQslu6Omz0b/eG3yvrVDJFnNTbses3hAQ=="
+      }
+    },
+    "trusted_keys": [
+      {
+        "key_id": "org-7f3a.policy-2026",
+        "public_key": "daeHHXk+3GqRnE9gaP8fefkJkSyaOw67KzzcKizjAtU="
+      }
+    ]
+  }
+}

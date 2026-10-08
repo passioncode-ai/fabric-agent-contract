@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0009`
+**Next free ID:** `OQ-0011`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -114,3 +114,28 @@ ruling; DEC-0017 states what holds now.
   exist and are tested, so the choices can be reviewed on a real wire. No consumer may claim
   conformance, and no Fabric migration is reserved for them.
 
+
+### OQ-0009 — Activity telemetry: a minimum summary cell, raw-retention expiry and an OTLP transport (DEC-0030)
+
+- **Status:** Open
+- **Raised:** 2026-10-08, with DEC-0030
+- **Owner of the answer:** the operator, then the organization server that adopts DEC-0030.
+- **Question:** (a) Does `activity-summary/1` need a minimum cell size — a cell shown only when it
+  covers at least *k* sessions or users — so that a project one person works on alone does not
+  identify them through the project dimension? (b) When `retention.raw_days` expires, does a server
+  delete raw events, or keep them under a stricter scope? (c) Should a receiver also accept the same
+  records as OTLP logs, beside HTTPS batches?
+- **Meanwhile:** summaries carry no person dimension (`FAC-SEM-040`), and the device policy carries
+  the retention days; neither (a), (b) nor (c) is required of a consumer.
+
+### OQ-0010 — Devices: attestation formats and trusted policy keys after enrollment (DEC-0031)
+
+- **Status:** Open
+- **Raised:** 2026-10-08, with DEC-0031
+- **Owner of the answer:** the operator, then the organization server that adopts DEC-0031.
+- **Question:** (a) Which platform attestation formats prove `build_channel.allowed: attested` and a
+  non-exportable key at enrollment? (b) How does a server publish and rotate its trusted policy
+  signing keys after enrollment — in the enrollment response, a signed key set, or a check-in field?
+  (c) After how long without activity is a checking-in device `inactive`?
+- **Meanwhile:** the schemas carry an optional opaque `attestation`, a policy names its `key_id`, and
+  `FAC-SEM-041` verifies against the trusted keys a device holds; `inactive` is left to the server.
