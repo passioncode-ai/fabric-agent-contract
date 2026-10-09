@@ -106,7 +106,7 @@ function serviceCommands(value: JsonObject): Finding[] {
 // service wearing the remote placement — it would skip the loopback guard it actually needs.
 const RESERVED_HOST = /(^|\.)(localhost|local|internal|home\.arpa|lan|localdomain)$/;
 
-/** FAC-SEM-024: a remote placement is an https origin on a public name, with nothing of launchd. */
+/** FAC-SEM-024: a remote placement is an https origin on a public name, with nothing of a local supervisor (launchd, systemd, Task Scheduler — DEC-0032). */
 function remoteShape(value: JsonObject): Finding[] {
   if (value.placement !== "remote") return [];
   const findings: Finding[] = [];
@@ -116,6 +116,10 @@ function remoteShape(value: JsonObject): Finding[] {
   const lifecycle = isObject(value.lifecycle) ? value.lifecycle : {};
   for (const field of ["label", "plist"]) {
     if (lifecycle[field] !== undefined) findings.push({ code: "FAC-SEM-024", instancePath: `/lifecycle/${field}`, message: `a remote service has no launchd ${field}` });
+  }
+  // DEC-0032: nor a systemd unit or a Scheduled Task — its platform supervises it.
+  for (const [field, of] of [["unit", "systemd"], ["task", "Task Scheduler"]] as const) {
+    if (lifecycle[field] !== undefined) findings.push({ code: "FAC-SEM-024", instancePath: `/lifecycle/${field}`, message: `a remote service has no ${of} ${field}` });
   }
   return findings;
 }
