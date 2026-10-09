@@ -53,6 +53,7 @@ descriptor describes an installation, not a run.
 |---|---|
 | macOS | `~/Library/Application Support/ai.passioncode.fabric/services/` |
 | Linux | `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/services/` |
+| Windows | `%LOCALAPPDATA%\passioncode-fabric\services\` (DEC-0032; LOCALAPPDATA, so token files never roam) |
 | any | the value of `FABRIC_SERVICES_DIR` when set |
 
 - The file name MUST be `<id>.<instance>.json`, written atomically (temporary file,
@@ -239,9 +240,9 @@ These rules are the local placement's; a remote one replaces the first two
 - A service MUST bind `127.0.0.1` only.
 - It MUST reject a `Host` header other than `127.0.0.1:<port>`, `localhost:<port>` or
   `[::1]:<port>`, an `Origin` other than its own, and `Sec-Fetch-Site: cross-site`.
-- The token lives in the file named by `auth.tokenFile`, mode `0600`, and travels only
-  in the declared header — never in a query string, an argument vector or a launchd
-  plist.
+- The token lives in the file named by `auth.tokenFile`, mode `0600` (on Windows, the ACL of
+  [Windows token files](#windows-token-files)), and travels only in the declared header — never in a
+  query string, an argument vector or a supervisor's file (plist, unit, task).
 - Browser writes that rely on the session cookie MUST also require a custom request
   header, which forces a CORS preflight the service never answers.
 
@@ -260,7 +261,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 |---|---|---|
 | `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
 | Trust anchor | loopback and the Host/Origin guard | the origin's TLS certificate and the service token |
-| Supervisor | launchd, or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
+| Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
 | Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
 | Commands | `doctor`, `update` | `doctor` only |
@@ -270,7 +271,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 `https://` followed by a DNS name and an optional port — no path, query, fragment or userinfo,
 and never an IP literal. The name MUST NOT be a reserved one (`localhost`, `*.local`,
 `*.internal`, `*.home.arpa`, `*.lan`, `*.localdomain`; `FAC-SEM-024`). `lifecycle.manager` MUST be
-`none` and the descriptor MUST NOT carry `label` or `plist`. `paths` is optional. `commands`
+`none` and the descriptor MUST NOT carry `label`, `plist`, `unit` or `task`. `paths` is optional. `commands`
 MAY carry `doctor` (a local executable, `FAC-SEM-012`) and MUST NOT carry `update`. The token
 file is local, as for every placement: the installer writes it on the operator's computer with
 mode `0600`, and the same value lives on the hosting platform as a secret.
@@ -310,15 +311,36 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
 Discovery still grants nothing: a remote descriptor makes an online service visible to the
 operator who installed it, on that operator's computer only.
 
+## Windows token files
+
+<a id="windows-token-files"></a>
+
+Windows has no POSIX owner or mode in a file's metadata, so a token file's privacy is its ACL
+(DEC-0032). A reader MUST refuse a token file unless all of these hold, and a refusal names the
+offending SID or reason — never the file's contents:
+
+1. It is a regular file — not a reparse point (a symlink or a junction) — and its real path lies
+   inside the user's profile.
+2. Its owner SID is the current user.
+3. Every ACE that grants any right names the current user, `S-1-5-18` (SYSTEM) or `S-1-5-32-544`
+   (BUILTIN\Administrators) — the same trust as root reading a `0600` file on POSIX. Any other SID with
+   any right is a refusal: `S-1-1-0` (Everyone), `S-1-5-11` (Authenticated Users), `S-1-5-32-545`
+   (BUILTIN\Users), another user, a left-behind CREATOR OWNER. Deny ACEs do not change the decision.
+
+A writer sets the ACL explicitly and protected (inheritance off): the current user, SYSTEM and
+Administrators, full control — so a file it writes passes whatever its folder inherits. Descriptor
+paths on Windows are drive-absolute (`C:\…` or `C:/…`) or under `~\`; a network share (`\\server\…`,
+`\\?\…`) is never a local path.
+
 ## Lifecycle
 
 | Rule | Requirement |
 |---|---|
 | One copy | Before any side effect (resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. If the lock is held it MUST print one sentence naming the holder's pid and exit with status 75. Binding a port is not a lock. |
-| Supervisor | On macOS the supervisor is launchd: `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time. The plist carries no secret. |
+| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`. **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on. No supervisor file carries a secret. |
 | Install | Write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error), then poll the well-known document until `service.id` matches, for at most 40 seconds. |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
-| Off | A host stops a service with `bootout` then `disable`, so it stays off across logins, and starts it with `enable` then `bootstrap`. A host MUST NOT start a service process itself. |
+| Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run). A host MUST NOT start a service process itself. |
 | Code | Code runs from an immutable release directory. An upgrade rewrites the plist and restarts. |
 | State | Data and configuration live in `~/Library/Application Support/<id>/`, logs in `~/Library/Logs/<id>/`, cache in `~/Library/Caches/<id>/` — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
 | Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then `bootout`, delete the plist, delete the descriptor. Data stays unless the operator asks to purge it. |

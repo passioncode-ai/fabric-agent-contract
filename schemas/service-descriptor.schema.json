@@ -114,6 +114,8 @@
         "manager": {
           "enum": [
             "launchd",
+            "systemd",
+            "task-scheduler",
             "none"
           ]
         },
@@ -131,26 +133,94 @@
               "pattern": "\\.plist$"
             }
           ]
+        },
+        "unit": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9:_.@-]{0,250}\\.service$",
+          "description": "DEC-0032: the systemd user unit (`systemctl --user`) that supervises this service on Linux."
+        },
+        "task": {
+          "type": "string",
+          "pattern": "^\\\\[A-Za-z0-9 ._\\\\-]{1,254}$",
+          "description": "DEC-0032: the per-user Scheduled Task (full path, e.g. `\\\\PassionCode\\\\example-agent.default`) that supervises this service on Windows."
         }
       },
-      "if": {
-        "properties": {
-          "manager": {
-            "const": "launchd"
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "manager": {
+                "const": "launchd"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "label",
+              "plist"
+            ],
+            "properties": {
+              "label": true,
+              "plist": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "manager": {
+                "const": "systemd"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "unit"
+            ],
+            "properties": {
+              "unit": true
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "unit"
+              ],
+              "properties": {
+                "unit": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "manager": {
+                "const": "task-scheduler"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "task"
+            ],
+            "properties": {
+              "task": true
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "task"
+              ],
+              "properties": {
+                "task": true
+              }
+            }
           }
         }
-      },
-      "then": {
-        "required": [
-          "label",
-          "plist"
-        ],
-        "properties": {
-          "label": true,
-          "plist": true
-        }
-      },
-      "additionalProperties": false
+      ]
     },
     "paths": {
       "type": "object",

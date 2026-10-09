@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0032`
+**Next free ID:** `DEC-0033`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -995,3 +995,48 @@ annotate only the old status; decision bodies are never rewritten.
   activity-contracts-20261008-b`, run `r-5fe268ae4`), and `FAC-SEM-045` by `agent_sync.py reserve
   SEM --key activity-contracts-20261008-sem-9`. This file and `conformance.md` were edited under the
   git leases of that run; the record plane is `fs`.
+
+### DEC-0032 — Services on Windows and Linux: the services folder, a supervisor per system, Windows paths and token files
+
+- **Date:** 2026-10-10
+- **Status:** Accepted source change; consumer adoption in progress (Fabric 0.3.4 CO-238, Fabric
+  Dashboards FD-37)
+- **Amends:** the `fabric-service/0.1` descriptor and service rules of DEC-0015 (launchd as the only
+  supervisor), additively under the DEC-0016 extension policy.
+- **Decision:**
+  - **Services folder on Windows:** `%LOCALAPPDATA%\passioncode-fabric\services\` — LOCALAPPDATA,
+    not APPDATA, so token files never roam with the profile. Linux keeps
+    `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/services/`; `FABRIC_SERVICES_DIR` still wins.
+  - **A supervisor per system**, named by `lifecycle.manager`: `launchd` (macOS, `label` + `plist`),
+    `systemd` (Linux, `unit`: a `systemctl --user` unit), `task-scheduler` (Windows, `task`: a per-user
+    Scheduled Task with a logon trigger and restart on failure, created without administrator
+    rights), or `none`. `unit` and `task` are required with their manager and refused with any other;
+    a remote placement carries none of them (`FAC-SEM-024`). Start, stop, restart and state per
+    system are in service.md *Lifecycle* (Off).
+  - **Windows paths:** `localPath` accepts drive-absolute (`C:\…`, `C:/…`) and `~\` paths beside the
+    POSIX ones; a network share is never a local path. A host validates the grammar of its own system.
+  - **Windows token files:** the reader rule of service.md *Windows token files* — regular file, real
+    path in the profile, owner the current user, every granting ACE on the allow-list (current user,
+    SYSTEM, Administrators), deny ACEs ignored, refusal by SID; the writer sets a protected ACL.
+- **Why:** The operator decided on 2026-10-09 that every PassionCode.ai product runs on macOS, Windows
+  and Linux (fabric-workspace `knowledge/platforms.md`). launchd exists only on macOS, the contract
+  named no Windows services folder, and its path grammar refused every Windows path, so no service
+  could be described, and no host could supervise or read one, off macOS.
+- **Compatibility:** Every existing descriptor stays valid: new enum values, new optional fields that
+  are refused only beside another manager, and a wider path pattern. `contractVersion` stays `0.1.0`.
+  A reader that knows only `launchd` and `none` sees a `systemd` or `task-scheduler` descriptor as
+  invalid and shows it as such — never as running or controllable.
+- **Consequences / affects:** `schemas/service-common.schema.json` (`localPath`),
+  `schemas/service-descriptor.schema.json` (`lifecycle`), `src/semantic-rules.ts` (`FAC-SEM-024`),
+  `fixtures/` (`service-descriptor-systemd`, `-task-scheduler`, and four refusals),
+  `test/service-rules.test.ts`, `docs/specification/service.md` (services folder, transport,
+  Lifecycle, Windows token files). Consumers: Fabric (`agentRegistry.ts` registry dirs and readers,
+  CO-238), `@passioncode-ai/fabric-service-host` and Fabric Dashboards (FD-37: reader, the supervisor
+  per system, the Windows token rule), the adapter kit and `building-fabric-services` (writers: the
+  unit, the task and the protected ACL).
+- **Not decided here:** a Windows service (needs administrator rights) as a supervisor; supervision of
+  a remote placement (its platform's).
+- **Source:** proposed by the Fabric Dashboards session (FD-37), agreed by the Fabric session (CO-238,
+  fabric-90) including the exact Windows token-file rule, 2026-10-10; the open question in
+  fabric-workspace `knowledge/platforms.md` (PR #86). DEC-0032 reserved by git CAS (`agent_sync.py
+  reserve DEC --key windows-linux-supervision-20261010`); this file edited under the git lease.

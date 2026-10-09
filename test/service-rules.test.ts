@@ -61,6 +61,12 @@ describe("fabric-service/0.1 semantic rules", () => {
     expect(codes("service-descriptor", value)).toContain("FAC-SEM-024");
   });
 
+  it("FAC-SEM-024 refuses a systemd unit or a Scheduled Task on a remote service (DEC-0032)", () => {
+    for (const lifecycle of [{ manager: "none", unit: "agent.service" }, { manager: "none", task: "\\PassionCode\\agent.default" }]) {
+      expect(codes("service-descriptor", { placement: "remote", origin: "https://agent.example.com", lifecycle })).toContain("FAC-SEM-024");
+    }
+  });
+
   it("FAC-SEM-024 accepts a remote service on a public name", () => {
     expect(codes("service-descriptor", { placement: "remote", origin: "https://agent.example.com", lifecycle: { manager: "none" } })).toEqual([]);
   });
