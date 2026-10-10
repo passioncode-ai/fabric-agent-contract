@@ -29,6 +29,8 @@ and recorded as DEC-0001.
 | Client and reader conformance | `docs/specification/conformance.md#clients-and-readers` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
+| Operator channel (`fabric-operator-channel/0.1`), OC-1…OC-13 and its status | `docs/specification/operator-channel.md`, `schemas/operator-channel-status.schema.json` (DEC-0034) |
+| Operator channel handoff | `docs/handoffs/2026-10-10-operator-channel.md` |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |
 | Runner catalogue shape, runner routes and route events | `docs/specification/runners.md`, `schemas/runner-route.schema.json`, `schemas/runner-route-event.schema.json` (DEC-0026, DEC-0029) |

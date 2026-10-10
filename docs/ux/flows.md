@@ -194,6 +194,32 @@ flowchart TD
 
 - **Screens traversed:** SCR-10 success; SCR-10 error.
 
+### FLW-08: Operator answers an agent's stop in the messenger
+
+- **Traces:** ST-009, ST-010 (JTBD-05, JRN-04/#2, JRN-04/#3, JRN-04/#4)
+- **Goal:** a stop is decided from the chat by the same operation the dashboard runs, and money never moves on one press
+- **Entry points:** the proposal of the channel; a stop sent with buttons
+- **Success exit:** the decision recorded and audited; the keyboard removed
+- **Task analysis:** link by a local code → receive a stop with buttons → check the sender's numeric id and the token → for money, confirm with the amount → run the agent's own operation → answer the callback.
+- **Rejected shape:** a chat command that performs the action directly — rejected because it is a second path that skips the agent's authorization (DEC-0034 OC-5).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  P[Stop awaiting a person] --> M[Screen: Chat with the agent's bot]
+  M --> B{Press by an allowlisted id?}
+  B -->|no| N[No effect]
+  B -->|yes| D{Stop still open?}
+  D -->|no| A[Already decided; keyboard removed]
+  D -->|yes| S{Spends money or irreversible?}
+  S -->|no| O[Agent runs its own operation]
+  S -->|yes| C[Confirmation with amount, 5 minutes]
+  C -->|confirmed in time| O
+  C -->|expired| X[Nothing spent]
+```
+
+- **Screens traversed:** SCR-11 empty; SCR-11 success; SCR-11 error.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

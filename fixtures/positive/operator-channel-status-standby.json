@@ -1,0 +1,14 @@
+{
+  "protocol": "fabric-operator-channel/0.1",
+  "agent": { "id": "example-agent", "instance": "preview" },
+  "generatedAt": "2026-10-10T09:30:00Z",
+  "transport": "telegram-bot-api",
+  "state": "standby",
+  "reason": { "code": "lease-held-elsewhere", "detail": "Another process of this agent receives the channel." },
+  "credential": { "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN", "present": true },
+  "receiver": { "mode": "long-polling", "lease": "elsewhere" },
+  "binding": { "chats": 1, "allowedUsers": 1, "linkedAt": "2026-10-09T18:02:11Z" },
+  "lastSendAt": null,
+  "lastReceiveAt": null,
+  "outcomeUnknown": 0
+}

@@ -240,6 +240,19 @@
             }
           },
           "additionalProperties": false
+        },
+        "operatorChannel": {
+          "description": "DEC-0034. Where the service answers its operator-channel status (fabric-operator-channel/0.1); token-protected like the events feed.",
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "service-common.schema.json#/$defs/originPath"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

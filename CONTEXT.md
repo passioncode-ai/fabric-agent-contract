@@ -93,6 +93,15 @@ placement, behind the service token for a remote one.
 level, one sentence a person can read, and optionally a subject, a link and a
 request to notify the operator.
 
+**Operator channel**: An agent's own messenger channel to its operator
+(`fabric-operator-channel/0.1`, DEC-0034), first over the Telegram Bot API: it sends the events
+the feed asks to notify and the stops awaiting a person, whose buttons run the agent's own
+operations. Off until the operator enables it; it names its bot token and never holds it. Not the
+Project board's mirror.
+
+**Link code**: The one-time code an agent issues locally and the operator types in the chat, which
+binds the chat and the operator's numeric user id to an operator channel (OC-3).
+
 **Settings backup**: A checksummed snapshot (`fabric-settings-backup/1`) of a service's
 operator decisions and bindings, kept outside its data directory. A restore only adds missing
 rows. It names secrets and never holds them (DEC-0025).

@@ -1,0 +1,11 @@
+{
+  "protocol": "fabric-operator-channel/0.1",
+  "agent": { "id": "example-agent", "instance": "default" },
+  "generatedAt": "2026-10-10T09:30:00Z",
+  "transport": "telegram-bot-api",
+  "state": "off",
+  "lastSendAt": null,
+  "lastReceiveAt": null,
+  "outcomeUnknown": 0,
+  "proposal": { "answer": "later", "at": "2026-10-10T08:00:00Z" }
+}

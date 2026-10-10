@@ -156,6 +156,10 @@ Telegram accepted the message, not that anyone read it. A lost send response bec
 `outcome_unknown` (transport state), never an automatic resend. Loops between bots are bounded
 by causal origin, depth, deadline, rate and cost.
 
+An agent's own channel to its operator is a different thing: [operator channel](operator-channel.md)
+(`fabric-operator-channel/0.1`, DEC-0034) reuses these principles for one agent's notifications
+and stops, never mirrors board threads, and never shares a token with this mirror.
+
 ## Restore
 
 A restored board starts with history only (C7). Consumer, grant and transport authority are off
