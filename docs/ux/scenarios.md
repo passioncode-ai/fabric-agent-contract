@@ -17,6 +17,8 @@
 | SCN-009 | Serve a request through the next available runner | routing | P-02 | ST-006, FLW-05 | validated | not audited |
 | SCN-010 | Read who read my data | telemetry | P-03 | ST-007, FLW-06 | draft | not audited |
 | SCN-011 | A locked setting is refused and shown | telemetry | P-03 | ST-008, FLW-07 | draft | not audited |
+| SCN-012 | Link the channel and answer a stop with a button | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
+| SCN-013 | Confirm a paid action, or find it already decided | operator-channel | P-02 | ST-009, ST-010, FLW-08 | draft | not audited |
 
 ## Personas
 
@@ -255,3 +257,47 @@ independent agent author and P-02 project operator.
 - **Status:** draft
 - **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042), fixtures `device-policy*`
 - **Product:** unobserved
+
+## Operator channel
+
+### SCN-012: Link the channel and answer a stop with a button
+
+- **Persona:** P-02
+- **Feature:** operator-channel
+- **Traces:** ST-009, FLW-08 (JTBD-05, JRN-04/#2, JRN-04/#3)
+- **Entry point:** the agent's one-time proposal of the channel
+- **Preconditions:** `example-agent` has human stops; its channel is `off`; the operator created a bot and stored its token under `EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN`
+- **Steps:**
+  1. Operator answers the proposal `accepted` and runs the agent's link command -> the agent shows a code valid for 10 minutes and its status turns `unlinked`.
+  2. Operator types the code in the chat with the bot -> the agent binds the chat and the operator's numeric user id; the status turns `linked`.
+  3. The agent stops for a choice between two variants -> the chat shows the stop with one button per action.
+  4. Operator presses "Variant B" -> the agent runs its own choose operation, answers the callback, and removes the keyboard.
+- **Expected result:** the decision is recorded exactly as the dashboard would record it, audited with the channel and the operator's numeric user id; the token appears nowhere but the secret store.
+- **Alt paths:** a code typed after 10 minutes -> refused, the operator issues a new one; a press by another group member -> no effect.
+- **UI elements:** proposal with four steps, link code, stop message, action buttons, status tile.
+- **States covered:** empty, success, error
+- **Errors & recovery:** a webhook already set on the bot -> the status is `degraded` (`webhook-set`) with the explanation, and the operator removes the webhook or switches the agent to it.
+- **Status:** draft
+- **Coverage:** `operator-channel-status.schema.json`, fixtures `operator-channel-status-*`, `test/operator-channel.test.ts`
+- **Product:** unobserved
+
+### SCN-013: Confirm a paid action, or find it already decided
+
+- **Persona:** P-02
+- **Feature:** operator-channel
+- **Traces:** ST-009, ST-010, FLW-08 (JTBD-05, JRN-04/#3, JRN-04/#4)
+- **Entry point:** a stop in the chat whose action spends money
+- **Preconditions:** the channel is `linked`; the stop "Render at the high tier" costs an estimated 4.20 USD
+- **Steps:**
+  1. Operator presses "Render" -> the agent sends a confirmation showing 4.20 USD and a confirm button valid for 5 minutes.
+  2. Operator presses "Confirm" within 5 minutes -> the agent runs its own operation and the spend is audited.
+  3. Later the operator presses an older button for a stop already answered in the dashboard -> the agent answers "already decided in the dashboard" and removes the keyboard.
+- **Expected result:** no money is spent on one press; no stop is decided twice.
+- **Alt paths:** the confirm button expired -> nothing is spent; the agent says to press the action again. The emergency spending stop is excluded -> the chat names the dashboard page where it is lifted.
+- **UI elements:** amount, confirm button, expiry, "already decided" answer.
+- **States covered:** success, error
+- **Errors & recovery:** the send of the confirmation lost its response -> counted as `outcome_unknown`, not resent; the operator sees the count in the status and resends from the agent.
+- **Status:** draft
+- **Coverage:** `operator-channel-status.schema.json` (`excluded`, `outcomeUnknown`), DEC-0034 OC-5, OC-6
+- **Product:** unobserved
+

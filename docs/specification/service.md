@@ -100,6 +100,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   ([interop C3.6](interop.md#c36-discovery-surface)).
 - `surfaces.usage` MAY name the path of the service's usage report
   ([Usage report](#usage-report), DEC-0021).
+- `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
+  requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
+  channel's state never changes the service's `status` or `degraded` list.
 
 ## Events feed
 

@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/operator-channel-status.schema.json",
+  "title": "Operator channel status (fabric-operator-channel/0.1, DEC-0034)",
+  "description": "What an agent reports about its own messenger channel to its operator (OC-9). It names the credential, never its value, and carries no chat id, user id or username.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "agent",
+    "generatedAt",
+    "transport",
+    "state",
+    "lastSendAt",
+    "lastReceiveAt",
+    "outcomeUnknown"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "fabric-operator-channel/0.1"
+    },
+    "agent": {
+      "description": "The fabric-service/0.1 identity of the agent that owns the channel.",
+      "type": "object",
+      "required": [
+        "id",
+        "instance"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "service-common.schema.json#/$defs/serviceId"
+        },
+        "instance": {
+          "$ref": "service-common.schema.json#/$defs/instance"
+        }
+      },
+      "additionalProperties": false
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "transport": {
+      "description": "The messenger API the channel speaks. Telegram Bot API is the first; a later revision may add another.",
+      "enum": [
+        "telegram-bot-api"
+      ]
+    },
+    "state": {
+      "description": "off: the operator has not enabled the channel (the default). unlinked: enabled, no chat bound yet. linked: bound, and this process holds the receiving lease. standby: bound, and another process of the same agent holds the lease. degraded: enabled, but the transport or its credential fails.",
+      "enum": [
+        "off",
+        "unlinked",
+        "linked",
+        "standby",
+        "degraded"
+      ]
+    },
+    "reason": {
+      "$ref": "#/$defs/reason"
+    },
+    "credential": {
+      "description": "The transport credential by NAME in the operator's secret store (OC-1). There is deliberately no field for its value.",
+      "type": "object",
+      "required": [
+        "name",
+        "present"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_./-]{0,127}$"
+        },
+        "present": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "receiver": {
+      "description": "How updates reach the agent (OC-2): exactly one mode per token, and a lease that one process holds.",
+      "type": "object",
+      "required": [
+        "mode",
+        "lease"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "long-polling",
+            "webhook"
+          ]
+        },
+        "lease": {
+          "description": "held: this process receives. elsewhere: another process of the same agent receives. none: nobody holds it now.",
+          "enum": [
+            "held",
+            "elsewhere",
+            "none"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "binding": {
+      "description": "Counts only: who is bound is private to the agent (OC-3, C8).",
+      "type": "object",
+      "required": [
+        "chats",
+        "allowedUsers",
+        "linkedAt"
+      ],
+      "properties": {
+        "chats": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "allowedUsers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "linkedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lastSendAt": {
+      "description": "When the transport last accepted a message from the agent; null when never.",
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "lastReceiveAt": {
+      "description": "When the agent last received an update; null when never.",
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "outcomeUnknown": {
+      "description": "Sends whose response was lost and that are not resent automatically (OC-4).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "pendingDecisions": {
+      "description": "Decision requests sent and not yet answered anywhere (OC-5).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "excluded": {
+      "description": "Stops the agent never offers in the channel, each with where it is lifted instead (OC-6).",
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "liftedAt"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){0,5}$"
+          },
+          "liftedAt": {
+            "description": "A path under the service origin where the operator lifts this stop.",
+            "$ref": "service-common.schema.json#/$defs/originPath"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "proposal": {
+      "description": "The operator's recorded answer to the one-time proposal (OC-11); absent when the channel was never proposed.",
+      "type": "object",
+      "required": [
+        "answer",
+        "at"
+      ],
+      "properties": {
+        "answer": {
+          "enum": [
+            "accepted",
+            "declined",
+            "later"
+          ]
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "standby",
+              "degraded"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": true
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "linked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "credential",
+          "receiver",
+          "binding"
+        ],
+        "properties": {
+          "receiver": {
+            "type": "object",
+            "properties": {
+              "lease": {
+                "const": "held"
+              }
+            }
+          },
+          "credential": {
+            "type": "object",
+            "properties": {
+              "present": {
+                "const": true
+              }
+            }
+          },
+          "binding": true
+        },
+        "not": {
+          "required": [
+            "reason"
+          ],
+          "properties": {
+            "reason": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "standby"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "credential",
+          "receiver",
+          "binding"
+        ],
+        "properties": {
+          "receiver": {
+            "type": "object",
+            "properties": {
+              "lease": {
+                "const": "elsewhere"
+              }
+            }
+          },
+          "credential": true,
+          "binding": true
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "unlinked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "credential",
+          "receiver"
+        ],
+        "not": {
+          "required": [
+            "binding"
+          ],
+          "properties": {
+            "binding": true
+          }
+        },
+        "properties": {
+          "credential": true,
+          "receiver": true
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "degraded"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "credential"
+        ],
+        "properties": {
+          "credential": true
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "reason": {
+      "description": "Why the channel is in its state. The code is an open vocabulary; the known codes are listed in operator-channel.md.",
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "detail": {
+          "description": "One sentence a person can read; never a token, chat id, user id or path.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "retryAt": {
+          "description": "When the agent will next try the transport, for example after a 429's retry_after.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -16,6 +16,7 @@
 | SCR-08 | Retro record | FLW-04 | disabled | designed | none yet |
 | SCR-09 | Access log | FLW-06 | disabled | proposed | none yet |
 | SCR-10 | Device settings | FLW-07 | disabled | proposed | none yet |
+| SCR-11 | Chat with the agent's bot | FLW-08 | disabled | proposed | none yet |
 
 ## Design system
 
@@ -140,3 +141,15 @@
 - **Scenarios:** SCN-011
 - **Resources:** device-policy schema; devices specification, Policy
 - **Status:** proposed
+
+### SCR-11: Chat with the agent's bot
+
+- **Used by:** FLW-08
+- **Purpose:** the operator reads an agent's notifications and answers its stops in a messenger.
+- **Elements:** notification text with a link, stop message with action buttons, confirmation with amount and expiry, reply prompt for free text (primary action: the stop's recommended button).
+- **States:** empty — not linked yet, the chat waits for the link code; success — a stop answered, keyboard removed; error — already decided, expired confirmation, or no effect for a sender outside the allowlist.
+- **Coverage:** `operator-channel-status.schema.json`, `test/operator-channel.test.ts`
+- **Scenarios:** SCN-012, SCN-013
+- **Resources:** operator-channel specification, Rules
+- **Status:** proposed
+
