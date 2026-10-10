@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0033`
+**Next free ID:** `DEC-0035`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1040,3 +1040,79 @@ annotate only the old status; decision bodies are never rewritten.
   fabric-90) including the exact Windows token-file rule, 2026-10-10; the open question in
   fabric-workspace `knowledge/platforms.md` (PR #86). DEC-0032 reserved by git CAS (`agent_sync.py
   reserve DEC --key windows-linux-supervision-20261010`); this file edited under the git lease.
+
+### DEC-0034 — An agent's own operator channel: notifications and decisions in a messenger (`fabric-operator-channel/0.1`)
+
+- **Date:** 2026-10-10
+- **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
+  added under the DEC-0016 extension policy; one optional well-known surface.
+- **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
+  operator, first over the Telegram Bot API ([operator channel](specification/operator-channel.md)).
+  It sends what the agent's events feed marks `notify: true`, and asks for the decisions the agent
+  stops for with buttons that run the agent's own operations. Thirteen rules, OC-1…OC-13:
+  - **OC-1** off by default, enabled only by the operator; the bot token is named in the
+    operator's secret store, never stored as a value;
+  - **OC-2** one bot per agent and one receiver per token (polling or webhook, never both, never
+    two processes) under an exclusive receiving lease; a webhook found set is a degraded channel,
+    never silently deleted;
+  - **OC-3** binding by a local one-time code (at least 40 bits, at most 10 minutes, hashed); only
+    allowlisted numeric user ids cause effects — chat membership is not consent;
+  - **OC-4** messages come from the events feed under a durable cursor, at most one per event id;
+    a lost send response is `outcome_unknown` and is not resent automatically;
+  - **OC-5** decision buttons carry opaque tokens mapped to subject, round and action; a press runs
+    the same operation as the agent's UI and API, idempotently on the update id and the token; a
+    stop already decided answers so and removes the keyboard; every callback query is answered;
+  - **OC-6** money or irreversible actions need a second press on a confirm token that expires
+    within 5 minutes and shows the amount; safety stops MAY be excluded, with where they are lifted;
+  - **OC-7** free text only as a reply to the request, bounded, from allowlisted ids;
+  - **OC-8** every effect audited with the channel and the numeric user id;
+  - **OC-9** a status document (`off | unlinked | linked | standby | degraded`) at
+    `surfaces.operatorChannel.path`; a transport failure degrades the channel, never the service;
+    a 429 waits exactly `retry_after`;
+  - **OC-10** results as media within the transport's ceilings (Telegram: photo 10 MB, file 50 MB,
+    albums of 2–10 with no buttons), larger ones named with size and place; no machine-local URL
+    offered to a phone;
+  - **OC-11** the proposal duty: an agent with human stops or notify events proposes the channel
+    once — at creation or adaptation, or at its first human stop while it is off — with the four
+    operator steps, and records the answer; it never creates a bot, stores a token or enables
+    itself;
+  - **OC-12** messages from bots are ignored, and the channel never commands other bots;
+  - **OC-13** a group migrated to a supergroup moves its binding.
+- **Why:** The operator asked on 2026-10-10 for agents to reach them in a messenger: notifications
+  from the events feed, and human-in-the-loop decisions answered with buttons, without opening a
+  dashboard. The Project board's Telegram mirror (DEC-0022, C8) projects a board, not one agent's
+  own stops, and an agent without a board had no contract for this at all. Two failures a
+  messenger invites are named by rule: a second path to a decision that skips the agent's own
+  authorization (OC-5), and a resend after a lost response that doubles a spend (OC-4, OC-6). The
+  Telegram facts are pinned to Bot API 10.3 in `docs/evidence/sources.md`.
+- **Relation to DEC-0022:** It complements the board and its mirror and contradicts neither: the
+  same off-by-default, allowlist, `outcome_unknown` and bounded-loop principles (project-comms
+  *Transport mirror*); board threads are never mirrored into an operator channel, and a board
+  mirror and an operator channel never share a token.
+- **Compatibility:** Additive under DEC-0016. One new schema (`operator-channel-status`) and one
+  optional property in `service-well-known` (`surfaces.operatorChannel`); no existing field or rule
+  changes and no semantic rule code is allocated. `contractVersion` stays `0.1.0`. A manifest
+  declares nothing for the profile, so no extension key is added (G-08 is unchanged).
+- **Consequences / affects:**
+  - spec: `docs/specification/operator-channel.md` (new), `docs/specification/service.md`
+    (well-known `surfaces.operatorChannel`), `docs/specification/project-comms.md` (a pointer from
+    *Transport mirror*);
+  - schemas: `schemas/operator-channel-status.schema.json` (new),
+    `schemas/service-well-known.schema.json`;
+  - fixtures: `fixtures/` (`operator-channel-status-*`, `service-well-known-operator-channel*`) and
+    `fixtures/catalogue.json`;
+  - tests: `test/operator-channel.test.ts`, `test/schema-compilation.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md`, `docs/ux/`
+    (JTBD-05, JRN-04, ST-009, ST-010, FLW-08, SCR-11, SCN-012, SCN-013), the handoff
+    `docs/handoffs/2026-10-10-operator-channel.md`.
+
+  Consumers: agents that serve `fabric-service/0.1` (providers), the fabric-agent-adapter skills
+  `creating-fabric-agents` and `adapting-projects-to-fabric` (OC-11's proposal), and hosts that
+  show the status (Fabric Dashboards).
+- **Not decided here:** other transports; a host relaying a channel for several agents; semantic
+  rules over a send ledger or callback log.
+- **Source:** operator request 2026-10-10 (task-pipeline run, module T6). DEC-0034 was reserved by
+  git CAS (`agent_sync.py reserve DEC --key t6-operator-channel-dec`, run `r-t6operatorch`;
+  DEC-0033 is held by another open branch). This file was edited under the git lease
+  `operator-channel`; the record plane is `fs`, as `AGENTS.md` describes.

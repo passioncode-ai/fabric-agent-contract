@@ -32,6 +32,7 @@ package ships in this version.
 - [Governance and roles](docs/specification/governance-and-roles.md)
 - [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
+- [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Activity telemetry — sessions, usage, summaries and access logs (`fabric-activity/0.1`)](docs/specification/activity.md)

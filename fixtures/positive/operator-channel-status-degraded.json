@@ -1,0 +1,17 @@
+{
+  "protocol": "fabric-operator-channel/0.1",
+  "agent": { "id": "example-agent", "instance": "default" },
+  "generatedAt": "2026-10-10T09:30:00Z",
+  "transport": "telegram-bot-api",
+  "state": "degraded",
+  "reason": {
+    "code": "webhook-set",
+    "detail": "A webhook is set on this bot, so polling cannot receive; remove it in the agent's channel settings or switch the agent to the webhook."
+  },
+  "credential": { "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN", "present": true },
+  "receiver": { "mode": "long-polling", "lease": "held" },
+  "binding": { "chats": 1, "allowedUsers": 1, "linkedAt": "2026-10-09T18:02:11Z" },
+  "lastSendAt": "2026-10-10T07:01:00Z",
+  "lastReceiveAt": "2026-10-10T06:59:30Z",
+  "outcomeUnknown": 1
+}

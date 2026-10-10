@@ -65,6 +65,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: telemetry nobody can see feels like surveillance; pull: a log of every read and visible locks; anxiety: data used beyond its stated purpose; habit: switch the collector off.
 - **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored.
 
+### JTBD-05: Answer my agents' stops from my phone
+
+- **Statement:** When an agent I operate stops for my decision or has something I asked to hear about, I want it to reach me in my messenger and take my answer there, so I can keep its work moving without opening its dashboard.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: stops wait for hours unseen; pull: one press answers; anxiety: a button in a chat could spend money or let someone else decide; habit: poll each dashboard.
+- **Success metric:** a stop sent to the channel is answered by one press (two for money), the same decision the dashboard would record, and nobody outside the allowlist causes an effect.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -95,6 +103,15 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Enroll | signs in once on the device | enrollment | 3 | unclear what is collected | a notice that names purpose and retention (priority 9) |
 | 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason (priority 9) |
 | 3 | Check | reads who read their data | access log | 3 | reads are invisible | every read with reader role and purpose (priority 9) |
+
+### JRN-04: Operator — connect and answer an agent's channel (JTBD-05)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Hear of it | reads the agent's one-time proposal | agent creation or first stop | 3 | unclear what the agent will do with a bot | four named steps, recorded answer (priority 9) |
+| 2 | Link | creates a bot, stores its token by name, types the code | messenger and the agent's link command | 3 | a token pasted into a chat or a config | the token only in the secret store; a short-lived code (priority 9) |
+| 3 | Decide | presses a button on a stop | messenger | 4 | a second press or a stale button doubles an action | idempotent tokens, "already decided" (priority 9) |
+| 4 | Spend | confirms a paid action | messenger | 2 | money leaves on one tap | a second press showing the amount (priority 9) |
 
 ## 4. User stories
 
@@ -185,6 +202,32 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
   - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
   - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-009: Operator links the channel and answers a stop with a button
+
+- **Story:** As P-02, I want to bind my chat with a one-time code and answer an agent's stop with a button, so that the decision is recorded as if I made it in the dashboard.
+- **Traces:** JTBD-05, JRN-04/#2, JRN-04/#3
+- **Acceptance criteria:**
+  - Given the channel is off, when nobody enabled it, then the agent sends nothing and its status says `off`.
+  - Given a link code issued locally, when I type it in the chat within 10 minutes, then my chat and numeric user id are bound and the status says `linked`.
+  - Given a stop sent with buttons, when I press one, then the agent runs the same operation its dashboard runs and removes the keyboard.
+  - Given the stop was already answered in the dashboard, when I press a button, then the agent answers "already decided" and changes nothing.
+  - Given someone else in the group presses, then nothing happens.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-010: Operator confirms a paid action with a second press
+
+- **Story:** As P-02, I want an action that spends money to ask me again with the amount, so that one tap never spends.
+- **Traces:** JTBD-05, JRN-04/#4
+- **Acceptance criteria:**
+  - Given a stop whose action spends money, when I press it, then the agent shows the amount (or "cost unknown") with a confirm button that expires within 5 minutes.
+  - Given the confirm button expired, when I press it, then nothing is spent and the agent says how to ask again.
+  - Given a safety stop the agent excluded, then the channel names where it is lifted instead.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

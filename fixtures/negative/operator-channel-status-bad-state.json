@@ -1,0 +1,37 @@
+{
+  "protocol": "fabric-operator-channel/0.1",
+  "agent": {
+    "id": "example-agent",
+    "instance": "default"
+  },
+  "generatedAt": "2026-10-10T09:30:00Z",
+  "transport": "telegram-bot-api",
+  "state": "paused",
+  "credential": {
+    "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN",
+    "present": true
+  },
+  "receiver": {
+    "mode": "long-polling",
+    "lease": "held"
+  },
+  "binding": {
+    "chats": 1,
+    "allowedUsers": 1,
+    "linkedAt": "2026-10-09T18:02:11Z"
+  },
+  "lastSendAt": "2026-10-10T09:12:40Z",
+  "lastReceiveAt": "2026-10-10T09:29:58Z",
+  "outcomeUnknown": 0,
+  "pendingDecisions": 2,
+  "excluded": [
+    {
+      "kind": "budget.emergency",
+      "liftedAt": "/dashboard/budgets"
+    }
+  ],
+  "proposal": {
+    "answer": "accepted",
+    "at": "2026-10-09T17:55:00Z"
+  }
+}
