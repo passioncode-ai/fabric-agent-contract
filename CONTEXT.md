@@ -102,6 +102,10 @@ Project board's mirror.
 **Link code**: The one-time code an agent issues locally and the operator types in the chat, which
 binds the chat and the operator's numeric user id to an operator channel (OC-3).
 
+**Addressed message**: In a group, a message meant for one bot: `/command@ThatBot`, a reply to
+that bot's own message, or a press of its own button. A bare `/command` in a group is not
+addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DEC-0035).
+
 **Settings backup**: A checksummed snapshot (`fabric-settings-backup/1`) of a service's
 operator decisions and bindings, kept outside its data directory. A restore only adds missing
 rows. It names secrets and never holds them (DEC-0025).

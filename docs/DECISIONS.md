@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0035`
+**Next free ID:** `DEC-0036`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1142,3 +1142,65 @@ annotate only the old status; decision bodies are never rewritten.
   git CAS (`agent_sync.py reserve DEC --key t6-operator-channel-dec`, run `r-t6operatorch`;
   DEC-0033 is held by another open branch). This file was edited under the git lease
   `operator-channel`; the record plane is `fs`, as `AGENTS.md` describes.
+
+### DEC-0035 — Operator channel in a shared group: silent unless addressed, and a channel nobody receives on is degraded (`fabric-operator-channel/0.1`, OC-14…OC-17)
+
+- **Date:** 2026-10-10
+- **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Amends:** DEC-0034 additively: four rules appended to the
+  [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
+  OC-13 are unchanged; OC-14 narrows the optional refusals of OC-3 and OC-7 to addressed input.
+- **Decision:** In a group or supergroup, an agent's channel answers only what is addressed to its
+  own bot, and a bound channel always has someone receiving:
+  - **OC-14** silent by default in a group: a message not addressed to the bot gets no answer of
+    any kind (no "unknown command", help, echo or refusal) and causes no effect;
+  - **OC-15** addressed means `/command@ThisBot`, a reply to the bot's own message, or a press of
+    the bot's own inline button. A bare `/command` in a group is not addressed; bare commands are
+    honoured only in a private chat. A bare `/link CODE` in a group is accepted only if it matches
+    this agent's pending code; one that does not match gets no answer, is not counted as a failed
+    attempt and is not kept;
+  - **OC-16** addressed but unknown or wrong input gets at most one short answer per message. An
+    agent whose bot may be an administrator MUST be built to receive every group message: an
+    unaddressed update is discarded once its offset advances — not stored, logged, sent to a model
+    or charged. No rule needs administrator rights, and the agent does not ask for them for the
+    channel's sake;
+  - **OC-17** a bound or waiting channel has a supervised receiver. If nobody holds the receiving
+    lease for more than 120 seconds, or the transport's pending update count (Telegram
+    `getWebhookInfo.pending_update_count`) is above zero and not lower over two checks at least
+    60 seconds apart, the channel is `degraded` with reason `receiver-missing` and
+    `receiver.lease: none`. The check never calls `getUpdates` and never drops pending updates.
+- **Why:** On 2026-10-10 the operator measured a shared agents chat with six agent bots, all
+  administrators. Telegram delivers every group message to an administrator bot whatever its
+  privacy mode (Telegram *Bots — features*, Privacy mode, in `docs/evidence/sources.md`), so each
+  bot sees the operator's text, the other bots' commands and the link codes meant for other bots.
+  Three defects were observed. One bot answered "unknown command" to every text. Another answered
+  a bare `/link CODE` meant for a different bot with "code did not match". Two bots had nobody
+  receiving, so their pending updates piled up while the status said nothing. DEC-0034 bounded
+  bot-to-bot loops (OC-12) but did not say what a bot does with the human traffic it was never
+  meant to read, and its status had no state for a bound channel with no receiver. Telegram keeps
+  an undelivered update for at most 24 hours, so a silent missing receiver loses the operator's
+  presses.
+- **Compatibility:** Additive under DEC-0016. `operator-channel-status.schema.json` is unchanged:
+  `reason.code` is an open vocabulary, and `degraded` with `receiver.lease: none` was already
+  valid. `receiver-missing` is added to the known codes table. `contractVersion` stays `0.1.0`; no
+  semantic rule code or extension key is allocated. An agent that followed DEC-0034 and answered
+  unaddressed group text now falls short of OC-14. No existing document or fixture becomes invalid.
+- **Consequences / affects:**
+  - spec: `docs/specification/operator-channel.md` (*Group chats and liveness*, OC-14…OC-17, the
+    `degraded` row, the `receiver-missing` code, *Not decided here*);
+  - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing.json`,
+    `fixtures/negative/operator-channel-status-linked-without-receiver.json`,
+    `fixtures/catalogue.json`;
+  - tests: `test/operator-channel.test.ts` (OC-1…OC-17; reason codes against the schema and the
+    fixtures; this entry);
+  - docs: `CONTEXT.md` (addressed message), `docs/DOCMAP.md`, `docs/evidence/sources.md`,
+    `docs/ux/scenarios.md` (SCN-014), the handoff
+    `docs/handoffs/2026-10-10-operator-channel-group-chat.md`.
+
+  Consumers: every agent that implements the channel. The fabric-agent-adapter pin follows the
+  merge commit of this change.
+- **Not decided here:** several agents sharing one bot (OC-2 still gives each its own); a host
+  that relays one group for several agents.
+- **Source:** operator request and measurement, 2026-10-10. DEC-0035 was reserved by git CAS
+  (`agent_sync.py reserve --key oc-group-chat-20261010 DEC`); this file was edited under the git
+  lease `docs/DECISIONS.md`; the record plane is `fs`, as `AGENTS.md` describes.
