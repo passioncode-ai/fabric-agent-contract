@@ -321,14 +321,18 @@ offending SID or reason — never the file's contents:
 
 1. It is a regular file — not a reparse point (a symlink or a junction) — and its real path lies
    inside the user's profile.
-2. Its owner SID is the current user.
+2. Its owner SID is the current user, `S-1-5-18` (SYSTEM) or `S-1-5-32-544` (BUILTIN\Administrators,
+   which owns a file an elevated administrator creates) — DEC-0033.
 3. Every ACE that grants any right names the current user, `S-1-5-18` (SYSTEM) or `S-1-5-32-544`
    (BUILTIN\Administrators) — the same trust as root reading a `0600` file on POSIX. Any other SID with
    any right is a refusal: `S-1-1-0` (Everyone), `S-1-5-11` (Authenticated Users), `S-1-5-32-545`
    (BUILTIN\Users), another user, a left-behind CREATOR OWNER. Deny ACEs do not change the decision.
 
 A writer sets the ACL explicitly and protected (inheritance off): the current user, SYSTEM and
-Administrators, full control — so a file it writes passes whatever its folder inherits. Descriptor
+Administrators, full control — so a file it writes passes whatever its folder inherits.
+A reader reads the ACL without loading a PowerShell module (`[System.IO.File]::GetAccessControl`),
+with `PSModulePath` removed from a Windows PowerShell 5.1 child's environment, and never synchronously
+on a UI or main thread: a cold PowerShell can take more than 15 s (DEC-0033). Descriptor
 paths on Windows are drive-absolute (`C:\…` or `C:/…`) or under `~\`; a network share (`\\server\…`,
 `\\?\…`) is never a local path.
 
