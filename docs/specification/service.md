@@ -100,6 +100,10 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   ([interop C3.6](interop.md#c36-discovery-surface)).
 - `surfaces.usage` MAY name the path of the service's usage report
   ([Usage report](#usage-report), DEC-0021).
+- `extensions` MAY carry the [embedded dashboard](embedded-dashboard.md) declaration under
+  `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1`: the page's floor width,
+  the appearance it applies, its themes and its kit (ED-9, DEC-0036). How the page behaves inside a
+  host — width, navigation, scrolling, appearance — is that profile's, not this one's.
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
@@ -468,7 +472,7 @@ defaulted or refused. Applying it is an operator action, never an agent's.
 | Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` ([below](#mcp-credentials)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
 | A remote agent | A2A `1.0` over HTTPS, or MCP behind an authenticated gateway |
-| The dashboard page | same-origin requests with the session cookie and the custom request header |
+| The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
 
 <a id="mcp-credentials"></a>
 

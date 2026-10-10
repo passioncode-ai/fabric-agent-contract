@@ -93,6 +93,15 @@ placement, behind the service token for a remote one.
 level, one sentence a person can read, and optionally a subject, a link and a
 request to notify the operator.
 
+**Dashboard floor**: The narrowest viewport, in CSS pixels, at which a dashboard page is fully
+usable without document-level horizontal scrolling: 360, or the larger `minWidth` it declares
+(`fabric-dashboard/0.1`, DEC-0036). The *host floor*, `max(480, minWidth)`, is the width a host
+keeps for the page when its own panes grow.
+
+**Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets on a
+dashboard's origin so the page shows the operator's colour scheme and theme (DEC-0036, ED-8).
+It carries no secret and no identity.
+
 **Operator channel**: An agent's own messenger channel to its operator
 (`fabric-operator-channel/0.1`, DEC-0034), first over the Telegram Bot API: it sends the events
 the feed asks to notify and the stops awaiting a person, whose buttons run the agent's own

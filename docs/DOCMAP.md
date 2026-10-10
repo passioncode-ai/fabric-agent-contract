@@ -30,6 +30,7 @@ and recorded as DEC-0001.
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
 | Operator channel (`fabric-operator-channel/0.1`), OC-1…OC-17 and its status | `docs/specification/operator-channel.md`, `schemas/operator-channel-status.schema.json` (DEC-0034; group chats and liveness OC-14…OC-17, DEC-0035) |
+| Embedded dashboard (`fabric-dashboard/0.1`), ED-1…ED-10: width floor, navigation, scrolling, the appearance carrier and its declaration | `docs/specification/embedded-dashboard.md`, `schemas/service-dashboard-extension.schema.json` (DEC-0036); handoff `docs/handoffs/2026-10-11-embedded-dashboard.md` |
 | Operator channel handoffs | `docs/handoffs/2026-10-10-operator-channel.md`, `docs/handoffs/2026-10-10-operator-channel-group-chat.md` |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |

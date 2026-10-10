@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-dashboard-extension.schema.json",
+  "title": "Embedded dashboard declaration (fabric-dashboard/0.1, DEC-0036)",
+  "description": "The value a service puts under the extension key https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1 in its well-known document's extensions (ED-9): the page's floor width, the appearance fields it applies, the themes it ships and the kit it is built from.",
+  "type": "object",
+  "required": ["minWidth"],
+  "properties": {
+    "minWidth": {
+      "description": "The page's floor in CSS pixels (ED-1). A host gives the page at least max(480, minWidth) (ED-7).",
+      "type": "integer",
+      "minimum": 360,
+      "maximum": 1280
+    },
+    "appearance": {
+      "description": "The fabric_appearance cookie fields the page applies (ED-8).",
+      "type": "array",
+      "items": { "enum": ["scheme", "theme"] },
+      "uniqueItems": true,
+      "maxItems": 2
+    },
+    "themes": {
+      "description": "Theme ids the page ships (ED-10). The reference set is graphite, fabric, paper, forest, ocean, ember, contrast; other ids are free.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 32
+    },
+    "kit": {
+      "description": "The dashboard kit the page is built from, name@semver.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?$"
+    }
+  },
+  "additionalProperties": false
+}

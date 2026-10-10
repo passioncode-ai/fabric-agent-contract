@@ -244,5 +244,11 @@
   {"name": "operator-channel-status-degraded-receiver-missing", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-degraded-receiver-missing.json", "valid": true},
   {"name": "operator-channel-status-linked-without-receiver", "schema": "operator-channel-status.schema.json", "path": "negative/operator-channel-status-linked-without-receiver.json", "valid": false, "keyword": "const"},
   {"name": "service-well-known-operator-channel", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-operator-channel.json", "valid": true},
-  {"name": "service-well-known-operator-channel-no-path", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-operator-channel-no-path.json", "valid": false, "keyword": "required"}
+  {"name": "service-well-known-operator-channel-no-path", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-operator-channel-no-path.json", "valid": false, "keyword": "required"},
+  {"name": "service-dashboard-extension", "schema": "service-dashboard-extension.schema.json", "path": "positive/service-dashboard-extension.json", "valid": true},
+  {"name": "service-dashboard-extension-minimal", "schema": "service-dashboard-extension.schema.json", "path": "positive/service-dashboard-extension-minimal.json", "valid": true},
+  {"name": "service-dashboard-extension-below-floor", "schema": "service-dashboard-extension.schema.json", "path": "negative/service-dashboard-extension-below-floor.json", "valid": false, "keyword": "minimum"},
+  {"name": "service-dashboard-extension-bad-theme", "schema": "service-dashboard-extension.schema.json", "path": "negative/service-dashboard-extension-bad-theme.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-dashboard-extension-unknown-field", "schema": "service-dashboard-extension.schema.json", "path": "negative/service-dashboard-extension-unknown-field.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "service-well-known-dashboard", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-dashboard.json", "valid": true}
 ]

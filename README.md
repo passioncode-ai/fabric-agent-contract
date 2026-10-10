@@ -31,6 +31,7 @@ package ships in this version.
 - [`mcp-memory-service` reference adapter](docs/reference-architecture/mcp-memory-service-adapter.md)
 - [Governance and roles](docs/specification/governance-and-roles.md)
 - [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
+- [Embedded dashboard — width, navigation, scrolling and themes inside a host (`fabric-dashboard/0.1`)](docs/specification/embedded-dashboard.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
