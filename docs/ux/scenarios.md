@@ -19,6 +19,7 @@
 | SCN-011 | A locked setting is refused and shown | telemetry | P-03 | ST-008, FLW-07 | draft | not audited |
 | SCN-012 | Link the channel and answer a stop with a button | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
 | SCN-013 | Confirm a paid action, or find it already decided | operator-channel | P-02 | ST-009, ST-010, FLW-08 | draft | not audited |
+| SCN-014 | Several agents share one group: only the addressed bot answers | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
 
 ## Personas
 
@@ -299,5 +300,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the send of the confirmation lost its response -> counted as `outcome_unknown`, not resent; the operator sees the count in the status and resends from the agent.
 - **Status:** draft
 - **Coverage:** `operator-channel-status.schema.json` (`excluded`, `outcomeUnknown`), DEC-0034 OC-5, OC-6
+- **Product:** unobserved
+
+### SCN-014: Several agents share one group: only the addressed bot answers
+
+- **Persona:** P-02
+- **Feature:** operator-channel
+- **Traces:** ST-009, FLW-08 (JTBD-05, JRN-04/#2, JRN-04/#3)
+- **Entry point:** a group in which the operator has bound the bots of several agents, each an administrator
+- **Preconditions:** `example-agent`'s bot (`ExampleAgentBot`) and a second agent's bot are in the group; both receive every message there
+- **Steps:**
+  1. Operator writes a plain sentence to the group -> no bot answers and nothing happens.
+  2. Operator sends a bare `/status` -> no bot answers; the operator is expected to name the bot.
+  3. Operator sends `/status@ExampleAgentBot` -> only `example-agent` answers, once.
+  4. The second agent shows a link code, and the operator sends a bare `/link CODE` in the group -> the second agent binds; `example-agent`, for which the code does not match, says nothing.
+  5. Operator replies to a message from `example-agent` with an unknown word -> `example-agent` answers once, in one line, with what it accepts.
+- **Expected result:** each bot answers only what is addressed to it, at most once per message; the operator never reads "unknown command" or "code did not match" for text meant for another bot.
+- **Alt paths:** `/link@ExampleAgentBot` with a wrong code -> one short refusal from `example-agent` only. In a private chat with the bot, a bare `/status` is answered.
+- **UI elements:** group chat, command naming the bot, reply to the bot, one-line answer, status tile.
+- **States covered:** success, error, degraded
+- **Errors & recovery:** the receiver of `example-agent` has stopped and its updates wait -> the status is `degraded` (`receiver-missing`) with the pending count, instead of a silent bot; the operator restarts the agent's receiver.
+- **Status:** draft
+- **Coverage:** DEC-0035 OC-14…OC-17, fixtures `operator-channel-status-degraded-receiver-missing` and `operator-channel-status-linked-without-receiver`, `test/operator-channel.test.ts`
 - **Product:** unobserved
 

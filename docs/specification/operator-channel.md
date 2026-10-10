@@ -1,6 +1,6 @@
 # Operator channel `fabric-operator-channel/0.1`
 
-DEC-0034 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
+DEC-0034, group chats and liveness DEC-0035 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
 · builds on [`fabric-service/0.1`](service.md) · beside [`fabric-project-comms/0.1`](project-comms.md)
 
 An **operator channel** is an agent's own messenger channel to the person who operates it. The
@@ -155,6 +155,70 @@ a bound group migrated (Telegram: `migrate_to_chat_id` in a message or in an err
 `parameters`), the agent moves the binding to the new chat id, keeps the allowlist unchanged, and
 audits the move (OC-8).
 
+### Group chats and liveness (DEC-0035)
+
+An operator may bind several agents' bots to one group. Privacy mode does not protect such a
+group: a bot added to a group as an administrator receives **every** message in it, whatever its
+privacy setting ([sources](../evidence/sources.md): Telegram *Bots — features*, Privacy mode). So
+every bot there sees the operator's text, the commands meant for the other bots and the link codes
+issued by the other agents. Even a bot in privacy mode receives a bare command when it was the
+last bot to post in the group. OC-14…OC-16 make a shared group usable. OC-17 makes a channel
+nobody receives on visible. In a private chat with the bot every message is addressed to it, and
+OC-14…OC-16 change nothing there.
+
+**OC-14 — Silent by default in a group.** In a group or supergroup, the agent MUST NOT answer a
+message that is not addressed to its bot (OC-15): no "unknown command", no help text, no echo, no
+refusal, no reaction. Such a message also causes no effect. The optional refusal of OC-3 and the
+refusals of OC-7 apply only to addressed input. A bound group shared with other bots is the
+normal case, not an error.
+
+**OC-15 — What "addressed" means.** A message in a group is addressed to the bot only when it is
+one of these:
+
+- a command that names the bot: `/command@ThisBot`, where `ThisBot` is the bot's own username
+  as `getMe` reports it, compared without regard to case;
+- a reply to a message that this bot sent;
+- a press of an inline button on a message that this bot sent (a callback query).
+
+A bare `/command` in a group is **not** addressed, because several bots share the chat; it causes
+no effect and gets no answer. Bare commands are honoured only in a private chat with the bot. The
+binding command follows the same rule: `/link@ThisBot CODE` is addressed. A bare `/link CODE` in
+a group is accepted only if `CODE` matches this agent's own pending link code (OC-3). A bare code
+that does not match gets **no** answer and causes no effect, because it is another agent's code.
+It is not counted as a failed attempt, and the agent does not keep its text.
+
+**OC-16 — Wrong input gets one short answer; built to receive everything.** Input that is
+addressed but unknown or wrong — an unknown command, a bad argument, an expired or non-matching
+code sent as `/link@ThisBot`, text over the OC-7 limit — gets **at most one** short answer per
+message. That answer names what the bot accepts in one line. It does not repeat the input, does
+not list the whole help, and is not sent again for the same update. An agent whose bot may be an
+administrator in a group MUST be designed to receive every message there. An unaddressed update
+is discarded once its offset is advanced. The agent does not store or log its text, does not
+pass it to a model, does not count it against a budget and does not let it delay addressed
+updates. No rule in this profile needs administrator rights: commands that name the bot, replies
+to it and its own buttons reach it in privacy mode too. An agent MUST NOT ask for those rights for
+the channel's sake.
+
+**OC-17 — A channel nobody receives on is degraded.** A bound channel, and an unlinked one that
+waits for a code, MUST have a supervised receiver: one receive loop (OC-2) that a supervisor
+restarts when it stops. Buttons and reply prompts MUST NOT be sent while nobody receives, because
+the operator's answer would be lost: Telegram keeps an undelivered update for at most 24 hours. A
+receiving lease counts as `held` only while the receive loop itself renews it, and a lease that
+its holder stopped renewing counts as `none`. The receiver is **missing** when either holds:
+
+- no process has held the receiving lease for more than 120 seconds while the channel is
+  enabled;
+- the transport's count of pending updates is above zero at two checks at least 60 seconds apart,
+  and is not lower at the second. On Telegram the count is `pending_update_count` from
+  `getWebhookInfo`, which answers under long polling too, with an empty `url`.
+
+A missing receiver makes the channel `degraded` with the reason `receiver-missing` and
+`receiver.lease: none`. `reason.detail` SHOULD give the pending count and since when nobody has
+received. The check MUST NOT call `getUpdates` itself: that would make it a second receiver
+(OC-2). It also MUST NOT drop the pending updates, since dropping them is the operator's choice. A
+missing receiver is never reported as `linked`, `standby` or `off`, and is never left silent.
+Like every channel failure, it degrades the channel, not the service (OC-9).
+
 ## Status
 
 Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json).
@@ -165,7 +229,7 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 | `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |
-| `degraded` | enabled, but the transport or its credential fails | `reason`, `credential` |
+| `degraded` | enabled, but the transport or its credential fails, or nobody receives (OC-17) | `reason`, `credential` |
 
 The document carries no chat id, user id, username or token: `binding` holds counts only, and
 `credential` holds the secret's name and whether it is present. `lastSendAt` and
@@ -183,6 +247,7 @@ Known `reason.code` values (an open vocabulary; a host shows an unknown code as 
 | `transport-unreachable` | `degraded` | the transport did not answer |
 | `rate-limited` | `degraded` | waiting out a 429; `retryAt` says until when (OC-9) |
 | `chat-unavailable` | `degraded` | the bound chat blocked or removed the bot |
+| `receiver-missing` | `degraded` | nobody receives the bound or waiting channel, or its pending updates are not draining (OC-17) |
 | `lease-held-elsewhere` | `standby` | another process of the agent receives (OC-2) |
 
 ## Not decided here
@@ -191,5 +256,7 @@ Known `reason.code` values (an open vocabulary; a host shows an unknown code as 
 - Delivering a channel through a host (for example a dashboard relaying for several agents); a
   host that does so implements the same rules as the agent would.
 - Semantic rules over a send ledger or a callback log. The rules above are normative under
-  DEC-0034; the status document is checked by its schema and fixtures
-  (`test/operator-channel.test.ts`).
+  DEC-0034 (OC-1…OC-13) and DEC-0035 (OC-14…OC-17); the status document is checked by its schema
+  and fixtures (`test/operator-channel.test.ts`).
+- How several agents share one bot. OC-2 still gives each agent its own bot. OC-14…OC-16 let
+  several bots share one group, not one token.

@@ -241,6 +241,8 @@
   {"name": "operator-channel-status-negative-unknown", "schema": "operator-channel-status.schema.json", "path": "negative/operator-channel-status-negative-unknown.json", "valid": false, "keyword": "minimum"},
   {"name": "operator-channel-status-bad-proposal", "schema": "operator-channel-status.schema.json", "path": "negative/operator-channel-status-bad-proposal.json", "valid": false, "keyword": "enum"},
   {"name": "operator-channel-status-linked-with-reason", "schema": "operator-channel-status.schema.json", "path": "negative/operator-channel-status-linked-with-reason.json", "valid": false, "keyword": "not"},
+  {"name": "operator-channel-status-degraded-receiver-missing", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-degraded-receiver-missing.json", "valid": true},
+  {"name": "operator-channel-status-linked-without-receiver", "schema": "operator-channel-status.schema.json", "path": "negative/operator-channel-status-linked-without-receiver.json", "valid": false, "keyword": "const"},
   {"name": "service-well-known-operator-channel", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-operator-channel.json", "valid": true},
   {"name": "service-well-known-operator-channel-no-path", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-operator-channel-no-path.json", "valid": false, "keyword": "required"}
 ]

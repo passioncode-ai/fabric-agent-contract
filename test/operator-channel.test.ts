@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 
-// fabric-operator-channel/0.1 (DEC-0034): the rules are prose, the status is a schema. These tests
+// fabric-operator-channel/0.1 (DEC-0034, group chats and liveness DEC-0035): the rules are prose, the status is a schema. These tests
 // keep the two from drifting apart and keep credentials and private ids out of the published shapes.
 const root = projectRoot();
 const read = (file: string) => readFile(path.join(root, file), "utf8");
@@ -22,10 +22,40 @@ function firstCells(heading: string): string[] {
   return rows.slice(2).map((row) => (row.split("|")[1] ?? "").trim().replace(/`/g, ""));
 }
 
-describe("fabric-operator-channel/0.1 (DEC-0034)", () => {
-  it("defines OC-1…OC-13 once each and no other rule", () => {
+describe("fabric-operator-channel/0.1 (DEC-0034, DEC-0035)", () => {
+  it("defines OC-1…OC-17 once each and no other rule", () => {
     const defined = [...spec.matchAll(/^\*\*(OC-\d+) — /gm)].map((match) => match[1]);
-    expect(defined).toEqual(Array.from({ length: 13 }, (_, index) => `OC-${index + 1}`));
+    expect(defined).toEqual(Array.from({ length: 17 }, (_, index) => `OC-${index + 1}`));
+  });
+
+  it("documents each known reason code once, in a state the schema has and a shape it accepts", () => {
+    const codes = firstCells("| Code | State | Meaning |");
+    expect(new Set(codes).size, "duplicate reason code").toBe(codes.length);
+    const start = spec.indexOf("| Code | State | Meaning |");
+    const rows = spec.slice(start).split("\n").filter((line) => line.startsWith("| `"));
+    const reasonDef = (schema as unknown as { $defs: { reason: { properties: { code: { pattern: string } } } } }).$defs.reason;
+    const pattern = new RegExp(reasonDef.properties.code.pattern);
+    for (const row of rows) {
+      const [code, state] = row.split("|").slice(1, 3).map((cell) => cell.trim().replace(/`/g, ""));
+      expect(code, row).toMatch(pattern);
+      expect(schema.properties.state?.enum, row).toContain(state);
+    }
+    // OC-17: a channel nobody receives on has a known code, and it is a degraded one.
+    expect(rows.find((row) => row.startsWith("| `receiver-missing` |"))).toContain("| `degraded` |");
+  });
+
+  it("uses in every valid fixture only reason codes the spec documents", async () => {
+    const codes = new Set(firstCells("| Code | State | Meaning |"));
+    const positives = (await readdir(path.join(root, "fixtures/positive"))).filter((name) => name.startsWith("operator-channel-status"));
+    const used = new Set<string>();
+    for (const name of positives) {
+      const document = JSON.parse(await read(`fixtures/positive/${name}`)) as { reason?: { code: string } };
+      if (document.reason) {
+        expect(codes, name).toContain(document.reason.code);
+        used.add(document.reason.code);
+      }
+    }
+    expect([...used]).toContain("receiver-missing");
   });
 
   it("documents exactly the states the status schema accepts", () => {
@@ -64,5 +94,17 @@ describe("fabric-operator-channel/0.1 (DEC-0034)", () => {
     expect(entry.startsWith("### DEC-0034")).toBe(true);
     expect(entry).toContain("specification/operator-channel.md");
     expect(entry).toContain("operator-channel-status.schema.json");
+  });
+
+  it("records the group-chat and liveness rules as DEC-0035 and links them", async () => {
+    const decisions = await read("docs/DECISIONS.md");
+    const start = decisions.indexOf("### DEC-0035");
+    expect(start).toBeGreaterThanOrEqual(0);
+    const next = decisions.indexOf("\n### DEC-", start + 1);
+    const entry = decisions.slice(start, next === -1 ? undefined : next);
+    expect(entry).toContain("specification/operator-channel.md");
+    for (const rule of ["OC-14", "OC-15", "OC-16", "OC-17"]) expect(entry, rule).toContain(rule);
+    expect(entry).toContain("receiver-missing");
+    expect(spec).toContain("DEC-0035");
   });
 });
