@@ -10,11 +10,12 @@ import { ruleCodeFindings } from "../src/rule-codes.js";
 const PIN = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "a5a27092ba0dcc5facfbeae8b359146dfb403e9a" };
 
 describe("G-08: one spelling of every extension key", () => {
-  it("names the service, interop and memory keys on one host and path", () => {
+  it("names the service, interop, memory and dashboard keys on one host and path", () => {
     expect(EXTENSION_KEYS).toEqual({
       service: "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1",
       interop: "https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1",
-      memory: "https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1"
+      memory: "https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1",
+      dashboard: "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1"
     });
   });
 

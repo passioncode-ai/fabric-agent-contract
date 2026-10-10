@@ -1,0 +1,6 @@
+{
+  "minWidth": 360,
+  "appearance": ["scheme", "theme"],
+  "themes": ["graphite", "fabric", "paper", "forest", "ocean", "ember", "contrast"],
+  "kit": "fabric-dashboard-kit@1.0.0"
+}

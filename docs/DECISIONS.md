@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0036`
+**Next free ID:** `DEC-0037`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1203,4 +1203,65 @@ annotate only the old status; decision bodies are never rewritten.
   that relays one group for several agents.
 - **Source:** operator request and measurement, 2026-10-10. DEC-0035 was reserved by git CAS
   (`agent_sync.py reserve --key oc-group-chat-20261010 DEC`); this file was edited under the git
+  lease `docs/DECISIONS.md`; the record plane is `fs`, as `AGENTS.md` describes.
+
+### DEC-0036 — Embedded dashboard: a 360 px floor, reachable navigation, one scroller, a 480 px host floor and the appearance carrier (`fabric-dashboard/0.1`)
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change (on merge of its pull request); host and adapter adoption pending.
+- **Amends:** DEC-0015 additively: a new profile, [embedded dashboard](specification/embedded-dashboard.md),
+  beside `surfaces.dashboard`. No existing field, schema or rule changes.
+- **Decision:** A dashboard page and the host that shows it make each other promises about width,
+  navigation, scrolling and appearance (ED-1…ED-10):
+  - the page is fully usable from **360 CSS pixels** (or the larger floor it declares) with no
+    document-level horizontal scroll, keeps its floor layout and scrolls sideways below it, keeps
+    every primary destination reachable without sideways scrolling, scrolls wide content in its own
+    marked box, has one vertical scroller and sticky chrome of at most 120 px or a quarter of the
+    viewport (ED-1…ED-5);
+  - the page follows `prefers-color-scheme`, and the host's cookie `fabric_appearance`
+    (`v=1&scheme=…&theme=…`) when present, hiding its own appearance controls then (ED-6, ED-8);
+  - a host gives every dashboard at least **`max(480, minWidth)`** CSS pixels when its window allows,
+    shrinking its own panes first, and never zooms a page to fit (ED-7);
+  - a service declares conformance in its well-known `extensions` under the new key
+    `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1`, with `minWidth` and
+    optionally `appearance`, `themes` and `kit` (ED-9, `service-dashboard-extension.schema.json`);
+  - the reference themes are `graphite` (default), `fabric`, `paper`, `forest`, `ocean`, `ember`
+    and `contrast`, each light and dark, each WCAG 2.2 AA (ED-10).
+- **Why:** On 2026-10-11 the operator showed an agent dashboard inside Fabric Dashboards with the
+  agent console open beside it: the page narrowed until its navigation disappeared. Measured: the
+  host's console may take half the window and nothing protects the page (Fabric Dashboards
+  `src/renderer/App.tsx` clamps the console to `floor(innerWidth/2)`, `src/core/types.ts`
+  `CONSOLE_WIDTH`), so at the 960 px minimum window with the sidebar open the page gets 240 px. The
+  sample agent's board, measured in WebKit, showed 4 of its 14 navigation links at 380 px, the rest
+  behind a sideways scroll with no visible scrollbar, and a document 410 px wide in a 380 px view.
+  `fabric-service/0.1` named the dashboard surface but said nothing about how a page behaves inside
+  a host, so every agent solved it differently or not at all. The colour scheme already reached
+  pages through `prefers-color-scheme`; a theme had no carrier, and the operator asked for themes
+  to choose from.
+- **Compatibility:** Additive under DEC-0016. `contractVersion` stays `0.1.0`. The declaration lives
+  in `extensions`, which every reader already preserves and ignores, so a host or a service built
+  before this decision is unaffected; `service-well-known.schema.json` is unchanged. A dashboard that
+  does not declare the key is a legacy dashboard: the host floor still protects it. No semantic rule
+  code is allocated; the rules are measured on a rendered page by the adapter's tools.
+- **Consequences / affects:**
+  - spec: `docs/specification/embedded-dashboard.md` (new), `docs/specification/service.md`
+    (*Well-known document*, *Surfaces*);
+  - schema: `schemas/service-dashboard-extension.schema.json` (new);
+  - code: `src/extensions.ts` (the `dashboard` key, G-08);
+  - fixtures: `fixtures/positive/service-dashboard-extension.json`,
+    `fixtures/positive/service-dashboard-extension-minimal.json`,
+    `fixtures/positive/service-well-known-dashboard.json`,
+    `fixtures/negative/service-dashboard-extension-{below-floor,bad-theme,unknown-field}.json`,
+    `fixtures/catalogue.json`;
+  - tests: `test/embedded-dashboard.test.ts`, `test/consistency.test.ts` (G-08);
+  - docs: `CONTEXT.md` (dashboard floor, appearance carrier), `docs/DOCMAP.md`, `README.md`, the
+    handoff `docs/handoffs/2026-10-11-embedded-dashboard.md`.
+
+  Consumers: Fabric Dashboards (ED-7 host floor, ED-8 carrier and its picker), the
+  fabric-agent-adapter (the dashboard kit, its layout check and the upgrade notice), and every
+  service with a dashboard. The adapter pin follows the merge commit of this change.
+- **Not decided here:** the host's picker screen and per-service choices; operator-defined colours
+  beyond a theme id; dashboards with a fixed width or several panes of their own; zoom.
+- **Source:** operator request, 2026-10-11, and the measurements above. DEC-0036 was reserved by git
+  CAS (`agent_sync.py reserve DEC --key embedded-dashboard`); this file was edited under the git
   lease `docs/DECISIONS.md`; the record plane is `fs`, as `AGENTS.md` describes.
