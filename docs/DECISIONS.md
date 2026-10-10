@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0033`
+**Next free ID:** `DEC-0034`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1040,3 +1040,29 @@ annotate only the old status; decision bodies are never rewritten.
   fabric-90) including the exact Windows token-file rule, 2026-10-10; the open question in
   fabric-workspace `knowledge/platforms.md` (PR #86). DEC-0032 reserved by git CAS (`agent_sync.py
   reserve DEC --key windows-linux-supervision-20261010`); this file edited under the git lease.
+
+### DEC-0033 — Windows token files: the owner may be the user, SYSTEM or Administrators
+
+- **Date:** 2026-10-10
+- **Status:** Accepted source change; consumers: Fabric Dashboards FD-37 (implemented), Fabric CO-238
+- **Amends:** DEC-0032, rule 2 of service.md *Windows token files*.
+- **Decision:** A Windows token file's owner SID MUST be the current user, `S-1-5-18` (SYSTEM) or
+  `S-1-5-32-544` (BUILTIN\Administrators) — the same set an ACE may grant to (rule 3). Any other owner
+  is a refusal that names the SID. Readers SHOULD read the ACL without loading a PowerShell module
+  (`[System.IO.File]::GetAccessControl`), with `PSModulePath` removed from a Windows PowerShell 5.1
+  child's environment, and never synchronously on a UI or main thread.
+- **Why:** Windows makes BUILTIN\Administrators the owner of a file created by an elevated member of
+  that group (the default owner of an elevated token). Fabric Dashboards' Windows CI (FD-37, runner
+  `windows-latest`) refused every token file its own tests wrote for that reason. An owner can always
+  rewrite the DACL, so the owner set must not be wider than the grant set; Administrators and SYSTEM
+  already hold any file on the machine, so trusting them as owners adds no reader. The same CI showed a
+  PowerShell 5.1 started under PowerShell 7 failing to load `Get-Acl` (pwsh's module path), and a cold
+  PowerShell on `windows-11-arm` taking more than 15 s.
+- **Compatibility:** Wider acceptance only: every token file valid under DEC-0032 stays valid; no schema,
+  fixture or `contractVersion` change.
+- **Consequences / affects:** `docs/specification/service.md` *Windows token files*. Consumers:
+  `@passioncode-ai/fabric-service-host` `windowsAclProblem` and `readTokenAsync` (Fabric Dashboards
+  FD-37), Fabric's Windows reader (CO-238), fabric-workspace `knowledge/platforms.md` PL-09.
+- **Source:** measured in Fabric Dashboards CI on 2026-10-10, agreed by the Fabric session (fabric-90)
+  the same day. DEC-0033 reserved by git CAS (`agent_sync.py reserve DEC --key
+  windows-token-owner-20261010`); this file edited under the git lease.
