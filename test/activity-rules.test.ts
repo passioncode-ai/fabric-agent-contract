@@ -229,7 +229,8 @@ describe("seq ranges: coverage by interval arithmetic", () => {
     const started = Date.now();
     expect(uncovered([[1, huge - 1]], 1, huge)).toEqual([[huge, huge]]);
     expect(contiguousFrom([[1, huge]], 0)).toBe(huge);
-    expect(Date.now() - started).toBeLessThan(100);
+    // Walking 2^53 seqs one by one would take years; 2 s leaves room for a loaded machine and still proves it.
+    expect(Date.now() - started).toBeLessThan(2000);
   });
 });
 

@@ -1,5 +1,7 @@
 # ADR-0125 — An agent launch may follow the operator's fallback order, resolved before the session opens
 
+> **Historical copy (noted 2026-10-11).** A draft written here for Fabric; Fabric owns ADR-0125, shipped in fabric PR #19 (`277add0`). This copy is kept for history and is not maintained.
+
 **Status:** accepted · 2026-10-07 · operator request («везде, где есть чаты с агентом — терминальные
 агенты по настройке с выбором и fallback; нет сессии Claude Code — отвечает запущенный Hermes») · plan
 CO-223 · contract DEC-0026 as refined by DEC-0029 (`fabric-agent-contract`, 2026-10-07). This record

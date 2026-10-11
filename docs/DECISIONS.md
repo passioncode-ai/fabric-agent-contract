@@ -5,6 +5,11 @@ annotate only the old status; decision bodies are never rewritten.
 
 **Next free ID:** `DEC-0043`
 
+`DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
+the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
+commits `2d385e0`, `25c07ce`). The `SEM-0035` and `SEM-0036` receipts DEC-0025 cites were taken before the
+origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b`).
+
 ### DEC-0001 — Documentation is governed in Git
 
 - **Date:** 2026-08-26
@@ -33,6 +38,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/memory.md` is `docs/specification/memory-and-learning.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** Raw knowledge and evidence remain project-scoped. Any agent may propose a cross-project insight; the CEO accepts it only after independent evidence and conflict checks. Global memory is retrieved on demand and links to project sources.
 - **Consequences / affects:** `docs/specification/memory.md`, `schemas/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit
@@ -49,6 +55,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/roles.md` is `docs/specification/governance-and-roles.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** One CEO governs the estate; exactly one product manager owns each project's backlog and execution graph; projects may instantiate multiple selectable developer runtimes. Every other business role is registered dynamically.
 - **Consequences / affects:** `CONTEXT.md`, `docs/specification/roles.md`, `docs/reference-architecture/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit
@@ -65,6 +72,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/governance.md` is `docs/specification/governance-and-roles.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** Publishing and support replies default to draft-only. Automation requires a named, scoped, expiring standing grant. Data carries a mandatory classification and retention policy; sensitive project records never promote globally as raw content.
 - **Consequences / affects:** `docs/specification/governance.md`, `schemas/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit
@@ -133,6 +141,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-28
 - **Status:** Accepted
+- **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -156,6 +165,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-11):** extended under its versioning policy by every later additive decision; each one's *Compatibility* line says it is additive under `0.1.0`, so that line, not this note, is the list.
 - **Decision:** The contracts Fabric locked for its agent registry on 2026-09-29 — the
   provider entry `fabric-provider/0.1`, the runner catalogue, the interop extension
   `fabric-interop/0.1` (keyed `https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1`)
@@ -183,6 +193,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-11):** item 6 amended by DEC-0018 (every tool's `outputSchema` is rooted at `type: object`).
 - **Refines:** DEC-0016
 - **Decision:** The operator, who owns the contract design, ruled on the seven questions
   AR-1 raised:
@@ -310,6 +321,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -1001,6 +1013,7 @@ annotate only the old status; decision bodies are never rewritten.
 - **Date:** 2026-10-10
 - **Status:** Accepted source change; consumer adoption in progress (Fabric 0.3.4 CO-238, Fabric
   Dashboards FD-37)
+- **Annotated (2026-10-11):** rule 2 of Windows token files amended by DEC-0033 (the owner may be the user, SYSTEM or Administrators).
 - **Amends:** the `fabric-service/0.1` descriptor and service rules of DEC-0015 (launchd as the only
   supervisor), additively under the DEC-0016 extension policy.
 - **Decision:**
@@ -1071,6 +1084,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1367,6 +1381,7 @@ annotate only the old status; decision bodies are never rewritten.
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the issuer (Fabric 0.4.0
   REQ-37), the meter (Project Observatory), then each callee and caller in the order of Fabric's
   [adoption plan](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/evidence/plans/2026-10-11-delegation-model/README.md).
+- **Annotated (2026-10-11):** tightens the service's operator-session lifetime (12 hours after last use, 7 days after sign-in): not additive for that rule, so a kit's longer cookie stops conforming at its next pin (ruled with Fabric's session, ADR-0144's owner, 2026-10-11).
 - **Amends:** interop C3.5 (the hub is the only issuer, not the only route); DEC-0024 additively
   (`surfaces.mcp.auth: "delegation"`); DEC-0037 (the registry's per-session token is the hub's delegation
   token; its grant-check codes become a subset of one code set); DEC-0037's L0 wording; DEC-0038's grant gains

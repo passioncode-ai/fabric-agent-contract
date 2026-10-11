@@ -1,6 +1,8 @@
 {
-  // agent-sync lease records are git-ignored runtime files, not documentation.
-  "ignores": [".agent-sync/**"],
+  // agent-sync lease records are git-ignored runtime files, not documentation; another session's worktree under
+  // .claude/worktrees/ is never this repository's (the gate passes tracked files only; this is the second guard).
+  // docs/MERGES.md is written by `agent_sync.py merge` in the tool's own format and rewritten on every merge.
+  "ignores": [".agent-sync/**", ".claude/**", "**/node_modules/**", "docs/MERGES.md"],
   "config": {
     "default": true,
     "MD001": false,
