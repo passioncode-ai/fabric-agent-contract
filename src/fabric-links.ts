@@ -26,15 +26,50 @@ const KNOWN: Record<FabricLink["action"], Record<string, RegExp>> = {
   chat: { service: AGENT_ID, project: PROJECT_REF },
   "session.new": { project: PROJECT_REF, runner: RUNNER_KIND }
 };
-/** Parameter names that can only carry a credential; a link carrying one is refused whole, not trimmed. */
-const SECRET_NAME = /(^|[._-])(token|access[_-]?token|id[_-]?token|secret|password|passwd|pass|key|api[_-]?key|code|login[_-]?code|auth|authorization|bearer|cookie|session[_-]?id|credential|credentials|jwt|otp|signature|sig)([._-]|$)/i;
-/** Parameter names that carry words for Fabric to act on; a link carries ids only (FL-4). */
-const PROMPT_NAME = /(^|[._-])(prompt|message|msg|text|instruction|instructions)([._-]|$)/i;
-/** `authToken` → `auth_token`, so a camelCase name meets the same word boundaries as a snake_case one. */
-const words = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, "$1_$2");
-const refusedName = (name: string) => SECRET_NAME.test(words(name)) || PROMPT_NAME.test(words(name));
-/** Values shaped like a bearer credential: a JWT/JWS, or a value that says it is one. */
-const SECRET_VALUE = /^(eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*|bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,})$/i;
+/**
+ * A parameter name's words: split at `.`, `_`, `-` and camelCase humps, lowercased — `refreshToken_v2-Id` is
+ * `refresh token v2 id` and `APIKey` is `api key`. A credential word must be a whole word of the name, so
+ * `themeCode`, `sortKey` and `tokenizer` are harmless (DEC-0041, CO-260).
+ */
+export function nameWords(name: string): string[] {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .map((word) => word.toLowerCase());
+}
+/** A name holding one of these words can only carry a credential (FL-4). */
+export const CREDENTIAL_WORDS = ["token", "secret", "password", "passwd", "credential", "credentials", "cookie", "authorization", "bearer", "jwt", "otp", "apikey"] as const;
+/**
+ * Words that carry a credential only beside a partner word in the same name (`api_key`, `authCode`, `sessionId`),
+ * or as the whole name (`key`, `auth`, `session`, `code`): `sortKey`, `authorName` and `sessionLength` pass.
+ */
+export const CREDENTIAL_PAIRS: Readonly<Record<string, readonly string[]>> = {
+  key: ["private", "api", "access", "secret"],
+  auth: ["token", "code", "header"],
+  session: ["token", "id"],
+  code: ["login", "auth"]
+};
+/** Whether a parameter name can only carry a credential. */
+export function credentialName(name: string): boolean {
+  const words = nameWords(name);
+  if (words.some((word) => (CREDENTIAL_WORDS as readonly string[]).includes(word))) return true;
+  if (words.length === 1 && (words[0] as string) in CREDENTIAL_PAIRS) return true;
+  return Object.entries(CREDENTIAL_PAIRS).some(([word, partners]) => words.includes(word) && partners.some((partner) => words.includes(partner)));
+}
+/** Words for Fabric to act on; a link carries ids only (FL-4). */
+export const PROMPT_WORDS = ["prompt", "message", "msg", "text", "instruction", "instructions"] as const;
+const promptName = (name: string) => nameWords(name).some((word) => (PROMPT_WORDS as readonly string[]).includes(word));
+/** A JWT or JWS anywhere in a value: three base64url segments, the first a JSON object's `eyJ`. */
+export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
+/** A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). */
+export const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
+/** A long secret: 40 or more characters of base64 without a separator, mixing upper case, lower case and digits. A hex digest is lower case and passes. */
+const LONG_RUN = /[A-Za-z0-9+/=_]{40,}/g;
+const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
+/** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */
+export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || longSecret(value);
 
 /**
  * Parse a `fabric://` link. Unknown parameters are ignored and listed; a known one that repeats or does not
@@ -53,16 +88,17 @@ export function parseFabricLink(url: string): ParsedLink {
   // The fragment is ignored, but it is part of the link a page hands over: it carries no credential either.
   const fragment = match[3] ?? "";
   if (fragment) {
+    // An anchor (`#auth-settings`, `#tokens`) names a place; a credential-named piece with a value carries one.
     const pieces = new URLSearchParams(fragment);
-    if (SECRET_VALUE.test(fragment) || [...pieces].some(([name, value]) => SECRET_NAME.test(words(name)) || SECRET_VALUE.test(value))) problems.push("the fragment could carry a credential; a link never does");
+    if (secretValue(fragment) || [...pieces].some(([name, value]) => (value !== "" && credentialName(name)) || secretValue(value) || secretValue(name))) problems.push("the fragment could carry a credential; a link never does");
   }
   const ignored: string[] = [];
   const values: Record<string, string> = {};
   const known = KNOWN[action];
   for (const name of new Set(params.keys())) {
     const all = params.getAll(name);
-    if (PROMPT_NAME.test(words(name))) { problems.push(`the parameter ${name} carries words to act on; a link carries ids only`); continue; }
-    if (refusedName(name) || all.some((value) => SECRET_VALUE.test(value))) { problems.push(`the parameter ${name} could carry a credential; a link never does`); continue; }
+    if (promptName(name)) { problems.push(`the parameter ${name} carries words to act on; a link carries ids only`); continue; }
+    if (credentialName(name) || secretValue(name) || all.some(secretValue)) { problems.push(`the parameter ${name} could carry a credential; a link never does`); continue; }
     const grammar = known[name];
     if (!grammar) { ignored.push(name); continue; }
     if (all.length > 1) { problems.push(`${name} is given ${all.length} times`); continue; }

@@ -67,6 +67,8 @@ export interface DelegationClaims {
   grant: string[];
   spend?: SpendRemaining;
   project?: string;
+  /** DEC-0041: the issuing host's task the work runs under; the meter keys the task window on it. */
+  task?: string;
   iat: number;
   exp: number;
   jti: string;
@@ -135,6 +137,8 @@ export const UNSAFE_NO_JTI_STORE: JtiStore = Object.freeze({ consume: () => true
 const refuse = (code: RefusalCode, detail: string, data?: Refusal["data"]): Refusal => (data ? { ok: false, code, detail, data } : { ok: false, code, detail });
 
 const B64URL = /^[A-Za-z0-9_-]+$/;
+/** A session or task id (`delegation-token.schema.json#/$defs/session`, `#/$defs/task`): opaque, 1–128 characters. */
+export const OPAQUE_ID = /^[A-Za-z0-9._:-]{1,128}$/;
 const isString = (value: unknown): value is string => typeof value === "string" && value.length > 0;
 const isTime = (value: unknown): value is number => typeof value === "number" && Number.isInteger(value) && value >= 0;
 
@@ -275,6 +279,8 @@ function delegationShape(payload: JsonObject): DelegationClaims | undefined {
   if (!Array.isArray(effect) || effect.length === 0 || !effect.every((e) => (EFFECT_CLASSES as readonly unknown[]).includes(e))) return undefined;
   if (!Array.isArray(grant) || grant.length === 0 || !grant.every(isString)) return undefined;
   if (!isObject(act)) return undefined;
+  // DEC-0041: an optional claim the meter keys a window on is typed like any other.
+  if (payload.task !== undefined && !(typeof payload.task === "string" && OPAQUE_ID.test(payload.task))) return undefined;
   return payload as unknown as DelegationClaims;
 }
 
@@ -358,6 +364,19 @@ export function verifyMeterToken(token: string, options: VerifyMeterOptions): De
   const result = verifyDelegation(token, { audience: meter, capability, effect: "none", jwks, now, readOnly: true, ...(issuer === undefined ? {} : { issuer }) });
   if (result.ok) return result;
   return { ok: false, denial: { decision: "denied", level: null, code: "principal-unproven", reason: `the meter's token was refused: ${result.code} (${result.detail})`, checkedAt: new Date(now * 1000).toISOString() } };
+}
+
+/**
+ * The key the meter holds a grant's `task` window under (DEC-0041), from the onward token it verified and the
+ * request's `tokenJti`: the token's `task`; else the session of the agent that called the callee — the meter
+ * token's second actor, `act.act`, because its outermost actor is the callee (DL-21); else the `jti` of the
+ * callee's own token. The prefixes keep the three namespaces apart.
+ */
+export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act">, tokenJti: string): string {
+  if (meterClaims.task !== undefined) return `task:${meterClaims.task}`;
+  const caller = meterClaims.act?.act;
+  if (caller?.session !== undefined) return `session:${caller.sub}:${caller.session}`;
+  return `jti:${tokenJti}`;
 }
 
 /** An in-memory `JtiStore` for tests and single-process callees; a service that restarts needs a durable one. */

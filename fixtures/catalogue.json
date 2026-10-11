@@ -295,5 +295,12 @@
   {"name": "grant-check-request", "schema": "grant-check-request.schema.json", "path": "positive/grant-check-request.json", "valid": true},
   {"name": "grant-check-request-with-token", "schema": "grant-check-request.schema.json", "path": "negative/grant-check-request-with-token.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "grant-check-limit-without-window", "schema": "grant-check.schema.json", "path": "negative/grant-check-limit-without-window.json", "valid": false, "keyword": "required"},
-  {"name": "governance-grant-delegation-read-only", "schema": "governance.schema.json", "path": "positive/governance-grant-delegation-read-only.json", "valid": true}
+  {"name": "governance-grant-delegation-read-only", "schema": "governance.schema.json", "path": "positive/governance-grant-delegation-read-only.json", "valid": true},
+  {"name": "grant-check-denied-call", "schema": "grant-check.schema.json", "path": "positive/grant-check-denied-call.json", "valid": true},
+  {"name": "grant-check-call-not-l3", "schema": "grant-check.schema.json", "path": "negative/grant-check-call-not-l3.json", "valid": false, "keyword": "const"},
+  {"name": "delegation-refusal-limit-call", "schema": "delegation-refusal.schema.json", "path": "positive/delegation-refusal-limit-call.json", "valid": true},
+  {"name": "delegation-refusal-call-not-l3", "schema": "delegation-refusal.schema.json", "path": "negative/delegation-refusal-call-not-l3.json", "valid": false, "keyword": "const"},
+  {"name": "grant-spend-call-window", "schema": "governance.schema.json", "path": "negative/grant-spend-call-window.json", "valid": false, "keyword": "enum"},
+  {"name": "delegation-token-claims-task", "schema": "delegation-token.schema.json", "path": "positive/delegation-token-claims-task.json", "valid": true},
+  {"name": "delegation-token-task-not-an-id", "schema": "delegation-token.schema.json", "path": "negative/delegation-token-task-not-an-id.json", "valid": false, "keyword": "pattern"}
 ]

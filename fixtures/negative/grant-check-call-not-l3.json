@@ -1,0 +1,8 @@
+{
+  "decision": "denied",
+  "level": "L1",
+  "reason": "the call would spend $0.80, above the grant's per-call maximum of $0.50",
+  "checkedAt": "2026-10-11T10:00:00Z",
+  "code": "limit-reached",
+  "window": "call"
+}

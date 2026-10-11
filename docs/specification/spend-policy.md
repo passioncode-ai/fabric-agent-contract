@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037, DEC-0038, DEC-0039 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
+DEC-0037, DEC-0038, DEC-0039, DEC-0041 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -20,7 +20,7 @@ The most specific level that exists decides. A level that does not exist is skip
 | **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80% |
 | **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project |
 | **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, or the agent itself within L1's threshold |
-| **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit) | derived from L2 |
+| **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit); exceeding it is `limit-reached` with window `call` | derived from L2 |
 
 ## The spend policy
 
@@ -44,10 +44,14 @@ A standing grant with a `spend` block authorizes spending (DEC-0038):
 - `mode: unlimited`, or `mode: limited` with one or more `limits`. Each limit names a `window` and a
   `limitUsd`; several windows apply together, and the first one reached stops the spend:
   - `total`: the grant's whole life;
-  - `task`: one task;
+  - `task`: one task. The meter's `task` window is keyed on the token's `task` claim; else on the session of
+    the agent that called the callee; else on the `jti` of the callee's own token (DEC-0041,
+    [delegation](delegation.md#the-hubs-grant-projection) DL-24);
   - `project`: everything spent on the grant's project;
   - `day`, `week`, `month`: calendar windows in UTC.
-- optional `perCallMaxUsd` and `autoApproveUsd`, at most the smallest window;
+- optional `perCallMaxUsd` and `autoApproveUsd`, at most the smallest window. A call above `perCallMaxUsd` is
+  denied `limit-reached` with window `call` at level L3 (DEC-0041). The window `call` is a refusal window, not a grant limit window:
+  a grant's `limits` name only the six windows above;
 - `payer: owner`: the agent's owner pays, also for a share grant;
 - a `credentialSource`.
 
@@ -92,12 +96,16 @@ The registry's answer is a [`grant-check`](../../schemas/grant-check.schema.json
   cannot together overrun a limit. Spend is settled against the receipt: the usage report's `byGrant` lists
   the receipts it settles. An unsettled reservation lapses at `expiresAt`.
 - `denied` names **why** in `code` (`limit-reached`, `no-grant`, `grant-expired`, `grant-revoked`,
-  `principal-unproven`, `credential-source-refused`, `unknown-state`) and **where** in `level`. `level` is
+  `principal-unproven`, `credential-source-refused`, `unknown-state`) and **where** in `level`; a
+  `limit-reached` names its `window` too, one of the grant's six or `call` (always with `level: L3`). `level` is
   `null` when the check stopped before any level (no grant, an unproven principal, an unknown state), and
   is always set for `limit-reached`. When the limit allows one, `denied` also carries the `approvalRequest`
   filed.
 
-An unknown grant state is a denial (Fabric ADR-0023). These codes are a subset of the contract's one refusal
+An unknown grant state is a denial (Fabric ADR-0023). A meter beside the hub reads the grant from the hub's
+projection of it ([delegation](delegation.md#the-hubs-grant-projection) DL-23, DL-24, DEC-0041): a missing,
+unreadable, stale or inactive projection is a denial, and the file authorises nothing without the verified onward
+token. These codes are a subset of the contract's one refusal
 code set ([delegation](delegation.md#refusal-codes), DEC-0039) and keep their meaning there.
 
 A grant that names an `audience` is a **delegation grant**: it also carries `capabilities` and an
