@@ -25,7 +25,7 @@ contract (`runners.schema.json`). One entry per runner kind:
   "version": {"argv": ["--version"], "pattern": "^(\\d+\\.\\d+\\.\\d+)", "timeoutMs": 5000},
   "drive": "claude-headless",
   "drives": {
-    "claude-headless": {"argv": ["-p", "--output-format", "stream-json", "--verbose", "--strict-mcp-config", "--mcp-config", "{mcpConfig}"]}
+    "claude-headless": {"argv": ["-p", "--output-format", "stream-json", "--verbose", "--strict-mcp-config", "--mcp-config={mcpConfig}"]}
   },
   "mcpConfig": {"file": "~/.claude.json", "format": "claude-json", "key": "mcpServers"},
   "skillsDir": "~/.claude/skills",
@@ -60,7 +60,9 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
   host may report a runner `not-connected`; a runner without `auth` is judged by its version probe
   alone.
 - `drives` keys are drive names; `{mcpConfig}` in an argv is the placeholder a host
-  replaces with the MCP configuration it generates for that run.
+  replaces with the MCP configuration it generates for that run. For Claude Code it is joined to its flag,
+  `--mcp-config={mcpConfig}`: the option takes several values, so a spaced value is followed by whatever comes next
+  (DEC-0042, SH-11).
 - `mcpConfig.file` and `skillsDir` are absolute or `~/` paths; `docs` is an HTTPS URL.
 
 ## Runner routes

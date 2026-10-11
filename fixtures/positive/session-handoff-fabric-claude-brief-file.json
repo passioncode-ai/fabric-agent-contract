@@ -1,0 +1,45 @@
+{
+  "format": "session-handoff/1",
+  "writer": {
+    "product": "fabric",
+    "version": "0.4.0"
+  },
+  "writtenAt": "2026-10-11T12:00:00Z",
+  "lifetime": {
+    "kind": "session",
+    "session": "0f9b6d1e-3c2a-4b8e-9d7f-2a1c5e6b7d80"
+  },
+  "files": [
+    "context.md",
+    "mcp.json",
+    "brief.md"
+  ],
+  "firstCall": {
+    "server": "fabric",
+    "tool": "fabric_whoami"
+  },
+  "preamble": "You are running inside Fabric, which is watching this session and holds the rules that apply to it. Call the fabric_whoami tool before you do anything else: it returns this project, what Fabric already remembers about it, the task you were opened for if there is one, and the rules for this session. Those rules are current and anything you recall about how Fabric works is not. If the call fails, say so and stop rather than guessing what it would have said.",
+  "mcp": {
+    "auth": "bearer",
+    "strict": true
+  },
+  "brief": {
+    "delivery": "file"
+  },
+  "launch": {
+    "runtime": "claude-code",
+    "args": [
+      "--mcp-config=/Users/example/Library/Application Support/ai.passioncode.fabric/sessions/0f9b6d1e-3c2a-4b8e-9d7f-2a1c5e6b7d80/mcp.json",
+      "--strict-mcp-config",
+      "--append-system-prompt-file",
+      "/Users/example/Library/Application Support/ai.passioncode.fabric/sessions/0f9b6d1e-3c2a-4b8e-9d7f-2a1c5e6b7d80/brief.md"
+    ],
+    "env": {}
+  },
+  "integrity": {
+    "packet": "execution-packet/1",
+    "parts": {
+      "context.md": "sha256:3a52e8c6960aa8009025135a2f6db76c382ce929442fb8fd102843eb9c83d482"
+    }
+  }
+}
