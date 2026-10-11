@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -22,4 +23,11 @@ export async function loadSchemas(): Promise<ContractSchema[]> {
   const directory = path.join(root, "schemas");
   const names = (await readdir(directory)).filter((name) => name.endsWith(".schema.json")).sort();
   return Promise.all(names.map(async (name) => JSON.parse(await readFile(path.join(directory, name), "utf8")) as ContractSchema));
+}
+
+/** The same schemas, read synchronously, for a caller that cannot await (the meter's projection read). */
+export function loadSchemasSync(): ContractSchema[] {
+  const directory = path.join(root, "schemas");
+  const names = readdirSync(directory).filter((name) => name.endsWith(".schema.json")).sort();
+  return names.map((name) => JSON.parse(readFileSync(path.join(directory, name), "utf8")) as ContractSchema);
 }

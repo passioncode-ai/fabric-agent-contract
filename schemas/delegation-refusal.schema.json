@@ -16,7 +16,7 @@
           "type": "object",
           "properties": {
             "detail": { "type": "string", "minLength": 1, "maxLength": 80 },
-            "window": { "enum": ["total", "task", "project", "day", "week", "month"] },
+            "window": { "enum": ["total", "task", "project", "day", "week", "month", "call"], "description": "The window reached with limit-reached. DEC-0041: call is a grant's perCallMaxUsd exceeded, a refusal window rather than a grant limit window, at level L3." },
             "level": { "enum": ["L0", "L1", "L2", "L3"] },
             "actionDigest": { "$ref": "common.schema.json#/$defs/sha256" },
             "approvalRequest": { "$ref": "common.schema.json#/$defs/uri" }
@@ -29,6 +29,10 @@
         {
           "if": { "properties": { "code": { "const": "limit-reached" } }, "required": ["code"] },
           "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["window"], "properties": { "window": true } } } }
+        },
+        {
+          "if": { "properties": { "data": { "type": "object", "required": ["window"], "properties": { "window": { "const": "call" } } } }, "required": ["data"] },
+          "then": { "properties": { "data": { "type": "object", "required": ["level"], "properties": { "level": { "const": "L3" } } } } }
         },
         {
           "if": { "properties": { "code": { "const": "approval-required" } }, "required": ["code"] },

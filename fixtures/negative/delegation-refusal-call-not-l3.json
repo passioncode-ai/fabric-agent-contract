@@ -1,0 +1,11 @@
+{
+  "error": {
+    "code": "limit-reached",
+    "message": "The call would spend 0.80 USD, above the grant's per-call maximum of 0.50 USD.",
+    "data": {
+      "detail": "per-call-maximum",
+      "window": "call",
+      "level": "L2"
+    }
+  }
+}

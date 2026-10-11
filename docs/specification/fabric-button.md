@@ -122,14 +122,36 @@ else.
 a password, a cookie or a session id, and never a prompt or an instruction. The whole link is refused, even
 when the action does not define the parameter (`FAC-SEM-052`), when:
 
-- a parameter's name can only carry a credential, in snake_case, kebab-case or camelCase (`api_key`,
-  `authToken`, `clientSecret`, `privateKey`, `refreshToken`, `sessionToken`);
-- a parameter's name carries words to act on (`prompt`, `message`, `text`, `instruction`, `initialPrompt`);
-- a value is shaped like a credential (a JWT or JWS, `Bearer …`, a provider key);
-- the fragment carries a credential (`#access_token=…`, a JWT). The fragment is otherwise ignored.
+- a parameter's name can only carry a credential. The name is split into words — at `.`, `_`, `-` and
+  camelCase humps, lowercased, so `refreshToken`, `refresh_token` and `refresh-token` are all `refresh token` —
+  and a credential word must be a **whole word** of it (DEC-0041, Fabric CO-260). A word ending in `s` also
+  counts as its singular (`secrets`, `tokens`, `apiKeys`):
+  - a word that is always a credential: `token`, `secret`, `password`, `passwd`, `pass`, `passphrase`,
+    `credential`, `credentials`, `cookie`, `authorization`, `bearer`, `jwt`, `otp`, `apikey`, `signature`, `sig`
+    (`authToken`, `clientSecret`, `id_token`, `X-Amz-Signature`), and the glued forms a name written in one case
+    leaves unsplit: `accesstoken`, `idtoken`, `authtoken`, `refreshtoken`, `sessionid`, `sessiontoken`,
+    `logincode`, `authcode`, `privatekey`, `clientsecret`, `secretkey`, `accesskey`;
+  - a word that is one beside a partner word in the same name, or as the whole name:
+    - `key` with `private`, `api`, `access`, `secret`, `session`, `auth`, `signing`, `encryption`, `master`, `client`, `login` or `refresh` (`privateKey`, `api_key`, `accessKeyId`, `signingKey`), or `key` alone;
+    - `auth` with `token`, `code` or `header` (`authCode`, `auth_header`), or `auth` alone;
+    - `session` with `token` or `id` (`sessionToken`, `session_id`), or `session` alone;
+    - `code` with `login`, `auth`, `access` or `session` (`loginCode`, `accessCode`), or `code` alone (a login code).
 
-`SECRET_NAME`, `PROMPT_NAME` and `SECRET_VALUE` in [`src/fabric-links.ts`](../../src/fabric-links.ts) are the
-names and shapes refused.
+  So `themeCode`, `sortKey`, `primaryKey`, `countryCode`, `tokenizer`, `authorName`, `sessionLength`,
+  `passage`, `signal` and `compass` pass;
+- a parameter's name carries words to act on, as a whole word (`prompt`, `message`, `msg`, `text`,
+  `instruction`, `instructions`: `initialPrompt`);
+- a value is shaped like a credential: a JWT or JWS **anywhere** in it, `Bearer …`, a provider key (`sk-…`,
+  `ghp_…`, `xoxb-…`, `AKIA…`, `glpat-…`), or a long secret — a run of 40 or more base64 or base64url
+  characters (`+`, `/`, `=`, `-` and `_` among them) that mixes upper case, lower case and digits (a lowercase
+  hex digest, such as a commit, passes). Each value is checked as decoded and also as written, percent-decoded
+  with a raw `+` kept, since form decoding turns `+` into a space;
+- the fragment carries a credential: a credential-named piece with a value (`#access_token=…`), or a value of
+  the shapes above anywhere in it. An anchor that only names a place (`#auth-settings`, `#tokens`) passes; the
+  fragment is otherwise ignored.
+
+`nameWords`, `credentialName`, `CREDENTIAL_WORDS`, `CREDENTIAL_PAIRS`, `PROMPT_WORDS`, `JWT_SHAPE`, `SECRET_VALUE` and
+`secretValue` in [`src/fabric-links.ts`](../../src/fabric-links.ts) are the names and shapes refused.
 
 **FL-5 — What Fabric opens.**
 

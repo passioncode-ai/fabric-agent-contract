@@ -62,7 +62,8 @@ export function principalActor(grant: JsonObject): { sub: string; session?: stri
  * than the token it was exchanged for (DL-5). Input: `{ grant, token, parent?, meter? }` — the standing grant
  * the token names, the decoded claims minted, the decoded claims of the token the caller presented to call
  * onward, and `{audience, capability}` of the estate's meter. A token for the meter (DL-21) is minted under the
- * parent's grant, not under a grant of its own. A callee never runs this: it never sees the parent.
+ * parent's grant, not under a grant of its own. An onward token keeps the parent's `task` or none (DEC-0041), and
+ * the meter's keeps it. A callee never runs this: it never sees the parent.
  */
 function delegationMintRules(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -127,6 +128,10 @@ function delegationMintRules(value: JsonObject): Finding[] {
   if (chainDepth(token.act) > chainDepth(parent.act) + 1) push("/token/act", "an onward token adds one actor");
   const parentCeiling = effectClosure(strings(parent.effect));
   for (const effect of strings(token.effect)) if (!parentCeiling.has(effect)) push("/token/effect", `the effect ${effect} is above the parent's ceiling`);
+  // DEC-0041: the task the work runs under follows the chain or is dropped, never replaced; the meter keys its
+  // task window on it, so the meter's token keeps it.
+  if (token.task !== undefined && token.task !== parent.task) push("/token/task", parent.task === undefined ? "an onward token of a parent without a task names none" : `an onward token keeps the parent's task ${String(parent.task)} or none, never ${String(token.task)}`);
+  if (forMeter && parent.task !== undefined && token.task === undefined) push("/token/task", "a token for the meter keeps the parent's task, which the meter keys the task window on");
   const parentExp = time(parent.exp);
   if (exp !== undefined && parentExp !== undefined && exp > parentExp) push("/token/exp", "an onward token expires no later than its parent");
   const above = remaining(parent.spend);
