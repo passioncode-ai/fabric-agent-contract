@@ -1,0 +1,44 @@
+{
+  "kind": "standing-grant",
+  "meta": {
+    "id": "urn:grant:project-a:share-unlimited",
+    "revision": 1,
+    "contentHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "createdAt": "2026-08-26T10:08:00Z",
+    "createdBy": "urn:operator:one"
+  },
+  "project": "urn:project:a",
+  "principal": {
+    "id": "urn:org:guest",
+    "revision": 1,
+    "contentHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "effects": [
+    "publish"
+  ],
+  "resourcePatterns": [
+    "https://blog.example/articles/project-a/*"
+  ],
+  "channels": [
+    "blog"
+  ],
+  "dataClasses": [
+    "public"
+  ],
+  "startsAt": "2026-08-26T10:08:00Z",
+  "expiresAt": "2026-09-26T10:08:00Z",
+  "rateLimit": 4,
+  "idempotency": "required",
+  "issuer": "urn:operator:one",
+  "state": "active",
+  "principalKind": "external",
+  "spend": {
+    "mode": "unlimited",
+    "payer": "owner",
+    "credentialSource": {
+      "kind": "capability",
+      "agent": "urn:agent:research:one",
+      "capability": "research.ask"
+    }
+  }
+}

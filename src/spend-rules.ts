@@ -21,4 +21,29 @@ export function spendPolicyRules(value: JsonObject): Finding[] {
   }
   return findings;
 }
+
+/**
+ * FAC-SEM-048 (DEC-0038): a limited grant names each window once (total, task, project, day, week, month),
+ * and neither its per-call maximum nor its auto-approve threshold exceeds its smallest window.
+ */
+export function grantSpendRules(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const spend = isObject(value.spend) ? value.spend : null;
+  if (!spend || spend.mode !== "limited" || !Array.isArray(spend.limits)) return findings;
+  const limits = spend.limits.filter(isObject);
+  const seen = new Set<unknown>();
+  limits.forEach((l, i) => {
+    if (seen.has(l.window)) findings.push({ code: "FAC-SEM-048", instancePath: `/spend/limits/${i}/window`, message: `the window ${String(l.window)} is limited twice` });
+    seen.add(l.window);
+  });
+  const amounts = limits.map((l) => l.limitUsd).filter((n): n is number => typeof n === "number");
+  if (amounts.length) {
+    const smallest = Math.min(...amounts);
+    for (const key of ["perCallMaxUsd", "autoApproveUsd"] as const) {
+      const v = spend[key];
+      if (typeof v === "number" && v > smallest) findings.push({ code: "FAC-SEM-048", instancePath: `/spend/${key}`, message: `${key} ${v} exceeds the smallest window's limit ${smallest}` });
+    }
+  }
+  return findings;
+}
 // #endregion spend-policy

@@ -3,7 +3,7 @@ import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { settingsBackupRules } from "./settings-backup.js";
-import { spendPolicyRules } from "./spend-rules.js";
+import { grantSpendRules, spendPolicyRules } from "./spend-rules.js";
 import { routeRules } from "./route-rules.js";
 import { activityRules } from "./activity-rules.js";
 import { deviceRules } from "./device-rules.js";
@@ -61,6 +61,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
   if (kind === "spend-policy") findings.push(...spendPolicyRules(value));
+  if (kind === "grant-spend") findings.push(...grantSpendRules(value));
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
   if (kind === "comms-transition") findings.push(...commsTransition(value));
 

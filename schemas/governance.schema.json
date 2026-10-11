@@ -26,17 +26,33 @@
         "principalKind": { "enum": ["agent", "session", "external"], "description": "DEC-0037: external is a person or organization outside the issuer's estate (a share grant)." },
         "spend": {
           "type": "object",
-          "description": "DEC-0037: what this grant may spend; spend outside it is denied.",
-          "required": ["limitUsd", "period", "payer", "credentialSource"],
+          "description": "DEC-0037, DEC-0038: what this grant may spend — unlimited, or limited by one or more windows; the owner pays. Spend outside it is denied.",
+          "required": ["mode", "payer", "credentialSource"],
           "properties": {
-            "limitUsd": { "type": "number", "minimum": 0 },
-            "period": { "enum": ["day", "month", "task", "grant"] },
+            "mode": { "enum": ["limited", "unlimited"] },
+            "limits": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["window", "limitUsd"],
+                "properties": {
+                  "window": { "enum": ["total", "task", "project", "day", "week", "month"] },
+                  "limitUsd": { "type": "number", "minimum": 0 }
+                },
+                "additionalProperties": false
+              }
+            },
             "perCallMaxUsd": { "type": "number", "minimum": 0 },
             "autoApproveUsd": { "type": "number", "minimum": 0 },
-            "payer": { "enum": ["owner", "guest"] },
+            "payer": { "const": "owner" },
             "credentialSource": { "oneOf": [{ "type": "object", "required": ["kind", "ref"], "properties": { "kind": { "const": "project-key" }, "ref": { "type": "string", "minLength": 1 } }, "additionalProperties": false }, { "type": "object", "required": ["kind", "agent"], "properties": { "kind": { "const": "capability" }, "agent": { "$ref": "common.schema.json#/$defs/uri" }, "capability": { "$ref": "common.schema.json#/$defs/capabilityName" } }, "additionalProperties": false }] },
             "modelClasses": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
           },
+          "allOf": [
+            { "if": { "properties": { "mode": { "const": "limited" } } }, "then": { "properties": { "limits": true }, "required": ["limits"] } },
+            { "if": { "properties": { "mode": { "const": "unlimited" } } }, "then": { "not": { "properties": { "limits": true }, "required": ["limits"] } } }
+          ],
           "additionalProperties": false
         }
       },

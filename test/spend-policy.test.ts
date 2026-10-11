@@ -34,4 +34,20 @@ describe("spend policy (DEC-0037, FAC-SEM-047)", () => {
     expect(valid("governance.schema.json", share)).toBe(true);
     expect((share.spend as Record<string, unknown>).credentialSource).toMatchObject({ kind: "capability" });
   });
+
+  it("lets a grant be unlimited, or limited by several windows at once, the owner paying (DEC-0038, FAC-SEM-048)", () => {
+    const grantCodes = (value: unknown) => evaluateSemanticRules("grant-spend", value).map((f) => f.code);
+    for (const f of ["positive/governance-grant-spend.json", "positive/governance-grant-unlimited.json"]) {
+      expect(valid("governance.schema.json", load(f)), f).toBe(true);
+      expect(grantCodes(load(f)), f).toEqual([]);
+    }
+    const windows = ((load("positive/governance-grant-spend.json").spend as Record<string, unknown>).limits as { window: string }[]).map((l) => l.window).sort();
+    expect(windows).toEqual(["day", "month", "project", "task", "total", "week"]);
+    for (const f of ["semantic/grant-spend-window-twice.json", "semantic/grant-spend-call-above-window.json"]) {
+      expect(valid("governance.schema.json", load(f)), f).toBe(true);
+      expect(grantCodes(load(f)), f).toEqual(["FAC-SEM-048"]);
+    }
+    expect(valid("governance.schema.json", load("negative/grant-spend-unknown-payer.json"))).toBe(false);
+    expect(valid("governance.schema.json", load("negative/grant-spend-limited-without-limits.json"))).toBe(false);
+  });
 });
