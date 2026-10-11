@@ -42,7 +42,8 @@ expected class and supported versions are safe diagnostics.
 12. the pipeline reference checker's rules PL-1…PL-4;
 13. one allocation and one definition of every semantic rule code (G-13).
 
-CI runs the same frozen command on pull requests and `main`. A green check never
+The merging session runs the same frozen command on the candidate and records its output in the pull request;
+hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`). A green check never
 substitutes for semantic review of prose. Before release, at least one planted
 negative fixture is temporarily inverted and observed failing; the restored green
 run is recorded in the retrospective.
