@@ -60,7 +60,7 @@ commit. New codes FAC-SEM-020 and FAC-SEM-021.
 
 ## Open
 
-- OQ-0001…OQ-0007 wait for the operator; each names what is enforced meanwhile.
+- OQ-0001…OQ-0007 wait for the operator; each names what is enforced meanwhile. **Closed 2026-09-30:** the operator ruled on all seven; DEC-0017 resolves them (`docs/OPEN_QUESTIONS.md`).
 - Fabric Dashboards' ADR-0003 and design spell the service key differently (G-08): a
   change in that repository, not here.
 - Fabric names three contract revisions (G-11): Fabric adds a `fabric-contract.lock.json`
