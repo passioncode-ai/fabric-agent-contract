@@ -9,7 +9,7 @@
       "required": ["action"],
       "properties": {
         "action": { "const": "chat" },
-        "service": { "$ref": "delegation-token.schema.json#/$defs/agentId" },
+        "service": { "$ref": "common.schema.json#/$defs/agentId" },
         "project": { "$ref": "#/$defs/projectRef" }
       },
       "anyOf": [{ "required": ["service"], "properties": { "service": true } }, { "required": ["project"], "properties": { "project": true } }],

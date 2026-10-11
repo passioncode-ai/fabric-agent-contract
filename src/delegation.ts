@@ -110,6 +110,8 @@ export interface VerifyDelegationOptions {
   effect: EffectClass;
   /** The issuer this callee trusts (`auth.delegation.issuer`); when given, `iss` must equal it. */
   issuer?: string;
+  /** A read-only door (DL-3): it serves `effect: none` only and refuses any other capability, whatever the ceiling. */
+  readOnly?: boolean;
 }
 
 /** Where a callee records consumed approval ids. It MUST survive a restart for the approval's lifetime. */
@@ -122,9 +124,13 @@ export interface VerifyApprovalOptions {
   /** `sha256:<hex>` of the RFC 8785 canonical JSON of the action the callee is about to take. */
   actionDigest: string;
   issuer?: string;
-  /** When given, the approval's `jti` is consumed here and a second use is `approval-reused`. */
-  jtiStore?: JtiStore;
+  /** Where the approval's `jti` is consumed; a second use is `approval-reused`. Required: replay protection is
+   * not optional, and a caller that truly needs none passes `UNSAFE_NO_JTI_STORE` by name. */
+  jtiStore: JtiStore;
 }
+
+/** A store that consumes nothing: every approval may be replayed until it expires. Only on purpose, by name. */
+export const UNSAFE_NO_JTI_STORE: JtiStore = Object.freeze({ consume: () => true });
 
 const refuse = (code: RefusalCode, detail: string, data?: Refusal["data"]): Refusal => (data ? { ok: false, code, detail, data } : { ok: false, code, detail });
 
@@ -134,25 +140,58 @@ const isTime = (value: unknown): value is number => typeof value === "number" &&
 
 interface Compact { header: JsonObject; payload: JsonObject; signingInput: Buffer; signature: Buffer }
 
-function decodeSegment(segment: string): JsonObject | undefined {
-  if (!B64URL.test(segment)) return undefined;
+/**
+ * Whether a JSON text (already known to parse) repeats a member name in one object. `JSON.parse` keeps the last
+ * of two, so `{"aud":"a","aud":"b"}` would be read as one claim while another reader saw the other (RFC 7515
+ * §5.2, RFC 8725 §3.2): a duplicate is refused, never resolved.
+ */
+export function hasDuplicateMembers(text: string): boolean {
+  const stack: Array<{ keys?: Set<string>; expectKey: boolean }> = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== '"') j += text[j] === "\\" ? 2 : 1;
+      const top = stack[stack.length - 1];
+      if (top?.keys && top.expectKey) {
+        const key = JSON.parse(text.slice(i, j + 1)) as string;
+        if (top.keys.has(key)) return true;
+        top.keys.add(key);
+        top.expectKey = false;
+      }
+      i = j;
+    } else if (c === "{") stack.push({ keys: new Set(), expectKey: true });
+    else if (c === "[") stack.push({ expectKey: false });
+    else if (c === "}" || c === "]") stack.pop();
+    else if (c === ",") { const top = stack[stack.length - 1]; if (top?.keys) top.expectKey = true; }
+  }
+  return false;
+}
+
+type Segment = { value: JsonObject } | { problem: "malformed" | "duplicate-member" };
+
+function decodeSegment(segment: string): Segment {
+  if (!B64URL.test(segment)) return { problem: "malformed" };
   try {
-    const value: unknown = JSON.parse(Buffer.from(segment, "base64url").toString("utf8"));
-    return isObject(value) ? value : undefined;
+    const text = Buffer.from(segment, "base64url").toString("utf8");
+    const value: unknown = JSON.parse(text);
+    if (!isObject(value)) return { problem: "malformed" };
+    return hasDuplicateMembers(text) ? { problem: "duplicate-member" } : { value };
   } catch {
-    return undefined;
+    return { problem: "malformed" };
   }
 }
 
-function parseCompact(token: unknown): Compact | undefined {
-  if (typeof token !== "string" || token.length > 8192) return undefined;
+function parseCompact(token: unknown): Compact | { problem: "malformed" | "duplicate-member" } {
+  if (typeof token !== "string" || token.length > 8192) return { problem: "malformed" };
   const parts = token.split(".");
-  if (parts.length !== 3) return undefined;
+  if (parts.length !== 3) return { problem: "malformed" };
   const [h, p, s] = parts as [string, string, string];
   const header = decodeSegment(h);
   const payload = decodeSegment(p);
-  if (!header || !payload || !B64URL.test(s)) return undefined;
-  return { header, payload, signingInput: Buffer.from(`${h}.${p}`, "ascii"), signature: Buffer.from(s, "base64url") };
+  if (!B64URL.test(s)) return { problem: "malformed" };
+  for (const part of [header, payload]) if ("problem" in part) return { problem: part.problem };
+  return { header: (header as { value: JsonObject }).value, payload: (payload as { value: JsonObject }).value, signingInput: Buffer.from(`${h}.${p}`, "ascii"), signature: Buffer.from(s, "base64url") };
 }
 
 /** Header rules shared by both documents: EdDSA, the expected `typ`, a `kid`, and nothing that points at a key elsewhere. */
@@ -164,11 +203,15 @@ function headerProblem(header: JsonObject, typ: string): string | undefined {
   return undefined;
 }
 
-type KeyLookup = { key: KeyObject } | { problem: "unknown-key" | "unusable-key" };
+type KeyLookup = { key: KeyObject } | { problem: "unknown-key" | "unusable-key" | "duplicate-kid" | "key-not-for-signing" };
 
 function keyFor(jwks: Jwks, kid: string): KeyLookup {
-  const jwk = jwks.keys.find((candidate) => isObject(candidate) && candidate.kid === kid);
+  const matches = jwks.keys.filter((candidate) => isObject(candidate) && candidate.kid === kid);
+  if (matches.length > 1) return { problem: "duplicate-kid" };
+  const jwk = matches[0];
   if (!jwk) return { problem: "unknown-key" };
+  // A key published for another use or algorithm is never a candidate (RFC 7517 §4.2, §4.4).
+  if ((jwk.use !== undefined && jwk.use !== "sig") || (jwk.alg !== undefined && jwk.alg !== "EdDSA")) return { problem: "key-not-for-signing" };
   if (jwk.kty !== "OKP" || jwk.crv !== "Ed25519" || !isString(jwk.x) || jwk.d !== undefined) return { problem: "unusable-key" };
   try {
     return { key: createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: jwk.x }, format: "jwk" }) };
@@ -184,12 +227,12 @@ type Checked = { compact: Compact; kid: string } | { problem: string; issuer?: t
 /** Parse, check the header, find the key, verify the signature. A problem with the published keys themselves is the issuer's. */
 function authentic(token: unknown, jwks: Jwks, typ: string): Checked {
   const compact = parseCompact(token);
-  if (!compact) return { problem: "malformed" };
+  if ("problem" in compact) return { problem: compact.problem };
   const header = headerProblem(compact.header, typ);
   if (header) return { problem: header };
   const kid = compact.header.kid as string;
   const found = keyFor(jwks, kid);
-  if ("problem" in found) return found.problem === "unusable-key" ? { problem: "unusable-key", issuer: true } : { problem: "unknown-key" };
+  if ("problem" in found) return found.problem === "unusable-key" || found.problem === "duplicate-kid" ? { problem: found.problem, issuer: true } : { problem: found.problem };
   if (compact.signature.length !== 64 || !verifySignature(null, compact.signingInput, found.key, compact.signature)) return { problem: "bad-signature" };
   return { compact, kid };
 }
@@ -247,7 +290,7 @@ function approvalShape(payload: JsonObject): ApprovalClaims | undefined {
  * signature is, so an unsigned token learns only `unauthenticated`.
  */
 export function verifyDelegation(token: string, options: VerifyDelegationOptions): DelegationAccepted | Refusal {
-  const { audience, jwks, now, capability, effect, issuer } = options;
+  const { audience, jwks, now, capability, effect, issuer, readOnly } = options;
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
   const checked = authentic(token, jwks, DELEGATION_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "unauthenticated", checked.problem);
@@ -256,12 +299,15 @@ export function verifyDelegation(token: string, options: VerifyDelegationOptions
   if (issuer !== undefined && claims.iss !== issuer) return refuse("unauthenticated", "wrong-issuer");
   if (claims.exp <= claims.iat || claims.exp - claims.iat > MAX_DELEGATION_LIFETIME_SECONDS) return refuse("unauthenticated", "lifetime-above-profile");
   if (claims.iat > now + LEEWAY_SECONDS) return refuse("unauthenticated", "issued-in-future");
+  const nbf = (checked.compact.payload as JsonObject).nbf;
+  if (nbf !== undefined && (!isTime(nbf) || nbf > now + LEEWAY_SECONDS)) return refuse("unauthenticated", "not-yet-valid");
   if (now > claims.exp + LEEWAY_SECONDS) return refuse("token-expired", "expired");
   if (claims.aud !== audience) return refuse("wrong-audience", "audience-mismatch");
   const depth = chainDepth(claims.act);
   if (!Number.isFinite(depth)) return refuse("unauthenticated", "malformed-chain");
   if (depth > MAX_CHAIN_DEPTH) return refuse("chain-too-deep", `depth-${depth}`);
   if (!claims.scope.split(" ").includes(capability)) return refuse("scope-not-granted", "capability-not-in-scope");
+  if (readOnly && effect !== "none") return refuse("effect-above-ceiling", "read-only-door");
   if (!effectWithin(effect, claims.effect)) return refuse("effect-above-ceiling", `effect-${effect}`);
   return { ok: true, claims, principal: claims.sub, caller: claims.act.sub, chain: chainOf(claims.act), kid: checked.kid };
 }
@@ -273,6 +319,7 @@ export function verifyDelegation(token: string, options: VerifyDelegationOptions
 export function verifyApproval(approval: string | undefined, options: VerifyApprovalOptions): ApprovalAccepted | Refusal {
   const { audience, jwks, now, actionDigest: expected, issuer, jtiStore } = options;
   if (approval === undefined || approval === "") return refuse("approval-required", "no-approval", { actionDigest: expected });
+  if (!isObject(jtiStore) || typeof jtiStore.consume !== "function") return refuse("unknown-state", "no-jti-store");
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
   const checked = authentic(approval, jwks, APPROVAL_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "approval-invalid", checked.problem);
@@ -284,8 +331,33 @@ export function verifyApproval(approval: string | undefined, options: VerifyAppr
   if (now > claims.exp + LEEWAY_SECONDS) return refuse("approval-invalid", "expired");
   if (claims.aud !== audience) return refuse("approval-invalid", "audience-mismatch");
   if (claims.actionDigest !== expected) return refuse("approval-invalid", "digest-mismatch", { actionDigest: expected });
-  if (jtiStore && !jtiStore.consume(claims.jti, claims.exp, now)) return refuse("approval-reused", "jti-consumed");
+  if (!jtiStore.consume(claims.jti, claims.exp, now)) return refuse("approval-reused", "jti-consumed");
   return { ok: true, claims, approver: claims.approver, method: claims.method, kid: checked.kid };
+}
+
+export interface VerifyMeterOptions {
+  /** The meter's own agent id: the onward token's `aud`. */
+  meter: string;
+  /** The meter's grant-check capability, as its manifest names it. */
+  capability: string;
+  jwks: Jwks | undefined;
+  now: number;
+  issuer?: string;
+}
+
+/** A grant-check denial (`grant-check.schema.json#/$defs/denied`). */
+export interface GrantCheckDenied { decision: "denied"; level: null; code: "principal-unproven"; reason: string; checkedAt: string }
+
+/**
+ * The meter's side (DL-21): the callee presents an onward token minted for the meter — `aud` the meter, the
+ * callee added as outermost actor, `scope` the grant-check capability, `effect: none`, the grant of the call.
+ * Any refusal of that token is the meter's `principal-unproven`, with the verifier's code in the reason.
+ */
+export function verifyMeterToken(token: string, options: VerifyMeterOptions): DelegationAccepted | { ok: false; denial: GrantCheckDenied } {
+  const { meter, capability, jwks, now, issuer } = options;
+  const result = verifyDelegation(token, { audience: meter, capability, effect: "none", jwks, now, readOnly: true, ...(issuer === undefined ? {} : { issuer }) });
+  if (result.ok) return result;
+  return { ok: false, denial: { decision: "denied", level: null, code: "principal-unproven", reason: `the meter's token was refused: ${result.code} (${result.detail})`, checkedAt: new Date(now * 1000).toISOString() } };
 }
 
 /** An in-memory `JtiStore` for tests and single-process callees; a service that restarts needs a durable one. */
@@ -309,12 +381,14 @@ export function createMemoryJtiStore(): JtiStore {
 export function readDelegationToken(headers: Record<string, string | string[] | undefined>): { token: string; via: "fabric-delegation" | "authorization" } | undefined {
   const get = (name: string) => {
     const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
-    return Array.isArray(entry) ? entry[0] : entry;
+    return Array.isArray(entry) ? (entry[0] ?? "") : entry;
   };
+  // A present header is the token, even empty: DL-10 refuses a present but invalid one, never falls through.
   const forwarded = get(DELEGATION_HEADER);
-  if (forwarded) return { token: forwarded.trim(), via: "fabric-delegation" };
+  if (forwarded !== undefined) return { token: forwarded.trim(), via: "fabric-delegation" };
   const bearer = /^Bearer\s+(\S+)$/i.exec(get("Authorization") ?? "")?.[1];
-  if (bearer && parseCompact(bearer)?.header.typ === DELEGATION_TYP) return { token: bearer, via: "authorization" };
+  const parsed = bearer ? parseCompact(bearer) : undefined;
+  if (bearer && parsed && !("problem" in parsed) && parsed.header.typ === DELEGATION_TYP) return { token: bearer, via: "authorization" };
   return undefined;
 }
 
@@ -333,9 +407,13 @@ export function jcs(value: unknown): string {
     if (/\p{Surrogate}/u.test(value)) throw new TypeError("a lone surrogate has no canonical form");
     return JSON.stringify(value);
   }
-  if (Array.isArray(value)) return `[${value.map(jcs).join(",")}]`;
+  if (Array.isArray(value)) return `[${Array.from(value, (item) => jcs(item)).join(",")}]`;
   if (isObject(value)) {
-    const keys = Object.keys(value).filter((key) => value[key] !== undefined).sort();
+    // JSON values only: a Date, a Map or a class instance would otherwise read as {} and two different
+    // actions would share a digest.
+    const prototype: unknown = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) throw new TypeError("only plain JSON objects have a canonical form");
+    const keys = Object.keys(value).sort();
     return `{${keys.map((key) => `${jcs(key)}:${jcs(value[key])}`).join(",")}}`;
   }
   throw new TypeError(`${typeof value} has no canonical form`);

@@ -9,7 +9,7 @@
     "iss": { "$ref": "common.schema.json#/$defs/uri", "description": "The estate hub that signed the token; stable across key rotation and port changes (urn:fabric:estate:<estate id>)." },
     "sub": { "$ref": "common.schema.json#/$defs/uri", "description": "The principal: the person of the estate on whose behalf the work runs (the operator, or an external person under a share grant)." },
     "act": { "$ref": "#/$defs/actor", "description": "RFC 8693 §4.1 actor chain: the agent now calling outermost, each earlier agent nested inside, at most four deep." },
-    "aud": { "$ref": "#/$defs/agentId", "description": "Exactly one callee agent id, as a string, never an array." },
+    "aud": { "$ref": "common.schema.json#/$defs/agentId", "description": "Exactly one callee agent id, as a string, never an array." },
     "scope": {
       "type": "string",
       "maxLength": 4096,
@@ -67,7 +67,6 @@
   },
   "additionalProperties": false,
   "$defs": {
-    "agentId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}(\\.[a-z][a-z0-9-]{0,31})?$" },
     "session": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$", "description": "An opaque id of the session the actor runs in, when it runs in one." },
     "header": {
       "type": "object",
@@ -82,25 +81,25 @@
     "actor": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor2" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor2" } },
       "additionalProperties": false
     },
     "actor2": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor3" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor3" } },
       "additionalProperties": false
     },
     "actor3": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor4" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor4" } },
       "additionalProperties": false
     },
     "actor4": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" } },
       "additionalProperties": false,
       "description": "The fourth actor is the last: it carries no act."
     }

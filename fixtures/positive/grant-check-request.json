@@ -1,0 +1,6 @@
+{
+  "amountUsd": 0.42,
+  "tokenJti": "01JA7Y5Q3C2K9M8N4P6R0S1T2V",
+  "grantRef": "urn:grant:project-a:example-media-writer#3",
+  "purpose": "writer.write: one draft of about 1 500 words"
+}

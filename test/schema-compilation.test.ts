@@ -3,10 +3,10 @@ import { CONTRACT_VERSION, SCHEMA_PREFIX, loadSchemas } from "../src/contract.js
 import { createValidator } from "../src/validator.js";
 
 describe("schema catalogue", () => {
-  it("loads 65 unique Draft 2020-12 schemas under the contract prefix", async () => {
+  it("loads 66 unique Draft 2020-12 schemas under the contract prefix", async () => {
     const schemas = await loadSchemas();
-    expect(schemas).toHaveLength(65);
-    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(65);
+    expect(schemas).toHaveLength(66);
+    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(66);
     expect(schemas.every((schema) => schema.$schema === "https://json-schema.org/draft/2020-12/schema")).toBe(true);
     expect(schemas.every((schema) => schema.$id.startsWith(SCHEMA_PREFIX))).toBe(true);
     expect(CONTRACT_VERSION).toBe("0.1.0");
@@ -15,7 +15,7 @@ describe("schema catalogue", () => {
   it("compiles every schema in one Ajv 2020 instance", async () => {
     const validator = await createValidator();
     for (const schema of await loadSchemas()) expect(validator.getSchema(schema.$id)).toBeTypeOf("function");
-    // Compiling all 65 schemas takes ~4 s alone and over 6 s beside the rest of the suite on a loaded
+    // Compiling all 66 schemas takes ~4 s alone and over 6 s beside the rest of the suite on a loaded
     // machine (2026-10-11, load average ~560): the bound is the compiler's, not a hang.
   }, 30_000);
 });

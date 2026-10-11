@@ -291,5 +291,9 @@
   {"name": "fabric-link-chat", "schema": "fabric-link.schema.json", "path": "positive/fabric-link-chat.json", "valid": true},
   {"name": "fabric-link-session", "schema": "fabric-link.schema.json", "path": "positive/fabric-link-session.json", "valid": true},
   {"name": "fabric-link-session-without-project", "schema": "fabric-link.schema.json", "path": "negative/fabric-link-session-without-project.json", "valid": false, "keyword": "required"},
-  {"name": "fabric-link-chat-with-token", "schema": "fabric-link.schema.json", "path": "negative/fabric-link-chat-with-token.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "fabric-link-chat-with-token", "schema": "fabric-link.schema.json", "path": "negative/fabric-link-chat-with-token.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "grant-check-request", "schema": "grant-check-request.schema.json", "path": "positive/grant-check-request.json", "valid": true},
+  {"name": "grant-check-request-with-token", "schema": "grant-check-request.schema.json", "path": "negative/grant-check-request-with-token.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "grant-check-limit-without-window", "schema": "grant-check.schema.json", "path": "negative/grant-check-limit-without-window.json", "valid": false, "keyword": "required"},
+  {"name": "governance-grant-delegation-read-only", "schema": "governance.schema.json", "path": "positive/governance-grant-delegation-read-only.json", "valid": true}
 ]

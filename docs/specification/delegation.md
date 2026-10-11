@@ -3,7 +3,8 @@
 DEC-0039 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
-[`delegation-refusal`](../../schemas/delegation-refusal.schema.json), the grant's `audience`, `capabilities` and
+[`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
+[`grant-check-request`](../../schemas/grant-check-request.schema.json), the grant's `audience`, `capabilities` and
 `effectCeiling` in [`governance`](../../schemas/governance.schema.json), `auth.delegation` in the
 [well-known document](../../schemas/service-well-known.schema.json) · rule codes `FAC-SEM-049`…`FAC-SEM-051` ·
 verifier [`src/delegation.ts`](../../src/delegation.ts)
@@ -60,14 +61,15 @@ in the shape of OAuth 2.0 Token Exchange (RFC 8693):
 | `aud` | yes | exactly **one** callee agent id, a string, never an array |
 | `scope` | yes | the callee's capability names, space-delimited (RFC 8693 §4.2) |
 | `effect` | yes | the effect ceiling: an array of [governance](governance-and-roles.md#external-effects) effect classes (DL-3) |
-| `grant` | yes | the opaque references of the grant(s) the call is under |
+| `grant` | yes | the references of the grant(s) the call is under; the issuer forms a reference as `<meta.id>#<meta.revision>` of the standing grant, and a callee and a usage reader treat it as opaque |
 | `spend` | no | what the grant had left when the token was minted: `{mode: unlimited}` or `{mode: limited, remaining: [{window, remainingUsd}], perCallMaxUsd?}` |
-| `project` | no | the project, when the grant is bound to one |
+| `project` | no in the schema | the grant's project; every standing grant names one, so a token minted under a grant always carries it (`FAC-SEM-050`) |
 | `iat`, `exp` | yes | issued and expiry times; `exp` is after `iat` and **at most 600 seconds** after it (`FAC-SEM-049`) |
 | `jti` | yes | a unique id, 16–128 characters of `[A-Za-z0-9._~-]` |
 
-An agent id is the hub's registry id (`interop-agent-call.schema.json` `agentId`): a service id, optionally
-followed by `.instance`. The issuer emits exactly these claims; a verifier ignores a claim it does not know
+An agent id is the hub's registry id (`common.schema.json#/$defs/agentId`): a service id, optionally
+followed by `.instance`. A verifier honours an `nbf` it finds (RFC 7519 §4.1.5) although the issuer does not
+emit one. The issuer emits exactly these claims; a verifier ignores a claim it does not know
 (RFC 7519 §4), so a newer issuer does not break an older callee. `spend` informs and never authorizes: the
 meter's check decides.
 
@@ -77,7 +79,9 @@ below every class, and `draft` is below every external class (`publish`, `send`,
 `delete` admits no `charge`. A capability's effect is the one its manifest entry declares
 ([interop C3.1](interop.md#c31-capabilities)); it is within the ceiling when it is listed, or is `none` under a
 non-empty ceiling, or is `draft` under a ceiling holding any class but `none`. `effectClosure` and
-`effectWithin` in [`src/delegation.ts`](../../src/delegation.ts) are this rule.
+`effectWithin` in [`src/delegation.ts`](../../src/delegation.ts) are this rule. A **read-only door** — a
+surface or route that serves only `effect: none` capabilities — refuses, with `effect-above-ceiling`, a call
+whose capability is not declared read-only, whatever the token's ceiling (the verifier's `readOnly` option).
 
 ## Minting and attenuation
 
@@ -86,12 +90,16 @@ registered with the hub, a session bearer of a session the hub started or enroll
 received and now calls onward under — and asks for one audience and some capabilities. The issuer, never the
 callee, enforces attenuation:
 
-- **DL-4 — Within a grant.** A token is minted only under a live **delegation grant** (a standing grant with an
-  `audience`, [below](#grants-for-delegation)) whose principal is the actor (`principalKind` `agent` or
-  `session`) or the external person (`external`). Its `aud` is the grant's `audience`; every scope name is
-  among the grant's `capabilities`; every effect is within the closure of the grant's `effectCeiling`; it
-  expires no later than the grant; its `project`, when present, is the grant's. `sub` is the grant's principal
-  for a share grant and otherwise the person who issued the grant.
+- **DL-4 — Within a grant.** A token is minted only under an active **delegation grant** (a standing grant
+  with an `audience`, [below](#grants-for-delegation)), and its `grant` claim names that grant as
+  `<meta.id>#<meta.revision>`. Its `aud` is the grant's `audience`; every scope name is among the grant's
+  `capabilities`; every effect is within the closure of the grant's `effectCeiling`; it is minted no earlier
+  than the grant's `startsAt` and expires no later than its `expiresAt`; its `project` is the grant's. Under a
+  limited grant (`spend.mode: limited`) the token is limited too and carries what remains. **Who acts:** a
+  grant whose `principalKind` is `agent` names its principal `urn:agent:<agent id>`, and the token's outermost
+  actor is that agent id; `session` names it `urn:session:<agent id>:<session id>`, and the outermost actor is
+  that agent with that `session`; for both, `sub` is the person who issued the grant (`issuer`). Under a share
+  grant (`external`) `sub` is the grant's principal, the outside person.
 - **DL-5 — Narrower than its parent.** A token minted for an onward call keeps the parent's `iss`, `sub` and
   `project`; its outermost actor is the parent's `aud` (the agent calling onward is the one the parent was
   for), and the rest of its chain is exactly the parent's `act`, so the chain grows by one actor per hop. Its
@@ -139,22 +147,22 @@ learns only `unauthenticated`.
 | # | Check | Refusal |
 |---|---|---|
 | 1 | the estate's key set is available and has a key | `issuer-unavailable` |
-| 2 | three base64url segments of JSON; the DL-1 header | `unauthenticated` |
-| 3 | `kid` names a published Ed25519 key; a published key that cannot be used is the issuer's fault | `unauthenticated`; `issuer-unavailable` |
+| 2 | three base64url segments of JSON objects with no member named twice (a duplicate is refused, never resolved: RFC 7515 §5.2, RFC 8725 §3.2); the DL-1 header | `unauthenticated` |
+| 3 | `kid` names a published Ed25519 key whose `use`, when present, is `sig` and whose `alg`, when present, is `EdDSA`; a published key that cannot be used, or a `kid` published twice, is the issuer's fault | `unauthenticated`; `issuer-unavailable` |
 | 4 | the Ed25519 signature over the first two segments | `unauthenticated` |
 | 5 | the claims have the DL-2 types; `iss` is the issuer the callee trusts | `unauthenticated` |
-| 6 | `exp` after `iat` and at most 600 seconds after; `iat` not later than now + 60 s | `unauthenticated` |
+| 6 | `exp` after `iat` and at most 600 seconds after; `iat`, and `nbf` when present, not later than now + 60 s | `unauthenticated` |
 | 7 | now not later than `exp` + 60 s | `token-expired` |
 | 8 | `aud` equals the callee's own agent id | `wrong-audience` |
 | 9 | the chain is at most four actors | `chain-too-deep` |
 | 10 | the called capability is a whole name in `scope` | `scope-not-granted` |
-| 11 | the capability's declared effect is within `effect` (DL-3) | `effect-above-ceiling` |
+| 11 | the capability's declared effect is within `effect`; at a read-only door, it is `none` (DL-3) | `effect-above-ceiling` |
 
 The clock leeway is **60 seconds** both ways. Then the callee acts for `sub`, names the outermost actor as its
 caller, and records the chain with the work. Attenuation is not the callee's check: it never sees the parent
 of the token it holds (DL-5 is the issuer's).
 
-The kit's verifier is `verifyDelegation(token, {audience, jwks, now, capability, effect, issuer?})` in
+The kit's verifier is `verifyDelegation(token, {audience, jwks, now, capability, effect, issuer?, readOnly?})` in
 [`src/delegation.ts`](../../src/delegation.ts), using Node's built-in Ed25519. It returns
 `{ok: true, claims, principal, caller, chain, kid}` or `{ok: false, code, detail}`; `detail` is a short
 machine word for `error.data.detail`, never the token. A verifier in another language follows the same table.
@@ -192,7 +200,7 @@ is required. A bearer value is a delegation token when it is a JWT whose header 
 | Claim | Value |
 |---|---|
 | `iss` | the estate hub |
-| `actionDigest` | `sha256:` and the lowercase hex SHA-256 of the RFC 8785 canonical JSON (JCS) of the action the callee will take |
+| `actionDigest` | `sha256:` and the lowercase hex SHA-256 of the RFC 8785 canonical JSON (JCS) of the action the callee will take. The action is JSON values only — objects, arrays, strings, finite numbers, booleans, `null`; `jcs` refuses a date, a map, a class instance or an `undefined` member, which would otherwise read as `{}` and let two actions share a digest |
 | `aud` | the one callee that may act on it |
 | `approver` | the person of the estate who approved |
 | `method` | `prompt` (in Fabric), `operator-channel` (the [operator channel](operator-channel.md)'s confirm token, OC-6) or `device` (a device check) |
@@ -202,17 +210,21 @@ is required. A bearer value is a delegation token when it is a JWT whose header 
 **DL-18 — Asking and checking.** A callee whose action needs an approval refuses `approval-required` with the
 action's digest in `error.data.actionDigest`. The caller asks the hub, which asks the operator and returns the
 document; the caller repeats the call carrying it. The callee checks it with
-`verifyApproval(approval, {audience, jwks, now, actionDigest, issuer?, jtiStore?})`: the signature and header as
+`verifyApproval(approval, {audience, jwks, now, actionDigest, issuer?, jtiStore})`: the signature and header as
 DL-13 steps 1–4, the lifetime, the 60 s leeway, its own agent id in `aud`, the digest of the action it is about
 to take, and finally that the `jti` was not consumed — recording it in a store that survives a restart for the
-approval's lifetime. Any fault of the document is `approval-invalid`; a second use is `approval-reused`.
+approval's lifetime. Any fault of the document is `approval-invalid`; a second use is `approval-reused`. The store
+is required: without one the answer is `unknown-state`, and a callee that truly wants no replay protection
+passes `UNSAFE_NO_JTI_STORE` by name. **The order** is: the delegation token, then the grant check, then `verifyApproval`, which consumes the `jti` last, then the action (DL-13, DL-21) — so an approval is not
+spent when the meter refuses, and stays usable until its `exp`.
 `actionDigest(action)` computes the digest; `jcs` is the canonical form. Products keep their own gates for
 people who use them directly; between agents this document replaces shared signing keys, plan-hash rows and
 confirm codes.
 
 ## Refusal codes
 
-**DL-19 — One set.** A callee, the hub and the meter refuse with these codes only, kebab-case, in `error.code`,
+**DL-19 — One set.** For authorisation refusals only — who may make this call, on whose behalf, within which
+grant and limit, with which approval — a callee, the hub and the meter refuse with these codes only, kebab-case, in `error.code`,
 with product detail in `error.data` ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)).
 An MCP tool returns the refusal as the `structuredContent` of a result with `isError: true`; an HTTP route as
 the JSON body with the status below. DEC-0037's grant-check codes are a subset and keep their meaning.
@@ -237,8 +249,11 @@ the JSON body with the status below. DEC-0037's grant-check codes are a subset a
 | `issuer-unavailable` | no hub to mint, or no usable published keys | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 
-A product maps its own codes onto these and keeps its words in `error.data`: Fabric's hub maps
-`access-required` and `needs-grant` to `no-grant`. An HTTP `401` carries
+A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
+`hub-unavailable` → `issuer-unavailable`, `binding-revoked` → `grant-revoked`, and `access-required` and `needs-grant` → `no-grant`
+(still carrying the ready request). Transport and product errors — a malformed argument, an unknown job, a
+failed upstream — are not refusals: they keep the interop error shape `{code, message, data?}`
+([interop C3.2](interop.md#c32-jobs)) and their own codes. An HTTP `401` carries
 `WWW-Authenticate: Bearer error="invalid_token"` (RFC 6750 §3).
 
 ## Grants for delegation
@@ -248,14 +263,31 @@ A product maps its own codes onto these and keeps its words in `error.data`: Fab
 principal, actor and audience. It then MUST carry `capabilities` (the audience's tool names a token may name)
 and `effectCeiling` (the effects a token may carry) and `principalKind`; the schema requires all three with
 `audience` (`dependentRequired`). `effectCeiling` may hold `none` and `draft`; every other member is one of the
-grant's `effects` (`FAC-SEM-050`). A grant without `audience` stays valid and authorizes what it authorized
+grant's `effects` (`FAC-SEM-050`). A delegation grant MAY omit `effects`: it then authorises reads and drafts
+only, and a **read-only grant** has `effectCeiling: ["none"]`. A grant without `audience` stays valid and authorizes what it authorized
 before; no token is minted under it. The payer is the owner (DEC-0038).
 
 ## Spend and usage
 
-- **DL-21 — The meter decides.** Before a call that spends, the callee (or the caller, for its own spend) asks
-  the meter's `grant-check` with the token and the amount; the token's `spend` claim is what was left at mint,
-  not a reservation.
+- **DL-21 — The meter decides.** Before a call that spends, the callee asks the meter. The token it was called
+  with names the callee as its audience, and a token never travels in arguments (DL-11), so it cannot hand
+  that token over. Instead:
+  1. the callee exchanges its token at the hub for an **onward token for the meter**: `aud` the meter's agent
+     id, the callee added as outermost actor to the chain, `scope` exactly the meter's grant-check capability
+     (named in the meter's manifest; `grant.check` in the examples), `effect: ["none"]`, the same `grant`,
+     `sub`, `project` and remaining `spend`, expiring no later than the callee's token. It is minted under the
+     parent's grant, not under a grant of its own: every holder of a valid token may ask the meter about its
+     own call (`FAC-SEM-050` with `meter`);
+  2. the callee calls the meter directly with that token in `Authorization: Bearer` and a request valid against
+     [`grant-check-request.schema.json`](../../schemas/grant-check-request.schema.json): the amount, and the
+     `jti` of its own token for attribution — never a token in a field;
+  3. the meter verifies the onward token with `verifyDelegation` (audience itself, capability its grant-check
+     capability, effect `none`, as a read-only door) and maps **any** verifier refusal to `principal-unproven`
+     (`verifyMeterToken` in [`src/delegation.ts`](../../src/delegation.ts)); then it reserves against the
+     grant's windows and every level above, and answers a [`grant-check`](../../schemas/grant-check.schema.json)
+     document.
+
+  The token's `spend` claim is what was left at mint, not a reservation.
 - **DL-22 — Usage stays opaque.** A usage report attributes spend by grant reference only (`byGrant`,
   [service](service.md#usage-report)), the value of the token's `grant` claim. It never carries the principal,
   the chain or a caller's identity; the mapping from grant to chain lives in the issuer's journal.
@@ -273,12 +305,12 @@ approval (DL-17) or a device check.
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-049` | `delegation-claims` | a delegation token expires after it was issued and at most 600 seconds after; its scope names each capability once; its spend names each window once |
-| `FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant: its audience, its capabilities, its effect ceiling (itself within the grant's effects), its expiry and its project; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry and no more remaining spend than its parent |
+| `FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names: its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant, and the actor and person the grant names; a token for the meter reads only its grant-check capability under the parent's grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry and no more remaining spend than its parent |
 | `FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of
 [`fixtures/catalogue.json`](../../fixtures/catalogue.json) and `fixtures/semantic/delegation-*`, `approval-*`;
-tests: [`test/delegation.test.ts`](../../test/delegation.test.ts).
+tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delegation-seams.test.ts`](../../test/delegation-seams.test.ts).
 
 ## Not decided here
 

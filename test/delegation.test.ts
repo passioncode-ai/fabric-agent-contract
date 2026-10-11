@@ -142,7 +142,7 @@ describe("approval/1: one action, one callee, one use (DEC-0039, verifyApproval)
   const action = { capability: "publisher.push", input: { app: "example-app", hash: `sha256:${"ab".repeat(32)}`, store: "app-store" } };
   const approvalClaims = load("positive/approval-claims.json");
   const digest = approvalClaims.actionDigest as string;
-  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: digest };
+  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: digest, jtiStore: createMemoryJtiStore() };
   const approval = (overrides: Json = {}, signOptions: Parameters<typeof sign>[1] = {}) => sign({ ...approvalClaims, ...overrides }, { typ: APPROVAL_TYP, ...signOptions });
 
   it("binds the digest of the action's RFC 8785 form; the fixture's digest is this action's", () => {

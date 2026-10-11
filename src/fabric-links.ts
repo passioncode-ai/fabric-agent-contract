@@ -21,13 +21,18 @@ export type FabricLink =
 
 export type ParsedLink = { ok: true; link: FabricLink; ignored: string[] } | { ok: false; problems: string[] };
 
-const SHAPE = /^fabric:\/\/(chat|session\/new)\/?(?:\?([^#]*))?(?:#.*)?$/;
+const SHAPE = /^fabric:\/\/(chat|session\/new)\/?(?:\?([^#]*))?(?:#(.*))?$/;
 const KNOWN: Record<FabricLink["action"], Record<string, RegExp>> = {
   chat: { service: AGENT_ID, project: PROJECT_REF },
   "session.new": { project: PROJECT_REF, runner: RUNNER_KIND }
 };
 /** Parameter names that can only carry a credential; a link carrying one is refused whole, not trimmed. */
 const SECRET_NAME = /(^|[._-])(token|access[_-]?token|id[_-]?token|secret|password|passwd|pass|key|api[_-]?key|code|login[_-]?code|auth|authorization|bearer|cookie|session[_-]?id|credential|credentials|jwt|otp|signature|sig)([._-]|$)/i;
+/** Parameter names that carry words for Fabric to act on; a link carries ids only (FL-4). */
+const PROMPT_NAME = /(^|[._-])(prompt|message|msg|text|instruction|instructions)([._-]|$)/i;
+/** `authToken` → `auth_token`, so a camelCase name meets the same word boundaries as a snake_case one. */
+const words = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, "$1_$2");
+const refusedName = (name: string) => SECRET_NAME.test(words(name)) || PROMPT_NAME.test(words(name));
 /** Values shaped like a bearer credential: a JWT/JWS, or a value that says it is one. */
 const SECRET_VALUE = /^(eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*|bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,})$/i;
 
@@ -45,12 +50,19 @@ export function parseFabricLink(url: string): ParsedLink {
   // A malformed percent escape stays in the value and fails its id grammar, which admits no `%`.
   const params = new URLSearchParams(match[2] ?? "");
   const problems: string[] = [];
+  // The fragment is ignored, but it is part of the link a page hands over: it carries no credential either.
+  const fragment = match[3] ?? "";
+  if (fragment) {
+    const pieces = new URLSearchParams(fragment);
+    if (SECRET_VALUE.test(fragment) || [...pieces].some(([name, value]) => SECRET_NAME.test(words(name)) || SECRET_VALUE.test(value))) problems.push("the fragment could carry a credential; a link never does");
+  }
   const ignored: string[] = [];
   const values: Record<string, string> = {};
   const known = KNOWN[action];
   for (const name of new Set(params.keys())) {
     const all = params.getAll(name);
-    if (SECRET_NAME.test(name) || all.some((value) => SECRET_VALUE.test(value))) { problems.push(`the parameter ${name} could carry a credential; a link never does`); continue; }
+    if (PROMPT_NAME.test(words(name))) { problems.push(`the parameter ${name} carries words to act on; a link carries ids only`); continue; }
+    if (refusedName(name) || all.some((value) => SECRET_VALUE.test(value))) { problems.push(`the parameter ${name} could carry a credential; a link never does`); continue; }
     const grammar = known[name];
     if (!grammar) { ignored.push(name); continue; }
     if (all.length > 1) { problems.push(`${name} is given ${all.length} times`); continue; }

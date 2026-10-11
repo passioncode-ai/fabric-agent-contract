@@ -82,7 +82,9 @@ estate's published keys. Not the service's descriptor token, which stays the hos
 
 **Principal**: In delegation, the person on whose behalf the work runs: the operator, or an external
 person under a share grant (a token's `sub`). A grant's `principal` field names who the grant is
-given to; for an agent or session grant that is the actor.
+given to; for an agent or session grant that is the actor: `urn:agent:<agent id>` names the agent whose id is
+the token's outermost `act.sub`, and `urn:session:<agent id>:<session id>` names that agent in that session
+(its `act.session`).
 
 **Actor chain**: The agents acting for the **Principal**, the one calling now outermost and each
 earlier one nested inside (a token's `act`, RFC 8693), at most four deep.

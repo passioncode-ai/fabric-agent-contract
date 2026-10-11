@@ -58,19 +58,22 @@ Three rules apply to every grant and every reader:
 1. **The credential source is the project's own key or another agent's capability.** It is never another
    agent's key: `project-key` names a key issued for this project; `capability` names the agent whose
    capability is called, so that agent's own wallet and limits apply. A reader refuses any other source.
-2. **A principal is proven, not claimed.** The registry authorizes a check by a credential it issued: a
-   per-session token minted when the session starts and bound to the session, the agent and the project.
-   Since DEC-0039 that credential is the estate hub's [delegation token](delegation.md): the meter verifies
-   it and holds no caller identity of its own.
-   - It is kept owner-only and never in an argument: mode 0600 on POSIX, and on Windows the protected ACL
-     of [service.md's Windows token files](service.md) (DEC-0032, DEC-0033).
-   - It is revoked when the session ends and has a maximum age. A missing or stale token is
+2. **A principal is proven, not claimed** (DEC-0039, [delegation](delegation.md) DL-21). The meter issues
+   no identity and holds none: it is proven to by the estate hub's delegation token.
+   - The callee exchanges the token it was called with for an **onward token** for the meter: `aud` the
+     meter, the callee added as outermost actor, `scope` the meter's grant-check capability, `effect:
+     ["none"]`, the same grant, principal and project, expiring no later than the callee's token.
+   - It presents that token in `Authorization: Bearer` on a direct call to the meter, never in an argument.
+     The request ([`grant-check-request`](../../schemas/grant-check-request.schema.json)) carries the amount
+     and the `jti` of the callee's own token, for attribution.
+   - The meter verifies the onward token offline (audience itself, capability its grant-check capability,
+     effect `none`) and answers any refusal of it — expired, another audience, unsigned — as
      `principal-unproven`.
    - A label the caller supplies about itself is advisory.
 
-   The boundary, stated plainly: any process of the same OS account can read an owner-only file. The token
-   stops accidental and confused borrowing, not a hostile process of the same user, which is the same claim
-   the vault makes.
+   The boundary, stated plainly: any process of the same OS account can read what the caller holds. The
+   token stops accidental and confused borrowing, gives every hop a name and lets a limit hold per caller;
+   it does not stop a hostile process of the same user, which is the same claim the vault makes.
 3. **Approvals never block.** Above `autoApproveUsd`, or with no policy yet, the agent files **one** durable
    approval request (`approvalRequest` in the check's answer). The person answers it through the
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent

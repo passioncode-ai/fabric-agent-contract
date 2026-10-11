@@ -41,6 +41,13 @@ the `fabric://` links it opens. Written by Fabric's session; the contract has no
   button component in the dashboard kit (FB-7), the operator session lifetime in the kit, then repin to this
   change's merge commit.
 - Fabric Dashboards (FD-45): draw the button and set `fabric_button`.
+- fabric-agent-adapter conformance probe: `plugins/fabric-agent-adapter/skills/building-fabric-services/scripts/check_service.py:451`
+  must treat `surfaces.mcp.auth: "delegation"` like `own` — send no descriptor token to the MCP surface and do not
+  report its refusal as nonconformance (DL-16).
+- fabric-agent-adapter kits: their operator session cookie lives 30 days; the contract's maximum is now 12 hours
+  after last use and 7 days after sign-in (`service.md` §The session's lifetime). Shorten the kits' cookie.
+- The meter (Project Observatory) serves the grant-check capability behind `verifyMeterToken`'s rule and the
+  `grant-check-request` schema (DL-21); the hub mints the meter's onward token without a grant of its own.
 
 ## Next task
 

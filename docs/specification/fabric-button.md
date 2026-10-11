@@ -108,7 +108,7 @@ Examples: `fabric://chat?service=example-agent.default&project=project-a`,
 `fabric://session/new?project=project-a&runner=claude-code`.
 
 **FL-1 — Shape.** The scheme is case-insensitive (RFC 3986 §3.1); the action is lowercase and exact. A trailing
-slash and a fragment are ignored. A link is at most 2 048 characters.
+slash and a fragment are ignored, except that a fragment carrying a credential refuses the link (FL-4). A link is at most 2 048 characters.
 
 **FL-2 — Unknown parameters are ignored.** A parameter the action does not define is ignored, so a newer page
 works with an older Fabric. The parser lists what it ignored.
@@ -118,11 +118,18 @@ grammar. A repeated known parameter, a value outside its grammar, a missing requ
 action refuses the whole link: Fabric comes to the front, says the link was refused and why, and does nothing
 else.
 
-**FL-4 — Never a secret.** A link carries ids only: never a token, a login code, a key, a password, a cookie or
-a session id, and never a prompt or an instruction. A parameter whose name can only carry a credential, or
-whose value is shaped like one (a JWT or JWS, `Bearer …`, a provider key), refuses the whole link even when the
-action does not define it (`FAC-SEM-052`). `SECRET_NAME` and `SECRET_VALUE` in
-[`src/fabric-links.ts`](../../src/fabric-links.ts) are the names and shapes refused.
+**FL-4 — Never a secret, never words to act on.** A link carries ids only: never a token, a login code, a key,
+a password, a cookie or a session id, and never a prompt or an instruction. The whole link is refused, even
+when the action does not define the parameter (`FAC-SEM-052`), when:
+
+- a parameter's name can only carry a credential, in snake_case, kebab-case or camelCase (`api_key`,
+  `authToken`, `clientSecret`, `privateKey`, `refreshToken`, `sessionToken`);
+- a parameter's name carries words to act on (`prompt`, `message`, `text`, `instruction`, `initialPrompt`);
+- a value is shaped like a credential (a JWT or JWS, `Bearer …`, a provider key);
+- the fragment carries a credential (`#access_token=…`, a JWT). The fragment is otherwise ignored.
+
+`SECRET_NAME`, `PROMPT_NAME` and `SECRET_VALUE` in [`src/fabric-links.ts`](../../src/fabric-links.ts) are the
+names and shapes refused.
 
 **FL-5 — What Fabric opens.**
 

@@ -1381,15 +1381,22 @@ annotate only the old status; decision bodies are never rewritten.
     `jti` (DL-1, DL-2; `delegation-token.schema.json`).
   - **The effect ceiling** is a set of governance effect classes: `none` is below every class, `draft` below
     every external one, and the external classes are not ordered against each other (DL-3).
-  - **Attenuation is the issuer's**: a token is minted within a delegation grant, and an onward token keeps the
-    parent's issuer, principal and project, adds the parent's audience as its outermost actor to the parent's
-    chain, and carries no wider effect, no later expiry and no more remaining spend (DL-4…DL-8, `FAC-SEM-050`).
+  - **Attenuation is the issuer's**: a token is minted within a delegation grant — its `grant` claim names it as
+    `<meta.id>#<meta.revision>`; it is minted no earlier than the grant starts; it carries the grant's project;
+    it is limited under a limited grant; and its outermost actor is the agent the grant's principal names
+    (`urn:agent:<agent id>`, or `urn:session:<agent id>:<session id>`), for the person who issued the grant
+    (the outside person under a share grant). An onward token keeps the parent's issuer, principal and project,
+    adds the parent's audience as its outermost actor to the parent's chain, and carries no wider effect, no
+    later expiry and no more remaining spend (DL-4…DL-8, `FAC-SEM-050`).
   - **Carrying it**: `Authorization: Bearer` on a direct call; `Fabric-Delegation` on a call the hub forwards
     with the product's own credential; never in a URL, argv, arguments, log or usage report. The descriptor
     token is the host's and is not presented to call a capability (DL-9…DL-12).
   - **The verifier** checks, offline and in a fixed order, the key set, the header, the key, the signature, the
-    claims, the lifetime, the 60 s leeway, the audience, the depth, the scope and the effect (DL-13). The kit
-    ships `verifyDelegation` and `verifyApproval` in `src/delegation.ts`, on Node's built-in Ed25519.
+    claims, the lifetime, the 60 s leeway, the audience, the depth, the scope and the effect (DL-13). It refuses
+    a JSON member named twice, a key published for another `use` or `alg`, an `nbf` in the future, and a `kid`
+    published twice (the issuer's fault: `issuer-unavailable`). A read-only door refuses any capability that is
+    not `effect: none` (DL-3). The kit ships `verifyDelegation` and `verifyApproval` in `src/delegation.ts`, on
+    Node's built-in Ed25519.
   - **Keys**: a JWK Set of Ed25519 public keys (`delegation-jwks.schema.json`); the previous key stays published
     one token lifetime plus the leeway after its last token, and 24 hours plus the leeway after its last
     approval (DL-14, DL-15). A service declares acceptance with well-known `auth.delegation: {issuer, jwks}`
@@ -1397,12 +1404,22 @@ annotate only the old status; decision bodies are never rewritten.
   - **`approval/1`**: a JWS by the estate key (`typ: fabric-approval+jwt`) over `iss`, `actionDigest` (SHA-256
     of the RFC 8785 canonical action), `aud`, `approver`, `method` (`prompt`, `operator-channel`, `device`),
     `iat`, `exp` at most 24 h after, and a `jti` consumed once; `approval-required` carries the digest (DL-17,
-    DL-18; `approval.schema.json`, `FAC-SEM-051`).
+    DL-18; `approval.schema.json`, `FAC-SEM-051`). The action is JSON values only: `jcs` refuses a date, a map
+    or a class instance. The jti store is required; the order is the token, the grant check, then the approval
+    (consuming its `jti`), then the action.
   - **One refusal-code set** of seventeen codes in `error.code`, detail in `error.data`
-    (`delegation-refusal.schema.json`): `limit-reached` carries its window, `approval-required` its digest
-    (DL-19).
+    (`delegation-refusal.schema.json`), for authorisation refusals only: `limit-reached` carries its window
+    (also in a denied grant check), `approval-required` its digest. Fabric's hub maps `hub-unavailable`,
+    `binding-revoked`, `access-required` and `needs-grant`; transport and product errors keep the interop error
+    shape (DL-19).
   - **The grant** gains `audience`, `capabilities` and `effectCeiling`; a grant with `audience` is a delegation
-    grant and then requires the other two and `principalKind` (DL-20).
+    grant and then requires the other two and `principalKind`, and may omit `effects` (reads and drafts only;
+    a read-only grant has `effectCeiling: ["none"]`) (DL-20).
+  - **The meter** is proven to by an onward token the callee obtains from the hub: `aud` the meter, the callee
+    added to the chain, `scope` the grant-check capability, `effect: none`, the same grant, presented in
+    `Authorization: Bearer`; the request (`grant-check-request.schema.json`) carries the amount and the callee's
+    own `jti`. The meter verifies the token and answers any refusal as `principal-unproven` (DL-21,
+    `verifyMeterToken`). This replaces DEC-0037's per-session registry credential.
   - **L0** is the estate total and each provider key's own ceiling; usage `byGrant` stays opaque and no caller
     identity enters a usage report (DL-21, DL-22).
   - **The operator's dashboard session** ends 12 h after its last use, 7 days after sign-in, on logout and on
@@ -1420,8 +1437,9 @@ annotate only the old status; decision bodies are never rewritten.
   from an approval; an approval carries `iss`; key rotation covers the approval's 24 hours, not only a token's
   10 minutes; unknown claims are refused by the schema (the issuer's conformance) and ignored by the verifier
   (RFC 7519 §4).
-- **Compatibility:** Additive under DEC-0016; `contractVersion` stays `0.1.0`. Five new schemas (with
-  DEC-0040's `fabric-link`, 65 in all); `audience`, `capabilities`, `effectCeiling` optional on a grant, so
+- **Compatibility:** Additive under DEC-0016; `contractVersion` stays `0.1.0`. Six new schemas (with
+  DEC-0040's `fabric-link`, 66 in all); a denied grant check with `limit-reached` now names its `window`, a
+  same-day change to DEC-0037's shape that no consumer had adopted; `audience`, `capabilities`, `effectCeiling` optional on a grant, so
   every existing grant stays valid; `auth` optional in the well-known document; `delegation` a new value of
   `surfaces.mcp.auth`. A caller using `agent.call` is unaffected. Nothing changes on the wire before Fabric's
   issuer exists.
@@ -1431,11 +1449,15 @@ annotate only the old status; decision bodies are never rewritten.
     MCP delegation tokens), `docs/specification/spend-policy.md` (L0, the principal's credential, the code set),
     `docs/specification/governance-and-roles.md`, `docs/specification/conformance.md` (`FAC-SEM-049`…`051`, a
     reader row);
-  - schemas: `delegation-token`, `delegation-jwks`, `approval`, `delegation-refusal` (new);
-    `governance.schema.json`, `service-well-known.schema.json`;
+  - schemas: `delegation-token`, `delegation-jwks`, `approval`, `delegation-refusal`, `grant-check-request`
+    (new); `common.schema.json` (`agentId`, now referenced by `interop-agent-call`, `delegation-token`,
+    `approval`, `governance` and `fabric-link`), `governance.schema.json`, `grant-check.schema.json` (`window`,
+    the L0 description), `service-well-known.schema.json`;
   - code: `src/delegation.ts`, `src/delegation-rules.ts`, `src/operator-session.ts`, `src/semantic-rules.ts`;
-  - fixtures: 9 positive, 12 negative, 7 semantic, `fixtures/catalogue.json`;
-  - tests: `test/delegation.test.ts`, `test/schema-compilation.test.ts` (65 schemas);
+  - fixtures: 11 positive, 14 negative, 14 semantic, `fixtures/catalogue.json`; `grant-check-denied.json` gains
+    its `window`;
+  - tests: `test/delegation.test.ts`, `test/delegation-seams.test.ts`, `test/capability-names.test.ts`,
+    `test/schema-compilation.test.ts` (66 schemas);
   - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md` (RFC 3986, 6750, 7515, 7517,
     7519, 7662, 8037, 8693, 8725, 8785), the handoff `docs/handoffs/2026-10-11-delegation-and-fabric-button.md`.
 
@@ -1448,7 +1470,10 @@ annotate only the old status; decision bodies are never rewritten.
   Fabric. DEC-0039 and `FAC-SEM-049`…`051` were reserved by git CAS (`agent_sync.py reserve --key
   delegation-20261011 DEC`, `--key delegation-claims-20261011 SEM` and its siblings); this file and
   `conformance.md` were edited under git leases; the record plane is `fs`, as `AGENTS.md` describes. Written by
-  Fabric's session; the contract has no live owner session.
+  Fabric's session; the contract has no live owner session. A blind seam review of the pull request
+  (2026-10-11) added the meter's onward token and the grant-check request, the full DL-4 check, JSON-only
+  `jcs`, the present-but-empty `Fabric-Delegation` refusal, the required jti store, the verifier's closed
+  leniencies, the read-only door and grant, and one `agentId` definition.
 
 ### DEC-0040 — Fabric's button in every product and `fabric://` links
 
@@ -1466,7 +1491,8 @@ annotate only the old status; decision bodies are never rewritten.
   - `fabric://chat?service=<agent id>&project=<id or slug>` and
     `fabric://session/new?project=<id or slug>[&runner=<runner kind>]`; unknown parameters ignored, known ones
     validated, a repeated or invalid one, a missing required one or an unknown action refuses the whole link;
-    a parameter that could carry a credential refuses it too (FL-1…FL-6, `FAC-SEM-052`);
+    a parameter that could carry a credential (in any case style) or words to act on (`prompt`, `message`,
+    `text`, `instruction`), or a credential in the fragment, refuses it too (FL-1…FL-6, `FAC-SEM-052`);
   - Fabric opens a product back through `fabric-dashboards://service/<id>.<instance>?path=…` or the service's
     own address, never with a token or a login code (FL-7).
 - **Why:** The operator asked on 2026-10-11 for Fabric's button in every product (Fabric 0.4.0 REQ-42), so a
@@ -1481,7 +1507,8 @@ annotate only the old status; decision bodies are never rewritten.
   - schema: `schemas/fabric-link.schema.json`; code: `src/fabric-links.ts`, `src/semantic-rules.ts`;
   - fixtures: `fixtures/positive/fabric-link-{chat,session}.json`,
     `fixtures/negative/fabric-link-{session-without-project,chat-with-token}.json`,
-    `fixtures/semantic/deep-link-*.json`, `fixtures/catalogue.json`;
+    `fixtures/semantic/deep-link-*.json` (with a prompt, a camelCase token and a credential in the fragment),
+    `fixtures/catalogue.json`;
   - tests: `test/fabric-button.test.ts`;
   - docs: `CONTEXT.md` (Fabric's button, Fabric link), `docs/DOCMAP.md`, `README.md`, `docs/ux/` (JTBD-06,
     JRN-05, ST-011, FLW-09, SCR-12, SCN-015), the handoff `docs/handoffs/2026-10-11-delegation-and-fabric-button.md`.
