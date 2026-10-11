@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 /**
- * The files the gate measures: this repository's tracked files, as `git ls-files` lists them, so a session's
- * worktree under `.claude/worktrees/`, an untracked scratch file or `.git/` is never read. Without git the
+ * The files the gate measures: this repository's files as `git ls-files` lists them — tracked ones, and untracked ones
+ * that `.gitignore` does not exclude, so a new document is checked before its first commit — and never another
+ * session's worktree under `.claude/worktrees/`, an ignored file or `.git/`. Without git the
  * directory tree is walked instead (skipping `.git`, `.claude` and `node_modules`), and one line on stderr says so.
  */
 export function trackedFiles(root: string): string[] {
@@ -14,7 +15,9 @@ export function trackedFiles(root: string): string[] {
       .split("\0")
       .filter(Boolean)
       .filter((file) => !file.startsWith(".claude/worktrees/"))
-      .map((file) => path.join(root, file));
+      .map((file) => path.join(root, file))
+      // A tracked file deleted but not yet staged is listed by git and absent on disk; it is not measured.
+      .filter((file) => existsSync(file));
   } catch {
     process.stderr.write("tracked-files: git is unavailable; walking the directory tree instead\n");
     return walk(root);
