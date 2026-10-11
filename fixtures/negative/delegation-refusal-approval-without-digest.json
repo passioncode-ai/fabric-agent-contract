@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "approval-required",
+    "message": "This needs the operator's approval."
+  }
+}

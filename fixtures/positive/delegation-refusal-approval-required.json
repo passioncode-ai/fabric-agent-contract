@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "approval-required",
+    "message": "Publishing to the store needs the operator's approval of this exact change.",
+    "data": {
+      "actionDigest": "sha256:921d6afae6e119d4b0c2d2e69a5cb0298489d4ff175e0e17025cdb2b5b09eae4"
+    }
+  }
+}

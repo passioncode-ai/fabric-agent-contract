@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "limit-reached",
+    "message": "A limit is reached.",
+    "data": {
+      "level": "L1"
+    }
+  }
+}

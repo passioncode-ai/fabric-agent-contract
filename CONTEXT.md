@@ -71,6 +71,35 @@ claimed piece of shared work.
 **Standing grant**: A named, scoped, expiring authorization for a class of
 otherwise approval-bound external actions.
 
+**Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
+call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**
+only under one (DEC-0039).
+
+**Delegation token**: A JWT of at most ten minutes, signed by the estate hub (Ed25519), that names the
+**Principal**, the **Actor chain**, exactly one callee, the capabilities and effect ceiling, and the
+grant a call is under (`fabric-delegation/0.1`, DEC-0039). The callee checks it offline against the
+estate's published keys. Not the service's descriptor token, which stays the host's.
+
+**Principal**: In delegation, the person on whose behalf the work runs: the operator, or an external
+person under a share grant (a token's `sub`). A grant's `principal` field names who the grant is
+given to; for an agent or session grant that is the actor.
+
+**Actor chain**: The agents acting for the **Principal**, the one calling now outermost and each
+earlier one nested inside (a token's `act`, RFC 8693), at most four deep.
+
+**Approval document**: `approval/1`, a JWS by the estate key that one person approved one action — bound
+by the SHA-256 of its RFC 8785 canonical form — for one callee, used once, within 24 hours (DEC-0039).
+
+**Refusal code**: One of the contract's seventeen kebab-case reasons a callee, the hub or the meter
+refuses (`error.code`, DEC-0039); a product's own words go in `error.data`.
+
+**Fabric's button**: The floating button a dashboard MAY show that opens Fabric on that product through
+a **Fabric link**, and says how to get Fabric when it is not installed (DEC-0040).
+
+**Fabric link**: A `fabric://chat` or `fabric://session/new` URL naming a service, a project or a
+runner by id. Following one opens a view in Fabric and nothing else; it never carries a secret
+(DEC-0040).
+
 **Service**: A long-running agent process following the `fabric-service/0.1`
 extension — on the operator's own computer, supervised by the operating system
 (a **local placement**), or online at an `https` origin, supervised by its
@@ -175,7 +204,9 @@ carries in `_meta`, so that all the calls made for one run form one trace.
 
 **Hub**: The host's MCP surface through which one agent reaches another
 (`agent.call`); it enforces access, mints the callee's credential and records one
-span per hop.
+span per hop. Since DEC-0039 it is the estate's only issuer of **Delegation tokens**, not the only
+route: a call carrying a token goes direct, and a call the hub forwards carries the token in
+`Fabric-Delegation`.
 
 **Pipeline**: A versioned graph of stages, each binding a capability or checking
 the one before it (`pipeline/0.1`). A stage names a capability, never an agent.
@@ -213,6 +244,9 @@ version and commit a consuming repository builds against.
   to one admitted **Binding** when a run starts.
 - Every call routed through the **Hub** carries **Trace context**; a **Job** keeps its
   id across restarts of the agent that owns it.
+- The hub issues a **Delegation token** under a **Delegation grant**; the call goes direct to the
+  callee, which acts for the token's **Principal** and names the outermost actor of its **Actor
+  chain** as its caller. An onward call's token adds one actor and narrows, never widens.
 
 ## Flagged ambiguities
 

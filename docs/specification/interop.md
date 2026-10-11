@@ -6,8 +6,8 @@
 
 How agents are called: every capability is an MCP tool, long work is a job, a question
 for a person is an elicitation, every call carries one trace, and one agent reaches
-another only through the host's hub. There is no new wire (DEC-0002): this extension
-profiles MCP `2026-07-28` and its official Tasks extension ([sources](../evidence/sources.md)).
+another under a delegation token only the host's hub issues (C3.5, amended by DEC-0039).
+There is no new wire (DEC-0002): this extension profiles MCP `2026-07-28` and its official Tasks extension ([sources](../evidence/sources.md)).
 
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119. The text of each
 numbered section below is the locked contract, moved here verbatim; what this document
@@ -199,6 +199,17 @@ Arguments: [`interop-agent-call.schema.json`](../../schemas/interop-agent-call.s
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond the four, so a credential cannot ride in
 the arguments.
+
+**Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
+**route**. It signs a [delegation token](delegation.md) naming the person the work is for,
+the chain of agents acting and the one callee, and a call carrying that token goes direct
+from caller to callee in `Authorization: Bearer` (DL-9). Where the hub forwards a call
+because it holds the callee's credential itself, it keeps forwarding and attaches the token
+as `Fabric-Delegation` (DL-10), so the callee sees the chain either way. Every mint and every
+forward is journalled by the hub, one span per hop as before. "Fabric's MCP is the only route"
+above now reads as "Fabric is the only issuer"; `agent.call` stays a valid route and its
+arguments are unchanged. This is additive under DEC-0016: a caller using `agent.call` is
+unaffected, and a direct call without a delegation token is the callee's to refuse.
 
 ## C3.6 Discovery surface
 

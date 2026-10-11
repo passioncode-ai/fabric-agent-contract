@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/approval.schema.json",
+  "title": "Operator approval claims (approval/1, DEC-0039)",
+  "description": "The decoded payload of an approval: a compact JWS by the estate key (alg EdDSA, typ fabric-approval+jwt) that one person of the estate approved one action for one callee. The protected header is $defs/header.",
+  "type": "object",
+  "required": ["iss", "actionDigest", "aud", "approver", "method", "iat", "exp", "jti"],
+  "properties": {
+    "iss": { "$ref": "common.schema.json#/$defs/uri", "description": "The estate hub that signed the approval." },
+    "actionDigest": { "$ref": "common.schema.json#/$defs/sha256", "description": "sha256: and the hex SHA-256 of the RFC 8785 canonical JSON of the action." },
+    "aud": { "$ref": "delegation-token.schema.json#/$defs/agentId", "description": "The one callee that may act on it." },
+    "approver": { "$ref": "common.schema.json#/$defs/uri", "description": "The person of the estate who approved." },
+    "method": { "enum": ["prompt", "operator-channel", "device"], "description": "prompt: in Fabric; operator-channel: the operator channel's confirm token (DEC-0034 OC-6); device: a device check." },
+    "iat": { "type": "integer", "minimum": 0 },
+    "exp": { "type": "integer", "minimum": 0, "description": "At most 24 hours after iat (FAC-SEM-051)." },
+    "jti": { "type": "string", "pattern": "^[A-Za-z0-9._~-]{16,128}$", "description": "Consumed once by the callee." }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "header": {
+      "type": "object",
+      "required": ["alg", "typ", "kid"],
+      "properties": {
+        "alg": { "const": "EdDSA" },
+        "typ": { "const": "fabric-approval+jwt" },
+        "kid": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

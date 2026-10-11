@@ -7,6 +7,8 @@ import { grantSpendRules, spendPolicyRules } from "./spend-rules.js";
 import { routeRules } from "./route-rules.js";
 import { activityRules } from "./activity-rules.js";
 import { deviceRules } from "./device-rules.js";
+import { delegationRules } from "./delegation-rules.js";
+import { deepLinkRules } from "./fabric-links.js";
 
 export type { Finding } from "./findings.js";
 
@@ -22,6 +24,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (activity) return activity;
   const device = deviceRules(kind, value);
   if (device) return device;
+  const delegation = delegationRules(kind, value);
+  if (delegation) return delegation;
+  if (kind === "deep-link") return deepLinkRules(value);
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {

@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "token-expired",
+    "message": "The delegation token expired; mint a new one at the hub.",
+    "data": {
+      "detail": "expired"
+    }
+  }
+}

@@ -73,6 +73,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: stops wait for hours unseen; pull: one press answers; anxiety: a button in a chat could spend money or let someone else decide; habit: poll each dashboard.
 - **Success metric:** a stop sent to the channel is answered by one press (two for money), the same decision the dashboard would record, and nobody outside the allowlist causes an effect.
 
+### JTBD-06: Bring Fabric to the product I am looking at
+
+- **Statement:** When I am in one of my agents' dashboards and want to ask about it or change it, I want one press to open Fabric on that product and project, so I can continue there without finding the project again.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: switching windows and finding the project costs a minute each time; pull: a button in the corner of every product; anxiety: a link that starts work or spends money by itself; habit: copy the project name into Fabric.
+- **Success metric:** from any dashboard that shows the button, Fabric opens on the right service and project in one press, starts nothing until I act, and says how to get Fabric when it is missing.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -112,6 +120,15 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Link | creates a bot, stores its token by name, types the code | messenger and the agent's link command | 3 | a token pasted into a chat or a config | the token only in the secret store; a short-lived code (priority 9) |
 | 3 | Decide | presses a button on a stop | messenger | 4 | a second press or a stale button doubles an action | idempotent tokens, "already decided" (priority 9) |
 | 4 | Spend | confirms a paid action | messenger | 2 | money leaves on one tap | a second press showing the amount (priority 9) |
+
+### JRN-05: Operator — from a product to Fabric and back (JTBD-06)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Notice | sees Fabric's button in the corner of a dashboard | dashboard | 3 | the button hides the last row | the page leaves room at the end of its scroll (priority 7) |
+| 2 | Open | chooses chat or a coding session | the button's menu | 4 | the wrong project opens | ids carried by the link, validated (priority 9) |
+| 3 | Continue | works in Fabric, then opens the product page again | Fabric, Fabric Dashboards | 4 | a sign-in again | the host signs in, the link carries no secret (priority 8) |
+| 4 | Missing | presses it on a computer without Fabric | the button's menu | 2 | nothing happens | one sentence with where to get Fabric (priority 8) |
 
 ## 4. User stories
 
@@ -229,6 +246,20 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given the confirm button expired, when I press it, then nothing is spent and the agent says how to ask again.
   - Given a safety stop the agent excluded, then the channel names where it is lifted instead.
 - **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-011: Operator opens Fabric from a product's dashboard
+
+- **Story:** As P-02, I want a button in every product's dashboard that opens Fabric on that service and project, so that I can ask or start work there in one press.
+- **Traces:** JTBD-06, JRN-05/#1, JRN-05/#2, JRN-05/#4
+- **Acceptance criteria:**
+  - Given a dashboard that knows its project, when I press the button, then a menu offers a chat with Fabric about the service and a coding session in the project.
+  - Given I choose the chat, then Fabric opens the manager conversation scoped to that service and project and sends nothing.
+  - Given I choose the session, then Fabric shows the project's session view and starts the runner only when I press Start.
+  - Given Fabric is not installed, then the menu says "Fabric is not installed — get it at passioncode.ai/fabric".
+  - Given a link with a token or a bad id, then Fabric refuses the whole link and says why.
+- **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
 

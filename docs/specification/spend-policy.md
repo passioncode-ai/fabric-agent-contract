@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037, DEC-0038 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
+DEC-0037, DEC-0038, DEC-0039 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -17,7 +17,7 @@ The most specific level that exists decides. A level that does not exist is skip
 
 | Level | What it limits | Who sets it, and when |
 |---|---|---|
-| **L0 estate** | everything the estate spends across all provider keys in a month; the hard stop | the estate's operator, once; the registry alerts at 80% |
+| **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80% |
 | **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project |
 | **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, or the agent itself within L1's threshold |
 | **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit) | derived from L2 |
@@ -60,6 +60,8 @@ Three rules apply to every grant and every reader:
    capability is called, so that agent's own wallet and limits apply. A reader refuses any other source.
 2. **A principal is proven, not claimed.** The registry authorizes a check by a credential it issued: a
    per-session token minted when the session starts and bound to the session, the agent and the project.
+   Since DEC-0039 that credential is the estate hub's [delegation token](delegation.md): the meter verifies
+   it and holds no caller identity of its own.
    - It is kept owner-only and never in an argument: mode 0600 on POSIX, and on Windows the protected ACL
      of [service.md's Windows token files](service.md) (DEC-0032, DEC-0033).
    - It is revoked when the session ends and has a maximum age. A missing or stale token is
@@ -92,7 +94,12 @@ The registry's answer is a [`grant-check`](../../schemas/grant-check.schema.json
   is always set for `limit-reached`. When the limit allows one, `denied` also carries the `approvalRequest`
   filed.
 
-An unknown grant state is a denial (Fabric ADR-0023).
+An unknown grant state is a denial (Fabric ADR-0023). These codes are a subset of the contract's one refusal
+code set ([delegation](delegation.md#refusal-codes), DEC-0039) and keep their meaning there.
+
+A grant that names an `audience` is a **delegation grant**: it also carries `capabilities` and an
+`effectCeiling`, and the hub mints delegation tokens only under one ([delegation](delegation.md#grants-for-delegation),
+DL-20).
 
 ## Semantic rules
 

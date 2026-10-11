@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0039`
+**Next free ID:** `DEC-0041`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1360,3 +1360,133 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** the operator, 2026-10-11, in their words: «да платит владелец, доступ выдается по лимиту
   либо анлим, лимит тотал, на задачу, на проект, в месяц, в день, в неделю». Drafted by the Fabric
   Dashboards session. DEC-0038 and FAC-SEM-048 are reserved by git CAS (`--key grant-windows-20261011`).
+
+### DEC-0039 — Delegation: the estate hub signs who acts for whom, the callee checks it offline, one approval document and one set of refusal codes (`fabric-delegation/0.1`)
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the issuer (Fabric 0.4.0
+  REQ-37), the meter (Project Observatory), then each callee and caller in the order of Fabric's
+  [adoption plan](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/evidence/plans/2026-10-11-delegation-model/README.md).
+- **Amends:** interop C3.5 (the hub is the only issuer, not the only route); DEC-0024 additively
+  (`surfaces.mcp.auth: "delegation"`); DEC-0037 (the registry's per-session token is the hub's delegation
+  token; its grant-check codes become a subset of one code set); DEC-0037's L0 wording; DEC-0038's grant gains
+  three optional fields. Implements Fabric
+  [ADR-0144](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md).
+- **Decision:** the profile [delegation](specification/delegation.md), DL-1…DL-22:
+  - **The delegation token** is a JWT (RFC 7519) signed by the estate hub with Ed25519 (`alg: EdDSA`, RFC 8037),
+    header `typ: fabric-delegation+jwt` and a `kid`, in the shape of RFC 8693: `iss` the hub, `sub` the person,
+    `act` the actor chain (outermost the agent calling now, at most four deep), `aud` exactly one callee as a
+    string, `scope` the callee's capability names space-delimited, `effect` the ceiling, `grant` the grant
+    references, optional `spend` (remaining per window at mint) and `project`, `exp` at most 600 s after `iat`,
+    `jti` (DL-1, DL-2; `delegation-token.schema.json`).
+  - **The effect ceiling** is a set of governance effect classes: `none` is below every class, `draft` below
+    every external one, and the external classes are not ordered against each other (DL-3).
+  - **Attenuation is the issuer's**: a token is minted within a delegation grant, and an onward token keeps the
+    parent's issuer, principal and project, adds the parent's audience as its outermost actor to the parent's
+    chain, and carries no wider effect, no later expiry and no more remaining spend (DL-4…DL-8, `FAC-SEM-050`).
+  - **Carrying it**: `Authorization: Bearer` on a direct call; `Fabric-Delegation` on a call the hub forwards
+    with the product's own credential; never in a URL, argv, arguments, log or usage report. The descriptor
+    token is the host's and is not presented to call a capability (DL-9…DL-12).
+  - **The verifier** checks, offline and in a fixed order, the key set, the header, the key, the signature, the
+    claims, the lifetime, the 60 s leeway, the audience, the depth, the scope and the effect (DL-13). The kit
+    ships `verifyDelegation` and `verifyApproval` in `src/delegation.ts`, on Node's built-in Ed25519.
+  - **Keys**: a JWK Set of Ed25519 public keys (`delegation-jwks.schema.json`); the previous key stays published
+    one token lifetime plus the leeway after its last token, and 24 hours plus the leeway after its last
+    approval (DL-14, DL-15). A service declares acceptance with well-known `auth.delegation: {issuer, jwks}`
+    (DL-16).
+  - **`approval/1`**: a JWS by the estate key (`typ: fabric-approval+jwt`) over `iss`, `actionDigest` (SHA-256
+    of the RFC 8785 canonical action), `aud`, `approver`, `method` (`prompt`, `operator-channel`, `device`),
+    `iat`, `exp` at most 24 h after, and a `jti` consumed once; `approval-required` carries the digest (DL-17,
+    DL-18; `approval.schema.json`, `FAC-SEM-051`).
+  - **One refusal-code set** of seventeen codes in `error.code`, detail in `error.data`
+    (`delegation-refusal.schema.json`): `limit-reached` carries its window, `approval-required` its digest
+    (DL-19).
+  - **The grant** gains `audience`, `capabilities` and `effectCeiling`; a grant with `audience` is a delegation
+    grant and then requires the other two and `principalKind` (DL-20).
+  - **L0** is the estate total and each provider key's own ceiling; usage `byGrant` stays opaque and no caller
+    identity enters a usage report (DL-21, DL-22).
+  - **The operator's dashboard session** ends 12 h after its last use, 7 days after sign-in, on logout and on
+    the descriptor token's rotation; a service may shorten, never lengthen (`service.md`,
+    `src/operator-session.ts`).
+- **Why:** Fabric's roll call of 25 sessions on 2026-10-11 measured fifteen ways a caller obtains a credential,
+  thirteen grant stores, ten approval formats and about eighteen refusal-code sets with no two overlapping
+  (ADR-0144 §Context). No contract schema carried a caller, a chain or a grant toward a callee, so a callee
+  could not tell callers apart and a limit could not hold per calling agent. Three agents called a service with
+  that service's own descriptor token, which can also mint operator login codes.
+- **Choices ADR-0144 left open, made here:** `scope` is the RFC 8693 space-delimited string, not an array; the
+  effect ceiling is a set with a `none`/`draft` floor rather than a total order, so `delete` never implies
+  `charge`; the chain's members are agent ids with an optional `session`; the child's scope is checked against
+  its own grant, because the parent's scope names another callee's capabilities; `typ` values separate a token
+  from an approval; an approval carries `iss`; key rotation covers the approval's 24 hours, not only a token's
+  10 minutes; unknown claims are refused by the schema (the issuer's conformance) and ignored by the verifier
+  (RFC 7519 §4).
+- **Compatibility:** Additive under DEC-0016; `contractVersion` stays `0.1.0`. Five new schemas (with
+  DEC-0040's `fabric-link`, 65 in all); `audience`, `capabilities`, `effectCeiling` optional on a grant, so
+  every existing grant stays valid; `auth` optional in the well-known document; `delegation` a new value of
+  `surfaces.mcp.auth`. A caller using `agent.call` is unaffected. Nothing changes on the wire before Fabric's
+  issuer exists.
+- **Consequences / affects:**
+  - spec: `docs/specification/delegation.md` (new), `docs/specification/interop.md` (C3.5 amendment),
+    `docs/specification/service.md` (well-known `auth.delegation`, usage `byGrant`, the session's lifetime,
+    MCP delegation tokens), `docs/specification/spend-policy.md` (L0, the principal's credential, the code set),
+    `docs/specification/governance-and-roles.md`, `docs/specification/conformance.md` (`FAC-SEM-049`…`051`, a
+    reader row);
+  - schemas: `delegation-token`, `delegation-jwks`, `approval`, `delegation-refusal` (new);
+    `governance.schema.json`, `service-well-known.schema.json`;
+  - code: `src/delegation.ts`, `src/delegation-rules.ts`, `src/operator-session.ts`, `src/semantic-rules.ts`;
+  - fixtures: 9 positive, 12 negative, 7 semantic, `fixtures/catalogue.json`;
+  - tests: `test/delegation.test.ts`, `test/schema-compilation.test.ts` (65 schemas);
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md` (RFC 3986, 6750, 7515, 7517,
+    7519, 7662, 8037, 8693, 8725, 8785), the handoff `docs/handoffs/2026-10-11-delegation-and-fabric-button.md`.
+
+  Consumers: Fabric (the issuer), Project Observatory (the meter), Fabric Dashboards, and every agent named in
+  the adoption plan; the fabric-agent-adapter ports the verifier to its kits and repins to this change's merge
+  commit.
+- **Not decided here:** the hub's mint, introspection and approval-request tools; how the hub proves a caller;
+  delegation across estates; proof of possession.
+- **Source:** Fabric ADR-0144 (CO-258, release 0.4.0 REQ-37), the operator's instruction of 2026-10-11 relayed to
+  Fabric. DEC-0039 and `FAC-SEM-049`…`051` were reserved by git CAS (`agent_sync.py reserve --key
+  delegation-20261011 DEC`, `--key delegation-claims-20261011 SEM` and its siblings); this file and
+  `conformance.md` were edited under git leases; the record plane is `fs`, as `AGENTS.md` describes. Written by
+  Fabric's session; the contract has no live owner session.
+
+### DEC-0040 — Fabric's button in every product and `fabric://` links
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the link
+  handler), Fabric Dashboards (the first host, FD-45), the fabric-agent-adapter's dashboard kit (the component).
+- **Decision:** the profile [Fabric's button](specification/fabric-button.md):
+  - a dashboard MAY show one floating button, bottom-right, labelled with the Fabric mark and **Fabric**,
+    accessible name **Open Fabric**, at least 44 × 44 CSS px, opening a menu of a chat and, when the page knows
+    its project, a coding session (FB-1…FB-4);
+  - when Fabric is absent the menu says exactly "Fabric is not installed — get it at passioncode.ai/fabric",
+    known from the host's `fabric_button` cookie (`v=1&owner=host|page&fabric=present|absent`), a local
+    service's own check, or a 1 500 ms test (FB-5, FB-6);
+  - the dashboard kit ships the component (FB-7); a press opens a view and never sends, starts or spends (FB-8);
+  - `fabric://chat?service=<agent id>&project=<id or slug>` and
+    `fabric://session/new?project=<id or slug>[&runner=<runner kind>]`; unknown parameters ignored, known ones
+    validated, a repeated or invalid one, a missing required one or an unknown action refuses the whole link;
+    a parameter that could carry a credential refuses it too (FL-1…FL-6, `FAC-SEM-052`);
+  - Fabric opens a product back through `fabric-dashboards://service/<id>.<instance>?path=…` or the service's
+    own address, never with a token or a login code (FL-7).
+- **Why:** The operator asked on 2026-10-11 for Fabric's button in every product (Fabric 0.4.0 REQ-42), so a
+  person in any agent's dashboard reaches Fabric — the manager conversation or a coding session — on that
+  product in one press. The kit already ships UI (the dashboard kit of DEC-0036), so the contract states the
+  element and the link grammar and the kit ships one component.
+- **Compatibility:** Additive; `contractVersion` stays `0.1.0`. One new schema (`fabric-link`), one rule
+  (`FAC-SEM-052`). No existing document changes; `fabric_appearance` is unchanged.
+- **Consequences / affects:**
+  - spec: `docs/specification/fabric-button.md` (new), `docs/specification/conformance.md` (`FAC-SEM-052`, a
+    reader row);
+  - schema: `schemas/fabric-link.schema.json`; code: `src/fabric-links.ts`, `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/fabric-link-{chat,session}.json`,
+    `fixtures/negative/fabric-link-{session-without-project,chat-with-token}.json`,
+    `fixtures/semantic/deep-link-*.json`, `fixtures/catalogue.json`;
+  - tests: `test/fabric-button.test.ts`;
+  - docs: `CONTEXT.md` (Fabric's button, Fabric link), `docs/DOCMAP.md`, `README.md`, `docs/ux/` (JTBD-06,
+    JRN-05, ST-011, FLW-09, SCR-12, SCN-015), the handoff `docs/handoffs/2026-10-11-delegation-and-fabric-button.md`.
+- **Not decided here:** a prefilled message; links to other Fabric views; a per-service choice to hide the
+  button; links followed on a phone.
+- **Source:** the operator, 2026-10-11 (Fabric 0.4.0 REQ-42); Fabric Dashboards session fabric-dashboards-76,
+  row FD-45. DEC-0040 and `FAC-SEM-052` were reserved by git CAS (`--key fabric-button-20261011`,
+  `--key deep-link-20261011`); edited under the same leases as DEC-0039.

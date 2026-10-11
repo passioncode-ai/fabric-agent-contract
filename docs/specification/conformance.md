@@ -57,6 +57,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a client of a service's token-protected routes, the events feed first | sends the token only in the header the descriptor's `auth.header` names, in the form `auth.scheme` names (`none`: the raw token; `Bearer`: `Bearer <token>`), and never assumes `Authorization: Bearer` | `FAC-SEM-036` | `test/service-feed.test.ts`, fixtures `fixtures/semantic/service-feed-request-*.json` ([service](service.md#feed-client), DEC-0025) |
 | a reader of a settings backup | refuses a file whose checksum, counts or row widths do not match its tables | `FAC-SEM-035` | `test/settings-backup.test.ts`, fixtures `settings-backup*` ([service](service.md#settings-backup), DEC-0025) |
 | a receiver of activity batches | attributes a batch to its client certificate's device and user, refuses an event that carries a content or person key instead of stripping it, and acknowledges the highest consumed seq of each stream | `FAC-SEM-037`, `FAC-SEM-039`, `FAC-SEM-045` | `test/activity-rules.test.ts`, fixtures `fixtures/semantic/activity-*`, `device-attribution-*` ([activity](activity.md#batch-and-acknowledgement), DEC-0030) |
+| a callee of a delegation token or an approval | checks the signature against the estate's published keys, the times with a 60 s leeway, its own agent id in `aud`, the chain's depth, the called capability and its effect, and an approval's action digest and single use, in DL-13's order, answering one of the contract's refusal codes | DL-13, DL-18 | `test/delegation.test.ts`, `src/delegation.ts` `verifyDelegation`, `verifyApproval` ([delegation](delegation.md#the-verifier), DEC-0039) |
+| Fabric, reading a `fabric://` link | ignores unknown parameters, validates the known ones and refuses a link that could carry a credential | `FAC-SEM-052` | `test/fabric-button.test.ts`, `src/fabric-links.ts` `parseFabricLink` ([Fabric's button](fabric-button.md#deep-links), DEC-0040) |
 | a device applying policy | applies a delivered policy only when it verifies and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` ([devices](devices.md#policy), DEC-0031) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
@@ -77,7 +79,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-049`
+**Next free rule code:** `FAC-SEM-053`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -130,6 +132,10 @@ register and carry no receipt.
 | `FAC-SEM-046` | `device-key-set` | [devices](devices.md#semantic-rules) | SEM-0046 |
 | `FAC-SEM-047` | `spend-policy` | [spend policy](spend-policy.md#semantic-rules) | SEM-0047 |
 | `FAC-SEM-048` | `grant-spend` | [spend policy](spend-policy.md#semantic-rules) | SEM-0048 |
+| `FAC-SEM-049` | `delegation-claims` | [delegation](delegation.md#semantic-rules) | SEM-0049 |
+| `FAC-SEM-050` | `delegation-mint` | [delegation](delegation.md#semantic-rules) | SEM-0050 |
+| `FAC-SEM-051` | `approval-claims` | [delegation](delegation.md#semantic-rules) | SEM-0051 |
+| `FAC-SEM-052` | `deep-link` | [fabric-button](fabric-button.md#semantic-rules) | SEM-0052 |
 
 ## Compatibility policy
 
