@@ -118,6 +118,11 @@ amendment 2 (Fabric commit `217aff4d`) replaced the `task` window's `tokenJti` f
 
 ## Open
 
+- Any meter: pass the verified token's `grant` as `readProjectedGrant(…, {tokenGrants})`, so a request's
+  `grantRef` the token does not name is `no-grant`/`not-named` before anything is read (DL-24's first row).
+- fabric-agent-adapter's port of `readProjectedGrant` validates the file against the standing-grant schema
+  (`additionalProperties: false`), so it needs the schema set and an Ajv-equivalent validator, and the hub and
+  the meter must share one contract pin.
 - Fabric (REQ-37): write the projection (`grantsDir` in `hub.json`, 0600 in 0700, atomic rename on every change)
   and set `task` when a session or run has one.
 - Project Observatory (OBS-55, OBS-57): call `verifyMeterToken`, then `readProjectedGrant`; key the `task` window

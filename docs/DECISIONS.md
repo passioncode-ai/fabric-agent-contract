@@ -1590,7 +1590,9 @@ annotate only the old status; decision bodies are never rewritten.
   is still refused (compared over 3 552 generated names, with the review's list: `accesstoken`, `idtoken`,
   `sessionid`, `logincode`, `sig`, `signature`, `X-Amz-Signature`, `pass`, `sessionKey`, `authKey` and
   `signingKey` stay refused), and 383 names `main` admitted are now refused (`authtoken`, `privatekey`,
-  `clientsecret`, `apiKeys`, `secrets`, `APIKey`).
+  `clientsecret`, `apiKeys`, `secrets`, `APIKey`). Values are refused more often too: a long run now counts `-`
+  and a raw `+`, so a mixed-case value of 40 or more characters with digits and hyphens (a long `project` slug
+  such as `Q2-Launch-Plan-For-Team-Alpha-Version-3-Draft`) is refused where `main` admitted it.
 - **Consequences / affects:**
   - spec: `docs/specification/delegation.md` (DL-2 `task`, DL-5, DL-19, DL-21 step 4, DL-23, DL-24, `FAC-SEM-050`),
     `docs/specification/spend-policy.md` (L3, the `task` and `call` windows, the projection),

@@ -47,7 +47,7 @@ function looseOrForeign(stats: Stats): string | undefined {
 }
 
 /** An RFC 3339 date-time with `Z` or a numeric offset; a local time or any other date string is not one. */
-const RFC3339 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const RFC3339 = /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
 const timeOf = (value: unknown): number | undefined => {
   if (typeof value !== "string" || !RFC3339.test(value)) return undefined;
   const ms = Date.parse(value);
@@ -77,12 +77,19 @@ function standingGrantShape(): ValidateFunction {
  *
  * `now` is in seconds since the epoch, like a JWT NumericDate.
  */
-export function readProjectedGrant(grantsDir: string, ref: string, options: { now?: number; platform?: NodeJS.Platform } = {}): ProjectedGrant | ProjectionRefusal {
+export function readProjectedGrant(
+  grantsDir: string,
+  ref: string,
+  options: { now?: number; platform?: NodeJS.Platform; tokenGrants?: readonly string[] } = {}
+): ProjectedGrant | ProjectionRefusal {
   const now = options.now ?? Math.floor(Date.now() / 1000);
+  // The request's `grantRef` is the caller's choice and unsigned: only a grant the verified token names is read.
+  if (options.tokenGrants !== undefined && !options.tokenGrants.includes(ref)) return refuse("no-grant", "not-named");
   const named = parseGrantRef(ref);
   if (!named) return refuse("no-grant", "malformed-reference");
   // Windows has no owner-only mode bits to check and no O_NOFOLLOW; where its files live is not decided (DL-23).
-  if ((options.platform ?? process.platform) === "win32") return refuse("unknown-state", "unsupported-platform");
+  // The option can only add the refusal: a meter on Windows never reads, whatever a caller passes.
+  if (process.platform === "win32" || options.platform === "win32") return refuse("unknown-state", "unsupported-platform");
   const dir = path.resolve(grantsDir);
   // The id grammar admits no separator and no leading dot, so the file is always directly inside the directory.
   const file = projectedGrantFile(dir, named.id);

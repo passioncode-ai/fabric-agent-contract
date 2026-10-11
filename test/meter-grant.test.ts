@@ -212,11 +212,13 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
   });
 
   it("unknown-state: a time that is not RFC 3339 with a zone, a file outside the standing-grant shape", () => {
-    for (const expiresAt of ["2026-11-11T09:00:00", "12 Nov 2026", "2026-11-11", "2026-11-11 09:00:00Z", "2026-11-11T09:00:00z", "1794393600"]) {
+    for (const expiresAt of ["2026-11-11T09:00:00", "12 Nov 2026", "2026-11-11", "2026-11-11 09:00:00Z", "2026-11-11T09:00:00+0200", "1794393600"]) {
       expect(result(hubDir({ [file]: revised({ expiresAt }) })), expiresAt).toBe("unknown-state/malformed-file");
     }
     expect(result(hubDir({ [file]: revised({ startsAt: "Oct 11 2026 09:00" }) }))).toBe("unknown-state/malformed-file");
     expect(result(hubDir({ [file]: revised({ expiresAt: "2026-11-11T11:00:00+02:00", startsAt: "2026-10-11T09:00:00.5Z" }) }))).toBe("ok");
+    // RFC 3339 §5.6 allows a lowercase `t` and `z`; the schema's date-time accepts them, so the read does too.
+    expect(result(hubDir({ [file]: revised({ expiresAt: "2026-11-11t09:00:00z" }) }))).toBe("ok");
     const spend = grant.spend as Json;
     for (const [label, changed] of [
       ["limits a string", revised({ spend: { ...spend, limits: "lots" } })],
@@ -241,10 +243,19 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     expect(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 2000, encoding: "utf8" })).toBe("unknown-state/not-a-file");
   });
 
+  it("no-grant: a request's grantRef the verified token does not name is refused before anything is read", () => {
+    const dir = hubDir({ [file]: grant });
+    expect(projection.readProjectedGrant(dir, ref, { now: NOW, tokenGrants: [ref] })).toMatchObject({ ok: true });
+    expect(projection.readProjectedGrant(dir, ref, { now: NOW, tokenGrants: [`${String(meta.id)}#${Number(meta.revision) + 1}`] })).toEqual({ ok: false, code: "no-grant", detail: "not-named" });
+    expect(projection.readProjectedGrant(path.join(scratch, "absent"), ref, { now: NOW, tokenGrants: [] })).toMatchObject({ detail: "not-named" });
+  });
+
   it("answers unknown-state on Windows before reading: the local profile is POSIX-only in 0.1", () => {
     const answer = projection.readProjectedGrant(hubDir({ [file]: grant }), ref, { now: NOW, platform: "win32" });
     expect(answer).toEqual({ ok: false, code: "unknown-state", detail: "unsupported-platform" });
     expect(projection.readProjectedGrant(path.join(scratch, "absent"), ref, { now: NOW, platform: "win32" })).toMatchObject({ detail: "unsupported-platform" });
+    // The option only adds the refusal: naming another platform on Windows still refuses (exercised where the suite runs on Windows).
+    if (process.platform === "win32") expect(projection.readProjectedGrant(hubDir({ [file]: grant }), ref, { now: NOW, platform: "linux" })).toMatchObject({ detail: "unsupported-platform" });
     expect(read("docs/specification/delegation.md")).toMatch(/POSIX-only in 0\.1[^\n]*\n?[^\n]*`unknown-state`/);
   });
 

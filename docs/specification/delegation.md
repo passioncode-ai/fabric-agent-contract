@@ -321,11 +321,12 @@ closed.
 
   | The projection | Refusal | `detail` |
   |---|---|---|
+  | the request's `grantRef` is not a reference the verified token names (checked first, nothing is read) | `no-grant` | `not-named` |
   | the reference names no projectable grant | `no-grant` | `malformed-reference` |
   | the meter runs on Windows | `unknown-state` | `unsupported-platform` |
   | the directory is missing, unreadable, or not the owner's alone | `unknown-state` | `no-projection`, `unreadable`, `loose-permissions`, `foreign-owner` |
   | the file is missing | `no-grant` | `not-projected` |
-  | the file is unreadable, malformed (not JSON, outside the standing-grant shape, or a `startsAt`/`expiresAt` that is not RFC 3339 with `Z` or a numeric offset), too large, a link or not a regular file, not the owner's alone, or for another grant | `unknown-state` | `unreadable`, `malformed-file`, `not-a-file`, `loose-permissions`, `foreign-owner`, `another-grant` |
+  | the file is unreadable, malformed (not JSON, outside the standing-grant shape, or a `startsAt`/`expiresAt` that is not RFC 3339 with `T`, and `Z` or a `±hh:mm` offset, either case), too large, a link or not a regular file, not the owner's alone, or for another grant | `unknown-state` | `unreadable`, `malformed-file`, `not-a-file`, `loose-permissions`, `foreign-owner`, `another-grant` |
   | the file is at an earlier revision than the token's | `unknown-state` | `projection-behind` |
   | the grant is `revoked` | `grant-revoked` | `revoked` |
   | the grant is `expired`, or `active` and past its `expiresAt` | `grant-expired` | `expired` |
