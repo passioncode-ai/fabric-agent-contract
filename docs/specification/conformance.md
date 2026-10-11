@@ -96,7 +96,10 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | a revisioned object's `contentHash`, over the object without `contentHash` | RFC 8785 | `rfc8785`; no contract code computes it | [overview](overview.md#common-identity-and-references) |
 
 A JWS — the delegation token, the approval document — signs its own base64url segments as sent and needs no
-canonical form; a session handoff's `integrity` digests file bytes.
+canonical form; a session handoff's `integrity` digests file bytes, and so does an artifact's or an evidence item's
+`contentHash` (`common.schema.json`, `work.schema.json`, `comms-common.schema.json`): it digests the artifact's
+bytes, not a JSON form, despite sharing the revision hash's name. A learning proposal's `proposedPayloadHash`
+(`memory.schema.json`) names no form yet: it is open, and the decision that first computes it picks one of the two.
 
 A new signed or hashed document picks one of these two forms and names it, never a third: a document that is or
 mirrors stored settings takes the settings form; any other takes RFC 8785. A restriction of the input, as the

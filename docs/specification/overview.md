@@ -34,7 +34,9 @@ Shape conformance is necessary but not sufficient for implementation admission.
   `createdBy`.
 - `contentHash` MUST use `sha256:<64 lowercase hexadecimal digits>` over the
   RFC 8785 canonical JSON of the object with `contentHash` omitted
-  ([canonical forms](conformance.md#canonical-forms), DEC-0043).
+  ([canonical forms](conformance.md#canonical-forms), DEC-0043). Fabric's hub-call references write a
+  `contentHash` over a joined string (`apps/desktop/src/main/hubCall.ts:311`, `:323` at `487ef5b0`) and do not
+  conform; Fabric's board row is CT-26.
 - References MUST name an immutable object ID and revision. A moving alias MAY be
   used for discovery but MUST resolve before a run starts.
 - Times use RFC 3339 UTC strings.
