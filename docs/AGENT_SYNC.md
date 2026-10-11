@@ -1,4 +1,4 @@
-<!-- agent-sync:generated source=fabric-agent-contract@94b1829 cfg=29e28bf679d2 at=2026-10-07T12:50:44Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
+<!-- agent-sync:generated source=fabric-agent-contract@2afbe60 cfg=29e28bf679d2 at=2026-10-11T19:44:18Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
 
 # How documentation and coordination work in fabric-agent-contract
 

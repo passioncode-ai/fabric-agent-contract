@@ -24,7 +24,7 @@ conformance checker every provider is admitted by. It stands on its own; any hos
 | What | Command |
 |---|---|
 | Install | `pnpm install --frozen-lockfile` |
-| Test (the gate) | `pnpm run check` |
+| Test (the gate) | `pnpm run check` — the merge gate, run by the merging session with its output in the PR; hosted CI is the nightly batch (org-index `docs/CI-BATCHING.md`), or `gh workflow run ci.yml --ref <branch>` once for an urgent branch |
 | Consumer pin | `pnpm pin:check <consumer checkout>` |
 | MCP (register + proving call) | none — the contract serves no MCP tools; README "Quick start → MCP" |
 

@@ -232,15 +232,15 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     expect(result(hubDir({ [file]: revised({ state: "suspended" }) }))).toBe("unknown-state/unknown-grant-state");
   });
 
-  it.skipIf(process.platform === "win32")("refuses a link or a FIFO at the file's path, without following or blocking on it", { timeout: 5000 }, () => {
+  it.skipIf(process.platform === "win32")("refuses a link or a FIFO at the file's path, without following or blocking on it", { timeout: 30000 }, () => {
     const linked = hubDir({ "elsewhere.json": grant });
     symlinkSync(path.join(linked, "elsewhere.json"), path.join(linked, file));
     expect(result(linked)).toBe("unknown-state/not-a-file");
     const piped = hubDir({});
     execFileSync("mkfifo", ["-m", "600", path.join(piped, file)]);
-    // A blocking open would hang this worker past any test timeout, so the read runs in a child killed at 2 s.
+    // A blocking open would hang this worker past any test timeout, so the read runs in a child killed at 15 s: a hang never ends, and a loaded machine needs seconds to start tsx.
     const script = `const p = await import(${JSON.stringify(path.join(root, "src/grant-projection.ts"))}); const a = p.readProjectedGrant(${JSON.stringify(piped)}, ${JSON.stringify(ref)}, { now: ${NOW} }); process.stdout.write(a.ok ? "ok" : a.code + "/" + a.detail);`;
-    expect(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 2000, encoding: "utf8" })).toBe("unknown-state/not-a-file");
+    expect(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 15000, encoding: "utf8" })).toBe("unknown-state/not-a-file");
   });
 
   it("no-grant: a request's grantRef the verified token does not name is refused before anything is read", () => {

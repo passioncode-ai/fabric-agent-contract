@@ -1,7 +1,30 @@
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { checkLinks, mermaidBodies } from "../src/docs-check.js";
 import { projectRoot } from "../src/contract.js";
+import { trackedFiles } from "../src/tracked-files.js";
+
+describe("the gate's scope", () => {
+  it("measures this repository's files, never another session's worktree under .claude/worktrees/", () => {
+    const repo = mkdtempSync(path.join(tmpdir(), "tracked-"));
+    try {
+      execFileSync("git", ["init", "-q"], { cwd: repo });
+      writeFileSync(path.join(repo, "a.md"), "# a\n");
+      writeFileSync(path.join(repo, "draft.md"), "# draft\n");
+      execFileSync("git", ["add", "a.md"], { cwd: repo });
+      mkdirSync(path.join(repo, ".claude/worktrees/other/test"), { recursive: true });
+      writeFileSync(path.join(repo, ".claude/worktrees/other/b.md"), "#  b\n");
+      writeFileSync(path.join(repo, ".claude/worktrees/other/test/x.test.ts"), "throw 1\n");
+      const files = trackedFiles(repo).map((file) => path.relative(repo, file)).sort();
+      expect(files).toEqual(["a.md", "draft.md"]);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("documentation helpers", () => {
   it("extracts Mermaid bodies", () => {

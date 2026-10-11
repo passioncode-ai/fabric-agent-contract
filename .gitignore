@@ -10,3 +10,6 @@ coverage/
 .env.agent-sync
 
 .agent-sync/
+
+# other sessions' worktrees (task-pipeline, agent-sync)
+.claude/worktrees/

@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "ux:lint": "python3 docs/ux/lint.py",
-    "docs:check": "tsx src/docs-check.ts && markdownlint-cli2 '**/*.md' '#node_modules'",
+    "docs:check": "tsx src/docs-check.ts && pnpm lint:md",
+    "lint:md": "tsx src/tracked-files.ts '*.md' | xargs markdownlint-cli2",
     "pin:check": "tsx src/pin-check.ts",
     "check": "pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check"
   },

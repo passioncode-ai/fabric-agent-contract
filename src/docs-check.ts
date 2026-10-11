@@ -5,6 +5,7 @@ import mermaid from "mermaid";
 import { CONTRACT_VERSION, SCHEMA_PREFIX, loadSchemas, projectRoot } from "./contract.js";
 import { foreignExtensionKeys } from "./extensions.js";
 import { ruleCodeFindings } from "./rule-codes.js";
+import { trackedFiles } from "./tracked-files.js";
 
 mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 
@@ -16,15 +17,9 @@ export function mermaidBodies(text: string): string[] {
   return [...text.matchAll(/```mermaid\s*\n([\s\S]*?)```/g)].map((match) => match[1] ?? "");
 }
 
+/** The tracked files under `directory` (src/tracked-files.ts): another session's worktree is never measured. */
 async function walk(directory: string): Promise<string[]> {
-  const output: string[] = [];
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    if ([".git", "node_modules"].includes(entry.name)) continue;
-    const target = path.join(directory, entry.name);
-    if (entry.isDirectory()) output.push(...await walk(target));
-    else output.push(target);
-  }
-  return output;
+  return trackedFiles(directory);
 }
 
 export async function checkLinks(file: string, text: string): Promise<string[]> {
