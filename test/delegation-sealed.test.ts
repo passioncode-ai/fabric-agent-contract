@@ -155,6 +155,10 @@ describe("F-B-307 — the verifier checks DL-2's types at row 5 and refuses in D
     ];
     for (const [name, overrides] of cases) expect(refusal(verifyDelegation(token(overrides), call)), name).toMatch(/^unauthenticated\/malformed-(claims|chain)$/);
     expect(refusal(verifyDelegation(token({ act: { sub: "Not An Agent Id!" } }), call))).toBe("unauthenticated/malformed-chain");
+    // CT-31: a hub-signed token with no `act` at all is refused, never thrown (the adapter's vector "no act claim").
+    const { act: _act, ...withoutAct } = claims as Json;
+    expect(() => verifyDelegation(sign(withoutAct), call)).not.toThrow();
+    expect(refusal(verifyDelegation(sign(withoutAct), call))).toBe("unauthenticated/malformed-chain");
     expect(refusal(verifyDelegation(token({ spend: { mode: "unlimited" }, project: "urn:project:b", nbf: IAT }), call))).toBe("ok");
   });
 
