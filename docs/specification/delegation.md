@@ -272,7 +272,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `approval-reused` | the approval's `jti` was already consumed | callee (verifier) | 403 |
 | `principal-unproven` | the caller's proof to the hub is missing or stale | hub, meter | 401 |
 | `credential-source-refused` | the grant names a credential source that is not the project's own key or another agent's capability | meter | 403 |
-| `chain-too-deep` | the chain would exceed four actors | hub, callee (verifier) | 403 |
+| `chain-too-deep` | the chain would exceed four actors (five for the meter's token, DL-6) | hub, callee (verifier) | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 
@@ -386,6 +386,10 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 | **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
 | **T1** | an enrolled machine of the same owner | its enrolment in the agent network; the binding that proves it is RM-21's to decide, not this profile's |
 | **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 | — |
+
+A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
+a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
+origin's tier, and the hub always attaches the delegation token of a T2 origin to what it forwards.
 
 **DL-26 — Inside the boundary the operator's instruction is the authority.** A callee MUST NOT require a
 delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and no local call waits on the hub.

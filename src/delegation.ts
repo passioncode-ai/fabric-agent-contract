@@ -318,7 +318,9 @@ type Shaped<T> = { claims: T } | { problem: string };
 
 /**
  * DL-13 row 5: the claims have DL-2's types. A claim the profile does not know is ignored (RFC 7519 §4); every
- * claim it knows is checked, so a port that reads the schema answers what this verifier answers (F-B-307).
+ * claim it knows is checked for its type (F-B-307). Members the schema forbids inside `act` and inside `spend`
+ * entries (`additionalProperties: false`) are not refused here, so a port that also applies the schema may refuse a
+ * token this verifier accepts; both refuse every token with a wrong type.
  */
 function delegationShape(payload: JsonObject): Shaped<DelegationClaims> & { depth?: number } {
   const { iss, sub, act, aud, scope, effect, grant, spend, project, task, iat, exp, nbf, jti } = payload;

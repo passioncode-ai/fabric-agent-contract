@@ -1837,7 +1837,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Fabric ADR-0144 amendments 3 and 4 at
   [`19ad05ca`](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md).
 - **Decision:** in [delegation](specification/delegation.md) unless named otherwise —
-  1. **One grant per token** (F-B-305). `grant` holds exactly one reference (`delegation-token.schema.json`
+  1. **One grant per token** (F-B-305). Fabric's session, as ADR-0144's owner, confirmed on 2026-10-12 that the
+     reference rule binds the meter's token only and will say so as amendment 5; `grant` holds exactly one reference (`delegation-token.schema.json`
      `maxItems: 1`); the verifier refuses two as a claim of the wrong type (DL-13 row 5); `FAC-SEM-050` refuses a
      reference beside the one the token was minted under, and requires the meter's token to keep its parent's one
      reference. An onward token to another callee is minted under its own grant, as DL-5 always said: amendment 3's

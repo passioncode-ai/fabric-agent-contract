@@ -381,7 +381,7 @@ independent agent author and P-02 project operator.
 - **Entry point:** a grant check above `project-a`'s auto-approve threshold
 - **Preconditions:** the policy's threshold is 2 USD; the operator channel is `linked`; a render would cost 4.20 USD
 - **Steps:**
-  1. The agent asks the meter -> the meter denies it, `limit-reached` at L1, with one filed approval request; the agent files no second one and goes on with other work.
+  1. The agent asks the meter -> the meter denies it, `limit-reached` at L1 with window `task` (the auto-approve threshold is a per-task limit), with one filed approval request; the agent files no second one and goes on with other work.
   2. The request reaches the operator in the chat -> the confirmation shows 4.20 USD first.
   3. Operator confirms -> the agent asks the meter again and is allowed, with a receipt.
 - **Expected result:** money above the threshold moves only after one answer that showed the amount; the agent was never blocked.

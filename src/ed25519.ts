@@ -8,7 +8,8 @@
  */
 
 /**
- * libsodium's `has_small_order` list (`crypto_core/ed25519/ref10/ed25519_ref10.c`): the 32-byte encodings, sign bit
+ * libsodium 1.0.18's `has_small_order` list (`crypto_core/ed25519/ref10/ed25519_ref10.c`; later versions check the
+ * point instead of a byte list, with the same result): the 32-byte encodings, sign bit
  * clear, of every point of order 1, 2, 4 or 8 — with the non-canonical `y = p` and `y = p + 1`, which a lax decoder
  * reduces to the points `y = 0` and `y = 1`.
  */
