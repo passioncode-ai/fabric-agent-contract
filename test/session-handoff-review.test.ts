@@ -134,7 +134,8 @@ describe("FAC-SEM-053…055: every message the rules emit has a test that produc
         if (longest.trim().length >= 8) fragments.push(longest.trim());
       }
     }
-    // Every call is read: a call the pattern skipped (wrapped over lines, a message in a variable) fails here.
+    // Every call is read: a call the pattern skipped (its message wrapped onto the next line) fails here. A message
+    // held in a variable is read as no fragment; none exists, and one would need its own case and a literal here.
     expect([...source.matchAll(/sem05[345]\(\s*(?:"[^"]*"|`[^`]*`|\w+)\s*,/g)].length).toBe([...source.matchAll(/\bsem05[345]\(/g)].length);
     expect(fragments.length).toBeGreaterThan(55);
     const missing = fragments.filter((fragment) => !produced.some((message) => message.includes(fragment)));
@@ -171,6 +172,9 @@ describe("the review's fixes", () => {
     const run = (arg: string) => onManifest("fabric-claude", (m) => { m.launch.args.push(arg); }).filter((message) => message.includes("never carries a credential"));
     expect(run("--aws-secret=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")).toHaveLength(1);
     expect(run("/Users/example/Library/Application/ai.passioncode.fabric/sessions/01JA7Y5Q3C2K9M8N4P6R0S1T2V/brief.md")).toEqual([]);
+    for (const relative of ["sessions/01JA7Y5Q3C2K9M8N4P6R0S1T2V/brief.md", "packages/FabricDesktop2/src/components/Header.tsx", "--add-dir=apps/Desktop/src/shared/agents/Runner2Config"]) {
+      expect(run(relative), relative).toEqual([]);
+    }
   });
 
   it("holds the runtime list of runners.md, the one place a runner takes its name", () => {

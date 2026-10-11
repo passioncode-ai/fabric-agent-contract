@@ -55,6 +55,8 @@ arguments in place). Fabric 0.4.0 REQ-06, Fabric ADR-0140, plan canvas C3; agree
   runners.md's list, and the message test counts every call. Planted, each failed then restored:
   other-server headers not all counted (1 of 107); `typ` unchecked (1); the first server's extra credential allowed
   (2); `Bearer` prose without a digit (1); every piece split at `/` (1); nothing split (3).
+- Third reading (of `dfa3336`): a relative path without `./` (`sessions/<id>/brief.md`) is split as a path when it
+  ends with an extension or has a lower-case word segment. Planted: relative paths not split (1 of 80).
 
 ## Open
 

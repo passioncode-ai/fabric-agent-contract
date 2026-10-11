@@ -78,15 +78,23 @@ export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || 
  * holding a digit, so prose ("the Bearer token refresh bug", "the Bearer authentication scheme") passes.
  */
 const BEARER_INSIDE = /\bbearer\s+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}=*/i;
-/** A path or a URL, whose separators split it into pieces: `/…`, `~/…`, `./…`, `C:\…`, `scheme://…`. */
+/** A path or a URL by its start: `/…`, `~/…`, `./…`, `C:\…`, `scheme://…`. */
 const PATH_LIKE = /^(?:[/~.]|[A-Za-z]:[\\/]|[a-z][a-z0-9+.-]*:\/\/)/i;
+/**
+ * Whether a piece is a path or a URL, whose separators split it: it starts like one, or it holds a separator and
+ * either ends with a file extension or has a lower-case word for a segment (`sessions/…`, `apps/Desktop/src`). A
+ * base64 secret's segments are mixed-case runs, so `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` stays one value.
+ */
+const pathLike = (piece: string): boolean =>
+  PATH_LIKE.test(piece) ||
+  (/[\\/]/.test(piece) && (/\.[A-Za-z0-9]{1,8}$/.test(piece) || piece.split(/[\\/]/).some((segment) => /^[a-z][a-z0-9_-]{2,}$/.test(segment))));
 /**
  * The same, for a launch argument or a server's command and URL, which carry paths: a long run is looked for
  * between path separators, so a folder path holding a session id is not taken for a key.
  */
 export const secretArgument = (value: string): boolean =>
   JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
-  value.split(/[\s=]/).some((piece) => (PATH_LIKE.test(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
+  value.split(/[\s=]/).some((piece) => (pathLike(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
 /**
  * A delegation token minted for this session (DEC-0039): exactly a JWS compact serialisation whose header says
  * `typ: fabric-delegation+jwt` and whose payload carries a numeric `exp`. The kit checks this shape only; the token's
