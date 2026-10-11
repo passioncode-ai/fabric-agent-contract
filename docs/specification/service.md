@@ -107,6 +107,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
+- `auth.delegation` MAY say that the service accepts the estate's delegation tokens: the issuer it
+  trusts and where it reads the estate's keys ([delegation](delegation.md) DL-16, DEC-0039). It is
+  public: an issuer and a key-set location, never a key or a token.
 
 ## Events feed
 
@@ -170,7 +173,9 @@ show every agent's spend beside its health without knowing any provider.
 - The report is the provider-side cost of running the service. It is not a customer's bill: a
   commercial agent's quotes and settlements are a separate ledger.
 - A service SHOULD compute the report from the log it already keeps rather than a second store,
-  and MUST NOT put prompts, outputs or caller identities in it.
+  and MUST NOT put prompts, outputs or caller identities in it. `byGrant` names a grant only by its
+  opaque reference — the `grant` claim of the delegation token the call carried — and never the
+  person or the chain of agents behind it ([delegation](delegation.md) DL-22, DEC-0039).
 
 ### Limits
 
@@ -238,6 +243,16 @@ When `surfaces.dashboard.login` is `true`, the dashboard requires an operator se
   does not tell a host to reload the page: that would discard what the operator is doing. A
   single-page dashboard whose shell answers `200` therefore also answers `401` for the page itself
   once its session is gone.
+
+<a id="operator-session-lifetime"></a>
+
+**The session's lifetime (DEC-0039).** An operator session ends 12 hours after it was last used, and
+never later than 7 days after the login code was redeemed, however often it is used. It also ends on
+logout and when the descriptor token rotates: a session begun under the old token is refused under
+the new one. These are the kit's defaults and the longest a service may keep a session; a service
+MAY shorten either bound and MUST NOT lengthen one. A request that arrives within the bounds refreshes
+the 12 hours. [`src/operator-session.ts`](../../src/operator-session.ts) `operatorSessionExpiresAt` is
+the rule.
 
 ## Authentication and network
 
@@ -469,7 +484,7 @@ defaulted or refused. Applying it is an operator action, never an agent's.
 
 | Caller | Surface |
 |---|---|
-| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` ([below](#mcp-credentials)) |
+| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
 | A remote agent | A2A `1.0` over HTTPS, or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
@@ -492,6 +507,15 @@ must not be able to mint an operator login code. When a service declares `own`:
   report its refusal (`401`/`403`) as nonconformance;
 - the MCP surface MUST NOT accept the descriptor's token either, so the two roles stay apart;
 - the capability list in `surfaces.mcp.capabilities` is still what a host shows without any token.
+
+**Delegation tokens (DEC-0039).** A service that declares `auth.delegation` accepts the estate's
+delegation tokens on its MCP surface in `Authorization: Bearer`, beside what `surfaces.mcp.auth` names,
+and checks each as [delegation](delegation.md#the-verifier) says. `surfaces.mcp.auth: "delegation"`
+means the surface accepts delegation tokens only; the rules for `own` above then apply to the
+descriptor's token. The descriptor's token stays the host's: once a caller can mint a delegation
+token, it never presents a service's own descriptor token to call that service's capabilities
+([delegation](delegation.md) DL-12). A host creating a sign-in for the dashboard it shows
+(`POST /fabric/v1/login-code`) is the host's operation and keeps using the descriptor's token.
 
 ## Semantic rules
 

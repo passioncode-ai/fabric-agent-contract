@@ -53,6 +53,7 @@ it("all four name-bearing schema surfaces reference the shared definition", asyn
     "comms-message.schema.json/properties/request/properties/capability",
     "comms-status.schema.json/properties/responders/items/properties/capability",
     "comms-submit.schema.json/properties/request/properties/capability",
+    "governance.schema.json/$defs/grant/properties/capabilities/items",
     "governance.schema.json/$defs/grant/properties/spend/properties/credentialSource/oneOf/1/properties/capability",
     "interop-agent-call.schema.json/properties/capability",
     "manifest.schema.json/properties/capabilities/items/properties/name",

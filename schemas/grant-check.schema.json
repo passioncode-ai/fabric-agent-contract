@@ -18,7 +18,7 @@
         "L2",
         "L3"
       ],
-      "description": "L0 estate total, L1 project policy, L2 task budget, L3 call."
+      "description": "L0 the limits no grant can raise: the estate total across all provider keys and each provider key's own ceiling (DEC-0039); L1 project policy; L2 task budget; L3 call."
     },
     "allowed": {
       "type": "object",
@@ -105,6 +105,17 @@
         },
         "code": {
           "$ref": "#/$defs/code"
+        },
+        "window": {
+          "enum": [
+            "total",
+            "task",
+            "project",
+            "day",
+            "week",
+            "month"
+          ],
+          "description": "DEC-0039: the window that was reached; required with limit-reached."
         }
       },
       "additionalProperties": false,
@@ -121,10 +132,14 @@
             ]
           },
           "then": {
+            "required": [
+              "window"
+            ],
             "properties": {
               "level": {
                 "$ref": "#/$defs/level"
-              }
+              },
+              "window": true
             }
           }
         }

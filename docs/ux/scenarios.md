@@ -20,6 +20,7 @@
 | SCN-012 | Link the channel and answer a stop with a button | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
 | SCN-013 | Confirm a paid action, or find it already decided | operator-channel | P-02 | ST-009, ST-010, FLW-08 | draft | not audited |
 | SCN-014 | Several agents share one group: only the addressed bot answers | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
+| SCN-015 | Open Fabric from a product's dashboard | fabric-button | P-02 | ST-011, FLW-09 | draft | not audited |
 
 ## Personas
 
@@ -324,3 +325,24 @@ independent agent author and P-02 project operator.
 - **Coverage:** DEC-0035 OC-14…OC-17, fixtures `operator-channel-status-degraded-receiver-missing` and `operator-channel-status-linked-without-receiver`, `test/operator-channel.test.ts`
 - **Product:** unobserved
 
+## Fabric's button
+
+### SCN-015: Open Fabric from a product's dashboard
+
+- **Persona:** P-02
+- **Feature:** fabric-button
+- **Traces:** ST-011, FLW-09 (JTBD-06, JRN-05/#1, JRN-05/#2, JRN-05/#4)
+- **Entry point:** Fabric's button in the corner of `example-agent`'s dashboard
+- **Preconditions:** the dashboard serves project `project-a`; Fabric is installed
+- **Steps:**
+  1. Operator presses the button -> a menu offers "Chat with Fabric about Example Agent" and "Open a coding session in project-a".
+  2. Operator chooses the chat -> the page follows `fabric://chat?service=example-agent.default&project=project-a`; Fabric opens the manager conversation for that service and project, empty, and sends nothing.
+  3. Back in the dashboard, the operator chooses the session -> Fabric shows `project-a`'s session view with the default runner chosen; nothing runs until the operator presses Start.
+- **Expected result:** Fabric opens on the right service and project in one press; no message is sent, no runner starts and nothing is spent by the link.
+- **Alt paths:** the link names a runner that is not installed -> Fabric uses the project's default runner and says so. The page is embedded in Fabric Dashboards, which draws its own button -> the page's button is hidden.
+- **UI elements:** floating button, menu with two actions, the absent message.
+- **States covered:** success, empty, error
+- **Errors & recovery:** Fabric is not installed -> the menu says "Fabric is not installed — get it at passioncode.ai/fabric" with the link; a link carrying a token or a bad id -> Fabric refuses the whole link and says why.
+- **Status:** draft
+- **Coverage:** DEC-0040 FB-1…FB-8, FL-1…FL-7, `fabric-link.schema.json`, `test/fabric-button.test.ts`
+- **Product:** unobserved

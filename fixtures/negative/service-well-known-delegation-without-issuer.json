@@ -1,0 +1,51 @@
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-writer",
+    "instance": "default",
+    "name": "Example Writer",
+    "version": "0.3.0",
+    "build": {
+      "commit": "4c1d2e9"
+    }
+  },
+  "process": {
+    "pid": 51234,
+    "startedAt": "2026-09-28T17:41:02Z"
+  },
+  "status": "ready",
+  "degraded": [],
+  "summary": [
+    {
+      "label": "Jobs running",
+      "value": 2
+    },
+    {
+      "label": "Awaiting you",
+      "value": 1,
+      "attention": true
+    }
+  ],
+  "surfaces": {
+    "dashboard": {
+      "path": "/dashboard",
+      "login": true
+    },
+    "mcp": {
+      "path": "/mcp",
+      "transport": "streamable-http",
+      "capabilities": [
+        "writer.write",
+        "writer.check",
+        "writer.send"
+      ],
+      "auth": "delegation"
+    },
+    "events": {
+      "path": "/fabric/v1/events"
+    }
+  },
+  "update": {
+    "available": null
+  }
+}

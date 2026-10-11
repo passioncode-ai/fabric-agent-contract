@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037, DEC-0038 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
+DEC-0037, DEC-0038, DEC-0039 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -17,7 +17,7 @@ The most specific level that exists decides. A level that does not exist is skip
 
 | Level | What it limits | Who sets it, and when |
 |---|---|---|
-| **L0 estate** | everything the estate spends across all provider keys in a month; the hard stop | the estate's operator, once; the registry alerts at 80% |
+| **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80% |
 | **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project |
 | **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, or the agent itself within L1's threshold |
 | **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit) | derived from L2 |
@@ -58,17 +58,22 @@ Three rules apply to every grant and every reader:
 1. **The credential source is the project's own key or another agent's capability.** It is never another
    agent's key: `project-key` names a key issued for this project; `capability` names the agent whose
    capability is called, so that agent's own wallet and limits apply. A reader refuses any other source.
-2. **A principal is proven, not claimed.** The registry authorizes a check by a credential it issued: a
-   per-session token minted when the session starts and bound to the session, the agent and the project.
-   - It is kept owner-only and never in an argument: mode 0600 on POSIX, and on Windows the protected ACL
-     of [service.md's Windows token files](service.md) (DEC-0032, DEC-0033).
-   - It is revoked when the session ends and has a maximum age. A missing or stale token is
+2. **A principal is proven, not claimed** (DEC-0039, [delegation](delegation.md) DL-21). The meter issues
+   no identity and holds none: it is proven to by the estate hub's delegation token.
+   - The callee exchanges the token it was called with for an **onward token** for the meter: `aud` the
+     meter, the callee added as outermost actor, `scope` the meter's grant-check capability, `effect:
+     ["none"]`, the same grant, principal and project, expiring no later than the callee's token.
+   - It presents that token in `Authorization: Bearer` on a direct call to the meter, never in an argument.
+     The request ([`grant-check-request`](../../schemas/grant-check-request.schema.json)) carries the amount
+     and the `jti` of the callee's own token, for attribution.
+   - The meter verifies the onward token offline (audience itself, capability its grant-check capability,
+     effect `none`) and answers any refusal of it — expired, another audience, unsigned — as
      `principal-unproven`.
    - A label the caller supplies about itself is advisory.
 
-   The boundary, stated plainly: any process of the same OS account can read an owner-only file. The token
-   stops accidental and confused borrowing, not a hostile process of the same user, which is the same claim
-   the vault makes.
+   The boundary, stated plainly: any process of the same OS account can read what the caller holds. The
+   token stops accidental and confused borrowing, gives every hop a name and lets a limit hold per caller;
+   it does not stop a hostile process of the same user, which is the same claim the vault makes.
 3. **Approvals never block.** Above `autoApproveUsd`, or with no policy yet, the agent files **one** durable
    approval request (`approvalRequest` in the check's answer). The person answers it through the
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent
@@ -92,7 +97,12 @@ The registry's answer is a [`grant-check`](../../schemas/grant-check.schema.json
   is always set for `limit-reached`. When the limit allows one, `denied` also carries the `approvalRequest`
   filed.
 
-An unknown grant state is a denial (Fabric ADR-0023).
+An unknown grant state is a denial (Fabric ADR-0023). These codes are a subset of the contract's one refusal
+code set ([delegation](delegation.md#refusal-codes), DEC-0039) and keep their meaning there.
+
+A grant that names an `audience` is a **delegation grant**: it also carries `capabilities` and an
+`effectCeiling`, and the hub mints delegation tokens only under one ([delegation](delegation.md#grants-for-delegation),
+DL-20).
 
 ## Semantic rules
 

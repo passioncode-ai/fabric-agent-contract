@@ -220,6 +220,28 @@ flowchart TD
 
 - **Screens traversed:** SCR-11 empty; SCR-11 success; SCR-11 error.
 
+### FLW-09: Operator opens Fabric from a product
+
+- **Traces:** ST-011 (JTBD-06, JRN-05/#1, JRN-05/#2, JRN-05/#4)
+- **Goal:** Fabric opens on the product's service and project in one press, and nothing runs until the person acts
+- **Entry points:** Fabric's button on a service dashboard
+- **Success exit:** the conversation or the session view open in Fabric on the right service and project
+- **Task analysis:** press the button → choose chat or session → the page follows a `fabric://` link built by the kit → Fabric validates the ids and opens the view → the person types or starts the runner.
+- **Rejected shape:** a link that carries a prompt or starts the runner — rejected because any page can emit a link (DEC-0040 FB-8, FL-4).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  B[Screen: Fabric's button and menu] --> C{Fabric installed?}
+  C -->|no, or no answer in 1.5 s| N[Fabric is not installed — get it at passioncode.ai/fabric]
+  C -->|yes| L{Link valid: action, ids, no secret?}
+  L -->|no| R[Fabric says the link was refused and why]
+  L -->|chat| T[Manager conversation scoped to service and project]
+  L -->|session| S[Session view; runner starts on the person's press]
+```
+
+- **Screens traversed:** SCR-12 success; SCR-12 empty; SCR-12 error.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

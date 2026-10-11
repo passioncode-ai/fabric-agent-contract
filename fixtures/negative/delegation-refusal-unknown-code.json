@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "needs-grant",
+    "message": "Ask the operator for access."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "iss": "urn:fabric:estate:example",
+  "sub": "urn:person:operator",
+  "act": {
+    "sub": "example-agent"
+  },
+  "aud": "example-reader",
+  "scope": "reader.search",
+  "effect": [
+    "none"
+  ],
+  "grant": [
+    "urn:grant:example-agent-reader#1"
+  ],
+  "iat": 1791720000,
+  "exp": 1791720300,
+  "jti": "01JA7Y6B8D3F5G7H9J1K2L3M4N"
+}

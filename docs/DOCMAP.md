@@ -31,6 +31,9 @@ and recorded as DEC-0001.
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
 | Operator channel (`fabric-operator-channel/0.1`), OC-1…OC-17 and its status | `docs/specification/operator-channel.md`, `schemas/operator-channel-status.schema.json` (DEC-0034; group chats and liveness OC-14…OC-17, DEC-0035) |
 | Embedded dashboard (`fabric-dashboard/0.1`), ED-1…ED-10: width floor, navigation, scrolling, the appearance carrier and its declaration | `docs/specification/embedded-dashboard.md`, `schemas/service-dashboard-extension.schema.json` (DEC-0036); handoff `docs/handoffs/2026-10-11-embedded-dashboard.md` |
+| Delegation (`fabric-delegation/0.1`), DL-1…DL-22: the delegation token, minting and attenuation, how it travels, the verifier, keys and rotation, `auth.delegation`, `approval/1`, the one refusal-code set, delegation grants | `docs/specification/delegation.md`, `schemas/delegation-token.schema.json`, `schemas/delegation-jwks.schema.json`, `schemas/approval.schema.json`, `schemas/delegation-refusal.schema.json`, `src/delegation.ts`, `src/delegation-rules.ts` (DEC-0039); handoff `docs/handoffs/2026-10-11-delegation-and-fabric-button.md` |
+| The operator's dashboard session lifetime | `docs/specification/service.md#operator-session-lifetime`, `src/operator-session.ts` (DEC-0039) |
+| Fabric's button and `fabric://` links, FB-1…FB-8, FL-1…FL-7 | `docs/specification/fabric-button.md`, `schemas/fabric-link.schema.json`, `src/fabric-links.ts` (DEC-0040) |
 | Operator channel handoffs | `docs/handoffs/2026-10-10-operator-channel.md`, `docs/handoffs/2026-10-10-operator-channel-group-chat.md` |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |

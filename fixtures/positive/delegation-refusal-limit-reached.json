@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "limit-reached",
+    "message": "The grant's daily limit of 5 USD is reached; it resets at 00:00 UTC.",
+    "data": {
+      "detail": "window-exhausted",
+      "window": "day",
+      "level": "L1",
+      "approvalRequest": "urn:fabric:approval-request:7f3c"
+    }
+  }
+}

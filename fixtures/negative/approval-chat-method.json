@@ -1,0 +1,10 @@
+{
+  "iss": "urn:fabric:estate:example",
+  "actionDigest": "sha256:921d6afae6e119d4b0c2d2e69a5cb0298489d4ff175e0e17025cdb2b5b09eae4",
+  "aud": "example-publisher",
+  "approver": "urn:person:operator",
+  "method": "chat-message",
+  "iat": 1791720000,
+  "exp": 1791723600,
+  "jti": "01JA7Y7C9E4G6H8J0K2L4M6N8P"
+}

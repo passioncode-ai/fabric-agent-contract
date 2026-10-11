@@ -17,6 +17,7 @@
 | SCR-09 | Access log | FLW-06 | disabled | proposed | none yet |
 | SCR-10 | Device settings | FLW-07 | disabled | proposed | none yet |
 | SCR-11 | Chat with the agent's bot | FLW-08 | disabled | proposed | none yet |
+| SCR-12 | Fabric's button and menu | FLW-09 | disabled | proposed | none yet |
 
 ## Design system
 
@@ -153,3 +154,13 @@
 - **Resources:** operator-channel specification, Rules
 - **Status:** proposed
 
+### SCR-12: Fabric's button and menu
+
+- **Used by:** FLW-09
+- **Purpose:** the operator opens Fabric on the product and project they are looking at.
+- **Elements:** a floating button bottom-right with the Fabric mark and the word Fabric (accessible name "Open Fabric"); its menu with "Chat with Fabric about …" and "Open a coding session in …" (primary action: the chat).
+- **States:** success — the menu shows both actions and a choice opens Fabric; empty — the page knows no project, so only the chat is offered; error — Fabric is not installed, and the menu says "Fabric is not installed — get it at passioncode.ai/fabric"; hidden — the host draws its own button (`fabric_button` with `owner=host`).
+- **Coverage:** `fabric-link.schema.json`, `test/fabric-button.test.ts` (FAC-SEM-052)
+- **Scenarios:** SCN-015
+- **Resources:** fabric-button specification, The button, Deep links
+- **Status:** proposed

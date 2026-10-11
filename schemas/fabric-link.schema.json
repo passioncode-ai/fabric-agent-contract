@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/fabric-link.schema.json",
+  "title": "A parsed fabric:// deep link (DEC-0040)",
+  "description": "What a fabric:// link asks Fabric to open, after parsing: a conversation with Fabric scoped to a service, a project or both (fabric://chat), or a coding-agent session in a project (fabric://session/new). It names ids only and never a credential, a prompt or an instruction.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["action"],
+      "properties": {
+        "action": { "const": "chat" },
+        "service": { "$ref": "common.schema.json#/$defs/agentId" },
+        "project": { "$ref": "#/$defs/projectRef" }
+      },
+      "anyOf": [{ "required": ["service"], "properties": { "service": true } }, { "required": ["project"], "properties": { "project": true } }],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["action", "project"],
+      "properties": {
+        "action": { "const": "session.new" },
+        "project": { "$ref": "#/$defs/projectRef" },
+        "runner": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$", "description": "A runner kind from the runner catalogue." }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "projectRef": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$", "description": "A project id or slug: no slash, no space." }
+  }
+}
