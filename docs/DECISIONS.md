@@ -165,7 +165,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
-- **Annotated (2026-10-11):** extended by DEC-0018, DEC-0020, DEC-0021, DEC-0024, DEC-0025, DEC-0026, DEC-0027 and DEC-0029 (each a versioned addition under its rule).
+- **Annotated (2026-10-11):** extended under its versioning policy by every later additive decision; each one's *Compatibility* line says it is additive under `0.1.0`, so that line, not this note, is the list.
 - **Decision:** The contracts Fabric locked for its agent registry on 2026-09-29 — the
   provider entry `fabric-provider/0.1`, the runner catalogue, the interop extension
   `fabric-interop/0.1` (keyed `https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1`)
