@@ -256,7 +256,8 @@ route's proxy passes it on unchanged (ADR-0147 amendment 2): `order` (provider s
 `ignore` (slugs never used), `allow_fallbacks` (`false`: only the ordered providers; absent: OpenRouter's `true`) and
 `sort` (`price`, `throughput` or `latency`; the string form only). It changes which upstream serves the model, never
 the model, and a profile's allow-list is unchanged — so a model one upstream refuses for a key is still reached
-through another. A slug is never both ordered and ignored (`FAC-SEM-058`). OpenRouter's other fields (`only`,
+through another. A slug is never both ordered and ignored, and a base slug ignored covers its variants, so ordering
+`deepinfra/turbo` while ignoring `deepinfra` is refused too (`FAC-SEM-058`). OpenRouter's other fields (`only`,
 `max_price`, the object form of `sort`, …) are not admitted in this revision.
 
 Measured on 2026-10-11 (Fabric's session, relaying a private agent's measurement): two requests of about 30k tokens
@@ -275,7 +276,9 @@ One order chooses the model profile, most specific first (`FAC-SEM-060`):
 
 The project's spend policy (L1) then **restricts** the chosen profile and never chooses: a model stays when every
 class the catalogue gives it is one the policy's `modelClasses` allows, in the profile's order; a model the catalogue
-does not hold stays only when the policy names no classes. A policy without `modelClasses` restricts nothing. When no
+does not hold stays only when the policy names no classes. A policy without `modelClasses` restricts nothing; a policy that has it names at least one class (an empty list
+would refuse every launch). The profiles offered to one resolution — an agent's own and the estate's — never share
+an id (`FAC-SEM-060`). When no
 model stays, the host refuses the launch with `model-classes-empty`, naming the profile and the policy's id and
 revision, and the person sees which policy to change. It is the host's own refusal of its launch, not a callee's
 refusal code (DL-19), because no callee is called. With the policy `strong`, `code`, `vision`, the profile `default`

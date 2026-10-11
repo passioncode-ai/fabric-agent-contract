@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0047`
+**Next free ID:** `DEC-0048`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1961,7 +1961,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `pi`), DEC-0021 (a usage row's `route`). Implements Fabric [ADR-0147](https://github.com/passioncode-ai/fabric/blob/29e3f984670f63650c39f2c4abc2ef8249e50f20/docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md) with amendments 1 and 2 (written at
   `31a9d6ca`; its last change `29e3f984`, now on Fabric `main`), on the rulings the board brief records.
 - **Decision:** in [runners](specification/runners.md#runner-and-model-profiles) unless named otherwise —
-  1. **A closed vocabulary of model classes:** `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`. The
+  1. **A closed vocabulary of model classes** (the proposal's §3.2 item 1, whose open list this closes):
+     `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`. The
      spend policy's and a grant's `modelClasses` take only these (`spend-policy.schema.json`,
      `governance.schema.json`); a new class takes a decision.
   2. **Three schemas.** The model catalogue (`registry-models.schema.json`): one row per `<vendor>/<model>` id with
@@ -1997,7 +1998,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Why:** nine agents keep their own model tables and price lists, and an L1 policy naming model classes could not
   be checked, because the classes were free strings and no catalogue mapped models to them (ADR-0147, Context). A
   subscription used outside its vendor's runner breaks the vendor's terms; a key without an allow-list can spend on any
-  model. Measured on 2026-10-11: `sort: price` cut two 30k-token requests from $0.047 to $0.0052.
+  model. Measured on 2026-10-11: `sort: price` cut two 30k-token requests from $0.047 to $0.0052. ADR-0147 leaves open
+  how a policy's classes restrict a model with several; the contract takes "every class allowed", because with
+  "any" a policy could never exclude `chinese-vendor`. The cost: capability classes (`code`, `vision`) are opt-ins a
+  policy must list, so a `strong`-only policy drops a model the catalogue also marks `code`.
 - **Compatibility:** Additive for documents except `modelClasses`: three schemas, two drives' worth of enum values
   (`drive`, `runtime`), optional `configuration` and `route`; `contractVersion` stays `0.1.0`. **Tightening** for
   `modelClasses`: a spend policy or grant naming any other string stops validating; no consumer writes one today

@@ -69,7 +69,9 @@ function modelCatalogue(value: JsonObject): Finding[] {
     const routing = isObject(row.provider) ? row.provider : {};
     const ignored = new Set(strings(routing.ignore));
     for (const slug of strings(routing.order)) {
-      if (ignored.has(slug)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/provider`, message: `model ${String(row.id)} both orders and ignores provider ${slug}` });
+      // A base slug covers its variants (`deepinfra` covers `deepinfra/turbo`), so an ordered variant of an ignored
+      // provider is ordered and ignored at once.
+      if (ignored.has(slug) || ignored.has(slug.split("/")[0] as string)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/provider`, message: `model ${String(row.id)} both orders and ignores provider ${slug}` });
     }
   });
   return findings;
@@ -113,7 +115,11 @@ function runnerProfile(value: JsonObject): Finding[] {
 function profileResolution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const catalogued = new Set(list(isObject(value.catalogue) ? value.catalogue.models : undefined).map((row) => row.id));
+  const ids = new Set<unknown>();
   list(value.profiles).forEach((profile, i) => {
+    // An agent's profile and an estate profile never share an id: the resolver would take whichever came first.
+    if (ids.has(profile.id)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/id`, message: `profile id ${String(profile.id)} is offered more than once to one resolution` });
+    ids.add(profile.id);
     strings(profile.models).forEach((model, j) => {
       if (!catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${String(profile.id)} names ${model}, which the catalogue does not hold` });
     });

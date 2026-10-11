@@ -192,3 +192,28 @@ describe("the drives, the shared kind pi, usage's route and the declared slots (
     expect(schema("service-well-known.schema.json").properties.configuration.properties.resolved.properties.from.enum).toEqual([...RESOLUTION_ORDER]);
   });
 });
+
+describe("review of DEC-0046 (F1, F2, F4)", () => {
+  it("FAC-SEM-060: an agent's profile and an estate profile never share an id in one resolution", () => {
+    const ok = load("semantic/profile-resolution-ok.json");
+    expect(codes("profile-resolution", ok)).toEqual([]);
+    const profiles = ok.profiles as Json[];
+    const twice = { ...ok, profiles: [...profiles, { ...profiles[0], models: [...(profiles[0]!.models as string[])].reverse() }] };
+    expect(codes("profile-resolution", twice)).toContain("FAC-SEM-060");
+  });
+
+  it("FAC-SEM-058: ordering a variant of an ignored base slug is ordering and ignoring at once", () => {
+    const catalogue = load("positive/registry-models.json");
+    const rows = catalogue.models as Json[];
+    const variant = { ...catalogue, models: [{ ...rows[0], provider: { order: ["deepinfra/turbo"], ignore: ["deepinfra"] } }, ...rows.slice(1)] };
+    expect(codes("model-catalogue", variant)).toEqual(["FAC-SEM-058"]);
+    const other = { ...catalogue, models: [{ ...rows[0], provider: { order: ["deepinfra/turbo"], ignore: ["openai"] } }, ...rows.slice(1)] };
+    expect(codes("model-catalogue", other)).toEqual([]);
+  });
+
+  it("a policy that names model classes names at least one", () => {
+    const policy = load("positive/spend-policy-limited.json");
+    expect(valid("spend-policy.schema.json", { ...policy, modelClasses: ["strong"] })).toBe(true);
+    expect(valid("spend-policy.schema.json", { ...policy, modelClasses: [] })).toBe(false);
+  });
+});
