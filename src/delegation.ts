@@ -296,6 +296,8 @@ const isAmount = (value: unknown): boolean => typeof value === "number" && Numbe
 
 /** The actor chain's depth when every actor is DL-2's — an agent id `sub`, an optional session id — else `undefined`. */
 function actorChainDepth(act: unknown): number | undefined {
+  // DL-2: a token always names at least one actor, the agent that holds it; no `act` is a malformed chain (CT-31).
+  if (act === undefined) return undefined;
   let depth = 0;
   for (let node: unknown = act; node !== undefined; node = (node as JsonObject).act) {
     if (!isObject(node) || typeof node.sub !== "string" || !AGENT_ID.test(node.sub)) return undefined;
