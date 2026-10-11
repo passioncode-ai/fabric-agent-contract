@@ -54,7 +54,7 @@ Exit criteria:
 - README status, acceptance evidence, glossary and source ledger true (F-D-012…015, F-A-020/021/025/030/031,
   F-B-110/111/113/203/213/316/320).
 
-### Wave 2 — delegation, spend, the operator session, runner and model profiles (N05, N06, N14; 20 items)
+### Wave 2 — delegation, spend, the operator session, runner and model profiles, service hygiene (N05, N06, N14, N15; 24 items)
 
 Depends on: wave 1 (#32 merged at `7931c1d`). Fabric's rulings on the four delegation questions are recorded in
 [brief.md](brief.md).
@@ -116,6 +116,23 @@ Exit criteria:
 CON-OE-02, CON-OE-09, RM-01, the RM-03 residue, CO-KB-02 and the adapter's DEC-0039 follow-ups.
 Each has a board row naming what it waits for.
 
+### Wave 1 — close record (2026-10-11)
+
+- **Merged:** PR #32 `7931c1d`, #31 `213e5a3`, #34 `39fcafe`, #37 `06cef17`, #38 `69e7795`, #39 `1dc352f`, #35
+  `181613f`, #36 `3443c5e`. Each was read by an independent verifier (unit, seam, product), fixed in one round
+  and gated locally before merge.
+- **Gate on `main` `3443c5e`:** `pnpm run check` — 27 test files, 919 tests, branch-coverage floors met, UX lint,
+  docs check, lint:md 0 errors.
+- **Inventory:** 46 items done with receipts (`findings/closed.json`); the consumer-owned items moved to N16 and
+  are tracked on the board (CT-03, CT-04, CT-18…CT-21).
+- **Still open from wave 1 (P1-07):** fabric-workspace #138 (LC-14 pointer, roadmap) and org-index #56 (X-4) in
+  review; the projects-wiki card committed locally (`73bc3fd`), blocked on that vault's diverged history
+  (27 local commits of other sessions, 37 on origin); the workspace's published snapshot is left to its
+  scheduled sync (F-D-019).
+- **Found during the wave and fixed in it:** three wall-clock test bounds that failed under machine load; the
+  gate reading other sessions' worktrees; `lint:md` able to lint nothing.
+- **New work, re-cut into wave 2:** CT-22…CT-24 (node N15); CT-05 gains the provider-routing `sort`.
+
 ## Questions for the operator — one batch
 
 Every other question was closed from the sources: [brief.md](brief.md) → *Decisions resolved from the
@@ -143,6 +160,7 @@ Outward acts (a tag, a publication, a deployment) are still asked one by one.
 
 ## Revisions
 
+- 2026-10-11 — wave 1 closed (record above); wave 2 re-cut with N15.
 - 2026-10-11 — gate closed by the operator's go; TRUST-TIERS (operator decision, ADR-0144 amendment 4) joins N05.
 - 2026-10-11 — first cut, from the inventory of 147 items (consumer survey pending; its items join at the
   first re-measure).

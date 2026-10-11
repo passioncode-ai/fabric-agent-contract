@@ -12,7 +12,7 @@ const table = JSON.parse(readFileSync(path.join(here, "waves.json"), "utf8"));
 const problems = [];
 
 const items = new Map();
-for (const file of readdirSync(path.join(here, "findings")).filter((name) => name.endsWith(".json")).sort()) {
+for (const file of readdirSync(path.join(here, "findings")).filter((name) => name.endsWith(".json") && name !== "closed.json").sort()) {
   for (const raw of JSON.parse(readFileSync(path.join(here, "findings", file), "utf8"))) {
     if (items.has(raw.id)) problems.push(`${raw.id}: in ${items.get(raw.id).file} and ${file}`);
     const source = Array.isArray(raw.source) ? raw.source.join("; ") : String(raw.source ?? "");
@@ -32,6 +32,13 @@ for (const file of readdirSync(path.join(here, "findings")).filter((name) => nam
       file
     });
   }
+}
+
+const closedFile = path.join(here, "findings", "closed.json");
+const closed = JSON.parse(readFileSync(closedFile, "utf8")).closed;
+for (const [id, receipt] of Object.entries(closed)) {
+  if (!items.has(id)) problems.push(`closed.json: ${id} is not an inventory item`);
+  else items.get(id).status = `done: ${receipt}`;
 }
 
 const placed = new Map();
@@ -55,7 +62,7 @@ const inventory = [...items.values()]
 writeFileSync(path.join(here, "inventory.json"), `${JSON.stringify({ schema: 1, generatedBy: "assign.mjs", items: inventory }, null, 2)}\n`);
 
 const count = (key) => inventory.reduce((acc, item) => acc.set(item[key], (acc.get(item[key]) ?? 0) + 1), new Map());
-console.log(`items: ${inventory.length}`);
+console.log(`items: ${inventory.length} (done: ${inventory.filter((item) => item.status.startsWith("done:")).length})`);
 for (const [wave, n] of [...count("wave")].sort((a, b) => (a[0] ?? 99) - (b[0] ?? 99))) console.log(`wave ${wave ?? "program"}: ${n}`);
 for (const [node, n] of count("node")) console.log(`  ${node}: ${n}`);
 if (problems.length) {
