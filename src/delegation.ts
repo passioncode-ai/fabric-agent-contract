@@ -1,4 +1,5 @@
 import { createHash, createPublicKey, verify as verifySignature, type KeyObject } from "node:crypto";
+import { rfc8785 } from "./canonical.js";
 import { isObject, type JsonObject } from "./findings.js";
 
 // #region delegation-verifier — docs: docs/specification/delegation.md#the-verifier
@@ -416,35 +417,12 @@ export function readDelegationToken(headers: Record<string, string | string[] | 
   return undefined;
 }
 
-/**
- * RFC 8785 JSON Canonicalization Scheme: object members sorted by UTF-16 code units, numbers in ECMAScript
- * form, strings escaped as `JSON.stringify` escapes them. Refuses what has no canonical form: a non-finite
- * number, a lone surrogate, a value JSON cannot carry.
- */
-export function jcs(value: unknown): string {
-  if (value === null || typeof value === "boolean") return JSON.stringify(value);
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new TypeError("a non-finite number has no canonical form");
-    return JSON.stringify(value);
-  }
-  if (typeof value === "string") {
-    if (/\p{Surrogate}/u.test(value)) throw new TypeError("a lone surrogate has no canonical form");
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) return `[${Array.from(value, (item) => jcs(item)).join(",")}]`;
-  if (isObject(value)) {
-    // JSON values only: a Date, a Map or a class instance would otherwise read as {} and two different
-    // actions would share a digest.
-    const prototype: unknown = Object.getPrototypeOf(value);
-    if (prototype !== Object.prototype && prototype !== null) throw new TypeError("only plain JSON objects have a canonical form");
-    const keys = Object.keys(value).sort();
-    return `{${keys.map((key) => `${jcs(key)}:${jcs(value[key])}`).join(",")}}`;
-  }
-  throw new TypeError(`${typeof value} has no canonical form`);
-}
+/** RFC 8785 now lives in `src/canonical.ts` with the settings form beside it (DEC-0043); the old name stays so
+ *  existing imports keep working. */
+export { rfc8785 as jcs } from "./canonical.js";
 
 /** The action digest an approval binds: `sha256:` and the hex SHA-256 of the action's RFC 8785 form. */
 export function actionDigest(action: unknown): string {
-  return `sha256:${createHash("sha256").update(jcs(action), "utf8").digest("hex")}`;
+  return `sha256:${createHash("sha256").update(rfc8785(action), "utf8").digest("hex")}`;
 }
 // #endregion delegation-verifier

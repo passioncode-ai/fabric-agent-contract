@@ -1,47 +1,18 @@
 import { createHash } from "node:crypto";
+import { settingsCanonicalJson } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 
 // #region settings-backup — docs: docs/specification/service.md#settings-backup
 /** The one format string of a settings backup file (DEC-0025). */
 export const SETTINGS_BACKUP_FORMAT = "fabric-settings-backup/1" as const;
 
-/** Unicode code-point order, which is how the canonical form sorts keys. JavaScript's default
- *  string order compares UTF-16 code units and differs above U+FFFF. */
-function byCodePoint(a: string, b: string): number {
-  const x = Array.from(a), y = Array.from(b);
-  for (let i = 0; i < Math.min(x.length, y.length); i += 1) {
-    const d = (x[i]!.codePointAt(0) ?? 0) - (y[i]!.codePointAt(0) ?? 0);
-    if (d !== 0) return d;
-  }
-  return x.length - y.length;
-}
-
-/**
- * The canonical JSON text of a value, as `docs/specification/service.md#settings-backup` defines
- * it: object keys sorted by code point at every level, `", "` between members and elements,
- * `": "` after a key, strings escaped as JSON requires and nothing else escaped, integers in
- * decimal. It equals Python's `json.dumps(value, sort_keys=True, ensure_ascii=False)`, which is
- * how a service in either language computes the same checksum.
- */
-export function canonicalJson(value: unknown): string {
-  if (value === null) return "null";
-  if (typeof value === "boolean") return value ? "true" : "false";
-  if (typeof value === "number") {
-    if (!Number.isSafeInteger(value)) throw new TypeError(`${value} has no canonical form: a settings backup stores a fraction as a string`);
-    return String(value);
-  }
-  if (typeof value === "string") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(", ")}]`;
-  if (isObject(value)) {
-    const keys = Object.keys(value).sort(byCodePoint);
-    return `{${keys.map((key) => `${JSON.stringify(key)}: ${canonicalJson(value[key])}`).join(", ")}}`;
-  }
-  throw new TypeError(`${typeof value} is not a JSON value`);
-}
+/** The settings canonical form now lives in `src/canonical.ts` with RFC 8785 beside it (DEC-0043); the old
+ *  name stays so existing imports keep working. */
+export { settingsCanonicalJson as canonicalJson } from "./canonical.js";
 
 /** The `sha256` a settings backup carries: SHA-256 of the UTF-8 canonical JSON of `tables`. */
 export function settingsBackupDigest(tables: unknown): string {
-  return createHash("sha256").update(canonicalJson(tables), "utf8").digest("hex");
+  return createHash("sha256").update(settingsCanonicalJson(tables), "utf8").digest("hex");
 }
 
 /** A string a JSON writer can encode to UTF-8: no lone surrogate. */

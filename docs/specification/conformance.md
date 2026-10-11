@@ -68,6 +68,43 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
 
+## Canonical forms
+
+A signature or a digest over JSON covers bytes, so the signer and the verifier must write the same bytes. The
+contract has two canonical forms, both in [`src/canonical.ts`](../../src/canonical.ts), and every signed or hashed
+JSON document names one of them (DEC-0043). They give different bytes for the same value — separators, key order
+above U+FFFF, fractions — so a document never says only "canonical JSON".
+
+| Form | Function | Key order | Separators | Numbers | Strings | Refuses |
+|---|---|---|---|---|---|---|
+| the settings form (DEC-0025) | `settingsCanonicalJson` | by Unicode code point, at every level | `", "` between members and elements, `": "` after a key | integers within ±(2^53 − 1), in decimal | `"`, `\` and the control characters escaped as `JSON.stringify` escapes them; every other character as itself | a fraction, an unsafe or non-finite number, `undefined`, a function, a bigint. It does not check prototypes, and writes a lone surrogate as `\udxxx` where Python cannot encode one, so a backup reader refuses one in a cell (`FAC-SEM-035`) |
+| RFC 8785, JCS (DEC-0039) | `rfc8785` | by UTF-16 code unit, at every level | none | ECMAScript form: `1e+30`, `0.002`, `-0` as `0` | as `JSON.stringify` escapes them | a non-finite number, a lone surrogate, a value that is not plain JSON: a date, a map, a class instance, an `undefined` member |
+
+The settings form equals Python's `json.dumps(value, sort_keys=True, ensure_ascii=False)`; RFC 8785 is pinned in
+the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src/settings-backup.ts`) and `jcs`
+(`src/delegation.ts`) re-export these two.
+
+| Document | Form | Computed by | Specified in |
+|---|---|---|---|
+| a settings backup's `sha256`, over `tables` | settings form | `settingsBackupDigest` | [service](service.md#settings-backup), DEC-0025 |
+| a device policy's Ed25519 signature, over the policy without `signature` — DEC-0031's "its canonical JSON" | settings form | `policySigningInput` | [devices](devices.md#policy), DEC-0031 |
+| a policy key set's signature under the root key | settings form | `policySigningInput`, as a policy | [devices](devices.md#key-sets), DEC-0031 |
+| an activity event's derived `eventId`, over `{key, source}` | settings form | `activityEventId` | [activity](activity.md#event-id), DEC-0030 |
+| a path-derived `sourceKey`, the HMAC over `{offset, path}` | settings form | `pathSourceKey` | [activity](activity.md#event-id), DEC-0030 |
+| an approval's `actionDigest`, over the action | RFC 8785 | `actionDigest` | [delegation](delegation.md#approval-approval1), DEC-0039 |
+| the board's idempotency digest, over the operation's arguments after `fabric-project-comms/0.1` NUL `<operation>` NUL | RFC 8785, the arguments holding integers within ±(2^53 − 1) only | `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) | [project comms](project-comms.md#idempotency), DEC-0022 |
+| a revisioned object's `contentHash`, over the object without `contentHash` | RFC 8785 | `rfc8785`; no contract code computes it | [overview](overview.md#common-identity-and-references) |
+
+A JWS — the delegation token, the approval document — signs its own base64url segments as sent and needs no
+canonical form; a session handoff's `integrity` digests file bytes.
+
+A new signed or hashed document picks one of these two forms and names it, never a third: a document that is or
+mirrors stored settings takes the settings form; any other takes RFC 8785. A restriction of the input, as the
+board's integers, is not a third form, since the bytes stay those of the named form. The shared vectors,
+[`fixtures/vectors/canonical.json`](../../fixtures/vectors/canonical.json), hold each form's cases (RFC 8785's own
+samples and its Appendix B among them), the inputs on which the two differ, and the board's digests; a kit port
+runs its functions over them, and `test/canonical.test.ts` runs this repository's.
+
 ## Semantic rule codes
 
 Every semantic rule has one `FAC-SEM-NNN` code, and this table is where a code is allocated.

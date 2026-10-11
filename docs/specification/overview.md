@@ -33,7 +33,8 @@ Shape conformance is necessary but not sufficient for implementation admission.
 - Revisioned objects MUST carry `revision`, `contentHash`, `createdAt` and
   `createdBy`.
 - `contentHash` MUST use `sha256:<64 lowercase hexadecimal digits>` over the
-  canonical JSON representation with `contentHash` omitted.
+  RFC 8785 canonical JSON of the object with `contentHash` omitted
+  ([canonical forms](conformance.md#canonical-forms), DEC-0043).
 - References MUST name an immutable object ID and revision. A moving alias MAY be
   used for discovery but MUST resolve before a run starts.
 - Times use RFC 3339 UTC strings.

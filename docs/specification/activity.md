@@ -207,11 +207,12 @@ A collector MUST drop content and person attributes at the source. Claude Code's
   is re-scanned after a restart — MUST carry a **derived** id, so a second read yields the same id.
   The id is `sha256:` followed by the hex SHA-256 of the canonical JSON of
   `{"key": <sourceKey>, "source": <source>}`, using the canonical form of
-  [settings backups](service.md#settings-backup). The event carries that `sourceKey` (schema).
+  [settings backups](service.md#settings-backup), not RFC 8785
+  ([canonical forms](conformance.md#canonical-forms), DEC-0043). The event carries that `sourceKey` (schema).
   `FAC-SEM-039` checks the derivation ([`activityEventId`](../../src/activity-rules.ts)).
 - When the source has no id of its own, the record is identified by its place in a file. A
   **path-derived key MUST be hashed**: the `sourceKey` is `hmac-sha256:` and the hex HMAC-SHA-256 of
-  the canonical JSON `{"offset": <byte offset>, "path": <path relative to the runtime's own
+  the settings-form canonical JSON `{"offset": <byte offset>, "path": <path relative to the runtime's own
   directory>}`. A plain relative path leaks the person: Claude Code's project directories encode
   the home directory into the name (`-Users-<name>-…`).
 - The HMAC key is the device's **telemetry key** ([`pathSourceKey`](../../src/activity-rules.ts),
