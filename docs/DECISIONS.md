@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0044`
+**Next free ID:** `DEC-0045`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1753,3 +1753,73 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   F-B-112, F-B-315 (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P2-01. DEC-0043 was
   reserved by git CAS (`agent_sync.py reserve --key canonical-forms-20261011 DEC`); this file and `conformance.md`
   were edited under git leases; the record plane is `fs`.
+
+### DEC-0044 — Service hygiene: a setup state is not an outage, a stdio server is declared where it is used, no secret in a command line
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards' outage
+  watcher (FD-48) and Copylot read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
+  LC-21 (its own row); Fabric starts provider entries' stdio servers by `scope`.
+- **Decision:**
+  - a well-known `degraded` entry MAY carry `setup: true`: the source waits for a person to finish setting it up,
+    not an outage. It still names `source` and `reason` and still makes the service `degraded` (`FAC-SEM-011`
+    unchanged); a watcher MUST NOT open an outage alert for it ([service](specification/service.md#well-known-document));
+  - a manifest's stdio MCP connection and a provider entry's `run.mcp.stdio` MAY carry `scope`: `project`, or
+    `on-demand` (the default when absent). `session`, every session, is spelled and refused by `FAC-SEM-056`; a host
+    never writes a declared stdio server into a runtime's user-wide MCP configuration. A tool without per-session
+    state SHOULD be a service's MCP surface, one copy on the machine under its supervisor
+    ([profiles](specification/profiles.md#where-a-stdio-server-is-declared), LC-19);
+  - no declared launch argument or MCP entry carries a credential (`FAC-SEM-057`): a manifest's MCP `args`,
+    `executableRef` and `url`, a local runner's `args` and `executableRef`, a provider entry's `command` and `url`, a
+    runner's `version`, `auth` and drive `argv`, a descriptor's `commands`
+    ([profiles](specification/profiles.md#no-secret-in-a-command-line), LC-21);
+  - one detector, `src/secret-shape.ts`: DEC-0041's whole-word credential names, the value shapes, SH-10's
+    `secretArgument` and a URL check (`secretUrl`: user-information password, a credential-named or secret-shaped
+    query or fragment parameter). `src/fabric-links.ts` re-exports what it exported. `src/session-handoff.ts` keeps
+    its copy, because Fabric vendors that file alone and runs it without this kit
+    (`apps/desktop/test/session-handoff-conformance.test.mjs` on Fabric's unmerged branch `agent/w2-handoff` at `29c8de91`, which pins its copy by sha256 at contract `84043cb`); a test holds the copy
+    to the original's patterns and behaviour.
+- **Why:** three asks from live consumers on 2026-10-11. The copy agent's database was down 3 h 07 min and the
+  operator heard nothing; the operator's rule (Dashboards' watcher messages after 5 minutes) needs to tell a setup
+  state from a failure under the same source. The same day about 35 sessions each held their own copies of five
+  stdio MCP servers, about 10 GB, which helped fill the disk three times (LC-19); and a plugin's MCP passed its bearer
+  key to `mcp-remote` in argv, visible in `ps` (LC-21).
+- **Compatibility:** Additive for documents; `contractVersion` stays `0.1.0`. Two optional fields; every existing
+  document stays valid, and an absent `scope` means `on-demand` — which gives every existing manifest's host a new
+  duty: stop the server when the run that started it ends. Not additive for two readers of provider entries:
+  Fabric's registry (`apps/desktop/src/main/agentRegistry.ts:236` at `487ef5b0`) and the adapter's
+  (`fabric_provider.py:119`) refuse any `run.mcp.stdio` member but `command` and `env`, so writers do not emit
+  `scope` until both accept it (their board rows, CT-27 and CT-28). `FAC-SEM-056` refuses only the spelled-out
+  `session`; the real LC-19 control — a host never writing a declared stdio server into a user-wide configuration —
+  is a host duty no checker can see, so LC-19's verification is met only for what documents declare. Tightening for two readers: a watcher that alerted on
+  every degraded source stops alerting on a setup entry, and a host that wrote declared stdio servers into a
+  user-wide configuration stops. `FAC-SEM-057` refuses a document that already carried a credential in an argument
+  or URL; no fixture or known consumer document does. At its next pin a consumer re-vendors `src/session-handoff.ts`
+  (one comment line changed) and may import `src/secret-shape.ts` instead of its own copy of the matcher. The
+  positive sweep now reads a manifest whole under the new kind `manifest` instead of `service-manifest`, which takes
+  a descriptor beside its manifest.
+- **Consequences / affects:**
+  - spec: `docs/specification/profiles.md` (where a stdio server is declared, no secret in a command line, the
+    semantic-rules table), `docs/specification/service.md` (the setup state, the descriptor's commands, surfaces),
+    `docs/specification/provider.md` (`scope`), `docs/specification/conformance.md` (`FAC-SEM-056`, `FAC-SEM-057`,
+    two reader rows);
+  - schema: `schemas/service-well-known.schema.json` (`degraded[].setup`), `schemas/manifest.schema.json` and
+    `schemas/provider.schema.json` (`scope`);
+  - code: `src/secret-shape.ts` (new), `src/semantic-rules.ts`, `src/fabric-links.ts` (re-exports),
+    `src/session-handoff.ts` (a comment);
+  - fixtures: 3 positive, 3 negative (`fixtures/catalogue.json`), 6 semantic (`fixtures/semantic/stdio-scope-*.json`,
+    `fixtures/semantic/command-line-*.json`);
+  - tests: `test/service-hygiene.test.ts` (new), `test/session-handoff-review.test.ts` (the copy against the
+    original), `test/positive-sweep.test.ts`, `test/fabric-button.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Setup state, Server scope), `docs/DOCMAP.md`, `README.md`, the handoff
+    `docs/handoffs/2026-10-12-service-hygiene.md`.
+- **Not decided here:** which `degraded` sources a given service marks `setup` (each service's own); how long a
+  watcher waits (the operator's 5 minutes, Dashboards' to implement); a `scope` for servers in a session handoff's
+  `mcp.json` (that file is already one run's); whether the adapter's plugin check refuses or warns.
+- **Source:** fabric-workspace `knowledge/authority.md`, *Telling the operator about outages* (operator, 2026-10-11),
+  and `knowledge/lifecycle.md` LC-19 and LC-21 (PR #136, `34e5fa1`); board rows CT-22, CT-23, CT-24; board run wave 2,
+  node N15, packet P2-02. DEC-0044 and `FAC-SEM-056`, `FAC-SEM-057` were reserved by git CAS
+  (`agent_sync.py reserve --key service-hygiene-20261011 DEC`, `--key service-hygiene-{mcp-scope,command-line}-20261011
+  SEM`); `DEC-0043` was reserved first by packet P2-01, so the marker moves to `DEC-0045`. This file and
+  `conformance.md` were edited under git leases; the record plane is `fs`.

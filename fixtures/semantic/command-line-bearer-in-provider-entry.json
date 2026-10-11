@@ -1,0 +1,38 @@
+{
+  "description": "The 2026-10-11 incident's shape: an mcp-remote bridge given its bearer in argv, where ps shows it (LC-21, FAC-SEM-057). The header comes from a secret reference in env instead.",
+  "schema": "provider.schema.json",
+  "kind": "provider-entry",
+  "document": {
+    "protocol": "fabric-provider/0.1",
+    "id": "example-agent",
+    "providerId": "https://agents.example/providers/example-agent",
+    "name": "Example Agent",
+    "summary": "Drafts reports on request; runs as a stdio MCP server.",
+    "manifest": "~/.local/share/example-agent/fabric-agent.json",
+    "run": {
+      "mcp": {
+        "stdio": {
+          "command": [
+            "~/.local/bin/npx",
+            "mcp-remote",
+            "https://agents.example/mcp",
+            "--header",
+            "Authorization: Bearer example0123456789abcdef"
+          ],
+          "scope": "on-demand"
+        }
+      }
+    },
+    "source": {
+      "repository": "https://github.com/example/example-agent"
+    },
+    "installedAt": "2026-09-30T08:00:00Z",
+    "installedBy": "example-agent install 1.0.0"
+  },
+  "findings": [
+    {
+      "code": "FAC-SEM-057",
+      "instancePath": "/run/mcp/stdio/command/4"
+    }
+  ]
+}

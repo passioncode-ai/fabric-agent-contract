@@ -123,6 +123,10 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 300
+          },
+          "setup": {
+            "description": "DEC-0044. true: the source waits for a person to finish setting it up (a key not entered, a model not chosen); it is not an outage, and a watcher does not alert on it. Absent or false: the source is failing.",
+            "type": "boolean"
           }
         },
         "additionalProperties": false

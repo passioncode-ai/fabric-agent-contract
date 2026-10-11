@@ -188,6 +188,13 @@ describes an installation, not a run.
 process, status, degraded sources and surfaces — unauthenticated for a local
 placement, behind the service token for a remote one.
 
+**Setup state**: A degraded source whose well-known entry says `setup: true`: it waits for a person to finish
+setting it up, such as a key not entered or a model not chosen. It is not an outage, and a watcher does not alert
+on it (DEC-0044).
+
+**Server scope**: Where a host starts a declared stdio MCP server: `project` (the sessions of a project that binds
+it) or `on-demand` (the one run that binds it, the default), never `session`, every session (LC-19, DEC-0044).
+
 **Activity event**: One record in a service's events feed — when, what kind, which
 level, one sentence a person can read, and optionally a subject, a link and a
 request to notify the operator.

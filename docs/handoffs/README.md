@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-11 canonical forms](2026-10-11-canonical-forms.md) | DEC-0043 (board run P2-01) | pending: pull request open |
+| [2026-10-12 service hygiene](2026-10-12-service-hygiene.md) | DEC-0044 | pull request open |
+| [2026-10-11 canonical forms](2026-10-11-canonical-forms.md) | DEC-0043 (board run P2-01) | PR #42 `4fdbd79` |
 | [2026-10-11 board waves](2026-10-11-board-waves.md) | the board run (inventory, canvas, six waves) | PR #33 `2afbe60` |
 | [2026-10-11 session handoff](2026-10-11-session-handoff.md) | DEC-0042 | PR #31 `213e5a3` |
 | [2026-10-11 meter grant read](2026-10-11-meter-grant-read.md) | DEC-0041 | PR #32 `7931c1d` |

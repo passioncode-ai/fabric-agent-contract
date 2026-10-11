@@ -18,15 +18,15 @@ does it for an agent.
 Status: contract `0.1.0`. What ships: the JSON Schemas, the fixtures, the conformance checker
 (`pnpm run check`: schemas, semantic rules, documents), the `pin:check` CLI that reports a consumer's
 contract pin, and reference verifiers that consumers copy or port and test against this repository's
-vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`
-and `src/session-handoff.ts`. What does not ship: a runtime, a provider implementation, a model router,
+vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`,
+`src/session-handoff.ts` and `src/secret-shape.ts` (the one credential detector). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
 
 - [Contract overview](docs/specification/overview.md)
 - [Create or connect a compatible agent](docs/guides/connecting-compatible-agents.md)
-- [MCP, A2A and local-runner profiles](docs/specification/profiles.md)
+- [MCP, A2A and local-runner profiles — where a stdio server is declared, and no secret in a command line (DEC-0044)](docs/specification/profiles.md)
 - [Registry, admission and binding](docs/specification/registry.md)
 - [Coordination and Git integration](docs/specification/coordination.md)
 - [Execution contexts and account pools](docs/specification/execution-context.md)

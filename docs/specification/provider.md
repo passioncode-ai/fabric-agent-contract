@@ -23,7 +23,7 @@ overrides), mode 0600, written only by the agent's installer, removed by its uni
 | `id` | `^[a-z][a-z0-9-]{1,62}$` | required; unique across `providers/` and `services/` |
 | `name`, `summary` | string ≤ 80 / ≤ 200 | required / optional |
 | `manifest` | absolute or `~/` path to `fabric-agent.json` | required; the manifest's `provider.id` names this entry |
-| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | required; argv arrays only, never a shell string; env values are secret references, never values (DEC-0013) |
+| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | required; argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013); `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044) |
 | `source.repository` | URL | optional |
 | `installedAt`, `installedBy` | RFC 3339, string | required |
 | `extensions` | object of absolute-URI keys | optional; unknown keys preserved |
@@ -68,6 +68,11 @@ These follow from the table and are enforced by the schema:
   is `secret-ref:<reference>` — a reference to a secret the host resolves at start
   (DEC-0013), such as `secret-ref:example-agent/EXAMPLE_API_KEY`.
 - `url` is `http://127.0.0.1:<port>/mcp`: loopback only, the port in range, no query.
+- `run.mcp.stdio.scope` is `project`, `on-demand` or `session`; the last is spelled so that `FAC-SEM-056` refuses it
+  by name ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044). A writer does not emit
+  `run.mcp.stdio.scope` until the readers accept it: Fabric's registry (`apps/desktop/src/main/agentRegistry.ts:236`
+  at `487ef5b0`) and the adapter's (`fabric_provider.py:119`) admit only `command` and `env` today. An absent `scope`
+  is `on-demand`.
 
 ## Semantic rules
 
@@ -76,6 +81,10 @@ These follow from the table and are enforced by the schema:
 | `FAC-SEM-013` | `provider-directory` | no id is both a service and a provider, or two providers |
 | `FAC-SEM-014` | `provider-observation` | the entry's `id` is its file name's stem; its `providerId` equals the resolved manifest's `provider.id` |
 | `FAC-SEM-015` | `provider-entry` | every `env` value has the form `secret-ref:NAME`, and NAME is not itself a credential |
+
+A provider entry is also read by `FAC-SEM-056` (a stdio server's scope) and `FAC-SEM-057` (no credential in
+`command` or `url`), defined in [profiles](profiles.md#semantic-rules) because they apply to every document that
+declares a server or a command line.
 
 The readings AR-1 left open (OQ-0001, OQ-0004) were ruled by DEC-0017, above.
 

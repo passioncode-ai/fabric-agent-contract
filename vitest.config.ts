@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/session-handoff.ts", "src/operator-session.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -25,13 +25,14 @@ export default defineConfig({
         // P2-01 moved RFC 8785's 20 covered branches to src/canonical.ts; the 15 uncovered stay for P2-03.
         "src/delegation.ts": { branches: 93.85 },
         "src/device-rules.ts": { branches: 79.81 },
-        "src/fabric-links.ts": { branches: 93.75 },
+        "src/fabric-links.ts": { branches: 97.61 },
         "src/grant-projection.ts": { branches: 87.8 },
         "src/interop-rules.ts": { branches: 88.46 },
         "src/operator-session.ts": { branches: 90.9 },
         "src/registry-rules.ts": { branches: 90.54 },
         "src/route-rules.ts": { branches: 92.8 },
-        "src/semantic-rules.ts": { branches: 85.71 },
+        "src/secret-shape.ts": { branches: 100 },
+        "src/semantic-rules.ts": { branches: 90.95 },
         "src/session-handoff.ts": { branches: 88.91 },
         "src/spend-rules.ts": { branches: 87.09 }
       }

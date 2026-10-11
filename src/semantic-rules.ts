@@ -10,12 +10,13 @@ import { deviceRules } from "./device-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
+import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
 
 export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   const registry = registryRules(kind, value);
-  if (registry) return registry;
+  if (registry) return [...registry, ...declaredServers(kind, value), ...commandLines(kind, value)];
   if (!isObject(value)) return [{ code: "FAC-SEM-000", instancePath: "", message: "value must be an object" }];
   const interop = interopRules(kind, value);
   if (interop) return interop;
@@ -64,7 +65,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known" && value.status === "ready" && Array.isArray(value.degraded) && value.degraded.length > 0) {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
-  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value));
+  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value));
+  if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
@@ -288,3 +290,109 @@ function commsTransition(value: JsonObject): Finding[] {
 }
 // #endregion comms-rules
 
+
+// #region declared-commands — docs: docs/specification/profiles.md#semantic-rules
+const listOf = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
+const stringsOf = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
+
+/** Every stdio MCP server a document declares, with where its `scope` sits: a manifest's capability profiles, a provider entry's `run`. */
+function stdioServers(kind: string, value: unknown): Array<{ at: string; server: JsonObject }> {
+  if (kind === "manifest" && isObject(value)) {
+    return listOf(value.capabilities).flatMap((capability, index) => {
+      const connection = isObject(capability.profile) && capability.profile.kind === "mcp" && isObject(capability.profile.connection) ? capability.profile.connection : undefined;
+      return connection?.mode === "stdio" ? [{ at: `/capabilities/${index}/profile/connection`, server: connection }] : [];
+    });
+  }
+  if (kind === "provider-entry" && isObject(value) && isObject(value.run) && isObject(value.run.mcp) && isObject(value.run.mcp.stdio)) {
+    return [{ at: "/run/mcp/stdio", server: value.run.mcp.stdio }];
+  }
+  return [];
+}
+
+/**
+ * FAC-SEM-056 (DEC-0044, LC-19): a stdio MCP server is declared where it is used — for a project or on demand —
+ * never for every session. Thirty-five sessions each holding five stdio servers held about 10 GB on 2026-10-11.
+ */
+function declaredServers(kind: string, value: unknown): Finding[] {
+  return stdioServers(kind, value)
+    .filter(({ server }) => server.scope === "session")
+    .map(({ at }) => ({ code: "FAC-SEM-056", instancePath: `${at}/scope`, message: "a stdio MCP server is declared for a project or on demand, never for every session (LC-19)" }));
+}
+
+/** Every launch argument and MCP entry a document declares, as `[instancePath, value, isUrl]`. */
+function declaredCommandLines(kind: string, value: unknown): Array<[string, string, boolean]> {
+  const argv = (at: string, list: unknown): Array<[string, string, boolean]> => stringsOf(list).map((arg, index) => [`${at}/${index}`, arg, false]);
+  const url = (at: string, raw: unknown): Array<[string, string, boolean]> => (typeof raw === "string" ? [[at, raw, true]] : []);
+  const runner = (entry: JsonObject, at: string) => [
+    ...argv(`${at}/version/argv`, isObject(entry.version) ? entry.version.argv : undefined),
+    ...argv(`${at}/auth/argv`, isObject(entry.auth) ? entry.auth.argv : undefined),
+    ...Object.entries(isObject(entry.drives) ? entry.drives : {}).flatMap(([drive, spec]) => argv(`${at}/drives/${drive}/argv`, isObject(spec) ? spec.argv : undefined))
+  ];
+  if (kind === "runner-catalogue") return listOf(value).flatMap((entry, index) => runner(entry, `/${index}`));
+  // Every other kind is one document; a value that is not an object declares nothing.
+  return listOf([value]).flatMap((doc): Array<[string, string, boolean]> => {
+    if (kind === "runner") return runner(doc, "");
+    if (kind === "service-descriptor") return Object.entries(isObject(doc.commands) ? doc.commands : {}).flatMap(([name, list]) => argv(`/commands/${name}`, list));
+    if (kind === "provider-entry") {
+      const mcp = isObject(doc.run) && isObject(doc.run.mcp) ? doc.run.mcp : {};
+      return [...argv("/run/mcp/stdio/command", isObject(mcp.stdio) ? mcp.stdio.command : undefined), ...url("/run/mcp/url", mcp.url)];
+    }
+    if (kind === "manifest") {
+      return listOf(doc.capabilities).flatMap((capability, index) => {
+        const profile = isObject(capability.profile) ? capability.profile : {};
+        const at = `/capabilities/${index}/profile`;
+        const connection = profile.kind === "mcp" && isObject(profile.connection) ? profile.connection : {};
+        return [
+          ...url(`${at}/connection/url`, connection.url),
+          ...url(`${at}/connection/executableRef`, connection.executableRef),
+          ...argv(`${at}/connection/args`, connection.args),
+          ...(profile.kind === "local-runner" ? [...url(`${at}/executableRef`, profile.executableRef), ...argv(`${at}/args`, profile.args)] : [])
+        ];
+      });
+    }
+    return [];
+  });
+}
+
+/**
+ * FAC-SEM-057 (DEC-0044, LC-21): no declared launch argument or MCP entry carries a credential — a process listing
+ * shows every argument to the whole user, and a URL lands in logs and configuration files. Keys reach a process
+ * through its environment (a secret reference), a 0600 file or the vault. The message never repeats the value.
+ */
+/**
+ * An argument that carries a credential by its name rather than its shape: `--token=x`, `API_KEY=x`, or a
+ * credential-named flag followed by its value (`--api-key x`). Checked here, beside the shape detector, so the
+ * detector session-handoff copies stays byte-identical (LC-21).
+ */
+function namedCredentialArguments(lines: Array<[string, string, boolean]>): Set<string> {
+  const flagged = new Set<string>();
+  const byList = new Map<string, Array<[string, string]>>();
+  for (const [at, text, isUrl] of lines) {
+    if (isUrl) continue;
+    const parent = at.replace(/\/\d+$/, "");
+    byList.set(parent, [...(byList.get(parent) ?? []), [at, text]]);
+  }
+  for (const list of byList.values()) {
+    list.forEach(([at, text], index) => {
+      const assigned = /^(?:--?)?([A-Za-z][\w.-]*)=(.+)$/.exec(text);
+      if (assigned && credentialName(assigned[1] as string)) flagged.add(at);
+      const flag = /^--?([A-Za-z][\w.-]*)$/.exec(text);
+      const next = list[index + 1];
+      if (flag && credentialName(flag[1] as string) && next && !next[1].startsWith("-")) flagged.add(next[0]);
+    });
+  }
+  return flagged;
+}
+
+function commandLines(kind: string, value: unknown): Finding[] {
+  const lines = declaredCommandLines(kind, value);
+  const named = namedCredentialArguments(lines);
+  return lines
+    .filter(([at, text, isUrl]) => (isUrl ? secretUrl(text) : secretArgument(text) || named.has(at)))
+    .map(([instancePath, , isUrl]) => ({
+      code: "FAC-SEM-057",
+      instancePath,
+      message: isUrl ? "a declared URL never carries a credential: pass it in a header from a secret reference (LC-21)" : "a launch argument never carries a credential: a process listing shows it (LC-21)"
+    }));
+}
+// #endregion declared-commands

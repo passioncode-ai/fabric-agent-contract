@@ -1,0 +1,38 @@
+{
+  "description": "A provider entry asks the host to start its stdio MCP server in every session (FAC-SEM-056).",
+  "schema": "provider.schema.json",
+  "kind": "provider-entry",
+  "document": {
+    "protocol": "fabric-provider/0.1",
+    "id": "example-agent",
+    "providerId": "https://agents.example/providers/example-agent",
+    "name": "Example Agent",
+    "summary": "Drafts reports on request; runs as a stdio MCP server.",
+    "manifest": "~/.local/share/example-agent/fabric-agent.json",
+    "run": {
+      "mcp": {
+        "stdio": {
+          "command": [
+            "~/.local/bin/example-agent",
+            "mcp"
+          ],
+          "env": {
+            "EXAMPLE_API_KEY": "secret-ref:example-agent/EXAMPLE_API_KEY"
+          },
+          "scope": "session"
+        }
+      }
+    },
+    "source": {
+      "repository": "https://github.com/example/example-agent"
+    },
+    "installedAt": "2026-09-30T08:00:00Z",
+    "installedBy": "example-agent install 1.0.0"
+  },
+  "findings": [
+    {
+      "code": "FAC-SEM-056",
+      "instancePath": "/run/mcp/stdio/scope"
+    }
+  ]
+}
