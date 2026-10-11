@@ -242,6 +242,73 @@ flowchart TD
 
 - **Screens traversed:** SCR-12 success; SCR-12 empty; SCR-12 error.
 
+### FLW-10: Operator sets a spend limit and answers what exceeds it
+
+- **Traces:** ST-012, ST-013 (JTBD-07, JRN-06/#1, JRN-06/#2)
+- **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
+- **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
+- **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
+- **Task analysis:** the launcher computes options → the operator picks one (one is preselected) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
+- **Rejected shape:** a fixed list of budgets, or an approval in a chat message — rejected because the options must come from the project (spend policy) and a chat message is never the approval (spend policy rule 3).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  F[First paid run, no policy] --> P[Screen: Spend policy choice]
+  P --> R[Policy recorded with its inputs]
+  R --> C{Grant check}
+  C -->|within the levels| A[Allowed, reserved]
+  C -->|above the threshold| Q[Denied with one filed request]
+  Q --> M[Screen: Chat with the agent's bot]
+  M -->|confirmed with the amount| A
+  M -->|no answer| W[Nothing spent; other work goes on]
+```
+
+- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-11 success; SCR-11 error.
+
+### FLW-11: Operator approves one action for an outside caller
+
+- **Traces:** ST-014 (JTBD-07, JRN-06/#3)
+- **Goal:** an effect asked for across the machine boundary happens only once, after an approval of exactly that action
+- **Entry points:** a callee's `approval-required` refusal to a T2 caller
+- **Success exit:** the action taken once; the approval's `jti` consumed
+- **Task analysis:** the callee refuses with the action's digest → the caller asks the hub → Fabric shows the operator the action → the operator approves → the hub signs `approval/1` (`method: prompt`) → the caller repeats the call → the callee checks the token, the grant, then the approval, and acts.
+- **Rejected shape:** a standing approval for a kind of action — rejected because an approval binds one action's digest, one callee and one use (DL-17, DL-18).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  R[approval-required with the digest] --> H[Caller asks the hub]
+  H --> P[Screen: Fabric's approval prompt]
+  P -->|declined| N[No approval; nothing happens]
+  P -->|approved| D[approval/1 signed, at most 24 h]
+  D --> C{Callee: token, grant check, approval}
+  C -->|valid, first use| A[Action taken; jti consumed]
+  C -->|used before| U[approval-reused]
+```
+
+- **Screens traversed:** SCR-14 success; SCR-14 error.
+
+### FLW-12: The host signs in again after a dashboard session ends
+
+- **Traces:** ST-015 (JTBD-06, JRN-05/#3)
+- **Goal:** an ended session is visible on the page and recovered by the host without a loop
+- **Entry points:** a dashboard page requested after the session ended
+- **Success exit:** the same page open again under a new session
+- **Task analysis:** the page answers `401` with an explanation → the host asks for a new login code with the descriptor token → it reopens the same page → it does so at most once a minute per page.
+- **Rejected shape:** reloading the page on any `401` from its API — rejected because it would discard what the operator is doing (service, Operator login).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  E[Session ended: idle, 7 days, logout or rotation] --> P[Screen: Dashboard page after the session ended]
+  P --> H{Host shows it, and last retry over a minute ago?}
+  H -->|yes| L[New login code; same page reopened]
+  H -->|no| S[Page stays; it explains the state]
+```
+
+- **Screens traversed:** SCR-15 error; SCR-15 success.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

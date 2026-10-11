@@ -130,7 +130,16 @@ only under one (DEC-0039).
 **Delegation token**: A JWT of at most ten minutes, signed by the estate hub (Ed25519), that names the
 **Principal**, the **Actor chain**, exactly one callee, the capabilities and effect ceiling, and the
 grant a call is under (`fabric-delegation/0.1`, DEC-0039). The callee checks it offline against the
-estate's published keys. Not the service's descriptor token, which stays the host's.
+estate's published keys. Not the service's descriptor token, which stays the host's. It names exactly one
+grant (DEC-0045).
+
+**Trust tier**: Where a caller stands against the machine boundary (DEC-0045, delegation DL-25): **T0** the
+operator's own machine, **T1** an enrolled machine of the same owner, **T2** everything else. A callee requires no
+**Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
+
+**Small-order key**: An Ed25519 public key whose point has order 1, 2, 4 or 8 — libsodium's seven encodings, sign bit
+ignored. Anyone can forge a signature under one, and Node 20 and 22 accept the forgery, so every Ed25519 check in
+the contract refuses such a key before verifying (`src/ed25519.ts`, DEC-0045, CT-29).
 
 **Principal**: In delegation, the person on whose behalf the work runs: the operator, or an external
 person under a share grant (a token's `sub`). A grant's `principal` field names who the grant is

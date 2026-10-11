@@ -254,13 +254,17 @@ When `surfaces.dashboard.login` is `true`, the dashboard requires an operator se
 
 <a id="operator-session-lifetime"></a>
 
-**The session's lifetime (DEC-0039).** An operator session ends 12 hours after it was last used, and
+**The session's lifetime (DEC-0039, DEC-0045).** An operator session ends 12 hours after it was last used, and
 never later than 7 days after the login code was redeemed, however often it is used. It also ends on
 logout and when the descriptor token rotates: a session begun under the old token is refused under
-the new one. These are the kit's defaults and the longest a service may keep a session; a service
+the new one. The descriptor token **rotates** when the value in `auth.tokenFile` changes, whoever changed it
+and why: each new value is a new revision. A service records with each session the revision it began under,
+as an opaque value that changes with the token (a counter or the time the file was written), never the token
+itself. These are the kit's defaults and the longest a service may keep a session; a service
 MAY shorten either bound and MUST NOT lengthen one. A request that arrives within the bounds refreshes
-the 12 hours. [`src/operator-session.ts`](../../src/operator-session.ts) `operatorSessionExpiresAt` is
-the rule.
+the 12 hours. This tightened the rule before it (DEC-0039 as annotated, DEC-0045): a kit whose cookie lives
+longer stops conforming at its next pin. [`src/operator-session.ts`](../../src/operator-session.ts)
+`operatorSessionExpiresAt` is the rule.
 
 ## Authentication and network
 

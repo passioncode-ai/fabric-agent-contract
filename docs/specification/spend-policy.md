@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037, DEC-0038, DEC-0039, DEC-0041 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
+DEC-0037, DEC-0038, DEC-0039, DEC-0041, DEC-0045 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -65,16 +65,19 @@ Three rules apply to every grant and every reader:
    agent's key: `project-key` names a key issued for this project; `capability` names the agent whose
    capability is called, so that agent's own wallet and limits apply. A reader refuses any other source.
 2. **A principal is proven, not claimed** (DEC-0039, [delegation](delegation.md) DL-21). The meter issues
-   no identity and holds none: it is proven to by the estate hub's delegation token.
+   no identity and holds none: it is proven to by the estate hub's delegation token. That proof is owed
+   across the machine boundary (tier T2, [delegation](delegation.md#trust-tiers) DL-25); a caller inside it
+   (T0, T1) needs no token and no grant record, and the money limits — L0, L1 and each key's ceiling — still
+   bind it (DL-26, DEC-0045).
    - The callee exchanges the token it was called with for an **onward token** for the meter: `aud` the
      meter, the callee added as outermost actor, `scope` the meter's grant-check capability, `effect:
-     ["none"]`, the same grant, principal and project, expiring no later than the callee's token.
+     ["none"]`, the same one grant, principal and project, expiring no later than the callee's token.
    - It presents that token in `Authorization: Bearer` on a direct call to the meter, never in an argument.
      The request ([`grant-check-request`](../../schemas/grant-check-request.schema.json)) carries the amount
      and the `jti` of the callee's own token, for attribution.
-   - The meter verifies the onward token offline (audience itself, capability its grant-check capability,
-     effect `none`) and answers any refusal of it — expired, another audience, unsigned — as
-     `principal-unproven`.
+   - The meter verifies the onward token offline (audience itself, scope exactly its grant-check capability,
+     effect exactly `none`) and answers any refusal of it — expired, another audience, unsigned — as
+     `principal-unproven`. A callee that stops on a denial relays its `code` unchanged (DL-21 step 6).
    - A label the caller supplies about itself is advisory.
 
    The boundary, stated plainly: any process of the same OS account can read what the caller holds. The

@@ -81,6 +81,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: switching windows and finding the project costs a minute each time; pull: a button in the corner of every product; anxiety: a link that starts work or spends money by itself; habit: copy the project name into Fabric.
 - **Success metric:** from any dashboard that shows the button, Fabric opens on the right service and project in one press, starts nothing until I act, and says how to get Fabric when it is missing.
 
+### JTBD-07: Bound what my agents spend and what outside callers do
+
+- **Statement:** When my agents spend money or a person outside my machine calls one of them, I want to set the limits once and answer only what goes beyond them, so I can let work run without approving each step or finding a surprise on the bill.
+- **Personas:** P-02
+- **Type:** functional, emotional
+- **Forces:** push: a fixed budget that is wrong for every project; pull: options computed from the project's own spend; anxiety: an agent that spends on one tap, or an outside caller who acts as me; habit: approve everything in chat.
+- **Success metric:** a project's limit is chosen once with its reasons kept, a spend above the threshold waits for one answer that shows the amount, and an outside caller's effect happens only after an approval of that one action.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -129,6 +137,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Open | chooses chat or a coding session | the button's menu | 4 | the wrong project opens | ids carried by the link, validated (priority 9) |
 | 3 | Continue | works in Fabric, then opens the product page again | Fabric, Fabric Dashboards | 4 | a sign-in again | the host signs in, the link carries no secret (priority 8) |
 | 4 | Missing | presses it on a computer without Fabric | the button's menu | 2 | nothing happens | one sentence with where to get Fabric (priority 8) |
+
+### JRN-06: Operator — set limits, then answer only what exceeds them (JTBD-07)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Set | chooses the project's spend policy at its first paid run | the launcher's policy choice | 3 | a number with no reason behind it | options computed from presets and recent spend, one preselected, inputs kept (priority 9) |
+| 2 | Answer | answers one request for a spend above the threshold | the operator channel | 3 | the agent waits, or spends anyway | one durable request with the amount; the agent works on meanwhile (priority 9) |
+| 3 | Approve | approves one action an outside caller asked for | Fabric's approval prompt | 2 | an approval that could be reused for something else | an approval bound to one action, one callee, one use (priority 9) |
 
 ## 4. User stories
 
@@ -259,6 +275,55 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given I choose the session, then Fabric shows the project's session view and starts the runner only when I press Start.
   - Given Fabric is not installed, then the menu says "Fabric is not installed — get it at passioncode.ai/fabric".
   - Given a link with a token or a bad id, then Fabric refuses the whole link and says why.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-012: Operator chooses a project's spend policy at its first paid run
+
+- **Story:** As P-02, I want to choose a project's spend limit once, from options computed for that project, so that its agents spend within a limit I understood.
+- **Traces:** JTBD-07, JRN-06/#1
+- **Acceptance criteria:**
+  - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
+  - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
+  - Given a policy is recorded, then the launcher never asks again for that project.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-013: Operator answers a spend approval request
+
+- **Story:** As P-02, I want a spend above the project's threshold to reach me once with its amount, so that I decide it while the agent goes on with other work.
+- **Traces:** JTBD-07, JRN-06/#2
+- **Acceptance criteria:**
+  - Given a check above the auto-approve threshold, then the meter denies it with the request it filed, and the agent files no second one.
+  - Given the request in the operator channel, when I confirm, then the confirmation shows the amount first (OC-6).
+  - Given I do not answer, then nothing is spent on that request and the agent's other work continues.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-014: Operator approves one action for an outside caller
+
+- **Story:** As P-02, I want an outside caller's effect to wait for my approval of that exact action, so that a share grant never lets anyone act as me beyond it.
+- **Traces:** JTBD-07, JRN-06/#3
+- **Acceptance criteria:**
+  - Given a T2 caller whose action needs approval, then the callee refuses `approval-required` with the action's digest, and Fabric asks me with the action shown.
+  - Given I approve, then Fabric signs one approval for that action and that callee, valid at most 24 hours, and the callee accepts it once.
+  - Given the same approval presented again, then the callee refuses `approval-reused`.
+  - Given a call from my own machine, then no approval is asked for: my instruction stands (DL-26).
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-015: Operator finds a dashboard whose session ended
+
+- **Story:** As P-02, I want a dashboard whose sign-in ended to say so and to be signed in again by its host, so that I never act on a page that silently stopped working.
+- **Traces:** JTBD-06, JRN-05/#3
+- **Acceptance criteria:**
+  - Given 12 hours without use, or 7 days since sign-in, or a rotated descriptor token, when I open a dashboard page, then the service answers `401` with a page that explains the state.
+  - Given a host showing that page, then it signs in again with a new login code and reopens the same page, at most once a minute per page.
+  - Given the page's own API call answers `401`, then the host does not reload the page.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

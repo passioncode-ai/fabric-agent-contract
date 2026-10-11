@@ -1,0 +1,48 @@
+{
+  "iss": "urn:fabric:estate:example",
+  "sub": "urn:person:operator",
+  "act": {
+    "sub": "example-writer",
+    "act": {
+      "sub": "example-media",
+      "act": {
+        "sub": "example-agent.default",
+        "act": {
+          "sub": "example-planner",
+          "act": {
+            "sub": "example-host"
+          }
+        }
+      }
+    }
+  },
+  "aud": "example-meter",
+  "scope": "grant.check",
+  "effect": [
+    "none"
+  ],
+  "grant": [
+    "urn:grant:project-a:example-media-writer#3"
+  ],
+  "spend": {
+    "mode": "limited",
+    "remaining": [
+      {
+        "window": "task",
+        "remainingUsd": 1.5
+      },
+      {
+        "window": "day",
+        "remainingUsd": 4.2
+      },
+      {
+        "window": "month",
+        "remainingUsd": 38
+      }
+    ]
+  },
+  "project": "urn:project:a",
+  "iat": 1791720030,
+  "exp": 1791720540,
+  "jti": "01JA7Y9M2N4P6Q8R0S2T4V6W8X"
+}

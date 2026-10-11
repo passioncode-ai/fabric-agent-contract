@@ -1,5 +1,7 @@
 import { createHash, createPublicKey, verify as verifySignature, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
+import { isSmallOrderKey } from "./ed25519.js";
+import { AGENT_ID } from "./fabric-links.js";
 import { isObject, type JsonObject } from "./findings.js";
 
 // #region delegation-verifier — docs: docs/specification/delegation.md#the-verifier
@@ -9,8 +11,8 @@ import { isObject, type JsonObject } from "./findings.js";
  * crypto verifies Ed25519 (RFC 8037 `EdDSA`); no JOSE library is needed.
  *
  * Attenuation is the issuer's check, not the verifier's: a callee never sees the parent of the token it is
- * handed, so it checks only what it can — the signature, the times, that the token names it, the chain's
- * depth, and that the called capability and its effect are inside the token.
+ * handed, so it checks only what it can — the signature, the claims' types, the times, that the token names it,
+ * the chain's depth, and that the called capability and its effect are inside the token (DL-13, in that order).
  */
 
 /** Every refusal code of the contract (DEC-0039 §Refusal codes). DEC-0037's grant-check codes are a subset. */
@@ -47,7 +49,7 @@ export const APPROVAL_TYP = "fabric-approval+jwt";
 /** A delegation token lives at most 10 minutes; an approval at most 24 hours. */
 export const MAX_DELEGATION_LIFETIME_SECONDS = 600;
 export const MAX_APPROVAL_LIFETIME_SECONDS = 86_400;
-/** The actor chain is at most four deep, the agent now calling included. */
+/** The actor chain is at most four deep, the agent now calling included; a token for the meter one deeper (DL-6). */
 export const MAX_CHAIN_DEPTH = 4;
 /** Clock skew tolerated between issuer and callee, both ways. */
 export const LEEWAY_SECONDS = 60;
@@ -79,7 +81,8 @@ export interface ApprovalClaims {
   actionDigest: string;
   aud: string;
   approver: string;
-  method: "prompt" | "operator-channel" | "device";
+  /** DEC-0045: `device` is removed until a decision defines it. */
+  method: "prompt" | "operator-channel";
   iat: number;
   exp: number;
   jti: string;
@@ -111,8 +114,8 @@ export interface VerifyDelegationOptions {
   capability: string;
   /** That capability's declared effect class (from its manifest entry). */
   effect: EffectClass;
-  /** The issuer this callee trusts (`auth.delegation.issuer`); when given, `iss` must equal it. */
-  issuer?: string;
+  /** The issuer this callee trusts (`auth.delegation.issuer`): `iss` must equal it. Required (DL-13 row 1). */
+  issuer: string;
   /** A read-only door (DL-3): it serves `effect: none` only and refuses any other capability, whatever the ceiling. */
   readOnly?: boolean;
 }
@@ -126,7 +129,8 @@ export interface VerifyApprovalOptions {
   now: number;
   /** `sha256:<hex>` of the RFC 8785 canonical JSON of the action the callee is about to take. */
   actionDigest: string;
-  issuer?: string;
+  /** The issuer this callee trusts: `iss` must equal it. Required. */
+  issuer: string;
   /** Where the approval's `jti` is consumed; a second use is `approval-reused`. Required: replay protection is
    * not optional, and a caller that truly needs none passes `UNSAFE_NO_JTI_STORE` by name. */
   jtiStore: JtiStore;
@@ -208,16 +212,21 @@ function headerProblem(header: JsonObject, typ: string): string | undefined {
   return undefined;
 }
 
-type KeyLookup = { key: KeyObject } | { problem: "unknown-key" | "unusable-key" | "duplicate-kid" | "key-not-for-signing" };
+type KeyLookup = { key: KeyObject } | { problem: "unknown-key" | "unusable-key" | "small-order-key" | "duplicate-kid" | "key-not-for-signing" };
 
 function keyFor(jwks: Jwks, kid: string): KeyLookup {
   const matches = jwks.keys.filter((candidate) => isObject(candidate) && candidate.kid === kid);
   if (matches.length > 1) return { problem: "duplicate-kid" };
   const jwk = matches[0];
   if (!jwk) return { problem: "unknown-key" };
-  // A key published for another use or algorithm is never a candidate (RFC 7517 §4.2, §4.4).
+  // A key published for another use or algorithm is never a candidate (RFC 7517 §4.2, §4.4); the published set is
+  // then outside delegation-jwks.schema.json, which is the issuer's fault (DL-13 row 3, F-B-319).
   if ((jwk.use !== undefined && jwk.use !== "sig") || (jwk.alg !== undefined && jwk.alg !== "EdDSA")) return { problem: "key-not-for-signing" };
   if (jwk.kty !== "OKP" || jwk.crv !== "Ed25519" || !isString(jwk.x) || jwk.d !== undefined) return { problem: "unusable-key" };
+  // CT-29: a small-order key verifies forged signatures on Node 20 and 22; it is refused before any verification.
+  const raw = Buffer.from(jwk.x, "base64url");
+  if (raw.length !== 32) return { problem: "unusable-key" };
+  if (isSmallOrderKey(raw)) return { problem: "small-order-key" };
   try {
     return { key: createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: jwk.x }, format: "jwk" }) };
   } catch {
@@ -237,7 +246,9 @@ function authentic(token: unknown, jwks: Jwks, typ: string): Checked {
   if (header) return { problem: header };
   const kid = compact.header.kid as string;
   const found = keyFor(jwks, kid);
-  if ("problem" in found) return found.problem === "unusable-key" || found.problem === "duplicate-kid" ? { problem: found.problem, issuer: true } : { problem: found.problem };
+  if ("problem" in found) return found.problem === "unknown-key" ? { problem: found.problem } : { problem: found.problem, issuer: true };
+  // RFC 8032 §5.1.7: an Ed25519 signature is 64 bytes. Node's verify already answers false for any other length,
+  // so on Node no test can tell this check is there (P2-03 plant M25); it stays for a port whose library is laxer.
   if (compact.signature.length !== 64 || !verifySignature(null, compact.signingInput, found.key, compact.signature)) return { problem: "bad-signature" };
   return { compact, kid };
 }
@@ -274,49 +285,100 @@ export function effectClosure(ceiling: readonly string[]): Set<string> {
 
 export const effectWithin = (effect: string, ceiling: readonly string[]): boolean => effectClosure(ceiling).has(effect);
 
-function delegationShape(payload: JsonObject): DelegationClaims | undefined {
-  const { iss, sub, act, aud, scope, effect, grant, iat, exp, jti } = payload;
-  if (!isString(iss) || !isString(sub) || !isString(aud) || !isString(scope) || !isString(jti) || !isTime(iat) || !isTime(exp)) return undefined;
-  if (!Array.isArray(effect) || effect.length === 0 || !effect.every((e) => (EFFECT_CLASSES as readonly unknown[]).includes(e))) return undefined;
-  if (!Array.isArray(grant) || grant.length === 0 || !grant.every(isString)) return undefined;
-  if (!isObject(act)) return undefined;
-  // DEC-0041: an optional claim the meter keys a window on is typed like any other.
-  if (payload.task !== undefined && !(typeof payload.task === "string" && OPAQUE_ID.test(payload.task))) return undefined;
-  return payload as unknown as DelegationClaims;
+/** A URI as DL-2 types one: a scheme, a colon and no white space (`urn:person:operator`, `https://…`). */
+const URI = /^[A-Za-z][A-Za-z0-9+.-]*:\S+$/;
+/** `delegation-token.schema.json` `jti` and `scope`: the claims' grammar, so a port reading the schema agrees. */
+const JTI = /^[A-Za-z0-9._~-]{16,128}$/;
+const SCOPE = /^[a-z][a-z0-9._-]{1,127}( [a-z][a-z0-9._-]{1,127})*$/;
+const SPEND_WINDOWS: readonly unknown[] = ["total", "task", "project", "day", "week", "month"];
+const isUri = (value: unknown): value is string => typeof value === "string" && URI.test(value);
+const isAmount = (value: unknown): boolean => typeof value === "number" && Number.isFinite(value) && value >= 0;
+
+/** The actor chain's depth when every actor is DL-2's — an agent id `sub`, an optional session id — else `undefined`. */
+function actorChainDepth(act: unknown): number | undefined {
+  let depth = 0;
+  for (let node: unknown = act; node !== undefined; node = (node as JsonObject).act) {
+    if (!isObject(node) || typeof node.sub !== "string" || !AGENT_ID.test(node.sub)) return undefined;
+    if (node.session !== undefined && !(typeof node.session === "string" && OPAQUE_ID.test(node.session))) return undefined;
+    depth += 1;
+  }
+  return depth;
+}
+
+/** `spend` as DL-2 types it: unlimited, or limited with one to six windows' remaining amounts and an optional per-call cap. */
+function spendShaped(spend: unknown): boolean {
+  if (!isObject(spend)) return false;
+  if (spend.mode === "unlimited") return true;
+  if (spend.mode !== "limited" || !Array.isArray(spend.remaining) || spend.remaining.length === 0 || spend.remaining.length > 6) return false;
+  if (!spend.remaining.every((entry) => isObject(entry) && SPEND_WINDOWS.includes(entry.window) && isAmount(entry.remainingUsd))) return false;
+  return spend.perCallMaxUsd === undefined || isAmount(spend.perCallMaxUsd);
+}
+
+type Shaped<T> = { claims: T } | { problem: string };
+
+/**
+ * DL-13 row 5: the claims have DL-2's types. A claim the profile does not know is ignored (RFC 7519 §4); every
+ * claim it knows is checked, so a port that reads the schema answers what this verifier answers (F-B-307).
+ */
+function delegationShape(payload: JsonObject): Shaped<DelegationClaims> & { depth?: number } {
+  const { iss, sub, act, aud, scope, effect, grant, spend, project, task, iat, exp, nbf, jti } = payload;
+  const depth = actorChainDepth(act);
+  if (depth === undefined) return { problem: "malformed-chain" };
+  const typed = isUri(iss) && isUri(sub) && typeof aud === "string" && AGENT_ID.test(aud)
+    && typeof scope === "string" && scope.length <= 4096 && SCOPE.test(scope)
+    && Array.isArray(effect) && effect.length > 0 && new Set(effect).size === effect.length && effect.every((e) => (EFFECT_CLASSES as readonly unknown[]).includes(e))
+    // DEC-0045: exactly one grant (F-B-305).
+    && Array.isArray(grant) && grant.length === 1 && typeof grant[0] === "string" && grant[0].length >= 1 && grant[0].length <= 256
+    && (spend === undefined || spendShaped(spend)) && (project === undefined || isUri(project))
+    // DEC-0041: an optional claim the meter keys a window on is typed like any other.
+    && (task === undefined || (typeof task === "string" && OPAQUE_ID.test(task)))
+    && isTime(iat) && isTime(exp) && (nbf === undefined || isTime(nbf)) && typeof jti === "string" && JTI.test(jti);
+  return typed ? { claims: payload as unknown as DelegationClaims, depth } : { problem: "malformed-claims" };
 }
 
 function approvalShape(payload: JsonObject): ApprovalClaims | undefined {
   const { iss, actionDigest, aud, approver, method, iat, exp, jti } = payload;
   if (!isString(iss) || !isString(actionDigest) || !isString(aud) || !isString(approver) || !isString(jti) || !isTime(iat) || !isTime(exp)) return undefined;
-  if (method !== "prompt" && method !== "operator-channel" && method !== "device") return undefined;
+  // DEC-0045: `device` is not a method until a decision defines it (F-B-314).
+  if (method !== "prompt" && method !== "operator-channel") return undefined;
   return payload as unknown as ApprovalClaims;
 }
 
-/**
- * Check a delegation token for one call. The order is fixed: nothing about a token is believed before its
- * signature is, so an unsigned token learns only `unauthenticated`.
- */
-export function verifyDelegation(token: string, options: VerifyDelegationOptions): DelegationAccepted | Refusal {
+/** DL-13 for one call, the chain allowed `maxDepth` actors: four for a callee, five for the meter's own token (DL-6). */
+function verifyAt(token: string, options: VerifyDelegationOptions, maxDepth: number): DelegationAccepted | Refusal {
   const { audience, jwks, now, capability, effect, issuer, readOnly } = options;
+  // Row 1: whom the callee trusts, and that issuer's keys.
+  if (!isString(issuer)) return refuse("issuer-unavailable", "no-trusted-issuer");
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
+  // Rows 2–4: form, header, key, signature.
   const checked = authentic(token, jwks, DELEGATION_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "unauthenticated", checked.problem);
-  const claims = delegationShape(checked.compact.payload);
-  if (!claims) return refuse("unauthenticated", "malformed-claims");
-  if (issuer !== undefined && claims.iss !== issuer) return refuse("unauthenticated", "wrong-issuer");
+  // Row 5: DL-2's types, then the issuer.
+  const shaped = delegationShape(checked.compact.payload);
+  if ("problem" in shaped) return refuse("unauthenticated", shaped.problem);
+  const { claims } = shaped;
+  if (claims.iss !== issuer) return refuse("unauthenticated", "wrong-issuer");
+  // Row 6: the lifetime and the times a token can hold before it is used.
   if (claims.exp <= claims.iat || claims.exp - claims.iat > MAX_DELEGATION_LIFETIME_SECONDS) return refuse("unauthenticated", "lifetime-above-profile");
   if (claims.iat > now + LEEWAY_SECONDS) return refuse("unauthenticated", "issued-in-future");
-  const nbf = (checked.compact.payload as JsonObject).nbf;
-  if (nbf !== undefined && (!isTime(nbf) || nbf > now + LEEWAY_SECONDS)) return refuse("unauthenticated", "not-yet-valid");
+  const nbf = checked.compact.payload.nbf as number | undefined;
+  if (nbf !== undefined && nbf > now + LEEWAY_SECONDS) return refuse("unauthenticated", "not-yet-valid");
+  // Rows 7–11.
   if (now > claims.exp + LEEWAY_SECONDS) return refuse("token-expired", "expired");
   if (claims.aud !== audience) return refuse("wrong-audience", "audience-mismatch");
-  const depth = chainDepth(claims.act);
-  if (!Number.isFinite(depth)) return refuse("unauthenticated", "malformed-chain");
-  if (depth > MAX_CHAIN_DEPTH) return refuse("chain-too-deep", `depth-${depth}`);
+  if ((shaped.depth as number) > maxDepth) return refuse("chain-too-deep", `depth-${shaped.depth}`);
   if (!claims.scope.split(" ").includes(capability)) return refuse("scope-not-granted", "capability-not-in-scope");
   if (readOnly && effect !== "none") return refuse("effect-above-ceiling", "read-only-door");
   if (!effectWithin(effect, claims.effect)) return refuse("effect-above-ceiling", `effect-${effect}`);
   return { ok: true, claims, principal: claims.sub, caller: claims.act.sub, chain: chainOf(claims.act), kid: checked.kid };
+}
+
+/**
+ * Check a delegation token for one call, in DL-13's order: nothing about a token is believed before its
+ * signature is, so an unsigned token learns only `unauthenticated`.
+ */
+export function verifyDelegation(token: string, options: VerifyDelegationOptions): DelegationAccepted | Refusal {
+  return verifyAt(token, options, MAX_CHAIN_DEPTH);
 }
 
 /**
@@ -327,12 +389,13 @@ export function verifyApproval(approval: string | undefined, options: VerifyAppr
   const { audience, jwks, now, actionDigest: expected, issuer, jtiStore } = options;
   if (approval === undefined || approval === "") return refuse("approval-required", "no-approval", { actionDigest: expected });
   if (!isObject(jtiStore) || typeof jtiStore.consume !== "function") return refuse("unknown-state", "no-jti-store");
+  if (!isString(issuer)) return refuse("issuer-unavailable", "no-trusted-issuer");
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
   const checked = authentic(approval, jwks, APPROVAL_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "approval-invalid", checked.problem);
   const claims = approvalShape(checked.compact.payload);
   if (!claims) return refuse("approval-invalid", "malformed-claims");
-  if (issuer !== undefined && claims.iss !== issuer) return refuse("approval-invalid", "wrong-issuer");
+  if (claims.iss !== issuer) return refuse("approval-invalid", "wrong-issuer");
   if (claims.exp <= claims.iat || claims.exp - claims.iat > MAX_APPROVAL_LIFETIME_SECONDS) return refuse("approval-invalid", "lifetime-above-profile");
   if (claims.iat > now + LEEWAY_SECONDS) return refuse("approval-invalid", "issued-in-future");
   if (now > claims.exp + LEEWAY_SECONDS) return refuse("approval-invalid", "expired");
@@ -349,22 +412,60 @@ export interface VerifyMeterOptions {
   capability: string;
   jwks: Jwks | undefined;
   now: number;
-  issuer?: string;
+  /** The issuer the meter trusts: `iss` must equal it. Required. */
+  issuer: string;
 }
 
-/** A grant-check denial (`grant-check.schema.json#/$defs/denied`). */
+/** The meter's refusal of its own token (`grant-check.schema.json#/$defs/denied` with `principal-unproven`). */
 export interface GrantCheckDenied { decision: "denied"; level: null; code: "principal-unproven"; reason: string; checkedAt: string }
+
+/** Any grant-check denial (`grant-check.schema.json#/$defs/denied`): its `code` is one of the one set's (DL-19). */
+export interface GrantCheckDenial {
+  decision: "denied";
+  level: "L0" | "L1" | "L2" | "L3" | null;
+  code: "limit-reached" | "no-grant" | "grant-expired" | "grant-revoked" | "principal-unproven" | "credential-source-refused" | "unknown-state";
+  reason: string;
+  checkedAt: string;
+  window?: "total" | "task" | "project" | "day" | "week" | "month" | "call";
+  approvalRequest?: string;
+}
+
+/** A refusal on the wire (`delegation-refusal.schema.json`). */
+export interface DelegationRefusalDocument {
+  error: { code: RefusalCode; message: string; data?: { detail?: string; window?: string; level?: string; actionDigest?: string; approvalRequest?: string } };
+}
 
 /**
  * The meter's side (DL-21): the callee presents an onward token minted for the meter — `aud` the meter, the
- * callee added as outermost actor, `scope` the grant-check capability, `effect: none`, the grant of the call.
- * Any refusal of that token is the meter's `principal-unproven`, with the verifier's code in the reason.
+ * callee added as outermost actor, `scope` exactly the grant-check capability, `effect` exactly `["none"]`, the
+ * grant of the call. Only such a token may hold a fifth actor (DL-6). Any refusal of it is the meter's
+ * `principal-unproven`, with the verifier's code in the reason.
  */
 export function verifyMeterToken(token: string, options: VerifyMeterOptions): DelegationAccepted | { ok: false; denial: GrantCheckDenied } {
   const { meter, capability, jwks, now, issuer } = options;
-  const result = verifyDelegation(token, { audience: meter, capability, effect: "none", jwks, now, readOnly: true, ...(issuer === undefined ? {} : { issuer }) });
+  const verified = verifyAt(token, { audience: meter, capability, effect: "none", jwks, now, issuer }, MAX_CHAIN_DEPTH + 1);
+  // DL-21 step 3: the meter reads its one capability; a wider token was not minted for it (F-B-312).
+  const result: DelegationAccepted | Refusal = !verified.ok ? verified
+    : verified.claims.scope !== capability ? refuse("scope-not-granted", "meter-scope-not-exact")
+    : verified.claims.effect.length !== 1 || verified.claims.effect[0] !== "none" ? refuse("effect-above-ceiling", "meter-effect-not-none")
+    : verified;
   if (result.ok) return result;
   return { ok: false, denial: { decision: "denied", level: null, code: "principal-unproven", reason: `the meter's token was refused: ${result.code} (${result.detail})`, checkedAt: new Date(now * 1000).toISOString() } };
+}
+
+/**
+ * DL-21 step 6: the refusal a callee answers its caller with after the meter denied a grant check. The meter's
+ * `code` goes unchanged into `error.code`, its `window`, `level` (when set) and `approvalRequest` into `error.data`,
+ * and its reason into the message (DEC-0045, F-B-301).
+ */
+export function refusalFromDenial(denial: GrantCheckDenial): DelegationRefusalDocument {
+  const data = {
+    ...(denial.window === undefined ? {} : { window: denial.window }),
+    ...(denial.level === null ? {} : { level: denial.level }),
+    ...(denial.approvalRequest === undefined ? {} : { approvalRequest: denial.approvalRequest })
+  };
+  const message = `the meter denied the spend: ${denial.reason}`.slice(0, 500);
+  return { error: { code: denial.code, message, ...(Object.keys(data).length > 0 ? { data } : {}) } };
 }
 
 /**

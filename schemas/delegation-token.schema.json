@@ -8,7 +8,7 @@
   "properties": {
     "iss": { "$ref": "common.schema.json#/$defs/uri", "description": "The estate hub that signed the token; stable across key rotation and port changes (urn:fabric:estate:<estate id>)." },
     "sub": { "$ref": "common.schema.json#/$defs/uri", "description": "The principal: the person of the estate on whose behalf the work runs (the operator, or an external person under a share grant)." },
-    "act": { "$ref": "#/$defs/actor", "description": "RFC 8693 §4.1 actor chain: the agent now calling outermost, each earlier agent nested inside, at most four deep." },
+    "act": { "$ref": "#/$defs/actor", "description": "RFC 8693 §4.1 actor chain: the agent now calling outermost, each earlier agent nested inside, at most four deep; a token for the meter (effect none) at most five (DL-6, DEC-0045)." },
     "aud": { "$ref": "common.schema.json#/$defs/agentId", "description": "Exactly one callee agent id, as a string, never an array." },
     "scope": {
       "type": "string",
@@ -26,10 +26,9 @@
     "grant": {
       "type": "array",
       "minItems": 1,
-      "maxItems": 8,
-      "uniqueItems": true,
+      "maxItems": 1,
       "items": { "type": "string", "minLength": 1, "maxLength": 256 },
-      "description": "Opaque references of the grant(s) the call is under; a usage report's byGrant repeats them."
+      "description": "The opaque reference of the one grant the call is under (DEC-0045: one grant per token); a token for the meter keeps its parent's. A usage report's byGrant repeats it."
     },
     "spend": {
       "description": "What the grant had left when the token was minted. Informative: the meter's grant check decides, not this claim.",
@@ -67,6 +66,13 @@
     "jti": { "type": "string", "pattern": "^[A-Za-z0-9._~-]{16,128}$" }
   },
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "required": ["act"], "properties": { "act": { "type": "object", "required": ["act"], "properties": { "act": { "type": "object", "required": ["act"], "properties": { "act": { "type": "object", "required": ["act"], "properties": { "act": { "type": "object", "required": ["act"], "properties": { "act": true } } } } } } } } } },
+      "then": { "properties": { "effect": { "const": ["none"] } } },
+      "description": "DL-6 (DEC-0045): only a token for the meter has a fifth actor, and it reads only. That its audience is the meter and its scope the grant-check capability is FAC-SEM-050's and the meter's check, not the schema's."
+    }
+  ],
   "$defs": {
     "session": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$", "description": "An opaque id of the session the actor runs in, when it runs in one." },
     "task": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$", "description": "An opaque id of the issuing host's task, in the session id's grammar (DEC-0041)." },
@@ -101,9 +107,16 @@
     "actor4": {
       "type": "object",
       "required": ["sub"],
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor5" } },
+      "additionalProperties": false,
+      "description": "The fourth actor is the last of a callee's token; only a token for the meter nests a fifth (DL-6)."
+    },
+    "actor5": {
+      "type": "object",
+      "required": ["sub"],
       "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" } },
       "additionalProperties": false,
-      "description": "The fourth actor is the last: it carries no act."
+      "description": "The fifth actor, in a token for the meter only (effect none, DEC-0045): it carries no act."
     }
   }
 }

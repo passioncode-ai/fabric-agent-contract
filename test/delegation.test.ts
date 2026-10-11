@@ -39,7 +39,7 @@ const claims = load("positive/delegation-token-claims.json");
 const IAT = claims.iat as number;
 const EXP = claims.exp as number;
 const NOW = IAT + 30;
-const call = { audience: "example-writer", jwks, now: NOW, capability: "writer.write", effect: "draft" as const };
+const call = { audience: "example-writer", jwks, now: NOW, capability: "writer.write", effect: "draft" as const, issuer: "urn:fabric:estate:example" };
 const token = (overrides: Json = {}, options: Parameters<typeof sign>[1] = {}) => sign({ ...claims, ...overrides }, options);
 const code = (result: { ok: boolean; code?: RefusalCode }) => (result.ok ? "ok" : result.code);
 
@@ -142,7 +142,7 @@ describe("approval/1: one action, one callee, one use (DEC-0039, verifyApproval)
   const action = { capability: "publisher.push", input: { app: "example-app", hash: `sha256:${"ab".repeat(32)}`, store: "app-store" } };
   const approvalClaims = load("positive/approval-claims.json");
   const digest = approvalClaims.actionDigest as string;
-  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: digest, jtiStore: createMemoryJtiStore() };
+  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: digest, issuer: "urn:fabric:estate:example", jtiStore: createMemoryJtiStore() };
   const approval = (overrides: Json = {}, signOptions: Parameters<typeof sign>[1] = {}) => sign({ ...approvalClaims, ...overrides }, { typ: APPROVAL_TYP, ...signOptions });
 
   it("binds the digest of the action's RFC 8785 form; the fixture's digest is this action's", () => {
@@ -249,7 +249,8 @@ describe("semantic rules FAC-SEM-049, FAC-SEM-050, FAC-SEM-051", () => {
     const wider = evaluateSemanticRules("delegation-mint", load("semantic/delegation-mint-wider-than-parent.json"));
     expect(new Set(wider.map((f) => f.instancePath))).toEqual(new Set(["/token/effect", "/token/exp", "/token/sub", "/token/act/sub"]));
     const spend = evaluateSemanticRules("delegation-mint", load("semantic/delegation-mint-spend-above-parent.json"));
-    expect(spend.map((f) => f.message)).toEqual(["the task window may hold at most the parent's 3 remaining", "the day window may hold at most the parent's 6 remaining"]);
+    // DEC-0045 (F-B-322): its task window is above its own grant's limit too.
+    expect(spend.map((f) => f.message)).toEqual(["the task window holds at most the grant's 2", "the task window may hold at most the parent's 3 remaining", "the day window may hold at most the parent's 6 remaining"]);
     expect(new Set([...outside, ...wider, ...spend].map((f) => f.code))).toEqual(new Set(["FAC-SEM-050"]));
   });
 

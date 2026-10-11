@@ -65,9 +65,11 @@ which MAY check whether the hub document of [Fabric's lifecycle](https://github.
 exists. A web page cannot see which URL schemes a computer handles, so without either signal it falls back to
 the 1 500 ms test.
 
-**FB-6 — The host's cookie.** A host that embeds a dashboard MAY set the cookie `fabric_button` on the page's
-origin, with the attributes of the appearance carrier (ED-8: path `/`, `SameSite=Strict`, not `HttpOnly`,
-`Secure` on `https`). Its value is form-encoded:
+**FB-6 — The host's cookie.** A host that embeds a dashboard MAY set the cookie `fabric_button` in the page's own storage
+partition on the service origin, with the attributes of the appearance carrier (ED-8: path `/`,
+`SameSite=Strict`, not `HttpOnly`, `Secure` on `https`). It is a session cookie, with no `Max-Age` and no
+`Expires` (DEC-0045), so an `owner=host` written while the host showed the page never hides the page's button
+in a plain browser tab later, where no host draws one (FB-1). Its value is form-encoded:
 
 | Field | Value | Meaning |
 |---|---|---|
