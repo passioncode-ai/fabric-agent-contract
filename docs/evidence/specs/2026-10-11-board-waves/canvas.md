@@ -282,3 +282,5 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-11 — N01 closed: PR #31 (DEC-0042) merged at `213e5a3` after three readings; SH-9 strict by Fabric's
+  ruling (another server carries only a delegation token; Fabric drops its `x-agw-key` gateway servers).

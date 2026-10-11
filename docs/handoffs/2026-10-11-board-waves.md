@@ -29,8 +29,10 @@ reading confirms the request. Entry point: [brief](../evidence/specs/2026-10-11-
     Compatibility.
 
   The gate showed 730 tests green and CI green.
-- **PR #31 (DEC-0042, `session-handoff/1`)** rebased on `7931c1d` at `d441f15`. DEC-0042 is kept (reserved
-  for it), and the markers read DEC-0043 / FAC-SEM-056.
+- **PR #31 (DEC-0042, `session-handoff/1`) merged at `213e5a3`** after the rebase (`d441f15`) and three readings
+  with fixes `e4a2a37`, `dfa3336`, `3f19b4a`. The gate showed 852 tests green and CI green. SH-9 is strict by
+  Fabric's ruling: another server carries only a delegation token; Fabric drops its `x-agw-key` gateway servers.
+  DEC-0042 is kept (reserved for it); the markers read DEC-0043 / FAC-SEM-056.
 - **Rulings from Fabric's session as ADR-0144's owner**, recorded in the brief:
   - one grant per token;
   - the meter hop exempt from the depth limit;
@@ -42,12 +44,6 @@ reading confirms the request. Entry point: [brief](../evidence/specs/2026-10-11-
 
 ## Open
 
-- **PR #31 review fixes.** The review at `84043cb` gave MERGE AFTER FIXES with eight majors: the reader's
-  FIFO/TOCTOU, the `__proto__` entries object, an unanchored bearer pattern and the old credential matcher,
-  untested SH-9/SH-11 messages, `runners.md`'s spaced `--mcp-config`, the session bearer unnamed, unpinned
-  Kilo/Hermes/Codex sources, and the ADR-0140 link. The full list is the brief given to the fixing agent; the
-  same items are listed in the review report quoted in Fabric's thread. The fixing agent stopped at the API
-  session limit after the rebase.
 - **The consumer survey** (`findings/consumers.json`) did not land before the limit. Re-run it, then re-run
   `assign.mjs`.
 - **Wave 1 packets P1-01…P1-06** are not started (they wait for #31), and P1-07 (knowledge base, wiki) waits
@@ -69,6 +65,6 @@ reading confirms the request. Entry point: [brief](../evidence/specs/2026-10-11-
 
 ## Next task
 
-Fix PR #31 per the review list above, in `/Users/sshlg/DATA/_worktrees/fac-pr31` at `d441f15`. Run the gate,
-merge it, and tell Fabric's session the merge commit. Then start wave 1: P1-01, P1-02 and P1-06 in parallel
-worktrees.
+Wait for the operator's go on the planning gate (brief, canvas, plan and the Q1–Q3 batch in
+[plan.md](../evidence/specs/2026-10-11-board-waves/plan.md)). Then merge PR #33, re-run the consumer survey into
+`findings/consumers.json`, re-run `assign.mjs`, and start wave 1: P1-01, P1-02 and P1-06 in parallel worktrees.
