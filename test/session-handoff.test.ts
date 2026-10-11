@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -134,7 +134,8 @@ describe("validateSessionHandoff(dir): a folder on disk", () => {
     mkdirSync(inside, { recursive: true, mode: 0o700 });
     const source = writeFolder("session-handoff-folder-ok");
     for (const name of ["handoff.json", "context.md", "mcp.json"]) writeFileSync(path.join(inside, name), readFileSync(path.join(source, name)), { mode: 0o600 });
-    expect(readSessionHandoff(inside).repository).toBe(repository);
+    // Found along the real path, so a temp folder reached through /var → /private/var is still found inside it.
+    expect(readSessionHandoff(inside).repository).toBe(realpathSync(repository));
     expect((await check(inside)).findings.some((finding) => finding.code === "FAC-SEM-054" && /never in a repository/.test(finding.message))).toBe(true);
 
     const stray = writeFolder("session-handoff-folder-ok");

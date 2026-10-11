@@ -1642,20 +1642,25 @@ annotate only the old status; decision bodies are never rewritten.
   one format across products (principle 8), and a Fabric agent opened in Dashboards' console and a Dashboards
   agent opened from Fabric should carry the same pack. The name `execution-packet/1` already meant Fabric's
   integrity manifest and task-pipeline's dispatch packet, so the format has its own (Fabric 0.4.0 resolution R-01).
-- **Compatibility:** Additive; `contractVersion` stays `0.1.0`. One new schema (67), three rules. No existing
-  document changes. Fabric's bundle changes in the same release: the joined `--mcp-config=`, `handoff.json`, a
+- **Compatibility:** Additive; `contractVersion` stays `0.1.0`. One new schema (67), three rules. One existing
+  example changes: the runner catalogue's `claude-headless` drive in `runners.md` and its fixtures now join
+  `--mcp-config={mcpConfig}`, the form SH-11 requires (the spaced form leaves the option's value list open). Fabric's bundle changes in the same release: the joined `--mcp-config=`, `handoff.json`, a
   `context.md` always (a note when the pack could not be compiled), a brief over 1000 characters or of more than
   one line as `brief.md`. Dashboards' pack changes as its handoff lists.
 - **Consequences / affects:**
   - spec: `docs/specification/session-handoff.md` (new), `docs/specification/conformance.md` (`FAC-SEM-053`…`055`,
     a reader row);
   - schema: `schemas/session-handoff.schema.json`; code: `src/session-handoff.ts`, `src/semantic-rules.ts`;
-  - fixtures: 6 positive, 8 negative, 19 semantic (`session-handoff-*`, `session-handoff-folder-*`),
+  - fixtures: 6 positive, 9 negative, 19 semantic (`session-handoff-*`, `session-handoff-folder-*`),
     `fixtures/catalogue.json`;
-  - tests: `test/session-handoff.test.ts`, `test/schema-compilation.test.ts` (67 schemas);
+  - tests: `test/session-handoff.test.ts`, `test/session-handoff-review.test.ts` (one case per rule message, the
+    reader, the copied credential matcher), `test/schema-compilation.test.ts` (67 schemas);
+  - the runner catalogue example: `docs/specification/runners.md`, `fixtures/*/runners-*.json` (joined
+    `--mcp-config=`);
   - docs: `CONTEXT.md` (Session handoff), `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md`, the handoff
     `docs/handoffs/2026-10-11-session-handoff.md`.
-- **Not decided here:** the Codex bearer path's measurement (`bearer_token_env_var`, no writer yet); a
+- **Not decided here:** the Codex bearer path's measurement (`bearer_token_env_var`, no writer yet; SH-11 marks
+  its row provisional and the kit checks the shape written there); a
   `session-handoff/1` for Gemini CLI; how a host verifies a folder another host wrote before it opens it.
 - **Source:** Fabric ADR-0140 (0.4.0 REQ-06, canvas C3), agreed with Fabric Dashboards on 2026-10-11
   (fabric-dashboards-76). Claude Code 2.1.296 `claude --help`; Switchboard `docs/CLI.md` and `docs/CONTRACTS.md` at

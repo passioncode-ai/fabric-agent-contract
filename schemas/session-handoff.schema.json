@@ -128,7 +128,7 @@
       "description": "What the handoff adds to the runtime's own command: its arguments, in order, and the environment variables it sets. A value that carries a credential or a document holding one is withheld as null.",
       "required": ["runtime", "args", "env"],
       "properties": {
-        "runtime": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$", "description": "A runner kind from the runner catalogue: claude-code, codex, kilo, hermes, kimi-code, cline, gemini-cli, …" },
+        "runtime": { "enum": ["claude-code", "codex", "cursor-agent", "gemini-cli", "goose", "hermes", "kilo", "kimi-code", "kiro", "opencode", "cline"], "description": "A shared runner kind name (runners.md, Kind names are shared). A runner not listed there takes a new name in the runner catalogue before a host hands it a session." },
         "args": {
           "type": "array",
           "maxItems": 16,

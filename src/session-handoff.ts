@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
+import { closeSync, constants, existsSync, fstatSync, lstatSync, openSync, readdirSync, readSync, realpathSync } from "node:fs";
 import path from "node:path";
 import type { Finding } from "./findings.js";
 
@@ -23,6 +23,8 @@ export const MAX_INLINE_BRIEF = 1000;
 export const MAX_PREAMBLE = 600;
 export const MAX_LAUNCH_ARGS = 16;
 export const MAX_LAUNCH_ARG = 1024;
+/** SH-3: a handoff file is small; a larger one is refused unread. */
+export const MAX_HANDOFF_FILE = 1_048_576;
 
 type Json = Record<string, unknown>;
 const isObject = (value: unknown): value is Json => typeof value === "object" && value !== null && !Array.isArray(value);
@@ -31,19 +33,67 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
 const CONTROL = /[\u0000-\u001f\u007f]/;
 /** A tool name as MCP servers in this family spell them: snake_case with at least one underscore. */
 const TOOL_WORD = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g;
-/** Names that only a credential travels under — a header, an environment variable or a config key. */
-const SECRET_NAME = /(^|[._-])(token|access[_-]?token|secret|password|passwd|api[_-]?key|key|auth|authorization|bearer|cookie|credential|credentials|jwt|session[_-]?id)([._-]|$)/i;
-/** Values shaped like a credential: a JWT/JWS, a bearer header value, a provider key. */
-const SECRET_VALUE = /(eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*|bearer\s+\S+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,})/i;
-const words = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, "$1_$2");
-const secretName = (name: string) => SECRET_NAME.test(words(name));
+/*
+ * The credential matcher of DEC-0041 (src/fabric-links.ts, CO-260), copied so this module stays dependency-free;
+ * `test/session-handoff.test.ts` checks that the copy agrees with the original.
+ */
+/** A name's words: split at `.`, `_`, `-` and camelCase humps, lowercased (`refreshToken_v2-Id` is `refresh token v2 id`). */
+function nameWords(name: string): string[] {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .map((word) => word.toLowerCase());
+}
+const CREDENTIAL_WORDS: readonly string[] = [
+  "token", "secret", "password", "passwd", "pass", "passphrase", "credential", "credentials", "cookie", "authorization",
+  "bearer", "jwt", "otp", "apikey", "signature", "sig",
+  "accesstoken", "idtoken", "authtoken", "refreshtoken", "sessionid", "sessiontoken", "logincode", "authcode", "privatekey",
+  "clientsecret", "secretkey", "accesskey"
+];
+const CREDENTIAL_PAIRS: Readonly<Record<string, readonly string[]>> = {
+  key: ["private", "api", "access", "secret", "session", "auth", "signing", "encryption", "master", "client", "login", "refresh"],
+  auth: ["token", "code", "header"],
+  session: ["token", "id"],
+  code: ["login", "auth", "access", "session"]
+};
+const withSingulars = (words: string[]): string[] => [...words, ...words.filter((word) => word.length > 2 && word.endsWith("s")).map((word) => word.slice(0, -1))];
+/** Whether a name — a header, an environment variable, a config key — can only carry a credential. */
+export function credentialName(name: string): boolean {
+  const split = nameWords(name);
+  const all = withSingulars(split);
+  if (all.some((word) => CREDENTIAL_WORDS.includes(word))) return true;
+  if (split.length === 1 && all.some((word) => Object.hasOwn(CREDENTIAL_PAIRS, word))) return true;
+  return Object.entries(CREDENTIAL_PAIRS).some(([word, partners]) => all.includes(word) && partners.some((partner) => all.includes(partner)));
+}
+const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
+const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
+const LONG_RUN = /[A-Za-z0-9+/=_-]{40,}/g;
+const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
+/** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */
+export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || longSecret(value);
+/** `Bearer <token>` inside a longer value (`--header=Authorization: Bearer …`): a token of 12 or more token characters, so prose ("the Bearer token refresh bug") passes. */
+const BEARER_INSIDE = /\bbearer\s+[A-Za-z0-9._~+/-]{12,}=*/i;
+/**
+ * The same, for a launch argument or a server's command and URL, which carry paths: a long run is looked for
+ * between path separators, so a folder path holding a session id is not taken for a key.
+ */
+export const secretArgument = (value: string): boolean =>
+  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) || value.split(/[\\/\s=]/).some((piece) => longSecret(piece));
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** One entry of a handoff folder as read from disk (or written in a fixture). `mode` is octal, e.g. "600". */
 export interface HandoffEntry {
   mode: string;
-  kind: "file" | "directory" | "symlink";
-  /** The file's bytes as UTF-8; absent for a directory or a link. */
+  /** `other`: a FIFO, a socket or a device — never opened for reading. */
+  kind: "file" | "directory" | "symlink" | "other";
+  /** The file's bytes as UTF-8; absent for anything but a regular file at most `MAX_HANDOFF_FILE` bytes. */
   text?: string;
+  /** `sha256:<hex>` of the file's bytes as read (SH-12); a fixture gives `text` and the digest is of its UTF-8. */
+  sha256?: string;
+  /** The file is larger than `MAX_HANDOFF_FILE` and was not read. */
+  tooLarge?: boolean;
 }
 
 /** A handoff folder, read. Pure data: the rules below never touch the filesystem. */
@@ -71,14 +121,52 @@ export interface SessionHandoffVerdict {
 
 const octal = (mode: number) => (mode & 0o777).toString(8).padStart(3, "0");
 
-/** The nearest ancestor of `dir` (itself included) holding `.git` — a working tree, a worktree or a submodule. */
+/**
+ * The nearest ancestor of `dir` (itself included) holding `.git` — a working tree, a worktree or a submodule —
+ * looked for along the folder's real path, so a folder reached through a linked ancestor is still found inside one.
+ */
 export function enclosingRepository(dir: string): string | null {
   let at = path.resolve(dir);
+  try { at = realpathSync(at); } catch { /* a path that does not resolve is looked up as written */ }
   for (;;) {
     if (existsSync(path.join(at, ".git"))) return at;
     const up = path.dirname(at);
     if (up === at) return null;
     at = up;
+  }
+}
+
+/**
+ * One entry, read without following a link or blocking: opened `O_NOFOLLOW | O_NONBLOCK`, checked on the open
+ * descriptor, and read only when it is a regular file of at most `MAX_HANDOFF_FILE` bytes.
+ */
+function readEntry(file: string): HandoffEntry {
+  const seen = lstatSync(file);
+  if (seen.isSymbolicLink()) return { mode: octal(seen.mode), kind: "symlink" };
+  if (seen.isDirectory()) return { mode: octal(seen.mode), kind: "directory" };
+  if (!seen.isFile()) return { mode: octal(seen.mode), kind: "other" };
+  let fd: number;
+  try {
+    fd = openSync(file, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
+  } catch {
+    // ELOOP: swapped for a link since the lstat; anything else unopenable is not a file this kit reads.
+    return { mode: octal(seen.mode), kind: "other" };
+  }
+  try {
+    const stats = fstatSync(fd);
+    if (!stats.isFile()) return { mode: octal(stats.mode), kind: "other" };
+    if (stats.size > MAX_HANDOFF_FILE) return { mode: octal(stats.mode), kind: "file", tooLarge: true };
+    const bytes = Buffer.alloc(stats.size);
+    let read = 0;
+    while (read < bytes.length) {
+      const n = readSync(fd, bytes, read, bytes.length - read, read);
+      if (n === 0) break;
+      read += n;
+    }
+    const content = bytes.subarray(0, read);
+    return { mode: octal(stats.mode), kind: "file", text: content.toString("utf8"), sha256: `sha256:${createHash("sha256").update(content).digest("hex")}` };
+  } finally {
+    closeSync(fd);
   }
 }
 
@@ -92,15 +180,10 @@ export function readSessionHandoff(dir: string): HandoffSnapshot {
     kind: self.isSymbolicLink() ? "symlink" : "directory",
     permissions: process.platform === "win32" ? "acl" : "posix",
     repository: enclosingRepository(absolute),
-    entries: {}
+    entries: Object.create(null) as Record<string, HandoffEntry>
   };
   if (snapshot.kind === "symlink" || !self.isDirectory()) return snapshot;
-  for (const name of readdirSync(absolute).sort()) {
-    const entry = lstatSync(path.join(absolute, name));
-    if (entry.isSymbolicLink()) snapshot.entries[name] = { mode: octal(entry.mode), kind: "symlink" };
-    else if (entry.isDirectory()) snapshot.entries[name] = { mode: octal(entry.mode), kind: "directory" };
-    else snapshot.entries[name] = { mode: octal(entry.mode), kind: "file", text: readFileSync(path.join(absolute, name), "utf8") };
-  }
+  for (const name of readdirSync(absolute).sort()) snapshot.entries[name] = readEntry(path.join(absolute, name));
   return snapshot;
 }
 
@@ -187,11 +270,16 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
 
   // SH-5 — a one-shot bearer lives in a per-session folder, never in a pack kept per agent key.
   if (mcp.auth === "bearer" && lifetime.kind !== "session") findings.push(sem053("/lifetime/kind", "a bearer is minted for one session; a pack kept per agent key holds no secret (mcp.auth none)"));
+  // SH-7 — a pack kept per agent key opens that agent's console, no other.
+  const callArguments = isObject(firstCall.arguments) ? firstCall.arguments : undefined;
+  if (lifetime.kind === "agent-key" && callArguments && typeof callArguments.key === "string" && callArguments.key !== lifetime.agentKey) {
+    findings.push(sem053("/firstCall/arguments/key", `a pack kept for agent key ${String(lifetime.agentKey)} opens that agent's console; the first call names ${callArguments.key}`));
+  }
 
   // SH-6 — the preamble names one tool, the first call, and holds no rule; it is one line.
   if (preamble.length > MAX_PREAMBLE) findings.push(sem053("/preamble", `the preamble is at most ${MAX_PREAMBLE} characters; this one ${preamble.length}`));
   if (CONTROL.test(preamble)) findings.push(sem053("/preamble", "the preamble is one line with no control character"));
-  if (tool && !new RegExp(`\\b${tool}\\b`).test(preamble)) findings.push(sem053("/preamble", `the preamble names the first call, ${tool}`));
+  if (tool && !new RegExp(`\\b${escapeRegExp(tool)}\\b`).test(preamble)) findings.push(sem053("/preamble", `the preamble names the first call, ${tool}`));
   const named = [...new Set(preamble.match(TOOL_WORD) ?? [])].filter((word) => word !== tool);
   if (named.length) findings.push(sem053("/preamble", `the preamble names one tool, the first call; it also names ${named.join(", ")} — a rule in the preamble is a rule in two places`));
 
@@ -211,12 +299,12 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
   const env = isObject(launch.env) ? launch.env : {};
   args.forEach((arg, index) => {
     if (CONTROL.test(arg)) findings.push(sem053(`/launch/args/${index}`, "a launch argument holds no control character"));
-    if (SECRET_VALUE.test(arg)) findings.push(sem053(`/launch/args/${index}`, "a launch argument never carries a credential: a process listing shows it"));
+    if (secretArgument(arg)) findings.push(sem053(`/launch/args/${index}`, "a launch argument never carries a credential: a process listing shows it"));
   });
   for (const [name, value] of Object.entries(env)) {
     if (typeof value !== "string") continue;
     if (CONTROL.test(value)) findings.push(sem053(`/launch/env/${name}`, "an environment value is recorded only when it is one plain line; withhold a document as null"));
-    if (secretName(name) || SECRET_VALUE.test(value)) findings.push(sem053(`/launch/env/${name}`, "a value that carries a credential is withheld as null"));
+    if (credentialName(name) || secretArgument(value)) findings.push(sem053(`/launch/env/${name}`, "a value that carries a credential is withheld as null"));
   }
 
   // SH-11 — the per-runtime table.
@@ -244,6 +332,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     const own = overrides.filter(([key]) => key.startsWith(`mcp_servers.${server}.`)).map(([key]) => key.slice(`mcp_servers.${server}.`.length));
     if (mcp.auth === "none" && !own.includes("command")) findings.push(sem053(at, `Codex is given the stdio server as -c mcp_servers.${server}.command=…`));
     if (mcp.auth === "bearer") {
+      // Provisional (SH-11): no writer has measured bearer_token_env_var yet; the first one amends this row.
       if (!own.includes("url")) findings.push(sem053(at, `Codex is given the HTTP server as -c mcp_servers.${server}.url=…`));
       const variable = overrides.find(([key]) => key === `mcp_servers.${server}.bearer_token_env_var`)?.[1].replace(/^"|"$/g, "");
       if (!variable || !Object.hasOwn(env, variable) || env[variable] !== null) findings.push(sem053(at, `Codex reads the bearer from the variable bearer_token_env_var names, set and withheld as null in launch.env`));
@@ -286,24 +375,28 @@ export function sessionHandoffFolderFindings(snapshot: HandoffSnapshot): Finding
   for (const name of [MANIFEST_FILE, ...listed]) {
     const entry = snapshot.entries[name];
     if (!entry) { findings.push(sem054(`/${name}`, `${name} is listed and missing`)); continue; }
-    if (entry.kind !== "file") { findings.push(sem054(`/${name}`, `${name} is a regular file, not a ${entry.kind}`)); continue; }
+    if (entry.kind !== "file") { findings.push(sem054(`/${name}`, `${name} is a regular file, not a ${entry.kind === "other" ? "FIFO, socket or device" : entry.kind}`)); continue; }
+    if (entry.tooLarge) { findings.push(sem054(`/${name}`, `${name} is at most ${MAX_HANDOFF_FILE} bytes; it was not read`)); continue; }
     if (posix && entry.mode !== "600") findings.push(sem054(`/${name}`, `${name} is 0600; this one ${entry.mode}`));
     if (name !== MANIFEST_FILE && !(entry.text ?? "").trim()) findings.push(sem054(`/${name}`, `${name} is not empty`));
   }
   for (const name of Object.keys(snapshot.entries)) {
+    // A stray is reported by name only; it is never read (readEntry opens nothing but regular files).
     if (name !== MANIFEST_FILE && !(listed as string[]).includes(name)) findings.push(sem054(`/${name}`, `${name} is not a file of the handoff; a folder holds handoff.json and the files it lists, nothing else`));
   }
+  const entryOf = (name: string): HandoffEntry | undefined => (Object.hasOwn(snapshot.entries, name) ? snapshot.entries[name] : undefined);
   const text = (name: string) => {
-    const entry = snapshot.entries[name];
-    return entry?.kind === "file" ? entry.text ?? "" : undefined;
+    const entry = entryOf(name);
+    return entry?.kind === "file" && !entry.tooLarge ? entry.text ?? "" : undefined;
   };
   // SH-12 — the integrity layer underneath: each digest names these bytes.
   const integrity = isObject(manifest.integrity) ? manifest.integrity : undefined;
   if (integrity && isObject(integrity.parts)) {
     for (const [name, digest] of Object.entries(integrity.parts)) {
+      const entry = entryOf(name);
       const bytes = text(name);
-      if (bytes === undefined) findings.push(sem054(`/integrity/parts/${name}`, `${name} has a digest and is not in the folder`));
-      else if (digest !== sha256(bytes)) findings.push(sem054(`/integrity/parts/${name}`, `${name} does not match its execution-packet digest`));
+      if (entry === undefined || bytes === undefined) findings.push(sem054(`/integrity/parts/${name}`, `${name} has a digest and is not in the folder`));
+      else if (digest !== (entry.sha256 ?? sha256(bytes))) findings.push(sem054(`/integrity/parts/${name}`, `${name} does not match its execution-packet digest`));
     }
   }
   // SH-4 — the launch names this folder's own files.
@@ -344,7 +437,7 @@ function mcpFindings(manifest: Json, text: (name: string) => string | undefined)
   } else if (mcp.auth === "none") {
     if (entry.type !== "stdio" || typeof entry.command !== "string" || !entry.command) findings.push(sem055(`/mcp.json/mcpServers/${server}`, "a server with no secret is a stdio command: type stdio and a command"));
   }
-  // Every value mcp.json may hold a secret in: header values and environment values.
+  // Every value mcp.json may hold a secret in: credential headers and environment values.
   const secrets: string[] = [];
   for (const [name, value] of Object.entries(servers)) {
     if (!isObject(value)) continue;
@@ -353,19 +446,28 @@ function mcpFindings(manifest: Json, text: (name: string) => string | undefined)
     for (const [header, headerValue] of Object.entries(headers)) {
       if (typeof headerValue !== "string") continue;
       if (mcp.auth === "none") findings.push(sem055(`/mcp.json/mcpServers/${name}/headers/${header}`, "a handoff with no secret carries no header"));
-      secrets.push(headerValue.replace(/^Bearer\s+/i, ""));
+      const credential = header.toLowerCase() === "authorization" || credentialName(header) || secretValue(headerValue);
+      if (!credential) continue;
+      const token = headerValue.replace(/^Bearer\s+/i, "");
+      secrets.push(token);
+      // SH-9 — the first call's server carries the session bearer; any other server only a delegation token
+      // minted for this session (a JWT, DEC-0039), never a standing key.
+      if (name !== server && mcp.auth === "bearer" && !JWT_SHAPE.test(token)) {
+        findings.push(sem055(`/mcp.json/mcpServers/${name}/headers/${header}`, "a server other than the first call's carries only a delegation token minted for this session (DEC-0039), never a standing key"));
+      }
     }
     for (const [variable, envValue] of Object.entries(env)) {
       if (typeof envValue !== "string") continue;
-      const credential = secretName(variable) || SECRET_VALUE.test(envValue);
+      const credential = credentialName(variable) || secretArgument(envValue);
       if (credential) secrets.push(envValue);
       if (credential && mcp.auth === "none") findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a handoff with no secret carries no credential in a server's environment"));
+      if (credential && mcp.auth === "bearer" && !JWT_SHAPE.test(envValue)) findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a credential in a server's environment is a delegation token minted for this session (DEC-0039), never a standing key"));
     }
     for (const field of ["url", "command"] as const) {
       const value2 = value[field];
-      if (mcp.auth === "none" && typeof value2 === "string" && SECRET_VALUE.test(value2)) findings.push(sem055(`/mcp.json/mcpServers/${name}/${field}`, "a handoff with no secret carries no credential"));
+      if (typeof value2 === "string" && secretArgument(value2)) findings.push(sem055(`/mcp.json/mcpServers/${name}/${field}`, `a server's ${field} never carries a credential`));
     }
-    for (const [index, arg] of strings(value.args).entries()) if (SECRET_VALUE.test(arg)) findings.push(sem055(`/mcp.json/mcpServers/${name}/args/${index}`, "a server's arguments never carry a credential: a process listing shows them"));
+    for (const [index, arg] of strings(value.args).entries()) if (secretArgument(arg)) findings.push(sem055(`/mcp.json/mcpServers/${name}/args/${index}`, "a server's arguments never carry a credential: a process listing shows them"));
   }
   // SH-13 — a secret lives in mcp.json and nowhere else in the folder.
   for (const secret of secrets.filter((value) => value.length >= 8)) {
@@ -388,12 +490,12 @@ export function sessionHandoffRules(kind: string, value: Json): Finding[] | unde
 
 /** A fixture's folder: `entries.<name>.json` is serialised to `text`. */
 export function snapshotFromFixture(value: Json): HandoffSnapshot {
-  const entries: Record<string, HandoffEntry> = {};
+  const entries = Object.create(null) as Record<string, HandoffEntry>;
   for (const [name, raw] of Object.entries(isObject(value.entries) ? value.entries : {})) {
     if (!isObject(raw)) continue;
-    const kind = raw.kind === "directory" || raw.kind === "symlink" ? raw.kind : "file";
+    const kind = raw.kind === "directory" || raw.kind === "symlink" || raw.kind === "other" ? raw.kind : "file";
     const text = typeof raw.text === "string" ? raw.text : raw.json !== undefined ? `${JSON.stringify(raw.json, null, 2)}\n` : undefined;
-    entries[name] = { mode: String(raw.mode ?? "600"), kind, ...(kind === "file" && text !== undefined ? { text } : {}) };
+    entries[name] = { mode: String(raw.mode ?? "600"), kind, ...(kind === "file" && text !== undefined ? { text } : {}), ...(raw.tooLarge === true ? { tooLarge: true } : {}) };
   }
   return {
     path: String(value.path ?? ""),

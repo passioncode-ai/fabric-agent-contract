@@ -20,7 +20,8 @@ arguments in place). Fabric 0.4.0 REQ-06, Fabric ADR-0140, plan canvas C3; agree
   `readSessionHandoff`, `checkSessionHandoff`, `sessionHandoffManifestFindings`), dependency-free so a consumer
   copies it; `FAC-SEM-053`…`055` wired into `evaluateSemanticRules` (kinds `session-handoff`,
   `session-handoff-folder`).
-- Fixtures: 6 positive, 8 negative (catalogue), 19 semantic; `test/session-handoff.test.ts`.
+- Fixtures: 6 positive, 9 negative (catalogue), 19 semantic; `test/session-handoff.test.ts`, and
+  `test/session-handoff-review.test.ts` (one case per rule message, the reader, the copied matcher).
 - `CONTEXT.md` (Session handoff), `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md` (Claude Code
   2.1.296, Switchboard launch in place), the conformance register and a reader row.
 
@@ -29,6 +30,25 @@ arguments in place). Fabric 0.4.0 REQ-06, Fabric ADR-0140, plan canvas C3; agree
 - `pnpm run check` → exit 0 (see the pull request for the test count).
 - 20 planted defects, each watched turning the suite red, listed in the pull request; two first survived (a
   fixture caught by a second rule, a negative refused for the wrong reason) and their tests were tightened.
+- Review fixes (owner session, after the rebase on `7931c1d`): gate green — 25 test files, 847 tests, UX lint,
+  docs check, markdownlint 0 errors. Planted, each watched failing then restored:
+
+  | Plant | Failed |
+  |---|---|
+  | entries a plain object (`__proto__`) | 1 of 101 |
+  | the bearer pattern unanchored | 1 |
+  | the tool name unescaped | 1 |
+  | the folder's digest from the UTF-8 text | 1 of 102 |
+  | every header counted as a secret | 1 |
+  | no real path for the repository check | 2 |
+  | no rule for another server's standing key | 2 |
+  | no agent-key check on the first call | 2 |
+  | no `Bearer …` inside an argument | 3 |
+  | no size cap | 1 |
+  | the lstat guard and `O_NONBLOCK` both gone (either alone keeps a FIFO unread) | 1 of 102 |
+  | `launch.runtime` a free pattern again | 1 of 319 (fixtures) |
+
+  The message test fails for any rule message no case produces.
 
 ## Open
 
@@ -39,5 +59,6 @@ arguments in place). Fabric 0.4.0 REQ-06, Fabric ADR-0140, plan canvas C3; agree
 
 ## Next task
 
-Merge this pull request (owner session fabric-agent-contract-75), then repin Fabric's vendored contract
-fixtures to the merge commit.
+Fabric repins its vendored schema and `src/session-handoff.ts` to this change's merge commit on
+`agent/w2-handoff`. Its writer puts the session bearer in `mcp.json` and, on other servers, only delegation tokens
+minted for the session. Fabric Dashboards conforms its pack.

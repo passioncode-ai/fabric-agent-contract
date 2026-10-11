@@ -21,14 +21,12 @@
           "stream-json",
           "--verbose",
           "--strict-mcp-config",
-          "--mcp-config",
-          "{mcpConfig}"
+          "--mcp-config={mcpConfig}"
         ]
       },
       "tui": {
         "argv": [
-          "--mcp-config",
-          "{mcpConfig}"
+          "--mcp-config={mcpConfig}"
         ]
       }
     },

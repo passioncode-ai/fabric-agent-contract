@@ -3,7 +3,7 @@
 `covers:` Fabric 0.4.0 REQ-06 — DEC-0042 · Fabric ADR-0140, agreed with Fabric Dashboards (fabric-dashboards-76)
 
 DEC-0042 is normative. It implements Fabric
-[ADR-0140](https://github.com/passioncode-ai/fabric/blob/main/docs/adr/0140-a-session-is-handed-its-context-in-one-format-session-handoff-1.md)
+[ADR-0140](https://github.com/passioncode-ai/fabric/blob/2242628117482e8b2b9d647bc56ae231781d62ba/docs/adr/0140-a-session-is-handed-its-context-in-one-format-session-handoff-1.md)
 (Fabric 0.4.0 REQ-06, plan canvas C3), agreed between Fabric and Fabric Dashboards on 2026-10-11.
 
 A **session handoff** is the folder a host writes for one coding-agent session before the session's first turn:
@@ -119,11 +119,14 @@ Fabric's preamble (`shared/preamble.ts#PREAMBLE`, unchanged by this decision):
 
 **SH-9 — `mcp.json` reaches the first call's server as `mcp.auth` declares.** `mcp.json` is
 `{"mcpServers": {<name>: <server>}}` and names the first call's server. With `mcp.auth: bearer` that server is
-`{type: "http", url, headers: {Authorization: "Bearer <token>"}}`, the token minted for this session (Fabric:
-the agent surface's one-shot bearer, revoked when the session ends). With `mcp.auth: none` it is
+`{type: "http", url, headers: {Authorization: "Bearer <token>"}}`. The token is the session bearer of
+[delegation](delegation.md) (DEC-0039): minted for this session, the credential the session exchanges for
+delegation tokens, revoked when the session ends (Fabric: the agent surface's one-shot bearer). With `mcp.auth: none` it is
 `{type: "stdio", command, args, env?}` and no server in the file carries a header or a credential in its
-environment (Dashboards' MCP launcher; Fabric's terminal path is `fabric-mcp`). Other servers may follow (Fabric:
-the project's granted gateway servers, each with its hop's role key, in a bearer folder only). A runtime that does
+environment (Dashboards' MCP launcher; Fabric's terminal path is `fabric-mcp`). Other servers may follow, in a bearer folder only (Fabric:
+the project's granted gateway servers). Such a server carries no standing key: its credential, in a header or its
+environment, is a delegation token minted for this session (a JWT, DEC-0039) that expires no later than the
+session. A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A runtime that does
 not read this dialect is given the same servers in its own (SH-11); `mcp.json` stays the record.
 
 `mcp.strict` is declared: whether the runtime is told to load only the handoff's servers. Fabric's launched
@@ -151,9 +154,11 @@ variable the handoff sets; a value that carries a credential, or a document hold
 Sources: Claude Code 2.1.296 `claude --help` (`--mcp-config <configs...>`, "Load MCP servers from JSON files or
 strings (space-separated)"; `--append-system-prompt[-file]`); an interactive start with a missing brief file
 stops with "Error: Append system prompt file not found: <path>" (measured 2026-10-11), so the file is read at an
-interactive start, not only in print mode. Kilo and Hermes: Fabric `shared/agents.ts` (the probes of ADR-0119).
-Codex's `-c` server keys: Dashboards `src/core/handoff.ts#handoffArgs`; `bearer_token_env_var` has no writer yet,
-and the first writer measures it on the Codex release it targets before shipping. A runtime not in the table is
+interactive start, not only in print mode. Kilo and Hermes: Fabric `apps/desktop/src/shared/agents.ts` at `1634c82e` (the probes of ADR-0119: Kilo 7.4.17 `KILO_CONFIG_CONTENT`, Hermes 0.21.4
+`HERMES_ACP_SKIP_CONFIGURED_MCP`). Codex's `-c` server keys: Dashboards `src/core/handoff.ts#handoffArgs` at
+`7a2febf`. The `bearer_token_env_var` row is **provisional**: it has no writer yet; the kit checks the shape
+written here, and the first writer measures it on the Codex release it targets before shipping, amending this row
+if the release differs. Every source is in the [source ledger](../evidence/sources.md). A runtime not in the table is
 held to SH-10 only, and its writer documents how the handoff is carried.
 
 ## Integrity

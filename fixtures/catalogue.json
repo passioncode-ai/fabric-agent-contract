@@ -316,5 +316,6 @@
   {"name": "session-handoff-unknown-field", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-field.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "session-handoff-too-many-args", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-too-many-args.json", "valid": false, "keyword": "maxItems"},
   {"name": "session-handoff-session-without-id", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-session-without-id.json", "valid": false, "keyword": "oneOf"},
-  {"name": "session-handoff-unknown-auth", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-auth.json", "valid": false, "keyword": "enum"}
+  {"name": "session-handoff-unknown-auth", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-auth.json", "valid": false, "keyword": "enum"},
+  {"name": "session-handoff-runtime-not-shared", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-runtime-not-shared.json", "valid": false, "keyword": "enum"}
 ]

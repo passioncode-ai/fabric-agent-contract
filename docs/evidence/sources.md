@@ -55,6 +55,10 @@ A provider declares the exact protocol revision it implements. The host rejects
 an unsupported major or incompatible date before semantic probing. A host may
 support multiple revisions through separate adapters, but it must never silently
 reinterpret one revision as another.
+| Claude Code CLI — `claude --help` | 2.1.296, measured 2026-10-11 | the binary's own help | `--mcp-config <configs...>` takes several values, so the joined `--mcp-config=<path>` is the one form that names exactly one file; `--append-system-prompt[-file]`; a missing brief file stops an interactive start (DEC-0042, SH-11). |
+| Kilo — session config by environment | 7.4.17, measured 2026-10-05 by Fabric | Fabric `apps/desktop/src/shared/agents.ts` at `1634c82e` (report `raw/probes/kilo-7.4.17-config-precedence.txt`) | `KILO_CONFIG_CONTENT` carries the session config and a project file cannot override it; the remote MCP entry with its bearer header connects (DEC-0042, SH-11). Not re-fetched here. |
+| Hermes Agent — ACP and configured MCP servers | 0.21.4, measured 2026-10-05 by Fabric | Fabric `apps/desktop/src/shared/agents.ts` at `1634c82e` (report `raw/probes/hermes-0.21.4-acp-shell-end-to-end.txt`) | Driven over ACP; `HERMES_ACP_SKIP_CONFIGURED_MCP=1` keeps the person's own MCP servers out of the session (DEC-0042, SH-11). Not re-fetched here. |
+| Codex CLI — `-c mcp_servers.*` overrides | as written by Fabric Dashboards `src/core/handoff.ts` at `7a2febf` | Dashboards' handoff writer | `-c mcp_servers.<server>.command=…` for a stdio server. `bearer_token_env_var` has no writer and is provisional in SH-11 until one measures it (DEC-0042). Not re-fetched here. |
 
 ## Evidence boundary
 
