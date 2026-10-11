@@ -11,7 +11,7 @@ The first section is today's measured state. Everything after it is the acceptan
 | Visibility | `gh repo view passioncode-ai/fabric-agent-contract --json visibility` → `PUBLIC` |
 | Schemas | `ls schemas \| wc -l` → 67 |
 | Fixtures | 129 positive, 190 negative (`fixtures/catalogue.json`), 102 semantic |
-| Gate | `pnpm run check`: 25 test files, 852 tests; UX lint 11 stories, 9 flows, 12 screens, 15 scenarios; docs check and markdownlint clean. One test, a FIFO probe with a 2 s child limit, fails under machine load without a defect; wave 1 of the board run raises the limit (packet P1-01) |
+| Gate | `pnpm run check`: 25 test files, 852 tests; UX lint 11 stories, 9 flows, 12 screens, 15 scenarios; docs check and markdownlint clean. Two tests, FIFO probes with a 2 s child limit (`meter-grant`, `session-handoff-review`), fail under machine load without a defect; wave 1 of the board run raises the limit (packet P1-01) |
 | Decisions | DEC-0001…DEC-0042 (DEC-0028 unwritten: its reservation was returned); next free DEC-0043, FAC-SEM-056 |
 | Open work | the [board run](specs/2026-10-11-board-waves/brief.md): inventory, canvas and six waves |
 

@@ -90,8 +90,9 @@ never later than 7 days after sign-in (`service.md` §The session's lifetime; ti
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027).
 
-**Spending limit**: A cap a service applies to its own spend for a day or a UTC month, stated in its usage
-report (DEC-0021, DEC-0027); distinct from a grant's **Limit window**, which caps what a grant may spend.
+**Spending limit**: A cap a service applies to its own spend — per day or UTC month, per order, a velocity limit, or
+a rolling window of `windowSeconds` — each listed in its usage report, enforced or not (DEC-0021, DEC-0027);
+distinct from a grant's **Limit window**, which caps what a grant may spend.
 
 **Services folder**: The per-user directory where installed services' descriptors and token files live:
 `~/Library/Application Support/ai.passioncode.fabric/services/` on macOS,
@@ -101,9 +102,9 @@ report (DEC-0021, DEC-0027); distinct from a grant's **Limit window**, which cap
 **Supervisor**: The system service manager that keeps a local service running — launchd, systemd or the
 Task Scheduler — named by the descriptor's `lifecycle.manager` (DEC-0015, DEC-0032).
 
-**Token file**: The file in the services folder holding a service's descriptor token, readable by its user
-only: mode 0600 on macOS and Linux; on Windows an ACL owned by the user, SYSTEM or Administrators
-(DEC-0032, DEC-0033).
+**Token file**: The file in the services folder holding a service's descriptor token: readable by its user
+only (mode 0600) on macOS and Linux; on Windows its owner and every ACE that grants a right name the user,
+SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DEC-0033).
 
 **Project board**: The board a Project's agents exchange information and requests through, under
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
@@ -112,8 +113,8 @@ only: mode 0600 on macOS and Linux; on Windows an ACL owned by the user, SYSTEM 
 ([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
 
 **Key set**: The device's set of trusted policy keys, signed by the organization's **Policy root key** and
-rotated with overlap; a policy counts only when signed by a key of the current set valid at its `issuedAt`
-([devices](docs/specification/devices.md), DEC-0031, `FAC-SEM-046`).
+rotated with overlap; a policy counts only when signed by a key of the current set valid at its `issuedAt` (`FAC-SEM-041`), and the set
+itself is checked under the root key (`FAC-SEM-046`) ([devices](docs/specification/devices.md), DEC-0031).
 
 **Policy root key**: The organization's root key, delivered at enrollment, that signs **Key sets** and nothing
 else (DEC-0031).
