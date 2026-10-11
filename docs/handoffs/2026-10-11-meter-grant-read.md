@@ -6,7 +6,8 @@ Fabric ADR-0144 amendment 1 in the contract (asked by project-observatory-3d whi
 how the meter reads a grant the hub holds, the `call` window of a per-call refusal, and the `task` claim the
 meter keys the `task` window on. With it, Fabric carry-over CO-260 (1): fabric:// credential names matched by
 whole words. Written by a Fabric session on branch `agent/dec-0041-meter-20261011`; the contract's owner session
-(fabric-agent-contract-75) reviews and merges.
+(fabric-agent-contract-75) reviews and merges. The review of PR #32 is folded in (§Review fixes): Fabric ADR-0144
+amendment 2 (Fabric commit `217aff4d`) replaced the `task` window's `tokenJti` fallback with the grant.
 
 ## Done
 
@@ -26,12 +27,36 @@ whole words. Written by a Fabric session on branch `agent/dec-0041-meter-2026101
 - Glossary (`CONTEXT.md`: Grant projection, Task claim), `docs/DOCMAP.md`.
 - Tests `test/meter-grant.test.ts` (18 cases); fixtures 3 positive, 4 negative, 6 semantic, 7 catalogue rows.
 
+## Review fixes (PR #32)
+
+- The `task` window's last fallback is the grant, `grant:<ref>`, never a `jti` (Fabric ADR-0144 amendment 2, at
+  Fabric `217aff4dfbd6`): `taskWindowKey(claims, grantRef)` takes the grant reference the meter checks and throws
+  for one the token does not name. DL-24, the spend policy, `CONTEXT.md`, the conformance row and DEC-0041 say
+  the same, in DL-24's words.
+- Links (FL-4): the glued forms (`accesstoken`, `sessionid`, `privatekey`, …), `pass`, `passphrase`, `signature`,
+  `sig` always; a plural counts as its singular (`apiKeys`, `secrets`); `key` beside `session`, `auth`, `signing`,
+  `encryption`, `master`, `client`, `login`, `refresh`; `code` beside `access`, `session`. A long secret counts
+  `-`, and each value is also checked as written with a raw `+` kept. Two defects found on the way, both on
+  `main` too: a parameter named `constructor` (or any name an object inherits) made `parseFabricLink` throw, and
+  a lone `constructor` counted as a pair word; both lookups are now own-property only.
+- Projection: one `open` with `O_NOFOLLOW | O_NONBLOCK`, then `fstat` on what was opened (no swap between check
+  and read; a FIFO cannot hang the meter); the file is checked against the standing-grant schema (the state left
+  to its own rows) and its times must be RFC 3339 with a zone; Windows answers `unknown-state`
+  (`unsupported-platform`) before reading (DL-23: POSIX-only in 0.1). DL-23 also states the `PROJECTED_GRANT_ID`
+  rule and that two ids differing only in case are never both projected.
+- DL-21's steps put the projection read before the reservation; the meter's token keeps `task` (step 1).
+- ADR-0144 links are pinned to Fabric commits: amendment 1 at `92cb5124e4f9`, amendment 2 at `217aff4dfbd6`.
+- DEC-0041's compatibility line states exactly which links FL-4 now admits (compared with `main`'s rule over
+  3 552 generated names: only a name whose one credential word is `key`, `code` or `auth` with no partner, and a
+  credential-named fragment piece with no value).
+
 ## Checks run
 
 - Against `origin/main` (8e49fbd), before the change: 17 of the 18 new cases failed (the module absent was
   stubbed to throw so each case ran), and 5 of the 7 new catalogue rows; the remaining case and rows guard that
   `call` stays out of a grant's limits, which `main` already refuses.
-- `pnpm run check` → exit 0: 23 test files, 723 tests (698 before), docs check 0 errors.
+- `pnpm run check` → exit 0: 23 test files, 723 tests (698 before), docs check 0 errors. After the review
+  fixes: 23 test files, 729 tests, UX lint passed, docs check 0 errors.
 - 24 planted defects, each valid code behaving like the missing check, each watched failing and restored
   (failures of the 380 tests in `meter-grant`, `fixtures`, `fabric-button`, `delegation-seams`, `delegation`):
 
@@ -45,7 +70,7 @@ whole words. Written by a Fabric session on branch `agent/dec-0041-meter-2026101
   | P6 | verifier does not type `task` | 1 |
   | P7 | onward token may replace the task | 1 |
   | P8 | meter token may drop the task | 1 |
-  | P9 | task key read from the callee's session | 1 |
+  | P9 | the task key's walk starts at `act.act` (0ae95fe) | 1 |
   | P10 | projection behind the token accepted | 1 |
   | P11 | later revision accepted | 1 |
   | P12 | `revoked` not checked | 1 |
@@ -62,6 +87,31 @@ whole words. Written by a Fabric session on branch `agent/dec-0041-meter-2026101
   | P23 | links: no long-secret check | 1 |
   | P24 | links: fragment anchors refused by name | 1 |
 
+  The review fixes' plants, each watched failing against the 386 tests of the same five files and restored:
+
+  | # | Plant | Failed |
+  |---|---|---|
+  | R1 | task key falls back to `jti:<second argument>` (the old body) | 2 |
+  | R2 | task key falls back to the meter token's own `jti` | 2 |
+  | R3 | task key accepts a grant the token does not name | 1 |
+  | R4 | links: none of the new always-words | 1 |
+  | R5 | links: `key` partners as before | 1 |
+  | R6 | links: no plural fold | 1 |
+  | R7 | links: a long run without `-` | 1 |
+  | R8 | links: query values checked only form-decoded | 1 |
+  | R9 | links: fragment values checked only form-decoded | 1 |
+  | R10 | projection: any `Date.parse` string is a time | 1 |
+  | R11 | projection: no standing-grant schema check | 1 |
+  | R12 | projection: the open follows a link | 1 |
+  | R13 | projection: the open blocks on a FIFO (the read runs in a child killed at 2 s) | 1 |
+  | R14 | projection: Windows reads like POSIX | 1 |
+  | R15 | spend policy: the old task-key sentence | 1 |
+  | R16 | `CONTEXT.md`: the old task-key sentence | 1 |
+  | R17 | links: a lone inherited name counts as a pair word | 1 |
+  | R18 | links: a parameter's grammar read through the prototype | 1 |
+
+  R9 first survived: the raw fragment already keeps `+`; the test now has a value mixing an escape and a raw `+`.
+
   P17 and P24 first survived: a path guard after the grammar covered P17 (the guard was unreachable and is
   removed; the test now names a leading dot, a space, a backslash and 201 characters), and no anchor in the test
   was a credential word (the test now has `#token-usage` and `#session`).
@@ -70,11 +120,12 @@ whole words. Written by a Fabric session on branch `agent/dec-0041-meter-2026101
 
 - Fabric (REQ-37): write the projection (`grantsDir` in `hub.json`, 0600 in 0700, atomic rename on every change)
   and set `task` when a session or run has one.
-- Project Observatory (OBS-55): call `verifyMeterToken`, then `readProjectedGrant`; key the `task` window with
-  `taskWindowKey`; answer `limit-reached` with window `call` at L3 above `perCallMaxUsd`.
+- Project Observatory (OBS-55, OBS-57): call `verifyMeterToken`, then `readProjectedGrant`; key the `task` window
+  with `taskWindowKey`; answer `limit-reached` with window `call` at L3 above `perCallMaxUsd`. Its meter must
+  change its last fallback from the request's `tokenJti` to the grant (`grant:<ref>`); Fabric's session tells it.
 - fabric-agent-adapter: port `readProjectedGrant`, `taskWindowKey` and the whole-word link rule to its kits, then
   repin to this change's merge commit.
-- Not decided: the projection on Windows; a meter not beside the hub.
+- Not decided: the projection on Windows (a Windows meter answers `unknown-state`); a meter not beside the hub.
 
 ## Next task
 

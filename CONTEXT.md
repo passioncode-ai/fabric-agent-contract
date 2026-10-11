@@ -98,8 +98,9 @@ atomically). The meter beside the hub reads the grant a verified token names fro
 nothing alone (DL-23, DL-24, DEC-0041).
 
 **Task claim**: A **Delegation token**'s optional `task`, the issuing host's task the work runs under. The meter
-keys a grant's `task` window on it, else on the calling agent's session, else on the call's `jti`; an onward
-token keeps it or drops it, never replaces it (DEC-0041).
+keys a grant's `task` window on it; else on the first `session` met walking the meter token's actor chain from
+its outermost actor; else on the grant itself (`grant:<ref>`), never on a `jti`. An onward token keeps it or
+drops it, never replaces it (DEC-0041).
 
 **Refusal code**: One of the contract's seventeen kebab-case reasons a callee, the hub or the meter
 refuses (`error.code`, DEC-0039); a product's own words go in `error.data`.

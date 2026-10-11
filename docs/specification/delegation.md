@@ -1,6 +1,6 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md)
+DEC-0039, DEC-0041 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/217aff4dfbd6989122fc9135cc362d904d1ec838/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 2)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -278,19 +278,19 @@ before; no token is minted under it. The payer is the owner (DEC-0038).
   1. the callee exchanges its token at the hub for an **onward token for the meter**: `aud` the meter's agent
      id, the callee added as outermost actor to the chain, `scope` exactly the meter's grant-check capability
      (named in the meter's manifest; `grant.check` in the examples), `effect: ["none"]`, the same `grant`,
-     `sub`, `project` and remaining `spend`, expiring no later than the callee's token. It is minted under the
-     parent's grant, not under a grant of its own: every holder of a valid token may ask the meter about its
-     own call (`FAC-SEM-050` with `meter`);
+     `sub`, `project`, `task` (when the callee's token has one) and remaining `spend`, expiring no later than
+     the callee's token. It is minted under the parent's grant, not under a grant of its own: every holder of a
+     valid token may ask the meter about its own call (`FAC-SEM-050` with `meter`);
   2. the callee calls the meter directly with that token in `Authorization: Bearer` and a request valid against
      [`grant-check-request.schema.json`](../../schemas/grant-check-request.schema.json): the amount, and the
      `jti` of its own token for attribution — never a token in a field;
   3. the meter verifies the onward token with `verifyDelegation` (audience itself, capability its grant-check
      capability, effect `none`, as a read-only door) and maps **any** verifier refusal to `principal-unproven`
-     (`verifyMeterToken` in [`src/delegation.ts`](../../src/delegation.ts)); then it reserves against the
-     grant's windows and every level above, and answers a [`grant-check`](../../schemas/grant-check.schema.json)
-     document.
-
-  4. the meter finds the grant the token names in the hub's projection (DL-23, DL-24) before it reserves.
+     (`verifyMeterToken` in [`src/delegation.ts`](../../src/delegation.ts));
+  4. the meter reads the grant the token names from the hub's projection (DL-23, DL-24) and denies if the
+     projection refuses it;
+  5. only then does it reserve against the grant's windows and every level above, and answer a
+     [`grant-check`](../../schemas/grant-check.schema.json) document.
 
   The token's `spend` claim is what was left at mint, not a reservation.
 - **DL-22 — Usage stays opaque.** A usage report attributes spend by grant reference only (`byGrant`,
@@ -299,26 +299,33 @@ before; no token is minted under it. The payer is the owner (DEC-0038).
 
 ## The hub's grant projection
 
-This is the contract's **local-placement profile** for how the meter reads a grant (DEC-0041, Fabric ADR-0144
-amendment 1): a meter on the same computer as the hub reads the hub's own record of the grant, not a second
-store and not a call to the hub, so a check within a token's lifetime still works while the hub is closed.
+This is the contract's **local-placement profile** for how the meter reads a grant (DEC-0041; Fabric ADR-0144
+[amendment 1](https://github.com/passioncode-ai/fabric/blob/92cb5124e4f9e8db2314acf439e4a1f903541cc2/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-1--2026-10-11-how-the-meter-reads-a-grant-the-call-and-task-windows),
+and [amendment 2](https://github.com/passioncode-ai/fabric/blob/217aff4dfbd6989122fc9135cc362d904d1ec838/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-2--2026-10-11-the-task-windows-key-a-vault-slot-released-under-a-grant)
+for the task window's key): a meter on the same computer as the hub reads the hub's own record of the grant,
+not a second store and not a call to the hub, so a check within a token's lifetime still works while the hub is
+closed.
 
 - **DL-23 — The projection.** A hub MAY project each grant it holds to a directory it names in its hub
   document as `grantsDir`. Each grant is one file, `<meta.id>.json`, holding the grant in the
   [standing-grant](../../schemas/governance.schema.json) shape at its latest revision with its `state`. The
   files are 0600 in a 0700 directory, both owned by the operator's account, and each is written atomically (a
-  temporary file in the same directory, then a rename) on every issue, revision, revocation and expiry. A grant
-  whose `meta.id` is not a file name — outside `^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$` — is not projected. Where
-  the files live on Windows is not decided here.
+  temporary file in the same directory, then a rename) on every issue, revision, revocation and expiry. The hub
+  projects only a grant whose `meta.id` is a file name — `^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$`
+  (`PROJECTED_GRANT_ID`) — and the meter answers `no-grant` for any other; two ids that differ only in case MUST
+  NOT both be projected, because the directory may be on a case-insensitive file system. The local projection
+  profile is POSIX-only in 0.1: a meter on Windows answers `unknown-state` (`unsupported-platform`) before it
+  reads anything, and where the files live on Windows is not decided here.
 - **DL-24 — The meter's read.** After the onward token is verified (DL-21), the meter looks up each grant
   reference `<meta.id>#<meta.revision>` the token names and MUST deny, with `level: null`, when:
 
   | The projection | Refusal | `detail` |
   |---|---|---|
   | the reference names no projectable grant | `no-grant` | `malformed-reference` |
+  | the meter runs on Windows | `unknown-state` | `unsupported-platform` |
   | the directory is missing, unreadable, or not the owner's alone | `unknown-state` | `no-projection`, `unreadable`, `loose-permissions`, `foreign-owner` |
   | the file is missing | `no-grant` | `not-projected` |
-  | the file is unreadable, malformed, too large, not a regular file, not the owner's alone, or for another grant | `unknown-state` | `unreadable`, `malformed-file`, `not-a-file`, `loose-permissions`, `foreign-owner`, `another-grant` |
+  | the file is unreadable, malformed (not JSON, outside the standing-grant shape, or a `startsAt`/`expiresAt` that is not RFC 3339 with `Z` or a numeric offset), too large, a link or not a regular file, not the owner's alone, or for another grant | `unknown-state` | `unreadable`, `malformed-file`, `not-a-file`, `loose-permissions`, `foreign-owner`, `another-grant` |
   | the file is at an earlier revision than the token's | `unknown-state` | `projection-behind` |
   | the grant is `revoked` | `grant-revoked` | `revoked` |
   | the grant is `expired`, or `active` and past its `expiresAt` | `grant-expired` | `expired` |
@@ -326,12 +333,14 @@ store and not a call to the hub, so a check within a token's lifetime still work
   | the file is at a later revision than the token's | `no-grant` | `revised` |
   | the grant is `active` and before its `startsAt` | `no-grant` | `not-started` |
 
-  The rows are checked in this order. The file authorises nothing without the verified onward token: it says
-  what the grant is, the token says who is asking under it. The meter keys the grant's `task` window on the
-  onward token's `task`; else on the first `session` met walking the onward token's actor chain from its
+  The rows are checked in this order. The meter opens the file once, refusing a link and never blocking on a
+  FIFO, and checks what it opened, not the path. The file authorises nothing without the verified onward token:
+  it says what the grant is, the token says who is asking under it. The meter keys the grant's `task` window on
+  the onward token's `task`; else on the first `session` met walking the onward token's actor chain from its
   outermost actor (`act`, then `act.act`, …: the callee's own session, else its caller's, and so on); else on
-  the `jti` of the callee's own token, the
-  request's `tokenJti`. `readProjectedGrant(grantsDir, ref, {now})` and `projectionDenial` in
+  the grant itself (`grant:<ref>`), one window for all the grant's spend. Never on a `jti`: the request's
+  `tokenJti` is unsigned and only attributes the spend, and every onward token has a fresh `jti`, so either
+  would open a new window with each check. `readProjectedGrant(grantsDir, ref, {now, platform})` and `projectionDenial` in
   [`src/grant-projection.ts`](../../src/grant-projection.ts), and `taskWindowKey` in
   [`src/delegation.ts`](../../src/delegation.ts), are this rule.
 

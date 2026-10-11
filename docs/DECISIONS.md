@@ -1526,7 +1526,9 @@ annotate only the old status; decision bodies are never rewritten.
   link reader (Fabric, Fabric Dashboards FD-45, the fabric-agent-adapter's dashboard kit).
 - **Amends:** DEC-0039 additively (DL-23, DL-24; the token's `task`; `window: call`); DEC-0040's FL-4 (how a
   credential name is matched). Implements Fabric
-  [ADR-0144 amendment 1](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave2/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-1--2026-10-11-how-the-meter-reads-a-grant-the-call-and-task-windows).
+  [ADR-0144 amendment 1](https://github.com/passioncode-ai/fabric/blob/92cb5124e4f9e8db2314acf439e4a1f903541cc2/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-1--2026-10-11-how-the-meter-reads-a-grant-the-call-and-task-windows)
+  and, for the `task` window's key, [amendment 2](https://github.com/passioncode-ai/fabric/blob/217aff4dfbd6989122fc9135cc362d904d1ec838/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-2--2026-10-11-the-task-windows-key-a-vault-slot-released-under-a-grant),
+  which replaces amendment 1's sentence on that key.
 - **Decision:**
   - **The `call` window.** Exceeding a grant's `perCallMaxUsd` is `limit-reached` with window `call`, always at
     level L3, in a denied grant check (`grant-check.schema.json`) and in a refusal
@@ -1538,9 +1540,12 @@ annotate only the old status; decision bodies are never rewritten.
     The verifier types it like any claim (`malformed-claims`). An onward token keeps the parent's `task` or none,
     never another, and a token for the meter keeps it (`FAC-SEM-050`, DL-5). The meter keys a grant's `task`
     window on the onward token's `task`; else on the first `session` met walking the meter token's actor chain
-    from its outermost actor (`act`, then `act.act`, …: the callee's own session, else its caller's, and so on —
-    the rule Project Observatory's meter runs); else on the `jti` of the callee's own token,
-    the request's `tokenJti` (`taskWindowKey` in `src/delegation.ts`).
+    from its outermost actor (`act`, then `act.act`, …: the callee's own session, else its caller's, and so on);
+    else on the grant itself (`grant:<ref>`), one window for all the grant's spend. Never on a `jti`: the
+    request's `tokenJti` is unsigned and only attributes the spend, and every onward token has a fresh `jti`, so
+    either would let a callee open a new window with each check and pass the L2 limit. This is ADR-0144
+    amendment 2, which makes the chain walk canonical and the grant the fallback (`taskWindowKey(claims,
+    grantRef)` in `src/delegation.ts`, which throws for a reference the token does not name).
   - **The hub's grant projection** — the contract's local-placement profile of the meter's read (DL-23, DL-24): a
     hub MAY project each grant it holds, in the standing-grant shape at its latest revision with its state, to
     `<grantsDir>/<meta.id>.json`, the directory named `grantsDir` in its hub document, 0600 in 0700, written
@@ -1548,34 +1553,51 @@ annotate only the old status; decision bodies are never rewritten.
     the grant each `grant` reference `<meta.id>#<meta.revision>` names and MUST deny, with `level: null`: a missing
     file or a later revision `no-grant`; `revoked` `grant-revoked`; `expired`, or past `expiresAt`, `grant-expired`;
     no directory, an unreadable, malformed, loosely permitted or misnamed file, an earlier revision or an unknown
-    state `unknown-state`. The file authorises nothing without the verified onward token. The kit ships
-    `readProjectedGrant(grantsDir, ref, {now})` and `projectionDenial` in `src/grant-projection.ts`, on Node's
-    built-in `fs`.
+    state `unknown-state`. Malformed is checked against the standing-grant schema (the state left to its own
+    rows), and `startsAt`/`expiresAt` must be RFC 3339 with `Z` or a numeric offset. The meter opens the file once
+    (`O_NOFOLLOW | O_NONBLOCK`) and checks what it opened, so a link or a FIFO swapped in is refused and never
+    blocks. The hub projects only ids matching `PROJECTED_GRANT_ID`, never two that differ only in case; the meter
+    answers `no-grant` for any other id. The profile is POSIX-only in 0.1: on Windows the meter answers
+    `unknown-state` (`unsupported-platform`) before reading. The file authorises nothing without the verified
+    onward token. The kit ships `readProjectedGrant(grantsDir, ref, {now, platform})` and `projectionDenial` in
+    `src/grant-projection.ts`, on Node's built-in `fs`.
   - **fabric:// credential names (Fabric CO-260 (1)).** A parameter name is split into words (at `.`, `_`, `-`
-    and camelCase humps) and a credential word must be a whole word: `token`, `secret`, `password`, `passwd`,
-    `credential(s)`, `cookie`, `authorization`, `bearer`, `jwt`, `otp`, `apikey` always; `key` with `private`,
-    `api`, `access` or `secret`; `auth` with `token`, `code` or `header`; `session` with `token` or `id`; `code`
-    with `login` or `auth`; and each of these four alone. So `themeCode`, `sortKey` and a `#auth-settings` anchor
-    pass, and `authToken`, `refreshToken`, `clientSecret`, `privateKey`, `sessionToken`, `token`, `key`, `secret`
-    and `password` are refused. A JWT anywhere in a value or the fragment is refused, as is a provider key's shape
-    and a long secret (40 or more base64 characters with no separator mixing upper case, lower case and digits).
-    A fragment piece is refused by its name only when it carries a value (FL-4, `FAC-SEM-052`).
+    and camelCase humps; a word ending in `s` also counts as its singular) and a credential word must be a whole
+    word: `token`, `secret`, `password`, `passwd`, `pass`, `passphrase`, `credential(s)`, `cookie`,
+    `authorization`, `bearer`, `jwt`, `otp`, `apikey`, `signature`, `sig` and the glued forms (`accesstoken`,
+    `idtoken`, `authtoken`, `refreshtoken`, `sessionid`, `sessiontoken`, `logincode`, `authcode`, `privatekey`,
+    `clientsecret`, `secretkey`, `accesskey`) always; `key` with `private`, `api`, `access`, `secret`, `session`,
+    `auth`, `signing`, `encryption`, `master`, `client`, `login` or `refresh`; `auth` with `token`, `code` or
+    `header`; `session` with `token` or `id`; `code` with `login`, `auth`, `access` or `session`; and each of these
+    four alone. So `themeCode`, `sortKey`, `passage`, `signal` and a `#auth-settings` anchor pass, and
+    `authToken`, `refreshToken`, `clientSecret`, `privateKey`, `apiKeys`, `X-Amz-Signature`, `token`, `key`,
+    `secret` and `password` are refused. A JWT anywhere in a value or the fragment is refused, as is a provider
+    key's shape and a long secret (40 or more base64 or base64url characters mixing upper case, lower case and
+    digits), checked on each value as decoded and as written with a raw `+` kept. A fragment piece is refused by
+    its name only when it carries a value (FL-4, `FAC-SEM-052`).
 - **Why:** Project Observatory's session asked, while building the meter (OBS-55), how it reads a grant the hub
   holds, what a per-call refusal names as its window, and what the `task` window counts. Fabric decided all three
   in ADR-0144 amendment 1; a hub read capability was rejected because the meter would then deny every check while
-  Fabric is closed, even within a token's lifetime. CO-260 (1), Fabric's carry-over from the DEC-0040 review: the
+  Fabric is closed, even within a token's lifetime. The review of this decision (PR #32) found amendment 1's
+  fallback to the request's `tokenJti` let a callee pass the L2 limit; Fabric replaced it in amendment 2. CO-260 (1), Fabric's carry-over from the DEC-0040 review: the
   link rule refused harmless names that merely contain a credential word (`themeCode`, `sortKey`,
   `#auth-settings`).
 - **Compatibility:** Additive; `contractVersion` stays `0.1.0`. `call` is a new value of two `window` enums, `task`
   a new optional claim, the projection a MAY of the hub. Every existing document stays valid. FL-4 now admits
-  links it refused before; every link refused for a credential before is still refused except a name that only
-  contains a credential word.
+  exactly two kinds of link it refused before: a name whose only credential word is `key`, `code` or `auth` with
+  no partner beside it (`themeCode`, `sortKey`, `countryCode`, `authSettings`, `authId`, `userKey`), and a
+  credential-named fragment piece with no value (`#token`, `#auth-settings`). Every other link refused on `main`
+  is still refused (compared over 3 552 generated names, with the review's list: `accesstoken`, `idtoken`,
+  `sessionid`, `logincode`, `sig`, `signature`, `X-Amz-Signature`, `pass`, `sessionKey`, `authKey` and
+  `signingKey` stay refused), and 383 names `main` admitted are now refused (`authtoken`, `privatekey`,
+  `clientsecret`, `apiKeys`, `secrets`, `APIKey`).
 - **Consequences / affects:**
   - spec: `docs/specification/delegation.md` (DL-2 `task`, DL-5, DL-19, DL-21 step 4, DL-23, DL-24, `FAC-SEM-050`),
     `docs/specification/spend-policy.md` (L3, the `task` and `call` windows, the projection),
     `docs/specification/fabric-button.md` (FL-4), `docs/specification/conformance.md` (a reader row);
   - schemas: `grant-check`, `delegation-refusal`, `delegation-token`;
   - code: `src/grant-projection.ts` (new), `src/delegation.ts` (`task`, `OPAQUE_ID`, `taskWindowKey`),
+    `src/contract.ts` (`loadSchemasSync`), `src/validator.ts` (`createValidatorSync`),
     `src/delegation-rules.ts` (`FAC-SEM-050`), `src/fabric-links.ts` (`nameWords`, `credentialName`,
     `CREDENTIAL_WORDS`, `CREDENTIAL_PAIRS`, `PROMPT_WORDS`, `JWT_SHAPE`, `SECRET_VALUE`, `secretValue`);
   - fixtures: 3 positive, 4 negative, 6 semantic, `fixtures/catalogue.json`;
@@ -1584,6 +1606,7 @@ annotate only the old status; decision bodies are never rewritten.
     `docs/handoffs/2026-10-11-meter-grant-read.md`.
 - **Not decided here:** the projection on Windows; a meter that does not run beside the hub; the format of the hub
   document beyond `grantsDir` (Fabric's); how the meter stores reservations per window.
-- **Source:** Fabric ADR-0144 amendment 1 (2026-10-11), asked by project-observatory-3d; CO-260 (1). DEC-0041 was
+- **Source:** Fabric ADR-0144 amendment 1 (2026-10-11), asked by project-observatory-3d, and amendment 2
+  (2026-10-11), asked by this decision's review and by project-observatory-3d (OBS-57); CO-260 (1). DEC-0041 was
   reserved by git CAS (`--key meter-grant-read-20261011`); this file and `conformance.md` were edited under git
   leases; no new rule code (`FAC-SEM-050` and `FAC-SEM-052` are extended). Written by a Fabric session.

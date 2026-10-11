@@ -44,8 +44,10 @@ A standing grant with a `spend` block authorizes spending (DEC-0038):
 - `mode: unlimited`, or `mode: limited` with one or more `limits`. Each limit names a `window` and a
   `limitUsd`; several windows apply together, and the first one reached stops the spend:
   - `total`: the grant's whole life;
-  - `task`: one task. The meter's `task` window is keyed on the token's `task` claim; else on the session of
-    the agent that called the callee; else on the `jti` of the callee's own token (DEC-0041,
+  - `task`: one task. The meter's `task` window is keyed on the token's `task` claim; else on the first
+    `session` met walking the onward token's actor chain from its outermost actor (the callee's own session,
+    else its caller's, and so on); else on the grant itself (`grant:<ref>`), one window for all the grant's
+    spend — never on a `jti`, which the callee could change with every check (DEC-0041,
     [delegation](delegation.md#the-hubs-grant-projection) DL-24);
   - `project`: everything spent on the grant's project;
   - `day`, `week`, `month`: calendar windows in UTC.

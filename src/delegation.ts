@@ -367,18 +367,21 @@ export function verifyMeterToken(token: string, options: VerifyMeterOptions): De
 }
 
 /**
- * The key the meter holds a grant's `task` window under (DEC-0041), from the onward token it verified and the
- * request's `tokenJti`: the token's `task`; else the first `session` met walking the token's actor chain from its
- * outermost actor (`act`, then `act.act`, …) — the callee's own session when it has one, else the session of the
- * agent that called it, and so on; else the `jti` of the callee's own token. The prefixes keep the three
- * namespaces apart, and the session key names the actor that holds it.
+ * The key the meter holds a grant's `task` window under (DEC-0041, Fabric ADR-0144 amendment 2), from the onward
+ * token it verified and the grant reference it is checking, one the token names: the token's `task`; else the first
+ * `session` met walking the token's actor chain from its outermost actor (`act`, then `act.act`, …) — the callee's
+ * own session when it has one, else the session of the agent that called it, and so on; else the grant itself, one
+ * window for all its spend. Never a `jti`: the request's `tokenJti` is unsigned and every onward token has a fresh
+ * one, so either would open a new window with each check. The prefixes keep the three namespaces apart, and the
+ * session key names the actor that holds it. A reference the token does not name throws: there is no window to key.
  */
-export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act">, tokenJti: string): string {
+export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act" | "grant">, grantRef: string): string {
+  if (!meterClaims.grant.includes(grantRef)) throw new RangeError("the meter checks only a grant its verified token names");
   if (meterClaims.task !== undefined) return `task:${meterClaims.task}`;
   for (let actor: Actor | undefined = meterClaims.act; actor !== undefined; actor = actor.act) {
     if (actor.session !== undefined) return `session:${actor.sub}:${actor.session}`;
   }
-  return `jti:${tokenJti}`;
+  return `grant:${grantRef}`;
 }
 
 /** An in-memory `JtiStore` for tests and single-process callees; a service that restarts needs a durable one. */

@@ -1,5 +1,6 @@
 import { generateKeyPairSync, sign as cryptoSign } from "node:crypto";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -92,28 +93,52 @@ describe("2 — the task claim (DEC-0041)", () => {
     expect(codes("delegation-mint", meterKept)).toEqual([]);
   });
 
-  it("keys the meter's task window on task, else on the first session along the actor chain, else on the call's jti", () => {
+  it("keys the meter's task window on task, else on the first session along the actor chain, else on the grant", () => {
     const meterToken = load("semantic/delegation-mint-meter-ok.json").token as delegation.DelegationClaims;
-    const jti = "01JA7Y5Q3C2K9M8N4P6R0S1T2V";
-    expect(delegation.taskWindowKey({ ...meterToken, task: "task:01JA7Z0K4M" }, jti)).toBe("task:task:01JA7Z0K4M");
+    const ref = meterToken.grant[0] as string;
+    expect(delegation.taskWindowKey({ ...meterToken, task: "task:01JA7Z0K4M" }, ref)).toBe("task:task:01JA7Z0K4M");
     const inSession = { ...meterToken, act: { sub: "example-writer", act: { sub: "example-media", session: "s-7", act: { sub: "example-agent.default" } } } };
-    expect(delegation.taskWindowKey(inSession, jti)).toBe("session:example-media:s-7");
-    expect(delegation.taskWindowKey(meterToken, jti)).toBe(`jti:${jti}`);
+    expect(delegation.taskWindowKey(inSession, ref)).toBe("session:example-media:s-7");
+    // No task and no session: one window for the whole grant (Fabric ADR-0144 amendment 2), never a jti.
+    expect(delegation.taskWindowKey(meterToken, ref)).toBe(`grant:${ref}`);
     // The walk starts at the outermost actor, the callee: its own session wins over its caller's.
     const calleeSession = { ...meterToken, act: { ...meterToken.act, session: "callee-1" } };
-    expect(delegation.taskWindowKey(calleeSession, jti)).toBe(`session:${meterToken.act?.sub}:callee-1`);
+    expect(delegation.taskWindowKey(calleeSession, ref)).toBe(`session:${meterToken.act?.sub}:callee-1`);
     const bothSessions = { ...meterToken, act: { sub: "example-writer", session: "w-1", act: { sub: "example-media", session: "s-7" } } };
-    expect(delegation.taskWindowKey(bothSessions, jti)).toBe("session:example-writer:w-1");
+    expect(delegation.taskWindowKey(bothSessions, ref)).toBe("session:example-writer:w-1");
     // A session three actors deep is still found.
     const deep = { ...meterToken, act: { sub: "a", act: { sub: "b", act: { sub: "c", session: "c-1" } } } };
-    expect(delegation.taskWindowKey(deep, jti)).toBe("session:c:c-1");
+    expect(delegation.taskWindowKey(deep, ref)).toBe("session:c:c-1");
+  });
+
+  it("never keys the task window on a jti: a fresh token or a fresh tokenJti opens no new window", () => {
+    const meterToken = load("semantic/delegation-mint-meter-ok.json").token as delegation.DelegationClaims;
+    const ref = meterToken.grant[0] as string;
+    const request = load("positive/grant-check-request.json");
+    // The request's tokenJti is unsigned; the callee may send any. Two checks that differ in it share one window.
+    const again = { ...request, tokenJti: "01JA7ZZZZZZZZZZZZZZZZZZZZZ" };
+    expect(valid("grant-check-request.schema.json", again)).toBe(true);
+    const keyFor = (claims: delegation.DelegationClaims, checked: Json) => delegation.taskWindowKey(claims, typeof checked.grantRef === "string" ? checked.grantRef : ref);
+    expect(keyFor(meterToken, again)).toBe(keyFor(meterToken, request));
+    expect(keyFor({ ...meterToken, jti: "01JA7ZZZZZZZZZZZZZZZZZZZZZ" }, request)).toBe(keyFor(meterToken, request));
+    expect(keyFor(meterToken, request)).not.toMatch(/jti|01JA7Y/);
+    // A reference the token does not name keys nothing: the meter checks only a grant the signed token names.
+    expect(() => delegation.taskWindowKey(meterToken, "urn:grant:project-a:another#1")).toThrow(RangeError);
   });
 
   it("is stated in the delegation profile and in the spend policy", () => {
     const profile = read("docs/specification/delegation.md");
     expect(profile).toMatch(/\| `task` \| no \|/);
     expect(profile).toMatch(/keeps the parent's `task` or none, never another/);
-    expect(read("docs/specification/spend-policy.md")).toMatch(/`task` window[^\n]*keyed on the token's `task`/);
+    const policy = read("docs/specification/spend-policy.md");
+    expect(policy).toMatch(/`task` window[^\n]*keyed on the token's `task`/);
+    // DL-24's rule, word for word where it names the key: the first session along the actor chain, else the grant.
+    for (const [name, text] of [["delegation.md", profile], ["spend-policy.md", policy], ["CONTEXT.md", read("CONTEXT.md")], ["DECISIONS.md", read("docs/DECISIONS.md")], ["conformance.md", read("docs/specification/conformance.md")]] as const) {
+      const flat = text.replace(/\s+/g, " ");
+      expect(flat, name).toMatch(/first `session` met walking the [^.]*actor chain from (its|the) outermost actor/);
+      expect(flat, name).toMatch(/else on the grant itself \(`grant:<ref>`\)/);
+      expect(flat, name).not.toMatch(/session of the agent that called the callee|the calling agent's session|else on the call's `jti`|else the call's `jti`|else on the `jti` of the callee's own token/);
+    }
   });
 });
 
@@ -186,6 +211,43 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     }
   });
 
+  it("unknown-state: a time that is not RFC 3339 with a zone, a file outside the standing-grant shape", () => {
+    for (const expiresAt of ["2026-11-11T09:00:00", "12 Nov 2026", "2026-11-11", "2026-11-11 09:00:00Z", "2026-11-11T09:00:00z", "1794393600"]) {
+      expect(result(hubDir({ [file]: revised({ expiresAt }) })), expiresAt).toBe("unknown-state/malformed-file");
+    }
+    expect(result(hubDir({ [file]: revised({ startsAt: "Oct 11 2026 09:00" }) }))).toBe("unknown-state/malformed-file");
+    expect(result(hubDir({ [file]: revised({ expiresAt: "2026-11-11T11:00:00+02:00", startsAt: "2026-10-11T09:00:00.5Z" }) }))).toBe("ok");
+    const spend = grant.spend as Json;
+    for (const [label, changed] of [
+      ["limits a string", revised({ spend: { ...spend, limits: "lots" } })],
+      ["a limit without limitUsd", revised({ spend: { ...spend, limits: [{ window: "task" }] } })],
+      ["a call limit window", revised({ spend: { ...spend, limits: [{ window: "call", limitUsd: 1 }] } })],
+      ["no issuer", (({ issuer: _issuer, ...rest }) => rest)(grant)],
+      ["meta without contentHash", revised({ meta: { id: meta.id, revision: meta.revision } })],
+      ["an unknown field", revised({ extra: true })]
+    ] as const) expect(result(hubDir({ [file]: changed as Json })), label).toBe("unknown-state/malformed-file");
+    // A state the contract does not name is still its own row, not a malformed file.
+    expect(result(hubDir({ [file]: revised({ state: "suspended" }) }))).toBe("unknown-state/unknown-grant-state");
+  });
+
+  it.skipIf(process.platform === "win32")("refuses a link or a FIFO at the file's path, without following or blocking on it", { timeout: 5000 }, () => {
+    const linked = hubDir({ "elsewhere.json": grant });
+    symlinkSync(path.join(linked, "elsewhere.json"), path.join(linked, file));
+    expect(result(linked)).toBe("unknown-state/not-a-file");
+    const piped = hubDir({});
+    execFileSync("mkfifo", ["-m", "600", path.join(piped, file)]);
+    // A blocking open would hang this worker past any test timeout, so the read runs in a child killed at 2 s.
+    const script = `const p = await import(${JSON.stringify(path.join(root, "src/grant-projection.ts"))}); const a = p.readProjectedGrant(${JSON.stringify(piped)}, ${JSON.stringify(ref)}, { now: ${NOW} }); process.stdout.write(a.ok ? "ok" : a.code + "/" + a.detail);`;
+    expect(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 2000, encoding: "utf8" })).toBe("unknown-state/not-a-file");
+  });
+
+  it("answers unknown-state on Windows before reading: the local profile is POSIX-only in 0.1", () => {
+    const answer = projection.readProjectedGrant(hubDir({ [file]: grant }), ref, { now: NOW, platform: "win32" });
+    expect(answer).toEqual({ ok: false, code: "unknown-state", detail: "unsupported-platform" });
+    expect(projection.readProjectedGrant(path.join(scratch, "absent"), ref, { now: NOW, platform: "win32" })).toMatchObject({ detail: "unsupported-platform" });
+    expect(read("docs/specification/delegation.md")).toMatch(/POSIX-only in 0\.1[^\n]*\n?[^\n]*`unknown-state`/);
+  });
+
   it("authorises nothing alone: every refusal is a meter denial with level null", () => {
     const answer = at(hubDir({}), ref);
     expect(answer.ok).toBe(false);
@@ -225,6 +287,42 @@ describe("4 — fabric:// credential names are whole words (DEC-0041, CO-260 (1)
     ]) expect(passes(`fabric://chat?service=example-agent&${name}=x`), name).toBe(false);
     expect(passes("fabric://chat?service=example-agent#access_token=abc")).toBe(false);
     expect(passes("fabric://chat?service=example-agent#sessionToken=abc")).toBe(false);
+  });
+
+  it("refuses the names whole words first let through: glued, plural, signatures, and key beside its owner", () => {
+    for (const name of [
+      "accesstoken", "idtoken", "authtoken", "refreshtoken", "sessionid", "sessiontoken", "logincode", "authcode", "privatekey",
+      "clientsecret", "secretkey", "accesskey", "sig", "signature", "X-Amz-Signature", "pass", "passphrase", "secrets", "tokens",
+      "apikeys", "apiKeys", "sessionKey", "authKey", "signingKey", "encryptionKey", "masterKey", "clientKey", "loginKey",
+      "refreshKey", "accessCode", "session_code"
+    ]) {
+      expect(links.credentialName(name), name).toBe(true);
+      expect(passes(`fabric://chat?service=example-agent&${name}=x`), name).toBe(false);
+    }
+    for (const name of ["themeCode", "sortKey", "tokenizer", "authorName", "sessionLength", "passage", "signal", "keyboard", "compass", "bypass", "signup", "monkeys", "passes", "constructor"]) {
+      expect(links.credentialName(name), name).toBe(false);
+      expect(passes(`fabric://chat?service=example-agent&${name}=x`), name).toBe(true);
+    }
+    // A name an object inherits is an unknown parameter like any other, not a grammar.
+    for (const name of ["constructor", "toString", "__proto__", "hasOwnProperty"]) expect(parseFabricLink(`fabric://chat?service=example-agent&${name}=x`), name).toMatchObject({ ok: true, ignored: [name] });
+  });
+
+  it("counts - and a raw + as part of a long secret", () => {
+    // 47 base64url characters with a - in the middle: no half is 40 long, the whole is.
+    const base64url = "Zm9vYmFyQmF6UXV4MTIzNDU2-Nzg5MGFiY2RlZkdISUpL0x";
+    expect(base64url).toHaveLength(47);
+    expect(passes(`fabric://chat?service=example-agent&ref=${base64url}`)).toBe(false);
+    // URLSearchParams turns a raw + into a space; the raw value is checked too.
+    expect(passes("fabric://chat?service=example-agent&x=Zm9vYmFyQmF6UXV4MTIzNDU2+Nzg5MGFiY2RlZkdISUpL")).toBe(false);
+    expect(passes("fabric://chat?service=example-agent#x=Zm9vYmFyQmF6UXV4MTIzNDU2+Nzg5MGFiY2RlZkdISUpL")).toBe(false);
+    // An escape and a raw + together: neither the form-decoded value nor the raw text holds a 40-character run.
+    const mixed = "Zm9vYmFyQmF6UXV4%2FMTIzNDU2Nzg5MGFi+Y2RlZkdISUpLTU5P";
+    expect(passes(`fabric://chat?service=example-agent&x=${mixed}`)).toBe(false);
+    expect(passes(`fabric://chat?service=example-agent#x=${mixed}`)).toBe(false);
+    // A lowercase hex digest and a ULID are ids, not secrets.
+    expect(passes("fabric://chat?service=example-agent&digest=9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08")).toBe(true);
+    expect(passes("fabric://chat?service=example-agent&run=01JA7Y5Q3C2K9M8N4P6R0S1T2V")).toBe(true);
+    expect(passes("fabric://chat?service=example-agent&project=example-project-2026")).toBe(true);
   });
 
   it("refuses a JWT anywhere and a long secret-shaped value", () => {
