@@ -106,11 +106,17 @@ function serviceClaims(value: JsonObject): Finding[] {
   return findings;
 }
 
+/**
+ * An executable's path as `localPath` admits it (schemas/service-common.schema.json, DEC-0032): POSIX `/…` or
+ * `~/…`, Windows drive-absolute `C:\…`/`C:/…` or `~\…` — and never a network share (`//server/…`).
+ */
+const EXECUTABLE_PATH = /^(~[\\/]|\/(?!\/)|[A-Za-z]:[\\/])/;
+
 function serviceCommands(value: JsonObject): Finding[] {
   const commands = isObject(value.commands) ? value.commands : {};
   return Object.entries(commands)
-    .filter(([, argv]) => Array.isArray(argv) && !/^(~\/|\/)/.test(String(argv[0])))
-    .map(([name]) => ({ code: "FAC-SEM-012", instancePath: `/commands/${name}/0`, message: `command ${name} must start with an absolute or home-relative executable path` }));
+    .filter(([, argv]) => Array.isArray(argv) && !EXECUTABLE_PATH.test(String(argv[0])))
+    .map(([name]) => ({ code: "FAC-SEM-012", instancePath: `/commands/${name}/0`, message: `command ${name} must start with an absolute or home-relative executable path (/…, ~/…, C:\\…, ~\\…), never a network share` }));
 }
 
 // DEC-0019: names that never reach the open internet. A remote origin on one of them is a local
