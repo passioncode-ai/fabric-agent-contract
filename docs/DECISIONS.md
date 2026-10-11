@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0037`
+**Next free ID:** `DEC-0038`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1265,3 +1265,60 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** operator request, 2026-10-11, and the measurements above. DEC-0036 was reserved by git
   CAS (`agent_sync.py reserve DEC --key embedded-dashboard`); this file was edited under the git
   lease `docs/DECISIONS.md`; the record plane is `fs`, as `AGENTS.md` describes.
+
+### DEC-0037 — Spend policy and grants with amounts: agents check a record instead of asking
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change. Consumer adoption: the registry and `grant check` (Project
+  Observatory), the project policy and presets at launch (Fabric), project pool ceilings and grant ids in
+  usage (Switchboard), and showing policies, grants and requests (Fabric Dashboards).
+- **Decision:**
+  - **Four levels, the most specific deciding:**
+    - L0 estate total across all provider keys;
+    - L1 project policy;
+    - L2 task presets;
+    - L3 per call.
+  - **A project's policy is chosen once, at its first paid run, from options computed for that project.**
+    The inputs are the agents' `costPresets`, the recent spend from usage reports, and the kind of work.
+    They are kept beside the choice. "No project limit" is a recorded `mode`, never a missing value.
+  - **Grants carry an amount.** A standing grant's optional `spend` block holds `limitUsd`, `period`,
+    `perCallMaxUsd`, `autoApproveUsd`, `payer` and `credentialSource`. A new `principalKind: external`
+    marks a share grant to a person or organization outside the estate.
+  - **The proof is a check, not a question.** The registry answers a `grant-check` document: `allowed`
+    with a receipt and the grant, or `denied` with the refusing level and, where allowed, the durable
+    approval request it filed. An unknown state is a denial.
+  - **Three rules:**
+    - a credential source is the project's own key or another agent's capability, never another agent's
+      key;
+    - a principal is proven by a credential the registry issued (a per-session token minted at session
+      start), never by a label the caller supplies;
+    - an approval is a durable request answered through the operator channel's confirm token and never
+      blocks the agent; a chat or cross-session message is not an approval.
+  - **Usage reports may attribute spend per grant** (`byGrant`). `FAC-SEM-047` keeps a policy consistent with
+    what was offered.
+- **Why:** Agents kept asking the person to approve spend or to prove an earlier approval. The limits
+  were scattered:
+  - each upstream key had its own ceiling, and nothing totalled them;
+  - each service reported its own budgets (DEC-0021, DEC-0027);
+  - standing grants had no amount field, although governance-and-roles required amount limits.
+
+  Nothing said whether one agent may spend another agent's key. Approvals sent as messages could expire
+  undelivered while the sender waited.
+- **Compatibility:** The change is additive. Two new schemas (`spend-policy`, `grant-check`) and optional
+  fields (`spend`, `principalKind`, `costPresets`, `byGrant`); every existing document stays valid.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - `schemas/spend-policy.schema.json` and `schemas/grant-check.schema.json` are new;
+  - `governance`, `manifest` and `service-usage` schemas gain the optional fields;
+  - `src/spend-rules.ts` (`FAC-SEM-047`), `docs/specification/spend-policy.md`, and the
+    governance-and-roles amount line;
+  - fixtures: 6 positive, 6 negative, 3 semantic.
+- **Not decided here:**
+  - the estate total's value and the price of any upstream call: the operator's configuration, not the
+    contract;
+  - who pays by default for a share grant;
+  - settlement between estates (the commerce draft).
+- **Source:** proposed by the Fabric Dashboards session (FD-40 brief) after the operator's request of
+  2026-10-11. The registry side is reviewed by the Project Observatory session. DEC-0037 and FAC-SEM-047 are
+  reserved by git CAS (`agent_sync.py reserve DEC|SEM --key spend-policy-20261011`), and this file was
+  edited under the git lease.

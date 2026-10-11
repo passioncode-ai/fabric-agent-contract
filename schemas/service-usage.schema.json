@@ -54,6 +54,40 @@
         "$ref": "#/$defs/limit"
       },
       "description": "Every spending limit the service applies, enforced or not (DEC-0027). Ids are unique (FAC-SEM-031)."
+    },
+    "byGrant": {
+      "type": "array",
+      "description": "DEC-0037: spend in the report's window attributed to each grant that authorized it (grant check receipts).",
+      "items": {
+        "type": "object",
+        "required": [
+          "grantRef",
+          "calls",
+          "costUsd"
+        ],
+        "properties": {
+          "grantRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "calls": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "costUsd": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false,

@@ -24,7 +24,7 @@ classes. Default authorization is `draft-only`. A standing grant MUST name:
 - allowed channels and recipient constraints;
 - data classifications allowed;
 - start and expiry;
-- rate and amount limits where applicable;
+- rate and amount limits where applicable (amounts: the grant's `spend` block, [spend policy](spend-policy.md), DEC-0037);
 - idempotency policy;
 - issuer and revocation status.
 
