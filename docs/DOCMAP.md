@@ -26,6 +26,8 @@ and recorded as DEC-0001.
 | Concrete memory backend mapping | `docs/reference-architecture/mcp-memory-service-adapter.md` |
 | Service extension (`fabric-service/0.1`), local and remote placement | `docs/specification/service.md` |
 | Settings backups (`fabric-settings-backup/1`) and the feed client's token header | `docs/specification/service.md#settings-backup`, `#feed-client`, `schemas/settings-backup.schema.json` (DEC-0025) |
+| Spend policy and grants with amounts (DEC-0037), grant limit windows (DEC-0038), the meter's `call` window and grant projection (DEC-0041) | `docs/specification/spend-policy.md`, `docs/specification/delegation.md#the-hubs-grant-projection`, `schemas/spend-policy.schema.json`, `schemas/grant-check*.schema.json` |
+| Services on Windows and Linux: the services folder, a supervisor per system, Windows paths and token files (DEC-0032, DEC-0033) | `docs/specification/service.md` (lifecycle, token files), `schemas/service-descriptor.schema.json`, `schemas/service-common.schema.json` |
 | Client and reader conformance | `docs/specification/conformance.md#clients-and-readers` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |

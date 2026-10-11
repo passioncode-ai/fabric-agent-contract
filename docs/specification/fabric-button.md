@@ -61,7 +61,7 @@ them, exactly:
 where *passioncode.ai/fabric* links to `https://passioncode.ai/fabric`, opened in a new browsing context with
 `rel="noopener"`. The page never downloads anything by itself and never retries a link in a loop. A page knows
 Fabric is absent from the host's `fabric_button` cookie (FB-6) or, for a local service, from its own server,
-which MAY check whether the hub document of [Fabric's lifecycle](https://github.com/passioncode-ai/fabric/blob/main/AGENTS.md#lifecycle)
+which MAY check whether the hub document of [Fabric's lifecycle](https://github.com/passioncode-ai/fabric/blob/7e2aed4ceef2e8db6a1463e2940eb0f651c2a795/AGENTS.md#lifecycle)
 exists. A web page cannot see which URL schemes a computer handles, so without either signal it falls back to
 the 1 500 ms test.
 

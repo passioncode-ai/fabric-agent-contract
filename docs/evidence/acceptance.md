@@ -1,7 +1,21 @@
 # Acceptance — Fabric Agent Contract 0.1.0
 
-Acceptance evidence captured on 2026-08-26. This page records receipts; the
-normative contract remains under `docs/specification/` and `schemas/`.
+This page records receipts; the normative contract remains under `docs/specification/` and `schemas/`.
+The first section is today's measured state. Everything after it is the acceptance record of
+2026-08-26, kept as history: its counts and its visibility line describe that day, not now.
+
+## Current state (measured 2026-10-11, `main` at `2afbe60`)
+
+| Subject | Receipt |
+|---|---|
+| Visibility | `gh repo view passioncode-ai/fabric-agent-contract --json visibility` → `PUBLIC` |
+| Schemas | `ls schemas \| wc -l` → 67 |
+| Fixtures | 129 positive, 190 negative (`fixtures/catalogue.json`), 102 semantic |
+| Gate | `pnpm run check`: 25 test files, 852 tests; UX lint 11 stories, 9 flows, 12 screens, 15 scenarios; docs check and markdownlint clean. Two tests, FIFO probes with a 2 s child limit (`meter-grant`, `session-handoff-review`), fail under machine load without a defect; wave 1 of the board run raises the limit (packet P1-01) |
+| Decisions | DEC-0001…DEC-0042 (DEC-0028 unwritten: its reservation was returned); next free DEC-0043, FAC-SEM-056 |
+| Open work | the [board run](specs/2026-10-11-board-waves/brief.md): inventory, canvas and six waves |
+
+## The 2026-08-26 acceptance record
 
 ## Outcome
 
@@ -13,7 +27,7 @@ navigation cards. No runtime, SDK, CLI, UI, marketplace or model router was buil
 
 | Subject | Receipt |
 |---|---|
-| Contract visibility | GitHub reported `PRIVATE` for `passioncode-ai/fabric-agent-contract` |
+| Contract visibility | GitHub reported `PRIVATE` for `passioncode-ai/fabric-agent-contract` on 2026-08-26 (public since; see *Current state*) |
 | Contract publication | PR #1 merged at `489737051828fafec92463df04b6a6fd3280c7b7` |
 | Contract CI | GitHub Actions job `contract` completed `SUCCESS` |
 | Fabric adoption | Fabric PR #1 merged at `5bb98740c84b006e0ef4f1509ec66018623d75cd` |
@@ -54,9 +68,9 @@ CI=true pnpm install --frozen-lockfile
 CI=true pnpm run check
 ```
 
-Expected measured result: strict TypeScript success, 4 test files and 34 tests
+Measured on 2026-08-26: strict TypeScript success, 4 test files and 34 tests
 passing, UX lint covering 5 stories / 4 flows / 8 screens / 8 scenarios, document
-checks passing, and 0 Markdown lint errors.
+checks passing, and 0 Markdown lint errors. Today's counts are in *Current state* above.
 
 ## Known operational handoff
 
