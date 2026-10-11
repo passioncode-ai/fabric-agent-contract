@@ -36,6 +36,9 @@ const onFolder = (base: string, edit: (f: Json, m: Json) => void) => {
   edit(f, f.entries["handoff.json"]?.json ?? {});
   return messagesOf(sessionHandoffFolderFindings(snapshotFromFixture(f)));
 };
+/** A token with a delegation token's shape (DEC-0039 header and an `exp`); the signature is never checked by the kit. */
+const shapedToken = (typ = "fabric-delegation+jwt", payload: Json = { sub: "operator", exp: 1_800_000_000 }) =>
+  [{ alg: "EdDSA", typ, kid: "k1" }, payload].map((part) => Buffer.from(JSON.stringify(part)).toString("base64url")).join(".") + ".c2lnbmF0dXJl";
 const withoutFlag = (args: string[], flag: string) => {
   const at = args.indexOf(flag);
   return at < 0 ? args.filter((arg) => !arg.startsWith(`${flag}=`)) : [...args.slice(0, at), ...args.slice(at + 2)];
@@ -103,6 +106,9 @@ const cases: Array<[string, () => string[], string]> = [
   ["SH-9 auth-none server not stdio", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].type = "http"; }), "a server with no secret is a stdio command"],
   ["SH-9 header in a no-secret folder", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].headers = { Accept: "application/json" }; }), "a handoff with no secret carries no header"],
   ["SH-9 a standing key on another server", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.gateway = { type: "http", url: "http://127.0.0.1:9/mcp", headers: { Authorization: "Bearer standing-key-0123456789" } }; }), "a server other than the first call's carries only a delegation token"],
+  ["SH-9 Fabric's gateway role key", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.gateway = { type: "http", url: "http://127.0.0.1:9/mcp", headers: { "x-agw-key": "role-key-5b8e2f1a" } }; }), "a server other than the first call's carries only a delegation token"],
+  ["SH-9 a JWT-looking standing key", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.gateway = { type: "http", url: "http://127.0.0.1:9/mcp", headers: { Authorization: `Bearer ${shapedToken("JWT")}` } }; }), "a server other than the first call's carries only a delegation token"],
+  ["SH-9 another credential on the first server", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.headers["X-Api-Key"] = "standing-0123"; }), "the first call's server carries the session bearer in Authorization and no other credential"],
   ["SH-9 credential env in a no-secret folder", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].env = { API_TOKEN: "abc" }; }), "a handoff with no secret carries no credential in a server's environment"],
   ["SH-9 standing key in a server's environment", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.env = { API_TOKEN: "abc" }; }), "a credential in a server's environment is a delegation token"],
   ["SH-9 credential in a URL", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.url = "http://127.0.0.1:47070/mcp?t=eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ4In0.c2ln"; }), "a server's url never carries a credential"],
@@ -128,6 +134,8 @@ describe("FAC-SEM-053…055: every message the rules emit has a test that produc
         if (longest.trim().length >= 8) fragments.push(longest.trim());
       }
     }
+    // Every call is read: a call the pattern skipped (wrapped over lines, a message in a variable) fails here.
+    expect([...source.matchAll(/sem05[345]\(\s*(?:"[^"]*"|`[^`]*`|\w+)\s*,/g)].length).toBe([...source.matchAll(/\bsem05[345]\(/g)].length);
     expect(fragments.length).toBeGreaterThan(55);
     const missing = fragments.filter((fragment) => !produced.some((message) => message.includes(fragment)));
     expect(missing).toEqual([]);
@@ -141,6 +149,11 @@ describe("the review's fixes", () => {
       m.launch.args[m.launch.args.length - 1] = m.brief.text;
     });
     expect(prose.filter((message) => message.includes("credential"))).toEqual([]);
+    const scheme = onManifest("fabric-claude", (m) => {
+      m.brief.text = `Add the Bearer authentication scheme to the API. ${m.preamble}`;
+      m.launch.args[m.launch.args.length - 1] = m.brief.text;
+    });
+    expect(scheme.filter((message) => message.includes("credential"))).toEqual([]);
     const accept = onFolder("folder-ok", (f) => {
       f.entries["mcp.json"].json.mcpServers.fabric.headers.Accept = "application/json, text/event-stream";
       f.entries["context.md"].text += "\nThe server answers application/json, text/event-stream.\n";
@@ -149,9 +162,23 @@ describe("the review's fixes", () => {
   });
 
   it("accepts a delegation token on another server of a bearer folder", () => {
-    const jwt = "eyJhbGciOiJFZERTQSIsInR5cCI6ImRlbGVnYXRpb24rand0In0.eyJzdWIiOiJ4In0.c2lnbmF0dXJl";
+    const jwt = shapedToken();
     const found = onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.gateway = { type: "http", url: "http://127.0.0.1:9/mcp", headers: { Authorization: `Bearer ${jwt}` } }; });
     expect(found.filter((message) => message.includes("delegation token"))).toEqual([]);
+  });
+
+  it("finds a standard-base64 secret in an argument, and splits only a path or a URL at its separators", () => {
+    const run = (arg: string) => onManifest("fabric-claude", (m) => { m.launch.args.push(arg); }).filter((message) => message.includes("never carries a credential"));
+    expect(run("--aws-secret=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")).toHaveLength(1);
+    expect(run("/Users/example/Library/Application/ai.passioncode.fabric/sessions/01JA7Y5Q3C2K9M8N4P6R0S1T2V/brief.md")).toEqual([]);
+  });
+
+  it("holds the runtime list of runners.md, the one place a runner takes its name", () => {
+    const runners = readFileSync(path.join(root, "docs/specification/runners.md"), "utf8");
+    const shared = runners.slice(runners.indexOf("**Kind names are shared.**"), runners.indexOf("A runner that is not listed"));
+    const listed = [...shared.matchAll(/`([a-z][a-z0-9-]+)`/g)].map((match) => match[1]).sort();
+    const raw = JSON.parse(readFileSync(path.join(root, "schemas/session-handoff.schema.json"), "utf8"));
+    expect([...raw.properties.launch.properties.runtime.enum].sort()).toEqual(listed);
   });
 
   it("does not throw on a tool name that is not a regular expression", () => {

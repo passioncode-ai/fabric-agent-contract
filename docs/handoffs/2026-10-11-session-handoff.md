@@ -49,11 +49,20 @@ arguments in place). Fabric 0.4.0 REQ-06, Fabric ADR-0140, plan canvas C3; agree
   | `launch.runtime` a free pattern again | 1 of 319 (fixtures) |
 
   The message test fails for any rule message no case produces.
+- Second review (of `e4a2a37`), fixed in the next commit: another server's every non-plain header is a credential
+  (Fabric's `x-agw-key`), a delegation token is checked for its shape and `typ`, the first server carries no other
+  credential, `Bearer <token>` needs a digit, only a path or URL is split at its separators, the runtime enum equals
+  runners.md's list, and the message test counts every call. Planted, each failed then restored:
+  other-server headers not all counted (1 of 107); `typ` unchecked (1); the first server's extra credential allowed
+  (2); `Bearer` prose without a digit (1); every piece split at `/` (1); nothing split (3).
 
 ## Open
 
-- Fabric: the reference writer conforms on its branch `agent/w2-handoff` (vendors this schema and
-  `src/session-handoff.ts`, runs the checker on a folder per adapter); it repins to this change's merge commit.
+- Fabric: its writer on `agent/w2-handoff` vendors this schema and `src/session-handoff.ts` and runs the checker
+  on a folder per adapter. It does **not** conform yet: it puts gateway servers with `x-agw-key` role keys in
+  `mcp.json`, which SH-9 refuses. Fabric drops them and the `FABRIC_AGW_KEY` path; its conformance test
+  `apps/desktop/test/session-handoff-conformance.test.mjs:127-131` moves from `todo` to required. Then it repins
+  to this change's merge commit.
 - Fabric Dashboards: its pack conforms after this merges (the list of changes is relayed to fabric-dashboards-76).
 - Codex over a bearer (`bearer_token_env_var`) has no writer; the first writer measures it.
 

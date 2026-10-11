@@ -125,8 +125,12 @@ delegation tokens, revoked when the session ends (Fabric: the agent surface's on
 `{type: "stdio", command, args, env?}` and no server in the file carries a header or a credential in its
 environment (Dashboards' MCP launcher; Fabric's terminal path is `fabric-mcp`). Other servers may follow, in a bearer folder only (Fabric:
 the project's granted gateway servers). Such a server carries no standing key: its credential, in a header or its
-environment, is a delegation token minted for this session (a JWT, DEC-0039) that expires no later than the
-session. A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A runtime that does
+environment, is a delegation token minted for this session (DEC-0039) that expires no later than the session.
+On such a server every header but `Accept`, `Content-Type`, `User-Agent` and `MCP-Protocol-Version` is taken for a
+credential; the first call's server carries the session bearer in `Authorization` and no other credential. The kit
+checks a delegation token's shape — a JWS whose header is `{"alg": "EdDSA", "typ": "fabric-delegation+jwt"}` and
+whose payload has a numeric `exp` — and the server that receives it verifies the rest (DL-13: signature, audience,
+expiry). A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A runtime that does
 not read this dialect is given the same servers in its own (SH-11); `mcp.json` stays the record.
 
 `mcp.strict` is declared: whether the runtime is told to load only the handoff's servers. Fabric's launched
@@ -137,7 +141,11 @@ sessions keep it (`--strict-mcp-config`); Dashboards' console does not. Where a 
 
 **SH-10 — What any carrier passes, and no credential on a command line.** `launch.args` are the arguments the
 handoff adds to the runtime's own command, in order: at most 16, each at most 1024 characters, none with a
-control character. No argument carries a credential, which a process listing shows. `launch.env` names each
+control character. No argument carries a credential, which a process listing shows. The kit looks for a JWT, a provider key's
+shape, `Bearer <token>` with a digit in the token, and a long mixed-case run (40 or more base64 characters); in a
+path or a URL it looks for the run between separators, so a session id in a folder path is not taken for a key.
+A long base64 value that is not a secret (a public key) in an environment value is reported too: record it as
+`null` or pass it by file. `launch.env` names each
 variable the handoff sets; a value that carries a credential, or a document holding one, is recorded as `null`.
 
 **SH-11 — The per-runtime table.** For each runtime the kit checks:
@@ -204,4 +212,4 @@ run it under `node --experimental-strip-types` against the folders it writes, pa
 Fixtures: `fixtures/positive/session-handoff-*.json`, `fixtures/negative/session-handoff-*.json` (the schema);
 `fixtures/semantic/session-handoff-*.json` (manifests, kind `session-handoff`) and
 `fixtures/semantic/session-handoff-folder-*.json` (folders, kind `session-handoff-folder`, a file given as
-`text` or `json` with its octal `mode`). Tests: `test/session-handoff.test.ts`.
+`text` or `json` with its octal `mode`). Tests: `test/session-handoff.test.ts`, `test/session-handoff-review.test.ts`.

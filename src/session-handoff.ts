@@ -73,14 +73,37 @@ const LONG_RUN = /[A-Za-z0-9+/=_-]{40,}/g;
 const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
 /** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */
 export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || longSecret(value);
-/** `Bearer <token>` inside a longer value (`--header=Authorization: Bearer …`): a token of 12 or more token characters, so prose ("the Bearer token refresh bug") passes. */
-const BEARER_INSIDE = /\bbearer\s+[A-Za-z0-9._~+/-]{12,}=*/i;
+/**
+ * `Bearer <token>` inside a longer value (`--header=Authorization: Bearer …`): a token of 12 or more token characters
+ * holding a digit, so prose ("the Bearer token refresh bug", "the Bearer authentication scheme") passes.
+ */
+const BEARER_INSIDE = /\bbearer\s+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}=*/i;
+/** A path or a URL, whose separators split it into pieces: `/…`, `~/…`, `./…`, `C:\…`, `scheme://…`. */
+const PATH_LIKE = /^(?:[/~.]|[A-Za-z]:[\\/]|[a-z][a-z0-9+.-]*:\/\/)/i;
 /**
  * The same, for a launch argument or a server's command and URL, which carry paths: a long run is looked for
  * between path separators, so a folder path holding a session id is not taken for a key.
  */
 export const secretArgument = (value: string): boolean =>
-  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) || value.split(/[\\/\s=]/).some((piece) => longSecret(piece));
+  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
+  value.split(/[\s=]/).some((piece) => (PATH_LIKE.test(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
+/**
+ * A delegation token minted for this session (DEC-0039): exactly a JWS compact serialisation whose header says
+ * `typ: fabric-delegation+jwt` and whose payload carries a numeric `exp`. The kit checks this shape only; the token's
+ * signature, audience and expiry are the DL-13 verifier's, at the server that receives it.
+ */
+export function delegationTokenShape(value: string): boolean {
+  const parts = /^(eyJ[A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(value);
+  if (!parts) return false;
+  const decode = (segment: string): unknown => {
+    try { return JSON.parse(Buffer.from(segment, "base64url").toString("utf8")); } catch { return undefined; }
+  };
+  const header = decode(parts[1] as string);
+  const payload = decode(parts[2] as string);
+  return isObject(header) && header.typ === "fabric-delegation+jwt" && header.alg === "EdDSA" && isObject(payload) && typeof payload.exp === "number";
+}
+/** Headers that carry no credential, whatever their value: content negotiation and the protocol's own version. */
+const PLAIN_HEADERS = new Set(["accept", "content-type", "user-agent", "mcp-protocol-version"]);
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** One entry of a handoff folder as read from disk (or written in a fixture). `mode` is octal, e.g. "600". */
@@ -446,13 +469,19 @@ function mcpFindings(manifest: Json, text: (name: string) => string | undefined)
     for (const [header, headerValue] of Object.entries(headers)) {
       if (typeof headerValue !== "string") continue;
       if (mcp.auth === "none") findings.push(sem055(`/mcp.json/mcpServers/${name}/headers/${header}`, "a handoff with no secret carries no header"));
-      const credential = header.toLowerCase() === "authorization" || credentialName(header) || secretValue(headerValue);
+      const lower = header.toLowerCase();
+      // On a server other than the first call's, every header but the plain ones is taken for a credential: a
+      // product's own key header (`x-agw-key`) has no name a matcher could know.
+      const credential = lower === "authorization" || credentialName(header) || secretValue(headerValue) || (name !== server && !PLAIN_HEADERS.has(lower));
       if (!credential) continue;
       const token = headerValue.replace(/^Bearer\s+/i, "");
       secrets.push(token);
-      // SH-9 — the first call's server carries the session bearer; any other server only a delegation token
-      // minted for this session (a JWT, DEC-0039), never a standing key.
-      if (name !== server && mcp.auth === "bearer" && !JWT_SHAPE.test(token)) {
+      if (mcp.auth !== "bearer") continue;
+      // SH-9 — the first call's server carries the session bearer in Authorization and nothing else; any other
+      // server only a delegation token minted for this session (DEC-0039), never a standing key.
+      if (name === server && lower !== "authorization") {
+        findings.push(sem055(`/mcp.json/mcpServers/${name}/headers/${header}`, "the first call's server carries the session bearer in Authorization and no other credential"));
+      } else if (name !== server && !delegationTokenShape(token)) {
         findings.push(sem055(`/mcp.json/mcpServers/${name}/headers/${header}`, "a server other than the first call's carries only a delegation token minted for this session (DEC-0039), never a standing key"));
       }
     }
@@ -461,7 +490,7 @@ function mcpFindings(manifest: Json, text: (name: string) => string | undefined)
       const credential = credentialName(variable) || secretArgument(envValue);
       if (credential) secrets.push(envValue);
       if (credential && mcp.auth === "none") findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a handoff with no secret carries no credential in a server's environment"));
-      if (credential && mcp.auth === "bearer" && !JWT_SHAPE.test(envValue)) findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a credential in a server's environment is a delegation token minted for this session (DEC-0039), never a standing key"));
+      if (credential && mcp.auth === "bearer" && !delegationTokenShape(envValue)) findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a credential in a server's environment is a delegation token minted for this session (DEC-0039), never a standing key"));
     }
     for (const field of ["url", "command"] as const) {
       const value2 = value[field];

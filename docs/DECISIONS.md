@@ -1644,7 +1644,12 @@ annotate only the old status; decision bodies are never rewritten.
   integrity manifest and task-pipeline's dispatch packet, so the format has its own (Fabric 0.4.0 resolution R-01).
 - **Compatibility:** Additive; `contractVersion` stays `0.1.0`. One new schema (67), three rules. One existing
   example changes: the runner catalogue's `claude-headless` drive in `runners.md` and its fixtures now join
-  `--mcp-config={mcpConfig}`, the form SH-11 requires (the spaced form leaves the option's value list open). Fabric's bundle changes in the same release: the joined `--mcp-config=`, `handoff.json`, a
+  `--mcp-config={mcpConfig}`, the form SH-11 requires (the spaced form leaves the option's value list open).
+  SH-9 admits on a server other than the first call's only a delegation token minted for the session: Fabric's
+  gateway servers with a role key (`x-agw-key`) do not conform. Ruled strict by Fabric's session on 2026-10-11,
+  because the machine gateway they name was retired on 2026-09-14 and ADR-0144 removes the path. Fabric drops the
+  gateway servers and `FABRIC_AGW_KEY` from its bundle, and product MCP in a session goes by delegation token under
+  the project's grant (REQ-04). Fabric's bundle changes in the same release: the joined `--mcp-config=`, `handoff.json`, a
   `context.md` always (a note when the pack could not be compiled), a brief over 1000 characters or of more than
   one line as `brief.md`. Dashboards' pack changes as its handoff lists.
 - **Consequences / affects:**
