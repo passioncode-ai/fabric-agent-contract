@@ -1,0 +1,12 @@
+{
+  "kind": "runner-profile",
+  "id": "claude-login",
+  "name": "Claude Code on the operator's login",
+  "runnerKind": "claude-code",
+  "drive": "claude-headless",
+  "route": "subscription",
+  "modelProfile": "frontier-claude",
+  "subscription": {
+    "login": "claude"
+  }
+}

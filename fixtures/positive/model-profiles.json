@@ -1,0 +1,66 @@
+{
+  "kind": "model-profiles",
+  "profiles": [
+    {
+      "kind": "model-profile",
+      "id": "default",
+      "name": "Default",
+      "models": [
+        "deepseek/deepseek-v4-pro",
+        "qwen/qwen3.8-max-0902",
+        "anthropic/claude-sonnet-5.5"
+      ],
+      "fallback": "between-turns"
+    },
+    {
+      "kind": "model-profile",
+      "id": "max-qwen",
+      "name": "Strongest Qwen",
+      "models": [
+        "qwen/qwen3.8-max-0902"
+      ],
+      "fallback": "none"
+    },
+    {
+      "kind": "model-profile",
+      "id": "max-glm",
+      "name": "Strongest GLM",
+      "models": [
+        "z-ai/glm-5.3-prime"
+      ],
+      "fallback": "none"
+    },
+    {
+      "kind": "model-profile",
+      "id": "cheap",
+      "name": "Cheap",
+      "models": [
+        "qwen/qwen3.8-flash",
+        "minimax/minimax-m3",
+        "anthropic/claude-haiku-5.5"
+      ],
+      "fallback": "between-turns"
+    },
+    {
+      "kind": "model-profile",
+      "id": "code",
+      "name": "Code",
+      "models": [
+        "mistralai/devstral-2512",
+        "x-ai/grok-build-0.1",
+        "anthropic/claude-sonnet-5.5"
+      ],
+      "fallback": "between-turns"
+    },
+    {
+      "kind": "model-profile",
+      "id": "frontier-claude",
+      "name": "Frontier Claude",
+      "models": [
+        "anthropic/claude-opus-5.5",
+        "anthropic/claude-sonnet-5.5"
+      ],
+      "fallback": "between-turns"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0046`
+**Next free ID:** `DEC-0047`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1286,6 +1286,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change. Consumer adoption: the registry and `grant check` (Project
   Observatory), the project policy and presets at launch (Fabric), project pool ceilings and grant ids in
   usage (Switchboard), and showing policies, grants and requests (Fabric Dashboards).
+- **Annotated (2026-10-12):** `modelClasses` closed to a vocabulary, and how a policy's classes restrict a launch, by
+  DEC-0046.
 - **Decision:**
   - **Four levels, the most specific deciding:**
     - L0 estate total across all provider keys;
@@ -1945,3 +1947,99 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   row CT-29; libsodium's `ge25519_has_small_order` list, each entry checked here to be a point of order dividing 8.
   DEC-0045 was reserved by git CAS (`agent_sync.py reserve --key delegation-sealed-20261012 DEC`); this file,
   `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0046 — Runner and model profiles: one catalogue, named profiles, a subscription-or-key route, one resolution order
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric publishes
+  `registry/models.json` and `registry/model-profiles.json`, checks `shared/agents.ts` against `registry/runners.json`,
+  writes the estate defaults and overrides into bindings and refuses an empty intersection at launch (0.4.0 wave 4);
+  the adapter's kit implements `resolveModelProfile`, reads the catalogue and shows the slots; Project Observatory
+  supplies prices and the tool-use probe, issues keys with the allow-list and meters by route; Fabric Dashboards shows
+  each agent's configuration.
+- **Amends:** DEC-0037 (`modelClasses` closed), DEC-0016 (three drives, the shared kind `pi`), DEC-0042 (SH-11 gains
+  `pi`), DEC-0021 (a usage row's `route`). Implements Fabric [ADR-0147](https://github.com/passioncode-ai/fabric/blob/29e3f984670f63650c39f2c4abc2ef8249e50f20/docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md) with amendments 1 and 2 (written at
+  `31a9d6ca`; its last change `29e3f984`, now on Fabric `main`), on the rulings the board brief records.
+- **Decision:** in [runners](specification/runners.md#runner-and-model-profiles) unless named otherwise —
+  1. **A closed vocabulary of model classes:** `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`. The
+     spend policy's and a grant's `modelClasses` take only these (`spend-policy.schema.json`,
+     `governance.schema.json`); a new class takes a decision.
+  2. **Three schemas.** The model catalogue (`registry-models.schema.json`): one row per `<vendor>/<model>` id with
+     classes, endpoints, tool use as measured or blocked with its reason and date, and a reference into the live price
+     feed, never a price. A model profile (`model-profile.schema.json`): an ordered list of catalogue ids with a
+     fallback `none` or `between-turns`, alone or as the estate's `model-profiles` set; an agent may declare its own.
+     A runner profile (`runner-profile.schema.json`): a runner kind, optionally its drive, a route and a model
+     profile. The contract owns the shapes; Fabric publishes the estate's contents. `FAC-SEM-058`: a model catalogued
+     once, a profile id declared once.
+  3. **Routes.** `subscription` is the operator's own login and runs only in its vendor's runner — `claude` in
+     `claude-code`, `kimi` in `kimi-code`, `chatgpt` in `codex` — spending no money and not metered; any other runner
+     takes `key`. `FAC-SEM-059` refuses a subscription in another runner.
+  4. **Headless drives** `pi-json`, `opencode-json`, `kimi-stream-json` (`runners.schema.json`), each printing JSONL
+     on stdout; `pi` is a shared kind, so `session-handoff.schema.json`'s runtime list gains it, with an SH-11 row
+     ([session handoff](specification/session-handoff.md#the-launch)): no measured strict switch.
+  5. **One resolution order:** the request's model profile, else the agent's, else the binding's or project's, else
+     the estate default. The project's spend policy restricts and never chooses: a model stays when every class the
+     catalogue gives it is allowed, in the profile's order; when none stays the host refuses the launch with
+     `model-classes-empty`, naming the profile and the policy's id and revision. "The provider owns model choice"
+     ([profiles](specification/profiles.md#local-runner-profile)) becomes "the provider chooses within the project's
+     allowed classes". `resolveModelProfile` in `src/profile-rules.ts` is the reference; `FAC-SEM-060` holds a
+     recorded `profile-resolution` to it.
+  6. **What an agent declares:** the well-known document's optional `configuration` names the configurable slots
+     (`runner`, `model`) and the resolved profiles read-only ([service](specification/service.md#well-known-document));
+     a usage row MAY carry `route` ([service](specification/service.md#usage-report)).
+  7. **A key route's key admits the profile's models:** `key.modelAllowList` is the model profile's id and equals the
+     runner profile's `modelProfile`, and `key.ref` is a secret reference, never a value (`FAC-SEM-059`).
+  8. **Per-model provider routing:** a catalogue row MAY carry `provider`, OpenRouter's provider-routing object by its
+     own field names — `order`, `ignore`, `allow_fallbacks`, `sort` (`price`, `throughput`, `latency`) — which the key
+     route's proxy applies; it changes the upstream, never the model or the allow-list. A slug is never both ordered
+     and ignored (`FAC-SEM-058`). An estate default of `sort: price` is **recommended to Fabric** as the catalogue's
+     publisher, not decided: ADR-0147 does not decide it.
+- **Why:** nine agents keep their own model tables and price lists, and an L1 policy naming model classes could not
+  be checked, because the classes were free strings and no catalogue mapped models to them (ADR-0147, Context). A
+  subscription used outside its vendor's runner breaks the vendor's terms; a key without an allow-list can spend on any
+  model. Measured on 2026-10-11: `sort: price` cut two 30k-token requests from $0.047 to $0.0052.
+- **Compatibility:** Additive for documents except `modelClasses`: three schemas, two drives' worth of enum values
+  (`drive`, `runtime`), optional `configuration` and `route`; `contractVersion` stays `0.1.0`. **Tightening** for
+  `modelClasses`: a spend policy or grant naming any other string stops validating; no consumer writes one today
+  (`git grep modelClasses` over Fabric `5bf15e5c`, the adapter `ea7efbe`, Project Observatory `5597810` and Fabric
+  Dashboards `837be19`: none outside documents), and this repository's eight spend-policy fixtures move from
+  `general`, `chinese` to the vocabulary. **Tightening for a host:** a launch an L1 policy leaves without a model is
+  refused, where before nothing checked. `src/session-handoff.ts` changes one line (`pi` joins SH-11's no-switch
+  runtimes), so a consumer that vendors it by digest re-vendors it at its next pin. A reader of `runners.schema.json`
+  or `session-handoff.schema.json` with its own enum copy accepts the new drives and `pi` at its next pin.
+- **Consequences / affects:**
+  - spec: `docs/specification/runners.md` (the drives, the shared kind, Runner and model profiles, three rules),
+    `docs/specification/profiles.md` (the local runner's model choice), `docs/specification/spend-policy.md`
+    (`modelClasses`), `docs/specification/service.md` (`configuration`, `route`),
+    `docs/specification/session-handoff.md` (SH-11's `pi`), `docs/specification/conformance.md` (`FAC-SEM-058`…`060`,
+    two reader rows);
+  - schemas: `schemas/registry-models.schema.json`, `schemas/model-profile.schema.json`,
+    `schemas/runner-profile.schema.json` (new), `schemas/runners.schema.json`, `schemas/session-handoff.schema.json`,
+    `schemas/spend-policy.schema.json`, `schemas/governance.schema.json`, `schemas/service-usage.schema.json`,
+    `schemas/service-well-known.schema.json`;
+  - code: `src/profile-rules.ts` (new), `src/semantic-rules.ts`, `src/session-handoff.ts`;
+  - fixtures: 7 positive and 10 negative (`fixtures/catalogue.json`), 12 semantic
+    (`fixtures/semantic/model-catalogue-*.json`, `fixtures/semantic/model-profiles-*.json`,
+    `fixtures/semantic/runner-profile-*.json`, `fixtures/semantic/profile-resolution-*.json`), the runner catalogue's
+    `pi` and `opencode` entries and the spend-policy fixtures' classes;
+  - tests: `test/runner-model-profiles.test.ts` (new), `test/positive-sweep.test.ts`,
+    `test/schema-compilation.test.ts`, `test/session-handoff.test.ts`; the floor in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - UX: `docs/ux/scenarios.md` (SCN-020), `docs/ux/screens.md` (SCR-05);
+  - docs: `CONTEXT.md` (Model catalogue, Model class, Model profile, Runner profile), `docs/DOCMAP.md`,
+    `docs/evidence/sources.md` (OpenRouter provider routing, ADR-0147, pi, OpenCode, Kimi Code),
+    `docs/backlog.md` (CT-05), the handoff `docs/handoffs/2026-10-12-runner-model-profiles.md`.
+- **Not decided here:** an estate default for `sort` (Fabric's, as the catalogue's publisher); whether resolution
+  skips a model whose tool use is `blocked` (today the kit's doctor reports it); whether a grant's `modelClasses`
+  restricts calls under the grant at the meter, beside the policy's at launch; a subscription route's models (a
+  Claude login serves Claude models; no rule checks a runner profile's model profile against its login); the issuing
+  wire of a key with its allow-list (Project Observatory's); OpenRouter's other routing fields and `sort`'s object
+  form; how `pi` and `kimi-code` are handed a session's MCP servers (SH-11 rows not measured).
+- **Source:** Fabric ADR-0147 at `29e3f984` (first written at `31a9d6ca`); the proposal *Runner and model profiles*,
+  2026-10-11, commit `9f05a3f` (cited by title and commit only), §3.2 items 1–7; the board brief's rulings
+  (`docs/evidence/specs/2026-10-11-board-waves/brief.md`, "Decisions resolved from the sources"); the provider-routing
+  and `sort` inputs and the measurement on board row CT-05; OpenRouter's provider-routing page (retrieved 2026-10-12)
+  and the runners' own help and documentation, in the [source ledger](evidence/sources.md); board run wave 2, node
+  N14, packet P2-04. DEC-0046 and `FAC-SEM-058`…`060` were reserved by git CAS (`agent_sync.py reserve --key
+  runner-model-profiles-20261012 DEC`, `--key runner-model-profiles-{catalogue,runner-profile,resolution}-20261012
+  SEM`); this file, `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.

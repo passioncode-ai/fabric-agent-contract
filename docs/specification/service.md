@@ -115,6 +115,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
+- `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
+  profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
+  binding ([runners](runners.md#what-an-agent-declares), DEC-0046).
 - `auth.delegation` MAY say that the service accepts the estate's delegation tokens: the issuer it
   trusts and where it reads the estate's keys ([delegation](delegation.md) DL-16, DEC-0039). It is
   public: an issuer and a key-set location, never a key or a token.
@@ -174,6 +177,9 @@ show every agent's spend beside its health without knowing any provider.
   `unpricedCalls > 0` (`FAC-SEM-025`).
 - `costBasis` says where a row's cost came from: `provider` (the provider reported the charge),
   `price-list` (computed from a published price list), `mixed`, or `unknown`.
+- `route` MAY say how a row's calls were paid for: `subscription` (the operator's own login in its vendor's runner,
+  not metered) or `key` (an issued key, metered); calls of one model on both routes are two rows
+  ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated.
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),

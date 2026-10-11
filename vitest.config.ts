@@ -29,6 +29,7 @@ export default defineConfig({
         "src/grant-projection.ts": { branches: 87.8 },
         "src/interop-rules.ts": { branches: 88.46 },
         "src/operator-session.ts": { branches: 100 },
+        "src/profile-rules.ts": { branches: 100 },
         "src/registry-rules.ts": { branches: 90.54 },
         "src/route-rules.ts": { branches: 92.8 },
         "src/secret-shape.ts": { branches: 100 },

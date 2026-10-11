@@ -1,0 +1,13 @@
+{
+  "kind": "runner-profile",
+  "id": "pi-default",
+  "name": "pi on an estate key",
+  "runnerKind": "pi",
+  "drive": "pi-json",
+  "route": "key",
+  "modelProfile": "default",
+  "key": {
+    "ref": "sk-or-v1-0123456789abcdef0123456789abcdef",
+    "modelAllowList": "default"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "kind": "model-profile",
+  "id": "copy-pinned",
+  "name": "One pinned model per stage",
+  "models": [
+    "anthropic/claude-sonnet-5.5"
+  ],
+  "fallback": "none",
+  "agent": "urn:agent:copy"
+}

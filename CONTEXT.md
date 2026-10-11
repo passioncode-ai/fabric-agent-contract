@@ -260,6 +260,21 @@ selects which runner serves a request; it grants nothing.
 switch of a conversation to another candidate, or an exhausted route — with the
 probe result of every candidate the walk passed over.
 
+**Model catalogue**: Every model the estate may use, one row per `<vendor>/<model>` id, with its **Model classes**,
+endpoints, tool use as last measured and a reference into the live price feed (DEC-0046). Fabric publishes it as
+`registry/models.json`. A row MAY carry OpenRouter's provider routing, which changes the upstream, never the model.
+
+**Model class**: One word of a closed vocabulary — `frontier`, `strong`, `cheap`, `code`, `vision`,
+`chinese-vendor` — that the catalogue gives a model and a spend policy allows. A policy restricts by class and never
+chooses.
+
+**Model profile**: A named, ordered list of catalogue ids with a fallback policy (`none` or `between-turns`), such
+as `default` or `cheap`. Resolved in the order request, agent, binding or project, estate default, then restricted by
+the project's **Model classes**; an empty result refuses the launch, naming the policy.
+
+**Runner profile**: A runner kind, a **Route** and a **Model profile**. **Route** `subscription` is the operator's own
+login, only in its vendor's runner and unmetered; `key` is an issued key whose model allow-list is the model profile.
+
 **Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
 agent session worked, waited or idled and what each model call used, sent by a collector on a
 device in batches. It carries no content and no person attribute; a person appears only as an
@@ -329,6 +344,8 @@ version and commit a consuming repository builds against.
   to one of the two, never both.
 - A **Runner route** orders admitted **Runner** candidates for one **Capability**;
   a run pins one route revision per local-runner binding, and every switch is recorded.
+- A **Runner profile** names one **Model profile**, whose models are **Model catalogue** ids; the project's **Spend
+  policy** restricts them by **Model class**, and a key route's key admits exactly them.
 - A **Device** hosts one or more **Collector nodes**; each emits **Telemetry events** in its own
   stream, and a receiver aggregates many devices' events into an **Activity summary** without a
   person dimension.

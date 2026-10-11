@@ -1,0 +1,12 @@
+{
+  "kind": "runner-profile",
+  "id": "pi-default",
+  "name": "pi on an estate key",
+  "runnerKind": "pi",
+  "drive": "pi-json",
+  "route": "subscription",
+  "modelProfile": "default",
+  "subscription": {
+    "login": "claude"
+  }
+}

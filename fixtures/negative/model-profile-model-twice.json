@@ -1,0 +1,10 @@
+{
+  "kind": "model-profile",
+  "id": "default",
+  "name": "Default",
+  "models": [
+    "deepseek/deepseek-v4-pro",
+    "deepseek/deepseek-v4-pro"
+  ],
+  "fallback": "between-turns"
+}

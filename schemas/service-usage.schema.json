@@ -181,6 +181,13 @@
             "mixed",
             "unknown"
           ]
+        },
+        "route": {
+          "enum": [
+            "subscription",
+            "key"
+          ],
+          "description": "DEC-0046: the route the row's calls took — the operator's own login in its vendor's runner, or an issued key. Absent: not stated (a report written before DEC-0046)."
         }
       },
       "unevaluatedProperties": false

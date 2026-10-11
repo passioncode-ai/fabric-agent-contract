@@ -376,7 +376,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     if (args.length) findings.push(sem053(at, "Kilo's handoff travels in KILO_CONFIG_CONTENT, not in arguments"));
   } else if (runtime === "hermes") {
     if ((env.HERMES_ACP_SKIP_CONFIGURED_MCP === "1") !== strict) findings.push(sem053("/launch/env", strict ? "mcp.strict is true, so Hermes is started with HERMES_ACP_SKIP_CONFIGURED_MCP=1" : "mcp.strict is false, so HERMES_ACP_SKIP_CONFIGURED_MCP is not set"));
-  } else if (runtime === "kimi-code" || runtime === "cline") {
+  } else if (runtime === "kimi-code" || runtime === "cline" || runtime === "pi") {
     if (strict) findings.push(sem053("/mcp/strict", `${runtime} offers no measured switch that loads only the handoff's servers; mcp.strict is false`));
   }
   return findings;

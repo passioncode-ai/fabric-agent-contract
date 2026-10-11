@@ -36,6 +36,7 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P2-03 | `src/ed25519.ts` (new) | 2 / 2 (100 %) | 100 % | the small-order key predicate (CT-29) |
 | P2-03 | `src/delegation-rules.ts` | 232 / 232 (100 %) | 100 % | FAC-SEM-050's one grant, depth, spend against grant and parent; one fixture per sub-check |
 | P2-03 | `src/operator-session.ts` | 11 / 11 (100 %) | 100 % | the 7-day clamp under use, and a session live before its end |
+| P2-04 | `src/profile-rules.ts` (new) | 64 / 64 (100 %) | 100 % | FAC-SEM-058…060 and `resolveModelProfile`; one fixture or case per sub-check, each planted |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -50,3 +51,8 @@ guards: FAC-SEM-049's window named twice and FAC-SEM-050's token for another aud
 stays at P2-02's 97.61 %: its two uncovered arms are the `?? ""`/`?? []` fallbacks P2-02 names. Measured with
 `vitest run --coverage` on the P2-03 branch after P2-02's merge. The CT-29 fix adds `src/ed25519.ts`, every branch
 covered; `device-rules.ts` gains one covered branch (80.36 %, floor unchanged at 79.81 % for wave 3).
+
+**Wave 2, P2-04 (DEC-0046).** `src/profile-rules.ts` is new and reaches every branch, with no `v8 ignore`; input of
+the wrong shape is refused without throwing. `src/session-handoff.ts` gains the `pi` arm of SH-11 (395 / 443,
+89.16 %, floor unchanged at 88.91 %); `semantic-rules.ts` only dispatches to the new module (91.38 %, floor unchanged).
+The whole set: 2353 / 2580 (91.2 %). Measured with `vitest run --coverage` on the P2-04 branch after P2-03's merge.
