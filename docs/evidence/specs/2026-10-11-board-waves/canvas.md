@@ -15,7 +15,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 ## Modules — as-is → to-be
 
-### N01 incoming — land the two PRs Fabric's session wrote (wave 1)
+### N01 incoming — land the two PRs Fabric's session wrote (wave 1) — done: `7931c1d`, `213e5a3`
 
 - As-is: PR #32 (DEC-0041) at `2f1dd28` after one review round and its fixes; PR #31 (DEC-0042,
   `session-handoff/1`) at `84043cb`. Both edit the Next free lines.
@@ -23,7 +23,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   `grant:<ref>`, per Fabric ADR-0144 amendment 2 at `217aff4d`), then #31 rebased, renumbered and merged.
   Fabric's session is told each merge commit. The audit findings F-B-302…304 close with #32.
 
-### N02 gate — the gate measures this repository and checks its own classes of defect (wave 1)
+### N02 gate — the gate measures this repository and checks its own classes of defect (wave 1) — done: #34, #35, #37, #38
 
 - As-is: `vitest` and `markdownlint` sweep `.claude/worktrees/` and transient `.git` files, so a local run
   reports other sessions' failures (F-A-001). No test runs the semantic rules over positive fixtures, so a
@@ -41,7 +41,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   its close record.
 - CI cadence (F-D-011) is the operator's call: question Q2 in [plan.md](plan.md).
 
-### N03 board — the board and the registers are true (wave 1)
+### N03 board — the board and the registers are true (wave 1) — repository part done (#39); knowledge base and wiki in review
 
 - As-is: `docs/backlog.md` holds CT-01…05 (CT-05 filed today), nothing for DEC-0032…0041 adoption or the
   org-edition packets. The roadmap's contract row is four decisions behind. Pins in org-index and the wiki
@@ -56,7 +56,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
     DEC-0027; DEC-0039 tightened by its own session lifetime);
   - the DEC-0028 gap is stated once in the register.
 
-### N04 truthful docs — the front door is true today (wave 1)
+### N04 truthful docs — the front door is true today (wave 1) — done: #36
 
 - As-is:
   - `README.md:18-20` says no SDK or CLI ships, while `src/` verifiers are ported by consumers and
@@ -115,6 +115,18 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - usage carries the route;
   - issued keys carry the profile's model allow-list (the profile id on key routes).
 - Designed with N05, because DEC-0037's spend policy is the shared page. Built after N05 in the same wave.
+
+### N15 service hygiene — asked by live consumers (wave 2)
+
+- `degraded[].setup: true` (CT-22): an optional flag on a well-known's degraded entry for a state that needs a person
+  to finish setup; a watcher (Dashboards FD-48) does not alert on it; the entry still names `source` and `reason`.
+- Tools declared where they are used (LC-19, CT-23): a declared stdio MCP server carries its scope (project, or
+  enabled where used); a semantic rule refuses a session-wide stdio server in a descriptor, manifest or agent
+  profile; a stateless tool is a shared local service under the lifecycle broker with a health check.
+- No secret in a command line (LC-21, CT-24): session-handoff's `secretArgument` becomes one shared detector in
+  `src/`, applied by a rule to launch arguments, runner drives and MCP entries (args, URL query).
+- Touches the service well-known schema, manifest/descriptor schemas and `semantic-rules.ts`; built after N05 and
+  N14 in wave 2, sharing no file with them except `conformance.md`'s register (lease).
 
 ### N06 canonical JSON — one register of byte forms (wave 2)
 
@@ -282,5 +294,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-11 — wave 1 closed: N01, N02, N04 done, N03's repository part done; N15 (CT-22…CT-24) added to wave 2;
+  consumer-owned items moved to N16 (program); ORG-LAYER joins N13.
 - 2026-10-11 — N01 closed: PR #31 (DEC-0042) merged at `213e5a3` after three readings; SH-9 strict by Fabric's
   ruling (another server carries only a delegation token; Fabric drops its `x-agw-key` gateway servers).

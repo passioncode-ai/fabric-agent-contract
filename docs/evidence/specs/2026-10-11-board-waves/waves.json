@@ -67,16 +67,7 @@
         "F-D-027",
         "F-D-010",
         "F-A-028",
-        "F-D-029",
-        "CT-03",
-        "CT-04",
-        "CON-OE-04",
-        "ASK-FABRIC-a",
-        "ASK-FABRIC-b",
-        "ASK-FABRIC-c",
-        "ASK-FABRIC-d",
-        "ASK-FABRIC-e",
-        "ASK-FABRIC-f"
+        "CON-OE-04"
       ]
     },
     {
@@ -146,6 +137,17 @@
       "release": "this",
       "items": [
         "CT-05"
+      ]
+    },
+    {
+      "id": "N15-service-hygiene",
+      "title": "Service hygiene asked by live consumers: `degraded[].setup` (CT-22), tools declared where they are used (LC-19, CT-23), no secret in a command line (LC-21, CT-24)",
+      "wave": 2,
+      "release": "this",
+      "items": [
+        "CT-22",
+        "CT-23",
+        "CT-24"
       ]
     },
     {
@@ -267,7 +269,25 @@
         "PRIVATE (out of scope for this repository)",
         "F-D-023",
         "F-D-009",
-        "RM-03-residual"
+        "RM-03-residual",
+        "ORG-LAYER"
+      ]
+    },
+    {
+      "id": "N16-consumer-adoption",
+      "title": "Consumer adoption: each consumer adopts by its own release and pin (DEC-0016); tracked on the board as CT-03, CT-04 and CT-18…CT-21",
+      "wave": null,
+      "release": "program",
+      "items": [
+        "ASK-FABRIC-a",
+        "ASK-FABRIC-b",
+        "ASK-FABRIC-c",
+        "ASK-FABRIC-d",
+        "ASK-FABRIC-e",
+        "ASK-FABRIC-f",
+        "CT-03",
+        "CT-04",
+        "F-D-029"
       ]
     }
   ]
