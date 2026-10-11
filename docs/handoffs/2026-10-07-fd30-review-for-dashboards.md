@@ -1,5 +1,7 @@
 # FD-30 estate updater — read-only review, origin/main d8c6d67 (2026-10-07)
 
+> **Historical copy (noted 2026-10-11).** A review written here for Fabric Dashboards (FD-30); Dashboards owns the outcome (its FD-33…FD-35). This copy is kept for history and is not maintained.
+
 Reviewer: session fabric-agent-contract-3f (Claude), reviewing the Kimi Code run of 2026-10-07.
 
 1. BLOCKER — npm/npx not found in the packaged app: estate-updater.ts:81 spawns bare git/npm/npx via runOwned with commandEnv() (children.ts:15-19,60); the running app has PATH=/usr/bin:/bin:/usr/sbin:/sbin. main.log: `estate_check failed npm view sshlg-skills version failed: spawn npm ENOENT` 02:35:36, 03:20:36, 08:34:06. npm also needs node on PATH; `sshlg-skills update` calls `claude` too. The console already resolves the login-shell PATH (console.ts:169-170, runtimes.ts:89-96). Fix: login-shell PATH for every estate run + a test that PATH reaches the runner. (= FD-33)

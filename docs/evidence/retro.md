@@ -21,8 +21,37 @@
 - `2026-10-02-remote-service` — contract `2ce3922` (DEC-0019); adapter `447b558` v0.6.0 and
   `d3a4c67` v0.6.1; Fabric Dashboards `f6cde69` v0.4.0 and `75eba78` v0.4.1; acceptance in
   `docs/evidence/runs/2026-10-02-remote-service/acceptance.md`.
+- `2026-10-04-capability-names` — `ccdbfc3`, `df55c8c` (DEC-0020).
+- `2026-10-04-usage-report` — `c220147`, `9091d3d` (DEC-0021).
+- `2026-10-05-project-comms` — `bb55fbf`, `b8453f4`, `d4c8831` (DEC-0022, accepted; DEC-0023, DEC-0024 merged in).
+- `2026-10-07-runner-routes` — `6e3c3f7` (DEC-0026), `058fb78` (DEC-0029).
+- `2026-10-07-spending-limits` — `94b1829` (DEC-0027).
+- `2026-10-08-settings-backup` — `0dea0e4` (DEC-0025).
+- `2026-10-08-activity-devices` — PR #22, `623bf61` (DEC-0030, DEC-0031).
+- `2026-10-10-services-every-system` — PR #23 `3168503` (DEC-0032), PR #24 `78b2da0` (DEC-0033).
+- `2026-10-10-operator-channel` — PR #25 `73c7978` (DEC-0034), PR #26 `52da526` (DEC-0035).
+- `2026-10-11-embedded-dashboard` — PR #27 `a83bec6` (DEC-0036).
+- `2026-10-11-spend-and-delegation` — PR #28 `934ca60` (DEC-0037), PR #29 `1e7a7d6` (DEC-0038), PR #30 `8e49fbd`
+  (DEC-0039, DEC-0040).
+- `2026-10-11-meter-and-handoff` — PR #32 `7931c1d` (DEC-0041), PR #31 `213e5a3` (DEC-0042).
+- `2026-10-11-board-waves` — PR #33 `2afbe60` (inventory, canvas, six waves); wave 1 in PRs #34…#38 and this one.
 
 ## Recent log
+
+### 2026-10-11 — The board run: reviews of two incoming decisions, and wave 1
+
+- **Goal:** land DEC-0041 and DEC-0042 written by another product's session, then make the gate trustworthy.
+- **Failed attempts:** (1) a plant of the single-use check survived because the reuse test replayed at the same
+  instant (delegation handoff); (2) in DEC-0042 two plants were masked — one fixture caught by a second rule,
+  one negative refused for the wrong reason; (3) the gate failed on other sessions' worktrees under
+  `.claude/worktrees/` and, under machine load, on three wall-clock bounds (a 2 s child limit, 100 ms and
+  200 ms), none a defect; (4) a commit claimed a green gate whose run had one such failure.
+- **Verified corrections:** the reuse test replays an hour later; the masked plants' tests were tightened; the
+  gate reads tracked files only (P1-01); the bounds are 15 s and 2 s, still proving their properties (P1-01,
+  P1-03); the claim was corrected in the next commit.
+- **Learning:** a wall-clock bound in a test is a claim about the machine, not the code: bound it far above any
+  loaded machine and far below the defect it guards. And a gate's verdict must be read from its last line before
+  it is written into a commit.
 
 ### 2026-08-26 — Contract validation build
 
