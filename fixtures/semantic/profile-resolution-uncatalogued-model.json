@@ -1,0 +1,85 @@
+{
+  "catalogue": {
+    "kind": "model-catalogue",
+    "asOf": "2026-10-11T18:00:00Z",
+    "models": [
+      {
+        "id": "deepseek/deepseek-v4-pro",
+        "family": "DeepSeek",
+        "classes": [
+          "strong",
+          "cheap",
+          "chinese-vendor"
+        ],
+        "endpoints": [
+          "anthropic-messages",
+          "openai-chat"
+        ],
+        "toolUse": {
+          "status": "measured",
+          "at": "2026-10-11"
+        },
+        "priceRef": "openrouter:deepseek/deepseek-v4-pro",
+        "provider": {
+          "sort": "price",
+          "allow_fallbacks": true
+        }
+      },
+      {
+        "id": "anthropic/claude-haiku-5.5",
+        "family": "Anthropic",
+        "classes": [
+          "cheap"
+        ],
+        "endpoints": [
+          "anthropic-messages"
+        ],
+        "toolUse": {
+          "status": "measured",
+          "at": "2026-10-11"
+        },
+        "priceRef": "openrouter:anthropic/claude-haiku-5.5"
+      },
+      {
+        "id": "anthropic/claude-sonnet-5.5",
+        "family": "Anthropic",
+        "classes": [
+          "strong",
+          "code",
+          "vision"
+        ],
+        "endpoints": [
+          "anthropic-messages"
+        ],
+        "toolUse": {
+          "status": "measured",
+          "at": "2026-10-11"
+        },
+        "priceRef": "openrouter:anthropic/claude-sonnet-5.5"
+      }
+    ]
+  },
+  "profiles": [
+    {
+      "kind": "model-profile",
+      "id": "default",
+      "name": "Default",
+      "models": [
+        "deepseek/deepseek-v4-pro",
+        "z-ai/glm-5.3-prime"
+      ],
+      "fallback": "between-turns"
+    }
+  ],
+  "choices": {
+    "estate": "default"
+  },
+  "resolved": {
+    "from": "estate",
+    "profile": "default",
+    "models": [
+      "deepseek/deepseek-v4-pro",
+      "z-ai/glm-5.3-prime"
+    ]
+  }
+}

@@ -102,6 +102,12 @@
       },
       "tui": {
         "argv": []
+      },
+      "kimi-stream-json": {
+        "argv": [
+          "--output-format",
+          "stream-json"
+        ]
       }
     },
     "mcpConfig": {
@@ -145,5 +151,68 @@
       "file": "~/.hermes/config.yaml",
       "format": "none"
     }
+  },
+  {
+    "kind": "opencode",
+    "name": "OpenCode",
+    "binaries": [
+      "opencode"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "opencode-json",
+    "drives": {
+      "opencode-json": {
+        "argv": [
+          "run",
+          "--format",
+          "json",
+          "--pure"
+        ]
+      },
+      "tui": {
+        "argv": []
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.config/opencode/opencode.json",
+      "format": "opencode-json",
+      "key": "mcp"
+    },
+    "docs": "https://opencode.ai/docs/cli/"
+  },
+  {
+    "kind": "pi",
+    "name": "pi",
+    "binaries": [
+      "pi"
+    ],
+    "version": {
+      "argv": [
+        "--version"
+      ],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "timeoutMs": 5000
+    },
+    "drive": "pi-json",
+    "drives": {
+      "pi-json": {
+        "argv": [
+          "--mode",
+          "json"
+        ]
+      }
+    },
+    "mcpConfig": {
+      "file": "~/.pi/agent/mcp.json",
+      "format": "claude-json",
+      "key": "mcpServers"
+    },
+    "docs": "https://github.com/earendil-works/pi/blob/04566631c2b51fb688486bc1f040f60d1518c126/packages/coding-agent/docs/json.md"
   }
 ]

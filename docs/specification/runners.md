@@ -33,16 +33,28 @@ contract (`runners.schema.json`). One entry per runner kind:
 }
 ```
 
-`drive` ∈ `claude-headless | codex-app-server | codex-exec | acp | tui`. `tui` (DEC-0029) is the
+`drive` ∈ `claude-headless | codex-app-server | codex-exec | acp | tui | pi-json | opencode-json |
+kimi-stream-json`. `tui` (DEC-0029) is the
 runner's own interactive terminal interface in a terminal the host holds — what a host opens when
 the conversation is the runtime's console. Initial catalogue: `claude-code`
 (claude-headless), `codex` (codex-app-server; ADR-0081), `gemini-cli`, `goose`, `opencode`,
 `cursor-agent`, `kiro` (acp).
 
+Three **headless drives** (DEC-0046) run one request to its end and print one JSON object per line on stdout,
+split only on LF; the request itself is the drive's to pass, after the catalogued `argv`:
+
+| Drive | Runs | Stream | Measured |
+|---|---|---|---|
+| `pi-json` | `pi --mode json <request>` | a session header, then the session's events (`agent_start`, `turn_start`, `message_*`, `tool_execution_*`, `turn_end`, `agent_end`), usage on each assistant message | pi 1.1.0, its JSON-mode documentation |
+| `opencode-json` | `opencode run --format json <request>` (`--pure`: no external plugins) | `step_start`, `text`, `tool_use`, `step_finish` with cost and tokens, `error`; the session id on every line | OpenCode 1.18.10, `opencode run --help` |
+| `kimi-stream-json` | `kimi --prompt <request> --output-format stream-json` | assistant and tool messages, and `meta` lines carrying the session id; no usage | Kimi Code 2.1.1, `kimi --help` |
+
+The [source ledger](../evidence/sources.md) pins each.
+
 **Kind names are shared.** A host that catalogues one of these runners uses this kind, so a route,
 an account chain and an event mean the same runner on every host: `claude-code`, `codex`,
 `cursor-agent`, `gemini-cli`, `goose`, `hermes` (Hermes Agent), `kilo`, `kimi-code` (Kimi Code
-CLI), `kiro`, `opencode`, `cline`. A runner that is not listed takes a new name here before a host
+CLI), `kiro`, `opencode`, `cline`, `pi` (the pi coding agent, DEC-0046). A runner that is not listed takes a new name here before a host
 ships it. `mcpConfig.format` ∈ `claude-json | codex-toml | cursor-json |
 gemini-json | opencode-json | kiro-json | none`. Detection runs **only** the catalogued version
 argv, without a shell, with the timeout; a binary not in the catalogue is never executed.
@@ -163,7 +175,8 @@ own pool. The host pins the derived context as its own revision, with the bindin
 parent, and names it in the event; it is the one revision a run creates after it starts, and it is
 fully determined by revisions the run pinned before its first node ([versioning.md](versioning.md)). So a
 route never widens write scope, never changes the model requirement, and never moves the run to
-another project: the provider still owns model choice, and admission (DEC-0010) is untouched.
+another project: the provider still chooses the model within the project's allowed classes
+([Runner and model profiles](#runner-and-model-profiles)), and admission (DEC-0010) is untouched.
 
 A **conversation** is the host's one continuing exchange — a chat thread, a task's session — and
 its events share one `conversation` id. A **conversation never switches runner mid-turn**, and no runner-private session state is carried
@@ -199,6 +212,92 @@ results as its evidence. A host records one event per launch's walk, exhausted w
 never a record per repeated probe of an unchanged state; how its journal names the events is the
 host's own vocabulary (Fabric: ADR-0125).
 
+## Runner and model profiles
+
+`covers:` Fabric [ADR-0147](https://github.com/passioncode-ai/fabric/blob/29e3f984670f63650c39f2c4abc2ef8249e50f20/docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md) with its amendments 1 and 2 — DEC-0046
+
+The estate runs coding agents and calls models from one set of named choices. The contract owns the shapes and the
+rules; the contents are Fabric's, as the runner catalogue's are:
+
+| Object | What it is | Schema | The estate's copy |
+|---|---|---|---|
+| Model catalogue | every model the estate may use: id (`<vendor>/<model>`), family, classes, the endpoints it serves (`anthropic-messages`, `openai-chat`, `responses`), tool use as last measured (`measured` or `blocked`, with the date and the reason), a reference into the live price feed, never a price | [`registry-models`](../../schemas/registry-models.schema.json) | Fabric's `registry/models.json`; prices and the weekly tool-use probe come from Project Observatory |
+| Model profile | a named, ordered list of catalogue ids with a fallback policy: `none`, or `between-turns` — the next model after a failed turn, never within one | [`model-profile`](../../schemas/model-profile.schema.json) | Fabric's `registry/model-profiles.json`, a `model-profiles` document; an agent may declare its own (`agent`) |
+| Runner profile | a runner kind of the catalogue, optionally its drive, a route and a model profile | [`runner-profile`](../../schemas/runner-profile.schema.json) | Fabric's settings, written into the bindings |
+| Resolution | which model profile applies, and which of its models the project admits | `resolveModelProfile` in [`src/profile-rules.ts`](../../src/profile-rules.ts) | the kit, implemented once |
+
+**Model classes.** The vocabulary is closed: `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`.
+The catalogue gives each model one or more of them. A spend policy's and a grant's model classes name only these, and
+a reader refuses any other by schema; a new class takes a decision. DEC-0037 had left the classes free strings.
+
+### Routes
+
+A runner profile's `route` says how its model calls are paid for:
+
+- `subscription` — the operator's own login, in the vendor's own runner only (`FAC-SEM-059`). Any other runner, on
+  any model, takes the key route. A subscription spends no money of the estate and is not metered.
+
+  | Login | Runs only in |
+  |---|---|
+  | `claude` | `claude-code` |
+  | `kimi` | `kimi-code` |
+  | `chatgpt` | `codex` |
+
+- `key` — a key Project Observatory issued for the project, named by its secret reference (`key.ref`, never the
+  value), with its own monthly ceiling under L0 ([spend policy](spend-policy.md#levels)) and a **model allow-list
+  equal to the profile's ids**. The allow-list is written as the model profile's id: `key.modelAllowList` equals the
+  runner profile's `modelProfile` (`FAC-SEM-059`), and the issuer reads that profile's `models`. The grant meter
+  meters the key's spend (DEC-0039).
+
+### Provider routing
+
+A catalogue row MAY carry `provider`, the provider-routing object of OpenRouter, in its field names, so the key
+route's proxy passes it on unchanged (ADR-0147 amendment 2): `order` (provider slugs tried first, in order),
+`ignore` (slugs never used), `allow_fallbacks` (`false`: only the ordered providers; absent: OpenRouter's `true`) and
+`sort` (`price`, `throughput` or `latency`; the string form only). It changes which upstream serves the model, never
+the model, and a profile's allow-list is unchanged — so a model one upstream refuses for a key is still reached
+through another. A slug is never both ordered and ignored, and a base slug ignored covers its variants, so ordering
+`deepinfra/turbo` while ignoring `deepinfra` is refused too (`FAC-SEM-058`). OpenRouter's other fields (`only`,
+`max_price`, the object form of `sort`, …) are not admitted in this revision.
+
+Measured on 2026-10-11 (Fabric's session, relaying a private agent's measurement): two requests of about 30k tokens
+cost $0.047 unpinned and $0.0052 with `sort: price`. **Recommended to Fabric**, as the catalogue's publisher: give
+rows `sort: price` unless a row needs another order. ADR-0147 does not decide an estate default, so the contract does
+not either; an absent `sort` is OpenRouter's own load balancing.
+
+### Resolution
+
+One order chooses the model profile, most specific first (`FAC-SEM-060`):
+
+1. the request's profile;
+2. else the agent's own setting;
+3. else the binding's, or its project's;
+4. else the estate default, which the operator sets once in Fabric.
+
+The project's spend policy (L1) then **restricts** the chosen profile and never chooses: a model stays when every
+class the catalogue gives it is one the policy's `modelClasses` allows, in the profile's order; a model the catalogue
+does not hold stays only when the policy names no classes. A policy without `modelClasses` restricts nothing; a policy that has it names at least one class (an empty list
+would refuse every launch). The profiles offered to one resolution — an agent's own and the estate's — never share
+an id (`FAC-SEM-060`). When no
+model stays, the host refuses the launch with `model-classes-empty`, naming the profile and the policy's id and
+revision, and the person sees which policy to change. It is the host's own refusal of its launch, not a callee's
+refusal code (DL-19), because no callee is called. With the policy `strong`, `code`, `vision`, the profile `default`
+(DeepSeek V4 Pro, then Claude Sonnet 5.5) resolves to Claude Sonnet 5.5 alone; with `strong` alone it refuses, because
+DeepSeek V4 Pro is also `cheap` and `chinese-vendor`.
+
+So the provider chooses the model **within the project's allowed classes**: among the resolved models, as the
+profile's fallback policy says. A runner profile is chosen in the same order and is not restricted. A recorded
+resolution — the catalogue, the profiles, the choice at each level, the policy and the outcome — is a
+`profile-resolution`, and `FAC-SEM-060` holds its outcome to `resolveModelProfile`'s.
+
+### What an agent declares
+
+An agent's [well-known document](service.md#well-known-document) MAY carry `configuration`: the slots the operator can
+configure (`runner`, `model`) and the resolved profiles, read-only — the runner profile, its kind and route, the model
+profile and its admitted models, and the level they came from. A change is made in Fabric and reaches the agent
+through its binding. A capability answer MAY carry the same object. A [usage report](service.md#usage-report)'s row
+carries `route` beside `model`.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -211,6 +310,9 @@ host's own vocabulary (Fabric: ADR-0125).
 | `FAC-SEM-032` | `route-bundle` | the binding that pins the route has its project, capability and the local-runner profile, a candidate as its provider, and this route as `runnerRoute` |
 | `FAC-SEM-033` | `route-bundle` | every candidate's kind is in the host's runner catalogue, and a named drive is one its entry offers |
 | `FAC-SEM-034` | `route-event` | the event names this route; every candidate it names is that position of the route, by an integer index; the probes cover every candidate above the selection, in order (all of them when exhausted, none for a sticky relaunch, which needs a conversation and sticky recovery); attach, spawn, `no-held-session` and `spawn-failed` obey the session policy; `held` only under `exhausted: hold`; `preferred-available` only under `recovery: reprobe`, moving up |
+| `FAC-SEM-058` | `model-catalogue`, `model-profiles` | a model is catalogued once and a profile id declared once; a row's provider routing never orders a provider it ignores |
+| `FAC-SEM-059` | `runner-profile` | a subscription runs only in its vendor's runner; a key route's model allow-list is the profile's model profile, and its key is a reference, never a value |
+| `FAC-SEM-060` | `profile-resolution` | every model a profile names is catalogued; the outcome is the resolution order's, restricted by the policy's classes, an empty result refused naming the policy |
 
 `FAC-SEM-021` states the locked "one entry per runner kind" as a rule; it is new in this
 revision because JSON Schema cannot express uniqueness by a property. The same limit shapes
@@ -219,7 +321,9 @@ making the route a grant (DEC-0010); a `route-bundle` is `{route, admissions, bi
 catalogue?}`, and `FAC-SEM-032`/`FAC-SEM-033` run when the optional parts are present. A
 `route-event` is `{route, event}`.
 
-Fixtures: the `runners-*`, `runner-route*` and `binding-runner-route*` entries of
-[`fixtures/catalogue.json`](../../fixtures/catalogue.json); rule tests:
-[`test/registry-rules.test.ts`](../../test/registry-rules.test.ts) and
-[`test/route-rules.test.ts`](../../test/route-rules.test.ts).
+Fixtures: the `runners-*`, `runner-route*`, `binding-runner-route*`, `registry-models*`, `model-profile*` and
+`runner-profile*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json), and
+`fixtures/semantic/{model-catalogue,model-profiles,runner-profile,profile-resolution}-*.json`; rule tests:
+[`test/registry-rules.test.ts`](../../test/registry-rules.test.ts),
+[`test/route-rules.test.ts`](../../test/route-rules.test.ts) and
+[`test/runner-model-profiles.test.ts`](../../test/runner-model-profiles.test.ts).

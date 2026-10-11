@@ -25,6 +25,7 @@
 | SCN-017 | Answer a spend approval request | spend | P-02 | ST-013, FLW-10 | draft | not audited |
 | SCN-018 | Approve one action for an outside caller | delegation | P-02 | ST-014, FLW-11 | draft | not audited |
 | SCN-019 | A dashboard session ends and the host signs in again | service | P-02 | ST-015, FLW-12 | draft | not audited |
+| SCN-020 | A launch the project's model classes leave without a model is refused, naming the policy | routing | P-02 | ST-006, FLW-05 | draft | not audited |
 
 ## Personas
 
@@ -431,4 +432,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the service refuses every new code -> the host retries at most once a minute per page, and the page keeps explaining the state.
 - **Status:** draft
 - **Coverage:** service specification, Operator login and the session's lifetime; `src/operator-session.ts`; `test/delegation-sealed.test.ts` (F-B-311)
+- **Product:** unobserved
+
+## Runner and model profiles
+
+### SCN-020: A launch the project's model classes leave without a model is refused, naming the policy
+
+- **Persona:** P-02
+- **Feature:** routing
+- **Traces:** ST-006, FLW-05 (JTBD-02, JRN-02/#2)
+- **Entry point:** an agent chat or a task of a project whose spend policy names model classes
+- **Preconditions:** the agent resolves to the model profile `default` (DeepSeek V4 Pro, then Claude Sonnet 5.5); the project's spend policy allows only the class `strong`
+- **Steps:**
+  1. Operator starts a chat -> the host resolves the model profile: no request names one, the agent names `default`.
+  2. The host keeps the profile's models every class of which the policy allows -> DeepSeek V4 Pro is also `cheap` and `chinese-vendor`, Claude Sonnet 5.5 also `code` and `vision`; none stays.
+  3. The host refuses the launch with `model-classes-empty` -> it names the profile and the spend policy by id and revision, and starts no runner.
+- **Expected result:** the operator sees which policy left the profile without a model and changes the policy or the profile in Fabric; nothing ran and nothing was spent.
+- **Alt paths:** the policy also allows `code` and `vision` -> Claude Sonnet 5.5 stays and the chat starts on it; the policy names no classes -> the profile is used whole.
+- **UI elements:** the refusal with the profile and the policy named, a link to the policy in Fabric.
+- **States covered:** error, success
+- **Errors & recovery:** the named profile does not exist -> the launch is refused as an unknown profile, never run on another one.
+- **Status:** draft
+- **Coverage:** runners specification, Resolution; `src/profile-rules.ts` `resolveModelProfile`; `test/runner-model-profiles.test.ts`, `fixtures/semantic/profile-resolution-refused.json`
 - **Product:** unobserved

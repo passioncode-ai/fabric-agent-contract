@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/runner-profile.schema.json",
+  "title": "Runner profile (DEC-0046)",
+  "description": "A runner kind of the catalogue, the route its model calls take, and a model profile (Fabric ADR-0147). subscription: the operator's own login, used only in its vendor's runner, spending no money and not metered; key: an Observatory-issued key whose model allow-list is the model profile (FAC-SEM-059).",
+  "type": "object",
+  "required": ["kind", "id", "runnerKind", "route", "modelProfile"],
+  "properties": {
+    "kind": { "const": "runner-profile" },
+    "id": { "$ref": "model-profile.schema.json#/$defs/profileId" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "runnerKind": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,62}$",
+      "description": "A shared runner kind (runners.md)."
+    },
+    "drive": {
+      "$ref": "runners.schema.json#/$defs/drive",
+      "description": "The catalogue drive to run it through; absent: the entry's default drive."
+    },
+    "route": { "enum": ["subscription", "key"] },
+    "modelProfile": { "$ref": "model-profile.schema.json#/$defs/profileId" },
+    "subscription": {
+      "type": "object",
+      "required": ["login"],
+      "properties": {
+        "login": {
+          "enum": ["claude", "kimi", "chatgpt"],
+          "description": "The vendor login the operator signed in with; each runs only in its vendor's runner: claude in claude-code, kimi in kimi-code, chatgpt in codex."
+        }
+      },
+      "additionalProperties": false
+    },
+    "key": {
+      "type": "object",
+      "required": ["ref", "modelAllowList"],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The secret reference of the key Observatory issued for this project (never a value)."
+        },
+        "modelAllowList": {
+          "$ref": "model-profile.schema.json#/$defs/profileId",
+          "description": "The model profile whose ids the key admits: this profile's modelProfile (FAC-SEM-059)."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "route": { "const": "subscription" } } },
+      "then": {
+        "required": ["subscription"],
+        "properties": { "subscription": true },
+        "not": { "required": ["key"], "properties": { "key": true } }
+      }
+    },
+    {
+      "if": { "properties": { "route": { "const": "key" } } },
+      "then": {
+        "required": ["key"],
+        "properties": { "key": true },
+        "not": { "required": ["subscription"], "properties": { "subscription": true } }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

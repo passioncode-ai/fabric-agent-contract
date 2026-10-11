@@ -332,5 +332,22 @@
   {"name": "session-handoff-too-many-args", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-too-many-args.json", "valid": false, "keyword": "maxItems"},
   {"name": "session-handoff-session-without-id", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-session-without-id.json", "valid": false, "keyword": "oneOf"},
   {"name": "session-handoff-unknown-auth", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-auth.json", "valid": false, "keyword": "enum"},
-  {"name": "session-handoff-runtime-not-shared", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-runtime-not-shared.json", "valid": false, "keyword": "enum"}
+  {"name": "session-handoff-runtime-not-shared", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-runtime-not-shared.json", "valid": false, "keyword": "enum"},
+  {"name": "registry-models", "schema": "registry-models.schema.json", "path": "positive/registry-models.json", "valid": true},
+  {"name": "model-profiles", "schema": "model-profile.schema.json", "path": "positive/model-profiles.json", "valid": true},
+  {"name": "model-profile-agent", "schema": "model-profile.schema.json", "path": "positive/model-profile-agent.json", "valid": true},
+  {"name": "runner-profile-subscription", "schema": "runner-profile.schema.json", "path": "positive/runner-profile-subscription.json", "valid": true},
+  {"name": "runner-profile-key", "schema": "runner-profile.schema.json", "path": "positive/runner-profile-key.json", "valid": true},
+  {"name": "registry-models-unknown-class", "schema": "registry-models.schema.json", "path": "negative/registry-models-unknown-class.json", "valid": false, "keyword": "enum"},
+  {"name": "registry-models-bad-sort", "schema": "registry-models.schema.json", "path": "negative/registry-models-bad-sort.json", "valid": false, "keyword": "enum"},
+  {"name": "registry-models-price-inline", "schema": "registry-models.schema.json", "path": "negative/registry-models-price-inline.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "registry-models-routing-unknown-field", "schema": "registry-models.schema.json", "path": "negative/registry-models-routing-unknown-field.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "model-profile-model-twice", "schema": "model-profile.schema.json", "path": "negative/model-profile-model-twice.json", "valid": false, "keyword": "uniqueItems"},
+  {"name": "runner-profile-subscription-with-key", "schema": "runner-profile.schema.json", "path": "negative/runner-profile-subscription-with-key.json", "valid": false, "keyword": "not"},
+  {"name": "runner-profile-key-without-key", "schema": "runner-profile.schema.json", "path": "negative/runner-profile-key-without-key.json", "valid": false, "keyword": "required"},
+  {"name": "spend-policy-unknown-class", "schema": "spend-policy.schema.json", "path": "negative/spend-policy-unknown-class.json", "valid": false, "keyword": "enum"},
+  {"name": "service-usage-route", "schema": "service-usage.schema.json", "path": "positive/service-usage-route.json", "valid": true},
+  {"name": "service-usage-unknown-route", "schema": "service-usage.schema.json", "path": "negative/service-usage-unknown-route.json", "valid": false, "keyword": "enum"},
+  {"name": "service-well-known-configuration", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-configuration.json", "valid": true},
+  {"name": "service-well-known-configuration-unknown-slot", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-configuration-unknown-slot.json", "valid": false, "keyword": "enum"}
 ]

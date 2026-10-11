@@ -1,0 +1,224 @@
+{
+  "kind": "model-catalogue",
+  "asOf": "2026-10-11T18:00:00Z",
+  "models": [
+    {
+      "id": "deepseek/deepseek-v4-pro",
+      "family": "DeepSeek",
+      "classes": [
+        "strong",
+        "cheap",
+        "chinese-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:deepseek/deepseek-v4-pro",
+      "provider": {
+        "sort": "price",
+        "allow_fallbacks": true,
+        "only": [
+          "deepinfra"
+        ]
+      }
+    },
+    {
+      "id": "qwen/qwen3.8-max-0902",
+      "family": "Qwen",
+      "classes": [
+        "strong",
+        "chinese-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:qwen/qwen3.8-max-0902"
+    },
+    {
+      "id": "qwen/qwen3.8-flash",
+      "family": "Qwen",
+      "classes": [
+        "cheap",
+        "chinese-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:qwen/qwen3.8-flash"
+    },
+    {
+      "id": "z-ai/glm-5.3-prime",
+      "family": "GLM",
+      "classes": [
+        "strong",
+        "chinese-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:z-ai/glm-5.3-prime"
+    },
+    {
+      "id": "minimax/minimax-m3",
+      "family": "MiniMax",
+      "classes": [
+        "cheap",
+        "chinese-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:minimax/minimax-m3"
+    },
+    {
+      "id": "mistralai/devstral-2512",
+      "family": "Mistral",
+      "classes": [
+        "cheap",
+        "code"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:mistralai/devstral-2512"
+    },
+    {
+      "id": "google/gemini-3.8-flash",
+      "family": "Gemini",
+      "classes": [
+        "cheap",
+        "vision"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:google/gemini-3.8-flash"
+    },
+    {
+      "id": "x-ai/grok-build-0.1",
+      "family": "Grok",
+      "classes": [
+        "code"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:x-ai/grok-build-0.1"
+    },
+    {
+      "id": "anthropic/claude-haiku-5.5",
+      "family": "Anthropic",
+      "classes": [
+        "cheap"
+      ],
+      "endpoints": [
+        "anthropic-messages"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:anthropic/claude-haiku-5.5"
+    },
+    {
+      "id": "anthropic/claude-sonnet-5.5",
+      "family": "Anthropic",
+      "classes": [
+        "strong",
+        "code",
+        "vision"
+      ],
+      "endpoints": [
+        "anthropic-messages"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:anthropic/claude-sonnet-5.5"
+    },
+    {
+      "id": "anthropic/claude-opus-5.5",
+      "family": "Anthropic",
+      "classes": [
+        "frontier",
+        "code",
+        "vision"
+      ],
+      "endpoints": [
+        "anthropic-messages"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-05"
+      },
+      "priceRef": "openrouter:anthropic/claude-opus-5.5"
+    },
+    {
+      "id": "openai/gpt-6.1-sol",
+      "family": "OpenAI",
+      "classes": [
+        "frontier"
+      ],
+      "endpoints": [
+        "openai-chat",
+        "responses"
+      ],
+      "toolUse": {
+        "status": "blocked",
+        "at": "2026-10-11",
+        "reason": "refused for one estate key: blocked for a previous policy violation"
+      },
+      "priceRef": "openrouter:openai/gpt-6.1-sol",
+      "provider": {
+        "order": [
+          "azure"
+        ],
+        "ignore": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      }
+    }
+  ]
+}

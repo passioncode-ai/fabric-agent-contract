@@ -87,8 +87,9 @@
 - **Elements:** revision references, allowlist, validation findings (primary action: validate new revision).
 - **States:** error — each invalid reference named; success — content hash and activation boundary shown.
 - **Coverage:** none yet
-- **Scenarios:** SCN-003, SCN-004, SCN-005, SCN-009
-- **Resources:** binding, execution-context and runner-route schemas
+- **Scenarios:** SCN-003, SCN-004, SCN-005, SCN-009, SCN-020
+- **Resources:** binding, execution-context and runner-route schemas; the model and runner profile schemas and the
+  spend policy's model classes (SCN-020)
 - **Status:** designed
 
 ### SCR-06: Version history

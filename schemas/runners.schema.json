@@ -23,7 +23,10 @@
         "codex-app-server",
         "codex-exec",
         "acp",
-        "tui"
+        "tui",
+        "pi-json",
+        "opencode-json",
+        "kimi-stream-json"
       ]
     },
     "runner": {

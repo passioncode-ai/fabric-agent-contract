@@ -158,6 +158,7 @@ variable the handoff sets; a value that carries a credential, or a document hold
 | `hermes` | sent in ACP `session/new` by the host's ACP client (HTTP, or the host's stdio bridge); no argument | `HERMES_ACP_SKIP_CONFIGURED_MCP=1` exactly when `true` | the session's first ACP prompt | Fabric (`acp-session`, Hermes 0.21.4) |
 | `kimi-code` | ACP, as `hermes` | `false`: no switch measured | the first ACP prompt | not connected yet |
 | `cline` | ACP, as `hermes` | `false`: no switch measured | the first ACP prompt | not connected yet |
+| `pi` | not measured: pi reads `mcp.json`, in the `mcpServers` dialect, from its agent directory (`PI_CODING_AGENT_DIR`), so a host points that at a directory of its own, never the user's (DEC-0046) | `false`: no switch measured | not measured | not connected yet |
 
 Sources: Claude Code 2.1.296 `claude --help` (`--mcp-config <configs...>`, "Load MCP servers from JSON files or
 strings (space-separated)"; `--append-system-prompt[-file]`); an interactive start with a missing brief file

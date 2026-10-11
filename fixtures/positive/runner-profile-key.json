@@ -1,0 +1,13 @@
+{
+  "kind": "runner-profile",
+  "id": "pi-default",
+  "name": "pi on an estate key",
+  "runnerKind": "pi",
+  "drive": "pi-json",
+  "route": "key",
+  "modelProfile": "default",
+  "key": {
+    "ref": "observatory:project-a/openrouter",
+    "modelAllowList": "default"
+  }
+}

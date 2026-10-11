@@ -288,6 +288,68 @@
       },
       "additionalProperties": false
     },
+    "configuration": {
+      "description": "DEC-0046. What the operator can configure for this agent, and what applies now — read-only: a change is made in Fabric and reaches the agent through its binding, never through this document.",
+      "type": "object",
+      "required": [
+        "slots",
+        "resolved"
+      ],
+      "properties": {
+        "slots": {
+          "description": "The configurable slots: the runner, the model, or both.",
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 2,
+          "items": {
+            "enum": [
+              "runner",
+              "model"
+            ]
+          }
+        },
+        "resolved": {
+          "description": "The profiles that apply now, after the resolution order (request, agent, binding or project, estate default) and the project's model classes.",
+          "type": "object",
+          "properties": {
+            "from": {
+              "enum": [
+                "request",
+                "agent",
+                "binding",
+                "estate"
+              ]
+            },
+            "runnerProfile": {
+              "$ref": "model-profile.schema.json#/$defs/profileId"
+            },
+            "runnerKind": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{1,62}$"
+            },
+            "route": {
+              "enum": [
+                "subscription",
+                "key"
+              ]
+            },
+            "modelProfile": {
+              "$ref": "model-profile.schema.json#/$defs/profileId"
+            },
+            "models": {
+              "description": "The profile's models the project's classes admit, first choice first.",
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "registry-models.schema.json#/$defs/modelId"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "update": {
       "type": "object",
       "required": [

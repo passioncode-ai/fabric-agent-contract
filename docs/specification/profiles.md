@@ -76,7 +76,10 @@ The profile MUST declare:
 - required execution-context capabilities.
 
 The project chooses a default local runner. An agent binding MAY override it only
-with a provider admitted to that project. The provider owns model choice.
+with a provider admitted to that project. The provider chooses the model within the project's allowed classes:
+the model profile comes from the request, else the agent, else the binding or project, else the estate default, and
+the project's spend policy restricts it and never chooses ([runners](runners.md#runner-and-model-profiles),
+DEC-0046).
 
 A project MAY pin an ordered runner route per capability served by this
 profile (see [Runner routes](runners.md#runner-routes)): the host tries each

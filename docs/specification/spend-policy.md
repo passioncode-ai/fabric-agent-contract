@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037, DEC-0038, DEC-0039, DEC-0041, DEC-0045 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
+DEC-0037, DEC-0038, DEC-0039, DEC-0041, DEC-0045, DEC-0046 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -36,6 +36,12 @@ four times that, and "no project limit", with one option preselected. The choice
 together, so anyone can see why.
 
 `mode: no-project-limit` is a recorded choice, never a missing value. Then only L0 stops spending.
+
+`modelClasses` names the classes the project allows, from the closed vocabulary of the
+[model catalogue](runners.md#runner-and-model-profiles) (DEC-0046); a grant's `spend.modelClasses` uses the same
+vocabulary. The policy restricts the model profile a launch resolves to and never chooses one: a model stays when
+every class it has is allowed, and when none stays the launch is refused with the policy named. Absent, it
+restricts nothing.
 
 ## Grants
 

@@ -175,7 +175,7 @@ describe("the specification", () => {
   });
 
   it("names the per-runtime rows the kit checks", () => {
-    for (const runtime of ["claude-code", "codex", "kilo", "hermes", "kimi-code", "cline"]) expect(spec).toMatch(new RegExp(`^\\| \`${runtime}\` \\|`, "m"));
+    for (const runtime of ["claude-code", "codex", "kilo", "hermes", "kimi-code", "cline", "pi"]) expect(spec).toMatch(new RegExp(`^\\| \`${runtime}\` \\|`, "m"));
     expect(spec).toContain("`--mcp-config=<folder>/mcp.json`");
   });
 });

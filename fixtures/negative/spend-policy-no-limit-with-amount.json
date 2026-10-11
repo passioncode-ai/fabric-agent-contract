@@ -12,8 +12,9 @@
   "period": "month",
   "autoApproveUsd": 0.5,
   "modelClasses": [
-    "general",
-    "chinese"
+    "strong",
+    "cheap",
+    "chinese-vendor"
   ],
   "credentialSources": [
     {

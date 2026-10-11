@@ -10,6 +10,7 @@ import { deviceRules } from "./device-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
+import { profileRules } from "./profile-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -29,6 +30,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   const delegation = delegationRules(kind, value);
   if (delegation) return delegation;
   if (kind === "deep-link") return deepLinkRules(value);
+  const profiles = profileRules(kind, value);
+  if (profiles) return profiles;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const findings: Finding[] = [];
