@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "about": "The wave table of the 2026-10-11 board run: each canvas node, the wave that closes it, its release, and the inventory items it owns. assign.mjs reads this table and the findings files and writes inventory.json; a re-cut is an edit here and a re-run. See canvas.md for the target state and plan.md for each wave's exit criteria.",
+  "waves": {
+    "1": "Integrate and make the gate trustworthy: land the incoming PRs, a hermetic gate, the finding classes as scripts, the board and registers telling the truth",
+    "2": "Delegation, spend and the operator session: the DEC-0037…0041 seam closed, one canonical-JSON register",
+    "3": "Activity and devices: DEC-0030/0031 hardened and amended together with CON-OE-01 and CON-OE-12",
+    "4": "Services on every system, the operator channel and the embedded dashboard: CT-01 decided, the lifecycle for Linux and Windows, OC/ED/FB gaps",
+    "5": "The 0.1.0 core and interop: results, learnings, roles, grants, contexts, the job result, usage reports with CON-OE-13 and RM-16",
+    "6": "The open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, then CON-OE-03 in parts"
+  },
+  "nodes": [
+    {
+      "id": "N01-incoming",
+      "title": "Land the incoming PRs: #32 (DEC-0041, the meter's grant read) after review fixes, then #31 (DEC-0042, session-handoff/1) rebased on it",
+      "wave": 1,
+      "release": "this",
+      "items": [
+        "PR-32",
+        "PR-31",
+        "F-D-001",
+        "F-D-002",
+        "F-D-018",
+        "F-B-302",
+        "F-B-303",
+        "F-B-304"
+      ]
+    },
+    {
+      "id": "N02-gate",
+      "title": "A hermetic, self-checking gate: no foreign worktree in the test or lint scope; every positive fixture passes the semantic rules; a decision's affected paths resolve; rule branches covered",
+      "wave": 1,
+      "release": "this",
+      "items": [
+        "F-A-001",
+        "F-A-010",
+        "F-A-009",
+        "F-B-201",
+        "F-D-026",
+        "F-D-011"
+      ]
+    },
+    {
+      "id": "N03-board",
+      "title": "The board and the registers tell the truth: a row per canvas node and per consumer adoption, closed rows with receipts, the KB and wiki pointers current",
+      "wave": 1,
+      "release": "this",
+      "items": [
+        "F-D-003",
+        "F-D-004",
+        "F-D-005",
+        "F-D-006",
+        "F-D-007",
+        "F-D-019",
+        "F-B-220",
+        "F-A-026",
+        "F-A-007",
+        "F-A-008",
+        "F-A-011",
+        "F-B-212",
+        "F-D-016",
+        "F-D-017",
+        "F-D-021",
+        "F-D-022",
+        "F-D-024",
+        "F-D-025",
+        "F-D-027",
+        "F-D-010",
+        "F-A-028",
+        "F-D-029",
+        "CT-03",
+        "CT-04",
+        "CON-OE-04",
+        "ASK-FABRIC-a",
+        "ASK-FABRIC-b",
+        "ASK-FABRIC-c",
+        "ASK-FABRIC-d",
+        "ASK-FABRIC-e",
+        "ASK-FABRIC-f"
+      ]
+    },
+    {
+      "id": "N04-truthful-docs",
+      "title": "Front-door documents true today: README status, acceptance evidence, navigation, the glossary, the source ledger's pinned revisions",
+      "wave": 1,
+      "release": "this",
+      "items": [
+        "F-D-012",
+        "F-D-013",
+        "F-A-025",
+        "F-A-031",
+        "F-D-014",
+        "F-D-015",
+        "F-A-030",
+        "F-B-320",
+        "F-A-020",
+        "F-A-021",
+        "F-B-110",
+        "F-B-111",
+        "F-B-203",
+        "F-B-213",
+        "F-B-316",
+        "F-B-113"
+      ]
+    },
+    {
+      "id": "N05-delegation",
+      "title": "Delegation and spend sealed: one refusal wire for the meter, one grant per token, the meter hop's depth, a strict verifier in DL-13's order, every security MUST killed by a test, the operator session's compatibility stated",
+      "wave": 2,
+      "release": "this",
+      "items": [
+        "F-B-301",
+        "F-B-305",
+        "F-B-306",
+        "F-B-307",
+        "F-B-308",
+        "F-B-309",
+        "F-B-310",
+        "F-B-311",
+        "F-B-312",
+        "F-B-313",
+        "F-B-314",
+        "F-B-319",
+        "F-B-322",
+        "F-B-317",
+        "F-B-318",
+        "F-B-321"
+      ]
+    },
+    {
+      "id": "N06-canonical-json",
+      "title": "One register of canonical forms: which bytes each signature or digest covers (settings-backup form, RFC 8785), with reference functions and shared test vectors",
+      "wave": 2,
+      "release": "this",
+      "items": [
+        "F-A-006",
+        "F-B-112",
+        "F-B-315"
+      ]
+    },
+    {
+      "id": "N14-runner-model-profiles",
+      "title": "Runner and model profiles (CT-05, T2) on Fabric ADR-0147: the modelClasses vocabulary DEC-0037 left free, model and runner profiles, route subscription|key, headless drives, one resolution order, declared config slots, the profile's model allow-list on issued keys",
+      "wave": 2,
+      "release": "this",
+      "items": [
+        "CT-05"
+      ]
+    },
+    {
+      "id": "N07-activity-devices",
+      "title": "Activity and devices: rules killed by tests, the hashed-branch form unified, path-free details, the bound user checked, policy-key validity fixed, amended with CON-OE-01 and CON-OE-12",
+      "wave": 3,
+      "release": "this",
+      "items": [
+        "F-B-101",
+        "F-B-102",
+        "F-B-103",
+        "F-B-104",
+        "F-B-105",
+        "F-B-106",
+        "F-B-107",
+        "F-B-108",
+        "F-B-109",
+        "F-B-114",
+        "CON-OE-01",
+        "CON-OE-12",
+        "OQ-0010",
+        "F-D-028",
+        "J-ENV / AL-01 / AS-01c / access-log/1"
+      ]
+    },
+    {
+      "id": "N08-services",
+      "title": "Services on macOS, Linux and Windows: CT-01 decided for every supervisor, the full lifecycle per system, Windows paths and token readers checked, superseded wording removed",
+      "wave": 4,
+      "release": "this",
+      "items": [
+        "CT-01",
+        "F-A-027",
+        "F-B-211",
+        "F-D-008",
+        "F-B-202",
+        "F-B-206",
+        "F-B-207",
+        "F-B-208",
+        "F-B-209",
+        "F-B-210",
+        "F-A-013",
+        "CON-OE-11"
+      ]
+    },
+    {
+      "id": "N09-channel-dashboard",
+      "title": "The operator channel and the embedded dashboard: status invariants in the schema and killed by tests, the appearance cookie's scope, ED-6 against ED-9, an invalid declaration's handling, the UX scenario",
+      "wave": 4,
+      "release": "this",
+      "items": [
+        "F-B-204",
+        "F-B-205",
+        "F-B-214",
+        "F-B-215",
+        "F-B-216",
+        "F-B-217",
+        "F-B-218",
+        "F-B-219",
+        "F-D-020"
+      ]
+    },
+    {
+      "id": "N10-core",
+      "title": "The 0.1.0 core: claim and proof, learning approval separation, the product-manager rule, residue extensions, retention, standing-grant channels, contexts, A2A profile fields, rollback",
+      "wave": 5,
+      "release": "this",
+      "items": [
+        "F-A-002",
+        "F-A-003",
+        "F-A-004",
+        "F-A-014",
+        "F-A-015",
+        "F-A-016",
+        "F-A-017",
+        "F-A-018",
+        "F-A-019"
+      ]
+    },
+    {
+      "id": "N11-interop-usage",
+      "title": "Interop and usage: the job result, the provider rules after DEC-0017, the memory pilot's retirement, the comms status words, the usage report's window, CON-OE-13 and the OpenRouter attribution headers",
+      "wave": 5,
+      "release": "this",
+      "items": [
+        "F-A-005",
+        "F-A-012",
+        "F-A-022",
+        "F-A-023",
+        "F-A-024",
+        "F-A-029",
+        "CON-OE-13",
+        "RM-16"
+      ]
+    },
+    {
+      "id": "N12-org-edition",
+      "title": "The open organization-edition contracts: proposals (CON-OE-05), surfaces.a2a well-known part (CON-OE-06), versions N and N-1 (CON-OE-07), the session join key (CON-OE-08), the local channel (CON-OE-10), then the node manifest, package and agent profile (CON-OE-03) in parts",
+      "wave": 6,
+      "release": "this",
+      "items": [
+        "CON-OE-05",
+        "CON-OE-06",
+        "CON-OE-07",
+        "CON-OE-08",
+        "CON-OE-10",
+        "CON-OE-03"
+      ]
+    },
+    {
+      "id": "N13-program",
+      "title": "Carried to the program: work whose inputs another owner has not produced yet",
+      "wave": null,
+      "release": "program",
+      "items": [
+        "CON-OE-02",
+        "CON-OE-09",
+        "RM-01",
+        "PRIVATE (out of scope for this repository)",
+        "F-D-023",
+        "F-D-009",
+        "RM-03-residual"
+      ]
+    }
+  ]
+}
