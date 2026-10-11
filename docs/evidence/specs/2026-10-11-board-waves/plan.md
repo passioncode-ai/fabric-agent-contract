@@ -130,7 +130,19 @@ sources*.
 A go that leaves a question unanswered takes the recommendation, recorded as **assumed**. Each wave that
 depends on it names it.
 
+**The gate, closed (2026-10-11).** The operator answered "делай все по рекомендации — го" (do everything as
+recommended — go). That go closes the manual gates of stages 0 (brief), 2 (canvas) and 3 (target-state spec), and
+the wave plan, and it answers the batch with the recommendations:
+
+- Q1 — yes: the contract's open org-edition packets start; waves 3, 5 and 6 carry them.
+- Q2 — convert: the hosted check runs nightly at 23:00 Europe/Warsaw with manual dispatch, per org-index
+  `docs/CI-BATCHING.md`; the merge gate is `pnpm run check` run by the merging session (P1-01).
+- Q3 — CO-KB-02 stays open.
+
+Outward acts (a tag, a publication, a deployment) are still asked one by one.
+
 ## Revisions
 
+- 2026-10-11 — gate closed by the operator's go; TRUST-TIERS (operator decision, ADR-0144 amendment 4) joins N05.
 - 2026-10-11 — first cut, from the inventory of 147 items (consumer survey pending; its items join at the
   first re-measure).

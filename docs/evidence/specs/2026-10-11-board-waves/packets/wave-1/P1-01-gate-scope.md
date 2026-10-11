@@ -1,7 +1,7 @@
 # P1-01 — the gate measures only this repository
 
 - **Node:** N02 gate · **REQ:** REQ-07 · **Wave:** 1
-- **Closes:** F-A-001, F-D-026 (agent-sync residue). The receipts are in [inventory.json](../../inventory.json),
+- **Closes:** F-A-001, F-D-026 (agent-sync residue), F-D-011 (CI cadence, Q2). The receipts are in [inventory.json](../../inventory.json),
   under `evidence` and `proposed_fix` for each id.
 
 ## Why
@@ -25,7 +25,14 @@ verdict must depend on this repository's tracked files only.
    `.claude/`, untracked files and `.git/` are never read. Fall back to the walk only when git is absent,
    and say so in one line on stderr.
 4. `.gitignore`: add `.claude/worktrees/`.
-5. agent-sync residue (F-D-026):
+5. **CI cadence (Q2, the operator's go of 2026-10-11).** `.github/workflows/ci.yml` runs on `schedule` at 23:00
+   Europe/Warsaw (cron `0 21 * * *` UTC; note in a comment that it is 22:00 UTC in winter and the org accepts the
+   hour's drift, or follow exactly what other repositories in org-index `docs/CI-BATCHING.md` use: read one
+   converted repository's workflow with `gh api` and copy its trigger block) and on `workflow_dispatch`, no longer
+   on `push` or `pull_request`. Add `concurrency` cancelling superseded runs, as CI-BATCHING.md says. AGENTS.md
+   gets one line: the merge gate is `pnpm run check` run by the merging session, its output in the PR; for an
+   urgent branch, `gh workflow run ci.yml --ref <branch>` once. F-D-011 closes with this.
+6. agent-sync residue (F-D-026):
    - regenerate `docs/AGENT_SYNC.md` with `agent_sync.py setup`;
    - `docs/MERGES.md`, the configured merge log: create it with its header, as `agent_sync.py merge` expects
      (read the tool's `merge` help), rather than removing the config;
@@ -48,4 +55,4 @@ verdict must depend on this repository's tracked files only.
 
 `vitest.config.ts`, `package.json` (`scripts` only), `.markdownlint-cli2.jsonc`, `.gitignore`,
 `src/docs-check.ts` (the walk only), `src/tracked-files.ts`, `test/docs-check.test.ts` (one new case),
-`docs/AGENT_SYNC.md`, `docs/MERGES.md`.
+`docs/AGENT_SYNC.md`, `docs/MERGES.md`, `.github/workflows/ci.yml`, `AGENTS.md` (one line).
