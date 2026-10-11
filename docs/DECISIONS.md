@@ -1537,8 +1537,9 @@ annotate only the old status; decision bodies are never rewritten.
     the hub when the session or run has one: an opaque id in the session id's grammar (`^[A-Za-z0-9._:-]{1,128}$`).
     The verifier types it like any claim (`malformed-claims`). An onward token keeps the parent's `task` or none,
     never another, and a token for the meter keeps it (`FAC-SEM-050`, DL-5). The meter keys a grant's `task`
-    window on the onward token's `task`; else on the session of the agent that called the callee (the meter
-    token's `act.act`, because its outermost actor is the callee); else on the `jti` of the callee's own token,
+    window on the onward token's `task`; else on the first `session` met walking the meter token's actor chain
+    from its outermost actor (`act`, then `act.act`, …: the callee's own session, else its caller's, and so on —
+    the rule Project Observatory's meter runs); else on the `jti` of the callee's own token,
     the request's `tokenJti` (`taskWindowKey` in `src/delegation.ts`).
   - **The hub's grant projection** — the contract's local-placement profile of the meter's read (DL-23, DL-24): a
     hub MAY project each grant it holds, in the standing-grant shape at its latest revision with its state, to

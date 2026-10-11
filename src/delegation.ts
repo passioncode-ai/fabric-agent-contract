@@ -368,14 +368,16 @@ export function verifyMeterToken(token: string, options: VerifyMeterOptions): De
 
 /**
  * The key the meter holds a grant's `task` window under (DEC-0041), from the onward token it verified and the
- * request's `tokenJti`: the token's `task`; else the session of the agent that called the callee — the meter
- * token's second actor, `act.act`, because its outermost actor is the callee (DL-21); else the `jti` of the
- * callee's own token. The prefixes keep the three namespaces apart.
+ * request's `tokenJti`: the token's `task`; else the first `session` met walking the token's actor chain from its
+ * outermost actor (`act`, then `act.act`, …) — the callee's own session when it has one, else the session of the
+ * agent that called it, and so on; else the `jti` of the callee's own token. The prefixes keep the three
+ * namespaces apart, and the session key names the actor that holds it.
  */
 export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act">, tokenJti: string): string {
   if (meterClaims.task !== undefined) return `task:${meterClaims.task}`;
-  const caller = meterClaims.act?.act;
-  if (caller?.session !== undefined) return `session:${caller.sub}:${caller.session}`;
+  for (let actor: Actor | undefined = meterClaims.act; actor !== undefined; actor = actor.act) {
+    if (actor.session !== undefined) return `session:${actor.sub}:${actor.session}`;
+  }
   return `jti:${tokenJti}`;
 }
 

@@ -328,8 +328,9 @@ store and not a call to the hub, so a check within a token's lifetime still work
 
   The rows are checked in this order. The file authorises nothing without the verified onward token: it says
   what the grant is, the token says who is asking under it. The meter keys the grant's `task` window on the
-  onward token's `task`; else on the `session` of the agent that called the callee (the onward token's
-  `act.act`, since its outermost actor is the callee); else on the `jti` of the callee's own token, the
+  onward token's `task`; else on the first `session` met walking the onward token's actor chain from its
+  outermost actor (`act`, then `act.act`, …: the callee's own session, else its caller's, and so on); else on
+  the `jti` of the callee's own token, the
   request's `tokenJti`. `readProjectedGrant(grantsDir, ref, {now})` and `projectionDenial` in
   [`src/grant-projection.ts`](../../src/grant-projection.ts), and `taskWindowKey` in
   [`src/delegation.ts`](../../src/delegation.ts), are this rule.

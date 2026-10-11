@@ -92,16 +92,21 @@ describe("2 — the task claim (DEC-0041)", () => {
     expect(codes("delegation-mint", meterKept)).toEqual([]);
   });
 
-  it("keys the meter's task window on task, else on the call's session, else on the call's jti", () => {
+  it("keys the meter's task window on task, else on the first session along the actor chain, else on the call's jti", () => {
     const meterToken = load("semantic/delegation-mint-meter-ok.json").token as delegation.DelegationClaims;
     const jti = "01JA7Y5Q3C2K9M8N4P6R0S1T2V";
     expect(delegation.taskWindowKey({ ...meterToken, task: "task:01JA7Z0K4M" }, jti)).toBe("task:task:01JA7Z0K4M");
     const inSession = { ...meterToken, act: { sub: "example-writer", act: { sub: "example-media", session: "s-7", act: { sub: "example-agent.default" } } } };
     expect(delegation.taskWindowKey(inSession, jti)).toBe("session:example-media:s-7");
     expect(delegation.taskWindowKey(meterToken, jti)).toBe(`jti:${jti}`);
-    // The callee's own session is not the call's: the meter token's outermost actor is the callee.
+    // The walk starts at the outermost actor, the callee: its own session wins over its caller's.
     const calleeSession = { ...meterToken, act: { ...meterToken.act, session: "callee-1" } };
-    expect(delegation.taskWindowKey(calleeSession, jti)).toBe(`jti:${jti}`);
+    expect(delegation.taskWindowKey(calleeSession, jti)).toBe(`session:${meterToken.act?.sub}:callee-1`);
+    const bothSessions = { ...meterToken, act: { sub: "example-writer", session: "w-1", act: { sub: "example-media", session: "s-7" } } };
+    expect(delegation.taskWindowKey(bothSessions, jti)).toBe("session:example-writer:w-1");
+    // A session three actors deep is still found.
+    const deep = { ...meterToken, act: { sub: "a", act: { sub: "b", act: { sub: "c", session: "c-1" } } } };
+    expect(delegation.taskWindowKey(deep, jti)).toBe("session:c:c-1");
   });
 
   it("is stated in the delegation profile and in the spend policy", () => {
