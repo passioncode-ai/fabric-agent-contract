@@ -20,6 +20,12 @@ permissions:
 jobs:
   contract:
     runs-on: ubuntu-latest
+    # Every Node the package admits (`engines: >=20`): Node 20 and 22 accept an Ed25519 signature under a small-order
+    # key, so only they prove the small-order guard of CT-29 (DEC-0045).
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
@@ -28,7 +34,7 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check

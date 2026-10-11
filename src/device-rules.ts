@@ -1,4 +1,5 @@
 import { createPublicKey, verify } from "node:crypto";
+import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, mergeStreams } from "./activity-rules.js";
 import { settingsCanonicalJson } from "./canonical.js";
@@ -31,7 +32,8 @@ export function verifyPolicySignature(policy: JsonObject, publicKeyBase64: strin
   const signature = isObject(policy.signature) ? policy.signature : {};
   if (signature.alg !== "ed25519" || typeof signature.value !== "string") return false;
   const raw = Buffer.from(publicKeyBase64, "base64");
-  if (raw.length !== 32) return false;
+  // CT-29 (DEC-0045): a small-order key verifies forged signatures on Node 20 and 22; never verify under one.
+  if (isSmallOrderKey(raw)) return false;
   try {
     const key = createPublicKey({ key: Buffer.concat([ED25519_SPKI_PREFIX, raw]), format: "der", type: "spki" });
     return verify(null, policySigningInput(policy), key, Buffer.from(signature.value, "base64"));
@@ -302,7 +304,8 @@ function attribution(value: JsonObject): Finding[] {
 
 /**
  * FAC-SEM-046: `{root: {keyId, publicKey}, current?, next}` — a policy key set is signed by the root key from enrollment,
- * moves its revision forward in its organization, names each key once with a window that ends after it starts, keeps
+ * moves its revision forward in its organization, names each key once with a window that ends after it starts and none
+ * of small order (DEC-0045, CT-29), keeps
  * a key valid at `issuedAt`, and rotates with overlap: a key of the current set still valid at the next set's
  * `issuedAt` stays until its `notAfter` unless it is revoked by name.
  */
@@ -323,6 +326,7 @@ function keySet(value: JsonObject): Finding[] {
     if (ids.has(key.keyId)) flag(`/next/keys/${i}/keyId`, `key ${String(key.keyId)} is named twice`);
     ids.add(key.keyId);
     if (key.keyId === root.keyId) flag(`/next/keys/${i}/keyId`, "the root key is never a policy signing key");
+    if (typeof key.publicKey === "string" && isSmallOrderKey(Buffer.from(key.publicKey, "base64"))) flag(`/next/keys/${i}/publicKey`, "a key of small order verifies forged signatures and is never published (DEC-0045)");
     const from = Date.parse(String(key.notBefore ?? "")), to = Date.parse(String(key.notAfter ?? ""));
     if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts");
     if (at >= from && at <= to) validNow = true;

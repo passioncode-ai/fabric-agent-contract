@@ -1,0 +1,9 @@
+{
+  "decision": "denied",
+  "level": null,
+  "reason": "above the project's auto-approve threshold of $0.50; a request was filed",
+  "approvalRequest": "urn:approval:project-a:42",
+  "checkedAt": "2026-10-11T10:00:00Z",
+  "code": "limit-reached",
+  "window": "task"
+}

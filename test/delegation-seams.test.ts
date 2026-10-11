@@ -31,7 +31,7 @@ function sign(payload: Json | string, header: Json | string = { alg: "EdDSA", ty
 
 const claims = load("positive/delegation-token-claims.json");
 const NOW = (claims.iat as number) + 30;
-const call = { audience: "example-writer", jwks, now: NOW, capability: "writer.write", effect: "draft" as const };
+const call = { audience: "example-writer", jwks, now: NOW, capability: "writer.write", effect: "draft" as const, issuer: "urn:fabric:estate:example" };
 const refusal = (result: { ok: boolean; code?: string; detail?: string }) => (result.ok ? "ok" : `${result.code}/${result.detail}`);
 
 describe("1 — jcs takes JSON only", () => {
@@ -49,7 +49,7 @@ describe("1 — jcs takes JSON only", () => {
 describe("2 — the meter verifies an onward token minted for it", () => {
   const mint = load("semantic/delegation-mint-meter-ok.json");
   const meterToken = mint.token as Json;
-  const meterCall = { meter: "example-meter", capability: "grant.check", jwks, now: (meterToken.iat as number) + 5 };
+  const meterCall = { meter: "example-meter", capability: "grant.check", jwks, now: (meterToken.iat as number) + 5, issuer: "urn:fabric:estate:example" };
 
   it("has a grant-check request that carries the amount and the callee's own jti, never a token", () => {
     expect(valid("grant-check-request.schema.json", load("positive/grant-check-request.json"))).toBe(true);
@@ -127,7 +127,7 @@ describe("5 — fabric:// links carry no prompt and no credential, anywhere", ()
 describe("6 — an approval's jti store is required, and the order is stated", () => {
   const approvalClaims = load("positive/approval-claims.json");
   const doc = sign(approvalClaims, { alg: "EdDSA", typ: APPROVAL_TYP, kid: "estate-new" });
-  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: approvalClaims.actionDigest as string };
+  const options = { audience: "example-publisher", jwks, now: (approvalClaims.iat as number) + 60, actionDigest: approvalClaims.actionDigest as string, issuer: "urn:fabric:estate:example" };
 
   it("refuses unknown-state without a store, and an explicit no-op store is a choice by name", () => {
     // @ts-expect-error jtiStore is required (finding 6)
@@ -184,9 +184,9 @@ describe("10 — a read-only delegation grant", () => {
 });
 
 describe("11 — verifier leniencies closed", () => {
-  it("refuses a key not for signing, a future nbf, duplicate members and duplicate kids", () => {
-    expect(refusal(verifyDelegation(sign(claims), { ...call, jwks: { keys: [jwk(estate.publicKey, { use: "enc" })] } }))).toBe("unauthenticated/key-not-for-signing");
-    expect(refusal(verifyDelegation(sign(claims), { ...call, jwks: { keys: [jwk(estate.publicKey, { alg: "ES256" })] } }))).toBe("unauthenticated/key-not-for-signing");
+  it("refuses a key not for signing (the issuer's fault since DEC-0045), a future nbf, duplicate members and duplicate kids", () => {
+    expect(refusal(verifyDelegation(sign(claims), { ...call, jwks: { keys: [jwk(estate.publicKey, { use: "enc" })] } }))).toBe("issuer-unavailable/key-not-for-signing");
+    expect(refusal(verifyDelegation(sign(claims), { ...call, jwks: { keys: [jwk(estate.publicKey, { alg: "ES256" })] } }))).toBe("issuer-unavailable/key-not-for-signing");
     expect(refusal(verifyDelegation(sign({ ...claims, nbf: NOW + 61 }), call))).toBe("unauthenticated/not-yet-valid");
     expect(refusal(verifyDelegation(sign({ ...claims, nbf: NOW + 60 }), call))).toBe("ok");
     const duplicated = JSON.stringify(claims).replace(/^\{/, '{"aud":"example-reader",');

@@ -16,8 +16,11 @@
 | SCR-08 | Retro record | FLW-04 | disabled | designed | none yet |
 | SCR-09 | Access log | FLW-06 | disabled | proposed | none yet |
 | SCR-10 | Device settings | FLW-07 | disabled | proposed | none yet |
-| SCR-11 | Chat with the agent's bot | FLW-08 | disabled | proposed | none yet |
+| SCR-11 | Chat with the agent's bot | FLW-08, FLW-10 | disabled | proposed | none yet |
 | SCR-12 | Fabric's button and menu | FLW-09 | disabled | proposed | none yet |
+| SCR-13 | Spend policy choice | FLW-10 | disabled | proposed | none yet |
+| SCR-14 | Fabric's approval prompt | FLW-11 | disabled | proposed | none yet |
+| SCR-15 | Dashboard page after the session ended | FLW-12 | disabled | proposed | none yet |
 
 ## Design system
 
@@ -145,12 +148,12 @@
 
 ### SCR-11: Chat with the agent's bot
 
-- **Used by:** FLW-08
+- **Used by:** FLW-08, FLW-10
 - **Purpose:** the operator reads an agent's notifications and answers its stops in a messenger.
 - **Elements:** notification text with a link, stop message with action buttons, confirmation with amount and expiry, reply prompt for free text (primary action: the stop's recommended button).
 - **States:** empty — not linked yet, the chat waits for the link code; success — a stop answered, keyboard removed; error — already decided, expired confirmation, or no effect for a sender outside the allowlist. silent — in a group shared with other bots, a message not addressed to this bot gets no answer (OC-14, OC-15); degraded — nobody receives, shown as `receiver-missing` (OC-17).
 - **Coverage:** `operator-channel-status.schema.json`, `test/operator-channel.test.ts`
-- **Scenarios:** SCN-012, SCN-013, SCN-014
+- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017
 - **Resources:** operator-channel specification, Rules
 - **Status:** proposed
 
@@ -163,4 +166,37 @@
 - **Coverage:** `fabric-link.schema.json`, `test/fabric-button.test.ts` (FAC-SEM-052)
 - **Scenarios:** SCN-015
 - **Resources:** fabric-button specification, The button, Deep links
+- **Status:** proposed
+
+### SCR-13: Spend policy choice
+
+- **Used by:** FLW-10
+- **Purpose:** the operator chooses a project's spend limit once, at its first paid run.
+- **Elements:** the computed options (about the expected month, twice and four times it, "no project limit") with one preselected, the inputs they were computed from, the auto-approve threshold (primary action: confirm the preselected option).
+- **States:** success — the choice recorded with its inputs; empty — no usage history yet, so the options come from the agents' presets alone and say so.
+- **Coverage:** `spend-policy.schema.json`, `test/spend-policy.test.ts` (FAC-SEM-047)
+- **Scenarios:** SCN-016
+- **Resources:** spend-policy specification, The spend policy
+- **Status:** proposed
+
+### SCR-14: Fabric's approval prompt
+
+- **Used by:** FLW-11
+- **Purpose:** the operator approves or declines one action an outside caller asked a callee to take.
+- **Elements:** the callee, the action as the callee will take it, who asks (the caller and the person under the share grant), the approval's lifetime (primary action: approve this action once).
+- **States:** success — approved, and the approval returned to the caller; error — declined, or the callee later refuses the approval as invalid or reused.
+- **Coverage:** `approval.schema.json`, `test/delegation.test.ts`, `test/delegation-sealed.test.ts` (DL-17, DL-18)
+- **Scenarios:** SCN-018
+- **Resources:** delegation specification, Approval, Trust tiers
+- **Status:** proposed
+
+### SCR-15: Dashboard page after the session ended
+
+- **Used by:** FLW-12
+- **Purpose:** a dashboard page says its operator session has ended instead of failing silently.
+- **Elements:** the state in one sentence and why it can end (idle 12 hours, 7 days, logout, a rotated token); no form (primary action: none; the host signs in again).
+- **States:** error — `401` with the explanation; success — the host's new session reopens the same page.
+- **Coverage:** `src/operator-session.ts`, `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
+- **Scenarios:** SCN-019
+- **Resources:** service specification, Operator login
 - **Status:** proposed

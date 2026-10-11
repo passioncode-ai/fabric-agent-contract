@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0045`
+**Next free ID:** `DEC-0046`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1382,6 +1382,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   REQ-37), the meter (Project Observatory), then each callee and caller in the order of Fabric's
   [adoption plan](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/evidence/plans/2026-10-11-delegation-model/README.md).
 - **Annotated (2026-10-11):** tightens the service's operator-session lifetime (12 hours after last use, 7 days after sign-in): not additive for that rule, so a kit's longer cookie stops conforming at its next pin (ruled with Fabric's session, ADR-0144's owner, 2026-10-11).
+- **Annotated (2026-10-12):** amended by DEC-0045 (one grant per token, the meter's hop, no `device` approval, the meter's refusal wire, a mandatory issuer, a strict verifier, trust tiers T0/T1/T2).
 - **Amends:** interop C3.5 (the hub is the only issuer, not the only route); DEC-0024 additively
   (`surfaces.mcp.auth: "delegation"`); DEC-0037 (the registry's per-session token is the hub's delegation
   token; its grant-check codes become a subset of one code set); DEC-0037's L0 wording; DEC-0038's grant gains
@@ -1823,3 +1824,124 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key service-hygiene-20261011 DEC`, `--key service-hygiene-{mcp-scope,command-line}-20261011
   SEM`); `DEC-0043` was reserved first by packet P2-01, so the marker moves to `DEC-0045`. This file and
   `conformance.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0045 — Delegation sealed: one grant per token, the meter's hop, one refusal wire, a strict verifier, trust tiers, and no small-order key
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's issuer mints one
+  grant per token and the meter's five-actor token, and issues only `prompt` and `operator-channel` approvals
+  (CT-19); Observatory's meter requires the exact scope and effect and answers `denied` as a result (CT-20); the
+  adapter's kit ports pass the issuer and run this verifier's table (CT-18).
+- **Amends:** DEC-0039 (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17, DL-19, DL-21; `FAC-SEM-050`), DEC-0040
+  (FB-6), the session-lifetime paragraph of [service](specification/service.md#operator-session-lifetime). Implements
+  Fabric ADR-0144 amendments 3 and 4 at
+  [`19ad05ca`](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md).
+- **Decision:** in [delegation](specification/delegation.md) unless named otherwise —
+  1. **One grant per token** (F-B-305). Fabric's session, as ADR-0144's owner, confirmed on 2026-10-12 that the
+     reference rule binds the meter's token only and will say so as amendment 5; `grant` holds exactly one reference (`delegation-token.schema.json`
+     `maxItems: 1`); the verifier refuses two as a claim of the wrong type (DL-13 row 5); `FAC-SEM-050` refuses a
+     reference beside the one the token was minted under, and requires the meter's token to keep its parent's one
+     reference. An onward token to another callee is minted under its own grant, as DL-5 always said: amendment 3's
+     "an onward token keeps the same reference" is read as the meter's token, the only onward token minted under
+     its parent's grant; read for every onward token it would contradict DL-4, which the amendment does not revise.
+  2. **The meter's hop is outside the depth limit** (F-B-306): a token whose `aud` is the meter, `scope` exactly its
+     grant-check capability and `effect` exactly `["none"]` may hold five actors; no other may, and none six (DL-6;
+     the schema's `actor5` and its `effect` condition; `verifyMeterToken`; `FAC-SEM-050`).
+  3. **`approval.method: device` is removed** (F-B-314) until a decision defines it; Fabric issues only `prompt` and
+     `operator-channel` (`approval.schema.json`, `verifyApproval`).
+  4. **One refusal wire for the meter** (F-B-301): the meter answers a grant check with a `grant-check` document, a
+     `denied` being a normal result, not `isError`, its `code` from the one set (DL-19); a callee that stops on it
+     relays the `code` unchanged in `error.code`, with `window`, `level` and `approvalRequest` in `error.data`
+     (DL-21 step 6, `refusalFromDenial`).
+  5. **The session lifetime tightened DEC-0039's predecessor rule** (F-B-311), as DEC-0039's annotation says; the
+     descriptor token **rotates** when the value in `auth.tokenFile` changes, each value a new revision, which a
+     service records with each session as an opaque value, never the token (service.md).
+  6. **Trust tiers** (TRUST-TIERS; amendment 4): T0 the operator's own machine (loopback on the owner's OS
+     account), T1 an enrolled machine of the same owner (RM-21 decides the binding), T2 everything else (DL-25). A
+     callee MUST NOT require a token, an approval or a grant record of a T0 or T1 caller, and MAY accept, verify and
+     use one for attribution and narrowing (DL-26); DL-8 binds T2; DL-12's retirement of descriptor-token capability
+     calls applies across the machine boundary and stays attribution hygiene on the machine; `surfaces.mcp.auth:
+     "delegation"` is for a service exposed to T2 (DL-16); "loopback reachability is not authorization" stays as the
+     statement about hostile local processes; money limits, human gates and the rule never to spend another
+     agent's key or vault slot bind at every tier.
+  7. **The verifier is strict and ordered** (F-B-307, F-B-313, F-B-319, F-B-312): DL-13 row 5 checks every DL-2 type
+     (actors' agent ids and session ids, URIs, `scope` and `jti` grammars, effects once, one grant, `spend`, `nbf`)
+     before rows 6–11, so a malformed chain is `unauthenticated` whatever else is wrong; the issuer is required in
+     `verifyDelegation`, `verifyApproval` and `verifyMeterToken`, its absence `issuer-unavailable`
+     (`no-trusted-issuer`, row 1); a published key of another `use` or `alg` is the issuer's fault
+     (`issuer-unavailable`, row 3); the meter's `readOnly`, which could never fire, is replaced by an exact scope
+     and effect.
+  8. **`FAC-SEM-050` checks spend against the grant** (F-B-322): each window a limited token names is one of the
+     grant's limits and at most its `limitUsd`, its `perCallMaxUsd` at most the grant's, and an onward token's at
+     most the parent's (DL-4, DL-5).
+  9. **FB-6's cookie** (F-B-318) is set in the page's own storage partition on the service origin, as ED-8's is,
+     and is a session cookie, so a stale `owner=host` never hides the button in a plain tab.
+  10. **Security fix: no Ed25519 key of small order** (CT-29). A public key whose 32 bytes, with the sign bit (top
+      bit of byte 31) cleared, equal one of libsodium's seven `has_small_order` encodings — `y = 0`, `y = 1`, the two
+      of order 8, `y = p − 1`, and the non-canonical `y = p` and `y = p + 1` — is refused before anything is
+      verified under it: by `verifyDelegation`, `verifyApproval` and `verifyMeterToken` as the issuer's unusable key
+      (`issuer-unavailable`, `small-order-key`; DL-13 row 3), by `verifyPolicySignature` for device policies and
+      key sets (`FAC-SEM-041`, `FAC-SEM-046`), by `FAC-SEM-046` in a published key set, and by the schemas of the
+      estate's JWKS and of a device key set (DL-14; devices, Key sets). One predicate, `isSmallOrderKey` in
+      `src/ed25519.ts`, serves every Ed25519 verification in the contract.
+- **Why:** the board run's audit of DEC-0037…0040 (2026-10-11, inventory node `N05-delegation`) measured a callee
+  able to point the meter at a grant its token was not minted under, a fourth-hop callee that could be called but
+  never metered, two refusal shapes for the meter, a verifier that accepted what DL-13 refuses and answered in
+  another order than its table, an optional issuer check, and twelve `FAC-SEM-050` sub-checks and seven verifier
+  MUSTs that a deletion left green. Fabric's session ruled rulings 1–5 as ADR-0144's owner (amendment 3); the
+  operator decided ruling 6 (amendment 4, "This machine is the operator's workplace").
+- **Compatibility:** Tightening, `contractVersion` stays `0.1.0`. Rulings 1 and 3 narrow schemas: a token with two
+  grants or an approval with `method: device` stops validating; no fixture or known consumer emits either, and
+  Fabric's issuer is not built yet (wave 4). Ruling 2 widens the token schema for the meter's token only. The
+  verifier refuses tokens it used to accept (malformed types; a five-actor token anywhere but at the meter; a meter
+  token wider than the grant check) and answers some in another code or order: a key of another `use`/`alg` is now
+  `issuer-unavailable`, a malformed chain with a wrong audience `unauthenticated`. `issuer` becomes required in
+  three option types, a breaking change for a TypeScript caller and a runtime refusal for a JavaScript one that
+  omitted it. `FAC-SEM-050` refuses mints it passed. The trust tiers relax requirements: no callee may require a
+  token of a T0/T1 caller. At their next pin: **Fabric's issuer** mints exactly one grant and the meter's
+  five-actor token with exact scope and `effect: ["none"]`, and offers only `prompt` and `operator-channel`
+  approvals (CT-19); **Observatory's meter** passes its issuer, requires the exact scope and effect, accepts five
+  actors only on its own token, and answers `denied` as a result (CT-20); **the adapter's ports** pass the issuer,
+  follow DL-13's order and row 5's types, classify an unusable key as the issuer's, relay a meter denial with
+  `refusalFromDenial`'s shape, and set the `fabric_button` cookie as a session cookie in the page's partition
+  (CT-18). **The small-order refusal (item 10) is a security fix and a tightening: any verifier of a delegation
+  token, an approval or a device policy running on Node 20 or 22 was forgeable** by anyone able to publish one key
+  in the set — measured here on Node v22.23.1, where `main`'s `verifyDelegation` answered `ok` for the adapter's
+  forged vector, while v24.19.0 and v26.10.0 refused it with `bad-signature`. It now answers `issuer-unavailable`
+  (`small-order-key`) on every Node; the adapter's vector expects `unauthenticated` (`bad-signature`), and its
+  port moves to this code (CT-18). The JWKS and key-set schemas also refuse a non-canonical base64 key, which no
+  real key encoder writes.
+- **Consequences / affects:**
+  - spec: `docs/specification/delegation.md` (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17…DL-19, DL-21,
+    Trust tiers DL-25 and DL-26, The boundary, the rules table, Not decided here), `docs/specification/service.md`
+    (the session's lifetime), `docs/specification/spend-policy.md` (rule 2's tiers and meter),
+    `docs/specification/fabric-button.md` (FB-6), `docs/specification/conformance.md` (three reader rows);
+  - schemas: `delegation-token` (`grant`, `actor5`, the fifth actor's `effect`), `approval` (`method`),
+    `grant-check-request` (`grantRef`'s description);
+  - code: `src/delegation.ts` (`verifyAt`, `delegationShape`, `verifyMeterToken`, `refusalFromDenial`,
+    `GrantCheckDenial`, `keyFor`), `src/delegation-rules.ts` (`FAC-SEM-050`), `src/ed25519.ts` (new,
+    `isSmallOrderKey`), `src/device-rules.ts` (`verifyPolicySignature`, `FAC-SEM-046`);
+  - security: `schemas/delegation-jwks.schema.json` and `schemas/device-key-set.schema.json` (`x`, `rawKey`),
+    `docs/specification/devices.md` (Key sets), `fixtures/vectors/delegation-small-order.json` (the adapter's forged
+    token), `test/ed25519.test.ts` (new);
+  - fixtures: 1 positive, 8 negative and the chain-too-deep keyword (`fixtures/catalogue.json`), 19 semantic
+    (`fixtures/semantic/delegation-mint-*.json`);
+  - tests: `test/delegation-sealed.test.ts` (new), `test/delegation.test.ts`, `test/delegation-seams.test.ts`,
+    `test/meter-grant.test.ts` (the issuer); floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - UX: `docs/ux/foundation.md` (JTBD-07, JRN-06, ST-012…ST-015), `docs/ux/flows.md` (FLW-10…FLW-12),
+    `docs/ux/screens.md` (SCR-13…SCR-15), `docs/ux/scenarios.md` (SCN-016…SCN-019, F-B-321);
+  - docs: `CONTEXT.md` (Trust tier), `docs/backlog.md` (CT-09 closed, CT-18…CT-20, CT-30), the handoff
+    `docs/handoffs/2026-10-12-delegation-sealed.md`.
+- **Not decided here:** a device approval; the binding that places a caller in T1 (RM-21); how a surface declaring
+  `delegation` admits a T0/T1 caller that presents no token; the grant check of a T0/T1 callee called without a
+  token (`grant-check-request` requires `tokenJti`; CT-30); shared verifier vectors for the kits' ports (today the
+  ports read `test/delegation-sealed.test.ts`; vectors need a published test key).
+- **Source:** Fabric ADR-0144 amendments 3 and 4 at `19ad05ca`; the board brief's rulings
+  (`docs/evidence/specs/2026-10-11-board-waves/brief.md`, "Decisions resolved from the sources"); inventory F-B-301,
+  F-B-305…F-B-314, F-B-317…F-B-319, F-B-321, F-B-322, TRUST-TIERS; board run wave 2, node N05, packet P2-03; the
+  small-order forgery reported by fabric-agent-adapter's session from its release CI on Node 22 (its
+  `test/fixtures/delegation/vectors.json` at `ea7efbea`, case "forged under a small-order placeholder key"), board
+  row CT-29; libsodium's `ge25519_has_small_order` list, each entry checked here to be a point of order dividing 8.
+  DEC-0045 was reserved by git CAS (`agent_sync.py reserve --key delegation-sealed-20261012 DEC`); this file,
+  `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.

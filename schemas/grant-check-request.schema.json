@@ -23,7 +23,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 256,
-      "description": "Which of the token's grants, when it names several."
+      "description": "The token's one grant (DEC-0045), when the callee names it; the meter refuses any other reference no-grant (DL-24, not-named)."
     },
     "purpose": {
       "type": "string",

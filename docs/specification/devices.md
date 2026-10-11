@@ -199,6 +199,11 @@ Schema: [`device-key-set.schema.json`](../../schemas/device-key-set.schema.json)
   `issuedAt` stays until its `notAfter`, unless the next set names it in `revoked`.
 - A key set always holds a key valid at its `issuedAt`, names each key once, never lists the root
   key, and gives each key a window that ends after it starts (`FAC-SEM-046`).
+- **No key of small order** (DEC-0045, CT-29). A root key, a policy signing key and a trusted key are never
+  one of libsodium's seven small-order encodings, with the sign bit ignored: such a key lets anyone forge a
+  signature, and Node 20 and 22 accept the forgery. The schema refuses one, `FAC-SEM-046` refuses one in a key
+  set, and a device never verifies a policy or a key set under one (`verifyPolicySignature`,
+  [`src/ed25519.ts`](../../src/ed25519.ts) `isSmallOrderKey`).
 - How a root key itself is replaced is a re-enrollment: the enrollment response carries the new one.
 
 <a id="check-in"></a>
@@ -292,7 +297,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
-| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts, holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
+| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 
 Each kind checks one input:
 

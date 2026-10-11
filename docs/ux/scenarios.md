@@ -21,6 +21,10 @@
 | SCN-013 | Confirm a paid action, or find it already decided | operator-channel | P-02 | ST-009, ST-010, FLW-08 | draft | not audited |
 | SCN-014 | Several agents share one group: only the addressed bot answers | operator-channel | P-02 | ST-009, FLW-08 | draft | not audited |
 | SCN-015 | Open Fabric from a product's dashboard | fabric-button | P-02 | ST-011, FLW-09 | draft | not audited |
+| SCN-016 | Choose a project's spend policy at its first paid run | spend | P-02 | ST-012, FLW-10 | draft | not audited |
+| SCN-017 | Answer a spend approval request | spend | P-02 | ST-013, FLW-10 | draft | not audited |
+| SCN-018 | Approve one action for an outside caller | delegation | P-02 | ST-014, FLW-11 | draft | not audited |
+| SCN-019 | A dashboard session ends and the host signs in again | service | P-02 | ST-015, FLW-12 | draft | not audited |
 
 ## Personas
 
@@ -345,4 +349,86 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** Fabric is not installed -> the menu says "Fabric is not installed — get it at passioncode.ai/fabric" with the link; a link carrying a token or a bad id -> Fabric refuses the whole link and says why.
 - **Status:** draft
 - **Coverage:** DEC-0040 FB-1…FB-8, FL-1…FL-7, `fabric-link.schema.json`, `test/fabric-button.test.ts`
+- **Product:** unobserved
+
+## Spend and delegation
+
+### SCN-016: Choose a project's spend policy at its first paid run
+
+- **Persona:** P-02
+- **Feature:** spend
+- **Traces:** ST-012, FLW-10 (JTBD-07, JRN-06/#1)
+- **Entry point:** the first run of `project-a` that would spend money
+- **Preconditions:** `project-a` has no spend policy; its agents declare cost presets; its usage reports show about 20 USD in the last month
+- **Steps:**
+  1. Operator starts the run -> the launcher stops before any spend and offers about 20, 40 and 80 USD a month and "no project limit", with 40 preselected, naming the presets, the recent spend and the kind of work it used.
+  2. Operator confirms 40 USD with an auto-approve threshold of 2 USD -> the policy is recorded with its inputs and the run starts.
+  3. A later run of the same project -> the launcher does not ask again.
+- **Expected result:** one recorded choice per project, its reasons kept beside it; nothing spent before it.
+- **Alt paths:** operator picks "no project limit" -> recorded as that choice; only the estate total (L0) stops spending.
+- **UI elements:** options, preselected option, inputs, threshold, confirm.
+- **States covered:** success, empty
+- **Errors & recovery:** a threshold above the monthly limit -> refused (`FAC-SEM-047`) with the limit named; the operator lowers it.
+- **Status:** draft
+- **Coverage:** spend-policy specification, The spend policy; `spend-policy.schema.json`, `test/spend-policy.test.ts`
+- **Product:** unobserved
+
+### SCN-017: Answer a spend approval request
+
+- **Persona:** P-02
+- **Feature:** spend
+- **Traces:** ST-013, FLW-10 (JTBD-07, JRN-06/#2)
+- **Entry point:** a grant check above `project-a`'s auto-approve threshold
+- **Preconditions:** the policy's threshold is 2 USD; the operator channel is `linked`; a render would cost 4.20 USD
+- **Steps:**
+  1. The agent asks the meter -> the meter denies it, `limit-reached` at L1 with window `task` (the auto-approve threshold is a per-task limit), with one filed approval request; the agent files no second one and goes on with other work.
+  2. The request reaches the operator in the chat -> the confirmation shows 4.20 USD first.
+  3. Operator confirms -> the agent asks the meter again and is allowed, with a receipt.
+- **Expected result:** money above the threshold moves only after one answer that showed the amount; the agent was never blocked.
+- **Alt paths:** a callee relays the denial to its own caller -> `limit-reached` with the window and level unchanged (DL-21 step 6).
+- **UI elements:** amount, confirm button, expiry.
+- **States covered:** success, error
+- **Errors & recovery:** the confirm button expired -> nothing is spent; the request stays filed and the operator answers it again.
+- **Status:** draft
+- **Coverage:** spend-policy specification, rule 3; `grant-check.schema.json`; `refusalFromDenial`, `test/delegation-sealed.test.ts` (F-B-301)
+- **Product:** unobserved
+
+### SCN-018: Approve one action for an outside caller
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-014, FLW-11 (JTBD-07, JRN-06/#3)
+- **Entry point:** Fabric's approval prompt
+- **Preconditions:** a partner's agent calls `example-publisher` under a share grant (T2) with a delegation token; pushing a build is an effect that needs approval
+- **Steps:**
+  1. The partner's agent asks for the push -> `example-publisher` refuses `approval-required` with the action's digest.
+  2. The caller asks the hub -> Fabric shows the operator the push, the callee and who asks.
+  3. Operator approves -> Fabric signs one approval (`method: prompt`) for that digest and callee, valid at most 24 hours.
+  4. The caller repeats the call with it -> the callee checks the token, the grant, then the approval, consumes its `jti` and pushes.
+- **Expected result:** exactly that push happens once; the approval opens nothing else.
+- **Alt paths:** the same push asked from the operator's own machine (T0) -> no approval is asked for; the operator's instruction stands (DL-26).
+- **UI elements:** action, callee, caller, lifetime, approve, decline.
+- **States covered:** success, error
+- **Errors & recovery:** the approval presented a second time -> `approval-reused`; for another action or callee -> `approval-invalid`; the caller asks for a new one.
+- **Status:** draft
+- **Coverage:** delegation DL-17, DL-18, DL-25, DL-26; `approval.schema.json`; `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
+- **Product:** unobserved
+
+### SCN-019: A dashboard session ends and the host signs in again
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-015, FLW-12 (JTBD-06, JRN-05/#3)
+- **Entry point:** a dashboard page shown in Fabric Dashboards
+- **Preconditions:** the operator session began 7 days ago and has been used every day
+- **Steps:**
+  1. The 7-day bound passes -> the next page request answers `401` with a page saying the session ended and why.
+  2. The host sees the `401` -> it asks for a new login code and reopens the same page under a new session.
+- **Expected result:** the operator sees the page again without signing in by hand, and never acts on a dead session.
+- **Alt paths:** the service's descriptor token was rotated -> every session begun under the old token ends at once, the same way. The page's own API call answers `401` -> the host does not reload the page.
+- **UI elements:** the ended-session message.
+- **States covered:** error, success
+- **Errors & recovery:** the service refuses every new code -> the host retries at most once a minute per page, and the page keeps explaining the state.
+- **Status:** draft
+- **Coverage:** service specification, Operator login and the session's lifetime; `src/operator-session.ts`; `test/delegation-sealed.test.ts` (F-B-311)
 - **Product:** unobserved

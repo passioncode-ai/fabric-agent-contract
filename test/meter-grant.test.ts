@@ -60,7 +60,7 @@ describe("2 — the task claim (DEC-0041)", () => {
     return `${signing}.${cryptoSign(null, Buffer.from(signing), estate.privateKey).toString("base64url")}`;
   };
   const claims = load("positive/delegation-token-claims-task.json");
-  const call = { audience: "example-writer", jwks, now: (claims.iat as number) + 30, capability: "writer.write", effect: "draft" as const };
+  const call = { audience: "example-writer", jwks, now: (claims.iat as number) + 30, capability: "writer.write", effect: "draft" as const, issuer: "urn:fabric:estate:example" };
 
   it("is an optional id with the session's grammar", () => {
     expect(valid("delegation-token.schema.json", claims)).toBe(true);

@@ -1,10 +1,11 @@
-import { chainDepth, effectClosure, MAX_APPROVAL_LIFETIME_SECONDS, MAX_DELEGATION_LIFETIME_SECONDS } from "./delegation.js";
+import { chainDepth, effectClosure, MAX_APPROVAL_LIFETIME_SECONDS, MAX_CHAIN_DEPTH, MAX_DELEGATION_LIFETIME_SECONDS } from "./delegation.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 
 // #region delegation-rules — docs: docs/specification/delegation.md#semantic-rules
 const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
 const scopeNames = (value: unknown): string[] => (typeof value === "string" ? value.split(" ") : []);
 const time = (value: unknown): number | undefined => (typeof value === "number" && Number.isFinite(value) ? value : undefined);
+const amount = (value: unknown): number | undefined => (typeof value === "number" ? value : undefined);
 
 /** The remaining amount per window a token's `spend` claims; `undefined` for an unlimited or absent spend. */
 function remaining(spend: unknown): Map<string, number> | undefined {
@@ -61,9 +62,10 @@ export function principalActor(grant: JsonObject): { sub: string; session?: stri
  * FAC-SEM-050 (DEC-0039): the issuer minted the token within its grant (DL-4) and, for an onward call, narrower
  * than the token it was exchanged for (DL-5). Input: `{ grant, token, parent?, meter? }` — the standing grant
  * the token names, the decoded claims minted, the decoded claims of the token the caller presented to call
- * onward, and `{audience, capability}` of the estate's meter. A token for the meter (DL-21) is minted under the
- * parent's grant, not under a grant of its own. An onward token keeps the parent's `task` or none (DEC-0041), and
- * the meter's keeps it. A callee never runs this: it never sees the parent.
+ * onward, and `{audience, capability}` of the estate's meter. A token names exactly one grant (DEC-0045). A token
+ * for the meter (DL-21) is minted under the parent's grant, not under a grant of its own, keeps the parent's one
+ * reference, and alone may hold a fifth actor (DL-6). An onward token keeps the parent's `task` or none
+ * (DEC-0041), and the meter's keeps it. A callee never runs this: it never sees the parent.
  */
 function delegationMintRules(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -80,7 +82,9 @@ function delegationMintRules(value: JsonObject): Finding[] {
   // The grant itself: active, started, named by the token, and the token inside its life and project.
   if (grant.state !== "active") push("/grant/state", `the grant is ${String(grant.state)}, not active`);
   const ref = grantRef(grant);
-  if (ref === undefined || !strings(token.grant).includes(ref)) push("/token/grant", `the token does not name the grant ${String(ref)} it was minted under`);
+  const named = strings(token.grant);
+  if (ref === undefined || !named.includes(ref)) push("/token/grant", `the token does not name the grant ${String(ref)} it was minted under`);
+  else if (named.length !== 1) push("/token/grant", `a token names one grant, the one it was minted under (${ref}), and no other`);
   const startsAt = typeof grant.startsAt === "string" ? Date.parse(grant.startsAt) / 1000 : Number.NaN;
   if (iat !== undefined && Number.isFinite(startsAt) && iat < startsAt) push("/token/iat", "the token was minted before its grant starts");
   const expiresAt = typeof grant.expiresAt === "string" ? Date.parse(grant.expiresAt) / 1000 : Number.NaN;
@@ -90,12 +94,29 @@ function delegationMintRules(value: JsonObject): Finding[] {
   const grantSpend = isObject(grant.spend) ? grant.spend : undefined;
   const tokenSpend = isObject(token.spend) ? token.spend : undefined;
   if (grantSpend?.mode === "limited" && tokenSpend?.mode !== "limited") push("/token/spend", "a limited grant mints a limited token, carrying what remains");
+  if (grantSpend?.mode === "limited" && tokenSpend?.mode === "limited") {
+    // DL-4 "carries what remains" (F-B-322): a window the grant limits, no more than its limit, and no larger per-call cap.
+    const limits = new Map<unknown, number>();
+    for (const limit of Array.isArray(grantSpend.limits) ? grantSpend.limits.filter(isObject) : []) limits.set(limit.window, amount(limit.limitUsd) ?? 0);
+    (Array.isArray(tokenSpend.remaining) ? tokenSpend.remaining : []).forEach((entry, index) => {
+      if (!isObject(entry)) return;
+      const limit = limits.get(entry.window);
+      if (limit === undefined) push(`/token/spend/remaining/${index}/window`, `the grant limits no ${String(entry.window)} window`);
+      else if ((amount(entry.remainingUsd) ?? 0) > limit) push(`/token/spend/remaining/${index}/remainingUsd`, `the ${String(entry.window)} window holds at most the grant's ${limit}`);
+    });
+    const perCall = amount(tokenSpend.perCallMaxUsd);
+    const grantPerCall = amount(grantSpend.perCallMaxUsd);
+    if (perCall !== undefined && (grantPerCall === undefined || perCall > grantPerCall)) push("/token/spend/perCallMaxUsd", grantPerCall === undefined ? "the grant states no per-call maximum for the token to carry" : `the per-call maximum is at most the grant's ${grantPerCall}`);
+  }
+  // DL-6 (DEC-0045): four actors, and five only in a token for the meter.
+  const depth = chainDepth(token.act);
+  if (Number.isFinite(depth) && depth > MAX_CHAIN_DEPTH + (forMeter ? 1 : 0)) push("/token/act", `the chain holds ${depth} actors; at most ${MAX_CHAIN_DEPTH}, and one more only in a token for the meter`);
 
   if (forMeter) {
     // DL-21: the meter's token reads one capability and names a grant of the token it was exchanged for.
     if (token.scope !== meter.capability) push("/token/scope", `a token for the meter names only ${String(meter.capability)}`);
     if (!jsonEqual(token.effect, ["none"])) push("/token/effect", "a token for the meter reads only");
-    if (parent && !strings(token.grant).every((g) => strings(parent.grant).includes(g))) push("/token/grant", "a token for the meter names only the parent's grants");
+    if (parent && !jsonEqual(named, strings(parent.grant))) push("/token/grant", "a token for the meter keeps the parent's one grant reference");
     if (!parent) push("/parent", "a token for the meter is an onward token: it is exchanged for the callee's own");
   } else {
     if (typeof grant.audience !== "string") push("/grant/audience", "a token is minted only under a delegation grant, one that names its audience");
@@ -109,7 +130,7 @@ function delegationMintRules(value: JsonObject): Finding[] {
     // Who acts and for whom (DL-4).
     const named = principalActor(grant);
     if (grant.principalKind === "external") {
-      if (isObject(grant.principal) && token.sub !== grant.principal.id) push("/token/sub", "under a share grant the token is for the grant's external principal");
+      if (!isObject(grant.principal) || token.sub !== grant.principal.id) push("/token/sub", "under a share grant the token is for the grant's external principal");
     } else {
       if (!named) push("/grant/principal", "an agent or session grant's principal is urn:agent:<agent id> or urn:session:<agent id>:<session>");
       else {
@@ -142,6 +163,9 @@ function delegationMintRules(value: JsonObject): Finding[] {
       const left = below.get(window);
       if (left === undefined || left > amount) push("/token/spend", `the ${window} window may hold at most the parent's ${amount} remaining`);
     }
+    const parentPerCall = amount((parent.spend as JsonObject).perCallMaxUsd);
+    const perCall = isObject(token.spend) ? amount(token.spend.perCallMaxUsd) : undefined;
+    if (parentPerCall !== undefined && (perCall === undefined || perCall > parentPerCall)) push("/token/spend/perCallMaxUsd", `an onward token's per-call maximum is at most the parent's ${parentPerCall}`);
   }
   return findings;
 }
