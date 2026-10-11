@@ -1,0 +1,7 @@
+{
+  "decision": "denied",
+  "level": null,
+  "code": "principal-unproven",
+  "reason": "the session token is missing or older than its maximum age",
+  "checkedAt": "2026-10-11T10:00:00Z"
+}

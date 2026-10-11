@@ -26,6 +26,8 @@
         "decision",
         "receipt",
         "grantRef",
+        "reservedUsd",
+        "expiresAt",
         "checkedAt"
       ],
       "properties": {
@@ -53,6 +55,15 @@
         },
         "checkedAt": {
           "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "reservedUsd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Held against the grant (and every level above it) until settled or expired, so concurrent checks cannot overrun a limit together."
+        },
+        "expiresAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "An unsettled reservation lapses here."
         }
       },
       "additionalProperties": false
@@ -62,6 +73,7 @@
       "required": [
         "decision",
         "level",
+        "code",
         "reason",
         "checkedAt"
       ],
@@ -70,7 +82,15 @@
           "const": "denied"
         },
         "level": {
-          "$ref": "#/$defs/level"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/level"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where the check stopped; null when it stopped before any level (no grant, unproven principal, unknown state)."
         },
         "reason": {
           "type": "string",
@@ -82,9 +102,45 @@
         },
         "checkedAt": {
           "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "code": {
+          "$ref": "#/$defs/code"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "limit-reached"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "level": {
+                "$ref": "#/$defs/level"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "code": {
+      "enum": [
+        "limit-reached",
+        "no-grant",
+        "grant-expired",
+        "grant-revoked",
+        "principal-unproven",
+        "credential-source-refused",
+        "unknown-state"
+      ],
+      "description": "Why a check stopped; the level says where."
     }
   }
 }

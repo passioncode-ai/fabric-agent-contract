@@ -84,6 +84,14 @@
                 "type": "null"
               }
             ]
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The grant-check receipts this spend settles."
           }
         },
         "additionalProperties": false

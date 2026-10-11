@@ -52,8 +52,16 @@ Three rules apply to every grant and every reader:
    agent's key: `project-key` names a key issued for this project; `capability` names the agent whose
    capability is called, so that agent's own wallet and limits apply. A reader refuses any other source.
 2. **A principal is proven, not claimed.** The registry authorizes a check by a credential it issued: a
-   per-session token minted when the session starts, bound to the session, the agent and the project,
-   kept in a 0600 file and never in an argument. A caller label the caller supplies itself is advisory.
+   per-session token minted when the session starts and bound to the session, the agent and the project.
+   - It is kept owner-only and never in an argument: mode 0600 on POSIX, and on Windows the protected ACL
+     of [service.md's Windows token files](service.md) (DEC-0032, DEC-0033).
+   - It is revoked when the session ends and has a maximum age. A missing or stale token is
+     `principal-unproven`.
+   - A label the caller supplies about itself is advisory.
+
+   The boundary, stated plainly: any process of the same OS account can read an owner-only file. The token
+   stops accidental and confused borrowing, not a hostile process of the same user, which is the same claim
+   the vault makes.
 3. **Approvals never block.** Above `autoApproveUsd`, or with no policy yet, the agent files **one** durable
    approval request (`approvalRequest` in the check's answer). The person answers it through the
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent
@@ -67,9 +75,15 @@ reports attribute spend to it through `byGrant`.
 
 The registry's answer is a [`grant-check`](../../schemas/grant-check.schema.json) document:
 
-- `allowed` carries a `receipt` and the `grantRef`, which the usage report's `byGrant` and the activity row
-  repeat;
-- `denied` names the `level` that refused and, when the limit allows one, the `approvalRequest` filed.
+- `allowed` carries a `receipt` and the `grantRef`, which the activity row repeats. It also **reserves**
+  `reservedUsd` against the grant and every level above it until `expiresAt`, so two concurrent checks
+  cannot together overrun a limit. Spend is settled against the receipt: the usage report's `byGrant` lists
+  the receipts it settles. An unsettled reservation lapses at `expiresAt`.
+- `denied` names **why** in `code` (`limit-reached`, `no-grant`, `grant-expired`, `grant-revoked`,
+  `principal-unproven`, `credential-source-refused`, `unknown-state`) and **where** in `level`. `level` is
+  `null` when the check stopped before any level (no grant, an unproven principal, an unknown state), and
+  is always set for `limit-reached`. When the limit allows one, `denied` also carries the `approvalRequest`
+  filed.
 
 An unknown grant state is a denial (Fabric ADR-0023).
 

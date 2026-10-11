@@ -261,6 +261,7 @@
   {"name": "grant-check-allowed", "schema": "grant-check.schema.json", "path": "positive/grant-check-allowed.json", "valid": true},
   {"name": "grant-check-denied", "schema": "grant-check.schema.json", "path": "positive/grant-check-denied.json", "valid": true},
   {"name": "grant-check-denied-without-level", "schema": "grant-check.schema.json", "path": "negative/grant-check-denied-without-level.json", "valid": false, "keyword": "required"},
+  {"name": "grant-check-no-grant", "schema": "grant-check.schema.json", "path": "positive/grant-check-no-grant.json", "valid": true},
   {"name": "manifest-cost-presets", "schema": "manifest.schema.json", "path": "positive/manifest-cost-presets.json", "valid": true},
   {"name": "manifest-cost-preset-negative", "schema": "manifest.schema.json", "path": "negative/manifest-cost-preset-negative.json", "valid": false, "keyword": "minimum"},
   {"name": "service-usage-by-grant", "schema": "service-usage.schema.json", "path": "positive/service-usage-by-grant.json", "valid": true}

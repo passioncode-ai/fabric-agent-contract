@@ -80,7 +80,11 @@
     {
       "grantRef": "urn:grant:project-a:share-research#1",
       "calls": 12,
-      "costUsd": 3.4
+      "costUsd": 3.4,
+      "receipts": [
+        "rcpt_01",
+        "rcpt_02"
+      ]
     },
     {
       "grantRef": "urn:grant:project-a:copy#2",

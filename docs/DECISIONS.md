@@ -1284,14 +1284,20 @@ annotate only the old status; decision bodies are never rewritten.
   - **Grants carry an amount.** A standing grant's optional `spend` block holds `limitUsd`, `period`,
     `perCallMaxUsd`, `autoApproveUsd`, `payer` and `credentialSource`. A new `principalKind: external`
     marks a share grant to a person or organization outside the estate.
-  - **The proof is a check, not a question.** The registry answers a `grant-check` document: `allowed`
-    with a receipt and the grant, or `denied` with the refusing level and, where allowed, the durable
-    approval request it filed. An unknown state is a denial.
+  - **The proof is a check, not a question.** The registry answers a `grant-check` document:
+    - `allowed` comes with a receipt, the grant, and a **reservation** (`reservedUsd` until `expiresAt`), so
+      that concurrent checks cannot together overrun a limit. Spend settles against the receipt (`byGrant`
+      lists the receipts), and an unsettled reservation lapses.
+    - `denied` comes with a `code` (why) and a `level` (where; `null` when no level was reached) and, where
+      allowed, the durable approval request it filed.
+
+    An unknown state is a denial.
   - **Three rules:**
     - a credential source is the project's own key or another agent's capability, never another agent's
       key;
     - a principal is proven by a credential the registry issued (a per-session token minted at session
-      start), never by a label the caller supplies;
+      start, owner-only, revoked at session end, with a maximum age), never by a label the caller supplies.
+      It stops accidental and confused borrowing, not a hostile process of the same OS account;
     - an approval is a durable request answered through the operator channel's confirm token and never
       blocks the agent; a chat or cross-session message is not an approval.
   - **Usage reports may attribute spend per grant** (`byGrant`). `FAC-SEM-047` keeps a policy consistent with
@@ -1312,7 +1318,7 @@ annotate only the old status; decision bodies are never rewritten.
   - `governance`, `manifest` and `service-usage` schemas gain the optional fields;
   - `src/spend-rules.ts` (`FAC-SEM-047`), `docs/specification/spend-policy.md`, and the
     governance-and-roles amount line;
-  - fixtures: 6 positive, 6 negative, 3 semantic.
+  - fixtures: 7 positive, 6 negative, 3 semantic.
 - **Not decided here:**
   - the estate total's value and the price of any upstream call: the operator's configuration, not the
     contract;
@@ -1321,4 +1327,5 @@ annotate only the old status; decision bodies are never rewritten.
 - **Source:** proposed by the Fabric Dashboards session (FD-40 brief) after the operator's request of
   2026-10-11. The registry side is reviewed by the Project Observatory session. DEC-0037 and FAC-SEM-047 are
   reserved by git CAS (`agent_sync.py reserve DEC|SEM --key spend-policy-20261011`), and this file was
-  edited under the git lease.
+  edited under the git lease. The Project Observatory session's review (2026-10-11) added the denial `code`,
+  the reservation and the token's boundary.
