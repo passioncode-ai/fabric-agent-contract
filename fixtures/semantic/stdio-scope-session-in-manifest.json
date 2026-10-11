@@ -1,0 +1,71 @@
+{
+  "description": "A manifest declares its stdio MCP server for every session; LC-19 declares it for a project or on demand (FAC-SEM-056).",
+  "schema": "manifest.schema.json",
+  "kind": "manifest",
+  "document": {
+    "contractVersion": "0.1.0",
+    "provider": {
+      "id": "https://agents.example/providers/seo",
+      "revision": 1,
+      "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "createdAt": "2026-08-26T10:00:00Z",
+      "createdBy": "https://agents.example/authors/team",
+      "name": "SEO capability provider",
+      "identity": {
+        "subject": "https://agents.example/providers/seo",
+        "method": "tls"
+      },
+      "supportedContractVersions": [
+        "0.1.0"
+      ]
+    },
+    "capabilities": [
+      {
+        "id": "https://agents.example/capabilities/keyword-analysis",
+        "name": "seo.keyword-analysis",
+        "inputSchema": "https://agents.example/schemas/keyword-input.json",
+        "outputSchema": "https://agents.example/schemas/keyword-output.json",
+        "effect": "none",
+        "idempotency": "supported",
+        "dataClasses": [
+          "public",
+          "project-internal"
+        ],
+        "profile": {
+          "kind": "mcp",
+          "protocolRevision": "2026-07-28",
+          "connection": {
+            "mode": "stdio",
+            "executableRef": "file:///opt/example-seo/bin/example-seo",
+            "args": [
+              "mcp",
+              "--log-level=info"
+            ],
+            "scope": "session"
+          },
+          "requiredFeatures": [
+            "tool:analyze_keywords"
+          ],
+          "probes": [
+            {
+              "id": "keyword-shape",
+              "inputFixture": "https://agents.example/fixtures/keyword.json",
+              "outputSchema": "https://agents.example/schemas/keyword-output.json",
+              "timeoutMs": 30000,
+              "sideEffectCeiling": "none",
+              "assertions": [
+                "returns ranked keyword observations with source URIs"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "findings": [
+    {
+      "code": "FAC-SEM-056",
+      "instancePath": "/capabilities/0/profile/connection/scope"
+    }
+  ]
+}

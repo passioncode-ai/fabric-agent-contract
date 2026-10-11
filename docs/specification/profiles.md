@@ -29,6 +29,25 @@ Semantic probe failure is `probe-failed`, not a transport failure.
 OAuth browser consent remains client-local and MUST NOT be converted into a
 static gateway credential. Stdio environment values use secret references only.
 
+<a id="where-a-stdio-server-is-declared"></a>
+
+**Where a stdio server is declared (DEC-0044, LC-19).** A stdio connection MAY carry a `scope`, and a
+[provider entry's](provider.md) `run.mcp.stdio` the same field:
+
+- `project`: a host starts the server for the sessions of a project that binds the capability, from that project's
+  MCP configuration (for Claude Code, the project's `.mcp.json`);
+- `on-demand`, the default when `scope` is absent: a host starts it for the run that binds the capability and stops
+  it when that run ends — a [session handoff's](session-handoff.md) `mcp.json` is one such run;
+- `session` means every session the host starts, and `FAC-SEM-056` refuses it. A host MUST NOT write a declared stdio
+  server into a runtime's user-wide MCP configuration, whatever the scope says.
+
+A server that holds no per-session state SHOULD NOT be a stdio server at all: it runs once on the machine as a
+[service](service.md) whose MCP surface is `streamable-http`, under its supervisor and the machine's lifecycle broker,
+with its well-known document as the health check. One copy per session is right only for a server that holds that
+session's state, such as a browser or a project index. On 2026-10-11 about 35 sessions each held their own copies of
+five stdio servers, about 10 GB of memory (fabric-workspace `knowledge/lifecycle.md` LC-19). Claude Code plugin
+configurations are not contract documents; the adapter checks them.
+
 ## A2A peer profile
 
 The profile MUST declare:
@@ -73,6 +92,31 @@ Commands MUST be represented as an executable plus an argument array. Shell
 strings are non-conforming because quoting and command substitution cannot be
 validated safely.
 
+## No secret in a command line
+
+`DEC-0044`, LC-21. A key reaches a process through its environment (a secret reference the host resolves at start,
+DEC-0013), a `0600` file or the vault — never its arguments, which `ps` and every process listing show to the whole
+user, and never a URL, which lands in logs and configuration files. On 2026-10-11 a plugin's MCP passed its bearer
+key to `mcp-remote` in argv (fabric-workspace `knowledge/lifecycle.md` LC-21).
+
+`FAC-SEM-057` applies one detector, [`src/secret-shape.ts`](../../src/secret-shape.ts), to every launch argument and MCP
+entry a contract document declares:
+
+| Document | Read |
+|---|---|
+| manifest, `mcp` profile | `connection.args`, `connection.executableRef`, `connection.url` |
+| manifest, `local-runner` profile | `args`, `executableRef` |
+| [provider entry](provider.md) | `run.mcp.stdio.command`, `run.mcp.url` |
+| [runner catalogue](runners.md) | each runner's `version.argv`, `auth.argv` and every drive's `argv` |
+| [service descriptor](service.md#descriptor) | every `commands` entry |
+
+An argument is refused when it holds a JWT, a provider key's shape, `Bearer <token>` anywhere in it, or a run of 40
+or more base64 characters mixing upper case, lower case and digits; a path's separators split such a run, so a folder
+named by a session id passes. A URL is refused for the same, for a password in its user information, and for a query
+or fragment parameter whose name can only carry a credential (DEC-0041's whole-word names: `api_key`, `token`) and
+has a value. The finding names the place, never the value. [Session handoff](session-handoff.md) SH-10 applies the
+same detector to a launch's arguments.
+
 ## Profile selection
 
 ```mermaid
@@ -97,3 +141,13 @@ binding revision.
   passes; never silently weaken the capability.
 - Lost heartbeat: stop issuing new work, request cancellation where supported,
   expire the coordination claim, then reconcile residue.
+
+## Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| `FAC-SEM-056` | `manifest`, `provider-entry` | a stdio MCP server is declared for a project or on demand, never for every session (`scope: session`) |
+| `FAC-SEM-057` | `manifest`, `provider-entry`, `runner`, `runner-catalogue`, `service-descriptor` | no declared launch argument or MCP entry carries a credential |
+
+Fixtures: `fixtures/semantic/stdio-scope-*.json`, `fixtures/semantic/command-line-*.json`; tests:
+[`test/service-hygiene.test.ts`](../../test/service-hygiene.test.ts).

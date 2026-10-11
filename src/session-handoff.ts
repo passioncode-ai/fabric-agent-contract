@@ -34,8 +34,8 @@ const CONTROL = /[\u0000-\u001f\u007f]/;
 /** A tool name as MCP servers in this family spell them: snake_case with at least one underscore. */
 const TOOL_WORD = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g;
 /*
- * The credential matcher of DEC-0041 (src/fabric-links.ts, CO-260), copied so this module stays dependency-free;
- * `test/session-handoff.test.ts` checks that the copy agrees with the original.
+ * The credential detector of `src/secret-shape.ts` (DEC-0041, DEC-0044), copied so this module stays dependency-free:
+ * Fabric vendors this file alone. `test/session-handoff-review.test.ts` checks that the copy agrees with the original.
  */
 /** A name's words: split at `.`, `_`, `-` and camelCase humps, lowercased (`refreshToken_v2-Id` is `refresh token v2 id`). */
 function nameWords(name: string): string[] {

@@ -328,6 +328,14 @@
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "scope": {
+                      "description": "DEC-0044, LC-19. Where a host starts this stdio server. project: for the sessions of a project that binds it, from that project's MCP configuration. on-demand (the default when absent): for the run that binds it, stopped when that run ends. session: in every session; spelled so that FAC-SEM-056 refuses it by name.",
+                      "enum": [
+                        "project",
+                        "on-demand",
+                        "session"
+                      ]
                     }
                   },
                   "additionalProperties": false

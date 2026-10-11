@@ -65,6 +65,14 @@ describe("fabric:// links (DEC-0040, FL-1…FL-6)", () => {
     expect(parseFabricLink(url)).toMatchObject({ ok: true, link: { action: "session.new", project: "urn:project:a", runner: "codex" } });
     expect(() => buildFabricLink({ action: "chat", service: "Not An Id" })).toThrow();
     expect(() => buildFabricLink({ action: "chat" })).toThrow();
+    // Each optional parameter left out (P2-02: the branches the detector's move to src/secret-shape.ts left uncovered).
+    expect(buildFabricLink({ action: "chat", project: "urn:project:a" })).toBe("fabric://chat?project=urn%3Aproject%3Aa");
+    expect(buildFabricLink({ action: "session.new", project: "urn:project:a" })).toBe("fabric://session/new?project=urn%3Aproject%3Aa");
+    expect(parseFabricLink("fabric://session/new?project=a")).toEqual({ ok: true, link: { action: "session.new", project: "a" }, ignored: [] });
+  });
+
+  it("FAC-SEM-052 reads a missing or non-string url as an empty link", () => {
+    expect(evaluateSemanticRules("deep-link", { url: 42 }).map((f) => f.message)).toEqual(["not fabric://chat or fabric://session/new"]);
   });
 
   it("FAC-SEM-052: the semantic fixtures", () => {

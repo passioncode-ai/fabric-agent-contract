@@ -44,6 +44,8 @@ and recorded as DEC-0001.
 | Activity telemetry (`fabric-activity/0.1`), `activity-summary/1`, `access-log/1` | `docs/specification/activity.md`, `schemas/telemetry-event.schema.json`, `schemas/activity-*.schema.json`, `schemas/access-log.schema.json`, `src/activity-rules.ts`, `src/seq-ranges.ts` (DEC-0030, OQ-0009) |
 | Device enrollment, signed policy, check-in and health (`fabric-device/0.1`) | `docs/specification/devices.md`, `schemas/device-*.schema.json`, `src/device-rules.ts`, `FAC-SEM-045` attribution (DEC-0031, OQ-0010) |
 | Activity telemetry and devices handoff | `docs/handoffs/2026-10-08-activity-telemetry.md` |
+| A stdio MCP server's `scope` (LC-19), no secret in a command line (LC-21), the one credential detector; `FAC-SEM-056`, `FAC-SEM-057` | `docs/specification/profiles.md#where-a-stdio-server-is-declared`, `#no-secret-in-a-command-line`, `src/secret-shape.ts`, `src/semantic-rules.ts` (DEC-0044); handoff `docs/handoffs/2026-10-12-service-hygiene.md` |
+| A setup state in the service well-known (`degraded[].setup`) | `docs/specification/service.md#well-known-document`, `schemas/service-well-known.schema.json` (DEC-0044) |
 | Semantic rule codes: allocation and the next free code | `docs/specification/conformance.md#semantic-rule-codes`, `src/rule-codes.ts` (DEC-0029) |
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |
 | Extension key spellings | `src/extensions.ts` |

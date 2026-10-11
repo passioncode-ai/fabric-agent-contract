@@ -4,11 +4,12 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import * as links from "../src/fabric-links.js";
+import * as shape from "../src/secret-shape.js";
 import {
   MAX_HANDOFF_FILE,
   credentialName,
   readSessionHandoff,
+  secretArgument,
   secretValue,
   sessionHandoffFolderFindings,
   sessionHandoffManifestFindings,
@@ -189,11 +190,35 @@ describe("the review's fixes", () => {
     expect(() => onManifest("fabric-claude", (m) => { m.firstCall.tool = "a(b"; })).not.toThrow();
   });
 
-  it("matches credentials exactly as DEC-0041's fabric:// rule does", () => {
+  it("matches credentials exactly as the shared detector does (src/secret-shape.ts, DEC-0044)", () => {
     const names = ["token", "apiKeys", "authKey", "sessionId", "X-Amz-Signature", "pass", "themeCode", "sortKey", "tokenizer", "authorName", "sessionLength", "passage", "Accept", "Content-Type", "accesstoken", "clientsecret", "constructor", "__proto__"];
-    for (const name of names) expect(credentialName(name), name).toBe(links.credentialName(name));
+    for (const name of names) expect(credentialName(name), name).toBe(shape.credentialName(name));
     const values = ["Bearer abc.def", "sk-abcdefghijklmnopqrstuv", "ghp_abcdefghijklmnopqrstuvwx", "eyJhbGciOi.eyJzdWIi.sig", "QrStUvWxYz0123456789abcdefGHIJKLmnopQRSTuv-x", "0123456789abcdef0123456789abcdef0123456789abcdef", "01JA7Y5Q3C2K9M8N4P6R0S1T2V", "plain words"];
-    for (const value of values) expect(secretValue(value), value).toBe(links.secretValue(value));
+    for (const value of values) expect(secretValue(value), value).toBe(shape.secretValue(value));
+    const args = [
+      ...values,
+      "--header=Authorization: Bearer abc123def456ghi789",
+      "the Bearer token refresh bug",
+      "/Users/example/sessions/QrStUvWxYz0123456789abcdefGHIJKLmnopQRSTuv/handoff.json",
+      "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY0123456789abcdef",
+      "C:\\Users\\example\\QrStUvWxYz0123456789abcdefGHIJKLmnopQRSTuv",
+      "--mcp-config=/tmp/handoff/mcp.json"
+    ];
+    for (const arg of args) expect(secretArgument(arg), arg).toBe(shape.secretArgument(arg));
+  });
+
+  it("holds the shared detector's patterns character for character (Fabric vendors this file alone)", () => {
+    const literal = (text: string, name: string) => new RegExp(`const ${name}(?:: [^=]+)? = (/.+/[a-z]*);`).exec(text)?.[1];
+    const copy = readFileSync(path.join(root, "src/session-handoff.ts"), "utf8");
+    const original = readFileSync(path.join(root, "src/secret-shape.ts"), "utf8");
+    for (const name of ["JWT_SHAPE", "SECRET_VALUE", "LONG_RUN", "BEARER_INSIDE", "PATH_LIKE"]) {
+      expect(literal(copy, name), name).toBeDefined();
+      expect(literal(copy, name), name).toBe(literal(original, name));
+    }
+    const words = (text: string, name: string) => /\[([^\]]+)\]/.exec(text.slice(text.indexOf(`const ${name}`)))?.[1]?.replace(/\s+/g, " ");
+    expect(words(copy, "CREDENTIAL_WORDS")).toBe(words(original, "CREDENTIAL_WORDS"));
+    const pairs = (text: string) => /CREDENTIAL_PAIRS[^{]+\{([^}]+)\}/.exec(text)?.[1]?.replace(/\s+/g, " ");
+    expect(pairs(copy)).toBe(pairs(original));
   });
 
   it("finds the folder's repository along its real path", () => {

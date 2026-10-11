@@ -69,7 +69,8 @@ descriptor describes an installation, not a run.
   directory; a remote origin claims no port here.
 - Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
   follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
-  invalid, as for the local runner ([profiles](profiles.md)).
+  invalid, as for the local runner ([profiles](profiles.md)). No argument carries a credential
+  ([profiles](profiles.md#no-secret-in-a-command-line), `FAC-SEM-057`).
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
 - A host MUST preserve and ignore unknown `extensions`.
@@ -93,6 +94,12 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   serve does not answer; the host derives `down`.
 - `degraded` MUST always be present. An empty list asserts full health. `status: ready`
   with a non-empty list is inconsistent (`FAC-SEM-011`).
+- A `degraded` entry with `setup: true` is a **setup state**: the source waits for a person to finish setting it
+  up — a key not entered, a model not chosen — and is not an outage (DEC-0044). It still names `source` and
+  `reason`, the reason says what the person does, and it still makes the service `degraded`. A watcher MUST NOT open
+  an outage alert for it; it shows the entry as waiting for a person. An entry without `setup`, or with `false`, is
+  a failure. Fabric Dashboards' watcher messages the operator when a source stays degraded for more than 5 minutes
+  (fabric-workspace `knowledge/authority.md`, *Telling the operator about outages*, 2026-10-11).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
   asks for the operator.
 - `update.available` is a newer version the service knows about, or `null`.
@@ -482,6 +489,9 @@ because that snapshot would become the newest and hide the good one before it is
 defaulted or refused. Applying it is an operator action, never an agent's.
 
 ## Surfaces
+
+A tool that holds no per-session state is offered as a service's MCP surface, one copy on the machine under its
+supervisor, rather than as a stdio server each session starts (LC-19, [profiles](profiles.md#where-a-stdio-server-is-declared)).
 
 | Caller | Surface |
 |---|---|

@@ -19,7 +19,7 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "activity-summary.schema.json": "activity-summary",
   "comms-submit.schema.json": "comms-submit",
   "coordination.schema.json": "coordination",
-  "manifest.schema.json": "service-manifest",
+  "manifest.schema.json": "manifest",
   "provider.schema.json": "provider-entry",
   "result.schema.json": "result",
   "roles.schema.json": "roles",
