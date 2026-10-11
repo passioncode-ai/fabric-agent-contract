@@ -72,7 +72,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - every glossary term a decision introduces is in `CONTEXT.md`;
   - every external citation has a ledger row with revision and retrieval date.
 
-### N05 delegation — DEC-0037…0041 sealed (wave 2)
+### N05 delegation — DEC-0037…0041 sealed (wave 2) — done: DEC-0045, #45 `2eb91c0`
 
 - As-is:
   - the meter refuses in two wire shapes (F-B-301);
@@ -98,7 +98,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
   One DEC records these rulings, with the next free id reserved at writing.
 
-### N14 runner and model profiles — CT-05 on Fabric ADR-0147 (wave 2)
+### N14 runner and model profiles — CT-05 on Fabric ADR-0147 (wave 2) — done: DEC-0046, #46 `f41d8e6`
 
 - As-is: DEC-0037's `modelClasses` are free strings. There are no model or runner profiles, routes are not
   typed, and the headless drives lack `pi-json`, `opencode-json` and `kimi-stream-json`. `profiles.md:60`
@@ -116,7 +116,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - issued keys carry the profile's model allow-list (the profile id on key routes).
 - Designed with N05, because DEC-0037's spend policy is the shared page. Built after N05 in the same wave.
 
-### N15 service hygiene — asked by live consumers (wave 2)
+### N15 service hygiene — asked by live consumers (wave 2) — done: DEC-0044, #43 `c6c5af1`
 
 - `degraded[].setup: true` (CT-22): an optional flag on a well-known's degraded entry for a state that needs a person
   to finish setup; a watcher (Dashboards FD-48) does not alert on it; the entry still names `source` and `reason`.
@@ -128,7 +128,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 - Touches the service well-known schema, manifest/descriptor schemas and `semantic-rules.ts`; built after N05 and
   N14 in wave 2, sharing no file with them except `conformance.md`'s register (lease).
 
-### N06 canonical JSON — one register of byte forms (wave 2)
+### N06 canonical JSON — one register of byte forms (wave 2) — done: DEC-0043, #42 `4fdbd79`
 
 - As-is: three "canonical JSON" uses — the settings-backup form (DEC-0025, device policies, activity ids),
   RFC 8785 (delegation approvals), and DEC-0022's under-specified digest — produce different bytes, and no
@@ -136,6 +136,15 @@ an owner. New contracts land designed against the whole, never as a shape a late
 - To-be: one section in `conformance.md` names each signed or hashed document and the form that covers it.
   Each form has a reference function in `src/` and shared vectors in `fixtures/`. DEC-0022's digest is
   pinned to one named form by a decision. A new document picks from the register, never a fourth form.
+
+### N17 organization edition, first contracts (wave 3, first) — from the first organization server's v4 §12 (D4)
+
+- `fabric-package/1` (CON-OE-03's package part, moved forward because Stage 1 packing needs it): manifest, service
+  template, `secrets[]`, `requires`, `costPresets`, result signal, `state[]`, evals receipt, vendored dependencies,
+  digest — one decision; publisher signature and organization countersignature — a second. The signatures' algorithm
+  follows Fabric's D2 (ES256 beside EdDSA); until D2 the package names the algorithm field and admits EdDSA.
+- `agentRef` as a rule beside the package.
+- `estate-record/1` (passkey-signed) last in wave 3, needed from Stage 3.
 
 ### N07 activity and devices — DEC-0030/0031 hardened and amended together (wave 3)
 
@@ -294,6 +303,9 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-12 — wave 2 closed: N05, N06, N14, N15 done (DEC-0043…0046) and CT-29, CT-31 fixed; wave 3 re-cut with N17
+  (v4 D4: package first, estate record last), N07 gains run/result, v4 device fields and CT-25, N08 the v4 descriptor;
+  the v4 delegation amendment waits on Fabric D2 and the secure transport on the relay draft (DEC-0047 reserved).
 - 2026-10-11 — wave 1 closed: N01, N02, N04 done, N03's repository part done; N15 (CT-22…CT-24) added to wave 2;
   consumer-owned items moved to N16 (program); ORG-LAYER joins N13.
 - 2026-10-11 — N01 closed: PR #31 (DEC-0042) merged at `213e5a3` after three readings; SH-9 strict by Fabric's

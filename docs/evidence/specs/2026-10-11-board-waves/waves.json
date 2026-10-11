@@ -4,10 +4,10 @@
   "waves": {
     "1": "Integrate and make the gate trustworthy: land the incoming PRs, a hermetic gate, the finding classes as scripts, the board and registers telling the truth",
     "2": "Delegation, spend and the operator session: the DEC-0037…0041 seam closed, one canonical-JSON register",
-    "3": "Activity and devices: DEC-0030/0031 hardened and amended together with CON-OE-01 and CON-OE-12",
-    "4": "Services on every system, the operator channel and the embedded dashboard: CT-01 decided, the lifecycle for Linux and Windows, OC/ED/FB gaps",
-    "5": "The 0.1.0 core and interop: results, learnings, roles, grants, contexts, the job result, usage reports with CON-OE-13 and RM-16",
-    "6": "The open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, then CON-OE-03 in parts"
+    "3": "The organization edition's first contracts and activity/devices: fabric-package/1 first, then DEC-0030/0031 hardened and amended (CON-OE-01, CON-OE-12, run/result, v4 device fields, CT-25), estate-record/1 last",
+    "4": "Services on every system (with the v4 descriptor for listings), the operator channel and the embedded dashboard",
+    "5": "The 0.1.0 core, interop and usage",
+    "6": "The remaining open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, the rest of CON-OE-03"
   },
   "nodes": [
     {
@@ -116,7 +116,9 @@
         "F-B-317",
         "F-B-318",
         "F-B-321",
-        "TRUST-TIERS"
+        "TRUST-TIERS",
+        "CT-29",
+        "CT-31"
       ]
     },
     {
@@ -170,7 +172,10 @@
         "CON-OE-12",
         "OQ-0010",
         "F-D-028",
-        "J-ENV / AL-01 / AS-01c / access-log/1"
+        "J-ENV / AL-01 / AS-01c / access-log/1",
+        "V4-RUN-RESULT",
+        "V4-DEVICE",
+        "CT-25"
       ]
     },
     {
@@ -190,7 +195,8 @@
         "F-B-209",
         "F-B-210",
         "F-A-013",
-        "CON-OE-11"
+        "CON-OE-11",
+        "V4-DESCRIPTOR"
       ]
     },
     {
@@ -270,7 +276,10 @@
         "F-D-023",
         "F-D-009",
         "RM-03-residual",
-        "ORG-LAYER"
+        "ORG-LAYER",
+        "V4-DELEGATION",
+        "V4-SECURE-TRANSPORT",
+        "CT-30"
       ]
     },
     {
@@ -287,7 +296,21 @@
         "ASK-FABRIC-f",
         "CT-03",
         "CT-04",
-        "F-D-029"
+        "F-D-029",
+        "CT-26",
+        "CT-27",
+        "CT-28"
+      ]
+    },
+    {
+      "id": "N17-org-first",
+      "title": "The organization edition's first contracts (v4 D4): fabric-package/1 (format and digest; signatures) with agentRef, then estate-record/1",
+      "wave": 3,
+      "release": "this",
+      "items": [
+        "V4-PACKAGE",
+        "V4-AGENTREF",
+        "V4-ESTATE-RECORD"
       ]
     }
   ]

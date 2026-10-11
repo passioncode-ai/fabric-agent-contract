@@ -133,6 +133,22 @@ Each has a board row naming what it waits for.
   gate reading other sessions' worktrees; `lint:md` able to lint nothing.
 - **New work, re-cut into wave 2:** CT-22…CT-24 (node N15); CT-05 gains the provider-routing `sort`.
 
+### Wave 2 — close record (2026-10-12)
+
+- **Merged:** #42 `4fdbd79` (DEC-0043), #43 `c6c5af1` (DEC-0044), #45 `2eb91c0` (DEC-0045), #46 `f41d8e6` (DEC-0046),
+  #47 `0b1cc4f` (CT-31), #44 (CT-29's row). Each was read by an independent verifier and fixed in one round; Fabric's
+  session reviewed #45 as ADR-0144's owner.
+- **Gate on `main`:** `pnpm run check` — 32 test files, 1133 tests, branch-coverage floors met, UX lint 20 scenarios;
+  hosted CI runs Node 20, 22 and 24.
+- **Found during the wave and fixed in it:** a forgery under small-order Ed25519 keys on Node 20/22 (CT-29, reported by
+  the adapter), a thrown verifier on a token without `act` (CT-31), a shadowed profile id, a credential passed by name
+  in an argument.
+- **New work:** the first organization server's v4 contract set (§12): N17 in wave 3 (package first, estate record
+  last), its device and run/result fields with N07, its descriptor with N08; its delegation amendment waits on Fabric's
+  D2 and its secure transport on the relay protocol (DEC-0047 reserved for Project Observatory's draft).
+- **Still open from wave 1:** fabric-workspace #138 (rebasing); the wiki card (blocked on that vault's history).
+  org-index #56 merged.
+
 ## Questions for the operator — one batch
 
 Every other question was closed from the sources: [brief.md](brief.md) → *Decisions resolved from the
@@ -160,6 +176,7 @@ Outward acts (a tag, a publication, a deployment) are still asked one by one.
 
 ## Revisions
 
+- 2026-10-12 — wave 2 closed (record above); wave 3 re-cut with N17 and the v4 set.
 - 2026-10-11 — wave 1 closed (record above); wave 2 re-cut with N15.
 - 2026-10-11 — gate closed by the operator's go; TRUST-TIERS (operator decision, ADR-0144 amendment 4) joins N05.
 - 2026-10-11 — first cut, from the inventory of 147 items (consumer survey pending; its items join at the
