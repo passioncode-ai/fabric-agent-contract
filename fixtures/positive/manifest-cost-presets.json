@@ -1,0 +1,82 @@
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "https://agents.example/providers/seo",
+    "revision": 1,
+    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "createdAt": "2026-08-26T10:00:00Z",
+    "createdBy": "https://agents.example/authors/team",
+    "name": "SEO capability provider",
+    "identity": {
+      "subject": "https://agents.example/providers/seo",
+      "method": "tls"
+    },
+    "supportedContractVersions": [
+      "0.1.0"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "https://agents.example/capabilities/keyword-analysis",
+      "name": "seo.keyword-analysis",
+      "inputSchema": "https://agents.example/schemas/keyword-input.json",
+      "outputSchema": "https://agents.example/schemas/keyword-output.json",
+      "effect": "none",
+      "idempotency": "supported",
+      "dataClasses": [
+        "public",
+        "project-internal"
+      ],
+      "profile": {
+        "kind": "mcp",
+        "protocolRevision": "2026-07-28",
+        "connection": {
+          "mode": "streamable-http",
+          "url": "https://agents.example/mcp"
+        },
+        "requiredFeatures": [
+          "tool:analyze_keywords"
+        ],
+        "probes": [
+          {
+            "id": "keyword-shape",
+            "inputFixture": "https://agents.example/fixtures/keyword.json",
+            "outputSchema": "https://agents.example/schemas/keyword-output.json",
+            "timeoutMs": 30000,
+            "sideEffectCeiling": "none",
+            "assertions": [
+              "returns ranked keyword observations with source URIs"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "costPresets": [
+    {
+      "id": "quick",
+      "capability": "seo.keyword-analysis",
+      "label": "Quick",
+      "maxUsd": 0.1,
+      "paidTools": 0,
+      "depth": "3 pages"
+    },
+    {
+      "id": "standard",
+      "capability": "seo.keyword-analysis",
+      "label": "Standard",
+      "maxUsd": 0.5,
+      "paidTools": 2,
+      "depth": "10 pages",
+      "default": true
+    },
+    {
+      "id": "deep",
+      "capability": "seo.keyword-analysis",
+      "label": "Deep",
+      "maxUsd": 3,
+      "paidTools": 6,
+      "depth": "4 sub-questions \u00d7 10 pages"
+    }
+  ]
+}

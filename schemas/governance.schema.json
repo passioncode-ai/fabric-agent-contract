@@ -22,7 +22,23 @@
         "rateLimit": { "type": "integer", "minimum": 1 },
         "idempotency": { "enum": ["required", "provider-native"] },
         "issuer": { "$ref": "common.schema.json#/$defs/uri" },
-        "state": { "enum": ["active", "expired", "revoked"] }
+        "state": { "enum": ["active", "expired", "revoked"] },
+        "principalKind": { "enum": ["agent", "session", "external"], "description": "DEC-0037: external is a person or organization outside the issuer's estate (a share grant)." },
+        "spend": {
+          "type": "object",
+          "description": "DEC-0037: what this grant may spend; spend outside it is denied.",
+          "required": ["limitUsd", "period", "payer", "credentialSource"],
+          "properties": {
+            "limitUsd": { "type": "number", "minimum": 0 },
+            "period": { "enum": ["day", "month", "task", "grant"] },
+            "perCallMaxUsd": { "type": "number", "minimum": 0 },
+            "autoApproveUsd": { "type": "number", "minimum": 0 },
+            "payer": { "enum": ["owner", "guest"] },
+            "credentialSource": { "oneOf": [{ "type": "object", "required": ["kind", "ref"], "properties": { "kind": { "const": "project-key" }, "ref": { "type": "string", "minLength": 1 } }, "additionalProperties": false }, { "type": "object", "required": ["kind", "agent"], "properties": { "kind": { "const": "capability" }, "agent": { "$ref": "common.schema.json#/$defs/uri" }, "capability": { "$ref": "common.schema.json#/$defs/capabilityName" } }, "additionalProperties": false }] },
+            "modelClasses": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },

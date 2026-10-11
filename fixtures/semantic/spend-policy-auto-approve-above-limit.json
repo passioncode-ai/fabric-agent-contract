@@ -1,0 +1,62 @@
+{
+  "kind": "spend-policy",
+  "meta": {
+    "id": "urn:spend-policy:project-a",
+    "revision": 1,
+    "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "createdAt": "2026-10-11T09:00:00Z",
+    "createdBy": "urn:operator:one"
+  },
+  "project": "urn:project:a",
+  "mode": "limited",
+  "limitUsd": 40,
+  "period": "month",
+  "autoApproveUsd": 60,
+  "modelClasses": [
+    "general",
+    "chinese"
+  ],
+  "credentialSources": [
+    {
+      "kind": "capability",
+      "agent": "urn:agent:copy:one",
+      "capability": "copy.write"
+    },
+    {
+      "kind": "project-key",
+      "ref": "vault:project-a/prod/MODEL_KEY"
+    }
+  ],
+  "proposal": {
+    "inputs": {
+      "presets": [
+        "research.standard",
+        "copy.translate"
+      ],
+      "recentSpendUsd": 18.4,
+      "workKind": "site localization"
+    },
+    "options": [
+      {
+        "limitUsd": 20,
+        "label": "about the expected month"
+      },
+      {
+        "limitUsd": 40,
+        "label": "twice that",
+        "preselected": true
+      },
+      {
+        "limitUsd": 80,
+        "label": "four times that"
+      },
+      {
+        "limitUsd": null,
+        "label": "no project limit"
+      }
+    ]
+  },
+  "decidedBy": "urn:operator:one",
+  "decidedAt": "2026-10-11T09:05:00Z",
+  "decisionRef": "urn:decision:project-a:spend"
+}

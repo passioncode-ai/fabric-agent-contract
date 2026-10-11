@@ -77,7 +77,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-047`
+**Next free rule code:** `FAC-SEM-048`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -128,6 +128,7 @@ register and carry no receipt.
 | `FAC-SEM-044` | `device-enrollment` | [devices](devices.md#semantic-rules) | SEM-0044 |
 | `FAC-SEM-045` | `device-attribution` | [devices](devices.md#semantic-rules) | SEM-0045 |
 | `FAC-SEM-046` | `device-key-set` | [devices](devices.md#semantic-rules) | SEM-0046 |
+| `FAC-SEM-047` | `spend-policy` | [spend policy](spend-policy.md#semantic-rules) | SEM-0047 |
 
 ## Compatibility policy
 

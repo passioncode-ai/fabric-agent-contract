@@ -1,0 +1,9 @@
+{
+  "decision": "allowed",
+  "receipt": "rcpt_01",
+  "grantRef": "urn:grant:project-a:share-research#1",
+  "remainingUsd": 21.6,
+  "checkedAt": "2026-10-11T10:00:00Z",
+  "reservedUsd": 0.4,
+  "expiresAt": "2026-10-11T10:15:00Z"
+}

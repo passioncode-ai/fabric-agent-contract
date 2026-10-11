@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/spend-policy.schema.json",
+  "title": "Project spend policy (DEC-0037)",
+  "type": "object",
+  "required": [
+    "kind",
+    "meta",
+    "project",
+    "mode",
+    "period",
+    "autoApproveUsd",
+    "credentialSources",
+    "proposal",
+    "decidedBy",
+    "decidedAt"
+  ],
+  "properties": {
+    "kind": {
+      "const": "spend-policy"
+    },
+    "meta": {
+      "$ref": "common.schema.json#/$defs/revisionMeta"
+    },
+    "project": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "mode": {
+      "enum": [
+        "limited",
+        "no-project-limit"
+      ],
+      "description": "no-project-limit: only the estate total (L0) stops spending \u2014 a recorded choice, never a missing value."
+    },
+    "limitUsd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "period": {
+      "enum": [
+        "month"
+      ]
+    },
+    "autoApproveUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Per task: at or below it an agent proceeds; above it the agent files one durable approval request and continues other work."
+    },
+    "modelClasses": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "credentialSources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "kind",
+              "ref"
+            ],
+            "properties": {
+              "kind": {
+                "const": "project-key"
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The secret reference of a key issued for this project (never a value)."
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "kind",
+              "agent"
+            ],
+            "properties": {
+              "kind": {
+                "const": "capability"
+              },
+              "agent": {
+                "$ref": "common.schema.json#/$defs/uri"
+              },
+              "capability": {
+                "$ref": "common.schema.json#/$defs/capabilityName"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "required": [
+        "inputs",
+        "options"
+      ],
+      "description": "The options offered at the project's first paid run, computed from the project (dynamic), with their inputs named.",
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "required": [
+            "presets",
+            "recentSpendUsd",
+            "workKind"
+          ],
+          "properties": {
+            "presets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "recentSpendUsd": {
+              "oneOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The project's spend over the last 30 days from usage reports; null when none is known."
+            },
+            "workKind": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "limitUsd",
+              "label"
+            ],
+            "properties": {
+              "limitUsd": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "preselected": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "decidedBy": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "decidedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "decisionRef": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "limited"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "limitUsd": true
+        },
+        "required": [
+          "limitUsd"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "no-project-limit"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "properties": {
+            "limitUsd": true
+          },
+          "required": [
+            "limitUsd"
+          ]
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
