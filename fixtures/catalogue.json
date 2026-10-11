@@ -302,5 +302,19 @@
   {"name": "delegation-refusal-call-not-l3", "schema": "delegation-refusal.schema.json", "path": "negative/delegation-refusal-call-not-l3.json", "valid": false, "keyword": "const"},
   {"name": "grant-spend-call-window", "schema": "governance.schema.json", "path": "negative/grant-spend-call-window.json", "valid": false, "keyword": "enum"},
   {"name": "delegation-token-claims-task", "schema": "delegation-token.schema.json", "path": "positive/delegation-token-claims-task.json", "valid": true},
-  {"name": "delegation-token-task-not-an-id", "schema": "delegation-token.schema.json", "path": "negative/delegation-token-task-not-an-id.json", "valid": false, "keyword": "pattern"}
+  {"name": "delegation-token-task-not-an-id", "schema": "delegation-token.schema.json", "path": "negative/delegation-token-task-not-an-id.json", "valid": false, "keyword": "pattern"},
+  {"name": "session-handoff-fabric-claude", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-fabric-claude.json", "valid": true},
+  {"name": "session-handoff-fabric-claude-brief-file", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-fabric-claude-brief-file.json", "valid": true},
+  {"name": "session-handoff-fabric-kilo", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-fabric-kilo.json", "valid": true},
+  {"name": "session-handoff-fabric-hermes", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-fabric-hermes.json", "valid": true},
+  {"name": "session-handoff-dashboards-claude", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-dashboards-claude.json", "valid": true},
+  {"name": "session-handoff-dashboards-codex", "schema": "session-handoff.schema.json", "path": "positive/session-handoff-dashboards-codex.json", "valid": true},
+  {"name": "session-handoff-other-format", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-other-format.json", "valid": false, "keyword": "const"},
+  {"name": "session-handoff-without-mcp-json", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-without-mcp-json.json", "valid": false, "keyword": "contains"},
+  {"name": "session-handoff-whoami-on-dashboards", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-whoami-on-dashboards.json", "valid": false, "keyword": "oneOf"},
+  {"name": "session-handoff-inline-brief-too-long", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-inline-brief-too-long.json", "valid": false, "keyword": "maxLength"},
+  {"name": "session-handoff-unknown-field", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-field.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "session-handoff-too-many-args", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-too-many-args.json", "valid": false, "keyword": "maxItems"},
+  {"name": "session-handoff-session-without-id", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-session-without-id.json", "valid": false, "keyword": "oneOf"},
+  {"name": "session-handoff-unknown-auth", "schema": "session-handoff.schema.json", "path": "negative/session-handoff-unknown-auth.json", "valid": false, "keyword": "enum"}
 ]

@@ -61,6 +61,7 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | the meter, answering a grant check | verifies the callee's onward token (audience itself, its grant-check capability, effect `none`) and answers any refusal of it as `principal-unproven`; reads the amount and the callee's `jti` from the request, never a token from it | DL-21 | `test/delegation-seams.test.ts`, `src/delegation.ts` `verifyMeterToken`, `schemas/grant-check-request.schema.json` ([delegation](delegation.md#spend-and-usage), DEC-0039) |
 | the meter, reading a grant beside the hub | after the onward token is verified, reads the grant it names from the hub's projection (`grantsDir`, `<meta.id>.json`, 0600 in 0700) and denies `no-grant`, `grant-revoked`, `grant-expired` or `unknown-state` when the file is missing, unreadable, at another revision or not active; keys the `task` window on the token's `task`, else on the first `session` met walking the token's actor chain from its outermost actor, else on the grant itself (`grant:<ref>`), never on a `jti`; on Windows answers `unknown-state` before reading | DL-23, DL-24 | `test/meter-grant.test.ts`, `src/grant-projection.ts` `readProjectedGrant`, `src/delegation.ts` `taskWindowKey` ([delegation](delegation.md#the-hubs-grant-projection), DEC-0041) |
 | Fabric, reading a `fabric://` link | ignores unknown parameters, validates the known ones and refuses a link that could carry a credential, matching credential words as whole words of a name (DEC-0041) | `FAC-SEM-052` | `test/fabric-button.test.ts`, `test/meter-grant.test.ts`, `src/fabric-links.ts` `parseFabricLink` ([Fabric's button](fabric-button.md#deep-links), DEC-0040) |
+| a host handing a coding-agent session its folder | writes `handoff.json`, `context.md`, `mcp.json` and the declared `brief.md`/`task.md` in its user data, 0700/0600, the preamble naming one first tool, Claude Code's joined `--mcp-config=`, a bearer only per session and a secret only in `mcp.json` | `FAC-SEM-053`, `FAC-SEM-054`, `FAC-SEM-055` | `test/session-handoff.test.ts`, `src/session-handoff.ts` `validateSessionHandoff` ([session handoff](session-handoff.md#the-kits-checker), DEC-0042) |
 | a device applying policy | applies a delivered policy only when it verifies and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` ([devices](devices.md#policy), DEC-0031) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
@@ -81,7 +82,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-053`
+**Next free rule code:** `FAC-SEM-056`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -138,6 +139,9 @@ register and carry no receipt.
 | `FAC-SEM-050` | `delegation-mint` | [delegation](delegation.md#semantic-rules) | SEM-0050 |
 | `FAC-SEM-051` | `approval-claims` | [delegation](delegation.md#semantic-rules) | SEM-0051 |
 | `FAC-SEM-052` | `deep-link` | [fabric-button](fabric-button.md#semantic-rules) | SEM-0052 |
+| `FAC-SEM-053` | `session-handoff`, `session-handoff-folder` | [session-handoff](session-handoff.md#semantic-rules) | SEM-0053 |
+| `FAC-SEM-054` | `session-handoff-folder` | [session-handoff](session-handoff.md#semantic-rules) | SEM-0054 |
+| `FAC-SEM-055` | `session-handoff-folder` | [session-handoff](session-handoff.md#semantic-rules) | SEM-0055 |
 
 ## Compatibility policy
 

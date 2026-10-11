@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0042`
+**Next free ID:** `DEC-0043`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1612,3 +1612,56 @@ annotate only the old status; decision bodies are never rewritten.
   (2026-10-11), asked by this decision's review and by project-observatory-3d (OBS-57); CO-260 (1). DEC-0041 was
   reserved by git CAS (`--key meter-grant-read-20261011`); this file and `conformance.md` were edited under git
   leases; no new rule code (`FAC-SEM-050` and `FAC-SEM-052` are extended). Written by a Fabric session.
+
+### DEC-0042 — `session-handoff/1`: the folder a host hands a coding-agent session
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the reference
+  writer, `sessionBundle.ts`, release 0.4.0 REQ-06), Fabric Dashboards (its console pack, `src/core/handoff.ts`),
+  Switchboard (carries the arguments in place).
+- **Decision:** the profile [session handoff](specification/session-handoff.md), one format for every product:
+  - a folder in the writing host's user data, never in a repository, `0700` with every file `0600`, holding
+    `handoff.json` (the manifest, `schemas/session-handoff.schema.json`), `context.md`, `mcp.json` and, as
+    declared, `brief.md` and `task.md` — nothing else (SH-1…SH-4);
+  - fixed: the preamble names exactly one first tool and holds no rule — `fabric_whoami` on `fabric`,
+    `service_context` on `fabric-dashboards` (SH-6, SH-7); Claude Code gets the joined
+    `--mcp-config=<folder>/mcp.json`, which closes its variadic list (SH-11);
+  - declared, not forced: `lifetime` (per session or per agent key; a bearer only per session, SH-5),
+    `mcp.auth` (`bearer`, a one-shot token over HTTP, or `none`, a stdio command with no secret, SH-9),
+    `mcp.strict` (SH-11), `brief.delivery` (inline in one argument of at most 1000 characters and no control
+    character, or `brief.md`, SH-8);
+  - the launch's limits (at most 16 arguments of at most 1024 characters, no control character, no credential;
+    a credential-carrying variable recorded as `null`, SH-10) and the per-runtime table for `claude-code`,
+    `codex`, `kilo`, `hermes`, `kimi-code` and `cline` (SH-11);
+  - Fabric's `execution-packet/1` stays underneath: `integrity` names it and the digest of each file materialised
+    there (SH-12); a secret lives in `mcp.json` only (SH-13);
+  - the kit's checker `validateSessionHandoff(dir)` (`src/session-handoff.ts`), dependency-free so a consumer can
+    copy it and run it on its own folders; `FAC-SEM-053`…`055`.
+- **Why:** Fabric hands a session a per-session bundle; Dashboards' consoles hand a pack of their own, persistent
+  per agent key, with a stdio `mcp.json`, its own brief and no `--strict-mcp-config`. The knowledge base asks for
+  one format across products (principle 8), and a Fabric agent opened in Dashboards' console and a Dashboards
+  agent opened from Fabric should carry the same pack. The name `execution-packet/1` already meant Fabric's
+  integrity manifest and task-pipeline's dispatch packet, so the format has its own (Fabric 0.4.0 resolution R-01).
+- **Compatibility:** Additive; `contractVersion` stays `0.1.0`. One new schema (67), three rules. No existing
+  document changes. Fabric's bundle changes in the same release: the joined `--mcp-config=`, `handoff.json`, a
+  `context.md` always (a note when the pack could not be compiled), a brief over 1000 characters or of more than
+  one line as `brief.md`. Dashboards' pack changes as its handoff lists.
+- **Consequences / affects:**
+  - spec: `docs/specification/session-handoff.md` (new), `docs/specification/conformance.md` (`FAC-SEM-053`…`055`,
+    a reader row);
+  - schema: `schemas/session-handoff.schema.json`; code: `src/session-handoff.ts`, `src/semantic-rules.ts`;
+  - fixtures: 6 positive, 8 negative, 19 semantic (`session-handoff-*`, `session-handoff-folder-*`),
+    `fixtures/catalogue.json`;
+  - tests: `test/session-handoff.test.ts`, `test/schema-compilation.test.ts` (67 schemas);
+  - docs: `CONTEXT.md` (Session handoff), `docs/DOCMAP.md`, `README.md`, `docs/evidence/sources.md`, the handoff
+    `docs/handoffs/2026-10-11-session-handoff.md`.
+- **Not decided here:** the Codex bearer path's measurement (`bearer_token_env_var`, no writer yet); a
+  `session-handoff/1` for Gemini CLI; how a host verifies a folder another host wrote before it opens it.
+- **Source:** Fabric ADR-0140 (0.4.0 REQ-06, canvas C3), agreed with Fabric Dashboards on 2026-10-11
+  (fabric-dashboards-76). Claude Code 2.1.296 `claude --help`; Switchboard `docs/CLI.md` and `docs/CONTRACTS.md` at
+  `70cc72b` (the 16 × 1024 in-place limit, SB-94); Dashboards `src/core/handoff.ts` at `7a2febf`; Fabric
+  `apps/desktop/src/main/sessionBundle.ts` at `c7028457`. DEC-0042 and `FAC-SEM-053`…`055` were reserved by git CAS
+  (`agent_sync.py reserve --key session-handoff-20261011 DEC`, `--key session-handoff-{manifest,dir,mcp}-20261011
+  SEM`); `DEC-0041` had been reserved first (`--key meter-grant-read-20261011`) and is pull request #32, merged at
+  `7931c1d`, so the marker moves to `DEC-0043`. This file and `conformance.md` were edited under git leases; the record plane is `fs`.
+  Written by Fabric's session; reviewed and merged by the contract's owner session (fabric-agent-contract-75).

@@ -37,6 +37,7 @@ package ships in this version.
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Delegation — who acts for whom: the hub's signed token, the callee's offline check, `approval/1` and one set of refusal codes (`fabric-delegation/0.1`)](docs/specification/delegation.md)
 - [Fabric's button in a product and `fabric://` links (DEC-0040)](docs/specification/fabric-button.md)
+- [Session handoff — the folder a host hands a coding-agent session (`session-handoff/1`, DEC-0042)](docs/specification/session-handoff.md)
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Activity telemetry — sessions, usage, summaries and access logs (`fabric-activity/0.1`)](docs/specification/activity.md)
 - [Devices — enrollment, signed policy, check-in and health (`fabric-device/0.1`)](docs/specification/devices.md)

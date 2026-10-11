@@ -1,0 +1,44 @@
+{
+  "format": "session-handoff/1",
+  "writer": {
+    "product": "fabric-dashboards",
+    "version": "0.9.0"
+  },
+  "writtenAt": "2026-10-11T12:00:00Z",
+  "lifetime": {
+    "kind": "agent-key",
+    "agentKey": "copylot.default"
+  },
+  "files": [
+    "context.md",
+    "mcp.json",
+    "task.md"
+  ],
+  "firstCall": {
+    "server": "fabric-dashboards",
+    "tool": "service_context",
+    "arguments": {
+      "key": "copylot.default"
+    }
+  },
+  "preamble": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said.",
+  "mcp": {
+    "auth": "none",
+    "strict": false
+  },
+  "brief": {
+    "delivery": "inline",
+    "text": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+  },
+  "launch": {
+    "runtime": "claude-code",
+    "args": [
+      "--mcp-config=/Users/example/Library/Application Support/Fabric Dashboards/consoles/copylot.default/mcp.json",
+      "--append-system-prompt",
+      "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+    ],
+    "env": {
+      "FABRIC_DASHBOARDS_CONTEXT": "/Users/example/Library/Application Support/Fabric Dashboards/consoles/copylot.default/context.md"
+    }
+  }
+}

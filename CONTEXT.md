@@ -105,6 +105,10 @@ drops it, never replaces it (DEC-0041).
 **Refusal code**: One of the contract's seventeen kebab-case reasons a callee, the hub or the meter
 refuses (`error.code`, DEC-0039); a product's own words go in `error.data`.
 
+**Session handoff**: The folder a host writes for one coding-agent session before its first turn —
+`handoff.json`, `context.md`, `mcp.json`, optionally `brief.md` and `task.md` — in its user data, never in a
+repository; format `session-handoff/1` (DEC-0042). Not Fabric's `execution-packet/1`, the integrity layer under it.
+
 **Fabric's button**: The floating button a dashboard MAY show that opens Fabric on that product through
 a **Fabric link**, and says how to get Fabric when it is not installed (DEC-0040).
 

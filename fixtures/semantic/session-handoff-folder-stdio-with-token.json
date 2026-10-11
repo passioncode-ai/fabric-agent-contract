@@ -1,0 +1,79 @@
+{
+  "path": "/Users/example/Library/Application Support/Fabric Dashboards/consoles/copylot.default",
+  "mode": "700",
+  "permissions": "posix",
+  "repository": null,
+  "entries": {
+    "handoff.json": {
+      "mode": "600",
+      "json": {
+        "format": "session-handoff/1",
+        "writer": {
+          "product": "fabric-dashboards",
+          "version": "0.9.0"
+        },
+        "writtenAt": "2026-10-11T12:00:00Z",
+        "lifetime": {
+          "kind": "agent-key",
+          "agentKey": "copylot.default"
+        },
+        "files": [
+          "context.md",
+          "mcp.json",
+          "task.md"
+        ],
+        "firstCall": {
+          "server": "fabric-dashboards",
+          "tool": "service_context",
+          "arguments": {
+            "key": "copylot.default"
+          }
+        },
+        "preamble": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said.",
+        "mcp": {
+          "auth": "none",
+          "strict": false
+        },
+        "brief": {
+          "delivery": "inline",
+          "text": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+        },
+        "launch": {
+          "runtime": "claude-code",
+          "args": [
+            "--mcp-config=/Users/example/Library/Application Support/Fabric Dashboards/consoles/copylot.default/mcp.json",
+            "--append-system-prompt",
+            "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+          ],
+          "env": {
+            "FABRIC_DASHBOARDS_CONTEXT": "/Users/example/Library/Application Support/Fabric Dashboards/consoles/copylot.default/context.md"
+          }
+        }
+      }
+    },
+    "context.md": {
+      "mode": "600",
+      "text": "# Copylot (copylot.default) — context from Fabric Dashboards\n"
+    },
+    "mcp.json": {
+      "mode": "600",
+      "json": {
+        "mcpServers": {
+          "fabric-dashboards": {
+            "type": "stdio",
+            "command": "/Applications/Fabric Dashboards.app/Contents/MacOS/fabric-dashboards-mcp",
+            "args": [],
+            "env": {
+              "ELECTRON_RUN_AS_NODE": "1",
+              "DASHBOARDS_TOKEN": "d4c8a1f0e9b7c6d5"
+            }
+          }
+        }
+      }
+    },
+    "task.md": {
+      "mode": "600",
+      "text": "# Task: Copylot is degraded\n"
+    }
+  }
+}
