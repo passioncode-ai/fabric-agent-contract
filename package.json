@@ -14,10 +14,13 @@
   },
   "type": "module",
   "packageManager": "pnpm@11.21.0",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
+    "test:fast": "vitest run",
     "ux:lint": "python3 docs/ux/lint.py",
     "docs:check": "tsx src/docs-check.ts && pnpm lint:md",
     "lint:md": "tsx src/tracked-files.ts '*.md' | xargs markdownlint-cli2",
@@ -26,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "@vitest/coverage-v8": "4.1.11",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "markdownlint-cli2": "^0.18.1",
