@@ -14,7 +14,7 @@ fixed by that context and the pinned route ([Runner routes](runners.md#the-walk)
 ## Revision shape
 
 A revision contains object URI, monotonically increasing revision number within
-that object, parent revision references, canonical content hash, author, creation
+that object, parent revision references, canonical content hash ([canonical forms](conformance.md#canonical-forms)), author, creation
 time, reason and payload. A merge revision MAY have multiple parents. Payload
 validation is selected by `kind` and schema URI.
 

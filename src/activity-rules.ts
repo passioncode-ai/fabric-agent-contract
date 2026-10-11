@@ -1,6 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
-import { canonicalJson } from "./settings-backup.js";
+import { settingsCanonicalJson } from "./canonical.js";
 import { type SeqRange, contiguousFrom, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region activity-rules — docs: docs/specification/activity.md#semantic-rules
@@ -93,7 +93,7 @@ export function forbiddenKeys(value: unknown, at: string, userAllowedAt: Readonl
 
 /** The `eventId` of an event read from a source that can be read again: `sha256:` of the canonical `{source, key}`. */
 export function activityEventId(source: string, sourceKey: string): string {
-  return `sha256:${createHash("sha256").update(canonicalJson({ key: sourceKey, source }), "utf8").digest("hex")}`;
+  return `sha256:${createHash("sha256").update(settingsCanonicalJson({ key: sourceKey, source }), "utf8").digest("hex")}`;
 }
 
 /**
@@ -103,7 +103,7 @@ export function activityEventId(source: string, sourceKey: string): string {
  * directory; the key keeps a dictionary of common paths from reversing it.
  */
 export function pathSourceKey(telemetryKey: Uint8Array, relativePath: string, offset: number): string {
-  return `hmac-sha256:${createHmac("sha256", telemetryKey).update(canonicalJson({ offset, path: relativePath }), "utf8").digest("hex")}`;
+  return `hmac-sha256:${createHmac("sha256", telemetryKey).update(settingsCanonicalJson({ offset, path: relativePath }), "utf8").digest("hex")}`;
 }
 
 /** `git.branch` when the policy asks for a hash: `hmac-sha256:` of the name under the device's telemetry key. */

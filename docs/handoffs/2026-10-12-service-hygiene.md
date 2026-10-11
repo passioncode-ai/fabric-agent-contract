@@ -38,5 +38,8 @@ in a declared command line (LC-21).
 
 ## Next task
 
-The owner session reviews and merges the pull request, then records CT-22, CT-23 and CT-24 as done with the merge
-commit, and files the consumer rows above where they are not yet on their owners' boards.
+The owner session rebased this branch on `4fdbd79` (P2-01, DEC-0043) and re-ran the gate, then merges it and
+records CT-22, CT-23 and CT-24 as done with the merge commit. Consumer rows filed on the contract's board: CT-27
+(Fabric's `agentRegistry.ts:236` accepts `run.mcp.stdio.scope`) and CT-28 (the adapter's `fabric_provider.py:119`
+does too, and checks Claude Code plugin configs for session-wide stdio servers), beside FD-48 (Dashboards' watcher
+honours `setup`) and Copylot's well-known emitting `setup` for its configuration state.

@@ -69,7 +69,10 @@ These follow from the table and are enforced by the schema:
   (DEC-0013), such as `secret-ref:example-agent/EXAMPLE_API_KEY`.
 - `url` is `http://127.0.0.1:<port>/mcp`: loopback only, the port in range, no query.
 - `run.mcp.stdio.scope` is `project`, `on-demand` or `session`; the last is spelled so that `FAC-SEM-056` refuses it
-  by name ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044).
+  by name ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044). A writer does not emit
+  `run.mcp.stdio.scope` until the readers accept it: Fabric's registry (`apps/desktop/src/main/agentRegistry.ts:236`
+  at `487ef5b0`) and the adapter's (`fabric_provider.py:119`) admit only `command` and `env` today. An absent `scope`
+  is `on-demand`.
 
 ## Semantic rules
 

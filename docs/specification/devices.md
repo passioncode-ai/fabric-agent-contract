@@ -148,13 +148,15 @@ A policy document is one **layer**, with a `revision`, `issuedAt` and `keys`. Ea
 
 **Unknown keys are kept and ignored**: a device that does not know a key MUST NOT reject the policy
 for it. Extension keys are spelled `x-<namespace>.<key>`. A value has no fraction (schema). A
-fraction is written as a string, because a signature covers canonical JSON, which has no form for
-fractions ([settings backups](service.md#settings-backup)).
+fraction is written as a string, because a signature covers the settings form of canonical JSON, which has no
+form for fractions ([settings backups](service.md#settings-backup)).
 
 **Signature.** A `server` policy MUST be signed. An `mdm` policy MAY be, since its channel is the
 operating system's managed preferences. A `user` layer is never signed and never delivered. The
 signature is Ed25519 (RFC 8032) over the UTF-8 canonical JSON of the document without `signature`
-([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The trusted keys are those of
+([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The canonical JSON is the settings form,
+not RFC 8785: the two give different bytes ([canonical forms](conformance.md#canonical-forms), DEC-0043).
+The trusted keys are those of
 the device's current [key set](#key-sets) that are valid at the policy's `issuedAt`. A policy signed
 by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
 

@@ -54,6 +54,27 @@ describe("semantic fixtures of DEC-0044", () => {
       }
     }
   });
+
+  it("names the place, never the value: no finding carries any string of the document it refused", () => {
+    for (const [, fixture] of cases.filter(([name]) => name.startsWith("command-line-"))) {
+      const secrets = JSON.stringify(fixture.document).match(/"[^"]{12,}"/g)?.map((quoted) => quoted.slice(1, -1)).filter((text) => secretArgument(text) || secretUrl(text)) ?? [];
+      expect(secrets.length, "each command-line fixture holds a secret").toBeGreaterThan(0);
+      const serialised = JSON.stringify(evaluateSemanticRules(fixture.kind, fixture.document));
+      for (const secret of secrets) expect(serialised).not.toContain(secret);
+    }
+  });
+
+  it("refuses an argument that carries a credential by its name, not only by its shape", () => {
+    const descriptor = structuredClone(cases.find(([name]) => name === "command-line-secret-in-descriptor-command.json")![1].document) as any;
+    const doctor = (argv: string[]) => evaluateSemanticRules("service-descriptor", { ...descriptor, commands: { doctor: ["~/bin/x", ...argv] } }).filter((finding) => finding.code === "FAC-SEM-057").map((finding) => finding.instancePath);
+    expect(doctor(["--token=abc123short"])).toEqual(["/commands/doctor/1"]);
+    expect(doctor(["--password=hunter2"])).toEqual(["/commands/doctor/1"]);
+    expect(doctor(["API_KEY=s3cr3tvalue12"])).toEqual(["/commands/doctor/1"]);
+    expect(doctor(["--api-key", "x"])).toEqual(["/commands/doctor/2"]);
+    // A credential-named flag without a value, or followed by another flag, and ordinary names, pass.
+    expect(doctor(["--token", "--json"])).toEqual([]);
+    expect(doctor(["--sort-key=name", "--theme-code=dark", "--json", "--page", "2"])).toEqual([]);
+  });
 });
 
 describe("degraded[].setup (CT-22)", () => {

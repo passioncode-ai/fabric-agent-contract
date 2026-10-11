@@ -29,6 +29,7 @@ and recorded as DEC-0001.
 | Spend policy and grants with amounts (DEC-0037), grant limit windows (DEC-0038), the meter's `call` window and grant projection (DEC-0041) | `docs/specification/spend-policy.md`, `docs/specification/delegation.md#the-hubs-grant-projection`, `schemas/spend-policy.schema.json`, `schemas/grant-check*.schema.json` |
 | Services on Windows and Linux: the services folder, a supervisor per system, Windows paths and token files (DEC-0032, DEC-0033) | `docs/specification/service.md` (lifecycle, token files), `schemas/service-descriptor.schema.json`, `schemas/service-common.schema.json` |
 | Client and reader conformance | `docs/specification/conformance.md#clients-and-readers` |
+| Canonical forms — the settings form and RFC 8785 — the register of every signed or hashed document, the board's idempotency digest, and the shared vectors a kit port runs (DEC-0043) | `docs/specification/conformance.md#canonical-forms`, `src/canonical.ts`, `src/comms-digest.ts`, `fixtures/vectors/canonical.json`, `test/canonical.test.ts`; handoff `docs/handoffs/2026-10-11-canonical-forms.md` |
 | Calling agents (`fabric-interop/0.1`) | `docs/specification/interop.md` |
 | Project communication (`fabric-project-comms/0.1`) | `docs/specification/project-comms.md`, `schemas/comms-*.schema.json` (DEC-0022, OQ-0008) |
 | Operator channel (`fabric-operator-channel/0.1`), OC-1…OC-17 and its status | `docs/specification/operator-channel.md`, `schemas/operator-channel-status.schema.json` (DEC-0034; group chats and liveness OC-14…OC-17, DEC-0035) |

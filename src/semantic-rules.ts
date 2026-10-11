@@ -10,7 +10,7 @@ import { deviceRules } from "./device-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
-import { secretArgument, secretUrl } from "./secret-shape.js";
+import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
 
@@ -359,9 +359,36 @@ function declaredCommandLines(kind: string, value: unknown): Array<[string, stri
  * shows every argument to the whole user, and a URL lands in logs and configuration files. Keys reach a process
  * through its environment (a secret reference), a 0600 file or the vault. The message never repeats the value.
  */
+/**
+ * An argument that carries a credential by its name rather than its shape: `--token=x`, `API_KEY=x`, or a
+ * credential-named flag followed by its value (`--api-key x`). Checked here, beside the shape detector, so the
+ * detector session-handoff copies stays byte-identical (LC-21).
+ */
+function namedCredentialArguments(lines: Array<[string, string, boolean]>): Set<string> {
+  const flagged = new Set<string>();
+  const byList = new Map<string, Array<[string, string]>>();
+  for (const [at, text, isUrl] of lines) {
+    if (isUrl) continue;
+    const parent = at.replace(/\/\d+$/, "");
+    byList.set(parent, [...(byList.get(parent) ?? []), [at, text]]);
+  }
+  for (const list of byList.values()) {
+    list.forEach(([at, text], index) => {
+      const assigned = /^(?:--?)?([A-Za-z][\w.-]*)=(.+)$/.exec(text);
+      if (assigned && credentialName(assigned[1] as string)) flagged.add(at);
+      const flag = /^--?([A-Za-z][\w.-]*)$/.exec(text);
+      const next = list[index + 1];
+      if (flag && credentialName(flag[1] as string) && next && !next[1].startsWith("-")) flagged.add(next[0]);
+    });
+  }
+  return flagged;
+}
+
 function commandLines(kind: string, value: unknown): Finding[] {
-  return declaredCommandLines(kind, value)
-    .filter(([, text, isUrl]) => (isUrl ? secretUrl(text) : secretArgument(text)))
+  const lines = declaredCommandLines(kind, value);
+  const named = namedCredentialArguments(lines);
+  return lines
+    .filter(([at, text, isUrl]) => (isUrl ? secretUrl(text) : secretArgument(text) || named.has(at)))
     .map(([instancePath, , isUrl]) => ({
       code: "FAC-SEM-057",
       instancePath,
