@@ -67,7 +67,8 @@ descriptor describes an installation, not a run.
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
   directory; a remote origin claims no port here.
-- Paths MAY start with `~/`. Commands MUST be argument arrays; a shell string is
+- Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
+  follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)).
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
@@ -355,7 +356,7 @@ Administrators, full control — so a file it writes passes whatever its folder 
 A reader reads the ACL without loading a PowerShell module (`[System.IO.File]::GetAccessControl`),
 with `PSModulePath` removed from a Windows PowerShell 5.1 child's environment, and never synchronously
 on a UI or main thread: a cold PowerShell can take more than 15 s (DEC-0033). Descriptor
-paths on Windows are drive-absolute (`C:\…` or `C:/…`) or under `~\`; a network share (`\\server\…`,
+paths and command executables (`FAC-SEM-012`) on Windows are drive-absolute (`C:\…` or `C:/…`) or under `~\`; a network share (`\\server\…`,
 `\\?\…`) is never a local path.
 
 ## Lifecycle
@@ -524,7 +525,7 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
 | `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port; no two descriptors claim one `id.instance` |
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
-| `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or `~/` executable path |
+| `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no launchd field |
 | `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
 | `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |

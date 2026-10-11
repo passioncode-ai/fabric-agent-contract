@@ -40,6 +40,12 @@ describe("fabric-service/0.1 semantic rules", () => {
     expect(codes("service-descriptor", descriptor("plan-board", "default", 47110, { commands: { doctor: ["brandctl", "check"] } }))).toContain("FAC-SEM-012");
   });
 
+  it("FAC-SEM-012 takes localPath's grammar on every system (DEC-0032) and refuses a bare name, a relative path or a share", () => {
+    const doctor = (executable: string) => codes("service-descriptor", descriptor("plan-board", "default", 47110, { commands: { doctor: [executable, "check"] } }));
+    for (const accepted of ["/usr/local/bin/x", "~/bin/x", "C:\\Users\\example\\x.exe", "C:/Users/example/x.exe", "~\\bin\\x.exe"]) expect(doctor(accepted), accepted).not.toContain("FAC-SEM-012");
+    for (const refused of ["example-agent.exe", ".\\bin\\x.exe", "bin/x", "\\\\srv\\share\\x.exe", "//srv/share/x.exe"]) expect(doctor(refused), refused).toContain("FAC-SEM-012");
+  });
+
   it("FAC-SEM-010 lets a remote service share a port number with a local one (DEC-0019)", () => {
     const remote = { protocol: "fabric-service/0.1", id: "example-agent", instance: "default", placement: "remote", origin: "https://agent.example.com:47191" };
     expect(codes("service-directory", { descriptors: [descriptor("maker", "default", 47191), remote] })).not.toContain("FAC-SEM-010");
