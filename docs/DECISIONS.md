@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0043`
+**Next free ID:** `DEC-0044`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1690,3 +1690,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   SEM`); `DEC-0041` had been reserved first (`--key meter-grant-read-20261011`) and is pull request #32, merged at
   `7931c1d`, so the marker moves to `DEC-0043`. This file and `conformance.md` were edited under git leases; the record plane is `fs`.
   Written by Fabric's session; reviewed and merged by the contract's owner session (fabric-agent-contract-75).
+
+### DEC-0043 — Two canonical forms, one register: the settings form and RFC 8785; the board's digest is RFC 8785
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's board already
+  computes the pinned digest (`apps/desktop/src/main/boardService.ts` `commsDigest`); the adapter's kit ports run
+  the shared vectors (ask (c), CT-18).
+- **Decision:**
+  1. The contract has exactly two canonical JSON forms, both in `src/canonical.ts`, and every signed or hashed JSON
+     document names one of them in the register
+     [canonical forms](specification/conformance.md#canonical-forms):
+     - the **settings form** (DEC-0025), `settingsCanonicalJson`: keys by Unicode code point, `", "` and `": "`,
+       integers within ±(2^53 − 1) only, `JSON.stringify` string escaping — Python's
+       `json.dumps(sort_keys=True, ensure_ascii=False)`;
+     - **RFC 8785** (JCS, DEC-0039), `rfc8785`: keys by UTF-16 code unit, no whitespace, ECMAScript numbers;
+       refuses a non-finite number, a lone surrogate and a value that is not plain JSON.
+
+     A new document picks one of the two and names it, never a third: the settings form for a document that is
+     or mirrors stored settings, RFC 8785 for any other. A restriction of the input is not a third form.
+  2. **DEC-0022's idempotency digest is RFC 8785** of the operation's arguments, which hold integers within
+     ±(2^53 − 1) only: `sha256:` and the hex SHA-256 of `fabric-project-comms/0.1` NUL `<operation>` NUL
+     `<RFC 8785>`; a call holding a fraction is refused `invalid_arguments` before anything is stored. The
+     reference is `commsDigest` (`src/comms-digest.ts`). It follows the consumer: Fabric's board computes exactly
+     this (UTF-16 order by `Array.prototype.sort`, no whitespace, integers only, lone surrogates refused).
+  3. **DEC-0031's "its canonical JSON" is the settings form**: a device policy and a policy key set are signed
+     over the settings form of the document without `signature` (`policySigningInput`), not over RFC 8785. So
+     are a settings backup's checksum and activity's derived `eventId` and path `sourceKey`.
+  4. A revisioned object's `contentHash` (`overview.md`) is over the RFC 8785 form of the object without
+     `contentHash`; the text had said only "canonical JSON".
+  5. Shared vectors, `fixtures/vectors/canonical.json`: each form's cases (RFC 8785's §3.2.2–§3.2.4 sample, its
+     §3.2.3 sorting sample and Appendix B), the inputs on which the two differ, and the board's digests.
+- **Why:** three uses of "canonical JSON" wrote different bytes and no page told them apart (F-A-006, F-B-112,
+  F-B-315): DEC-0022 named sorted keys without the order, which differs above U+FFFF, and no reference or vector;
+  DEC-0031 named neither form next to the RFC 8785 that DEC-0039 had made citable. A signer who reads "canonical
+  JSON" beside RFC 8785 writes bytes the device refuses, and two boards could answer `idempotency_conflict` to the
+  same call. The settings form stays because settings backups, device policies and activity ids are already
+  signed and stored in it; RFC 8785 stays because approvals are and it is the published standard.
+- **Compatibility:** Additive in code — `canonicalJson` (`src/settings-backup.ts`) and `jcs` (`src/delegation.ts`)
+  re-export the two functions, and no output changes. Clarifying in text for DEC-0031 and the activity ids: the
+  bytes are those the code always computed. A tightening for DEC-0022, whose text admitted either key order: the
+  one consumer that computes it, Fabric's board at `487ef5b0`, already writes these bytes (the four digest vectors
+  were checked against its `commsDigest`), so nobody must change. The reference also refuses an empty operation
+  or one holding a NUL; Fabric passes fixed names only. `contentHash` is named for the first time; no contract
+  code computes it. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - code: `src/canonical.ts` (new), `src/comms-digest.ts` (new), `src/settings-backup.ts` and `src/delegation.ts`
+    (re-exports), `src/device-rules.ts` and `src/activity-rules.ts` (import the settings form by name);
+  - spec: `docs/specification/conformance.md` (Canonical forms), `docs/specification/project-comms.md`
+    (Idempotency), `docs/specification/devices.md`, `docs/specification/activity.md`,
+    `docs/specification/delegation.md`, `docs/specification/overview.md`;
+  - vectors and tests: `fixtures/vectors/canonical.json`, `test/canonical.test.ts`; coverage floors in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Canonical form), `docs/DOCMAP.md`, `docs/evidence/sources.md` (RFC 8785 text pinned),
+    the handoff `docs/handoffs/2026-10-11-canonical-forms.md`.
+- **Not decided here:** unifying the two forms (a contract-owner choice; it would re-sign every device policy and
+  change every stored backup checksum); whether the settings form should refuse a lone surrogate, as Python
+  cannot encode one (today only `FAC-SEM-035` refuses one in a backup cell); the `contentHash` Fabric's hub call
+  writes on its synthetic binding and hub references (`hubCall.ts`), which hashes a string, not an object.
+- **Source:** RFC 8785 (text pinned in `docs/evidence/sources.md`); Fabric `apps/desktop/src/main/boardService.ts`
+  at `487ef5b0` (`commsCanonical`, `commsDigest`, last changed `d8eb9ff5`); the board-waves inventory F-A-006,
+  F-B-112, F-B-315 (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P2-01. DEC-0043 was
+  reserved by git CAS (`agent_sync.py reserve --key canonical-forms-20261011 DEC`); this file and `conformance.md`
+  were edited under git leases; the record plane is `fs`.

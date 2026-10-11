@@ -220,7 +220,9 @@ approval's lifetime. Any fault of the document is `approval-invalid`; a second u
 is required: without one the answer is `unknown-state`, and a callee that truly wants no replay protection
 passes `UNSAFE_NO_JTI_STORE` by name. **The order** is: the delegation token, then the grant check, then `verifyApproval`, which consumes the `jti` last, then the action (DL-13, DL-21) — so an approval is not
 spent when the meter refuses, and stays usable until its `exp`.
-`actionDigest(action)` computes the digest; `jcs` is the canonical form. Products keep their own gates for
+`actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
+RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
+DEC-0043). Products keep their own gates for
 people who use them directly; between agents this document replaces shared signing keys, plan-hash rows and
 confirm codes.
 

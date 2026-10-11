@@ -108,9 +108,12 @@ authority is separately granted. Exactly-once external execution is not claimed.
 
 The namespace is the logical Project and operation family, not the provider or the session, so a
 replacement responder can retry the same accepted command. The digest is SHA-256 over
-`fabric-project-comms/0.1 NUL <operation> NUL <canonical JSON>`. Canonical JSON uses sorted keys,
-no insignificant whitespace, integers only (`|n| ≤ 2^53−1`), no lone surrogates and no Unicode
-normalisation.
+`fabric-project-comms/0.1 NUL <operation> NUL <canonical JSON>`, written `sha256:<hex>`. The canonical JSON is
+RFC 8785 of the operation's arguments ([canonical forms](conformance.md#canonical-forms), DEC-0043): members
+sorted by UTF-16 code unit, no whitespace, no lone surrogates and no Unicode normalisation. The arguments hold
+integers only (`|n| ≤ 2^53−1`); a call that holds a fraction is refused `invalid_arguments` before anything is
+stored. `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) computes it, and Fabric's board
+computes the same digests (the vectors in `fixtures/vectors/canonical.json`).
 
 - The same key with the same digest returns the same receipt after current authorization.
 - The same key with a different digest is `idempotency_conflict`.

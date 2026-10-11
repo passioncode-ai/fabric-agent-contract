@@ -218,6 +218,13 @@ addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DE
 operator decisions and bindings, kept outside its data directory. A restore only adds missing
 rows. It names secrets and never holds them (DEC-0025).
 
+**Canonical form**: The bytes a signature or a digest over JSON covers. The contract has two, and each signed or
+hashed document names one ([canonical forms](docs/specification/conformance.md#canonical-forms), DEC-0043): the
+**settings form** — keys by code point, `", "` and `": "`, integers only, Python's `json.dumps(sort_keys=True,
+ensure_ascii=False)` — for settings backups, device policies and key sets and activity ids; and **RFC 8785**
+(JCS) — keys by UTF-16 code unit, no whitespace, ECMAScript numbers — for approvals, the board's idempotency
+digest and a revision's `contentHash`. They give different bytes for the same value.
+
 **Provider entry**: The file an installer writes to announce an agent that is not
 a service (`fabric-provider/0.1`): its id, its manifest and how to reach it over
 MCP. Like a service descriptor, it describes an installation and grants nothing.

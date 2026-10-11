@@ -1,7 +1,7 @@
 import { createPublicKey, verify } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, mergeStreams } from "./activity-rules.js";
-import { canonicalJson } from "./settings-backup.js";
+import { settingsCanonicalJson } from "./canonical.js";
 import { rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
@@ -20,7 +20,7 @@ type Source = (typeof POLICY_PRECEDENCE)[number];
 /** The bytes a policy signature covers: the canonical JSON of the document without `signature`. */
 export function policySigningInput(policy: JsonObject): Buffer {
   const { signature: _signature, ...signed } = policy;
-  return Buffer.from(canonicalJson(signed), "utf8");
+  return Buffer.from(settingsCanonicalJson(signed), "utf8");
 }
 
 /** DER prefix of an Ed25519 SubjectPublicKeyInfo (RFC 8410); the raw 32-byte key follows it. */
