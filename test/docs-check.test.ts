@@ -18,8 +18,12 @@ describe("the gate's scope", () => {
       mkdirSync(path.join(repo, ".claude/worktrees/other/test"), { recursive: true });
       writeFileSync(path.join(repo, ".claude/worktrees/other/b.md"), "#  b\n");
       writeFileSync(path.join(repo, ".claude/worktrees/other/test/x.test.ts"), "throw 1\n");
+      writeFileSync(path.join(repo, ".gitignore"), "coverage/\n");
+      mkdirSync(path.join(repo, "coverage"));
+      writeFileSync(path.join(repo, "coverage/report.md"), "#  ignored\n");
       const files = trackedFiles(repo).map((file) => path.relative(repo, file)).sort();
-      expect(files).toEqual(["a.md", "draft.md"]);
+      // Tracked and untracked-but-not-ignored files only: no ignored file, no other session's worktree.
+      expect(files).toEqual([".gitignore", "a.md", "draft.md"]);
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
