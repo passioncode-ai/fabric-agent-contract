@@ -1,6 +1,6 @@
 # Spend policy and grants with amounts
 
-DEC-0037 · rule code `FAC-SEM-047` · schemas
+DEC-0037, DEC-0038 · rule codes `FAC-SEM-047`, `FAC-SEM-048` · schemas
 [`spend-policy`](../../schemas/spend-policy.schema.json),
 [`grant-check`](../../schemas/grant-check.schema.json), and the `spend` and `principalKind` fields of a
 [standing grant](../../schemas/governance.schema.json); `costPresets` in the
@@ -39,12 +39,19 @@ together, so anyone can see why.
 
 ## Grants
 
-A standing grant with a `spend` block authorizes spending:
+A standing grant with a `spend` block authorizes spending (DEC-0038):
 
-- `limitUsd` and a `period` (`day`, `month`, `task` or `grant`);
-- optional `perCallMaxUsd` and `autoApproveUsd`;
-- a `payer` (`owner` or `guest`);
+- `mode: unlimited`, or `mode: limited` with one or more `limits`. Each limit names a `window` and a
+  `limitUsd`; several windows apply together, and the first one reached stops the spend:
+  - `total`: the grant's whole life;
+  - `task`: one task;
+  - `project`: everything spent on the grant's project;
+  - `day`, `week`, `month`: calendar windows in UTC.
+- optional `perCallMaxUsd` and `autoApproveUsd`, at most the smallest window;
+- `payer: owner`: the agent's owner pays, also for a share grant;
 - a `credentialSource`.
+
+An unlimited grant is still stopped by the estate total (L0).
 
 Three rules apply to every grant and every reader:
 
@@ -92,3 +99,4 @@ An unknown grant state is a denial (Fabric ADR-0023).
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-047` | `spend-policy` | the auto-approve threshold of a limited policy is at most its monthly limit; at most one offered option is preselected; "no project limit" is chosen only when it was offered |
+| `FAC-SEM-048` | `grant-spend` | a limited grant names each window once, and neither its per-call maximum nor its auto-approve threshold exceeds its smallest window |

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0038`
+**Next free ID:** `DEC-0039`
 
 ### DEC-0001 — Documentation is governed in Git
 
@@ -1329,3 +1329,34 @@ annotate only the old status; decision bodies are never rewritten.
   reserved by git CAS (`agent_sync.py reserve DEC|SEM --key spend-policy-20261011`), and this file was
   edited under the git lease. The Project Observatory session's review (2026-10-11) added the denial `code`,
   the reservation and the token's boundary.
+
+### DEC-0038 — Grant limits: unlimited, or several windows at once (total, task, project, day, week, month); the owner pays
+
+- **Date:** 2026-10-11
+- **Status:** Accepted source change, amending DEC-0037 before any consumer adopted it.
+- **Amends:** DEC-0037. The standing grant's `spend` block.
+- **Decision:**
+  - A grant's `spend` is `mode: unlimited` or `mode: limited`. A limited grant carries one or more `limits`,
+    each `{window, limitUsd}`.
+    - The windows are `total` (the grant's life), `task`, `project`, `day`, `week` and `month` (calendar
+      windows in UTC).
+    - Several windows apply together, and the first one reached stops the spend.
+  - An unlimited grant is still stopped by the estate total (L0).
+  - `payer` is `owner`: the agent's owner pays, also for a share grant to someone outside the estate.
+  - `FAC-SEM-048`: each window appears once, and neither `perCallMaxUsd` nor `autoApproveUsd` exceeds the
+    smallest window.
+- **Why:** The operator decided on 2026-10-11 that the owner pays and that access is given with a limit or
+  without one. A limit can be on the total, a task, a project, a month, a day or a week. DEC-0037's single
+  `limitUsd` with one `period` could not express a weekly window, a project window, several windows at once,
+  or an unlimited grant.
+- **Compatibility:** It replaces DEC-0037's `limitUsd`/`period` in the grant's `spend` with `mode`/`limits`
+  the same day. No producer or reader of DEC-0037 existed yet. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - `schemas/governance.schema.json` (`spend`);
+  - `src/spend-rules.ts` (`grantSpendRules`) and `src/semantic-rules.ts` (kind `grant-spend`);
+  - `docs/specification/spend-policy.md` §Grants;
+  - fixtures: an unlimited grant, a limited grant with all six windows, a missing `limits`, a `guest`
+    payer, and two semantic refusals.
+- **Source:** the operator, 2026-10-11, in their words: «да платит владелец, доступ выдается по лимиту
+  либо анлим, лимит тотал, на задачу, на проект, в месяц, в день, в неделю». Drafted by the Fabric
+  Dashboards session. DEC-0038 and FAC-SEM-048 are reserved by git CAS (`--key grant-windows-20261011`).

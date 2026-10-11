@@ -33,9 +33,34 @@
   "state": "active",
   "principalKind": "external",
   "spend": {
-    "limitUsd": 25,
-    "period": "month",
-    "perCallMaxUsd": 2,
+    "mode": "limited",
+    "limits": [
+      {
+        "window": "task",
+        "limitUsd": 2
+      },
+      {
+        "window": "day",
+        "limitUsd": 5
+      },
+      {
+        "window": "week",
+        "limitUsd": 20
+      },
+      {
+        "window": "month",
+        "limitUsd": 50
+      },
+      {
+        "window": "project",
+        "limitUsd": 120
+      },
+      {
+        "window": "total",
+        "limitUsd": 200
+      }
+    ],
+    "perCallMaxUsd": 1,
     "autoApproveUsd": 0.5,
     "payer": "owner",
     "credentialSource": {
