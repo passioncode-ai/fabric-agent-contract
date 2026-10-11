@@ -51,10 +51,12 @@ exact check receipts.
 **Definition of done:** all five guide requirements have file receipts; README and
 DOCMAP resolve the guide; documentation and full gates pass; private CI passes.
 
-- [ ] Author the guide from the approved design without changing normative rules.
-- [ ] Add README and DOCMAP navigation.
-- [ ] Run `pnpm docs:check`, `pnpm run check` and `git diff --check`.
-- [ ] Record acceptance, commit, publish through private PR and merge after CI.
+- [x] Author the guide from the approved design without changing normative rules.
+- [x] Add README and DOCMAP navigation.
+- [x] Run `pnpm docs:check`, `pnpm run check` and `git diff --check`.
+- [x] Record acceptance, commit, publish through private PR and merge after CI.
+
+All four steps closed at `cb638b1`; the receipt is [the guide's acceptance](../specs/2026-08-27-agent-provider-guide-acceptance.md) (noted 2026-10-11).
 
 ## Self-review
 

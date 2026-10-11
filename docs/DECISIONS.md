@@ -5,6 +5,11 @@ annotate only the old status; decision bodies are never rewritten.
 
 **Next free ID:** `DEC-0043`
 
+`DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
+the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
+commits `2d385e0`, `25c07ce`). The `SEM-0035` and `SEM-0036` receipts DEC-0025 cites were taken before the
+origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b`).
+
 ### DEC-0001 — Documentation is governed in Git
 
 - **Date:** 2026-08-26
@@ -136,6 +141,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-28
 - **Status:** Accepted
+- **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -159,6 +165,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-11):** extended by DEC-0018, DEC-0020, DEC-0021, DEC-0024, DEC-0025, DEC-0026, DEC-0027 and DEC-0029 (each a versioned addition under its rule).
 - **Decision:** The contracts Fabric locked for its agent registry on 2026-09-29 — the
   provider entry `fabric-provider/0.1`, the runner catalogue, the interop extension
   `fabric-interop/0.1` (keyed `https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1`)
@@ -186,6 +193,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-11):** item 6 amended by DEC-0018 (every tool's `outputSchema` is rooted at `type: object`).
 - **Refines:** DEC-0016
 - **Decision:** The operator, who owns the contract design, ruled on the seven questions
   AR-1 raised:
@@ -313,6 +321,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -1004,6 +1013,7 @@ annotate only the old status; decision bodies are never rewritten.
 - **Date:** 2026-10-10
 - **Status:** Accepted source change; consumer adoption in progress (Fabric 0.3.4 CO-238, Fabric
   Dashboards FD-37)
+- **Annotated (2026-10-11):** rule 2 of Windows token files amended by DEC-0033 (the owner may be the user, SYSTEM or Administrators).
 - **Amends:** the `fabric-service/0.1` descriptor and service rules of DEC-0015 (launchd as the only
   supervisor), additively under the DEC-0016 extension policy.
 - **Decision:**
@@ -1074,6 +1084,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1370,6 +1381,7 @@ annotate only the old status; decision bodies are never rewritten.
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the issuer (Fabric 0.4.0
   REQ-37), the meter (Project Observatory), then each callee and caller in the order of Fabric's
   [adoption plan](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/evidence/plans/2026-10-11-delegation-model/README.md).
+- **Annotated (2026-10-11):** tightens the service's operator-session lifetime (12 hours after last use, 7 days after sign-in): not additive for that rule, so a kit's longer cookie stops conforming at its next pin (ruled with Fabric's session, ADR-0144's owner, 2026-10-11).
 - **Amends:** interop C3.5 (the hub is the only issuer, not the only route); DEC-0024 additively
   (`surfaces.mcp.auth: "delegation"`); DEC-0037 (the registry's per-session token is the hub's delegation
   token; its grant-check codes become a subset of one code set); DEC-0037's L0 wording; DEC-0038's grant gains
