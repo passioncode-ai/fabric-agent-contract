@@ -240,14 +240,14 @@ describe("the review's fixes", () => {
     expect(messagesOf(sessionHandoffFolderFindings(snapshot)).filter((message) => message.includes("digest"))).toEqual([]);
   });
 
-  it.skipIf(process.platform === "win32")("reports a FIFO or an oversized file without blocking on it or reading it", { timeout: 5000 }, () => {
+  it.skipIf(process.platform === "win32")("reports a FIFO or an oversized file without blocking on it or reading it", { timeout: 30000 }, () => {
     const dir = path.join(scratch, "fifo");
     mkdirSync(dir, { mode: 0o700 });
     execFileSync("mkfifo", ["-m", "600", path.join(dir, "context.md")]);
     writeFileSync(path.join(dir, "task.md"), Buffer.alloc(MAX_HANDOFF_FILE + 1, 0x61), { mode: 0o600 });
-    // A blocking open would hang this worker past any test timeout, so the read runs in a child killed at 2 s.
+    // A blocking open would hang this worker past any test timeout, so the read runs in a child killed at 15 s: a hang never ends, and a loaded machine needs seconds to start tsx.
     const script = `const h = await import(${JSON.stringify(path.join(root, "src/session-handoff.ts"))}); const s = h.readSessionHandoff(${JSON.stringify(dir)}); process.stdout.write(JSON.stringify({ c: s.entries["context.md"], t: s.entries["task.md"] }));`;
-    const out = JSON.parse(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 2000, encoding: "utf8" }));
+    const out = JSON.parse(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 15000, encoding: "utf8" }));
     expect(out.c).toEqual({ mode: "600", kind: "other" });
     expect(out.t).toEqual({ mode: "600", kind: "file", tooLarge: true });
   });
