@@ -33,6 +33,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/memory.md` is `docs/specification/memory-and-learning.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** Raw knowledge and evidence remain project-scoped. Any agent may propose a cross-project insight; the CEO accepts it only after independent evidence and conflict checks. Global memory is retrieved on demand and links to project sources.
 - **Consequences / affects:** `docs/specification/memory.md`, `schemas/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit
@@ -49,6 +50,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/roles.md` is `docs/specification/governance-and-roles.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** One CEO governs the estate; exactly one product manager owns each project's backlog and execution graph; projects may instantiate multiple selectable developer runtimes. Every other business role is registered dynamically.
 - **Consequences / affects:** `CONTEXT.md`, `docs/specification/roles.md`, `docs/reference-architecture/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit
@@ -65,6 +67,7 @@ annotate only the old status; decision bodies are never rewritten.
 
 - **Date:** 2026-08-26
 - **Status:** Accepted
+- **Erratum (2026-10-11):** the affected path `docs/specification/governance.md` is `docs/specification/governance-and-roles.md`; the name in *Consequences / affects* below predates the file's title (found by `docs:check`'s decision-path check).
 - **Decision:** Publishing and support replies default to draft-only. Automation requires a named, scoped, expiring standing grant. Data carries a mandatory classification and retention policy; sensitive project records never promote globally as raw content.
 - **Consequences / affects:** `docs/specification/governance.md`, `schemas/`
 - **Source:** run `2026-08-26-fabric-agent-contract`; stage-0 commit

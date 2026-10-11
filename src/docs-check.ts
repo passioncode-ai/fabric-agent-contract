@@ -79,6 +79,41 @@ export async function checkRuleCodes(root = projectRoot()): Promise<string[]> {
   return ruleCodeFindings(register, specs.filter((spec) => spec !== register), sources);
 }
 
+/**
+ * A decision's named paths resolve (DOCMAP: a decision's *Consequences / affects* is checked by `docs:check`).
+ * Inside a decision's `Consequences / affects` bullet — which names this repository's files; another repository's
+ * paths live in `Source` and `Why` — every backticked token starting `docs/`, `schemas/`, `src/`, `test/` or
+ * `fixtures/` must name a tracked file, or match one when it is a glob (`*`) or a folder (`…/`). An anchor (`#…`)
+ * or a line number (`:12`) is dropped first; a token holding a placeholder (`<…>`, `{…}`) names no file.
+ */
+export function decisionPathFindings(text: string, files: readonly string[]): string[] {
+  const findings: string[] = [];
+  let decision = "";
+  let affects = false;
+  // The register is append-only: a wrong path is corrected by an erratum line in its section, not by a rewrite.
+  let errata = new Map<string, string>();
+  text.split("\n").forEach((line, index) => {
+    const heading = /^### (DEC-\d{4})/.exec(line);
+    if (heading) { decision = heading[1] as string; affects = false; errata = new Map(); return; }
+    const erratum = /^- \*\*Erratum[^*]*:\*\* the affected path `([^`]+)` is `([^`]+)`/.exec(line);
+    if (erratum) errata.set(erratum[1] as string, erratum[2] as string);
+    if (/^- \*\*/.test(line)) affects = /^- \*\*Consequences/.test(line);
+    if (!decision || !affects) return;
+    for (const match of line.matchAll(/`((?:docs|schemas|src|test|fixtures)\/[^`\s]+)`/g)) {
+      const written = (match[1] as string).replace(/#.*$/, "").replace(/:\d+(?:-\d+)?$/, "").replace(/[),.;]+$/, "");
+      const raw = errata.get(written) ?? written;
+      if (/[<>{}]/.test(raw)) continue;
+      const pattern = new RegExp(`^${raw.replace(/[.+?^$()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*")}$`);
+      const directory = raw.endsWith("/") ? raw : undefined;
+      // `schemas/comms-common` names a schema by its short name: `schemas/comms-common.schema.json`.
+      const schemaName = raw.startsWith("schemas/") && !raw.includes(".") ? `${raw}.schema.json` : undefined;
+      const found = directory ? files.some((file) => file.startsWith(directory)) : files.some((file) => pattern.test(file) || file === schemaName);
+      if (!found) findings.push(`docs/DECISIONS.md:${index + 1}: ${decision}: missing path ${raw}`);
+    }
+  });
+  return findings;
+}
+
 export async function runDocsCheck(): Promise<string[]> {
   const root = projectRoot();
   const files = (await walk(root)).filter((file) => file.endsWith(".md"));
@@ -96,6 +131,8 @@ export async function runDocsCheck(): Promise<string[]> {
   const kinds = schemaProfileKinds(JSON.parse(await readFile(path.join(root, "schemas/manifest.schema.json"), "utf8")));
   if (context.join(",") !== kinds.join(",")) findings.push(`CONTEXT.md: profile names ${context.join(", ")} differ from manifest.schema.json ${kinds.join(", ")} (G-12)`);
   findings.push(...await checkRuleCodes(root));
+  const tracked = (await walk(root)).map((file) => path.relative(root, file).split(path.sep).join("/"));
+  findings.push(...decisionPathFindings(await readFile(path.join(root, "docs/DECISIONS.md"), "utf8"), tracked));
   const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")) as { version?: string };
   if (packageJson.version !== CONTRACT_VERSION) findings.push(`package.json: expected version ${CONTRACT_VERSION}`);
   for (const schema of await loadSchemas()) {
