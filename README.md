@@ -15,9 +15,12 @@ is storage-agnostic and stands on its own: any host or agent can implement it, a
 [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) is the kit that
 does it for an agent.
 
-Status: contract `0.1.0` architecture, schemas, fixtures and validation gates are
-implemented. No SDK, runtime, CLI, provider implementation, model router or public
-package ships in this version.
+Status: contract `0.1.0`. What ships: the JSON Schemas, the fixtures, the conformance checker
+(`pnpm run check`: schemas, semantic rules, documents), the `pin:check` CLI that reports a consumer's
+contract pin, and reference verifiers that consumers copy or port and test against this repository's
+vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`
+and `src/session-handoff.ts`. What does not ship: a runtime, a provider implementation, a model router,
+a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
 
@@ -35,6 +38,9 @@ package ships in this version.
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
+- [Spend policy and grants with amounts — agents check a record instead of asking (DEC-0037, DEC-0038)](docs/specification/spend-policy.md)
+- [Conformance — profiles, the semantic-rule register and who checks what](docs/specification/conformance.md)
+- [Results and evidence — claims, proof and what was not verified](docs/specification/results-and-evidence.md)
 - [Delegation — who acts for whom: the hub's signed token, the callee's offline check, `approval/1` and one set of refusal codes (`fabric-delegation/0.1`)](docs/specification/delegation.md)
 - [Fabric's button in a product and `fabric://` links (DEC-0040)](docs/specification/fabric-button.md)
 - [Session handoff — the folder a host hands a coding-agent session (`session-handoff/1`, DEC-0042)](docs/specification/session-handoff.md)

@@ -69,7 +69,58 @@ claimed piece of shared work.
 **Write scope**: The paths or logical resources a node declares it may modify.
 
 **Standing grant**: A named, scoped, expiring authorization for a class of
-otherwise approval-bound external actions.
+otherwise approval-bound external actions. With a `spend` block it authorizes spending: `unlimited`, or
+`limited` by one or more **Limit windows** at once; the owner pays (DEC-0037, DEC-0038).
+
+**Spend policy**: A project's L1 record of what its agents may spend — the monthly limit, the auto-approve
+threshold per task, the model classes and the credential sources — that an agent checks instead of asking
+the person ([spend policy](docs/specification/spend-policy.md), DEC-0037).
+
+**Limit window**: The span a grant's spending limit counts over: `total`, `task`, `project`, `day`, `week`
+or `month`; several apply together and the first reached stops the spend (DEC-0038). `call` is a refusal
+window at L3, not a grant limit (DEC-0041).
+
+**Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
+public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
+DEC-0039).
+
+**Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
+never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
+
+**Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
+it applies, enforced or not (DEC-0021, DEC-0027).
+
+**Spending limit**: A cap a service applies to its own spend for a day or a UTC month, stated in its usage
+report (DEC-0021, DEC-0027); distinct from a grant's **Limit window**, which caps what a grant may spend.
+
+**Services folder**: The per-user directory where installed services' descriptors and token files live:
+`~/Library/Application Support/ai.passioncode.fabric/services/` on macOS,
+`${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/services/` on Linux,
+`%LOCALAPPDATA%\passioncode-fabric\services\` on Windows, or `FABRIC_SERVICES_DIR` (DEC-0015, DEC-0032).
+
+**Supervisor**: The system service manager that keeps a local service running — launchd, systemd or the
+Task Scheduler — named by the descriptor's `lifecycle.manager` (DEC-0015, DEC-0032).
+
+**Token file**: The file in the services folder holding a service's descriptor token, readable by its user
+only: mode 0600 on macOS and Linux; on Windows an ACL owned by the user, SYSTEM or Administrators
+(DEC-0032, DEC-0033).
+
+**Project board**: The board a Project's agents exchange information and requests through, under
+`fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
+
+**memory/0.1**: The wire on which agent memory is served, first by Project Observatory
+([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
+
+**Key set**: The device's set of trusted policy keys, signed by the organization's **Policy root key** and
+rotated with overlap; a policy counts only when signed by a key of the current set valid at its `issuedAt`
+([devices](docs/specification/devices.md), DEC-0031, `FAC-SEM-046`).
+
+**Policy root key**: The organization's root key, delivered at enrollment, that signs **Key sets** and nothing
+else (DEC-0031).
+
+**Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
+every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
+(DEC-0030, DEC-0031).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
 call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**
