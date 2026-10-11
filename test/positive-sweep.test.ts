@@ -10,13 +10,12 @@ const root = projectRoot();
 interface Entry { name: string; schema: string; path: string; valid: boolean }
 const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.json"), "utf8")) as Entry[];
 
-/**
- * The rule kind that reads one document of a schema whole. A schema missing here has no single-document rule; the
- * composite kinds — `device-enrollment` (a request with its response), `device-key-set` (a set with the root key it
- * is checked under) and the interop, route and delegation bundles — are exercised by their semantic fixtures.
- */
+/** The rule kind that reads one document of a schema whole. */
 export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "activity-batch.schema.json": "activity-batch",
+  "approval.schema.json": "approval-claims",
+  "delegation-token.schema.json": "delegation-claims",
+  "governance.schema.json": "grant-spend",
   "activity-summary.schema.json": "activity-summary",
   "comms-submit.schema.json": "comms-submit",
   "coordination.schema.json": "coordination",
@@ -35,6 +34,55 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "telemetry-event.schema.json": "telemetry-event"
 };
 
+/**
+ * Schemas with positive fixtures and no rule that reads one of their documents whole. Their rules, where they have
+ * any, take a wrapped input — a request with its response (`device-enrollment`), a set with the root key it is
+ * checked under (`device-key-set`), a batch with its acknowledgement, the interop, route and delegation bundles —
+ * and are exercised by their semantic fixtures. A schema with positive fixtures is on one list or the other.
+ */
+export const NOT_SWEPT: readonly string[] = [
+  "access-log.schema.json",
+  "activity-batch-ack.schema.json",
+  "admission.schema.json",
+  "binding.schema.json",
+  "comms-complete.schema.json",
+  "comms-fence.schema.json",
+  "comms-page.schema.json",
+  "comms-refusal.schema.json",
+  "comms-status.schema.json",
+  "conformance-report.schema.json",
+  "contract-pin.schema.json",
+  "delegation-jwks.schema.json",
+  "delegation-refusal.schema.json",
+  "device-check-in.schema.json",
+  "device-enrollment.schema.json",
+  "device-health.schema.json",
+  "device-key-set.schema.json",
+  "device-policy.schema.json",
+  "execution-context.schema.json",
+  "fabric-link.schema.json",
+  "grant-check-request.schema.json",
+  "grant-check.schema.json",
+  "interop-agent-call.schema.json",
+  "interop-capability.schema.json",
+  "interop-job-handle.schema.json",
+  "interop-job-request.schema.json",
+  "interop-job-tool-output.schema.json",
+  "interop-job.schema.json",
+  "interop-request-meta.schema.json",
+  "interop-result.schema.json",
+  "memory-capability.schema.json",
+  "memory.schema.json",
+  "operator-channel-status.schema.json",
+  "pipeline.schema.json",
+  "runner-route-event.schema.json",
+  "service-dashboard-extension.schema.json",
+  "service-events-page.schema.json",
+  "service-login-code.schema.json",
+  "versioned-setting.schema.json",
+  "work.schema.json"
+];
+
 describe("every positive fixture passes the semantic rules", () => {
   const swept = catalogue.filter((entry) => entry.valid && KIND_OF_SCHEMA[entry.schema]);
 
@@ -51,6 +99,11 @@ describe("every positive fixture passes the semantic rules", () => {
       expect(sources, kind).toContain(`kind === "${kind}"`);
       expect(catalogue.some((entry) => entry.schema === schema && entry.valid), schema).toBe(true);
     }
-    expect(swept.length).toBeGreaterThan(40);
+    expect(swept.length).toBeGreaterThan(50);
+    // A schema with positive fixtures is either swept or listed as having no single-document rule.
+    const withFixtures = [...new Set(catalogue.filter((entry) => entry.valid).map((entry) => entry.schema))].sort();
+    const placed = withFixtures.filter((schema) => schema in KIND_OF_SCHEMA || NOT_SWEPT.includes(schema));
+    expect(placed).toEqual(withFixtures);
+    expect(Object.keys(KIND_OF_SCHEMA).filter((schema) => NOT_SWEPT.includes(schema))).toEqual([]);
   });
 });

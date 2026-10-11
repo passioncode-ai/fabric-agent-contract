@@ -108,7 +108,8 @@ function serviceClaims(value: JsonObject): Finding[] {
 
 /**
  * An executable's path as `localPath` admits it (schemas/service-common.schema.json, DEC-0032): POSIX `/…` or
- * `~/…`, Windows drive-absolute `C:\…`/`C:/…` or `~\…` — and never a network share (`//server/…`).
+ * `~/…`, Windows drive-absolute `C:\…`/`C:/…` or `~\…` — and never a network share (`//server/…`). `localPath` itself
+ * still admits `//…` (F-B-207); wave 4 of the board run narrows it, and then this pattern and that one are one.
  */
 const EXECUTABLE_PATH = /^(~[\\/]|\/(?!\/)|[A-Za-z]:[\\/])/;
 

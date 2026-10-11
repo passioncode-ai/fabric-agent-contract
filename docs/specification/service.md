@@ -67,7 +67,8 @@ descriptor describes an installation, not a run.
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
   directory; a remote origin claims no port here.
-- Paths MAY start with `~/`. Commands MUST be argument arrays; a shell string is
+- Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
+  follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)).
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
