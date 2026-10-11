@@ -146,13 +146,13 @@
   {
     "id": "TRUST-TIERS",
     "title": "Trust tiers in fabric-delegation/0.1 (operator decision 2026-10-11; Fabric ADR-0144 amendment 4): T0 the operator's own machine and T1 an enrolled machine of the same owner need no delegation token, approval or grant record (money limits and human gates still bind); T2 another person's machine takes the full profile",
-    "source": "project-observatory session message 2026-10-11; operator's global instructions 'This machine is the operator's workplace' (2026-10-11)",
+    "source": "Fabric ADR-0144 amendment 4 at 19ad05ca (2026-10-11); project-observatory session message 2026-10-11; operator's global instructions 'This machine is the operator's workplace' (2026-10-11)",
     "status_measured": "open: delegation.md has no tier section; DL-8, DL-12 and surfaces.mcp.auth 'delegation' read as unconditional",
     "area": "spec",
     "severity": "major",
     "owner": "contract",
     "closable_in_one_pass": true,
     "needs": "",
-    "proposed_fix": "a trust-tier section: a callee MUST NOT require a token from a T0/T1 caller, MAY accept and verify one for attribution and narrowing; DL-8 scoped to T2; DL-12's retirement of descriptor-token calls applies across the machine boundary; auth 'delegation' is for a service exposed to T2; T0 = loopback on the owner's OS account, T1 = an enrolled machine's binding (RM-21 decides it), else T2; 'loopback reachability is not authorization' stays a statement about hostile local processes"
+    "proposed_fix": "a trust-tier section: a callee MUST NOT require a token from a T0/T1 caller, MAY accept and verify one for attribution and narrowing; DL-8 scoped to T2; DL-12's retirement of descriptor-token calls applies across the machine boundary; auth 'delegation' is for a service exposed to T2; T0 = loopback on the owner's OS account, T1 = an enrolled machine's binding (RM-21 decides it), else T2; 'loopback reachability is not authorization' stays a statement about hostile local processes; amendment 4 keeps 'no call with another service's descriptor token' as attribution hygiene, not a local requirement, and 'never spend another agent's key or vault slot' in force (money)"
   }
 ]
