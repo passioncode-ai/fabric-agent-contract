@@ -2428,8 +2428,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      check attestation, the authenticator's provenance, the signature counter, extension outputs, or the enrollment
      that pinned the first passkey; the specification says why for each. It refuses a passkey the parent revokes (a
      revision may revoke its own signer when it removes it: rotation), an unreadable clock first, and a record that
-     breaks `FAC-SEM-072`…`FAC-SEM-076` (`rule-violation`), so passing it is enough to apply a revision. Its refusals
-     are rows ER-1…ER-11.
+     breaks `FAC-SEM-072`…`FAC-SEM-076` (`rule-violation`). A machine applies a revision only when it is valid against
+     the schema and this verifier accepts it; the verifier does not check the schema. Its refusals are rows ER-1…ER-11.
   9. **Algorithms.** Passkeys are `ES256` or `EdDSA`, each named in a field; anything else (RS256 among them) is refused.
      Hub and publisher keys are `EdDSA` until Fabric records D2, when `ES256` joins them additively. Device keys are
      DEC-0053's.

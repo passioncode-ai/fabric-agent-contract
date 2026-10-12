@@ -138,8 +138,10 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
   revocation of the parent kept (`FAC-SEM-072` holds here too, so a passkey cannot quietly un-revoke a machine);
 - the authority is one the verifier trusts: its parent's and not revoked by the parent, or for revision 1 the one it
   pinned. A revision may revoke its own signer when it removes it (a passkey rotated out signs its own removal);
-- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`, so passing `verifyEstateRecord` is enough to apply a
-  revision.
+- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`. The schema is not checked here: a machine applies a
+  revision only when it is valid against [`estate-record`](../../schemas/estate-record.schema.json) and
+  `verifyEstateRecord` accepts it — a signed record of the wrong shape (say `authorities: null`) would otherwise lock
+  the estate out at the next revision.
 
 ### What is not verified
 
@@ -167,7 +169,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-7 | `wrong-type`, `wrong-challenge`, `wrong-origin`, `cross-origin` | the client data's `type`, `challenge` or `origin`, or a cross-origin frame |
 | ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the `rpIdHash`, AT set or BS without BE, UP clear, UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
-| ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with an offset on a day that exists, or the window is not positive or exceeds 30 days; or the clock is before `issuedAt` or after `validUntil` (both instants are inside the window) |
+| ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is before `issuedAt` or after `validUntil` (both instants are inside the window) |
 | ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`; the verdict names the codes |
 
 The vectors hold one case or more per problem, the EdDSA test passkey's seed (Ed25519 is deterministic, so a port's

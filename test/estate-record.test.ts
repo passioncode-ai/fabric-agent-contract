@@ -300,6 +300,14 @@ describe("the verifier (DEC-0055, WebAuthn Level 3 §7.2)", () => {
     for (const issuedAt of ["2026-13-45T25:61:61Z", "2026-02-30T00:00:00Z", "2026-10-12T09:00:00"]) {
       expect(verifyEstateRecord(resign({ ...first, issuedAt }), { authorities: [edAuthority], at: AT }), issuedAt).toEqual({ ok: false, problem: "too-long-lived" });
     }
+    // A one-day window, so the refusal does not depend on the time zone reading a missing offset as local time.
+    const oneDay = (issuedAt: string) => resign({ ...first, issuedAt, validUntil: "2026-10-13T09:00:00Z" });
+    const atNoon = { authorities: [edAuthority], at: new Date("2026-10-13T00:00:00Z") };
+    expect(verifyEstateRecord(oneDay("2026-10-12T09:00:00Z"), atNoon).ok).toBe(true);
+    for (const issuedAt of ["2026-10-12T09:00:00", "2026-10-12 09:00:00Z", "2026-10-12T23:59:60Z"]) {
+      expect(verifyEstateRecord(oneDay(issuedAt), atNoon), issuedAt).toEqual({ ok: false, problem: "too-long-lived" });
+    }
+    expect(codes("estate-record", (() => { const r = { ...first, issuedAt: "2028-02-29T09:00:00Z", validUntil: "2028-03-01T09:00:00Z" }; return { ...r, digest: estateRecordDigest(r) }; })())).toEqual([]);
   });
 
   it("refuses a revision issued before its parent or dropping a parent revocation, before any signature check (FAC-SEM-072)", () => {

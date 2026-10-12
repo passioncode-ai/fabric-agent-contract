@@ -74,15 +74,17 @@ export interface EstateRecordTrust {
 
 const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
 /**
- * An RFC 3339 date-time as milliseconds, or NaN: an offset is required and the day must exist in its month, as the
- * schema's `date-time` format demands. `Date.parse` alone reads 2026-02-30 as 2 March and a missing offset as local time.
+ * An RFC 3339 date-time as milliseconds, or NaN: `T`, an offset and a day that exists in its month are required. This is
+ * stricter than the schema's `date-time`, which also admits a space separator and a leap second `:60`; both are refused
+ * here (ER-10). `Date.parse` alone reads 2026-02-30 as 2 March and a missing offset as local time.
  */
 const time = (value: unknown): number => {
   const match = isString(value) ? RFC3339.exec(value) : null;
   if (!match) return Number.NaN;
   const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 60) return Number.NaN;
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return Number.NaN;
   return Date.parse(value as string);
 };
 /** A revocation's identity across revisions: its kind and its reference. */
