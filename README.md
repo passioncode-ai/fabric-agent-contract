@@ -48,6 +48,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
 - [Spend policy and grants with amounts — agents check a record instead of asking (DEC-0037, DEC-0038)](docs/specification/spend-policy.md)
 - [Conformance — profiles, the semantic-rule register and who checks what](docs/specification/conformance.md)
+- [Identifiers — when two identifiers are the same: the normal form writers emit and readers compare (DEC-0076)](docs/specification/identifiers.md)
 - [Results and evidence — claims, proof and what was not verified](docs/specification/results-and-evidence.md)
 - [Delegation — who acts for whom: the hub's signed token, the callee's offline check, `approval/1` and one set of refusal codes (`fabric-delegation/0.1`)](docs/specification/delegation.md)
 - [Fabric's button in a product and `fabric://` links (DEC-0040)](docs/specification/fabric-button.md)

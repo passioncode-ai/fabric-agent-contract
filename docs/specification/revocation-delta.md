@@ -162,7 +162,8 @@ the hub key a delegation verifier trusts (DL-14: the delta's part, `deltaRevocat
 
 ## Reconciliation
 
-A revision issued at or after an entry's `at` lists that entry's revocation (the same `kind` and `ref`). A machine
+A revision issued at or after an entry's `at` lists that entry's revocation (the same `kind` and `ref`; a `grant` ref
+matched by the normal form of the grant's URI id, every other kind exactly: `isRevoked`, DEC-0076). A machine
 holding the entry refuses such a revision as `unreconciled` and keeps the one it holds (`reconcileRevision`,
 `FAC-SEM-084`); a revision issued before the entry need not list it, and the entry stays in force. Times are compared as
 instants, never as strings (an entry at `19:05:00+09:00` is `10:05:00Z`), and an unreadable time is `malformed`, never

@@ -38,7 +38,8 @@ equal to the slug `id`; an `env` value refused by name patterns) is superseded.
 - **FAC-SEM-014 compares like things (OQ-0001).** The entry's slug `id` equals the stem
   of its file name, `providers/<id>.json`. The entry names its provider by URI in a
   required field `providerId`, and that URI equals the manifest's `provider.id`, compared
-  URI to URI; the manifest must resolve. Both halves are enforced.
+  URI to URI by their normal forms ([identifiers](identifiers.md), DEC-0076); the slug and the file stem compare as
+  written; the manifest must resolve. Both halves are enforced.
 - **FAC-SEM-015 checks a value by its form (OQ-0004).** Name patterns — password, API
   key, access token, client secret, private key — apply to *names*, such as the fields
   of a manifest. An `env` *value* is checked by its form: `secret-ref:NAME`, whose NAME is
@@ -79,7 +80,7 @@ These follow from the table and are enforced by the schema:
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-013` | `provider-directory` | no id is both a service and a provider, or two providers |
-| `FAC-SEM-014` | `provider-observation` | the entry's `id` is its file name's stem; its `providerId` equals the resolved manifest's `provider.id` |
+| `FAC-SEM-014` | `provider-observation` | the entry's `id` is its file name's stem; its `providerId` equals the resolved manifest's `provider.id`, by normal form (DEC-0076) |
 | `FAC-SEM-015` | `provider-entry` | every `env` value has the form `secret-ref:NAME`, and NAME is not itself a credential |
 
 A provider entry is also read by `FAC-SEM-056` (a stdio server's scope) and `FAC-SEM-057` (no credential in

@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { normalIdentifier } from "./identifiers.js";
 import { strictTime } from "./rfc3339.js";
 
 // #region usage-rules — docs: docs/specification/service.md#usage-report
@@ -6,7 +7,8 @@ import { strictTime } from "./rfc3339.js";
  * FAC-SEM-025, the usage report's whole rule: the arithmetic of days and models (DEC-0021) and what DEC-0065 adds:
  * - the window: every `days[].date` is a date that exists, not after the UTC date of `generatedAt` and at most 30 days
  *   before it, so `days` covers at most the last 31 UTC days with today last (F-A-024);
- * - the project attribution: `byProject[]` names each project once and each task run once within its project, a row's
+ * - the project attribution: `byProject[]` names each project once — two spellings of one project id are one project,
+ *   compared by normal form (DEC-0076) — and each task run once within its project, a row's
  *   calls are at least its task runs' calls, all projects together hold no more calls than the days, and an unknown cost
  *   is null exactly as in a day's rows (CON-OE-13).
  * Malformed input answers findings or none, never an exception.
@@ -58,14 +60,16 @@ function pricedRow(row: JsonObject, at: string): Finding[] {
 function usageProjects(value: JsonObject): Finding[] {
   if (!Array.isArray(value.byProject)) return [];
   const findings: Finding[] = [];
-  const projects = new Set<string>();
+  const projects = new Map<string, string>();
   let projectCalls = 0;
   value.byProject.forEach((project: unknown, p: number) => {
     if (!isObject(project)) return;
     const at = `/byProject/${p}`;
-    if (typeof project.projectId === "string") {
-      if (projects.has(project.projectId)) findings.push(flag(`${at}/projectId`, "each project is one row"));
-      projects.add(project.projectId);
+    const projectId = normalIdentifier(project.projectId);
+    if (projectId !== undefined) {
+      const first = projects.get(projectId);
+      if (first !== undefined) findings.push(flag(`${at}/projectId`, `each project is one row: ${String(project.projectId)} names the project ${first} already names`));
+      else projects.set(projectId, String(project.projectId));
     }
     projectCalls += count(project.calls);
     findings.push(...pricedRow(project, at));

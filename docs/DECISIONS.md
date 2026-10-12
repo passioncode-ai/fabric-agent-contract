@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0076`
+**Next free ID:** `DEC-0077`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -194,6 +194,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-014` compares the entry's `providerId` with the manifest's `provider.id` by normal form; the slug and the file stem compare as written (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-11):** item 6 amended by DEC-0018 (every tool's `outputSchema` is rooted at `type: object`).
 - **Refines:** DEC-0016
 - **Decision:** The operator, who owns the contract design, ruled on the seven questions
@@ -646,6 +647,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034` compare a revision reference's id, a project and a capability by their normal forms (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Refines:** DEC-0026 (runner routes — additive, under the DEC-0016 extension policy); DEC-0010
   (admission unchanged); DEC-0013 (execution contexts unchanged)
@@ -2410,6 +2412,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   runs the signing ceremony and certifies hub keys (backlog CT-19); Project Observatory's node verifies each revision
   before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
   (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-076` keys share grants and `grant` revocations by the normal form of the grant's id (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** ER-10's window admits a revision from 60 s before `issuedAt` (the clock skew every
   relay time allows, `CLOCK_SKEW_SECONDS` in `src/rfc3339.ts`), not from `issuedAt` itself — DEC-0066. This text is
   unchanged; `verifyEstateRecord`, estate-record.md and `fixtures/vectors/estate-record.json` carry the skew.
@@ -3190,6 +3193,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the heartbeat in its check-in, refuses what arrives from other machines unless current and refuses an unreconciled
   revision (CT-20), and its relay client reads the frames as these documents (CT-34); the relay carries them unchanged
   (DEC-0047).
+- **Annotated (2026-10-13):** amended by DEC-0076: `isRevoked`, and so `reconcileRevision` (`FAC-SEM-084`), matches a `grant` revocation by the normal form of the grant's id; every other kind exactly (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** HB-0 — a held heartbeat the machine could not have accepted is refused `malformed`, never read as nothing held (the owed reading of #64; packet P6-08).
 - **Amends:** nothing; it gives DEC-0053 item 9's `records.heartbeat` and `records.revocationDelta`, and DEC-0047 item
   9's `delta`, `heartbeat` and `welcome` frames, the documents they named as this decision's. It adds a precondition to
@@ -3516,6 +3520,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's result writer lists every
   unproven done claim in `notVerified` by its id and refuses self-approval of learning and promotion (CT-19); the first
   organization server and Project Observatory check grant windows with `FAC-SEM-097` (CT-04, CT-20). Board row CT-14.
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-094` (approver against author), `FAC-SEM-006` (the scoped projects) and `FAC-SEM-096` (a rollback basis's id) compare by normal form (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `FAC-SEM-093` also refuses one claim id on two done claims and names each done item by its own index; `FAC-SEM-097` names the field that failed; the grant window is written `[startsAt, expiresAt)` in governance-and-roles.md (the owed reading of #67; packet P6-08).
 - **Amends:** DEC-0011 (a rule for the claim/proof relation), DEC-0004 and DEC-0012 (a rule for approval separation),
   DEC-0006 (one product manager, now found), DEC-0007 (a rule for rollback), DEC-0008 (a rule for a grant's window;
@@ -3586,6 +3591,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   writes `byProject` and moves its OpenRouter referer to its product page (CT-20); the adapter's kits offer the
   attribution setting, off by default (CT-18); Fabric attributes from its first model call through OpenRouter (CT-19).
   Board row CT-15.
+- **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
   adoption. Implements the organization roadmap's RM-16 architecture phase. Closes the board run's inventory items
@@ -4245,3 +4251,98 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   v2's contract plan row CON-OE-10 and its CROSSWALK-v4; Project Observatory's session (2026-10-12); DEC-0015,
   DEC-0033, DEC-0052, DEC-0067; packet P6-04. DEC-0075 and `FAC-SEM-106` were reserved by git CAS (`--key
   w6-p6-04-local-channel-20261012 DEC`, `--key w6-p6-04-sem-local-channel-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0076 — Identifier equality: two identifiers are the same when their normal forms are equal (RFC 3986 §6.2.2; RFC 8141 §3.1 for `urn:`)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). Closes the board row CT-39 (the owed readings of #67
+  and #68, 2026-10-12). Consumer adoption — each writes identifiers in their normal form, looks an accepted reference up
+  by it, and runs `fixtures/vectors/identifiers.json` where it compares identifiers: the adapter first (its kits'
+  ports of the reference code and their route and provider checks: CT-18), Fabric (approvals, routes, bindings,
+  rollbacks, grant revocations: CT-03), the first organization server (usage aggregation by the normal form of
+  `projectId`), Project Observatory (it emits the normal form: CT-20) and Fabric Dashboards (usage and route views: CT-21). The board cells are register text in the handoff
+  `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
+- **Amends:** DEC-0064 (`FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-096` compare by normal form), DEC-0065 (`byProject`
+  duplicates), DEC-0029 (`FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`), DEC-0017 (`FAC-SEM-014`'s `providerId`), DEC-0055
+  (`FAC-SEM-076`'s grants and `grant` revocations), DEC-0054 (`isRevoked` for a `grant`, and so `reconcileRevision`), and
+  `FAC-SEM-002`. No new rule code.
+- **Decision:** in [identifiers](specification/identifiers.md) —
+  1. **The normal form.** A URI — a string matching RFC 3986's `URI` production with an authority or a non-empty path —
+     is normalized by RFC 3986 §6.2.2: the scheme and the host lower-cased and percent-encoding hex upper-cased
+     (§6.2.2.1), percent-encoded unreserved characters decoded (§6.2.2.2), dot segments removed from a hierarchical path
+     (§6.2.2.3), and from a rootless path only its leading `./` and `../` segments (§5.2.4's step A) while it stays
+     rootless — the inner ones kept, the contract's own narrowing under RFC 3986 §6.1, because removing them can make a
+     rootless path absolute; nothing scheme-based (§6.2.3: no default port removed, no empty path made `/`).
+  2. **A URN** (`urn:`) is normalized by RFC 8141 §3.1 instead: `urn` and the NID lower-cased, percent-encoding hex
+     upper-cased, nothing decoded, the NSS's case kept, the r-, q- and f-components ignored. This refines the brief's
+     design, which decoded `%7E` everywhere: RFC 8141 §3.1 says percent-encoding normalization MUST NOT be applied to a
+     URN, so `urn:example:a%7E` and `urn:example:a~` are two identifiers.
+  3. **Anything else** — a string that is not such a URI — is its own normal form, and a value that is not a string is
+     compared as it is (`===`). Neither function throws; nothing is keyed by input in a plain object.
+  4. **Writers SHOULD emit the normal form; readers MUST compare by it** wherever a rule compares identifiers for
+     sameness, and a host that resolves an accepted reference looks it up by normal form. `normalIdentifier` and
+     `sameIdentifier` (`src/identifiers.ts`, no rule code: G-13) are the reference.
+  5. **Records that already collide** — stored under two spellings with one normal form — are one identifier: a host
+     refuses such a reference and reports the collision rather than pick one record, until its operator merges them or
+     renames one.
+- **Why:** rules compared identifier strings byte for byte, so an author could approve their own proposal under
+  another spelling of their id (`AGENT:x` for `agent:x`, `urn:Fabric:x` for `urn:fabric:x`), and one project could split
+  its costs over two `byProject` rows. RFC 3986 §6.1 and RFC 8141 §3.1 already define when two spellings are one; the
+  contract adopts them rather than a scheme-specific rule of its own.
+- **Compatibility:** `contractVersion` stays `0.1.0`. A reader pinned before this decision compares bytes.
+  - Tightening for `FAC-SEM-094`, `FAC-SEM-006` and `FAC-SEM-025` (`byProject`): two spellings of one id that passed as
+    two now meet as one; a byte reader still passes them.
+  - Loosening, where a rule now accepts a reference spelled otherwise and a byte lookup after it misses: `FAC-SEM-002`
+    (the pool's fallback then spends another account), `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` (the route walk moves
+    on to the next candidate), `FAC-SEM-096` (a rollback reaches the other setting, one stored under that exact spelling).
+  - Also loosened: `FAC-SEM-014` (a `providerId` spelled otherwise passes, and a byte lookup of the manifest by it
+    misses); `isRevoked`, and with it `reconcileRevision` (`FAC-SEM-084`), for a `grant` revocation — a reader pinned
+    before this decision still lets a revoked grant spelled otherwise through, which is the fail-open this decision
+    closes. Also tightened: `FAC-SEM-076` (two spellings of one share grant are one grant).
+  - Hence items 4 and 5: a writer that emits the normal form is read the same by both readers, and a host looks an
+    accepted reference up by normal form, refusing a collision.
+- **Consequences / affects:**
+  - sites changed (each by `sameIdentifier` or a key in normal form): `FAC-SEM-094` approver against author and
+    `FAC-SEM-096` rollback basis id against the setting's (`src/core-rules.ts`); `FAC-SEM-025` `byProject[].projectId`
+    duplicates, the finding naming the second spelling (`src/usage-rules.ts`); `FAC-SEM-006` the scoped projects and their
+    managers, `FAC-SEM-002` the selected account against the pool (`src/semantic-rules.ts`); `FAC-SEM-030` the revision
+    reference key's id and the admission's capability, `FAC-SEM-032` the binding's project, capability, provider and
+    `runnerRoute`, `FAC-SEM-034` the event's project, capability and route (`src/route-rules.ts`); `FAC-SEM-014` an
+    entry's `providerId` against its manifest's `provider.id` (`src/registry-rules.ts`); `FAC-SEM-076` a share grant's
+    `meta.id` against the grants before it and a `grant` revocation's `ref` against the grants and the revocations before
+    it (`src/estate-record-rules.ts`); `isRevoked` for kind `grant`, which `reconcileRevision` (`FAC-SEM-084`) uses too
+    (`src/revocation-delta.ts`) — before, another spelling of a revoked grant was not revoked (fail open);
+  - sites left as written, with the reason: the delegation token's and the approval's claims (`iss`, `sub`, `project`,
+    the grant's principal id and issuer, an onward token's parent claims) and the grant reference in
+    `src/delegation-rules.ts`, `src/delegation.ts`, `src/grant-projection.ts` — RFC 7519 §2 compares StringOrURI "with no
+    transformations or canonicalizations", and the hub copies them from the grant it signs, so another spelling is
+    refused, fail closed; a revision's revocations against its parent's (`FAC-SEM-072`, `revocationKey` in
+    `src/estate-record-rules.ts`) — a re-spelled `grant` revocation reads as dropped and the revision is refused, fail
+    closed; `agentRef` in `src/estate-record-rules.ts` — its pattern admits only the normal form; opaque ids
+    (estates, machines, devices, users, sessions, leases: `src/estate-record-rules.ts`, `src/revocation-delta.ts`,
+    `src/window-lease.ts`, `src/device-rules.ts`, `src/activity-rules.ts`, `src/session-join.ts`, `src/relay.ts`), agent and
+    service ids, capability names (`src/pipeline-check.ts`), model ids (`src/profile-rules.ts`), runner kinds, MCP roles
+    and secret slots (`src/package-rules.ts`), a provider entry's slug `id` and its file stem (`FAC-SEM-013`, `FAC-SEM-014`'s
+    first half, `src/registry-rules.ts`), key ids, `jti`, claim ids
+    (`FAC-SEM-093`) and limit ids (`FAC-SEM-031`) — names, not URIs;
+  - spec: `docs/specification/identifiers.md` (new), `docs/specification/conformance.md`,
+    `docs/specification/governance-and-roles.md`, `docs/specification/service.md`, `docs/specification/versioning.md`,
+    `docs/specification/runners.md`, `docs/specification/memory-and-learning.md`, `docs/specification/provider.md`,
+    `docs/specification/estate-record.md`, `docs/specification/revocation-delta.md`;
+  - code: `src/identifiers.ts` (new); floor in `vitest.config.ts`;
+  - fixtures: `fixtures/vectors/identifiers.json` (new);
+  - tests: `test/identifiers.test.ts` (new), `test/core-rules.test.ts`, `test/usage-rules.test.ts`,
+    `test/route-rules.test.ts`, `test/registry-rules.test.ts`, `test/estate-record.test.ts`,
+    `test/revocation-delta.test.ts`, `test/rule-tolerance.test.ts`;
+  - docs: `docs/evidence/sources.md` (RFC 8141 pinned; RFC 3986 and RFC 7519 hashed), `docs/backlog.md` (CT-39),
+    `docs/guides/connecting-compatible-agents.md` (a writer's normal form), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`;
+  - annotations "amended by DEC-0076" on DEC-0017, DEC-0029, DEC-0054, DEC-0055, DEC-0064 and DEC-0065, and the consumer board cells, are register text
+    in `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
+- **Not decided here:** internationalized identifiers (IRIs) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
+  scheme-based normalization for any scheme; URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules;
+  none is adopted); whether a schema should refuse a non-normal spelling outright. Each is proposed as an open question
+  in the handoff, for the owner to file under the lease on `docs/OPEN_QUESTIONS.md`.
+- **Source:** the board row CT-39; RFC 3986 §6, RFC 8141 §2 and §3, RFC 7519 §2 (pinned with SHA-256 in
+  `docs/evidence/sources.md`). DEC-0076 was reserved by git CAS (`--key ct39-identifiers-20261013 DEC`); no `FAC-SEM` id;
+  the record plane is `fs`. The register was edited without a lease, by the owner session's arrangement; the owner applies
+  it under leases at merge.

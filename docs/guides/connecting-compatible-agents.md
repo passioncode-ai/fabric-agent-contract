@@ -92,8 +92,8 @@ minimum, the author declares:
 
 | Area | Required responsibility |
 |---|---|
-| Provider identity | stable absolute URI, monotonic revision, canonical content hash, creation provenance, identity method and supported contract versions |
-| Capability identity | stable URI and semantic name independent of implementation or model |
+| Provider identity | stable absolute URI, written in its normal form ([identifiers](../specification/identifiers.md), DEC-0076: a writer SHOULD emit it), monotonic revision, canonical content hash, creation provenance, identity method and supported contract versions |
+| Capability identity | stable URI (in its normal form) and semantic name independent of implementation or model |
 | Data contract | absolute input/output JSON Schema references |
 | Effects | side-effect class, idempotency behavior and accepted data classifications |
 | Protocol profile | exactly one MCP, A2A or local-runner declaration for the capability |

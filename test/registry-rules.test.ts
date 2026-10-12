@@ -47,6 +47,13 @@ describe("fabric-provider/0.1 semantic rules", () => {
     expect(codes("provider-observation", { ...ok, manifest: manifest("example-agent") })).toContain("FAC-SEM-014");
   });
 
+  it("FAC-SEM-014 compares providerId with provider.id by normal form (DEC-0076), the file stem as written", () => {
+    const ok = { entry: entry("example-agent"), file: "example-agent.json", manifest: manifest("HTTPS://Agents.Example/providers/%65xample-agent") };
+    expect(codes("provider-observation", ok)).toEqual([]);
+    expect(codes("provider-observation", { ...ok, manifest: manifest("https://agents.example/providers/Example-agent") })).toContain("FAC-SEM-014");
+    expect(codes("provider-observation", { ...ok, file: "Example-agent.json" })).toContain("FAC-SEM-014");
+  });
+
   it("FAC-SEM-014 reads the file name only when one is given", () => {
     expect(codes("provider-observation", { entry: entry("example-agent"), manifest: manifest("https://agents.example/providers/example-agent") })).toEqual([]);
   });

@@ -3595,7 +3595,7 @@
       "id": "CX-CON-10",
       "title": "A grant's purpose and the declared context on a receipt (CX-30)",
       "source": "fabric-workspace docs/reports/2026-10-12-org-contexts/README.md at d8668299 (report fabric/2026-10-12-org-contexts, §6, §15; roadmap RM-28)",
-      "status": "open: contract verdict sent to the report's owner 2026-10-12 — accept with amendments; refined by the report's owner 2026-10-12 (model.md §10 C1): the receipt carries a purpose mark only — in-purpose may name a project listed in the grant's own purpose, outside-purpose names no other context — visibility only, never grounds to refuse, never a person",
+      "status": "open: contract verdict sent to the report's owner 2026-10-12 — accept with amendments; refined by the report's owner 2026-10-12 (model.md §10 C1): the receipt carries a purpose mark only — in-purpose may name a project listed in the grant's own purpose, outside-purpose names no other context — visibility only, never grounds to refuse, never a person Refined 2026-10-13 by RM-28 testing (fabric-workspace #191, testing.md §3 D-12): an `in-purpose` mark names a project only while that project's current context is the grant's context; otherwise the mark is `outside-purpose` with no identifier (a token outliving its session must not tell the old context that work continues in a project that left it). Visibility only, never grounds to refuse, never a person.",
       "area": "contract",
       "severity": "major",
       "owner": "contract",

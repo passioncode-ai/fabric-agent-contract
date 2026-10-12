@@ -26,8 +26,8 @@ change. Human summaries are advisory; content hashes and payloads are normative.
 ## Rollback
 
 Rollback creates a new revision whose payload is based on an earlier revision and
-whose `rollbackBasis` points to it — the same setting's `id` and an earlier revision; every parent is an earlier
-revision too (`FAC-SEM-096`, DEC-0064). It does not delete, reactivate or edit the old
+whose `rollbackBasis` points to it — the same setting's `id` (compared by normal form, [identifiers](identifiers.md),
+DEC-0076) and an earlier revision; every parent is an earlier revision too (`FAC-SEM-096`, DEC-0064). It does not delete, reactivate or edit the old
 revision. New runs MAY select the rollback revision after approval; existing runs
 remain pinned.
 
@@ -110,5 +110,5 @@ Vectors: [`fixtures/vectors/protocol-revisions.json`](../../fixtures/vectors/pro
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064) |
+| `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` (compared by normal form, [identifiers](identifiers.md)) and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064, DEC-0076) |
 | `FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |

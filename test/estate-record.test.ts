@@ -401,3 +401,27 @@ describe("the estate record in the repository's checks", () => {
   });
 
 });
+
+// DEC-0076: a share grant's id is a URI, so FAC-SEM-076 keys grants and their revocations by its normal form.
+describe("FAC-SEM-076 reads another spelling of a grant id as that grant (DEC-0076)", () => {
+  const grant = first.shareGrants[0];
+  const id = String(grant.meta.id);
+  const spelled = id.replace(/^urn:/, "URN:");
+  const at076 = (value: Json) => evaluateSemanticRules("estate-record", value).filter((finding) => finding.code === "FAC-SEM-076").map((finding) => finding.instancePath);
+  it("refuses a grant listed twice under two spellings", () => {
+    expect(spelled).not.toBe(id);
+    expect(at076({ ...first, shareGrants: [grant, { ...grant, meta: { ...grant.meta, id: spelled } }] })).toEqual(["/shareGrants/1/meta/id"]);
+  });
+  it("refuses a grant still listed after a revocation that spells it otherwise, and one revoked twice under two spellings", () => {
+    const revoke = (ref: unknown) => ({ kind: "grant", ref, revokedAt: "2026-10-20T09:00:00Z" });
+    expect(at076({ ...first, revocations: [revoke(spelled)] })).toEqual(["/revocations/0/ref"]);
+    expect(at076({ ...first, shareGrants: [], revocations: [revoke(id), revoke(spelled)] })).toEqual(["/revocations/1"]);
+    // Another grant stays apart, and a ref that is not a string is keyed by itself.
+    expect(at076({ ...first, revocations: [revoke(`${id}-other`)] })).toEqual([]);
+    expect(at076({ ...first, shareGrants: [{ ...grant, meta: { ...grant.meta, id: 7 } }], revocations: [revoke(7)] })).toEqual(["/revocations/0/ref"]);
+    // Other kinds still match exactly: an opaque machine id shaped like a URI is not normalized.
+    const machines = [{ ...first.machines[0], id: "Dev:m1" }, ...first.machines.slice(1)];
+    expect(at076({ ...first, machines, revocations: [{ kind: "machine", ref: "dev:m1", revokedAt: "2026-10-20T09:00:00Z" }] })).toEqual([]);
+    expect(at076({ ...first, machines, revocations: [{ kind: "machine", ref: "Dev:m1", revokedAt: "2026-10-20T09:00:00Z" }] })).toEqual(["/revocations/0/ref"]);
+  });
+});

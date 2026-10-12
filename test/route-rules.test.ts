@@ -211,3 +211,47 @@ describe("the positive fixtures agree as one bundle (DEC-0029)", async () => {
     expect(codes("route-bundle", { route: odd, admissions, catalogue })).toContain("FAC-SEM-033");
   });
 });
+
+describe("identifiers in a route compare by normal form (DEC-0076)", async () => {
+  const capability = "urn:fabric:capability:agent-chat";
+  const meta = { id: "urn:route:project-a:agent-chat", revision: 1, contentHash: `sha256:${"6".repeat(64)}` };
+  const pinned = { ...route([candidate("claude-code")]), meta };
+  const admissions = [{ provider: provider("urn:fabric:provider:claude-code-local"), capability, state: "admitted" }];
+  const binding = { project: "urn:project:a", capability, profileKind: "local-runner", provider: provider("urn:fabric:provider:claude-code-local"), runnerRoute: meta };
+  const bundle = (change: Record<string, unknown> = {}, admitted: unknown[] = admissions) => codes("route-bundle", { route: pinned, admissions: admitted, binding: { ...binding, ...change } });
+
+  it("FAC-SEM-030: an admission that spells the provider id or the capability otherwise admits the same revision", () => {
+    expect(bundle({}, [{ ...admissions[0], provider: provider("URN:Fabric:provider:claude-code-local") }])).toEqual([]);
+    expect(bundle({}, [{ ...admissions[0], capability: "URN:FABRIC:capability:agent-chat" }])).toEqual([]);
+    // The NSS keeps its case: another letter case there is another provider.
+    expect(bundle({}, [{ ...admissions[0], provider: provider("urn:fabric:provider:Claude-code-local") }])).toContain("FAC-SEM-030");
+  });
+
+  it("FAC-SEM-030: a provider id that is not a string is keyed as it is", () => {
+    const odd = { ...pinned, candidates: [{ ...candidate("claude-code"), provider: { ...provider("x"), id: 7 } }] };
+    expect(codes("route-bundle", { route: odd, admissions: [{ provider: { ...provider("x"), id: 7 }, capability, state: "admitted" }] })).toEqual([]);
+    expect(codes("route-bundle", { route: odd, admissions: [{ provider: { ...provider("x"), id: "7" }, capability, state: "admitted" }] })).toEqual([]);
+    expect(codes("route-bundle", { route: odd, admissions })).toContain("FAC-SEM-030");
+  });
+
+  it("FAC-SEM-032: a binding that spells the project, the capability, the provider or the route otherwise agrees", () => {
+    expect(bundle({ project: "URN:project:a" })).toEqual([]);
+    expect(bundle({ capability: "urn:FABRIC:capability:agent-chat" })).toEqual([]);
+    expect(bundle({ provider: provider("URN:fabric:provider:claude-code-local") })).toEqual([]);
+    expect(bundle({ runnerRoute: { ...meta, id: "URN:Route:project-a:agent-chat" } })).toEqual([]);
+    expect(bundle({ project: "urn:project:A" })).toContain("FAC-SEM-032");
+  });
+
+  it("FAC-SEM-034: an event that spells the project, the capability or the route otherwise names the same", async () => {
+    const route0 = await fixture("positive/runner-route.json");
+    const selected = await fixture("positive/runner-route-event-selected.json");
+    const check = (change: Record<string, unknown>) => codes("route-event", { route: route0, event: { ...clone(selected), ...change } });
+    const project = String(route0.project);
+    const spelled = project.replace(/^urn:/, "URN:");
+    expect(spelled).not.toBe(project);
+    expect(check({ project: spelled })).toEqual([]);
+    expect(check({ capability: String(route0.capability).replace(/^urn:/, "URN:") })).toEqual([]);
+    expect(check({ route: { ...(selected.route as object), id: String((selected.route as { id: string }).id).replace(/^urn:/, "URN:") } })).toEqual([]);
+    expect(check({ project: `${project}-other` })).toContain("FAC-SEM-034");
+  });
+});

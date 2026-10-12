@@ -105,14 +105,17 @@ kept outside the signed record, so the record carries no label a person chose:
 A share grant is DEC-0039's standing grant (`governance.schema.json#/$defs/grant`) with `principalKind: external` and
 an `audience`: a person or organization outside the estate may call one agent, the owner paying (DEC-0037, DEC-0038).
 Signed once into the record, it does not depend on the owner's laptop being awake (v4 Path 7). Each grant's id is listed
-once (`FAC-SEM-076`).
+once (`FAC-SEM-076`); a grant's id is a URI, so two spellings with one normal form are one grant
+([identifiers](identifiers.md), DEC-0076).
 
 ## Revocations
 
 Each revocation names its `kind` — `authority`, `machine`, `device-key`, `hub-key`, `publisher-key`, `package` (a
 digest) or `grant` (a grant's `meta.id`) — its `ref` in that kind's own form and `revokedAt`. A revision keeps every
 revocation before it (`FAC-SEM-072`), lists each once, and lists nothing it revokes: revocation outranks addition (v4 §7;
-`FAC-SEM-076`). Removing a machine also revokes its DEC-0031 certificate where an organization server issued one; who revokes for a
+`FAC-SEM-076`). A `grant` revocation matches the grant by the normal form of its id, in the record and in `isRevoked`
+(`src/revocation-delta.ts`), so another spelling of a revoked grant is revoked; every other kind's `ref` matches exactly
+(DEC-0076). Removing a machine also revokes its DEC-0031 certificate where an organization server issued one; who revokes for a
 solo estate, with no organization server, belongs to the enrollment ceremony (not decided here). The fast
 revocation delta that reaches machines within seconds is DEC-0054's ([revocation delta](revocation-delta.md)), carried by the relay (v4 §7, [DEC-0047](relay.md#revocation-and-heartbeat)); the record is its
 durable state: a revision issued at or after a delta entry lists its revocation, or a machine holding the entry refuses
@@ -200,7 +203,7 @@ keys are DEC-0053's.
 | `FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once |
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine under a publisher key the record pins, each pinned once; an installed package is the one placed — its own digest, the placement's `agentRef` and digest, on a machine of the record |
 | `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine, a source machine of the record, a slot once per agent, and a slot the placed package declares |
-| `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes |
+| `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076) |
 
 ## Who adopts it
 

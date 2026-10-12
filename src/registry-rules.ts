@@ -1,6 +1,7 @@
 // #region registry-rules — docs: docs/specification/provider.md#semantic-rules
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { sameIdentifier } from "./identifiers.js";
 
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 
@@ -21,7 +22,8 @@ function providerDirectory(value: JsonObject): Finding[] {
 /**
  * FAC-SEM-014 (DEC-0017): equality is between like things. The entry's slug `id` equals
  * the stem of its file name, `providers/<id>.json`; the entry's `providerId` (a URI)
- * equals the `provider.id` (a URI) of the manifest it names, and that manifest resolves.
+ * equals the `provider.id` (a URI) of the manifest it names — compared by normal form (DEC-0076) — and that manifest
+ * resolves.
  */
 function providerObservation(value: JsonObject): Finding[] {
   const entry = isObject(value.entry) ? value.entry : {};
@@ -33,7 +35,7 @@ function providerObservation(value: JsonObject): Finding[] {
   const manifest = value.manifest;
   if (!(isObject(manifest) && isObject(manifest.provider) && Array.isArray(manifest.capabilities))) {
     findings.push({ code: "FAC-SEM-014", instancePath: "/manifest", message: `the manifest of ${String(entry.id)} does not resolve to a provider manifest` });
-  } else if (manifest.provider.id !== entry.providerId) {
+  } else if (!sameIdentifier(manifest.provider.id, entry.providerId)) {
     findings.push({ code: "FAC-SEM-014", instancePath: "/entry/providerId", message: `entry ${String(entry.id)} names provider ${String(entry.providerId)}, but its manifest is ${String(manifest.provider.id)}` });
   }
   return findings;

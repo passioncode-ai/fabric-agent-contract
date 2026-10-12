@@ -92,6 +92,11 @@ fault (the meter: `principal-unproven`, with the detail in its reason) (delegati
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
 
+**Identifier**: A URI naming an agent, a project, a proposal, a setting or an account
+(`common.schema.json#/$defs/uri`). Two identifiers are the same when their normal forms are equal — RFC 3986 §6.2.2 for
+a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers SHOULD emit the normal form; readers MUST compare by it
+([identifiers](docs/specification/identifiers.md), DEC-0076).
+
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never
 to a caller (DEC-0065).

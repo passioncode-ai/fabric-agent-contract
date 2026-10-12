@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0011`
+**Next free ID:** `OQ-0012`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -146,3 +146,17 @@ ruling; DEC-0017 states what holds now.
   non-exportable key at enrollment?
 - **Meanwhile:** `attestation` is an optional opaque field in the enrollment request. No consumer is
   required to produce or verify one.
+
+### OQ-0011 — Identifier equality: what DEC-0076 left open
+
+- **Status:** Open
+- **Raised:** 2026-10-13, CT-39 (#87, DEC-0076 *Not decided here*)
+- **Owner of the answer:** this repository.
+- **Question:** four choices DEC-0076 did not make:
+  - **Q1** — internationalized identifiers (IRIs) and Unicode normalization: today a non-ASCII string is no URI and is
+    compared as it is;
+  - **Q2** — scheme-based normalization (RFC 3986 §6.2.3) for any scheme, such as a default port or an empty path;
+  - **Q3** — URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules), for `urn:fabric:` first;
+  - **Q4** — whether a schema refuses a non-normal spelling outright, so that a writer MUST emit the normal form and the
+    readers' lookup by normal form becomes a check.
+- **Meanwhile:** readers compare by normal form; writers SHOULD emit it; nothing refuses a non-normal spelling.
