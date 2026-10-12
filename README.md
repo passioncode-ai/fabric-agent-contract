@@ -116,7 +116,7 @@ pnpm run check
 The gate typechecks the harness, compiles all Draft 2020-12 schemas, runs every
 positive/negative fixture case in [`fixtures/catalogue.json`](fixtures/catalogue.json)
 plus the semantic rules and the pipeline checker, validates UX traces, resolves
-relative links, parses Mermaid source, checks contract-version consistency, extension
+relative links (a link inside a fenced code block is text and is not resolved; a fence never closed and a malformed percent escape are findings), parses Mermaid source, checks contract-version consistency, extension
 key spelling and glossary profile names, and lints Markdown. Start in
 [AGENTS.md](AGENTS.md); the decisions are in [DECISIONS.md](docs/DECISIONS.md).
 

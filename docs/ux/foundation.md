@@ -179,6 +179,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Notice | sees a new request to one of the Projects | the Project board | 3 | a request lost in a chat | one thread per request, fixed participants (priority 8) |
 | 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
 | 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried | `outcome_unknown`, left only by an observed reconciliation (priority 9) |
+| 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
 
 ## 4. User stories
 
@@ -431,6 +432,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a service running, when its supervisor starts a second copy marked as supervised, then that copy waits up to 300 s touching nothing, the running copy keeps answering, and the host never shows an outage.
   - Given launchd supervises it, then the host lists the waiting copy as two copies (`duplicate`); given the Task Scheduler, then the host shows the running copy as ready and nothing of the waiting one.
 - **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-022: Operator unlists a Project from the project directory
+
+- **Story:** As P-02, I want to keep a Project out of the project directory, so that the agents of my estate do not discover it, while a sender that already works with it still reaches it.
+- **Traces:** JTBD-09, JRN-08/#4
+- **Acceptance criteria:**
+  - Given a Project I unlisted, when any session of the estate reads `com.directory`, then no page and no capability filter lists it.
+  - Given a sender that already knows the Project's id, when it submits a request to it, then the board takes the request as for a listed Project; unlisting refuses no message.
+  - Given a restore of the estate, then the Project is still unlisted.
+- **Priority:** could
 - **Status:** draft
 - **Product:** unobserved
 

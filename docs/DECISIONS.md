@@ -359,6 +359,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-04
 - **Status:** Accepted 2026-10-05 — the operator accepted C1–C9 as written (OQ-0008); consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-12):** the tool list amended by DEC-0073 (`com.directory`, seventeen tools; every tool's arguments and answer a closed schema, one receipt).
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -4060,6 +4061,101 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   v2's contract plan row CON-OE-05 and its CROSSWALK-v4; DEC-0012, DEC-0023; packet P6-03. DEC-0072 and
   `FAC-SEM-103`…`FAC-SEM-105` were reserved by git CAS (`--key w6-p6-03-proposals-20261012 DEC`; `--key
   w6-p6-03-sem-{proposal-submit,proposal-transition,learning-rollout}-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0073 — The board's tools: every argument and answer a closed schema, one receipt without a sequence number, slots that end with the session, and a project directory (`fabric-project-comms/0.1`, amended)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric serves the tools
+  against these schemas after repinning (COM-02.3/COM-03); the adapter's kits read receipts and the directory
+  (FAA-12a/b). Board rows CT-41 to CT-43.
+- **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
+  Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
+- **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
+  1. **Arguments.** Every tool's arguments are a closed schema: `comms-list`, `comms-message-ref` (`com.get`,
+     `com.read_ack`), `comms-status-args`, `comms-reply` (exactly one of a participant's `{idempotency, replyTo}` or
+     a responder's `{fence}`), `comms-cancel`, `comms-enroll`, `comms-claim`, `comms-fenced` (`com.accept`,
+     `com.renew`), `comms-progress`, `comms-effect-begin`, `comms-reconcile` (`observed` is `true`),
+     `comms-responder-replace`, `comms-directory-args`. No argument carries the estate, the caller's Project, a
+     principal, a session or a slot's Project.
+  2. **One receipt.** Every successful mutation answers `comms-receipt` `{ok, repeated, message?, thread?, at?,
+     request?, slot?, attempt?}`. It never carries an estate-wide sequence number (C3), and it and its `request`,
+     `slot` and `attempt` are closed: a reader refuses an unknown member.
+  3. **Which calls store a receipt.**
+     - `com.claim` with nothing claimable answers `{ok: true, repeated: false}` and stores nothing, so the same key
+       may poll again.
+     - `com.renew` and `com.progress` are naturally idempotent: the key's shape and epoch are checked and no receipt
+       is stored. A progress note is posted at most once per attempt and key, and a repeat answers that message with
+       `repeated: true`.
+     - `com.read_ack` takes no idempotency key and stores no receipt, because marking read twice is one mark. The
+       first mark answers `repeated: false` and its time as `at`; a second mark of the same message by the same
+       reader changes nothing and answers `repeated: true` with the first mark's `at`.
+  4. **Idempotency epochs.** An epoch is open, closed or retired. A closed epoch takes no new key
+     (`idempotency_window_expired`) and still answers a repeat of a stored key and digest; a retired epoch is a closed
+     one whose receipts were compacted, and refuses every key (C6). `com.status` may report the open epoch as
+     `idempotency.epoch`.
+  5. **Slots end with the session.** Leaving or ending the session releases its slots and live attempts; there is
+     no release tool. A release is not a lifecycle operation and moves no request: a released `claimed` request is
+     taken by the next `com.claim` as a lapsed claim (op `claim`, `claimed` → `claimed` with a new attempt), an
+     `accepted` one is held (C4), and an `in_progress` one becomes `outcome_unknown` by op `lost_result` when the next
+     holder takes the slot. `COMMS_TRANSITIONS` is unchanged.
+  6. **Replies.** `com.reply` is the reply path and takes its thread from `replyTo`. A `com.submit` of kind `reply`
+     stays for DEC-0022 clients; its `thread` must be `replyTo`'s own, or it is refused `invalid_arguments`.
+  7. **`com.status` arguments.** A Project session omits `project` or names its own. Another Project is
+     `not_authorized`, the same answer as for an unknown one, so the answer does not reveal which ids exist. A viewer
+     principal names the Project it was granted.
+  8. **Project directory.** `com.directory` (`comms-directory`) lists the caller's estate's addressable Projects:
+     id, name, listed capabilities and each one's responder state, nothing else.
+     - Readers: a managed or an enrolled session of a Project of the same estate, that is a T0 or T1 session of the
+       estate's owner (DL-25). An asserted principal, a viewer principal, a share-grant principal (T2) and every
+       other estate are refused `not_authorized`. The caller's own Project is never listed.
+     - Within an organization the directory never lists another owner's Project and never shows another member's
+       responder state (DEC-0047's presence rule; OD-1, the organization edition's rule 10).
+     - A page holds at most 100 Projects in order of name, then id. Its cursor is bound to the reader, its grant
+       revision, the filter and the restore epoch; a change of any of them is `cursor_reset_required`.
+     - The operator may unlist a Project in the host; no tool does. Unlisting is discovery only: the Project leaves
+       every page and capability filter, a sender that knows its id still reaches it, and unlisting refuses no
+       message. An unlisted Project is not a hidden Project for refusal messages, and an unlisting survives a
+       restore.
+     - It is a tool of its own, not a `com.status` member, because viewer principals read `com.status` and must not
+       see the estate's Project list. The tools number seventeen.
+- **Why:** Fabric adds no field the contract lacks (its ADR-0117 §2), so it could not serve reply, cancel or any
+  responder tool, and its submit receipt passed the estate sequence through, against C3. An enrolled session could
+  not learn another Project's id, so no cross-project request could be addressed.
+- **Compatibility:** Additive for the contract: fifteen new schemas and one optional `com.status` member;
+  `contractVersion` stays `0.1.0`. One answer changes shape for a board already serving it, and the rollout runs in
+  this order:
+  1. Fabric's submit receipt today carries `seq`, and its `request` is a string or null (Fabric's migration 081). At
+     this pin Fabric drops `seq` from the submit and read-ack receipts, sends `request` as the object, and
+     translates every stored idempotency receipt it replays to the new shape, so a repeat never answers the old one
+     (CT-41).
+  2. The adapter's kits repin only after Fabric's receipts drop `seq`, because a kit at this pin refuses a receipt
+     that carries it (CT-42).
+  3. `comms-status` is closed. `idempotency` is the epoch the caller's Project submits under, and a viewer submits
+     nothing, so Fabric omits it for viewer principals: Fabric Dashboards, a `com.status` reader, needs no repin for
+     it. Fabric sends it to a Project session only once that session's kit is pinned at or after this decision.
+- **Consequences / affects:**
+  - spec: `docs/specification/project-comms.md`;
+  - schemas: `schemas/comms-list.schema.json`, `schemas/comms-message-ref.schema.json`,
+    `schemas/comms-status-args.schema.json`, `schemas/comms-reply.schema.json`, `schemas/comms-cancel.schema.json`,
+    `schemas/comms-enroll.schema.json`, `schemas/comms-claim.schema.json`, `schemas/comms-fenced.schema.json`,
+    `schemas/comms-progress.schema.json`, `schemas/comms-effect-begin.schema.json`,
+    `schemas/comms-reconcile.schema.json`, `schemas/comms-responder-replace.schema.json`,
+    `schemas/comms-receipt.schema.json`, `schemas/comms-directory-args.schema.json`,
+    `schemas/comms-directory.schema.json` (new); `schemas/comms-status.schema.json` (`idempotency`);
+  - fixtures: `fixtures/positive/comms-*`, `fixtures/negative/comms-*`, `fixtures/catalogue.json`;
+  - tests: `test/comms-tools.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/capability-names.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-025, SCN-027), `docs/ux/foundation.md`,
+    `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/handoffs/2026-10-12-comms-tools-registers.md`.
+- **Not decided here:** a semantic rule that a directory lists a Project once and a capability once per Project
+  (`uniqueItems` compares whole objects; CT-43); Fabric driving a service's capability as the responder
+  (Fabric's C7 follow-on); the `project-history` grant's shape.
+- **Source:** Fabric's COM-02.3/03 specification §0 findings 1–2, §1.1–§1.3, §2.1 (Fabric `origin/main` `bb0e6870`);
+  the rollout design for every agent on the board, finding 2 and its contract deliverables; DEC-0022, OQ-0008. The
+  directory's boundary (same estate only; names, ids, capabilities and responder state, never content, participants
+  or activity counts; an operator opt-out that leaves a Project addressable by id) is the operator's, approved on
+  2026-10-12 as the communication program's decision D6.
+  DEC-0073 was reserved by git CAS (`--key board-tool-shapes-20261012 DEC`); no SEM code; the record plane is `fs`.
 
 ### DEC-0074 — A required MCP role names the secret slots that configure it
 

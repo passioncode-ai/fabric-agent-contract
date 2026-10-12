@@ -22,13 +22,55 @@ async function walk(directory: string): Promise<string[]> {
   return trackedFiles(directory);
 }
 
+/** `text` split at its fenced code blocks: what lies outside them, and the line of a fence never closed. */
+export interface FenceScan {
+  outside: string;
+  /** The 1-based line of the first opening fence that no closing fence matches. */
+  unclosed?: number;
+}
+
+/**
+ * `text` without its fenced code blocks (CommonMark 0.31.2 §4.5): a fence of three or more backticks or tildes, at
+ * most three spaces in, closed by a line of the same character at least as long and nothing else. A backtick line
+ * whose info string holds a backtick (```` ```code``` text ````) opens no fence: it is inline code. A fence never
+ * closed is reported, and the text after it is still read, so a typo in a fence cannot hide a broken link.
+ */
+export function scanFences(text: string): FenceScan {
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let fence: { marker: string; line: number } | undefined;
+  for (const [index, line] of lines.entries()) {
+    const open = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    const marker = open?.[1];
+    if (fence === undefined) {
+      if (marker !== undefined && !(marker[0] === "`" && (open?.[2] ?? "").includes("`"))) fence = { marker, line: index + 1 };
+      else kept.push(line);
+    } else if (marker !== undefined && marker[0] === fence.marker[0] && marker.length >= fence.marker.length && line.trim() === marker) {
+      fence = undefined;
+    }
+  }
+  if (fence === undefined) return { outside: kept.join("\n") };
+  // The opening line was not a fence after all: read on from the line after it, fences included.
+  const rest = scanFences(lines.slice(fence.line).join("\n"));
+  return { outside: [...kept, rest.outside].join("\n"), unclosed: fence.line };
+}
+
+/** `text` without its fenced code blocks (`scanFences`). */
+export function outsideFences(text: string): string {
+  return scanFences(text).outside;
+}
+
 export async function checkLinks(file: string, text: string): Promise<string[]> {
   const findings: string[] = [];
-  for (const raw of markdownLinks(text)) {
+  const name = path.relative(projectRoot(), file);
+  const { outside, unclosed } = scanFences(text);
+  if (unclosed !== undefined) findings.push(`${name}:${unclosed}: code fence never closed`);
+  for (const raw of markdownLinks(outside)) {
     const target = raw.replace(/^<|>$/g, "").split("#", 1)[0] ?? "";
     if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
-    const resolved = path.resolve(path.dirname(file), decodeURIComponent(target));
-    try { await stat(resolved); } catch { findings.push(`${path.relative(projectRoot(), file)}: broken link ${raw}`); }
+    let decoded: string;
+    try { decoded = decodeURIComponent(target); } catch { findings.push(`${name}: malformed link ${raw}`); continue; }
+    try { await stat(path.resolve(path.dirname(file), decoded)); } catch { findings.push(`${name}: broken link ${raw}`); }
   }
   return findings;
 }
