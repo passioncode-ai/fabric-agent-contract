@@ -73,6 +73,7 @@
             "$ref": "governance.schema.json#/$defs/grant"
           },
           {
+            "type": "object",
             "required": [
               "principalKind",
               "audience"
@@ -80,7 +81,8 @@
             "properties": {
               "principalKind": {
                 "const": "external"
-              }
+              },
+              "audience": true
             }
           }
         ]
@@ -108,6 +110,7 @@
   },
   "additionalProperties": false,
   "if": {
+    "type": "object",
     "properties": {
       "revision": {
         "const": 1
@@ -118,14 +121,19 @@
     ]
   },
   "then": {
+    "type": "object",
     "properties": {
       "parent": false
     }
   },
   "else": {
+    "type": "object",
     "required": [
       "parent"
-    ]
+    ],
+    "properties": {
+      "parent": true
+    }
   },
   "$defs": {
     "b64url": {
@@ -145,6 +153,7 @@
       "properties": {
         "credentialId": {
           "$ref": "#/$defs/b64url",
+          "type": "string",
           "maxLength": 1366,
           "description": "The WebAuthn credential id, as the authenticator returned it. No user handle is recorded."
         },
@@ -229,6 +238,7 @@
       "allOf": [
         {
           "if": {
+            "type": "object",
             "properties": {
               "alg": {
                 "const": "ES256"
@@ -239,17 +249,23 @@
             ]
           },
           "then": {
+            "type": "object",
             "properties": {
               "publicKey": {
-                "required": [
-                  "y"
-                ]
+                "type": "object",
+                "properties": {
+                  "kty": {
+                    "const": "EC"
+                  }
+                }
               }
             }
           },
           "else": {
+            "type": "object",
             "properties": {
               "publicKey": {
+                "type": "object",
                 "properties": {
                   "kty": {
                     "const": "OKP"
@@ -267,9 +283,13 @@
           "$ref": "delegation-jwks.schema.json#/properties/keys/items"
         },
         {
+          "type": "object",
           "required": [
             "alg"
-          ]
+          ],
+          "properties": {
+            "alg": true
+          }
         }
       ],
       "description": "A public Ed25519 JWK naming its alg (EdDSA), as the estate's key set publishes it (DEC-0039); ES256 joins when Fabric records its decision D2."
@@ -404,6 +424,7 @@
         },
         "credentialId": {
           "$ref": "#/$defs/b64url",
+          "type": "string",
           "maxLength": 1366
         },
         "alg": {
@@ -414,15 +435,18 @@
         },
         "authenticatorData": {
           "$ref": "#/$defs/b64url",
+          "type": "string",
           "minLength": 50,
           "maxLength": 4096
         },
         "clientDataJSON": {
           "$ref": "#/$defs/b64url",
+          "type": "string",
           "maxLength": 8192
         },
         "sig": {
           "$ref": "#/$defs/b64url",
+          "type": "string",
           "maxLength": 200,
           "description": "ES256: an ASN.1 DER Ecdsa-Sig-Value (WebAuthn Level 3 §6.5.5, RFC 3279 §2.2.3); EdDSA: the 64-byte Ed25519 signature."
         }
