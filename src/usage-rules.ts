@@ -10,7 +10,9 @@ import { strictTime } from "./rfc3339.js";
  * - the project attribution: `byProject[]` names each project once — two spellings of one project id are one project,
  *   compared by normal form (DEC-0076) — and each task run once within its project, a row's
  *   calls are at least its task runs' calls, all projects together hold no more calls than the days, and an unknown cost
- *   is null exactly as in a day's rows (CON-OE-13).
+ *   is null exactly as in a day's rows (CON-OE-13); the known costs add up the same way: a project costs at least its task
+ *   runs (and holds at least their priced calls) and all projects no more than the days (CT-40), a null cost counting
+ *   as none.
  * Malformed input answers findings or none, never an exception.
  */
 
@@ -20,6 +22,11 @@ const WINDOW_DAYS = 31;
 const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-025", instancePath, message });
 const count = (value: unknown): number => (Number.isSafeInteger(value) && (value as number) >= 0 ? (value as number) : 0);
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
+/** A known, non-negative cost, or 0 for null, a negative or anything else (the schema refuses those; the sums ignore them). */
+const cost = (value: unknown): number => (typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 0);
+/** Whether `a` exceeds `b` by more than rounding (the tolerance the day's cost check uses). */
+const exceeds = (a: number, b: number) => a - b > 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+const usd = (value: number) => String(Math.round(value * 1e6) / 1e6);
 
 /** Midnight UTC of a `YYYY-MM-DD` date that exists, or NaN. */
 export function utcDate(value: unknown): number {
@@ -62,6 +69,7 @@ function usageProjects(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const projects = new Map<string, string>();
   let projectCalls = 0;
+  let projectCost = 0;
   value.byProject.forEach((project: unknown, p: number) => {
     if (!isObject(project)) return;
     const at = `/byProject/${p}`;
@@ -72,21 +80,34 @@ function usageProjects(value: JsonObject): Finding[] {
       else projects.set(projectId, String(project.projectId));
     }
     projectCalls += count(project.calls);
+    projectCost += cost(project.costUsd);
     findings.push(...pricedRow(project, at));
     const runs = new Set<string>();
     let runCalls = 0;
+    let runCost = 0;
+    let runPriced = 0;
     list(project.taskRuns).forEach((run, r) => {
       if (typeof run.taskRunId === "string") {
         if (runs.has(run.taskRunId)) findings.push(flag(`${at}/taskRuns/${r}/taskRunId`, "each task run is one row within its project"));
         runs.add(run.taskRunId);
       }
       runCalls += count(run.calls);
+      runCost += cost(run.costUsd);
+      runPriced += Math.max(0, count(run.calls) - count(run.unpricedCalls));
       findings.push(...pricedRow(run, `${at}/taskRuns/${r}`));
     });
+    // One finding per project for its runs: the first bound they break, calls, then priced calls, then known cost. A
+    // project whose cost is unknown (null) has no cost to compare: its priced calls are bounded here, and pricedRow
+    // judges its null against its own unpricedCalls. A value the schema refuses is not compared again.
+    const projectPriced = Math.max(0, count(project.calls) - count(project.unpricedCalls));
     if (runCalls > count(project.calls)) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more calls than the project (${runCalls} > ${count(project.calls)})`));
+    else if (runPriced > projectPriced) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more priced calls than the project (${runPriced} > ${projectPriced})`));
+    else if (cost(project.costUsd) === project.costUsd && exceeds(runCost, cost(project.costUsd))) findings.push(flag(`${at}/taskRuns`, `a project's task runs cost more than the project (${usd(runCost)} > ${usd(cost(project.costUsd))})`));
   });
   const dayCalls = list(value.days).reduce((n, day) => n + count(day.calls), 0);
   if (projectCalls > dayCalls) findings.push(flag("/byProject", `the projects hold more calls than the days (${projectCalls} > ${dayCalls})`));
+  const dayCost = list(value.days).reduce((n, day) => n + cost(day.costUsd), 0);
+  if (exceeds(projectCost, dayCost)) findings.push(flag("/byProject", `the projects cost more than the days (${usd(projectCost)} > ${usd(dayCost)})`));
   return findings;
 }
 
