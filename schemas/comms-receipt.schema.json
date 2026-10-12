@@ -13,7 +13,7 @@
       "const": true
     },
     "repeated": {
-      "description": "true: the same idempotency key and digest were already stored, and this is that receipt. com.renew and com.progress without a note store none and always answer false.",
+      "description": "true: the same idempotency key and digest were already stored, and this is that receipt; for a com.progress note, the note was already posted under this attempt and key. com.renew and com.progress without a note store nothing and answer false.",
       "type": "boolean"
     },
     "message": {

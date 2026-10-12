@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { checkLinks, decisionPathFindings, mermaidBodies } from "../src/docs-check.js";
+import { checkLinks, decisionPathFindings, mermaidBodies, outsideFences } from "../src/docs-check.js";
 import { projectRoot } from "../src/contract.js";
 import { trackedFiles } from "../src/tracked-files.js";
 
@@ -60,5 +60,18 @@ describe("documentation helpers", () => {
   it("reports a broken relative link", async () => {
     const file = path.join(projectRoot(), "README.md");
     expect(await checkLinks(file, "[missing](docs/does-not-exist.md)")).toEqual(["README.md: broken link docs/does-not-exist.md"]);
+  });
+
+  // A handoff carries register text to paste into another file, its links relative to that file. Inside a fenced
+  // block Markdown renders them as text, so they are not links of the handoff; outside one they still are.
+  it("reads no link inside a fenced code block, and still reads one after it closes", async () => {
+    const file = path.join(projectRoot(), "README.md");
+    const text = "```markdown\n[elsewhere](specification/does-not-exist.md)\n```\n~~~\n[tilde](nope.md)\n~~~\n[after](docs/does-not-exist.md)\n";
+    expect(await checkLinks(file, text)).toEqual(["README.md: broken link docs/does-not-exist.md"]);
+  });
+
+  it("closes a fence only with a bare line of its own character, at least as long", () => {
+    expect(outsideFences("a\n````\n```\n~~~~\n```` x\nin\n````\nb")).toBe("a\nb");
+    expect(outsideFences("a\n```\nnever closed\n[x](y.md)")).toBe("a");
   });
 });

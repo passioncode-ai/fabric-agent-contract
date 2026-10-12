@@ -26,34 +26,58 @@ This run defines every tool's arguments and answer, one receipt, and a project d
   in `test/schema-compilation.test.ts` goes from 81 to 96.
 - **Test:** `test/comms-tools.test.ts`. It checks that the spec table names 17 tools, the same set as the
   capability groups, each with existing schemas. It checks that every argument schema is closed, that every tool
-  which stores a receipt requires an idempotency key or a fence, and that every mutation answers the one receipt.
+  mutation but a read mark (twelve tools) requires an idempotency key or a fence, and that every mutation answers the
+  one receipt.
   It checks that the directory carries only ids, names, capabilities and responder state, and that the boundary is
   stated. Each of the 24 refusals is a mutant that its named negative fixture must kill.
+- `test/capability-names.test.ts`: the seven new places that name a capability use the shared definition.
 - `CONTEXT.md` (**Project directory**, **Board receipt**), `docs/DOCMAP.md` (the project-communication row).
+- The gate (not part of the decision): `src/docs-check.ts` no longer resolves a link inside a fenced code block,
+  because Markdown renders it as text. The register text below holds links relative to the files it goes into, and
+  the check had reported them as broken links of this handoff. Tested in `test/docs-check.test.ts`, and noted in
+  `README.md`.
 
 ## Decisions taken here (for the owner's reading)
 
 1. **`com.directory` is a tool of its own, not a `com.status` member.** `com.status` describes one Project and is read
    by viewer principals (a host showing communication health, COM-11) that must not see the estate's Project list.
    The directory is estate-wide, paged and read by senders. DEC-0022's tool list grows from 16 to 17.
-2. **The directory boundary.** Only a principal verified for a Project of the same estate may read it: a managed,
-   enrolled or board session. An `asserted` principal, a viewer principal and other estates are refused
+2. **The directory boundary.** Only a session verified for a Project of the same estate may read it: a managed or
+   an enrolled session. An `asserted` principal, a viewer principal and other estates are refused
    `not_authorized`. The answer holds no content, participant, count, generation, lease or holder; responder state
    is the only activity signal. The caller's own Project is not listed. The operator can unlist a Project in the
    host (in Fabric, per Project), and no tool does it. An unlisted Project stays addressable by id.
 3. **Where the decision departs from Fabric's proposal** (Fabric's COM-02.3/03 spec §1.2):
    - `com.status` with a `project` other than the session's own is `not_authorized`. It is not silently ignored.
-   - `com.progress` with a `note` is stored like a reply, so a retry never posts the note twice. Without a note it
-     is naturally idempotent, as proposed.
+   - (Not a departure; how the proposal is kept.) `com.progress` stays naturally idempotent, as proposed, and stores no receipt. A `note` is posted as a message
+     at most once per attempt and key: the note's own message is the record a repeat finds (`repeated: true`), so a
+     retry never posts it twice, and a different note under the same attempt and key is `idempotency_conflict`.
    - `com.claim` with nothing claimable stores no receipt, so the same key may poll again.
    - `com.read_ack` takes no idempotency key and stores no receipt, because marking read twice is one mark.
 
 ## Checks run
 
-- Plants: 24 mutants in `test/comms-tools.test.ts`, each killed. On disk, 23 plants were made in the schema files:
-  each constraint was removed, `vitest run test/fixtures.test.ts -t <fixture>` went red (`1 failed`, exit 1), and
-  the file was restored. The pull request body lists them.
-- `pnpm run check` with `ORG_INDEX` set to the org-index checkout. The output summary is in the pull request.
+- Plants, in memory: the 24 mutants in `test/comms-tools.test.ts`, each killed by its named negative fixture, and
+  an identity run in which no schema accepts its own negatives.
+- Plants, on disk: the same 24 constraints were removed one at a time from the schema files.
+  `vitest run test/fixtures.test.ts -t "'<fixture>' has expected validity"` went red (`1 failed | 575 skipped`,
+  exit 1) for each and green again (`1 passed`, exit 0) once the file was restored. Vitest shortens the title of
+  `comms-responder-replace-duplicate-transfer`, so that run filtered on its first 37 characters. The pull request
+  body lists the plants.
+- `pnpm run check` with `ORG_INDEX` set to an org-index checkout. Exit 0; the summary is in the pull request.
+
+## Merging with `main`
+
+`main` moved on after this branch was cut. It gained DEC-0072, DEC-0074, DEC-0075 and four schemas. The
+`agent-sync` guard refuses a merge commit here, because a merge stages `main`'s own changes to
+`docs/DECISIONS.md`, `docs/specification/conformance.md` and `docs/backlog.md`, and the owner holds those leases.
+So the branch is not merged with `main`, and the pull request shows two textual conflicts for the owner to resolve:
+
+- `test/schema-compilation.test.ts`: the count becomes **100** (`main`'s 85 plus this branch's 15).
+- `docs/handoffs/README.md`: keep both. This branch's row goes on top, above `main`'s rows.
+
+A trial merge with those two resolutions passed `pnpm run check` (exit 0) in a scratch worktree before the pull
+request was opened.
 
 ## Open
 
@@ -67,7 +91,7 @@ This run defines every tool's arguments and answer, one receipt, and a project d
 
 ## Register text to insert
 
-### 1. `docs/DECISIONS.md` — append as the last decision section (after the highest-numbered DEC present at insert)
+### 1. `docs/DECISIONS.md`: insert between DEC-0072 and DEC-0074 (immediately before the line `### DEC-0074 — A required MCP role names the secret slots that configure it`)
 
 ```markdown
 ### DEC-0073 — The board's tools: every argument and answer a closed schema, one receipt without a sequence number, slots that end with the session, and a project directory (`fabric-project-comms/0.1`, amended)
@@ -88,8 +112,8 @@ This run defines every tool's arguments and answer, one receipt, and a project d
   2. **One receipt.** Every successful mutation answers `comms-receipt` `{ok, repeated, message?, thread?, at?,
      request?, slot?, attempt?}`. It never carries an estate-wide sequence number (C3); a reader refuses an unknown
      member. `com.claim` with nothing claimable answers `{ok: true, repeated: false}` and stores nothing.
-     `com.renew` and `com.progress` without a note are naturally idempotent: the key's shape and epoch are checked
-     and no receipt is stored. A note is stored like a reply.
+     `com.renew` and `com.progress` are naturally idempotent: the key's shape and epoch are checked and no receipt
+     is stored. A progress note is posted at most once per attempt and key, and a repeat answers that message.
   3. **Slots end with the session.** Leaving or ending the session releases its slots and live attempts; there is
      no release tool. `com.status` may report `idempotency.epoch`, and its `project` argument is the session's own
      or a viewer's granted Project.
@@ -113,13 +137,17 @@ This run defines every tool's arguments and answer, one receipt, and a project d
     `schemas/comms-receipt.schema.json`, `schemas/comms-directory-args.schema.json`,
     `schemas/comms-directory.schema.json` (new); `schemas/comms-status.schema.json` (`idempotency`);
   - fixtures: `fixtures/positive/comms-*`, `fixtures/negative/comms-*`, `fixtures/catalogue.json`;
-  - tests: `test/comms-tools.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`;
+  - tests: `test/comms-tools.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/capability-names.test.ts`;
   - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/handoffs/2026-10-12-comms-tools-registers.md`.
 - **Not decided here:** a semantic rule that a directory lists a Project once and a capability once per Project
   (`uniqueItems` compares whole objects; board row below); Fabric driving a service's capability as the responder
   (Fabric's C7 follow-on); the `project-history` grant's shape.
 - **Source:** Fabric's COM-02.3/03 specification §0 findings 1–2, §1.1–§1.3 (Fabric `origin/main` `bb0e6870`);
-  the rollout design for every agent on the board, finding 2 and its contract deliverables; DEC-0022, OQ-0008.
+  the rollout design for every agent on the board, finding 2 and its contract deliverables; DEC-0022, OQ-0008. The
+  directory's boundary (same estate only; names, ids, capabilities and responder state, never content, participants
+  or activity counts; an operator opt-out that leaves a Project addressable by id) is the operator's, approved on
+  2026-10-12 as the communication program's decision D6.
   DEC-0073 was reserved by git CAS (`--key board-tool-shapes-20261012 DEC`); no SEM code; the record plane is `fs`.
 ```
 
@@ -133,7 +161,7 @@ No semantic rule code is added, so **Semantic rule codes** and its "Next free ru
 | a board answering `com.directory` (Fabric) | answers only a principal verified for a Project of its own estate; never lists another estate's Project, an unlisted Project or the caller's own; adds no member beyond `comms-directory.schema.json` | `comms-directory.schema.json` (DEC-0073) | the host's own test; fixtures `comms-directory*` ([project comms](project-comms.md#project-directory)) |
 ```
 
-### 3. `docs/backlog.md` — rows appended to the table, with the next free CT ids at insert (at `origin/main` `3cb040c` the last row is CT-40; the open pull requests #73, #74 and #76 add no new CT id)
+### 3. `docs/backlog.md` — rows appended to the table, with the next free CT ids at insert (at `origin/main` `fe55fc6` the last row is still CT-40)
 
 ```markdown
 | CT-41 | Fabric adopts DEC-0073: repins to its merge commit; serves the seventeen `com.*` tools against the tool table's schemas (`unsupported_capability` for any whose schema is not pinned); drops `seq` from the submit and read-ack receipts (C3) and refuses an unknown receipt member; implements `com.directory` with its boundary and an operator setting that unlists a Project; maps `idempotency.epoch` in `com.status` | open — Fabric COM-02.3/03 Task 1 onward | DEC-0073; [project comms → tools](specification/project-comms.md#tools-arguments-and-answers) |

@@ -54,8 +54,10 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     }
   });
 
-  it("makes every tool that stores a receipt carry an idempotency key or a fence", async () => {
-    for (const row of TOOLS.filter((cells) => /^yes|^only/.test(cells[3] as string))) {
+  it("makes every mutation but a read mark carry an idempotency key or a fence", async () => {
+    const mutations = TOOLS.filter((cells) => cells[3] !== "— (a read)" && ticked(cells[0] as string)[0] !== "com.read_ack");
+    expect(mutations).toHaveLength(12);
+    for (const row of mutations) {
       const value = await schema(ticked(row[1] as string)[0] as string);
       for (const branch of (value.oneOf ?? [value]) as Record<string, any>[]) {
         expect(branch.required.some((member: string) => member === "idempotency" || member === "fence"), row[0]).toBe(true);
@@ -125,7 +127,8 @@ describe("every refusal of DEC-0073 is killed by its fixture", () => {
     expect(await killers(file, { name, mutate })).toContain(killer);
   });
 
-  it("an unchanged schema accepts none of its negative fixtures", async () => {
+  // One compilation of the whole catalogue per schema: slower than vitest's 5 s default on a loaded machine.
+  it("an unchanged schema accepts none of its negative fixtures", { timeout: 60_000 }, async () => {
     for (const file of new Set(PLANTS.map((plant) => plant.schema))) expect(await killers(file, { name: "identity", mutate: () => {} }), file).toEqual([]);
   });
 });

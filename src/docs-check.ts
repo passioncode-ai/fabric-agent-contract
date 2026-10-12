@@ -22,9 +22,28 @@ async function walk(directory: string): Promise<string[]> {
   return trackedFiles(directory);
 }
 
+/**
+ * `text` without its fenced code blocks (CommonMark: a fence of three or more backticks or tildes, closed by a line
+ * of the same character at least as long; an unclosed fence runs to the end). A link inside one is rendered as text.
+ */
+export function outsideFences(text: string): string {
+  const kept: string[] = [];
+  let fence: string | undefined;
+  for (const line of text.split("\n")) {
+    const marker = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+    if (fence === undefined) {
+      if (marker !== undefined) fence = marker;
+      else kept.push(line);
+    } else if (marker !== undefined && marker[0] === fence[0] && marker.length >= fence.length && line.trim() === marker) {
+      fence = undefined;
+    }
+  }
+  return kept.join("\n");
+}
+
 export async function checkLinks(file: string, text: string): Promise<string[]> {
   const findings: string[] = [];
-  for (const raw of markdownLinks(text)) {
+  for (const raw of markdownLinks(outsideFences(text))) {
     const target = raw.replace(/^<|>$/g, "").split("#", 1)[0] ?? "";
     if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
     const resolved = path.resolve(path.dirname(file), decodeURIComponent(target));

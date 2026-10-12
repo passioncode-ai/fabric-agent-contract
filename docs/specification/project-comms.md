@@ -177,7 +177,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 | `com.claim` | `comms-claim.schema.json` | `comms-receipt.schema.json`: `request`, `attempt`, `message`; none when nothing is claimable | yes, unless nothing was claimable |
 | `com.renew` | `comms-fenced.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt` | no |
 | `com.accept` | `comms-fenced.schema.json` | `comms-receipt.schema.json`: `request` | yes |
-| `com.progress` | `comms-progress.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt`, and `message` for a note | only with a note |
+| `com.progress` | `comms-progress.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt`, and `message` for a note | no; a note is posted at most once per attempt and key |
 | `com.effect_begin` | `comms-effect-begin.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.complete` | `comms-complete.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.reconcile` | `comms-reconcile.schema.json` | `comms-receipt.schema.json`: `request` | yes |
@@ -193,10 +193,12 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - **`com.claim` with nothing claimable** answers `{ok: true, repeated: false}` with no `request`. It stores no
   receipt, so the responder may poll again with the same key.
 - **`com.renew` and `com.progress` are naturally idempotent.** The board checks their key's shape and epoch, and a
-  closed or retired epoch is refused as for any call. It stores no receipt, and `repeated` is always `false`: a
-  repeated renewal is one more renewal of the same lease. A `com.progress` that carries a `note` posts it as the
-  responder's reply on the request's thread. That posting is stored like any reply, so the same key returns its
-  receipt and never posts the note twice.
+  closed or retired epoch is refused as for any call. It stores no receipt: a repeated renewal is one more renewal
+  of the same lease, and answers `repeated: false`. A `com.progress` that carries a `note` posts it as the
+  responder's message on the request's thread, at most once per attempt and idempotency key. The note's message is
+  its own record, so no receipt is stored for it either: a repeat finds that message, posts nothing and answers its
+  `message` with `repeated: true`. The same attempt and key with a different note is `idempotency_conflict`, judged
+  against that message's digest.
 - A participant's `com.reply` names the message it answers (`replyTo`) and joins its thread. A responder's
   `com.reply` carries its fence and answers `fence.request`. A call with both forms, or neither, is refused. A reply
   never changes a request's state.
@@ -227,9 +229,9 @@ caller's estate that a sender may address. For each Project it gives:
 
 The boundary:
 
-- **Who may read it.** A principal the board verified for a Project of the same estate may read it: a managed
-  session, an enrolled session or a board session. An `asserted` principal, a viewer principal and every caller from
-  another estate are refused `not_authorized`.
+- **Who may read it.** Only a session the board verified for a Project of the same estate may read it: a managed
+  session (one the host launched) or an enrolled session (one the operator consented to). An `asserted` principal,
+  a viewer principal and every caller from another estate are refused `not_authorized`.
 - **Never across estates.** A Project of another estate is never listed and never addressable through this board.
 - **Never content.** The answer never carries a message, a body, a subject, a thread, a participant, an unread or
   message count, a request count, a generation, a lease time, a holder or a last-activity time. Responder state is

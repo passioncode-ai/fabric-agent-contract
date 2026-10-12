@@ -24,7 +24,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A progress note, posted as the responder's reply on the request's thread."
+      "description": "A progress note, posted as the responder's message on the request's thread at most once per attempt and idempotency key; a repeat posts nothing."
     }
   },
   "additionalProperties": false

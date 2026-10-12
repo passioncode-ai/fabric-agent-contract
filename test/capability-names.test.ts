@@ -50,7 +50,13 @@ it("all four name-bearing schema surfaces reference the shared definition", asyn
   };
   for (const schema of await loadSchemas()) visit(schema, schema.$id.split("/").at(-1)!);
   expect(uses.sort()).toEqual([
+    "comms-claim.schema.json/properties/capability",
+    "comms-directory-args.schema.json/properties/capability",
+    "comms-directory.schema.json/properties/projects/items/properties/capabilities/items/properties/capability",
+    "comms-enroll.schema.json/properties/capability",
     "comms-message.schema.json/properties/request/properties/capability",
+    "comms-receipt.schema.json/properties/slot/properties/capability",
+    "comms-responder-replace.schema.json/properties/capability",
     "comms-status.schema.json/properties/responders/items/properties/capability",
     "comms-submit.schema.json/properties/request/properties/capability",
     "governance.schema.json/$defs/grant/properties/capabilities/items",
