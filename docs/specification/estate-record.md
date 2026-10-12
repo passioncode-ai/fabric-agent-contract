@@ -83,7 +83,7 @@ kept outside the signed record, so the record carries no label a person chose:
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
   delegation verifier that reads the estate record trusts a token's `kid` only while the revision it reads certifies
-  it — a revision it verified and the highest its machine applied — and refuses otherwise with the codes of
+  it — a revision `verifyEstateRecord` accepted, not lower than the highest its machine applied (DL-14) — and refuses otherwise with the codes of
   [DL-14](delegation.md#keys-publication-and-rotation) (`hubKeyCertified`, `FAC-SEM-081`, DEC-0060).
 - **`packages[]`** — the agents placed on this machine: `agentRef` (DEC-0050), the placed version's package `digest`
   and the `publisherKid` of the key in `publisherKeys` its publisher signature verifies under. An agent is placed once

@@ -189,6 +189,8 @@ describe("the verifiers' estate option (DL-13 row 4a)", () => {
     expect(refused.ok ? "ok" : refused.denial.reason).toBe("the meter's token was refused: issuer-unavailable (estate-rolled-back)");
     const uncertified = verifyMeterToken(meterToken, { ...meter, now: AT3, estate: third });
     expect(uncertified.ok ? "ok" : uncertified.denial.reason).toBe("the meter's token was refused: unauthenticated (kid-not-certified)");
+    const deltaRevoked = verifyMeterToken(meterToken, { ...meter, estate: second, estateRevocations: [{ kind: "machine", ref: "m-4c1e", revokedAt: "2026-10-21T09:00:00Z" }] });
+    expect(deltaRevoked.ok ? "ok" : deltaRevoked.denial.reason).toBe("the meter's token was refused: unauthenticated (kid-not-certified)");
   });
 });
 
@@ -230,6 +232,13 @@ describe("FAC-SEM-081 fixtures (delegation-hub-key)", () => {
   it.each(files)("%s yields exactly its expected codes", (name) => {
     const fixture = read(`fixtures/semantic/${name}`);
     expect(codes(fixture.kind, fixture.input)).toEqual(fixture.expect);
+  });
+
+  it("reads extraRevocations in the rule's input (the revocation delta, DEC-0054)", () => {
+    const base = { record: second, kid: K1, x: X1, at: "2026-10-22T09:00:00Z" };
+    expect(codes("delegation-hub-key", { ...base, answer: "certified" })).toEqual([]);
+    expect(codes("delegation-hub-key", { ...base, extraRevocations: [{ kind: "hub-key", ref: K1, revokedAt: "2026-10-21T09:00:00Z" }], answer: "kid-not-certified" })).toEqual([]);
+    expect(codes("delegation-hub-key", { ...base, extraRevocations: [{ kind: "hub-key", ref: K1, revokedAt: "2026-10-21T09:00:00Z" }], answer: "certified" })).toEqual(["FAC-SEM-081"]);
   });
 
   it("names the answer DL-14 gives and whose fault it is", () => {

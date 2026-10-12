@@ -207,28 +207,36 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   `verifyDelegation`, `verifyApproval` or `verifyMeterToken`; without `estate` the check does not run. The revision it
   reads:
 
-  - MUST be one `verifyEstateRecord` accepted and its machine applied ([estate record](estate-record.md#the-verifier)).
-    The check reads the revision and does not verify it, so an unverified record would certify whatever it lists.
-  - MUST be the highest revision its machine has applied, or a later one. An older revision can still be inside its
-    30-day window and list a hub key the applied revision revokes, so reading it would bring the key back: a rollback,
-    which the adapter's review of its kits found (FAA-31). A verifier that keeps the applied revision's number, and its
-    digest when it has it, passes them as `estateApplied`, and a lower revision is refused.
+  - The check reads the revision and does not verify it, so an unverified record would certify whatever it lists.
+  - MUST be one `verifyEstateRecord` accepted ([estate record](estate-record.md#the-verifier)) whose number is not
+    lower than the highest revision its machine has applied. A higher one is read only when this verifier itself verified
+    its chain from the applied revision (`verifyEstateRecord` with that revision as `parent`); otherwise the verifier
+    reads the applied one. An older revision can still be inside its 30-day window and list a hub key the applied
+    revision revokes, so reading it would bring the key back: a rollback, which the adapter's review of its kits found
+    (FAA-31). A verifier that keeps the applied revision's number, and its digest when it has it, passes them as
+    `estateApplied`, and a lower revision is refused.
+  - Revocations the revocation delta applied since that revision (DEC-0054, `deltaRevocations`) are passed as
+    `estateRevocations` (a list, or a function returning it); they revoke exactly as the revision's own do.
 
-  `hubKeyCertified(record, kid, x, at, applied?)` in [`src/hub-key-rules.ts`](../../src/hub-key-rules.ts) is this rule;
-  `x` is the published key's, `at` the clock as a `Date` or as seconds. It answers, the first row that applies:
+  `hubKeyCertified(record, kid, x, at, applied?, {extraRevocations}?)` in [`src/hub-key-rules.ts`](../../src/hub-key-rules.ts)
+  is this rule; `x` is the published key's, `at` the clock as a `Date` or as seconds (the verifiers bound it to ±8.64 × 10¹² s
+  before row 1; the function itself refuses only a clock that is not a finite number). It answers, the first row that
+  applies:
 
   | # | The revision and the key | Whose fault | Refusal | `detail` |
   |---|---|---|---|---|
   | 1 | the clock is not a time (the verifiers refuse this before DL-13 row 1) | the verifier's | `unknown-state` | `no-clock` |
-  | 2 | the revision cannot be read: a source that throws; not an object; `revision` not an integer from 1 (a JSON number above 2⁵³ − 1 included); `digest` not a string; `issuedAt` or `validUntil` not RFC 3339 read strictly as ER-10 reads it, or a window that is not positive or exceeds 30 days; `machines` not an array; `revocations` present but not an array; or an `estateApplied` without an integer `revision` from 1 | the trust source's | `issuer-unavailable` | `estate-unreadable` |
-  | 3 | its `revision` is lower than the applied one; or it is the applied number with another `digest` than the applied one's | the trust source's | `issuer-unavailable` | `estate-rolled-back`; `estate-forked` |
-  | 4 | the clock is before `issuedAt` or after `validUntil` (both instants are inside) | the trust source's | `issuer-unavailable` | `estate-outside-window` |
-  | 5 | the revision revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, compared exactly, or two are (`FAC-SEM-073`); that `hubKey.x` is not the published key's `x` (a missing `x` never matches); or the revision revokes `machine <id>` of that machine | the token's | `unauthenticated`; `approval-invalid` for an approval; the meter's `principal-unproven` (DL-21 step 3) | `kid-not-certified` |
+  | 2 | the revision cannot be read: a source that throws; not an object; `revision` not an integer from 1 (a JSON number above 2⁵³ − 1 included); `digest` not a string; `issuedAt` or `validUntil` not RFC 3339 read strictly as ER-10 reads it, or a window that is not positive or exceeds 30 days; `machines` not an array; `revocations` present but not an array; `extraRevocations` given but not an array; or an `estateApplied` without an integer `revision` from 1 | the trust source's | `issuer-unavailable`; the meter's `principal-unproven` with the detail in its reason (DL-21 step 3) | `estate-unreadable` |
+  | 3 | its `revision` is lower than the applied one; or it is the applied number with another `digest` than the applied one's | the trust source's | `issuer-unavailable`; the meter's `principal-unproven` (DL-21 step 3) | `estate-rolled-back`; `estate-forked` |
+  | 4 | the clock is before `issuedAt` or after `validUntil` (both instants are inside) | the trust source's | `issuer-unavailable`; the meter's `principal-unproven` (DL-21 step 3) | `estate-outside-window` |
+  | 5 | the revision or `extraRevocations` revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, compared exactly, or two are (`FAC-SEM-073`); that `hubKey.x` is not the published key's `x` (a missing `x` never matches); or the revision or `extraRevocations` revokes `machine <id>` of that machine | the token's | `unauthenticated`; `approval-invalid` for an approval; the meter's `principal-unproven` (DL-21 step 3) | `kid-not-certified` |
 
   Otherwise the key is certified, for that one machine, by that revision. The token's fault is `unauthenticated`, as an
   unknown `kid` is (row 3 of DL-13): the token names a key the estate does not stand behind. The revision's faults are
   `issuer-unavailable`, as an unusable published key is: the caller cannot cure them by minting again, and 503 says to
-  retry once the hub has drafted a fresh revision or the machine has applied it. The vectors
+  retry once the hub has drafted a fresh revision or the machine has applied it. At the meter every refusal of its token
+  is `principal-unproven` (DL-21 step 3); the detail travels in its `reason`, so a callee can tell a trust-source fault
+  from its own and does not mint again for nothing. The vectors
   [`fixtures/vectors/hub-key.json`](../../fixtures/vectors/hub-key.json) hold each row, the exact window boundaries, a
   rotation (revision 3 certifies a new hub key and revokes the old one, and verifies against revision 2), the rollback,
   and the verifiers' answers; `FAC-SEM-081` checks a verifier's answer on `{record, kid, x, at, applied?, answer}`.
@@ -238,6 +246,10 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   caches the set for at most 10 minutes and, on an unknown `kid`, re-reads it at most once a minute before
   refusing. Where callees read the estate record, a new key is also certified by a revision before the issuer signs
   with it: a callee whose applied revision does not certify the key refuses its tokens `kid-not-certified` (DL-14).
+  To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
+  key once the check-ins it reads (`records.estateRecord.revision`, DEC-0053) show the certifying revision applied, and
+  revokes the old key in a later revision. A revision that certifies the new key and revokes the old one at once (as
+  the rotation vector does) is valid, but callees on the older revision refuse the new key until they apply it.
 
 ## Declaring acceptance
 
@@ -270,8 +282,9 @@ does not declare it, because it MUST NOT require a token of its callers (DL-26).
 **DL-18 — Asking and checking.** A callee whose action needs an approval refuses `approval-required` with the
 action's digest in `error.data.actionDigest`. The caller asks the hub, which asks the operator and returns the
 document; the caller repeats the call carrying it. The callee checks it with
-`verifyApproval(approval, {audience, jwks, now, actionDigest, issuer, jtiStore})`: the signature and header as
-DL-13 steps 1–4, the lifetime, the 60 s leeway, its own agent id in `aud`, the digest of the action it is about
+`verifyApproval(approval, {audience, jwks, now, actionDigest, issuer, jtiStore, estate?, estateApplied?, estateRevocations?})`:
+a missing approval, then a missing `jtiStore`, then an unreadable clock (`unknown-state`, `no-clock`), then the
+signature and header as DL-13 steps 1–4a, the lifetime, the 60 s leeway, its own agent id in `aud`, the digest of the action it is about
 to take, and finally that the `jti` was not consumed — recording it in a store that survives a restart for the
 approval's lifetime. Any fault of the document is `approval-invalid`; a second use is `approval-reused`. The store
 is required: without one the answer is `unknown-state`, and a callee that truly wants no replay protection
@@ -297,7 +310,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 
 | Code | Means | Refused by | HTTP |
 |---|---|---|---|
-| `unauthenticated` | no token, or one not signed by a published key or not of this profile | callee (verifier) | 401 |
+| `unauthenticated` | no token, or one not signed by a published key or not of this profile, or signed by a key the estate revision the callee reads does not certify (DL-14) | callee (verifier) | 401 |
 | `token-expired` | past `exp` by more than the leeway; mint a new one | callee (verifier) | 401 |
 | `wrong-audience` | the token is for another callee | callee (verifier) | 403 |
 | `scope-not-granted` | the called capability is not in `scope` | callee (verifier) | 403 |
@@ -481,6 +494,7 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
   the callee's own token, and the meter's token-less answer (Observatory's `slotsRequireGrant: when-token`) is
   the meter's (CT-30).
 - How a callee on a machine learns the revision its node applied (a file, a call to the node, the relay): DL-14 takes
-  the revision and the applied mark as arguments. What a callee reports beyond its refusal when it sees a fork
+  the revision and the applied mark as arguments. Until it is decided, a callee other than the node passes no `estate`
+  (the check does not run) unless it verifies revisions itself and keeps its own applied mark (board CT-32). What a callee reports beyond its refusal when it sees a fork
   (`estate-forked`), as for a receiver (estate record, *Not decided here*). Whether the hub key is the machine's `#sig`
   key or its own (Fabric's D3, DEC-0055).

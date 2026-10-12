@@ -83,9 +83,10 @@ window at L3, not a grant limit (DEC-0041).
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
 DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it
-trusts a `kid` only while the revision it reads certifies it — one it verified and the highest its machine applied —
-and refuses otherwise `kid-not-certified`, or `issuer-unavailable` when the revision is at fault (delegation DL-14,
-DEC-0060).
+trusts a `kid` only while the revision it reads certifies it — one `verifyEstateRecord` accepted, not lower than the
+highest its machine applied — and refuses otherwise `kid-not-certified`, or `issuer-unavailable` when the revision is at
+fault (the meter: `principal-unproven`, with the detail in its reason) (delegation DL-14, DEC-0060). The module is
+`src/hub-key-rules.ts`.
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).

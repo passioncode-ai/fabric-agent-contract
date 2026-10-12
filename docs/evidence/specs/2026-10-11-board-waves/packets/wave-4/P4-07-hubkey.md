@@ -24,7 +24,7 @@
 
 ## What to build (one decision)
 
-1. **The reference function** in `src/estate-record-rules.ts`: `hubKeyCertified(record, kid, x, at, applied?)`, a
+1. **The reference function** (landed in `src/hub-key-rules.ts`, DEC-0060 item 4) in `src/estate-record-rules.ts`: `hubKeyCertified(record, kid, x, at, applied?)`, a
    verdict that is either certified (the machine and the revision) or refused with a fault (the token's or the trust
    source's) and a detail. It never throws.
 2. **The verifier's option:** `estate` (a revision, or a function returning it) and `estateApplied` on
