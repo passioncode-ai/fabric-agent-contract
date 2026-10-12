@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-12 a role's secret slots (P6-10)](2026-10-12-w6-p6-10-mcp-secrets.md) | DEC-0074 (board run P6-10) | pull request open |
 | [2026-10-12 a consumer agent (P6-09)](2026-10-12-w6-p6-09-consumer-agent.md) | DEC-0071 (board run P6-09) | this pull request |
 | [2026-10-12 data on feed events (P6-07)](2026-10-12-w6-p6-07-feed-data.md) | DEC-0070 (board run P6-07) | merged, #77 `b9453a0` |
 | [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | merged, #73 `fee53a2` |
