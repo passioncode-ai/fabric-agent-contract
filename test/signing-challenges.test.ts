@@ -159,3 +159,17 @@ describe("signing-credential semantic fixtures (FAC-SEM-092)", () => {
     expect(signingCredentialFindings({ rpId: "sign.example.org", origins: "https://sign.example.org" }, "")).toEqual([]);
   });
 });
+
+describe("statement fields at their exact limits (owed readings of #65)", () => {
+  it("refuses a renamed field even when the count is right", () => {
+    const auth = statement("relay-auth/1").fields as Record<string, unknown>;
+    const { iat, ...rest } = auth;
+    expect(signingStatement("relay-auth/1", { ...rest, issuedAt: iat })).toBeUndefined();
+  });
+  it("refuses a jkt whose last character cannot end 32 bytes, and a grant at revision 0", () => {
+    const grant = statement("share-grant/1").fields as Record<string, string>;
+    expect(signingStatement("share-grant/1", grant)).toBeDefined();
+    expect(signingStatement("share-grant/1", { ...grant, jkt: `${String(grant.jkt).slice(0, -1)}B` })).toBeUndefined();
+    expect(signingStatement("share-grant/1", { ...grant, grant: String(grant.grant).replace(/#\d+$/, "#0") })).toBeUndefined();
+  });
+});

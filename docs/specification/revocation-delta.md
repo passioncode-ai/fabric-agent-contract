@@ -126,6 +126,7 @@ in lower-case hex, `estateRecord.digest` as `sha256:` and 64 hex), then compares
 
 | Row | Problem | When |
 |---|---|---|
+| HB-0 | `malformed` | the heartbeat the machine holds is not one it could have accepted (a corrupt held state): refused, never read as "nothing held" (the owed reading of #64, 2026-10-12) |
 | HB-1 | `not-newer` | its sequence is below the held heartbeat's: nothing changes |
 | HB-2 | `fork` | the held sequence with other bytes; a head at a sequence the machine holds with another hash; or the applied revision's number with another digest. The machine becomes `broken` |
 | HB-3 | `regressed` | a newer sequence that moves `at`, the head's sequence or the revision back; the held heartbeat stays |

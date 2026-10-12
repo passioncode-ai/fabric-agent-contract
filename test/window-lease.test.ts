@@ -217,9 +217,11 @@ describe("the verifier's context and edges (DEC-0062)", () => {
     expect(verifyWindowLease({ ...lease, sig: `${lease.sig.slice(0, -1)}B` }, trust)).toEqual({ ok: false, problem: "bad-signature" });
   });
 
-  it("lets a held lease of another slot, or a malformed one, supersede nothing", () => {
+  it("lets a held lease of another slot supersede nothing, and refuses a held state it cannot read", () => {
     expect(verifyWindowLease(lease, { ...trust, held: { ...lease, scope: "project:p-1", sequence: 99 } }).ok).toBe(true);
-    expect(verifyWindowLease(lease, { ...trust, held: { ...lease, leaseId: "other", sequence: "x" } }).ok).toBe(true);
+    for (const held of [{ ...lease, leaseId: "other", sequence: "x" }, { ...lease, sequence: "nine" }, { ...lease, sequence: 0 }, { ...lease, leaseId: 7 }]) {
+      expect(verifyWindowLease(lease, { ...trust, held })).toEqual({ ok: false, problem: "context-invalid" });
+    }
   });
 
   it("refuses a meter's request it cannot read, and a ledger it cannot read", () => {
@@ -268,6 +270,22 @@ describe("window-lease semantic fixtures (FAC-SEM-089…091)", () => {
     expect(codes("window-lease-division", together)).toEqual([]);
     const over = { ...division, leases: [first, { ...second, issuedAt: first.issuedAt, amount: "600.000001" }] };
     expect(codes("window-lease-division", over)).toEqual(["FAC-SEM-090"]);
+  });
+
+  it("counts a report only when it was received before a lease was issued, not at the same instant", () => {
+    const division = load("semantic/window-lease-division-ok.json").input;
+    const [first, second, third] = division.leases as [Json, Json, Json];
+    const later = { ...third, leaseId: "lease-mb2c3-2026-10-0002", sequence: third.sequence + 1, issuedAt: "2026-10-12T09:00:00Z", expiresAt: "2026-10-13T09:00:00Z", amount: "749.5" };
+    const report = (receivedAt: string) => ({ leaseId: first.leaseId, spent: "0", receivedAt });
+    expect(codes("window-lease-division", { ...division, leases: [first, second, third, later], reports: [report("2026-10-12T08:59:59.999Z")] })).toEqual([]);
+    expect(codes("window-lease-division", { ...division, leases: [first, second, third, later], reports: [report("2026-10-12T09:00:00Z")] })).toEqual(["FAC-SEM-090"]);
+  });
+
+  it("names a malformed lease in a division by its own finding, whatever else is wrong", () => {
+    const division = load("semantic/window-lease-division-ok.json").input;
+    const [first, second] = division.leases as [Json, Json];
+    const found = evaluateSemanticRules("window-lease-division", { ...division, leases: [first, { ...second, sig: 7 }] });
+    expect(found.map((finding) => `${finding.instancePath} ${finding.message}`)).toEqual(["/leases/1 every lease of the division is a well-formed window-lease/1"]);
   });
 
   it("flags each problem of one lease where it is", () => {

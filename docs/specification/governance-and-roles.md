@@ -25,7 +25,7 @@ classes. Default authorization is `draft-only`. A standing grant MUST name:
   `recipientConstraints` no recipient outside the project (the schema keeps both optional; the safe default is the
   meaning of their absence, DEC-0064);
 - data classifications allowed;
-- start and expiry, `expiresAt` after `startsAt`; an `active` grant is inside its window when evaluated (`FAC-SEM-097`);
+- start and expiry, `expiresAt` after `startsAt`; an `active` grant is inside its window `[startsAt, expiresAt)` when evaluated (`FAC-SEM-097`);
 - rate and amount limits where applicable (amounts: the grant's `spend` block, [spend policy](spend-policy.md), DEC-0037);
 - for a grant that lets an agent call another agent: the callee (`audience`), its capabilities and the effect
   ceiling (`effectCeiling`) — a delegation grant ([delegation](delegation.md), DEC-0039). A delegation grant
