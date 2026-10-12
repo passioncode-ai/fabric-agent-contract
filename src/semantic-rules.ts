@@ -1,6 +1,7 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
+import { relayRules } from "./relay-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { lockOutcomeRules } from "./service-supervisor.js";
 import { windowsTokenRules } from "./windows-token.js";
@@ -15,6 +16,7 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -33,6 +35,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (device) return device;
   const delegation = delegationRules(kind, value);
   if (delegation) return delegation;
+  const relay = relayRules(kind, value);
+  if (relay) return relay;
   if (kind === "deep-link") return deepLinkRules(value);
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
   if (kind === "windows-token-file") return windowsTokenRules(value);
@@ -78,6 +82,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known" && value.status === "ready" && Array.isArray(value.degraded) && value.degraded.length > 0) {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
+  if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));

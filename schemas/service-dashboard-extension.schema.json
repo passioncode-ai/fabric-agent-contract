@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-dashboard-extension.schema.json",
   "title": "Embedded dashboard declaration (fabric-dashboard/0.1, DEC-0036)",
-  "description": "The value a service puts under the extension key https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1 in its well-known document's extensions (ED-9): the page's floor width, the appearance fields it applies, the themes it ships and the kit it is built from.",
+  "description": "The value a service puts under the extension key https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1 in its well-known document's extensions (ED-9): the page's floor width, the appearance fields it applies, the themes it ships and the kit it is built from. A host validates the value against this schema and treats an invalid one as not declared (ED-9, DEC-0059); a checker reports it as FAC-SEM-080.",
   "type": "object",
   "required": ["minWidth"],
   "properties": {
@@ -13,7 +13,7 @@
       "maximum": 1280
     },
     "appearance": {
-      "description": "The fabric_appearance cookie fields the page applies (ED-8).",
+      "description": "The fabric_appearance cookie fields the page applies, and only these (ED-6, ED-8, DEC-0059). A field not listed stays the page's own; with none listed, the page takes nothing from the cookie and follows prefers-color-scheme only.",
       "type": "array",
       "items": { "enum": ["scheme", "theme"] },
       "uniqueItems": true,

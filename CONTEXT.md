@@ -249,9 +249,11 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 (`fabric-dashboard/0.1`, DEC-0036). The *host floor*, `max(480, minWidth)`, is the width a host
 keeps for the page when its own panes grow.
 
-**Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets on a
-dashboard's origin so the page shows the operator's colour scheme and theme (DEC-0036, ED-8).
-It carries no secret and no identity.
+**Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
+dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+is not isolated by port, so it is per host in a shared cookie store and per service where the host
+gives each service its own store; a page applies only the fields it declares in `appearance`
+(DEC-0059, ED-6). It carries no secret and no identity.
 
 **Operator channel**: An agent's own messenger channel to its operator
 (`fabric-operator-channel/0.1`, DEC-0034), first over the Telegram Bot API: it sends the events
@@ -264,7 +266,8 @@ binds the chat and the operator's numeric user id to an operator channel (OC-3).
 
 **Addressed message**: In a group, a message meant for one bot: `/command@ThatBot`, a reply to
 that bot's own message, or a press of its own button. A bare `/command` in a group is not
-addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DEC-0035).
+addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DEC-0035), except a bare
+`/link CODE` that matches its own pending code (OC-15).
 
 **Settings backup**: A checksummed snapshot (`fabric-settings-backup/1`) of a service's
 operator decisions and bindings, kept outside its data directory. A restore only adds missing
@@ -367,6 +370,19 @@ effect; every effectful stage has one on every path from the start.
 
 **Contract pin**: The one record (`fabric-contract.lock.json`) naming the contract
 version and commit a consuming repository builds against.
+
+**Relay**: A server that admits machines on their device keys and carries their messages,
+sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
+authority: it reads nothing it carries, decides no trust tier and never reports a queued command done.
+
+**Admission set**: The signing keys a **Relay** admits — the machines of the estate record it holds,
+applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
+keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
+organization's relay has none of its own until `org-authority/1` (Fabric D8).
+
+**Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
+signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a
+**Relay** as a blob and opened only in the target's vault.
 
 ## Relationships
 

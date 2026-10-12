@@ -89,6 +89,22 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: a fixed budget that is wrong for every project; pull: options computed from the project's own spend; anxiety: an agent that spends on one tap, or an outside caller who acts as me; habit: approve everything in chat.
 - **Success metric:** a project's limit is chosen once with its reasons kept, a spend above the threshold waits for one answer that shows the amount, and an outside caller's effect happens only after an approval of that one action.
 
+### JTBD-08: Use an agent's dashboard beside my console, whatever room it gets
+
+- **Statement:** When I open an agent's dashboard inside my host with the agent console beside it, I want the page to stay usable however wide I drag the console, and to look the way I chose in the host, so I can work in both without hunting for a lost menu or a clashing theme.
+- **Personas:** P-02
+- **Type:** functional, emotional
+- **Forces:** push: the page narrows until its navigation disappears; pull: one floor every page keeps and one appearance choice for every page; anxiety: a page that breaks silently, or a theme that half applies; habit: open the dashboard in a separate browser window.
+- **Success metric:** at every console width the host allows, every primary destination of the page stays reachable without sideways scrolling, and a page applies exactly the appearance fields it declared.
+
+### JTBD-09: Follow what my agents ask of each Project
+
+- **Statement:** When one of my agents asks another Project for something, I want to read the request and its state on the Project board, so I can see what is waiting, what happened and what is unknown without asking each agent.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: requests buried in chats and logs; pull: one board with each request's state; anxiety: a request reported done that never happened; habit: ask each agent in its own session.
+- **Success metric:** every request between Projects shows its request state and effect state separately, and a lost result shows as `outcome_unknown`, never as done.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -145,6 +161,24 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Set | chooses the project's spend policy at its first paid run | the launcher's policy choice | 3 | a number with no reason behind it | options computed from presets and recent spend, one preselected, inputs kept (priority 9) |
 | 2 | Answer | answers one request for a spend above the threshold | the operator channel | 3 | the agent waits, or spends anyway | one durable request with the amount; the agent works on meanwhile (priority 9) |
 | 3 | Approve | approves one action an outside caller asked for | Fabric's approval prompt | 2 | an approval that could be reused for something else | an approval bound to one action, one callee, one use (priority 9) |
+| 4 | Proceed | sees an agent spend within a standing grant without asking | the usage report by grant | 4 | an agent asks again for what a grant already allows | the agent checks the record and cites the receipt (priority 9) |
+
+### JRN-07: Operator — a dashboard beside the console (JTBD-08)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Open | opens an agent's dashboard in the host's pane | Fabric Dashboards | 4 | the page assumes a full window | a 360 px page floor and reachable navigation (priority 9) |
+| 2 | Widen | drags the console wider | the host's pane divider | 2 | the page shrinks until its menu disappears | a host floor of `max(480, minWidth)` the console stops at (priority 9) |
+| 3 | Choose | picks a colour scheme and a theme in the host | the host's appearance picker | 4 | each page keeps its own look | one carrier the declaring pages apply (priority 7) |
+| 4 | Mismatch | opens a page that declares less, or declares wrongly | the host's pane | 3 | a theme half applied, or a page squeezed by a bad declaration | the page applies only what it declared; an invalid declaration counts as none (priority 8) |
+
+### JRN-08: Operator — a request on the Project board (JTBD-09)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Notice | sees a new request to one of the Projects | the Project board | 3 | a request lost in a chat | one thread per request, fixed participants (priority 8) |
+| 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
+| 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried | `outcome_unknown`, left only by an observed reconciliation (priority 9) |
 
 ## 4. User stories
 
@@ -324,6 +358,66 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given 12 hours without use, or 7 days since sign-in, or a rotated descriptor token, when I open a dashboard page, then the service answers `401` with a page that explains the state.
   - Given a host showing that page, then it signs in again with a new login code and reopens the same page, at most once a minute per page.
   - Given the page's own API call answers `401`, then the host does not reload the page.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-016: Operator keeps a dashboard usable beside a wide console
+
+- **Story:** As P-02, I want the host to stop the console before the dashboard page gets narrower than its floor, and the page to keep every destination reachable at that width, so that widening the console never hides the page's navigation.
+- **Traces:** JTBD-08, JRN-07/#1, JRN-07/#2
+- **Acceptance criteria:**
+  - Given a dashboard that declares `minWidth: 360`, when I drag the console wider, then the console stops growing when the page has 480 CSS pixels left.
+  - Given the page at 480 CSS pixels, then every primary destination is visible or inside a visible *More* menu, and the document does not scroll sideways.
+  - Given a window too narrow for both the page's floor and the panes' minimums, then the page keeps its floor layout and scrolls sideways; the host never zooms it.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-017: Operator's appearance choice reaches the pages that declare it
+
+- **Story:** As P-02, I want a scheme and theme I choose in the host to apply to each page for exactly the fields it declared, so that no page half follows my choice.
+- **Traces:** JTBD-08, JRN-07/#3, JRN-07/#4
+- **Acceptance criteria:**
+  - Given a page that declares `appearance: [scheme, theme]`, when I choose dark and `ocean`, then the page shows dark `ocean` and hides its own scheme and theme controls.
+  - Given a page that declares only `scheme`, then it follows my scheme and keeps its own theme control.
+  - Given a page that declares no `appearance`, or whose declaration is invalid, then it takes nothing from the host's cookie and follows the system colour scheme unless I set the page's own control, and the host treats an invalid declaration as not declared and reports it.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-018: An agent finds a standing grant and proceeds without asking
+
+- **Story:** As P-02, I want an agent whose spend a standing grant already allows to check the record and go on, so that I am asked only about what no record allows.
+- **Traces:** JTBD-07, JRN-06/#4
+- **Acceptance criteria:**
+  - Given a standing grant with a limit the spend fits, when the agent checks, then the registry answers `allowed` with a receipt and reserves the amount, and the agent proceeds without a question.
+  - Given the usage report, then the spend appears under the grant with the receipt it settles.
+  - Given a check that is denied, then the agent relays the refusal code unchanged and files at most one approval request.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-019: Operator restores settings after the data directory was lost
+
+- **Story:** As P-02, I want a service whose data directory was lost to restore what I decided from its settings backup, adding and never overwriting, so that a purge or a bad migration costs me none of my decisions.
+- **Traces:** JTBD-03, JRN-02/#5
+- **Acceptance criteria:**
+  - Given a fresh database and an intact snapshot with content, when the service starts, then it restores from the newest such snapshot and names any damaged one it skipped.
+  - Given a database that already holds records, when I choose a snapshot, then a preview shows what each table would gain and what would be dropped, defaulted or refused, and nothing is applied until I apply it.
+  - Given a row the database refuses, then the report names it with its key and reason and does not count it as inserted.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-020: Operator follows a request on the Project board
+
+- **Story:** As P-02, I want each request between Projects to show its request state and its effect state, so that I know what happened and what is unknown.
+- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3
+- **Acceptance criteria:**
+  - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
+  - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
+  - Given a deadline that passes before anyone accepts, then the request shows `expired`; accepted work is held, not expired.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

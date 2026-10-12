@@ -43,6 +43,11 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P3-03 | `src/estate-record-rules.ts` (new) | 190 / 190 (100 %) | 100 % | FAC-SEM-072…076, the digest, the challenge, `verifyEstateRecord` and `placementTrust`; one fixture or vector case per rule and problem, the chain checks planted |
 | P3-03 | `src/webauthn.ts` (new) | 78 / 78 (100 %) | 100 % | the offline WebAuthn Level 3 §7.2 assertion checks, ER-4…ER-9 |
 | P3-02 | `src/p256.ts` (new) | 8 / 8 (100 %) | 100 % | SEC 1 §3.2.2 P-256 key validation over `fixtures/vectors/p256.json` (DEC-0053) |
+| DEC-0047 | `src/relay.ts` (new) | 103 / 103 (100 %) | 100 % | admission, relay-auth/1 and relay-blob/1, the message body with its signed `exp`, `relayAdmissionSet`; boundary tests for the review of #53 (its second reading caught 42 of 45 planted mutations) |
+| DEC-0047 | `src/secret-envelope.ts` (new) | 90 / 90 (100 %) | 100 % | HPKE base mode against RFC 9180 §A.3.1 and the envelope's open checks over `fixtures/vectors/secret-envelope.json` |
+| DEC-0047 | `src/relay-rules.ts` (new) | 51 / 51 (100 %) | 100 % | FAC-SEM-070 and FAC-SEM-071; one fixture per sub-check |
+| DEC-0047 | `src/p256.ts` | 46 / 46 (100 %) | 100 % | DEC-0053's copy merged with DEC-0047's; one helper turns SEC 1 octets or a JWK into the key every verifier uses |
+| P4-03 | `src/dashboard-declaration.ts` (new) | 20 / 20 (100 %) | 100 % | FAC-SEM-080 and `hostView` over `fixtures/vectors/dashboard-declaration.json` (DEC-0059); malformed input answered, never thrown |
 | P4-01 | `src/service-supervisor.ts` (new) | 114 / 114 (100 %) | 100 % | the supervisor marker over `fixtures/vectors/service-supervisor.json` and FAC-SEM-078; one fixture or test per check, each planted (DEC-0057) |
 | P4-01 | `src/windows-token.ts` (new) | 45 / 45 (100 %) | 100 % | the Windows token-file reader over `fixtures/vectors/windows-token.json` (FAC-SEM-079); every check planted (DEC-0057) |
 
@@ -82,9 +87,23 @@ throwing; the verifier's checks added in review (issued before the parent, a dro
 rules, an unreadable clock, the day of the month, one hub key under two kids, a canonical JWK, an unadmitted algorithm,
 a revocation kind read from a `Map`) were each removed and a test failed. `semantic-rules.ts` only dispatches to the new module. The whole-set floor stays at 86.85 %; measured whole set
 3131 / 3290 (95.16 %). Measured with `vitest run --coverage` on the P3-03 branch off main's `92de756`.
+**Wave 3, DEC-0047 (#53).** `src/relay.ts`, `src/secret-envelope.ts` and `src/relay-rules.ts` are new and reach every
+branch, with no `v8 ignore`; `src/p256.ts` keeps every branch after the merge with DEC-0053's copy and the key helper.
+The whole set: 3415 / 3574 (95.55 %). Measured with `vitest run --coverage` on the DEC-0047 branch rebased onto main's `b291bf0`, after the second reading.
+
+**Wave 4, P4-03 (DEC-0058, DEC-0059).** `src/dashboard-declaration.ts` is new and reaches every branch, with no
+`v8 ignore`; `service-well-known` joins `test/rule-tolerance.test.ts`. `semantic-rules.ts` only dispatches to it
+(91.51 %, floor unchanged). The schema invariants this packet proves are not branches: `test/schema-mutants.ts` removes
+each one from a copy of its schema and requires a negative fixture the copy accepts (22 mutants of
+`operator-channel-status`, 10 of `service-dashboard-extension`, and an identity mutant for each). The whole set: 3153 / 3312 (95.19 %). Measured with
+`vitest run --coverage` on the P4-03 branch off `main` `31ed9f0`. On its merge with `main` `8060254` (the relay, DEC-0047): 39 files, 1689 tests,
+whole set 3441 / 3600 (95.58 %).
 
 **Wave 4, P4-01 (DEC-0057).** `src/service-supervisor.ts` and `src/windows-token.ts` are new and reach every branch,
 with no `v8 ignore`; both rule kinds join `test/rule-tolerance.test.ts`. 44 plants (each check removed or loosened
 once, the descriptor's DEC-0032 rules and the review round's checks among them) each failed at least one test. `semantic-rules.ts` gains two
 dispatches and `FAC-SEM-012`'s path (358 / 391, 91.56 %, floor unchanged). The whole-set floor stays at 86.85 %;
 measured whole set 3294 / 3453 (95.39 %), after the review round. Measured with `vitest run --coverage` on the P4-01 branch off main's `31ed9f0`.
+
+**Wave 4, P4-01 merged with main `c00a0c3`** (the relay DEC-0047, P4-03 DEC-0058/0059, #59): 41 files, 1777 tests,
+whole set 3604 / 3763 (95.77 %), every floor met.

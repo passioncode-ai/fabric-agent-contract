@@ -25,11 +25,13 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "model-profile.schema.json": "model-profiles",
   "provider.schema.json": "provider-entry",
   "registry-models.schema.json": "model-catalogue",
+  "relay-frame.schema.json": "relay-frame",
   "result.schema.json": "result",
   "roles.schema.json": "roles",
   "runner-profile.schema.json": "runner-profile",
   "runner-route.schema.json": "runner-route",
   "runners.schema.json": "runner-catalogue",
+  "secret-envelope.schema.json": "secret-envelope",
   "service-descriptor.schema.json": "service-descriptor",
   "service-usage.schema.json": "service-usage",
   "service-well-known.schema.json": "service-well-known",
@@ -99,7 +101,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules"]
+    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

@@ -312,9 +312,12 @@ describe("F-B-317 — ordinary parameter names pass (re-checked after DEC-0041)"
 });
 
 describe("F-B-318 — the button cookie lives in the page's partition for the session only", () => {
-  it("states the partition and the lifetime in FB-6", () => {
+  it("states the scope and the lifetime in FB-6", () => {
     const fb6 = /\*\*FB-6 — [\s\S]*?(?=\*\*FB-7)/.exec(read("docs/specification/fabric-button.md"))?.[0] ?? "";
-    expect(fb6).toMatch(/page's own storage\s+partition on the service origin/);
+    // DEC-0059 gave FB-6 ED-8's scope: a cookie is per host, not per origin (RFC 6265 §8.5).
+    expect(fb6).toMatch(/\*\*per host in a shared\s+cookie store; per service where the host gives each service its own store\*\*/);
+    expect(fb6).toMatch(/hides the button of every\s+local service on that host/);
+    expect(fb6).not.toMatch(/on the service origin/);
     expect(fb6).toMatch(/session cookie/);
   });
 });

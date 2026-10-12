@@ -1,6 +1,6 @@
 # Embedded dashboard `fabric-dashboard/0.1`
 
-DEC-0036 · declaration schema [`service-dashboard-extension.schema.json`](../../schemas/service-dashboard-extension.schema.json)
+DEC-0036, amended by DEC-0059 · rule code `FAC-SEM-080` · declaration schema [`service-dashboard-extension.schema.json`](../../schemas/service-dashboard-extension.schema.json)
 · builds on [`fabric-service/0.1`](service.md) (`surfaces.dashboard`, [Operator login](service.md#operator-login))
 
 A service's dashboard is a web page, and a host shows it **inside** its own window: Fabric
@@ -55,12 +55,16 @@ pixels or a quarter of the viewport height, whichever is less. A jump to an anch
 the sticky chrome (for example `scroll-margin-top` equal to its height). A data refresh MUST keep
 the scroll position and the focus.
 
-**ED-6 — Appearance follows the host.** A page MUST follow `prefers-color-scheme` when nothing else
-is set, and MUST render correctly with neither a cookie nor a stored preference. When the cookie
-`fabric_appearance` (ED-8) is present, its values take precedence over the page's own stored
-preference, and the page MUST hide its own scheme and theme controls while it is: the host owns
-appearance then. An unknown `theme` is ignored and the page's default theme is used. Meaning is
-never carried by colour alone, in any theme.
+**ED-6 — Appearance follows the host, for the fields the page declares.** A page MUST follow
+`prefers-color-scheme` when nothing else is set, and MUST render correctly with neither a cookie nor a
+stored preference. The fields a page takes from the cookie `fabric_appearance` (ED-8) are exactly those
+its declaration lists in `appearance` (ED-9), and only those (DEC-0059). For each listed field, while the
+cookie is present its value takes precedence over the page's own stored preference, and the page MUST
+hide its own control for that field: the host owns that field then. A field the page does not list stays
+the page's own, with its control. A page that lists no field — its declaration has no `appearance`, it
+declares nothing, or its declaration is invalid (ED-9) — takes nothing from the cookie: from the host it
+follows `prefers-color-scheme` only. An unknown `theme` is ignored and the page's default theme is used.
+Meaning is never carried by colour alone, in any theme.
 
 ## The host
 
@@ -72,9 +76,14 @@ falls back to ED-2. A host MUST NOT scale or zoom a page to make it fit. The 480
 dashboard, declared or not: a page built before this profile was never told it could be narrower.
 
 **ED-8 — The appearance carrier.** A host that offers the operator a colour scheme or a theme MUST
-carry the choice to the page as the cookie `fabric_appearance`, set in the page's own storage
-partition on the service origin, with path `/`, `SameSite=Strict`, not `HttpOnly` (the page's
-script reads it) and `Secure` on an `https` origin. Its value is form-encoded:
+carry the choice to the page as the cookie `fabric_appearance`, set for the page's host in the cookie
+store the page reads, with path `/`, `SameSite=Strict`, not `HttpOnly` (the page's script reads it) and
+`Secure` on an `https` origin. A cookie is scoped to a host, not to an origin: "cookies do not provide
+isolation by port" (RFC 6265 §8.5, [sources](../evidence/sources.md)). So the appearance cookie is **per
+host in a shared cookie store; per service where the host gives each service its own store** (DEC-0059).
+Every local service on `127.0.0.1` that shares one store reads the same cookie, and any of them can
+overwrite it. Fabric Dashboards gives each service its own store, the partition `persist:svc-<key>`, so
+there it is per service. Its value is form-encoded:
 
 | Field | Value | Meaning |
 |---|---|---|
@@ -85,9 +94,10 @@ script reads it) and `Secure` on an `https` origin. Its value is form-encoded:
 Example: `fabric_appearance=v=1&scheme=dark&theme=ocean`. The cookie carries no secret and no
 identity; a host MUST NOT put anything else in it. A host that also controls the page's
 `prefers-color-scheme` (Electron `nativeTheme`, for example) SHOULD keep the two in agreement.
-When the operator changes the choice, the host rewrites the cookie; a page SHOULD apply the change
-without a reload when the cookie changes (`cookieStore` `change` where it exists) or when it
-becomes visible again, and a host MAY reload a page that does not declare `appearance` (ED-9).
+When the operator changes the choice, the host rewrites the cookie; a page SHOULD apply a change to a
+field it lists without a reload, when the cookie changes (`cookieStore` `change` where it exists) or when
+it becomes visible again. A page that lists no field reads no cookie (ED-6), so reloading it changes
+nothing the cookie carries; `prefers-color-scheme` reaches it live.
 
 ## The declaration
 
@@ -99,7 +109,7 @@ becomes visible again, and a host MAY reload a page that does not declare `appea
 | Field | Required | Meaning |
 |---|---|---|
 | `minWidth` | yes | the page's floor in CSS pixels, 360…1280; a host floor of `max(480, minWidth)` follows from it |
-| `appearance` | no | which carrier fields the page applies: any of `scheme`, `theme` |
+| `appearance` | no | which carrier fields the page applies: any of `scheme`, `theme`; with none it takes nothing from the cookie (ED-6) |
 | `themes` | no | the theme ids the page ships, so a host can offer only those |
 | `kit` | no | the dashboard kit the page is built from, `name@semver` (`fabric-dashboard-kit@1.0.0`), so a host or an agent can tell a page built from an older kit |
 
@@ -107,6 +117,14 @@ becomes visible again, and a host MAY reload a page that does not declare `appea
 ([Descriptor](service.md#descriptor)), so a host built before this profile is unaffected. A
 service that does not declare the key is a *legacy dashboard*: ED-7's 480 still protects it, and a
 host promises it nothing else.
+
+A host validates the value against the schema before it uses any field of it, and treats an invalid
+value as not declared: the page is a legacy dashboard, its host floor is 480, and it applies no carrier
+field (ED-6). The host also reports it; Fabric Dashboards logs it once per load. The well-known schema
+cannot refuse such a value, because `extensions` is open, so a contract checker reports it on the
+well-known document as `FAC-SEM-080` (DEC-0059). The reference reading is `hostView` in
+[`src/dashboard-declaration.ts`](../../src/dashboard-declaration.ts), with vectors a host's port runs in
+[`fixtures/vectors/dashboard-declaration.json`](../../fixtures/vectors/dashboard-declaration.json).
 
 **ED-10 — Reference themes.** The theme ids `graphite` (the default), `fabric`, `paper`, `forest`,
 `ocean`, `ember` and `contrast` are the reference set; each has a light and a dark variant. A page
@@ -123,12 +141,22 @@ The rules are checked by measuring a rendered page, not by reading its source. T
 at 360, 480, 768 and 1280 CSS pixels and reports ED-1 (document overflow), ED-3 (every navigation
 link visible or inside an open-able menu), ED-4 (overflowing boxes that are not scroll containers)
 and ED-5 (sticky chrome height); its `check_service.py` checks the ED-9 declaration against the
-schema. A rule a tool cannot measure is reported `NOT_RUN` with its reason, never as a pass.
+schema, and so does this repository's checker (`FAC-SEM-080`). A rule a tool cannot measure is reported
+`NOT_RUN` with its reason, never as a pass.
+
+## Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| `FAC-SEM-080` | `service-well-known` | a value under the dashboard extension key is valid against `service-dashboard-extension.schema.json`; an invalid one is reported once per schema error, and a host treats it as not declared (ED-9) |
 
 ## Not decided here
 
-- The host's picker: where a host lets the operator choose a scheme and a theme, and whether a
-  choice can be made per service. Fabric Dashboards owns that screen.
+- The host's picker: where a host lets the operator choose a scheme and a theme. Fabric Dashboards owns
+  that screen.
+- A per-service choice for pages that share a cookie store: there one host-scoped cookie serves every
+  service on that host (ED-8), so a per-service choice needs another carrier, such as a cookie name per
+  service or a message to the page. A host that gives each service its own store already has one.
 - Themes defined by the operator (their own colours) beyond choosing an id; a later revision may
   add an `accent` field to the carrier.
 - A dashboard that wants a fixed width, or several panes of its own inside the host's pane.

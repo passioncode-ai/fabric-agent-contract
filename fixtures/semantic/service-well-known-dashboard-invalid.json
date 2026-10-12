@@ -1,0 +1,61 @@
+{
+  "description": "The audit's probe (F-B-216): a declaration with a floor no window holds and an unknown field. The well-known schema accepts it, because extensions are open; FAC-SEM-080 refuses it, once per schema error.",
+  "kind": "service-well-known",
+  "expect": [
+    "FAC-SEM-080",
+    "FAC-SEM-080"
+  ],
+  "input": {
+    "protocol": "fabric-service/0.1",
+    "service": {
+      "id": "example-agent",
+      "instance": "default",
+      "name": "Example Agent",
+      "version": "0.2.0",
+      "build": {
+        "commit": "8b80be9",
+        "dirty": false,
+        "builtAt": "2026-09-28T17:40:00Z"
+      }
+    },
+    "process": {
+      "pid": 51234,
+      "startedAt": "2026-09-28T17:41:02Z"
+    },
+    "status": "ready",
+    "degraded": [],
+    "summary": [
+      {
+        "label": "Jobs running",
+        "value": 2
+      },
+      {
+        "label": "Awaiting you",
+        "value": 1,
+        "attention": true
+      }
+    ],
+    "surfaces": {
+      "dashboard": {
+        "path": "/dashboard",
+        "login": true
+      },
+      "mcp": {
+        "path": "/mcp",
+        "transport": "streamable-http"
+      },
+      "events": {
+        "path": "/fabric/v1/events"
+      }
+    },
+    "update": {
+      "available": null
+    },
+    "extensions": {
+      "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1": {
+        "minWidth": 99999,
+        "zoom": 3
+      }
+    }
+  }
+}
