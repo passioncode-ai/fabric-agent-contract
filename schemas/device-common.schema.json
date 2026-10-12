@@ -40,8 +40,8 @@
     },
     "detail": {
       "type": "string",
-      "pattern": "^(?![/~\\\\])(?![A-Za-z]:[\\\\/])(?!.*(/Users/|/home/|\\\\Users\\\\))[^\\r\\n]{1,200}$",
-      "description": "One line of at most 200 characters, with no absolute or home path; never a username or content (DEC-0031)."
+      "pattern": "^(?!.*(?:(?:^|[\\s\"'`=(\\[{<,;:])[/\\\\~]|[A-Za-z]:[/\\\\]|%(?:25)?2[fF]|(?:^|[^A-Za-z0-9])(?:[Uu]sers|home)[/\\\\]|-(?:[Uu]sers|home)-[A-Za-z0-9]))[^\\r\\n]{1,200}$",
+      "description": "One line of at most 200 characters with no path: no absolute path anywhere in it (a slash, backslash or tilde at the start of a word, or a drive letter), no URL-encoded slash, and no home directory in its slash or dash form (F-B-104). Never a username or content (DEC-0031)."
     },
     "canonicalValue": {
       "anyOf": [

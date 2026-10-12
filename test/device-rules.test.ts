@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { type DeviceState, mergeDeviceState, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature } from "../src/device-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { mergeRanges, uncovered } from "../src/seq-ranges.js";
 
 // DEC-0031: fabric-device/0.1 — enrollment, signed policy, check-in, health and attribution.
 type Json = Record<string, any>;
@@ -280,5 +281,80 @@ describe("FAC-SEM-045: attribution comes from the client certificate", () => {
     const fixture = load("semantic/device-attribution-ok.json").input;
     fixture.epochs[0].binding.device.id = "dev-other";
     expect(paths("device-attribution", fixture)).toContain("FAC-SEM-045 /batch/events/0/collector/epoch");
+  });
+});
+
+// F-B-103…F-B-108 (DEC-0053, DEC-0052): each fix with a test that fails without it.
+describe("F-B-103…F-B-108: the audit's device fixes", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+
+  it("F-B-103: devices.md names the keyed hmac-sha256: branch the schema requires, never a bare sha256:", () => {
+    const spec = readFileSync(path.join(projectRoot(), "docs/specification/devices.md"), "utf8");
+    const row = spec.split("\n").find((line) => line.startsWith("| `telemetry.git_branch`"));
+    expect(row).toContain("`hmac-sha256:`");
+    expect(row).not.toMatch(/[^-]`?sha256:/);
+    const branch = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/activity-common.schema.json"), "utf8")).$defs.branch.pattern as string;
+    expect(branch).toContain("hmac-sha256:");
+  });
+
+  /** A server policy pair under one fresh key whose window is the first half of 2026. */
+  const backdated = () => {
+    const signer = ed25519Signer("org-7f3a.policy-h1");
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    fixture.trustedKeys = [{ keyId: signer.keyId, publicKey: signer.publicKey, notBefore: "2026-01-01T00:00:00Z", notAfter: "2026-06-30T23:59:59Z" }];
+    fixture.current.issuedAt = "2026-03-01T08:00:00Z";
+    fixture.next.issuedAt = "2026-05-01T08:00:00Z";
+    signer.signDoc(fixture.current);
+    signer.signDoc(fixture.next);
+    return { fixture, signer };
+  };
+
+  it("F-B-106: a key is judged when the device verifies, so a backdated policy under an expired key is refused", () => {
+    const { fixture } = backdated();
+    fixture.at = "2026-05-02T08:00:00Z";
+    expect(paths("device-policy-update", fixture)).toEqual([]);
+    fixture.at = "2026-10-07T09:00:00Z";
+    expect(exactly("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/signature/keyId key org-7f3a.policy-h1 is outside its validity window when the device verifies"]);
+  });
+
+  it("F-B-106: a policy issued before the one the device holds is refused, and the rule needs the verification time", () => {
+    const { fixture, signer } = backdated();
+    fixture.at = "2026-05-02T08:00:00Z";
+    fixture.next.issuedAt = "2026-02-01T08:00:00Z";
+    signer.signDoc(fixture.next);
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/issuedAt"]);
+    const timeless = backdated().fixture;
+    delete timeless.at;
+    expect(paths("device-policy-update", timeless)).toEqual(["FAC-SEM-041 /at"]);
+  });
+
+  it("F-B-105: an SSO certificate binds the user the proof names; a token one only the user the token names", () => {
+    const sso = load("semantic/device-enrollment-ok.json").input;
+    sso.proof.userId = "m-0007";
+    expect(exactly("device-enrollment", sso)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id an SSO enrollment binds the user its sign-in proves, never another"]);
+    const token = load("semantic/device-enrollment-token-names-user.json").input;
+    expect(paths("device-enrollment", token)).toEqual([]);
+    token.token.userId = "m-0007";
+    expect(paths("device-enrollment", token)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id"]);
+    token.token = { ...token.token, tokenId: "tok-other", userId: "m-4821" };
+    expect(paths("device-enrollment", token)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id", "FAC-SEM-044 /request/device/id"]);
+  });
+
+  it("F-B-108: a check-in's dropped ranges are pending: tamper evidence counts them, an ack never does", () => {
+    const o = load("semantic/device-health-overflow-pending.json").input as { known: DeviceState; batch: Json; checkIn: Json };
+    expect(tamperEvidence(o.known, o.batch, o.checkIn)).toEqual([]);
+    const state = mergeDeviceState(o.known, o.batch, o.checkIn);
+    const stream = state.streams.find((s) => s.collector.id === o.checkIn.collectors[0].collector.id)!;
+    expect(stream.pending).toEqual(mergeRanges(o.checkIn.collectors[0].dropped.map((r: Json) => [r.fromSeq, r.toSeq])));
+    expect(uncovered([...stream.held, ...stream.accounted], ...stream.pending![0]!)).toEqual([stream.pending![0]]);
+  });
+});
+
+describe("F-B-109: the reader row of a device applying policy names its key-set duty", () => {
+  it("lists FAC-SEM-046 and the key-set fixtures beside FAC-SEM-041 and FAC-SEM-042", () => {
+    const conformance = readFileSync(path.join(projectRoot(), "docs/specification/conformance.md"), "utf8");
+    const row = conformance.split("\n").find((line) => line.startsWith("| a device applying policy |"));
+    expect(row).toContain("`FAC-SEM-046`");
+    expect(row).toContain("fixtures/semantic/device-key-set-*");
   });
 });

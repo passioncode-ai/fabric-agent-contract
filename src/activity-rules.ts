@@ -251,19 +251,21 @@ function batchIntegrity(value: JsonObject): Finding[] {
 }
 
 /** What a receiver holds about one stream of one device, across batches: seqs held (received, accepted or rejected), seqs
- *  accounted for by overflows or a check-in's `dropped`, and the last `bufferedFrom` the device reported. */
-export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; bufferedFrom?: number }
+ *  accounted for by overflow events, seqs a check-in reports `dropped` whose overflow has not arrived (`pending`), and the
+ *  last `bufferedFrom` the device reported. Only held and accounted seqs are consumed, so only they move an ack; a pending
+ *  range is the device's word until its overflow event arrives, and counts for tamper evidence only (F-B-108, DEC-0052). */
+export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; pending?: SeqRange[]; bufferedFrom?: number }
 
 const stateKey = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
 
 /** The streams of one device after `batch` and `checkIn`, merged into what the receiver already holds. Ranges stay merged. */
 export function mergeStreams(known: readonly StreamState[], batch: JsonObject | null, checkIn: JsonObject | null): StreamState[] {
   const streams = new Map<string, StreamState>();
-  for (const s of known) streams.set(stateKey(s.collector as unknown as JsonObject), { ...s, held: [...s.held], accounted: [...s.accounted] });
+  for (const s of known) streams.set(stateKey(s.collector as unknown as JsonObject), { ...s, held: [...s.held], accounted: [...s.accounted], pending: [...(s.pending ?? [])] });
   const stream = (collector: JsonObject) => {
     const key = stateKey(collector);
     let s = streams.get(key);
-    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [] }; streams.set(key, s); }
+    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [], pending: [] }; streams.set(key, s); }
     return s;
   };
   for (const event of batch ? events(batch) : []) {
@@ -273,10 +275,10 @@ export function mergeStreams(known: readonly StreamState[], batch: JsonObject | 
   }
   for (const c of checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : []) {
     const s = stream(isObject(c.collector) ? c.collector : {});
-    s.accounted.push(...rangesOf(c.dropped));
+    s.pending!.push(...rangesOf(c.dropped));
     if (typeof c.bufferedFrom === "number") s.bufferedFrom = Math.max(s.bufferedFrom ?? 0, c.bufferedFrom);
   }
-  return [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted) }));
+  return [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted), pending: mergeRanges(s.pending ?? []) }));
 }
 
 export interface StreamAck { collector: { id: string; epoch: number }; seq: number; held: SeqRange[] }
@@ -284,7 +286,8 @@ export interface StreamAck { collector: { id: string; epoch: number }; seq: numb
 /**
  * The ack of each stream after `batch`, over everything the receiver holds for it across batches: `seq` is the highest
  * seq up to which every seq is consumed — held, rejected (consumed with a rejection, never resent) or accounted for by an
- * overflow — and `held` the consumed ranges above it, which the device may drop as well.
+ * overflow event — and `held` the consumed ranges above it, which the device may drop as well. A check-in's `dropped`
+ * ranges (`pending`) are not consumed and never move an ack.
  */
 export function contiguousAcks(known: readonly StreamState[], batch: JsonObject): StreamAck[] {
   return mergeStreams(known, batch, null).map((s) => {
@@ -294,10 +297,12 @@ export function contiguousAcks(known: readonly StreamState[], batch: JsonObject)
   });
 }
 
-const asStreams = (value: unknown): StreamState[] => (Array.isArray(value) ? value.filter(isObject) : []).map((s) => ({
+/** Stream states as a receiver stores them (`[{collector, held, accounted, pending?, bufferedFrom?}]`). */
+export const asStreams = (value: unknown): StreamState[] => (Array.isArray(value) ? value.filter(isObject) : []).map((s) => ({
   collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"],
   held: rangesOf(s.held),
   accounted: rangesOf(s.accounted),
+  pending: rangesOf(s.pending),
   ...(typeof s.bufferedFrom === "number" ? { bufferedFrom: s.bufferedFrom } : {})
 }));
 

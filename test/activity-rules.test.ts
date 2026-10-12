@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, pathSourceKey } from "../src/activity-rules.js";
+import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, mergeStreams, pathSourceKey } from "../src/activity-rules.js";
 import { contiguousFrom, mergeRanges, uncovered } from "../src/seq-ranges.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -296,5 +296,36 @@ describe("FAC-SEM-040: a summary has no person dimension", () => {
     expect(paths("activity-summary", summary)).toContain("FAC-SEM-040 /cells/1/day");
     summary.from = "2026-10-08";
     expect(paths("activity-summary", summary)).toContain("FAC-SEM-040 /to");
+  });
+});
+
+// F-B-108 (DEC-0052): one definition of consumed — held, rejected or accounted for by an overflow event. A check-in's
+// dropped ranges are pending and never move an ack.
+describe("F-B-108: a check-in's dropped ranges never move an ack", () => {
+  it("acks only up to the first seq neither held nor accounted for by an overflow event", () => {
+    const collector = { id: "cc-otel", epoch: 2 };
+    const known = [{ collector, held: [[1, 37]] as [number, number][], accounted: [], pending: [[38, 40]] as [number, number][] }];
+    const batch = { device: { id: "dev-01j9a" }, events: [41, 42].map((seq) => ({ collector, seq, kind: "session.interval" })) };
+    expect(contiguousAcks(known, batch)).toEqual([{ collector, seq: 37, held: [[41, 42]] }]);
+    const overflow = { collector, seq: 43, kind: "buffer.overflow", data: { dropped: { events: 3, ranges: [{ fromSeq: 38, toSeq: 40 }] } } };
+    expect(contiguousAcks(known, { ...batch, events: [...batch.events, overflow] })).toEqual([{ collector, seq: 43, held: [] }]);
+  });
+
+  it("keeps the ranges a check-in reports apart from what an overflow accounts for", () => {
+    const collector = { id: "cc-otel", epoch: 2 };
+    const checkIn = { collectors: [{ collector, lastSeq: 44, bufferedFrom: 41, dropped: [{ fromSeq: 38, toSeq: 40 }] }] };
+    const [state] = mergeStreams([{ collector, held: [[1, 37]], accounted: [] }], null, checkIn);
+    expect(state).toMatchObject({ accounted: [], pending: [[38, 40]], bufferedFrom: 41 });
+  });
+});
+
+describe("F-B-107: a clause no rule checks is not attributed to one", () => {
+  it("names the summary's mixed basis a receiver duty, not FAC-SEM-038, which never reads a cell's lines", () => {
+    const spec = readFileSync(path.join(projectRoot(), "docs/specification/activity.md"), "utf8");
+    const clause = spec.split("\n\n").find((block) => block.includes("`mixed` when its lines differ") || block.includes("is `mixed` when its lines differ"));
+    expect(clause).toBeDefined();
+    expect(clause).toContain("receiver's duty");
+    expect(clause).not.toContain("FAC-SEM-038");
+    expect(readFileSync(path.join(projectRoot(), "src/activity-rules.ts"), "utf8")).not.toMatch(/["']mixed["']/);
   });
 });

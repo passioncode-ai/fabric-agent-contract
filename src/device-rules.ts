@@ -1,9 +1,9 @@
 import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
-import { type StreamState, mergeStreams } from "./activity-rules.js";
+import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { settingsCanonicalJson } from "./canonical.js";
-import { rangesOf, uncovered } from "./seq-ranges.js";
+import { uncovered } from "./seq-ranges.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
@@ -66,22 +66,28 @@ export function resolvePolicy(layers: readonly JsonObject[]): Record<string, Eff
   return effective;
 }
 
-/** FAC-SEM-041: `{current?, next, trustedKeys, rootKeyId?}` — trustedKeys are the keys of the device's current key set,
- *  with their validity windows (FAC-SEM-046) —  — a delivered policy verifies and moves its layer forward. */
+/**
+ * FAC-SEM-041: `{current?, next, trustedKeys, rootKeyId?, at}` — a delivered policy verifies and moves its layer forward.
+ * `trustedKeys` are the keys of the device's current key set with their validity windows (FAC-SEM-046); `at` is the
+ * device's clock when it verifies. A key is judged valid at `at`, never at the `issuedAt` the signer chose, and a policy
+ * is issued no earlier than the one the device holds (F-B-106, DEC-0053): otherwise a leaked key past its `notAfter`, still
+ * in the set, signs a backdated policy with a higher revision.
+ */
 function policyUpdate(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-041", instancePath, message });
   const next = isObject(value.next) ? value.next : {};
   const current = isObject(value.current) ? value.current : null;
   const keys = Array.isArray(value.trustedKeys) ? value.trustedKeys.filter(isObject) : [];
+  const at = Date.parse(String(value.at ?? ""));
   if (next.source === "user") flag("/next/source", "a user layer is set on the device; it is never delivered as an update");
   const signature = isObject(next.signature) ? next.signature : null;
   if (signature) {
     const key = keys.find((k) => k.keyId === signature.keyId);
-    const at = Date.parse(String(next.issuedAt ?? ""));
     if (signature.keyId === value.rootKeyId) flag("/next/signature/keyId", "the root key signs key sets only, never a policy");
     else if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${String(signature.keyId)}`);
-    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${String(signature.keyId)} is outside its validity window at the policy's issuedAt`);
+    else if (Number.isNaN(at)) flag("/at", "a key's validity is judged when the device verifies; the input names that time");
+    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${String(signature.keyId)} is outside its validity window when the device verifies`);
     else if (!verifyPolicySignature(next, key.publicKey)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
   } else if (next.source === "server") {
     flag("/next/signature", "a server policy is signed");
@@ -90,6 +96,7 @@ function policyUpdate(value: JsonObject): Finding[] {
     const org = (doc: JsonObject) => (isObject(doc.org) ? doc.org.id : undefined);
     if (org(current) !== org(next)) flag("/next/org/id", "a policy update stays in its organization");
     if (current.source !== next.source) flag("/next/source", `an update replaces the ${String(current.source)} layer, not the ${String(next.source)} layer`);
+    if (Date.parse(String(next.issuedAt ?? "")) < Date.parse(String(current.issuedAt ?? ""))) flag("/next/issuedAt", "a policy is issued no earlier than the one the device holds");
     if (typeof current.revision === "number" && typeof next.revision === "number" && next.revision <= current.revision) {
       flag("/next/revision", `revision ${next.revision} does not move past ${current.revision}: a device applies only a newer revision`);
     }
@@ -143,8 +150,8 @@ export function mergeDeviceState(known: DeviceState, batch: JsonObject | null, c
  * Evidence that a device's telemetry or state was tampered with (DEC-0031). A batch is a contiguous
  * slice of each stream, so a hole inside a batch is evidence at once. A gap between batches is pending —
  * its overflow may still be in the device's buffer — until a check-in reports `bufferedFrom` above it:
- * every seq below `bufferedFrom` was sent or dropped, so a seq there that is neither held nor accounted
- * for by an overflow or the check-in's `dropped` ranges is evidence. So are an epoch the server never
+ * every seq below `bufferedFrom` was sent or dropped, so a seq there that is neither held, nor accounted
+ * for by an overflow, nor pending in a check-in's `dropped` ranges is evidence. So are an epoch the server never
  * issued to the device, a collector counter below a seq already held, and a policy revision below the
  * baseline of the current enrollment, and a `bufferedFrom` below one the device reported before (a
  * buffer floor only rises). A reinstall re-enrolls, takes a new epoch and starts at seq 1, which is
@@ -178,7 +185,7 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
     if (typeof floorBefore === "number" && num(c.bufferedFrom) < floorBefore) evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `${key} reports its buffer from ${num(c.bufferedFrom)}, below ${floorBefore} it reported before: a buffer floor only rises` });
     if (num(c.bufferedFrom) > num(c.lastSeq) + 1) evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `${key} reports a buffer that starts after its last seq` });
     const floor = Math.min(num(c.bufferedFrom), num(c.lastSeq) + 1) - 1;
-    for (const [from, to] of uncovered([...(s?.held ?? []), ...(s?.accounted ?? [])], 1, floor)) {
+    for (const [from, to] of uncovered([...(s?.held ?? []), ...(s?.accounted ?? []), ...(s?.pending ?? [])], 1, floor)) {
       evidence.push({ instancePath: `/checkIn/collectors/${i}/bufferedFrom`, message: `seqs ${from}…${to} of ${key} were sent or dropped, yet none is held and no overflow accounts for them` });
     }
   });
@@ -194,17 +201,11 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
 
 const asState = (value: unknown): DeviceState => {
   const k = isObject(value) ? value : {};
-  const streams = Array.isArray(k.streams) ? k.streams.filter(isObject) : [];
   return {
     deviceId: String(k.deviceId ?? ""),
     epochs: Array.isArray(k.epochs) ? k.epochs.filter((e): e is number => typeof e === "number") : [],
     policyBaseline: isObject(k.policyBaseline) ? k.policyBaseline as DeviceState["policyBaseline"] : {},
-    streams: streams.map((s) => ({
-      collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"],
-      held: rangesOf(s.held),
-      accounted: rangesOf(s.accounted),
-      ...(typeof s.bufferedFrom === "number" ? { bufferedFrom: s.bufferedFrom } : {})
-    }))
+    streams: asStreams(k.streams)
   };
 };
 
@@ -232,10 +233,12 @@ const DAY_MS = 86_400_000;
 export const MAX_CERTIFICATE_DAYS = 30;
 
 /**
- * FAC-SEM-044: `{request, response, issuedEpochs?, enrolled?, token?}` — the certificate is short-lived and bound to what
- * enrolled, and the epoch is new. `enrolled` is the record the server holds for the request's `device.id` (`{keySha256}`),
- * absent for a first enrollment; `token` is the server's record of the enrollment token the request names
- * (`{tokenId, deviceId?}`). Re-enrolling a device that is already enrolled needs proof that it is that device: a CSR
+ * FAC-SEM-044: `{request, response, issuedEpochs?, enrolled?, token?, proof?}` — the certificate is short-lived and bound to
+ * what enrolled, and the epoch is new. `enrolled` is the record the server holds for the request's `device.id`
+ * (`{keySha256}`), absent for a first enrollment; `token` is the server's record of the enrollment token the request names
+ * (`{tokenId, deviceId?, userId?}`); `proof` is what the `Authorization` proof names (`{userId?}`, the signed-in user for
+ * SSO). An SSO certificate binds the user the proof names, and a token certificate binds a user only when the token names
+ * that person (F-B-105). Re-enrolling a device that is already enrolled needs proof that it is that device: a CSR
  * from the key on record, or a device-management token issued for that device. Otherwise any member could enroll as
  * another person's device and make it look tampered.
  */
@@ -250,15 +253,22 @@ function enrollment(value: JsonObject): Finding[] {
   if (id(binding.org) !== id(request.org)) flag("/response/certificate/binding/org/id", "the certificate names another organization than the request");
   if (id(binding.device) !== id(request.device)) flag("/response/certificate/binding/device/id", "the certificate names another device than the request");
   const auth = isObject(request.auth) ? request.auth : {};
-  if (auth.method === "sso" && !isObject(binding.user)) flag("/response/certificate/binding/user", "an SSO enrollment binds the signed-in user");
+  const token = isObject(value.token) && typeof auth.tokenId === "string" && value.token.tokenId === auth.tokenId ? value.token : {};
+  const bound = isObject(binding.user) ? binding.user.id : undefined;
+  if (auth.method === "sso") {
+    const proven = isObject(value.proof) ? value.proof.userId : undefined;
+    if (bound === undefined) flag("/response/certificate/binding/user", "an SSO enrollment binds the signed-in user");
+    else if (bound !== proven) flag("/response/certificate/binding/user/id", "an SSO enrollment binds the user its sign-in proves, never another");
+  } else if (auth.method === "enrollment-token" && bound !== undefined && bound !== token.userId) {
+    flag("/response/certificate/binding/user/id", "a token enrollment binds a user only when the token names that person");
+  }
   const from = Date.parse(String(certificate.notBefore ?? "")), to = Date.parse(String(certificate.notAfter ?? ""));
   if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
   else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
   if (isObject(value.enrolled)) {
     const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
-    const token = isObject(value.token) ? value.token : {};
     const sameKey = typeof key === "string" && key === value.enrolled.keySha256;
-    const deviceToken = auth.method === "enrollment-token" && token.tokenId === auth.tokenId && token.deviceId === id(request.device);
+    const deviceToken = auth.method === "enrollment-token" && token.deviceId !== undefined && token.deviceId === id(request.device);
     if (!sameKey && !deviceToken) flag("/request/device/id", "this device is already enrolled: re-enrollment needs a CSR from the key on record or a device-management token issued for this device");
   }
   const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];

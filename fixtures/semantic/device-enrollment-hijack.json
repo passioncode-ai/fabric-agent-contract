@@ -121,6 +121,9 @@
     ],
     "enrolled": {
       "keySha256": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+    },
+    "proof": {
+      "userId": "m-4821"
     }
   }
 }

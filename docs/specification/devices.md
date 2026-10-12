@@ -54,10 +54,11 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
    description, the CSR, and `auth.method`:
    - `sso` — a person signs in through the organization's single sign-on; the server binds the
-     certificate to that person's `user.id`;
+     certificate to the `user.id` the sign-in proves, never another (`FAC-SEM-044`, F-B-105);
    - `enrollment-token` — unattended creation by device management (MDM); `tokenId` names the
      token. The certificate binds a `user.id` only when the token names the person the device is
-     assigned to. Otherwise the device is enrolled unassigned until an SSO sign-in re-enrolls it.
+     assigned to, and then that person (`FAC-SEM-044`). Otherwise the device is enrolled unassigned
+     until an SSO sign-in re-enrolls it.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
@@ -143,7 +144,7 @@ A policy document is one **layer**, with a `revision`, `issuedAt` and `keys`. Ea
 | `logging.required` | boolean | Activity telemetry must be on. Usually locked. |
 | `build_channel.allowed` | `any`, `official`, `attested` | Which collector builds may run: any build, the organization's official build, or a build whose platform attestation verifies. |
 | `telemetry.endpoint` | `https://` URL | Where batches go. Optional; when it is absent, batches go to the endpoint the device enrolled with. |
-| `telemetry.git_branch` | `omit`, `hash`, `plain` | Whether events carry `git.branch`, its `sha256:`, or nothing. |
+| `telemetry.git_branch` | `omit`, `hash`, `plain` | `omit`: events carry no `git.branch`; `hash`: `hmac-sha256:` of the name under the device's telemetry key ([activity](activity.md#event-id), F-B-103); `plain`: the name. |
 | `retention.raw_days` | integer, 1…3650 | How long raw events are kept before only summaries remain. |
 
 **Unknown keys are kept and ignored**: a device that does not know a key MUST NOT reject the policy
@@ -156,15 +157,18 @@ operating system's managed preferences. A `user` layer is never signed and never
 signature is Ed25519 (RFC 8032) over the UTF-8 canonical JSON of the document without `signature`
 ([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The canonical JSON is the settings form,
 not RFC 8785: the two give different bytes ([canonical forms](conformance.md#canonical-forms), DEC-0043).
-The trusted keys are those of
-the device's current [key set](#key-sets) that are valid at the policy's `issuedAt`. A policy signed
-by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
+The trusted keys are those of the device's current [key set](#key-sets) that are valid **when the device
+verifies** — on its own clock, never at the `issuedAt` the signer chose — and a policy is never issued before
+the one the device holds for its layer (DEC-0053, F-B-106). Judged at `issuedAt`, a leaked key past its
+`notAfter` that is still in the set would sign a backdated policy with a higher revision. So a policy signed
+by a key that has since expired is refused too, and the server signs again under a current key. A policy
+signed by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
 
-**Revision.** A device applies a delivered policy only when both hold:
+**Revision.** A device applies a delivered policy only when all hold:
 
 - its signature verifies under a trusted key;
-- its revision is greater than the one the device holds for the same organization and layer
-  (`FAC-SEM-041`).
+- its revision is greater than the one the device holds for the same organization and layer;
+- its `issuedAt` is not before the held policy's (`FAC-SEM-041`).
 
 It reports the revision it holds for each delivered layer in every check-in.
 
@@ -237,8 +241,10 @@ newer [key set](#key-sets) and a newer signed `policy` when there are some (neve
 and a `certificate.action` (`rotate` or `re-enroll`) when one is due.
 
 **Free text stays bounded.** Every `detail` and `error` string is one line of at most 200
-characters with no absolute or home path (schema `device-common#/$defs/detail`). It MUST NOT name a
-username or carry content.
+characters with no path in it (schema `device-common#/$defs/detail`, F-B-104): no slash, backslash or
+tilde at the start of a word anywhere in the line, no drive letter, no URL-encoded slash, and no home
+directory in its slash or dash form (`Users/<name>`, `-Users-<name>-`). It MUST NOT name a username
+or carry content.
 
 <a id="health"></a>
 
@@ -269,14 +275,17 @@ state as it is. Reads of a device's health are logged in its person's
 ### Tamper evidence
 
 The server keeps, per stream and across batches, the seq ranges it **holds** (received, accepted or
-rejected) and the ranges **accounted for** by overflows and by check-ins' `dropped`. All coverage is
+rejected), the ranges **accounted for** by overflow events, and the ranges **pending**: a check-in's
+`dropped` whose overflow event has not arrived. Pending ranges count here and never in an ack, which
+moves only over what the receiver holds or an overflow accounts for ([activity](activity.md), DEC-0052,
+F-B-108). All coverage is
 computed by merging ranges, never seq by seq ([`tamperEvidence`](../../src/device-rules.ts),
 [`mergeDeviceState`](../../src/device-rules.ts)). Evidence is:
 
 - **a hole inside one batch**: a batch carries a contiguous slice of each stream;
 - **a gap below `bufferedFrom`**: once a check-in says every seq below `bufferedFrom` was sent or
-  dropped, a seq there that is neither held nor accounted for. Before that, a gap between batches is
-  pending — its overflow may still be buffered;
+  dropped, a seq there that is neither held, nor accounted for, nor pending. Before that, a gap
+  between batches is pending — its overflow may still be buffered;
 - **an epoch the server never issued** to the device;
 - **a collector counter that went back**: a `lastSeq` below a seq already held;
 - **a buffer floor that went back**: a `bufferedFrom` below one the device reported before. Events
@@ -292,10 +301,10 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a trusted key, stays in its organization and layer, and moves its revision forward; a user layer is never delivered |
+| `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
 | `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default — with one layer per source and no lock in the user layer |
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
+| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
 | `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 
@@ -303,11 +312,11 @@ Each kind checks one input:
 
 | Kind | Input |
 |---|---|
-| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?}`; `publicKey` is the raw 32-byte Ed25519 key in base64 |
+| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?, at}`; `publicKey` is the raw 32-byte Ed25519 key in base64; `at` is the device's clock when it verifies |
 | `device-key-set` | `{root: {keyId, publicKey}, current?, next}` |
 | `device-policy-resolution` | `{layers, effective}` |
-| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
-| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?}}` |
+| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, pending?, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
+| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names |
 | `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are

@@ -119,6 +119,9 @@
     "issuedEpochs": [
       1,
       2
-    ]
+    ],
+    "proof": {
+      "userId": "m-4821"
+    }
   }
 }

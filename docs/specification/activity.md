@@ -275,7 +275,9 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
   evidence from ([`mergeStreams`](../../src/activity-rules.ts),
   [devices](devices.md#tamper-evidence)):
   - `seq` is the highest seq up to which every seq is **consumed**: held, rejected, or accounted for
-    by an overflow, whichever batch brought it. Seq 0 means nothing yet.
+    by an overflow event, whichever batch brought it. Seq 0 means nothing yet. A check-in's `dropped`
+    ranges are not consumed: they are the device's word until the overflow event arrives, and they
+    count for [tamper evidence](devices.md#tamper-evidence) only (DEC-0052, F-B-108).
   - `held` lists the consumed ranges above `seq`.
 
   An ack names no more and no less (`FAC-SEM-039`; [`contiguousAcks`](../../src/activity-rules.ts),
@@ -321,7 +323,8 @@ A cell carries:
 - `usage`: `tokens` and `cost`.
   - A cell whose every line is unpriced costs `null`.
   - A cell with some priced lines carries the known part, which a reader shows as a lower bound.
-  - A known cost names its basis (schema), `mixed` when its lines differ (`FAC-SEM-038`).
+  - A known cost names its basis (schema). The basis is `mixed` when its lines differ; that is the
+    receiver's duty, since a summary does not carry its lines and no rule can check it (F-B-107).
 
 **There is no person dimension.** The schema names every field a cell may carry. `FAC-SEM-040`
 refuses a person key anywhere, two cells for one dimension tuple, and a day outside the range.
@@ -420,7 +423,8 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
-batch (`[{collector, held, accounted}]`), then the batch, then the answer.
+batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves
+an ack), then the batch, then the answer.
 
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.
