@@ -10,7 +10,7 @@ hash, 72-hour rule and vectors of the first organization server's target archite
 
 ## Done
 
-- **DEC-0054** in [`docs/DECISIONS.md`](../DECISIONS.md), under the id the relay run reserved before this run (key
+- **DEC-0054** in [`docs/DECISIONS.md`](../DECISIONS.md), under the id the owner session's P3-02 run reserved before this run (key
   `revocation-delta-20261012`, git CAS commit `776e807`, run `r-51535649e`); this run reserved no decision id. Rule codes
   **FAC-SEM-082**…**FAC-SEM-084** (receipts SEM-0082…SEM-0084; FAC-SEM-081 is P4-07's).
 - [Revocation delta](../specification/revocation-delta.md) (new): entries signed by the estate key (a hub key the highest

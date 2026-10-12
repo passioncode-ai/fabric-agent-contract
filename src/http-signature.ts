@@ -404,20 +404,9 @@ export type DeviceSignatureVerdict =
   | { ok: true; binding: "mutual-tls"; serial: string }
   | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string };
 
-const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
-/**
- * An RFC 3339 date-time as milliseconds, or NaN: `T`, an offset and a day that exists are required, as the estate record's
- * `time` (src/estate-record-rules.ts). `Date.parse` alone reads 2026-02-30 as 2 March and a missing offset as local time.
- */
-export const strictTime = (value: unknown): number => {
-  const match = typeof value === "string" ? RFC3339.exec(value) : null;
-  if (!match) return Number.NaN;
-  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
-  const date = new Date(0);
-  date.setUTCFullYear(year, month - 1, day);
-  if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return Number.NaN;
-  return Date.parse(value as string);
-};
+/** The strict RFC 3339 reader (`T`, an offset and a day that exists), shared by every rule that compares a time. */
+export { strictTime } from "./rfc3339.js";
+import { strictTime } from "./rfc3339.js";
 
 /** Header lookup by lower-case name, joining repeated lines with ", " (RFC 9421 §2.1) and trimming the value. */
 const headerMap = (headers: unknown): Map<string, string> => {

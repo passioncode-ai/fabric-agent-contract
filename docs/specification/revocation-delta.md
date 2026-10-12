@@ -156,7 +156,8 @@ forever and a revoked machine would keep calling.
 **Revocations in force** are the applied revision's, the applied entries' and those of forked entries
 (`effectiveRevocations`). Every check that reads the estate record's revocations reads these instead: the relay's
 admission set (DEC-0047; a relay SHOULD subtract the delta's revocations too), an envelope's sender (DEC-0047 item 7),
-the hub key a delegation verifier trusts (DL-14), the package a node installs.
+the hub key a delegation verifier trusts (DL-14: the delta's part, `deltaRevocations`, goes to
+`hubKeyCertified(..., {extraRevocations})` and to the verifiers' `estateRevocations`, DEC-0060), the package a node installs.
 
 ## Reconciliation
 

@@ -17,7 +17,7 @@ These are added:
   `src/estate-record-rules.ts` `time`), an unreadable clock is refused before any comparison, and a test that depends
   on the time zone runs in at least two zones.
 - **Peer pull requests:** #53 (DEC-0047, the relay, Project Observatory's session) is reviewed by the owner session,
-  not rebuilt here. DEC-0054 (revocation delta and heartbeat) was reserved by the relay run (key
+  not rebuilt here. DEC-0054 (revocation delta and heartbeat) was reserved by the owner session's P3-02 run (key
   `revocation-delta-20261012`); P4-06 builds it under that reservation and reserves no new decision id.
 
 | Packet | Node | Owns | Order |
@@ -28,3 +28,4 @@ These are added:
 | [P4-04 device transport and keys](P4-04-device-transport.md) | N18 | `devices.md` (transport, enrollment key roles, check-in digest), `src/device-rules.ts`, `src/http-signature.ts` (new) | parallel with P4-01 |
 | [P4-05 window leases and signing challenges](P4-05-leases-challenges.md) | N18 | `window-lease/1`, the signing-challenge register | after #53 (DEC-0047) merges |
 | [P4-06 revocation delta and heartbeat](P4-06-delta-heartbeat.md) | N18 | DEC-0054 (pre-reserved): `revocation-delta.md` (new), `revocation-delta`/`heartbeat` schemas (new), `src/revocation-delta.ts` (new), the DEC-0054 passages of `relay.md`, `devices.md`, `estate-record.md` | parallel; added 2026-10-12, after DEC-0047 (#53) |
+| [P4-07 a delegation key the estate certifies](P4-07-hubkey.md) | N18 | DL-14's certification rule, `hubKeyCertified` in `src/estate-record-rules.ts`, the verifiers' `estate` option, `fixtures/vectors/hub-key.json` (new) | parallel; added 2026-10-12 from the adapter's FAA-31 report |

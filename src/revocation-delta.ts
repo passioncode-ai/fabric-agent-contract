@@ -1,4 +1,5 @@
 import { createHash, createPublicKey, verify } from "node:crypto";
+import { strictTime } from "./rfc3339.js";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type JsonObject, isObject } from "./findings.js";
@@ -42,22 +43,9 @@ const isCount = (value: unknown, min: number): value is number => Number.isSafeI
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 const sha256hex = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
-// TODO(DEC-0060, #62): import `strictTime` from ./rfc3339.js once #62 merges, and drop this copy (owner session, 2026-10-12).
-const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
-/**
- * An RFC 3339 date-time as milliseconds, or NaN: `T`, an offset and a day that exists are required, as the estate
- * record's `time` reads it (DEC-0055 ER-10). An unreadable time is refused before any comparison: a comparison with NaN
- * is always false and would let anything through.
- */
-export const deltaTime = (value: unknown): number => {
-  const match = isString(value) ? RFC3339.exec(value) : null;
-  if (!match) return Number.NaN;
-  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
-  const date = new Date(0);
-  date.setUTCFullYear(year, month - 1, day);
-  if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return Number.NaN;
-  return Date.parse(value as string);
-};
+/** The shared strict RFC 3339 reader (DEC-0055 ER-10, `src/rfc3339.ts`): an unreadable time is refused before any
+ * comparison, since a comparison with NaN is always false and would let anything through. */
+export const deltaTime = (value: unknown): number => strictTime(value);
 
 /** The clock a verifier is given, as milliseconds, or NaN when it is not a readable `Date`. */
 const clock = (trust: unknown): number => (isObject(trust) && trust.at instanceof Date ? trust.at.getTime() : Number.NaN);

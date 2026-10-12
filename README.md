@@ -22,7 +22,9 @@ vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts
 `src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), `src/estate-record-rules.ts` with
 `src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/relay.ts` (relay
 admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope) and
-`src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056) and `src/revocation-delta.ts` (the revocation delta, the heartbeat and the 72-hour rule, DEC-0054). What does not ship: a runtime, a provider implementation, a model router,
+`src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
+estate record certifies a delegation key, DEC-0060) and `src/revocation-delta.ts` (the revocation delta, the heartbeat
+and the 72-hour rule, DEC-0054). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here

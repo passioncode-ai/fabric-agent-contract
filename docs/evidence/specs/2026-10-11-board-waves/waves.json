@@ -325,7 +325,8 @@
         "V4-SIGNING-CHALLENGE",
         "DEV-HTTPSIG",
         "DEV-KEY-ROLES",
-        "DEV-CHECKIN-DIGEST"
+        "DEV-CHECKIN-DIGEST",
+        "DL-HUBKEY"
       ]
     }
   ]
