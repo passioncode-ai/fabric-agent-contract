@@ -4150,15 +4150,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-13
 - **Status:** Accepted source change (on merge of its pull request). Closes the board row CT-39 (the owed readings of #67
-  and #68, 2026-10-12). Consumer adoption: a port of the reference code runs `fixtures/vectors/identifiers.json`; a
-  writer emits the normal form.
+  and #68, 2026-10-12). Consumer adoption — each writes identifiers in their normal form, looks an accepted reference up
+  by it, and runs `fixtures/vectors/identifiers.json` where it compares identifiers: Fabric (approvals, routes,
+  bindings, rollbacks: CT-03), Project Observatory (its usage reports' `byProject`, learning records: CT-20), Fabric
+  Dashboards (usage and route views: CT-21), the adapter (its kits' ports of the reference code: CT-18) and the first
+  organization server (the projects and agents it records). The board cells are register text in the handoff
+  `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
 - **Amends:** DEC-0064 (`FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-096` compare by normal form), DEC-0065 (`byProject`
   duplicates), DEC-0029 (`FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`), and `FAC-SEM-002`. No new rule code.
 - **Decision:** in [identifiers](specification/identifiers.md) —
   1. **The normal form.** A URI — a string matching RFC 3986's `URI` production with an authority or a non-empty path —
      is normalized by RFC 3986 §6.2.2: the scheme and the host lower-cased and percent-encoding hex upper-cased
      (§6.2.2.1), percent-encoded unreserved characters decoded (§6.2.2.2), dot segments removed from a hierarchical path
-     (§6.2.2.3); nothing scheme-based (§6.2.3: no default port removed, no empty path made `/`).
+     (§6.2.2.3), and from a rootless path only its leading `./` and `../` segments (§5.2.4's step A) while it stays
+     rootless — the inner ones kept, the contract's own narrowing under RFC 3986 §6.1, because removing them can make a
+     rootless path absolute; nothing scheme-based (§6.2.3: no default port removed, no empty path made `/`).
   2. **A URN** (`urn:`) is normalized by RFC 8141 §3.1 instead: `urn` and the NID lower-cased, percent-encoding hex
      upper-cased, nothing decoded, the NSS's case kept, the r-, q- and f-components ignored. This refines the brief's
      design, which decoded `%7E` everywhere: RFC 8141 §3.1 says percent-encoding normalization MUST NOT be applied to a
@@ -4166,15 +4172,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **Anything else** — a string that is not such a URI — is its own normal form, and a value that is not a string is
      compared as it is (`===`). Neither function throws; nothing is keyed by input in a plain object.
   4. **Writers SHOULD emit the normal form; readers MUST compare by it** wherever a rule compares identifiers for
-     sameness. `normalIdentifier` and `sameIdentifier` (`src/identifiers.ts`, no rule code: G-13) are the reference.
+     sameness, and a host that resolves an accepted reference looks it up by normal form. `normalIdentifier` and
+     `sameIdentifier` (`src/identifiers.ts`, no rule code: G-13) are the reference.
+  5. **Records that already collide** — stored under two spellings with one normal form — are one identifier: a host
+     refuses such a reference and reports the collision rather than pick one record, until its operator merges them or
+     renames one.
 - **Why:** rules compared identifier strings byte for byte, so an author could approve their own proposal under
   another spelling of their id (`AGENT:x` for `agent:x`, `urn:Fabric:x` for `urn:fabric:x`), and one project could split
   its costs over two `byProject` rows. RFC 3986 §6.1 and RFC 8141 §3.1 already define when two spellings are one; the
   contract adopts them rather than a scheme-specific rule of its own.
-- **Compatibility:** `contractVersion` stays `0.1.0`. Tightening for `FAC-SEM-094`, `FAC-SEM-006` and `FAC-SEM-025`
-  (`byProject`): two spellings of one id that passed as two now meet as one. Loosening for `FAC-SEM-002`, `FAC-SEM-096`,
-  `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034`: a reference spelled otherwise now agrees. A reader pinned before this
-  decision compares bytes; a writer that emits the normal form is read the same by both.
+- **Compatibility:** `contractVersion` stays `0.1.0`. A reader pinned before this decision compares bytes.
+  - Tightening for `FAC-SEM-094`, `FAC-SEM-006` and `FAC-SEM-025` (`byProject`): two spellings of one id that passed as
+    two now meet as one; a byte reader still passes them.
+  - Loosening, where a rule now accepts a reference spelled otherwise and a byte lookup after it misses: `FAC-SEM-002`
+    (the pool's fallback then spends another account), `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` (the route walk moves
+    on to the next candidate), `FAC-SEM-096` (a rollback reaches the other setting, one stored under that exact spelling).
+  - Hence items 4 and 5: a writer that emits the normal form is read the same by both readers, and a host looks an
+    accepted reference up by normal form, refusing a collision.
 - **Consequences / affects:**
   - sites changed (each by `sameIdentifier` or a key in normal form): `FAC-SEM-094` approver against author and
     `FAC-SEM-096` rollback basis id against the setting's (`src/core-rules.ts`); `FAC-SEM-025` `byProject[].projectId`
@@ -4200,10 +4214,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - tests: `test/identifiers.test.ts` (new), `test/core-rules.test.ts`, `test/usage-rules.test.ts`,
     `test/route-rules.test.ts`;
   - docs: `docs/evidence/sources.md` (RFC 8141 pinned; RFC 3986 and RFC 7519 hashed), `docs/backlog.md` (CT-39),
-    `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
+    `docs/guides/connecting-compatible-agents.md` (a writer's normal form), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`;
+  - annotations "amended by DEC-0076" on DEC-0029, DEC-0064 and DEC-0065, and the consumer board cells, are register text
+    in `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
 - **Not decided here:** internationalized identifiers (IRIs) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
   scheme-based normalization for any scheme; URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules;
-  none is adopted); whether a schema should refuse a non-normal spelling outright.
+  none is adopted); whether a schema should refuse a non-normal spelling outright. Each is proposed as an open question
+  in the handoff, for the owner to file under the lease on `docs/OPEN_QUESTIONS.md`.
 - **Source:** the board row CT-39; RFC 3986 §6, RFC 8141 §2 and §3, RFC 7519 §2 (pinned with SHA-256 in
   `docs/evidence/sources.md`). DEC-0076 was reserved by git CAS (`--key ct39-identifiers-20261013 DEC`); no `FAC-SEM` id;
   the record plane is `fs`. The register was edited without a lease, by the owner session's arrangement; the owner applies

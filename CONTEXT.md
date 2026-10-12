@@ -94,7 +94,7 @@ never later than 7 days after sign-in (`service.md` §The session's lifetime; ti
 
 **Identifier**: A URI naming an agent, a project, a proposal, a setting or an account
 (`common.schema.json#/$defs/uri`). Two identifiers are the same when their normal forms are equal — RFC 3986 §6.2.2 for
-a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers emit the normal form and readers compare by it
+a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers SHOULD emit the normal form; readers MUST compare by it
 ([identifiers](docs/specification/identifiers.md), DEC-0076).
 
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit

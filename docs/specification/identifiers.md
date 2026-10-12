@@ -25,8 +25,13 @@ Sources: [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986) §6.2.2 (syntax-base
    - a percent-encoded unreserved character (`A`–`Z`, `a`–`z`, `0`–`9`, `-`, `.`, `_`, `~`) decoded (§6.2.2.2); a reserved
      one, such as `%2F`, stays encoded, because decoding it changes the URI;
    - dot segments removed from a hierarchical path — one after an authority or beginning with `/` — by §5.2.4's
-     `remove_dot_segments` (§6.2.2.3); a rootless path (`agent:a/../b`) keeps them; a path that would then begin with
-     `//` without an authority keeps its dot segments, so it is never read as an authority;
+     `remove_dot_segments` (§6.2.2.3); a path that would then begin with `//` without an authority keeps its dot
+     segments, so it is never read as an authority;
+   - a rootless path (`agent:./x`) loses its leading `./` and `../` segments (§5.2.4's step A) while what is left stays
+     rootless — not empty and not beginning with `/`; dot segments further in (`agent:a/../b`) are kept, because
+     `remove_dot_segments` there can turn a rootless path into an absolute one (`a/../b` → `/b`). Keeping them is the
+     contract's own narrowing of §6.2.2.3, under RFC 3986 §6.1's aim of no false positives: `agent:a/../b` and `agent:b`
+     are two identifiers;
    - no default port removed, and no empty path made `/`.
 2. **A URN** (a URI whose scheme is `urn`) normalized by RFC 8141 §3.1 instead: `urn` and the NID lower-cased (an NID
    is case-insensitive, §2.1), percent-encoding hex upper-cased, and **nothing decoded** (§3.1: percent-encoding
@@ -46,6 +51,8 @@ Sources: [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986) §6.2.2 (syntax-base
 | `https://EXAMPLE.com/%7ex` | `https://example.com/~x` | the host lower-cased, an unreserved octet decoded |
 | `https://example.com/a%2fb` | `https://example.com/a%2Fb` | a reserved octet stays encoded |
 | `https://example.com/a/./b/../c` | `https://example.com/a/c` | dot segments removed |
+| `agent:./x` | `agent:x` | a rootless path's leading dot segments removed |
+| `agent:a/../b` | `agent:a/../b` | a rootless path's inner dot segments kept |
 | `https://example.com:443` | `https://example.com:443` | no scheme-based normalization |
 
 The only strings normalized are ones the schema's `format: uri` admits, and each normal form is admitted too
@@ -61,8 +68,35 @@ only miss a sameness, never invent one — RFC 3986 §6.1's aim: avoid false pos
   author, a row against the rows before it, a binding against the route it pins. `sameIdentifier(a, b)` is the reference;
   a port runs the [vectors](../../fixtures/vectors/identifiers.json), which include the mistakes a lax port makes
   (decoding `%2F`, lower-casing a URN's NSS, decoding inside a URN, removing a default port).
+- **A host that resolves an accepted reference looks it up by normal form**: the account a context selects, the provider
+  revision and the route a binding or an event names, the setting a rollback returns to. A rule that accepts
+  `URN:account:a` for the pool's `urn:account:a` is only half the change; the lookup that follows it must find the same
+  record.
 - Neither function throws, and neither keys anything by input in a plain object, so `__proto__` and `constructor` are
   strings like any other.
+
+## Compatibility
+
+DEC-0076 tightens some rules and loosens others. A reader pinned before it compares bytes.
+
+- **Tightened** — `FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-025` (`byProject`): two spellings of one id that passed as two
+  now meet as one. A byte-comparing reader keeps letting `AGENT:x` approve `agent:x`'s proposal and keeps splitting one
+  project over two rows; only a reader at this pin refuses them.
+- **Loosened** — a rule now accepts a reference spelled otherwise, and a reader that compares bytes then fails at the
+  lookup that follows:
+  - `FAC-SEM-002`: a selected account spelled otherwise passes, but a byte lookup finds no pool account and the pool's
+    fallback spends **another account**;
+  - `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`: a candidate, a binding or an event spelled otherwise agrees with the
+    route, but a byte lookup misses the admitted revision and **the route walk moves on** to the next candidate;
+  - `FAC-SEM-096`: a rollback basis spelled otherwise passes, but a byte lookup that finds a record under that exact
+    spelling **reaches the other setting**.
+
+  So a writer emits the normal form (then both readers agree), and a host that accepts a spelling looks the record up by
+  normal form (the previous section).
+- **Records that already collide.** Records stored before this decision under two spellings of one id (two settings,
+  two projects, two accounts whose ids have one normal form) are one identifier from this decision on. A host that finds
+  such a pair does not pick one of them silently: it refuses the reference and reports the collision until its operator
+  merges the records or renames one to an id with another normal form.
 
 ## Where identifiers are compared
 
@@ -75,7 +109,7 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 | `FAC-SEM-006` ([conformance](conformance.md#semantic-rule-codes)) | the projects active assignments scope, and the product managers of each |
 | `FAC-SEM-002` ([conformance](conformance.md#semantic-rule-codes)) | the selected account against the pool's account references |
 | `FAC-SEM-096` ([versioning](versioning.md#semantic-rules)) | a rollback basis's `id` against the setting's own |
-| `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and capability of an admission, a binding or an event against the route's |
+| `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and the `capability` of an admission, a binding or an event against the route's — there `capability` is a capability's URI (`common.schema.json#/$defs/uri` in `runner-route`, `runner-route-event`, `binding` and `admission`) |
 
 **Compared as written** — fields that are not URIs, or whose comparison another specification fixes:
 
@@ -86,5 +120,7 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;
 - opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),
-  agent ids and service ids (patterns of lower-case names), capability names, model ids, runner kinds, MCP roles, secret
-  slots, key ids, `jti`, claim ids and enum values: names, not URIs.
+  agent ids and service ids (patterns of lower-case names), capability names (`common.schema.json#/$defs/capabilityName`,
+  a lower-case dotted name: the manifest, pipelines, `fabric-interop/0.1` and the project board — not the URI-typed
+  `capability` of a route, a binding or an admission above), model ids, runner kinds, MCP roles, secret slots, key ids,
+  `jti`, claim ids and enum values: names, not URIs.

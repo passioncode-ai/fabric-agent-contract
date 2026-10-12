@@ -246,8 +246,8 @@ show every agent's spend beside its health without knowing any provider.
 - `byProject` MAY attribute the window's calls to the project the service ran them for, and within a project to the
   service's own task runs (`taskRuns[]`, `taskRunId`), DEC-0065. It is the service's run attribution: it names no
   caller, session or person, so a session id is not a field (DL-22). Each project is one row — two spellings of one
-  `projectId` are one project, compared by normal form ([identifiers](identifiers.md), DEC-0076) — and each task run one
-  row within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
+  `projectId` are one project, compared by normal form ([identifiers](identifiers.md), DEC-0076), and a service SHOULD
+  write each `projectId` in its normal form — and each task run one row within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
   an unknown cost is `null` as in a day's rows (`FAC-SEM-025`). A call the service ran for no project is in no row.
 - **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
   object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that
