@@ -4,9 +4,10 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | pull request open |
-| [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | pull request open |
-| [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | pull request open |
+| [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | this pull request |
+| [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | merged, #75 `3cb040c` |
+| [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | merged, #72 `0656aa1` |
+| [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | merged, #71 `866d0b0` |
 | [2026-10-12 interop and usage (P5-02)](2026-10-12-w5-p5-02-interop-usage.md) | DEC-0065 (board run P5-02; CT-15) | merged, #68 `508e38a` |
 | [2026-10-12 the 0.1.0 core (P5-01)](2026-10-12-w5-p5-01-core.md) | DEC-0064 (board run P5-01; CT-14) | merged, #67 `252fd25` |
 | [2026-10-12 window leases and signing challenges](2026-10-12-w4-p4-05-leases-challenges.md) | DEC-0062, DEC-0063 (board run P4-05; V4-WINDOW-LEASE, V4-SIGNING-CHALLENGE) | merged, #65 `7b238c7` |

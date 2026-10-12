@@ -27,7 +27,7 @@ ES256 rule, DEC-0066) and
 `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
 estate record certifies a delegation key, DEC-0060) `src/revocation-delta.ts` (the revocation delta, the heartbeat
 and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062), `src/signing-challenges.ts` (the
-signing register and its verifier, DEC-0063) `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065) `src/protocol-revisions.ts` (protocol revisions, N and N−1, DEC-0067) and `src/session-join.ts` (one writer per session, DEC-0068). What does not ship: a runtime, a provider implementation, a model router,
+signing register and its verifier, DEC-0063) `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065) `src/protocol-revisions.ts` (protocol revisions, N and N−1, DEC-0067) `src/session-join.ts` (one writer per session, DEC-0068) and `src/app-descriptor.ts` (an app's own descriptor, DEC-0069). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
