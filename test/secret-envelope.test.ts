@@ -35,6 +35,7 @@ const ctx = (over: Partial<OpenContext> = {}): OpenContext => ({
   senderKey: (kid) => (kid === SENDER ? vector.senderKey : undefined),
   mayHold: (kid, agentRef, slot) => kid === SENDER && agentRef === vector.envelope.header.agentRef && slot === vector.envelope.header.slot,
   currentPlacement: () => vector.open.placement,
+  appliedRevision: () => vector.open.placement,
   now: new Date(vector.open.now),
   ...over
 });
@@ -79,7 +80,7 @@ describe("fabric-secret-envelope/1", () => {
     const envelope = sealEnvelope(base);
     const open = openEnvelope(envelope, {
       ownKemKid: "m#kem", ownKemPrivateKey: kem.getPrivateKey(), senderKey: () => sender.publicKey.export({ format: "jwk" }),
-      mayHold: () => true, currentPlacement: () => 1, now: new Date("2026-10-12T00:30:00Z")
+      mayHold: () => true, currentPlacement: () => 1, appliedRevision: () => 1, now: new Date("2026-10-12T00:30:00Z")
     });
     expect(open).toEqual({ ok: true, secret: Buffer.from("v") });
     expect(() => sealEnvelope({ ...base, recipientKey: { ...recipientKey, y: recipientKey.x } })).toThrow(/bad-key/);
@@ -179,6 +180,11 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
     expect(openEnvelope(respelled, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
   });
 
+  it("answers a null header as malformed, never by throwing (third reading 3)", () => {
+    expect(openEnvelope({ header: null, ct: "AA", sig: "AA" }, ctx())).toEqual({ ok: false, refusal: "malformed" });
+    expect(openEnvelope({ header: [], ct: "AA", sig: "AA" }, ctx())).toEqual({ ok: false, refusal: "malformed" });
+  });
+
   it("refuses an encapsulated key off the curve and a signature that is not 64 canonical bytes", () => {
     const offCurve = clone();
     const enc = Buffer.from(offCurve.header.enc, "base64url");
@@ -251,6 +257,22 @@ describe("the open context from the estate record (DEC-0055; review of #53, B)",
     expect(estateEnvelopeContext([r1, r2, moved, back], target).currentPlacement(agentRef, slot)).toBe(4);
     expect(open(seal({ placement: 2 }), [r1, r2, moved, back])).toEqual({ ok: false, refusal: "placement-stale" });
     expect(estateEnvelopeContext([r1], target).currentPlacement("urn:fabric:agent:example:none", slot)).toBeUndefined();
+  });
+
+  it("refuses a holder the latest applied revision replaced, though an earlier one named it (review of #53, third reading 1)", () => {
+    const r1 = withHolder(base, 1);
+    const moved = withHolder(base, 2, (r) => { r.machines[0].secrets[0].from = r.machines[1].id; });
+    expect(estateEnvelopeContext([r1, moved], target).mayHold(`${from}#sig`, agentRef, slot)).toBe(false);
+    expect(open(seal({ placement: 2 }), [r1, moved])).toEqual({ ok: false, refusal: "sender-not-allowed" });
+  });
+
+  it("refuses an envelope placed by a revision newer than the target has applied (third reading 5)", () => {
+    const r1 = withHolder(base, 1), r2 = withHolder(base, 2);
+    expect(estateEnvelopeContext([r1, r2], target).appliedRevision()).toBe(2);
+    expect(open(seal({ placement: 2 }), [r1, r2])).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(open(seal({ placement: 3 }), [r1, r2])).toEqual({ ok: false, refusal: "placement-stale" });
+    expect(estateEnvelopeContext([], target).appliedRevision()).toBeUndefined();
+    expect(openEnvelope(vector.envelope, ctx({ appliedRevision: () => undefined }))).toEqual({ ok: false, refusal: "placement-stale" });
   });
 
   it("takes the sender's key from the record, and none for a revoked machine or key", () => {

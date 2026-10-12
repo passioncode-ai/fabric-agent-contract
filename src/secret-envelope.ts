@@ -154,6 +154,9 @@ export interface OpenContext {
   // The revision from which the target's current placement of (agentRef, slot) holds unchanged, in the latest revision
   // the target verified and applied; an envelope sealed under an older placement is stale.
   currentPlacement: (agentRef: string, slot: string) => number | undefined;
+  // The latest estate-record revision the target verified and applied. An envelope placed by a newer revision is
+  // `placement-stale` until the target has fetched and verified that revision itself.
+  appliedRevision: () => number | undefined;
   now: Date;
 }
 
@@ -182,7 +185,10 @@ export function openEnvelope(value: unknown, ctx: OpenContext): { ok: true; secr
   if (!verified) return { ok: false, refusal: "bad-signature" };
   if (!ctx.mayHold(header.sender, header.agentRef, header.slot)) return { ok: false, refusal: "sender-not-allowed" };
   const current = ctx.currentPlacement(header.agentRef, header.slot);
-  if (current === undefined || header.placement < current) return { ok: false, refusal: "placement-stale" };
+  const applied = ctx.appliedRevision();
+  if (current === undefined || applied === undefined || header.placement < current || header.placement > applied) {
+    return { ok: false, refusal: "placement-stale" };
+  }
   const iat = instant(header.iat) as number, exp = instant(header.exp) as number;
   if (iat - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, refusal: "not-yet-valid" };
   if (exp <= iat || exp - iat > MAX_ENVELOPE_LIFETIME_SECONDS * 1000) return { ok: false, refusal: "lifetime-too-long" };
@@ -223,9 +229,10 @@ function signingKey(record: JsonObject, machineId: unknown): { kid: string; key:
  * in which the placement names the same `from` — so an envelope sealed after the placement was made opens, and one
  * sealed under a placement since replaced is `placement-stale`.
  */
-export function estateEnvelopeContext(applied: readonly JsonObject[], machineId: string): Pick<OpenContext, "mayHold" | "currentPlacement" | "senderKey"> {
+export function estateEnvelopeContext(applied: readonly JsonObject[], machineId: string): Pick<OpenContext, "mayHold" | "currentPlacement" | "senderKey" | "appliedRevision"> {
   const latest = applied[applied.length - 1];
   return {
+    appliedRevision: () => (latest ? Number(latest.revision) : undefined),
     mayHold: (senderKid, agentRef, slot) => {
       if (!latest) return false;
       const from = placedFrom(latest, machineId, agentRef, slot);

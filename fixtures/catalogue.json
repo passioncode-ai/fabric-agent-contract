@@ -415,5 +415,6 @@
   {"name": "secret-envelope", "schema": "secret-envelope.schema.json", "path": "positive/secret-envelope.json", "valid": true},
   {"name": "relay-frame-send", "schema": "relay-frame.schema.json", "path": "positive/relay-frame-send.json", "valid": true},
   {"name": "secret-envelope-extra-member", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-extra-member.json", "valid": false, "keyword": "additionalProperties"},
-  {"name": "relay-frame-unknown-type", "schema": "relay-frame.schema.json", "path": "negative/relay-frame-unknown-type.json", "valid": false, "keyword": "oneOf"}
+  {"name": "relay-frame-unknown-type", "schema": "relay-frame.schema.json", "path": "negative/relay-frame-unknown-type.json", "valid": false, "keyword": "oneOf"},
+  {"name": "secret-envelope-without-agent", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-without-agent.json", "valid": false, "keyword": "required"}
 ]

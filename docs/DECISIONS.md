@@ -2540,6 +2540,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
        Presence and `lastSeen` follow the same verified set.
      - **No organization record yet.** An organization's relay has no admission source of its own until
        `org-authority/1` (Fabric D8) is decided.
+     - `relayAdmissionSet` takes the schema check from its caller, which MUST pass the validator of
+       `estate-record.schema.json`; `() => true` is not conformant.
   5. **Messages.**
      - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
      - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
@@ -2581,7 +2583,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
        5. the signature is 64 canonical bytes and verifies (`bad-signature`);
        6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
           it from the sender's machine (`sender-not-allowed`);
-       7. `placement` is at least the revision from which that placement holds unchanged (`placement-stale`);
+       7. `placement` is at least the revision from which that placement holds unchanged and at most the latest
+          revision the target has applied: a newer one is fetched and verified first (`placement-stale`);
        8. `iat` is at most 60 s ahead (`not-yet-valid`);
        9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
        10. HPKE opens (`cannot-open`).

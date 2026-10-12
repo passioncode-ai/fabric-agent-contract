@@ -254,6 +254,9 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
   });
 
   it("fails closed when the held revision's window has ended, and admits nobody without a record", () => {
+    // At validUntil exactly the revision still admits, as verifyEstateRecord's `at > validUntil` reads it.
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(rev1.validUntil), schemaValid }).ok).toBe(true);
+    expect(relayAdmissionSet({ candidate: rev1, pinned, at: new Date(rev1.validUntil), schemaValid }).ok).toBe(true);
     const after = new Date(Date.parse(rev1.validUntil) + 1000);
     expect(relayAdmissionSet({ held: rev1, pinned, at: after, schemaValid })).toEqual({ ok: false, refusal: "expired" });
     expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 1000), schemaValid })).toEqual({ ok: false, refusal: "expired" });

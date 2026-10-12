@@ -100,6 +100,9 @@ tiers](#trust-tiers)).
   when it is valid against `estate-record.schema.json` and `verifyEstateRecord` accepts it against the revision it
   holds (revision 1: against the pinned passkeys). A refused revision changes nothing. A relay never starts with a
   configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets.
+- **The schema check is the caller's to supply, and it MUST be the validator of
+  [`estate-record.schema.json`](../../schemas/estate-record.schema.json).** `relayAdmissionSet` takes it as
+  `schemaValid`; a relay that passes `() => true` is not conformant.
 - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
   revision arrives. Sessions already open end at their next re-authentication; queued mail stays until its `ttl`.
   Presence and `lastSeen` follow the same verified set.
@@ -189,9 +192,10 @@ A secret moves to a machine only where a placed package declares it
   5. the signature is 64 bytes and verifies;
   6. the latest estate-record revision this machine verified and applied places `(agentRef, slot)` on it from the
      sender's machine ([estate record](estate-record.md), DEC-0055);
-  7. `placement` is at least the revision from which that placement holds unchanged; an envelope sealed under a
-     placement since replaced is `placement-stale` (`estateEnvelopeContext` derives 6 and 7, and the sender's key,
-     from the applied revisions);
+  7. `placement` is at least the revision from which that placement holds unchanged, and at most the latest revision
+     this machine has applied. An envelope sealed under a placement since replaced, or placed by a revision the target
+     has not yet fetched and verified, is `placement-stale` (`estateEnvelopeContext` derives 6 and 7, the sender's key
+     and the applied revision from the applied revisions);
   8. `iat` is at most 60 s ahead;
   9. the life is more than zero and at most 24 h;
   10. `now < exp`;
