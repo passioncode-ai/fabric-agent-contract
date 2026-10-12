@@ -19,10 +19,11 @@ describe("FAC-SEM-104: a rule is approved by a person, and a proposal moves alon
     expect(paths("proposal", fix)).toEqual([]);
     expect(paths("proposal", { ...rule, approvedBy: { policy: "auto" } })).toEqual(["FAC-SEM-104 /approvedBy"]);
   });
-  it("allows every edge of the graph and nothing else", () => {
-    for (const [from, next] of PROPOSAL_TRANSITIONS) {
+  it("allows exactly the decisions DEC-0072 names, and nothing else", () => {
+    const edges = new Set(["proposed>approved", "proposed>refused", "proposed>merged", "proposed>superseded", "approved>applied", "approved>superseded", "applied>retired", "applied>superseded", "applied>verified"]);
+    for (const from of PROPOSAL_TRANSITIONS.keys()) {
       for (const to of PROPOSAL_TRANSITIONS.keys()) {
-        const expected = next.includes(to) && !(to === "verified") ? [] : ["FAC-SEM-104 /to"];
+        const expected = edges.has(`${from}>${to}`) && to !== "verified" ? [] : ["FAC-SEM-104 /to"];
         expect(paths("proposal-transition", { type: "rule", from, to }), `${from} → ${to}`).toEqual(expected);
       }
     }
