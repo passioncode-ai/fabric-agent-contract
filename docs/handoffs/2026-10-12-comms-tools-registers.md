@@ -90,7 +90,7 @@ This run defines every tool's arguments and answer, one receipt, and a project d
 
 ## Merging with `main`
 
-`main` moved on after this branch was cut. It gained DEC-0072, DEC-0074, DEC-0075 and four schemas. The
+`main` moved on after this branch was cut. It gained DEC-0072, DEC-0074, DEC-0075, four schemas and the board run's closing handoffs. The
 `agent-sync` guard refuses a merge commit here, because a merge stages `main`'s own changes to
 `docs/DECISIONS.md`, `docs/specification/conformance.md` and `docs/backlog.md`, and the owner holds those leases.
 So the branch is not merged with `main`, and the pull request shows two textual conflicts for the owner to resolve:
@@ -100,7 +100,8 @@ So the branch is not merged with `main`, and the pull request shows two textual 
 - `docs/handoffs/README.md`: the owner keeps only this branch's DEC-0073 row from this side.
 
 A trial merge with those two resolutions passed `pnpm run check` (exit 0) in a scratch worktree before the pull
-request was opened.
+request was opened, and again in the review round: `60b121d` merged with `origin/main` `4781999`, 63 test files and
+3380 tests passed, UX lint, docs, Markdown lint and privacy clean.
 
 ## Open
 
