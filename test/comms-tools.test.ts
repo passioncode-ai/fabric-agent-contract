@@ -84,9 +84,15 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(item.properties.responder.enum).toEqual(status.properties.responders.items.properties.state.enum);
   });
 
-  it("states the directory's boundary: same estate, no content, operator opt-out", () => {
-    const section = spec.slice(spec.indexOf("## Project directory"), spec.indexOf("## Transport mirror"));
-    for (const phrase of ["Never across estates", "Never content", "Opt-out", "no tool sets", "`not_authorized`"]) expect(section).toContain(phrase);
+  it("states the directory's boundary: same estate and owner, no content, operator opt-out that is discovery only", () => {
+    const section = spec.slice(spec.indexOf("## Project directory"), spec.indexOf("## Transport mirror")).replace(/\s+/g, " ");
+    const phrases = [
+      "Never across estates", "Never content", "Opt-out", "no tool sets", "`not_authorized`",
+      "a managed session", "an enrolled session", "a viewer principal", "share-grant principal (T2)",
+      "another owner's Project", "Unlisting is discovery only", "already knows its id", "survives a restore",
+      "ordered by name and then id", "the restore epoch"
+    ];
+    for (const phrase of phrases) expect(section, phrase).toContain(phrase);
   });
 });
 
@@ -98,6 +104,11 @@ const without = (list: string[], member: string) => list.filter((name) => name !
 const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-with-seq", name: "receipt open to unknown members", mutate: (s) => { s.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-not-ok", name: "ok any boolean", mutate: (s) => { s.properties.ok = { type: "boolean" }; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-without-ok", name: "ok optional", mutate: (s) => { s.required = without(s.required, "ok"); } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-without-repeated", name: "repeated optional", mutate: (s) => { s.required = without(s.required, "repeated"); } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-request-with-seq", name: "request open", mutate: (s) => { s.properties.request.additionalProperties = true; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-slot-with-holder", name: "slot open", mutate: (s) => { s.properties.slot.additionalProperties = true; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-attempt-with-seq", name: "attempt open", mutate: (s) => { s.properties.attempt.additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "responder reply open", mutate: (s) => { responderBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "participant reply open", mutate: (s) => { participantBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-neither", name: "responder reply without fence", mutate: (s) => { responderBranch(s).required = ["body"]; } },
@@ -117,6 +128,9 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-responder-replace.schema.json", killer: "comms-responder-replace-duplicate-transfer", name: "transfer repeats a request", mutate: (s) => { s.properties.transfer.properties.requests.uniqueItems = false; } },
   { schema: "comms-status.schema.json", killer: "comms-status-epoch-zero", name: "epoch zero", mutate: (s) => { s.properties.idempotency.properties.epoch.minimum = 0; } },
   { schema: "comms-directory-args.schema.json", killer: "comms-directory-args-forged-estate", name: "directory arguments open", mutate: (s) => { s.additionalProperties = true; } },
+  { schema: "comms-directory-args.schema.json", killer: "comms-directory-args-limit-over-page", name: "limit above a directory page", mutate: (s) => { delete s.properties.limit.maximum; } },
+  { schema: "comms-directory.schema.json", killer: "comms-directory-snapshot-with-count", name: "snapshot open", mutate: (s) => { s.properties.snapshot.additionalProperties = true; } },
+  { schema: "comms-directory.schema.json", killer: "comms-directory-over-page", name: "page unbounded", mutate: (s) => { delete s.properties.projects.maxItems; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-entry-with-content", name: "entry open", mutate: (s) => { s.properties.projects.items.additionalProperties = true; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-entry-with-generation", name: "capability item open", mutate: (s) => { s.properties.projects.items.properties.capabilities.items.additionalProperties = true; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-with-count", name: "directory open", mutate: (s) => { s.additionalProperties = true; } }

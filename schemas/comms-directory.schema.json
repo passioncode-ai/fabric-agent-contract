@@ -24,6 +24,7 @@
           "$ref": "common.schema.json#/$defs/timestamp"
         },
         "stale": {
+          "description": "The board answered from a projection it knows is behind: a Project listed or unlisted, or a responder enrolled or lapsed, may not show yet.",
           "type": "boolean"
         }
       },

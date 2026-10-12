@@ -122,9 +122,13 @@ computes the same digests (the vectors in `fixtures/vectors/canonical.json`).
 - `com.status` reports the epoch the caller's Project submits under now (`idempotency.epoch`, DEC-0073).
 - The same key with the same digest returns the same receipt after current authorization.
 - The same key with a different digest is `idempotency_conflict`.
-- An epoch has a finite key capacity. A full epoch refuses before any effect
-  (`capacity_exceeded`). A retired epoch is refused (`idempotency_window_expired`) even after its
-  receipts are compacted, so a missing old receipt never becomes a fresh write (C6).
+- An epoch is **open**, **closed** or **retired**, and a Project has one open epoch. An epoch has a finite key
+  capacity. A full epoch refuses before any effect (`capacity_exceeded`).
+- A **closed** epoch (full, aged or ended by a restore) takes no new key: a new key under it is
+  `idempotency_window_expired`. Its stored receipts still answer: the same key with the same digest returns the
+  receipt with `repeated: true`.
+- A **retired** epoch is a closed one whose receipts were compacted. Every key under it is refused
+  (`idempotency_window_expired`), a repeat included, so a missing old receipt never becomes a fresh write (C6).
 
 ## Capability negotiation and host health
 
@@ -168,7 +172,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 | `com.submit` | `comms-submit.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at`, and `request` for a request | yes |
 | `com.list` | `comms-list.schema.json` | `comms-page.schema.json` | — (a read) |
 | `com.get` | `comms-message-ref.schema.json` | `comms-message.schema.json` | — (a read) |
-| `com.read_ack` | `comms-message-ref.schema.json` | `comms-receipt.schema.json`: `message`, `at` | no; marking read twice is one mark |
+| `com.read_ack` | `comms-message-ref.schema.json` | `comms-receipt.schema.json`: `message`, `at` | no key and no receipt; marking read twice is one mark |
 | `com.reply` | `comms-reply.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at` | yes |
 | `com.cancel` | `comms-cancel.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.status` | `comms-status-args.schema.json` | `comms-status.schema.json` | — (a read) |
@@ -190,6 +194,10 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - `repeated: true` means the same key and digest were already stored, and this is that receipt.
 - `request` is the request after the call: its state, its effect state and its revision. `slot` and `attempt` carry
   what the caller's next fence needs. Their lease times are database time; the caller's clock is not authoritative.
+- **`com.read_ack` takes no idempotency key and stores no receipt**, because marking read twice is one mark. The
+  reader's read mark is its own record. The first mark answers `repeated: false` and `at`, the time of the mark. A
+  second mark of the same message by the same reader changes nothing and answers `repeated: true` with the first
+  mark's `at`.
 - **`com.claim` with nothing claimable** answers `{ok: true, repeated: false}` with no `request`. It stores no
   receipt, so the responder may poll again with the same key.
 - **`com.renew` and `com.progress` are naturally idempotent.** The board checks their key's shape and epoch, and a
@@ -202,14 +210,24 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - A participant's `com.reply` names the message it answers (`replyTo`) and joins its thread. A responder's
   `com.reply` carries its fence and answers `fence.request`. A call with both forms, or neither, is refused. A reply
   never changes a request's state.
+- `com.reply` is the reply path, and it takes the thread from `replyTo`. A `com.submit` of kind `reply` stays for
+  clients written against DEC-0022; its `thread` must be `replyTo`'s own, and the board refuses any other thread
+  `invalid_arguments`.
 
 ### Slots end with the session
 
 Leaving the session (for MCP over HTTP, the session's `DELETE`) or the session ending releases every slot its
-enrollments hold and ends their live attempts. There is no release tool. A released `claimed` request becomes
-claimable again under a new attempt. An `accepted` one is held (C4), and an `in_progress` one becomes
-`outcome_unknown` when a new holder takes the slot ([request lifecycle](#request-lifecycle)). A host's release is
-best effort. The authority recheck inside every transition is what refuses a released responder.
+enrollments hold and ends their live attempts. There is no release tool. A release is not an operation of the
+[request lifecycle](#request-lifecycle): it moves no request, and `FAC-SEM-027`'s table is unchanged. What happens to
+each request afterwards is an operation that table already has:
+
+- a released `claimed` request stays `claimed`, and the next `com.claim` takes it as a lapsed claim (`com.claim`,
+  `claimed` → `claimed` with a new attempt);
+- an `accepted` one is held (C4), and a new responder continues it only by a checkpoint transfer;
+- an `in_progress` one becomes `outcome_unknown` by the lost-result operation (`lost_result`) when the next holder
+  takes the slot.
+
+A host's release is best effort. The authority recheck inside every transition is what refuses a released responder.
 
 ### `com.status` arguments
 
@@ -229,10 +247,14 @@ caller's estate that a sender may address. For each Project it gives:
 
 The boundary:
 
-- **Who may read it.** Only a session the board verified for a Project of the same estate may read it: a managed
-  session (one the host launched) or an enrolled session (one the operator consented to). An `asserted` principal,
-  a viewer principal and every caller from another estate are refused `not_authorized`.
-- **Never across estates.** A Project of another estate is never listed and never addressable through this board.
+- **Who may read it.** Only a managed session (one the host launched) or an enrolled session (one the operator
+  consented to) of a Project of the same estate. In tier terms, that is a T0 or T1 session of the estate's owner
+  ([trust tiers](relay.md#trust-tiers), DL-25). An `asserted` principal, a viewer principal, a share-grant principal
+  (T2) and every caller from another estate are refused `not_authorized`.
+- **Never across estates or owners.** A Project of another estate is never listed and never addressable through this
+  board. Within an organization, the directory never lists another owner's Project and never shows another
+  member's responder state, as the organization's relay sends no presence from one member to another
+  ([relay messages](relay.md#messages), DEC-0047; OD-1, the organization edition's rule 10).
 - **Never content.** The answer never carries a message, a body, a subject, a thread, a participant, an unread or
   message count, a request count, a generation, a lease time, a holder or a last-activity time. Responder state is
   its only activity signal, the same one `com.status` shows. Every object in the schema is closed, so a reader
@@ -240,14 +262,22 @@ The boundary:
 - **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
 - **Opt-out.** A Project can be unlisted. Its operator sets this in the host, in Fabric per Project; no tool sets
   it, so an agent cannot list or unlist a Project. An unlisted Project is absent from every page and every
-  capability filter. A sender that already knows its id can still address it, because a listing is discovery, not
-  authority. Unlisting refuses no message; whether a Project accepts a request is its responders' and grants'
-  business.
-- **Listing is not acceptance.** A listed capability with an `absent` responder may never be claimed; the request
-  then waits or expires.
+  capability filter.
+- **Unlisting is discovery only.** It does not hide the Project from a sender that already knows its id: that sender
+  can still address it, because a listing is discovery, not authority. Unlisting refuses no message; whether a
+  Project accepts a request is its responders' and grants' business. An unlisted Project is not a hidden Project in
+  the sense of [refusals](#refusals): a call that names it by id is answered as for a listed one, and no answer
+  names it to a sender that did not. An unlisting is the operator's setting, kept with the Project, so it survives a
+  restore; it is not authority that a restore turns off (C7).
+- **Listing is not acceptance.** A listed capability with an `absent` responder is not claimed until a responder
+  enrolls; the request waits or expires.
+- **`snapshot.stale`** is `true` when the board answered from a projection it knows is behind (the same flag as on
+  a `com.list` page, `comms-page.schema.json`): a Project listed or unlisted, or a responder enrolled or lapsed, may
+  not show yet.
 
-A page holds at most 100 Projects, ordered by name and then id, with a cursor bound to the reader, its grant
-revision and the filter. A changed filter or a revoked grant returns `cursor_reset_required`.
+A page holds at most 100 Projects, ordered by name and then id. Its cursor is bound to the reader, its grant
+revision, the filter and the restore epoch. A changed filter, a revoked grant, a restore or an expired cursor
+returns `cursor_reset_required`.
 
 The directory is a tool of its own, not a `com.status` member. `com.status` describes one Project and is read by
 viewer principals that must not see the estate's Project list, while the directory is estate-wide, paged and read

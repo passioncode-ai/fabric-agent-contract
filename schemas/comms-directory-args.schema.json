@@ -10,7 +10,7 @@
       "$ref": "common.schema.json#/$defs/capabilityName"
     },
     "cursor": {
-      "description": "The cursor of the previous page, bound to this reader, its grant revision and this filter.",
+      "description": "The cursor of the previous page, bound to this reader, its grant revision, this filter and the restore epoch.",
       "$ref": "comms-common.schema.json#/$defs/opaqueId"
     },
     "limit": {

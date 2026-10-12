@@ -130,8 +130,10 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
 **Project directory**: What `com.directory` answers: the addressable Projects of the caller's estate, each with its
-id, name, listed capabilities and their responder state, and nothing else. Only verified sessions of the same estate
-read it, and an operator may unlist a Project, which stays addressable by id
+id, name, listed capabilities and their responder state, and nothing else. Only a managed or enrolled session of a
+Project of the same estate reads it (T0 or T1 of the estate's owner); asserted, viewer and share-grant principals and
+every other estate are refused `not_authorized`, and the caller's own Project is never listed. An operator may unlist
+a Project: that hides it from discovery only, and it stays addressable by id
 ([project communication](docs/specification/project-comms.md#project-directory), DEC-0073).
 
 **Board receipt**: The one answer of every successful board mutation (`comms-receipt.schema.json`): `ok`,
