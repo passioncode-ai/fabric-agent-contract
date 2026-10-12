@@ -15,12 +15,14 @@
         },
         "role": "org.admin"
       },
-      "scope": "activity.raw",
+      "scope": "activity.usage",
       "range": {
         "from": "2026-10-01T00:00:00Z",
         "to": "2026-10-07T23:59:59Z"
       },
+      "step": "day",
       "purpose": "Spend reconciliation for the example project, as the organization's notice states.",
+      "purposeId": "spend.reconciliation",
       "requestId": "rq-5521"
     },
     {
@@ -31,6 +33,23 @@
       },
       "scope": "activity.raw",
       "purpose": "Nightly summary build."
+    },
+    {
+      "at": "2026-10-07T18:55:00Z",
+      "reader": {
+        "user": {
+          "id": "m-0031"
+        },
+        "role": "org.support"
+      },
+      "scope": "activity.raw",
+      "range": {
+        "from": "2026-10-07T09:00:00Z",
+        "to": "2026-10-07T10:00:00Z"
+      },
+      "step": "event",
+      "purpose": "Debugging a stalled collector, with the person's consent.",
+      "purposeId": "debugging"
     },
     {
       "at": "2026-10-07T19:05:00Z",
@@ -45,6 +64,18 @@
         "id": "dev-01j9a"
       },
       "purpose": "Support request about a device that stopped reporting."
+    },
+    {
+      "at": "2026-10-07T20:00:00Z",
+      "reader": {
+        "user": {
+          "id": "m-4821"
+        },
+        "role": "self"
+      },
+      "scope": "activity.raw",
+      "step": "event",
+      "purpose": "The person reads their own activity."
     }
   ]
 }

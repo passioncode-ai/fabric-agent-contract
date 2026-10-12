@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-notice.schema.json",
+  "title": "Notice acknowledgement and consent messages (fabric-activity/0.1, DEC-0052)",
+  "description": "What a person sends the organization server about its notice: that they acknowledged a version of it, and that they gave or withdrew consent to one purpose. Neutral messages only: the person comes from the authenticated session, never from the body, and how a server stores consent records is its own (private) business.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/acknowledgement"
+    },
+    {
+      "$ref": "#/$defs/consent"
+    }
+  ],
+  "$defs": {
+    "acknowledgement": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "noticeVersion",
+        "purposeIds",
+        "at"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "activity-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "notice.acknowledgement"
+        },
+        "noticeVersion": {
+          "$ref": "activity-common.schema.json#/$defs/noticeVersion"
+        },
+        "purposeIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "activity-common.schema.json#/$defs/purposeId"
+          },
+          "description": "The purposes the acknowledged notice names."
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "consent": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "kind",
+        "purposeId",
+        "state",
+        "at"
+      ],
+      "properties": {
+        "protocol": {
+          "$ref": "activity-common.schema.json#/$defs/protocol"
+        },
+        "kind": {
+          "const": "consent"
+        },
+        "purposeId": {
+          "$ref": "activity-common.schema.json#/$defs/purposeId"
+        },
+        "state": {
+          "enum": [
+            "given",
+            "withdrawn"
+          ]
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

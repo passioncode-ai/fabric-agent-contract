@@ -112,10 +112,23 @@
           },
           "additionalProperties": false
         },
+        "step": {
+          "enum": [
+            "event",
+            "hour",
+            "day",
+            "period"
+          ],
+          "description": "How finely the rows served were resolved in time: every event, per hour, per UTC day or per billing period. Per-person usage and cost are served to another person only per day or period (FAC-SEM-067)."
+        },
         "purpose": {
           "type": "string",
           "minLength": 1,
           "maxLength": 280
+        },
+        "purposeId": {
+          "$ref": "activity-common.schema.json#/$defs/purposeId",
+          "description": "The purpose the read served, as the notice names it (DEC-0052). A read of a person's time or presence served to another person needs one the subject confirmed (FAC-SEM-067)."
         },
         "requestId": {
           "$ref": "activity-common.schema.json#/$defs/opaqueId"

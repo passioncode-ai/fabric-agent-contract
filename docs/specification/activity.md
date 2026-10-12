@@ -1,11 +1,12 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030 · rule codes `FAC-SEM-037`…`FAC-SEM-040` (and `FAC-SEM-045`, [devices](devices.md#attribution))
-· schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
+DEC-0030, amended by DEC-0052 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067` (and `FAC-SEM-045`,
+[devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
 [`activity-summary`](../../schemas/activity-summary.schema.json),
-[`access-log`](../../schemas/access-log.schema.json), shared definitions in
+[`access-log`](../../schemas/access-log.schema.json),
+[`activity-notice`](../../schemas/activity-notice.schema.json), shared definitions in
 [`activity-common`](../../schemas/activity-common.schema.json)
 
 Activity telemetry records **when an agent session worked, waited or idled, and what each model
@@ -56,6 +57,27 @@ Telemetry events and check-ins that carry a `user.id`, or come from a device bou
 The operator confirmed this shape on 2026-10-08 (DEC-0030): per-person presence estimates, labelled
 by `method`; every read in the person's access log; and no scoring of persons.
 
+<a id="notice"></a>
+
+**Notice, consent and what reaches another person** (DEC-0052, the operator's OD-1 in neutral form).
+
+- The device policy names the `noticeVersion` it is issued under ([devices](devices.md#policy)). A person
+  acknowledges that notice with a `notice.acknowledgement` message (`noticeVersion`, the `purposeIds` it
+  names, `at`), and gives or withdraws consent to one purpose with a `consent` message (`purposeId`,
+  `state` `given` or `withdrawn`, `at`) — schema
+  [`activity-notice`](../../schemas/activity-notice.schema.json). Neither carries the person: the
+  receiver takes them from the authenticated session, as enrollment takes the user from its proof. How a
+  receiver stores consent records is its own business and not part of this contract.
+- A receiver serves **another person** — an owner, an administrator, support — a person's time and
+  presence (raw events, intervals, `attended`) only under a `purposeId` that person confirmed: the latest
+  `consent` for it at the time of the read says `given`. It serves a person's **usage and cost** only as
+  sums per UTC day or billing period. The access log records the read's `purposeId` and `step`, and
+  `FAC-SEM-067` refuses a log entry that breaks either ([`confirmedPurposes`](../../src/activity-rules.ts)).
+  The person reading their own data, and a service that serves nobody (a summary build), are not narrowed.
+- This narrows what DEC-0030's presence ruling lets a receiver serve, not the schema: the per-person
+  estimates still exist, and reach an owner or administrator only through a purpose the person
+  confirmed.
+
 The contract defines no score, rank or comparison of persons, and no field for one. Presence-derived
 values are **estimates**, not observations of a person:
 
@@ -77,7 +99,7 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `buffer.overflow`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `buffer.overflow`, `policy.violation`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
@@ -85,6 +107,7 @@ policy key names).
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
 | `received` | Set by the receiver when it stores the event. A device never sends it (the batch schema refuses it). |
 | `user.id` | Optional and opaque: an organization membership id or a local profile id. The receiver sets it from the binding recorded for the event's epoch ([attribution](devices.md#attribution)). The pattern refuses `@` and spaces, so an e-mail address does not fit; a name-like id does, so issuing opaque values is the issuer's duty. |
+| `account.class`, `account.tenantRef` | The account the session ran on (DEC-0052): `organization`, `personal` or `unknown` — a statement about an account, never a person. An organization account carries the `tenantRef` its tenant has in the policy's `accounts.tenants` ([devices](devices.md#policy)): `sha256:` of the RFC 8785 form of `{provider, tenant}` ([`tenantRef`](../../src/activity-rules.ts)). A personal or unknown account carries none (schema), so no hash of a person's own tenant leaves the device. |
 | `session.id`, `session.parent` | The runtime's session, and the session that launched it when one agent started another. |
 | `project.id` | The project the session worked in, as the organization names it. |
 | `runtime.name`, `runtime.version` | The runtime (open vocabulary: `claude_code`, `codex`, …). |
@@ -149,6 +172,14 @@ and `runtime`. `data`:
   read as a key by `FAC-SEM-037`.
 
 A collector never drops an overflow event without carrying its ranges into the next one.
+
+**`policy.violation`** — the device saw work that breaks the organization's policy, counted per **UTC
+day** (DEC-0052). It requires `project`. `data`: `day`, `provider`, `accountClass`, `reason` (open
+vocabulary: `personal_account_in_work_folder`, `unknown_account`, `personal_key_shared`) and an optional
+`count`. It carries a day and **no finer time**: `occurred` is that day's midnight UTC
+(`FAC-SEM-039` checks it is the same day), `monotonicNs` is `"0"`, and it carries no `session`, `run`,
+`task`, `git`, `skill` or `launch` that would tie it to a timed interval (schema). A collector emits a
+day's violations after the day ends, so the stream position tells no more than the day.
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any
 kind a reader does not know — an extension, or a core kind a later revision of this protocol adds —
@@ -364,8 +395,12 @@ that the device is `logging_disabled`. Each entry records:
   `device.policy`);
 - `device`: the device, when the read was keyed by one;
 - `range`: the time range read;
-- `purpose`: a sentence;
+- `purpose`: a sentence, and `purposeId`: the purpose as the notice names it (DEC-0052);
+- `step`: how finely the rows served were resolved — `event`, `hour`, `day` or `period`;
 - `requestId`: the receiver's own request id.
+
+A read served to another person carries the `purposeId` and `step` the [notice rules](#notice) require
+(`FAC-SEM-067`).
 
 A receiver that stores activity telemetry MUST record these reads and MUST let the subject read
 their own log. Reads of summaries, which carry no person, are not logged per subject.
@@ -419,16 +454,18 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 |---|---|---|
 | `FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no home directory, plain or encoded, in any value |
 | `FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced |
-| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
+| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; a policy violation's `occurred` is the day it names; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`, and one with no canonical form is refused; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
+| `FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves
-an ack), then the batch, then the answer.
+an ack), then the batch, then the answer. `access-log-disclosure` checks `{log, consents?}`: an
+access log and the subject's `consent` messages.
 
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.
-- Rule inputs: `fixtures/semantic/telemetry-event-*` and `activity-*`.
+- Rule inputs: `fixtures/semantic/telemetry-event-*`, `activity-*` and `access-log-*`.
 - Tests: `test/activity-rules.test.ts`.
 
 ## Decided after the first draft

@@ -132,8 +132,9 @@ attribute events to another person.
 
 Schema: [`device-policy.schema.json`](../../schemas/device-policy.schema.json).
 
-A policy document is one **layer**, with a `revision`, `issuedAt` and `keys`. Each key is
-`{value, locked?}`. The layer's `source` is one of:
+A policy document is one **layer**, with a `revision`, `issuedAt`, `keys` and optionally the
+`noticeVersion` of the organization's notice it is issued under ([notice](activity.md#notice),
+DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 
 - `mdm`: delivered by device management;
 - `server`: delivered by the organization server;
@@ -267,7 +268,10 @@ an open vocabulary; known states:
 | `outdated` | The collector's version or build channel is not allowed by policy. |
 
 `reasons[]` names what the judgement rests on (`code`, bounded `detail`). A reader shows an unknown
-state as it is. Reads of a device's health are logged in its person's
+state as it is. **`re_enrolled`** is posture, not tamper evidence (DEC-0052): it carries `gapSeconds`,
+the time between the last check-in under the earlier epoch and the re-enrollment, and `count`, the
+re-enrollments in the server's window. A re-enrollment resets the baseline and so hides nothing from
+the rules above, but a device that re-enrolls often, or after long gaps, is visible. Reads of a device's health are logged in its person's
 [access log](activity.md#access-log).
 
 <a id="tamper-evidence"></a>

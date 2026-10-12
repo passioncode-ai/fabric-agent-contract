@@ -1,0 +1,10 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "kind": "consent",
+  "purposeId": "work.memory",
+  "state": "given",
+  "at": "2026-10-12T08:16:00Z",
+  "user": {
+    "id": "m-4821"
+  }
+}

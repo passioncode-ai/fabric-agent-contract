@@ -95,6 +95,7 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | a device policy's Ed25519 signature, over the policy without `signature` — DEC-0031's "its canonical JSON" | settings form | `policySigningInput` | [devices](devices.md#policy), DEC-0031 |
 | a policy key set's signature under the root key | settings form | `policySigningInput`, as a policy | [devices](devices.md#key-sets), DEC-0031 |
 | an activity event's derived `eventId`, over `{key, source}` | settings form | `activityEventId` | [activity](activity.md#event-id), DEC-0030 |
+| an organization tenant's `tenantRef`, over `{provider, tenant}` | RFC 8785 | `tenantRef` | [activity](activity.md#envelope), DEC-0052 |
 | a path-derived `sourceKey`, the HMAC over `{offset, path}` | settings form | `pathSourceKey` | [activity](activity.md#event-id), DEC-0030 |
 | an approval's `actionDigest`, over the action | RFC 8785 | `actionDigest` | [delegation](delegation.md#approval-approval1), DEC-0039 |
 | the board's idempotency digest, over the operation's arguments after `fabric-project-comms/0.1` NUL `<operation>` NUL | RFC 8785, the arguments holding integers within ±(2^53 − 1) only | `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) | [project comms](project-comms.md#idempotency), DEC-0022 |
@@ -128,7 +129,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-061`
+**Next free rule code:** `FAC-SEM-070`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -193,6 +194,7 @@ register and carry no receipt.
 | `FAC-SEM-058` | `model-catalogue`, `model-profiles` | [runners](runners.md#semantic-rules) | SEM-0058 |
 | `FAC-SEM-059` | `runner-profile` | [runners](runners.md#semantic-rules) | SEM-0059 |
 | `FAC-SEM-060` | `profile-resolution` | [runners](runners.md#semantic-rules) | SEM-0060 |
+| `FAC-SEM-067` | `access-log-disclosure` | [activity](activity.md#semantic-rules) | SEM-0067 |
 
 ## Compatibility policy
 

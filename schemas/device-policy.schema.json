@@ -34,6 +34,10 @@
     "issuedAt": {
       "$ref": "common.schema.json#/$defs/timestamp"
     },
+    "noticeVersion": {
+      "$ref": "activity-common.schema.json#/$defs/noticeVersion",
+      "description": "The version of the organization's notice this policy is issued under (DEC-0052). A device shows that notice; collection waits for its acknowledgement (collectionStart, DEC-0053)."
+    },
     "keys": {
       "type": "object",
       "maxProperties": 128,

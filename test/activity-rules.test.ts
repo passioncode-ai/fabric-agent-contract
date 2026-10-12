@@ -2,7 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, mergeStreams, pathSourceKey } from "../src/activity-rules.js";
+import { createHash } from "node:crypto";
+import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, mergeStreams, pathSourceKey, tenantRef } from "../src/activity-rules.js";
 import { contiguousFrom, mergeRanges, uncovered } from "../src/seq-ranges.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -337,5 +338,57 @@ describe("CT-25: an event whose sourceKey has no canonical form is refused, not 
     event.sourceKey = "req\ud800";
     expect(() => evaluateSemanticRules("telemetry-event", event)).not.toThrow();
     expect(paths("telemetry-event", event)).toContain("FAC-SEM-039 /sourceKey");
+  });
+});
+
+// DEC-0052 (CON-OE-01): account class, policy violations by UTC day, neutral notice and consent messages, and OD-1 in
+// neutral form over the access log (FAC-SEM-067).
+describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
+  const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("access-log-"));
+
+  it("has a passing and a failing input", () => {
+    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))]).toEqual(["FAC-SEM-067"]);
+    expect(files.some((name) => (load(`semantic/${name}`).expect as string[]).length === 0)).toBe(true);
+  });
+
+  it.each(files)("%s yields exactly its expected codes, and its log is schema-valid", (name) => {
+    const fixture = load(`semantic/${name}`);
+    expect([...new Set(codes(fixture.kind, fixture.input))]).toEqual(fixture.expect);
+    const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/access-log.schema.json`, fixture.input.log);
+    expect(result.valid, JSON.stringify(result.errors, null, 2)).toBe(true);
+  });
+
+  it("refuses a person's usage served to another person without a step, and narrows nothing the subject reads", () => {
+    const fixture = load("semantic/access-log-disclosure-ok.json").input;
+    delete fixture.log.entries[0].step;
+    expect(paths("access-log-disclosure", fixture)).toEqual(["FAC-SEM-067 /log/entries/0/step"]);
+    const self = load("semantic/access-log-disclosure-ok.json").input;
+    self.consents = [];
+    self.log.entries = self.log.entries.filter((entry: Json) => entry.reader.user?.id !== "m-0031");
+    self.log.entries.push({ ...self.log.entries[0], reader: { user: { id: "m-4821" }, role: "self" }, step: "event" });
+    expect(paths("access-log-disclosure", self)).toEqual([]);
+  });
+
+  it("reads a consent at the read's time: given after the read does not count, the latest message before it does", () => {
+    const fixture = load("semantic/access-log-disclosure-ok.json").input;
+    fixture.consents[0].at = "2026-10-07T19:00:00Z";
+    expect(paths("access-log-disclosure", fixture)).toEqual(["FAC-SEM-067 /log/entries/2/purposeId"]);
+    const again = load("semantic/access-log-disclosure-withdrawn.json").input;
+    again.consents.push({ ...again.consents[0], state: "given", at: "2026-10-07T18:54:00Z" });
+    expect(paths("access-log-disclosure", again)).toEqual([]);
+  });
+});
+
+describe("CON-OE-01 (DEC-0052): account class and policy violations", () => {
+  it("derives a tenant reference from the RFC 8785 form of {provider, tenant}", () => {
+    expect(tenantRef("anthropic", "org-0b6c1f2e-acme")).toBe(`sha256:${createHash("sha256").update('{"provider":"anthropic","tenant":"org-0b6c1f2e-acme"}', "utf8").digest("hex")}`);
+    expect(load("positive/telemetry-event-organization-account.json").account.tenantRef).toBe(tenantRef("anthropic", "org-0b6c1f2e-acme"));
+  });
+
+  it("passes a violation on its own day and refuses one whose occurred is another day", () => {
+    const violation = load("positive/telemetry-event-policy-violation.json");
+    expect(codes("telemetry-event", violation)).toEqual([]);
+    violation.occurred = "2026-10-06T00:00:00Z";
+    expect(paths("telemetry-event", violation)).toEqual(["FAC-SEM-039 /occurred"]);
   });
 });
