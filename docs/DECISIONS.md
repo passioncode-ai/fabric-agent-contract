@@ -3358,3 +3358,115 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   w4-p4-02-descriptor-20261012 DEC`, `--key w4-p4-02-sem-{peer-endpoint,credential-value,runner-check,peer-request}-20261012
   SEM`); this file, `conformance.md` and `backlog.md` travelled as a patch the owner session applied under its leases
   (the agent-sync guard refuses a commit of a guarded file by a run that holds no lease); the record plane is `fs`.
+
+### DEC-0062 — The window lease, `window-lease/1`: one hub-signed share of one window instance per machine, spent offline within the smaller remainder, fail closed at expiry
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's hub issues leases (backlog
+  CT-19); Project Observatory's meter verifies, holds and spends them and reports `spent` (CT-20); an organization server
+  hands leases of organization windows once `org-authority/1` exists. Agreed with Project Observatory's session as the
+  meter's owner on 2026-10-12 (its `METER.md` M3/M4).
+- **Amends:** nothing; it gives DEC-0053 item 9's check-in `records.leases` its document and adds an optional `spent`.
+  Implements the first organization server's target architecture v4 (commit `9c6a780`) §6 Path 5 and §12's row
+  "window lease". Closes V4-WINDOW-LEASE (board run N18, packet P4-05).
+- **Decision:** in [window lease](specification/window-lease.md) unless named otherwise —
+  1. **The document** ([`window-lease.schema.json`](../schemas/window-lease.schema.json)): `{type, leaseId, sequence,
+     estate, estateRevision, machine, scope, window, period, amount, unit, issuedAt, expiresAt, alg, kid, sig}`. `scope`
+     is `estate`, `project:<id>` or `grant:<id>#<revision>` (v4 uses `estate` only); `window` is the spend policy's
+     calendar window in UTC (`day`, `week` from Monday, `month`, DEC-0038); `amount` a decimal string in USD; the life at
+     most 24 hours and never past the window instance. There is no escalation field: spending above a lease is an
+     approval (DEC-0034 OC-6).
+  2. **The window instance** is one label, `period`: `YYYY-MM-DD`, the ISO week `YYYY-Www`, or `YYYY-MM`. A pair of
+     instants was rejected because it states the instance twice and invites ports that round differently.
+  3. **Who signs:** a hub key the estate record the machine applied certifies, compared exactly, revoked neither by the
+     record nor by the revocation delta's applied entries (DEC-0054; the same reading as DL-14, DEC-0060), Ed25519 of
+     full order, `alg` `EdDSA` until Fabric's D2, over RFC 8785 without `sig`.
+  4. **One lease per slot** (estate, machine, scope, window, period): a higher `sequence` supersedes; the same sequence
+     with other bytes is refused.
+  5. **The meter** reserves only as `mayReserve` answers: the smaller of its own remainder and the lease's, nothing after
+     `expiresAt`. At expiry it fails closed in that window until a new lease arrives; whatever it has not reported counts
+     as spent.
+  6. **Reporting** is the check-in's `records.leases[{leaseId, expiresAt, spent}]`; `spent` is an upper bound (settled
+     receipts plus open reservations). The hub credits a late report as a refund at its next division.
+  7. **The verifier** `verifyWindowLease` answers WL-1…WL-12 in order, the clock and the context first; `windowRemainder`
+     and the division rule keep a hub's leases of one instance within its limit.
+  8. **Rules:** `FAC-SEM-089` (`window-lease`), `FAC-SEM-090` (`window-lease-division`), `FAC-SEM-091`
+     (`lease-reservation`).
+- **Why:** v4 makes an estate window spendable on several machines without a hub online for every call; the meter's
+  owner asked for a concrete instance, a scope, a replacement rule and a fail-closed expiry, and a lease is the first
+  multi-machine remainder the meter has. J10: a lease names an estate, a device id, a window and an amount; no person,
+  no caller, and `spent` is a sum over one instance on one machine.
+- **Compatibility:** Additive: a new schema, specification, rules and an optional check-in member. `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/window-lease.md` (new), `docs/specification/conformance.md` (register, canonical forms,
+    readers), `docs/specification/estate-record.md` (*Not decided here*);
+  - schemas: `schemas/window-lease.schema.json` (new), `schemas/device-check-in.schema.json` (`records.leases[].spent`);
+  - code: `src/window-lease.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/window-lease*.json`, `fixtures/negative/window-lease-*`,
+    `fixtures/semantic/window-lease-*`, `fixtures/semantic/lease-reservation-*`, `fixtures/vectors/window-lease.json`;
+  - tests: `test/window-lease.test.ts` (new), `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`,
+    `test/schema-compilation.test.ts`; floors in `vitest.config.ts`;
+  - docs: `docs/evidence/sources.md` (RFC 3339's week form), `docs/backlog.md`, `docs/handoffs/2026-10-12-w4-p4-05-leases-challenges.md`.
+- **Not decided here:** v4's static per-machine split in the estate record (the hub's leases are the split); how a lease
+  reaches a machine and a report reaches the hub beyond the check-in and the relay; where an estate's window limits are
+  signed (`limits/1`, DEC-0063); organization windows and member allowances (`org-authority/1`); `ES256` hub keys (D2).
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§6 Path 5, §12); Project
+  Observatory's agreement of 2026-10-12 (the meter's owner); DEC-0037, DEC-0038, DEC-0053, DEC-0054, DEC-0055, DEC-0060;
+  RFC 3339 and RFC 8785 in the [source ledger](evidence/sources.md); the board-waves inventory V4-WINDOW-LEASE, packet
+  P4-05. DEC-0062 and `FAC-SEM-089`…`FAC-SEM-091` were reserved by git CAS (`agent_sync.py reserve --key
+  w4-p4-05-window-lease-20261012 DEC`, `--key w4-p4-05-sem-{lease,lease-division,lease-reservation}-20261012 SEM`); the
+  agent stopped at its limit before the registers, and the owner session wrote this entry under its leases; the record
+  plane is `fs`.
+
+### DEC-0063 — Signing challenges and the signing RP: one register of passkey-signed statements over RFC 8785, a dedicated `sign.<domain>` credential
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric registers each person's
+  signing credential apart from the sign-in one, runs ceremonies in the person's Fabric or a pinned static page, and
+  computes challenges from the register (CT-19); Project Observatory's node verifies estate revisions under signing
+  credentials only (CT-20); the first organization server pins administrators' signing credentials in `org-authority/1`
+  and never serves a signing page (CT-04).
+- **Amends:** DEC-0055 (tightening): an estate record's authority must be a signing credential, `rpId` `sign.<domain>`,
+  origins on that RP ID (schema and `FAC-SEM-092`). Implements v4 §7 *Signing surface* and §12's row "signing challenge
+  types … over JCS, and the dedicated signing RP". Closes V4-SIGNING-CHALLENGE (board run N18, packet P4-05).
+- **Decision:** in [signing](specification/signing.md) and [conformance](specification/conformance.md#signing-challenges) —
+  1. **The register.** A passkey signs a challenge, SHA-256 of the RFC 8785 form of `{type, ...fields}`, from one
+     register (`SIGNING_STATEMENTS`, `signingChallenge`): `estate-revision/1` `{digest}` (DEC-0055, unchanged),
+     `org-countersign/1` `{organization, digest, audience, grant, revision}`, `share-grant/1` `{estate, grant, jkt,
+     expiresAt}` (`jkt` the RFC 7638 thumbprint RFC 9449 binds DPoP to) and `limits/1` `{scope, digest}`. `organization`
+     and `estate` are added to v4's fields because hosted organizations and personal estates share PassionCode's signing
+     RP. Each field is checked where the register defines it.
+  2. **The signing RP** is `sign.<domain>`; the signing credential is registered under it and used for nothing else;
+     its origins are `https://` on the RP ID; related origins are never used for signing.
+  3. **The ceremony** runs top-level in the signer's own Fabric or a static, integrity-pinned page on the signing RP ID,
+     which computes the challenge from the statement it fetched by digest and shows it; UV is required; an organization
+     server or a relay never serves a signing page.
+  4. **The verifier** `verifySigningAssertion(assertion, credential, type, fields)` rebuilds the challenge, refuses a
+     non-signing RP (`wrong-rp`) before reading the assertion and an origin outside the RP ID (`wrong-origin`), then runs
+     WebAuthn Level 3 §7.2 as the estate record does.
+  5. **Rule:** `FAC-SEM-092` (`estate-record`, `signing-credential`).
+- **Why:** v4 puts money and placement under passkey signatures; a challenge from bytes a signer was handed signs what
+  the hander chose, and a sign-in credential that can also sign lets a sign-in page sign. One register makes every
+  statement's bytes a port's data.
+- **Compatibility:** Additive for new statements. Tightening for DEC-0055: an estate record whose authority `rpId` is not
+  `sign.<domain>` is refused; no estate record is deployed yet (CT-19, CT-20), and the vectors already use
+  `sign.example.org`. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/signing.md` (new), `docs/specification/conformance.md` (the register, canonical forms,
+    readers), `docs/specification/estate-record.md`;
+  - schemas: `schemas/estate-record.schema.json` (the authority's `rpId` and origins);
+  - code: `src/signing-challenges.ts` (new), `src/rfc3339.ts`, `src/estate-record-rules.ts`, `src/semantic-rules.ts`;
+  - fixtures: `fixtures/semantic/signing-credential-*`, `fixtures/negative/estate-record-authority-sign-in-rp.json`,
+    `fixtures/vectors/signing-challenges.json`, `fixtures/vectors/estate-record.json`;
+  - tests: `test/signing-challenges.test.ts` (new); floors in `vitest.config.ts`;
+  - docs: `docs/evidence/sources.md` (RFC 7638, RFC 9449, WebAuthn §4 and §5.11), `docs/backlog.md`.
+- **Not decided here:** where administrators' and finance approvers' signing credentials are pinned, their quorum,
+  delay and device binding (`org-authority/1`; until then `org-countersign/1` is registered but unread, and the package's
+  organization countersignature stays DEC-0051's); the shape of a limits document; how an outside person's key is first
+  registered and shown to the owner; recovery by a printed code.
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§3, §6 Paths 4, 5 and 7, §7, §12);
+  W3C Web Authentication Level 3, RFC 8785, RFC 7638 and RFC 9449 in the [source ledger](evidence/sources.md); DEC-0050,
+  DEC-0051, DEC-0055; packet P4-05. DEC-0063 and `FAC-SEM-092` were reserved by git CAS (`--key
+  w4-p4-05-signing-challenges-20261012 DEC`, `--key w4-p4-05-sem-signing-credential-20261012 SEM`); the owner session
+  wrote this entry under its leases after the agent stopped at its limit; the record plane is `fs`.

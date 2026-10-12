@@ -23,8 +23,9 @@ vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts
 `src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/relay.ts` (relay
 admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope) and
 `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
-estate record certifies a delegation key, DEC-0060) and `src/revocation-delta.ts` (the revocation delta, the heartbeat
-and the 72-hour rule, DEC-0054). What does not ship: a runtime, a provider implementation, a model router,
+estate record certifies a delegation key, DEC-0060) `src/revocation-delta.ts` (the revocation delta, the heartbeat
+and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062) and `src/signing-challenges.ts` (the
+signing register and its verifier, DEC-0063). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
@@ -54,6 +55,8 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Devices — enrollment, signed policy, check-in, health and the request signature beside mutual TLS (`fabric-device/0.1`)](docs/specification/devices.md)
 - [Relay — admission by device key, store-and-forward messages, trust tiers from the signed sender and the HPKE secret envelope (`fabric-relay/0.1`, `fabric-secret-envelope/1`, DEC-0047)](docs/specification/relay.md)
 - [The revocation delta and the heartbeat — revocations within seconds, a signed commitment to them, and the 72-hour rule (`revocation-delta/1`, `heartbeat/1`, DEC-0054)](docs/specification/revocation-delta.md)
+- [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
+- [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
