@@ -3885,10 +3885,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `requires.mcp[]`). Packet P6-09.
 - **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
   1. **A consumer agent** is `kind: agent` without `provider`: it keeps `agentRef`, `resultSignal` and `evals`, may carry
-     `secrets[]`, lists its `skills`, and has no `service` (schema).
+     `secrets[]`, lists its `skills` and its plugin manifest (`FAC-SEM-064`), and has no `service`, `state` or `layer`
+     (schema).
   2. **`requires.mcp[]`**: each server it calls by `role` — the server registered under that name in the placement's
      configuration — with the `tools` it must expose and an optional `contract` name. Never an address or a token; those
-     come with the placement through the secret slots. Each role once (`FAC-SEM-102`, kind `package`).
+     come with the placement through the secret slots. Each role once (`FAC-SEM-102`, kind `package`); no role,
+     contract or tool shaped like a credential (`FAC-SEM-065`). Any package may declare it.
   3. **The placement's check.** `consumerPlacement(package, configured)` answers each required role the configuration
      does not register (`missing-role`) and each tool a registered server lacks (`missing-tool`); role names compare
      exactly.
@@ -3900,13 +3902,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:**
   - spec: `docs/specification/package.md`, `docs/specification/conformance.md`;
   - schemas: `schemas/fabric-package.schema.json`;
-  - code: `src/package-rules.ts` (`consumerPlacement`, `FAC-SEM-102`);
+  - code: `src/package-rules.ts` (`consumerPlacement`, `FAC-SEM-102`, the plugin manifest and credential checks);
   - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`, `fixtures/negative/fabric-package-consumer-*`,
     `fixtures/catalogue.json`;
   - tests: `test/consumer-agent.test.ts` (new);
   - docs: `docs/backlog.md` (CT-04, CT-18, CT-20), `CONTEXT.md`, `docs/DOCMAP.md`.
 - **Not decided here:** how a placement learns the tools a configured server exposes (its MCP `tools/list`, or a
-  pinned list); a consumer agent's evals against a server it does not control.
+  pinned list); which secret slot configures which role's server entry; the usage and spend route of an agent without a
+  service; a consumer agent's evals against a server it does not control.
 - **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
   DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
   w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.

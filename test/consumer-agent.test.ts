@@ -20,6 +20,13 @@ describe("consumerPlacement", () => {
   it("compares role names exactly, so another server's key does not stand in", () => {
     expect(consumerPlacement(pkg, configured([["Org-Server", ["activation_status", "members_list"]]]))).toEqual([{ problem: "missing-role", role: "org-server" }]);
   });
+  it("reads a configuration that is not a map as registering nothing, and a server's tools that are not a list as none", () => {
+    expect(consumerPlacement(pkg, null as unknown as Map<string, string[]>)).toEqual([{ problem: "missing-role", role: "org-server" }]);
+    expect(consumerPlacement(pkg, new Map([["org-server", null as unknown as string[]]]))).toEqual([
+      { problem: "missing-tool", role: "org-server", tool: "activation_status" },
+      { problem: "missing-tool", role: "org-server", tool: "members_list" }
+    ]);
+  });
   it("reads a package without requirements, and malformed ones, as needing nothing, never by throwing", () => {
     expect(consumerPlacement(null, configured([]))).toEqual([]);
     expect(consumerPlacement({ requires: { mcp: "x" } }, configured([]))).toEqual([]);
@@ -34,5 +41,19 @@ describe("FAC-SEM-102: one role, one server", () => {
     const twice = { ...pkg, requires: { ...pkg.requires, mcp: [...pkg.requires.mcp, { role: "org-server", tools: ["other"] }] } };
     expect(codes(twice)).toEqual(["FAC-SEM-102 /requires/mcp/1/role"]);
     expect(codes({ ...pkg, requires: { mcp: [{ role: 7, tools: ["a"] }, { role: 7, tools: ["b"] }] } })).toEqual([]);
+  });
+});
+
+describe("a consumer agent is a plugin, and names servers without credentials", () => {
+  const all = (value: unknown) => evaluateSemanticRules("package", value).map((finding) => `${finding.code} ${finding.instancePath}`);
+  it("lists the plugin manifest", () => {
+    const files = pkg.files.filter((file: { path: string }) => file.path !== ".claude-plugin/plugin.json");
+    expect(all({ ...pkg, files })).toContain("FAC-SEM-064 /files");
+  });
+  it("refuses a credential-shaped role, contract or tool", () => {
+    const token = "ghp_" + "a".repeat(36);
+    const withTool = { ...pkg, requires: { ...pkg.requires, mcp: [{ role: "org-server", contract: token, tools: ["activation_status", token] }] } };
+    expect(all(withTool).filter((f) => f.startsWith("FAC-SEM-065"))).toEqual(["FAC-SEM-065 /requires/mcp/0/contract", "FAC-SEM-065 /requires/mcp/0/tools/1"]);
+    expect(all({ ...pkg, requires: { mcp: [null, { role: token, tools: "x" }] } }).filter((f) => f.startsWith("FAC-SEM-065"))).toEqual(["FAC-SEM-065 /requires/mcp/1/role"]);
   });
 });
