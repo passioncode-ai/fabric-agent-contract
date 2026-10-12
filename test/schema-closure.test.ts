@@ -1,4 +1,5 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
@@ -30,9 +31,10 @@ describe("sourceClosure", () => {
     expect(closure).toContain("findings.ts");
   });
   it("follows re-exports and multi-line imports, not only one-line imports", () => {
-    expect(sourceClosure(src, "relay-vectors.ts")).toContain("relay.ts");
-    const reexporting = sourceClosure(src, "semantic-rules.ts");
-    expect(reexporting.length).toBeGreaterThan(20);
+    const dir = mkdtempSync(path.join(tmpdir(), "closure-"));
+    writeFileSync(path.join(dir, "a.ts"), 'export { x } from "./b.js";\nimport {\n  y,\n} from "./c.js";\nimport type { Z } from "./d.js";\n');
+    for (const name of ["b.ts", "c.ts", "d.ts"]) writeFileSync(path.join(dir, name), "export const x = 1;\n");
+    expect(sourceClosure(dir, "a.ts")).toEqual(["a.ts", "b.ts", "c.ts", "d.ts"]);
   });
   it("resolves for every module to files that exist", () => {
     for (const file of readdirSync(src).filter((name) => name.endsWith(".ts"))) {
