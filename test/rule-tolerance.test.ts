@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device and estate-record rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, one-copy and Windows token-file rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification",
-  "estate-record", "estate-record-revision", "estate-placement"
+  "estate-record", "estate-record-revision", "estate-placement",
+  "service-lock-outcome", "windows-token-file"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -17,7 +18,8 @@ const MEMBERS = [
   "checkIn", "health", "request", "response", "enrolled", "token", "proof", "issuedEpochs", "binding", "epochs", "root",
   "action", "decision", "pinned", "certification", "revocations", "data", "collector", "device", "user", "session", "kind",
   "seq", "record", "machine", "package", "parent", "machines", "authorities", "publisherKeys", "shareGrants",
-  "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation"
+  "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
+  "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {

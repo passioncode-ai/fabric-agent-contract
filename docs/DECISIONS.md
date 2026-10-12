@@ -142,6 +142,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-09-28
 - **Status:** Accepted
 - **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
+- **Annotated (2026-10-12):** one copy amended by DEC-0057 (a copy its supervisor started and marked may wait for the lock, at most 300 s, before exit 75; the node supervises too).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -1016,6 +1017,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change; consumer adoption in progress (Fabric 0.3.4 CO-238, Fabric
   Dashboards FD-37)
 - **Annotated (2026-10-11):** rule 2 of Windows token files amended by DEC-0033 (the owner may be the user, SYSTEM or Administrators).
+- **Annotated (2026-10-12):** amended by DEC-0057 (the supervisor marker, the lifecycle and directories per system, one supervisor per descriptor, a forward-slash share refused, the token reader as a function with vectors).
 - **Amends:** the `fabric-service/0.1` descriptor and service rules of DEC-0015 (launchd as the only
   supervisor), additively under the DEC-0016 extension policy.
 - **Decision:**
@@ -2471,3 +2473,116 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0057 — Services on every system: one copy under any supervisor and its marker (CT-01), the lifecycle per system, the descriptor's hygiene and the Windows token-file reader
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's kits read the
+  marker in both forms and `task_xml`/`taskXml` write the argument (its row FAA-32); Fabric sets the marker when it
+  starts a service as its supervisor; Project Observatory's node sets it and honours the wait; Fabric Dashboards shows a
+  waiting copy as `duplicate` (no change); every Windows token reader runs the new vectors.
+- **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
+  paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
+- **Decision:** in [service](specification/service.md) —
+  1. **One copy (CT-01).** "No side effect without the lock on `service.lock`" and "a copy that does not get it exits
+     75 with one sentence naming the holder's pid" stay. A copy whose start carries the supervisor marker MAY first wait
+     for the lock in-process, at most 300 s, touching nothing (no port, no file written, no job resumed; it may read the
+     lock), and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. A copy started
+     without the marker tries once and exits 75 at once. The holder keeps answering its well-known document for the
+     whole wait, so a host shows the waiting copy as a duplicate, not an outage. How the copy spaces its tries is its
+     own.
+  2. **The supervisor marker** is the environment variable `FABRIC_SERVICE_SUPERVISOR=<manager>` or the argument
+     `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`), after the executable and before any `--`;
+     `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor file writes
+     it: the plist's `EnvironmentVariables`, the unit's `Environment=`, the task's `Arguments` — a task's `Exec` action
+     has no environment. A host or node that starts a service as its supervisor sets it; a start by hand never does;
+     a copy never infers supervision from its parent process. An empty variable is no marker, and a value that names no
+     manager leaves the copy unsupervised. Markers that disagree (both forms with different values, or the argument
+     twice) leave the copy unsupervised: it exits 75 at once, before it takes the lock and whether or not the lock is
+     held, naming the markers. `supervisorMarker` and `lockWaitBudgetMs` (`src/service-supervisor.ts`) are the
+     reference, with vectors; `FAC-SEM-078` checks a kit's record of a start against a held lock.
+  3. **Supervisors per system (CON-OE-11).** DEC-0015's "launchd is the only supervisor", which DEC-0032 already made
+     one per system, now reads: launchd (macOS), `systemd --user` (Linux), the Task Scheduler (Windows, with
+     `MultipleInstancesPolicy` `IgnoreNew` recommended), and Project Observatory's node (`node.lifecycle`), which
+     supervises the services it starts as its children on any system. The Supervisor row lists each one's marker.
+     The descriptor's `lifecycle.manager` admits `node` by a later change (board CT-12, packet P4-02); this decision
+     defines only the marker value.
+  4. **The lifecycle per system (F-B-202, F-A-013).** Install, Code, State and Uninstall have a form for launchd,
+     systemd and the Task Scheduler, and *Directories per system* fixes where data and configuration, logs and cache
+     live: `~/Library/Application Support/<id>/`, `~/Library/Logs/<id>/`, `~/Library/Caches/<id>/` on macOS;
+     `${XDG_DATA_HOME:-~/.local/share}/<id>/`, `${XDG_STATE_HOME:-~/.local/state}/<id>/logs/`,
+     `${XDG_CACHE_HOME:-~/.cache}/<id>/` on Linux; `%LOCALAPPDATA%\<id>\` with `Logs\` and `Cache\` beneath it on Windows
+     — the directories the adapter's `building-fabric-services` lifecycle reference already names (at `a124ecb`).
+  5. **The descriptor names one supervisor (F-B-209):** `label` and `plist` are refused beside `systemd` and
+     `task-scheduler` (beside `none` they stay valid, as DEC-0015 allowed). **A share in either slash is never local
+     (F-B-207):** `localPath`, and so `FAC-SEM-012`'s executable, refuses `//server/…` and `/\server…`, which Windows
+     reads as a share, beside the `\\server\…` it already refused. **Killing fixtures (F-B-206)** for DEC-0032's
+     descriptor rules: a task beside another manager, a unit without `.service`, a task without its leading backslash,
+     an unknown manager; and a test that the Supervisor row names every manager the schema admits.
+  6. **The Windows token-file reader (F-B-210)** is a reference function, `windowsTokenAclProblem`
+     (`src/windows-token.ts`), over what a reader has read — the file's flags, its owner SID, its ACEs — with vectors a
+     port runs (`FAC-SEM-079`) and a row in *Clients and readers*. It makes two readings explicit that the rule left
+     open: an `allow` ACE whose mask is 0 grants nothing, and an ACE of any type but allow and deny, or anything
+     unreadable, is refused.
+  7. **Wording (F-A-013, F-B-208):** service.md is the *Service extension*, local and remote; the diagram's edge goes to
+     a supervisor; `FAC-SEM-024`'s row says "no local supervisor field (`label`, `plist`, `unit`, `task`)"; the
+     placement description names launchd, systemd, the Task Scheduler or nothing; the operator-channel status's
+     `degraded` description adds "or nobody receives (OC-17)", as operator-channel.md has it.
+  8. **Rules:** `FAC-SEM-078` (one copy: what a copy does when the lock is held), `FAC-SEM-079` (a Windows token file
+     the reader may read).
+- **Why:** CT-01 waited on a decision since 2026-10-04: under launchd's `KeepAlive` or systemd's `Restart=always` an
+  immediate exit 75 restarts every 10 s forever, and under the Task Scheduler each failure spends one of a finite
+  number of restarts, while the adapter's kits already waited up to 300 s under launchd and systemd. The marker could
+  not stay an environment variable alone, because a Scheduled Task's action carries no environment (the `Exec`
+  element, pinned in the [source ledger](evidence/sources.md)), so a Task Scheduler copy would never be marked. The
+  lifecycle rows were macOS-only after DEC-0032, so a Linux or Windows writer had no install, upgrade or uninstall and
+  no directories. The descriptor rules DEC-0032 added survived mutation, a descriptor could name two supervisors, and
+  a forward-slash share passed `localPath`. DEC-0033 exists because a consumer's token reader got the rule wrong; a
+  function and vectors let every port test against the same cases.
+- **Compatibility:** The wait is a MAY: a copy that exits 75 at once still conforms, so the adapter's current pin
+  conforms. Kits at 0.18.0 read only the variable and only `launchd`, `systemd` and `task-scheduler`: a copy the node
+  starts, or a Task Scheduler copy, exits at once until the kit reads the argument and `node` (FAA-32), which is the
+  stricter behaviour. Two refusals narrow the schema: a descriptor naming launchd's `label` or `plist` beside `systemd`
+  or `task-scheduler`, and a `localPath` starting `//` or `/\`. DEC-0032 already said a descriptor names one supervisor
+  per system and that a share is never a local path, so a descriptor refused now broke DEC-0032's text already; the
+  adapter at `a124ecb` writes `label` and `plist` only beside `launchd` (its sample service). The token reader's two explicit readings narrow
+  nothing a writer produces: the writer's protected ACL has three allow ACEs with full control. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md` (title, diagram, Lifecycle, *Directories per system*, *One copy*, *Windows
+    token files*, the semantic-rules table), `docs/specification/conformance.md` (two reader rows, `FAC-SEM-078`,
+    `FAC-SEM-079`);
+  - schemas: `schemas/service-descriptor.schema.json` (one supervisor, the placement description),
+    `schemas/service-common.schema.json` (`localPath`), `schemas/operator-channel-status.schema.json` (the `degraded`
+    description);
+  - code: `src/service-supervisor.ts` (new), `src/windows-token.ts` (new), `src/semantic-rules.ts` (the two kinds,
+    `FAC-SEM-012`'s path);
+  - fixtures: seven negatives `fixtures/negative/service-descriptor-*` (`fixtures/catalogue.json`), ten
+    `fixtures/semantic/service-lock-*.json`, vectors `fixtures/vectors/service-supervisor.json` and
+    `fixtures/vectors/windows-token.json`;
+  - tests: `test/service-supervisor.test.ts` (new), `test/windows-token.test.ts` (new), `test/service-rules.test.ts`,
+    `test/rule-tolerance.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Supervisor, Supervisor marker), `docs/DOCMAP.md`, `docs/evidence/sources.md` (the `Exec`
+    element, `MultipleInstancesPolicy`, systemd's `Environment=`, `launchd.plist(5)`, the XDG row), `docs/backlog.md`
+    (CT-01 closed, CT-12, CT-18…CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
+    `docs/handoffs/README.md`.
+- **Not decided here:** `lifecycle.manager: node` in the descriptor and whether `label`/`plist` are refused beside it
+  (P4-02); a Windows service (administrator rights) as a supervisor, and a Task Scheduler task that runs whether or not
+  the user is logged on (a host's S4U or SYSTEM principal in v4 §5), which the node's host units need; supervision of a
+  remote placement (its platform's); the restart count a Task Scheduler writer sets.
+- **Source:** agreed with Fabric's session (CO-238: points 1–5 as written, 300 s is enough; Fabric is not a supervisor
+  today, its one background job runs under launchd; when it starts services it sets the marker for a supervised start
+  and not for a manual one), with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`: an outage is only `down`, no
+  health answer for 15 s local or 60 s remote; a copy waiting for the lock shows `duplicate` provided the holder keeps
+  answering for the whole wait; off macOS, supervision goes through Project Observatory's node) and with the adapter's
+  session (its kits 0.18.0+: back-off from 0.5 s doubling to 30 s, at most 300 s, touching nothing, then exit 75 naming
+  the holder's pid); the owner session ruled the argument form and the conflict, 2026-10-12. The first organization
+  server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md` at `9c6a780`), §2 rule 3 and §5
+  ("`lifecycle.manager: node` covers supervised children"). The `Exec` element, `MultipleInstancesPolicy`, systemd's
+  `Environment=`, `launchd.plist(5)` and XDG 0.8 in the [source ledger](evidence/sources.md). Board-waves inventory CT-01,
+  F-A-027, F-B-211, F-D-008, F-B-202, F-A-013, F-B-206…F-B-210, CON-OE-11; packet P4-01. DEC-0057 and `FAC-SEM-078`,
+  `FAC-SEM-079` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-01-services-20261012 DEC`,
+  `--key w4-p4-01-sem-{one-copy,windows-token}-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited
+  without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the record plane is
+  `fs`.

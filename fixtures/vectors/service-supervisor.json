@@ -1,0 +1,273 @@
+{
+  "about": "The supervisor marker of service.md One copy (DEC-0057, CT-01), for the kits' ports: how a copy reads FABRIC_SERVICE_SUPERVISOR=<manager> from its environment or --fabric-supervisor <manager> from its argument vector, and how long it may wait for a held lock. supervisorMarker and lockWaitBudgetMs in src/service-supervisor.ts run these; argv[0] is the executable.",
+  "managers": [
+    "launchd",
+    "systemd",
+    "task-scheduler",
+    "node"
+  ],
+  "lockWaitMaxMs": 300000,
+  "exitStatus": 75,
+  "cases": [
+    {
+      "name": "no marker: started by hand",
+      "env": {},
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "environment, launchd (the plist's EnvironmentVariables)",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "launchd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "launchd"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "environment, systemd (the unit's Environment=)",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "systemd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "systemd"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "environment, node (Project Observatory's node.lifecycle)",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "node"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "node"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "argument, task-scheduler (the task's Arguments)",
+      "env": {},
+      "argv": [
+        "C:\\Users\\example\\AppData\\Local\\Programs\\example-agent\\example-agent.exe",
+        "serve",
+        "--fabric-supervisor",
+        "task-scheduler"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "task-scheduler"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "argument with =, task-scheduler",
+      "env": {},
+      "argv": [
+        "C:\\Users\\example\\AppData\\Local\\Programs\\example-agent\\example-agent.exe",
+        "--fabric-supervisor=task-scheduler",
+        "serve"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "task-scheduler"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "both forms, the same manager",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "systemd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "--fabric-supervisor",
+        "systemd",
+        "serve"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "systemd"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "both forms, different managers: a conflict, exit 75 at once",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "launchd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "--fabric-supervisor",
+        "task-scheduler"
+      ],
+      "marker": {
+        "kind": "conflict"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "two arguments, different managers: a conflict",
+      "env": {},
+      "argv": [
+        "C:\\Users\\example\\AppData\\Local\\Programs\\example-agent\\example-agent.exe",
+        "--fabric-supervisor",
+        "task-scheduler",
+        "--fabric-supervisor=node"
+      ],
+      "marker": {
+        "kind": "conflict"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "environment set, argument without a value: a conflict",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "systemd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve",
+        "--fabric-supervisor"
+      ],
+      "marker": {
+        "kind": "conflict"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "an unknown manager: unsupervised",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "cron"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "none is not a supervisor",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "none"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "the manager is case-sensitive",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "Launchd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "an empty environment value is no marker",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": ""
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "an empty variable beside the argument: the argument decides",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": ""
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve",
+        "--fabric-supervisor",
+        "systemd"
+      ],
+      "marker": {
+        "kind": "supervised",
+        "manager": "systemd"
+      },
+      "waitBudgetMs": 300000
+    },
+    {
+      "name": "an argument without a value names no manager",
+      "env": {},
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve",
+        "--fabric-supervisor"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "after -- the argument belongs to the program, not the marker",
+      "env": {},
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve",
+        "--",
+        "--fabric-supervisor",
+        "systemd"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "the executable itself is not read",
+      "env": {},
+      "argv": [
+        "--fabric-supervisor",
+        "systemd"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    }
+  ]
+}

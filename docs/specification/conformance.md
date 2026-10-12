@@ -57,6 +57,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 |---|---|---|---|
 | a client of a service's token-protected routes, the events feed first | sends the token only in the header the descriptor's `auth.header` names, in the form `auth.scheme` names (`none`: the raw token; `Bearer`: `Bearer <token>`), and never assumes `Authorization: Bearer` | `FAC-SEM-036` | `test/service-feed.test.ts`, fixtures `fixtures/semantic/service-feed-request-*.json` ([service](service.md#feed-client), DEC-0025) |
 | a reader of a settings backup | refuses a file whose checksum, counts or row widths do not match its tables | `FAC-SEM-035` | `test/settings-backup.test.ts`, fixtures `settings-backup*` ([service](service.md#settings-backup), DEC-0025) |
+| a copy of a service, reading how it was started (the kits' `supervised()`) | reads the supervisor marker from `FABRIC_SERVICE_SUPERVISOR` or `--fabric-supervisor`; while another copy holds `service.lock` it touches nothing, waits only when marked, at most 300 s, and exits 75 naming the holder's pid; on markers that disagree it exits 75 at once, naming them | `FAC-SEM-078` | `test/service-supervisor.test.ts`, `src/service-supervisor.ts` `supervisorMarker`, vectors `fixtures/vectors/service-supervisor.json`, fixtures `fixtures/semantic/service-lock-*` ([service](service.md#one-copy), DEC-0057) |
+| a Windows reader of a service's token file (a host, Fabric, Fabric Dashboards) | refuses a reparse point, a file that is not regular or lies outside the profile, an owner other than the user, SYSTEM or Administrators, and an allow ACE granting any right to another SID; ignores deny ACEs; refuses what it cannot read; names the SID, never the contents | `FAC-SEM-079` | `test/windows-token.test.ts`, `src/windows-token.ts` `windowsTokenAclProblem`, vectors `fixtures/vectors/windows-token.json` ([service](service.md#windows-token-files), DEC-0032, DEC-0033, DEC-0057) |
 | a receiver of activity batches | attributes a batch to its client certificate's device and user, refuses an event that carries a content or person key instead of stripping it, and acknowledges the highest consumed seq of each stream | `FAC-SEM-037`, `FAC-SEM-039`, `FAC-SEM-045` | `test/activity-rules.test.ts`, fixtures `fixtures/semantic/activity-*`, `device-attribution-*` ([activity](activity.md#batch-and-acknowledgement), DEC-0030) |
 | a callee of a delegation token or an approval | names the issuer it trusts and refuses `iss` from any other; checks the signature against the estate's published keys, the claims' DL-2 types, the times with a 60 s leeway, its own agent id in `aud`, the chain's depth, the called capability and its effect, and an approval's action digest and single use, in DL-13's order, answering one of the contract's refusal codes; requires no token, approval or grant record of a T0 or T1 caller | DL-13, DL-18, DL-26 | `test/delegation.test.ts`, `test/delegation-sealed.test.ts`, `src/delegation.ts` `verifyDelegation`, `verifyApproval` ([delegation](delegation.md#the-verifier), DEC-0039, DEC-0045) |
 | the meter, answering a grant check | verifies the callee's onward token (the issuer it trusts, audience itself, at most five actors, scope exactly its grant-check capability, effect exactly `none`) and answers any refusal of it as `principal-unproven`; reads the amount and the callee's `jti` from the request, never a token from it; answers a `denied` as a normal result, not `isError` | DL-6, DL-19, DL-21 | `test/delegation-seams.test.ts`, `test/delegation-sealed.test.ts`, `src/delegation.ts` `verifyMeterToken`, `schemas/grant-check-request.schema.json` ([delegation](delegation.md#spend-and-usage), DEC-0039, DEC-0045) |
@@ -137,7 +139,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-077`
+**Next free rule code:** `FAC-SEM-080`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -213,6 +215,8 @@ register and carry no receipt.
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0074 |
 | `FAC-SEM-075` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0075 |
 | `FAC-SEM-076` | `estate-record` | [estate record](estate-record.md#semantic-rules) | SEM-0076 |
+| `FAC-SEM-078` | `service-lock-outcome` | [service](service.md#semantic-rules) | SEM-0078 |
+| `FAC-SEM-079` | `windows-token-file` | [service](service.md#semantic-rules) | SEM-0079 |
 
 ## Compatibility policy
 

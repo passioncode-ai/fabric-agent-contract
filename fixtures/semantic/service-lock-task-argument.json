@@ -1,0 +1,20 @@
+{
+  "description": "A copy the Task Scheduler started carries the marker as an argument, because a task's action has no environment; it waits and exits 75: conforming (FAC-SEM-078).",
+  "start": {
+    "env": {},
+    "argv": [
+      "C:\\Users\\example\\AppData\\Local\\Programs\\example-agent\\example-agent.exe",
+      "serve",
+      "--fabric-supervisor",
+      "task-scheduler"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 12,
+  "waitedMs": 240000,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "Example Agent is already running (pid 4242)."
+  }
+}

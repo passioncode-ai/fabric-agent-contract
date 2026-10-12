@@ -1,0 +1,20 @@
+{
+  "description": "Markers that disagree, yet the copy waited and took the lock: a conflict exits 75 at once (FAC-SEM-078).",
+  "start": {
+    "env": {
+      "FABRIC_SERVICE_SUPERVISOR": "systemd"
+    },
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve",
+      "--fabric-supervisor=launchd"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 3,
+  "waitedMs": 4000,
+  "sideEffects": [],
+  "outcome": {
+    "acquired": true
+  }
+}

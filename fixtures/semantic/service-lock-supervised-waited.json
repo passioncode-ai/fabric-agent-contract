@@ -1,0 +1,20 @@
+{
+  "description": "A copy launchd started (the plist sets the marker) finds the lock held, waits the full 300 s touching nothing, and exits 75 naming the holder: conforming (FAC-SEM-078, DEC-0057).",
+  "start": {
+    "env": {
+      "FABRIC_SERVICE_SUPERVISOR": "launchd"
+    },
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 14,
+  "waitedMs": 300000,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "Example Agent is already running (pid 4242). Waited 300 s for it to exit."
+  }
+}
