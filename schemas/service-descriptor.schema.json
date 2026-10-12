@@ -165,9 +165,9 @@
             },
             "path": {
               "type": "string",
-              "pattern": "^/[^\\u0000]{1,98}$",
+              "pattern": "^/[\\x21-\\x7e]{1,98}$",
               "maxLength": 99,
-              "description": "POSIX: the absolute socket path, at most 99 bytes as published (sun_path), in a directory of mode 0700 the node owns; never under ~."
+              "description": "POSIX: the absolute socket path, printable ASCII and so at most 99 bytes as published (sun_path), in a directory of mode 0700 the node owns; never under ~."
             },
             "pipe": {
               "type": "string",

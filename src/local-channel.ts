@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { negotiateRevision } from "./protocol-revisions.js";
+import { negotiateRevision, parseRevision } from "./protocol-revisions.js";
 
 // #region local-channel — docs: docs/specification/local-channel.md
 /**
@@ -47,14 +47,15 @@ export type ChannelAnswer =
   | { ok: false; code: null; state: ChannelState };
 
 const CLIENT_NAME = /^[a-z][a-z0-9-]{0,63}$/;
-const isText = (value: unknown, max: number, min = 1) => typeof value === "string" && value.length >= min && value.length <= max;
+/** Length as JSON Schema counts it: code points, not UTF-16 units. */
+const isText = (value: unknown, max: number, min = 1) => typeof value === "string" && [...value].length >= min && [...value].length <= max;
 
 /** Whether `channel.hello` params are what `local-channel.schema.json#/$defs/hello` accepts. */
 function helloParamsValid(params: Record<string, unknown>): boolean {
   const allowed = new Set(["protocols", "client", "capabilities", "token"]);
   if (Object.keys(params).some((key) => !allowed.has(key))) return false;
   const { protocols, client, capabilities, token } = params;
-  if (!Array.isArray(protocols) || protocols.length === 0 || protocols.length > 64 || !protocols.every((entry) => typeof entry === "string") || new Set(protocols).size !== protocols.length) return false;
+  if (!Array.isArray(protocols) || protocols.length === 0 || protocols.length > 64 || !protocols.every((entry) => parseRevision(entry) !== undefined) || new Set(protocols).size !== protocols.length) return false;
   if (!isObject(client) || Object.keys(client).some((key) => key !== "name" && key !== "version") || typeof client.name !== "string" || !CLIENT_NAME.test(client.name) || !isText(client.version, 64)) return false;
   if (capabilities !== undefined && (!Array.isArray(capabilities) || capabilities.length > 16 || !capabilities.every((entry) => entry === "consent.ui") || new Set(capabilities).size !== capabilities.length)) return false;
   if (token !== undefined && !isText(token, 512, 16)) return false;
@@ -74,6 +75,8 @@ export function lineWithinLimit(line: string): boolean {
 export function channelStep(state: ChannelState, request: unknown): ChannelAnswer {
   // A notification (no id) is never answered, whatever it is.
   if (isObject(request) && request.id === undefined) return { ok: false, code: null, state };
+  // A request's id is a string or an integer; null is not one (the schema refuses it).
+  if (isObject(request) && request.id === null) return { ok: false, code: "invalid-request", state };
   const method = isObject(request) ? request.method : undefined;
   if (typeof method === "string" && CLIENT_METHODS.has(method)) return { ok: false, code: state.hello ? "unknown-method" : "hello-first", state };
   if (method !== "channel.hello") return state.hello ? { ok: true, state } : { ok: false, code: "hello-first", state };

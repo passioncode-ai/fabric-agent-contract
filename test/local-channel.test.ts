@@ -102,13 +102,19 @@ describe("hello as the schema reads it, notifications, client methods, limits", 
       { ...ok, protocols: [7, LOCAL_CHANNEL_PROTOCOL] },
       { ...ok, protocols: [] },
       { ...ok, client: { ...client, extra: 1 } },
-      { ...ok, protocols: [LOCAL_CHANNEL_PROTOCOL, LOCAL_CHANNEL_PROTOCOL] }
+      { ...ok, protocols: [LOCAL_CHANNEL_PROTOCOL, LOCAL_CHANNEL_PROTOCOL] },
+      { ...ok, protocols: ["not a protocol!!", LOCAL_CHANNEL_PROTOCOL] },
+      { ...ok, token: "🙂".repeat(10) }
     ];
     for (const params of bad) {
       expect(def("hello", params), JSON.stringify(params)).toBe(false);
       expect(channelStep(fresh, hello(params)), JSON.stringify(params)).toMatchObject({ ok: false, code: "invalid-params" });
     }
     expect(def("hello", { ...ok, token: "t".repeat(16), capabilities: ["consent.ui"] })).toBe(true);
+    const astral = { ...ok, client: { name: "fabric", version: "🙂".repeat(33) } };
+    expect(def("hello", astral)).toBe(true);
+    expect(channelStep(fresh, hello(astral))).toMatchObject({ ok: true });
+    expect(channelStep(fresh, { jsonrpc: "2.0", id: null, method: "health" })).toMatchObject({ ok: false, code: "invalid-request" });
     expect(channelStep(fresh, hello({ ...ok, token: "t".repeat(16), capabilities: ["consent.ui"] }))).toMatchObject({ ok: true });
   });
   it("never answers a notification, and answers a client method sent to the node as unknown", () => {
@@ -144,5 +150,6 @@ describe("the message definitions validate what they name", () => {
       expect(whole({ jsonrpc: "2.0", id: 1, error: { code: integer + 1000, message: "m", data: { code } } }), code).toBe(false);
     }
     expect(whole({ jsonrpc: "2.0", id: 1, error: { code: -32004, message: "m" } })).toBe(false);
+    expect(whole({ jsonrpc: "2.0", id: 1, error: { code: -32004, message: "m", data: { code: "hello-first" } } })).toBe(false);
   });
 });
