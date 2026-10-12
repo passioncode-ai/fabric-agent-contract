@@ -478,5 +478,41 @@
     "closable_in_one_pass": true,
     "needs": "",
     "proposed_fix": "hubKeyCertified with vectors, DL-14's refusal codes and details normative, the highest-applied-revision rule; consumer rows CT-18, CT-19, CT-20"
+  },
+  {
+    "id": "W4-READINGS-OWED",
+    "title": "three-tier readings (unit, seam, product) owed for DEC-0054 (#64), DEC-0062 and DEC-0063 (#65): merged after the owner's own review while subagent readers were at their weekly limit",
+    "source": "wave-4 close, 2026-10-12",
+    "status_measured": "open",
+    "area": "review",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "subagent readers available",
+    "proposed_fix": "run the three readings on main; any finding is a fix PR"
+  },
+  {
+    "id": "RELAY-AUDIT-1",
+    "title": "Project Observatory's release-iteration audit of DEC-0047 (CON-001…023): signature before access and blob state, re-authentication, envelope anti-rollback, strict instant(), schema-first openEnvelope, refusal vectors, presence terminal answer, error references, ECDSA malleability, JWS crit",
+    "source": "project-observatory docs/runs/2026-10-12-release-iteration-1/raw/audit-contract.json; owner positions sent 2026-10-12",
+    "status_measured": "open: one consolidated revision coming from Project Observatory",
+    "area": "schema",
+    "severity": "major",
+    "owner": "contract (drafted by Project Observatory)",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "review and merge the consolidated PR under #53's rules"
+  },
+  {
+    "id": "AGENT-SYNC-IDS",
+    "title": "agent-sync fetches every id register into one shared ref without '+', so CAS receipts are parented on another register's tip and DEC receipts fall off origin's DEC chain (DEC-0060 45a9e64, DEC-0061 2feae46)",
+    "source": "PR #62 seam reading, 2026-10-12",
+    "status_measured": "open: tool defect, reported",
+    "area": "tooling",
+    "severity": "minor",
+    "owner": "agent-sync",
+    "closable_in_one_pass": false,
+    "needs": "the agent-sync owner",
+    "proposed_fix": "one fetched ref per register, fetched with '+'"
   }
 ]

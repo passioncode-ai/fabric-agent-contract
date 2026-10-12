@@ -99,7 +99,7 @@ Packets: [wave-4/](packets/wave-4/README.md) — P4-01 services, P4-02 the descr
 device transport, P4-05 leases and challenges. Agreements recorded 2026-10-12: Fabric (CO-238), Fabric Dashboards
 (FD-37) and the adapter on CT-01; Dashboards on ED-8/ED-9; the first organization server on the device binding.
 
-### Wave 5 — the 0.1.0 core, interop and usage (N10, N11; 17 items)
+### Wave 5 — the 0.1.0 core, interop and usage, wave 4's follow-ups (N10, N11, N19; 20 items)
 
 Exit criteria:
 
@@ -171,6 +171,24 @@ Each has a board row naming what it waits for.
 - **New work:** N18 in wave 4 (the network's transport, split from V4-SECURE-TRANSPORT) with the device
   message-signature binding the first organization server asked for; OQ-0010 and F-D-028 move to N13.
 - **Inventory:** 174 items, 93 closed (`assign.mjs`).
+
+### Wave 4 — close record (2026-10-12)
+
+- **Merged:** #57 `8c6211e` (DEC-0057, services on every system, CT-01), #56 `32c01ea` (DEC-0058/0059, channel status
+  and embedded dashboard), #58 `204f189` (DEC-0056, device transport), #62 `557f30d` (DEC-0060, `hubKeyCertified`),
+  #64 `5967bb1` (DEC-0054, delta and heartbeat), #63 `335e736` (DEC-0061, the descriptor for listings), #65 `7b238c7`
+  (DEC-0062 window leases, DEC-0063 signing challenges); Project Observatory's #53 `8060254` (DEC-0047, the relay), #59,
+  #60, #61.
+- **Readings:** #56, #57, #58 and #62 had three readings, one fix round and a confirming reading (the last two cut short
+  by rate limits and finished by the owner). #63, #64 and #65 were merged on the owner's own review, plants recorded,
+  when subagent readers hit their weekly limit; their readings are owed (N19, W4-READINGS-OWED).
+- **Agreements:** CT-01 with Fabric, Fabric Dashboards and the adapter (the `--fabric-supervisor` argument); ED-8 with
+  Dashboards; the device binding with the first organization server, which adopted DEC-0056 at 54/54 vectors; the window
+  lease with Project Observatory as the meter's owner; `Fabric-Relay-Request` (#60) and its follow-ups (#61).
+- **Found and fixed:** a verifier trusting a revoked passkey (wave 3, carried); a NaN clock accepting expired tokens in
+  the delegation verifiers; a credential echoed in a finding; refusals without fixtures; Workers rejecting KeyObjects.
+- **Gate on `main` `7b238c7`:** 48 test files, 2618 tests, floors met, ux lint, docs-check, markdownlint, privacy 0.
+- **Inventory:** 178 items, 123 closed (`assign.mjs`).
 
 ## Questions for the operator — one batch
 
