@@ -5,7 +5,8 @@
       "name": "none-found",
       "existing": null,
       "tool": "Example App 0.4.0",
-      "expect": "write"
+      "expect": "write",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "same-version",
@@ -14,10 +15,15 @@
           "by": "person",
           "role": "operator",
           "tool": "Example App 0.4.0"
+        },
+        "lifecycle": {
+          "manager": "person",
+          "app": "/Applications/Example App.app"
         }
       },
       "tool": "Example App 0.4.0",
-      "expect": "keep"
+      "expect": "keep",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "updated",
@@ -26,11 +32,16 @@
           "by": "person",
           "role": "operator",
           "tool": "Example App 0.4.0"
+        },
+        "lifecycle": {
+          "manager": "person",
+          "app": "/Applications/Example App.app"
         }
       },
       "tool": "Example App 0.4.1",
       "expect": "write",
-      "note": "an update is a reinstall"
+      "note": "an update is a reinstall",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "downgraded",
@@ -39,10 +50,15 @@
           "by": "person",
           "role": "operator",
           "tool": "Example App 0.4.1"
+        },
+        "lifecycle": {
+          "manager": "person",
+          "app": "/Applications/Example App.app"
         }
       },
       "tool": "Example App 0.4.0",
-      "expect": "write"
+      "expect": "write",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "string-form",
@@ -51,7 +67,8 @@
       },
       "tool": "Example App 0.4.0",
       "expect": "write",
-      "note": "not an app's descriptor yet"
+      "note": "not an app's descriptor yet",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "case-differs",
@@ -60,11 +77,16 @@
           "by": "person",
           "role": "operator",
           "tool": "example app 0.4.0"
+        },
+        "lifecycle": {
+          "manager": "person",
+          "app": "/Applications/Example App.app"
         }
       },
       "tool": "Example App 0.4.0",
       "expect": "write",
-      "note": "tools compare as exact strings"
+      "note": "tools compare as exact strings",
+      "appPath": "/Applications/Example App.app"
     },
     {
       "name": "installed-by-null",
@@ -73,7 +95,48 @@
       },
       "tool": "Example App 0.4.0",
       "expect": "write",
-      "note": "a malformed descriptor is rewritten, never read as kept"
+      "note": "a malformed descriptor is rewritten, never read as kept",
+      "appPath": "/Applications/Example App.app"
+    },
+    {
+      "name": "moved",
+      "existing": {
+        "installedBy": {
+          "by": "person",
+          "role": "operator",
+          "tool": "Example App 0.4.0"
+        },
+        "lifecycle": {
+          "manager": "person",
+          "app": "~/Downloads/Example App.app"
+        }
+      },
+      "tool": "Example App 0.4.0",
+      "appPath": "/Applications/Example App.app",
+      "expect": "write",
+      "note": "the same version from a new path: the app was moved"
+    },
+    {
+      "name": "translocated",
+      "existing": null,
+      "tool": "Example App 0.4.0",
+      "appPath": "/private/var/folders/ab/xyz/T/AppTranslocation/0A1B2C3D/d/Example App.app",
+      "expect": "keep",
+      "note": "macOS App Translocation runs a quarantined app from a randomised read-only copy; that path is never recorded"
+    },
+    {
+      "name": "no-lifecycle",
+      "existing": {
+        "installedBy": {
+          "by": "person",
+          "role": "operator",
+          "tool": "Example App 0.4.0"
+        }
+      },
+      "tool": "Example App 0.4.0",
+      "appPath": "/Applications/Example App.app",
+      "expect": "write",
+      "note": "a descriptor without the installed path is rewritten"
     }
   ],
   "stale": [

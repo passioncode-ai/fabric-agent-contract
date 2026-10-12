@@ -56,9 +56,12 @@ descriptor describes an installation, not a run. The one exception is an app, be
 **An app's descriptor (DEC-0069).** An app a person installs and starts — a desktop app such as Fabric — has no
 supervisor to write its descriptor. It carries `lifecycle.manager: "person"` with `lifecycle.app`, the installed app
 (a bundle or an executable), and no `label`, `plist`, `unit` or `task` (schema). Its installer writes the descriptor;
-when the installer cannot (a macOS app dragged into Applications), the app writes it on a start where none exists or
-where its own version differs from `installedBy.tool`, since an update is a reinstall, and rewrites nothing on any
-other start ([`appDescriptorAction`](../../src/app-descriptor.ts)). `installedBy` is the object form
+when the installer cannot (a macOS app dragged into Applications), the app writes it on a start where none exists,
+where its own version differs from `installedBy.tool` (an update is a reinstall) or where it runs from another path
+than `lifecycle.app` (a moved app), and rewrites nothing on any other start ([`appDescriptorAction`](../../src/app-descriptor.ts)).
+An app running from a translocated copy (macOS App Translocation runs a quarantined app from a randomised read-only
+path) never records that path. Only an app that writes its own descriptor runs this; a descriptor an installer wrote is
+the installer's to update. `installedBy` is the object form
 `{by: "person", role, tool}`, `tool` naming the installer, or the app and its version (schema). It is removed at
 uninstall when it can be; a reader that does not find `lifecycle.app` treats the descriptor as stale
 (`appDescriptorStale`). **The descriptor says the app is installed, never that it runs.** `origin` is optional for an

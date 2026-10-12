@@ -3886,8 +3886,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **`lifecycle.manager: "person"`** with `lifecycle.app`, the installed app (a bundle or an executable); no `label`,
      `plist`, `unit` or `task`; `installedBy` in its object form with `by: "person"` (schema).
   2. **Who writes it.** The installer; when there is none (a macOS app dragged into Applications), the app on a start
-     where no descriptor exists or where its version differs from `installedBy.tool`'s, and on no other start
-     (`appDescriptorAction` in `src/app-descriptor.ts`). Removed at uninstall when it can be; a reader that does not find
+     where no descriptor exists, where its version differs from `installedBy.tool`'s or where it runs from another path
+     than `lifecycle.app`, and on no other start; never from a translocated copy (`appDescriptorAction` in
+     `src/app-descriptor.ts`). Only an app that writes its own descriptor does this. Removed at uninstall when it can be; a reader that does not find
      `lifecycle.app` treats it as stale (`appDescriptorStale`).
   3. **Installed, never running.** `origin` is optional for an app; its live origin and process id are in the app's own
      liveness file, rewritten on every start and removed on quit. A kit's "Open in <app>" button reads the descriptor; a
@@ -3896,9 +3897,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Why:** an app has no supervisor, so the rule that only an installer writes a descriptor left Fabric's desktop app,
   which has no installer on macOS, with no descriptor at all, and a descriptor that claimed a port it changes each start
   would point callers at a dead origin.
-- **Compatibility:** Additive for readers at this pin: a new enum value and an optional member, and `origin` stays
-  required for every other manager. An older pinned reader refuses `manager: "person"`, so an app writes this descriptor
-  for readers pinned at or after this decision. `contractVersion` stays `0.1.0`.
+- **Compatibility:** Additive in the schema: a new enum value and an optional member, and `origin` stays required for
+  every other manager. The descriptor sits in a shared directory, so an app cannot choose its readers: a reader pinned
+  before this decision (Fabric Dashboards and the adapter's kits today) refuses or mislists `manager: "person"` and a
+  missing origin until it adopts this decision (CT-18, CT-21), and must skip such an entry rather than fail the
+  directory. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/service.md`;
   - schemas: `schemas/service-descriptor.schema.json`;

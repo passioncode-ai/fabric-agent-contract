@@ -135,7 +135,7 @@ function serviceIdentity(value: JsonObject): Finding[] {
   const descriptor = isObject(value.descriptor) ? value.descriptor : {};
   const answered = isObject(value.wellKnown) && isObject(value.wellKnown.service) ? value.wellKnown.service : {};
   if (serviceKey(descriptor) === serviceKey(answered)) return [];
-  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${String(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
+  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${descriptor.origin === undefined ? serviceKey(descriptor) : String(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
 }
 
 function serviceClaims(value: JsonObject): Finding[] {
