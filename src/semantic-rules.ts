@@ -1,6 +1,7 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
+import { relayRules } from "./relay-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { settingsBackupRules } from "./settings-backup.js";
 import { grantSpendRules, spendPolicyRules } from "./spend-rules.js";
@@ -31,6 +32,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (device) return device;
   const delegation = delegationRules(kind, value);
   if (delegation) return delegation;
+  const relay = relayRules(kind, value);
+  if (relay) return relay;
   if (kind === "deep-link") return deepLinkRules(value);
   const profiles = profileRules(kind, value);
   if (profiles) return profiles;

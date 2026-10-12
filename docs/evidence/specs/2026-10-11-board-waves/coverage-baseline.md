@@ -43,6 +43,10 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P3-03 | `src/estate-record-rules.ts` (new) | 190 / 190 (100 %) | 100 % | FAC-SEM-072…076, the digest, the challenge, `verifyEstateRecord` and `placementTrust`; one fixture or vector case per rule and problem, the chain checks planted |
 | P3-03 | `src/webauthn.ts` (new) | 78 / 78 (100 %) | 100 % | the offline WebAuthn Level 3 §7.2 assertion checks, ER-4…ER-9 |
 | P3-02 | `src/p256.ts` (new) | 8 / 8 (100 %) | 100 % | SEC 1 §3.2.2 P-256 key validation over `fixtures/vectors/p256.json` (DEC-0053) |
+| DEC-0047 | `src/relay.ts` (new) | 103 / 103 (100 %) | 100 % | admission, relay-auth/1 and relay-blob/1, the message body with its signed `exp`, `relayAdmissionSet`; boundary tests for the review of #53 (its second reading caught 42 of 45 planted mutations) |
+| DEC-0047 | `src/secret-envelope.ts` (new) | 90 / 90 (100 %) | 100 % | HPKE base mode against RFC 9180 §A.3.1 and the envelope's open checks over `fixtures/vectors/secret-envelope.json` |
+| DEC-0047 | `src/relay-rules.ts` (new) | 51 / 51 (100 %) | 100 % | FAC-SEM-070 and FAC-SEM-071; one fixture per sub-check |
+| DEC-0047 | `src/p256.ts` | 46 / 46 (100 %) | 100 % | DEC-0053's copy merged with DEC-0047's; one helper turns SEC 1 octets or a JWK into the key every verifier uses |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -80,3 +84,6 @@ throwing; the verifier's checks added in review (issued before the parent, a dro
 rules, an unreadable clock, the day of the month, one hub key under two kids, a canonical JWK, an unadmitted algorithm,
 a revocation kind read from a `Map`) were each removed and a test failed. `semantic-rules.ts` only dispatches to the new module. The whole-set floor stays at 86.85 %; measured whole set
 3131 / 3290 (95.16 %). Measured with `vitest run --coverage` on the P3-03 branch off main's `92de756`.
+**Wave 3, DEC-0047 (#53).** `src/relay.ts`, `src/secret-envelope.ts` and `src/relay-rules.ts` are new and reach every
+branch, with no `v8 ignore`; `src/p256.ts` keeps every branch after the merge with DEC-0053's copy and the key helper.
+The whole set: 3415 / 3574 (95.55 %). Measured with `vitest run --coverage` on the DEC-0047 branch rebased onto main's `b291bf0`, after the second reading.

@@ -119,8 +119,9 @@ DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 d
 platform keystore, listed by role in the enrollment request's `deviceKeys`:
 
 - **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
-- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol (DEC-0047, reserved) seals
-  secrets to it.
+- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol ([relay](relay.md), DEC-0047) seals
+  secrets to it, and admits a relay participant on an ES256 `#sig` only: an Ed25519 `#sig` stays valid for a device
+  and is `unsupported-alg` at a relay.
 
 One key is never used for the other role, and each kid names the enrolling device (`FAC-SEM-044`). A
 P-256 public key — a device key, a policy root key, an offline root or delegation key — is validated by
@@ -321,8 +322,10 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 - optionally `records`, what the device holds of the records the relay protocol carries (DEC-0053):
   the `estateRecord.revision` it applies ([estate record](estate-record.md), DEC-0055), the latest `heartbeat` (`sequence`, `at`), the head of the
   `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
-  `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
-  protocol's (DEC-0047, reserved), and a check-in response carries them in `records` unchanged.
+  `expiresAt`). These are fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the
+  leases the window lease's decision (not yet taken); the relay ([DEC-0047](relay.md#revocation-and-heartbeat))
+  carries the first two unchanged, and a check-in response carries all three in `records` unchanged. A relay's
+  `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a

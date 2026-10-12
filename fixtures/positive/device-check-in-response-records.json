@@ -74,12 +74,12 @@
   },
   "records": {
     "heartbeat": {
-      "format": "see-DEC-0047",
+      "format": "see-DEC-0054",
       "sequence": 42
     },
     "leases": [
       {
-        "format": "see-DEC-0047",
+        "format": "see-window-lease-decision",
         "leaseId": "lease-org-7f3a-0413"
       }
     ]

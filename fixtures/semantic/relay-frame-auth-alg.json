@@ -1,0 +1,18 @@
+{
+  "description": "An auth frame naming EdDSA: a relay admits ES256 proofs only (DEC-0047 item 8, unsupported-alg).",
+  "kind": "relay-frame",
+  "expect": [
+    "FAC-SEM-071"
+  ],
+  "input": {
+    "v": 1,
+    "type": "auth",
+    "id": "a1",
+    "protocol": "fabric-relay/0.1",
+    "alg": "EdDSA",
+    "estate": "urn:fabric:estate:example",
+    "kid": "urn:fabric:machine:example-laptop#sig",
+    "iat": "2026-10-12T00:00:00Z",
+    "sig": "x"
+  }
+}
