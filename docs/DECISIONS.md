@@ -4151,13 +4151,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-13
 - **Status:** Accepted source change (on merge of its pull request). Closes the board row CT-39 (the owed readings of #67
   and #68, 2026-10-12). Consumer adoption — each writes identifiers in their normal form, looks an accepted reference up
-  by it, and runs `fixtures/vectors/identifiers.json` where it compares identifiers: Fabric (approvals, routes,
-  bindings, rollbacks: CT-03), Project Observatory (its usage reports' `byProject`, learning records: CT-20), Fabric
-  Dashboards (usage and route views: CT-21), the adapter (its kits' ports of the reference code: CT-18) and the first
-  organization server (the projects and agents it records). The board cells are register text in the handoff
+  by it, and runs `fixtures/vectors/identifiers.json` where it compares identifiers: the adapter first (its kits'
+  ports of the reference code and their route and provider checks: CT-18), Fabric (approvals, routes, bindings,
+  rollbacks, grant revocations: CT-03), the first organization server (usage aggregation by the normal form of
+  `projectId`), Project Observatory (it emits the normal form: CT-20) and Fabric Dashboards (usage and route views: CT-21). The board cells are register text in the handoff
   `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
 - **Amends:** DEC-0064 (`FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-096` compare by normal form), DEC-0065 (`byProject`
-  duplicates), DEC-0029 (`FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`), and `FAC-SEM-002`. No new rule code.
+  duplicates), DEC-0029 (`FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`), DEC-0017 (`FAC-SEM-014`'s `providerId`), DEC-0055
+  (`FAC-SEM-076`'s grants and `grant` revocations), DEC-0054 (`isRevoked` for a `grant`, and so `reconcileRevision`), and
+  `FAC-SEM-002`. No new rule code.
 - **Decision:** in [identifiers](specification/identifiers.md) —
   1. **The normal form.** A URI — a string matching RFC 3986's `URI` production with an authority or a non-empty path —
      is normalized by RFC 3986 §6.2.2: the scheme and the host lower-cased and percent-encoding hex upper-cased
@@ -4195,27 +4197,36 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     duplicates, the finding naming the second spelling (`src/usage-rules.ts`); `FAC-SEM-006` the scoped projects and their
     managers, `FAC-SEM-002` the selected account against the pool (`src/semantic-rules.ts`); `FAC-SEM-030` the revision
     reference key's id and the admission's capability, `FAC-SEM-032` the binding's project, capability, provider and
-    `runnerRoute`, `FAC-SEM-034` the event's project, capability and route (`src/route-rules.ts`);
+    `runnerRoute`, `FAC-SEM-034` the event's project, capability and route (`src/route-rules.ts`); `FAC-SEM-014` an
+    entry's `providerId` against its manifest's `provider.id` (`src/registry-rules.ts`); `FAC-SEM-076` a share grant's
+    `meta.id` against the grants before it and a `grant` revocation's `ref` against the grants and the revocations before
+    it (`src/estate-record-rules.ts`); `isRevoked` for kind `grant`, which `reconcileRevision` (`FAC-SEM-084`) uses too
+    (`src/revocation-delta.ts`) — before, another spelling of a revoked grant was not revoked (fail open);
   - sites left as written, with the reason: the delegation token's and the approval's claims (`iss`, `sub`, `project`,
     the grant's principal id and issuer, an onward token's parent claims) and the grant reference in
     `src/delegation-rules.ts`, `src/delegation.ts`, `src/grant-projection.ts` — RFC 7519 §2 compares StringOrURI "with no
     transformations or canonicalizations", and the hub copies them from the grant it signs, so another spelling is
-    refused, fail closed; `agentRef` in `src/estate-record-rules.ts` — its pattern admits only the normal form; opaque ids
+    refused, fail closed; a revision's revocations against its parent's (`FAC-SEM-072`, `revocationKey` in
+    `src/estate-record-rules.ts`) — a re-spelled `grant` revocation reads as dropped and the revision is refused, fail
+    closed; `agentRef` in `src/estate-record-rules.ts` — its pattern admits only the normal form; opaque ids
     (estates, machines, devices, users, sessions, leases: `src/estate-record-rules.ts`, `src/revocation-delta.ts`,
     `src/window-lease.ts`, `src/device-rules.ts`, `src/activity-rules.ts`, `src/session-join.ts`, `src/relay.ts`), agent and
     service ids, capability names (`src/pipeline-check.ts`), model ids (`src/profile-rules.ts`), runner kinds, MCP roles
-    and secret slots (`src/package-rules.ts`), provider ids (`src/registry-rules.ts`), key ids, `jti`, claim ids
+    and secret slots (`src/package-rules.ts`), a provider entry's slug `id` and its file stem (`FAC-SEM-013`, `FAC-SEM-014`'s
+    first half, `src/registry-rules.ts`), key ids, `jti`, claim ids
     (`FAC-SEM-093`) and limit ids (`FAC-SEM-031`) — names, not URIs;
   - spec: `docs/specification/identifiers.md` (new), `docs/specification/conformance.md`,
     `docs/specification/governance-and-roles.md`, `docs/specification/service.md`, `docs/specification/versioning.md`,
-    `docs/specification/runners.md`, `docs/specification/memory-and-learning.md`;
+    `docs/specification/runners.md`, `docs/specification/memory-and-learning.md`, `docs/specification/provider.md`,
+    `docs/specification/estate-record.md`, `docs/specification/revocation-delta.md`;
   - code: `src/identifiers.ts` (new); floor in `vitest.config.ts`;
   - fixtures: `fixtures/vectors/identifiers.json` (new);
   - tests: `test/identifiers.test.ts` (new), `test/core-rules.test.ts`, `test/usage-rules.test.ts`,
-    `test/route-rules.test.ts`;
+    `test/route-rules.test.ts`, `test/registry-rules.test.ts`, `test/estate-record.test.ts`,
+    `test/revocation-delta.test.ts`, `test/rule-tolerance.test.ts`;
   - docs: `docs/evidence/sources.md` (RFC 8141 pinned; RFC 3986 and RFC 7519 hashed), `docs/backlog.md` (CT-39),
     `docs/guides/connecting-compatible-agents.md` (a writer's normal form), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`;
-  - annotations "amended by DEC-0076" on DEC-0029, DEC-0064 and DEC-0065, and the consumer board cells, are register text
+  - annotations "amended by DEC-0076" on DEC-0017, DEC-0029, DEC-0054, DEC-0055, DEC-0064 and DEC-0065, and the consumer board cells, are register text
     in `docs/handoffs/2026-10-13-ct39-identifiers.md`, applied by the owner under the lease.
 - **Not decided here:** internationalized identifiers (IRIs) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
   scheme-based normalization for any scheme; URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules;

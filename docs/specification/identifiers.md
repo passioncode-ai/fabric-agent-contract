@@ -109,6 +109,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 | `FAC-SEM-006` ([conformance](conformance.md#semantic-rule-codes)) | the projects active assignments scope, and the product managers of each |
 | `FAC-SEM-002` ([conformance](conformance.md#semantic-rule-codes)) | the selected account against the pool's account references |
 | `FAC-SEM-096` ([versioning](versioning.md#semantic-rules)) | a rollback basis's `id` against the setting's own |
+| `FAC-SEM-014` ([provider](provider.md#semantic-rules)) | an entry's `providerId` against its manifest's `provider.id` (the slug against the file stem stays as written) |
+| `FAC-SEM-076` ([estate record](estate-record.md#semantic-rules)) | a share grant's `meta.id` against the grants before it, and a `grant` revocation's `ref` against the grants and the revocations before it |
+| `isRevoked` (`src/revocation-delta.ts`; [revocation delta](revocation-delta.md), and through it `reconcileRevision`, `FAC-SEM-084`) | a `grant` revocation's `ref` against the grant asked about; every other kind exactly |
 | `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and the `capability` of an admission, a binding or an event against the route's — there `capability` is a capability's URI (`common.schema.json#/$defs/uri` in `runner-route`, `runner-route-event`, `binding` and `admission`) |
 
 **Compared as written** — fields that are not URIs, or whose comparison another specification fixes:
@@ -117,10 +120,14 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   token's parent claims): JWT claims, which [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) §2 compares "as
   case-sensitive strings with no transformations or canonicalizations applied"; the hub copies them from the grant it
   signs, so a different spelling is refused, fail closed ([delegation](delegation.md));
+- a revision's revocations against its parent's (`FAC-SEM-072`, `revocationKey` in `src/estate-record-rules.ts`): a
+  `grant` revocation re-spelled in the next revision reads as dropped, and the revision is refused — fail closed, so a
+  writer keeps each revocation exactly as it was first written;
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;
 - opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),
-  agent ids and service ids (patterns of lower-case names), capability names (`common.schema.json#/$defs/capabilityName`,
+  agent ids and service ids (patterns of lower-case names; a provider entry's slug `id` and its file stem,
+  `FAC-SEM-013`, `FAC-SEM-014`), capability names (`common.schema.json#/$defs/capabilityName`,
   a lower-case dotted name: the manifest, pipelines, `fabric-interop/0.1` and the project board — not the URI-typed
   `capability` of a route, a binding or an admission above), model ids, runner kinds, MCP roles, secret slots, key ids,
   `jti`, claim ids and enum values: names, not URIs.
