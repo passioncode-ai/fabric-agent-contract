@@ -60,6 +60,7 @@ describe("FAC-SEM-099: a protocols list", () => {
   it("refuses a malformed entry, a repeat, an unpublished revision and a third revision", () => {
     expect(paths({ protocols: ["fabric-device"] })).toEqual(["FAC-SEM-099 /protocols/0"]);
     expect(paths({ protocols: ["fabric-device/0.1", "fabric-device/0.1"] })).toEqual(["FAC-SEM-099 /protocols/1"]);
+    expect(paths({ protocols: ["example.org-x/1", "example.org-x/1"] })).toEqual(["FAC-SEM-099 /protocols/1"]);
     expect(paths({ protocols: ["fabric-device/0.2"] })).toEqual(["FAC-SEM-099 /protocols/0"]);
     expect(paths({ protocols: ["x/3", "x/2", "x/1"] })).toEqual(["FAC-SEM-099 /protocols/2"]);
   });
