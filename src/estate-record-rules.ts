@@ -70,6 +70,8 @@ export interface EstateRecordTrust {
 }
 
 const time = (value: unknown) => (isString(value) ? Date.parse(value) : Number.NaN);
+/** A revocation's identity across revisions: its kind and its reference. */
+const revocationKey = (entry: JsonObject) => `${String(entry.kind)} ${String(entry.ref)}`;
 
 /**
  * The reference verifier (DEC-0055), in the order of estate-record.md's ER table: shape, digest, the chain to the
@@ -99,6 +101,11 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
       return { ok: false, problem: "broken-chain" };
     }
     if (parent.estate !== record.estate || record.revision !== Number(parent.revision) + 1 || record.parent !== parentDigest) return { ok: false, problem: "broken-chain" };
+    // FAC-SEM-072 holds here too, so a machine that only verifies still refuses a revision issued before its parent or
+    // one that drops a revocation: a passkey cannot quietly un-revoke a stolen machine.
+    if (time(record.issuedAt) < time(parent.issuedAt)) return { ok: false, problem: "broken-chain" };
+    const kept = new Set(list(record.revocations).map(revocationKey));
+    if (list(parent.revocations).some((entry) => !kept.has(revocationKey(entry)))) return { ok: false, problem: "broken-chain" };
     trusted = list(parent.authorities);
   } else {
     // Without a parent only revision 1 starts a chain; a later revision is checked against the one before it.
@@ -174,9 +181,9 @@ function revisionChain(value: JsonObject): Finding[] {
   }
   if (next.parent !== parentDigest) flag("/next/parent", "parent names the digest of the revision before it");
   if (time(next.issuedAt) < time(parent.issuedAt)) flag("/next/issuedAt", "a revision is never issued before its parent");
-  const kept = new Set(list(next.revocations).map((entry) => `${String(entry.kind)} ${String(entry.ref)}`));
+  const kept = new Set(list(next.revocations).map(revocationKey));
   list(parent.revocations).forEach((entry, index) => {
-    if (!kept.has(`${String(entry.kind)} ${String(entry.ref)}`)) flag(`/parent/revocations/${index}`, `the ${String(entry.kind)} revocation of ${String(entry.ref)} is dropped: a revision keeps every revocation before it`);
+    if (!kept.has(revocationKey(entry))) flag(`/parent/revocations/${index}`, `the ${String(entry.kind)} revocation of ${String(entry.ref)} is dropped: a revision keeps every revocation before it`);
   });
   return findings;
 }

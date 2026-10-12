@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-12 estate record](2026-10-12-w3-p3-03-estate-record.md) | DEC-0055 (board run P3-03; V4-ESTATE-RECORD) | pull request open |
 | [2026-10-12 activity and devices](2026-10-12-activity-devices.md) | DEC-0052, DEC-0053 (board run P3-02; CT-11, CT-25) | pull request open |
 | [2026-10-12 agent package](2026-10-12-agent-package.md) | DEC-0050, DEC-0051 (board run P3-01; V4-PACKAGE, V4-AGENTREF) | pull request open |
 | [2026-10-12 runner and model profiles](2026-10-12-runner-model-profiles.md) | DEC-0046 (board run P2-04; CT-05) | PR #46 `f41d8e6` |

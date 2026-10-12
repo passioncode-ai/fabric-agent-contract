@@ -225,6 +225,19 @@ describe("the verifier (DEC-0055, WebAuthn Level 3 §7.2)", () => {
     expect(verifyEstateRecord(first, { authorities: [{ ...credential, publicKey: 1 }], at: AT })).toEqual({ ok: false, problem: "unusable-key" });
     expect(verifyEstateRecord(first, { authorities: [{ ...credential, origins: "x" }], at: AT })).toEqual({ ok: false, problem: "wrong-origin" });
   });
+
+  it("refuses a revision issued before its parent or dropping a parent revocation, before any signature check (FAC-SEM-072)", () => {
+    const brokenChain = { ok: false, problem: "broken-chain" };
+    const rehash = (record: Json) => ({ ...record, digest: estateRecordDigest(record) });
+    const early = rehash({ ...second, issuedAt: "2000-01-01T00:00:00Z" });
+    expect(verifyEstateRecord(early, { parent: first, at: AT })).toEqual(brokenChain);
+    const revoking = rehash({ ...first, revocations: [{ kind: "machine", ref: "machine-lost", revokedAt: first.issuedAt }] });
+    const forgetting = rehash({ ...second, parent: revoking.digest, revocations: [] });
+    expect(verifyEstateRecord(forgetting, { parent: revoking, at: AT })).toEqual(brokenChain);
+    // The same child keeping the parent's revocation is past the chain: it fails later, on its stale signature.
+    const keeping = rehash({ ...second, parent: revoking.digest, revocations: [...(second as Json).revocations, ...(revoking as Json).revocations] });
+    expect(verifyEstateRecord(keeping, { parent: revoking, at: AT })).not.toEqual(brokenChain);
+  });
 });
 
 describe("the passkey assertion (WebAuthn Level 3 §7.2, §6.5.5)", () => {

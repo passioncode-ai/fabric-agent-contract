@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0055`
+**Next free ID:** `DEC-0056`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -2374,3 +2374,92 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-068`, `FAC-SEM-069` were reserved by git CAS (`agent_sync.py reserve --key w3-p3-02-devices-20261012 DEC`,
   `--key w3-p3-02-sem-{device-action,root-certification}-20261012 SEM`); this file, `conformance.md` and `backlog.md`
   were edited under git leases; the record plane is `fs`.
+
+### DEC-0055 — The estate record, `estate-record/1`: whole revisions chained by digest, keys by role, placements by reference, signed by a passkey
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's hub drafts revisions,
+  runs the signing ceremony and certifies hub keys (backlog CT-19); Project Observatory's node verifies each revision
+  before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
+  (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
+- **Implements:** the first organization server's target architecture v4 (commit `9c6a780`) §12 row "`estate-record/1`:
+  machines (device key, hub `kid` certificate), packages per machine, secret placements, share grants, revocations,
+  revision; passkey-signed", with §3's noun, §6 Paths 2, 6 and 7, and §7's estate authority and freshness. Closes
+  V4-ESTATE-RECORD (packet P3-03).
+- **Decision:** in [estate record](specification/estate-record.md) —
+  1. **A revision is a whole record, chained by digest.** `revision` is 1, then the parent's plus one; `parent` is the
+     parent's `digest`, absent exactly in revision 1; a revision continues its parent's `estate`, is never issued
+     before it, and keeps every revocation the parent carries (`FAC-SEM-072`; `verifyEstateRecord` refuses a revision
+     that breaks any of these as `broken-chain`, so a passkey cannot quietly un-revoke a machine). Adding or removing a machine, placing
+     or moving an agent, placing a secret, granting a share and revoking anything is each a new revision (v4 §6, §7).
+  2. **The digest is RFC 8785.** `digest` is `sha256:` and the hex SHA-256 of the RFC 8785 form of the record without
+     `digest` and `signature` (`estateRecordDigest`; DEC-0043's register). A record is valid from `issuedAt` to
+     `validUntil`, at most 30 days later (v4 §7 "the estate record 30").
+  3. **Authorities are passkeys.** Each lists its WebAuthn `credentialId`, `alg` (`ES256` or `EdDSA`), public JWK, the
+     dedicated signing `rpId` and pinned `origins`. Revision 1 verifies under a passkey the machine pinned at
+     enrollment; every later revision under a passkey its parent lists. A P-256 key passes SEC 1 §3.2.2
+     (`isValidP256Key`), an Ed25519 key the small-order check (DEC-0045); no user handle is recorded (`FAC-SEM-073`).
+  4. **Machines carry keys by role.** Each machine names its device `id` (never a human name; the schema refuses
+     `name`), DEC-0053's `deviceKeys` — exactly one `<id>#sig`, at most one `<id>#kem`, never one key in both roles —
+     and a `hubKey` certificate: the passkey-signed binding of one hub `kid` and public key to that machine, never
+     certified for two machines, never of small order (`FAC-SEM-073`). A delegation verifier that reads the estate
+     record trusts a `kid` only while a current revision certifies it.
+  5. **Packages are placed by `agentRef`, digest and publisher key.** A machine's `packages[]` names the agent
+     (DEC-0050), the placed version's package digest and the `publisherKid` in the record's `publisherKeys`; an agent
+     is placed once per machine (`FAC-SEM-074`). `placementTrust` gives `verifyPackage` (DEC-0051) the key the record
+     pins, and kind `estate-placement` checks that an installed package is the one placed. This settles a difference
+     inside v4: Path 2 places an agent by "its `agentRef`, publisher key and a ceiling", "not a digest", while the §12
+     row lists packages per machine; until a ceiling is defined, every new version is a new revision.
+  6. **Secrets are placed by reference.** `secrets[]` is `{agentRef, slot, from}`: a slot of a package placed on that
+     machine, filled from the vault of a machine of the record. No member can hold a value (schema, DEC-0013), none is
+     shaped like a credential (`src/secret-shape.ts`), and the package declares the slot (`FAC-SEM-075`). The value
+     travels sealed to the machine's `#kem` key, never in the record.
+  7. **Share grants and revocations.** A share grant is DEC-0039's grant with `principalKind: external`, signed once into
+     the record (v4 Path 7). A revocation names its `kind` (`authority`, `machine`, `device-key`, `hub-key`,
+     `publisher-key`, `package`, `grant`), its `ref` and `revokedAt`; each is listed once and nothing the record revokes
+     is listed in it: revocation outranks addition (`FAC-SEM-076`).
+  8. **The signature is a WebAuthn assertion, verified offline.** W3C Web Authentication Level 3 (Recommendation of
+     25 August 2026, pinned in the [source ledger](evidence/sources.md)). The challenge is SHA-256 of the RFC 8785 form of
+     `{type: "estate-revision/1", digest}` (`estateChallenge`), so the assertion is bound to this record and to no other
+     signature over the same digest. `verifyEstateRecord` checks, with no network, §7.2's client data (`type`
+     `webauthn.get`, the challenge, a pinned origin, no `crossOrigin` and no `topOrigin`), the authenticator data
+     (`rpIdHash`, UP and UV set, AT clear, BS only with BE) and the signature over `authenticatorData ‖
+     SHA-256(clientDataJSON)` — DER for ES256 (§6.5.5, RFC 3279 §2.2.3), 64 bytes for EdDSA (RFC 8032). It does not
+     check attestation, the authenticator's provenance, the signature counter, extension outputs, or the enrollment
+     that pinned the first passkey; the specification says why for each. Its refusals are rows ER-1…ER-10.
+  9. **Algorithms.** Passkeys are `ES256` or `EdDSA`, each named in a field; anything else (RS256 among them) is refused.
+     Hub and publisher keys are `EdDSA` until Fabric records D2, when `ES256` joins them additively. Device keys are
+     DEC-0053's.
+  10. **Rules:** `FAC-SEM-072` (the chain and the window), `FAC-SEM-073` (keys), `FAC-SEM-074` (placements),
+      `FAC-SEM-075` (secret references), `FAC-SEM-076` (grants and revocations).
+- **Why:** v4 makes three signed records the trust of the agent network — the package (DEC-0050/0051), the estate
+  record and the organization record — and puts the person's passkey over the estate (§7). Machines must apply a
+  revision without asking a server, so every check that binds an assertion to a record is offline, and what an
+  assertion cannot prove is named rather than implied. J10: the record describes keys, machines, placements and grants;
+  machines are named by id, no user handle is stored, a grant names its principal only because it authorizes them.
+- **Compatibility:** Additive: a new schema, a new specification and new rule codes; nothing existing changes.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/estate-record.md` (new), `docs/specification/conformance.md` (register, canonical forms,
+    readers);
+  - schemas: `schemas/estate-record.schema.json` (new);
+  - code: `src/estate-record-rules.ts` (new), `src/webauthn.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/estate-record-*`, `fixtures/negative/estate-record-*`,
+    `fixtures/semantic/estate-*`, `fixtures/vectors/estate-record.json`;
+  - tests: `test/estate-record.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; floors
+    in `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (WebAuthn Level 3, RFC 3279), the board run's brief, `CONTEXT.md`,
+    `docs/DOCMAP.md`, `README.md`, `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w3-p3-03-estate-record.md`.
+- **Not decided here:** Fabric's D3 (keys) is not recorded on Fabric's `main` (`5bf15e5c`); the record takes no side on
+  whether the hub key is the machine's `#sig` key or its own, whether the hub holds a private key, or the estate's
+  fingerprint and enrollment ceremony. The ceiling within which a later version installs without a new revision
+  (Fabric's ADR-0138 amendment D2b and the listing contract); the signing-challenge types and the signing RP as a
+  contract; recovery by a printed code; the revocation delta and heartbeat (DEC-0054, reserved); the estate's windows
+  per machine (window leases); `ES256` for hub and publisher keys (Fabric's D2).
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§2 rules 6 and 12, §3, §6, §7,
+  §12, §15 D3 and D4); Fabric ADR-0144 item 6 (three signed records), read on Fabric `main` `5bf15e5c`; WebAuthn
+  Level 3, RFC 3279, RFC 8032 and RFC 8785 in the [source ledger](evidence/sources.md); the board-waves inventory
+  V4-ESTATE-RECORD, packet P3-03. DEC-0055 and `FAC-SEM-072`…`FAC-SEM-076` were reserved by git CAS
+  (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,
+  `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
+  `backlog.md` were edited under git leases; the record plane is `fs`.

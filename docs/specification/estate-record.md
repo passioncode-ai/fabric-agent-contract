@@ -56,7 +56,7 @@ digest is what the passkey signs.
 
 A record is valid from `issuedAt` to `validUntil`, at most 30 days later (v4 §7, Freshness: "the estate record 30"); a
 verifier refuses it before or after, and the hub drafts a fresh revision before the window ends. The relay serves the
-latest revision and online machines fetch it hourly (v4 §7); how a revision travels is the relay protocol's (DEC-0047).
+latest revision and online machines fetch it hourly (v4 §7); how a revision travels is the relay protocol's (DEC-0047, reserved).
 
 ## Authorities
 
@@ -74,7 +74,7 @@ A machine is a device enrolled in the estate, by its device `id` (DEC-0031) and 
 
 - **`deviceKeys`** — DEC-0053's device keys by role: exactly one `<id>#sig` (ES256 or Ed25519) and at most one
   `<id>#kem` (ECDH over P-256), each named for this machine, valid for its algorithm and never one key in both roles
-  (`FAC-SEM-073`). The relay seals a secret to the `#kem` key (DEC-0047).
+  (`FAC-SEM-073`). The relay seals a secret to the `#kem` key (DEC-0047, reserved).
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
@@ -103,8 +103,8 @@ Each revocation names its `kind` — `authority`, `machine`, `device-key`, `hub-
 digest) or `grant` (a grant's `meta.id`) — its `ref` in that kind's own form and `revokedAt`. A revision keeps every
 revocation before it (`FAC-SEM-072`), lists each once, and lists nothing it revokes: revocation outranks addition (v4 §7;
 `FAC-SEM-076`). Removing a machine also revokes its DEC-0031 certificate, which the organization server does. The fast
-revocation delta that reaches machines within seconds is the relay protocol's (v4 §7, DEC-0047); the record is its
-durable state.
+revocation delta that reaches machines within seconds is DEC-0054's (reserved), carried by the relay (v4 §7, DEC-0047,
+reserved); the record is its durable state.
 
 ## The signature
 
@@ -130,6 +130,8 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
   set (v4 §3: user verification required), AT is not set (§6.1) and BS is not set without BE (§7.2);
 - `sig` verifies over `authenticatorData ‖ SHA-256(clientDataJSON)` under the authority's public key in its `alg`: an
   ASN.1 DER `Ecdsa-Sig-Value` for ES256 (§6.5.5, RFC 3279 §2.2.3), the 64-byte Ed25519 signature for EdDSA (RFC 8032);
+- the revision follows its parent: the same estate, the next number, the parent's digest, not issued before it, every
+  revocation of the parent kept (`FAC-SEM-072` holds here too, so a passkey cannot quietly un-revoke a machine);
 - the authority is one the verifier trusts: its parent's, or for revision 1 the one it pinned.
 
 ### What is not verified
@@ -151,7 +153,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 |---|---|---|
 | ER-1 | `malformed` | the record is not an object, its `digest` is not a string, its `revision` is not an integer, it has no RFC 8785 form, the signature is not a `webauthn-assertion` with string base64url fields under the authority's credential id, `clientDataJSON` is not UTF-8 JSON naming an object, or `authenticatorData` is shorter than 37 bytes |
 | ER-2 | `digest-mismatch` | the recomputed digest is not `digest` |
-| ER-3 | `broken-chain` | with a parent: another estate, not the parent's revision plus one, or `parent` not the parent's digest; without one: a revision other than 1, or revision 1 naming a parent |
+| ER-3 | `broken-chain` | with a parent: another estate, not the parent's revision plus one, `parent` not the parent's digest, issued before the parent, or a revocation of the parent's left out; without one: a revision other than 1, or revision 1 naming a parent |
 | ER-4 | `no-trusted-authority`, `unknown-authority`, `duplicate-authority` | the verifier trusts no passkey, not the signing one, or lists it twice |
 | ER-5 | `unknown-algorithm`, `key-algorithm-mismatch` | `alg` is not ES256 or EdDSA, or not the passkey's `alg` |
 | ER-6 | `unusable-key`, `small-order-key` | the passkey's key is not a public P-256 point valid by SEC 1 §3.2.2 or a public Ed25519 key, or is of small order (DEC-0045) |
@@ -190,7 +192,7 @@ keys are DEC-0053's.
 - **Project Observatory's node** verifies each revision before applying it, installs only placed packages through
   `placementTrust` and `verifyPackage`, fills only placed slots, and reports the applied revision in its check-in's
   `records.estateRecord.revision` (DEC-0053).
-- **The relay** serves the latest revision by digest (DEC-0047); it never decides trust.
+- **The relay** serves the latest revision by digest (DEC-0047, reserved); it never decides trust.
 
 ## Privacy
 
@@ -209,5 +211,5 @@ records no use. A credential's id is an opaque handle.
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract
   define a ceiling, every new version is a new revision.
 - The signing-challenge types and the dedicated signing RP as a contract (v4 §12; a later wave), recovery by a printed
-  code, the revocation delta and heartbeat (DEC-0047, a later wave), the estate's windows and their split per machine
+  code, the revocation delta and heartbeat (DEC-0054, reserved), the estate's windows and their split per machine
   (window leases, a later wave), and `ES256` for hub and publisher keys (Fabric's D2).

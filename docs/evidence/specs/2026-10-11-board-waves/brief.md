@@ -49,6 +49,7 @@ Frozen at planning: adding is free, removing needs the operator.
 | Consumers' code (Fabric, the adapter, Dashboards, Observatory, Switchboard, Inbox) | pins and adoption, measured | `findings/consumers.json` (survey running at this commit) |
 | `pnpm run check` | main tree green: 22 files, 698 tests; the gate is not hermetic (F-A-001) | F-A-001 |
 | Code graph | none: no `graphify-out/` in this repository | — |
+| W3C Web Authentication Level 3, Recommendation of 25 August 2026 (pinned for P3-03) | the passkey assertion of `estate-record/1`: §7.2, §6.1, §6.5.5 verified offline; attestation, provenance and the counter not | [`docs/evidence/sources.md`](../../sources.md) row "Web Authentication Level 3", DEC-0055 |
 
 ## Decisions resolved from the sources, not asked
 
