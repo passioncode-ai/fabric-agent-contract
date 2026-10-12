@@ -23,7 +23,7 @@ import { estateRecordRules } from "./estate-record-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
 import { attributionRules } from "./openrouter-attribution.js";
-import { protocolRules } from "./protocol-revisions.js";
+import { embeddedProtocolsFindings, protocolRules } from "./protocol-revisions.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
@@ -112,6 +112,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
+  if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value));

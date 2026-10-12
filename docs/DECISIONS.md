@@ -3624,32 +3624,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the organization edition's CON-OE-07. Closes the board run's inventory item CON-OE-07 (node N12, packet P6-01).
 - **Decision:** in [versioning → Protocol revisions](specification/versioning.md#protocol-revisions) —
   1. **The register.** `PROTOCOL_REVISIONS` in `src/protocol-revisions.ts` lists every contract protocol's published
-     revisions, oldest first; a test keeps it equal to the revisions the schemas pin with `const`. A decision that
-     publishes a revision appends it.
+     revisions, oldest first; a test keeps it equal to the revisions the schemas pin with `const` plus `NAMED_ONLY` (five
+     protocols a specification names without a schema pin). A decision that publishes a revision appends it and widens
+     each module's own revision constant, which a test keeps at the newest entry.
   2. **N and N−1.** A receiver accepts the newest revision of a protocol it implements and the one before it in the
      register, and no other; it never translates between revisions (DEC-0009).
   3. **`protocols`** (`common.schema.json#/$defs/protocols`): at most N and N−1 per protocol, each entry
-     `<name>/<revision>` once (`FAC-SEM-099`, kind `protocols`). It is optional in the service well-known document
+     `<name>/<revision>` once, 1 to 64 entries (`FAC-SEM-099`, kind `protocols`). It is optional in the service well-known document
      (what the service accepts), the device check-in (what the node reads) and the device enrollment response (what the
-     receiver accepts). A sender writes the newest revision both sides name; absent, a party reads only its own
-     documents' revision.
+     receiver accepts), and `FAC-SEM-099` checks it in each. A sender writes the newest revision both sides name; absent,
+     a party reads only its own documents' revision.
   4. **`schema-unsupported`** (`schemas/schema-unsupported.schema.json`, `negotiateRevision`): sent before the document is
-     read further, naming the revision received (at most 80 characters) and the accepted revisions of that protocol, or
-     all of them when the received value names none the receiver reads; revisions compare as exact strings. HTTP 400
-     with the JSON body, or an MCP `isError` result's `structuredContent`, in the envelope of
+     read further, naming the revision received (at most 80 characters, never splitting one) and the accepted revisions
+     of that protocol, or all of them when the received value names none the receiver reads; revisions compare as exact
+     strings. The accepted list is normalised (well-formed, once, at most 64), so the refusal always validates; a receiver
+     accepting nothing answers its own fault `no-accepted-revisions` instead. HTTP 400
+     with the JSON body, or an MCP `isError` result's `structuredContent`, answered after the request is authenticated
+     (device signature, DL-13) and before its body is read, as DEC-0009's "before semantic probes" allows, in the envelope of
      `delegation-refusal.schema.json`. The relay keeps its own frame code `protocol-unsupported` (DEC-0047).
 - **Why:** an organization's machines update at different times; without a stated window a receiver either refuses a
   machine one release behind or silently guesses at a revision it does not implement. Two revisions bound the window,
   the list makes it visible before anything is sent, and one refusal shape lets a sender pick again.
-- **Compatibility:** Additive: `protocols` is optional everywhere, and every protocol has one published revision today,
-  so N−1 does not yet exist and every current document is accepted as before. `contractVersion` stays `0.1.0`.
+- **Compatibility:** Additive for readers at this pin: `protocols` is optional everywhere, and every protocol has one
+  published revision today, so N−1 does not yet exist and every current document is accepted as before. Not for an
+  older pinned reader: the three carrying objects are closed, so a party sends `protocols` only to a reader pinned at
+  or after this decision (CT-04, CT-18, CT-20 note it). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/versioning.md`, `docs/specification/service.md`, `docs/specification/devices.md`,
     `docs/specification/conformance.md`;
   - schemas: `schemas/common.schema.json` (`protocolRevision`, `protocols`), `schemas/service-well-known.schema.json`,
     `schemas/device-check-in.schema.json`, `schemas/device-enrollment.schema.json`,
     `schemas/schema-unsupported.schema.json` (new);
-  - code: `src/protocol-revisions.ts` (new), `src/semantic-rules.ts`;
+  - code: `src/protocol-revisions.ts` (new), `src/semantic-rules.ts`, `src/device-rules.ts`;
   - fixtures: `fixtures/positive/service-well-known-protocols.json`, `fixtures/negative/service-well-known-protocols-unparsed.json`,
     `fixtures/positive/device-check-in-protocols.json`, `fixtures/positive/device-enrollment-response-protocols.json`,
     `fixtures/positive/schema-unsupported.json`, `fixtures/negative/schema-unsupported-empty-accepted.json`,

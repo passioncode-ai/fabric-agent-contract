@@ -67,26 +67,38 @@ two commits, updates the lock and every mention in one change, and releases.
 
 ## Protocol revisions
 
-Every document of the contract names its protocol revision, `<name>/<revision>` (`fabric-service/0.1`,
-`estate-record/1`), and DEC-0009 makes that revision an explicit input: a host rejects an unsupported revision before
-any other check and never translates one revision into another. DEC-0067 (CON-OE-07; the first organization server's
+Every protocol of the contract has a revision, `<name>/<revision>` (`fabric-service/0.1`, `estate-record/1`), and the
+documents that pin one carry it (most in `protocol`, `type` or `format`). DEC-0009 makes the revision an explicit input:
+hosts "reject unsupported revisions before semantic probes and never silently translate them". DEC-0067 (CON-OE-07; the first organization server's
 target architecture v4 §12 at `9c6a780`, "`protocols[]` with N and N−1, `schema-unsupported`") adds how two parties
 on different releases still talk:
 
 - **The register.** [`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) `PROTOCOL_REVISIONS` lists each
-  contract protocol's published revisions, oldest first; a test keeps it equal to the revisions the schemas pin. A
-  decision that publishes a new revision appends it there.
+  contract protocol's published revisions, oldest first; a test keeps it equal to the revisions the schemas pin with
+  `const` plus `NAMED_ONLY` (`approval/1`, `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1`,
+  `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
+  there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
+  `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,
+  `WINDOW_LEASE_TYPE`, `COMMS_PROTOCOL`).
 - **N and N−1.** A receiver accepts the newest revision of a protocol it implements (N) and the one before it in the
   register (N−1), and no other (`acceptedRevisions`). A protocol with one published revision has no N−1.
 - **`protocols`.** A party says which revisions it reads in a list of at most N and N−1 per protocol
   (`common.schema.json#/$defs/protocols`): a service in its well-known document (what it accepts), a node in its
   check-in (what records and policy it can be sent), a receiver in its enrollment response (what it accepts from the
   device). A sender writes each document in the newest revision both lists name. Absent, the party reads only the
-  revision its own documents name.
-- **`schema-unsupported`.** A document in a revision the receiver does not accept is refused before it is read further
+  revision its own documents name. `FAC-SEM-099` checks the list wherever it appears (kinds `service-well-known`,
+  `device-check-in`, `device-enrollment`, and `protocols` alone). A party sends `protocols` only to a reader pinned at
+  or after DEC-0067, or one that ignores unknown members: the three carrying objects are closed, so an older pinned
+  copy refuses the new member.
+- **`schema-unsupported`.** A document in a revision the receiver does not accept is refused after the request is
+  authenticated (a device's signature, [devices](devices.md#transport) steps 0–8; a delegated call's DL-13 order) and
+  before its body is read further, so an unauthenticated caller never learns the accepted list
   ([`schema-unsupported.schema.json`](../../schemas/schema-unsupported.schema.json); `negotiateRevision`): the
-  refusal names the revision received (at most 80 characters) and the accepted revisions of that protocol, or all of
-  them when the received value names no protocol the receiver reads. An HTTP route answers it as the JSON body of a
+  refusal names the revision received (at most 80 characters, never splitting one) and the accepted revisions of that
+  protocol, or all of them when the received value names no protocol the receiver reads. The accepted list is read as
+  a `protocols` list — malformed entries and repeats dropped, at most 64 kept — so the refusal is always a valid
+  document; a receiver left accepting nothing is misconfigured and answers its own fault (`no-accepted-revisions`),
+  not a refusal. An HTTP route answers it as the JSON body of a
   400, an MCP tool as `structuredContent` of an `isError` result. Revisions compare as exact strings:
   `fabric-device/0.10` is not `fabric-device/0.1`.
 - The relay keeps `protocol-unsupported` on its own frames (DEC-0047); it answers the same condition inside a
@@ -99,4 +111,4 @@ Vectors: [`fixtures/vectors/protocol-revisions.json`](../../fixtures/vectors/pro
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064) |
-| `FAC-SEM-099` | `protocols` | a protocols list (`{protocols}`) names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes, and two of them consecutive in the register: N and N−1 (DEC-0067) |
+| `FAC-SEM-099` | `protocols` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |

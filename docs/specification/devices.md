@@ -418,7 +418,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 - `protocols` MAY list the revisions the node reads; the receiver sends each record and the policy in the newest
   revision that list and its own writer share, and the enrollment response's `protocols` lists what the receiver
   accepts from the device. A document in a revision the other side does not accept is refused with
-  `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067).
+  `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067) — after the request signature's steps
+  0–8 hold, before the body is read.
 - `sequenceNum` increases by one per check-in. On a gap the server answers with the flag
   `report_full_state`, and the next check-in carries `fullState: true`. A gap in check-ins is lost
   synchronisation, not tampering.
