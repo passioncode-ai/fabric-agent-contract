@@ -50,6 +50,14 @@ describe("FAC-SEM-100 boundaries", () => {
     expect(sessionTotals([{ kind: "usage.line", data: {} }]).size).toBe(0);
     expect(sessionTotals([{ kind: "usage.line", session: { id: "s" }, data: { dedupeKey: "k" } }]).get("s")).toEqual({ seconds: {}, calls: 1, inputTokens: 0, outputTokens: 0 });
   });
+  it("orders intervals by start, whatever order the events arrive in", () => {
+    expect(paths([iv("2026-10-07T09:10:00Z", "2026-10-07T09:20:00Z"), iv("2026-10-07T09:00:00Z", "2026-10-07T09:05:00Z")])).toEqual([]);
+    expect(paths([iv("2026-10-07T09:10:00Z", "2026-10-07T09:20:00Z"), iv("2026-10-07T09:00:00Z", "2026-10-07T09:15:00Z")])).toEqual(["/events/0/data/start"]);
+  });
+  it("leaves an unreadable interval out, so it cannot hide an overlap", () => {
+    expect(paths([iv("2026-02-30T09:00:00Z", "2026-10-07T09:30:00Z"), iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z"), iv("2026-10-07T09:05:00Z", "2026-10-07T09:20:00Z")])).toEqual(["/events/2/data/start"]);
+    expect(paths([iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z"), iv("2026-10-07T09:05:00Z", "not a time"), iv("2026-10-07T09:05:00Z", "2026-10-07T09:20:00Z")])).toEqual(["/events/2/data/start"]);
+  });
   it("keeps sessions apart: two sessions may overlap and have different collectors", () => {
     expect(paths([iv("2026-10-07T09:00:00Z", "2026-10-07T10:00:00Z", "a", "s1"), iv("2026-10-07T09:10:00Z", "2026-10-07T09:20:00Z", "b", "s2")])).toEqual([]);
   });
