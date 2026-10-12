@@ -1,6 +1,7 @@
 # Packages — `fabric-package/1`
 
-DEC-0050 (format and digest), DEC-0051 (signatures) · rule codes `FAC-SEM-064`…`FAC-SEM-066` · schema
+DEC-0050 (format and digest), DEC-0051 (signatures), DEC-0071 (a consumer agent) · rule codes `FAC-SEM-064`…`FAC-SEM-066`,
+`FAC-SEM-102` · schema
 [`fabric-package`](../../schemas/fabric-package.schema.json) · code [`src/package-rules.ts`](../../src/package-rules.ts) ·
 vectors [`fixtures/vectors/package.json`](../../fixtures/vectors/package.json)
 
@@ -46,11 +47,11 @@ and its scope is `publisher`, not a dotted prefix.
 | `agentRef` | `urn:fabric:agent:<publisher>:<id>` ([agentRef](#agentref)) | agent, required; never in a skill set |
 | `licence` | an SPDX license expression | both |
 | `layer` | `base`, `org`, `team`, `workplace` or `person`: the narrowest audience a skill set is published for | skill set, required |
-| `runners`, `skills`, `allowedToolsCeiling`, `listingChars` | the runner kinds it is written for; its Agent Skills by name; the union of their `allowed-tools`; the size of its skill listing, measured at packing | optional; a skill set names at least one skill |
-| `provider` | the path of the agent's provider manifest, `fabric-agent.json` ([profiles](profiles.md)) | agent, required |
-| `service` | the [service template](#service-template) | agent, optional |
+| `runners`, `skills`, `allowedToolsCeiling`, `listingChars` | the runner kinds it is written for; its Agent Skills by name; the union of their `allowed-tools`; the size of its skill listing, measured at packing | optional; a skill set and a consumer agent name at least one skill |
+| `provider` | the path of the agent's provider manifest, `fabric-agent.json` ([profiles](profiles.md)) | agent that serves capabilities; absent for a [consumer agent](#a-consumer-agent) |
+| `service` | the [service template](#service-template) | agent, optional; never on a consumer agent |
 | `secrets[]` | the [secret slots](#secrets), by name | agent, optional |
-| `requires` | what the agent needs of a machine: MCP `servers` by service id, `packages` (`publisher`, `id`, `range`), `platforms` (`darwin`, `linux`, `windows`), `gpu` | optional |
+| `requires` | what the agent needs of a machine: MCP `servers` by service id, MCP servers by role (`mcp[]`: `role`, `tools`, an optional `contract`), `packages` (`publisher`, `id`, `range`), `platforms` (`darwin`, `linux`, `windows`), `gpu` | optional; `mcp` required for a consumer agent |
 | `costPresets` | the [cost presets](#cost-presets) | agent, optional |
 | `resultSignal` | the [result signal](#the-result-signal) | agent, required |
 | `state[]` | what [moves with a placement](#state) | agent, optional |
@@ -71,7 +72,7 @@ v4 §12's row and CON-OE-03's field list are reconciled here; where they differ,
 
 | Source item | Here |
 |---|---|
-| v4 "manifest"; CON-OE-03 `fabric.package.json` | this document. The agent's capability manifest is a file of the folder, named by `provider` |
+| v4 "manifest"; CON-OE-03 `fabric.package.json` | this document. The capability manifest of an agent that serves is a file of the folder, named by `provider`; a consumer agent has none |
 | v4 "service template" | `service` |
 | v4 `secrets[]`, `requires`, `costPresets`, "result signal", `state[]` | the fields of the same names (`resultSignal`); CON-OE-03's `requires {servers, packages}` gains `platforms` and `gpu`, which v4 §6 routes by |
 | v4 "evals receipt"; CON-OE-03 `evals` (a path) | `evals.suite` and `evals.receipt` |
@@ -80,6 +81,22 @@ v4 §12's row and CON-OE-03's field list are reconciled here; where they differ,
 | v4 "ES256 publisher signature", "organization countersignature (a passkey assertion)"; CON-OE-03 `signature` (one) | `signatures[]`, each naming its algorithm — EdDSA until Fabric records D2 ([algorithms](#algorithms)) |
 | CON-OE-03 `id` "a scoped reverse name equal to the plugin name" | a kebab-case `id` equal to the plugin name, scoped by `publisher` and named across versions by `agentRef` (v4 §3) |
 | CON-OE-03 `schema`, `kind`, `version`, `layer`, `publisher`, `licence`, `runners`, `skills`, `allowedToolsCeiling`, `listingChars` | the fields of the same names |
+
+## A consumer agent
+
+An agent that serves nothing and only calls MCP servers — a Claude Code plugin whose skills use an organization
+server's tools — is `kind: agent` **without** `provider` (DEC-0071). It keeps `agentRef`, `resultSignal`, `evals` and
+may carry `secrets[]`; it lists its `skills` and its plugin manifest (`FAC-SEM-064`), and has no `service`, `state` or
+`layer` (schema). It names the servers it calls in
+`requires.mcp[]` by **role**: the server registered under that role name in the placement's configuration (in Claude
+Code's `.mcp.json`, the server key) and the `tools` it must expose, with an optional `contract` name for people. The
+address and the token are never in the package; they come with the placement, through the secret slots: a role
+names the slots that configure its server entry in `secrets` (DEC-0074), each declared in `secrets[]`, one slot feeding
+one role (`FAC-SEM-102`). A package
+names each role once (`FAC-SEM-102`), and no role, contract or tool is shaped like a credential (`FAC-SEM-065`). Any
+package may declare `requires.mcp`; a placement checks it the same way for each. A placement checks the roles before it installs:
+[`consumerPlacement`](../../src/package-rules.ts) answers each role the configuration does not register and each tool
+a registered server lacks.
 
 ## agentRef
 
@@ -217,6 +234,7 @@ no private key: `crypto.verify` accepts it on Node 20 and 22 and refuses it on 2
 | `FAC-SEM-064` | `package` | the package is whole: its `digest` is its own; each path is listed once and `fabric.package.json` never; the provider manifest, the service's entry, the evals suite and a vendored dependency are listed, the receipt's and the dependency's SHA-256 equal to the listed file's; a state path is declared once; a skill set lists its plugin manifest |
 | `FAC-SEM-065` | `package` | a package carries no secret: a slot is named once, and its name and purpose are not shaped like a credential; the service's entry carries none |
 | `FAC-SEM-066` | `package` | an agent's `agentRef` is `urn:fabric:agent:<publisher>:<id>` |
+| `FAC-SEM-102` | `package` | a package names each MCP role in `requires.mcp[]` once: one role, one server; each slot a role names in `secrets` is declared in `secrets[]`, and one slot feeds one role (DEC-0071, DEC-0074) |
 
 ## Privacy
 

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0069`
+**Next free ID:** `DEC-0076`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -395,6 +395,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; provider and consumer adoption pending
+- **Annotated (2026-10-12):** the reserved name `memory.learning.propose` is withdrawn by DEC-0072: learning lives in Fabric (Fabric ADR-0109) and a learning note is `learning-note/1`.
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Supersedes:** DEC-0014's pilot, for agent memory only (Fabric ADR-0105). DEC-0014 still
   governs Fabric's own domain memory.
@@ -3877,3 +3878,270 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-100` were reserved by git CAS (`--key w6-p6-02-session-join-20261012 DEC`, `--key
   w6-p6-02-sem-session-join-20261012 SEM`); the SEM counter at origin is consistent, but its receipt commit is not
   reachable on origin's SEM chain (the agent-sync defect AGENT-SYNC-IDS); the record plane is `fs`.
+
+### DEC-0069 — An app's own descriptor: `lifecycle.manager: "person"`, written by its installer or by the app on an install or update, and never a statement that it runs
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Fabric's session on 2026-10-12 (its
+  CO-263, with its amendment: an update is a reinstall). Consumer adoption: Fabric writes its descriptor this way and
+  keeps its liveness in its own file (CT-19); the adapter's kits read an app's descriptor for an "Open in <app>" button
+  and its liveness file before sending anything (CT-18).
+- **Amends:** DEC-0015 (the one exception to "the running service MUST NOT write its own descriptor"), DEC-0032 and
+  DEC-0061 (a sixth `lifecycle.manager`, `person`). Closes Fabric's ask CO-263 (board row CT-19; packet P6-06).
+- **Decision:** in [service → An app's descriptor](specification/service.md#an-apps-descriptor) —
+  1. **`lifecycle.manager: "person"`** with `lifecycle.app`, the installed app (a bundle or an executable); no `label`,
+     `plist`, `unit` or `task`; `installedBy` in its object form with `by: "person"` (schema).
+  2. **Who writes it.** The installer; when there is none (a macOS app dragged into Applications), the app on a start
+     where no descriptor exists, where its version differs from `installedBy.tool`'s or where it runs from another path
+     than `lifecycle.app`, and on no other start; never from a translocated copy (`appDescriptorAction` in
+     `src/app-descriptor.ts`). Only an app that writes its own descriptor does this. Removed at uninstall when it can be; a reader that does not find
+     `lifecycle.app` treats it as stale (`appDescriptorStale`).
+  3. **Installed, never running.** `origin` is optional for an app; its live origin and process id are in the app's own
+     liveness file, rewritten on every start and removed on quit. A kit's "Open in <app>" button reads the descriptor; a
+     caller that sends anything reads the liveness file and checks the process. Without an origin, the descriptor claims
+     no port (`FAC-SEM-010`).
+- **Why:** an app has no supervisor, so the rule that only an installer writes a descriptor left Fabric's desktop app,
+  which has no installer on macOS, with no descriptor at all, and a descriptor that claimed a port it changes each start
+  would point callers at a dead origin.
+- **Compatibility:** Additive in the schema: a new enum value and an optional member, and `origin` stays required for
+  every other manager. The descriptor sits in a shared directory, so an app cannot choose its readers: a reader pinned
+  before this decision (Fabric Dashboards and the adapter's kits today) refuses or mislists `manager: "person"` and a
+  missing origin until it adopts this decision (CT-18, CT-21), and must skip such an entry rather than fail the
+  directory. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`;
+  - schemas: `schemas/service-descriptor.schema.json`;
+  - code: `src/app-descriptor.ts` (new), `src/semantic-rules.ts` (`FAC-SEM-010`);
+  - fixtures: `fixtures/positive/service-descriptor-person-app.json`, `fixtures/negative/service-descriptor-person-*`,
+    `fixtures/negative/service-descriptor-without-origin.json`, `fixtures/negative/service-descriptor-app-beside-launchd.json`,
+    `fixtures/vectors/app-descriptor.json`, `fixtures/catalogue.json`;
+  - tests: `test/app-descriptor.test.ts` (new); floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-19), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** the liveness file's name, place and shape (each app's own; Fabric's is its hub file); an app's
+  descriptor on Linux and Windows package managers that do have an installer (they write it as any installer does).
+- **Source:** Fabric's session, CO-263 and its amendment (2026-10-12, Fabric `main` `bb0e6870`); DEC-0015, DEC-0032,
+  DEC-0061; packet P6-06. DEC-0069 was reserved by git CAS (`--key w6-p6-06-app-descriptor-20261012 DEC`); no rule code
+  was needed; the record plane is `fs`.
+
+### DEC-0070 — A service feed event may carry machine-readable `data`: a published schema and a bounded value, never a secret
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for by a consumer service that publishes
+  daily activity summaries and unanswered community questions on its feed (2026-10-12), following option (b) of Fabric's
+  answer of 2026-10-11 (contract `1e7a7d6`). Consumer adoption: the adapter's kits let a service add `data` (CT-18);
+  Fabric reads it when it knows its schema and shows `text` otherwise (CT-19).
+- **Amends:** DEC-0015's events feed (`service-events-page.schema.json`, an optional member of an event). Packet P6-07.
+- **Decision:** in [service → Events feed](specification/service.md#event-data) —
+  1. **`data`** is optional: `{schema, value}`. `schema` is the absolute URI of a payload schema the service publishes;
+     `value` is an object of at most 32 members, each a scalar (a string of at most 500 characters, a number, a boolean,
+     null), a list of at most 32 scalars, or an object of at most 32 scalar members (schema).
+  2. **`text` stays the event.** A host that ignores `data` loses nothing; a host validates `value` against `schema` when
+     it knows that schema, otherwise treats it as opaque, and never fails an event for it.
+  3. **No secret, no personal data.** No string in `value` sits under a credential's name or has a credential's shape
+     (`FAC-SEM-101`, kind `service-events-page`, the shared detector of `src/secret-shape.ts`, values and URLs); a
+     list's items and an object's members count under the outer name too; a number under a name such as
+     `inputTokens` is a count. Personal data is the service's duty: no check tells a name from another string.
+- **Why:** consumers of a feed could only read the sentence; a summary or a question carried counts and ids a host had
+  to parse out of prose. A published schema keeps the fields the service's own, and the bounds keep a feed a feed.
+- **Compatibility:** Additive in the schema. The feed is pulled, so a service cannot know its readers' pins: a host that
+  validates events against a copy pinned before this decision refuses the new member (the event object is closed) until
+  it adopts this decision; a host that ignores unknown members, as Fabric Dashboards does, shows `text` as before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/service-events-page.schema.json`;
+  - code: `src/feed-data.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/service-events-page-data.json`, `fixtures/negative/service-events-page-data-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/feed-data.test.ts` (new), `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`; floor in
+    `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-18, CT-19), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** a registry of payload schemas; `data` on the Server-Sent Events stream beyond "the same event
+  objects" it already carries.
+- **Source:** the consumer service's request (2026-10-12); Fabric's answer (contract `1e7a7d6`); DEC-0015; packet P6-07.
+  DEC-0070 and `FAC-SEM-101` were reserved by git CAS (`--key w6-p6-07-feed-data-20261012 DEC`, `--key
+  w6-p6-07-sem-feed-data-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0071 — A consumer agent: `kind: agent` without a provider manifest, requiring MCP servers by role and tools
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for and agreed by the first organization
+  server's session on 2026-10-12 (its admin agents are plugins that only call its MCP at each organization's own
+  address). Consumer adoption: the first organization server repacks its admin agents as consumer agents (CT-04);
+  Project Observatory's node checks `requires.mcp` with `consumerPlacement` before it places one (CT-20); the adapter's
+  `pack` writes them (CT-18).
+- **Annotated (2026-10-12):** its open question (which secret slot feeds which role's server entry) is decided by DEC-0074 (`requires.mcp[].secrets`).
+- **Amends:** DEC-0050 (`fabric-package/1`: `provider` becomes optional for an agent that serves nothing;
+  `requires.mcp[]`). Packet P6-09.
+- **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
+  1. **A consumer agent** is `kind: agent` without `provider`: it keeps `agentRef`, `resultSignal` and `evals`, may carry
+     `secrets[]`, lists its `skills` and its plugin manifest (`FAC-SEM-064`), and has no `service`, `state` or `layer`
+     (schema).
+  2. **`requires.mcp[]`**: each server it calls by `role` — the server registered under that name in the placement's
+     configuration — with the `tools` it must expose and an optional `contract` name. Never an address or a token; those
+     come with the placement through the secret slots. Each role once (`FAC-SEM-102`, kind `package`); no role,
+     contract or tool shaped like a credential (`FAC-SEM-065`). Any package may declare it.
+  3. **The placement's check.** `consumerPlacement(package, configured)` answers each required role the configuration
+     does not register (`missing-role`) and each tool a registered server lacks (`missing-tool`); role names compare
+     exactly.
+- **Why:** an agent that only consumes tools had to pack as a skill set, which cannot carry an `agentRef`, a secret slot
+  or a result signal; and "some MCP server is there" did not tell a placement whether the tools the skills call exist.
+- **Compatibility:** Additive for readers at this pin: every agent package valid before stays valid (`provider`
+  present). An older pinned reader refuses an agent without `provider`, so a consumer agent is placed by readers pinned
+  at or after this decision. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/fabric-package.schema.json`;
+  - code: `src/package-rules.ts` (`consumerPlacement`, `FAC-SEM-102`, the plugin manifest and credential checks);
+  - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`, `fixtures/negative/fabric-package-consumer-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/consumer-agent.test.ts` (new);
+  - docs: `docs/backlog.md` (CT-04, CT-18, CT-20), `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** how a placement learns the tools a configured server exposes (its MCP `tools/list`, or a
+  pinned list); which secret slot configures which role's server entry; the usage and spend route of an agent without a
+  service; a consumer agent's evals against a server it does not control.
+- **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
+  DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
+  w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0072 — Proposals and learning notes: `fabric-proposal/1` and `learning-note/1`, nothing applies itself, nothing private leaves
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Fabric's session on 2026-10-12 (its five
+  corrections against ADR-0109 and ADR-0029). Consumer adoption: Fabric keeps proposals and answers learning notes in
+  this shape and refuses a private proposal at submit (CT-19); Project Observatory sends learning notes and Fix
+  proposals by reference (CT-20); the first organization server receives approved rules and listings only (CT-04).
+- **Annotated (2026-10-12):** `FAC-SEM-103` also scans the proposal's URIs (`id`, `target.project`, `mergedInto`,
+  `supersededBy`, `appliedIn`), the goal's id and text, the finding's id, `approvedBy.policy` and `verifiedRun`, and finds a
+  home-folder path after `file://localhost` and after any character that cannot continue a path (a backtick, a bracket,
+  a comma), not only after a space, a quote or `(=:` (the board run's final verification; w7 close).
+- **Amends:** DEC-0023 (`memory.learning.propose` withdrawn). Implements the organization edition's CON-OE-05 (kept by
+  its CROSSWALK-v4; `proposal.submit` also serves a listing, v4 Path 4). Closes the board run's inventory item
+  CON-OE-05 (node N12, packet P6-03).
+- **Decision:** in [proposals](specification/proposals.md) —
+  1. **`fabric-proposal/1`**: `type` `rule` | `new-agent` | `skill-promotion` | `skill-retirement` | `listing` | `fix`;
+     `goal` required for the first four; `evidence[]` by reference only; a fix carries its `finding` and, once its source
+     stops reporting it, `verifiedAt` and `verifiedRun`; `target` the owning project's manager or the CEO; `private`
+     for a private agent's proposal (schema).
+  2. **Decisions.** `status` moves only along proposed → approved | refused | merged | superseded → applied → retired, and
+     `verified` for a fix (`FAC-SEM-104`, `PROPOSAL_TRANSITIONS`); `approvedBy` is a person (`operator`,
+     `administrator`) or a recorded autonomy policy — a project manager or the CEO, agent bindings in this contract,
+     decide only under a policy — and a rule's is the operator (`FAC-SEM-104`); an applied rule names the instruction
+     revision it entered (`appliedIn`), not a second approver.
+  3. **What leaves.** Only to an organization server or as an export (filing on the Board is not leaving); never a
+     private agent's proposal; an organization server receives an organization proposal (`sourceClass`) that is an
+     approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home path
+     (`FAC-SEM-103`).
+  4. **`learning-note/1`** from Project Observatory to Fabric, with the answer `accepted` | `duplicate` | `rejected`
+     (`learning-note-answer.schema.json`); evidence by reference, no transcript or secret; a `personal` or `unknown`
+     note never feeds an organization rollout (`FAC-SEM-105`).
+  5. **`memory.learning.propose`** (DEC-0023's reserved name) is withdrawn.
+- **Why:** problems seen in Dashboards and Observatory had no way to reach the system that fixes them, and learning had
+  two candidate homes; one open shape, one direction (Observatory notes, Fabric decides) and rules a test can fail keep
+  "nothing applies itself" and "private stays private" true by construction.
+- **Compatibility:** Additive: three new schemas and a withdrawn reserved name no provider served. `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/proposals.md` (new), `docs/specification/memory-and-learning.md`,
+    `schemas/memory-capability.schema.json` (the reserve removed),
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/fabric-proposal.schema.json`, `schemas/learning-note.schema.json`,
+    `schemas/learning-note-answer.schema.json` (new);
+  - code: `src/proposal-rules.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts` (the two revisions
+    registered, DEC-0067);
+  - fixtures: `fixtures/positive/fabric-proposal-*`, `fixtures/positive/learning-note*`,
+    `fixtures/negative/fabric-proposal-*`, `fixtures/negative/learning-note*`, `fixtures/catalogue.json`;
+  - tests: `test/proposal-rules.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/rule-tolerance.test.ts`;
+  - docs: `docs/backlog.md` (CT-04, CT-16, CT-19, CT-20), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** the v2 plan's `effect` and `measured_by` (not fields; see proposals.md, Relation to DEC-0012);
+  the Board's own screens; how a listing proposal carries the listing (v4 Path 4, with
+  `org-authority/1`); the per-kind autonomy policies' contents (Fabric's).
+- **Source:** Fabric ADR-0029, ADR-0109 and Fabric's session's corrections (2026-10-12); the organization architecture
+  v2's contract plan row CON-OE-05 and its CROSSWALK-v4; DEC-0012, DEC-0023; packet P6-03. DEC-0072 and
+  `FAC-SEM-103`…`FAC-SEM-105` were reserved by git CAS (`--key w6-p6-03-proposals-20261012 DEC`; `--key
+  w6-p6-03-sem-{proposal-submit,proposal-transition,learning-rollout}-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0074 — A required MCP role names the secret slots that configure it
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Proposed by the first organization server's session
+  after it repacked its admin agents under DEC-0071. Consumer adoption: the first organization server's packages name
+  their slots per role (CT-04); Project Observatory's node configures each role's server entry from the slots it names
+  (CT-20).
+- **Amends:** DEC-0071 (its open question). Packet P6-10.
+- **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
+  1. **`requires.mcp[].secrets`** names, by slot name, the secret slots a placement uses to configure that role's server
+     entry (its address and its token) (schema).
+  2. **Each named slot is declared** in the package's `secrets[]`, and **one slot feeds one role** (`FAC-SEM-102`).
+  3. **Vendoring.** A consumer that vendors this repository's reference code copies a module's import closure
+     (`sourceClosure`, beside `schemaClosure`), as it copies a schema's `$ref` closure ([adoption](specification/adoption.md#vendoring-schemas)).
+- **Why:** DEC-0071 said the address and token come through the secret slots but not which slot configures which
+  server; a placement had to guess, and a slot meant for one server could reach another.
+- **Compatibility:** Additive: an optional member, and a rule over it. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md`, `docs/specification/adoption.md`;
+  - schemas: `schemas/fabric-package.schema.json`;
+  - code: `src/package-rules.ts` (`FAC-SEM-102`), `src/schema-closure.ts` (`sourceClosure`);
+  - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`,
+    `fixtures/negative/fabric-package-consumer-secret-twice.json`, `fixtures/catalogue.json`;
+  - tests: `test/consumer-agent.test.ts`, `test/schema-closure.test.ts`;
+  - docs: `docs/backlog.md` (CT-04, CT-20).
+- **Not decided here:** how a placement maps a slot's value onto a server entry's fields (a URL, a header), which is
+  the runner's configuration format; whether a role may name a slot marked `optional`.
+- **Source:** the first organization server's session (2026-10-12); DEC-0071; packet P6-10. DEC-0074 was reserved by
+  git CAS (`--key w6-p6-10-mcp-secrets-20261012 DEC`); no new `FAC-SEM` id (`FAC-SEM-102` grew); the record plane is `fs`.
+
+### DEC-0075 — The local channel to the node: `fabric-local-channel/0.1`, the same OS user only, hello first, consent the other way
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Project Observatory's session on
+  2026-10-12 (its node serves the channel; its changes on locations, the directory as access control, Windows pipes,
+  limits and consent are taken whole). Consumer adoption: Project Observatory's node serves it and publishes
+  `channels.local` (CT-20); Fabric, Fabric Switchboard and Fabric Dashboards connect to it, Fabric declaring
+  `consent.ui` (CT-19, CT-03, CT-21).
+- **Annotated (2026-10-12):** `channelStep` answers `invalid-request` to every message whose envelope `$defs/request` refuses (not an
+  object, `jsonrpc` not `"2.0"`, an `id` not a 1–128 code-point string or an integer, a method that is not a method name,
+  `params` not an object, another member), tested against the schema on the same inputs; before, a malformed request
+  fell through to `hello-first` or was passed on (the board run's final verification; w7 close).
+- **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
+  CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
+  CON-OE-10 (node N12, packet P6-04).
+- **Decision:** in [the local channel](specification/local-channel.md) —
+  1. **Transport.** A Unix socket in a user-owned 0700 directory (macOS under Application Support, Linux under
+     `$XDG_RUNTIME_DIR` or the state directory) with the peer's uid checked, or a per-user named pipe on Windows with
+     remote clients rejected and process owners checked both ways; another user is `unauthenticated` before anything
+     is read; the client checks the server; a token file only where there are no peer credentials (`admitPeer`).
+  2. **Discovery.** The node publishes the path in its descriptor's `channels.local`; a client never computes it.
+  3. **Session.** JSON-RPC 2.0, one object per line of at most 1 MiB; `channel.hello` within 5 s (else `{id: null,
+     error: hello-first}` and close) negotiates N and N−1 (DEC-0067), refuses a missing client or an unknown capability,
+     and is answered once per session; nothing else is answered before it (`FAC-SEM-106`, `channelStep`). The node serves
+     `health` and `enroll.status`; payload methods belong to their owners' decisions. The node keeps its socket path
+     under 100 bytes.
+  4. **Consent.** The node sends `consent.prompt` with a deadline of at most 10 minutes to every client that declared
+     `consent.ui` (`mayPrompt`); the first answer before the deadline wins (`given` carries its time), the others receive
+     `consent.cancel`, and no answer or a late one is denied (`consentOutcome`, on the node's receipt time); a `given`
+     answer becomes DEC-0052's `consent`, a denied one records nothing; with no `consent.ui` client, denied at the
+     deadline.
+  5. **Errors** in the JSON-RPC envelope with `error.data.code` from one set and one integer per code (`ERROR_CODES`);
+     an Administrators process that opens a Windows pipe is admitted only with the node's user SID.
+- **Why:** three surfaces need to reach the node on one machine without a network port, a browser origin or a second
+  copy of anyone's credentials; the operating system already proves who the peer is.
+- **Compatibility:** Additive: a new protocol, registered in the revision register (DEC-0067), and an optional
+  descriptor member. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/local-channel.md` (new), `docs/specification/service.md`,
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/local-channel.schema.json` (new), `schemas/service-descriptor.schema.json` (`channels`);
+  - code: `src/local-channel.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts` (named-only);
+  - fixtures: `fixtures/positive/local-channel-*`, `fixtures/negative/local-channel-*`,
+    `fixtures/positive/service-descriptor-local-channel.json`, `fixtures/negative/service-descriptor-local-channel-both.json`,
+    `fixtures/semantic/local-channel-session-*`, `fixtures/catalogue.json`;
+  - tests: `test/local-channel.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-03, CT-16, CT-19, CT-20, CT-21), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
+- **Not decided here:** the key helper's code-signing check of its peer; payload methods' shapes; which descriptor `id`
+  a client trusts as the node's (its configuration).
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§5); the organization architecture
+  v2's contract plan row CON-OE-10 and its CROSSWALK-v4; Project Observatory's session (2026-10-12); DEC-0015,
+  DEC-0033, DEC-0052, DEC-0067; packet P6-04. DEC-0075 and `FAC-SEM-106` were reserved by git CAS (`--key
+  w6-p6-04-local-channel-20261012 DEC`, `--key w6-p6-04-sem-local-channel-20261012 SEM`); the record plane is `fs`.

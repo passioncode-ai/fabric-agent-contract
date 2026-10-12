@@ -1,0 +1,25 @@
+{
+  "schema": "fabric-proposal/1",
+  "id": "urn:fabric:proposal:p-0043",
+  "type": "fix",
+  "change": "Stop the nightly sync from retrying a revoked token.",
+  "evidence": [
+    {
+      "kind": "finding",
+      "ref": "urn:observatory:finding:f-77"
+    }
+  ],
+  "finding": {
+    "id": "f-77",
+    "source": "observatory",
+    "text": "The nightly sync retried a revoked token 40 times."
+  },
+  "target": {
+    "kind": "ceo"
+  },
+  "status": "refused",
+  "approvedBy": {
+    "policy": "fix-autonomy-1"
+  },
+  "createdAt": "2026-10-11T10:00:00Z"
+}

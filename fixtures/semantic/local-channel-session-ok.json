@@ -1,0 +1,31 @@
+{
+  "description": "A session that opens with channel.hello, then asks for health.",
+  "kind": "local-channel-session",
+  "expect": [],
+  "input": {
+    "requests": [
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "channel.hello",
+        "params": {
+          "protocols": [
+            "fabric-local-channel/0.1"
+          ],
+          "client": {
+            "name": "fabric",
+            "version": "0.4.0"
+          },
+          "capabilities": [
+            "consent.ui"
+          ]
+        }
+      },
+      {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "health"
+      }
+    ]
+  }
+}

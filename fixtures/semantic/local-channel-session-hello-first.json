@@ -1,0 +1,33 @@
+{
+  "description": "A session that opens with health instead of channel.hello (FAC-SEM-106).",
+  "kind": "local-channel-session",
+  "expect": [
+    "FAC-SEM-106"
+  ],
+  "input": {
+    "requests": [
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "health"
+      },
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "channel.hello",
+        "params": {
+          "protocols": [
+            "fabric-local-channel/0.1"
+          ],
+          "client": {
+            "name": "fabric",
+            "version": "0.4.0"
+          },
+          "capabilities": [
+            "consent.ui"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "events": [
+    {
+      "id": "4213",
+      "at": "2026-09-28T17:55:10Z",
+      "kind": "community.question_unanswered",
+      "level": "notice",
+      "text": "A question in the community chat has had no answer for 2 hours.",
+      "subject": {
+        "type": "report",
+        "id": "q3",
+        "label": "Q3 report"
+      },
+      "link": "/dashboard#/approvals/77",
+      "notify": true,
+      "data": {
+        "schema": "https://example.org/example-agent/schemas/question-unanswered-1.json",
+        "value": {
+          "k0": 0,
+          "k1": 1,
+          "k2": 2,
+          "k3": 3,
+          "k4": 4,
+          "k5": 5,
+          "k6": 6,
+          "k7": 7,
+          "k8": 8,
+          "k9": 9,
+          "k10": 10,
+          "k11": 11,
+          "k12": 12,
+          "k13": 13,
+          "k14": 14,
+          "k15": 15,
+          "k16": 16,
+          "k17": 17,
+          "k18": 18,
+          "k19": 19,
+          "k20": 20,
+          "k21": 21,
+          "k22": 22,
+          "k23": 23,
+          "k24": 24,
+          "k25": 25,
+          "k26": 26,
+          "k27": 27,
+          "k28": 28,
+          "k29": 29,
+          "k30": 30,
+          "note": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      }
+    },
+    {
+      "id": "4214",
+      "at": "2026-09-28T17:56:00Z",
+      "kind": "service.started",
+      "level": "info",
+      "text": "Service started on build 8b80be9."
+    }
+  ],
+  "cursor": "4214"
+}

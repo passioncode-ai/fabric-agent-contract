@@ -4,10 +4,19 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 the board's tool shapes and the project directory](2026-10-12-comms-tools-registers.md) | DEC-0073 (Fabric COM-02.3/03 Task 0; register text for the owner inside) | open, #83 |
-| [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | pull request open |
-| [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | pull request open |
-| [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | pull request open |
+| [2026-10-12 the board's tool shapes and the project directory](2026-10-12-comms-tools-registers.md) | DEC-0073 (Fabric COM-02.3/03 Task 0; register text applied at merge) | this pull request |
+| [2026-10-13 CT-40: the privacy check never passes unchecked](2026-10-13-ct40-privacy-skip.md) | none (tooling) | merged, #86 `71478fe` |
+| [2026-10-12 w7: the final verification's gaps](2026-10-12-w7-final.md) | DEC-0072 and DEC-0075 annotated | merged, #84 `4541f7b` |
+| [2026-10-12 the board run closes](2026-10-12-board-run-close.md) | DEC-0041…DEC-0075 (waves 1–6) | merged, #82 `fe55fc6` |
+| [2026-10-12 the local channel (P6-04)](2026-10-12-w6-p6-04-local-channel.md) | DEC-0075 (board run P6-04; CON-OE-10) | merged, #80 `b4f0344` |
+| [2026-10-12 a role's secret slots (P6-10)](2026-10-12-w6-p6-10-mcp-secrets.md) | DEC-0074 (board run P6-10) | merged, #79 `146240a` |
+| [2026-10-12 proposals and learning notes (P6-03)](2026-10-12-w6-p6-03-proposals.md) | DEC-0072 (board run P6-03; CON-OE-05) | merged, #78 `fc4dda0` |
+| [2026-10-12 a consumer agent (P6-09)](2026-10-12-w6-p6-09-consumer-agent.md) | DEC-0071 (board run P6-09) | merged, #76 `9c0032a` |
+| [2026-10-12 data on feed events (P6-07)](2026-10-12-w6-p6-07-feed-data.md) | DEC-0070 (board run P6-07) | merged, #77 `b9453a0` |
+| [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | merged, #73 `fee53a2` |
+| [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | merged, #75 `3cb040c` |
+| [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | merged, #72 `0656aa1` |
+| [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | merged, #71 `866d0b0` |
 | [2026-10-12 interop and usage (P5-02)](2026-10-12-w5-p5-02-interop-usage.md) | DEC-0065 (board run P5-02; CT-15) | merged, #68 `508e38a` |
 | [2026-10-12 the 0.1.0 core (P5-01)](2026-10-12-w5-p5-01-core.md) | DEC-0064 (board run P5-01; CT-14) | merged, #67 `252fd25` |
 | [2026-10-12 window leases and signing challenges](2026-10-12-w4-p4-05-leases-challenges.md) | DEC-0062, DEC-0063 (board run P4-05; V4-WINDOW-LEASE, V4-SIGNING-CHALLENGE) | merged, #65 `7b238c7` |

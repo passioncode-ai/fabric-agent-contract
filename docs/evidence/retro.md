@@ -7,6 +7,7 @@
 - A learning is created from a failed attempt beside a verified correction, never from a successful run alone.
 - A run may propose a prompt, pipeline, or policy change but may not mutate the rules governing itself.
 - A conformance probe for a placement reached through a platform is accepted only after it has run against a real instance behind that platform, not only against a sample the run itself wrote.
+- A reference function that answers for a schema is tested against that schema on the same inputs: every output it emits validates, and every input the schema refuses it refuses.
 
 ## Run stamps
 
@@ -35,8 +36,28 @@
   (DEC-0039, DEC-0040).
 - `2026-10-11-meter-and-handoff` — PR #32 `7931c1d` (DEC-0041), PR #31 `213e5a3` (DEC-0042).
 - `2026-10-11-board-waves` — PR #33 `2afbe60` (inventory, canvas, six waves); wave 1 in PRs #34…#38 and this one.
+- `2026-10-12-board-waves-close` — waves 2–6 in PRs #39…#81; the last wave closed at `d54b69a` (DEC-0043…DEC-0075, without
+  DEC-0073); 193 inventory items, 151 closed, 42 open: 37 in the program and 5 wave-1 board items without a row, given rows or
+  receipts by the w7 close (`2026-10-12-w7-final`).
 
 ## Recent log
+
+### 2026-10-12 — The board run, waves 2–6
+
+- **Goal:** close the board in its final form, wave by wave, with three independent readings before every merge.
+- **Failed attempts:** (1) the first reading found a blocking defect in nearly every PR, most often a reference
+  function or a refusal that its own schema would refuse, or a schema rule no test pinned; (2) a pushed branch commit
+  named a private agent in a handoff; (3) a register-merge script ordered a modified shared line after an appended
+  block and left a fragment at the end of DECISIONS.md; (4) a subagent wrote its plant script over the owner's in the
+  shared scratchpad, so later plants ran nothing; (5) a test derived its expected graph from the code it tested, so a
+  planted edge survived.
+- **Verified corrections:** each reading's findings were fixed in a round and confirmed by a second reading; the name
+  was replaced and the PR merged as a squash, so main's history never carried it (checked over every main commit); the
+  resolver keeps an edit before an appended block and the file was repaired; owner scripts live under `owner/` and
+  subagents write elsewhere; expected values are written out in the test, never computed from the code.
+- **Learning:** a schema and the reference code that answers for it drift unless one test runs both on the same
+  inputs; and the privacy check runs before every push, not only before the merge.
+
 
 ### 2026-10-11 — The board run: reviews of two incoming decisions, and wave 1
 

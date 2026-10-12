@@ -30,11 +30,10 @@
     },
     "reservedCapability": {
       "enum": [
-        "memory.learning.propose",
         "memory.explain",
         "memory.forget"
       ],
-      "description": "Named by memory/0.1 for a later revision; a provider must not serve them under these names before their schema exists."
+      "description": "Named by memory/0.1 for a later revision; a provider must not serve them under these names before their schema exists. memory.learning.propose is withdrawn (DEC-0072)."
     },
     "declaration": {
       "type": "object",

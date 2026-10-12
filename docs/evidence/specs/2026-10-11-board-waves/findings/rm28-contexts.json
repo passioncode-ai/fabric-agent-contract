@@ -111,7 +111,7 @@
     "id": "CX-CON-10",
     "title": "A grant's purpose and the declared context on a receipt (CX-30)",
     "source": "fabric-workspace docs/reports/2026-10-12-org-contexts/README.md at d8668299 (report fabric/2026-10-12-org-contexts, §6, §15; roadmap RM-28)",
-    "status_measured": "open: contract verdict sent to the report's owner 2026-10-12 — accept with amendments",
+    "status_measured": "open: contract verdict sent to the report's owner 2026-10-12 — accept with amendments; refined by the report's owner 2026-10-12 (model.md §10 C1): the receipt carries a purpose mark only — in-purpose may name a project listed in the grant's own purpose, outside-purpose names no other context — visibility only, never grounds to refuse, never a person",
     "area": "contract",
     "severity": "major",
     "owner": "contract",
@@ -130,5 +130,17 @@
     "closable_in_one_pass": false,
     "needs": "Fabric CX-FAB-05 (the workflow definition's fixed-executor field)",
     "proposed_fix": "amend FAC-SEM-067 with the four conditions; vectors for the floor and secondary suppression"
+  },
+  {
+    "id": "DV-CON-01",
+    "title": "A node's summary of its services and a headless enrollment token, scoped by context",
+    "source": "the agent network platform's ask DV-CON-01, answered 'amend' by the owner session on 2026-10-12",
+    "status_measured": "program: accepted with three changes — (1) `node-summary/1`, signed with that context's DEC-0053 `#sig` device key over RFC 8785 (DEC-0043), never a shared key; services by `id`/`instance` with `protocols` (DEC-0067), A2A card digests and MCP endpoints as published, no person and no path; (2) it travels as a check-in record or over the relay, like the other DEC-0053 check-in records; (3) `enroll-token/1` in the DEC-0063 signing register with `{scope, purpose, ceiling, expiresAt ≤ 15 min, nonce}`, single use by the receiver's nonce store as in DEC-0056",
+    "area": "contract",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": false,
+    "needs": "Fabric's organization ADR (D8) for the context key; a decision recording the three changes",
+    "proposed_fix": "a DEC adding node-summary/1 and enroll-token/1 with schemas, vectors and FAC-SEM rows"
   }
 ]
