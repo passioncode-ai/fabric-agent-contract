@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "schema-unsupported",
+    "message": "this receiver does not read that protocol revision",
+    "data": {
+      "protocol": "fabric-device/0.2",
+      "accepted": [
+        "fabric-device/0.1"
+      ]
+    }
+  }
+}

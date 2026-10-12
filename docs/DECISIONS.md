@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0067`
+**Next free ID:** `DEC-0068`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3768,3 +3768,62 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   git CAS (`agent_sync.py reserve --key relay-audit-n19-20261012 DEC`); no rule code was reserved. This file,
   `docs/backlog.md` and `conformance.md` were edited under git leases of run `N19-relay-audit`; the record plane is
   `fs`.
+
+### DEC-0067 — Protocol revisions: a receiver accepts N and N−1, says so in `protocols`, and refuses another revision with `schema-unsupported`
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Project Observatory's node lists
+  `protocols` in its check-in and answers `schema-unsupported` (CT-20); the first organization server lists what it
+  accepts in its enrollment response and sends records in a revision the node reads (CT-04); services and the adapter's
+  kits may list `protocols` in the well-known document (CT-18). Board row CT-16.
+- **Amends:** DEC-0009 (how a revision is negotiated and refused, not only named). Implements the first organization
+  server's target architecture v4 §12 row "`protocols[]` with N and N−1, `schema-unsupported`" (commit `9c6a780`) and
+  the organization edition's CON-OE-07. Closes the board run's inventory item CON-OE-07 (node N12, packet P6-01).
+- **Decision:** in [versioning → Protocol revisions](specification/versioning.md#protocol-revisions) —
+  1. **The register.** `PROTOCOL_REVISIONS` in `src/protocol-revisions.ts` lists every contract protocol's published
+     revisions, oldest first; a test keeps it equal to the revisions the schemas pin with `const` plus `NAMED_ONLY` (five
+     protocols a specification names without a schema pin). A decision that publishes a revision appends it and widens
+     each module's own revision constant, which a test keeps at the newest entry.
+  2. **N and N−1.** A receiver accepts the newest revision of a protocol it implements and the one before it in the
+     register, and no other; it never translates between revisions (DEC-0009).
+  3. **`protocols`** (`common.schema.json#/$defs/protocols`): at most N and N−1 per protocol, each entry
+     `<name>/<revision>` once, 1 to 64 entries (`FAC-SEM-099`, kind `protocols`). It is optional in the service well-known document
+     (what the service accepts), the device check-in (what the node reads) and the device enrollment response (what the
+     receiver accepts), and `FAC-SEM-099` checks it in each. A sender writes the newest revision both sides name; absent,
+     a party reads only its own documents' revision.
+  4. **`schema-unsupported`** (`schemas/schema-unsupported.schema.json`, `negotiateRevision`): sent before the document is
+     read further, naming the revision received (at most 80 characters, never splitting one) and the accepted revisions
+     of that protocol, or all of them when the received value names none the receiver reads; revisions compare as exact
+     strings. The accepted list is normalised (well-formed, once, at most 64), so the refusal always validates; a receiver
+     accepting nothing answers its own fault `no-accepted-revisions` instead. HTTP 400
+     with the JSON body, or an MCP `isError` result's `structuredContent`, answered after the request is authenticated
+     (device signature, DL-13) and before its body is read, as DEC-0009's "before semantic probes" allows, in the envelope of
+     `delegation-refusal.schema.json`. The relay keeps its own frame code `protocol-unsupported` (DEC-0047).
+- **Why:** an organization's machines update at different times; without a stated window a receiver either refuses a
+  machine one release behind or silently guesses at a revision it does not implement. Two revisions bound the window,
+  the list makes it visible before anything is sent, and one refusal shape lets a sender pick again.
+- **Compatibility:** Additive for readers at this pin: `protocols` is optional everywhere, and every protocol has one
+  published revision today, so N−1 does not yet exist and every current document is accepted as before. Not for an
+  older pinned reader: the three carrying objects are closed, so a party sends `protocols` only to a reader pinned at
+  or after this decision (CT-04, CT-18, CT-20 note it). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/versioning.md`, `docs/specification/service.md`, `docs/specification/devices.md`,
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/common.schema.json` (`protocolRevision`, `protocols`), `schemas/service-well-known.schema.json`,
+    `schemas/device-check-in.schema.json`, `schemas/device-enrollment.schema.json`,
+    `schemas/schema-unsupported.schema.json` (new);
+  - code: `src/protocol-revisions.ts` (new), `src/semantic-rules.ts`, `src/device-rules.ts`;
+  - fixtures: `fixtures/positive/service-well-known-protocols.json`, `fixtures/negative/service-well-known-protocols-unparsed.json`,
+    `fixtures/positive/device-check-in-protocols.json`, `fixtures/positive/device-enrollment-response-protocols.json`,
+    `fixtures/positive/schema-unsupported.json`, `fixtures/negative/schema-unsupported-empty-accepted.json`,
+    `fixtures/vectors/protocol-revisions.json`, `fixtures/catalogue.json`;
+  - tests: `test/protocol-revisions.test.ts` (new), `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+    `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-16), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** a revision's end of support beyond N−1 (a third revision drops the first); a revision field for
+  the signing-statement types (`relay-auth/1`, `estate-revision/1`, …), which are versioned inside their own registers;
+  `crit` on device policy (v4 §12 *Later*).
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§12); the organization architecture
+  v2's contract plan row CON-OE-07 and its CROSSWALK-v4 (fabric-workspace `docs/reports/2026-10-08-org-architecture-v2/plans/`);
+  DEC-0009; packet P6-01. DEC-0067 and `FAC-SEM-099` were reserved by git CAS (`--key w6-p6-01-protocols-20261012 DEC`,
+  `--key w6-p6-01-sem-protocols-20261012 SEM`); the record plane is `fs`.

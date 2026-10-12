@@ -100,6 +100,8 @@ Schema: [`service-well-known.schema.json`](../../schemas/service-well-known.sche
 under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote
 placement requires the token here too ([Remote placement](#remote-placement)).
 
+- `protocols` MAY list the protocol revisions the service accepts, N and N−1 per protocol; a request in another
+  revision is refused with `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067).
 - `service.id` and `service.instance` MUST equal the descriptor's. A different answer
   means another program holds the port; a host MUST report it as `foreign` and MUST NOT
   send it the descriptor's token (`FAC-SEM-009`).

@@ -1,0 +1,133 @@
+{
+  "description": "Protocol revisions (DEC-0067, versioning.md#protocol-revisions): a receiver's answer to a document naming `received`, given the revisions it accepts. A revision is compared as an exact string.",
+  "cases": [
+    {
+      "name": "accepts-N",
+      "received": "fabric-device/0.1",
+      "accepted": [
+        "fabric-device/0.1"
+      ],
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "refuses-newer",
+      "received": "fabric-device/0.2",
+      "accepted": [
+        "fabric-device/0.1"
+      ],
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "fabric-device/0.2",
+            "accepted": [
+              "fabric-device/0.1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "names-only-same-protocol",
+      "received": "fabric-service/0.2",
+      "accepted": [
+        "fabric-device/0.1",
+        "fabric-service/0.1"
+      ],
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "fabric-service/0.2",
+            "accepted": [
+              "fabric-service/0.1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown-protocol-lists-all",
+      "received": "other/1",
+      "accepted": [
+        "fabric-device/0.1",
+        "fabric-service/0.1"
+      ],
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "other/1",
+            "accepted": [
+              "fabric-device/0.1",
+              "fabric-service/0.1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "exact-match-only",
+      "received": "fabric-device/0.10",
+      "accepted": [
+        "fabric-device/0.1"
+      ],
+      "note": "a revision is compared as a whole string; a lax prefix or numeric match gets this wrong",
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "fabric-device/0.10",
+            "accepted": [
+              "fabric-device/0.1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "case-sensitive",
+      "received": "Fabric-Device/0.1",
+      "accepted": [
+        "fabric-device/0.1"
+      ],
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "Fabric-Device/0.1",
+            "accepted": [
+              "fabric-device/0.1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "not-a-string",
+      "received": 7,
+      "accepted": [
+        "fabric-device/0.1"
+      ],
+      "expect": {
+        "error": {
+          "code": "schema-unsupported",
+          "message": "this receiver does not read that protocol revision",
+          "data": {
+            "protocol": "",
+            "accepted": [
+              "fabric-device/0.1"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
