@@ -44,7 +44,7 @@ function transitionFindings(value: JsonObject): Finding[] {
  * without `localhost`), or after any character that cannot continue a path (a space, a quote, a backtick, a bracket, a
  * comma), so `docs/Users/x`, `src/home/page` and a folder in any script before `/home/` are not home folders.
  */
-const HOME_PATH = new RegExp(String.raw`(?:^|file:\/\/(?:localhost)?\/?|[^\p{L}\p{N}_.\-\/~@+])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:[\\/]Users[\\/])`, "u");
+const HOME_PATH = new RegExp(String.raw`(?:^|file:\/\/(?:localhost)?|[^\p{L}\p{N}_.\-\/~@+])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)`, "u");
 
 /**
  * Every string a proposal carries out: its URIs (`id`, `target.project`, `mergedInto`, `supersededBy`, `appliedIn`), its
