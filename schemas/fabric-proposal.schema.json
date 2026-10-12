@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/fabric-proposal.schema.json",
+  "title": "Proposal, fabric-proposal/1 (DEC-0072)",
+  "description": "A change proposed to a project's manager (or the CEO when there is no project), Fabric ADR-0029 and ADR-0109: a rule for an agent binding, a new agent, a skill promotion or retirement, a listing (v4 Path 4), or a fix of a finding. Evidence by reference; nothing applies itself; a rule is approved by a person; a proposal about a private agent never leaves (FAC-SEM-103, FAC-SEM-104).",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "type",
+    "change",
+    "evidence",
+    "target",
+    "status",
+    "createdAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "fabric-proposal/1"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "type": {
+      "enum": [
+        "rule",
+        "new-agent",
+        "skill-promotion",
+        "skill-retirement",
+        "listing",
+        "fix"
+      ]
+    },
+    "goal": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      },
+      "additionalProperties": false,
+      "description": "The agent binding's goal the proposal serves (ADR-0109 §3); required for rule, new-agent, skill-promotion and skill-retirement."
+    },
+    "change": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "additionalProperties": false,
+      "description": "For a fix: the finding's id, its source and its text, never a secret (ADR-0109 §6)."
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "project",
+            "ceo"
+          ]
+        },
+        "project": {
+          "$ref": "common.schema.json#/$defs/uri"
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "approved",
+        "refused",
+        "merged",
+        "superseded",
+        "applied",
+        "retired",
+        "verified"
+      ]
+    },
+    "approvedBy": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "role"
+          ],
+          "properties": {
+            "role": {
+              "enum": [
+                "operator",
+                "product-manager",
+                "ceo",
+                "administrator"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "policy"
+          ],
+          "properties": {
+            "policy": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "description": "A person's role, or a recorded per-kind autonomy policy (ADR-0029 §3); never an agent. A rule is approved by a person (FAC-SEM-104)."
+    },
+    "mergedInto": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "supersededBy": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "appliedIn": {
+      "$ref": "common.schema.json#/$defs/revisionRef",
+      "description": "The instruction revision an approved rule entered (ADR-0109 §4): applying is not a second act."
+    },
+    "verifiedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "verifiedRun": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "For a fix: the source's run that no longer reported the finding."
+    },
+    "private": {
+      "type": "boolean",
+      "description": "About an agent the operator marks private: never exported or submitted (ADR-0109 §7, FAC-SEM-103)."
+    },
+    "payload": {
+      "type": "object",
+      "maxProperties": 32
+    },
+    "createdAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "rule",
+              "new-agent",
+              "skill-promotion",
+              "skill-retirement"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "goal"
+        ],
+        "properties": {
+          "goal": true
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "fix"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "finding"
+        ],
+        "properties": {
+          "finding": true
+        }
+      },
+      "else": {
+        "properties": {
+          "finding": false,
+          "verifiedAt": false,
+          "verifiedRun": false
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "project"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": [
+              "project"
+            ],
+            "properties": {
+              "project": true
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "project": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "approved",
+              "applied",
+              "retired",
+              "verified"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "approvedBy"
+        ],
+        "properties": {
+          "approvedBy": true
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "merged"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mergedInto"
+        ],
+        "properties": {
+          "mergedInto": true
+        }
+      },
+      "else": {
+        "properties": {
+          "mergedInto": false
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "superseded"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "supersededBy"
+        ],
+        "properties": {
+          "supersededBy": true
+        }
+      },
+      "else": {
+        "properties": {
+          "supersededBy": false
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "type",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "const": "rule"
+          },
+          "status": {
+            "enum": [
+              "applied",
+              "retired"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "appliedIn"
+        ],
+        "properties": {
+          "appliedIn": true
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "verified"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "verifiedAt",
+          "verifiedRun"
+        ],
+        "properties": {
+          "type": {
+            "const": "fix"
+          },
+          "verifiedAt": true,
+          "verifiedRun": true
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": [
+        "kind",
+        "ref"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "pattern": "^[^\\s]+$"
+        },
+        "window": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "end": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "Evidence by reference only — an episode, a finding, a run, a journal interval — never a copy of content."
+    }
+  }
+}
