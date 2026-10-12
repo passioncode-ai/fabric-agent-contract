@@ -67,6 +67,8 @@ describe("privacyPlan", () => {
     // A sibling folder whose name only starts like the home directory is not inside it.
     const near = privacyPlan(inputs({ home, orgIndex: `${home}-other` }));
     expect(near.action === "fail" && near.reason).toContain(`${home}-other`);
-    expect(privacyPlan(inputs({ home: "", orgIndex: path.join(home, "x") }))).toMatchObject({ action: "fail" });
+    // An unknown home directory replaces nothing.
+    const unknown = privacyPlan(inputs({ home: "", orgIndex: path.join(home, "x") }));
+    expect(unknown.action === "fail" && unknown.reason).toContain(`but ${path.join(home, "x", "scripts", "check_private.py")}`);
   });
 });
