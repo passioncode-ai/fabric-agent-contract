@@ -531,7 +531,9 @@
             "mailbox-full",
             "expired",
             "digest-mismatch",
-            "internal"
+            "internal",
+            "malformed",
+            "recipients-mismatch"
           ]
         },
         "message": {
