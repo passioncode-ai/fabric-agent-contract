@@ -887,6 +887,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
   Revised before merge by the contract owner's review of PR #22 and its re-review.
 - **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and item 9 records the posture reason `re_enrolled` (CON-OE-01); DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
+- **Annotated (2026-10-12):** items 1 and 2 extended by DEC-0056 — every request after enrollment carries an HTTP message signature beside mutual TLS, and a receiver behind a TLS-terminating host attributes by the certificate the verified signature names.
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -2285,6 +2286,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   binds the proven user, states `collectionStart`, signs key sets in its root's algorithm and, for organizations a
   vendor hosts, delivers the root's certification (backlog CT-04). The relay protocol (DEC-0047, reserved) builds on
   the `#kem` key and the check-in's `records`.
+- **Annotated (2026-10-12):** item 8 tightened by DEC-0056 (an enrollment that lists `deviceKeys` lists exactly one `#sig` and at most one `#kem`), and item 9 extended by it (an optional `records.estateRecord.digest`).
 - **Amends:** DEC-0031 (items 1, 3, 4 and 7). Implements CON-OE-12 as the v4 crosswalk keeps it and the first
   organization server's target architecture v4 §12 row "DEC-0031: `platform-keystore` device keys; ES256
   `policyRootKey` form; check-in carries the record revision, heartbeat, delta and leases" (commit `9c6a780`), and closes
@@ -2471,3 +2473,109 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0056 — Device transport: an HTTP message signature on every device request beside mutual TLS, key roles counted at enrollment, and the estate revision's digest in the check-in
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the first organization server
+  verifies the binding as receiver and runs the vectors at its next contract pin; a collector and Project Observatory's
+  node sign every batch, check-in and rotation request with the device's `#sig` key, and the node reports the applied
+  estate revision's `digest` (backlog CT-04, CT-20, CT-32).
+- **Amends:** DEC-0031 items 1 and 2 (transport and attribution) and DEC-0053 items 8 and 9 (device keys, check-in
+  fields), additively except where *Compatibility* says. Closes DEV-HTTPSIG, DEV-KEY-ROLES and DEV-CHECKIN-DIGEST
+  (board run N18, packet P4-04).
+- **Decision:** in [devices](specification/devices.md#transport) unless named otherwise —
+  1. **A device signs every request after enrollment.** Every batch (`fabric-activity/0.1`), check-in and rotation
+     request (`certificate.action: "rotate"`) carries an HTTP message signature, a subset of RFC 9421, beside mutual TLS,
+     not instead of it. On one request (the owner session's ruling): a signature that is present is always verified;
+     beside a client certificate, `keyid` MUST equal that certificate's serial, else 401 `certificate-unknown`; an invalid
+     signature over a valid mutual-TLS session is refused with the signature step's code; an unsigned request is accepted
+     only by a receiver that sees the client certificate, while that certificate is known, not revoked and valid. A
+     receiver behind a host that terminates TLS therefore requires the signature. Enrollment is unchanged: its proof
+     travels in `Authorization`. A device signs each retry afresh, with a new `nonce` and `created`.
+  2. **The signature's shape.** Label `fabric-device`; covered components `("@method" "@target-uri" "content-digest")`
+     in that order; parameters `created`, `nonce`, `keyid`, `alg`, in that order and no other; `keyid` the certificate's
+     serial; `alg` `ecdsa-p256-sha256` (RFC 9421 §3.3.4, r ‖ s) for an `es256` signing key, `ed25519` (§3.3.6) for an
+     `ed25519` one; `nonce` 22–64 base64url characters, required; `Content-Digest` exactly one member, `sha-256`, over
+     the body's bytes (RFC 9530 §2). The fields are RFC 8941 Dictionaries (RFC 9651's Date and Display String admitted on
+     other members); a parameter repeated on the `fabric-device` member is refused, while other members keep RFC 8941's
+     last-wins rule. The signature base is RFC 9421 §2.5's with §2.3's signature parameters last.
+  3. **The signing key** is the `#sig` key of the enrollment whose epoch the certificate carries (rotation keeps it), or,
+     where that enrollment listed no `deviceKeys`, the certified key (DEC-0031's key on record); the receiver's data model
+     records which. Serials are unique among the certificates one receiver accepts. A P-256 key passes SEC 1 §3.2.2
+     (`isValidP256Key`), an Ed25519 key the small-order check (DEC-0045), before anything is verified under it.
+  4. **The target URI** is built from the receiver's public base URL — `https://` and the authority the device enrolled
+     with, host in lower case, no default port, no path — and the request target as received; never from `Host`.
+  5. **The receiver's steps and codes**, each refusal HTTP 401: `signature-missing` (no conforming `fabric-device`
+     signature, a missing or malformed nonce among them), `digest-mismatch`, `signature-stale` (`created` more than 300 s
+     from its clock, either way), `certificate-unknown` (also a `keyid` that is not the client certificate's serial),
+     `certificate-revoked` (`revoked` present and not `false`), `certificate-expired` (outside
+     `notBefore` ≤ t < `notAfter`, read strictly as RFC 3339), `signature-invalid` (the wrong `alg` for the key, an
+     unusable key, a base that cannot be built, a signature that does not verify) and `signature-replayed`. A context that
+     is not usable — not an object, an unreadable clock, a malformed public base URL, a certificate lookup or nonce store
+     that is not a function — is refused first, as the receiver's own fault (`context-invalid`, `clock-unreadable`,
+     `base-url-invalid`); the verifier answers and never throws.
+  6. **Replay.** Only after the signature verifies does the receiver record (serial, `nonce`), atomically, and it keeps
+     the pair at least while its clock is at or before `created + 300` s; a repeat answers `signature-replayed`. A
+     refused request records nothing. The store is an interface (`NonceStore`); it detects repeats and nothing else.
+  7. **Attribution is unchanged:** the certificate the verified signature names stands where the client certificate
+     stands (`FAC-SEM-045`).
+  8. **The reference verifier** is `src/http-signature.ts` (`checkDeviceSignature`, `verifyDeviceRequest`, the signer
+     `signDeviceRequest`, which refuses a nonce, serial or `created` the receiver would refuse, `parseDictionary`,
+     `signatureBase`), with the vectors `fixtures/vectors/http-signature.json` that a server and a collector run.
+     **`FAC-SEM-077`** (`device-request-signature`, receipt SEM-0077), in its own module `src/device-transport-rules.ts`
+     so a consumer that vendors `src/device-rules.ts` needs no HTTP layer: the answer of a receiver that requires the
+     signature, or that sees a client certificate, is the one the binding gives.
+  9. **Key roles at enrollment (DEV-KEY-ROLES).** `FAC-SEM-044` counts roles: an enrollment that lists `deviceKeys`
+     lists exactly one `#sig` and at most one `#kem`, as the estate record's `FAC-SEM-073` does (DEC-0055).
+  10. **The revision's digest (DEV-CHECKIN-DIGEST).** The check-in's `records.estateRecord` MAY carry `digest`
+      (`sha256:` and 64 hex, DEC-0055's `digest`) beside `revision`, so a receiver tells two revisions with one number
+      apart (`schemas/device-check-in.schema.json`). A device omits it toward a receiver pinned before this decision.
+  11. **J10.** The binding carries a certificate serial, a nonce and a time; it describes a device's key and nothing about
+      a person. The nonce store detects repeats only: a pair SHOULD be deleted once the clock passes its `keepUntil`, and
+      the store is never read as a record of activity.
+- **Why:** a host that terminates TLS at its edge never passes a client certificate on, so DEC-0031's mutual TLS proves
+  nothing there; the first organization server runs on such a host and proposed this binding (its ADR-0007). The nonce
+  makes a replay visible: a check-in's `sequenceNum` drives OpAMP's full-state request on a gap, not a refusal, so a
+  check-in replayed inside the window would be read again and could bring back an old posture and hide `tampered`. A
+  receiver must know the one key that signs, which is why the enrollment's key roles are counted. A fork of the estate
+  record (two revisions, one number) was invisible in a check-in that carried only the number (PR #54's seam review).
+- **Compatibility:** Additive in schema: a new optional `digest`, a new rule code, a new module. Tightening, each with
+  what a consumer does: an enrollment listing two `#sig` keys, or two `#kem` keys, or only a `#kem` key, is refused by
+  `FAC-SEM-044` (a collector lists one of each role); a device signs every request (a collector built against mutual TLS
+  alone adds the signature; none is deployed, CT-04); a receiver behind a TLS-terminating host refuses an unsigned
+  request with `signature-missing`. The first organization server's implementation (its commit `7a47447`) already
+  speaks this label, these parameters and these codes; the seam reading ran it against the vectors, and these
+  differences remain for its next pin: (a) its anchored pattern answers `signature-missing` when another signature is
+  beside ours; (b) an off-curve P-256 key on record throws (a 500, not a 401); (c) it accepts an `http://` public base
+  URL; (d) it refuses an expired (serial, nonce) pair until its purge runs, where the binding lets it lapse after
+  `keepUntil`; (e) it does not refuse a small-order key at enrollment; (f) it upper-cases `@method`; (g) it verifies
+  under the CSR's key rather than the `#sig` key. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/devices.md` (transport, enrollment, device keys, attribution, check-in, rules),
+    `docs/specification/activity.md` (batch transport, OTLP intake), `docs/specification/estate-record.md` (device-key
+    counts, the fork), `docs/specification/conformance.md` (register, readers, canonical forms);
+  - schemas: `schemas/device-check-in.schema.json`, `schemas/device-enrollment.schema.json`,
+    `schemas/activity-batch.schema.json`, `schemas/activity-common.schema.json` (descriptions);
+  - code: `src/http-signature.ts` (new), `src/device-transport-rules.ts` (new), `src/device-rules.ts`,
+    `src/semantic-rules.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/device-check-in-records-digest.json`,
+    `fixtures/negative/device-check-in-records-digest-bare-hex.json`, `fixtures/semantic/device-enrollment-device-keys-*`,
+    `fixtures/semantic/device-request-signature-*`, `fixtures/vectors/http-signature.json` (new);
+  - tests: `test/http-signature.test.ts` (new), `test/device-rules.test.ts`, `test/rule-tolerance.test.ts`; floors in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (RFC 9421, RFC 9530, RFC 8941, RFC 9651), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
+    `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w4-p4-04-device-transport.md` and `docs/handoffs/README.md`.
+- **Not decided here:** a response signature (the server signing its answers; a device trusts the TLS channel and the
+  signed policy and key sets); the URL paths of batches, check-ins and rotation (the vectors' paths are examples); how a
+  receiver behind a TLS-terminating host learns a revoked certificate beyond its own records; what a receiver does when
+  a check-in's estate digest shows a fork; RFC 9421's successor drafts and `Accept-Signature`; clock skew (whether a
+  device reports a `signature-stale` refusal); several certificate issuers behind one receiver, whose serials could
+  collide.
+- **Source:** the first organization server's ADR-0007, amended 2026-10-12 at its commit `7a47447`, agreed with this
+  repository's owner session on 2026-10-12; RFC 9421, RFC 9530 and RFC 8941 in the [source ledger](evidence/sources.md);
+  the board-waves inventory DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST, packet P4-04. DEC-0056 and `FAC-SEM-077`
+  were reserved by git CAS (`agent_sync.py reserve --key w4-p4-04-device-transport-20261012 DEC`,
+  `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
+  run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
+  record plane is `fs`.
