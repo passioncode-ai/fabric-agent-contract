@@ -24,6 +24,7 @@ import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
 import { attributionRules } from "./openrouter-attribution.js";
 import { embeddedProtocolsFindings, protocolRules } from "./protocol-revisions.js";
+import { sessionJoinRules } from "./session-join.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
@@ -70,6 +71,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (attribution) return attribution;
   const protocols = protocolRules(kind, value);
   if (protocols) return protocols;
+  const joined = sessionJoinRules(kind, value);
+  if (joined) return joined;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const descriptorBundle = descriptorBundleRules(kind, value);

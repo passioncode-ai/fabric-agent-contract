@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0068`
+**Next free ID:** `DEC-0069`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -744,6 +744,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
   (head `19e2b58`).
 - **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
+- **Annotated (2026-10-12):** amended by DEC-0068 (the core kind `session.annotation`; one writer per session, `FAC-SEM-100`).
 - **Amends:** nothing — a new protocol beside `fabric-service/0.1`, added under the DEC-0016
   extension policy
 - **Decision:** The contract defines activity telemetry for debugging, work memory and spend
@@ -3827,3 +3828,47 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   v2's contract plan row CON-OE-07 and its CROSSWALK-v4 (fabric-workspace `docs/reports/2026-10-08-org-architecture-v2/plans/`);
   DEC-0009; packet P6-01. DEC-0067 and `FAC-SEM-099` were reserved by git CAS (`--key w6-p6-01-protocols-20261012 DEC`,
   `--key w6-p6-01-sem-protocols-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0068 — The session join key: the runtime's `session.id`, one collector writes a session's intervals and usage, surfaces annotate
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Project Observatory's session on
+  2026-10-12 (its node is the single writer; the collector side is filed in its program for CT-20). Consumer adoption:
+  Project Observatory's collector writes Fabric's and Switchboard's session events as `session.annotation` (CT-20);
+  Fabric and Fabric Switchboard keep their own events as events and never count them into activity (CT-19, CT-03);
+  the first organization server counts only intervals and usage lines (CT-04). Board row CT-16.
+- **Amends:** DEC-0030 (a core kind `session.annotation`, additive within `fabric-activity/0.1` by its own rule for new
+  core kinds; a rule for one writer per session). Implements the organization architecture v2's CON-OE-08 (R07-5, kept
+  unchanged by its CROSSWALK-v4). Closes the board run's inventory item CON-OE-08 (node N12, packet P6-02).
+- **Decision:** in [activity → One writer per session](specification/activity.md#one-writer-per-session) —
+  1. **The key.** The runtime's `session.id` joins every event about a session.
+  2. **One writer.** On one device the collector writes a session's `session.interval` and `usage.line` events: every
+     counted event of one `session.id` carries one `collector.id`, and the session's intervals do not overlap
+     (`FAC-SEM-100`, kind `session-join`, `{events}`).
+  3. **Annotations.** What Fabric (`session.ended`, `terminal.opened`), Switchboard (`journal_launch`) or another surface
+     reports about a session is written by the collector as `session.annotation` `{by, label, at}`; the schema refuses
+     start, end, tokens, cost and `user` in it, so it is never counted and adds no subject to a summary cell's
+     population.
+  4. **What a reader counts.** Interval seconds by state and one usage line per `dedupeKey`, nothing else
+     (`sessionTotals` in `src/session-join.ts`): a session seen by three writers totals as its collector wrote it.
+- **Why:** three writers of one session's time (the collector, Fabric, Switchboard) with no join key counted the same
+  work two or three times; a single writer per fact and a key make the count one by construction.
+- **Compatibility:** Additive: a reader that does not know the new core kind already stores it as an unknown kind
+  (DEC-0030), and a rule over events no consumer writes from two collectors today. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/activity.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/telemetry-event.schema.json` (`session.annotation`);
+  - code: `src/session-join.ts` (new), `src/semantic-rules.ts`, `src/activity-rules.ts` (`population`);
+  - fixtures: `fixtures/positive/telemetry-event-session-annotation.json`,
+    `fixtures/negative/telemetry-event-annotation-with-duration.json`, `fixtures/negative/telemetry-event-annotation-with-user.json`,
+    `fixtures/negative/telemetry-event-annotation-without-session.json`, `fixtures/semantic/session-join-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/session-join.test.ts` (new), `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-16), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** how a collector merges intervals it reads from two sources of its own (OTel and a transcript)
+  before writing them — its method, recorded in `data.method`; a session that moves between devices.
+- **Source:** the organization architecture v2 (fabric-workspace `docs/reports/2026-10-08-org-architecture-v2/README.md`
+  §4 "One writer per fact", R07-5) and its contract plan row CON-OE-08; DEC-0030; packet P6-02. DEC-0068 and
+  `FAC-SEM-100` were reserved by git CAS (`--key w6-p6-02-session-join-20261012 DEC`, `--key
+  w6-p6-02-sem-session-join-20261012 SEM`); the SEM counter at origin is consistent, but its receipt commit is not
+  reachable on origin's SEM chain (the agent-sync defect AGENT-SYNC-IDS); the record plane is `fs`.
