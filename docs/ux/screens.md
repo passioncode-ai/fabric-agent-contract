@@ -21,6 +21,10 @@
 | SCR-13 | Spend policy choice | FLW-10 | disabled | proposed | none yet |
 | SCR-14 | Fabric's approval prompt | FLW-11 | disabled | proposed | none yet |
 | SCR-15 | Dashboard page after the session ended | FLW-12 | disabled | proposed | none yet |
+| SCR-16 | Dashboard in a host pane | FLW-13 | disabled | proposed | `test/embedded-dashboard.test.ts` |
+| SCR-17 | Usage by grant | FLW-14 | disabled | proposed | `test/spend-policy.test.ts` |
+| SCR-18 | Restore preview and report | FLW-15 | disabled | proposed | `test/settings-backup.test.ts` |
+| SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
 
 ## Design system
 
@@ -200,4 +204,48 @@
 - **Coverage:** `src/operator-session.ts`, `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
 - **Scenarios:** SCN-019
 - **Resources:** service specification, Operator login
+- **Status:** proposed
+
+### SCR-16: Dashboard in a host pane
+
+- **Used by:** FLW-13
+- **Purpose:** an agent's dashboard page shown inside a host beside the agent console, usable at every width the host keeps for it.
+- **Elements:** the page's navigation (wrapping, a visible *More* menu or one labelled control), its content, its own scheme and theme controls when it applies no host field (primary action: the page's own).
+- **States:** success — the page at or above its floor, every destination reachable; narrow — the console stopped at the host floor `max(480, minWidth)`; legacy — the page declares nothing valid, so the host keeps 480 and the page follows the system colour scheme; below floor — a window too small for both, so the page keeps its floor layout and scrolls sideways.
+- **Coverage:** `service-dashboard-extension.schema.json`, `test/embedded-dashboard.test.ts` (ED-1…ED-10, FAC-SEM-080), `src/dashboard-declaration.ts`
+- **Scenarios:** SCN-021, SCN-022
+- **Resources:** embedded-dashboard specification, The page, The host, The declaration
+- **Status:** proposed
+
+### SCR-17: Usage by grant
+
+- **Used by:** FLW-14
+- **Purpose:** the operator sees what an agent spent under which standing grant, without having been asked.
+- **Elements:** each grant with its receipts settled, the amounts, the level that would have refused (primary action: none; the report is read-only).
+- **States:** success — the spend listed under its grant with the receipt; error — a denied check, its code and level shown as the agent relayed them.
+- **Coverage:** `grant-check.schema.json`, `service-usage.schema.json` (`byGrant`), `test/spend-policy.test.ts`, `test/meter-grant.test.ts`
+- **Scenarios:** SCN-023
+- **Resources:** spend-policy specification, Grants, Checking
+- **Status:** proposed
+
+### SCR-18: Restore preview and report
+
+- **Used by:** FLW-15
+- **Purpose:** the operator sees what a restore would add and what it would drop, default or refuse, before and after applying it.
+- **Elements:** per table, rows to insert; snapshot columns dropped, current columns defaulted, required columns missing; refused rows with key and reason; skipped damaged snapshots (primary action: apply).
+- **States:** preview — nothing applied yet; success — rows inserted, none overwritten; error — rows refused with their reasons, or no intact snapshot with content.
+- **Coverage:** `settings-backup.schema.json`, `src/settings-backup.ts` (FAC-SEM-035), `test/settings-backup.test.ts`
+- **Scenarios:** SCN-024
+- **Resources:** service specification, Settings backup, Restore
+- **Status:** proposed
+
+### SCR-19: Project board thread
+
+- **Used by:** FLW-16
+- **Purpose:** the operator reads one thread between Projects and the state of each request in it.
+- **Elements:** participants fixed at creation, messages with sender Project and principal provenance, each request's state and effect state (primary action: none for the operator; responders act through the board's operations).
+- **States:** success — a request completed with an observed result; unknown — `outcome_unknown` after a lost result; expired — a deadline passed before anyone accepted.
+- **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
+- **Scenarios:** SCN-025
+- **Resources:** project-comms specification, Request lifecycle
 - **Status:** proposed
