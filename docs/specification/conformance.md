@@ -289,6 +289,9 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-100` | `session-join` | [activity](activity.md#semantic-rules) | SEM-0100 |
 | `FAC-SEM-101` | `service-events-page` | [service](service.md#semantic-rules) | SEM-0101 |
 | `FAC-SEM-102` | `package` | [package](package.md#semantic-rules) | SEM-0102 |
+| `FAC-SEM-103` | `proposal-submit` | [proposals](proposals.md#semantic-rules) | SEM-0103 |
+| `FAC-SEM-104` | `proposal`, `proposal-transition` | [proposals](proposals.md#semantic-rules) | SEM-0104 |
+| `FAC-SEM-105` | `learning-rollout` | [proposals](proposals.md#semantic-rules) | SEM-0105 |
 | `FAC-SEM-106` | `local-channel-session` | [local channel](local-channel.md#semantic-rules) | SEM-0106 |
 
 ## Compatibility policy

@@ -60,6 +60,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
 - [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
 - [The local channel to the node — `fabric-local-channel/0.1` (DEC-0075)](docs/specification/local-channel.md)
+- [Proposals and learning notes — `fabric-proposal/1`, `learning-note/1` (DEC-0072)](docs/specification/proposals.md)
 - [OpenRouter attribution — the organization's products as apps on OpenRouter (DEC-0065)](docs/specification/openrouter-attribution.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)

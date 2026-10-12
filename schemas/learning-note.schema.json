@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/learning-note.schema.json",
+  "title": "Learning note, learning-note/1 (DEC-0072)",
+  "description": "What Project Observatory hands Fabric when it learns something about an agent's work (ADR-0109: learning lives in Fabric). Evidence by reference only; no transcript content or secret. Fabric answers accepted, duplicate or rejected (learning-note-answer). A personal or unknown note never feeds an organization rollout (FAC-SEM-105).",
+  "type": "object",
+  "required": [
+    "schema",
+    "noteId",
+    "projectId",
+    "goal",
+    "observation",
+    "proposedChange",
+    "evidence",
+    "confidence",
+    "engineRevision",
+    "sourceClass"
+  ],
+  "properties": {
+    "schema": {
+      "const": "learning-note/1"
+    },
+    "noteId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+      "description": "Stable: the idempotency key."
+    },
+    "projectId": {
+      "$ref": "common.schema.json#/$defs/uri"
+    },
+    "agent": {
+      "$ref": "common.schema.json#/$defs/uri",
+      "description": "The agent binding, when known."
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "observation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "proposedChange": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "fabric-proposal.schema.json#/$defs/evidence"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "engineRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "sourceClass": {
+      "enum": [
+        "organization",
+        "personal",
+        "unknown"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

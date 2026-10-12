@@ -433,6 +433,9 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 **Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
 [local channel](docs/specification/local-channel.md)).
+**Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
+listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
+about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

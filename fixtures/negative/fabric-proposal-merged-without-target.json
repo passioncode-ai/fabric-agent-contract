@@ -1,0 +1,33 @@
+{
+  "schema": "fabric-proposal/1",
+  "id": "urn:fabric:proposal:p-0042",
+  "type": "rule",
+  "goal": {
+    "id": "g-accuracy",
+    "text": "Cite the sources it summarises"
+  },
+  "change": "Quote the source line next to each claim in a digest.",
+  "evidence": [
+    {
+      "kind": "insight",
+      "ref": "urn:fabric:insight:i-17"
+    },
+    {
+      "kind": "run",
+      "ref": "urn:fabric:run:r-981",
+      "window": {
+        "start": "2026-10-10T08:00:00Z",
+        "end": "2026-10-11T08:00:00Z"
+      }
+    }
+  ],
+  "target": {
+    "kind": "project",
+    "project": "urn:project:research"
+  },
+  "status": "merged",
+  "approvedBy": {
+    "role": "operator"
+  },
+  "createdAt": "2026-10-11T09:00:00Z"
+}

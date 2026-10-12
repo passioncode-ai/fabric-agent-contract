@@ -4,8 +4,11 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 the local channel (P6-04)](2026-10-12-w6-p6-04-local-channel.md) | DEC-0075 (board run P6-04; CON-OE-10) | pull request open |
+| [2026-10-12 the local channel (P6-04)](2026-10-12-w6-p6-04-local-channel.md) | DEC-0075 (board run P6-04; CON-OE-10) | this pull request |
 | [2026-10-12 a role's secret slots (P6-10)](2026-10-12-w6-p6-10-mcp-secrets.md) | DEC-0074 (board run P6-10) | merged, #79 `146240a` |
+| [2026-10-12 proposals and learning notes (P6-03)](2026-10-12-w6-p6-03-proposals.md) | DEC-0072 (board run P6-03; CON-OE-05) | merged, #78 `fc4dda0` |
+| [2026-10-12 a consumer agent (P6-09)](2026-10-12-w6-p6-09-consumer-agent.md) | DEC-0071 (board run P6-09) | merged, #76 `9c0032a` |
+| [2026-10-12 a role's secret slots (P6-10)](2026-10-12-w6-p6-10-mcp-secrets.md) | DEC-0074 (board run P6-10) | pull request open |
 | [2026-10-12 a consumer agent (P6-09)](2026-10-12-w6-p6-09-consumer-agent.md) | DEC-0071 (board run P6-09) | this pull request |
 | [2026-10-12 data on feed events (P6-07)](2026-10-12-w6-p6-07-feed-data.md) | DEC-0070 (board run P6-07) | merged, #77 `b9453a0` |
 | [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | merged, #73 `fee53a2` |
