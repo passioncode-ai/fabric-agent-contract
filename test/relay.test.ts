@@ -55,6 +55,15 @@ describe("relay-auth/1", () => {
   });
 });
 
+describe("a signature that is not a string (owner's item 10)", () => {
+  it("is false in verifyEs256 and unauthenticated in admit, never a throw", () => {
+    for (const sig of [undefined, null, 7, ["x"], {}]) {
+      expect(verifyEs256(v.machineKey, v.auth.signingInput, sig), String(sig)).toBe(false);
+      expect(admit({ ...v.auth.frame, sig: sig as never }, ctx()), String(sig)).toEqual({ ok: false, code: "unauthenticated" });
+    }
+  });
+});
+
 describe("relay-blob/1", () => {
   it("binds the method, the digest, the recipients and the algorithm", () => {
     const fields = { relay: "https://relay.example", method: "PUT" as const, digest: `sha256:${"0".repeat(64)}`, recipients: ["m#sig"], iat: "2026-10-12T00:00:00Z" };

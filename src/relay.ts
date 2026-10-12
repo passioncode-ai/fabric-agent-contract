@@ -13,7 +13,7 @@
  */
 import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
-import { isEd25519Key, isLowS, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
+import { P256_CURVE, isEd25519Key, isLowS, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
@@ -113,12 +113,32 @@ export function instant(value: unknown): number | undefined {
  * verify. Low-S means nobody but the signer can make a second valid encoding of a signature; a signer normalises with
  * `toLowS` or signs with `signEs256`.
  */
-export function verifyEs256(key: P256Key, bytes: string, sig: string): boolean | "bad-key" | "unsupported-alg" {
+export function verifyEs256(key: P256Key, bytes: string, sig: unknown): boolean | "bad-key" | "unsupported-alg" {
   if (isEd25519Key(key)) return "unsupported-alg";
   if (p256KeyRefusal(key) !== null) return "bad-key";
-  const raw = Buffer.from(sig, "base64url");
-  if (raw.length !== 64 || raw.toString("base64url") !== sig || !isLowS(raw)) return false;
-  return nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: p256Jwk(key), format: "jwk", dsaEncoding: "ieee-p1363" }, raw);
+  return proveEs256(key, bytes, sig);
+}
+
+const hex32 = (value: bigint) => Buffer.from(value.toString(16).padStart(64, "0"), "hex").toString("base64url");
+/** A valid P-256 key nothing signs under (the base point G): the key a pre-proof check verifies under when it has none. */
+const DUMMY_KEY = { kty: "EC", crv: "P-256", x: hex32(P256_CURVE.gx), y: hex32(P256_CURVE.gy) } as const;
+/** 64 bytes that are no signature, verified in place of a signature that is not 64 canonical bytes. */
+const DUMMY_SIG = Buffer.alloc(64, 0x5a);
+
+/**
+ * One ES256 verification of equal cost whatever the inputs (DEC-0066): a key that is missing or unusable is replaced by
+ * DUMMY_KEY and a signature that is not 64 canonical bytes by DUMMY_SIG, the verification runs once either way, and the
+ * low-S rule is applied after it. The answer is true only for a usable key, 64 canonical low-S bytes and a signature
+ * that verifies. `admit` and `verifyBlobRequest` call this for every request past its own bytes, so neither the answer
+ * nor the work tells an unproven caller whether the relay holds its kid, its estate or a record at all.
+ */
+function proveEs256(key: P256Key | undefined, bytes: string, sig: unknown): boolean {
+  const usable = key !== undefined && !isEd25519Key(key) && p256KeyRefusal(key) === null;
+  const jwk = usable ? p256Jwk(key) : p256Jwk(DUMMY_KEY);
+  const raw = typeof sig === "string" ? Buffer.from(sig, "base64url") : DUMMY_SIG;
+  const canonical = typeof sig === "string" && raw.length === 64 && raw.toString("base64url") === sig;
+  const verified = nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: jwk, format: "jwk", dsaEncoding: "ieee-p1363" }, canonical ? raw : DUMMY_SIG);
+  return usable && canonical && verified && isLowS(raw);
 }
 
 /**
@@ -142,9 +162,9 @@ export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: stri
   if (iat - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, code: "not-yet-valid" };
   if (ctx.now.getTime() - iat > AUTH_WINDOW_SECONDS * 1000) return { ok: false, code: "unauthenticated" };
   if (ctx.nonceUsed) return { ok: false, code: "replay" };
-  // The signed estate must be the held record's; a mismatch is the same answer as a bad signature.
+  // The signed estate must be the held record's; a mismatch is the same answer, and the same work, as a bad signature.
   const key = ctx.estate !== undefined && frame.estate === ctx.estate ? ctx.admittedKey(frame.kid) : undefined;
-  const proven = key !== undefined && verifyEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig) === true;
+  const proven = proveEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig);
   return proven ? { ok: true, kid: frame.kid } : { ok: false, code: "unauthenticated" };
 }
 
@@ -399,7 +419,7 @@ export function verifyBlobRequest(header: string | null | undefined, ctx: BlobRe
   if (t - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, status: 401, code: "not-yet-valid" };
   if (ctx.now.getTime() - t > AUTH_WINDOW_SECONDS * 1000) return { ok: false, status: 401, code: "unauthenticated" };
   const key = ctx.admittedKey(kid);
-  const proven = key !== undefined && verifyEs256(key, relayBlobSigningInput({ relay: ctx.relay, method: ctx.method, digest: ctx.digest, recipients, iat }), sig) === true;
+  const proven = proveEs256(key, relayBlobSigningInput({ relay: ctx.relay, method: ctx.method, digest: ctx.digest, recipients, iat }), sig);
   if (!proven) return { ok: false, status: 401, code: "unauthenticated" };
   if (ctx.method === "PUT" && !recipients.every((recipient) => ctx.admittedKey(recipient) !== undefined)) return { ok: false, status: 403, code: "unknown-recipient" };
   return { ok: true, kid, recipients };
