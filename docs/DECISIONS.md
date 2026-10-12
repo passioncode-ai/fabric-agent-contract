@@ -3143,7 +3143,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   onto the four classes; whether `key` is split by provenance (an organization's key or a person's, DEC-0053's
   `api-org`); the node's operation names and schemas (OBS-79); a third placement value for a service with no local or
   platform supervisor; Fabric writing its own descriptor at start although DEC-0015 says the running service does not
-  (ADR-0139, CO-263) — Fabric is an app, and the rule's wording for an app is owed.
+  (ADR-0139, CO-263) — Fabric is an app, and the rule's wording for an app is owed; the exceptionally reserved `UK`
+  and `EL`, which the residency shape admits beside `GB` and `GR`; a public name under an IDN top-level domain, which
+  the endpoint pattern refuses; the special-use names `.test`, `.invalid`, `.example` and `.onion`, which FAC-SEM-085
+  does not yet refuse; a credential-shaped endpoint path, which no rule checks yet.
 - **Source:** the first organization server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md`
   at `9c6a780`), §2 rule 8, §5 (`lifecycle.manager: node` covers supervised children), §8, §9 *Hosting*, §12's descriptor
   row and §13, §20 V2-18 (custody) and V2-19 (four classes and residency); Fabric (2026-10-12): it needs `installedBy`

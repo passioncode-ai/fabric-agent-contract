@@ -197,8 +197,9 @@ show every agent's spend beside its health without knowing any provider.
 - `route` MAY say how a row's calls were paid for: `subscription` (the operator's own login in its vendor's runner,
   not metered), `key` (an issued key, metered) or `platform-metered` (the hosting platform's own metered models,
   billed to the deployment's account, DEC-0061); calls of one model on two routes are two rows
-  ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated. A row's route matches the descriptor's
-  `runner.credentialKind` of the same name; a service whose kind is `none` makes no model calls to report.
+  ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated. A row's route SHOULD match the descriptor's
+  `runner.credentialKind` of the same name, and a service whose kind is `none` makes no model calls to report; no rule
+  checks this yet beyond FAC-SEM-087's refusal of `subscription` rows on an offered service (DEC-0061).
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),
