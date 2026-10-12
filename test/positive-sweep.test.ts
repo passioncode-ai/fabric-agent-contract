@@ -96,6 +96,7 @@ export const NOT_SWEPT: readonly string[] = [
   "schema-unsupported.schema.json",
   "service-login-code.schema.json",
   "work.schema.json",
+  "local-channel.schema.json",
   "learning-note.schema.json",
   "learning-note-answer.schema.json"
 ];

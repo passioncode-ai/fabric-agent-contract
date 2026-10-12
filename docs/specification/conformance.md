@@ -292,6 +292,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-103` | `proposal-submit` | [proposals](proposals.md#semantic-rules) | SEM-0103 |
 | `FAC-SEM-104` | `proposal`, `proposal-transition` | [proposals](proposals.md#semantic-rules) | SEM-0104 |
 | `FAC-SEM-105` | `learning-rollout` | [proposals](proposals.md#semantic-rules) | SEM-0105 |
+| `FAC-SEM-106` | `local-channel-session` | [local channel](local-channel.md#semantic-rules) | SEM-0106 |
 
 ## Compatibility policy
 

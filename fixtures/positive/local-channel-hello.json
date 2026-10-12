@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "channel.hello",
+  "params": {
+    "protocols": [
+      "fabric-local-channel/0.1"
+    ],
+    "client": {
+      "name": "fabric",
+      "version": "0.4.0"
+    },
+    "capabilities": [
+      "consent.ui"
+    ]
+  }
+}
