@@ -47,7 +47,7 @@ const withoutFlag = (args: string[], flag: string) => {
 
 // Each case: a label, the messages a mutation produces, and the text one of them must hold.
 const cases: Array<[string, () => string[], string]> = [
-  ["SH-5 bearer per agent key", () => onManifest("fabric-claude", (m) => { m.lifetime = { kind: "agent-key", agentKey: "copylot.default" }; }), "a bearer is minted for one session"],
+  ["SH-5 bearer per agent key", () => onManifest("fabric-claude", (m) => { m.lifetime = { kind: "agent-key", agentKey: "example-console.default" }; }), "a bearer is minted for one session"],
   ["SH-7 another agent's console", () => onManifest("dashboards-codex", (m) => { m.firstCall.arguments.key = "other.default"; }), "opens that agent's console"],
   ["SH-6 long preamble", () => onManifest("fabric-claude", (m) => { m.preamble = `Call fabric_whoami. ${"a".repeat(600)}`; }), "the preamble is at most 600"],
   ["SH-6 two lines", () => onManifest("fabric-claude", (m) => { m.preamble += "\nsecond"; }), "the preamble is one line"],

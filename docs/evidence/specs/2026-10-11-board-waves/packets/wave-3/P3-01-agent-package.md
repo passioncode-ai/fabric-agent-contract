@@ -16,7 +16,7 @@
   v4 is the later text and wins where they conflict, and the decision says where.
 - The adapter writes packages (v4 Stage 0: "adapter writes effects and `costPresets`"; Stage 1: `new/test/pack`).
   Read the adapter's current pack format, if any, read-only:
-  `git -C /Users/sshlg/DATA/fabric-agent-adapter grep -n -i "costPresets\|fabric.package" origin/main`.
+  `git -C <workspace>/fabric-agent-adapter grep -n -i "costPresets\|fabric.package" origin/main`.
 - Fabric ADR-0138 (digests per version: packaged, shared, published, revoked), read-only, from Fabric `main`.
 
 ## What to build — two decisions, one PR
