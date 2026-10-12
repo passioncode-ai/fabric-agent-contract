@@ -2784,7 +2784,7 @@
       "id": "CON-OE-10",
       "title": "Local channel Fabric / Switchboard / Dashboards -> observatory-net: socket or named pipe with ACL, version handshake, method envelope, base methods",
       "source": "plans/fabric-agent-contract.md:28",
-      "status": "open",
+      "status": "done: #80 (b4f0344, DEC-0075)",
       "area": "OPEN",
       "severity": null,
       "owner": "contract",

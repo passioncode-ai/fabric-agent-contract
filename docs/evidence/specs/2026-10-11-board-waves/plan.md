@@ -222,7 +222,7 @@ Each has a board row naming what it waits for.
   - #76 `9c0032a` (DEC-0071, a consumer agent) and #79 `146240a` (DEC-0074, a role's secret slots), both asked by the
     first organization server;
   - #78 `fc4dda0` (DEC-0072, proposals and learning notes, CON-OE-05);
-  - #80 (DEC-0075, the local channel to the node, CON-OE-10).
+  - #80 `b4f0344` (DEC-0075, the local channel to the node, CON-OE-10).
 - **Readings:** every PR had three independent readings, one or two fix rounds and a confirming reading before merge;
   #70 and #80 also had Project Observatory's reading from the node side. The owed readings of #63–#68 ran and found no
   blocking defect.

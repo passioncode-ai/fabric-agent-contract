@@ -262,7 +262,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
     `sessionId` (DL-22: no caller identity enters a usage report);
   - RM-16 adds three OpenRouter attribution headers and three rules, with the source pinned at writing.
 
-### N12 org edition — the open packets (wave 6) — done: DEC-0067 #71, DEC-0068 #72, DEC-0072 #78, DEC-0075 #80; CON-OE-03 covered; CON-OE-06 to the program; with DEC-0069, DEC-0070, DEC-0071, DEC-0074 asked by consumers
+### N12 org edition — the open packets (wave 6) — done: DEC-0067 #71, DEC-0068 #72, DEC-0072 #78, DEC-0075 #80 `b4f0344`; CON-OE-03 covered; CON-OE-06 to the program; with DEC-0069, DEC-0070, DEC-0071, DEC-0074 asked by consumers
 
 - CON-OE-05 `fabric-proposal/1` (open part) and the learning note; drop the `memory.learning.propose`
   reserve (RM-12).

@@ -151,6 +151,7 @@
     "CO-263": "#73 (fee53a2, DEC-0069)",
     "FEED-DATA": "#77 (b9453a0, DEC-0070)",
     "CONSUMER-AGENT": "#76 (9c0032a, DEC-0071)",
-    "MCP-SECRETS": "#79 (146240a, DEC-0074)"
+    "MCP-SECRETS": "#79 (146240a, DEC-0074)",
+    "CON-OE-10": "#80 (b4f0344, DEC-0075)"
   }
 }
