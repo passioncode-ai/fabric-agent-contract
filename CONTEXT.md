@@ -83,7 +83,11 @@ window at L3, not a grant limit (DEC-0041).
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
 DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it
-trusts a `kid` only while a current revision certifies it.
+trusts a `kid` only while the revision it reads certifies it — one `verifyEstateRecord` accepted, not lower than the
+highest its machine applied — and refuses otherwise `kid-not-certified`, or `issuer-unavailable` when the revision is at
+fault (the meter: `principal-unproven`, with the detail in its reason) (delegation DL-14, DEC-0060). The module is
+`src/hub-key-rules.ts`. It also signs
+**Revocation delta** entries and **Heartbeats** (DEC-0054).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
@@ -394,6 +398,15 @@ authority: it reads nothing it carries, decides no trust tier and never reports 
 applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
 organization's relay has none of its own until `org-authority/1` (Fabric D8).
+
+**Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
+entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
+`{sequence, sha256}` — what a check-in reports and a **Relay**'s `welcome` carries. A revision issued after an entry
+lists it ([revocation delta](docs/specification/revocation-delta.md)).
+
+**Heartbeat**: A signed timestamp (`heartbeat/1`, DEC-0054) committing to the **Revocation delta**'s head and the
+estate revision. A machine whose heartbeat is more than 72 hours old, or that has not applied up to it, refuses what
+arrives from other machines and keeps the person's own work.
 
 **Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
 signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a

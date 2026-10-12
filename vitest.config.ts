@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -32,10 +32,14 @@ export default defineConfig({
         "src/p256.ts": { branches: 100 },
         "src/relay.ts": { branches: 100 },
         "src/relay-rules.ts": { branches: 100 },
+        "src/revocation-delta.ts": { branches: 100 },
+        "src/revocation-delta-rules.ts": { branches: 100 },
+        "src/rfc3339.ts": { branches: 100 },
         "src/secret-envelope.ts": { branches: 100 },
         "src/fabric-links.ts": { branches: 97.61 },
         "src/grant-projection.ts": { branches: 87.8 },
         "src/http-signature.ts": { branches: 100 },
+        "src/hub-key-rules.ts": { branches: 100 },
         "src/interop-rules.ts": { branches: 88.46 },
         "src/operator-session.ts": { branches: 100 },
         "src/package-rules.ts": { branches: 100 },

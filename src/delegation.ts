@@ -3,6 +3,7 @@ import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { AGENT_ID } from "./fabric-links.js";
 import { isObject, type JsonObject } from "./findings.js";
+import { type AppliedRevision, hubKeyCertified } from "./hub-key-rules.js";
 
 // #region delegation-verifier — docs: docs/specification/delegation.md#the-verifier
 /**
@@ -118,6 +119,14 @@ export interface VerifyDelegationOptions {
   issuer: string;
   /** A read-only door (DL-3): it serves `effect: none` only and refuses any other capability, whatever the ceiling. */
   readOnly?: boolean;
+  /** DL-14's estate check (DEC-0060): the estate-record revision this verifier reads (one `verifyEstateRecord`
+   * accepted and its machine applied), or a function returning it. Absent: the check does not run. */
+  estate?: unknown;
+  /** The highest revision this verifier's machine has applied; a lower revision is a rollback (DL-14). */
+  estateApplied?: AppliedRevision;
+  /** Revocations in force beyond the revision's own: the revocation delta's entries applied since it (DEC-0054), or a
+   * function returning them. */
+  estateRevocations?: unknown;
 }
 
 /** Where a callee records consumed approval ids. It MUST survive a restart for the approval's lifetime. */
@@ -134,6 +143,10 @@ export interface VerifyApprovalOptions {
   /** Where the approval's `jti` is consumed; a second use is `approval-reused`. Required: replay protection is
    * not optional, and a caller that truly needs none passes `UNSAFE_NO_JTI_STORE` by name. */
   jtiStore: JtiStore;
+  /** DL-14's estate check, as for a delegation token (DEC-0060). */
+  estate?: unknown;
+  estateApplied?: AppliedRevision;
+  estateRevocations?: unknown;
 }
 
 /** A store that consumes nothing: every approval may be replayed until it expires. Only on purpose, by name. */
@@ -212,7 +225,7 @@ function headerProblem(header: JsonObject, typ: string): string | undefined {
   return undefined;
 }
 
-type KeyLookup = { key: KeyObject } | { problem: "unknown-key" | "unusable-key" | "small-order-key" | "duplicate-kid" | "key-not-for-signing" };
+type KeyLookup = { key: KeyObject; x: string } | { problem: "unknown-key" | "unusable-key" | "small-order-key" | "duplicate-kid" | "key-not-for-signing" };
 
 function keyFor(jwks: Jwks, kid: string): KeyLookup {
   const matches = jwks.keys.filter((candidate) => isObject(candidate) && candidate.kid === kid);
@@ -228,7 +241,7 @@ function keyFor(jwks: Jwks, kid: string): KeyLookup {
   if (raw.length !== 32) return { problem: "unusable-key" };
   if (isSmallOrderKey(raw)) return { problem: "small-order-key" };
   try {
-    return { key: createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: jwk.x }, format: "jwk" }) };
+    return { key: createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: jwk.x }, format: "jwk" }), x: jwk.x };
   } catch {
     return { problem: "unusable-key" };
   }
@@ -236,7 +249,32 @@ function keyFor(jwks: Jwks, kid: string): KeyLookup {
 
 const hasKeys = (jwks: Jwks | undefined): jwks is Jwks => isObject(jwks) && Array.isArray(jwks.keys) && jwks.keys.length > 0;
 
-type Checked = { compact: Compact; kid: string } | { problem: string; issuer?: true };
+/** ECMAScript's time range in seconds (±8.64e15 ms): a NumericDate outside it is no instant a `Date` can hold. */
+const MAX_CLOCK_SECONDS = 8.64e12;
+/** A clock the time rows can compare: a finite number of seconds within a `Date`'s range. NaN or a string would pass every row. */
+const readableClock = (now: unknown): now is number => typeof now === "number" && Number.isFinite(now) && Math.abs(now) <= MAX_CLOCK_SECONDS;
+
+/**
+ * DL-14 (DEC-0060), after the signature: when the callee reads the estate record, the token's `kid` and the published
+ * key must be certified by that revision. `undefined` when the check passes or does not run; else the refusal's fault
+ * (the token's, or the trust source's: `issuer-unavailable`) and detail. A source that throws is unreadable, never a pass.
+ */
+function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevision; estateRevocations?: unknown }, kid: string, x: string, now: number): { issuer: boolean; detail: string } | undefined {
+  if (options.estate === undefined) return undefined;
+  let record: unknown;
+  let extra: unknown;
+  try {
+    record = typeof options.estate === "function" ? (options.estate as () => unknown)() : options.estate;
+    extra = typeof options.estateRevocations === "function" ? (options.estateRevocations as () => unknown)() : options.estateRevocations;
+  } catch {
+    return { issuer: true, detail: "estate-unreadable" };
+  }
+  const verdict = hubKeyCertified(record, kid, x, now, options.estateApplied, extra === undefined ? undefined : { extraRevocations: extra as unknown[] });
+  // The clock was refused before row 1, so a verdict here is the token's or the trust source's.
+  return verdict.certified ? undefined : { issuer: verdict.fault !== "token", detail: verdict.detail };
+}
+
+type Checked = { compact: Compact; kid: string; x: string } | { problem: string; issuer?: true };
 
 /** Parse, check the header, find the key, verify the signature. A problem with the published keys themselves is the issuer's. */
 function authentic(token: unknown, jwks: Jwks, typ: string): Checked {
@@ -250,7 +288,7 @@ function authentic(token: unknown, jwks: Jwks, typ: string): Checked {
   // RFC 8032 §5.1.7: an Ed25519 signature is 64 bytes. Node's verify already answers false for any other length,
   // so on Node no test can tell this check is there (P2-03 plant M25); it stays for a port whose library is laxer.
   if (compact.signature.length !== 64 || !verifySignature(null, compact.signingInput, found.key, compact.signature)) return { problem: "bad-signature" };
-  return { compact, kid };
+  return { compact, kid, x: found.x };
 }
 
 /** Depth of an actor chain; `Infinity` for a chain that is not one (a missing or non-string `sub` at any level). */
@@ -351,12 +389,17 @@ function approvalShape(payload: JsonObject): ApprovalClaims | undefined {
 /** DL-13 for one call, the chain allowed `maxDepth` actors: four for a callee, five for the meter's own token (DL-6). */
 function verifyAt(token: string, options: VerifyDelegationOptions, maxDepth: number): DelegationAccepted | Refusal {
   const { audience, jwks, now, capability, effect, issuer, readOnly } = options;
+  // Before row 1: every time row compares against the clock, and a comparison with NaN is always false.
+  if (!readableClock(now)) return refuse("unknown-state", "no-clock");
   // Row 1: whom the callee trusts, and that issuer's keys.
   if (!isString(issuer)) return refuse("issuer-unavailable", "no-trusted-issuer");
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
   // Rows 2–4: form, header, key, signature.
   const checked = authentic(token, jwks, DELEGATION_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "unauthenticated", checked.problem);
+  // Row 4a: the estate record certifies the key (DL-14), when the callee reads it.
+  const uncertified = estateRefusal(options, checked.kid, checked.x, now);
+  if (uncertified) return refuse(uncertified.issuer ? "issuer-unavailable" : "unauthenticated", uncertified.detail);
   // Row 5: DL-2's types, then the issuer.
   const shaped = delegationShape(checked.compact.payload);
   if ("problem" in shaped) return refuse("unauthenticated", shaped.problem);
@@ -393,10 +436,13 @@ export function verifyApproval(approval: string | undefined, options: VerifyAppr
   const { audience, jwks, now, actionDigest: expected, issuer, jtiStore } = options;
   if (approval === undefined || approval === "") return refuse("approval-required", "no-approval", { actionDigest: expected });
   if (!isObject(jtiStore) || typeof jtiStore.consume !== "function") return refuse("unknown-state", "no-jti-store");
+  if (!readableClock(now)) return refuse("unknown-state", "no-clock");
   if (!isString(issuer)) return refuse("issuer-unavailable", "no-trusted-issuer");
   if (!hasKeys(jwks)) return refuse("issuer-unavailable", "no-published-keys");
   const checked = authentic(approval, jwks, APPROVAL_TYP);
   if ("problem" in checked) return refuse(checked.issuer ? "issuer-unavailable" : "approval-invalid", checked.problem);
+  const uncertified = estateRefusal(options, checked.kid, checked.x, now);
+  if (uncertified) return refuse(uncertified.issuer ? "issuer-unavailable" : "approval-invalid", uncertified.detail);
   const claims = approvalShape(checked.compact.payload);
   if (!claims) return refuse("approval-invalid", "malformed-claims");
   if (claims.iss !== issuer) return refuse("approval-invalid", "wrong-issuer");
@@ -418,6 +464,10 @@ export interface VerifyMeterOptions {
   now: number;
   /** The issuer the meter trusts: `iss` must equal it. Required. */
   issuer: string;
+  /** DL-14's estate check, when the meter reads the estate record (DEC-0060). */
+  estate?: unknown;
+  estateApplied?: AppliedRevision;
+  estateRevocations?: unknown;
 }
 
 /** The meter's refusal of its own token (`grant-check.schema.json#/$defs/denied` with `principal-unproven`). */
@@ -446,15 +496,15 @@ export interface DelegationRefusalDocument {
  * `principal-unproven`, with the verifier's code in the reason.
  */
 export function verifyMeterToken(token: string, options: VerifyMeterOptions): DelegationAccepted | { ok: false; denial: GrantCheckDenied } {
-  const { meter, capability, jwks, now, issuer } = options;
-  const verified = verifyAt(token, { audience: meter, capability, effect: "none", jwks, now, issuer }, MAX_CHAIN_DEPTH + 1);
+  const { meter, capability, jwks, now, issuer, estate, estateApplied, estateRevocations } = options;
+  const verified = verifyAt(token, { audience: meter, capability, effect: "none", jwks, now, issuer, ...(estate === undefined ? {} : { estate }), ...(estateApplied === undefined ? {} : { estateApplied }), ...(estateRevocations === undefined ? {} : { estateRevocations }) }, MAX_CHAIN_DEPTH + 1);
   // DL-21 step 3: the meter reads its one capability; a wider token was not minted for it (F-B-312).
   const result: DelegationAccepted | Refusal = !verified.ok ? verified
     : verified.claims.scope !== capability ? refuse("scope-not-granted", "meter-scope-not-exact")
     : verified.claims.effect.length !== 1 || verified.claims.effect[0] !== "none" ? refuse("effect-above-ceiling", "meter-effect-not-none")
     : verified;
   if (result.ok) return result;
-  return { ok: false, denial: { decision: "denied", level: null, code: "principal-unproven", reason: `the meter's token was refused: ${result.code} (${result.detail})`, checkedAt: new Date(now * 1000).toISOString() } };
+  return { ok: false, denial: { decision: "denied", level: null, code: "principal-unproven", reason: `the meter's token was refused: ${result.code} (${result.detail})`, checkedAt: new Date(readableClock(now) ? now * 1000 : Date.now()).toISOString() } };
 }
 
 /**

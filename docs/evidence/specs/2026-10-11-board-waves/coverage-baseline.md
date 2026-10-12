@@ -53,6 +53,11 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P4-04 | `src/http-signature.ts` (new) | 350 / 350 (100 %) | 100 % | the device transport binding (DEC-0056): RFC 8941 parsing with RFC 9651's Date and Display String, RFC 9421 §2.3 and §2.5, mutual TLS beside the signature, the receiver's steps and the nonce store, over `fixtures/vectors/http-signature.json`; every refusal planted |
 | P4-04 | `src/device-transport-rules.ts` (new) | 40 / 40 (100 %) | 100 % | FAC-SEM-077, moved out of `device-rules.ts` so a consumer that vendors the device rules needs no HTTP layer |
 | P4-04 | `src/device-rules.ts` | 515 / 529 (97.35 %) | 97.35 % | FAC-SEM-044's key-role counts, every new branch covered |
+| P4-07 | `src/hub-key-rules.ts` (new) | 79 / 79 (100 %) | 100 % | `hubKeyCertified` and FAC-SEM-081 over `fixtures/vectors/hub-key.json` (DEC-0060); every check planted (39 plants with the verifier's, all killed) |
+| P4-07 | `src/rfc3339.ts` (new) | 11 / 11 (100 %) | 100 % | the strict date reader moved out of `src/estate-record-rules.ts` (179 / 179 after the move), unchanged |
+| P4-07 | `src/delegation.ts` | 324 / 324 (100 %) | 100 % | DL-13 row 4a (the `estate` option), the clock refused before row 1, the meter's `checkedAt` on an unreadable clock |
+| P4-06 | `src/revocation-delta.ts` (new) | 262 / 262 (100 %) | 100 % | the revocation delta and the heartbeat (DEC-0054): `applyDelta` RD-1…RD-10, `acceptHeartbeat` HB-1…HB-3, the 72-hour rule and reconciliation over `fixtures/vectors/revocation-delta.json`; malformed input answered, never thrown; every refusal planted |
+| P4-06 | `src/revocation-delta-rules.ts` (new) | 73 / 73 (100 %) | 100 % | FAC-SEM-082…084; one fixture per sub-check, each planted |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -121,6 +126,11 @@ branch off main's `31ed9f0`, after the review round: whole set 3528 / 3688 (95.6
 **Wave 4, P4-04 merged with main `8c6211e`** (P4-01, P4-03, the relay and #59): 42 files, 1991 tests, whole set
 4001 / 4161 (96.15 %), every floor met.
 
+**Wave 4, P4-06 (DEC-0054).** `src/revocation-delta.ts` and `src/revocation-delta-rules.ts` are new and reach every
+branch, with no `v8 ignore`; the four kinds join `test/rule-tolerance.test.ts`, and 50 planted defects (35 in the
+verifier, 15 in the rules) each failed a test. The whole-set floor stays at 86.85 %. Measured with `vitest run
+--coverage` on the P4-06 branch merged with main's `51719e4`: 44 files, 2173 tests, whole set 4407 / 4567 (96.49 %),
+every floor met.
 **Wave 4, P4-02 (DEC-0061).** `src/descriptor-rules.ts` is new and reaches every branch (95 / 95), with no `v8 ignore`;
 its floor is 100. `service-descriptor`, `service-runner` and `service-peer-request` are in `test/rule-tolerance.test.ts`.
 26 plants (each check of the module or its dispatch removed or loosened once) each failed at least one test, and the
@@ -128,3 +138,6 @@ schema's refusals are proved by 26 mutants in `test/descriptor-rules.test.ts`, e
 with an identity mutant for each schema. `semantic-rules.ts` gains two dispatches (366 / 399, 91.72 %, floor
 unchanged). The whole-set floor stays at 86.85 %. Measured with `vitest run --coverage` on the P4-02 branch off main's
 `204f189`: 43 files, 2114 tests, whole set 4098 / 4258 (96.24 %).
+
+**Wave 4, P4-02 merged with main `5967bb1`** (P4-06, P4-07): 46 files, 2402 tests, whole set 4611 / 4769 (96.68 %),
+every floor met.

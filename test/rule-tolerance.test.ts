@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, relay, one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) and peer-request (FAC-SEM-088) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) and peer-request (FAC-SEM-088) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
-  "service-well-known", "service-lock-outcome", "windows-token-file", "service-descriptor", "service-runner", "service-peer-request"
+  "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
+  "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -22,6 +23,8 @@ const MEMBERS = [
   "header", "ct", "sig", "type", "kid", "alg", "protocol", "ttl", "body", "extensions", "status", "degraded",
   "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid",
   "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method",
+  "head", "entries", "deltaHead", "estateRecord", "applied", "heartbeat", "broken", "revision", "prev", "sequence", "revocation",
+  "revokedAt", "estate", "issuedAt", "x",
   "descriptor", "catalogue", "derived", "dataClass", "sent", "peer", "runner", "installedBy", "lifecycle", "commands", "placement", "origin"
 ];
 

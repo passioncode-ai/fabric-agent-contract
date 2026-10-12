@@ -1,0 +1,22 @@
+{
+  "description": "A heartbeat at head 3 and revision 3 (DEC-0054).",
+  "kind": "heartbeat",
+  "expect": [],
+  "input": {
+    "type": "heartbeat/1",
+    "alg": "EdDSA",
+    "estate": "estate-5d0f1a",
+    "sequence": 7,
+    "at": "2026-10-12T11:45:00Z",
+    "deltaHead": {
+      "sequence": 3,
+      "sha256": "460ead10497f2b77eb5a9a086e3f51c4c694d2020a5459466bad5aaf4edce57a"
+    },
+    "estateRecord": {
+      "revision": 3,
+      "digest": "sha256:070512bd06a81493e33a1540eed836621eb220c252d94b3bb580d8478e9d32b4"
+    },
+    "kid": "hub-m-4c1e-1",
+    "sig": "jp1Qfwq2csW1v3v2I0PgYPIpv-gDw6ClZiIRkxuhcDNqF9jfdhGYFenjkDOLRvgfcNMCOJ21EiIytOf181nKCA"
+  }
+}

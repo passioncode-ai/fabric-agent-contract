@@ -1,0 +1,24 @@
+{
+  "description": "Head 0 with a hash other than the estate's genesis.",
+  "kind": "heartbeat",
+  "expect": [
+    "FAC-SEM-083"
+  ],
+  "input": {
+    "type": "heartbeat/1",
+    "alg": "EdDSA",
+    "estate": "estate-5d0f1a",
+    "sequence": 0,
+    "at": "2026-10-12T09:30:00Z",
+    "deltaHead": {
+      "sequence": 0,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "estateRecord": {
+      "revision": 3,
+      "digest": "sha256:070512bd06a81493e33a1540eed836621eb220c252d94b3bb580d8478e9d32b4"
+    },
+    "kid": "hub-m-4c1e-1",
+    "sig": "_mdcfBDl2tvbV3RLOJddmoXn8OedHSneLOAUJlGHasilwApbngtgUL-CDDle4jmA6Bd-xya6QCnDuj71leoVDw"
+  }
+}

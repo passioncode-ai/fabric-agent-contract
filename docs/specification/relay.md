@@ -78,7 +78,8 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
    - the signature verifies under that key, which is a P-256 key and passes SEC 1.
 
    Then it answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat}`.
-   `deltaHead` has the shape of a device check-in's `records.revocationDelta`, so a node passes it on unchanged;
+   `deltaHead` has the shape of a device check-in's `records.revocationDelta` (DEC-0054's head), so a node passes it on
+   unchanged; `heartbeat` is the latest `heartbeat/1` the relay holds, or `null`;
    `estateRevision` is the verified revision (1 or more) the relay admits from, always present. Otherwise it answers
    `error`:
    - `protocol-unsupported`;
@@ -232,20 +233,46 @@ A secret moves to a machine only where a placed package declares it
   - A device's requests to its organization server carry a different signature under the same `#sig` key: an RFC 9421
     HTTP message signature with a nonce ([devices](devices.md#transport), DEC-0056). The two never sign the same
     bytes: RFC 8785 JSON starts with `{`, an RFC 9421 signature base with `"@method"`.
+- **The header's wire form** (annotated 2026-10-12; `parseRelayRequest`, `relayRequestHeader`):
+  - `Fabric-Relay-Request` is base64url without padding of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`:
+    `kid` the signer's `#sig`, `sig` the signature above.
+  - At most 8192 bytes; a longer value is refused 431 `too-large` before it is decoded.
+  - Parsed strictly, else 400 `malformed`: canonical base64url (re-encoding gives the same string), bytes that are
+    their own RFC 8785 form, exactly those five members, `recipients` 1–64 distinct `#sig` kids of at most 256 characters,
+    `iat` a real instant.
+- **Who may ask** (`verifyBlobRequest`, in this order after the form and `alg`):
+  - `iat` within 60 s either way (401 `unauthenticated`, 401 `not-yet-valid`);
+  - the signer is in the current verified admission set (403 `not-admitted`);
+  - a PUT: every recipient is too (403 `unknown-recipient`); a blob the relay holds is accepted again only with the
+    same recipient list (200, no change), never another one (409 `recipients-mismatch`, never merged);
+  - a GET: the signer is one of the stored recipients and signs the stored list letter for letter (403
+    `not-admitted`). A GET of a blob the relay does not hold is answered the same 403 `not-admitted`, never 404, so a
+    machine that may not fetch a blob cannot learn whether it exists. A GET signature reused within its 60 s fetches the same blob for the same machine again, which
+    reveals nothing new;
+  - then the signature (401 `unauthenticated`; 403 `bad-key`; 401 `unsupported-alg` for an Ed25519 key).
 - **Digest check.** The relay recomputes the digest and refuses a mismatch with `digest-mismatch`.
-- **Download.** A `GET` carries the same kind of signature by one of the `recipients`.
-- **Retention.** A relay keeps a blob until every recipient fetched it, or until 7 days pass.
+- **Retention.** A relay keeps a blob until every stored recipient fetched it (counted per kid), or until 7 days pass,
+  whichever comes first; a blob nobody fetched in 7 days is deleted without notice.
 
 ## Revocation and heartbeat
 
-- **What the relay carries.** It carries the revocation delta and the timestamp heartbeat as signed objects, without
-  rewriting them, in `delta` and `heartbeat` frames. On `welcome` it sends its `deltaHead` and its latest
-  heartbeat, and it pushes each new one to every connected machine of the estate or organization the object names.
-- **Catching up.** A node behind the head asks with `delta-query` `{fromSeq}`.
-- **Delay is detected; forgery is impossible.** A relay that withholds a delta is detected by the heartbeat: its
-  head is signed by a key the relay does not hold. A relay cannot invent an entry, because each entry is signed.
-- **What DEC-0054 (reserved) owns:** the documents, their keys, the head hash, the 72-hour rule and their vectors.
-  The window lease is not decided yet.
+The documents are DEC-0054's ([revocation delta](revocation-delta.md)): `revocation-delta/1` entries, each one
+revocation signed by an estate key (a hub key the estate record certifies) and chained by RFC 8785 hash, and
+`heartbeat/1`, the signed commitment to the delta's head and the estate revision.
+
+- **What the relay carries.** It carries them unchanged: a page of entries (`{head, entries}`, at most 256) in a `delta`
+  frame, a heartbeat in a `heartbeat` frame (both typed by [`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)
+  against DEC-0054's schemas). On `welcome` it sends its `deltaHead` and its latest heartbeat (or `null`), and it pushes
+  each new one to every connected machine of the estate the object names.
+- **Catching up.** A node behind the head asks with `delta-query` `{fromSeq}`, its applied head's sequence plus one.
+- **Delay is detected; forgery is impossible.** A relay that withholds an entry is detected by the heartbeat: its head
+  is signed by a key the relay does not hold, and a node that has not applied up to it, or whose heartbeat is more than
+  72 hours old, refuses what arrives from other machines ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)). A
+  relay cannot invent an entry, because each entry is signed, and an unsigned or altered one it injects is refused
+  without marking the node broken.
+- **The admission set.** A relay that applies the delta SHOULD subtract its revocations from the admission set too, so
+  a revoked machine is turned away within seconds rather than at the next revision.
+- The window lease is not decided yet.
 
 ## Semantic rules
 
