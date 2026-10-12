@@ -99,7 +99,7 @@ Packets: [wave-4/](packets/wave-4/README.md) — P4-01 services, P4-02 the descr
 device transport, P4-05 leases and challenges. Agreements recorded 2026-10-12: Fabric (CO-238), Fabric Dashboards
 (FD-37) and the adapter on CT-01; Dashboards on ED-8/ED-9; the first organization server on the device binding.
 
-### Wave 5 — the 0.1.0 core, interop and usage, wave 4's follow-ups (N10, N11, N19; 20 items)
+### Wave 5 — the 0.1.0 core, interop and usage (N10, N11; 17 items) — closed 2026-10-12; N19 re-cut to wave 6
 
 Exit criteria:
 
@@ -107,13 +107,17 @@ Exit criteria:
 - CON-OE-13 and RM-16 land. RM-16's OpenRouter source is re-read and pinned at writing.
 - Project Observatory's `memory/0.1` pin gap (F-A-029) is a board row on Observatory.
 
-### Wave 6 — the open organization-edition contracts (N12; 6 items, about 8 decisions)
+### Wave 6 — the open organization-edition contracts, contexts, wave 4's follow-ups (N12, N20, N19; 20 items)
 
-Depends on: Q1; wave 3 (CON-OE-01).
+Depends on: Q1; wave 3 (CON-OE-01); for N20, Fabric's organization ADR (D8).
 
 Exit criteria:
 
 - CON-OE-05, -06 (well-known part), -07, -08 and -10 merged, each with its fixtures.
+- N20: CX-CON-01…10 decided as the contract's verdicts of 2026-10-12 say, or parked with a row naming the Fabric ADR
+  each waits for; workflow cells amend FAC-SEM-067 with the four conditions the first organization server accepted.
+- N19: the owed readings of #63–#68 run (subagents return 2026-10-17); Project Observatory's relay-audit pull request
+  reviewed and merged; the agent-sync id defect reported to its owner.
 - CON-OE-03 split into its decisions. The part needing Fabric ADR FAB-OE-19 is parked with a row until
   that ADR exists.
 
@@ -189,6 +193,22 @@ Each has a board row naming what it waits for.
   the delegation verifiers; a credential echoed in a finding; refusals without fixtures; Workers rejecting KeyObjects.
 - **Gate on `main` `7b238c7`:** 48 test files, 2618 tests, floors met, ux lint, docs-check, markdownlint, privacy 0.
 - **Inventory:** 178 items, 123 closed (`assign.mjs`).
+
+### Wave 5 — close record (2026-10-12)
+
+- **Merged:** #67 `252fd25` (DEC-0064, the 0.1.0 core: `FAC-SEM-093`, `094`, `096`, `097`; `FAC-SEM-001` and `006`
+  corrected; `FAC-SEM-095` reserved and unused), #68 `508e38a` (DEC-0065, interop and usage: `FAC-SEM-025`'s window and
+  `byProject`, `FAC-SEM-098` OpenRouter attribution, adoption measured).
+- **Readings:** both merged on the owner's own review with plants recorded (7 of 7, 23 of 23 caught); subagent readers
+  are at their weekly limit until 2026-10-17, so the three-tier readings are owed with #63–#65 (N19).
+- **Decided differently from the canvas:** F-A-016 is the safe reading (absent channels and recipient constraints allow
+  none, DEC-0064 item 5), not a refusal rule; the effect is the same for a grant authorising an external effect.
+- **Agreements:** Project Observatory's release iteration 1 question batch answered (relay delta ingress by an admitted
+  hub's own session; 60 s skew on `issuedAt`; `fabric-relay/0.1` amended in place); its relay-audit pull request comes
+  next under its own leases.
+- **Re-cut:** N19 moves to wave 6 (each item waits on an outside event); N20 (RM-28 contexts, 11 items) added to wave 6.
+- **Gate on `main` `508e38a`:** 51 test files, 2689 tests, floors met, ux lint, docs-check, markdownlint, privacy 0.
+- **Inventory:** 189 items, 140 closed (`assign.mjs`).
 
 ## Questions for the operator — one batch
 
