@@ -65,6 +65,15 @@
       "tool": "Example App 0.4.0",
       "expect": "write",
       "note": "tools compare as exact strings"
+    },
+    {
+      "name": "installed-by-null",
+      "existing": {
+        "installedBy": null
+      },
+      "tool": "Example App 0.4.0",
+      "expect": "write",
+      "note": "a malformed descriptor is rewritten, never read as kept"
     }
   ],
   "stale": [
