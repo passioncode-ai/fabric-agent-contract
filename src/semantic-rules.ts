@@ -10,6 +10,7 @@ import { grantSpendRules, spendPolicyRules } from "./spend-rules.js";
 import { routeRules } from "./route-rules.js";
 import { activityRules } from "./activity-rules.js";
 import { deviceRules } from "./device-rules.js";
+import { deviceTransportRules } from "./device-transport-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
@@ -33,6 +34,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (activity) return activity;
   const device = deviceRules(kind, value);
   if (device) return device;
+  const transport = deviceTransportRules(kind, value);
+  if (transport) return transport;
   const delegation = delegationRules(kind, value);
   if (delegation) return delegation;
   const relay = relayRules(kind, value);

@@ -9,8 +9,8 @@ An **estate** is one person's authority: their passkeys, their machines, the hub
 record** is its signed state, one revision at a time. It lists the passkeys that sign the next revision, the machines
 with their device keys and a certificate of each machine's hub key, the packages placed on each machine, where each
 secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
-signs it; every machine of the estate applies the latest revision it can verify and reports its number in its check-in
-(`records.estateRecord.revision`, [devices](devices.md#check-in), DEC-0053).
+signs it; every machine of the estate applies the latest revision it can verify and reports its number, and optionally
+its digest, in its check-in (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
 
 Sources: the first organization server's target architecture v4 (commit `9c6a780`) — §2 rule 6 (three signed records)
 and rule 12 (algorithms by role), §3 (the nouns *Passkey*, *Estate*, *Machine*, *Device key*, *Signing key*, *Estate
@@ -77,7 +77,8 @@ kept outside the signed record, so the record carries no label a person chose:
 
 - **`deviceKeys`** — DEC-0053's device keys by role: exactly one `<id>#sig` (ES256 or Ed25519) and at most one
   `<id>#kem` (ECDH over P-256), each named for this machine, valid for its algorithm and never one key in both roles
-  (`FAC-SEM-073`). The sending machine seals a secret to the `#kem` key and the relay carries it ([DEC-0047](relay.md#the-secret-envelope)).
+  (`FAC-SEM-073`), the counts `FAC-SEM-044` also checks at enrollment (DEC-0056). The sending machine seals a secret to
+  the `#kem` key and the relay carries it ([DEC-0047](relay.md#the-secret-envelope)).
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
@@ -204,7 +205,7 @@ keys are DEC-0053's.
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key); fills
   only placed slots; and reports the applied revision in its check-in's
-  `records.estateRecord.revision` (DEC-0053).
+  `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
 
 ## Privacy
@@ -224,11 +225,9 @@ records no use. A credential's id is an opaque handle.
   coupled here. Also open: whether the hub holds a private key at all (Fabric's 0.5.0 decision, v4 §19), the estate's
   fingerprint and the enrollment ceremony.
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
-  whose `parent` is the digest it holds, but a check-in reports only `records.estateRecord.revision`; a digest beside it
-  is a later additive change to DEC-0053.
-- Device-key counts at enrollment: this record holds exactly one `#sig` and at most one `#kem` per machine
-  (`FAC-SEM-073`), stricter than DEC-0053's `FAC-SEM-044`, which does not count roles; an enrollment with two `#kem`
-  keys and no `#sig` cannot be listed here until `FAC-SEM-044` counts them (board run N18).
+  whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
+  (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is
+  not decided here.
 - The ceiling within which a later version of a placed agent installs without a new revision (v4 Path 2 places an agent
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract
   define a ceiling, every new version is a new revision.

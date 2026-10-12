@@ -1,0 +1,41 @@
+{
+  "description": "A check-in signed with the device's ES256 #sig key under the fabric-device label, received at the public base URL inside the window; the receiver accepts it: no finding (FAC-SEM-077, DEC-0056).",
+  "kind": "device-request-signature",
+  "expect": [],
+  "input": {
+    "request": {
+      "method": "POST",
+      "target": "/v1/devices/check-in",
+      "headers": {
+        "content-type": "application/json",
+        "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+        "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+        "signature": "fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+VmSZvFDav25DrSoU9mAZ9FF0OeiKVc3w==:"
+      },
+      "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+    },
+    "publicBaseUrl": "https://org.example",
+    "certificates": [
+      {
+        "serial": "7b6578616d706c65",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "es256",
+          "publicKey": "BM/OA4VayGPuBPgWypZv+JRnyZUbLCPpfXK1uJPlrkt6x6sdDG7zLa6JptSQZ9XhseCIx94venWLQebeAfd5Vow="
+        }
+      },
+      {
+        "serial": "5e1f0c2a9b3d4e6f",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "ed25519",
+          "publicKey": "GmHbOKj9DZ4wDliYqxiW0ispbeh69CnYnS21VsFOal0="
+        }
+      }
+    ],
+    "at": "2026-10-12T09:00:00Z",
+    "answer": "accepted"
+  }
+}

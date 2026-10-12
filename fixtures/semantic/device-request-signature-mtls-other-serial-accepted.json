@@ -1,0 +1,44 @@
+{
+  "description": "Mutual TLS with the client certificate 7b6578616d706c65 and a valid signature whose keyid names another certificate: the receiver accepted it, where a signature beside a client certificate names that certificate and the answer is 401 certificate-unknown (FAC-SEM-077, DEC-0056 item 1).",
+  "kind": "device-request-signature",
+  "expect": [
+    "FAC-SEM-077"
+  ],
+  "input": {
+    "request": {
+      "method": "POST",
+      "target": "/v1/activity/batches",
+      "headers": {
+        "content-type": "application/json",
+        "content-digest": "sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:",
+        "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"5e1f0c2a9b3d4e6f\";alg=\"ed25519\"",
+        "signature": "fabric-device=:K9nacDMLnihm9iKT0OU2J495E63ofeNapNuSPS+2tyEHj2C9jYqRen/vgh41s6P6lfYDGiRAimEFazm/wKqsAw==:"
+      },
+      "body": "{\"protocol\":\"fabric-activity/0.1\",\"device\":{\"id\":\"dev-01j9a\"},\"sent\":\"2026-10-12T08:59:58Z\",\"events\":[]}"
+    },
+    "publicBaseUrl": "https://org.example",
+    "certificates": [
+      {
+        "serial": "7b6578616d706c65",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "es256",
+          "publicKey": "BM/OA4VayGPuBPgWypZv+JRnyZUbLCPpfXK1uJPlrkt6x6sdDG7zLa6JptSQZ9XhseCIx94venWLQebeAfd5Vow="
+        }
+      },
+      {
+        "serial": "5e1f0c2a9b3d4e6f",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "ed25519",
+          "publicKey": "GmHbOKj9DZ4wDliYqxiW0ispbeh69CnYnS21VsFOal0="
+        }
+      }
+    ],
+    "at": "2026-10-12T09:00:00Z",
+    "clientCertificateSerial": "7b6578616d706c65",
+    "answer": "accepted"
+  }
+}

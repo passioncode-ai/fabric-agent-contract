@@ -1,6 +1,6 @@
 import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
-import { isValidP256Key } from "./p256.js";
+import { isValidP256Key, p256Jwk } from "./p256.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
@@ -319,6 +319,15 @@ function enrollment(value: JsonObject): Finding[] {
     if (seen !== undefined) flag(`${at}/publicKey`, `the same key is already listed at /request/deviceKeys/${seen}: one key is never used for the other role`);
     else roles.set(key.publicKey, i);
   });
+  // DEV-KEY-ROLES (DEC-0056): an enrollment that lists device keys lists exactly one signing key and at most one
+  // key-agreement key, as the estate record's FAC-SEM-073 counts a machine's — so there is the one key that signs a
+  // device's requests (devices.md, transport), and the one key a sender seals to.
+  if (Array.isArray(request.deviceKeys)) {
+    const listed = request.deviceKeys.filter(isObject);
+    const count = (use: string) => listed.filter((key) => key.use === use).length;
+    if (count("sig") !== 1) flag("/request/deviceKeys", `an enrollment that lists device keys lists exactly one signing key, <device.id>#sig; this one lists ${count("sig")}`);
+    if (count("kem") > 1) flag("/request/deviceKeys", `an enrollment lists at most one key-agreement key, <device.id>#kem; this one lists ${count("kem")}`);
+  }
   const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];
   if (issued.length && num(response.streamEpoch) <= Math.max(...issued)) flag("/response/streamEpoch", `an enrollment issues an epoch above every epoch issued to the device before (${Math.max(...issued)})`);
   return findings;
@@ -453,8 +462,11 @@ function deviceAction(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-068", instancePath: "/decision", message: want.decision === "refuse" ? `the device must refuse: ${want.reason}` : `nothing in the policy refuses this ${String(action.kind)}` }];
 }
 
-/** DER prefix of a P-256 SubjectPublicKeyInfo (RFC 5480); the 65-byte uncompressed point follows it. */
-const P256_SPKI_PREFIX = Buffer.from("3059301306072a8648ce3d020106082a8648ce3d030107034200", "hex");
+/**
+ * A raw uncompressed P-256 point (0x04 ‖ X ‖ Y) as a public JWK. A P-256 key goes to `verify` as `{key: jwk, format: "jwk",
+ * dsaEncoding}`: workerd (Cloudflare Workers) throws a TypeError on a KeyObject beside `dsaEncoding`, and Node accepts both.
+ * Local until `p256Jwk` (src/p256.ts, #59) lands.
+ */
 
 /**
  * Whether `signature` (base64) over `bytes` verifies under `key` (`{alg, publicKey}`): `ed25519` with a raw 32-byte key
@@ -472,7 +484,7 @@ export function verifyWith(key: JsonObject, bytes: Buffer, signature: unknown): 
     }
     if (key.alg === "es256") {
       if (!isValidP256Key(raw)) return false;
-      return verify("sha256", bytes, { key: createPublicKey({ key: Buffer.concat([P256_SPKI_PREFIX, raw]), format: "der", type: "spki" }), dsaEncoding: "ieee-p1363" }, value);
+      return verify("sha256", bytes, { key: p256Jwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, value);
     }
   } catch {
     return false;

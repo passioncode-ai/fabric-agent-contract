@@ -126,9 +126,15 @@ itself is checked under the root key (`FAC-SEM-046`) ([devices](docs/specificati
 else (DEC-0031); Ed25519 or ES256, naming its algorithm, and certified by the offline root an installer pinned when
 it pinned one (**Root certification**, `FAC-SEM-069`, DEC-0053).
 
-**Device key**: A device's non-exportable key. Beside DEC-0031's enrollment key, `deviceKeys` lists a signing key
-`<device.id>#sig` (ES256 or Ed25519) and a key-agreement key `<device.id>#kem` (ECDH over P-256), never one key in
-both roles; a P-256 key is a valid point by SEC 1 §3.2.2 (`isValidP256Key`, DEC-0053).
+**Device key**: A device's non-exportable key. Beside DEC-0031's enrollment key, `deviceKeys` lists exactly one signing
+key `<device.id>#sig` (ES256 or Ed25519) and at most one key-agreement key `<device.id>#kem` (ECDH over P-256), never
+one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by SEC 1 §3.2.2 (`isValidP256Key`,
+DEC-0053).
+
+**Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
+every batch, check-in and rotation request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
+terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
+accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **Collection start**: When a device starts collecting for the organization: the notice's acknowledgement, or under
 device management the earlier of that and the policy's deadline. Nothing that occurred before it is uploaded

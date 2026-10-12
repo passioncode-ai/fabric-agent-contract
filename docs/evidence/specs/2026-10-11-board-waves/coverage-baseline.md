@@ -50,6 +50,9 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P4-03 | `src/dashboard-declaration.ts` (new) | 20 / 20 (100 %) | 100 % | FAC-SEM-080 and `hostView` over `fixtures/vectors/dashboard-declaration.json` (DEC-0059); malformed input answered, never thrown |
 | P4-01 | `src/service-supervisor.ts` (new) | 114 / 114 (100 %) | 100 % | the supervisor marker over `fixtures/vectors/service-supervisor.json` and FAC-SEM-078; one fixture or test per check, each planted (DEC-0057) |
 | P4-01 | `src/windows-token.ts` (new) | 45 / 45 (100 %) | 100 % | the Windows token-file reader over `fixtures/vectors/windows-token.json` (FAC-SEM-079); every check planted (DEC-0057) |
+| P4-04 | `src/http-signature.ts` (new) | 350 / 350 (100 %) | 100 % | the device transport binding (DEC-0056): RFC 8941 parsing with RFC 9651's Date and Display String, RFC 9421 §2.3 and §2.5, mutual TLS beside the signature, the receiver's steps and the nonce store, over `fixtures/vectors/http-signature.json`; every refusal planted |
+| P4-04 | `src/device-transport-rules.ts` (new) | 40 / 40 (100 %) | 100 % | FAC-SEM-077, moved out of `device-rules.ts` so a consumer that vendors the device rules needs no HTTP layer |
+| P4-04 | `src/device-rules.ts` | 515 / 529 (97.35 %) | 97.35 % | FAC-SEM-044's key-role counts, every new branch covered |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -107,3 +110,13 @@ measured whole set 3294 / 3453 (95.39 %), after the review round. Measured with 
 
 **Wave 4, P4-01 merged with main `c00a0c3`** (the relay DEC-0047, P4-03 DEC-0058/0059, #59): 41 files, 1777 tests,
 whole set 3604 / 3763 (95.77 %), every floor met.
+
+**Wave 4, P4-04 (DEC-0056).** `src/http-signature.ts` is new and reaches every branch, with no `v8 ignore`: the RFC 8941
+parser's refusals case by case, RFC 9421 Appendix B.2.6 and RFC 9530 Appendix D as vectors, and one binding vector per
+receiver step. `device-rules.ts` gains FAC-SEM-044's counts, every new branch covered (97.35 %, its floor raised from
+97.08 %); FAC-SEM-077 is `src/device-transport-rules.ts`, every branch covered, and its kind joins
+`test/rule-tolerance.test.ts`. The whole-set floor stays at 86.85 %. Measured with `vitest run --coverage` on the P4-04
+branch off main's `31ed9f0`, after the review round: whole set 3528 / 3688 (95.66 %).
+
+**Wave 4, P4-04 merged with main `8c6211e`** (P4-01, P4-03, the relay and #59): 42 files, 1991 tests, whole set
+4001 / 4161 (96.15 %), every floor met.

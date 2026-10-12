@@ -35,7 +35,7 @@
         },
         "device": {
           "$ref": "activity-common.schema.json#/$defs/device",
-          "description": "Checked against the client certificate (FAC-SEM-045)."
+          "description": "Checked against the client certificate, or the certificate a verified request signature names (FAC-SEM-045, DEC-0056)."
         },
         "sequenceNum": {
           "type": "integer",
@@ -248,10 +248,14 @@
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 9007199254740991
+                },
+                "digest": {
+                  "$ref": "common.schema.json#/$defs/sha256",
+                  "description": "The applied revision's digest (DEC-0055 `digest`, `sha256:` and 64 hex), so a receiver tells two revisions with one number apart (DEC-0056). Optional."
                 }
               },
               "additionalProperties": false,
-              "description": "The estate-record revision the device applies."
+              "description": "The estate-record revision the device applies, and optionally its digest (DEC-0056)."
             },
             "heartbeat": {
               "type": "object",

@@ -229,6 +229,9 @@ A secret moves to a machine only where a placed package declares it
   - The signature is accepted within 60 s of `iat`.
   - It is bound to the method, the digest and the recipients, so replaying it only re-uploads the same bytes. It is
     not a bearer credential.
+  - A device's requests to its organization server carry a different signature under the same `#sig` key: an RFC 9421
+    HTTP message signature with a nonce ([devices](devices.md#transport), DEC-0056). The two never sign the same
+    bytes: RFC 8785 JSON starts with `{`, an RFC 9421 signature base with `"@method"`.
 - **Digest check.** The relay recomputes the digest and refuses a mismatch with `digest-mismatch`.
 - **Download.** A `GET` carries the same kind of signature by one of the `recipients`.
 - **Retention.** A relay keeps a blob until every recipient fetched it, or until 7 days pass.
