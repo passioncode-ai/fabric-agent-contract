@@ -5,6 +5,7 @@ import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.j
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { uncovered } from "./seq-ranges.js";
+import { embeddedProtocolsFindings } from "./protocol-revisions.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
@@ -284,6 +285,7 @@ function enrollment(value: JsonObject): Finding[] {
   const request = isObject(value.request) ? value.request : {};
   const response = isObject(value.response) ? value.response : {};
   const certificate = isObject(response.certificate) ? response.certificate : {};
+  findings.push(...embeddedProtocolsFindings(response.protocols, "/response/protocols"));
   const binding = isObject(certificate.binding) ? certificate.binding : {};
   const id = (x: unknown) => (isObject(x) ? x.id : undefined);
   if (id(binding.org) !== id(request.org)) flag("/response/certificate/binding/org/id", "the certificate names another organization than the request");

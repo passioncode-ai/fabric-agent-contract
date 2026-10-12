@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/schema-unsupported.schema.json",
+  "title": "schema-unsupported refusal (DEC-0067)",
+  "description": "What a receiver answers when a document names a protocol revision it does not accept: the revision received and the revisions it accepts of that protocol (all of them when the received value names none it can read). Sent before the document is read further; an HTTP route answers it as the JSON body of a 400, an MCP tool as structuredContent of an isError result, the same envelope as delegation-refusal.schema.json.",
+  "type": "object",
+  "required": [
+    "error"
+  ],
+  "properties": {
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "data"
+      ],
+      "properties": {
+        "code": {
+          "const": "schema-unsupported"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "data": {
+          "type": "object",
+          "required": [
+            "protocol",
+            "accepted"
+          ],
+          "properties": {
+            "protocol": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "The revision the document named, as received (at most 80 characters); empty when it named none."
+            },
+            "accepted": {
+              "$ref": "common.schema.json#/$defs/protocols"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

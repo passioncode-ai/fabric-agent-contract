@@ -155,7 +155,7 @@ forever and a revoked machine would keep calling.
 
 **Revocations in force** are the applied revision's, the applied entries' and those of forked entries
 (`effectiveRevocations`). Every check that reads the estate record's revocations reads these instead: the relay's
-admission set (DEC-0047; a relay SHOULD subtract the delta's revocations too), an envelope's sender (DEC-0047 item 7),
+admission set (DEC-0047; a relay subtracts the revocations in force from its admission set and closes the sessions they revoke, DEC-0066), an envelope's sender (DEC-0047 item 7),
 the hub key a delegation verifier trusts (DL-14: the delta's part, `deltaRevocations`, goes to
 `hubKeyCertified(..., {extraRevocations})` and to the verifiers' `estateRevocations`, DEC-0060), the package a node installs.
 
@@ -186,13 +186,15 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 
 ## Who adopts it
 
-- **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, and lists every entry in the next
-  revision (backlog CT-19).
+- **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, lists every entry in the next
+  revision, and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
   the heartbeat in its check-in, refuses what arrives from other machines unless `current`, and refuses an unreconciled
   revision (CT-20, CT-34).
-- **The relay** carries pages and heartbeats unchanged in `delta`, `heartbeat` and `welcome` frames and answers
-  `delta-query` (DEC-0047); it never signs one.
+- **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
+  holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them
+  unchanged in `delta`, `heartbeat` and `welcome` frames, answers `delta-query`, subtracts the revocations in force from
+  its admission set and closes the sessions they revoke (DEC-0047, DEC-0066); it never signs one.
 
 ## Privacy
 

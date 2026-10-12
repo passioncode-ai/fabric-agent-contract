@@ -1,0 +1,188 @@
+{
+  "description": "One session seen by three writers: the collector's intervals, Switchboard's launch and Fabric's terminal and end events as annotations. One collector writes the intervals, they do not overlap, and the totals are the collector's (FAC-SEM-100).",
+  "kind": "session-join",
+  "expect": [],
+  "input": {
+    "events": [
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Y9",
+        "kind": "session.annotation",
+        "source": "switchboard",
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "seq": 43,
+        "occurred": "2026-10-07T09:02:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "183772004511273",
+        "session": {
+          "id": "cc-sess-5d1e"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.1.287"
+        },
+        "data": {
+          "by": "switchboard",
+          "label": "journal_launch",
+          "at": "2026-10-07T09:02:00Z"
+        }
+      },
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Z2",
+        "kind": "session.annotation",
+        "source": "fabric",
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "seq": 45,
+        "occurred": "2026-10-07T09:02:05Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "183772004511275",
+        "session": {
+          "id": "cc-sess-5d1e"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.1.287"
+        },
+        "data": {
+          "by": "fabric",
+          "label": "terminal.opened",
+          "at": "2026-10-07T09:02:05Z"
+        }
+      },
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Y7",
+        "kind": "session.interval",
+        "source": "claude_code.otel",
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "seq": 41,
+        "occurred": "2026-10-07T09:14:05Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "183772004511230",
+        "user": {
+          "id": "m-4821"
+        },
+        "session": {
+          "id": "cc-sess-5d1e"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.1.287"
+        },
+        "skill": "code-review",
+        "launch": {
+          "via": "terminal"
+        },
+        "git": {
+          "branch": "feature/retry-budget"
+        },
+        "task": {
+          "ref": {
+            "system": "linear",
+            "key": "EX-142"
+          }
+        },
+        "data": {
+          "start": "2026-10-07T09:02:11Z",
+          "end": "2026-10-07T09:14:05Z",
+          "state": "agent_working",
+          "method": "otel"
+        }
+      },
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Y8",
+        "kind": "session.interval",
+        "source": "claude_code.otel",
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "seq": 42,
+        "occurred": "2026-10-07T09:29:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "183772004511230",
+        "user": {
+          "id": "m-4821"
+        },
+        "session": {
+          "id": "cc-sess-5d1e"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.1.287"
+        },
+        "skill": "code-review",
+        "launch": {
+          "via": "terminal"
+        },
+        "git": {
+          "branch": "feature/retry-budget"
+        },
+        "task": {
+          "ref": {
+            "system": "linear",
+            "key": "EX-142"
+          }
+        },
+        "data": {
+          "start": "2026-10-07T09:14:05Z",
+          "end": "2026-10-07T09:29:00Z",
+          "state": "awaiting_input",
+          "method": "otel"
+        }
+      },
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Z1",
+        "kind": "session.annotation",
+        "source": "fabric",
+        "collector": {
+          "id": "cc-otel",
+          "epoch": 2
+        },
+        "seq": 44,
+        "occurred": "2026-10-07T09:30:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "183772004511274",
+        "session": {
+          "id": "cc-sess-5d1e"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.1.287"
+        },
+        "data": {
+          "by": "fabric",
+          "label": "session.ended",
+          "at": "2026-10-07T09:30:00Z"
+        }
+      }
+    ]
+  }
+}

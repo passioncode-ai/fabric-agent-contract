@@ -30,6 +30,10 @@
         "protocol": {
           "$ref": "device-common.schema.json#/$defs/protocol"
         },
+        "protocols": {
+          "$ref": "common.schema.json#/$defs/protocols",
+          "description": "DEC-0067: the protocol revisions this node reads (the records and policy it is sent). A receiver sends each document in the newest revision listed here that it also writes, and never translates one."
+        },
         "kind": {
           "const": "check-in"
         },

@@ -393,10 +393,12 @@ version and commit a consuming repository builds against.
 
 **Relay**: A server that admits machines on their device keys and carries their messages,
 sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
-authority: it reads nothing it carries, decides no trust tier and never reports a queued command done.
+authority: it reads nothing it carries, decides no trust tier and never reports a queued command done, and until a
+caller's signature is proven it tells it nothing it holds (DEC-0066).
 
 **Admission set**: The signing keys a **Relay** admits — the machines of the estate record it holds,
-applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
+applied only after `verifyEstateRecord`, minus revoked machines and keys (and the revocations of verified delta
+entries), minus keys that could never verify; none once the record's window ends, when open sessions close too. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
 organization's relay has none of its own until `org-authority/1` (Fabric D8).
 
@@ -413,6 +415,14 @@ in its check-in ([window lease](docs/specification/window-lease.md)).
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
 
+**Session annotation**: A surface's event about a session (Fabric's end of a session, Switchboard's launch), written by
+the device's collector as `session.annotation` and never counted; the collector alone writes a session's intervals and
+usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/specification/activity.md#one-writer-per-session)).
+
+**Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
+of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,
+[versioning](docs/specification/versioning.md#protocol-revisions)).
+
 **OpenRouter attribution**: The three headers (`HTTP-Referer` = the product page, `X-OpenRouter-Title`,
 `X-OpenRouter-Categories`) an organization product adds to a request it originates to `https://openrouter.ai`, never
 to forwarded traffic and never over a user's own attribution; off without a setting (DEC-0065,
@@ -424,7 +434,8 @@ arrives from other machines and keeps the person's own work.
 
 **Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
 signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a
-**Relay** as a blob and opened only in the target's vault.
+**Relay** as a blob and opened only in the target's vault, under a signed `envelopeSequence` the target's mark of the
+placement run guards against rollback (DEC-0066).
 
 ## Relationships
 

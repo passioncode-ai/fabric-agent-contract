@@ -1,4 +1,10 @@
 // #region rfc3339 — docs: docs/specification/estate-record.md#the-verifier
+/**
+ * How far ahead of the verifier's clock a signed time may be before it is `not-yet-valid` (60 s): a relay's `iat`, a
+ * message body's and an envelope's `iat`, and an estate record's `issuedAt` (DEC-0047, DEC-0066).
+ */
+export const CLOCK_SKEW_SECONDS = 60;
+
 const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
 
 /**

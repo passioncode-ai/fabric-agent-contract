@@ -21,11 +21,13 @@ contract pin, and reference verifiers that consumers copy or port and test again
 vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`,
 `src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), `src/estate-record-rules.ts` with
 `src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/relay.ts` (relay
-admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope) and
+admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope), `src/relay-vectors.ts`
+(the framework-free runner of the relay's shared vectors, DEC-0066), `src/p256.ts` `signEs256`/`toLowS` (the low-S
+ES256 rule, DEC-0066) and
 `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
 estate record certifies a delegation key, DEC-0060) `src/revocation-delta.ts` (the revocation delta, the heartbeat
 and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062), `src/signing-challenges.ts` (the
-signing register and its verifier, DEC-0063) and `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065). What does not ship: a runtime, a provider implementation, a model router,
+signing register and its verifier, DEC-0063) `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065) `src/protocol-revisions.ts` (protocol revisions, N and N−1, DEC-0067) and `src/session-join.ts` (one writer per session, DEC-0068). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
