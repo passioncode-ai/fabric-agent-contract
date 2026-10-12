@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/openrouter-attribution.schema.json",
+  "title": "OpenRouter attribution setting (DEC-0065)",
+  "description": "A product's own OpenRouter app attribution: the product slug (its app is https://passioncode.ai/<product>/), the title OpenRouter shows, and at most two recognized categories. Absent, a product sends no attribution (off by default). The headers go only on requests to https://openrouter.ai for traffic the product originates, never in place of a user's own attribution (openrouter-attribution.md, FAC-SEM-098). The category list is OpenRouter's App Attribution page retrieved 2026-10-12.",
+  "type": "object",
+  "required": [
+    "product",
+    "title"
+  ],
+  "properties": {
+    "product": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,62}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[\\x21-\\x7e](?:[\\x20-\\x7e]{0,98}[\\x21-\\x7e])?$"
+    },
+    "categories": {
+      "type": "array",
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "cli-agent",
+          "ide-extension",
+          "cloud-agent",
+          "programming-app",
+          "native-app-builder",
+          "creative-writing",
+          "video-gen",
+          "image-gen",
+          "audio-gen",
+          "writing-assistant",
+          "general-chat",
+          "personal-agent",
+          "legal",
+          "roleplay",
+          "game"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

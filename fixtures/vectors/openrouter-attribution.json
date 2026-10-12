@@ -1,0 +1,456 @@
+{
+  "description": "OpenRouter attribution (DEC-0065, openrouter-attribution.md): for each setting and request, the headers a product adds, or none with the reason. Header names in `expect` are exact; `request.headers` names compare case-insensitively. Categories are OpenRouter's App Attribution page retrieved 2026-10-12.",
+  "cases": [
+    {
+      "name": "attributed",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      }
+    },
+    {
+      "name": "no-categories",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/fabric/",
+          "X-OpenRouter-Title": "Fabric"
+        }
+      }
+    },
+    {
+      "name": "off-by-default",
+      "setting": null,
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "no-setting"
+      }
+    },
+    {
+      "name": "forwarded",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": false
+      },
+      "expect": {
+        "headers": {},
+        "none": "forwarded"
+      },
+      "note": "a request forwarded for someone else's agent keeps its own attribution"
+    },
+    {
+      "name": "user-set-referer",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "http-referer": "https://example.org/"
+        }
+      },
+      "expect": {
+        "headers": {},
+        "none": "user-set"
+      },
+      "note": "header names compare case-insensitively"
+    },
+    {
+      "name": "user-set-legacy-title",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "X-Title": "Mine"
+        }
+      },
+      "expect": {
+        "headers": {},
+        "none": "user-set"
+      }
+    },
+    {
+      "name": "authorization-is-not-attribution",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "Authorization": "Bearer <redacted>"
+        }
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      }
+    },
+    {
+      "name": "other-host",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "lookalike-host",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai.example.org/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      },
+      "note": "a lax suffix or prefix match gets this wrong"
+    },
+    {
+      "name": "subdomain",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://eu.openrouter.ai/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "plain-http",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "http://openrouter.ai/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "explicit-port",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai:8443/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "userinfo",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://user@openrouter.ai/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "upper-case-host",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://OpenRouter.AI/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      },
+      "note": "WHATWG URL parsing lower-cases the host"
+    },
+    {
+      "name": "not-a-url",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "openrouter.ai/api",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "unknown-category",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric",
+        "categories": [
+          "agents"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "three-categories",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric",
+        "categories": [
+          "personal-agent",
+          "cloud-agent",
+          "general-chat"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "category-twice",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric",
+        "categories": [
+          "personal-agent",
+          "personal-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "upper-case-category",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric",
+        "categories": [
+          "Personal-Agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "product-not-a-slug",
+      "setting": {
+        "product": "Fabric",
+        "title": "Fabric"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "title-with-newline",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric\r\nX-Injected: 1"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      },
+      "note": "a header value never carries CR or LF"
+    },
+    {
+      "name": "title-100",
+      "setting": {
+        "product": "fabric",
+        "title": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/fabric/",
+          "X-OpenRouter-Title": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        }
+      }
+    },
+    {
+      "name": "title-101",
+      "setting": {
+        "product": "fabric",
+        "title": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    },
+    {
+      "name": "title-trailing-space",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric "
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
+    }
+  ]
+}

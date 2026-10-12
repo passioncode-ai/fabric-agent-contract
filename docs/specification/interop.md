@@ -119,9 +119,9 @@ interop extension block. Then:
   inputRequests?, result?, error?}}` and `fabric.job.cancel {id}` → the same shape.
 - `status` ∈ `working | input_required | completed | failed | cancelled` (the MCP Task states);
   terminal: `completed | failed | cancelled`.
-- `result` is the **result envelope**: `{done: [...], proof: [...], scope: {...}, notVerified:
-  [...], output: <outputSchema value>, usage: {inputTokens, outputTokens, cacheReadTokens?,
-  cacheWriteTokens?, costUsd?, wallMs}}` (DEC-0011 collections plus usage).
+- `result` is the **full result envelope** ([results and evidence](results-and-evidence.md)) with `output` (the
+  `outputSchema` value) and `usage` (`{inputTokens, outputTokens, cacheReadTokens?, cacheWriteTokens?, costUsd?,
+  wallMs}`) required: one shape, no subset (DEC-0017, OQ-0002; `interop-result.schema.json`).
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
 

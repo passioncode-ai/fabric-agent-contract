@@ -183,7 +183,8 @@ and answers what the service spent, self-reported from its own usage receipts, s
 show every agent's spend beside its health without knowing any provider.
 
 - `days` covers at most the last 31 UTC days, oldest first, one entry per date, today last if
-  there was activity today. A day without calls MAY be omitted. There is no paging and no query.
+  there was activity today. A day without calls MAY be omitted. There is no paging and no query. Every date exists,
+  is not after the UTC date of `generatedAt` and is at most 30 days before it (`FAC-SEM-025`, DEC-0065).
 - Each day carries totals and `byModel` rows (`provider`, `model`); the totals are the sums of
   the rows, and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
   ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
@@ -210,6 +211,11 @@ show every agent's spend beside its health without knowing any provider.
   and MUST NOT put prompts, outputs or caller identities in it. `byGrant` names a grant only by its
   opaque reference — the `grant` claim of the delegation token the call carried — and never the
   person or the chain of agents behind it ([delegation](delegation.md) DL-22, DEC-0039).
+- `byProject` MAY attribute the window's calls to the project the service ran them for, and within a project to the
+  service's own task runs (`taskRuns[]`, `taskRunId`), DEC-0065. It is the service's run attribution: it names no
+  caller, session or person, so a session id is not a field (DL-22). Each project is one row and each task run one row
+  within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
+  an unknown cost is `null` as in a day's rows (`FAC-SEM-025`). A call the service ran for no project is in no row.
 - **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
   object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that
   authorized it — a share grant or a listing's grant, by its opaque reference — and no row, total or grant names a
@@ -683,7 +689,7 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
-| `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
+| `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once and each task run once within it, a project holds at least its task runs' calls and all projects no more than the days, with the same unknown-cost rule (DEC-0065; `src/usage-rules.ts`) |
 | `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
 | `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |

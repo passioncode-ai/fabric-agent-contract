@@ -186,7 +186,7 @@ two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were al
 register and carry no receipt. `FAC-SEM-095` was reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-098`
+**Next free rule code:** `FAC-SEM-099`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -284,6 +284,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-094` | `learning`, `promotion` | [governance and roles](governance-and-roles.md#semantic-rules) | SEM-0094 |
 | `FAC-SEM-096` | `versioned-setting` | [versioning](versioning.md#semantic-rules) | SEM-0096 |
 | `FAC-SEM-097` | `grant-window` | [governance and roles](governance-and-roles.md#semantic-rules) | SEM-0097 |
+| `FAC-SEM-098` | `openrouter-attribution` | [OpenRouter attribution](openrouter-attribution.md#semantic-rules) | SEM-0098 |
 
 ## Compatibility policy
 

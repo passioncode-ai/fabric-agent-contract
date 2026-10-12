@@ -2,8 +2,10 @@
 
 `covers: MEM-REQ-006, MEM-REQ-007`
 
-Status: recommended private pilot backend, not a mandated dependency. DEC-0014
-keeps the Memory Kernel storage-agnostic. The pinned evidence is listed in the
+Status: **superseded for agent memory by DEC-0023**: agents use `memory/0.1`, served first by
+Project Observatory ([memory and learning → Wire: memory/0.1](../specification/memory-and-learning.md#wire-memory01)).
+This page is kept as a historical mapping of one retrieval backend; it is not a recommended
+pilot. DEC-0014 keeps the Memory Kernel storage-agnostic. The pinned evidence is listed in the
 [external source ledger](../evidence/sources.md).
 
 ## Deployment boundary

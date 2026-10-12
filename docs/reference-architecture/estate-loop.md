@@ -86,6 +86,6 @@ to an admitted Codex provider.
 All roles use the host-shaped [Memory Kernel](../specification/memory-and-learning.md).
 They do not address a vector store or graph directly. Project observations remain
 isolated; approved global insights are pointers with evidence, and retrieval
-returns a bounded, cited `MemoryPack`. The first private backend pilot is the
-[`mcp-memory-service` adapter](mcp-memory-service-adapter.md), which remains
-replaceable and non-canonical.
+returns a bounded, cited `MemoryPack`. Agents reach memory through `memory/0.1`, served first by
+Project Observatory (DEC-0023, [Wire: memory/0.1](../specification/memory-and-learning.md#wire-memory01)); the earlier
+[`mcp-memory-service` pilot](mcp-memory-service-adapter.md) is superseded and kept as history.

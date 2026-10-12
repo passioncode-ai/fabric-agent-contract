@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0065`
+**Next free ID:** `DEC-0066`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -290,6 +290,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Amends:** DEC-0016; C3.1/C3.6 naming in the interop specification
 - **Decision:** `common.schema.json#/$defs/capabilityName` admits
   `^[a-z][a-z0-9._-]{1,127}$`. The manifest capability name, hub argument,
@@ -322,6 +323,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
@@ -355,6 +358,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted 2026-10-05 — the operator accepted C1–C9 as written (OQ-0008); consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -391,6 +395,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; provider and consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Supersedes:** DEC-0014's pilot, for agent memory only (Fabric ADR-0105). DEC-0014 still
   governs Fabric's own domain memory.
 - **Decision:** `memory/0.1` is the capability family for agent memory, with extension key
@@ -451,6 +456,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-05
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Amends:** the `fabric-service/0.1` Surfaces table (additive, DEC-0016 extension policy)
 - **Decision:** `surfaces.mcp.auth` is optional, with the values `descriptor` (default) and `own`.
   With `descriptor`, the MCP surface takes the descriptor's token in its header, as before. With
@@ -481,6 +487,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-05
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:**
   - **Settings backup.** A service whose store holds operator decisions SHOULD keep snapshots of
@@ -542,6 +549,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; refined by DEC-0029 (attach boundary, derived context, route
   event, rule-code register); consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Refines:** DEC-0016 (additive extension policy); DEC-0010 (admission lifecycle unchanged)
 - **Decision:** A project pins, per capability served by the local-runner profile,
   an immutable **runner route**: an ordered list of candidates, each naming a
@@ -591,6 +599,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Amends:** the `fabric-service/0.1` usage report of DEC-0021 (additive, DEC-0016 extension
   policy)
 - **Decision:** `service-usage.schema.json` gains an optional `budgets` array, at most 64
@@ -635,6 +644,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Refines:** DEC-0026 (runner routes — additive, under the DEC-0016 extension policy); DEC-0010
   (admission unchanged); DEC-0013 (execution contexts unchanged)
 - **Decision:** A review of DEC-0026 against the operator's request and Fabric's host design
@@ -3538,3 +3548,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   w5-p5-01-sem-{result-integrity,approval-separation,pm-coverage,rollback,grant-window}-20261012 SEM`); `FAC-SEM-095`
   (pm-coverage) is unused because that rule became the `FAC-SEM-006` fix. The owner session wrote this entry under its
   leases; the record plane is `fs`.
+
+### DEC-0065 — Interop and usage: a usage report's window and project attribution, OpenRouter attribution for the organization's products, and text behind its rulings
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Project Observatory's meter
+  writes `byProject` and moves its OpenRouter referer to its product page (CT-20); the adapter's kits offer the
+  attribution setting, off by default (CT-18); Fabric attributes from its first model call through OpenRouter (CT-19).
+  Board row CT-15.
+- **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
+  adoption. Implements the organization roadmap's RM-16 architecture phase. Closes the board run's inventory items
+  CON-OE-13, F-A-005, F-A-012, F-A-022, F-A-023, F-A-024, F-A-029 and RM-16 (node N11, packet P5-02).
+- **Decision:**
+  1. **The window** ([service → Usage report](specification/service.md#usage-report)). Every `days[].date` exists, is
+     not after the UTC date of `generatedAt` and is at most 30 days before it; an unreadable `generatedAt` is a finding
+     (`FAC-SEM-025`).
+  2. **Project attribution** (CON-OE-13). A usage report MAY carry `byProject[]`: `projectId`, calls, unpriced calls
+     and cost, and within it the service's own `taskRuns[]` (`taskRunId`). It is the service's run attribution and
+     names no caller, session or person, so `sessionId` is not a field (DL-22, DEC-0039). Each project is one row and
+     each task run one row within its project; a project holds at least its task runs' calls; all projects together hold
+     no more calls than the days; an unknown cost is `null` as in a day's rows (`FAC-SEM-025`).
+  3. **One module per rule.** `FAC-SEM-025` moves whole into `src/usage-rules.ts` (G-13: one code, one checker).
+  4. **OpenRouter attribution** ([OpenRouter attribution](specification/openrouter-attribution.md)). A product's setting
+     names its slug (its app is `https://passioncode.ai/<product>/`, one app per product), its title and at most two
+     recognized categories (`FAC-SEM-098`, kind `openrouter-attribution`, schema
+     `openrouter-attribution.schema.json`). `attributionHeaders` adds `HTTP-Referer`, `X-OpenRouter-Title` and
+     `X-OpenRouter-Categories`, and nothing else, only with a valid setting, only to `https://openrouter.ai` exactly,
+     only for traffic the product originates, and never when the request already carries an attribution header. Without
+     a setting nothing is sent.
+  5. **Text behind its rulings.** interop.md C3.2's job `result` is the full result envelope (DEC-0017, OQ-0002);
+     provider.md states the ruled `FAC-SEM-014` and `FAC-SEM-015` and marks the locked text superseded; the
+     `mcp-memory-service` pilot is history in the adapter reference, the estate loop, the source ledger and DOCMAP
+     (DEC-0023); the comms checkers' comments no longer call DEC-0022 proposed.
+  6. **Adoption is measured, not assumed** ([adoption](evidence/adoption.md)): the pins of the organization's
+     repositories on 2026-10-12, annotated on DEC-0020…DEC-0029. A pin that contains a decision is a precondition of
+     adopting it, not proof.
+- **Why:** a usage report whose dates were never read could put spend in a future month; a host that splits spend by
+  project needs it from the service, without learning who called. The organization's products were not credited for
+  their own model traffic, and a header rule without a host check would leak a product's identity onto other services
+  or over a user's own settings.
+- **Compatibility:** Additive for `byProject`, the attribution schema and the rule. Tightening for `FAC-SEM-025`: a
+  report with a date outside its window is now refused; a report written as service.md already required passes.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`, `docs/specification/openrouter-attribution.md` (new),
+    `docs/specification/interop.md`, `docs/specification/provider.md`, `docs/specification/conformance.md`;
+  - reference architecture: `docs/reference-architecture/mcp-memory-service-adapter.md`,
+    `docs/reference-architecture/estate-loop.md`;
+  - schemas: `schemas/service-usage.schema.json` (`byProject`), `schemas/openrouter-attribution.schema.json` (new);
+  - code: `src/usage-rules.ts` (new), `src/openrouter-attribution.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/service-usage-by-project.json`, `fixtures/negative/service-usage-by-project-session.json`,
+    `fixtures/positive/openrouter-attribution.json`, `fixtures/negative/openrouter-attribution-*`,
+    `fixtures/vectors/openrouter-attribution.json`, `fixtures/catalogue.json`;
+  - tests: `test/usage-rules.test.ts` (new), `test/openrouter-attribution.test.ts` (new), `test/positive-sweep.test.ts`,
+    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`; floors in `vitest.config.ts`;
+  - docs: `docs/evidence/sources.md` (OpenRouter *App Attribution*), `docs/evidence/adoption.md` (new),
+    `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md`.
+- **Not decided here:** a per-project breakdown by day or by model; whether a hidden app (`X-OpenRouter-App-Visibility`)
+  is ever right for a product; attribution on providers other than OpenRouter; a schedule for re-measuring adoption.
+- **Source:** the board run's inventory (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`, node
+  `N11-interop-usage`); the organization's roadmap RM-16 (fabric-workspace `knowledge/roadmap.md`); OpenRouter's *App
+  Attribution* page in the [source ledger](evidence/sources.md); DEC-0017, DEC-0021, DEC-0022, DEC-0023, DEC-0039;
+  packet P5-02. DEC-0065 and `FAC-SEM-098` were reserved by git CAS (`--key w5-p5-02-interop-usage-20261012 DEC`,
+  `--key w5-p5-02-sem-openrouter-attribution-20261012 SEM`); the record plane is `fs`.

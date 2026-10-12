@@ -22,6 +22,7 @@ import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
+import { attributionRules } from "./openrouter-attribution.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
@@ -64,6 +65,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (lease) return lease;
   const signing = signingRules(kind, value);
   if (signing) return signing;
+  const attribution = attributionRules(kind, value);
+  if (attribution) return attribution;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const descriptorBundle = descriptorBundleRules(kind, value);
@@ -244,7 +247,7 @@ function usageLimits(value: JsonObject): Finding[] {
 // #endregion usage-limits
 
 // #region comms-rules — docs: docs/specification/project-comms.md#semantic-rules
-/** FAC-SEM-026 (DEC-0022, proposed): a submit is coherent — a request's target can read the new
+/** FAC-SEM-026 (DEC-0022): a submit is coherent — a request's target can read the new
  *  thread, participants name no Project twice, and a reply answers a message. Identity is never in
  *  the payload: the schema already refuses estate, sender, principal and session fields. */
 function commsSubmit(value: JsonObject): Finding[] {
@@ -260,7 +263,7 @@ function commsSubmit(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** The request lifecycle (DEC-0022, proposed). Request state and effect state are separate facts:
+/** The request lifecycle (DEC-0022). Request state and effect state are separate facts:
  *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
  *  `outcome_unknown`. Accepted work is held on expiry and on responder replacement. */
 export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {

@@ -24,8 +24,8 @@ vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts
 admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope) and
 `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
 estate record certifies a delegation key, DEC-0060) `src/revocation-delta.ts` (the revocation delta, the heartbeat
-and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062) and `src/signing-challenges.ts` (the
-signing register and its verifier, DEC-0063). What does not ship: a runtime, a provider implementation, a model router,
+and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062), `src/signing-challenges.ts` (the
+signing register and its verifier, DEC-0063) and `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
@@ -57,6 +57,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [The revocation delta and the heartbeat — revocations within seconds, a signed commitment to them, and the 72-hour rule (`revocation-delta/1`, `heartbeat/1`, DEC-0054)](docs/specification/revocation-delta.md)
 - [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
 - [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
+- [OpenRouter attribution — the organization's products as apps on OpenRouter (DEC-0065)](docs/specification/openrouter-attribution.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
