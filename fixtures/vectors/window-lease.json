@@ -1,0 +1,3330 @@
+{
+  "about": "Vectors for window-lease/1 (DEC-0062). verify: verifyWindowLease(lease, trust) with trust.at an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock) and trust.estateRecord, when absent, the estateRecord below — the members of fixtures/positive/estate-record-first.json the verifier reads. reserve: mayReserve(lease, request), the meter's decision under a verified lease. remainder: windowRemainder(ledger), the hub's division. decimals: usdMicros; periods: periodBounds and periodOf. The hub key's seed is the test key of fixtures/vectors/estate-record.json (keys.hub); Ed25519 is deterministic, so a port's signer reproduces every sig. Never real credentials.",
+  "keys": {
+    "hub": {
+      "seed": "ed3a3c05e3661e523882ffe441ffec074ad025722fb67357b8d5388e0faa3866",
+      "kid": "hub-m-4c1e-1",
+      "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw"
+    }
+  },
+  "estateRecord": {
+    "schema": "estate-record/1",
+    "estate": "estate-5d0f1a",
+    "revision": 1,
+    "machines": [
+      {
+        "id": "m-4c1e",
+        "hubKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw",
+          "kid": "hub-m-4c1e-1",
+          "use": "sig",
+          "alg": "EdDSA"
+        }
+      },
+      {
+        "id": "m-9a07"
+      }
+    ],
+    "revocations": []
+  },
+  "signingInput": {
+    "lease": {
+      "type": "window-lease/1",
+      "leaseId": "lease-m9a07-2026-10-0003",
+      "sequence": 3,
+      "estate": "estate-5d0f1a",
+      "estateRevision": 1,
+      "machine": "m-9a07",
+      "scope": "estate",
+      "window": "month",
+      "period": "2026-10",
+      "amount": "250.5",
+      "unit": "USD",
+      "issuedAt": "2026-10-12T09:00:00Z",
+      "expiresAt": "2026-10-13T09:00:00Z",
+      "alg": "EdDSA",
+      "kid": "hub-m-4c1e-1",
+      "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+    },
+    "input": "{\"alg\":\"EdDSA\",\"amount\":\"250.5\",\"estate\":\"estate-5d0f1a\",\"estateRevision\":1,\"expiresAt\":\"2026-10-13T09:00:00Z\",\"issuedAt\":\"2026-10-12T09:00:00Z\",\"kid\":\"hub-m-4c1e-1\",\"leaseId\":\"lease-m9a07-2026-10-0003\",\"machine\":\"m-9a07\",\"period\":\"2026-10\",\"scope\":\"estate\",\"sequence\":3,\"type\":\"window-lease/1\",\"unit\":\"USD\",\"window\":\"month\"}"
+  },
+  "decimals": [
+    {
+      "text": "0",
+      "micros": "0"
+    },
+    {
+      "text": "250.5",
+      "micros": "250500000"
+    },
+    {
+      "text": "250.500000",
+      "micros": "250500000"
+    },
+    {
+      "text": "999999999.999999",
+      "micros": "999999999999999"
+    },
+    {
+      "text": "0.000001",
+      "micros": "1"
+    },
+    {
+      "text": "1e3",
+      "micros": null
+    },
+    {
+      "text": "01",
+      "micros": null
+    },
+    {
+      "text": "+1",
+      "micros": null
+    },
+    {
+      "text": "-1",
+      "micros": null
+    },
+    {
+      "text": " 1",
+      "micros": null
+    },
+    {
+      "text": "1.",
+      "micros": null
+    },
+    {
+      "text": ".5",
+      "micros": null
+    },
+    {
+      "text": "1.0000001",
+      "micros": null
+    },
+    {
+      "text": "1000000000",
+      "micros": null
+    },
+    {
+      "text": "1,5",
+      "micros": null
+    },
+    {
+      "text": "",
+      "micros": null
+    }
+  ],
+  "periods": {
+    "bounds": [
+      {
+        "window": "day",
+        "period": "2026-10-12",
+        "start": "2026-10-12T00:00:00.000Z",
+        "end": "2026-10-13T00:00:00.000Z"
+      },
+      {
+        "window": "day",
+        "period": "2028-02-29",
+        "start": "2028-02-29T00:00:00.000Z",
+        "end": "2028-03-01T00:00:00.000Z"
+      },
+      {
+        "window": "day",
+        "period": "2026-02-29",
+        "valid": false
+      },
+      {
+        "window": "day",
+        "period": "2026-10-12T00:00:00Z",
+        "valid": false
+      },
+      {
+        "window": "week",
+        "period": "2026-W42",
+        "start": "2026-10-12T00:00:00.000Z",
+        "end": "2026-10-19T00:00:00.000Z"
+      },
+      {
+        "window": "week",
+        "period": "2026-W53",
+        "start": "2026-12-28T00:00:00.000Z",
+        "end": "2027-01-04T00:00:00.000Z"
+      },
+      {
+        "window": "week",
+        "period": "2025-W01",
+        "start": "2024-12-30T00:00:00.000Z",
+        "end": "2025-01-06T00:00:00.000Z"
+      },
+      {
+        "window": "week",
+        "period": "2025-W53",
+        "valid": false
+      },
+      {
+        "window": "week",
+        "period": "2026-W00",
+        "valid": false
+      },
+      {
+        "window": "week",
+        "period": "2026-w42",
+        "valid": false
+      },
+      {
+        "window": "month",
+        "period": "2026-10",
+        "start": "2026-10-01T00:00:00.000Z",
+        "end": "2026-11-01T00:00:00.000Z"
+      },
+      {
+        "window": "month",
+        "period": "2026-12",
+        "start": "2026-12-01T00:00:00.000Z",
+        "end": "2027-01-01T00:00:00.000Z"
+      },
+      {
+        "window": "month",
+        "period": "2026-13",
+        "valid": false
+      },
+      {
+        "window": "month",
+        "period": "2026-1",
+        "valid": false
+      },
+      {
+        "window": "year",
+        "period": "2026",
+        "valid": false
+      }
+    ],
+    "periodOf": [
+      {
+        "window": "day",
+        "at": "2026-10-12T23:59:59.999Z",
+        "period": "2026-10-12"
+      },
+      {
+        "window": "day",
+        "at": "2026-10-12T23:30:00-01:00",
+        "period": "2026-10-13"
+      },
+      {
+        "window": "week",
+        "at": "2026-10-12T12:00:00Z",
+        "period": "2026-W42"
+      },
+      {
+        "window": "week",
+        "at": "2027-01-01T12:00:00Z",
+        "period": "2026-W53"
+      },
+      {
+        "window": "week",
+        "at": "2024-12-30T00:00:00Z",
+        "period": "2025-W01"
+      },
+      {
+        "window": "week",
+        "at": "2026-10-11T23:59:59Z",
+        "period": "2026-W41"
+      },
+      {
+        "window": "week",
+        "at": "2026-10-12T08:00:00+09:00",
+        "period": "2026-W41"
+      },
+      {
+        "window": "month",
+        "at": "2026-10-31T23:59:59Z",
+        "period": "2026-10"
+      },
+      {
+        "window": "month",
+        "at": "2026-11-01T08:00:00+09:00",
+        "period": "2026-10"
+      }
+    ]
+  },
+  "verify": [
+    {
+      "name": "a month lease for this machine, signed by the hub key the record certifies",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "lower-case t and z (RFC 3339 §5.6), signed",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12t09:00:00z",
+        "expiresAt": "2026-10-13t09:00:00z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "cdSXJwsNfTkfSzCgO6AqNpWFgEusQPIGCtF082OFF2HlN6Ytu5U0PJX5BOTWuH28kImHQDX8IoTAshxtsfutDg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13t09:00:00z"
+      }
+    },
+    {
+      "name": "times with a +09:00 offset, the same instants, signed",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T18:00:00+09:00",
+        "expiresAt": "2026-10-13T18:00:00+09:00",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "YA0pM68R-BisMIzZ3lkyLRU-ckjKDXsJoDKfwABac_HJb-n3bc6hKWdoEWWNZN-yWSHzn9byV5XSulTYthCIBA"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T18:00:00+09:00"
+      }
+    },
+    {
+      "name": "a week lease in ISO week 2026-W53, checked on 1 January 2027",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-w53-0001",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "week",
+        "period": "2026-W53",
+        "amount": "40",
+        "unit": "USD",
+        "issuedAt": "2027-01-01T06:00:00Z",
+        "expiresAt": "2027-01-02T06:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "s7TEkU3mVr5AXX4RPs6xsV_Nl8IZua_J0OyMEmbz7cU-CnjOJ5z1dVSAXmGY_Gkvt3uDV2flQyAr3jjkjDAwDQ"
+      },
+      "trust": {
+        "at": "2027-01-01T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-w53-0001",
+        "slot": "estate-5d0f1a m-9a07 estate week 2026-W53",
+        "amount": "40",
+        "expiresAt": "2027-01-02T06:00:00Z"
+      }
+    },
+    {
+      "name": "a grant's window: the scope is kept, though v4 leases only the estate's",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-grant-0001",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "grant:g-7f3a#2",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "6I1nvSNnVblVw9ssjhSPXwQhFC13xWg-gYdrJ8flvbgmGQCFUoNO-7cOsXIoebYanP6XU30E2fW76gq7nFelCg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-grant-0001",
+        "slot": "estate-5d0f1a m-9a07 grant:g-7f3a#2 month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "the same lease delivered again",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-10-0003",
+          "sequence": 3,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-10",
+          "amount": "250.5",
+          "unit": "USD",
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "expiresAt": "2026-10-13T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "a newer lease than the one held",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-10-0002",
+          "sequence": 2,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-10",
+          "amount": "300",
+          "unit": "USD",
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "expiresAt": "2026-10-13T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "RpdXtIOrWOIkWTThWxphui3UKLvR8guwp-j1eG2nIUAg9FEovVuvOO1xJp8cTw6iw3ZFFhfSioTeE80MQxARCw"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "the lease held is of another period: it supersedes nothing",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-09-0011",
+          "sequence": 11,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-09",
+          "amount": "250.5",
+          "unit": "USD",
+          "issuedAt": "2026-09-29T09:00:00Z",
+          "expiresAt": "2026-09-30T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "irRkXk3Fn4xEIMOAuIU4AhLVwbN_WPnRTNLnb1Zad7HaOagkTF8mv7HynSSaMzxwrN3DQfhUdPhSKubus4uvBw"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "the amount equals the remainder (250.5 and 250.500000)",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "250.500000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "a life of exactly 24 hours",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "expiring exactly when its month ends",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0009",
+        "sequence": 9,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-31T12:00:00Z",
+        "expiresAt": "2026-11-01T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "G4XTReCAxPct01Few2uicDf7Hsoi9BlXxmcW-G3Cekh2eqT3wue_w4krXvrwZxenL8GVMpfWs9wtCsjQZYv1AA"
+      },
+      "trust": {
+        "at": "2026-10-31T13:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0009",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-11-01T00:00:00Z"
+      }
+    },
+    {
+      "name": "checked at the instant it was issued",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "checked one millisecond before it expires",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-13T08:59:59.999Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": true,
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "slot": "estate-5d0f1a m-9a07 estate month 2026-10",
+        "amount": "250.5",
+        "expiresAt": "2026-10-13T09:00:00Z"
+      }
+    },
+    {
+      "name": "the trust context is not an object",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "the remainder is written with an exponent",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1e3"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "the meter's clock is not a date that exists (30 February)",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-02-30T00:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    },
+    {
+      "name": "the meter's clock has no offset",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    },
+    {
+      "name": "another type",
+      "lease": {
+        "type": "window-lease/2",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "the amount has an exponent",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "2.505e2",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "the amount has a leading zero",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "0250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "the amount has seven fraction digits",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5000001",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "the amount is a JSON number",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": 250.5,
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "the unit in lower case",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "usd",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a week's period with a lower-case w",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "week",
+        "period": "2026-w42",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a month window with a week's period",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-W42",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "ISO week 53 of 2025, which has 52",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "week",
+        "period": "2025-W53",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "sequence 0",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 0,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a member the register does not list",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg",
+        "note": "extra"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "no signature",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "issuedAt on a day that does not exist (31 September)",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-09-31T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a life of 24 hours and one second",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:01Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "eGGhX3wNEmiedpQipwXwWgf2fv0_2eBGD2PQL0dAFeiwmBn2g7kyOwdLL5lg5PR4RR9l_pdbJzCrbIAJOAGlDw"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "a life of zero",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-12T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "3TXQoODtdbLxl32qK9dsEtjUJLjJc-RFfXVcLaAMr7YLLghq_v89jfoV19u6_48cw7RigMvCqubNPW1OPBmDBw"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "expiring one second after its month ends",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0010",
+        "sequence": 10,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-31T12:00:00Z",
+        "expiresAt": "2026-11-01T00:00:01Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "HxNEyw35jPevGJIfm2VQpbNOaHmlcHjR4uqNbrB-maHTWRJSFAM4agk89bNinYKyJWVLhrncybdo3i83-Y8-AA"
+      },
+      "trust": {
+        "at": "2026-10-31T13:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "past-window"
+      }
+    },
+    {
+      "name": "ES256 before Fabric's D2",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "ES256",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "another estate's lease",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-other",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PyAayIRTIAcUgA377IgedbDJNfQYWPtF9bXT1V_tmR3GmdAjzVEuSG-BQaIpy_6sR7ZcMpv7OlCqEvCsNNiFBQ"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-estate"
+      }
+    },
+    {
+      "name": "it follows an estate revision this machine has not applied",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 2,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "eDz_IinvvPiwy6yNQx-nnEMgC5_9egFPjseqh23hw4l2BX3-jDMehsNd_rxhRFNBs9DDWwtxPVuXzQdQ78IwBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-estate"
+      }
+    },
+    {
+      "name": "a kid the record does not certify",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-unknown",
+        "sig": "QzitXCerXCqptox3k0yzmbAQvhmhFDWmgOepRehM5y_z_OndUVPubOVMrpPkvEYatCG8nwTIYoq_7Mlzbq1MDA"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "hub-key-uncertified"
+      }
+    },
+    {
+      "name": "the record revokes the hub key",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07"
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "hub-key",
+              "ref": "hub-m-4c1e-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "hub-key-uncertified"
+      }
+    },
+    {
+      "name": "the record revokes the machine that holds the hub key",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07"
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "machine",
+              "ref": "m-4c1e",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "hub-key-uncertified"
+      }
+    },
+    {
+      "name": "the record certifies the kid on two machines",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDw",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            }
+          ],
+          "revocations": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "hub-key-uncertified"
+      }
+    },
+    {
+      "name": "the hub key's x is 3 bytes",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "AAAA",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07"
+            }
+          ],
+          "revocations": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "the hub key's x is not the canonical base64url of its bytes",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "tEuo6MY1azEdV6d4ygBTPBrvS9NrUtG_CtdeFK1DEDx",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07"
+            }
+          ],
+          "revocations": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "a signature forged under a small-order hub key, with no private key",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "WGZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmYBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "estateRecord": {
+          "schema": "estate-record/1",
+          "estate": "estate-5d0f1a",
+          "revision": 1,
+          "machines": [
+            {
+              "id": "m-4c1e",
+              "hubKey": {
+                "kty": "OKP",
+                "crv": "Ed25519",
+                "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "kid": "hub-m-4c1e-1",
+                "use": "sig",
+                "alg": "EdDSA"
+              }
+            },
+            {
+              "id": "m-9a07"
+            }
+          ],
+          "revocations": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "the amount changed after it was signed",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "350.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "a signature of 63 bytes",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdX"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "the signature's bytes in a non-canonical base64url text (a padding bit set)",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBh"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "a lease for another machine",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-4c1e",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-machine"
+      }
+    },
+    {
+      "name": "checked one second before it was issued",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T08:59:59Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "checked at the instant it expires",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-13T09:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "expired"
+      }
+    },
+    {
+      "name": "November's lease checked on 31 October",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-11-0001",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-11",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-31T20:00:00Z",
+        "expiresAt": "2026-11-01T20:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "HRwslGDjaoSxYoVcg-PPkl9_50F8mtZK3XYeQt6n2OvkSAobPJHFz0KMN0y7xU5p5-8KBIoa7fSwZHj26qCXCA"
+      },
+      "trust": {
+        "at": "2026-10-31T21:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-current-period"
+      }
+    },
+    {
+      "name": "the lease held has a higher sequence",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-10-0004",
+          "sequence": 4,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-10",
+          "amount": "250.5",
+          "unit": "USD",
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "expiresAt": "2026-10-13T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "w3cDy1gDezDkv_VlM4Z5SU_DhXFE2JMYOlM3EO6kW7WQKsDWK1-6w3VOrelSv7ZPAjo7PhTzP4Mm9zI1P1HsAQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "superseded"
+      }
+    },
+    {
+      "name": "the lease held has the same sequence and another id",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-10-0003b",
+          "sequence": 3,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-10",
+          "amount": "250.5",
+          "unit": "USD",
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "expiresAt": "2026-10-13T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "VCkTIYKspzoZG3yzaRHmurlaTnW2IMG0dwhNWkytHtZmFJmy_z7_oNMJJ0PdN9BDl_Hondl-0bYi8ndSLYPKAA"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "superseded"
+      }
+    },
+    {
+      "name": "the lease held has the same id and sequence, and another amount",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "1000",
+        "held": {
+          "type": "window-lease/1",
+          "leaseId": "lease-m9a07-2026-10-0003",
+          "sequence": 3,
+          "estate": "estate-5d0f1a",
+          "estateRevision": 1,
+          "machine": "m-9a07",
+          "scope": "estate",
+          "window": "month",
+          "period": "2026-10",
+          "amount": "300",
+          "unit": "USD",
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "expiresAt": "2026-10-13T09:00:00Z",
+          "alg": "EdDSA",
+          "kid": "hub-m-4c1e-1",
+          "sig": "zXjUqpWeGi-17OcPqISCEX3cOeVXon_ZhuRcno46GV2hVmgAwveTiKtGTQyJtgfXLHijl6J9Cybaopk6Kh82CQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "superseded"
+      }
+    },
+    {
+      "name": "the amount is one millionth above the remainder",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "trust": {
+        "at": "2026-10-12T12:00:00Z",
+        "machine": "m-9a07",
+        "remainderUsd": "250.499999"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "over-remainder"
+      }
+    }
+  ],
+  "reserve": [
+    {
+      "name": "10 of 250.5 with 200.5 spent",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "10",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "200.5"
+      },
+      "expected": {
+        "ok": true,
+        "remainingUsd": "40"
+      }
+    },
+    {
+      "name": "exactly the lease's remainder",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "50",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "200.5"
+      },
+      "expected": {
+        "ok": true,
+        "remainingUsd": "0"
+      }
+    },
+    {
+      "name": "one millionth above the lease's remainder",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "50.000001",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "200.5"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "exhausted"
+      }
+    },
+    {
+      "name": "the local remainder is smaller: exactly it",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "5",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "0",
+        "localRemainderUsd": "5"
+      },
+      "expected": {
+        "ok": true,
+        "remainingUsd": "0"
+      }
+    },
+    {
+      "name": "the local remainder is smaller: above it",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "5.5",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "0",
+        "localRemainderUsd": "5"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "exhausted"
+      }
+    },
+    {
+      "name": "the lease's remainder is smaller than the local one: above it",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "50.000001",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "200.5",
+        "localRemainderUsd": "1000"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "exhausted"
+      }
+    },
+    {
+      "name": "spent beyond the lease (a call's price error): zero still fits",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "0",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "260"
+      },
+      "expected": {
+        "ok": true,
+        "remainingUsd": "0"
+      }
+    },
+    {
+      "name": "spent beyond the lease: a millionth does not",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "0.000001",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "260"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "exhausted"
+      }
+    },
+    {
+      "name": "at the instant the lease expires: fail closed",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "0",
+        "at": "2026-10-13T09:00:00Z",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "expired"
+      }
+    },
+    {
+      "name": "before the lease was issued",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-12T08:59:59Z",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "November's lease on 31 October",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-11-0001",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-11",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-31T20:00:00Z",
+        "expiresAt": "2026-11-01T20:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "HRwslGDjaoSxYoVcg-PPkl9_50F8mtZK3XYeQt6n2OvkSAobPJHFz0KMN0y7xU5p5-8KBIoa7fSwZHj26qCXCA"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-31T21:00:00Z",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-current-period"
+      }
+    },
+    {
+      "name": "a negative amount",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "-1",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "spent with an exponent",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "1e2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "an empty local remainder",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "0",
+        "localRemainderUsd": ""
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "an unreadable clock",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-12",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    },
+    {
+      "name": "a lease of the wrong shape",
+      "lease": {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "x",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+      },
+      "request": {
+        "amountUsd": "1",
+        "at": "2026-10-12T12:00:00Z",
+        "spentUsd": "0"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    }
+  ],
+  "remainder": [
+    {
+      "name": "two other machines hold 400 and an active 250.5",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-11T12:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "349.5",
+        "heldUsd": "650.5"
+      }
+    },
+    {
+      "name": "a machine's own leases are what its new lease replaces",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-11T12:00:00Z",
+        "machine": "m-9a07",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "600",
+        "heldUsd": "400"
+      }
+    },
+    {
+      "name": "an expired lease nobody reported counts as spent",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "349.5",
+        "heldUsd": "650.5"
+      }
+    },
+    {
+      "name": "a report received after expiry: the late report is the refund",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "spent": "120",
+            "receivedAt": "2026-10-12T06:30:00Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "480",
+        "heldUsd": "520"
+      }
+    },
+    {
+      "name": "two reports after expiry: the latest received counts",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "spent": "130",
+            "receivedAt": "2026-10-12T07:00:00Z"
+          },
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "spent": "120",
+            "receivedAt": "2026-10-12T06:30:00Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "470",
+        "heldUsd": "530"
+      }
+    },
+    {
+      "name": "a report received before expiry does not end the lease's claim",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "spent": "120",
+            "receivedAt": "2026-10-12T05:59:59Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "349.5",
+        "heldUsd": "650.5"
+      }
+    },
+    {
+      "name": "a report without spent leaves the lease unreported",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "receivedAt": "2026-10-12T06:30:00Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "349.5",
+        "heldUsd": "650.5"
+      }
+    },
+    {
+      "name": "a report under the newer lease covers the expired one; the newer lease's amount still holds",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0002",
+            "sequence": 2,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "100",
+            "unit": "USD",
+            "issuedAt": "2026-10-12T07:00:00Z",
+            "expiresAt": "2026-10-13T07:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "A1vcLCFnuSO0e06Tdm2nqC3auHJSAjBo9aBH38lm5tzfkJ5WJn_5GEXKcVxw8engRZSRLRYoD1PmYIVFqpD3Dw"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0002",
+            "spent": "120",
+            "receivedAt": "2026-10-12T08:00:00Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "480",
+        "heldUsd": "520"
+      }
+    },
+    {
+      "name": "a shrunk share counts the larger lease until it expires",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T05:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0002",
+            "sequence": 2,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "100",
+            "unit": "USD",
+            "issuedAt": "2026-10-12T04:00:00Z",
+            "expiresAt": "2026-10-13T04:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "A1vcLCFnuSO0e06Tdm2nqC3auHJSAjBo9aBH38lm5tzfkJ5WJn_5GEXKcVxw8engRZSRLRYoD1PmYIVFqpD3Dw"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "749.5",
+        "heldUsd": "250.5"
+      }
+    },
+    {
+      "name": "the others hold more than the limit: nothing is left",
+      "ledger": {
+        "limitUsd": "300",
+        "at": "2026-10-11T12:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "0",
+        "heldUsd": "400"
+      }
+    },
+    {
+      "name": "a report received after the hub's clock is not counted yet",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-12T09:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m4c1e-2026-10-0000",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-4c1e",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "400",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T08:00:00Z",
+            "expiresAt": "2026-10-12T08:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+          },
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-10",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": [
+          {
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "spent": "120",
+            "receivedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "expected": {
+        "ok": true,
+        "remainderUsd": "349.5",
+        "heldUsd": "650.5"
+      }
+    },
+    {
+      "name": "a limit with an exponent",
+      "ledger": {
+        "limitUsd": "1e3",
+        "at": "2026-10-11T12:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [],
+        "reports": []
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a lease of the wrong shape",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "2026-10-11T12:00:00Z",
+        "machine": "m-b2c3",
+        "leases": [
+          {
+            "type": "window-lease/1",
+            "leaseId": "lease-m9a07-2026-10-0001",
+            "sequence": 1,
+            "estate": "estate-5d0f1a",
+            "estateRevision": 1,
+            "machine": "m-9a07",
+            "scope": "estate",
+            "window": "month",
+            "period": "2026-13",
+            "amount": "250.5",
+            "unit": "USD",
+            "issuedAt": "2026-10-11T06:00:00Z",
+            "expiresAt": "2026-10-12T06:00:00Z",
+            "alg": "EdDSA",
+            "kid": "hub-m-4c1e-1",
+            "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+          }
+        ],
+        "reports": []
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "an unreadable clock",
+      "ledger": {
+        "limitUsd": "1000",
+        "at": "yesterday",
+        "machine": "m-b2c3",
+        "leases": [],
+        "reports": []
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    }
+  ]
+}

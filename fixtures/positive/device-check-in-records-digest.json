@@ -75,7 +75,8 @@
     "leases": [
       {
         "leaseId": "lease-org-7f3a-0412",
-        "expiresAt": "2026-10-13T06:00:00Z"
+        "expiresAt": "2026-10-13T06:00:00Z",
+        "spent": "120.25"
       }
     ]
   }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) and peer-request (FAC-SEM-088) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091) and signing-credential (FAC-SEM-092) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -9,7 +9,8 @@ const KINDS = [
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
-  "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request"
+  "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
+  "window-lease", "window-lease-division", "lease-reservation", "signing-credential"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -25,7 +26,9 @@ const MEMBERS = [
   "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method",
   "head", "entries", "deltaHead", "estateRecord", "applied", "heartbeat", "broken", "revision", "prev", "sequence", "revocation",
   "revokedAt", "estate", "issuedAt", "x",
-  "descriptor", "catalogue", "derived", "dataClass", "sent", "peer", "runner", "installedBy", "lifecycle", "commands", "placement", "origin"
+  "descriptor", "catalogue", "derived", "dataClass", "sent", "peer", "runner", "installedBy", "lifecycle", "commands", "placement", "origin",
+  "limitUsd", "leases", "reports", "lease", "window", "period", "amount", "expiresAt",
+  "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
@@ -54,6 +57,12 @@ describe("activity and device rules tolerate malformed input", () => {
     const headers = { "signature-input": ["fabric-device=(", 7, null], signature: { a: 1 }, "content-digest": [] };
     expect(() => evaluateSemanticRules("device-request-signature", { ...device, request: { method: 1, target: 2, headers, body: 3 } })).not.toThrow();
     for (const kind of KINDS) expect(() => evaluateSemanticRules(kind, device), kind).not.toThrow();
+    // A division, a reservation and a credential whose members hold every wrong shape still answer with findings.
+    const lease = { type: "window-lease/1", window: "month", period: "2026-10", issuedAt: "2026-10-12T09:00:00Z", expiresAt: 4, amount: [] };
+    expect(() => evaluateSemanticRules("window-lease-division", { limitUsd: "1000", leases: [1, lease, { ...lease, constructor: 1 }], reports: [1, { leaseId: 2, receivedAt: 3 }] })).not.toThrow();
+    expect(() => evaluateSemanticRules("lease-reservation", { lease, request: { at: 1, amountUsd: [], spentUsd: {} }, decision: 2 })).not.toThrow();
+    expect(() => evaluateSemanticRules("signing-credential", { rpId: ["sign.example.org"], origins: [1, null, { a: 1 }] })).not.toThrow();
+    expect(() => evaluateSemanticRules("window-lease", { window: "__proto__", period: "constructor" })).not.toThrow();
     const dashboard = "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1";
     for (const value of WRONG) expect(() => evaluateSemanticRules("service-well-known", { extensions: { [dashboard]: value, constructor: value } })).not.toThrow();
   });

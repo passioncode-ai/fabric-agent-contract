@@ -6,7 +6,8 @@ import { isValidP256Key } from "./p256.js";
 import { type PackageTrust, packageDigest } from "./package-rules.js";
 import { strictTime } from "./rfc3339.js";
 import { secretValue } from "./secret-shape.js";
-import { type AssertionProblem, type PasskeyCredential, credentialKey, verifyAssertion } from "./webauthn.js";
+import { signingCredentialFindings, verifySigningAssertion } from "./signing-challenges.js";
+import { type AssertionProblem, type PasskeyCredential, credentialKey } from "./webauthn.js";
 
 // #region estate-record-rules — docs: docs/specification/estate-record.md#semantic-rules
 /**
@@ -19,7 +20,7 @@ const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.fil
 const isString = (value: unknown): value is string => typeof value === "string";
 
 export const ESTATE_RECORD_SCHEMA = "estate-record/1";
-/** The challenge type an estate revision's passkey assertion covers (v4 §7, signing challenge types). */
+/** The challenge type an estate revision's passkey assertion covers: the first row of the register (DEC-0063). */
 export const ESTATE_CHALLENGE_TYPE = "estate-revision/1";
 /** v4 §7, Freshness: the estate record is valid for 30 days. */
 export const MAX_VALIDITY_SECONDS = 30 * 24 * 60 * 60;
@@ -136,7 +137,9 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
     rpId: String(authority.rpId),
     origins: Array.isArray(authority.origins) ? authority.origins.filter(isString) : []
   };
-  const assertion = verifyAssertion(signature, credential, estateChallenge(digest));
+  // DEC-0063: the challenge is the register's `estate-revision/1`, and the passkey is a signing credential — an RP ID
+  // that is not sign.<domain> is `wrong-rp`, an origin outside it is not pinned.
+  const assertion = verifySigningAssertion(signature, credential, ESTATE_CHALLENGE_TYPE, { digest });
   if (!assertion.ok) return { ok: false, problem: assertion.problem };
 
   const issuedAt = time(record.issuedAt);
@@ -328,7 +331,7 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
   });
 }
 
-/** FAC-SEM-072…076 over one record. */
+/** FAC-SEM-072…076 over one record, and FAC-SEM-092 (DEC-0063) on each passkey it lists. */
 function recordFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   revisionWhole(value, flagger(findings, "FAC-SEM-072"));
@@ -336,6 +339,7 @@ function recordFindings(value: JsonObject): Finding[] {
   placements(value, flagger(findings, "FAC-SEM-074"));
   secretReferences(value, flagger(findings, "FAC-SEM-075"));
   grantsAndRevocations(value, flagger(findings, "FAC-SEM-076"));
+  list(value.authorities).forEach((authority, index) => findings.push(...signingCredentialFindings(authority, `/authorities/${index}`)));
   return findings;
 }
 

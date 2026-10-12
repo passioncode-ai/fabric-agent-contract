@@ -67,7 +67,9 @@ the sign-in credential) and the pinned `origins` a ceremony may run in. Revision
 machine pinned when it was enrolled (v4 Path 2 step 1: the person confirms the estate's fingerprint on the machine);
 every later revision under a passkey its parent lists, so a new passkey is added by a revision an existing one signs.
 A P-256 key is valid by SEC 1 §3.2.2 (`isValidP256Key`), an Ed25519 key is not of small order (`isSmallOrderKey`,
-DEC-0045), and each passkey is listed once (`FAC-SEM-073`). No user handle is recorded.
+DEC-0045), and each passkey is listed once (`FAC-SEM-073`). Each is a signing credential: its `rpId` is `sign.<domain>`
+(the schema) and each pinned origin is on that RP ID or a host under it (`FAC-SEM-092`, [signing](signing.md),
+DEC-0063). No user handle is recorded.
 
 ## Machines
 
@@ -123,8 +125,8 @@ The signature is a passkey assertion: a WebAuthn assertion response (W3C Web Aut
 **The challenge** the signer passes to `navigator.credentials.get()` is SHA-256 of the UTF-8 RFC 8785 form of
 `{"type": "estate-revision/1", "digest": <digest>}` (`estateChallenge`, v4 §7's signing challenge type
 `estate-revision/1`). The type is inside, so an assertion over an estate revision is no other passkey signature over
-the same 32 bytes. The signing-challenge decision of a later wave owns the challenge types; it adopts these fields or
-replaces them, a change it states.
+the same 32 bytes. The register of signed statements owns the type and adopts these fields unchanged
+([signing challenges](conformance.md#signing-challenges), DEC-0063).
 
 ### What is verified offline
 
@@ -170,8 +172,8 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-4 | `no-trusted-authority`, `unknown-authority`, `duplicate-authority`, `revoked-authority` | the verifier trusts no passkey, not the signing one, lists it twice, or the parent revokes it |
 | ER-5 | `unknown-algorithm`, `key-algorithm-mismatch` | `alg` is not ES256 or EdDSA, or not the passkey's `alg` |
 | ER-6 | `unusable-key`, `small-order-key` | the passkey's key is not a public P-256 point valid by SEC 1 §3.2.2 or a public Ed25519 key, or is of small order (DEC-0045) |
-| ER-7 | `wrong-type`, `wrong-challenge`, `wrong-origin`, `cross-origin` | the client data's `type`, `challenge` or `origin`, or a cross-origin frame |
-| ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the `rpIdHash`, AT set or BS without BE, UP clear, UV clear |
+| ER-7 | `wrong-type`, `wrong-challenge`, `wrong-origin`, `cross-origin` | the client data's `type`, `challenge` or `origin` — an origin the authority does not pin, or one it pins outside its RP ID (DEC-0063) — or a cross-origin frame |
+| ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the authority's RP ID is not a signing RP, `sign.<domain>` (DEC-0063: checked as soon as ER-4 has chosen the authority, before any check of the assertion); the `rpIdHash`; AT set or BS without BE; UP clear; UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
 | ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is before `issuedAt` or after `validUntil` (both instants are inside the window) |
 | ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`; the verdict names the codes |
@@ -236,6 +238,7 @@ records no use. A credential's id is an opaque handle.
 - The ceiling within which a later version of a placed agent installs without a new revision (v4 Path 2 places an agent
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract
   define a ceiling, every new version is a new revision.
-- The signing-challenge types and the dedicated signing RP as a contract (v4 §12; a later wave), recovery by a printed
-  code, the estate's windows and their split per machine
-  (window leases, a later wave), and `ES256` for hub and publisher keys (Fabric's D2).
+- Recovery by a printed code, and `ES256` for hub and publisher keys (Fabric's D2). The signing-challenge types and the
+  signing RP are DEC-0063's ([signing](signing.md)); the estate's windows are divided by window leases signed by a
+  certified hub key (DEC-0062, [window lease](window-lease.md)), and no field of this record carries a static split
+  per machine.

@@ -404,6 +404,14 @@ entries, one revocation each, signed by an **Estate key** and chained by RFC 878
 `{sequence, sha256}` — what a check-in reports and a **Relay**'s `welcome` carries. A revision issued after an entry
 lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
+**Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):
+the meter spends within the smaller of its own remainder and the lease's, fails closed at expiry, and reports `spent`
+in its check-in ([window lease](docs/specification/window-lease.md)).
+
+**Signing credential**: A passkey registered under the dedicated signing RP `sign.<domain>` and used for nothing else;
+it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
+top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
+
 **Heartbeat**: A signed timestamp (`heartbeat/1`, DEC-0054) committing to the **Revocation delta**'s head and the
 estate revision. A machine whose heartbeat is more than 72 hours old, or that has not applied up to it, refuses what
 arrives from other machines and keeps the person's own work.
