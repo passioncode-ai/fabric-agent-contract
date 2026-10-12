@@ -122,7 +122,9 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
 
   it("admits from revision 1 verified against the passkeys pinned at setup", () => {
     const result = relayAdmissionSet({ candidate: rev1, pinned, at: at1, schemaValid });
-    expect(result.ok && [...result.set.keys()].sort()).toEqual(["m-4c1e#sig", "m-9a07#sig"]);
+    // m-9a07's #sig is Ed25519, which devices.md admits and a relay participant may not use: it is left out, and named.
+    expect(result.ok && [...result.set.keys()].sort()).toEqual(["m-4c1e#sig"]);
+    expect(result.ok && result.excluded).toEqual([{ kid: "m-9a07#sig", reason: "unsupported-alg" }]);
     expect(result.ok && result.revision).toBe(1);
   });
 
@@ -155,12 +157,21 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
   });
 
   it("drops a machine revoked while still listed, and reads a record without revocations", () => {
-    const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-9a07", revokedAt: "2026-10-12T10:00:00Z" }] };
+    const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-4c1e", revokedAt: "2026-10-12T10:00:00Z" }] };
     const result = relayAdmissionSet({ held, pinned, at: at1, schemaValid });
-    expect(result.ok && [...result.set.keys()]).toEqual(["m-4c1e#sig"]);
+    expect(result.ok && [...result.set.keys()]).toEqual([]);
     const { revocations: _none, ...bare } = rev1;
     const all = relayAdmissionSet({ held: bare, pinned, at: at1, schemaValid });
-    expect(all.ok && all.set.size).toBe(2);
+    expect(all.ok && all.set.size + all.excluded.length).toBe(2);
+  });
+
+  it("leaves out a #sig key SEC 1 refuses, naming it bad-key, so admit and a blob request never meet it", () => {
+    const offCurve = Buffer.from(rev1.machines[0].deviceKeys[0].publicKey, "base64");
+    offCurve[64] = offCurve[64]! ^ 1;
+    const machines = rev1.machines.map((m: any, i: number) => (i === 0 ? { ...m, deviceKeys: m.deviceKeys.map((k: any) => (k.use === "sig" ? { ...k, publicKey: offCurve.toString("base64") } : k)) } : m));
+    const result = relayAdmissionSet({ held: { ...rev1, machines }, pinned, at: at1, schemaValid });
+    expect(result.ok && result.set.size).toBe(0);
+    expect(result.ok && result.excluded).toEqual([{ kid: "m-4c1e#sig", reason: "bad-key" }, { kid: "m-9a07#sig", reason: "unsupported-alg" }]);
   });
 
   it("drops a revoked device key, and admits exactly what the set holds", () => {

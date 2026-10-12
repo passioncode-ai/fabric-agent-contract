@@ -260,8 +260,8 @@
         },
         "expect": {
           "ok": false,
-          "status": 403,
-          "code": "not-admitted"
+          "status": 401,
+          "code": "unauthenticated"
         }
       },
       {
@@ -320,8 +320,8 @@
         },
         "expect": {
           "ok": false,
-          "status": 403,
-          "code": "not-admitted"
+          "status": 401,
+          "code": "unauthenticated"
         }
       },
       {
@@ -344,7 +344,7 @@
         "expect": {
           "ok": false,
           "status": 401,
-          "code": "unsupported-alg"
+          "code": "unauthenticated"
         }
       },
       {
@@ -367,8 +367,144 @@
         },
         "expect": {
           "ok": false,
-          "status": 403,
-          "code": "bad-key"
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a forged PUT of a held blob with another list",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiblIwRDlGV1I0bnR4X2RwTWQwblliSDRaZGktcTFPLTBycGlBc3RFZTBlTlAzbkZ3UzZXSVVGWHZOUjd3ZjByME1QLWJ5X2xFS2VIQ2k3bmZ6dTNfcUEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "stored": {
+          "recipients": [
+            "urn:fabric:machine:a#sig",
+            "urn:fabric:machine:b#sig"
+          ]
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a forged PUT of a blob the relay does not hold",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiblIwRDlGV1I0bnR4X2RwTWQwblliSDRaZGktcTFPLTBycGlBc3RFZTBlTlAzbkZ3UzZXSVVGWHZOUjd3ZjByME1QLWJ5X2xFS2VIQ2k3bmZ6dTNfcUEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a forged GET of a held blob",
+        "method": "GET",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmIjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiMXpicmkyMTdSQndlSEwwT2tpcGRuNXdtV25sOXY1NVBIYnFhWnRsdkdzQnpyTW55d0VMVUZ4U1VjWjF1c2lkSFdzbGgzT2pyaXRLcXVfZ1Z1d1hwakEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "stored": {
+          "recipients": [
+            "urn:fabric:machine:b#sig"
+          ]
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a forged GET of a blob the relay does not hold",
+        "method": "GET",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmIjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiMXpicmkyMTdSQndlSEwwT2tpcGRuNXdtV25sOXY1NVBIYnFhWnRsdkdzQnpyTW55d0VMVUZ4U1VjWjF1c2lkSFdzbGgzT2pyaXRLcXVfZ1Z1d1hwakEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a forged GET by a kid outside the admission set",
+        "method": "GET",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmMjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiMXpicmkyMTdSQndlSEwwT2tpcGRuNXdtV25sOXY1NVBIYnFhWnRsdkdzQnpyTW55d0VMVUZ4U1VjWjF1c2lkSFdzbGgzT2pyaXRLcXVfZ1Z1d1hwakEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "stored": {
+          "recipients": [
+            "urn:fabric:machine:b#sig"
+          ]
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
         }
       },
       {
@@ -1277,7 +1413,7 @@
         },
         "expect": {
           "ok": false,
-          "code": "not-admitted"
+          "code": "unauthenticated"
         }
       },
       {
@@ -1309,7 +1445,7 @@
         },
         "expect": {
           "ok": false,
-          "code": "bad-key"
+          "code": "unauthenticated"
         }
       },
       {
@@ -1340,7 +1476,7 @@
         },
         "expect": {
           "ok": false,
-          "code": "unsupported-alg"
+          "code": "unauthenticated"
         }
       },
       {

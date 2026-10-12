@@ -91,12 +91,18 @@ export function verifyEs256(key: P256Key, bytes: string, sig: string): boolean |
   return nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: p256Jwk(key), format: "jwk", dsaEncoding: "ieee-p1363" }, raw);
 }
 
-/** Every code `admit` refuses with; the shared vectors carry each (DEC-0066). */
-export const ADMIT_REFUSALS = ["protocol-unsupported", "unsupported-alg", "unauthenticated", "not-yet-valid", "replay", "not-admitted", "bad-key"] as const;
+/**
+ * Every code `admit` refuses with; the shared vectors carry each (DEC-0066). There is no `not-admitted` and no `bad-key`:
+ * until the signer is proven, nothing the relay holds may change the answer, so an unknown kid, an unusable admitted
+ * key and a bad signature are one `unauthenticated` (DEC-0066, CON-001).
+ */
+export const ADMIT_REFUSALS = ["protocol-unsupported", "unsupported-alg", "unauthenticated", "not-yet-valid", "replay"] as const;
 
 /**
- * Admits a machine on its `auth` frame (DEC-0047 item 3), or names why not. The relay attributes every later frame on
- * the connection to the returned kid and to nothing a frame claims.
+ * Admits a machine on its `auth` frame (DEC-0047 item 4, DEC-0066), or names why not. The checks that depend only on
+ * the frame's own bytes come first (protocol, `alg`, the times); then the nonce; then, as one step with one answer,
+ * the kid's key in the admission set and the signature under it. The relay attributes every later frame on the
+ * connection to the returned kid and to nothing a frame claims.
  */
 export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: string } | { ok: false; code: RelayErrorCode } {
   if (frame.protocol !== RELAY_PROTOCOL) return { ok: false, code: "protocol-unsupported" };
@@ -107,10 +113,8 @@ export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: stri
   if (ctx.now.getTime() - iat > AUTH_WINDOW_SECONDS * 1000) return { ok: false, code: "unauthenticated" };
   if (ctx.nonceUsed) return { ok: false, code: "replay" };
   const key = ctx.admittedKey(frame.kid);
-  if (!key) return { ok: false, code: "not-admitted" };
-  const verdict = verifyEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig);
-  if (verdict === "bad-key" || verdict === "unsupported-alg") return { ok: false, code: verdict };
-  return verdict ? { ok: true, kid: frame.kid } : { ok: false, code: "unauthenticated" };
+  const proven = key !== undefined && verifyEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig) === true;
+  return proven ? { ok: true, kid: frame.kid } : { ok: false, code: "unauthenticated" };
 }
 
 /**
@@ -178,13 +182,17 @@ export interface AdmissionInput {
   schemaValid: (record: unknown) => boolean;
 }
 
+/** A `#sig` key of the record that the admission set leaves out, and why: it could never verify a relay signature. */
+export interface ExcludedKey { kid: string; reason: "unsupported-alg" | "bad-key" }
+
 export type AdmissionResult =
-  | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array> }
+  | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array>; excluded: ExcludedKey[] }
   | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "expired"; problem?: EstateRecordProblem };
 
 /**
  * The admission set — kid → `#sig` key as SEC 1 octets — of the machines in the verified estate record, minus revoked
- * machines and keys; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
+ * machines and keys, and minus every key that could never verify a relay signature (an Ed25519 key, or one SEC 1
+ * refuses), which `excluded` names for the relay's log; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
  * revision's window has ended the relay fails closed (`expired`): no new `auth` is admitted until a newer verified
  * revision arrives. The organization record has no reference yet (`org-authority/1`, Fabric D8), so an organization's
  * relay has no admission source of its own.
@@ -205,15 +213,19 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   const revoked = (kind: string) => new Set(list(record.revocations).filter((entry) => entry.kind === kind).map((entry) => entry.ref));
   const machines = revoked("machine"), keys = revoked("device-key");
   const set = new Map<string, Uint8Array>();
+  const excluded: ExcludedKey[] = [];
   for (const machine of list(record.machines)) {
     if (machines.has(machine.id)) continue;
     for (const key of list(machine.deviceKeys)) {
       if (key.use === "sig" && typeof key.kid === "string" && key.kid.endsWith("#sig") && typeof key.publicKey === "string" && !keys.has(key.kid)) {
-        set.set(key.kid, Buffer.from(key.publicKey, "base64"));
+        const octets = new Uint8Array(Buffer.from(key.publicKey, "base64"));
+        if (isEd25519Key(octets)) excluded.push({ kid: key.kid, reason: "unsupported-alg" });
+        else if (p256KeyRefusal(octets) !== null) excluded.push({ kid: key.kid, reason: "bad-key" });
+        else set.set(key.kid, octets);
       }
     }
   }
-  return { ok: true, held: record, revision: Number(record.revision), set };
+  return { ok: true, held: record, revision: Number(record.revision), set, excluded };
 }
 
 // ---- Fabric-Relay-Request: the blob request's wire form (annotated under DEC-0047, 2026-10-12) ----------------------
@@ -228,11 +240,17 @@ export const MAX_KID_CHARS = 256;
 
 export interface RelayRequest { alg: string; kid: string; recipients: string[]; iat: string; sig: string }
 export type BlobRefusal = { ok: false; status: number; code: RelayErrorCode };
-/** Every (status, code) a blob request is refused with; the shared vectors carry each (DEC-0066). */
+/**
+ * Every (status, code) a blob request is refused with by `verifyBlobRequest` and `decideBlobAccess`; the shared vectors
+ * carry each (DEC-0066). The relay adds its own steps between them, in the order relay.md gives: 411 and 413 for the
+ * length, 413 `too-large` and 422 `digest-mismatch` for the bytes.
+ */
 export const BLOB_REFUSALS: ReadonlyArray<readonly [number, RelayErrorCode]> = [
   [400, "malformed"], [431, "too-large"], [401, "unsupported-alg"], [401, "not-yet-valid"], [401, "unauthenticated"],
-  [403, "not-admitted"], [403, "unknown-recipient"], [409, "recipients-mismatch"], [403, "bad-key"]
+  [403, "unknown-recipient"], [403, "not-admitted"], [409, "recipients-mismatch"]
 ];
+/** The largest blob a relay accepts, in bytes (32 MiB): a declared or counted length above it is 413 `too-large`. */
+export const MAX_BLOB_BYTES = 33_554_432;
 
 const REQUEST_MEMBERS = ["alg", "iat", "kid", "recipients", "sig"];
 const isSigKid = (value: unknown) => typeof value === "string" && value.length > 0 && value.length <= MAX_KID_CHARS && value.endsWith("#sig");
@@ -265,25 +283,32 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
   return { ok: true, request: { alg, kid, recipients: recipients as string[], iat, sig } };
 }
 
-/** What a relay knows when it checks a blob request. */
+/**
+ * What a relay knows when it checks a blob request. It holds no blob state: whether the relay holds the blob is
+ * `decideBlobAccess`'s question, asked only once the signer is proven (DEC-0066, CON-001).
+ */
 export interface BlobRequestContext {
   relay: string; // this relay's origin
   method: "PUT" | "GET";
   digest: string; // from the path
   now: Date;
   admittedKey: (kid: string) => P256Key | undefined; // the current verified admission set (relayAdmissionSet)
-  stored?: { recipients: string[] }; // the blob's recipient list, when the relay already holds the blob
 }
 
+/** A blob request whose signer is proven: its kid and the recipient list it signed. */
+export interface VerifiedBlobRequest { ok: true; kid: string; recipients: string[] }
+
 /**
- * The relay's check of a blob request (DEC-0047 item 8 and its 2026-10-12 annotation), in order: the header's form;
- * `alg`; the recipients (1–64 distinct `#sig` kids, each ≤ 256 characters) and the signer's kid; `iat` (60 s either way); who may
- * ask — a PUT's signer and every recipient in the admission set, a GET's signer in the admission set and in the stored
- * recipients, with the signed list equal to the stored one letter for letter; a PUT of a held blob with another list
- * is 409 `recipients-mismatch`; then the signature. A GET signature reused within its 60 s fetches the same blob for
- * the same machine again, which reveals nothing new.
+ * The relay's check of a blob request's signer (DEC-0047 item 8, its 2026-10-12 annotation, DEC-0066), in order: the
+ * header's form (400, 431); `alg` (401 `unsupported-alg`); the recipients (1–64 distinct `#sig` kids, each ≤ 256
+ * characters), the signer's kid and `iat` a real instant (400); `iat` within 60 s either way (401 `unauthenticated`,
+ * 401 `not-yet-valid`); then, as one step with one answer, the signer's key in the admission set and the signature
+ * under it (401 `unauthenticated` for an unknown kid, a revoked one, a relay that holds no record and a bad
+ * signature); then, for a PUT, every recipient in the admission set (403 `unknown-recipient`). Until the signer is
+ * proven the answer depends only on the request's own bytes. A GET signature reused within its 60 s fetches the same
+ * blob for the same machine again, which reveals nothing new.
  */
-export function verifyBlobRequest(header: string | null | undefined, ctx: BlobRequestContext): { ok: true; kid: string; recipients: string[]; repeat: boolean } | BlobRefusal {
+export function verifyBlobRequest(header: string | null | undefined, ctx: BlobRequestContext): VerifiedBlobRequest | BlobRefusal {
   const parsed = parseRelayRequest(header);
   if (!parsed.ok) return parsed;
   const { alg, kid, recipients, iat, sig } = parsed.request;
@@ -297,19 +322,25 @@ export function verifyBlobRequest(header: string | null | undefined, ctx: BlobRe
   if (t - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, status: 401, code: "not-yet-valid" };
   if (ctx.now.getTime() - t > AUTH_WINDOW_SECONDS * 1000) return { ok: false, status: 401, code: "unauthenticated" };
   const key = ctx.admittedKey(kid);
-  if (!key) return { ok: false, status: 403, code: "not-admitted" };
-  const same = ctx.stored !== undefined && JSON.stringify(ctx.stored.recipients) === JSON.stringify(recipients);
-  if (ctx.method === "PUT") {
-    if (!recipients.every((recipient) => ctx.admittedKey(recipient) !== undefined)) return { ok: false, status: 403, code: "unknown-recipient" };
-    if (ctx.stored !== undefined && !same) return { ok: false, status: 409, code: "recipients-mismatch" };
-  } else if (ctx.stored === undefined || !ctx.stored.recipients.includes(kid) || !same) {
-    return { ok: false, status: 403, code: "not-admitted" };
-  }
-  const verdict = verifyEs256(key, relayBlobSigningInput({ relay: ctx.relay, method: ctx.method, digest: ctx.digest, recipients, iat }), sig);
-  if (verdict === "bad-key") return { ok: false, status: 403, code: "bad-key" };
-  if (verdict === "unsupported-alg") return { ok: false, status: 401, code: "unsupported-alg" };
-  if (!verdict) return { ok: false, status: 401, code: "unauthenticated" };
-  return { ok: true, kid, recipients, repeat: ctx.method === "PUT" && same };
+  const proven = key !== undefined && verifyEs256(key, relayBlobSigningInput({ relay: ctx.relay, method: ctx.method, digest: ctx.digest, recipients, iat }), sig) === true;
+  if (!proven) return { ok: false, status: 401, code: "unauthenticated" };
+  if (ctx.method === "PUT" && !recipients.every((recipient) => ctx.admittedKey(recipient) !== undefined)) return { ok: false, status: 403, code: "unknown-recipient" };
+  return { ok: true, kid, recipients };
+}
+
+/**
+ * The blob's state, asked only after `verifyBlobRequest` proved the signer (DEC-0066). `stored` is the blob's recipient
+ * list when the relay holds it live (not expired, not every recipient done), else undefined. A PUT stores a blob the
+ * relay does not hold (`repeat: false`), accepts the same list again (`repeat: true`, 200, restoring a lost object),
+ * and refuses another list as 409 `recipients-mismatch` (never merged); the relay asks this after the bytes hash to
+ * the digest, so only a holder of the bytes learns that. A GET is answered only to a stored recipient that signed the
+ * stored list letter for letter; anything else — not held, expired, not a recipient, another list — is one 403
+ * `not-admitted`, never 404.
+ */
+export function decideBlobAccess(method: "PUT" | "GET", verified: VerifiedBlobRequest, stored: { recipients: readonly string[] } | undefined): { ok: true; repeat: boolean } | BlobRefusal {
+  const same = stored !== undefined && JSON.stringify(stored.recipients) === JSON.stringify(verified.recipients);
+  if (method === "PUT") return stored === undefined || same ? { ok: true, repeat: same } : { ok: false, status: 409, code: "recipients-mismatch" };
+  return same && stored.recipients.includes(verified.kid) ? { ok: true, repeat: false } : { ok: false, status: 403, code: "not-admitted" };
 }
 
 /** A `Fabric-Relay-Request` value from its fields: base64url of the RFC 8785 bytes (for senders and vectors). */

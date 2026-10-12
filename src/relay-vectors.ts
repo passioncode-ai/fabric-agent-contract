@@ -7,7 +7,7 @@
  *
  * A key in a case is a JWK object or a string of base64 SEC 1 octets; a time is RFC 3339.
  */
-import { admit, instant, verifyBlobRequest, verifyMessageBody, type AuthFrame } from "./relay.js";
+import { admit, decideBlobAccess, instant, verifyBlobRequest, verifyMessageBody, type AuthFrame } from "./relay.js";
 import { openEnvelope, type OpenContext } from "./secret-envelope.js";
 import type { P256Key } from "./p256.js";
 
@@ -46,10 +46,13 @@ export function relayVectorResults(vectors: Json): VectorResult[] {
   }
   const blob = (vectors.blobRequest ?? {}) as Json;
   for (const c of cases(blob)) {
-    const actual = verifyBlobRequest(c.header as string | null, {
-      relay: blob.relay as string, method: c.method as "PUT" | "GET", digest: blob.digest as string, now: new Date(blob.now as string),
-      admittedKey: keyring(c.admitted), ...(c.stored ? { stored: c.stored as { recipients: string[] } } : {})
+    // The signer first, then the state: `expect` is what the two give together.
+    const method = c.method as "PUT" | "GET";
+    const verified = verifyBlobRequest(c.header as string | null, {
+      relay: blob.relay as string, method, digest: blob.digest as string, now: new Date(blob.now as string), admittedKey: keyring(c.admitted)
     });
+    const decided = verified.ok ? decideBlobAccess(method, verified, c.stored as { recipients: string[] } | undefined) : verified;
+    const actual = decided.ok && verified.ok ? { ...verified, repeat: decided.repeat } : decided;
     out.push({ group: "blobRequest", name: c.name as string, actual, expected: c.expect });
   }
   return out;
