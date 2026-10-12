@@ -1,0 +1,18 @@
+{
+  "description": "A copy started by hand finds the lock held, tries once and exits 75 at once naming the holder: conforming (FAC-SEM-078).",
+  "start": {
+    "env": {},
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 1,
+  "waitedMs": 0,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "Example Agent is already running (pid 4242)."
+  }
+}

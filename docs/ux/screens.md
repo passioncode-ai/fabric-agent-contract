@@ -25,6 +25,7 @@
 | SCR-17 | Usage by grant | FLW-14 | disabled | proposed | `test/spend-policy.test.ts` |
 | SCR-18 | Restore preview and report | FLW-15 | disabled | proposed | `test/settings-backup.test.ts` |
 | SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
+| SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
 
 ## Design system
 
@@ -248,4 +249,15 @@
 - **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
 - **Scenarios:** SCN-025
 - **Resources:** project-comms specification, Request lifecycle
+- **Status:** proposed
+
+### SCR-20: Service card with a second copy
+
+- **Used by:** FLW-17
+- **Purpose:** a host's card for a service shows a second copy honestly: never as an outage, and as two copies where the supervisor's pid shows one.
+- **Elements:** the service's state from its well-known document; under launchd a "two copies" (`duplicate`) mark with both pids; the second copy's one sentence in its log (primary action: none; the operator removes the duplicate install).
+- **States:** loading — a supervised copy waits for the lock (launchd: `duplicate`; Task Scheduler: the holder `ready`, the wait not visible); error — the second copy exited 75 naming the holder, the holder unknown, or the markers; success — one copy runs and answers.
+- **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
+- **Scenarios:** SCN-026
+- **Resources:** service specification, One copy
 - **Status:** proposed

@@ -406,6 +406,31 @@ flowchart TD
 
 - **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired.
 
+### FLW-17: A second copy of a service starts while one runs
+
+- **Traces:** ST-021 (JTBD-03, JRN-02/#3)
+- **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage
+- **Entry points:** the operator runs the service by hand; its supervisor starts it again
+- **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left
+- **Task analysis:** the second copy reads the supervisor marker → by hand it tries the lock once and exits 75 naming the holder → marked, it waits up to 300 s touching nothing and exits 75, or takes the lock if the holder leaves → markers that disagree exit 75 at once → the host keeps showing the holder's health.
+- **Rejected shape:** exiting at once under a supervisor — rejected because launchd and systemd restart it every 10 s, forever (service, One copy).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  S[Second copy starts; the lock is held] --> M{Marker?}
+  M -->|none| X[Exit 75 at once, naming the holder]
+  M -->|markers disagree| C[Exit 75 at once, naming the markers]
+  M -->|supervised| W[Wait up to 300 s, touching nothing]
+  W -->|holder leaves| T[Takes the lock and runs]
+  W -->|wait runs out| X
+  X --> V[Screen: Service card with a second copy]
+  C --> V
+  W --> V
+```
+
+- **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

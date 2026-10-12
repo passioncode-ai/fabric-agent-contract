@@ -1,0 +1,23 @@
+{
+  "description": "A supervised copy bound its port and resumed a job while it waited for the lock: a copy touches nothing without the lock (FAC-SEM-078).",
+  "start": {
+    "env": {
+      "FABRIC_SERVICE_SUPERVISOR": "systemd"
+    },
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 6,
+  "waitedMs": 30000,
+  "sideEffects": [
+    "bound its port",
+    "resumed job j-17"
+  ],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "Example Agent is already running (pid 4242)."
+  }
+}

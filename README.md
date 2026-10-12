@@ -35,7 +35,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Memory, retrospectives and learning](docs/specification/memory-and-learning.md)
 - [`mcp-memory-service` reference adapter](docs/reference-architecture/mcp-memory-service-adapter.md)
 - [Governance and roles](docs/specification/governance-and-roles.md)
-- [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
+- [Services and their dashboards — local and online, on macOS, Linux and Windows (`fabric-service/0.1`, DEC-0057 for one copy under every supervisor)](docs/specification/service.md)
 - [Embedded dashboard — width, navigation, scrolling and themes inside a host (`fabric-dashboard/0.1`)](docs/specification/embedded-dashboard.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)

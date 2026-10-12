@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -41,9 +41,11 @@ export default defineConfig({
         "src/route-rules.ts": { branches: 92.8 },
         "src/secret-shape.ts": { branches: 100 },
         "src/semantic-rules.ts": { branches: 90.95 },
+        "src/service-supervisor.ts": { branches: 100 },
         "src/session-handoff.ts": { branches: 88.91 },
         "src/spend-rules.ts": { branches: 87.09 },
-        "src/webauthn.ts": { branches: 100 }
+        "src/webauthn.ts": { branches: 100 },
+        "src/windows-token.ts": { branches: 100 }
       }
     }
   }

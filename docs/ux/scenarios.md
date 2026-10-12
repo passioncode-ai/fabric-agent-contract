@@ -31,6 +31,7 @@
 | SCN-023 | An agent finds a standing grant and proceeds without asking | spend | P-02 | ST-018, FLW-14 | draft | not audited |
 | SCN-024 | Restore settings after the data directory was lost | settings | P-02 | ST-019, FLW-15 | draft | not audited |
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
+| SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 
 ## Personas
 
@@ -569,3 +570,25 @@ independent agent author and P-02 project operator.
 - **Coverage:** project-comms Request lifecycle; `comms-submit.schema.json`, `comms-message.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
 - **Product:** unobserved
 
+## Services
+
+### SCN-026: A second copy of a service starts, by hand or by its supervisor
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3)
+- **Entry point:** a terminal where the operator runs the service, or its supervisor restarting it
+- **Preconditions:** the service runs under launchd and holds `service.lock`; Fabric Dashboards shows it `ready`
+- **Steps:**
+  1. Operator runs the service by hand -> the copy finds the lock held, tries once, prints "Example Agent is already running (pid 4242)." and exits 75; nothing else changes.
+  2. launchd starts a second copy from a plist carrying `FABRIC_SERVICE_SUPERVISOR=launchd` -> the copy waits for the lock, touching nothing, for at most 300 s.
+  3. Meanwhile the holder keeps answering -> the host lists the service as two copies (`duplicate`), never `down`.
+  4. The wait runs out -> the copy exits 75 naming the holder; launchd starts it again later, a few starts an hour instead of one every 10 s.
+- **Expected result:** the running copy is never disturbed and the operator sees two copies, not an outage, and removes the duplicate install.
+- **Alt paths:** the holder leaves during the wait -> the waiting copy takes the lock and runs. Under the Task Scheduler (the marker in the task's arguments) -> the host shows the holder `ready` and nothing of the waiting copy. The lock records no pid yet -> the sentence says the holder is unknown.
+- **UI elements:** the service card's `duplicate` mark with both pids; the copy's one sentence in its log.
+- **States covered:** loading, error, success
+- **Errors & recovery:** the plist says launchd and the arguments say task-scheduler -> the copy exits 75 at once naming both markers, without trying the lock; the operator fixes the supervisor file.
+- **Status:** draft
+- **Coverage:** service specification, One copy; `src/service-supervisor.ts`; `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
+- **Product:** unobserved

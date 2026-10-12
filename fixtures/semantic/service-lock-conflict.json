@@ -1,0 +1,22 @@
+{
+  "description": "The environment says launchd and the argument says task-scheduler: the copy is unsupervised and exits 75 at once naming both markers, without trying the lock: conforming (FAC-SEM-078).",
+  "start": {
+    "env": {
+      "FABRIC_SERVICE_SUPERVISOR": "launchd"
+    },
+    "argv": [
+      "C:\\Users\\example\\AppData\\Local\\Programs\\example-agent\\example-agent.exe",
+      "serve",
+      "--fabric-supervisor",
+      "task-scheduler"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 0,
+  "waitedMs": 0,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "FABRIC_SERVICE_SUPERVISOR says launchd but --fabric-supervisor says task-scheduler; not starting."
+  }
+}

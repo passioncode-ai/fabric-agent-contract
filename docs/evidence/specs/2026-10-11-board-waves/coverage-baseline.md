@@ -48,6 +48,8 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | DEC-0047 | `src/relay-rules.ts` (new) | 51 / 51 (100 %) | 100 % | FAC-SEM-070 and FAC-SEM-071; one fixture per sub-check |
 | DEC-0047 | `src/p256.ts` | 46 / 46 (100 %) | 100 % | DEC-0053's copy merged with DEC-0047's; one helper turns SEC 1 octets or a JWK into the key every verifier uses |
 | P4-03 | `src/dashboard-declaration.ts` (new) | 20 / 20 (100 %) | 100 % | FAC-SEM-080 and `hostView` over `fixtures/vectors/dashboard-declaration.json` (DEC-0059); malformed input answered, never thrown |
+| P4-01 | `src/service-supervisor.ts` (new) | 114 / 114 (100 %) | 100 % | the supervisor marker over `fixtures/vectors/service-supervisor.json` and FAC-SEM-078; one fixture or test per check, each planted (DEC-0057) |
+| P4-01 | `src/windows-token.ts` (new) | 45 / 45 (100 %) | 100 % | the Windows token-file reader over `fixtures/vectors/windows-token.json` (FAC-SEM-079); every check planted (DEC-0057) |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -96,3 +98,12 @@ each one from a copy of its schema and requires a negative fixture the copy acce
 `operator-channel-status`, 10 of `service-dashboard-extension`, and an identity mutant for each). The whole set: 3153 / 3312 (95.19 %). Measured with
 `vitest run --coverage` on the P4-03 branch off `main` `31ed9f0`. On its merge with `main` `8060254` (the relay, DEC-0047): 39 files, 1689 tests,
 whole set 3441 / 3600 (95.58 %).
+
+**Wave 4, P4-01 (DEC-0057).** `src/service-supervisor.ts` and `src/windows-token.ts` are new and reach every branch,
+with no `v8 ignore`; both rule kinds join `test/rule-tolerance.test.ts`. 44 plants (each check removed or loosened
+once, the descriptor's DEC-0032 rules and the review round's checks among them) each failed at least one test. `semantic-rules.ts` gains two
+dispatches and `FAC-SEM-012`'s path (358 / 391, 91.56 %, floor unchanged). The whole-set floor stays at 86.85 %;
+measured whole set 3294 / 3453 (95.39 %), after the review round. Measured with `vitest run --coverage` on the P4-01 branch off main's `31ed9f0`.
+
+**Wave 4, P4-01 merged with main `c00a0c3`** (the relay DEC-0047, P4-03 DEC-0058/0059, #59): 41 files, 1777 tests,
+whole set 3604 / 3763 (95.77 %), every floor met.

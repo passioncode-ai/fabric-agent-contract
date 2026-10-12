@@ -101,7 +101,12 @@ distinct from a grant's **Limit window**, which caps what a grant may spend.
 `%LOCALAPPDATA%\passioncode-fabric\services\` on Windows, or `FABRIC_SERVICES_DIR` (DEC-0015, DEC-0032).
 
 **Supervisor**: The system service manager that keeps a local service running — launchd, systemd or the
-Task Scheduler — named by the descriptor's `lifecycle.manager` (DEC-0015, DEC-0032).
+Task Scheduler — named by the descriptor's `lifecycle.manager`, or Project Observatory's node for the services it starts
+as its children (DEC-0015, DEC-0032, DEC-0057).
+
+**Supervisor marker**: How a service's copy knows its supervisor started it: `FABRIC_SERVICE_SUPERVISOR=<manager>` in its
+environment or `--fabric-supervisor <manager>` in its arguments, written into the plist, unit or task. Only a marked
+copy may wait for a held `service.lock`, at most 300 s, before it exits 75 (DEC-0057).
 
 **Token file**: The file in the services folder holding a service's descriptor token: readable by its user
 only (mode 0600) on macOS and Linux; on Windows its owner and every ACE that grants a right name the user,

@@ -1,0 +1,18 @@
+{
+  "description": "A copy that did not get the lock exited 1 with a sentence that does not name the holder (FAC-SEM-078).",
+  "start": {
+    "env": {},
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 1,
+  "waitedMs": 0,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 1,
+    "message": "Another copy is running."
+  }
+}
