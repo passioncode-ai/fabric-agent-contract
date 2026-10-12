@@ -3,8 +3,8 @@ import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { isValidP256Key } from "./p256.js";
-import { rfc3339Time } from "./rfc3339.js";
 import { type PackageTrust, packageDigest } from "./package-rules.js";
+import { strictTime } from "./rfc3339.js";
 import { secretValue } from "./secret-shape.js";
 import { signingCredentialFindings, verifySigningAssertion } from "./signing-challenges.js";
 import { type AssertionProblem, type PasskeyCredential, credentialKey } from "./webauthn.js";
@@ -74,11 +74,8 @@ export interface EstateRecordTrust {
   at: Date;
 }
 
-/**
- * An RFC 3339 date-time as milliseconds, or NaN: `T`, an offset and a day that exists in its month are required, a leap
- * second `:60` and a space separator refused (ER-10). The one strict reading, shared with the window lease (DEC-0062).
- */
-const time = rfc3339Time;
+/** RFC 3339 read strictly (ER-10): `T`, an offset and a day that exists; NaN otherwise. */
+const time = strictTime;
 /** A revocation's identity across revisions: its kind and its reference. */
 const revocationKey = (entry: JsonObject) => `${String(entry.kind)} ${String(entry.ref)}`;
 

@@ -1,7 +1,7 @@
 import { createPublicKey, verify as verifySignature } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { rfc3339Time } from "./rfc3339.js";
+import { strictTime } from "./rfc3339.js";
 import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
 
 // #region window-lease — docs: docs/specification/window-lease.md
@@ -145,7 +145,7 @@ function wellFormed(lease: JsonObject): boolean {
     periodBounds(lease.window, lease.period) !== undefined &&
     usdMicros(lease.amount) !== undefined &&
     lease.unit === "USD" &&
-    Number.isFinite(rfc3339Time(lease.issuedAt)) && Number.isFinite(rfc3339Time(lease.expiresAt)) &&
+    Number.isFinite(strictTime(lease.issuedAt)) && Number.isFinite(strictTime(lease.expiresAt)) &&
     isString(lease.alg) && isString(lease.kid) && lease.kid.length > 0 &&
     isString(lease.sig) && B64URL.test(lease.sig)
   );
@@ -227,8 +227,8 @@ export function verifyWindowLease(lease: unknown, trust: LeaseTrust): LeaseVerdi
   const input = windowLeaseSigningInput(lease);
   if (!input) return { ok: false, problem: "malformed" };
 
-  const issuedAt = rfc3339Time(lease.issuedAt);
-  const expiresAt = rfc3339Time(lease.expiresAt);
+  const issuedAt = strictTime(lease.issuedAt);
+  const expiresAt = strictTime(lease.expiresAt);
   if (expiresAt <= issuedAt || expiresAt - issuedAt > MAX_LEASE_SECONDS * 1000) return { ok: false, problem: "too-long-lived" };
   const bounds = periodBounds(lease.window, lease.period) as { start: number; end: number };
   // A lease never outlives its window instance: the next instance is a new lease.
@@ -303,8 +303,8 @@ export function mayReserve(lease: unknown, request: ReserveRequest): ReserveVerd
   const local = request.localRemainderUsd === undefined ? undefined : usdMicros(request.localRemainderUsd);
   if (amount === undefined || spent === undefined || (request.localRemainderUsd !== undefined && local === undefined)) return { ok: false, problem: "malformed" };
   const bounds = periodBounds(lease.window, lease.period) as { start: number; end: number };
-  if (at < rfc3339Time(lease.issuedAt)) return { ok: false, problem: "not-yet-valid" };
-  if (at >= rfc3339Time(lease.expiresAt)) return { ok: false, problem: "expired" };
+  if (at < strictTime(lease.issuedAt)) return { ok: false, problem: "not-yet-valid" };
+  if (at >= strictTime(lease.expiresAt)) return { ok: false, problem: "expired" };
   if (at < bounds.start || at >= bounds.end) return { ok: false, problem: "not-current-period" };
   const leaseRemainder = max(0n, (usdMicros(lease.amount) as bigint) - spent);
   const remainder = local === undefined ? leaseRemainder : min(leaseRemainder, local);
@@ -349,13 +349,13 @@ function heldBy(leases: JsonObject[], reports: readonly LeaseReport[], at: numbe
   let held = 0n;
   for (const lease of leases) {
     const amount = usdMicros(lease.amount) as bigint;
-    const expiresAt = rfc3339Time(lease.expiresAt);
+    const expiresAt = strictTime(lease.expiresAt);
     let claim = amount;
     if (at >= expiresAt) {
       const covering = new Set(leases.filter((other) => (other.sequence as number) >= (lease.sequence as number)).map((other) => other.leaseId));
       const final = reports
-        .filter((report) => covering.has(report.leaseId) && usdMicros(report.spent) !== undefined && rfc3339Time(report.receivedAt) >= expiresAt && rfc3339Time(report.receivedAt) <= at)
-        .sort((a, b) => rfc3339Time(a.receivedAt) - rfc3339Time(b.receivedAt))
+        .filter((report) => covering.has(report.leaseId) && usdMicros(report.spent) !== undefined && strictTime(report.receivedAt) >= expiresAt && strictTime(report.receivedAt) <= at)
+        .sort((a, b) => strictTime(a.receivedAt) - strictTime(b.receivedAt))
         .at(-1);
       if (final) claim = usdMicros(final.spent) as bigint;
     }
@@ -377,7 +377,7 @@ export function windowRemainder(ledger: WindowLedger): RemainderVerdict {
   if (limit === undefined || !isString(ledger.machine) || !Array.isArray(ledger.leases) || !Array.isArray(ledger.reports)) return { ok: false, problem: "malformed" };
   const leases = ledger.leases.filter(isObject);
   if (leases.length !== ledger.leases.length || !leases.every(wellFormed)) return { ok: false, problem: "malformed" };
-  const reports = ledger.reports.filter((report): report is LeaseReport => isObject(report) && isString(report.leaseId) && Number.isFinite(rfc3339Time(report.receivedAt)));
+  const reports = ledger.reports.filter((report): report is LeaseReport => isObject(report) && isString(report.leaseId) && Number.isFinite(strictTime(report.receivedAt)));
   const byMachine = new Map<string, JsonObject[]>();
   for (const lease of leases) byMachine.set(lease.machine as string, [...(byMachine.get(lease.machine as string) ?? []), lease]);
   let others = 0n;
@@ -393,8 +393,8 @@ type Flag = (instancePath: string, message: string) => void;
 function leaseDocument(value: JsonObject, flag: Flag): void {
   const bounds = periodBounds(value.window, value.period);
   if (!bounds) flag("/period", `a ${String(value.window)} window's period is ${value.window === "week" ? "an ISO 8601 week, YYYY-Www" : value.window === "day" ? "a date, YYYY-MM-DD" : "a month, YYYY-MM"}, and one that exists`);
-  const issuedAt = rfc3339Time(value.issuedAt);
-  const expiresAt = rfc3339Time(value.expiresAt);
+  const issuedAt = strictTime(value.issuedAt);
+  const expiresAt = strictTime(value.expiresAt);
   if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt)) {
     flag(Number.isFinite(issuedAt) ? "/expiresAt" : "/issuedAt", "issuedAt and expiresAt are RFC 3339 date-times with an offset, on days that exist");
     return;
@@ -433,10 +433,10 @@ function division(value: JsonObject): Finding[] {
     ids.add(lease.leaseId);
     usable.push({ lease, index });
   });
-  const ordered = [...usable].sort((a, b) => rfc3339Time(a.lease.issuedAt) - rfc3339Time(b.lease.issuedAt) || a.index - b.index);
+  const ordered = [...usable].sort((a, b) => strictTime(a.lease.issuedAt) - strictTime(b.lease.issuedAt) || a.index - b.index);
   const lastSequence = new Map<string, number>();
   ordered.forEach(({ lease, index }, position) => {
-    const issuedAt = rfc3339Time(lease.issuedAt);
+    const issuedAt = strictTime(lease.issuedAt);
     const machine = lease.machine as string;
     const previous = lastSequence.get(machine);
     if (previous !== undefined && (lease.sequence as number) <= previous) flag(`/leases/${index}/sequence`, `machine ${machine}'s leases rise in sequence as they are issued: ${String(lease.sequence)} follows ${previous}`);
@@ -449,7 +449,7 @@ function division(value: JsonObject): Finding[] {
       at: new Date(issuedAt),
       machine,
       leases: before,
-      reports: reports.filter((report) => rfc3339Time(report.receivedAt) < issuedAt)
+      reports: reports.filter((report) => strictTime(report.receivedAt) < issuedAt)
     });
     if (allowed.ok && (usdMicros(lease.amount) as bigint) > (usdMicros(allowed.remainderUsd) as bigint)) {
       flag(`/leases/${index}/amount`, `the hub could lease machine ${machine} at most ${allowed.remainderUsd} USD of this window instance when it issued this lease: the others held ${allowed.heldUsd}`);
@@ -464,7 +464,7 @@ function division(value: JsonObject): Finding[] {
  */
 function reservation(value: JsonObject): Finding[] {
   const request = isObject(value.request) ? value.request : {};
-  const verdict = mayReserve(value.lease, { ...request, at: new Date(rfc3339Time(request.at)) } as unknown as ReserveRequest);
+  const verdict = mayReserve(value.lease, { ...request, at: new Date(strictTime(request.at)) } as unknown as ReserveRequest);
   const expected = verdict.ok ? "reserve" : "refuse";
   if (value.decision === expected) return [];
   const why = verdict.ok ? `the lease leaves ${verdict.remainingUsd} USD after it` : `the lease answers ${verdict.problem}`;

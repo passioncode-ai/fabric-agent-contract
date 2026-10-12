@@ -1,0 +1,30 @@
+{
+  "description": "An entry signed as ES256: an estate key signs with EdDSA until Fabric records D2 (unsupported-alg).",
+  "kind": "revocation-delta",
+  "expect": [
+    "FAC-SEM-082"
+  ],
+  "input": {
+    "head": {
+      "sequence": 1,
+      "sha256": "111fb00beca217f88987fe4d4f88dc899ac4ce1ef1f154d6212a364bacff50b1"
+    },
+    "entries": [
+      {
+        "type": "revocation-delta/1",
+        "alg": "ES256",
+        "estate": "estate-5d0f1a",
+        "sequence": 1,
+        "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+        "at": "2026-10-12T10:00:00Z",
+        "revocation": {
+          "kind": "hub-key",
+          "ref": "hub-m-9a07-1",
+          "revokedAt": "2026-10-12T10:00:00Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "HE7qCqm7w6o-29Cz2DhAvv1dleId_YYjDn4co4d_0TEK39-EDiHyhC6VebmC3vLQDt8Cb4W7GXI_hdWIHORjBg"
+      }
+    ]
+  }
+}

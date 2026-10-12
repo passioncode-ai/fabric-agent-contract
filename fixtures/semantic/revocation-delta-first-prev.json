@@ -1,0 +1,30 @@
+{
+  "description": "Entry 1 whose prev is not the estate's genesis.",
+  "kind": "revocation-delta",
+  "expect": [
+    "FAC-SEM-082"
+  ],
+  "input": {
+    "head": {
+      "sequence": 1,
+      "sha256": "ed991bc781f26c00761cb3799ef347c4264ce281e8d23a5582fccf523b75fe60"
+    },
+    "entries": [
+      {
+        "type": "revocation-delta/1",
+        "alg": "EdDSA",
+        "estate": "estate-5d0f1a",
+        "sequence": 1,
+        "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+        "at": "2026-10-12T10:00:00Z",
+        "revocation": {
+          "kind": "hub-key",
+          "ref": "hub-m-9a07-1",
+          "revokedAt": "2026-10-12T10:00:00Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "HoALg9XrECraZTT0ggy-voAvUUnnIhUGZzvP35vMX5P0rbNkMqVMV9Tac5biz0Rv74IdZD5N8d7zncAW2cKBBQ"
+      }
+    ]
+  }
+}

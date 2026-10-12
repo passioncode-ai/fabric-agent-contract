@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { rfc3339Time } from "./rfc3339.js";
+import { strictTime } from "./rfc3339.js";
 import { type AssertionVerdict, type PasskeyCredential, verifyAssertion } from "./webauthn.js";
 
 // #region signing-challenges — docs: docs/specification/signing.md
@@ -61,7 +61,7 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
       signer: "passkey",
       fields: ["estate", "grant", "jkt", "expiresAt"],
       decision: "DEC-0063",
-      check: (f) => matches(OPAQUE, f.estate) && matches(GRANT_REF, f.grant) && matches(JKT, f.jkt) && Number.isFinite(rfc3339Time(f.expiresAt))
+      check: (f) => matches(OPAQUE, f.estate) && matches(GRANT_REF, f.grant) && matches(JKT, f.jkt) && Number.isFinite(strictTime(f.expiresAt))
     }
   ],
   ["limits/1", { signer: "passkey", fields: ["scope", "digest"], decision: "DEC-0063", check: (f) => matches(LIMITS_SCOPE, f.scope) && matches(SHA256, f.digest) }],

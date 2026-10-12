@@ -130,30 +130,19 @@
           "description": "the revision (1 or more) of the verified estate record the relay admits from; a relay with none admits nobody, so a welcome always carries it"
         },
         "deltaHead": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "sequence",
-            "sha256"
-          ],
-          "properties": {
-            "sequence": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "sha256": {
-              "type": "string",
-              "pattern": "^[a-f0-9]{64}$"
-            }
-          },
-          "description": "The head of the revocation delta: the same shape as device check-in records.revocationDelta."
+          "$ref": "revocation-delta.schema.json#/$defs/head",
+          "description": "The head of the revocation delta: the same shape as device check-in records.revocationDelta (DEC-0054)."
         },
         "heartbeat": {
-          "type": [
-            "object",
-            "null"
-          ]
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "heartbeat.schema.json"
+            }
+          ],
+          "description": "The relay's latest heartbeat (heartbeat/1, DEC-0054), unchanged, or null when it holds none."
         }
       }
     },
@@ -397,27 +386,16 @@
           "const": "delta"
         },
         "head": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "sequence",
-            "sha256"
-          ],
-          "properties": {
-            "sequence": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "sha256": {
-              "type": "string",
-              "pattern": "^[a-f0-9]{64}$"
-            }
-          },
-          "description": "The head of the revocation delta: the same shape as device check-in records.revocationDelta."
+          "$ref": "revocation-delta.schema.json#/$defs/head",
+          "description": "The head the entries lead to: a hint; only a signed heartbeat's head binds (DEC-0054)."
         },
         "entries": {
-          "type": "array"
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "revocation-delta.schema.json#/$defs/entry"
+          },
+          "description": "Consecutive signed entries (revocation-delta/1, DEC-0054), carried unchanged."
         }
       }
     },
@@ -442,7 +420,8 @@
           "const": "heartbeat"
         },
         "heartbeat": {
-          "type": "object"
+          "$ref": "heartbeat.schema.json",
+          "description": "A signed heartbeat (heartbeat/1, DEC-0054), carried unchanged."
         }
       }
     },
@@ -468,7 +447,8 @@
         },
         "fromSeq": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "description": "The first entry the node lacks: its applied head's sequence plus one (DEC-0054)."
         }
       }
     },
@@ -551,7 +531,9 @@
             "mailbox-full",
             "expired",
             "digest-mismatch",
-            "internal"
+            "internal",
+            "malformed",
+            "recipients-mismatch"
           ]
         },
         "message": {

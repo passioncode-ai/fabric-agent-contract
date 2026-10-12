@@ -1,0 +1,30 @@
+{
+  "description": "An entry time without an offset is never compared.",
+  "kind": "revocation-delta",
+  "expect": [
+    "FAC-SEM-082"
+  ],
+  "input": {
+    "head": {
+      "sequence": 1,
+      "sha256": "7fcb2d462f05fa0d74431a79338eda0d1cf96bdff26dccd106cde5693fad9af5"
+    },
+    "entries": [
+      {
+        "type": "revocation-delta/1",
+        "alg": "EdDSA",
+        "estate": "estate-5d0f1a",
+        "sequence": 1,
+        "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+        "at": "2026-10-12T10:00:00",
+        "revocation": {
+          "kind": "hub-key",
+          "ref": "hub-m-9a07-1",
+          "revokedAt": "2026-10-12T10:00:00Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "V3rGPgu54Xzl46OC9Ra-bBSeNrmY5pdMxYGBGFluUWNrAGKmHissyWWhjr90GjBQprirNohZNDVtJuLEqjcUCw"
+      }
+    ]
+  }
+}

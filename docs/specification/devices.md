@@ -439,10 +439,12 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   toward a receiver pinned before DEC-0056, whose schema refuses an unknown member), the latest
   `heartbeat` (`sequence`, `at`), the head of the
   `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
-  `expiresAt`). These are fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the
-  leases the window lease's decision (not yet taken); the relay ([DEC-0047](relay.md#revocation-and-heartbeat))
-  carries the first two unchanged, and a check-in response carries all three in `records` unchanged. A relay's
-  `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
+  `expiresAt`). The heartbeat and the revocation delta are DEC-0054's ([revocation delta](revocation-delta.md)):
+  `heartbeat` is the accepted `heartbeat/1`'s own `sequence` and `at`, `revocationDelta` the head applied (the last
+  entry's sequence and hash, `0` and the estate's genesis before any). The leases are the window lease's decision (not
+  yet taken). The relay ([DEC-0047](relay.md#revocation-and-heartbeat)) carries heartbeats and pages of the delta
+  unchanged, and a check-in response carries a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
+  `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a

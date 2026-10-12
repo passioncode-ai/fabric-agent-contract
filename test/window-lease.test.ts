@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { rfc3339Time } from "../src/rfc3339.js";
+import { strictTime } from "../src/rfc3339.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import {
@@ -36,7 +36,7 @@ const lease = load("positive/window-lease.json");
 const schema = read("schemas/window-lease.schema.json");
 const spec = readFileSync(path.join(root, "docs/specification/window-lease.md"), "utf8");
 /** A vector's clock, read strictly: an unparseable one is an unreadable clock (`Invalid Date`). */
-const clock = (text: unknown) => new Date(rfc3339Time(text));
+const clock = (text: unknown) => new Date(strictTime(text));
 const trustOf = (trust: Json | null) => (trust === null ? null : { ...trust, at: clock(trust.at), estateRecord: trust.estateRecord ?? vectors.estateRecord });
 const hubKey = createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), Buffer.from(vectors.keys.hub.seed, "hex")]), format: "der", type: "pkcs8" });
 
@@ -50,7 +50,7 @@ function runVectors(): void {
     if (entry.valid === false) expect(bounds, `${entry.window} ${entry.period}`).toBeUndefined();
     else expect(bounds && { start: new Date(bounds.start).toISOString(), end: new Date(bounds.end).toISOString() }, `${entry.window} ${entry.period}`).toEqual({ start: entry.start, end: entry.end });
   }
-  for (const entry of vectors.periods.periodOf as Json[]) expect(periodOf(entry.window, rfc3339Time(entry.at)), `${entry.window} ${entry.at}`).toBe(entry.period);
+  for (const entry of vectors.periods.periodOf as Json[]) expect(periodOf(entry.window, strictTime(entry.at)), `${entry.window} ${entry.at}`).toBe(entry.period);
 }
 
 describe("the document (DEC-0062)", () => {
@@ -254,7 +254,7 @@ describe("window-lease semantic fixtures (FAC-SEM-089…091)", () => {
   it("reads a division with no lease list as empty, and orders leases issued at one instant as listed", () => {
     expect(codes("window-lease-division", { limitUsd: "1000", leases: "x", reports: [] })).toEqual([]);
     const division = load("semantic/window-lease-division-ok.json").input;
-    const [first, second] = division.leases as Json[];
+    const [first, second] = division.leases as [Json, Json];
     const together = { ...division, leases: [first, { ...second, issuedAt: first.issuedAt, amount: "600" }] };
     expect(codes("window-lease-division", together)).toEqual([]);
     const over = { ...division, leases: [first, { ...second, issuedAt: first.issuedAt, amount: "600.000001" }] };

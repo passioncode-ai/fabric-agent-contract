@@ -74,8 +74,21 @@
   },
   "records": {
     "heartbeat": {
-      "format": "see-DEC-0054",
-      "sequence": 42
+      "type": "heartbeat/1",
+      "alg": "EdDSA",
+      "estate": "estate-5d0f1a",
+      "sequence": 7,
+      "at": "2026-10-12T11:45:00Z",
+      "deltaHead": {
+        "sequence": 3,
+        "sha256": "460ead10497f2b77eb5a9a086e3f51c4c694d2020a5459466bad5aaf4edce57a"
+      },
+      "estateRecord": {
+        "revision": 3,
+        "digest": "sha256:070512bd06a81493e33a1540eed836621eb220c252d94b3bb580d8478e9d32b4"
+      },
+      "kid": "hub-m-4c1e-1",
+      "sig": "jp1Qfwq2csW1v3v2I0PgYPIpv-gDw6ClZiIRkxuhcDNqF9jfdhGYFenjkDOLRvgfcNMCOJ21EiIytOf181nKCA"
     },
     "leases": [
       {
@@ -96,6 +109,59 @@
         "kid": "hub-m-4c1e-1",
         "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
       }
-    ]
+    ],
+    "revocationDelta": {
+      "head": {
+        "sequence": 3,
+        "sha256": "460ead10497f2b77eb5a9a086e3f51c4c694d2020a5459466bad5aaf4edce57a"
+      },
+      "entries": [
+        {
+          "type": "revocation-delta/1",
+          "alg": "EdDSA",
+          "estate": "estate-5d0f1a",
+          "sequence": 1,
+          "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+          "at": "2026-10-12T10:00:00Z",
+          "revocation": {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          "kid": "hub-m-4c1e-1",
+          "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+        },
+        {
+          "type": "revocation-delta/1",
+          "alg": "EdDSA",
+          "estate": "estate-5d0f1a",
+          "sequence": 2,
+          "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+          "at": "2026-10-12T19:05:00+09:00",
+          "revocation": {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          },
+          "kid": "hub-m-4c1e-1",
+          "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+        },
+        {
+          "type": "revocation-delta/1",
+          "alg": "EdDSA",
+          "estate": "estate-5d0f1a",
+          "sequence": 3,
+          "prev": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe",
+          "at": "2026-10-12T10:30:00Z",
+          "revocation": {
+            "kind": "grant",
+            "ref": "grant-share-0042",
+            "revokedAt": "2026-10-12T10:29:00Z"
+          },
+          "kid": "hub-m-4c1e-1",
+          "sig": "M2hp5b8GfdKTzLwzYVuG63BC6rhN4GxoeU_eHPxiC8kPo3poASEZlTVIwdIRR62_0DZqxrTCDHTuBWwgXliQDw"
+        }
+      ]
+    }
   }
 }

@@ -83,7 +83,11 @@ window at L3, not a grant limit (DEC-0041).
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
 DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it
-trusts a `kid` only while a current revision certifies it.
+trusts a `kid` only while the revision it reads certifies it — one `verifyEstateRecord` accepted, not lower than the
+highest its machine applied — and refuses otherwise `kid-not-certified`, or `issuer-unavailable` when the revision is at
+fault (the meter: `principal-unproven`, with the detail in its reason) (delegation DL-14, DEC-0060). The module is
+`src/hub-key-rules.ts`. It also signs
+**Revocation delta** entries and **Heartbeats** (DEC-0054).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
@@ -101,8 +105,17 @@ distinct from a grant's **Limit window**, which caps what a grant may spend.
 `%LOCALAPPDATA%\passioncode-fabric\services\` on Windows, or `FABRIC_SERVICES_DIR` (DEC-0015, DEC-0032).
 
 **Supervisor**: The system service manager that keeps a local service running — launchd, systemd or the
-Task Scheduler — named by the descriptor's `lifecycle.manager`, or Project Observatory's node for the services it starts
-as its children (DEC-0015, DEC-0032, DEC-0057).
+Task Scheduler — or Project Observatory's node for the services it starts as its children, named by the descriptor's
+`lifecycle.manager` (`node` for the node, with no supervisor file; DEC-0015, DEC-0032, DEC-0057, DEC-0061).
+
+**Peer (a service offered to others)**: A service a colleague, an organization's members or a guest may call beside
+its operator — a listing. Its descriptor's `peer` names the `endpoint` they reach, the `custody` of the machine or
+account (organization-managed or personal), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
+internal, confidential, restricted) a host never sends above. It grants nobody access (DEC-0061).
+
+**Credential kind**: The kind of a runner's sign-in, never its value: `subscription` (the operator's own vendor login,
+never offered to others), `key`, `platform-metered` (the hosting platform's own metered models) or `none` — the
+descriptor's `runner.credentialKind` and, for the same calls, a usage row's `route` (DEC-0046, DEC-0061).
 
 **Supervisor marker**: How a service's copy knows its supervisor started it: `FABRIC_SERVICE_SUPERVISOR=<manager>` in its
 environment or `--fabric-supervisor <manager>` in its arguments, written into the plist, unit or task. Only a marked
@@ -385,6 +398,15 @@ authority: it reads nothing it carries, decides no trust tier and never reports 
 applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
 organization's relay has none of its own until `org-authority/1` (Fabric D8).
+
+**Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
+entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
+`{sequence, sha256}` — what a check-in reports and a **Relay**'s `welcome` carries. A revision issued after an entry
+lists it ([revocation delta](docs/specification/revocation-delta.md)).
+
+**Heartbeat**: A signed timestamp (`heartbeat/1`, DEC-0054) committing to the **Revocation delta**'s head and the
+estate revision. A machine whose heartbeat is more than 72 hours old, or that has not applied up to it, refuses what
+arrives from other machines and keeps the person's own work.
 
 **Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
 signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a

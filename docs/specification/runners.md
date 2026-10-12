@@ -296,7 +296,10 @@ An agent's [well-known document](service.md#well-known-document) MAY carry `conf
 configure (`runner`, `model`) and the resolved profiles, read-only — the runner profile, its kind and route, the model
 profile and its admitted models, and the level they came from. A change is made in Fabric and reaches the agent
 through its binding. A capability answer MAY carry the same object. A [usage report](service.md#usage-report)'s row
-carries `route` beside `model`.
+carries `route` beside `model`; besides a runner profile's two routes it admits `platform-metered`, the hosting
+platform's own metered models (DEC-0061). A service's descriptor names the kind of its runner's sign-in as
+`runner.credentialKind` — `subscription`, `key`, `platform-metered` or `none`, never a credential — and a service
+offered to others never names `subscription` ([service](service.md#offered-to-others), DEC-0061).
 
 ## Semantic rules
 
