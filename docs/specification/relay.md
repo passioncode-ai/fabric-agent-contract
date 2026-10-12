@@ -237,7 +237,7 @@ A secret moves to a machine only where a placed package declares it
     `kid` the signer's `#sig`, `sig` the signature above.
   - At most 8192 bytes; a longer value is refused 431 `too-large` before it is decoded.
   - Parsed strictly, else 400 `malformed`: canonical base64url (re-encoding gives the same string), bytes that are
-    their own RFC 8785 form, exactly those five members, `recipients` 1–64 `#sig` kids of at most 256 characters,
+    their own RFC 8785 form, exactly those five members, `recipients` 1–64 distinct `#sig` kids of at most 256 characters,
     `iat` a real instant.
 - **Who may ask** (`verifyBlobRequest`, in this order after the form and `alg`):
   - `iat` within 60 s either way (401 `unauthenticated`, 401 `not-yet-valid`);
@@ -245,7 +245,8 @@ A secret moves to a machine only where a placed package declares it
   - a PUT: every recipient is too (403 `unknown-recipient`); a blob the relay holds is accepted again only with the
     same recipient list (200, no change), never another one (409 `recipients-mismatch`, never merged);
   - a GET: the signer is one of the stored recipients and signs the stored list letter for letter (403
-    `not-admitted`). A GET signature reused within its 60 s fetches the same blob for the same machine again, which
+    `not-admitted`). A GET of a blob the relay does not hold is answered the same 403 `not-admitted`, never 404, so a
+    machine that may not fetch a blob cannot learn whether it exists. A GET signature reused within its 60 s fetches the same blob for the same machine again, which
     reveals nothing new;
   - then the signature (401 `unauthenticated`; 403 `bad-key`; 401 `unsupported-alg` for an Ed25519 key).
 - **Digest check.** The relay recomputes the digest and refuses a mismatch with `digest-mismatch`.
