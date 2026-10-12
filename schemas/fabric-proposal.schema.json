@@ -131,8 +131,6 @@
             "role": {
               "enum": [
                 "operator",
-                "product-manager",
-                "ceo",
                 "administrator"
               ]
             }
@@ -154,7 +152,7 @@
           "additionalProperties": false
         }
       ],
-      "description": "A person's role, or a recorded per-kind autonomy policy (ADR-0029 §3); never an agent. A rule is approved by a person (FAC-SEM-104)."
+      "description": "A person — the operator, or an organization's administrator — or a recorded per-kind autonomy policy (ADR-0029 §3) under which an agent such as a project manager or the CEO may decide; never an agent by name. A rule is approved by the operator (FAC-SEM-104)."
     },
     "mergedInto": {
       "$ref": "common.schema.json#/$defs/uri"
@@ -179,9 +177,18 @@
       "type": "boolean",
       "description": "About an agent the operator marks private: never exported or submitted (ADR-0109 §7, FAC-SEM-103)."
     },
+    "sourceClass": {
+      "enum": [
+        "organization",
+        "personal",
+        "unknown"
+      ],
+      "description": "Whose work the proposal comes from; only an organization proposal goes to an organization server (FAC-SEM-103)."
+    },
     "payload": {
       "type": "object",
-      "maxProperties": 32
+      "maxProperties": 32,
+      "description": "Type-specific fields Fabric defines (for a listing, the listing reference); never a copy of content or a secret (FAC-SEM-103 scans it on submit)."
     },
     "createdAt": {
       "$ref": "common.schema.json#/$defs/timestamp"
@@ -408,6 +415,50 @@
           },
           "verifiedAt": true,
           "verifiedRun": true
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "proposed",
+              "refused",
+              "merged",
+              "superseded"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "appliedIn": false,
+          "verifiedAt": false,
+          "verifiedRun": false
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "proposed",
+              "refused"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "approvedBy": false
         }
       }
     }

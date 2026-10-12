@@ -21,22 +21,35 @@ CON-OE-05 asks, with Fabric's corrections of 2026-10-12. The store, the Board an
 | `finding` | for a `fix`: the finding's id, its source and its text, never a secret |
 | `target` | `{kind: project, project}` — the owning project's manager — or `{kind: ceo}` when there is no project (ADR-0029) |
 | `status` | `proposed` → `approved` \| `refused` \| `merged` (`mergedInto`) \| `superseded` (`supersededBy`) → `applied` → `retired`, and `verified` for a fix; a status Fabric keeps inside, such as an evaluation, is not in the contract |
-| `approvedBy` | a person's role (`operator`, `product-manager`, `ceo`, `administrator`) or a recorded per-kind autonomy policy `{policy}` (ADR-0029 §3); never an agent |
+| `approvedBy` | a person — `operator` or an organization's `administrator` — or a recorded per-kind autonomy policy `{policy}` (ADR-0029 §3). A project manager or the CEO is an agent binding in this contract (`roles.schema.json`), so an agent decides only under a recorded policy, never by its role; the approver is a person or a policy, never the authoring agent, so DEC-0012's author ≠ approver holds by construction |
 | `appliedIn` | for a rule: the instruction revision it entered — an approved rule enters the binding's next revision, so applying is not a second act |
 | `verifiedAt`, `verifiedRun` | for a fix: when, and in which of the source's runs, the finding stopped being reported |
 | `private` | about an agent the operator marks private (ADR-0109 §7) |
+| `sourceClass` | `organization`, `personal` or `unknown`: whose work the proposal comes from |
+| `payload` | type-specific fields Fabric defines (a listing's reference); never a copy of content or a secret |
 
 The schema holds the shapes. The rules:
 
-- **A rule is approved by a person** on the Board (ADR-0109 §4): `approvedBy` of a `rule` is a role, never a policy
-  (`FAC-SEM-104`, kind `proposal`).
+- **A rule is approved by the operator** on the Board (ADR-0109 §4): `approvedBy` of a `rule` is `{role: operator}`,
+  never a policy or another role (`FAC-SEM-104`, kind `proposal`).
 - **A proposal moves along its decisions** and nowhere else: from `proposed` to `approved`, `refused`, `merged` or
   `superseded`; from `approved` to `applied` or `superseded`; from `applied` to `retired`, `superseded`, or `verified`
   for a fix; the other statuses are final (`FAC-SEM-104`, kind `proposal-transition`, `{type, from, to}`;
   `PROPOSAL_TRANSITIONS`).
-- **What leaves the estate.** A proposal about a private agent is never exported or submitted, by construction; an
-  organization server receives only an approved or applied rule, or a listing (`proposal.submit`; `FAC-SEM-103`, kind
-  `proposal-submit`, `{proposal, to}`).
+- **What leaves the estate** (`FAC-SEM-103`, kind `proposal-submit`, `{proposal, to}`). A proposal leaves only `to` an
+  organization server or an `export`; filing a proposal to its own project's manager on the Board is not leaving. A
+  proposal about a private agent never leaves, by construction. An organization server receives a proposal whose
+  `sourceClass` is `organization` and that is an approved or applied rule, or a live listing (proposed, approved or
+  applied). Nothing leaving carries a credential-shaped value or URL (the shared detector) or a home-folder path, in its
+  change, its finding's text, its evidence references or its payload.
+
+## Relation to DEC-0012
+
+`memory.schema.json`'s `learningProposal` and `promotion` stay the Memory Kernel's records of a retrospective's
+proposal and a global promotion (DEC-0012, `FAC-SEM-003`, `FAC-SEM-094`). A `fabric-proposal/1` is what reaches a
+manager on the Board: Fabric files one for a rule a learning proposal recommends, citing it in `evidence[]`. The v2
+plan's `effect` and `measured_by` are not fields here: a proposal's expected effect is in `change` and `payload`, and
+what measured it is its evidence.
 
 ## A learning note
 

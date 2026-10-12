@@ -18,6 +18,8 @@ describe("FAC-SEM-104: a rule is approved by a person, and a proposal moves alon
     expect(paths("proposal", rule)).toEqual([]);
     expect(paths("proposal", fix)).toEqual([]);
     expect(paths("proposal", { ...rule, approvedBy: { policy: "auto" } })).toEqual(["FAC-SEM-104 /approvedBy"]);
+    expect(paths("proposal", { ...rule, approvedBy: { role: "administrator" } })).toEqual(["FAC-SEM-104 /approvedBy"]);
+    expect(paths("proposal", { ...fix, approvedBy: { role: "administrator" } })).toEqual([]);
   });
   it("allows exactly the decisions DEC-0072 names, and nothing else", () => {
     const edges = new Set(["proposed>approved", "proposed>refused", "proposed>merged", "proposed>superseded", "approved>applied", "approved>superseded", "applied>retired", "applied>superseded", "applied>verified"]);
@@ -48,6 +50,21 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     expect(paths("proposal-submit", { proposal: fix, to: "organization" })).toEqual(["FAC-SEM-103 /proposal"]);
     expect(paths("proposal-submit", { proposal: fix, to: "export" })).toEqual([]);
     expect(paths("proposal-submit", { to: "organization" })).toEqual(["FAC-SEM-103 /proposal"]);
+    expect(paths("proposal-submit", { proposal: { ...rule, type: "listing", status: "refused" }, to: "organization" })).toEqual(["FAC-SEM-103 /proposal"]);
+  });
+  it("refuses a destination other than an organization server or an export, and a rule not from the organization's work", () => {
+    for (const to of ["public", "organisation", undefined]) expect(paths("proposal-submit", { proposal: fix, to })).toEqual(["FAC-SEM-103 /to"]);
+    for (const sourceClass of ["personal", "unknown", undefined]) expect(paths("proposal-submit", { proposal: { ...rule, sourceClass }, to: "organization" })).toEqual(["FAC-SEM-103 /proposal/sourceClass"]);
+  });
+  it("lets nothing leaving the estate carry a credential or a home path", () => {
+    const token = "ghp_" + "a".repeat(36);
+    // Home paths are built at run time, so no home path sits in the repository's text.
+    const posixHome = ["", "Users", "someone", "notes", "secret.md"].join("/");
+    const windowsHome = ["C:", "Users", "someone", "x"].join("\\");
+    const leaking = { ...rule, change: `Use ${token} for the sync.`, evidence: [{ kind: "file", ref: posixHome }, { kind: "link", ref: "https://x.example/?token=sk-abcdef1234567890abcd" }], finding: undefined, payload: { note: windowsHome, "a/b": ["ok"] } };
+    expect(paths("proposal-submit", { proposal: leaking, to: "export" })).toEqual(["FAC-SEM-103 /proposal/change", "FAC-SEM-103 /proposal/evidence/0/ref", "FAC-SEM-103 /proposal/evidence/1/ref", "FAC-SEM-103 /proposal/payload/note"]);
+    expect(paths("proposal-submit", { proposal: { ...fix, finding: { ...fix.finding, text: "see ~/x" } }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/finding/text"]);
+    expect(paths("proposal-submit", { proposal: { ...fix, evidence: [null, { kind: "x" }] }, to: "export" })).toEqual([]);
   });
 });
 

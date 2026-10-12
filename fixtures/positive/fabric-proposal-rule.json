@@ -34,5 +34,6 @@
     "revision": 4,
     "contentHash": "sha256:f67304e98088a5975c375b214c47c8a6d3d1375eb311f3ad505e5029c0535a2f"
   },
-  "createdAt": "2026-10-11T09:00:00Z"
+  "createdAt": "2026-10-11T09:00:00Z",
+  "sourceClass": "organization"
 }

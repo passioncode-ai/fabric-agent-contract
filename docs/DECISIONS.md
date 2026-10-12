@@ -4018,11 +4018,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      stops reporting it, `verifiedAt` and `verifiedRun`; `target` the owning project's manager or the CEO; `private`
      for a private agent's proposal (schema).
   2. **Decisions.** `status` moves only along proposed → approved | refused | merged | superseded → applied → retired, and
-     `verified` for a fix (`FAC-SEM-104`, `PROPOSAL_TRANSITIONS`); `approvedBy` is a person's role or a recorded
-     autonomy policy, never an agent, and a rule's is a person's (`FAC-SEM-104`); an applied rule names the instruction
+     `verified` for a fix (`FAC-SEM-104`, `PROPOSAL_TRANSITIONS`); `approvedBy` is a person (`operator`,
+     `administrator`) or a recorded autonomy policy — a project manager or the CEO, agent bindings in this contract,
+     decide only under a policy — and a rule's is the operator (`FAC-SEM-104`); an applied rule names the instruction
      revision it entered (`appliedIn`), not a second approver.
-  3. **What leaves.** A private agent's proposal is never exported or submitted; an organization server receives an
-     approved or applied rule, or a listing, and nothing else (`FAC-SEM-103`).
+  3. **What leaves.** Only to an organization server or as an export (filing on the Board is not leaving); never a
+     private agent's proposal; an organization server receives an organization proposal (`sourceClass`) that is an
+     approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home path
+     (`FAC-SEM-103`).
   4. **`learning-note/1`** from Project Observatory to Fabric, with the answer `accepted` | `duplicate` | `rejected`
      (`learning-note-answer.schema.json`); evidence by reference, no transcript or secret; a `personal` or `unknown`
      note never feeds an organization rollout (`FAC-SEM-105`).
@@ -4034,6 +4037,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/proposals.md` (new), `docs/specification/memory-and-learning.md`,
+    `schemas/memory-capability.schema.json` (the reserve removed),
     `docs/specification/conformance.md`;
   - schemas: `schemas/fabric-proposal.schema.json`, `schemas/learning-note.schema.json`,
     `schemas/learning-note-answer.schema.json` (new);
@@ -4044,7 +4048,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - tests: `test/proposal-rules.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
     `test/rule-tolerance.test.ts`;
   - docs: `docs/backlog.md` (CT-04, CT-16, CT-19, CT-20), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
-- **Not decided here:** the Board's own screens; how a listing proposal carries the listing (v4 Path 4, with
+- **Not decided here:** the v2 plan's `effect` and `measured_by` (not fields; see proposals.md, Relation to DEC-0012);
+  the Board's own screens; how a listing proposal carries the listing (v4 Path 4, with
   `org-authority/1`); the per-kind autonomy policies' contents (Fabric's).
 - **Source:** Fabric ADR-0029, ADR-0109 and Fabric's session's corrections (2026-10-12); the organization architecture
   v2's contract plan row CON-OE-05 and its CROSSWALK-v4; DEC-0012, DEC-0023; packet P6-03. DEC-0072 and
