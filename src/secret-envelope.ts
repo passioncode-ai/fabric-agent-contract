@@ -99,9 +99,12 @@ export interface EnvelopeHeader {
 }
 export interface SecretEnvelope { header: EnvelopeHeader; ct: string; sig: string }
 
-export type EnvelopeRefusal =
-  | "malformed" | "unsupported-alg" | "wrong-recipient" | "bad-key" | "bad-signature" | "sender-not-allowed"
-  | "placement-stale" | "not-yet-valid" | "lifetime-too-long" | "expired" | "cannot-open";
+/** Every refusal `openEnvelope` names, in the order it checks; the shared vectors carry each (DEC-0066). */
+export const ENVELOPE_REFUSALS = [
+  "malformed", "unsupported-alg", "wrong-recipient", "bad-key", "bad-signature", "sender-not-allowed",
+  "placement-stale", "not-yet-valid", "lifetime-too-long", "expired", "cannot-open"
+] as const;
+export type EnvelopeRefusal = (typeof ENVELOPE_REFUSALS)[number];
 const signingInput = (envelope: { header: EnvelopeHeader; ct: string }) => Buffer.from(rfc8785({ header: envelope.header, ct: envelope.ct }), "utf8");
 
 /** `sha256:` and the hex SHA-256 of the envelope's RFC 8785 bytes: the name a relay stores it under. */

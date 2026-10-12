@@ -86,32 +86,6 @@ describe("fabric-secret-envelope/1", () => {
     expect(() => sealEnvelope({ ...base, recipientKey: { ...recipientKey, y: recipientKey.x } })).toThrow(/bad-key/);
   });
 
-  it("refuses each failed check by name, before opening anything", () => {
-    const cases: Array<[string, unknown, Partial<OpenContext>, string]> = [
-      ["not an envelope", { header: {} }, {}, "malformed"],
-      ["another machine's envelope", vector.envelope, { ownKemKid: "urn:fabric:machine:other#kem" }, "wrong-recipient"],
-      ["a sender the record does not list", vector.envelope, { senderKey: () => undefined }, "bad-key"],
-      ["a sender key off the curve", vector.envelope, { senderKey: () => ({ ...vector.senderKey, y: vector.senderKey.x }) }, "bad-key"],
-      ["a sender that may not hold the slot", vector.envelope, { mayHold: () => false }, "sender-not-allowed"],
-      ["a placement older than the current one", vector.envelope, { currentPlacement: () => vector.open.placement + 1 }, "placement-stale"],
-      ["a slot not placed here", vector.envelope, { currentPlacement: () => undefined }, "placement-stale"],
-      ["after exp", vector.envelope, { now: new Date("2026-10-12T12:00:00Z") }, "expired"]
-    ];
-    for (const [name, envelope, over, refusal] of cases) expect(openEnvelope(envelope, ctx(over)), name).toEqual({ ok: false, refusal });
-  });
-
-  it("refuses an envelope whose header, ciphertext or signature was changed", () => {
-    const slot = clone();
-    slot.header.slot = "OTHER_KEY";
-    expect(openEnvelope(slot, ctx({ mayHold: () => true }))).toEqual({ ok: false, refusal: "bad-signature" });
-    const ct = clone();
-    ct.ct = Buffer.from(Buffer.from(ct.ct, "base64url").map((b, i) => (i === 0 ? b ^ 1 : b))).toString("base64url");
-    expect(openEnvelope(ct, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
-    const longLived = clone();
-    longLived.header.exp = "2026-10-14T00:00:00Z";
-    expect(openEnvelope(longLived, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
-  });
-
   it("refuses a validly signed envelope that lives longer than 24 hours or cannot be opened", () => {
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
@@ -127,6 +101,8 @@ describe("fabric-secret-envelope/1", () => {
   });
 });
 
+// Every refusal and boundary of the open checks is a shared vector (fixtures/vectors/secret-envelope.json `cases`,
+// run by test/relay-vectors.test.ts).
 describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
   const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
   const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
@@ -145,55 +121,6 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
     expect(sealed.header).toEqual(again.header);
     expect(sealed.ct).toBe(again.ct);
     expect(open(sealed)).toEqual({ ok: true, secret: Buffer.from("x") });
-  });
-
-  it("signs the algorithm in the header and refuses another, or an Ed25519 sender, as unsupported-alg", () => {
-    expect(vector.envelope.header.alg).toBe("ES256");
-    const other = clone();
-    (other.header as { alg: string }).alg = "EdDSA";
-    expect(openEnvelope(other, ctx())).toEqual({ ok: false, refusal: "unsupported-alg" });
-    const ed = generateKeyPairSync("ed25519").publicKey.export({ format: "jwk" });
-    expect(openEnvelope(vector.envelope, ctx({ senderKey: () => ed }))).toEqual({ ok: false, refusal: "unsupported-alg" });
-  });
-
-  it("refuses a time that matches the pattern and is no date, and a time ahead of the clock", () => {
-    const bad = clone();
-    bad.header.iat = "2026-13-45T25:61:61Z";
-    expect(openEnvelope(bad, ctx())).toEqual({ ok: false, refusal: "malformed" });
-    expect(open(seal(), { now: new Date(T0 - 60_000) }).ok).toBe(true);
-    expect(open(seal(), { now: new Date(T0 - 61_000) })).toEqual({ ok: false, refusal: "not-yet-valid" });
-  });
-
-  it("holds the life at exactly 24 hours and refuses exp equal to iat", () => {
-    expect(open(seal({ exp: new Date(T0 + 86_400_000) })).ok).toBe(true);
-    expect(open(seal({ exp: new Date(T0 + 86_401_000) }))).toEqual({ ok: false, refusal: "lifetime-too-long" });
-    expect(open(seal({ exp: new Date(T0) }))).toEqual({ ok: false, refusal: "lifetime-too-long" });
-    expect(open(seal(), { now: new Date(T0 + 3_600_000) })).toEqual({ ok: false, refusal: "expired" });
-  });
-
-  it("refuses the same 64 signature bytes spelled non-canonically (the last character's spare bits)", () => {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    const last = alphabet.indexOf(vector.envelope.sig.slice(-1));
-    const respelled = clone();
-    respelled.sig = vector.envelope.sig.slice(0, -1) + alphabet[(last & 0b110000) | ((last + 1) & 0b001111)];
-    expect(Buffer.from(respelled.sig, "base64url").equals(Buffer.from(vector.envelope.sig, "base64url"))).toBe(true);
-    expect(openEnvelope(respelled, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
-  });
-
-  it("answers a null header as malformed, never by throwing (third reading 3)", () => {
-    expect(openEnvelope({ header: null, ct: "AA", sig: "AA" }, ctx())).toEqual({ ok: false, refusal: "malformed" });
-    expect(openEnvelope({ header: [], ct: "AA", sig: "AA" }, ctx())).toEqual({ ok: false, refusal: "malformed" });
-  });
-
-  it("refuses an encapsulated key off the curve and a signature that is not 64 canonical bytes", () => {
-    const offCurve = clone();
-    const enc = Buffer.from(offCurve.header.enc, "base64url");
-    enc[64] = (enc[64] as number) ^ 1;
-    offCurve.header.enc = enc.toString("base64url");
-    expect(openEnvelope(offCurve, ctx())).toEqual({ ok: false, refusal: "bad-key" });
-    const short = clone();
-    short.sig = short.sig.slice(0, 80);
-    expect(openEnvelope(short, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
   });
 
   it("seals only to a #kem key, signed by a #sig key", () => {

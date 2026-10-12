@@ -2,7 +2,6 @@ import { createHash, generateKeyPairSync, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { rfc8785 } from "../src/canonical.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import {
@@ -28,8 +27,6 @@ const ctx = (over: Partial<AuthContext> = {}): AuthContext => ({
   relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false,
   admittedKey: (kid) => (kid === v.auth.frame.kid ? v.machineKey : undefined), now: new Date(v.auth.context.now), ...over
 });
-const iatMs = Date.parse(v.auth.frame.iat);
-const at = (offsetMs: number) => new Date(iatMs + offsetMs);
 
 describe("relay-auth/1", () => {
   it("signs the RFC 8785 bytes the vector pins, naming ES256", () => {
@@ -45,40 +42,10 @@ describe("relay-auth/1", () => {
     expect(admit(v.auth.frame, ctx({ admittedKey: () => octets }))).toEqual({ ok: true, kid: v.auth.frame.kid });
   });
 
-  const cases: Array<[string, AuthFrame, Partial<AuthContext>, string]> = [
-    ["another protocol", { ...v.auth.frame, protocol: "fabric-relay/9" }, {}, "protocol-unsupported"],
-    ["an alg other than ES256", { ...v.auth.frame, alg: "EdDSA" }, {}, "unsupported-alg"],
-    ["no alg at all", { ...v.auth.frame, alg: undefined as unknown as string }, {}, "unsupported-alg"],
-    ["a signature made for another relay", v.auth.frame, { relay: "https://other-relay.example" }, "unauthenticated"],
-    ["another connection's nonce", v.auth.frame, { nonce: "BBECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8" }, "unauthenticated"],
-    ["the nonce used once already", v.auth.frame, { nonceUsed: true }, "replay"],
-    ["iat 61 s in the past", v.auth.frame, { now: at(61_000) }, "unauthenticated"],
-    ["iat 61 s ahead of the clock", v.auth.frame, { now: at(-61_000) }, "not-yet-valid"],
-    ["iat not RFC 3339", { ...v.auth.frame, iat: "yesterday" }, {}, "unauthenticated"],
-    ["iat that matches the pattern and is no date", { ...v.auth.frame, iat: "2026-13-45T25:61:61Z" }, {}, "unauthenticated"],
-    ["a kid outside the admission set", v.auth.frame, { admittedKey: () => undefined }, "not-admitted"],
-    ["an admitted key off the curve", v.auth.frame, { admittedKey: () => ({ ...v.machineKey, y: v.machineKey.x }) }, "bad-key"],
-    ["an admitted Ed25519 #sig", v.auth.frame, { admittedKey: () => v.ed25519.key }, "unsupported-alg"],
-    ["a claimed estate other than the signed one", { ...v.auth.frame, estate: "urn:fabric:estate:other" }, {}, "unauthenticated"],
-    ["a signature that is not 64 bytes", { ...v.auth.frame, sig: "AAAA" }, {}, "unauthenticated"],
-    ["a 64-byte signature in a non-canonical spelling", { ...v.auth.frame, sig: `${v.auth.frame.sig.slice(0, -1)}h` }, {}, "unauthenticated"]
-  ];
-  it.each(cases)("refuses %s, by code", (_name, frame, over, code) => {
-    expect(admit(frame, ctx(over))).toEqual({ ok: false, code });
-  });
-
-  it("gives the same answer for every case whether the admitted key is a JWK or octets", () => {
-    for (const [name, frame, over] of cases) {
-      if (over.admittedKey) continue;
-      expect(admit(frame, ctx({ ...over, admittedKey: () => octets })), name).toEqual(admit(frame, ctx(over)));
-    }
-  });
-
-  it("admits an iat exactly 60 s off either way and names the window it uses", () => {
+  // The refusals are shared vectors (fixtures/vectors/relay.json `admit`), run by test/relay-vectors.test.ts.
+  it("names the window it uses", () => {
     expect(AUTH_WINDOW_SECONDS).toBe(60);
     expect(CLOCK_SKEW_SECONDS).toBe(60);
-    expect(admit(v.auth.frame, ctx({ now: at(60_000) })).ok).toBe(true);
-    expect(admit(v.auth.frame, ctx({ now: at(-60_000) })).ok).toBe(true);
   });
 
   it("refuses the vector's Ed25519 participant as unsupported-alg", () => {
@@ -105,20 +72,6 @@ describe("fabric-relay-message/1", () => {
   const frame = { from: v.message.frame.from, to: v.message.frame.to, msgId: v.message.frame.msgId };
   const senderKey = (kid: string) => (kid === frame.from ? v.machineKey : undefined);
   const now = new Date(v.message.now);
-  const b64 = (value: unknown) => Buffer.from(typeof value === "string" ? value : rfc8785(value)).toString("base64url");
-  // A one-off sender for the boundary cases: the vector pins the format, these pin each line of the check.
-  const own = generateKeyPairSync("ec", { namedCurve: "P-256" });
-  const ownKey = () => own.publicKey.export({ format: "jwk" });
-  const T0 = Date.parse("2026-10-12T00:00:00Z");
-  const iso = (ms: number) => new Date(ms).toISOString().replace(/\.000Z$/, "Z");
-  const jws = (over: Record<string, unknown> = {}, header: Record<string, unknown> = {}) => {
-    const signed = `${b64({ alg: "ES256", typ: "fabric-relay-message+jwt", ...header })}.${b64({
-      type: "fabric-relay-message/1", ...frame, iat: iso(T0), exp: iso(T0 + 3_600_000), payload: {}, ...over
-    })}`;
-    return `${signed}.${sign("sha256", Buffer.from(signed), { key: own.privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
-  };
-  const check = (body: string, nowMs: number) => verifyMessageBody(body, frame, () => ownKey(), new Date(nowMs));
-
   it("verifies the vector's body against its frame, with the sender's key as a JWK or as octets", () => {
     expect(verifyMessageBody(v.message.body, frame, senderKey, now).ok).toBe(true);
     expect(verifyMessageBody(v.message.body, frame, () => Buffer.from(v.machineKeyOctets, "base64"), now).ok).toBe(true);
@@ -131,51 +84,7 @@ describe("fabric-relay-message/1", () => {
     expect(verifyMessageBody(v.message.body, frame, senderKey, new Date(exp))).toEqual({ ok: false, reason: "expired" });
   });
 
-  it("refuses a body that does not match its frame, or that a relay could have altered", () => {
-    const [h, p, s] = v.message.body.split(".") as [string, string, string];
-    const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8")) as Record<string, unknown>;
-    const reencoded = (over: Record<string, unknown>) => `${h}.${b64({ ...payload, ...over })}.${s}`;
-    const cases: Array<[string, string, Partial<typeof frame>, string]> = [
-      ["not a JWS", "x.y", {}, "malformed"],
-      ["a payload that is not JSON", `${h}.!!!.${s}`, {}, "malformed"],
-      ["a header that is JSON null", `${b64("null")}.${b64("{}")}.AAAA`, {}, "malformed"],
-      ["a payload that is an array", `${h}.${b64("[]")}.${s}`, {}, "malformed"],
-      ["a frame naming another sender", v.message.body, { from: "urn:fabric:machine:stranger#sig" }, "mismatch"],
-      ["a frame naming another recipient", v.message.body, { to: "urn:fabric:machine:other#sig" }, "mismatch"],
-      ["a frame with another msgId", v.message.body, { msgId: "another" }, "mismatch"],
-      ["a payload changed in transit", reencoded({ payload: { command: "run.cancel" } }), {}, "bad-signature"],
-      ["an exp moved in transit", reencoded({ exp: "2026-10-19T00:00:00Z" }), {}, "bad-signature"]
-    ];
-    for (const [name, body, frameOver, reason] of cases) {
-      expect(verifyMessageBody(body, { ...frame, ...frameOver }, senderKey, now), name).toEqual({ ok: false, reason });
-    }
-    expect(verifyMessageBody(v.message.body, frame, () => undefined, now)).toEqual({ ok: false, reason: "unknown-sender" });
-    expect(verifyMessageBody(v.message.body, frame, () => ({ ...v.machineKey, y: v.machineKey.x }), now)).toEqual({ ok: false, reason: "bad-key" });
-    expect(verifyMessageBody(v.message.body, frame, () => v.ed25519.key, now)).toEqual({ ok: false, reason: "unsupported-alg" });
-  });
-
-  it("names the algorithm and the type it refuses", () => {
-    expect(check(jws({}, { alg: "none" }), T0)).toEqual({ ok: false, reason: "unsupported-alg" });
-    expect(check(jws({}, { alg: "EdDSA" }), T0)).toEqual({ ok: false, reason: "unsupported-alg" });
-    expect(check(jws({}, { typ: "JWT" }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ type: "fabric-relay-message/2" }), T0)).toEqual({ ok: false, reason: "malformed" });
-  });
-
-  it("refuses an iat or an exp that does not parse to an instant", () => {
-    expect(check(jws({ iat: "2026-13-45T25:61:61Z" }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ exp: null }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ from: 7 }), T0)).toEqual({ ok: false, reason: "malformed" });
-  });
-
-  it("holds each time boundary: not-before skew, the 7-day life and the expiry", () => {
-    expect(check(jws(), T0 - 60_000).ok).toBe(true);
-    expect(check(jws(), T0 - 61_000)).toEqual({ ok: false, reason: "not-yet-valid" });
-    expect(check(jws({ exp: iso(T0) }), T0)).toEqual({ ok: false, reason: "lifetime-too-long" });
-    expect(check(jws({ exp: iso(T0 + MAX_MESSAGE_TTL_SECONDS * 1000) }), T0).ok).toBe(true);
-    expect(check(jws({ exp: iso(T0 + MAX_MESSAGE_TTL_SECONDS * 1000 + 1000) }), T0)).toEqual({ ok: false, reason: "lifetime-too-long" });
-    expect(check(jws(), T0 + 3_600_000 - 1).ok).toBe(true);
-    expect(check(jws(), T0 + 3_600_000)).toEqual({ ok: false, reason: "expired" });
-  });
+  // Every refusal and time boundary is a shared vector (fixtures/vectors/relay.json `messageBody`).
 });
 
 describe("limits and constants", () => {
@@ -198,24 +107,6 @@ describe("limits and constants", () => {
   it("closes with the codes and the idle time DEC-0047 item 3 names", () => {
     expect(CLOSE_CODES).toEqual({ unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001 });
     expect(IDLE_CLOSE_SECONDS).toBe(90);
-  });
-});
-
-/** The same 64 bytes in a non-canonical spelling: the 86th character carries four spare bits a lenient decoder drops. */
-const respell = (sig: string): string => {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-  const last = alphabet.indexOf(sig[sig.length - 1] as string);
-  const other = alphabet[(last & 0b110000) | ((last + 1) & 0b001111)] as string;
-  return sig.slice(0, -1) + other;
-};
-
-describe("a signature's spelling (review of #53, non-blocking 1)", () => {
-  it("refuses the same bytes spelled non-canonically, in admit and in verifyEs256", () => {
-    const sig = respell(v.auth.frame.sig);
-    expect(sig).not.toBe(v.auth.frame.sig);
-    expect(Buffer.from(sig, "base64url").equals(Buffer.from(v.auth.frame.sig, "base64url"))).toBe(true);
-    expect(admit({ ...v.auth.frame, sig }, ctx())).toEqual({ ok: false, code: "unauthenticated" });
-    expect(verifyEs256(v.machineKey, v.auth.signingInput, sig)).toBe(false);
   });
 });
 

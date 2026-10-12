@@ -91,6 +91,9 @@ export function verifyEs256(key: P256Key, bytes: string, sig: string): boolean |
   return nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: p256Jwk(key), format: "jwk", dsaEncoding: "ieee-p1363" }, raw);
 }
 
+/** Every code `admit` refuses with; the shared vectors carry each (DEC-0066). */
+export const ADMIT_REFUSALS = ["protocol-unsupported", "unsupported-alg", "unauthenticated", "not-yet-valid", "replay", "not-admitted", "bad-key"] as const;
+
 /**
  * Admits a machine on its `auth` frame (DEC-0047 item 3), or names why not. The relay attributes every later frame on
  * the connection to the returned kid and to nothing a frame claims.
@@ -116,9 +119,11 @@ export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: stri
  */
 export interface RelayMessagePayload { type: "fabric-relay-message/1"; from: string; to: string; msgId: string; iat: string; exp: string; payload: unknown }
 
-export type MessageRefusal =
-  | "malformed" | "unsupported-alg" | "unknown-sender" | "bad-key" | "bad-signature" | "mismatch"
-  | "not-yet-valid" | "lifetime-too-long" | "expired";
+/** Every refusal `verifyMessageBody` names, in the order it checks; the shared vectors carry each (DEC-0066). */
+export const MESSAGE_REFUSALS = [
+  "malformed", "unsupported-alg", "unknown-sender", "bad-key", "bad-signature", "mismatch", "not-yet-valid", "lifetime-too-long", "expired"
+] as const;
+export type MessageRefusal = (typeof MESSAGE_REFUSALS)[number];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 
@@ -223,6 +228,11 @@ export const MAX_KID_CHARS = 256;
 
 export interface RelayRequest { alg: string; kid: string; recipients: string[]; iat: string; sig: string }
 export type BlobRefusal = { ok: false; status: number; code: RelayErrorCode };
+/** Every (status, code) a blob request is refused with; the shared vectors carry each (DEC-0066). */
+export const BLOB_REFUSALS: ReadonlyArray<readonly [number, RelayErrorCode]> = [
+  [400, "malformed"], [431, "too-large"], [401, "unsupported-alg"], [401, "not-yet-valid"], [401, "unauthenticated"],
+  [403, "not-admitted"], [403, "unknown-recipient"], [409, "recipients-mismatch"], [403, "bad-key"]
+];
 
 const REQUEST_MEMBERS = ["alg", "iat", "kid", "recipients", "sig"];
 const isSigKid = (value: unknown) => typeof value === "string" && value.length > 0 && value.length <= MAX_KID_CHARS && value.endsWith("#sig");
