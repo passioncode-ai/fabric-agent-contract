@@ -430,6 +430,10 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
+**Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
+listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
+about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
+
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,
 [versioning](docs/specification/versioning.md#protocol-revisions)).

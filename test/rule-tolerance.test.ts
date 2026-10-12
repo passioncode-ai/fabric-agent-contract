@@ -10,7 +10,7 @@ const KINDS = [
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
-  "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "session-join", "service-events-page",
+  "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "proposal", "proposal-transition", "proposal-submit", "learning-rollout", "session-join", "service-events-page",
   "result", "learning", "promotion", "versioned-setting", "grant-window", "roles"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
