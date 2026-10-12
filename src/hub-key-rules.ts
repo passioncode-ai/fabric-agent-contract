@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { strictTime } from "./rfc3339.js";
+import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 
 // #region hub-key-rules — docs: docs/specification/delegation.md#keys-publication-and-rotation
 /**
@@ -55,7 +55,8 @@ const clock = (at: unknown): number => (at instanceof Date ? at.getTime() : type
  *    `estate-unreadable`;
  * 3. its revision is lower than `applied`'s → `estate-rolled-back`; the same number with another digest than `applied`'s
  *    → `estate-forked`;
- * 4. `at` is before `issuedAt` or after `validUntil` (both instants inside) → `estate-outside-window`;
+ * 4. `at` is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants
+ *    inside) → `estate-outside-window`;
  * 5. the revision, or `options.extraRevocations`, revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, or two are; that machine's `hubKey.x` is
  *    not the string `x`; or the revision or `options.extraRevocations` revokes `machine <id>` of that machine →
  *    `kid-not-certified`. A revocation's `ref` is compared exactly, never as a string conversion.
@@ -79,7 +80,8 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
     if (record.revision < applied.revision) return refused("estate", "estate-rolled-back");
     if (record.revision === applied.revision && applied.digest !== undefined && record.digest !== applied.digest) return refused("estate", "estate-forked");
   }
-  if (now < issuedAt || now > validUntil) return refused("estate", "estate-outside-window");
+  // The window verifyEstateRecord admits the revision in: from 60 s before issuedAt (the clock skew) to validUntil (DEC-0066).
+  if (now < issuedAt - CLOCK_SKEW_SECONDS * 1000 || now > validUntil) return refused("estate", "estate-outside-window");
 
   const revocations = [...((record.revocations ?? []) as unknown[]), ...((extra ?? []) as unknown[])];
   const revokes = (kind: string, ref: unknown) => revocations.some((entry) => isObject(entry) && entry.kind === kind && entry.ref === ref);
