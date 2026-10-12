@@ -13,6 +13,7 @@ const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.js
 /** The rule kind that reads one document of a schema whole. */
 export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "activity-batch.schema.json": "activity-batch",
+  "service-events-page.schema.json": "service-events-page",
   "device-check-in.schema.json": "device-check-in",
   "openrouter-attribution.schema.json": "openrouter-attribution",
   "approval.schema.json": "approval-claims",
@@ -90,7 +91,6 @@ export const NOT_SWEPT: readonly string[] = [
   "pipeline.schema.json",
   "runner-route-event.schema.json",
   "service-dashboard-extension.schema.json",
-  "service-events-page.schema.json",
   "schema-unsupported.schema.json",
   "service-login-code.schema.json",
   "versioned-setting.schema.json",
@@ -106,7 +106,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "revocation-delta-rules", "window-lease", "openrouter-attribution", "protocol-revisions"]
+    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "revocation-delta-rules", "window-lease", "openrouter-attribution", "protocol-revisions", "feed-data"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

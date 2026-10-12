@@ -413,6 +413,9 @@ in its check-in ([window lease](docs/specification/window-lease.md)).
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
 
+**Event data**: An optional `{schema, value}` on a service feed event: machine-readable fields under a schema the service
+publishes, bounded, never a secret; `text` stays the event (DEC-0070, [service](docs/specification/service.md#event-data)).
+
 **App descriptor**: The descriptor of an app a person installs and starts (`lifecycle.manager: "person"`): written by its
 installer, or by the app on an install or update; it says the app is installed, never that it runs — liveness is the
 app's own file (DEC-0069, [service](docs/specification/service.md#an-apps-descriptor)).
