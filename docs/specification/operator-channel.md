@@ -1,6 +1,6 @@
 # Operator channel `fabric-operator-channel/0.1`
 
-DEC-0034, group chats and liveness DEC-0035 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
+DEC-0034, group chats and liveness DEC-0035, status invariants DEC-0058 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
 · builds on [`fabric-service/0.1`](service.md) · beside [`fabric-project-comms/0.1`](project-comms.md)
 
 An **operator channel** is an agent's own messenger channel to the person who operates it. The
@@ -216,8 +216,10 @@ A missing receiver makes the channel `degraded` with the reason `receiver-missin
 `receiver.lease: none`. `reason.detail` SHOULD give the pending count and since when nobody has
 received. The check MUST NOT call `getUpdates` itself: that would make it a second receiver
 (OC-2). It also MUST NOT drop the pending updates, since dropping them is the operator's choice. A
-missing receiver is never reported as `linked`, `standby` or `off`, and is never left silent.
-Like every channel failure, it degrades the channel, not the service (OC-9).
+missing receiver is never reported as `unlinked`, `linked`, `standby` or `off`, and is never left silent.
+The status schema makes the other states unrepresentable for it (DEC-0058): `unlinked` requires
+`receiver.lease` `held` or `elsewhere`, and a `reason.code` of `receiver-missing` requires `state: degraded`
+and `receiver.lease: none`. Like every channel failure, it degrades the channel, not the service (OC-9).
 
 ## Status
 
@@ -226,7 +228,7 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 | State | Meaning | Requires |
 |---|---|---|
 | `off` | the operator has not enabled the channel (the default) | — |
-| `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver`; no `binding` |
+| `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver` with `receiver.lease: held` or `elsewhere`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |
 | `degraded` | enabled, but the transport or its credential fails, or nobody receives (OC-17) | `reason`, `credential` |
@@ -247,7 +249,7 @@ Known `reason.code` values (an open vocabulary; a host shows an unknown code as 
 | `transport-unreachable` | `degraded` | the transport did not answer |
 | `rate-limited` | `degraded` | waiting out a 429; `retryAt` says until when (OC-9) |
 | `chat-unavailable` | `degraded` | the bound chat blocked or removed the bot |
-| `receiver-missing` | `degraded` | nobody receives the bound or waiting channel, or its pending updates are not draining (OC-17) |
+| `receiver-missing` | `degraded` | nobody receives the bound or waiting channel, or its pending updates are not draining (OC-17); the schema requires `state: degraded` and `receiver.lease: none` with it (DEC-0058) |
 | `lease-held-elsewhere` | `standby` | another process of the agent receives (OC-2) |
 
 ## Not decided here
@@ -257,6 +259,7 @@ Known `reason.code` values (an open vocabulary; a host shows an unknown code as 
   host that does so implements the same rules as the agent would.
 - Semantic rules over a send ledger or a callback log. The rules above are normative under
   DEC-0034 (OC-1…OC-13) and DEC-0035 (OC-14…OC-17); the status document is checked by its schema
-  and fixtures (`test/operator-channel.test.ts`).
+  and fixtures (`test/operator-channel.test.ts`), whose state invariants DEC-0058 completed, each with a
+  negative fixture that a test proves kills it.
 - How several agents share one bot. OC-2 still gives each agent its own bot. OC-14…OC-16 let
   several bots share one group, not one token.

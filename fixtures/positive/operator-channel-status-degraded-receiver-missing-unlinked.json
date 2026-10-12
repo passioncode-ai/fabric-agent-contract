@@ -1,0 +1,25 @@
+{
+  "protocol": "fabric-operator-channel/0.1",
+  "agent": {
+    "id": "example-agent",
+    "instance": "default"
+  },
+  "generatedAt": "2026-10-10T09:30:00Z",
+  "transport": "telegram-bot-api",
+  "state": "degraded",
+  "reason": {
+    "code": "receiver-missing",
+    "detail": "Nobody has received this bot's updates since 08:52 while the agent waits for a link code; restart the agent's channel receiver."
+  },
+  "credential": {
+    "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN",
+    "present": true
+  },
+  "receiver": {
+    "mode": "long-polling",
+    "lease": "none"
+  },
+  "lastSendAt": null,
+  "lastReceiveAt": "2026-10-10T08:51:40Z",
+  "outcomeUnknown": 0
+}

@@ -45,7 +45,7 @@
       ]
     },
     "state": {
-      "description": "off: the operator has not enabled the channel (the default). unlinked: enabled, no chat bound yet. linked: bound, and this process holds the receiving lease. standby: bound, and another process of the same agent holds the lease. degraded: enabled, but the transport or its credential fails.",
+      "description": "off: the operator has not enabled the channel (the default). unlinked: enabled, no chat bound yet, and a process receives while the agent waits for a code (receiver.lease held or elsewhere). linked: bound, and this process holds the receiving lease. standby: bound, and another process of the same agent holds the lease. degraded: enabled, but the transport or its credential fails, or nobody receives (OC-17: reason receiver-missing with receiver.lease none). A channel nobody receives on is never unlinked, linked, standby or off (DEC-0058).",
       "enum": [
         "off",
         "unlinked",
@@ -318,7 +318,17 @@
         },
         "properties": {
           "credential": true,
-          "receiver": true
+          "receiver": {
+            "type": "object",
+            "properties": {
+              "lease": {
+                "enum": [
+                  "held",
+                  "elsewhere"
+                ]
+              }
+            }
+          }
         }
       }
     },
@@ -336,6 +346,44 @@
         ],
         "properties": {
           "credential": true
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "const": "receiver-missing"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "receiver"
+        ],
+        "properties": {
+          "state": {
+            "const": "degraded"
+          },
+          "receiver": {
+            "type": "object",
+            "properties": {
+              "lease": {
+                "const": "none"
+              }
+            }
+          }
         }
       }
     }

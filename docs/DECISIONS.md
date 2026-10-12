@@ -1163,6 +1163,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
 - **Amends:** DEC-0034 additively: four rules appended to the
   [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
   OC-13 are unchanged; OC-14 narrows the optional refusals of OC-3 and OC-7 to addressed input.
@@ -1225,6 +1226,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request); host and adapter adoption pending.
+- **Annotated (2026-10-12):** ED-6, ED-8 and ED-9 amended by DEC-0059 (the cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared, `FAC-SEM-080`).
 - **Amends:** DEC-0015 additively: a new profile, [embedded dashboard](specification/embedded-dashboard.md),
   beside `surfaces.dashboard`. No existing field, schema or rule changes.
 - **Decision:** A dashboard page and the host that shows it make each other promises about width,
@@ -2471,3 +2473,118 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: every agent that publishes the
+  operator-channel status — the fabric-agent-adapter's kits first (backlog CT-18, its row FAA-15) — reports a channel
+  whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
+  link code, and never as `unlinked`.
+- **Amends:** DEC-0035, whose *Compatibility* said `operator-channel-status.schema.json` was unchanged: this decision
+  tightens that schema. DEC-0034's status table gains the lease `unlinked` requires. Closes F-B-204, F-B-205 and
+  F-B-219 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [operator channel](specification/operator-channel.md) and its status schema —
+  1. **`unlinked` has someone receiving.** A status in state `unlinked` carries `receiver.lease` `held` or `elsewhere`,
+     never `none` (schema, `unlinked` branch). A waiting channel nobody receives on is `degraded` with
+     `receiver-missing` (OC-17), and the status table says so.
+  2. **`receiver-missing` is one shape.** A status whose `reason.code` is `receiver-missing` has `state: degraded` and a
+     `receiver` with `lease: none` (schema, an `if`/`then` on `reason.code`). OC-17's closing list names `unlinked`
+     beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
+  3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
+     `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
+     `linked`, `receiver-missing` in a state other than `degraded`, with a held lease and without a receiver, the
+     sixteen-chat limit and an `excluded.liftedAt` that is an absolute URL. `test/operator-channel.test.ts` removes
+     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted;
+     one, `linked` without `receiver`, survived before this change, because the fixture of that name carried a receiver
+     with lease `none`.
+  4. **The glossary's *Addressed message*** names the one unaddressed input OC-15 honours: a bare `/link CODE` that
+     matches the agent's own pending code.
+- **Why:** the audit's probe (F-B-204) published the defect DEC-0035 was written for — on 2026-10-10 two bots had
+  nobody receiving while their status said nothing — as a valid status in state `unlinked` with `receiver.lease:
+  none`, and as `receiver-missing` with a held lease or no receiver at all, because the schema left both
+  representable. F-B-205 removed eight state invariants one at a time and every test still passed: the schema stated
+  them and nothing proved them.
+- **Compatibility:** tightening under DEC-0016, `contractVersion` stays `0.1.0`. A status that reported a channel
+  nobody receives on as `unlinked`, or `receiver-missing` with another lease or state, was already against OC-17's
+  text and is now refused by the schema; the agent reports `degraded` instead. No positive fixture changes; one is
+  added, a waiting channel nobody receives on. No semantic rule code is allocated.
+- **Consequences / affects:**
+  - spec: `docs/specification/operator-channel.md` (OC-17's closing paragraph, the `unlinked` row, the
+    `receiver-missing` code, *Not decided here*);
+  - schema: `schemas/operator-channel-status.schema.json` (the `unlinked` branch, the `receiver-missing` branch, the
+    `state` description);
+  - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json`,
+    `fixtures/negative/operator-channel-status-*` (seventeen new), `fixtures/catalogue.json`;
+  - tests: `test/operator-channel.test.ts` (this entry, the boundaries, the mutants), `test/schema-mutants.ts` (new);
+  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18), the
+    handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md` and `docs/handoffs/README.md`.
+- **Not decided here:** whether `off` may carry a `receiver` at all; reason codes other than `receiver-missing` keep an
+  open vocabulary and constrain no lease.
+- **Source:** the board-waves inventory F-B-204, F-B-205, F-B-219
+  (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P4-03. DEC-0058 was reserved by git CAS
+  (`agent_sync.py reserve --key w4-p4-03-channel-dashboard-20261012 DEC`); this file, `conformance.md` and `backlog.md`
+  were edited in the run's branch without a lease, by the wave-4 arrangement: the owner session takes those leases when
+  it merges; the record plane is `fs`.
+
+### DEC-0059 — Embedded dashboard amended: the appearance cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared (`FAC-SEM-080`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards consumes
+  ED-9 `appearance` and validates the declaration, logging an invalid one once per load (its own row, filed by its
+  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares and its
+  `check_service.py` keeps checking the declaration (CT-18, FAA-17).
+- **Amends:** DEC-0036 (ED-6, ED-8, ED-9 and its *Not decided here*; its *Compatibility* said no semantic rule code is
+  allocated, and this decision allocates one). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
+  Closes F-B-214, F-B-215, F-B-216 and F-B-217 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [embedded dashboard](specification/embedded-dashboard.md) —
+  1. **ED-8, the cookie's scope.** The appearance cookie is set for the page's host in the store the page reads. A
+     cookie is not isolated by port (RFC 6265 §8.5), so it is "per host in a shared cookie store; per service where
+     the host gives each service its own store": every local service on `127.0.0.1` sharing one store reads and can
+     overwrite one cookie, and Fabric Dashboards, which gives each service the partition `persist:svc-<key>`
+     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service.
+  2. **ED-6 follows ED-9's `appearance`.** A page takes from the cookie exactly the fields its declaration lists, hides
+     only those fields' controls while the cookie is present, and keeps the others. A page that lists none — no
+     `appearance`, no declaration, or an invalid one — takes nothing from the cookie and follows
+     `prefers-color-scheme` only. (Fabric Dashboards already keeps that in agreement with the theme chosen in the app,
+     `nativeTheme.themeSource`.) ED-8's reload sentence follows: a page that lists no field reads no cookie.
+  3. **ED-9, an invalid declaration.** A host validates the value against
+     `service-dashboard-extension.schema.json`, treats an invalid one as not declared (a legacy dashboard: host floor
+     480, no carrier field) and reports it. **`FAC-SEM-080`** (`service-well-known`, receipt SEM-0080) reports it on the
+     well-known document, once per schema error, at the extension key; the well-known schema cannot, because
+     `extensions` is open. `hostView` in `src/dashboard-declaration.ts` is the reference reading, with vectors in
+     `fixtures/vectors/dashboard-declaration.json` for a host's port (nineteen cases, the floors 359, 360, 480, 481,
+     1280 and 1281 among them).
+  4. **Killing fixtures for the declaration (F-B-217):** a declaration without `minWidth`, a fractional one, one above
+     1280, a theme or a carrier field twice. `test/embedded-dashboard.test.ts` removes each of eight constraints from a
+     copy of the schema and fails if no negative fixture is then accepted.
+- **Why:** ED-8 said the cookie lived "on the service origin", which RFC 6265 contradicts for every local service on
+  one address (F-B-214). ED-6 bound every declaring page to both carrier fields while ED-9 let it declare a subset,
+  so a subset had no conformant meaning (F-B-215). The audit's probe put `{minWidth: 99999, zoom: 3}` under the key
+  and the well-known schema accepted it; a host computing `max(480, minWidth)` from it would give the page more than
+  any window, and only the adapter's script checked it (F-B-216). Four schema constraints survived their removal
+  (F-B-217). The three texts were agreed with Fabric Dashboards' session on 2026-10-12.
+- **Compatibility:** under DEC-0016, `contractVersion` stays `0.1.0`. ED-8's change describes what a cookie already
+  does. ED-6 narrows: a page that applied a field it did not list now falls short of ED-6 and lists it; a page that
+  listed both is unaffected. `FAC-SEM-080` is new: a well-known document carrying an invalid declaration was
+  schema-valid and stays so, and the checker now reports it; a host already treating it as not declared
+  (Fabric Dashboards) is unaffected. `service-dashboard-extension.schema.json` changes only its descriptions.
+- **Consequences / affects:**
+  - spec: `docs/specification/embedded-dashboard.md` (ED-6, ED-8, ED-9, *How a page shows that it holds*, *Semantic
+    rules* (new), *Not decided here*), `docs/specification/conformance.md` (the register row);
+  - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
+  - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/negative/service-dashboard-extension-*` (five new), `fixtures/semantic/service-well-known-dashboard-*`,
+    `fixtures/vectors/dashboard-declaration.json`, `fixtures/catalogue.json`;
+  - tests: `test/embedded-dashboard.test.ts`, `test/rule-tolerance.test.ts`, `test/schema-mutants.ts`; the floor in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (RFC 6265), `CONTEXT.md` (*Appearance carrier*), `docs/DOCMAP.md`,
+    `docs/ux/foundation.md`, `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/ux/scenarios.md` (SCN-021, SCN-022),
+    `docs/backlog.md` (CT-13, CT-18, CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md`.
+- **Not decided here:** a per-service appearance choice for pages that share a cookie store; it needs another carrier
+  (a cookie name per service, a message to the page). The host's picker stays Fabric Dashboards' screen.
+- **Source:** Fabric Dashboards' session (FD-37), its `main` `e1fdd64`, on 2026-10-12; RFC 6265 in the
+  [source ledger](evidence/sources.md); the board-waves inventory F-B-214…F-B-217, packet P4-03. DEC-0059 and
+  `FAC-SEM-080` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-03-dashboard-20261012 DEC`,
+  `--key w4-p4-03-sem-dashboard-declaration-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in
+  the run's branch without a lease, by the wave-4 arrangement; the record plane is `fs`.
