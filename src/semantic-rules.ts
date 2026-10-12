@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { coreRules } from "./core-rules.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { relayRules } from "./relay-rules.js";
@@ -86,7 +87,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     const active = value.assignments.filter(isObject).filter((item) => item.active === true);
     const ceos = active.filter((item) => item.role === "ceo");
     if (ceos.length !== 1) findings.push({ code: "FAC-SEM-005", instancePath: "/assignments", message: "estate requires exactly one active CEO" });
-    const projects = new Set(active.filter((item) => item.role === "product-manager" && isObject(item.scope)).map((item) => (item.scope as JsonObject).project));
+    // Every project any active assignment scopes needs its one product manager (F-A-004, DEC-0064): a project with
+    // developers and no manager is found, not skipped.
+    const projects = new Set(active.filter((item) => isObject(item.scope) && (item.scope as JsonObject).project !== undefined).map((item) => (item.scope as JsonObject).project));
     for (const project of projects) {
       const managers = active.filter((item) => item.role === "product-manager" && isObject(item.scope) && item.scope.project === project);
       if (managers.length !== 1) findings.push({ code: "FAC-SEM-006", instancePath: "/assignments", message: `project ${String(project)} requires exactly one active product manager` });
@@ -94,6 +97,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   }
   if (kind === "coordination" && value.kind === "renew" && value.claim === undefined) findings.push({ code: "FAC-SEM-007", instancePath: "/claim", message: "renew requires a claim reference" });
   if (kind === "binding-bundle" && isObject(value.admission) && value.admission.state !== "admitted") findings.push({ code: "FAC-SEM-008", instancePath: "/admission/state", message: "only an admitted provider revision can be bound" });
+  findings.push(...(coreRules(kind, value) ?? []));
 
   if (kind === "service-observation") findings.push(...serviceIdentity(value));
   if (kind === "service-directory") findings.push(...serviceClaims(value));

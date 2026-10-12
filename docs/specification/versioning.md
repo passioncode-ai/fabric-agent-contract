@@ -26,7 +26,8 @@ change. Human summaries are advisory; content hashes and payloads are normative.
 ## Rollback
 
 Rollback creates a new revision whose payload is based on an earlier revision and
-whose `rollbackBasis` points to it. It does not delete, reactivate or edit the old
+whose `rollbackBasis` points to it — the same setting's `id` and an earlier revision; every parent is an earlier
+revision too (`FAC-SEM-096`, DEC-0064). It does not delete, reactivate or edit the old
 revision. New runs MAY select the rollback revision after approval; existing runs
 remain pinned.
 
@@ -63,3 +64,9 @@ consumer MAY carry an equivalent check in its own language; the Fabric Agent Ada
 
 Moving the pin is a compatibility change: the consumer reviews what changed between the
 two commits, updates the lock and every mention in one change, and releases.
+
+## Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064) |

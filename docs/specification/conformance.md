@@ -183,19 +183,20 @@ other code in the semantic-rules table of the specification this table names.
 `test/consistency.test.ts` (G-13) fails when a code is allocated twice, defined in two rows anywhere
 in the specifications, given other kinds there than here, named by `src/` without a row here, named by
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
-register and carry no receipt.
+register and carry no receipt. `FAC-SEM-095` was reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
+for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-093`
+**Next free rule code:** `FAC-SEM-098`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
 | `FAC-SEM-000` | any | here: the value checked is a JSON object | — |
-| `FAC-SEM-001` | `result` | here: a `succeeded` result keeps no unverified required claim | — |
+| `FAC-SEM-001` | `result` | here: a `succeeded` result lists no claim in `notVerified` (every reported claim is an acceptance claim, DEC-0064) | — |
 | `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool | — |
 | `FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself | — |
 | `FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally | — |
 | `FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO | — |
-| `FAC-SEM-006` | `roles` | here: each project has exactly one active product manager | — |
+| `FAC-SEM-006` | `roles` | here: each project any active assignment scopes has exactly one active product manager (DEC-0064) | — |
 | `FAC-SEM-007` | `coordination` | here: a renew names the claim it renews | — |
 | `FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound | — |
 | `FAC-SEM-009` | `service-observation` | [service](service.md#semantic-rules) | — |
@@ -279,6 +280,10 @@ register and carry no receipt.
 | `FAC-SEM-090` | `window-lease-division` | [window lease](window-lease.md#semantic-rules) | SEM-0090 |
 | `FAC-SEM-091` | `lease-reservation` | [window lease](window-lease.md#semantic-rules) | SEM-0091 |
 | `FAC-SEM-092` | `estate-record`, `signing-credential` | [signing](signing.md#semantic-rules) | SEM-0092 |
+| `FAC-SEM-093` | `result` | [results and evidence](results-and-evidence.md#semantic-rules) | SEM-0093 |
+| `FAC-SEM-094` | `learning`, `promotion` | [governance and roles](governance-and-roles.md#semantic-rules) | SEM-0094 |
+| `FAC-SEM-096` | `versioned-setting` | [versioning](versioning.md#semantic-rules) | SEM-0096 |
+| `FAC-SEM-097` | `grant-window` | [governance and roles](governance-and-roles.md#semantic-rules) | SEM-0097 |
 
 ## Compatibility policy
 
