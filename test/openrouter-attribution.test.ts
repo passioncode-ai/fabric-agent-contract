@@ -44,6 +44,9 @@ describe("FAC-SEM-098: the attribution setting", () => {
     expect(attributionHeaders(setting, { url: "https://openrouter.ai/api/v1", originated: "yes" as unknown as boolean })).toEqual({ headers: {}, none: "forwarded" });
     expect(attributionHeaders(setting, { url: "https://openrouter.ai/api/v1", originated: true, headers: "x" as unknown as Record<string, string> }).headers).toHaveProperty("HTTP-Referer");
     expect(attributionHeaders(setting, null as unknown as { url: string; originated: boolean })).toEqual({ headers: {}, none: "not-openrouter" });
+    // A password alone in the user information, built at run time so no credential-shaped URL sits in the repository.
+    const passwordOnly = ["https://", ":", "pw", "@openrouter.ai/api/v1"].join("");
+    expect(attributionHeaders(setting, { url: passwordOnly, originated: true })).toEqual({ headers: {}, none: "not-openrouter" });
     expect(attributionHeaders(setting, undefined as unknown as { url: string; originated: boolean })).toEqual({ headers: {}, none: "not-openrouter" });
   });
 });

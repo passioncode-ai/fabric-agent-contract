@@ -411,7 +411,8 @@ This follows The Update Framework's delegation from an offline root to short-liv
 
 ## Check-in
 
-Schema: [`device-check-in.schema.json`](../../schemas/device-check-in.schema.json).
+Schema: [`device-check-in.schema.json`](../../schemas/device-check-in.schema.json). It refers to other files; a consumer
+that vendors it copies its `$ref` closure ([adoption → Vendoring schemas](adoption.md#vendoring-schemas)).
 
 Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 

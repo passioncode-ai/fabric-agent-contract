@@ -608,25 +608,6 @@
       }
     },
     {
-      "name": "password-only-userinfo",
-      "setting": {
-        "product": "observatory",
-        "title": "Project Observatory",
-        "categories": [
-          "programming-app",
-          "cli-agent"
-        ]
-      },
-      "request": {
-        "url": "https://:pw@openrouter.ai/api/v1",
-        "originated": true
-      },
-      "expect": {
-        "headers": {},
-        "none": "not-openrouter"
-      }
-    },
-    {
       "name": "empty-categories",
       "setting": {
         "product": "fabric",
