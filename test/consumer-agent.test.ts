@@ -57,3 +57,18 @@ describe("a consumer agent is a plugin, and names servers without credentials", 
     expect(all({ ...pkg, requires: { mcp: [null, { role: token, tools: "x" }] } }).filter((f) => f.startsWith("FAC-SEM-065"))).toEqual(["FAC-SEM-065 /requires/mcp/1/role"]);
   });
 });
+
+describe("FAC-SEM-102: the slots a role names (DEC-0074)", () => {
+  const codes = (value: unknown) => evaluateSemanticRules("package", value).map((finding) => `${finding.code} ${finding.instancePath}`).filter((f) => f.startsWith("FAC-SEM-102"));
+  const mcp = (entries: unknown[]) => ({ ...pkg, requires: { ...pkg.requires, mcp: entries } });
+  it("passes slots declared in secrets[], each feeding one role", () => expect(codes(pkg)).toEqual([]));
+  it("refuses a slot not declared in secrets[]", () => {
+    expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: ["ORG_URL", "MISSING_SLOT"] }]))).toEqual(["FAC-SEM-102 /requires/mcp/0/secrets/1"]);
+  });
+  it("refuses one slot feeding two roles", () => {
+    expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: ["ORG_URL"] }, { role: "other", tools: ["b"], secrets: ["ORG_URL"] }]))).toEqual(["FAC-SEM-102 /requires/mcp/1/secrets/0"]);
+  });
+  it("reads malformed slots as nothing", () => {
+    expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: [7, null] }, { role: "x", tools: ["b"], secrets: "ORG_URL" }]))).toEqual([]);
+  });
+});

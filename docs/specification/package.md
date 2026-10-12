@@ -90,7 +90,9 @@ may carry `secrets[]`; it lists its `skills` and its plugin manifest (`FAC-SEM-0
 `layer` (schema). It names the servers it calls in
 `requires.mcp[]` by **role**: the server registered under that role name in the placement's configuration (in Claude
 Code's `.mcp.json`, the server key) and the `tools` it must expose, with an optional `contract` name for people. The
-address and the token are never in the package; they come with the placement, through the secret slots. A package
+address and the token are never in the package; they come with the placement, through the secret slots: a role
+names the slots that configure its server entry in `secrets` (DEC-0074), each declared in `secrets[]`, one slot feeding
+one role (`FAC-SEM-102`). A package
 names each role once (`FAC-SEM-102`), and no role, contract or tool is shaped like a credential (`FAC-SEM-065`). Any
 package may declare `requires.mcp`; a placement checks it the same way for each. A placement checks the roles before it installs:
 [`consumerPlacement`](../../src/package-rules.ts) answers each role the configuration does not register and each tool
@@ -232,7 +234,7 @@ no private key: `crypto.verify` accepts it on Node 20 and 22 and refuses it on 2
 | `FAC-SEM-064` | `package` | the package is whole: its `digest` is its own; each path is listed once and `fabric.package.json` never; the provider manifest, the service's entry, the evals suite and a vendored dependency are listed, the receipt's and the dependency's SHA-256 equal to the listed file's; a state path is declared once; a skill set lists its plugin manifest |
 | `FAC-SEM-065` | `package` | a package carries no secret: a slot is named once, and its name and purpose are not shaped like a credential; the service's entry carries none |
 | `FAC-SEM-066` | `package` | an agent's `agentRef` is `urn:fabric:agent:<publisher>:<id>` |
-| `FAC-SEM-102` | `package` | a package names each MCP role in `requires.mcp[]` once: one role, one server (DEC-0071) |
+| `FAC-SEM-102` | `package` | a package names each MCP role in `requires.mcp[]` once: one role, one server; each slot a role names in `secrets` is declared in `secrets[]`, and one slot feeds one role (DEC-0071, DEC-0074) |
 
 ## Privacy
 
