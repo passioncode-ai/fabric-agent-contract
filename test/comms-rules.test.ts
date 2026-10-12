@@ -45,7 +45,7 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
       expect(paths(page(entry("proj-a", [["a.b", "active"], ["A.b", "active"]]), entry("Proj-a", [])))).toEqual([]);
     });
     it("answers malformed pages with findings or none, never by throwing", () => {
-      for (const value of [{}, { projects: "x" }, { projects: [null, 3, { id: 7, capabilities: "x" }, { capabilities: [null, { capability: 7 }] }] }]) {
+      for (const value of [{}, { projects: "x" }, { projects: [null, 3, { id: 7, capabilities: "x" }, { capabilities: [null, { capability: 7 }] }] }, { projects: [{ id: "p", capabilities: [{ capability: 7 }, { capability: 7 }] }, { id: 7 }, { id: 7 }] }]) {
         expect(() => evaluateSemanticRules("comms-directory", value)).not.toThrow();
         expect(paths(value)).toEqual([]);
       }
