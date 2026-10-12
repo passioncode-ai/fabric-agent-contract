@@ -36,8 +36,10 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   `alg: "ES256"`, and the message body is a JWS whose header says `alg: ES256`.
 - **One key, two spellings.** DEC-0053 records a device's public key as base64 SEC 1 octets (65 bytes, `0x04 ‖ X ‖ Y`);
   the relay protocol names keys as JWKs (RFC 7518 §6.2.1). They are the same key: the JWK's `x` and `y` are the
-  octets' `X` and `Y`, base64url. `p256Point` and `p256PublicKey` accept either form, and every check gives the same
-  answer for both (`fixtures/vectors/relay.json` carries `machineKey` and `machineKeyOctets`).
+  octets' `X` and `Y`, base64url. `p256Point`, `p256Jwk` and `p256PublicKey` accept either form, and every check gives the
+  same answer for both (`fixtures/vectors/relay.json` carries `machineKey` and `machineKeyOctets`). The reference
+  verifiers hand `node:crypto` the key as a JWK with `format: "jwk"`, the form a Cloudflare Worker (`nodejs_compat`)
+  accepts as well as Node.
 - **Every public key is validated before use** by SEC 1 v2 §3.2.2 (`p256KeyRefusal`): not the point at infinity,
   coordinates in [0, p − 1], on the curve. The cofactor is 1, so the order check holds for every point on the curve.
   A key that fails is refused as `bad-key`, and nothing is verified or sealed under it.

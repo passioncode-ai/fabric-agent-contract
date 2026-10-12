@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { P256_CURVE, isEd25519Key, isValidP256Key, p256KeyRefusal, p256Point, p256PublicKey, type P256Key } from "../src/p256.js";
+import { P256_CURVE, isEd25519Key, isValidP256Key, p256Jwk, p256KeyRefusal, p256Point, p256PublicKey, type P256Key } from "../src/p256.js";
 
 // DEC-0053, DEC-0047: a P-256 public key is validated by SEC 1 v2 §3.2.2 before anything is verified or sealed under
 // it, over the shared vectors a port runs too — SEC 1 octets (device keys, roots) and JWKs (relay keys). The curve
@@ -84,6 +84,7 @@ describe("one key, two forms (DEC-0053 octets, DEC-0047 JWKs)", () => {
     const a = p256PublicKey(jwk).export({ format: "jwk" });
     const b = p256PublicKey(new Uint8Array(point)).export({ format: "jwk" });
     expect(b).toEqual(a);
+    expect(p256Jwk(new Uint8Array(point))).toEqual({ kty: "EC", crv: "P-256", x: jwk.x, y: jwk.y });
   });
 
   it("throws on a key SEC 1 refuses, naming why", () => {
