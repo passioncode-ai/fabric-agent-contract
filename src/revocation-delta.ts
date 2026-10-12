@@ -3,6 +3,7 @@ import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type JsonObject, isObject } from "./findings.js";
+import { sameIdentifier } from "./identifiers.js";
 
 // #region revocation-delta — docs: docs/specification/revocation-delta.md#the-verifier
 /**
@@ -116,10 +117,13 @@ export function effectiveRevocations(record: unknown, state: DeltaState | undefi
 
 /**
  * Whether `revocations` revoke `ref` of `kind`, matched exactly: `kind` and `ref` are compared as the strings they are,
- * never through `String()`, as DL-14's `hubKeyCertified` matches them (a number 5 never revokes the machine "5").
+ * never through `String()`, as DL-14's `hubKeyCertified` matches them (a number 5 never revokes the machine "5"). A
+ * `grant` ref is a grant's URI id, so it matches by normal form (DEC-0076): another spelling of a revoked grant is
+ * revoked, never let through.
  */
 export function isRevoked(revocations: readonly unknown[], kind: string, ref: unknown): boolean {
-  return isString(ref) && revocations.some((revocation) => isObject(revocation) && revocation.kind === kind && revocation.ref === ref);
+  const same = (other: unknown) => (kind === "grant" ? sameIdentifier(other, ref) : other === ref);
+  return isString(ref) && revocations.some((revocation) => isObject(revocation) && revocation.kind === kind && same(revocation.ref));
 }
 
 export type SignerProblem = "unknown-signer" | "revoked-signer" | "unusable-key" | "small-order-key";

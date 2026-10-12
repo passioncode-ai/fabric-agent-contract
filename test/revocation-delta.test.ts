@@ -206,6 +206,14 @@ describe("what a machine does with them", () => {
     expect(effectiveRevocations({ revocations: [{ kind: "grant", ref: "g-1" }] }, undefined)).toEqual([{ kind: "grant", ref: "g-1" }]);
   });
 
+  it("DEC-0076: matches a grant revocation by the normal form of its URI id, so another spelling is still revoked", () => {
+    const revocations = [{ kind: "grant", ref: "urn:grant:estate:g-1" }, { kind: "grant", ref: 9 }];
+    expect(isRevoked(revocations, "grant", "URN:grant:estate:g-1")).toBe(true);
+    expect(isRevoked(revocations, "grant", "urn:grant:estate:G-1")).toBe(false);
+    expect(isRevoked(revocations, "grant", "9")).toBe(false);
+    expect(isRevoked([{ kind: "machine", ref: "m-1" }], "machine", "M-1")).toBe(false);
+  });
+
   it("matches a revocation exactly, as DL-14 does: no String() on the ref", () => {
     const revocations = [{ kind: "machine", ref: "5" }, { kind: "hub-key", ref: 7 }];
     expect(isRevoked(revocations, "machine", "5")).toBe(true);

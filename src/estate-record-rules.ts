@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { normalIdentifier } from "./identifiers.js";
 import { isValidP256Key } from "./p256.js";
 import { type PackageTrust, packageDigest } from "./package-rules.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
@@ -302,15 +303,18 @@ function secretReferences(value: JsonObject, flag: Flag): void {
 
 /**
  * FAC-SEM-076: share grants and revocations — a share grant's principal is external and its id is named once; a
- * revocation is listed once; and the record lists nothing it revokes (revocation outranks addition, v4 §7).
+ * revocation is listed once; and the record lists nothing it revokes (revocation outranks addition, v4 §7). A grant's id
+ * is a URI, so grants and their revocations are keyed by its normal form (DEC-0076): another spelling of one grant is
+ * that grant, listed twice or still listed after its revocation.
  */
 function grantsAndRevocations(value: JsonObject, flag: Flag): void {
+  const grantKey = (id: unknown): unknown => (typeof id === "string" ? normalIdentifier(id) : id);
   const grantIds = new Set<unknown>();
   list(value.shareGrants).forEach((grant, index) => {
     if (grant.principalKind !== "external") flag(`/shareGrants/${index}/principalKind`, "a share grant is to a principal outside the estate: principalKind external");
     const id = isObject(grant.meta) ? grant.meta.id : undefined;
-    if (grantIds.has(id)) flag(`/shareGrants/${index}/meta/id`, `grant ${String(id)} is listed twice`);
-    grantIds.add(id);
+    if (grantIds.has(grantKey(id))) flag(`/shareGrants/${index}/meta/id`, `grant ${String(id)} is listed twice`);
+    grantIds.add(grantKey(id));
   });
   const machines = list(value.machines);
   // A Map, so a kind such as `constructor` or `__proto__` reads nothing from Object.prototype.
@@ -325,10 +329,11 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
   }));
   const seen = new Set<string>();
   list(value.revocations).forEach((revocation, index) => {
-    const key = `${String(revocation.kind)} ${String(revocation.ref)}`;
+    const ref = revocation.kind === "grant" ? grantKey(revocation.ref) : revocation.ref;
+    const key = `${String(revocation.kind)} ${String(ref)}`;
     if (seen.has(key)) flag(`/revocations/${index}`, `the ${String(revocation.kind)} ${String(revocation.ref)} is revoked twice`);
     seen.add(key);
-    if (listed.get(String(revocation.kind))?.has(revocation.ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${String(revocation.kind)} it revokes: revocation outranks addition`);
+    if (listed.get(String(revocation.kind))?.has(ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${String(revocation.kind)} it revokes: revocation outranks addition`);
   });
 }
 
