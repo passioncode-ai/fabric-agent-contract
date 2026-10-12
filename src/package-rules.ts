@@ -183,6 +183,9 @@ export function checkPackageFolder(pkg: JsonObject, files: ReadonlyMap<string, U
   return problems;
 }
 
+const mcpRequirements = (value: JsonObject): JsonObject[] =>
+  isObject(value.requires) && Array.isArray(value.requires.mcp) ? value.requires.mcp.filter(isObject) : [];
+
 /**
  * FAC-SEM-064: a package is whole — its digest is its own, each path is listed once and never `fabric.package.json`,
  * every file it names (the provider manifest, the service's entry, the evals suite, a vendored dependency) is listed,
@@ -228,6 +231,8 @@ function whole(value: JsonObject): Finding[] {
     paths.add(entry.path);
   });
   if (value.kind === "skill-set" && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a skill set is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
+  // DEC-0071: a consumer agent is the plugin it is, so it lists the plugin manifest as a skill set does.
+  if (value.kind === "agent" && value.provider === undefined && mcpRequirements(value).length > 0 && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a consumer agent is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
   return findings;
 }
 
@@ -248,6 +253,14 @@ function noSecret(value: JsonObject): Finding[] {
       if (isString(text) && secretValue(text)) flag(`/secrets/${index}/${field}`, "a secret slot is named, never filled: this looks like a credential");
     }
   });
+  // DEC-0071: a required MCP server is named by role and tools, never by a credential.
+  if (isObject(value.requires) && Array.isArray(value.requires.mcp)) {
+    value.requires.mcp.forEach((requirement: unknown, index: number) => {
+      if (!isObject(requirement)) return;
+      const texts: Array<[string, unknown]> = [["role", requirement.role], ["contract", requirement.contract], ...(Array.isArray(requirement.tools) ? requirement.tools.map((tool: unknown, t: number): [string, unknown] => [`tools/${t}`, tool]) : [])];
+      for (const [field, text] of texts) if (isString(text) && secretValue(text)) flag(`/requires/mcp/${index}/${field}`, "a required MCP server is named by role and tools, never by a credential");
+    });
+  }
   if (isObject(value.service) && Array.isArray(value.service.entry)) {
     value.service.entry.forEach((arg, index) => {
       if (isString(arg) && secretArgument(arg)) flag(`/service/entry/${index}`, "a launch argument never carries a credential: the secret reaches the service from its slot");
@@ -264,8 +277,46 @@ function agentRef(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-066", instancePath: "/agentRef", message: `the agent is ${expected}: agentRef is derived from publisher and id` }];
 }
 
+/** FAC-SEM-102 (DEC-0071): a package names each MCP role it requires once, so a placement maps one server to one role. */
+function mcpRoles(value: JsonObject): Finding[] {
+  const seen = new Set<string>();
+  const findings: Finding[] = [];
+  mcpRequirements(value).forEach((requirement, index) => {
+    if (!isString(requirement.role)) return;
+    if (seen.has(requirement.role)) findings.push({ code: "FAC-SEM-102", instancePath: `/requires/mcp/${index}/role`, message: `role ${requirement.role} is required twice: one role, one server` });
+    seen.add(requirement.role);
+  });
+  return findings;
+}
+
+export type ConsumerPlacementProblem = { problem: "missing-role"; role: string } | { problem: "missing-tool"; role: string; tool: string };
+
+/**
+ * What a placement lacks for an agent's `requires.mcp` (DEC-0071): `configured` maps each role name the machine's
+ * configuration registers (in Claude Code's .mcp.json, the server key) to the tools that server exposes. Every required
+ * role must be registered and expose every tool it names; an empty answer means the placement can serve the agent.
+ */
+export function consumerPlacement(value: unknown, configured: ReadonlyMap<string, readonly string[]>): ConsumerPlacementProblem[] {
+  if (!isObject(value)) return [];
+  const problems: ConsumerPlacementProblem[] = [];
+  if (!(configured instanceof Map)) return mcpRequirements(value).filter((requirement) => isString(requirement.role)).map((requirement) => ({ problem: "missing-role" as const, role: requirement.role as string }));
+  for (const requirement of mcpRequirements(value)) {
+    if (!isString(requirement.role)) continue;
+    const registered = configured.get(requirement.role);
+    const tools = registered === undefined ? undefined : Array.isArray(registered) ? registered : [];
+    if (tools === undefined) {
+      problems.push({ problem: "missing-role", role: requirement.role });
+      continue;
+    }
+    for (const tool of Array.isArray(requirement.tools) ? requirement.tools : []) {
+      if (isString(tool) && !tools.includes(tool)) problems.push({ problem: "missing-tool", role: requirement.role, tool });
+    }
+  }
+  return problems;
+}
+
 export function packageRules(kind: string, value: JsonObject): Finding[] | undefined {
-  if (kind === "package") return [...whole(value), ...noSecret(value), ...agentRef(value)];
+  if (kind === "package") return [...whole(value), ...noSecret(value), ...agentRef(value), ...mcpRoles(value)];
   return undefined;
 }
 // #endregion package-rules
