@@ -14,7 +14,7 @@ from a linked worktree — so a gate run there could be green without the check 
     directory's parent);
   - with the denylist present and no script found → fail.
 - `src/privacy-check.ts` reads the git common directory and runs the plan. AGENTS.md's command table says so.
-- Tests: `test/privacy-plan.test.ts` (6), branch floor 100 in vitest.config.ts; 7 plants, each caught.
+- Tests: `test/privacy-plan.test.ts` (8), branch floor 100 in vitest.config.ts; 12 plants, each caught. After the reading: no main-checkout guess outside a `.git` common directory (bare, separate git dir, submodule), the home directory shown as `~` in a failure message, git's own stderr silenced.
 - Run from this worktree without `ORG_INDEX`: the check ran and reported 0 findings, where before it skipped. With
   `ORG_INDEX` pointing nowhere it exits 1.
 
