@@ -4201,7 +4201,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `test/route-rules.test.ts`;
   - docs: `docs/evidence/sources.md` (RFC 8141 pinned; RFC 3986 and RFC 7519 hashed), `docs/backlog.md` (CT-39),
     `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
-- **Not decided here:** IRIs (RFC 3987) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
+- **Not decided here:** internationalized identifiers (IRIs) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
   scheme-based normalization for any scheme; URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules;
   none is adopted); whether a schema should refuse a non-normal spelling outright.
 - **Source:** the board row CT-39; RFC 3986 §6, RFC 8141 §2 and §3, RFC 7519 §2 (pinned with SHA-256 in
