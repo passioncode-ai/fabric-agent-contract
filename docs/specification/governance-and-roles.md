@@ -65,12 +65,14 @@ An agent MUST NOT approve its own global promotion, privileged grant, checker
 rule change or policy change. Independent checker identity must differ from the
 producing binding revision. Product manager approval is sufficient for ordinary
 project settings; CEO approval is required for estate scope. An approved learning proposal or promotion names its
-approver in `approvedBy`, who is never its author (`meta.createdBy`, `FAC-SEM-094`). Every project an active assignment
-scopes has exactly one active product manager (`FAC-SEM-006`).
+approver in `approvedBy`, who is never its author (`meta.createdBy`, `FAC-SEM-094`): the two ids compare by their normal
+forms, so another spelling of the author's own id (`AGENT:x` for `agent:x`, `urn:Fabric:…` for `urn:fabric:…`) is still
+the author ([identifiers](identifiers.md), DEC-0076). Every project an active assignment scopes has exactly one active
+product manager (`FAC-SEM-006`), two spellings of one project id being one project.
 
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-094` | `learning`, `promotion` | an approved learning proposal or promotion names its approver, who is not its author (DEC-0004, DEC-0012, DEC-0064) |
+| `FAC-SEM-094` | `learning`, `promotion` | an approved learning proposal or promotion names its approver, who is not its author, compared by normal form (DEC-0004, DEC-0012, DEC-0064, DEC-0076) |
 | `FAC-SEM-097` | `grant-window` | a standing grant's `expiresAt` is after its `startsAt`, both strict RFC 3339; given `{grant, at}`, an `active` grant is inside its window at `at` (DEC-0064) |

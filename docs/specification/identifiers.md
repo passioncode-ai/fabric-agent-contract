@@ -1,0 +1,90 @@
+# Identifiers — when two identifiers are the same
+
+DEC-0076 · code [`src/identifiers.ts`](../../src/identifiers.ts) (`normalIdentifier`, `sameIdentifier`) · vectors
+[`fixtures/vectors/identifiers.json`](../../fixtures/vectors/identifiers.json) · tests
+[`test/identifiers.test.ts`](../../test/identifiers.test.ts)
+
+Agents, projects, proposals, settings and accounts are named by URIs (`common.schema.json#/$defs/uri`, `format: uri`).
+One URI can be written several ways: `AGENT:x` and `agent:x`, `urn:Fabric:agent:x` and `urn:fabric:agent:x`,
+`https://example.com/%7Ex` and `https://example.com/~x`. A rule that compares the strings byte for byte reads those as two
+agents or two projects, so an author could approve their own proposal under another spelling of their id, and one
+project could split its costs over two rows. This page fixes when two identifiers are the same.
+
+Sources: [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986) §6.2.2 (syntax-based normalization) and
+[RFC 8141](https://www.rfc-editor.org/rfc/rfc8141) §3.1 (URN-equivalence), both pinned with their SHA-256 in the
+[source ledger](../evidence/sources.md).
+
+## The normal form
+
+**Two identifiers are the same when their normal forms are equal** (DEC-0076). The normal form is:
+
+1. **A URI** — a string that matches RFC 3986's `URI` production and has an authority or a non-empty path — normalized
+   by RFC 3986 §6.2.2, and by nothing scheme-based (§6.2.3):
+   - the scheme and the host lower-cased, and percent-encoding hex upper-cased (§6.2.2.1); the user information, the
+     path, the query and the fragment keep their case;
+   - a percent-encoded unreserved character (`A`–`Z`, `a`–`z`, `0`–`9`, `-`, `.`, `_`, `~`) decoded (§6.2.2.2); a reserved
+     one, such as `%2F`, stays encoded, because decoding it changes the URI;
+   - dot segments removed from a hierarchical path — one after an authority or beginning with `/` — by §5.2.4's
+     `remove_dot_segments` (§6.2.2.3); a rootless path (`agent:a/../b`) keeps them; a path that would then begin with
+     `//` without an authority keeps its dot segments, so it is never read as an authority;
+   - no default port removed, and no empty path made `/`.
+2. **A URN** (a URI whose scheme is `urn`) normalized by RFC 8141 §3.1 instead: `urn` and the NID lower-cased (an NID
+   is case-insensitive, §2.1), percent-encoding hex upper-cased, and **nothing decoded** (§3.1: percent-encoding
+   normalization MUST NOT be applied); the NSS keeps its case; the r-, q- and f-components (`?+…`, `?=…`, `#…`) are
+   ignored. A `?` not followed by `+` or `=` is no URN component and is kept.
+3. **Any other string** — no scheme, a character outside the URI grammar, a malformed percent triplet, a port that is
+   not digits, an empty path with no authority (`x:`) — is its own normal form: it is compared as it is. A value that is
+   not a string has no normal form and is compared as it is (`===`).
+
+| Spelling | Normal form | Why |
+|---|---|---|
+| `AGENT:x` | `agent:x` | a scheme is case-insensitive |
+| `agent:X` | `agent:X` | a path keeps its case |
+| `URN:Fabric:agent:x` | `urn:fabric:agent:x` | the NID is case-insensitive |
+| `urn:fabric:agent:X` | `urn:fabric:agent:X` | the NSS keeps its case |
+| `urn:example:a%7e` | `urn:example:a%7E` | a URN decodes nothing |
+| `https://EXAMPLE.com/%7ex` | `https://example.com/~x` | the host lower-cased, an unreserved octet decoded |
+| `https://example.com/a%2fb` | `https://example.com/a%2Fb` | a reserved octet stays encoded |
+| `https://example.com/a/./b/../c` | `https://example.com/a/c` | dot segments removed |
+| `https://example.com:443` | `https://example.com:443` | no scheme-based normalization |
+
+The only strings normalized are ones the schema's `format: uri` admits, and each normal form is admitted too
+(`test/identifiers.test.ts`, on the same inputs). The schema's validator also admits a few strings RFC 3986 refuses (a
+port that is not digits, read as an empty authority before a path); those are compared as they are, so the difference can
+only miss a sameness, never invent one — RFC 3986 §6.1's aim: avoid false positives.
+
+## Writers and readers
+
+- **A writer SHOULD emit the normal form** of every identifier it writes, so a reader pinned before DEC-0076, which
+  compares bytes, reads the same identifiers as one that compares normal forms.
+- **A reader MUST compare by normal form** wherever a rule compares identifiers for sameness: an approver against an
+  author, a row against the rows before it, a binding against the route it pins. `sameIdentifier(a, b)` is the reference;
+  a port runs the [vectors](../../fixtures/vectors/identifiers.json), which include the mistakes a lax port makes
+  (decoding `%2F`, lower-casing a URN's NSS, decoding inside a URN, removing a default port).
+- Neither function throws, and neither keys anything by input in a plain object, so `__proto__` and `constructor` are
+  strings like any other.
+
+## Where identifiers are compared
+
+The rules that compare identifier-typed fields compare their normal forms (DEC-0076 lists each site and the ones left):
+
+| Rule | Comparison |
+|---|---|
+| `FAC-SEM-094` ([governance and roles](governance-and-roles.md#semantic-rules)) | the approver against the author `meta.createdBy` |
+| `FAC-SEM-025` ([service](service.md#usage-report)) | each `byProject[].projectId` against the rows before it; the finding names the second spelling |
+| `FAC-SEM-006` ([conformance](conformance.md#semantic-rule-codes)) | the projects active assignments scope, and the product managers of each |
+| `FAC-SEM-002` ([conformance](conformance.md#semantic-rule-codes)) | the selected account against the pool's account references |
+| `FAC-SEM-096` ([versioning](versioning.md#semantic-rules)) | a rollback basis's `id` against the setting's own |
+| `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and capability of an admission, a binding or an event against the route's |
+
+**Compared as written** — fields that are not URIs, or whose comparison another specification fixes:
+
+- a delegation token's and an approval's claims (`iss`, `sub`, `project`, a grant's principal and issuer, an onward
+  token's parent claims): JWT claims, which [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) §2 compares "as
+  case-sensitive strings with no transformations or canonicalizations applied"; the hub copies them from the grant it
+  signs, so a different spelling is refused, fail closed ([delegation](delegation.md));
+- `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
+  value is already its normal form;
+- opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),
+  agent ids and service ids (patterns of lower-case names), capability names, model ids, runner kinds, MCP roles, secret
+  slots, key ids, `jti`, claim ids and enum values: names, not URIs.

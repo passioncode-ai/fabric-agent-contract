@@ -322,7 +322,9 @@ revision because JSON Schema cannot express uniqueness by a property. The same l
 `FAC-SEM-028` and `FAC-SEM-029`. `FAC-SEM-030` keeps a route honest about admission without
 making the route a grant (DEC-0010); a `route-bundle` is `{route, admissions, binding?,
 catalogue?}`, and `FAC-SEM-032`/`FAC-SEM-033` run when the optional parts are present. A
-`route-event` is `{route, event}`.
+`route-event` is `{route, event}`. Where `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034` compare a revision reference's `id`,
+a project or a capability, they compare normal forms, so another spelling of one URI is the same one
+([identifiers](identifiers.md), DEC-0076); the revision number and the content hash still compare exactly.
 
 Fixtures: the `runners-*`, `runner-route*`, `binding-runner-route*`, `registry-models*`, `model-profile*` and
 `runner-profile*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json), and

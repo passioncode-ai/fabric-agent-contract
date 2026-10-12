@@ -192,11 +192,11 @@ for became a fix of `FAC-SEM-006`.
 |---|---|---|---|
 | `FAC-SEM-000` | any | here: the value checked is a JSON object | — |
 | `FAC-SEM-001` | `result` | here: a `succeeded` result lists no claim in `notVerified` (every reported claim is an acceptance claim, DEC-0064) | — |
-| `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool | — |
+| `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool, account references compared by normal form ([identifiers](identifiers.md), DEC-0076) | — |
 | `FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself (the schema's `selfApply: false` is the guarantee; the rule answers a schema-invalid input; approval separation is `FAC-SEM-094`, DEC-0064) | — |
 | `FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally | — |
 | `FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO | — |
-| `FAC-SEM-006` | `roles` | here: each project any active assignment scopes has exactly one active product manager (DEC-0064) | — |
+| `FAC-SEM-006` | `roles` | here: each project any active assignment scopes has exactly one active product manager; two spellings of one project id are one project ([identifiers](identifiers.md), DEC-0064, DEC-0076) | — |
 | `FAC-SEM-007` | `coordination` | here: a renew names the claim it renews | — |
 | `FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound | — |
 | `FAC-SEM-009` | `service-observation` | [service](service.md#semantic-rules) | — |
