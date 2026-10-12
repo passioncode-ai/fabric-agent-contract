@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
+import { coreRules } from "../src/core-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0064: the 0.1.0 core keeps its promises — FAC-SEM-093 (claims and proof), FAC-SEM-094 (approval separation),
@@ -42,6 +43,7 @@ describe("FAC-SEM-094: approval separation", () => {
     expect(paths("learning", { ...learning, state: "approved", approvedBy: learning.meta.createdBy })).toEqual(["FAC-SEM-094 /approvedBy"]);
     expect(paths("promotion", { state: "approved", meta: { createdBy: "urn:agent:a" } })).toEqual(["FAC-SEM-094 /approvedBy"]);
     expect(paths("promotion", { state: "approved", meta: { createdBy: "urn:agent:a" }, approvedBy: "urn:agent:a" })).toEqual(["FAC-SEM-094 /approvedBy"]);
+    expect(codes("promotion", { state: "approved", meta: 7, approvedBy: "urn:person:pm" })).toEqual([]);
   });
 });
 
@@ -86,5 +88,12 @@ describe("FAC-SEM-097: a standing grant's window", () => {
     expect(paths("grant-window", { grant, at: "2026-08-26T10:07:59Z" })).toEqual(["FAC-SEM-097 /grant/state"]);
     expect(paths("grant-window", { grant, at: "yesterday" })).toEqual(["FAC-SEM-097 /at"]);
     expect(codes("grant-window", { grant: { ...grant, state: "expired" }, at: "2027-01-01T00:00:00Z" })).toEqual([]);
+  });
+});
+
+describe("the module reads only its own kinds and objects", () => {
+  it("answers nothing for another kind or a non-object", () => {
+    expect(coreRules("package", {})).toBeUndefined();
+    expect(coreRules("result", null)).toBeUndefined();
   });
 });
