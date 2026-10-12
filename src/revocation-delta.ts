@@ -31,7 +31,7 @@ export const HEARTBEAT_MAX_INTERVAL_SECONDS = 24 * 60 * 60;
 /** The interval a running hub SHOULD keep, beside a heartbeat after every entry and every revision. */
 export const HEARTBEAT_INTERVAL_SECONDS = 60 * 60;
 /** How far ahead of the verifier's clock a signed time may be: the relay's skew (DEC-0047 item 2). */
-export const MAX_FUTURE_SECONDS = CLOCK_SKEW_SECONDS; // one skew for every signed time (DEC-0066)
+export const MAX_FUTURE_SECONDS = CLOCK_SKEW_SECONDS; // the relay family's and the estate record's skew (DEC-0066)
 /** The most entries one page carries, so a relay frame stays under 1 MiB (DEC-0047 item 3). */
 export const MAX_PAGE_ENTRIES = 256;
 

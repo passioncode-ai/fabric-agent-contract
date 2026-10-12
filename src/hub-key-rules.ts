@@ -55,7 +55,8 @@ const clock = (at: unknown): number => (at instanceof Date ? at.getTime() : type
  *    `estate-unreadable`;
  * 3. its revision is lower than `applied`'s → `estate-rolled-back`; the same number with another digest than `applied`'s
  *    → `estate-forked`;
- * 4. `at` is before `issuedAt` or after `validUntil` (both instants inside) → `estate-outside-window`;
+ * 4. `at` is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants
+ *    inside) → `estate-outside-window`;
  * 5. the revision, or `options.extraRevocations`, revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, or two are; that machine's `hubKey.x` is
  *    not the string `x`; or the revision or `options.extraRevocations` revokes `machine <id>` of that machine →
  *    `kid-not-certified`. A revocation's `ref` is compared exactly, never as a string conversion.

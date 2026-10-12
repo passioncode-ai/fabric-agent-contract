@@ -3651,7 +3651,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `(sender, agentRef, slot, envelopeSequence)` for an envelope, never the digest. `instant` keeps the relay's pattern
      (`Z`, upper-case `T`, at most nine fraction digits) and reads through `strictTime`, so a day its month lacks, hour 24
      and `:60` are refused; FAC-SEM-070 and `relayAdmissionSet` read times the same way. `CLOCK_SKEW_SECONDS` (60) lives
-     in `src/rfc3339.ts` and is the one skew for every signed time: an estate record's `issuedAt` may be 60 s ahead in
+     in `src/rfc3339.ts` and is the one skew of the relay family's and the estate record's times (HTTP message signatures
+     keep their 300 s, delegation its `LEEWAY_SECONDS`, and a window lease's `issuedAt` its 0 s): an estate record's
+     `issuedAt` may be 60 s ahead in
      `verifyEstateRecord` (ER-10, the owner's P3), DL-14's `hubKeyCertified` holds the same window (DEC-0060), and
      DEC-0054's `MAX_FUTURE_SECONDS` is the same constant; DEC-0055's and DEC-0060's texts stay as they were and carry a
      dated annotation. A time is read to the millisecond.
@@ -3700,8 +3702,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   7. **Delta ingress** (item 9; the owner's P1, option a). An admitted hub machine sends `delta` and `heartbeat` frames
      on its own session; the relay accepts one only when it verifies under its held record by DEC-0054's rules (an
      estate key the record certifies as DL-14/DEC-0060 do, `applyDelta`, `acceptHeartbeat`, the sequence and `sha256`
-     chain unchanged), answers a refused page with `applyDelta`'s own problem code (`gap` included), keeps a forked
-     entry's revocations in force (RD-10), subtracts the revocations in force from its admission set and closes the
+     chain unchanged), answers a refused page with `applyDelta`'s own problem code (`gap` included), keeps the revocations
+     of its correctly signed forked and broken-chain entries in force (RD-10), subtracts the revocations in force from its admission set and closes the
      revoked sessions. revocation-delta.md's "SHOULD subtract" becomes this rule.
   8. **Shared vectors.** Every refusal of `admit`, `verifyMessageBody`/`checkReplay`, `verifyBlobRequest`/
      `decideBlobAccess` and `openEnvelope` is a case in `fixtures/vectors/relay.json` (groups `instant`, `relayOrigin`,

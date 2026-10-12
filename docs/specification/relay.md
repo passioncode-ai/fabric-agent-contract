@@ -44,7 +44,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   accepts as well as Node (`test/worker-key-form.test.ts` holds it).
 - **Every public key is validated before use** by SEC 1 v2 §3.2.2 (`p256KeyRefusal`): not the point at infinity,
   coordinates in [0, p − 1], on the curve. The cofactor is 1, so the order check holds for every point on the curve.
-  A key that fails is refused as `bad-key`, and nothing is verified or sealed under it.
+  A key that fails is refused as `bad-key` by a recipient (a message body, an envelope), and nothing is verified or
+  sealed under it. Admission and blob requests answer `unauthenticated` instead: before the signer is proven they say
+  nothing about a key, and `bad-key` is reserved there (DEC-0066).
 - **All signatures are ES256**, raw `r ‖ s` (64 bytes), base64url, over RFC 8785 bytes ([canonical
   forms](conformance.md#canonical-forms)).
 - **Low-S** (DEC-0066). A relay-family signature — `relay-auth/1`, `relay-blob/1`, a message body, an envelope — has
@@ -391,8 +393,8 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   page. A page `applyDelta` refuses is answered `error` with `applyDelta`'s own problem code in its message — `gap`
   included, so the hub resends from the relay's head — and the relay applies exactly what DEC-0054 applies: a page that
   forks the chain (`fork`) or breaks it (`broken-chain`) with correctly signed entries is not carried as the chain, but
-  the revocations of a forked entry stay in force (RD-10, `effectiveRevocations`) and leave the admission set like any
-  other.
+  the revocations of its correctly signed entries — forked and broken-chain alike — stay in force (RD-10,
+  `effectiveRevocations`) and leave the admission set like any other.
 - **Catching up.** A node behind the head asks with `delta-query` `{fromSeq}`, its applied head's sequence plus one, and
   is answered with `delta` pages carrying `replyTo`, and an empty page at the head.
 - **Delay is detected; forgery is impossible.** A relay that withholds an entry is detected by the heartbeat: its head
