@@ -2128,7 +2128,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's `pack` signs
   (FAA-27) and its kits port `verifyPackage` with `fixtures/vectors/package.json`; Project Observatory's node verifies
-  before install; Fabric's hub signs packages for the person's own machines until the passkey does (v4 Stage 1).
+  before install; Fabric's hub signs packages for the person's own machines until the passkey does (v4 Stage 1). v4
+  has the hub sign with the node's P-256 device key (ES256); until Fabric's D2 admits ES256, the publisher key is a
+  software Ed25519 key. EdDSA stays admitted for packages after D2 (v4 keeps release signatures on Ed25519); dropping
+  it would be breaking and needs its own decision.
 - **Decision:** in [package](specification/package.md#signatures) —
   1. `signatures[]` holds exactly one `publisher` signature and any number of `organization` countersignatures, each
      `{role, alg, kid, sig}`; absent, the package is unsigned and installs only where the installing machine's own
@@ -2144,8 +2147,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   4. **The verifier,** `verifyPackage(package, trust, {countersigned})`, in PK-1…PK-10's order: malformed, digest
      mismatch, unsigned, not exactly one publisher signature, then per signature an unadmitted algorithm, an unknown
      or duplicated `kid` in its role's pinned set, a key for another algorithm or not a public Ed25519 signing key, a
-     small-order key, a bad signature; with `countersigned`, no organization countersignature. Every signature present
-     must verify — a bad countersignature refuses the package.
+     small-order key, a bad signature; with `countersigned`, no organization countersignature. Shape and the
+     per-signature checks run in array order after the publisher count. A signature under a pinned key must verify —
+     a bad countersignature refuses the package; an organization countersignature under a `kid` the machine does not
+     pin is set aside as `unverified` unless `countersigned` is asked.
   5. **Vectors** (`fixtures/vectors/package.json`): one case per problem, the test keys' seeds (Ed25519 is
      deterministic, so a port's signer reproduces every `sig`), the digest's canonical form and the signing input, and
      a signature forged under the all-zero key with no private key, which Node 20 and 22's `crypto.verify` accept.

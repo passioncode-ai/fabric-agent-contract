@@ -270,7 +270,12 @@ describe("signatures and the verifier (DEC-0051)", () => {
       expect(verifyPackage({ ...signed, signatures: [sig, { ...sig, role: "organization", ...broken }] }, trust), JSON.stringify(broken)).toEqual({ ...malformed, signature: 1 });
     }
     // An organization countersignature with no organization keys pinned is under an unknown key.
-    expect(verifyPackage({ ...signed, signatures: [sig, { ...sig, role: "organization" }] }, trust)).toEqual({ ok: false, problem: "unknown-key", signature: 1 });
+    // An organization entry under a kid the organization set does not pin is set aside unless a countersignature is asked.
+    expect(verifyPackage({ ...signed, signatures: [sig, { ...sig, role: "organization" }] }, trust)).toMatchObject({ ok: true, unverified: [{ role: "organization" }] });
+    expect(verifyPackage({ ...signed, signatures: [sig, { ...sig, role: "organization" }] }, trust, { countersigned: true })).toEqual({ ok: false, problem: "unknown-key", signature: 1 });
+    // Only an unpinned kid is set aside: a pinned organization key that cannot be used still refuses the package.
+    const pinnedBadly = { ...trust, organization: [{ ...(trust.publisher as Json[])[0], alg: "ES256" }] };
+    expect(verifyPackage({ ...signed, signatures: [sig, { ...sig, role: "organization" }] }, pinnedBadly)).toEqual({ ok: false, problem: "key-algorithm-mismatch", signature: 1 });
     // Two publisher signatures.
     expect(verifyPackage({ ...signed, signatures: [sig, sig] }, trust)).toEqual({ ok: false, problem: "no-publisher-signature" });
   });

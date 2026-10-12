@@ -68,7 +68,7 @@ export type PackageProblem =
   | "no-countersignature";
 
 export type PackageVerdict =
-  | { ok: true; digest: string; signers: Array<{ role: string; kid: string }> }
+  | { ok: true; digest: string; signers: Array<{ role: string; kid: string }>; unverified?: Array<{ role: string; kid: string }> }
   | { ok: false; problem: PackageProblem; signature?: number };
 
 /** The keys a verifier trusts, per role: JWKs (`kty`, `crv`, `x`, `kid`, `alg`), as the installing machine pinned them. */
@@ -100,9 +100,11 @@ function keyFor(keys: readonly unknown[], kid: string, alg: string): KeyLookup {
 /**
  * The reference verifier (DEC-0051), in the order of package.md's PK table: the digest is recomputed first, then
  * exactly one publisher signature, then every signature — its algorithm admitted, its key found in its role's set
- * under that algorithm, of full order, the signature verifying over `packageSigningInput`. Every signature present
- * must verify: a bad countersignature refuses the package, it is never skipped. With `countersigned`, at least one
- * organization countersignature is required.
+ * under that algorithm, of full order, the signature verifying over `packageSigningInput`. Shape and PK-5…PK-9 are
+ * checked per signature, in array order, after PK-4. A signature under a pinned key must verify: a bad countersignature
+ * refuses the package, it is never skipped. An organization countersignature whose `kid` this machine does not pin is
+ * set aside, listed as `unverified`, unless `countersigned` is asked — then at least one countersignature must verify,
+ * so a publisher's own machines keep installing a package after an organization countersigns it.
  */
 export function verifyPackage(pkg: unknown, trust: PackageTrust, options: { countersigned?: boolean } = {}): PackageVerdict {
   if (!isObject(pkg) || !isString(pkg.digest)) return { ok: false, problem: "malformed" };
@@ -118,12 +120,17 @@ export function verifyPackage(pkg: unknown, trust: PackageTrust, options: { coun
   const signatures: unknown[] = pkg.signatures;
   if (signatures.filter((entry) => isObject(entry) && entry.role === "publisher").length !== 1) return { ok: false, problem: "no-publisher-signature" };
   const signers: Array<{ role: string; kid: string }> = [];
+  const unverified: Array<{ role: string; kid: string }> = [];
   for (const [index, entry] of signatures.entries()) {
     if (!isObject(entry) || (entry.role !== "publisher" && entry.role !== "organization") || !isString(entry.alg) || !isString(entry.kid) || !isString(entry.sig) || !B64URL.test(entry.sig)) {
       return { ok: false, problem: "malformed", signature: index };
     }
     if (!PACKAGE_ALGORITHMS.includes(entry.alg)) return { ok: false, problem: "unknown-algorithm", signature: index };
     const found = keyFor((entry.role === "publisher" ? trust.publisher : trust.organization) ?? [], entry.kid, entry.alg);
+    if ("problem" in found && found.problem === "unknown-key" && entry.role === "organization" && options.countersigned !== true) {
+      unverified.push({ role: entry.role, kid: entry.kid });
+      continue;
+    }
     if ("problem" in found) return { ok: false, problem: found.problem, signature: index };
     const signature = Buffer.from(entry.sig, "base64url");
     // RFC 8032 §5.1.7: an Ed25519 signature is 64 bytes; checked here for a port whose library is laxer than Node's.
@@ -133,7 +140,7 @@ export function verifyPackage(pkg: unknown, trust: PackageTrust, options: { coun
     signers.push({ role: entry.role, kid: entry.kid });
   }
   if (options.countersigned === true && !signers.some((signer) => signer.role === "organization")) return { ok: false, problem: "no-countersignature" };
-  return { ok: true, digest, signers };
+  return unverified.length ? { ok: true, digest, signers, unverified } : { ok: true, digest, signers };
 }
 
 export type FolderProblem = "file-missing" | "file-unlisted" | "file-digest" | "plugin-manifest" | "provider-manifest";

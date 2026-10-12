@@ -33,7 +33,9 @@ three rule rows); `docs/backlog.md` (CT-16, and DEC-0050/0051's next-pin work on
 
 ## Checks run
 
-On this branch at `bcada4a`, `node_modules` linked from the main checkout, Node v26.10.0, read after the run:
+After the review fixes (on main `0cacd08` merged in): `privacy-check` 0 findings; vitest 1203+ tests green; an
+organization countersignature under an unpinned `kid` is set aside unless required (two vector cases). Earlier, on
+this branch at `bcada4a`, `node_modules` linked from the main checkout, Node v26.10.0, read after the run:
 `tsc --noEmit` exit 0; `vitest run --coverage` 33 files, 1203 tests passed, branches 91.71 % (2513 / 2740), every
 floor held, `src/package-rules.ts` 152 / 152; `python3 docs/ux/lint.py` 15 stories, 12 flows, 15 screens, 20
 scenarios; `tsx src/docs-check.ts` passed; `tsx src/lint-md.ts` 0 errors. The whole suite also passes on Node 22.23.3 (1203 / 1203) and `test/package.test.ts` on Node 20.20.2 (56 / 56). The small-order forgery checked against raw
@@ -112,9 +114,8 @@ Each planted alone, the whole suite run, the file restored (`failed / total`):
 - Merging beside P3-02: both branches add rows to `conformance.md`'s rule register (P3-02 `FAC-SEM-061`…`063`, this
   one `064`…`066`) and decisions (DEC-0048/0049 and DEC-0050/0051); the second to merge keeps both and the higher
   markers (`FAC-SEM-067`, `DEC-0052`).
-- Found on `main`, not changed here (the owner session's file): the wave-3 packets' README names the organization
-  server's repository in a command line (`packets/wave-3/README.md:9`), which its own rule and CON-OE-04 forbid in this
-  public repository; `org-index/scripts/check_private.py` reports it (rule P1).
+- Found on `main` and resolved there by `0cacd08` (privacy scrub, PR #51): the wave-3 packets' README named the
+  organization server's repository.
 - The knowledge base (`fabric-workspace/knowledge/` products and plans) and the workspace sync are the owner session's
   close-of-wave step.
 

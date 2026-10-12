@@ -185,7 +185,8 @@ verifier of this version refuses it as `unknown-algorithm`. Every Ed25519 key pa
 
 `verifyPackage(package, trust, {countersigned})` is the reference. `trust` holds the keys the installing machine pinned,
 per role, as JWKs (`kty`, `crv`, `x`, `kid`, `alg`): the publisher's key from the estate record or the listing, the
-organization's keys from its record. It answers `{ok: true, digest, signers}` or the first problem, in this order:
+organization's keys from its record. It answers `{ok: true, digest, signers, unverified?}` or the first problem, in this order — PK-1's package checks,
+PK-2…PK-4, then each signature in array order: its shape (PK-1's entry part) and PK-5…PK-9:
 
 | Row | Problem | When |
 |---|---|---|
@@ -200,7 +201,11 @@ organization's keys from its record. It answers `{ok: true, digest, signers}` or
 | PK-9 | `bad-signature` | the signature is not 64 bytes or does not verify over the statement |
 | PK-10 | `no-countersignature` | `countersigned` is asked and no organization countersignature verified |
 
-Every signature present must verify: a bad countersignature refuses the package, it is never skipped. The vectors hold
+A signature under a pinned key must verify: a bad countersignature refuses the package, it is never skipped. An
+organization countersignature whose `kid` the machine does not pin at all is set aside and listed in `unverified`,
+unless `countersigned` is asked — then it is `unknown-key`. So the publisher's own machines, which pin no organization
+key, keep installing a package after an organization countersigns it; a pinned organization key that cannot be used
+still refuses it. The vectors hold
 one case per problem, the test keys' seeds (Ed25519 is deterministic, so a port's signer reproduces every `sig`), the
 digest's canonical form and the signing input. The small-order case is a signature forged under the all-zero key with
 no private key: `crypto.verify` accepts it on Node 20 and 22 and refuses it on 24 and 26.

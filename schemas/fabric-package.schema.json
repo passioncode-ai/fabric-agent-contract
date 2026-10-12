@@ -491,7 +491,7 @@
     },
     "agentRef": {
       "type": "string",
-      "maxLength": 147,
+      "maxLength": 146,
       "pattern": "^urn:fabric:agent:[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
       "description": "urn:fabric:agent:<publisher>:<id> — one agent across its versions (FAC-SEM-066)."
     },
