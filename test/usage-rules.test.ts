@@ -76,6 +76,16 @@ describe("FAC-SEM-025: calls by project and task run", () => {
     expect(paths(rows([{ ...project, costUsd: 1.09 }]))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
     expect(evaluateSemanticRules("service-usage", rows([{ ...project, costUsd: 1.09 }]))[0]?.message).toBe("a project's task runs cost more than the project (1.1 > 1.09)");
   });
+  it("CT-40: refuses task runs holding more priced calls than their project, so a null project cannot hide priced runs", () => {
+    const hidden = { projectId: "urn:project:h", calls: 3, unpricedCalls: 3, costUsd: null, taskRuns: [{ taskRunId: "r1", calls: 3, unpricedCalls: 0, costUsd: 0.5 }] };
+    expect(paths(rows([hidden]))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
+    expect(evaluateSemanticRules("service-usage", rows([hidden]))[0]?.message).toBe("a project's task runs hold more priced calls than the project (3 > 0)");
+    // The boundary: as many priced calls as the project's is allowed.
+    expect(paths(rows([{ ...hidden, unpricedCalls: 0, costUsd: 0.5 }]))).toEqual([]);
+    expect(paths(rows([{ ...hidden, unpricedCalls: 1, costUsd: 0.5 }]))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
+    // A cost the schema refuses (negative) is not compared again.
+    expect(usageRules({ byProject: [{ projectId: "urn:project:n", calls: 1, unpricedCalls: 0, costUsd: -5, taskRuns: [{ taskRunId: "r", calls: 1, unpricedCalls: 0, costUsd: 0.2 }] }] }).map((f) => f.instancePath)).not.toContain("/byProject/0/taskRuns");
+  });
   it("CT-40: refuses projects costing more than the days, at the boundary (the days cost 1.594)", () => {
     const filler = (costUsd: number | null, calls = 1) => ({ projectId: "urn:project:filler", calls, unpricedCalls: costUsd === null ? calls : 0, costUsd });
     expect(paths(rows([project, filler(0.494)]))).toEqual([]);
@@ -86,7 +96,7 @@ describe("FAC-SEM-025: calls by project and task run", () => {
     const unpricedDays = { ...rows([project]), days: report.days.map((day: Json) => ({ ...day, costUsd: null })) };
     expect(paths(unpricedDays)).toContain("FAC-SEM-025 /byProject");
   });
-  it("CT-40 with DEC-0076: two spellings of one project are one project in the cost sum too", () => {
+  it("CT-40 with DEC-0076: a project named under two spellings is refused, and both rows still count in the cost sum", () => {
     const spelled = String(project.projectId).replace(/^urn:/i, "URN:");
     const twice = rows([project, { ...project, projectId: spelled, calls: 0, taskRuns: [] }]);
     // The duplicate is refused, and the sum still counts both rows' costs (2.2) against the days (1.594).

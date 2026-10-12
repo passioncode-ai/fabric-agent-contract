@@ -10,12 +10,14 @@ project, but not the costs: a report could attribute more money to its projects 
 - `src/usage-rules.ts` `usageProjects`: the known costs add up as the calls do. A project costs at least its task runs
   when its own cost is known (a `null` project cost is judged by the unknown-cost rule, not compared). All projects
   together cost no more than the days. A `null` cost counts as none on either side, within the rounding the day's
-  cost check allows. The project key stays the normal form of `projectId` (DEC-0076), so two spellings are one
-  project in the sum too.
+  cost check allows, so rows are written unrounded. A project also holds at least its task runs' priced calls, so a
+  `null` project cannot hide priced runs. Every row counts in the sum; a project named twice is refused by the normal
+  form of `projectId` (DEC-0076).
 - Tests in `test/usage-rules.test.ts`:
   - the rounding boundary on both sums, with exact messages;
   - an unknown cost on either side;
-  - two spellings of one project in the cost sum.
+  - two spellings of one project in the cost sum;
+  - priced calls of the runs against the project, and a negative cost not compared twice.
 - service.md (the `byProject` paragraph and the `FAC-SEM-025` row) updated, DEC-0065 annotated, and CT-40 marked done.
 
 ## Open

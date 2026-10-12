@@ -11,7 +11,8 @@ import { strictTime } from "./rfc3339.js";
  *   compared by normal form (DEC-0076) — and each task run once within its project, a row's
  *   calls are at least its task runs' calls, all projects together hold no more calls than the days, and an unknown cost
  *   is null exactly as in a day's rows (CON-OE-13); the known costs add up the same way: a project costs at least its task
- *   runs and all projects no more than the days (CT-40), a null cost counting as none.
+ *   runs (and holds at least their priced calls) and all projects no more than the days (CT-40), a null cost counting
+ *   as none.
  * Malformed input answers findings or none, never an exception.
  */
 
@@ -84,6 +85,7 @@ function usageProjects(value: JsonObject): Finding[] {
     const runs = new Set<string>();
     let runCalls = 0;
     let runCost = 0;
+    let runPriced = 0;
     list(project.taskRuns).forEach((run, r) => {
       if (typeof run.taskRunId === "string") {
         if (runs.has(run.taskRunId)) findings.push(flag(`${at}/taskRuns/${r}/taskRunId`, "each task run is one row within its project"));
@@ -91,11 +93,16 @@ function usageProjects(value: JsonObject): Finding[] {
       }
       runCalls += count(run.calls);
       runCost += cost(run.costUsd);
+      runPriced += Math.max(0, count(run.calls) - count(run.unpricedCalls));
       findings.push(...pricedRow(run, `${at}/taskRuns/${r}`));
     });
+    // One finding per project for its runs: the first bound they break, calls, then priced calls, then known cost. A
+    // project whose cost is unknown (null) has no cost to compare: its priced calls are bounded here, and pricedRow
+    // judges its null against its own unpricedCalls. A value the schema refuses is not compared again.
+    const projectPriced = Math.max(0, count(project.calls) - count(project.unpricedCalls));
     if (runCalls > count(project.calls)) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more calls than the project (${runCalls} > ${count(project.calls)})`));
-    // A project whose cost is unknown (null) has nothing to compare its runs with; pricedRow judges that null.
-    if (typeof project.costUsd === "number" && exceeds(runCost, cost(project.costUsd))) findings.push(flag(`${at}/taskRuns`, `a project's task runs cost more than the project (${usd(runCost)} > ${usd(cost(project.costUsd))})`));
+    else if (runPriced > projectPriced) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more priced calls than the project (${runPriced} > ${projectPriced})`));
+    else if (cost(project.costUsd) === project.costUsd && exceeds(runCost, cost(project.costUsd))) findings.push(flag(`${at}/taskRuns`, `a project's task runs cost more than the project (${usd(runCost)} > ${usd(cost(project.costUsd))})`));
   });
   const dayCalls = list(value.days).reduce((n, day) => n + count(day.calls), 0);
   if (projectCalls > dayCalls) findings.push(flag("/byProject", `the projects hold more calls than the days (${projectCalls} > ${dayCalls})`));
