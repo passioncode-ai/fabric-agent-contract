@@ -1,0 +1,16 @@
+{
+  "id": "urn:coordination:event:3",
+  "kind": "reconcile",
+  "work": "urn:node:a:1",
+  "owner": {
+    "id": "urn:agent:developer:a:1",
+    "revision": 1,
+    "contentHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "idempotencyKey": "project-a-node-1-reconcile-0001",
+  "occurredAt": "2026-08-26T10:30:00Z",
+  "claim": "urn:coordination:event:1",
+  "residue": [
+    "Stale Branch"
+  ]
+}

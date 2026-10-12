@@ -80,4 +80,4 @@ sequenceDiagram
 Every coordination command has an idempotency key. Duplicate delivery returns the
 original decision. Residue categories are `none`, `uncommitted-files`,
 `unpushed-commit`, `open-pr`, `merged-unreconciled`, `external-effect` and
-namespaced extensions. Residue is evidence, never silently discarded.
+namespaced extensions `<namespace>/<category>` (the schema admits them, DEC-0064). Residue is evidence, never silently discarded.

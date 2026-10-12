@@ -19,7 +19,8 @@ An execution context revision declares:
 - provider/runner reference;
 - working-directory policy and repository reference;
 - allowlisted environment keys with literal non-secret values or secret refs;
-- denied environment keys and ambient-environment policy `deny`;
+- the ambient-environment policy `deny`: every key not allowlisted is denied (the schema lists no separate denied keys,
+  DEC-0064);
 - network, filesystem and tool scopes;
 - account-pool revision and optional selected account reference;
 - time, cost and concurrency limits;
@@ -64,8 +65,9 @@ or policy-declared transient health failure. Authentication failure caused by a
 revoked or invalid credential suspends that account and requires operator action
 unless another already-approved account is eligible.
 
-Every switch records from/to account references, reason, pool revision, run/node,
-time and evidence. Runner switches under a pinned runner route record the same
+Every switch records from/to account references, reason, pool revision and time in its
+`account-switched` event; the run/node and the evidence are the host's records of that run, not fields of the event
+(DEC-0064). Runner switches under a pinned runner route record the same
 facts for from/to candidate, runner kind and route revision as a
 `runner-route-event`, whose probe results are the evidence ([Runner routes](runners.md#events)). A switch MUST NOT change provider
 profile, model requirement or write scope implicitly.

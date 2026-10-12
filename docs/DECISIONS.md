@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0064`
+**Next free ID:** `DEC-0065`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3470,3 +3470,71 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0051, DEC-0055; packet P4-05. DEC-0063 and `FAC-SEM-092` were reserved by git CAS (`--key
   w4-p4-05-signing-challenges-20261012 DEC`, `--key w4-p4-05-sem-signing-credential-20261012 SEM`); the owner session
   wrote this entry under its leases after the agent stopped at its limit; the record plane is `fs`.
+
+### DEC-0064 — The 0.1.0 core keeps its promises: claim and proof, approval separation, one product manager per scoped project, rollback, grant windows, namespaced residue, and host-side records named as such
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's result writer lists every
+  unproven done claim in `notVerified` by its id and refuses self-approval of learning and promotion (CT-19); the first
+  organization server and Project Observatory check grant windows with `FAC-SEM-097` (CT-04, CT-20). Board row CT-14.
+- **Amends:** DEC-0011 (a rule for the claim/proof relation), DEC-0004 and DEC-0012 (a rule for approval separation),
+  DEC-0006 (one product manager, now found), DEC-0007 (a rule for rollback), DEC-0008 (a rule for a grant's window;
+  retention and absent grant fields read as the schema carries them), DEC-0005 (residue extensions are namespaced strings
+  in the schema), DEC-0009 and DEC-0013 (host-side records named as such). Corrects `FAC-SEM-001`'s text to its code and `FAC-SEM-006`'s code to its text. Closes the board
+  run's inventory items F-A-002, F-A-003, F-A-004, F-A-014, F-A-015, F-A-016, F-A-017, F-A-018 and F-A-019 (node N10,
+  packet P5-01).
+- **Decision:**
+  1. **Claim and proof** ([results and evidence](specification/results-and-evidence.md#semantic-rules)). Every
+     `proof[].claimIds` member names a `done[].claimId`, and every done claim no proof names is listed in `notVerified` by
+     its claim id (`FAC-SEM-093`, kind `result`). `FAC-SEM-001` says what it checks: a `succeeded` result lists no claim
+     in `notVerified`, because every reported claim is an acceptance claim.
+  2. **Approval separation** ([governance and roles](specification/governance-and-roles.md#semantic-rules)). An approved
+     learning proposal or promotion names `approvedBy`, who is never its author `meta.createdBy` (`FAC-SEM-094`, kinds
+     `learning`, `promotion`). The active revision, the checker of the retro's own run and the approver's role are the
+     host's records, so the host checks those clauses ([memory and learning](specification/memory-and-learning.md)).
+     `FAC-SEM-003` stays as the answer to a schema-invalid `selfApply`.
+  3. **One product manager.** `FAC-SEM-006` derives the projects from every active project-scoped assignment, so a
+     project with assignments and no active product manager is found.
+  4. **Rollback** ([versioning](specification/versioning.md#semantic-rules)). `rollbackBasis` names the same setting's
+     `id` and an earlier revision, and every parent's revision is earlier than the setting's own (`FAC-SEM-096`, kind
+     `versioned-setting`); `fixtures/positive/versioned-setting-rollback.json` is the example DOCMAP asks for.
+  5. **Grant window.** A standing grant's `expiresAt` is after its `startsAt`, both strict RFC 3339 (`src/rfc3339.ts`);
+     given `{grant, at}`, an `active` grant is inside `[startsAt, expiresAt)` at `at` (`FAC-SEM-097`, kind
+     `grant-window`). An absent `channels` means no outbound channel and an absent `recipientConstraints` means no
+     recipient outside the project: the schema keeps both optional and the absence is the safe reading.
+  6. **Retention** is per classification in the project data policy; a record's retention is resolved through its
+     classification, not carried by each record.
+  7. **Residue.** A coordination event's residue item is one of the six named categories or a namespaced string
+     `owner/category` (`schemas/coordination.schema.json`), as coordination.md allows.
+  8. **Host-side records named as such.** The execution context's ambient policy `deny` is the denied-keys rule (the
+     schema lists no separate keys); an `account-switched` event carries from/to, reason, pool revision and time, and
+     the run/node and evidence are the host's records of that run. A2A task-state mapping and cancellation, and a local
+     runner's required execution-context capabilities, are host-side expectations, not manifest fields
+     ([execution context](specification/execution-context.md), [profiles](specification/profiles.md)).
+- **Why:** the 0.1.0 specs promised checks no rule made and fields no schema had (inventory F-A-002…019). A promise a
+  checker cannot fail is a sentence, not a contract: each one either gets a rule a fixture fails, or is worded as what
+  the host keeps.
+- **Compatibility:** Tightening for results, learning, promotion, rollbacks and grants: a document that broke the
+  stated rule is now refused. The residue schema widens (additive). The wording changes in items 6 and 8 narrow no
+  schema. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/results-and-evidence.md`, `docs/specification/governance-and-roles.md`,
+    `docs/specification/versioning.md`, `docs/specification/memory-and-learning.md`,
+    `docs/specification/coordination.md`, `docs/specification/execution-context.md`, `docs/specification/profiles.md`,
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/coordination.schema.json` (residue);
+  - code: `src/core-rules.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/versioned-setting-rollback.json`,
+    `fixtures/positive/coordination-reconcile-residue-extension.json`,
+    `fixtures/negative/coordination-residue-unnamespaced.json`, `fixtures/catalogue.json`;
+  - tests: `test/core-rules.test.ts` (new), `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-14).
+- **Not decided here:** a schema field for the active revision or the accepting checker of a learning proposal; manifest
+  fields for A2A task-state mapping or runner capabilities (a later profile revision may add them); whether a grant's
+  channels become required in a later contract version.
+- **Source:** the board run's inventory (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`, node `N10-core`);
+  DEC-0004…DEC-0009, DEC-0011, DEC-0012, DEC-0013; packet P5-01. DEC-0064 and `FAC-SEM-093`…`FAC-SEM-097`
+  were reserved by git CAS (`--key w5-p5-01-core-20261012 DEC`; `--key
+  w5-p5-01-sem-{result-integrity,approval-separation,pm-coverage,rollback,grant-window}-20261012 SEM`); `FAC-SEM-095`
+  (pm-coverage) is unused because that rule became the `FAC-SEM-006` fix. The owner session wrote this entry under its
+  leases; the record plane is `fs`.

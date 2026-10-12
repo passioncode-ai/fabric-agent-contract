@@ -4,15 +4,16 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 window leases and signing challenges](2026-10-12-w4-p4-05-leases-challenges.md) | DEC-0062, DEC-0063 (board run P4-05; V4-WINDOW-LEASE, V4-SIGNING-CHALLENGE) | pull request open |
+| [2026-10-12 the 0.1.0 core (P5-01)](2026-10-12-w5-p5-01-core.md) | DEC-0064 (board run P5-01; CT-14) | this pull request |
+| [2026-10-12 window leases and signing challenges](2026-10-12-w4-p4-05-leases-challenges.md) | DEC-0062, DEC-0063 (board run P4-05; V4-WINDOW-LEASE, V4-SIGNING-CHALLENGE) | merged, #65 `7b238c7` |
 | [2026-10-12 the descriptor for listings](2026-10-12-w4-p4-02-descriptor.md) | DEC-0061 (board run P4-02; V4-DESCRIPTOR) | merged, #63 `335e736` |
 | [2026-10-12 revocation delta and heartbeat](2026-10-12-w4-p4-06-delta-heartbeat.md) | DEC-0054 (board run P4-06; V4-DELTA-HEARTBEAT; the id pre-reserved by the owner's P3-02 run) | merged, #64 `5967bb1` |
 | [2026-10-12 a delegation key the estate certifies](2026-10-12-w4-p4-07-hubkey.md) | DEC-0060 (board run P4-07; DL-HUBKEY) | merged, #62 `557f30d` |
-| [2026-10-12 device transport and keys](2026-10-12-w4-p4-04-device-transport.md) | DEC-0056 (board run P4-04; DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST) | PR #58 |
+| [2026-10-12 device transport and keys](2026-10-12-w4-p4-04-device-transport.md) | DEC-0056 (board run P4-04; DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST) | merged, #58 `204f189` |
 | [2026-10-12 services on every system](2026-10-12-w4-p4-01-services.md) | DEC-0057 (board run P4-01; CT-01) | merged, #57 `8c6211e` |
 | [2026-10-12 channel status and embedded dashboard](2026-10-12-w4-p4-03-channel-dashboard.md) | DEC-0058, DEC-0059 (board run P4-03; CT-13) | merged, #56 `32c01ea` |
 | [2026-10-12 relay and secret envelope](2026-10-12-relay.md) | DEC-0047 (`fabric-relay/0.1`, `fabric-secret-envelope/1`; relay RLY-01) | merged, #53 `8060254` |
-| [2026-10-12 estate record](2026-10-12-w3-p3-03-estate-record.md) | DEC-0055 (board run P3-03; V4-ESTATE-RECORD) | pull request open |
+| [2026-10-12 estate record](2026-10-12-w3-p3-03-estate-record.md) | DEC-0055 (board run P3-03; V4-ESTATE-RECORD) | merged, #54 `b291bf0` |
 | [2026-10-12 activity and devices](2026-10-12-activity-devices.md) | DEC-0052, DEC-0053 (board run P3-02; CT-11, CT-25) | merged, #52 `92de756` |
 | [2026-10-12 agent package](2026-10-12-agent-package.md) | DEC-0050, DEC-0051 (board run P3-01; V4-PACKAGE, V4-AGENTREF) | merged, #50 `9d29d71` |
 | [2026-10-12 runner and model profiles](2026-10-12-runner-model-profiles.md) | DEC-0046 (board run P2-04; CT-05) | PR #46 `f41d8e6` |

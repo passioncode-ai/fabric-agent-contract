@@ -19,7 +19,7 @@
     "revision": { "$ref": "common.schema.json#/$defs/revisionRef" },
     "artifacts": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/artifact" } },
     "outcome": { "enum": ["succeeded", "failed", "cancelled", "expired", "abandoned"] },
-    "residue": { "type": "array", "items": { "enum": ["none", "uncommitted-files", "unpushed-commit", "open-pr", "merged-unreconciled", "external-effect"] } },
+    "residue": { "type": "array", "items": { "anyOf": [{ "enum": ["none", "uncommitted-files", "unpushed-commit", "open-pr", "merged-unreconciled", "external-effect"] }, { "type": "string", "pattern": "^[a-z][a-z0-9.-]*/[a-z][a-z0-9.-]*$", "description": "A namespaced residue category (DEC-0064)." }] } },
     "switch": {
       "type": "object",
       "required": ["from", "to", "reason", "pool"],

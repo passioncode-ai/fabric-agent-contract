@@ -56,7 +56,7 @@ The profile MUST declare:
 - an HTTPS Agent Card URL, normally `/.well-known/agent-card.json`;
 - the exact Agent Card skill IDs used to satisfy Fabric capabilities;
 - supported binding (`REST`, `JSON-RPC` or `gRPC`) and optional streaming/push;
-- task-state mapping and cancellation behavior;
+- task-state mapping and cancellation behavior — a host-side expectation of the A2A peer, not a manifest field (DEC-0064);
 - Fabric semantic probes.
 
 The A2A task is opaque to Fabric except for protocol-visible messages, artifacts,
@@ -73,7 +73,8 @@ The profile MUST declare:
 - executable reference and argument template with typed placeholders;
 - input mode and result-envelope location;
 - supported cancellation and heartbeat behavior;
-- required execution-context capabilities.
+- required execution-context capabilities — a host-side expectation the host checks against the execution context, not
+  a manifest field (DEC-0064).
 
 The project chooses a default local runner. An agent binding MAY override it only
 with a provider admitted to that project. The provider chooses the model within the project's allowed classes:

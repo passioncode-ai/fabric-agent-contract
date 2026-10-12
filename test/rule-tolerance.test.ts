@@ -10,7 +10,8 @@ const KINDS = [
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
-  "window-lease", "window-lease-division", "lease-reservation", "signing-credential"
+  "window-lease", "window-lease-division", "lease-reservation", "signing-credential",
+  "result", "learning", "promotion", "versioned-setting", "grant-window", "roles"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -27,7 +28,8 @@ const MEMBERS = [
   "head", "entries", "deltaHead", "estateRecord", "applied", "heartbeat", "broken", "revision", "prev", "sequence", "revocation",
   "revokedAt", "estate", "issuedAt", "x",
   "descriptor", "catalogue", "derived", "dataClass", "sent", "peer", "runner", "installedBy", "lifecycle", "commands", "placement", "origin",
-  "limitUsd", "leases", "reports", "lease", "window", "period", "amount", "expiresAt",
+  "done", "proof", "notVerified", "outcome", "approvedBy", "state", "meta", "rollbackBasis", "parents", "grant", "startsAt",
+  "assignments", "limitUsd", "leases", "reports", "lease", "window", "period", "amount", "expiresAt",
   "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd"
 ];
 

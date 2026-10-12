@@ -21,15 +21,16 @@ Every completed or stopped invocation produces one result envelope:
 - `trace`: `{traceparent, tracestate?}` of the span that produced the result; for a
   stored result it is authoritative over any response's `_meta` (DEC-0017).
 
-The four collections from DEC-0011 are required even when empty. `succeeded`
-MUST NOT be used when a required acceptance claim appears in `notVerified`.
+The four collections from DEC-0011 are required even when empty. Every claim a result reports is an acceptance claim,
+so `succeeded` MUST NOT be used while any claim appears in `notVerified` (`FAC-SEM-001`, DEC-0064).
 
 ## Claim and proof relation
 
 Each `done` item has a stable claim ID and statement. Each proof item names one or
 more claim IDs, an evidence URI, evidence kind, producer and capture time. A claim
 with no independent proof MAY be reported as done by the provider, but it MUST
-also be present in `notVerified` until a checker verifies it.
+also be present in `notVerified`, by its claim ID in `claim`, until a checker verifies it; and a proof item names only
+claims the result reports as done (`FAC-SEM-093`, DEC-0064).
 
 ## Evidence kinds
 
@@ -37,8 +38,10 @@ also be present in `notVerified` until a checker verifies it.
 `metric`, `external-source`, `human-approval`, `protocol-receipt` and namespaced
 extensions. Evidence records carry provenance and data classification.
 
-Evidence content MAY live outside the contract store. The URI, hash,
-classification, retention and authorization boundary remain in the record.
+Evidence content MAY live outside the contract store. A proof item references an evidence record by URI; the
+evidence record carries the hash, the classification and the authorization boundary, and its retention is resolved
+from the project's data-policy rule for that classification ([governance](governance-and-roles.md#data-classification),
+DEC-0064).
 
 ## Artifacts
 
@@ -59,3 +62,9 @@ preserve identifiers and lifecycle semantics.
 still includes useful artifacts and proof. Timeouts, cancellation and claim expiry
 are outcomes with evidence; they do not erase provider output. Secret values,
 unredacted credentials and private model reasoning MUST NOT appear in any field.
+
+## Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| `FAC-SEM-093` | `result` | every `proof[].claimIds` member names a `done[].claimId`, and every done claim no proof names is listed in `notVerified` by its claim ID (DEC-0011, DEC-0064) |

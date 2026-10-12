@@ -21,9 +21,11 @@ classes. Default authorization is `draft-only`. A standing grant MUST name:
 - grant ID and immutable revision;
 - principal/provider and project;
 - exact effect classes and resource patterns;
-- allowed channels and recipient constraints;
+- allowed channels and recipient constraints — absent `channels` allows no outbound channel and absent
+  `recipientConstraints` no recipient outside the project (the schema keeps both optional; the safe default is the
+  meaning of their absence, DEC-0064);
 - data classifications allowed;
-- start and expiry;
+- start and expiry, `expiresAt` after `startsAt`; an `active` grant is inside its window when evaluated (`FAC-SEM-097`);
 - rate and amount limits where applicable (amounts: the grant's `spend` block, [spend policy](spend-policy.md), DEC-0037);
 - for a grant that lets an agent call another agent: the callee (`audience`), its capabilities and the effect
   ceiling (`effectCeiling`) — a delegation grant ([delegation](delegation.md), DEC-0039). A delegation grant
@@ -47,8 +49,8 @@ Every artifact, observation, evidence record and memory record uses one class:
 | `credential` | token, key, session | storage in contract forbidden; reference only |
 | `regulated` | legally controlled records | raw promotion forbidden; jurisdiction policy required |
 
-Each record carries retention policy: purpose, maximum duration or durable basis,
-deletion mode and owner. Shorter upstream obligations win. Deletion of evidence
+A record's retention is resolved from the project data-policy rule for its classification: purpose, maximum duration
+or durable basis, deletion mode and owner (DEC-0064; records do not each carry a policy). Shorter upstream obligations win. Deletion of evidence
 content may leave a tombstone URI and hash when policy permits.
 
 ## Provenance
@@ -62,4 +64,13 @@ An external claim without a resolvable receipt stays `notVerified`.
 An agent MUST NOT approve its own global promotion, privileged grant, checker
 rule change or policy change. Independent checker identity must differ from the
 producing binding revision. Product manager approval is sufficient for ordinary
-project settings; CEO approval is required for estate scope.
+project settings; CEO approval is required for estate scope. An approved learning proposal or promotion names its
+approver in `approvedBy`, who is never its author (`meta.createdBy`, `FAC-SEM-094`). Every project an active assignment
+scopes has exactly one active product manager (`FAC-SEM-006`).
+
+## Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| `FAC-SEM-094` | `learning`, `promotion` | an approved learning proposal or promotion names its approver, who is not its author (DEC-0004, DEC-0012, DEC-0064) |
+| `FAC-SEM-097` | `grant-window` | a standing grant's `expiresAt` is after its `startsAt`, both strict RFC 3339; given `{grant, at}`, an `active` grant is inside its window at `at` (DEC-0064) |

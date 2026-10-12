@@ -253,7 +253,11 @@ A useful learning records goal, failed attempt, separately verified correction,
 causal hypothesis, evidence, recurrence signal, scope and proposed change. It
 MUST NOT mutate the active revision, target the current run, approve itself or
 change its own acceptance checker. Product managers approve project proposals;
-the CEO approves global proposals.
+the CEO approves global proposals. The contract checks the approval: an approved
+proposal names `approvedBy`, never its author `meta.createdBy` (`FAC-SEM-094`,
+DEC-0064). Which revision is active, which checker accepts the retro's own run and
+whether the approver holds the product-manager or CEO role are the host's records,
+not fields of the proposal, so the host checks those clauses before it applies one.
 
 The project memory audit runs periodically and after material incidents. It
 measures unsupported claims, unresolved conflicts, stale supported records,
