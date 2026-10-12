@@ -14,6 +14,8 @@
 import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { isEd25519Key, p256KeyRefusal, p256PublicKey, type P256Key } from "./p256.js";
+import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
+import { isObject, type JsonObject } from "./findings.js";
 
 export const RELAY_PROTOCOL = "fabric-relay/0.1";
 export const RELAY_SUBPROTOCOL = "fabric-relay.v1";
@@ -155,5 +157,56 @@ export function verifyMessageBody(
   if (exp <= iat || exp - iat > MAX_MESSAGE_TTL_SECONDS * 1000) return { ok: false, reason: "lifetime-too-long" };
   if (now.getTime() >= exp) return { ok: false, reason: "expired" };
   return { ok: true, payload: payload as unknown as RelayMessagePayload };
+}
+
+/**
+ * What a relay admits from: the estate record it holds, which it applies only when the candidate is valid against
+ * `estate-record.schema.json` (`schemaValid`) and `verifyEstateRecord` accepts it against the revision held — or, for
+ * revision 1, against the passkeys `pinned` when the relay was set up for the estate (DEC-0047 item 4, DEC-0055).
+ */
+export interface AdmissionInput {
+  held?: JsonObject; // the revision the relay verified and applied last, if any
+  candidate?: unknown; // a newer revision offered to it
+  pinned: readonly unknown[]; // the estate's first passkeys, pinned at setup
+  at: Date;
+  schemaValid: (record: unknown) => boolean;
+}
+
+export type AdmissionResult =
+  | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array> }
+  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "expired"; problem?: EstateRecordProblem };
+
+/**
+ * The admission set — kid → `#sig` key as SEC 1 octets — of the machines in the verified estate record, minus revoked
+ * machines and keys; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
+ * revision's window has ended the relay fails closed (`expired`): no new `auth` is admitted until a newer verified
+ * revision arrives. The organization record has no reference yet (`org-authority/1`, Fabric D8), so an organization's
+ * relay has no admission source of its own.
+ */
+export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
+  let record = input.held;
+  if (input.candidate !== undefined) {
+    if (!input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
+    const verdict = verifyEstateRecord(input.candidate, input.held ? { parent: input.held, at: input.at } : { authorities: input.pinned, at: input.at });
+    if (!verdict.ok) return { ok: false, refusal: "unverified", problem: verdict.problem };
+    record = input.candidate as JsonObject;
+  }
+  if (!record) return { ok: false, refusal: "no-record" };
+  const now = input.at.getTime();
+  const from = Date.parse(String(record.issuedAt)), until = Date.parse(String(record.validUntil));
+  if (!Number.isFinite(now) || !Number.isFinite(from) || !Number.isFinite(until) || now < from || now > until) return { ok: false, refusal: "expired" };
+  const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
+  const revoked = (kind: string) => new Set(list(record.revocations).filter((entry) => entry.kind === kind).map((entry) => entry.ref));
+  const machines = revoked("machine"), keys = revoked("device-key");
+  const set = new Map<string, Uint8Array>();
+  for (const machine of list(record.machines)) {
+    if (machines.has(machine.id)) continue;
+    for (const key of list(machine.deviceKeys)) {
+      if (key.use === "sig" && typeof key.kid === "string" && key.kid.endsWith("#sig") && typeof key.publicKey === "string" && !keys.has(key.kid)) {
+        set.set(key.kid, Buffer.from(key.publicKey, "base64"));
+      }
+    }
+  }
+  return { ok: true, held: record, revision: Number(record.revision), set };
 }
 // #endregion relay

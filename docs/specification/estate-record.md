@@ -77,7 +77,7 @@ kept outside the signed record, so the record carries no label a person chose:
 
 - **`deviceKeys`** — DEC-0053's device keys by role: exactly one `<id>#sig` (ES256 or Ed25519) and at most one
   `<id>#kem` (ECDH over P-256), each named for this machine, valid for its algorithm and never one key in both roles
-  (`FAC-SEM-073`). The relay seals a secret to the `#kem` key ([DEC-0047](relay.md#the-secret-envelope)).
+  (`FAC-SEM-073`). The sending machine seals a secret to the `#kem` key and the relay carries it ([DEC-0047](relay.md#the-secret-envelope)).
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A

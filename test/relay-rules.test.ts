@@ -84,12 +84,25 @@ describe("welcome and delta carry the check-in's revocation-delta shape (DEC-004
     expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/device-check-in.schema.json`, { ...checkIn, records: old }).valid).toBe(false);
   });
 
-  it("refuses the old {seq, hash} shape, an estate revision of 0 or null, and admits none at all", () => {
+  it("refuses the old {seq, hash} shape, and an estate revision that is 0, null or absent", () => {
     expect(validateDocument(validator, frame, { ...welcome, deltaHead: { seq: 41, hash: "x" } }).valid).toBe(false);
     expect(validateDocument(validator, frame, { ...welcome, deltaHead: { ...head, sha256: "A".repeat(64) } }).valid).toBe(false);
     expect(validateDocument(validator, frame, { ...welcome, estateRevision: 0 }).valid).toBe(false);
     expect(validateDocument(validator, frame, { ...welcome, estateRevision: null }).valid).toBe(false);
+    // A relay admits only from a verified estate record, so every welcome names its revision.
     const { estateRevision: _omitted, ...withoutRevision } = welcome;
-    expect(validateDocument(validator, frame, withoutRevision).valid).toBe(true);
+    expect(validateDocument(validator, frame, withoutRevision).valid).toBe(false);
   });
 });
+
+describe("the envelope's slot name (DEC-0047 item 7)", () => {
+  it("is 1 to 64 characters, like a package's secret names", () => {
+    const envelope = load("semantic/relay-envelope-ok.json").input;
+    const schema = `${SCHEMA_PREFIX}schemas/secret-envelope.schema.json`;
+    const withSlot = (slot: string) => ({ ...envelope, header: { ...envelope.header, slot } });
+    expect(validateDocument(validator, schema, withSlot(`A${"B".repeat(63)}`)).valid).toBe(true);
+    expect(validateDocument(validator, schema, withSlot(`A${"B".repeat(64)}`)).valid).toBe(false);
+    expect(validateDocument(validator, schema, withSlot("")).valid).toBe(false);
+  });
+});
+

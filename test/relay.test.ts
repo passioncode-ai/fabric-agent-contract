@@ -3,10 +3,11 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { rfc8785 } from "../src/canonical.js";
-import { projectRoot } from "../src/contract.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { createValidator, validateDocument } from "../src/validator.js";
 import {
   AUTH_WINDOW_SECONDS, CLOCK_SKEW_SECONDS, CLOSE_CODES, IDLE_CLOSE_SECONDS, MAX_BODY_BYTES, MAX_FRAME_BYTES, MAX_MESSAGE_TTL_SECONDS,
-  RELAY_ERROR_CODES, admit, instant, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
+  RELAY_ERROR_CODES, admit, instant, relayAdmissionSet, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
   type AuthContext, type AuthFrame
 } from "../src/relay.js";
 
@@ -21,6 +22,7 @@ type Vector = {
   ed25519: { key: Record<string, string>; frame: AuthFrame; expect: string };
 };
 const v = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "relay.json"), "utf8")) as Vector;
+const validator = await createValidator();
 const octets = Buffer.from(v.machineKeyOctets, "base64");
 const ctx = (over: Partial<AuthContext> = {}): AuthContext => ({
   relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false,
@@ -198,3 +200,79 @@ describe("limits and constants", () => {
     expect(IDLE_CLOSE_SECONDS).toBe(90);
   });
 });
+
+/** The same 64 bytes in a non-canonical spelling: the 86th character carries four spare bits a lenient decoder drops. */
+const respell = (sig: string): string => {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const last = alphabet.indexOf(sig[sig.length - 1] as string);
+  const other = alphabet[(last & 0b110000) | ((last + 1) & 0b001111)] as string;
+  return sig.slice(0, -1) + other;
+};
+
+describe("a signature's spelling (review of #53, non-blocking 1)", () => {
+  it("refuses the same bytes spelled non-canonically, in admit and in verifyEs256", () => {
+    const sig = respell(v.auth.frame.sig);
+    expect(sig).not.toBe(v.auth.frame.sig);
+    expect(Buffer.from(sig, "base64url").equals(Buffer.from(v.auth.frame.sig, "base64url"))).toBe(true);
+    expect(admit({ ...v.auth.frame, sig }, ctx())).toEqual({ ok: false, code: "unauthenticated" });
+    expect(verifyEs256(v.machineKey, v.auth.signingInput, sig)).toBe(false);
+  });
+});
+
+describe("relayAdmissionSet: admission only from a verified estate record (DEC-0055; review of #53, A)", () => {
+  const schemaValid = (record: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/estate-record.schema.json`, record).valid;
+  type Case = { name: string; record: Record<string, any>; trust: { at: string; parent?: Record<string, any> } };
+  const estate = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "estate-record.json"), "utf8")) as {
+    keys: { passkeyEs256: { authority: unknown } }; cases: Case[];
+  };
+  const [rev1, rev2] = [estate.cases[0]!.record, estate.cases[1]!.record];
+  const pinned = [estate.keys.passkeyEs256.authority];
+  const at1 = new Date(estate.cases[0]!.trust.at), at2 = new Date(estate.cases[1]!.trust.at);
+
+  it("admits from revision 1 verified against the passkeys pinned at setup", () => {
+    const result = relayAdmissionSet({ candidate: rev1, pinned, at: at1, schemaValid });
+    expect(result.ok && [...result.set.keys()].sort()).toEqual(["m-4c1e#sig", "m-9a07#sig"]);
+    expect(result.ok && result.revision).toBe(1);
+  });
+
+  it("applies revision 2 only against the revision held, and drops the machine it revokes", () => {
+    const result = relayAdmissionSet({ held: rev1, candidate: rev2, pinned, at: at2, schemaValid });
+    expect(result.ok && [...result.set.keys()]).toEqual(["m-4c1e#sig"]);
+    expect(result.ok && result.held).toBe(rev2);
+  });
+
+  it("refuses an unverified candidate, a forged higher revision and a schema-invalid one, changing nothing", () => {
+    const tampered = { ...rev1, machines: [...rev1.machines, { ...rev1.machines[0], id: "m-intruder" }] };
+    expect(relayAdmissionSet({ candidate: tampered, pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "unverified", problem: "digest-mismatch" });
+    expect(relayAdmissionSet({ held: rev1, candidate: { ...rev2, revision: 3 }, pinned, at: at2, schemaValid }))
+      .toMatchObject({ ok: false, refusal: "unverified" });
+    expect(relayAdmissionSet({ candidate: rev1, pinned: [], at: at1, schemaValid })).toEqual({ ok: false, refusal: "unverified", problem: "no-trusted-authority" });
+    expect(relayAdmissionSet({ held: rev1, candidate: rev1, pinned, at: at1, schemaValid })).toMatchObject({ ok: false, refusal: "unverified", problem: "broken-chain" });
+    expect(relayAdmissionSet({ candidate: { ...rev1, schema: "estate-record/9" }, pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "invalid" });
+    // The held revision still admits after every refusal above: a refused candidate changes nothing.
+    expect(relayAdmissionSet({ held: rev1, pinned, at: at1, schemaValid }).ok).toBe(true);
+  });
+
+  it("fails closed when the held revision's window has ended, and admits nobody without a record", () => {
+    const after = new Date(Date.parse(rev1.validUntil) + 1000);
+    expect(relayAdmissionSet({ held: rev1, pinned, at: after, schemaValid })).toEqual({ ok: false, refusal: "expired" });
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 1000), schemaValid })).toEqual({ ok: false, refusal: "expired" });
+    expect(relayAdmissionSet({ pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "no-record" });
+  });
+
+  it("drops a machine revoked while still listed, and reads a record without revocations", () => {
+    const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-9a07", revokedAt: "2026-10-12T10:00:00Z" }] };
+    const result = relayAdmissionSet({ held, pinned, at: at1, schemaValid });
+    expect(result.ok && [...result.set.keys()]).toEqual(["m-4c1e#sig"]);
+    const { revocations: _none, ...bare } = rev1;
+    const all = relayAdmissionSet({ held: bare, pinned, at: at1, schemaValid });
+    expect(all.ok && all.set.size).toBe(2);
+  });
+
+  it("drops a revoked device key, and admits exactly what the set holds", () => {
+    const held = { ...rev1, revocations: [{ kind: "device-key", ref: "m-9a07#sig", revokedAt: "2026-10-12T10:00:00Z" }] };
+    const result = relayAdmissionSet({ held, pinned, at: at1, schemaValid });
+    expect(result.ok && [...result.set.keys()]).toEqual(["m-4c1e#sig"]);
+  });
+});
+

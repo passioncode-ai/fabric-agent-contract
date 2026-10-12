@@ -108,9 +108,9 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | an estate record's `digest`, over the record without `digest` and `signature` | RFC 8785 | `estateRecordDigest` | [estate record](estate-record.md#the-digest), DEC-0055 |
 | an estate revision's passkey challenge, SHA-256 over `{type: "estate-revision/1", digest}` | RFC 8785 | `estateChallenge` (`estateChallengeInput` for the bytes) | [estate record](estate-record.md#the-signature), DEC-0055 |
 | a revisioned object's `contentHash`, over the object without `contentHash` | RFC 8785 | `rfc8785`; no contract code computes it | [overview](overview.md#common-identity-and-references) |
-| a relay machine's proof of its device key, `relay-auth/1` `{type, relay, nonce, estate, kid, iat}` | RFC 8785 | `relayAuthSigningInput` in [`src/relay.ts`](../../src/relay.ts) | [relay](relay.md#admission), DEC-0047 |
-| a relay blob request, `relay-blob/1` `{type, relay, method, digest, recipients, iat}` | RFC 8785 | `relayBlobSigningInput` | [relay](relay.md#blobs), DEC-0047 |
-| a relay message body's JWS payload, `{type, from, to, msgId, iat, payload}` | RFC 8785 | the sender; checked by `verifyMessageBody` | [relay](relay.md#messages), DEC-0047 |
+| a relay machine's proof of its device key, `relay-auth/1` `{type, alg, relay, nonce, estate, kid, iat}` | RFC 8785 | `relayAuthSigningInput` in [`src/relay.ts`](../../src/relay.ts) | [relay](relay.md#admission), DEC-0047 |
+| a relay blob request, `relay-blob/1` `{type, alg, relay, method, digest, recipients, iat}` | RFC 8785 | `relayBlobSigningInput` | [relay](relay.md#blobs), DEC-0047 |
+| a relay message body's JWS payload, `{type, from, to, msgId, iat, exp, payload}` (`exp` signed) | RFC 8785 | the sender; checked by `verifyMessageBody` | [relay](relay.md#messages), DEC-0047 |
 | a secret envelope's header, as the HPKE additional data; its signature over `{header, ct}`; its digest over the whole envelope | RFC 8785 | `sealEnvelope`, `openEnvelope`, `envelopeDigest` in [`src/secret-envelope.ts`](../../src/secret-envelope.ts) | [relay](relay.md#the-secret-envelope), DEC-0047 |
 
 A JWS — the delegation token, the approval document — signs its own base64url segments as sent and needs no

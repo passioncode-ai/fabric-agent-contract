@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { envelopeDigest, hpkeOpenBase, hpkeSealBase, openEnvelope, sealEnvelope, type OpenContext, type SecretEnvelope } from "../src/secret-envelope.js";
+import { envelopeDigest, estateEnvelopeContext, hpkeOpenBase, hpkeSealBase, openEnvelope, sealEnvelope, type OpenContext, type SecretEnvelope } from "../src/secret-envelope.js";
 
 // DEC-0047 item 7. The HPKE suite is checked against RFC 9180 §A.3.1 (text pinned in docs/evidence/sources.md); the
 // envelope against the shared vector every consumer runs.
@@ -33,7 +33,7 @@ const ctx = (over: Partial<OpenContext> = {}): OpenContext => ({
   ownKemKid: vector.open.ownKemKid,
   ownKemPrivateKey: Buffer.from(vector.recipientKemPrivateKey, "hex"),
   senderKey: (kid) => (kid === SENDER ? vector.senderKey : undefined),
-  mayHold: (kid, slot) => kid === SENDER && slot === vector.envelope.header.slot,
+  mayHold: (kid, agentRef, slot) => kid === SENDER && agentRef === vector.envelope.header.agentRef && slot === vector.envelope.header.slot,
   currentPlacement: () => vector.open.placement,
   now: new Date(vector.open.now),
   ...over
@@ -74,7 +74,7 @@ describe("fabric-secret-envelope/1", () => {
     const pk = kem.getPublicKey(null, "uncompressed");
     const recipientKey = { kty: "EC", crv: "P-256", x: pk.subarray(1, 33).toString("base64url"), y: pk.subarray(33).toString("base64url") };
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
-    const base = { recipientKid: "m#kem", recipientKey, senderKid: "s#sig", senderKey: sender.privateKey, slot: "K", placement: 1,
+    const base = { recipientKid: "m#kem", recipientKey, senderKid: "s#sig", senderKey: sender.privateKey, agentRef: "urn:fabric:agent:example:a", slot: "K", placement: 1,
       iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"), secret: Buffer.from("v") };
     const envelope = sealEnvelope(base);
     const open = openEnvelope(envelope, {
@@ -115,7 +115,7 @@ describe("fabric-secret-envelope/1", () => {
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
     const seal = (over: Record<string, unknown>) => sealEnvelope({ recipientKid: vector.open.ownKemKid, recipientKey: vector.recipientKey,
-      senderKid: SENDER, senderKey: sender.privateKey, slot: vector.envelope.header.slot, placement: vector.open.placement,
+      senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement,
       iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-13T00:00:01Z"), secret: Buffer.from("x"), ...over });
     expect(openEnvelope(seal({}), ctx({ senderKey: () => senderKey }))).toEqual({ ok: false, refusal: "lifetime-too-long" });
     const otherKem = createECDH("prime256v1");
@@ -131,7 +131,7 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
   const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
   const T0 = Date.parse("2026-10-12T00:00:00Z");
   const seal = (over: Record<string, unknown> = {}) => sealEnvelope({ recipientKid: vector.open.ownKemKid, recipientKey: vector.recipientKey,
-    senderKid: SENDER, senderKey: sender.privateKey, slot: vector.envelope.header.slot, placement: vector.open.placement,
+    senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement,
     iat: new Date(T0), exp: new Date(T0 + 3_600_000), secret: Buffer.from("x"), ...over });
   const open = (envelope: unknown, over: Partial<OpenContext> = {}) =>
     openEnvelope(envelope, ctx({ senderKey: () => senderKey, now: new Date(T0 + 1_000), ...over }));
@@ -170,6 +170,15 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
     expect(open(seal(), { now: new Date(T0 + 3_600_000) })).toEqual({ ok: false, refusal: "expired" });
   });
 
+  it("refuses the same 64 signature bytes spelled non-canonically (the last character's spare bits)", () => {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const last = alphabet.indexOf(vector.envelope.sig.slice(-1));
+    const respelled = clone();
+    respelled.sig = vector.envelope.sig.slice(0, -1) + alphabet[(last & 0b110000) | ((last + 1) & 0b001111)];
+    expect(Buffer.from(respelled.sig, "base64url").equals(Buffer.from(vector.envelope.sig, "base64url"))).toBe(true);
+    expect(openEnvelope(respelled, ctx())).toEqual({ ok: false, refusal: "bad-signature" });
+  });
+
   it("refuses an encapsulated key off the curve and a signature that is not 64 canonical bytes", () => {
     const offCurve = clone();
     const enc = Buffer.from(offCurve.header.enc, "base64url");
@@ -187,43 +196,75 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
   });
 });
 
-describe("keys as the estate record stores them (DEC-0055, DEC-0053's base64 SEC 1)", () => {
-  // The record's machine keys are public halves only (their private halves were never kept), so the test seals to the
-  // record's #kem key and runs every open check up to HPKE on the record's own data: who may hold the slot, the
-  // revision as the placement. Opening itself needs the target's private key, which no fixture holds.
-  type Record_ = { revision: number; machines: Array<{ id: string; deviceKeys: Array<{ kid: string; use: string; publicKey: string }>;
-    secrets: Array<{ slot: string; from: string }> }> };
-  const record = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "positive", "estate-record-first.json"), "utf8")) as Record_;
-  const machine = record.machines[0]!;
-  const keyOf = (use: string) => Buffer.from(machine.deviceKeys.find((k) => k.use === use)!.publicKey, "base64");
-  const kemKid = machine.deviceKeys.find((k) => k.use === "kem")!.kid;
-  const sigKid = machine.deviceKeys.find((k) => k.use === "sig")!.kid;
-  const slot = machine.secrets[0]!.slot;
-  const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
-  const senderKid = `${machine.secrets[0]!.from}-peer#sig`;
-  const sealed = sealEnvelope({ recipientKid: kemKid, recipientKey: keyOf("kem"), senderKid, senderKey: sender.privateKey, slot,
-    placement: record.revision, iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"), secret: Buffer.from("x") });
-  const other = createECDH("prime256v1");
-  other.generateKeys();
-  const recordCtx = (over: Partial<OpenContext> = {}): OpenContext => ({
-    ownKemKid: kemKid, ownKemPrivateKey: other.getPrivateKey(), senderKey: (kid) => (kid === senderKid ? sender.publicKey.export({ format: "jwk" }) : undefined),
-    mayHold: (kid, name) => kid === senderKid && machine.secrets.some((s) => s.slot === name),
-    currentPlacement: () => record.revision, now: new Date("2026-10-12T00:30:00Z"), ...over
+describe("the open context from the estate record (DEC-0055; review of #53, B)", () => {
+  // A revision as the target applies it after verifyEstateRecord: m-4c1e's #sig is replaced with a key this test holds,
+  // so the holder the record names really signs; everything else is the record fixture's.
+  type Json = Record<string, any>;
+  const base = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "positive", "estate-record-first.json"), "utf8")) as Json;
+  const holderKey = generateKeyPairSync("ec", { namedCurve: "P-256" });
+  const octets = (pub: ReturnType<typeof generateKeyPairSync>["publicKey"]) => {
+    const jwk = pub.export({ format: "jwk" }) as Record<string, string>;
+    return Buffer.concat([Buffer.from([4]), Buffer.from(jwk.x!, "base64url"), Buffer.from(jwk.y!, "base64url")]).toString("base64");
+  };
+  const withHolder = (record: Json, revision: number, mutate: (r: Json) => void = () => {}): Json => {
+    const r = JSON.parse(JSON.stringify(record)) as Json;
+    r.revision = revision;
+    for (const m of r.machines) for (const k of m.deviceKeys) if (k.kid === "m-4c1e#sig") k.publicKey = octets(holderKey.publicKey);
+    mutate(r);
+    return r;
+  };
+  const target = base.machines[0].id as string; // m-4c1e: the machine the secret is placed on, and its holder
+  const kem = Buffer.from(base.machines[0].deviceKeys.find((k: Json) => k.use === "kem").publicKey, "base64");
+  const kemKid = base.machines[0].deviceKeys.find((k: Json) => k.use === "kem").kid as string;
+  const { agentRef, slot, from } = base.machines[0].secrets[0] as { agentRef: string; slot: string; from: string };
+  const seal = (over: Record<string, unknown> = {}) => sealEnvelope({ recipientKid: kemKid, recipientKey: kem, senderKid: `${from}#sig`,
+    senderKey: holderKey.privateKey, agentRef, slot, placement: 1, iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"),
+    secret: Buffer.from("x"), ...over });
+  const otherKem = createECDH("prime256v1");
+  otherKem.generateKeys();
+  const open = (envelope: unknown, applied: Json[]) => openEnvelope(envelope, {
+    ownKemKid: kemKid, ownKemPrivateKey: otherKem.getPrivateKey(), now: new Date("2026-10-12T00:30:00Z"), ...estateEnvelopeContext(applied, target)
   });
 
-  it("seals to the record's #kem key, given as base64 SEC 1 octets", () => {
-    expect(sealed.header).toMatchObject({ recipient: kemKid, slot, placement: record.revision, alg: "ES256" });
-    expect(record.revision).toBeGreaterThanOrEqual(1);
+  it("seals to the record's #kem key as base64 SEC 1, and opens up to HPKE on the record's holder, key and revision", () => {
+    expect(seal().header).toMatchObject({ recipient: kemKid, agentRef, slot, placement: 1, alg: "ES256" });
+    // Every check passes on the record's data; HPKE refuses only because no fixture holds the target's private half.
+    expect(open(seal(), [withHolder(base, 1)])).toEqual({ ok: false, refusal: "cannot-open" });
   });
 
-  it("passes every open check on the record's data, and stops only at HPKE without the target's private key", () => {
-    expect(openEnvelope(sealed, recordCtx())).toEqual({ ok: false, refusal: "cannot-open" });
-    expect(openEnvelope(sealed, recordCtx({ currentPlacement: () => record.revision + 1 }))).toEqual({ ok: false, refusal: "placement-stale" });
+  it("refuses a sender the record does not name for that agent's slot, even with the same slot name", () => {
+    const twoAgents = withHolder(base, 1, (r) => {
+      r.machines[0].secrets.push({ agentRef: "urn:fabric:agent:example:other", slot, from: r.machines[1].id });
+    });
+    const forOther = seal({ agentRef: "urn:fabric:agent:example:other" });
+    expect(open(forOther, [twoAgents])).toEqual({ ok: false, refusal: "sender-not-allowed" });
+    expect(open(seal(), [twoAgents])).toEqual({ ok: false, refusal: "cannot-open" });
   });
 
-  it("reads the record's #sig key as a valid P-256 key: a wrong signer is bad-signature, never bad-key", () => {
-    expect(openEnvelope(sealed, recordCtx({ senderKey: () => keyOf("sig") }))).toEqual({ ok: false, refusal: "bad-signature" });
-    expect(sigKid.endsWith("#sig")).toBe(true);
+  it("keeps a placement current while it is unchanged, and makes an envelope under a replaced one stale", () => {
+    const r1 = withHolder(base, 1), r2 = withHolder(base, 2);
+    const moved = withHolder(base, 3, (r) => { r.machines[0].secrets[0].from = r.machines[1].id; });
+    const back = withHolder(base, 4);
+    const ctx = estateEnvelopeContext([r1, r2], target);
+    expect(ctx.currentPlacement(agentRef, slot)).toBe(1); // unchanged since revision 1
+    expect(open(seal({ placement: 1 }), [r1, r2])).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(estateEnvelopeContext([r1, r2, moved, back], target).currentPlacement(agentRef, slot)).toBe(4);
+    expect(open(seal({ placement: 2 }), [r1, r2, moved, back])).toEqual({ ok: false, refusal: "placement-stale" });
+    expect(estateEnvelopeContext([r1], target).currentPlacement("urn:fabric:agent:example:none", slot)).toBeUndefined();
+  });
+
+  it("takes the sender's key from the record, and none for a revoked machine or key", () => {
+    const r = withHolder(base, 1);
+    const ctx = estateEnvelopeContext([r], target);
+    expect(ctx.senderKey(`${from}#sig`)).toEqual(Buffer.from(octets(holderKey.publicKey), "base64"));
+    expect(ctx.senderKey("nobody#sig")).toBeUndefined();
+    const revokedKey = withHolder(base, 1, (x) => { x.revocations = [{ kind: "device-key", ref: `${from}#sig`, revokedAt: "2026-10-12T00:00:00Z" }]; });
+    expect(estateEnvelopeContext([revokedKey], target).mayHold(`${from}#sig`, agentRef, slot)).toBe(false);
+    const revokedMachine = withHolder(base, 1, (x) => { x.revocations = [{ kind: "machine", ref: from, revokedAt: "2026-10-12T00:00:00Z" }]; });
+    expect(estateEnvelopeContext([revokedMachine], target).senderKey(`${from}#sig`)).toBeUndefined();
+    const bare = withHolder(base, 1, (x) => { delete x.machines[0].secrets; });
+    expect(estateEnvelopeContext([bare], target).mayHold(`${from}#sig`, agentRef, slot)).toBe(false);
+    const none = estateEnvelopeContext([], target);
+    expect([none.mayHold(`${from}#sig`, agentRef, slot), none.currentPlacement(agentRef, slot), none.senderKey(`${from}#sig`)]).toEqual([false, undefined, undefined]);
   });
 });
-

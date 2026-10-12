@@ -367,10 +367,10 @@ version and commit a consuming repository builds against.
 sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
 authority: it reads nothing it carries, decides no trust tier and never reports a queued command done.
 
-**Admission set**: The signing keys a **Relay** admits — the machines of the latest estate or
-organization record it holds, minus applied revocations. It keeps strangers out of mailboxes and is not
-authorization: a recipient decides the tier from the signed sender. Configured out of band until
-`estate-record/1` is accepted.
+**Admission set**: The signing keys a **Relay** admits — the machines of the estate record it holds,
+applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
+keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
+organization's relay has none of its own until `org-authority/1` (Fabric D8).
 
 **Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
 signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a

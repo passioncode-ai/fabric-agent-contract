@@ -1,7 +1,7 @@
 # Relay `fabric-relay/0.1`
 
 A relay carries sessions, messages, sealed secret envelopes and package blobs between the machines it admits: one
-owner's estate, or the members of one organization. **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
+owner's estate (an organization's members once `org-authority/1`, Fabric D8, gives them a record). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047; the reference server is
 [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
@@ -77,7 +77,8 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 
    Then it answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat}`.
    `deltaHead` has the shape of a device check-in's `records.revocationDelta`, so a node passes it on unchanged;
-   `estateRevision` is 1 or more, and absent while the relay holds no estate record. Otherwise it answers `error`:
+   `estateRevision` is the verified revision (1 or more) the relay admits from, always present. Otherwise it answers
+   `error`:
    - `protocol-unsupported`;
    - `unsupported-alg` (another `alg`, or an Ed25519 key);
    - `not-yet-valid` (`iat` more than 60 s ahead);
@@ -89,15 +90,21 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
    After the error it closes with code 4401 (unauthenticated) or 4403 (not admitted).
 4. The relay attributes every later frame on the connection to the admitted `kid`, and to nothing a frame claims.
 
-**The admission set** is the set of signing keys of the machines listed in the latest estate record (or
-organization record) the relay holds, minus those revoked by an applied delta. Being admitted by an organization's
-relay makes no machine T1 to another member (see [Trust tiers](#trust-tiers)). It keeps strangers out of
+**The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
+machines and keys (`relayAdmissionSet`). Being admitted by a relay makes no machine T1 to another owner's machine (see
+[Trust tiers](#trust-tiers)). It keeps strangers out of
 mailboxes. **It is not authorization**: a recipient checks the sender itself (see [Trust
 tiers](#trust-tiers)).
-- **From the record only.** The estate record is `estate-record/1` ([estate record](estate-record.md), DEC-0055):
-  the set is the `#sig` keys in its `machines[].deviceKeys`, given there as base64 SEC 1 octets. A relay refuses to
-  start with a deployment-configured set. (Until DEC-0055 was accepted, a deployment configured the set out of band;
-  that interim ended with it.)
+- **Only from a verified revision** ([estate record](estate-record.md), DEC-0055). The relay pins the estate's first
+  passkeys when it is set up for the estate, the same act as a machine's enrollment pin. It applies a revision only
+  when it is valid against `estate-record.schema.json` and `verifyEstateRecord` accepts it against the revision it
+  holds (revision 1: against the pinned passkeys). A refused revision changes nothing. A relay never starts with a
+  configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets.
+- **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
+  revision arrives. Sessions already open end at their next re-authentication; queued mail stays until its `ttl`.
+  Presence and `lastSeen` follow the same verified set.
+- **No organization record yet.** An organization's relay has no admission source of its own until
+  `org-authority/1` (Fabric D8) is decided.
 
 ## Messages
 
@@ -161,6 +168,7 @@ A secret moves to a machine only where a placed package declares it
 - **Header:**
   - `type`;
   - `alg`: `ES256`, signed with the rest;
+  - `agentRef`: the placed agent the slot belongs to — one slot name can belong to two agents;
   - `suite`;
   - `recipient` (`#kem`);
   - `sender` (`#sig`);
@@ -179,9 +187,11 @@ A secret moves to a machine only where a placed package declares it
   3. `recipient` is its own `#kem` key;
   4. the sender's key is a P-256 key and it and the encapsulated key pass SEC 1;
   5. the signature is 64 bytes and verifies;
-  6. the estate record lets the sender hold the slot: a placement of the slot on this machine names the sender's
-     machine as its `from` ([estate record](estate-record.md), DEC-0055);
-  7. `placement` is the current placement or newer: the revision (1 or more) of the estate record that placed it;
+  6. the latest estate-record revision this machine verified and applied places `(agentRef, slot)` on it from the
+     sender's machine ([estate record](estate-record.md), DEC-0055);
+  7. `placement` is at least the revision from which that placement holds unchanged; an envelope sealed under a
+     placement since replaced is `placement-stale` (`estateEnvelopeContext` derives 6 and 7, and the sender's key,
+     from the applied revisions);
   8. `iat` is at most 60 s ahead;
   9. the life is more than zero and at most 24 h;
   10. `now < exp`;

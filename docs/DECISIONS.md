@@ -2529,12 +2529,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      - the signature verifies.
 
      It then attributes every later frame on the connection to that `kid`.
-     - **The admission set** is the set of signing keys of the machines in the latest estate or organization record,
-       minus applied revocations. It is not authorization.
-     - **The set comes from the estate record only** (`estate-record/1`, DEC-0055: the `#sig` keys of
-       `machines[].deviceKeys`), and a relay refuses to start with a configured one. The interim this text first
-       named, a set configured out of band until `estate-record/1` was accepted, ended with DEC-0055, which landed
-       first.
+     - **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds,
+       minus revoked machines and keys (`relayAdmissionSet`). It is not authorization.
+     - **Only from a verified revision.** The relay pins the estate's first passkeys when it is set up for the
+       estate, the same act as a machine's enrollment pin. It applies a revision only when it is valid against the
+       schema and `verifyEstateRecord` accepts it against the revision it holds (revision 1: against the pinned
+       passkeys). A refused revision changes nothing, and a relay never starts with a configured set.
+     - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
+       revision arrives; open sessions end at their next re-authentication, and queued mail stays until its `ttl`.
+       Presence and `lastSeen` follow the same verified set.
+     - **No organization record yet.** An organization's relay has no admission source of its own until
+       `org-authority/1` (Fabric D8) is decided.
   5. **Messages.**
      - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
      - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
@@ -2562,24 +2567,30 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
          §A.3.1;
        - recipient: the target's `#kem` key;
        - `info`: the ASCII bytes `fabric-secret-envelope/1`;
-       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, slot, placement, iat, exp,
-         enc}`.
+       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, agentRef, slot, placement, iat,
+         exp, enc}`: a slot is named with its agent, since one slot name can belong to two agents.
      - A sealer refuses a recipient kid without `#kem` and a sender kid without `#sig`.
      - The sender signs `{header, ct}` with its `#sig` key. The envelope is named by
        `sha256:<hex of its RFC 8785 bytes>`.
-     - **A target opens an envelope only when all of these hold:**
-       - the recipient is its own;
-       - the keys are valid;
-       - the signature verifies;
-       - `alg` is `ES256` and the sender's key is P-256;
-       - the estate record (DEC-0055) lets the sender hold the slot, its placement naming the sender's machine;
-       - the placement is current or newer: an estate-record revision, 1 or more;
-       - `iat` is not more than 60 s ahead, and the life is more than zero, at most 24 hours and not over.
+     - **A target opens an envelope only when all of these hold, checked in this order** (a refusal names the first
+       that failed; relay.md and `openEnvelope` keep the same order):
+       1. it is well formed, its times real instants (`malformed`);
+       2. `alg` is `ES256` (`unsupported-alg`);
+       3. the recipient is its own `#kem` (`wrong-recipient`);
+       4. the sender's key is P-256 and it and the encapsulated key pass SEC 1 (`unsupported-alg`, `bad-key`);
+       5. the signature is 64 canonical bytes and verifies (`bad-signature`);
+       6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
+          it from the sender's machine (`sender-not-allowed`);
+       7. `placement` is at least the revision from which that placement holds unchanged (`placement-stale`);
+       8. `iat` is at most 60 s ahead (`not-yet-valid`);
+       9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
+       10. HPKE opens (`cannot-open`).
 
-       A refusal names the first check that failed.
+       `estateEnvelopeContext` derives the holder, the sender's key and the current placement from the target's
+       applied revisions.
   8. **Blobs.**
      - `PUT`/`GET /v1/blobs/<digest>` carry `Fabric-Relay-Request`: an ES256 signature over the RFC 8785 bytes of
-       `{type: "relay-blob/1", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
+       `{type: "relay-blob/1", alg: "ES256", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
        method, the digest and the recipients, so it is not a bearer credential.
      - A blob's name is always `sha256:` and the hex SHA-256 of its bytes. A package travels as its archive's
        bytes; its DEC-0050 content digest is not its blob name.
@@ -2587,7 +2598,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      - A blob is kept until every recipient fetched it, or until 7 days pass.
   9. **Revocation travels, it is not defined, here.**
      - `welcome` carries `deltaHead {sequence, sha256}`, the shape of DEC-0053's check-in
-       `records.revocationDelta`, so a node reports it as it came; `estateRevision` is 1 or more, or absent.
+       `records.revocationDelta`, so a node reports it as it came, and `estateRevision`, the verified revision (1 or
+       more) the relay admits from — always present, since a relay without one admits nobody.
      - New deltas and heartbeats are pushed to every connected machine they name. A node behind the head asks with
        `delta-query`.
      - A relay can delay revocation, which the signed heartbeat exposes, but it cannot forge it. The documents, keys,

@@ -15,6 +15,7 @@
       ],
       "recipient": "urn:fabric:machine:example-gpu-box#sig",
       "sender": "urn:fabric:machine:example-laptop#sig",
+      "agentRef": "urn:fabric:agent:example:inbox-digest",
       "slot": "EXAMPLE_API_KEY",
       "placement": 7,
       "iat": "2026-10-12T00:00:00Z",
