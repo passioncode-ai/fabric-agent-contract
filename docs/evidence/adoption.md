@@ -8,7 +8,8 @@ of implementation is the consumer's own test, named on the [board](../backlog.md
 
 ## 2026-10-12
 
-Method: for every repository of the organization, `gh api repos/<owner>/<repo>/contents/fabric-contract.lock.json`
+Method: for every repository of the organization, and for Project Observatory's node, which lives in a private
+repository and is named here only as the product, `gh api repos/<owner>/<repo>/contents/fabric-contract.lock.json`
 on the default branch (schema [`contract-pin.schema.json`](../../schemas/contract-pin.schema.json)), then
 `git show <pin>:docs/DECISIONS.md` in this repository for the decisions that commit holds. Repositories without the file do not pin
 the contract. Private agents of the operator that pin the contract are not named in this public repository.

@@ -49,7 +49,26 @@ Schema: [`service-descriptor.schema.json`](../../schemas/service-descriptor.sche
 
 An installer MUST write one descriptor per installed service instance, and its
 uninstaller MUST remove it. The running service MUST NOT write its own descriptor: the
-descriptor describes an installation, not a run.
+descriptor describes an installation, not a run. The one exception is an app, below.
+
+<a id="an-apps-descriptor"></a>
+
+**An app's descriptor (DEC-0069).** An app a person installs and starts — a desktop app such as Fabric — has no
+supervisor to write its descriptor. It carries `lifecycle.manager: "person"` with `lifecycle.app`, the installed app
+(a bundle or an executable), and no `label`, `plist`, `unit` or `task` (schema). Its installer writes the descriptor;
+when the installer cannot (a macOS app dragged into Applications), the app writes it on a start where none exists,
+where its own version differs from `installedBy.tool` (an update is a reinstall) or where it runs from another path
+than `lifecycle.app` (a moved app), and rewrites nothing on any other start ([`appDescriptorAction`](../../src/app-descriptor.ts)).
+An app running from a translocated copy (macOS App Translocation runs a quarantined app from a randomised read-only
+path) never records that path. Only an app that writes its own descriptor runs this; a descriptor an installer wrote is
+the installer's to update. `installedBy` is the object form
+`{by: "person", role, tool}`, `tool` naming the installer, or the app and its version (schema). It is removed at
+uninstall when it can be; a reader that does not find `lifecycle.app` treats the descriptor as stale
+(`appDescriptorStale`). **The descriptor says the app is installed, never that it runs.** `origin` is optional for an
+app, because its live origin changes from start to start: the app keeps its own liveness file, rewritten on every start
+and removed on quit, with its origin and process id. A kit that shows an "Open in <app>" button reads the descriptor;
+a caller that sends anything reads the liveness file and checks the process. An app's descriptor without an origin
+claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
 
 | Platform | Services directory |
 |---|---|
@@ -65,7 +84,7 @@ descriptor describes an installation, not a run.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
   remote one.
-- For a local placement `origin` MUST be `http://127.0.0.1:<port>`. **A port is a claim:**
+- For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a claim:**
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
   directory; a remote origin claims no port here.
@@ -152,6 +171,15 @@ Schema: [`service-events-page.schema.json`](../../schemas/service-events-page.sc
   events are returned. `limit` defaults to 50 and MUST NOT exceed 200.
 - A service MUST retain at least seven days or 1000 events, whichever is more.
 - `text` MUST be one sentence a person can read without the service's source code.
+- <a id="event-data"></a>`data` MAY carry the event's machine-readable fields (DEC-0070): `schema`, the absolute URI of
+  a payload schema the service publishes (under its origin or its repository), and `value`, an object of at most 32
+  members, each a scalar (a string of at most 500 characters, a number, a boolean, null), a list of at most 32 scalars
+  or an object of at most 32 scalar members — two levels at most (schema). A host that ignores `data` loses nothing:
+  `text` stays the sentence. A host validates `value` against `schema` when it knows that schema and otherwise treats
+  it as opaque, and never fails the event for it. `data` never carries a secret or personal data: no string sits under
+  a credential's name (a list's items and an object's members count under the outer name too) or has a credential's
+  shape, a URL with a credential included (`FAC-SEM-101`, the shared detector); personal data is the service's
+  duty, since no check can tell a name from another string.
 - `notify: true` asks a host to raise an operator notification; `link` is a path under
   the service origin that the notification opens. The host MAY suppress it by the
   operator's settings.
@@ -471,7 +499,7 @@ These rules are a local placement's; a remote one is supervised by its platform 
 | Rule | Requirement |
 |---|---|
 | One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. |
-| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler` and `node`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061). No supervisor file carries a secret. |
+| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. **No supervisor — `person`**: an app a person installs and starts ([an app's descriptor](#an-apps-descriptor), DEC-0069); no supervisor file and no marker. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler`, `node` and `person`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061, DEC-0069). No supervisor file carries a secret. |
 | Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. Node: a host asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off until it is started again, and to restart (DEC-0061). A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run; from the node, whether the child is kept on, whether it runs and its pid, which a host compares with the well-known `process.pid` as it compares systemd's `MainPID`). A host MUST NOT start a service process itself, and MUST NOT stop or signal a node's child or write a supervisor file for it. The node's operations' names and schemas are Project Observatory's (its row OBS-79); this row fixes what each does. |
@@ -687,7 +715,7 @@ token, it never presents a service's own descriptor token to call that service's
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
-| `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port; no two descriptors claim one `id.instance` |
+| `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port (an app's descriptor without an origin claims none, DEC-0069); no two descriptors claim one `id.instance` |
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
@@ -702,3 +730,4 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-086` | `service-descriptor` | `runner` and `installedBy` carry no value shaped like a credential (the shared detector); the finding names the place, never the value |
 | `FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | `FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
+| `FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |

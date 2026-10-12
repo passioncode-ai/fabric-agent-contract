@@ -287,6 +287,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-098` | `openrouter-attribution` | [OpenRouter attribution](openrouter-attribution.md#semantic-rules) | SEM-0098 |
 | `FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | [versioning](versioning.md#semantic-rules) | SEM-0099 |
 | `FAC-SEM-100` | `session-join` | [activity](activity.md#semantic-rules) | SEM-0100 |
+| `FAC-SEM-101` | `service-events-page` | [service](service.md#semantic-rules) | SEM-0101 |
 | `FAC-SEM-102` | `package` | [package](package.md#semantic-rules) | SEM-0102 |
 
 ## Compatibility policy

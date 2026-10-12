@@ -183,6 +183,9 @@ export function checkPackageFolder(pkg: JsonObject, files: ReadonlyMap<string, U
   return problems;
 }
 
+const mcpRequirements = (value: JsonObject): JsonObject[] =>
+  isObject(value.requires) && Array.isArray(value.requires.mcp) ? value.requires.mcp.filter(isObject) : [];
+
 /**
  * FAC-SEM-064: a package is whole — its digest is its own, each path is listed once and never `fabric.package.json`,
  * every file it names (the provider manifest, the service's entry, the evals suite, a vendored dependency) is listed,
@@ -229,7 +232,7 @@ function whole(value: JsonObject): Finding[] {
   });
   if (value.kind === "skill-set" && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a skill set is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
   // DEC-0071: a consumer agent is the plugin it is, so it lists the plugin manifest as a skill set does.
-  if (value.kind === "agent" && value.provider === undefined && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a consumer agent is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
+  if (value.kind === "agent" && value.provider === undefined && mcpRequirements(value).length > 0 && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a consumer agent is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
   return findings;
 }
 
@@ -273,9 +276,6 @@ function agentRef(value: JsonObject): Finding[] {
   if (value.agentRef === expected) return [];
   return [{ code: "FAC-SEM-066", instancePath: "/agentRef", message: `the agent is ${expected}: agentRef is derived from publisher and id` }];
 }
-
-const mcpRequirements = (value: JsonObject): JsonObject[] =>
-  isObject(value.requires) && Array.isArray(value.requires.mcp) ? value.requires.mcp.filter(isObject) : [];
 
 /** FAC-SEM-102 (DEC-0071): a package names each MCP role it requires once, so a placement maps one server to one role. */
 function mcpRoles(value: JsonObject): Finding[] {

@@ -212,7 +212,10 @@ export interface LeaseTrust {
 
 /** Whether `value` is a usable trust context, the clock aside. */
 function usableTrust(trust: LeaseTrust): boolean {
-  return isString(trust.machine) && isObject(trust.estateRecord) && usdMicros(trust.remainderUsd) !== undefined && (trust.held === undefined || isObject(trust.held));
+  const held = trust.held;
+  // A held lease the meter reads back must be one it could compare: a corrupt held state never reads as "nothing held".
+  const heldUsable = held === undefined || (isObject(held) && Number.isSafeInteger(held.sequence) && (held.sequence as number) >= 1 && isString(held.leaseId));
+  return isString(trust.machine) && isObject(trust.estateRecord) && usdMicros(trust.remainderUsd) !== undefined && heldUsable;
 }
 
 /**
@@ -253,6 +256,7 @@ export function verifyWindowLease(lease: unknown, trust: LeaseTrust): LeaseVerdi
   const sig = Buffer.from(lease.sig as string, "base64url");
   // The key and the signature are checked before use, as the package and delegation verifiers check theirs, so
   // `crypto.verify` answers false rather than throwing.
+  // The 32-byte, canonical `x` checked above is a key Node imports; nothing reaches a throw here.
   const key = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: x as string }, format: "jwk" });
   if (sig.length !== 64 || sig.toString("base64url") !== lease.sig || !verifySignature(null, input, key, sig)) return { ok: false, problem: "bad-signature" };
 
@@ -265,7 +269,7 @@ export function verifyWindowLease(lease: unknown, trust: LeaseTrust): LeaseVerdi
   if (held && leaseSlot(held) === leaseSlot(lease)) {
     const same = held.leaseId === lease.leaseId && windowLeaseSigningInput(held)?.equals(input) === true;
     // A newer lease supersedes the older; the same lease delivered again is the same lease.
-    if (!same && (lease.sequence as number) <= Number(held.sequence)) return { ok: false, problem: "superseded" };
+    if (!same && (lease.sequence as number) <= (held.sequence as number)) return { ok: false, problem: "superseded" };
   }
   if ((usdMicros(lease.amount) as bigint) > (usdMicros(trust.remainderUsd) as bigint)) return { ok: false, problem: "over-remainder" };
   return { ok: true, leaseId: lease.leaseId as string, slot: leaseSlot(lease), amount: lease.amount as string, expiresAt: lease.expiresAt as string };
