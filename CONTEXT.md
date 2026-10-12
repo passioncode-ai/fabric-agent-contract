@@ -415,9 +415,20 @@ in its check-in ([window lease](docs/specification/window-lease.md)).
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
 
+**Event data**: An optional `{schema, value}` on a service feed event: machine-readable fields under a schema the service
+publishes, bounded, never a secret; `text` stays the event (DEC-0070, [service](docs/specification/service.md#event-data)).
+
+**App descriptor**: The descriptor of an app a person installs and starts (`lifecycle.manager: "person"`): written by its
+installer, or by the app on an install or update; it says the app is installed, never that it runs — liveness is the
+app's own file (DEC-0069, [service](docs/specification/service.md#an-apps-descriptor)).
+
 **Session annotation**: A surface's event about a session (Fabric's end of a session, Switchboard's launch), written by
 the device's collector as `session.annotation` and never counted; the collector alone writes a session's intervals and
 usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/specification/activity.md#one-writer-per-session)).
+
+**Consumer agent**: An agent package that serves nothing and only calls MCP servers it names by role and tools
+(`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
+[package](docs/specification/package.md#a-consumer-agent)).
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

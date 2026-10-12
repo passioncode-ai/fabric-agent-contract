@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0069`
+**Next free ID:** `DEC-0072`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3877,3 +3877,126 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-100` were reserved by git CAS (`--key w6-p6-02-session-join-20261012 DEC`, `--key
   w6-p6-02-sem-session-join-20261012 SEM`); the SEM counter at origin is consistent, but its receipt commit is not
   reachable on origin's SEM chain (the agent-sync defect AGENT-SYNC-IDS); the record plane is `fs`.
+
+### DEC-0069 — An app's own descriptor: `lifecycle.manager: "person"`, written by its installer or by the app on an install or update, and never a statement that it runs
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Fabric's session on 2026-10-12 (its
+  CO-263, with its amendment: an update is a reinstall). Consumer adoption: Fabric writes its descriptor this way and
+  keeps its liveness in its own file (CT-19); the adapter's kits read an app's descriptor for an "Open in <app>" button
+  and its liveness file before sending anything (CT-18).
+- **Amends:** DEC-0015 (the one exception to "the running service MUST NOT write its own descriptor"), DEC-0032 and
+  DEC-0061 (a sixth `lifecycle.manager`, `person`). Closes Fabric's ask CO-263 (board row CT-19; packet P6-06).
+- **Decision:** in [service → An app's descriptor](specification/service.md#an-apps-descriptor) —
+  1. **`lifecycle.manager: "person"`** with `lifecycle.app`, the installed app (a bundle or an executable); no `label`,
+     `plist`, `unit` or `task`; `installedBy` in its object form with `by: "person"` (schema).
+  2. **Who writes it.** The installer; when there is none (a macOS app dragged into Applications), the app on a start
+     where no descriptor exists, where its version differs from `installedBy.tool`'s or where it runs from another path
+     than `lifecycle.app`, and on no other start; never from a translocated copy (`appDescriptorAction` in
+     `src/app-descriptor.ts`). Only an app that writes its own descriptor does this. Removed at uninstall when it can be; a reader that does not find
+     `lifecycle.app` treats it as stale (`appDescriptorStale`).
+  3. **Installed, never running.** `origin` is optional for an app; its live origin and process id are in the app's own
+     liveness file, rewritten on every start and removed on quit. A kit's "Open in <app>" button reads the descriptor; a
+     caller that sends anything reads the liveness file and checks the process. Without an origin, the descriptor claims
+     no port (`FAC-SEM-010`).
+- **Why:** an app has no supervisor, so the rule that only an installer writes a descriptor left Fabric's desktop app,
+  which has no installer on macOS, with no descriptor at all, and a descriptor that claimed a port it changes each start
+  would point callers at a dead origin.
+- **Compatibility:** Additive in the schema: a new enum value and an optional member, and `origin` stays required for
+  every other manager. The descriptor sits in a shared directory, so an app cannot choose its readers: a reader pinned
+  before this decision (Fabric Dashboards and the adapter's kits today) refuses or mislists `manager: "person"` and a
+  missing origin until it adopts this decision (CT-18, CT-21), and must skip such an entry rather than fail the
+  directory. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`;
+  - schemas: `schemas/service-descriptor.schema.json`;
+  - code: `src/app-descriptor.ts` (new), `src/semantic-rules.ts` (`FAC-SEM-010`);
+  - fixtures: `fixtures/positive/service-descriptor-person-app.json`, `fixtures/negative/service-descriptor-person-*`,
+    `fixtures/negative/service-descriptor-without-origin.json`, `fixtures/negative/service-descriptor-app-beside-launchd.json`,
+    `fixtures/vectors/app-descriptor.json`, `fixtures/catalogue.json`;
+  - tests: `test/app-descriptor.test.ts` (new); floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-19), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** the liveness file's name, place and shape (each app's own; Fabric's is its hub file); an app's
+  descriptor on Linux and Windows package managers that do have an installer (they write it as any installer does).
+- **Source:** Fabric's session, CO-263 and its amendment (2026-10-12, Fabric `main` `bb0e6870`); DEC-0015, DEC-0032,
+  DEC-0061; packet P6-06. DEC-0069 was reserved by git CAS (`--key w6-p6-06-app-descriptor-20261012 DEC`); no rule code
+  was needed; the record plane is `fs`.
+
+### DEC-0070 — A service feed event may carry machine-readable `data`: a published schema and a bounded value, never a secret
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for by a consumer service that publishes
+  daily activity summaries and unanswered community questions on its feed (2026-10-12), following option (b) of Fabric's
+  answer of 2026-10-11 (contract `1e7a7d6`). Consumer adoption: the adapter's kits let a service add `data` (CT-18);
+  Fabric reads it when it knows its schema and shows `text` otherwise (CT-19).
+- **Amends:** DEC-0015's events feed (`service-events-page.schema.json`, an optional member of an event). Packet P6-07.
+- **Decision:** in [service → Events feed](specification/service.md#event-data) —
+  1. **`data`** is optional: `{schema, value}`. `schema` is the absolute URI of a payload schema the service publishes;
+     `value` is an object of at most 32 members, each a scalar (a string of at most 500 characters, a number, a boolean,
+     null), a list of at most 32 scalars, or an object of at most 32 scalar members (schema).
+  2. **`text` stays the event.** A host that ignores `data` loses nothing; a host validates `value` against `schema` when
+     it knows that schema, otherwise treats it as opaque, and never fails an event for it.
+  3. **No secret, no personal data.** No string in `value` sits under a credential's name or has a credential's shape
+     (`FAC-SEM-101`, kind `service-events-page`, the shared detector of `src/secret-shape.ts`, values and URLs); a
+     list's items and an object's members count under the outer name too; a number under a name such as
+     `inputTokens` is a count. Personal data is the service's duty: no check tells a name from another string.
+- **Why:** consumers of a feed could only read the sentence; a summary or a question carried counts and ids a host had
+  to parse out of prose. A published schema keeps the fields the service's own, and the bounds keep a feed a feed.
+- **Compatibility:** Additive in the schema. The feed is pulled, so a service cannot know its readers' pins: a host that
+  validates events against a copy pinned before this decision refuses the new member (the event object is closed) until
+  it adopts this decision; a host that ignores unknown members, as Fabric Dashboards does, shows `text` as before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/service-events-page.schema.json`;
+  - code: `src/feed-data.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/service-events-page-data.json`, `fixtures/negative/service-events-page-data-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/feed-data.test.ts` (new), `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`; floor in
+    `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-18, CT-19), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** a registry of payload schemas; `data` on the Server-Sent Events stream beyond "the same event
+  objects" it already carries.
+- **Source:** the consumer service's request (2026-10-12); Fabric's answer (contract `1e7a7d6`); DEC-0015; packet P6-07.
+  DEC-0070 and `FAC-SEM-101` were reserved by git CAS (`--key w6-p6-07-feed-data-20261012 DEC`, `--key
+  w6-p6-07-sem-feed-data-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0071 — A consumer agent: `kind: agent` without a provider manifest, requiring MCP servers by role and tools
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for and agreed by the first organization
+  server's session on 2026-10-12 (its admin agents are plugins that only call its MCP at each organization's own
+  address). Consumer adoption: the first organization server repacks its admin agents as consumer agents (CT-04);
+  Project Observatory's node checks `requires.mcp` with `consumerPlacement` before it places one (CT-20); the adapter's
+  `pack` writes them (CT-18).
+- **Amends:** DEC-0050 (`fabric-package/1`: `provider` becomes optional for an agent that serves nothing;
+  `requires.mcp[]`). Packet P6-09.
+- **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
+  1. **A consumer agent** is `kind: agent` without `provider`: it keeps `agentRef`, `resultSignal` and `evals`, may carry
+     `secrets[]`, lists its `skills` and its plugin manifest (`FAC-SEM-064`), and has no `service`, `state` or `layer`
+     (schema).
+  2. **`requires.mcp[]`**: each server it calls by `role` — the server registered under that name in the placement's
+     configuration — with the `tools` it must expose and an optional `contract` name. Never an address or a token; those
+     come with the placement through the secret slots. Each role once (`FAC-SEM-102`, kind `package`); no role,
+     contract or tool shaped like a credential (`FAC-SEM-065`). Any package may declare it.
+  3. **The placement's check.** `consumerPlacement(package, configured)` answers each required role the configuration
+     does not register (`missing-role`) and each tool a registered server lacks (`missing-tool`); role names compare
+     exactly.
+- **Why:** an agent that only consumes tools had to pack as a skill set, which cannot carry an `agentRef`, a secret slot
+  or a result signal; and "some MCP server is there" did not tell a placement whether the tools the skills call exist.
+- **Compatibility:** Additive for readers at this pin: every agent package valid before stays valid (`provider`
+  present). An older pinned reader refuses an agent without `provider`, so a consumer agent is placed by readers pinned
+  at or after this decision. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/fabric-package.schema.json`;
+  - code: `src/package-rules.ts` (`consumerPlacement`, `FAC-SEM-102`, the plugin manifest and credential checks);
+  - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`, `fixtures/negative/fabric-package-consumer-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/consumer-agent.test.ts` (new);
+  - docs: `docs/backlog.md` (CT-04, CT-18, CT-20), `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** how a placement learns the tools a configured server exposes (its MCP `tools/list`, or a
+  pinned list); which secret slot configures which role's server entry; the usage and spend route of an agent without a
+  service; a consumer agent's evals against a server it does not control.
+- **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
+  DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
+  w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.

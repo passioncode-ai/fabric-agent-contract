@@ -26,6 +26,7 @@ import { attributionRules } from "./openrouter-attribution.js";
 import { proposalRules } from "./proposal-rules.js";
 import { embeddedProtocolsFindings, protocolRules } from "./protocol-revisions.js";
 import { sessionJoinRules } from "./session-join.js";
+import { feedDataRules } from "./feed-data.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
@@ -76,6 +77,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (protocols) return protocols;
   const joined = sessionJoinRules(kind, value);
   if (joined) return joined;
+  const feed = feedDataRules(kind, value);
+  if (feed) return feed;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const descriptorBundle = descriptorBundleRules(kind, value);
@@ -138,7 +141,7 @@ function serviceIdentity(value: JsonObject): Finding[] {
   const descriptor = isObject(value.descriptor) ? value.descriptor : {};
   const answered = isObject(value.wellKnown) && isObject(value.wellKnown.service) ? value.wellKnown.service : {};
   if (serviceKey(descriptor) === serviceKey(answered)) return [];
-  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${String(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
+  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${descriptor.origin === undefined ? serviceKey(descriptor) : String(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
 }
 
 function serviceClaims(value: JsonObject): Finding[] {
@@ -150,7 +153,8 @@ function serviceClaims(value: JsonObject): Finding[] {
     const key = serviceKey(descriptor);
     // DEC-0019: a port is a claim on THIS computer, so only local placements claim one. A remote
     // origin's port belongs to another host and collides with nothing here.
-    if (descriptor.placement !== "remote") {
+    // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it claims no port.
+    if (descriptor.placement !== "remote" && descriptor.origin !== undefined) {
       const port = /:(\d+)$/.exec(String(descriptor.origin))?.[1] ?? "";
       const holder = byPort.get(port);
       if (holder !== undefined && holder !== key) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}/origin`, message: `port ${port} is claimed by both ${holder} and ${key}` });

@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/schema-closure.ts", "src/protocol-revisions.ts", "src/session-join.ts", "src/relay-vectors.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -43,6 +43,8 @@ export default defineConfig({
         "src/signing-challenges.ts": { branches: 100 },
         "src/protocol-revisions.ts": { branches: 100 },
         "src/session-join.ts": { branches: 100 },
+        "src/app-descriptor.ts": { branches: 100 },
+        "src/feed-data.ts": { branches: 100 },
         "src/rfc3339.ts": { branches: 100 },
         "src/secret-envelope.ts": { branches: 100 },
         "src/fabric-links.ts": { branches: 97.61 },
