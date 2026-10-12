@@ -148,7 +148,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-082`
+**Next free rule code:** `FAC-SEM-093`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
