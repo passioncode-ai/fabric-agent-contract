@@ -264,8 +264,47 @@ function agentRef(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-066", instancePath: "/agentRef", message: `the agent is ${expected}: agentRef is derived from publisher and id` }];
 }
 
+const mcpRequirements = (value: JsonObject): JsonObject[] =>
+  isObject(value.requires) && Array.isArray(value.requires.mcp) ? value.requires.mcp.filter(isObject) : [];
+
+/** FAC-SEM-102 (DEC-0071): a package names each MCP role it requires once, so a placement maps one server to one role. */
+function mcpRoles(value: JsonObject): Finding[] {
+  const seen = new Set<string>();
+  const findings: Finding[] = [];
+  mcpRequirements(value).forEach((requirement, index) => {
+    if (!isString(requirement.role)) return;
+    if (seen.has(requirement.role)) findings.push({ code: "FAC-SEM-102", instancePath: `/requires/mcp/${index}/role`, message: `role ${requirement.role} is required twice: one role, one server` });
+    seen.add(requirement.role);
+  });
+  return findings;
+}
+
+export type ConsumerPlacementProblem = { problem: "missing-role"; role: string } | { problem: "missing-tool"; role: string; tool: string };
+
+/**
+ * What a placement lacks for an agent's `requires.mcp` (DEC-0071): `configured` maps each role name the machine's
+ * configuration registers (in Claude Code's .mcp.json, the server key) to the tools that server exposes. Every required
+ * role must be registered and expose every tool it names; an empty answer means the placement can serve the agent.
+ */
+export function consumerPlacement(value: unknown, configured: ReadonlyMap<string, readonly string[]>): ConsumerPlacementProblem[] {
+  if (!isObject(value)) return [];
+  const problems: ConsumerPlacementProblem[] = [];
+  for (const requirement of mcpRequirements(value)) {
+    if (!isString(requirement.role)) continue;
+    const tools = configured.get(requirement.role);
+    if (tools === undefined) {
+      problems.push({ problem: "missing-role", role: requirement.role });
+      continue;
+    }
+    for (const tool of Array.isArray(requirement.tools) ? requirement.tools : []) {
+      if (isString(tool) && !tools.includes(tool)) problems.push({ problem: "missing-tool", role: requirement.role, tool });
+    }
+  }
+  return problems;
+}
+
 export function packageRules(kind: string, value: JsonObject): Finding[] | undefined {
-  if (kind === "package") return [...whole(value), ...noSecret(value), ...agentRef(value)];
+  if (kind === "package") return [...whole(value), ...noSecret(value), ...agentRef(value), ...mcpRoles(value)];
   return undefined;
 }
 // #endregion package-rules
