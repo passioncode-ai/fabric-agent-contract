@@ -79,8 +79,8 @@ This run defines every tool's arguments and answer, one receipt, and a project d
   an identity run in which no schema accepts its own negatives.
 - Plants, on disk: the same 32 constraints were removed one at a time from the schema files (24 in the first round,
   8 in the review round).
-  `vitest run test/fixtures.test.ts -t "'<fixture>' has expected validity"` went red (`1 failed | 575 skipped`,
-  exit 1) for each and green again (`1 passed`, exit 0) once the file was restored. Vitest shortens the title of
+  `vitest run test/fixtures.test.ts -t "'<fixture>' has expected validity"` went red (`1 failed | 575 skipped` for the
+  first 24 against a 576-case catalogue, `1 failed | 583 skipped` for the review round's 8 against 584; exit 1) for each and green again (`1 passed`, exit 0) once the file was restored. Vitest shortens the title of
   `comms-responder-replace-duplicate-transfer`, so that run filtered on its first 37 characters. The pull request
   body lists the plants.
 - `src/docs-check.ts` changes: the old `checkLinks` (at `46a775d`) gave no finding for the unclosed fence and hid the
@@ -115,6 +115,8 @@ request was opened, and again in the review round: `60b121d` merged with `origin
 ---
 
 ## Register text to insert
+
+Applied by the owner at merge (2026-10-13), under its leases on the three registers; the blocks below are kept as written.
 
 ### 1. `docs/DECISIONS.md`: insert between DEC-0072 and DEC-0074 (immediately before the line `### DEC-0074 — A required MCP role names the secret slots that configure it`)
 
