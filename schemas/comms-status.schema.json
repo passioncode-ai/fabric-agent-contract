@@ -95,6 +95,20 @@
     "unread": {
       "type": "integer",
       "minimum": 0
+    },
+    "idempotency": {
+      "description": "The idempotency epoch the caller's Project submits under now (DEC-0073); a key under a closed epoch is refused idempotency_window_expired unless it repeats a stored receipt.",
+      "type": "object",
+      "required": [
+        "epoch"
+      ],
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

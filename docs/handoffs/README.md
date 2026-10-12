@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-12 the board's tool shapes and the project directory](2026-10-12-comms-tools-registers.md) | DEC-0073 (Fabric COM-02.3/03 Task 0; register text for the owner inside) | pull request open |
 | [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | pull request open |
 | [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | pull request open |
 | [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | pull request open |

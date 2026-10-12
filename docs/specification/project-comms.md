@@ -2,6 +2,9 @@
 
 **Status: accepted (DEC-0022, 2026-10-05).** The operator accepted the choices C1–C9 recorded in
 [OQ-0008](../OPEN_QUESTIONS.md). Hosts and consumers adopt it by repinning this revision.
+**Amended by DEC-0073 (2026-10-12):** the arguments and answer of every tool, one receipt, slots that end with
+the session, and the [project directory](#project-directory) (`com.directory`). It adds schemas and one optional
+`com.status` member, and changes no existing field.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -11,7 +14,8 @@ and changes neither of them. An agent that does not speak it keeps every tool it
 
 A message is addressed to a **Project**, and through a request to a **capability** of that Project.
 It is never addressed to a session, a process id, a bot name or a working directory. A Project id
-is data, not authority.
+is data, not authority. A sender finds the ids of the Projects of its estate in the
+[project directory](#project-directory).
 
 The board takes the estate, the sender's Project, the principal and the session from the
 **authenticated endpoint** and never from the payload. `comms-submit.schema.json` refuses any
@@ -115,6 +119,7 @@ integers only (`|n| ≤ 2^53−1`); a call that holds a fraction is refused `inv
 stored. `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) computes it, and Fabric's board
 computes the same digests (the vectors in `fixtures/vectors/canonical.json`).
 
+- `com.status` reports the epoch the caller's Project submits under now (`idempotency.epoch`, DEC-0073).
 - The same key with the same digest returns the same receipt after current authorization.
 - The same key with a different digest is `idempotency_conflict`.
 - An epoch has a finite key capacity. A full epoch refuses before any effect
@@ -128,11 +133,11 @@ A service that serves the board lists the tools it serves in `surfaces.mcp.capab
 
 | Group | Tools |
 |---|---|
-| Participants | `com.submit`, `com.list`, `com.get`, `com.read_ack`, `com.reply`, `com.cancel`, `com.status` |
+| Participants | `com.submit`, `com.list`, `com.get`, `com.read_ack`, `com.reply`, `com.cancel`, `com.status`, `com.directory` |
 | Responders | `com.enroll`, `com.claim`, `com.renew`, `com.accept`, `com.progress`, `com.effect_begin`, `com.complete`, `com.reconcile`, `com.responder_replace` |
 
-Calls are short MCP calls. No long-running task or A2A claim is made without negotiated acceptance
-(C9).
+DEC-0022 named sixteen tools; DEC-0073 adds `com.directory`, seventeen in all. Calls are short MCP calls. No
+long-running task or A2A claim is made without negotiated acceptance (C9).
 
 - A board that does not serve an operation answers the typed refusal `unsupported_capability`.
 - An old client without the extension keeps its existing tools, unchanged.
@@ -149,6 +154,102 @@ communication health without reading any message (Fabric COM-11). It returns:
 - the reader's unread count.
 
 A host shows a board it cannot reach as unreachable, never as an empty board.
+
+## Tools, arguments and answers
+
+Every tool's arguments are a closed schema (DEC-0073): a member the schema does not name is refused
+`invalid_arguments` before anything is stored. So no call carries the estate, the caller's Project, a principal, a
+session, a slot's Project or a sequence number; the board takes each from the authenticated endpoint or from its
+own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency](#idempotency)). Every refusal is
+`comms-refusal.schema.json`.
+
+| Tool | Arguments | Answer | Receipt stored |
+|---|---|---|---|
+| `com.submit` | `comms-submit.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at`, and `request` for a request | yes |
+| `com.list` | `comms-list.schema.json` | `comms-page.schema.json` | — (a read) |
+| `com.get` | `comms-message-ref.schema.json` | `comms-message.schema.json` | — (a read) |
+| `com.read_ack` | `comms-message-ref.schema.json` | `comms-receipt.schema.json`: `message`, `at` | no; marking read twice is one mark |
+| `com.reply` | `comms-reply.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at` | yes |
+| `com.cancel` | `comms-cancel.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.status` | `comms-status-args.schema.json` | `comms-status.schema.json` | — (a read) |
+| `com.directory` | `comms-directory-args.schema.json` | `comms-directory.schema.json` | — (a read) |
+| `com.enroll` | `comms-enroll.schema.json` | `comms-receipt.schema.json`: `slot` | yes |
+| `com.claim` | `comms-claim.schema.json` | `comms-receipt.schema.json`: `request`, `attempt`, `message`; none when nothing is claimable | yes, unless nothing was claimable |
+| `com.renew` | `comms-fenced.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt` | no |
+| `com.accept` | `comms-fenced.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.progress` | `comms-progress.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt`, and `message` for a note | only with a note |
+| `com.effect_begin` | `comms-effect-begin.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.complete` | `comms-complete.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.reconcile` | `comms-reconcile.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.responder_replace` | `comms-responder-replace.schema.json` | `comms-receipt.schema.json`: `slot` | yes |
+
+### Receipts
+
+- A receipt never carries an estate-wide sequence number (C3) or another Project's data; its schema is closed, so a
+  reader refuses a receipt with a member it does not name.
+- `repeated: true` means the same key and digest were already stored, and this is that receipt.
+- `request` is the request after the call: its state, its effect state and its revision. `slot` and `attempt` carry
+  what the caller's next fence needs. Their lease times are database time; the caller's clock is not authoritative.
+- **`com.claim` with nothing claimable** answers `{ok: true, repeated: false}` with no `request`. It stores no
+  receipt, so the responder may poll again with the same key.
+- **`com.renew` and `com.progress` are naturally idempotent.** The board checks their key's shape and epoch, and a
+  closed or retired epoch is refused as for any call. It stores no receipt, and `repeated` is always `false`: a
+  repeated renewal is one more renewal of the same lease. A `com.progress` that carries a `note` posts it as the
+  responder's reply on the request's thread. That posting is stored like any reply, so the same key returns its
+  receipt and never posts the note twice.
+- A participant's `com.reply` names the message it answers (`replyTo`) and joins its thread. A responder's
+  `com.reply` carries its fence and answers `fence.request`. A call with both forms, or neither, is refused. A reply
+  never changes a request's state.
+
+### Slots end with the session
+
+Leaving the session (for MCP over HTTP, the session's `DELETE`) or the session ending releases every slot its
+enrollments hold and ends their live attempts. There is no release tool. A released `claimed` request becomes
+claimable again under a new attempt. An `accepted` one is held (C4), and an `in_progress` one becomes
+`outcome_unknown` when a new holder takes the slot ([request lifecycle](#request-lifecycle)). A host's release is
+best effort. The authority recheck inside every transition is what refuses a released responder.
+
+### `com.status` arguments
+
+A Project session's Project comes from its endpoint. It omits `project` or names its own Project, and naming another
+Project is `not_authorized`, the same answer as for an unknown one. A viewer principal, such as a host showing
+communication health, names the Project it was granted.
+
+## Project directory
+
+`com.directory` (`comms-directory-args.schema.json`, answer `comms-directory.schema.json`) lists the Projects of the
+caller's estate that a sender may address. For each Project it gives:
+
+- its id;
+- its name;
+- the capabilities it takes requests for, as its host lists them;
+- for each capability, the responder state `com.status` reports (`active`, `stale` or `absent`).
+
+The boundary:
+
+- **Who may read it.** A principal the board verified for a Project of the same estate may read it: a managed
+  session, an enrolled session or a board session. An `asserted` principal, a viewer principal and every caller from
+  another estate are refused `not_authorized`.
+- **Never across estates.** A Project of another estate is never listed and never addressable through this board.
+- **Never content.** The answer never carries a message, a body, a subject, a thread, a participant, an unread or
+  message count, a request count, a generation, a lease time, a holder or a last-activity time. Responder state is
+  its only activity signal, the same one `com.status` shows. Every object in the schema is closed, so a reader
+  refuses an answer that carries more.
+- **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
+- **Opt-out.** A Project can be unlisted. Its operator sets this in the host, in Fabric per Project; no tool sets
+  it, so an agent cannot list or unlist a Project. An unlisted Project is absent from every page and every
+  capability filter. A sender that already knows its id can still address it, because a listing is discovery, not
+  authority. Unlisting refuses no message; whether a Project accepts a request is its responders' and grants'
+  business.
+- **Listing is not acceptance.** A listed capability with an `absent` responder may never be claimed; the request
+  then waits or expires.
+
+A page holds at most 100 Projects, ordered by name and then id, with a cursor bound to the reader, its grant
+revision and the filter. A changed filter or a revoked grant returns `cursor_reset_required`.
+
+The directory is a tool of its own, not a `com.status` member. `com.status` describes one Project and is read by
+viewer principals that must not see the estate's Project list, while the directory is estate-wide, paged and read
+by senders.
 
 ## Transport mirror
 
@@ -189,6 +290,10 @@ a hidden Project, a participant set or a body.
 | Artifacts per message | 8 |
 | Participants of a new thread | 16 |
 | Page | 100 messages |
+| Directory page | 100 Projects |
+| Capabilities per directory entry | 64 |
+| Requests transferred by one replacement | 64 |
+| Progress note, outcome or checkpoint summary | 2,000 characters |
 | Responder lease | 60 s database time |
 | Ids | 8–128 characters `[A-Za-z0-9_-]` (board-issued); Project ids up to 192 |
 
