@@ -95,6 +95,10 @@ Exit criteria:
 - N18: DEC-0047 merged; DEC-0054, the window lease, the signing challenges and the device message-signature binding
   each a decision with fixtures and vectors; the first organization server runs the binding's vectors.
 
+Packets: [wave-4/](packets/wave-4/README.md) — P4-01 services, P4-02 the descriptor, P4-03 channel and dashboard, P4-04
+device transport, P4-05 leases and challenges. Agreements recorded 2026-10-12: Fabric (CO-238), Fabric Dashboards
+(FD-37) and the adapter on CT-01; Dashboards on ED-8/ED-9; the first organization server on the device binding.
+
 ### Wave 5 — the 0.1.0 core, interop and usage (N10, N11; 17 items)
 
 Exit criteria:
