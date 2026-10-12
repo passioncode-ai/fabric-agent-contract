@@ -39,6 +39,17 @@ const sha = (bytes: Uint8Array | string) => createHash("sha256").update(bytes).d
 const AT = new Date("2026-10-13T00:00:00Z");
 const pinned = [vectors.keys.passkeyEs256.authority];
 const credential = vectors.keys.passkeyEs256.authority;
+const edAuthority = vectors.keys.passkeyEdDSA.authority;
+const edKey = createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), Buffer.from(vectors.keys.passkeyEdDSA.seed, "hex")]), format: "der", type: "pkcs8" });
+/** `record` signed afresh by the EdDSA test passkey: a valid assertion over its digest, so only the fields under test differ. */
+const resign = (record: Json): Json => {
+  const { digest: _digest, signature: _signature, ...body } = record;
+  const digest = estateRecordDigest(body);
+  const clientData = Buffer.from(JSON.stringify({ type: "webauthn.get", challenge: estateChallenge(digest).toString("base64url"), origin: edAuthority.origins[0] }));
+  const authData = Buffer.concat([sha(edAuthority.rpId), Buffer.from([0x05]), Buffer.alloc(4)]);
+  const sig = sign(null, Buffer.concat([authData, sha(clientData)]), edKey);
+  return { ...body, digest, signature: { format: "webauthn-assertion", credentialId: edAuthority.credentialId, alg: "EdDSA", authenticatorData: authData.toString("base64url"), clientDataJSON: clientData.toString("base64url"), sig: sig.toString("base64url") } };
+};
 
 describe("the schema (DEC-0055)", () => {
   it("accepts the first revision and the second, and both pass every rule", () => {
@@ -124,6 +135,34 @@ describe("estate-record semantic fixtures (FAC-SEM-072…076)", () => {
     const findings = evaluateSemanticRules("estate-record", { ...twoKem, digest: estateRecordDigest(twoKem) });
     expect(findings.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual(["FAC-SEM-073 /machines/0/deviceKeys"]);
     expect(findings[0]?.message).toMatch(/at most one key-agreement/);
+  });
+
+  it("never throws on a revocation kind named like an Object.prototype member", () => {
+    for (const kind of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+      expect(() => evaluateSemanticRules("estate-record", { ...first, revocations: [{ kind, ref: "x", revokedAt: first.issuedAt }] })).not.toThrow();
+    }
+  });
+
+  it("refuses an authority whose algorithm is not admitted, and one hub key certified for two machines under two kids", () => {
+    const rs256 = { ...first, authorities: [{ ...edAuthority, alg: "RS256" }] };
+    expect(codes("estate-record", { ...rs256, digest: estateRecordDigest(rs256) })).toEqual(["FAC-SEM-073"]);
+    const [one, two] = first.machines;
+    const shared = { ...first, machines: [one, { ...two, hubKey: { ...one.hubKey, kid: `${String(one.hubKey.kid)}-other` } }] };
+    const findings = evaluateSemanticRules("estate-record", { ...shared, digest: estateRecordDigest(shared) }).filter((finding) => finding.instancePath === "/machines/1/hubKey/x");
+    expect(findings.map((finding) => finding.code)).toEqual(["FAC-SEM-073"]);
+  });
+
+  it("flags a date that is not an RFC 3339 date-time with an offset on a day that exists (FAC-SEM-072)", () => {
+    for (const issuedAt of ["2026-13-45T25:61:61Z", "2026-02-30T00:00:00Z", "2026-10-12T09:00:00", "2026-10-12T24:00:00Z"]) {
+      const bad = { ...first, issuedAt };
+      expect(codes("estate-record", { ...bad, digest: estateRecordDigest(bad) }), issuedAt).toEqual(["FAC-SEM-072"]);
+    }
+    // 31 September would read as 1 October, inside a valid window: only the day check refuses it.
+    const noSuchDay = { ...first, issuedAt: "2026-09-31T09:00:00Z", validUntil: "2026-10-12T09:00:00Z" };
+    expect(codes("estate-record", { ...noSuchDay, digest: estateRecordDigest(noSuchDay) })).toEqual(["FAC-SEM-072"]);
+    expect(verifyEstateRecord(resign(noSuchDay), { authorities: [edAuthority], at: new Date("2026-10-05T00:00:00Z") })).toEqual({ ok: false, problem: "too-long-lived" });
+    const badEnd = { ...first, validUntil: "2026-11-31T09:00:00Z" };
+    expect(evaluateSemanticRules("estate-record", { ...badEnd, digest: estateRecordDigest(badEnd) }).map((finding) => finding.instancePath)).toEqual(["/validUntil"]);
   });
 
   it("reads only its own three kinds", () => {
@@ -224,6 +263,43 @@ describe("the verifier (DEC-0055, WebAuthn Level 3 §7.2)", () => {
     expect(verifyEstateRecord(first, { authorities: [null, 3, ...pinned], at: AT }).ok).toBe(true);
     expect(verifyEstateRecord(first, { authorities: [{ ...credential, publicKey: 1 }], at: AT })).toEqual({ ok: false, problem: "unusable-key" });
     expect(verifyEstateRecord(first, { authorities: [{ ...credential, origins: "x" }], at: AT })).toEqual({ ok: false, problem: "wrong-origin" });
+  });
+
+  it("refuses a passkey key whose base64url is not canonical, in the verifier and the schema alike", () => {
+    const x: string = credential.publicKey.x;
+    const last = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const sibling = x.slice(0, -1) + last[last.indexOf(x.slice(-1)) + 1];
+    expect(Buffer.from(sibling, "base64url").equals(Buffer.from(x, "base64url"))).toBe(true);
+    expect(credentialKey({ ...credential.publicKey, x: sibling }, "ES256")).toEqual({ problem: "unusable-key" });
+    expect(credentialKey({ ...credential.publicKey, y: credential.publicKey.y.slice(0, -1) + last[last.indexOf(credential.publicKey.y.slice(-1)) + 1] }, "ES256")).toEqual({ problem: "unusable-key" });
+    const record = { ...first, authorities: [{ ...credential, publicKey: { ...credential.publicKey, x: sibling } }, first.authorities[1]] };
+    expect(valid({ ...record, digest: estateRecordDigest(record) })).toBe(false);
+  });
+
+  it("refuses an unreadable clock first, so a window comparison never runs on NaN", () => {
+    const noClock = { ok: false, problem: "no-clock" };
+    expect(verifyEstateRecord(first, { authorities: pinned, at: new Date("nope") })).toEqual(noClock);
+    expect(verifyEstateRecord(first, { authorities: pinned, at: "2026-10-13T00:00:00Z" } as never)).toEqual(noClock);
+    expect(verifyEstateRecord(first, undefined as never)).toEqual(noClock);
+    expect(verifyEstateRecord(first, { authorities: "x", at: AT } as never)).toEqual({ ok: false, problem: "no-trusted-authority" });
+  });
+
+  it("holds the window's edges: valid from issuedAt to validUntil inclusive, never a zero-length window", () => {
+    const signed = resign(first);
+    const trust = (at: number) => ({ authorities: [edAuthority], at: new Date(at) });
+    const issued = Date.parse(first.issuedAt);
+    const until = Date.parse(first.validUntil);
+    expect(verifyEstateRecord(signed, trust(issued)).ok).toBe(true);
+    expect(verifyEstateRecord(signed, trust(until)).ok).toBe(true);
+    expect(verifyEstateRecord(signed, trust(issued - 1))).toEqual({ ok: false, problem: "not-yet-valid" });
+    expect(verifyEstateRecord(signed, trust(until + 1))).toEqual({ ok: false, problem: "expired" });
+    expect(verifyEstateRecord(resign({ ...first, validUntil: first.issuedAt }), trust(issued))).toEqual({ ok: false, problem: "too-long-lived" });
+  });
+
+  it("refuses a signed record whose dates are not real RFC 3339 date-times", () => {
+    for (const issuedAt of ["2026-13-45T25:61:61Z", "2026-02-30T00:00:00Z", "2026-10-12T09:00:00"]) {
+      expect(verifyEstateRecord(resign({ ...first, issuedAt }), { authorities: [edAuthority], at: AT }), issuedAt).toEqual({ ok: false, problem: "too-long-lived" });
+    }
   });
 
   it("refuses a revision issued before its parent or dropping a parent revocation, before any signature check (FAC-SEM-072)", () => {

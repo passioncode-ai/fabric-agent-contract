@@ -80,7 +80,7 @@ Exit criteria:
   `personalKeySharing`, expired policy keeps locks).
 - No private schema lands (J10).
 
-### Wave 4 — services, operator channel, embedded dashboard, the network's transport (N08, N09, N18; 27 items)
+### Wave 4 — services, operator channel, embedded dashboard, the network's transport (N08, N09, N18; 29 items)
 
 Depends on: wave 1's sweep test; agreement with Fabric (CO-238) and Fabric Dashboards (FD-37) on the
 lifecycle decision.
@@ -156,15 +156,17 @@ Each has a board row naming what it waits for.
 - **Merged:** #50 `9d29d71` (DEC-0050, DEC-0051, the package), #52 `92de756` (DEC-0052, DEC-0053, activity and devices),
   #54 (DEC-0055, the estate record). Each was read by three independent verifiers (unit, seam, product) and fixed in
   one round.
-- **Gate:** `pnpm run check` on #54's head — 36 test files, 1473 tests, floors met, whole set 95.12 % of branches.
-- **Found during the wave and fixed in it:** a verifier that would accept a revision dropping a revocation (P3-03,
-  the owner's review), a scope that sidestepped OD-1 and a stale revocation list for a delegated root (P3-02's review).
+- **Gate:** `pnpm run check` on #54's head after its review round — 36 test files, 1493 tests, floors met, whole set
+  95.16 % of branches.
+- **Found during the wave and fixed in it:** in P3-03, a verifier that accepted a revision dropping a revocation or
+  signed by a passkey its parent revoked, an unreadable clock that accepted any record, and a revocation kind that made
+  a rule throw (the owner's review and the three tiers); a scope that sidestepped OD-1 and a stale revocation list for a delegated root (P3-02's review).
 - **Peer work reviewed:** #53 (DEC-0047, the relay, Project Observatory's session) failed its first reading on all
   three tiers (a NaN date passing every time check, octet keys that crash, a check-in shape it misstated); the review
   and the owner's rulings are on the pull request, and it lands after #54.
 - **New work:** N18 in wave 4 (the network's transport, split from V4-SECURE-TRANSPORT) with the device
   message-signature binding the first organization server asked for; OQ-0010 and F-D-028 move to N13.
-- **Inventory:** 172 items, 93 closed (`assign.mjs`).
+- **Inventory:** 174 items, 93 closed (`assign.mjs`).
 
 ## Questions for the operator — one batch
 

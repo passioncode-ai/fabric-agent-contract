@@ -183,11 +183,11 @@
                 },
                 "x": {
                   "type": "string",
-                  "pattern": "^[A-Za-z0-9_-]{43}$"
+                  "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$"
                 },
                 "y": {
                   "type": "string",
-                  "pattern": "^[A-Za-z0-9_-]{43}$"
+                  "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$"
                 }
               },
               "additionalProperties": false

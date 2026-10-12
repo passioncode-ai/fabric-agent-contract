@@ -442,5 +442,29 @@
     "closable_in_one_pass": true,
     "needs": "",
     "proposed_fix": "one decision amending DEC-0031's transport, with a rule, fixtures and vectors the organization server runs"
+  },
+  {
+    "id": "DEV-KEY-ROLES",
+    "title": "FAC-SEM-044 counts device-key roles at enrollment (exactly one #sig, at most one #kem), as the estate record's FAC-SEM-073 already does",
+    "source": "PR #54 seam review, 2026-10-12",
+    "status_measured": "open",
+    "area": "rule",
+    "severity": "minor",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "tighten FAC-SEM-044 with a fixture per count; a DEC-0053 annotation"
+  },
+  {
+    "id": "DEV-CHECKIN-DIGEST",
+    "title": "the check-in reports the applied estate revision's digest beside its number, so a receiver tells two revisions with one number apart",
+    "source": "PR #54 seam review, 2026-10-12",
+    "status_measured": "open",
+    "area": "schema",
+    "severity": "minor",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "an optional records.estateRecord.digest, additive to DEC-0053"
   }
 ]

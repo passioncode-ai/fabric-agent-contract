@@ -222,7 +222,9 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - window leases (V4-WINDOW-LEASE);
   - signing challenges over RFC 8785 (V4-SIGNING-CHALLENGE), adopting or replacing DEC-0055's `estate-revision/1`;
   - HTTP message signatures beside mutual TLS for devices (DEV-HTTPSIG; label `fabric-device`, a nonce refused when
-    repeated), agreed with the first organization server.
+    repeated), agreed with the first organization server;
+  - device-key role counts at enrollment (DEV-KEY-ROLES) and the estate revision's digest in the check-in
+    (DEV-CHECKIN-DIGEST), from #54's review.
 
 ### N10 core — the 0.1.0 rules keep their promises (wave 5)
 

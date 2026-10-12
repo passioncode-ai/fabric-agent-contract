@@ -323,7 +323,9 @@
         "V4-DELTA-HEARTBEAT",
         "V4-WINDOW-LEASE",
         "V4-SIGNING-CHALLENGE",
-        "DEV-HTTPSIG"
+        "DEV-HTTPSIG",
+        "DEV-KEY-ROLES",
+        "DEV-CHECKIN-DIGEST"
       ]
     }
   ]

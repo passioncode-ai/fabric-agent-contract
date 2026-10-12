@@ -29,20 +29,27 @@ passkey-signed state of one person's estate that the first organization server's
 
 ## Checks run
 
-On the branch off `main` `92de756`: `tsc --noEmit` clean; `vitest run --coverage` 36 files, 1473 tests passed, every
-floor met, whole set 3102 / 3261 branches (95.12 %), `estate-record-rules.ts` 161 / 161 and `webauthn.ts` 74 / 74;
+On the branch off `main` `92de756`, after the review round: `tsc --noEmit` clean; `vitest run --coverage` 36 files,
+1493 tests passed, every floor met, whole set 3131 / 3290 branches (95.16 %), `estate-record-rules.ts` 190 / 190 and
+`webauthn.ts` 78 / 78;
 `python3 docs/ux/lint.py` exit 0; `tsx src/docs-check.ts` "Documentation checks passed"; `tsx src/lint-md.ts` 0 errors;
 `tsx src/privacy-check.ts` with `ORG_INDEX` set: 0 findings. The owner session's review added two chain checks to the
 verifier (a revision issued before its parent, a dropped revocation), each removed once and a test failed, with two
-vector cases for ports.
+vector cases for ports. The three-tier review then found: an unreadable clock that accepted any record (now
+`no-clock`, checked first); a revocation kind such as `constructor` that made FAC-SEM-076 throw (now a `Map`); lax dates
+(now strict RFC 3339 in the code, as in the schema); an unadmitted authority algorithm and one hub key under two kids
+(both FAC-SEM-073); untested window edges; and a verifier that trusted a passkey its parent revoked and ran none of
+FAC-SEM-073…076 (now `rule-violation`, ER-11). Each has tests and vectors.
 
 ## Decisions taken here
 
 - v4 differs inside itself: Path 2 places an agent by `agentRef`, publisher key and a ceiling, "not a digest"; the §12
   row lists packages per machine. A placement names all three of `agentRef`, digest and `publisherKid`; until a ceiling
   is defined, every new version is a new revision.
-- Fabric's D3 is not recorded (Fabric `main` `5bf15e5c`): the hub key is certified by its own `hubKey` entry, so
-  whether it is the machine's `#sig` key stays open.
+- Fabric's D3 is not recorded (Fabric `main` `5bf15e5c`): the hub key is certified by its own `hubKey` entry. It is
+  Ed25519 until Fabric's D2, so v4's proposal (the hub signing with the ES256 `#sig` key) cannot be certified before D2:
+  D2 and D3 are coupled here.
+- Machines carry no human name, a departure from v4 §3: the name a person sees stays with the node and Observatory.
 - `verifyEstateRecord` enforces FAC-SEM-072's chain too, so a machine that only verifies cannot apply a revision that
   un-revokes a machine.
 
@@ -56,7 +63,7 @@ vector cases for ports.
 
 ## Next task
 
-The owner session merges the P3-03 pull request, releases the leases on `docs/DECISIONS.md`,
-`docs/specification/conformance.md` and `docs/backlog.md` and tells Project Observatory, which rebases PR #53 (DEC-0047)
-onto it; then closes wave 3 (closed.json receipts, the board's statuses, the canvas and the plan's close record) and
-re-cuts wave 4.
+The owner session merges #54, which carries P3-03 and the wave-3 close (closed.json, the board, the canvas, the plan's
+close record and the wave-4 re-cut with N18), releases the leases on `docs/DECISIONS.md`,
+`docs/specification/conformance.md` and `docs/backlog.md`, and tells Project Observatory to rebase #53 (DEC-0047);
+then starts wave 4 (N08, N09, N18).

@@ -56,6 +56,8 @@ export type AssertionVerdict = { ok: true; flags: number; signCount: number } | 
 const B64URL = /^[A-Za-z0-9_-]+$/;
 const isString = (value: unknown): value is string => typeof value === "string";
 const bytes = (text: string) => Buffer.from(text, "base64url");
+/** Whether `text` is the one canonical unpadded base64url form of its bytes, so two verifiers never disagree on a key. */
+const canonical = (text: string) => Buffer.from(text, "base64url").toString("base64url") === text;
 
 /** Flag bits of the authenticator data (§6.1). */
 export const FLAGS = { UP: 0x01, UV: 0x04, BE: 0x08, BS: 0x10, AT: 0x40, ED: 0x80 } as const;
@@ -65,9 +67,10 @@ export const FLAGS = { UP: 0x01, UV: 0x04, BE: 0x08, BS: 0x10, AT: 0x40, ED: 0x8
  * an Ed25519 key of full order (`isSmallOrderKey`, DEC-0045) for EdDSA.
  */
 export function credentialKey(publicKey: unknown, alg: string): { key: KeyObject } | { problem: "unusable-key" | "small-order-key" } {
-  if (!isObject(publicKey) || publicKey.d !== undefined || !isString(publicKey.x) || !B64URL.test(publicKey.x)) return { problem: "unusable-key" };
+  if (!ASSERTION_ALGORITHMS.includes(alg)) return { problem: "unusable-key" };
+  if (!isObject(publicKey) || publicKey.d !== undefined || !isString(publicKey.x) || !B64URL.test(publicKey.x) || !canonical(publicKey.x)) return { problem: "unusable-key" };
   if (alg === "ES256") {
-    if (publicKey.kty !== "EC" || publicKey.crv !== "P-256" || !isString(publicKey.y) || !B64URL.test(publicKey.y)) return { problem: "unusable-key" };
+    if (publicKey.kty !== "EC" || publicKey.crv !== "P-256" || !isString(publicKey.y) || !B64URL.test(publicKey.y) || !canonical(publicKey.y)) return { problem: "unusable-key" };
     const x = bytes(publicKey.x);
     const y = bytes(publicKey.y);
     if (x.length !== 32 || y.length !== 32 || !isValidP256Key(Buffer.concat([Buffer.from([4]), x, y]))) return { problem: "unusable-key" };
@@ -131,6 +134,7 @@ export function verifyAssertion(assertion: unknown, credential: PasskeyCredentia
   try {
     good = alg === "ES256"
       ? verifySignature("sha256", signed, { key: found.key, dsaEncoding: "der" }, signature)
+      // Node's verify also refuses other lengths; the check keeps the rule independent of the runtime.
       : signature.length === 64 && verifySignature(null, signed, found.key, signature);
   } catch {
     good = false;

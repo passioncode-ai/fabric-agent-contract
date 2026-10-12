@@ -2400,7 +2400,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      enrollment; every later revision under a passkey its parent lists. A P-256 key passes SEC 1 §3.2.2
      (`isValidP256Key`), an Ed25519 key the small-order check (DEC-0045); no user handle is recorded (`FAC-SEM-073`).
   4. **Machines carry keys by role.** Each machine names its device `id` (never a human name; the schema refuses
-     `name`), DEC-0053's `deviceKeys` — exactly one `<id>#sig`, at most one `<id>#kem`, never one key in both roles —
+     `name`, a departure from v4 §3's *Machine*: the name a person sees stays with the node and Observatory), DEC-0053's `deviceKeys` — exactly one `<id>#sig`, at most one `<id>#kem`, never one key in both roles —
      and a `hubKey` certificate: the passkey-signed binding of one hub `kid` and public key to that machine, never
      certified for two machines, never of small order (`FAC-SEM-073`). A delegation verifier that reads the estate
      record trusts a `kid` only while a current revision certifies it.
@@ -2426,7 +2426,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (`rpIdHash`, UP and UV set, AT clear, BS only with BE) and the signature over `authenticatorData ‖
      SHA-256(clientDataJSON)` — DER for ES256 (§6.5.5, RFC 3279 §2.2.3), 64 bytes for EdDSA (RFC 8032). It does not
      check attestation, the authenticator's provenance, the signature counter, extension outputs, or the enrollment
-     that pinned the first passkey; the specification says why for each. Its refusals are rows ER-1…ER-10.
+     that pinned the first passkey; the specification says why for each. It refuses a passkey the parent revokes (a
+     revision may revoke its own signer when it removes it: rotation), an unreadable clock first, and a record that
+     breaks `FAC-SEM-072`…`FAC-SEM-076` (`rule-violation`), so passing it is enough to apply a revision. Its refusals
+     are rows ER-1…ER-11.
   9. **Algorithms.** Passkeys are `ES256` or `EdDSA`, each named in a field; anything else (RS256 among them) is refused.
      Hub and publisher keys are `EdDSA` until Fabric records D2, when `ES256` joins them additively. Device keys are
      DEC-0053's.
@@ -2446,18 +2449,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - code: `src/estate-record-rules.ts` (new), `src/webauthn.ts` (new), `src/semantic-rules.ts`;
   - fixtures: `fixtures/catalogue.json`, `fixtures/positive/estate-record-*`, `fixtures/negative/estate-record-*`,
     `fixtures/semantic/estate-*`, `fixtures/vectors/estate-record.json`;
-  - tests: `test/estate-record.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; floors
+  - tests: `test/estate-record.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/rule-tolerance.test.ts`; floors
     in `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
-  - docs: `docs/evidence/sources.md` (WebAuthn Level 3, RFC 3279), the board run's brief, `CONTEXT.md`,
-    `docs/DOCMAP.md`, `README.md`, `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w3-p3-03-estate-record.md`.
-- **Not decided here:** Fabric's D3 (keys) is not recorded on Fabric's `main` (`5bf15e5c`); the record takes no side on
-  whether the hub key is the machine's `#sig` key or its own, whether the hub holds a private key, or the estate's
-  fingerprint and enrollment ceremony. The ceiling within which a later version installs without a new revision
+  - docs: `docs/evidence/sources.md` (WebAuthn Level 3, RFC 3279, RFC 8032's row),
+    `docs/evidence/specs/2026-10-11-board-waves/brief.md`, `docs/specification/delegation.md` (DL-14),
+    `docs/specification/package.md`, `docs/specification/devices.md`, `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
+    `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w3-p3-03-estate-record.md` and `docs/handoffs/README.md`.
+- **Not decided here:** Fabric's D3 (keys) is not recorded on Fabric's `main` (`5bf15e5c`); the record leaves open
+  whether the hub key is the machine's `#sig` key or its own, but only partly: `hubKey` is Ed25519 until Fabric's D2,
+  so v4's proposal of the hub signing with the ES256 `#sig` key cannot be certified before D2 (D2 and D3 are coupled
+  here). Also open: whether the hub holds a private key, the estate's fingerprint and enrollment ceremony, and who
+  revokes a solo estate's machine certificate. The ceiling within which a later version installs without a new revision
   (Fabric's ADR-0138 amendment D2b and the listing contract); the signing-challenge types and the signing RP as a
   contract; recovery by a printed code; the revocation delta and heartbeat (DEC-0054, reserved); the estate's windows
   per machine (window leases); `ES256` for hub and publisher keys (Fabric's D2).
 - **Source:** the first organization server's target architecture v4 at `9c6a780` (§2 rules 6 and 12, §3, §6, §7,
-  §12, §15 D3 and D4); Fabric ADR-0144 item 6 (three signed records), read on Fabric `main` `5bf15e5c`; WebAuthn
+  §12, §15 D3 and D4, §19); Fabric ADR-0144 item 6 (three signed records), read on Fabric `main` `5bf15e5c`; WebAuthn
   Level 3, RFC 3279, RFC 8032 and RFC 8785 in the [source ledger](evidence/sources.md); the board-waves inventory
   V4-ESTATE-RECORD, packet P3-03. DEC-0055 and `FAC-SEM-072`…`FAC-SEM-076` were reserved by git CAS
   (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,

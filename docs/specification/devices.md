@@ -319,7 +319,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   revision by omitting the layer.
 - `certificate.serial` and `notAfter`.
 - optionally `records`, what the device holds of the records the relay protocol carries (DEC-0053):
-  the `estateRecord.revision` it applies, the latest `heartbeat` (`sequence`, `at`), the head of the
+  the `estateRecord.revision` it applies ([estate record](estate-record.md), DEC-0055), the latest `heartbeat` (`sequence`, `at`), the head of the
   `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
   `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
   protocol's (DEC-0047, reserved), and a check-in response carries them in `records` unchanged.

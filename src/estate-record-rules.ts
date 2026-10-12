@@ -54,11 +54,14 @@ export type EstateRecordProblem =
   | AssertionProblem
   | "too-long-lived"
   | "not-yet-valid"
-  | "expired";
+  | "expired"
+  | "no-clock"
+  | "revoked-authority"
+  | "rule-violation";
 
 export type EstateRecordVerdict =
   | { ok: true; digest: string; revision: number; signedBy: string; signCount: number }
-  | { ok: false; problem: EstateRecordProblem };
+  | { ok: false; problem: EstateRecordProblem; codes?: string[] };
 
 export interface EstateRecordTrust {
   /** The record's verified parent: its authorities are the trusted ones, and the chain is checked against it. */
@@ -69,7 +72,19 @@ export interface EstateRecordTrust {
   at: Date;
 }
 
-const time = (value: unknown) => (isString(value) ? Date.parse(value) : Number.NaN);
+const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
+/**
+ * An RFC 3339 date-time as milliseconds, or NaN: an offset is required and the day must exist in its month, as the
+ * schema's `date-time` format demands. `Date.parse` alone reads 2026-02-30 as 2 March and a missing offset as local time.
+ */
+const time = (value: unknown): number => {
+  const match = isString(value) ? RFC3339.exec(value) : null;
+  if (!match) return Number.NaN;
+  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 60) return Number.NaN;
+  return Date.parse(value as string);
+};
 /** A revocation's identity across revisions: its kind and its reference. */
 const revocationKey = (entry: JsonObject) => `${String(entry.kind)} ${String(entry.ref)}`;
 
@@ -79,6 +94,9 @@ const revocationKey = (entry: JsonObject) => `${String(entry.kind)} ${String(ent
  * the validity window. The caller verified `parent` before; this function does not verify it again.
  */
 export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): EstateRecordVerdict {
+  // An unreadable clock would make every window comparison false and accept any record; it is refused first.
+  const at = isObject(trust) && trust.at instanceof Date ? trust.at.getTime() : Number.NaN;
+  if (!Number.isFinite(at)) return { ok: false, problem: "no-clock" };
   if (!isObject(record) || !isString(record.digest) || !Number.isSafeInteger(record.revision) || !isObject(record.signature)) return { ok: false, problem: "malformed" };
   const signature = record.signature;
   if (signature.format !== "webauthn-assertion" || !isString(signature.credentialId)) return { ok: false, problem: "malformed" };
@@ -91,6 +109,7 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
   if (digest !== record.digest) return { ok: false, problem: "digest-mismatch" };
 
   let trusted: readonly unknown[];
+  let revoked = new Set<unknown>();
   if (trust.parent !== undefined) {
     const parent = trust.parent;
     if (!isObject(parent)) return { ok: false, problem: "broken-chain" };
@@ -106,17 +125,20 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
     if (time(record.issuedAt) < time(parent.issuedAt)) return { ok: false, problem: "broken-chain" };
     const kept = new Set(list(record.revocations).map(revocationKey));
     if (list(parent.revocations).some((entry) => !kept.has(revocationKey(entry)))) return { ok: false, problem: "broken-chain" };
+    // A passkey the parent revokes signs nothing after it; a revision may still revoke its own signer (rotation).
+    revoked = new Set(list(parent.revocations).filter((entry) => entry.kind === "authority").map((entry) => entry.ref));
     trusted = list(parent.authorities);
   } else {
     // Without a parent only revision 1 starts a chain; a later revision is checked against the one before it.
     if (record.revision !== 1 || record.parent !== undefined) return { ok: false, problem: "broken-chain" };
-    trusted = trust.authorities ?? [];
+    trusted = Array.isArray(trust.authorities) ? trust.authorities : [];
   }
   if (trusted.length === 0) return { ok: false, problem: "no-trusted-authority" };
   const matches = trusted.filter((entry) => isObject(entry) && entry.credentialId === signature.credentialId) as JsonObject[];
   if (matches.length > 1) return { ok: false, problem: "duplicate-authority" };
   const authority = matches[0];
   if (!authority) return { ok: false, problem: "unknown-authority" };
+  if (revoked.has(authority.credentialId)) return { ok: false, problem: "revoked-authority" };
   const credential: PasskeyCredential = {
     credentialId: String(authority.credentialId),
     alg: String(authority.alg),
@@ -130,9 +152,11 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
   const issuedAt = time(record.issuedAt);
   const validUntil = time(record.validUntil);
   if (!Number.isFinite(issuedAt) || !Number.isFinite(validUntil) || validUntil <= issuedAt || validUntil - issuedAt > MAX_VALIDITY_SECONDS * 1000) return { ok: false, problem: "too-long-lived" };
-  const at = trust.at.getTime();
   if (at < issuedAt) return { ok: false, problem: "not-yet-valid" };
   if (at > validUntil) return { ok: false, problem: "expired" };
+  // The record's own rules (FAC-SEM-072…076) hold too, so passing this function is enough to apply a revision.
+  const codes = [...new Set(recordFindings(record).map((finding) => finding.code))];
+  if (codes.length > 0) return { ok: false, problem: "rule-violation", codes };
   return { ok: true, digest, revision: record.revision as number, signedBy: credential.credentialId, signCount: assertion.signCount };
 }
 
@@ -160,7 +184,9 @@ function revisionWhole(value: JsonObject, flag: Flag): void {
   }
   const issuedAt = time(value.issuedAt);
   const validUntil = time(value.validUntil);
-  if (Number.isFinite(issuedAt) && Number.isFinite(validUntil) && (validUntil <= issuedAt || validUntil - issuedAt > MAX_VALIDITY_SECONDS * 1000)) {
+  if (!Number.isFinite(issuedAt) || !Number.isFinite(validUntil)) {
+    flag(Number.isFinite(issuedAt) ? "/validUntil" : "/issuedAt", "issuedAt and validUntil are RFC 3339 date-times with an offset, on days that exist");
+  } else if (validUntil <= issuedAt || validUntil - issuedAt > MAX_VALIDITY_SECONDS * 1000) {
     flag("/validUntil", "an estate record is valid after it is issued and for at most 30 days");
   }
 }
@@ -202,6 +228,7 @@ const validDeviceKey = (key: JsonObject) => {
 function keys(value: JsonObject, flag: Flag): void {
   const ids = new Set<unknown>();
   const hubKids = new Set<unknown>();
+  const hubKeys = new Set<unknown>();
   list(value.machines).forEach((machine, m) => {
     const at = `/machines/${m}`;
     if (ids.has(machine.id)) flag(`${at}/id`, `machine ${String(machine.id)} is listed twice`);
@@ -220,6 +247,8 @@ function keys(value: JsonObject, flag: Flag): void {
       const hub = machine.hubKey;
       if (hubKids.has(hub.kid)) flag(`${at}/hubKey/kid`, `hub key ${String(hub.kid)} is certified for two machines: one kid per machine`);
       hubKids.add(hub.kid);
+      if (hubKeys.has(hub.x)) flag(`${at}/hubKey/x`, "one hub public key is certified for two machines under two kids: one key per machine");
+      hubKeys.add(hub.x);
       const raw = Buffer.from(String(hub.x ?? ""), "base64url");
       if (isSmallOrderKey(raw)) flag(`${at}/hubKey/x`, "a hub key of small order verifies forged tokens and is never certified (DEC-0045)");
     }
@@ -290,7 +319,8 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
     grantIds.add(id);
   });
   const machines = list(value.machines);
-  const listed: Record<string, Set<unknown>> = {
+  // A Map, so a kind such as `constructor` or `__proto__` reads nothing from Object.prototype.
+  const listed = new Map<string, Set<unknown>>(Object.entries({
     authority: new Set(list(value.authorities).map((entry) => entry.credentialId)),
     machine: new Set(machines.map((machine) => machine.id)),
     "device-key": new Set(machines.flatMap((machine) => list(machine.deviceKeys).map((key) => key.kid))),
@@ -298,14 +328,25 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
     "publisher-key": new Set(list(value.publisherKeys).map((key) => key.kid)),
     package: new Set(machines.flatMap((machine) => list(machine.packages).map((placement) => placement.digest))),
     grant: grantIds
-  };
+  }));
   const seen = new Set<string>();
   list(value.revocations).forEach((revocation, index) => {
     const key = `${String(revocation.kind)} ${String(revocation.ref)}`;
     if (seen.has(key)) flag(`/revocations/${index}`, `the ${String(revocation.kind)} ${String(revocation.ref)} is revoked twice`);
     seen.add(key);
-    if (listed[String(revocation.kind)]?.has(revocation.ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${String(revocation.kind)} it revokes: revocation outranks addition`);
+    if (listed.get(String(revocation.kind))?.has(revocation.ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${String(revocation.kind)} it revokes: revocation outranks addition`);
   });
+}
+
+/** FAC-SEM-072…076 over one record. */
+function recordFindings(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  revisionWhole(value, flagger(findings, "FAC-SEM-072"));
+  keys(value, flagger(findings, "FAC-SEM-073"));
+  placements(value, flagger(findings, "FAC-SEM-074"));
+  secretReferences(value, flagger(findings, "FAC-SEM-075"));
+  grantsAndRevocations(value, flagger(findings, "FAC-SEM-076"));
+  return findings;
 }
 
 /**
@@ -342,15 +383,7 @@ function installation(value: JsonObject): Finding[] {
 }
 
 export function estateRecordRules(kind: string, value: JsonObject): Finding[] | undefined {
-  if (kind === "estate-record") {
-    const findings: Finding[] = [];
-    revisionWhole(value, flagger(findings, "FAC-SEM-072"));
-    keys(value, flagger(findings, "FAC-SEM-073"));
-    placements(value, flagger(findings, "FAC-SEM-074"));
-    secretReferences(value, flagger(findings, "FAC-SEM-075"));
-    grantsAndRevocations(value, flagger(findings, "FAC-SEM-076"));
-    return findings;
-  }
+  if (kind === "estate-record") return recordFindings(value);
   if (kind === "estate-record-revision") return revisionChain(value);
   if (kind === "estate-placement") return installation(value);
   return undefined;
