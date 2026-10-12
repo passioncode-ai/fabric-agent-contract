@@ -460,6 +460,8 @@
   {"name": "secret-envelope-extra-member", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-extra-member.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "relay-frame-unknown-type", "schema": "relay-frame.schema.json", "path": "negative/relay-frame-unknown-type.json", "valid": false, "keyword": "oneOf"},
   {"name": "secret-envelope-without-agent", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-without-agent.json", "valid": false, "keyword": "required"},
+  {"name": "secret-envelope-without-sequence", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-without-sequence.json", "valid": false, "keyword": "required"},
+  {"name": "secret-envelope-sequence-zero", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-sequence-zero.json", "valid": false, "keyword": "minimum"},
   {"name": "revocation-delta-page", "schema": "revocation-delta.schema.json", "path": "positive/revocation-delta-page.json", "valid": true},
   {"name": "heartbeat", "schema": "heartbeat.schema.json", "path": "positive/heartbeat.json", "valid": true},
   {"name": "heartbeat-genesis", "schema": "heartbeat.schema.json", "path": "positive/heartbeat-genesis.json", "valid": true},

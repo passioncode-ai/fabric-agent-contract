@@ -36,6 +36,7 @@ const ctx = (over: Partial<OpenContext> = {}): OpenContext => ({
   mayHold: (kid, agentRef, slot) => kid === SENDER && agentRef === vector.envelope.header.agentRef && slot === vector.envelope.header.slot,
   currentPlacement: () => vector.open.placement,
   appliedRevision: () => vector.open.placement,
+  lastOpened: () => undefined,
   now: new Date(vector.open.now),
   ...over
 });
@@ -66,7 +67,10 @@ describe("fabric-secret-envelope/1", () => {
   it("opens the shared vector and names it by its digest", () => {
     expect(envelopeDigest(vector.envelope)).toBe(vector.digest);
     const result = openEnvelope(vector.envelope, ctx());
-    expect(result).toEqual({ ok: true, secret: Buffer.from(vector.open.secret) });
+    expect(result).toMatchObject({ ok: true, secret: Buffer.from(vector.open.secret) });
+    // The mark the target writes with the secret: the run, the signed sequence and the envelope's digest.
+    expect(result.ok && result.mark).toEqual({ agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, since: vector.open.placement,
+      sequence: vector.envelope.header.envelopeSequence, digest: vector.digest });
   });
 
   it("round-trips a fresh envelope and never seals to an invalid key", () => {
@@ -75,14 +79,15 @@ describe("fabric-secret-envelope/1", () => {
     const pk = kem.getPublicKey(null, "uncompressed");
     const recipientKey = { kty: "EC", crv: "P-256", x: pk.subarray(1, 33).toString("base64url"), y: pk.subarray(33).toString("base64url") };
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
-    const base = { recipientKid: "m#kem", recipientKey, senderKid: "s#sig", senderKey: sender.privateKey, agentRef: "urn:fabric:agent:example:a", slot: "K", placement: 1,
+    const base = { recipientKid: "m#kem", recipientKey, senderKid: "s#sig", senderKey: sender.privateKey, agentRef: "urn:fabric:agent:example:a", slot: "K", placement: 1, envelopeSequence: 1,
       iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"), secret: Buffer.from("v") };
     const envelope = sealEnvelope(base);
     const open = openEnvelope(envelope, {
       ownKemKid: "m#kem", ownKemPrivateKey: kem.getPrivateKey(), senderKey: () => sender.publicKey.export({ format: "jwk" }),
-      mayHold: () => true, currentPlacement: () => 1, appliedRevision: () => 1, now: new Date("2026-10-12T00:30:00Z")
+      mayHold: () => true, currentPlacement: () => 1, appliedRevision: () => 1, lastOpened: () => undefined, now: new Date("2026-10-12T00:30:00Z")
     });
-    expect(open).toEqual({ ok: true, secret: Buffer.from("v") });
+    expect(open).toMatchObject({ ok: true, secret: Buffer.from("v") });
+    expect(envelope.header.envelopeSequence).toBe(1);
     expect(() => sealEnvelope({ ...base, recipientKey: { ...recipientKey, y: recipientKey.x } })).toThrow(/bad-key/);
   });
 
@@ -90,7 +95,7 @@ describe("fabric-secret-envelope/1", () => {
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
     const seal = (over: Record<string, unknown>) => sealEnvelope({ recipientKid: vector.open.ownKemKid, recipientKey: vector.recipientKey,
-      senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement,
+      senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement, envelopeSequence: 1,
       iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-13T00:00:01Z"), secret: Buffer.from("x"), ...over });
     expect(openEnvelope(seal({}), ctx({ senderKey: () => senderKey }))).toEqual({ ok: false, refusal: "lifetime-too-long" });
     const otherKem = createECDH("prime256v1");
@@ -108,7 +113,7 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
   const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
   const T0 = Date.parse("2026-10-12T00:00:00Z");
   const seal = (over: Record<string, unknown> = {}) => sealEnvelope({ recipientKid: vector.open.ownKemKid, recipientKey: vector.recipientKey,
-    senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement,
+    senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement, envelopeSequence: 1,
     iat: new Date(T0), exp: new Date(T0 + 3_600_000), secret: Buffer.from("x"), ...over });
   const open = (envelope: unknown, over: Partial<OpenContext> = {}) =>
     openEnvelope(envelope, ctx({ senderKey: () => senderKey, now: new Date(T0 + 1_000), ...over }));
@@ -120,7 +125,7 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
     const again = seal({ ephemeralPrivateKey: Buffer.alloc(32, 7) });
     expect(sealed.header).toEqual(again.header);
     expect(sealed.ct).toBe(again.ct);
-    expect(open(sealed)).toEqual({ ok: true, secret: Buffer.from("x") });
+    expect(open(sealed)).toMatchObject({ ok: true, secret: Buffer.from("x") });
   });
 
   it("seals only to a #kem key, signed by a #sig key", () => {
@@ -151,12 +156,12 @@ describe("the open context from the estate record (DEC-0055; review of #53, B)",
   const kemKid = base.machines[0].deviceKeys.find((k: Json) => k.use === "kem").kid as string;
   const { agentRef, slot, from } = base.machines[0].secrets[0] as { agentRef: string; slot: string; from: string };
   const seal = (over: Record<string, unknown> = {}) => sealEnvelope({ recipientKid: kemKid, recipientKey: kem, senderKid: `${from}#sig`,
-    senderKey: holderKey.privateKey, agentRef, slot, placement: 1, iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"),
+    senderKey: holderKey.privateKey, agentRef, slot, placement: 1, envelopeSequence: 1, iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-12T01:00:00Z"),
     secret: Buffer.from("x"), ...over });
   const otherKem = createECDH("prime256v1");
   otherKem.generateKeys();
   const open = (envelope: unknown, applied: Json[]) => openEnvelope(envelope, {
-    ownKemKid: kemKid, ownKemPrivateKey: otherKem.getPrivateKey(), now: new Date("2026-10-12T00:30:00Z"), ...estateEnvelopeContext(applied, target)
+    ownKemKid: kemKid, ownKemPrivateKey: otherKem.getPrivateKey(), now: new Date("2026-10-12T00:30:00Z"), lastOpened: () => undefined, ...estateEnvelopeContext(applied, target)
   });
 
   it("seals to the record's #kem key as base64 SEC 1, and opens up to HPKE on the record's holder, key and revision", () => {
@@ -215,5 +220,38 @@ describe("the open context from the estate record (DEC-0055; review of #53, B)",
     expect(estateEnvelopeContext([bare], target).mayHold(`${from}#sig`, agentRef, slot)).toBe(false);
     const none = estateEnvelopeContext([], target);
     expect([none.mayHold(`${from}#sig`, agentRef, slot), none.currentPlacement(agentRef, slot), none.senderKey(`${from}#sig`)]).toEqual([false, undefined, undefined]);
+  });
+});
+
+// DEC-0066 (CON-005): openEnvelope's first step is envelopeShape, a hand-written check that is exactly
+// secret-envelope.schema.json plus real instants (a schema cannot say that a day exists). The parity is measured, so a
+// schema edit the code misses fails here: over every secret-envelope fixture of the catalogue and every vector case.
+describe("envelopeShape is the schema (parity)", async () => {
+  const { createValidator, validateDocument } = await import("../src/validator.js");
+  const { SCHEMA_PREFIX } = await import("../src/contract.js");
+  const { instant } = await import("../src/relay.js");
+  const { envelopeShape } = await import("../src/secret-envelope.js");
+  const validator = await createValidator();
+  const schemaValid = (value: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/secret-envelope.schema.json`, value).valid;
+  const realInstants = (value: unknown) => {
+    const header = (value as { header?: { iat?: unknown; exp?: unknown } }).header;
+    return instant(header?.iat) !== undefined && instant(header?.exp) !== undefined;
+  };
+  const read = (relative: string) => JSON.parse(readFileSync(path.join(projectRoot(), relative), "utf8"));
+  const catalogue = (read("fixtures/catalogue.json") as Array<{ schema: string; path: string; name: string }>).filter((entry) => entry.schema === "secret-envelope.schema.json");
+  const cases = (read("fixtures/vectors/secret-envelope.json").cases as Array<{ name: string; envelope: unknown }>);
+  const inputs: Array<[string, unknown]> = [
+    ...catalogue.map((entry) => [`catalogue ${entry.name}`, read(`fixtures/${entry.path}`)] as [string, unknown]),
+    ...cases.map((c) => [`vector ${c.name}`, c.envelope] as [string, unknown])
+  ];
+
+  it("has fixtures on both sides", () => {
+    expect(inputs.some(([, x]) => schemaValid(x))).toBe(true);
+    expect(inputs.some(([, x]) => !schemaValid(x))).toBe(true);
+    expect(catalogue.map((entry) => entry.name)).toEqual(expect.arrayContaining(["secret-envelope-without-sequence", "secret-envelope-sequence-zero"]));
+  });
+
+  it.each(inputs)("%s", (_name, input) => {
+    expect(envelopeShape(input)).toBe(schemaValid(input) && realInstants(input));
   });
 });

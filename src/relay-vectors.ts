@@ -99,6 +99,11 @@ export function envelopeVectorResults(vectors: Json): VectorResult[] {
       mayHold: (sender, agentRef, slot) => holders.some((h) => h.sender === sender && h.agentRef === agentRef && h.slot === slot),
       currentPlacement: (agentRef, slot) => placements.find((p) => p.agentRef === agentRef && p.slot === slot)?.since,
       appliedRevision: () => (applied === null ? undefined : applied),
+      lastOpened: (agentRef, slot) => {
+        const found = ((ctx.marks ?? []) as Array<{ agentRef: string; slot: string; since: number; sequence: number; digest: string }>)
+          .find((m) => m.agentRef === agentRef && m.slot === slot);
+        return found && { since: found.since, sequence: found.sequence, digest: found.digest };
+      },
       now: new Date(ctx.now as string)
     };
     const result = openEnvelope(c.envelope, context);

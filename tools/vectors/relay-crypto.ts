@@ -459,17 +459,23 @@ function seal(header: Json, ephemeral: string, key: TestKey = MACHINE, secret = 
 }
 const baseHeader = (): Json => ({
   type: ENVELOPE_TYPE, alg: RELAY_ALG, suite: [...ENVELOPE_SUITE], recipient: GPU_KEM, sender: LAPTOP, agentRef: AGENT, slot: SLOT,
-  placement: 7, iat: ENV_IAT, exp: "2026-10-12T12:00:00Z"
+  placement: 7, envelopeSequence: 3, iat: ENV_IAT, exp: "2026-10-12T12:00:00Z"
 });
 
 function envelopeCases(vector: SecretEnvelope): Json[] {
   const context = (over: Json = {}) => ({
     ownKemKid: GPU_KEM, ownKemPrivateKey: RFC9180.skRm, senders: { [LAPTOP]: MACHINE.jwk },
     holders: [{ sender: LAPTOP, agentRef: AGENT, slot: SLOT }], placements: [{ agentRef: AGENT, slot: SLOT, since: 7 }],
-    appliedRevision: 7, now: ENV_NOW, ...over
+    appliedRevision: 7, marks: [], now: ENV_NOW, ...over
   });
   const c = (name: string, envelope: unknown, expect: Json, over: Json = {}) => ({ name, envelope, context: context(over), expect });
-  const ok = { ok: true, secret: SECRET };
+  // The mark the target writes with the secret, in one transaction: the run it belongs to, the sequence and the digest.
+  const markOf = (e: SecretEnvelope, since = 7) => ({ agentRef: AGENT, slot: SLOT, since, sequence: (e.header as unknown as Json).envelopeSequence, digest: envelopeDigest(e) });
+  const ok = { ok: true, secret: SECRET, mark: markOf(vector) };
+  const okFor = (e: SecretEnvelope) => ({ ok: true, secret: SECRET, mark: markOf(e) });
+  const mark = (since: number, sequence: number, digest = `sha256:${"0".repeat(64)}`) => [{ agentRef: AGENT, slot: SLOT, since, sequence, digest }];
+  const another = seal(baseHeader(), "the same sequence, another envelope", MACHINE, "another-secret-value-not-real");
+  const signedWith = (header: Json, name: string) => seal(header, name);
   const no = (refusal: string) => ({ ok: false, refusal });
   const edit = (mutate: (e: Json) => void) => {
     const e = JSON.parse(JSON.stringify(vector)) as Json;
@@ -477,7 +483,11 @@ function envelopeCases(vector: SecretEnvelope): Json[] {
     return e;
   };
   const header = (e: Json) => e.header as Json;
-  const life = (name: string, exp: string, expect: Json) => c(name, seal({ ...baseHeader(), exp }, name), expect, { now: ENV_IAT });
+  const life = (name: string, exp: string, good: boolean) => {
+    const e = seal({ ...baseHeader(), exp }, name);
+    return c(name, e, good ? okFor(e) : no("lifetime-too-long"), { now: ENV_IAT });
+  };
+  const { envelopeSequence: _seq, ...noSequence } = baseHeader();
   const otherKem = sha256(`${LABEL}another machine's #kem`).toString("hex");
   return [
     c("the vector envelope, sender key as a JWK", vector, ok),
@@ -496,7 +506,18 @@ function envelopeCases(vector: SecretEnvelope): Json[] {
       enc[64] = (enc[64] as number) ^ 1;
       header(e).enc = enc.toString("base64url");
     }), no("bad-key")),
-    c("a signature cut to 80 characters", edit((e) => { e.sig = (e.sig as string).slice(0, 80); }), no("bad-signature")),
+    // CON-005: the schema's shape, refused as malformed before anything else, validly signed or not.
+    c("a signature cut to 80 characters", edit((e) => { e.sig = (e.sig as string).slice(0, 80); }), no("malformed")),
+    c("an extra header member, validly signed", signedWith({ ...baseHeader(), note: "x" }, "an extra header member"), no("malformed")),
+    c("an extra top-level member", edit((e) => { e.note = "x"; }), no("malformed")),
+    c("a slot outside its pattern, validly signed", signedWith({ ...baseHeader(), slot: "lower" }, "a slot outside its pattern"), no("malformed"), { holders: [{ sender: LAPTOP, agentRef: AGENT, slot: "lower" }], placements: [{ agentRef: AGENT, slot: "lower", since: 7 }] }),
+    c("placement 0, validly signed", signedWith({ ...baseHeader(), placement: 0 }, "placement 0"), no("malformed"), { placements: [{ agentRef: AGENT, slot: SLOT, since: 0 }], appliedRevision: 0 }),
+    c("an agentRef outside its pattern, validly signed", signedWith({ ...baseHeader(), agentRef: "agent:Inbox" }, "an agentRef outside its pattern"), no("malformed"), { holders: [{ sender: LAPTOP, agentRef: "agent:Inbox", slot: SLOT }], placements: [{ agentRef: "agent:Inbox", slot: SLOT, since: 7 }] }),
+    c("envelopeSequence missing, validly signed", signedWith(noSequence, "envelopeSequence missing"), no("malformed")),
+    c("envelopeSequence 0, validly signed", signedWith({ ...baseHeader(), envelopeSequence: 0 }, "envelopeSequence 0"), no("malformed")),
+    c("envelopeSequence 1.5, validly signed", signedWith({ ...baseHeader(), envelopeSequence: 1.5 }, "envelopeSequence 1.5"), no("malformed")),
+    c("iat 30 February, validly signed", signedWith({ ...baseHeader(), iat: "2026-02-30T00:00:00Z", exp: "2026-03-02T12:00:00Z" }, "iat 30 February"), no("malformed"), { now: "2026-03-02T06:00:00Z" }),
+    c("high-S: the vector signature as (r, n - s)", edit((e) => { e.sig = highS(e.sig as string); }), no("bad-signature")),
     c("a 64-byte signature in a non-canonical spelling", edit((e) => { e.sig = respell(e.sig as string); }), no("bad-signature")),
     c("the slot changed after signing", edit((e) => { header(e).slot = "OTHER_KEY"; }), no("bad-signature")),
     c("a ciphertext bit flipped", edit((e) => {
@@ -511,12 +532,21 @@ function envelopeCases(vector: SecretEnvelope): Json[] {
     c("a slot not placed here", vector, no("placement-stale"), { placements: [] }),
     c("a placement newer than the applied revision", vector, no("placement-stale"), { placements: [{ agentRef: AGENT, slot: SLOT, since: 5 }], appliedRevision: 6 }),
     c("no applied revision", vector, no("placement-stale"), { appliedRevision: null }),
+    // CON-003 and the owner's condition: anti-rollback by a signed envelopeSequence and the target's mark of the run.
+    c("the same sequence and the same envelope as the mark (a repeat delivery)", vector, ok, { marks: mark(7, 3, envelopeDigest(vector)) }),
+    c("the same sequence as the mark, another envelope", another, no("sequence-reused"), { marks: mark(7, 3, envelopeDigest(vector)) }),
+    c("a sequence above the mark", vector, ok, { marks: mark(7, 2) }),
+    c("a sequence below the mark, same placement run", vector, no("replayed"), { marks: mark(7, 4) }),
+    c("a sequence below a mark from an earlier run", vector, ok, { marks: mark(5, 9) }),
+    c("a mark ahead of the current run", vector, no("replayed"), { marks: mark(8, 1) }),
+    c("a mark for another slot", vector, ok, { marks: [{ agentRef: AGENT, slot: "OTHER_KEY", since: 7, sequence: 9, digest: `sha256:${"0".repeat(64)}` }] }),
     c("iat 60 s ahead", vector, ok, { now: shift(ENV_IAT, -60_000) }),
     c("iat 61 s ahead", vector, no("not-yet-valid"), { now: shift(ENV_IAT, -61_000) }),
-    life("a life of exactly 24 h", "2026-10-13T00:00:00Z", ok),
-    life("a life of 24 h and 1 s", "2026-10-13T00:00:01Z", no("lifetime-too-long")),
-    life("exp equal to iat", ENV_IAT, no("lifetime-too-long")),
+    life("a life of exactly 24 h", "2026-10-13T00:00:00Z", true),
+    life("a life of 24 h and 1 s", "2026-10-13T00:00:01Z", false),
+    life("exp equal to iat", ENV_IAT, false),
     c("now equal to exp", vector, no("expired"), { now: "2026-10-12T12:00:00Z" }),
+    c("a mark ahead of the run, and expired: the earlier check names it", vector, no("replayed"), { marks: mark(8, 1), now: "2026-10-12T12:00:00Z" }),
     c("another machine's #kem private key", vector, no("cannot-open"), { ownKemPrivateKey: otherKem })
   ];
 }
@@ -524,7 +554,7 @@ function envelopeCases(vector: SecretEnvelope): Json[] {
 function envelopeVectors(): Json {
   const envelope = seal(baseHeader(), RFC9180.skEm);
   return {
-    about: "fabric-secret-envelope/1 (DEC-0047 item 7, DEC-0066): written by tools/vectors/relay-crypto.ts, never by hand. The envelope is sealed to RFC 9180 §A.3.1's recipient key pkRm with its ephemeral key skEm (both public test data) and signed, deterministically and low-S, by a test key derived from a published label. `open` holds what a recipient must hold to open it: its #kem private key (RFC 9180's skRm), the sender's #sig public key, the slot's placement and a time inside the envelope's life. `cases` is data a port runs through src/relay-vectors.ts. The secret is a placeholder.",
+    about: "fabric-secret-envelope/1 (DEC-0047 item 7, DEC-0066): written by tools/vectors/relay-crypto.ts, never by hand. The envelope is sealed to RFC 9180 §A.3.1's recipient key pkRm with its ephemeral key skEm (both public test data) and signed, deterministically and low-S, by a test key derived from a published label. `open` holds what a recipient must hold to open it: its #kem private key (RFC 9180's skRm), the sender's #sig public key, the slot's placement and a time inside the envelope's life. A case's context.marks are the target's marks {agentRef, slot, since, sequence, digest}; an opened case expects the mark it writes with the secret. `cases` is data a port runs through src/relay-vectors.ts. The secret is a placeholder.",
     recipientKemPrivateKey: RFC9180.skRm,
     recipientKey: RECIPIENT_JWK,
     senderKey: MACHINE.jwk,
