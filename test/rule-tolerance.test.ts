@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), openrouter-attribution (FAC-SEM-098) and protocols (FAC-SEM-099) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099) and session-join (FAC-SEM-100) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -10,7 +10,7 @@ const KINDS = [
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
-  "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in",
+  "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "session-join",
   "result", "learning", "promotion", "versioned-setting", "grant-window", "roles"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];

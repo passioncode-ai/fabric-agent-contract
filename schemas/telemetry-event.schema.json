@@ -377,7 +377,8 @@
               "usage.line",
               "buffer.overflow",
               "policy.violation",
-              "result"
+              "result",
+              "session.annotation"
             ]
           }
         },
@@ -392,6 +393,34 @@
             "$ref": "activity-common.schema.json#/$defs/extData"
           }
         }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "session.annotation"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "session": true,
+          "runtime": true,
+          "data": {
+            "$ref": "#/$defs/annotation"
+          }
+        },
+        "required": [
+          "session",
+          "runtime",
+          "data"
+        ]
       }
     }
   ],
@@ -569,6 +598,29 @@
         }
       },
       "additionalProperties": false
+    },
+    "annotation": {
+      "type": "object",
+      "required": [
+        "by",
+        "label",
+        "at"
+      ],
+      "properties": {
+        "by": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "Who wrote the annotated event: fabric, switchboard, or another surface."
+        },
+        "label": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "What the surface reported, such as session.ended, terminal.opened or journal_launch."
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false,
+      "description": "DEC-0068 (CON-OE-08): a surface's event about a session, read by the device's collector. It carries no start, end, tokens or cost, so it is never counted: session.interval and usage.line are the collector's alone."
     }
   }
 }

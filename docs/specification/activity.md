@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052 and DEC-0068; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -99,7 +99,7 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `buffer.overflow`, `policy.violation`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
@@ -189,6 +189,22 @@ the device's stream, which the receiver attributes to a user by certificate (`FA
 it never attaches a user to a result and serves results only as project or agent cells of at least 3
 (`activity.results`, `FAC-SEM-067`). `data`: `signal` (the declared signal's name),
 `outcome` (`met`, `not_met`) and an optional `count`. A summary gains no person dimension from it.
+
+**`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
+`session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
+(the surface), `label` (what it reported) and `at`. It carries no start, end, tokens or cost (schema), so it is never
+counted ([one writer per session](#one-writer-per-session)).
+
+<a id="one-writer-per-session"></a>
+
+**One writer per session** (DEC-0068, CON-OE-08). The runtime's `session.id` is the key that joins every event about
+a session. On one device the collector is the one writer of a session's `session.interval` and `usage.line` events:
+every counted event of one `session.id` carries one `collector.id`, and the session's intervals do not overlap, since a
+session is in one state at a time (`FAC-SEM-100`, kind `session-join`). A surface's own events about the session —
+Fabric's, Switchboard's — are annotations, never counters: when the collector reads them it writes
+`session.annotation`. A reader counts interval seconds by state and one usage line per `dedupeKey`, and nothing else
+([`sessionTotals`](../../src/session-join.ts)), so a session seen by three writers totals as its collector wrote it
+(`fixtures/semantic/session-join-three-writers.json`).
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any
 kind a reader does not know — an extension, or a core kind a later revision of this protocol adds —
@@ -474,6 +490,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; a policy violation's `occurred` is the day it names; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`, and one with no canonical form is refused; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 | `FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
+| `FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves

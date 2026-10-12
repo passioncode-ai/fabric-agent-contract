@@ -1,0 +1,31 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "01K6Z3V8Q4M2N7P5R9T1W3X5Z1",
+  "kind": "session.annotation",
+  "source": "fabric",
+  "collector": {
+    "id": "cc-otel",
+    "epoch": 2
+  },
+  "seq": 44,
+  "occurred": "2026-10-07T09:30:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "183772004511274",
+  "session": {
+    "id": "cc-sess-5d1e"
+  },
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code",
+    "version": "2.1.287"
+  },
+  "data": {
+    "by": "fabric",
+    "label": "session.ended",
+    "at": "2026-10-07T09:30:00Z",
+    "start": "2026-10-07T09:02:11Z",
+    "end": "2026-10-07T09:30:00Z"
+  }
+}
