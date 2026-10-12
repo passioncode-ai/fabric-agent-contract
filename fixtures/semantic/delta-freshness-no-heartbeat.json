@@ -1,0 +1,17 @@
+{
+  "description": "No heartbeat held, a machine that answers current.",
+  "kind": "delta-freshness",
+  "expect": [
+    "FAC-SEM-083"
+  ],
+  "input": {
+    "at": "2026-10-12T12:00:00Z",
+    "applied": {
+      "sequence": 2,
+      "revision": 3
+    },
+    "heartbeat": null,
+    "broken": false,
+    "answer": "current"
+  }
+}

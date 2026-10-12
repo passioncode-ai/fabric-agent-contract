@@ -2266,7 +2266,7 @@
       "id": "V4-DELTA-HEARTBEAT",
       "title": "revocation delta and timestamp heartbeat: documents, keys, head hash, the 72-hour rule and vectors (DEC-0054, reserved)",
       "source": "v4 §7, §12; split from V4-SECURE-TRANSPORT on 2026-10-12",
-      "status": "open: DEC-0054 reserved by the revocation-delta run",
+      "status": "in review: packet P4-06 builds DEC-0054 under the relay run's pre-reserved id (agent_sync.py reserve --key revocation-delta-20261012 DEC, git CAS commit 776e807, run r-51535649e); no new decision id is reserved, only FAC-SEM-082…084",
       "area": "schema",
       "severity": "major",
       "owner": "contract",

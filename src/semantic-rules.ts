@@ -2,6 +2,7 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { relayRules } from "./relay-rules.js";
+import { revocationDeltaRules } from "./revocation-delta-rules.js";
 import { feedRequestRules } from "./service-feed.js";
 import { lockOutcomeRules } from "./service-supervisor.js";
 import { windowsTokenRules } from "./windows-token.js";
@@ -41,6 +42,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (delegation) return delegation;
   const relay = relayRules(kind, value);
   if (relay) return relay;
+  const delta = revocationDeltaRules(kind, value);
+  if (delta) return delta;
   if (kind === "deep-link") return deepLinkRules(value);
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
   if (kind === "windows-token-file") return windowsTokenRules(value);

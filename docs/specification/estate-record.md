@@ -110,8 +110,9 @@ digest) or `grant` (a grant's `meta.id`) — its `ref` in that kind's own form a
 revocation before it (`FAC-SEM-072`), lists each once, and lists nothing it revokes: revocation outranks addition (v4 §7;
 `FAC-SEM-076`). Removing a machine also revokes its DEC-0031 certificate where an organization server issued one; who revokes for a
 solo estate, with no organization server, belongs to the enrollment ceremony (not decided here). The fast
-revocation delta that reaches machines within seconds is DEC-0054's (reserved), carried by the relay (v4 §7, [DEC-0047](relay.md#revocation-and-heartbeat)); the record is its
-durable state.
+revocation delta that reaches machines within seconds is DEC-0054's ([revocation delta](revocation-delta.md)), carried by the relay (v4 §7, [DEC-0047](relay.md#revocation-and-heartbeat)); the record is its
+durable state: a revision issued at or after a delta entry lists its revocation, or a machine holding the entry refuses
+it (`FAC-SEM-084`), and every check that reads the record's revocations reads the applied entries' too.
 
 ## The signature
 
@@ -203,7 +204,8 @@ keys are DEC-0053's.
   pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
-  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`); installs a
+  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`) and it is
+  reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054); installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key); fills
   only placed slots; and reports the applied revision in its check-in's
@@ -235,5 +237,5 @@ records no use. A credential's id is an opaque handle.
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract
   define a ceiling, every new version is a new revision.
 - The signing-challenge types and the dedicated signing RP as a contract (v4 §12; a later wave), recovery by a printed
-  code, the revocation delta and heartbeat (DEC-0054, reserved), the estate's windows and their split per machine
+  code, the estate's windows and their split per machine
   (window leases, a later wave), and `ES256` for hub and publisher keys (Fabric's D2).

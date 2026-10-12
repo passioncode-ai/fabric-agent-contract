@@ -1,0 +1,45 @@
+{
+  "description": "Entry 2 whose prev is not entry 1's hash.",
+  "kind": "revocation-delta",
+  "expect": [
+    "FAC-SEM-082"
+  ],
+  "input": {
+    "head": {
+      "sequence": 2,
+      "sha256": "8ee83c9778c0c6ea3cc8a79d11c4146cb1c21f7882ab079892f7cedcfb2fb57d"
+    },
+    "entries": [
+      {
+        "type": "revocation-delta/1",
+        "alg": "EdDSA",
+        "estate": "estate-5d0f1a",
+        "sequence": 1,
+        "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+        "at": "2026-10-12T10:00:00Z",
+        "revocation": {
+          "kind": "hub-key",
+          "ref": "hub-m-9a07-1",
+          "revokedAt": "2026-10-12T10:00:00Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+      },
+      {
+        "type": "revocation-delta/1",
+        "alg": "EdDSA",
+        "estate": "estate-5d0f1a",
+        "sequence": 2,
+        "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+        "at": "2026-10-12T10:06:00Z",
+        "revocation": {
+          "kind": "machine",
+          "ref": "m-9a07",
+          "revokedAt": "2026-10-12T10:06:00Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "Xk7_2eDdv46EK9N2ZfyMdtluGkTjZxFdRwWBFmIpUYYXh3zB2pnE_XtPdwq6HPR2ChccJveF-t0aW4H_PNJXDw"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "description": "A revocation dated one second after the entry that carries it.",
+  "kind": "revocation-delta",
+  "expect": [
+    "FAC-SEM-082"
+  ],
+  "input": {
+    "head": {
+      "sequence": 1,
+      "sha256": "127e3bc77671e49e5b87ddd880b9e52882586cea79f6d0c433aab69096deb514"
+    },
+    "entries": [
+      {
+        "type": "revocation-delta/1",
+        "alg": "EdDSA",
+        "estate": "estate-5d0f1a",
+        "sequence": 1,
+        "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+        "at": "2026-10-12T10:00:00Z",
+        "revocation": {
+          "kind": "hub-key",
+          "ref": "hub-m-9a07-1",
+          "revokedAt": "2026-10-12T10:00:01Z"
+        },
+        "kid": "hub-m-4c1e-1",
+        "sig": "3KJQYJLZH19DK6mI1GEDbdgbgr7_1PJ2iM57mG5eYHmXXf0ixXmB5XQu688Rq6RxUwcJJgMswQuFYy_fXuOGBg"
+      }
+    ]
+  }
+}

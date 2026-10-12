@@ -1,0 +1,25 @@
+{
+  "v": 1,
+  "type": "delta",
+  "id": "d-0001",
+  "head": {
+    "sequence": 1,
+    "sha256": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce"
+  },
+  "entries": [
+    {
+      "type": "revocation-delta/1",
+      "alg": "EdDSA",
+      "estate": "estate-5d0f1a",
+      "sequence": 1,
+      "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+      "at": "2026-10-12T10:00:00Z",
+      "revocation": {
+        "kind": "hub-key",
+        "ref": "hub-m-9a07-1",
+        "revokedAt": "2026-10-12T10:00:00Z"
+      },
+      "kid": "hub-m-4c1e-1"
+    }
+  ]
+}
