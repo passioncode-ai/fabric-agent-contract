@@ -30,7 +30,7 @@ F-B-205, F-B-219 (operator channel), F-B-214…F-B-217 (embedded dashboard, agre
   constraint at a time and requires a negative fixture the copy accepts: 22 mutants of the channel status, 8 of the
   declaration. It found one constraint nothing proved: `linked` without `receiver` (the fixture of that name carried a
   receiver with lease `none`); `operator-channel-status-linked-receiver-absent` now kills it.
-- Register row `FAC-SEM-080`; board rows CT-13 (in review), CT-18 (adapter: FAA-15, FAA-17) and CT-21 (Fabric
+- Register row `FAC-SEM-080`; board rows CT-13 (in review), CT-18 (adapter: new rows asked for the channel status and the dashboard kit; FAA-15 and FAA-17 are closed) and CT-21 (Fabric
   Dashboards consumes ED-9 `appearance` and the validation; it files its own row); DOCMAP, CONTEXT; DEC-0035 and
   DEC-0036 annotated.
 
@@ -55,7 +55,7 @@ without its 480 (3); the instance pointer unescaped (1). The schema plants run a
 
 ## Open
 
-- Consumers: the adapter's kits and `check_service.py` (CT-18, FAA-15, FAA-17); Fabric Dashboards' validation and
+- Consumers: the adapter's kits and `check_service.py` (CT-18, new adapter rows); Fabric Dashboards' validation and
   ED-9 `appearance` (CT-21, its own row).
 - A per-service appearance choice for pages sharing a cookie store (*Not decided here* in DEC-0059); whether `off`
   may carry a `receiver` (DEC-0058).

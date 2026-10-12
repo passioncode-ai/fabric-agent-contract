@@ -171,4 +171,34 @@ describe("fabric-operator-channel/0.1 (DEC-0034, DEC-0035)", () => {
   it.each(MUTANTS)("a fixture kills the mutant: $name", async (mutant) => {
     expect(await killers("operator-channel-status.schema.json", mutant)).not.toEqual([]);
   });
+
+  it("the unchanged schema accepts no negative fixture (the identity mutant), so the filter reads negatives only", async () => {
+    expect(await killers("operator-channel-status.schema.json", { name: "identity", mutate: () => {} })).toEqual([]);
+  });
+});
+
+// The UX chain names fixtures as coverage; a name that is not in the catalogue is a claim nothing backs (the P4-03
+// review found SCN-012 naming one). Every backticked fixture name in docs/ux/*.md that begins with a catalogued
+// schema's base name (of two words or more) resolves to a catalogue entry; a pattern with `*` is a family, not a name.
+describe("fixture names in the UX chain", () => {
+  it("resolve to the catalogue", async () => {
+    const catalogue = JSON.parse(await read("fixtures/catalogue.json")) as { name: string; schema: string }[];
+    const names = new Set(catalogue.map((entry) => entry.name));
+    // Bases of two words or more: a one-word base such as `approval` prefixes refusal codes (`approval-reused`), not fixtures.
+    const bases = [...new Set(catalogue.map((entry) => entry.schema.replace(/\.schema\.json$/, "")))].filter((base) => base.includes("-"));
+    const ux = await readdir(path.join(root, "docs/ux"));
+    const missing: string[] = [];
+    let checked = 0;
+    for (const file of ux.filter((name) => name.endsWith(".md"))) {
+      const text = await read(`docs/ux/${file}`);
+      for (const [, token] of text.matchAll(/`([a-z0-9][a-z0-9-]*)`/g)) {
+        if (!bases.some((base) => token!.startsWith(`${base}-`))) continue;
+        checked += 1;
+        if (!names.has(token!)) missing.push(`${file}: ${token}`);
+      }
+    }
+    expect(missing).toEqual([]);
+    // The two families the review named are among those checked.
+    expect(checked).toBeGreaterThanOrEqual(5);
+  });
 });

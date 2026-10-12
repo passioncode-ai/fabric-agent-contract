@@ -90,7 +90,7 @@
           ]
         },
         "lease": {
-          "description": "held: this process receives. elsewhere: another process of the same agent receives. none: nobody holds it now.",
+          "description": "held: this process receives. elsewhere: another process of the same agent receives. none: nobody holds it now, a holder stopped renewing it, or the receiver is missing (OC-17), which reads none even while a process still renews the lease. A status with lease none is degraded or off (DEC-0058).",
           "enum": [
             "held",
             "elsewhere",

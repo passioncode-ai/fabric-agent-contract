@@ -20,7 +20,7 @@ const validator = await createValidator();
 const SCHEMA = `${SCHEMA_PREFIX}schemas/service-dashboard-extension.schema.json`;
 const REFERENCE_THEMES = ["graphite", "fabric", "paper", "forest", "ocean", "ember", "contrast"];
 const vectors = JSON.parse(await read("fixtures/vectors/dashboard-declaration.json")) as {
-  key: string; cases: { name: string; wellKnown: unknown; expect: Omit<HostView, "errors"> }[];
+  key: string; cases: { name: string; wellKnown?: unknown; wellKnownJson?: string; expect: Omit<HostView, "errors"> }[];
 };
 const semantic = (await readdir(path.join(root, "fixtures/semantic"))).filter((name) => name.startsWith("service-well-known-dashboard"));
 
@@ -75,8 +75,10 @@ describe("fabric-dashboard/0.1 (DEC-0036)", () => {
     }
   });
 
-  // F-B-217: every constraint of the declaration, removed one at a time, lets a negative fixture through.
+  // F-B-217: each of these constraints of the declaration, removed one at a time, lets a negative fixture through.
   const MUTANTS: Mutant[] = [
+    { name: "themes may be empty", mutate: (s) => { delete s.properties.themes.minItems; } },
+    { name: "themes beyond 32", mutate: (s) => { delete s.properties.themes.maxItems; } },
     { name: "minWidth not required", mutate: (s) => { s.required = []; } },
     { name: "minWidth any number", mutate: (s) => { s.properties.minWidth.type = "number"; } },
     { name: "floor below 360", mutate: (s) => { s.properties.minWidth.minimum = 0; } },
@@ -88,6 +90,10 @@ describe("fabric-dashboard/0.1 (DEC-0036)", () => {
   ];
   it.each(MUTANTS)("a fixture kills the mutant: $name", async (mutant) => {
     expect(await killers("service-dashboard-extension.schema.json", mutant)).not.toEqual([]);
+  });
+
+  it("the unchanged schema accepts no negative fixture (the identity mutant), so the filter reads negatives only", async () => {
+    expect(await killers("service-dashboard-extension.schema.json", { name: "identity", mutate: () => {} })).toEqual([]);
   });
 });
 
@@ -104,15 +110,31 @@ describe("the declaration as a host reads it (DEC-0059, ED-6, ED-8, ED-9, FAC-SE
 
   it("names the dashboard key the code reads", () => {
     expect(vectors.key).toBe(EXTENSION_KEYS.dashboard);
-    expect(vectors.cases.length).toBeGreaterThanOrEqual(15);
+    expect(vectors.cases.length).toBeGreaterThanOrEqual(21);
+    expect(vectors.cases.filter((item) => item.wellKnownJson !== undefined).map((item) => item.wellKnownJson)).toEqual([expect.stringContaining('"minWidth":360.0')]);
   });
 
-  it.each(vectors.cases)("vector $name", ({ wellKnown, expect: expected }) => {
+  it.each(vectors.cases)("vector $name", ({ wellKnown: given, wellKnownJson, expect: expected }) => {
+    // A raw-text case is parsed as a host would parse the document it fetched.
+    const wellKnown = wellKnownJson === undefined ? given : (JSON.parse(wellKnownJson) as unknown);
     const { errors, ...view } = hostView(wellKnown);
     expect(view).toEqual(expected);
     expect(errors.length > 0).toBe(expected.reported);
     // A declaration the host uses is one the schema accepts, and FAC-SEM-080 reports exactly the ones it does not.
     expect(dashboardDeclarationRules(wellKnown as Record<string, unknown>).length > 0).toBe(expected.reported);
+  });
+
+  it("reads only the document's own key, never one inherited from Object.prototype", () => {
+    const proto = Object.prototype as Record<string, unknown>;
+    try {
+      // Not enumerable: an enumerable member would also reach every object the validator walks with for…in and make
+      // the inherited declaration itself invalid, which would hide a reader that used `in`.
+      Object.defineProperty(proto, EXTENSION_KEYS.dashboard, { value: { minWidth: 1280 }, configurable: true, enumerable: false });
+      expect(hostView({ extensions: {} }).declared).toBe(false);
+      expect(hostView({ extensions: {} }).hostFloor).toBe(480);
+    } finally {
+      delete proto[EXTENSION_KEYS.dashboard];
+    }
   });
 
   it("never throws on a malformed document", () => {

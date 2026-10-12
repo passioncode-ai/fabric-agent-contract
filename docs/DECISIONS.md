@@ -1087,6 +1087,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
+- **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1226,7 +1227,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request); host and adapter adoption pending.
-- **Annotated (2026-10-12):** ED-6, ED-8 and ED-9 amended by DEC-0059 (the cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared, `FAC-SEM-080`).
+- **Annotated (2026-10-12):** ED-6, ED-8 and ED-9, and its *Not decided here*, amended by DEC-0059 (the cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared, `FAC-SEM-080`).
 - **Amends:** DEC-0015 additively: a new profile, [embedded dashboard](specification/embedded-dashboard.md),
   beside `surfaces.dashboard`. No existing field, schema or rule changes.
 - **Decision:** A dashboard page and the host that shows it make each other promises about width,
@@ -1502,6 +1503,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the link
   handler), Fabric Dashboards (the first host, FD-45), the fabric-agent-adapter's dashboard kit (the component).
+- **Annotated (2026-10-12):** FB-6's cookie scope amended by DEC-0059 (per host in a shared cookie store, per service
+  where the host gives each service its own store).
 - **Decision:** the profile [Fabric's button](specification/fabric-button.md):
   - a dashboard MAY show one floating button, bottom-right, labelled with the Fabric mark and **Fabric**,
     accessible name **Open Fabric**, at least 44 × 44 CSS px, opening a menu of a chat and, when the page knows
@@ -1839,6 +1842,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   grant per token and the meter's five-actor token, and issues only `prompt` and `operator-channel` approvals
   (CT-19); Observatory's meter requires the exact scope and effect and answers `denied` as a result (CT-20); the
   adapter's kit ports pass the issuer and run this verifier's table (CT-18).
+- **Annotated (2026-10-12):** item 9's "in the page's own storage partition on the service origin, as ED-8's is" is
+  superseded by DEC-0059: FB-6's cookie, like ED-8's, is per host in a shared cookie store and per service where the
+  host gives each service its own store, so in a shared store an `owner=host` for one local service hides every local
+  service's button on that host (RFC 6265 §8.5).
 - **Amends:** DEC-0039 (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17, DL-19, DL-21; `FAC-SEM-050`), DEC-0040
   (FB-6), the session-lifetime paragraph of [service](specification/service.md#operator-session-lifetime). Implements
   Fabric ADR-0144 amendments 3 and 4 at
@@ -2477,9 +2484,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
 
 - **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: every agent that publishes the
-  operator-channel status — the fabric-agent-adapter's kits first (backlog CT-18, its row FAA-15) — reports a channel
-  whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: channel-status producers — every agent
+  that publishes the operator-channel status, and the fabric-agent-adapter's kits when they serve the status (a new
+  adapter row under backlog CT-18) — report a channel whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
   link code, and never as `unlinked`.
 - **Amends:** DEC-0035, whose *Compatibility* said `operator-channel-status.schema.json` was unchanged: this decision
   tightens that schema. DEC-0034's status table gains the lease `unlinked` requires. Closes F-B-204, F-B-205 and
@@ -2517,7 +2524,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json`,
     `fixtures/negative/operator-channel-status-*` (seventeen new), `fixtures/catalogue.json`;
   - tests: `test/operator-channel.test.ts` (this entry, the boundaries, the mutants), `test/schema-mutants.ts` (new);
-  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18), the
+  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18),
+    `docs/DECISIONS.md` (DEC-0034 and DEC-0035 annotated), the
     handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md` and `docs/handoffs/README.md`.
 - **Not decided here:** whether `off` may carry a `receiver` at all; reason codes other than `receiver-missing` keep an
   open vocabulary and constrain no lease.
@@ -2532,17 +2540,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards consumes
   ED-9 `appearance` and validates the declaration, logging an invalid one once per load (its own row, filed by its
-  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares and its
-  `check_service.py` keeps checking the declaration (CT-18, FAA-17).
+  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares, keeps the page's own saved value
+  for a field it does not list and hides only the listed fields' controls, and its `check_service.py` keeps checking
+  the declaration (a new adapter row under CT-18). Fabric Dashboards' FD-42 sentence that it "reloads only the pages
+  that do not declare appearance" is superseded: a page that lists no field reads no cookie (CT-21).
 - **Amends:** DEC-0036 (ED-6, ED-8, ED-9 and its *Not decided here*; its *Compatibility* said no semantic rule code is
-  allocated, and this decision allocates one). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
+  allocated, and this decision allocates one); DEC-0040's FB-6 and DEC-0045 item 9 (the `fabric_button` cookie takes
+  ED-8's scope). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
   Closes F-B-214, F-B-215, F-B-216 and F-B-217 of the board-waves inventory (node N09, backlog CT-13).
 - **Decision:** in the [embedded dashboard](specification/embedded-dashboard.md) —
   1. **ED-8, the cookie's scope.** The appearance cookie is set for the page's host in the store the page reads. A
      cookie is not isolated by port (RFC 6265 §8.5), so it is "per host in a shared cookie store; per service where
      the host gives each service its own store": every local service on `127.0.0.1` sharing one store reads and can
      overwrite one cookie, and Fabric Dashboards, which gives each service the partition `persist:svc-<key>`
-     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service.
+     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service. **FB-6's `fabric_button` cookie** has the same scope: in a
+     shared store an `owner=host` written for one local service hides the button of every local service on that host.
   2. **ED-6 follows ED-9's `appearance`.** A page takes from the cookie exactly the fields its declaration lists, hides
      only those fields' controls while the cookie is present, and keeps the others. A page that lists none — no
      `appearance`, no declaration, or an invalid one — takes nothing from the cookie and follows
@@ -2571,7 +2583,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (Fabric Dashboards) is unaffected. `service-dashboard-extension.schema.json` changes only its descriptions.
 - **Consequences / affects:**
   - spec: `docs/specification/embedded-dashboard.md` (ED-6, ED-8, ED-9, *How a page shows that it holds*, *Semantic
-    rules* (new), *Not decided here*), `docs/specification/conformance.md` (the register row);
+    rules* (new), *Not decided here*), `docs/specification/fabric-button.md` (FB-6),
+    `docs/specification/conformance.md` (the register row);
   - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
   - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
   - fixtures: `fixtures/negative/service-dashboard-extension-*` (five new), `fixtures/semantic/service-well-known-dashboard-*`,

@@ -290,7 +290,7 @@ independent agent author and P-02 project operator.
 - **States covered:** empty, success, error
 - **Errors & recovery:** a webhook already set on the bot -> the status is `degraded` (`webhook-set`) with the explanation, and the operator removes the webhook or switches the agent to it. The agent's receiver stops while it waits for the code -> the status is `degraded` (`receiver-missing`, `receiver.lease: none`), never `unlinked`, and the operator restarts the receiver before typing the code (OC-17, DEC-0058).
 - **Status:** draft
-- **Coverage:** `operator-channel-status.schema.json`, fixtures `operator-channel-status-*` (among them `operator-channel-status-unlinked-lease-none` and `operator-channel-status-receiver-missing-unlinked`), `test/operator-channel.test.ts`
+- **Coverage:** `operator-channel-status.schema.json`, fixtures `operator-channel-status-*` (among them `operator-channel-status-unlinked-lease-none` and `operator-channel-status-degraded-receiver-missing-unlinked`), `test/operator-channel.test.ts`
 - **Product:** unobserved
 
 ### SCN-013: Confirm a paid action, or find it already decided
@@ -480,7 +480,7 @@ independent agent author and P-02 project operator.
 - **States covered:** success, narrow, below floor
 - **Errors & recovery:** a page whose navigation scrolls sideways in a strip -> the adapter's layout check reports ED-3 at 480 CSS pixels; the agent's author moves the extra destinations into a menu.
 - **Status:** draft
-- **Coverage:** embedded-dashboard ED-1, ED-2, ED-3, ED-7; `service-dashboard-extension.schema.json` (`minWidth` 360…1280); `hostView` in `src/dashboard-declaration.ts`; `test/embedded-dashboard.test.ts`
+- **Coverage:** embedded-dashboard ED-1, ED-2, ED-3, ED-7; `service-dashboard-extension.schema.json` (`minWidth` 360…1280); `hostView` in `src/dashboard-declaration.ts` (the host floor); `test/embedded-dashboard.test.ts`. ED-1…ED-3 (the floor layout, reachable navigation) are prose rules a service proves on its rendered page with the adapter's layout check; no contract test measures them.
 - **Product:** unobserved
 
 ### SCN-022: Choose a theme in the host: each page applies the fields it declared
@@ -494,7 +494,7 @@ independent agent author and P-02 project operator.
   1. Operator chooses dark and `ocean` -> the host writes `fabric_appearance=v=1&scheme=dark&theme=ocean` where each page reads it.
   2. `example-agent`'s page -> shows dark `ocean` and hides its own scheme and theme controls.
   3. The second agent's page -> turns dark and keeps its own theme control.
-  4. The third agent's page -> the host finds the declaration invalid, treats it as not declared (host floor 480) and logs it once for this load; the page follows the system colour scheme only.
+  4. The third agent's page -> the host finds the declaration invalid, treats it as not declared (host floor 480) and logs it once for this load; the page takes nothing from the host's cookie and follows the system colour scheme unless the operator set the page's own control.
 - **Expected result:** each page applies exactly the carrier fields it declared, and an invalid declaration is a legacy dashboard, never a page given a floor no window can hold.
 - **Alt paths:** a host that gives each service its own cookie store (Fabric Dashboards' partition per service) -> the cookie is per service. Pages on a shared cookie store under one host name -> one cookie serves them all, so a per-service choice is not available there.
 - **UI elements:** scheme and theme picker, the pages' own appearance controls.
@@ -512,13 +512,13 @@ independent agent author and P-02 project operator.
 - **Feature:** spend
 - **Traces:** ST-018, FLW-14 (JTBD-07, JRN-06/#4)
 - **Entry point:** an agent of `project-a` about to call a paid model for 1.80 USD
-- **Preconditions:** `project-a` holds a standing grant with `spend.mode: limited`, a `month` limit of 40 USD with 12 USD spent, and `autoApproveUsd: 2`
+- **Preconditions:** `project-a` holds a standing grant with `spend.mode: limited` and a `month` limit of 40 USD with 12 USD spent; its spend policy's auto-approve threshold (L1) is 2 USD
 - **Steps:**
   1. The agent asks the meter with the amount -> the meter answers `allowed` with a receipt and reserves 1.80 USD against the grant and every level above it.
   2. The agent makes the call -> no question reaches the operator.
   3. The agent's usage report settles the spend -> `byGrant` lists the receipt under the grant.
 - **Expected result:** the operator sees the spend under its grant afterwards and was not asked: the record was the proof.
-- **Alt paths:** the call would cost 2.40 USD, above `autoApproveUsd` -> `denied` `limit-reached` at L1 with window `task` and one filed approval request (SCN-017).
+- **Alt paths:** the call would cost 2.40 USD, above the project policy's 2 USD threshold -> `denied` `limit-reached` at L1 with window `task` (the threshold is a per-task limit) and one filed approval request, as in SCN-017.
 - **UI elements:** usage report by grant, receipt.
 - **States covered:** success, error
 - **Errors & recovery:** the grant expired -> `denied` `grant-expired`, `level: null`; the agent relays the code unchanged and goes on with other work.
@@ -544,7 +544,7 @@ independent agent author and P-02 project operator.
 - **States covered:** preview, success, error
 - **Errors & recovery:** a row needs a required column the snapshot lacks -> the row is refused with its key and reason and not counted as inserted; the operator re-enters that binding.
 - **Status:** draft
-- **Coverage:** service Settings backup and Restore; `settings-backup.schema.json`; `src/settings-backup.ts` (FAC-SEM-035); `test/settings-backup.test.ts`
+- **Coverage:** service Settings backup and Restore; `settings-backup.schema.json`; `src/settings-backup.ts` (FAC-SEM-035, the snapshot file); `test/settings-backup.test.ts`. The Restore steps (add, never overwrite; automatic restore only on a fresh database; the preview and the report) are prose rules the service proves; no contract test runs a restore.
 - **Product:** unobserved
 
 ## Project board

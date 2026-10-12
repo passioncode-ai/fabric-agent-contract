@@ -211,7 +211,7 @@
 - **Used by:** FLW-13
 - **Purpose:** an agent's dashboard page shown inside a host beside the agent console, usable at every width the host keeps for it.
 - **Elements:** the page's navigation (wrapping, a visible *More* menu or one labelled control), its content, its own scheme and theme controls when it applies no host field (primary action: the page's own).
-- **States:** success — the page at or above its floor, every destination reachable; narrow — the console stopped at the host floor `max(480, minWidth)`; legacy — the page declares nothing valid, so the host keeps 480 and the page follows the system colour scheme; below floor — a window too small for both, so the page keeps its floor layout and scrolls sideways.
+- **States:** success — the page at or above its floor, every destination reachable; narrow — the console stopped at the host floor `max(480, minWidth)`; legacy — the page declares nothing valid, so the host keeps 480 and the page takes nothing from the host's cookie, following the system colour scheme unless the operator set its own control; below floor — a window too small for both, so the page keeps its floor layout and scrolls sideways.
 - **Coverage:** `service-dashboard-extension.schema.json`, `test/embedded-dashboard.test.ts` (ED-1…ED-10, FAC-SEM-080), `src/dashboard-declaration.ts`
 - **Scenarios:** SCN-021, SCN-022
 - **Resources:** embedded-dashboard specification, The page, The host, The declaration

@@ -381,7 +381,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a page that declares `appearance: [scheme, theme]`, when I choose dark and `ocean`, then the page shows dark `ocean` and hides its own scheme and theme controls.
   - Given a page that declares only `scheme`, then it follows my scheme and keeps its own theme control.
-  - Given a page that declares no `appearance`, or whose declaration is invalid, then it follows the system colour scheme only, and the host treats an invalid declaration as not declared and reports it.
+  - Given a page that declares no `appearance`, or whose declaration is invalid, then it takes nothing from the host's cookie and follows the system colour scheme unless I set the page's own control, and the host treats an invalid declaration as not declared and reports it.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

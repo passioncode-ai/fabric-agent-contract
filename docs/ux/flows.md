@@ -334,7 +334,7 @@ flowchart TD
   C --> D{Fields the page declared}
   D -->|scheme and theme| B[Page follows both and hides both controls]
   D -->|one field| H[Page follows that field and keeps its other control]
-  D -->|none| P[Page follows the system colour scheme only]
+  D -->|none| P[Page takes nothing from the cookie; its own controls stay]
 ```
 
 - **Screens traversed:** SCR-16 success; SCR-16 narrow; SCR-16 legacy.
