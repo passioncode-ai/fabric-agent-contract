@@ -86,5 +86,5 @@ a revocation kind read from a `Map`) were each removed and a test failed. `seman
 `v8 ignore`; `service-well-known` joins `test/rule-tolerance.test.ts`. `semantic-rules.ts` only dispatches to it
 (91.51 %, floor unchanged). The schema invariants this packet proves are not branches: `test/schema-mutants.ts` removes
 each one from a copy of its schema and requires a negative fixture the copy accepts (22 mutants of
-`operator-channel-status`, 8 of `service-dashboard-extension`). The whole set: 3153 / 3312 (95.19 %). Measured with
+`operator-channel-status`, 10 of `service-dashboard-extension`, and an identity mutant for each). The whole set: 3153 / 3312 (95.19 %). Measured with
 `vitest run --coverage` on the P4-03 branch off `main` `31ed9f0`.

@@ -25,10 +25,10 @@ F-B-205, F-B-219 (operator channel), F-B-214…F-B-217 (embedded dashboard, agre
   SHA-256); ED-6 applies only the fields ED-9's `appearance` lists, none meaning `prefers-color-scheme` only; ED-9: a
   host validates the declaration, treats an invalid one as not declared and reports it. `src/dashboard-declaration.ts`
   (`hostView`, `dashboardDeclarationRules`), semantic fixtures `fixtures/semantic/service-well-known-dashboard-*`,
-  vectors `fixtures/vectors/dashboard-declaration.json` (nineteen cases), five negative declaration fixtures.
+  vectors `fixtures/vectors/dashboard-declaration.json` (21 cases), seven negative declaration fixtures.
 - **Killing fixtures proved by test:** [`test/schema-mutants.ts`](../../test/schema-mutants.ts) removes one schema
-  constraint at a time and requires a negative fixture the copy accepts: 22 mutants of the channel status, 8 of the
-  declaration. It found one constraint nothing proved: `linked` without `receiver` (the fixture of that name carried a
+  constraint at a time and requires a negative fixture the copy accepts: 22 mutants of the channel status, 10 of the
+  declaration, and an identity mutant for each that must let nothing through. It found one constraint nothing proved: `linked` without `receiver` (the fixture of that name carried a
   receiver with lease `none`); `operator-channel-status-linked-receiver-absent` now kills it.
 - Register row `FAC-SEM-080`; board rows CT-13 (in review), CT-18 (adapter: new rows asked for the channel status and the dashboard kit; FAA-15 and FAA-17 are closed) and CT-21 (Fabric
   Dashboards consumes ED-9 `appearance` and the validation; it files its own row); DOCMAP, CONTEXT; DEC-0035 and
@@ -36,12 +36,12 @@ F-B-205, F-B-219 (operator channel), F-B-214…F-B-217 (embedded dashboard, agre
 
 ## Checks run
 
-On the branch off `main` `31ed9f0`: `tsc --noEmit` clean; `vitest run --coverage` 36 files, 1578 tests passed, every
+On the branch off `main` `31ed9f0`, after the review round: `tsc --noEmit` clean; `vitest run --coverage` 36 files, 1588 tests passed, every
 floor met, whole set 3153 / 3312 branches (95.19 %), `dashboard-declaration.ts` 20 / 20; `python3 docs/ux/lint.py`
 "20 stories, 16 flows, 19 screens, 25 scenarios"; `tsx src/docs-check.ts` passed; `tsx src/lint-md.ts` 0 errors;
 `tsx src/privacy-check.ts` with `ORG_INDEX` set: 0 findings. Plants, each restored after a test failed: FAC-SEM-080
 not dispatched from `semantic-rules.ts` (1 test failed); `hostView` using an invalid declaration (11); the host floor
-without its 480 (3); the instance pointer unescaped (1). The schema plants run as the mutant tests on every gate.
+without its 480 (3); the instance pointer unescaped (1). The schema plants run as the mutant tests on every gate. The review round (owner session's three readings; 13 items) added and planted: the mutant filter reading positives (both identity tests failed); `in` for `Object.hasOwn` under a non-enumerable inherited key (1 failed); a reader that checks only `minWidth` (the new vector `valid-floor-duplicate-field` among 11 failures); SCN-012's old wrong fixture name (the new UX fixture-name test failed). FB-6 now takes ED-8's scope (DEC-0045 and DEC-0040 annotated).
 
 ## Decisions taken here
 

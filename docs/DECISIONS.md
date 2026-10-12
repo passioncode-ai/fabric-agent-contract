@@ -2498,11 +2498,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **`receiver-missing` is one shape.** A status whose `reason.code` is `receiver-missing` has `state: degraded` and a
      `receiver` with `lease: none` (schema, an `if`/`then` on `reason.code`). OC-17's closing list names `unlinked`
      beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
+     `receiver.lease` reads `none` whenever the receiver is missing, even while a process still renews the lease (the
+     not-draining condition). In the first 120 seconds after a lease stops being renewed the receiver is not yet
+     missing: the last status stands and the lapse is never reported as `unlinked`; from the 120th second the status is
+     `degraded` with `receiver-missing`. The lease's schema description says the same.
   3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
      `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
      `linked`, `receiver-missing` in a state other than `degraded`, with a held lease and without a receiver, the
      sixteen-chat limit and an `excluded.liftedAt` that is an absolute URL. `test/operator-channel.test.ts` removes
-     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted;
+     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted, and
+     an identity mutant must let none through;
      one, `linked` without `receiver`, survived before this change, because the fixture of that name carried a receiver
      with lease `none`.
   4. **The glossary's *Addressed message*** names the one unaddressed input OC-15 honours: a bare `/link CODE` that
@@ -2565,11 +2570,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      480, no carrier field) and reports it. **`FAC-SEM-080`** (`service-well-known`, receipt SEM-0080) reports it on the
      well-known document, once per schema error, at the extension key; the well-known schema cannot, because
      `extensions` is open. `hostView` in `src/dashboard-declaration.ts` is the reference reading, with vectors in
-     `fixtures/vectors/dashboard-declaration.json` for a host's port (nineteen cases, the floors 359, 360, 480, 481,
-     1280 and 1281 among them).
+     `fixtures/vectors/dashboard-declaration.json` for a host's port (21 cases: the floors 359, 360, 480, 481,
+     1280 and 1281, a valid floor beside a field named twice, and `360.0` given as raw JSON text).
   4. **Killing fixtures for the declaration (F-B-217):** a declaration without `minWidth`, a fractional one, one above
-     1280, a theme or a carrier field twice. `test/embedded-dashboard.test.ts` removes each of eight constraints from a
-     copy of the schema and fails if no negative fixture is then accepted.
+     1280, a theme or a carrier field twice, an empty `themes` and 33 themes. `test/embedded-dashboard.test.ts` removes
+     each of ten constraints from a copy of the schema and fails if no negative fixture is then accepted; an identity
+     mutant, which changes nothing, must let no negative fixture through.
 - **Why:** ED-8 said the cookie lived "on the service origin", which RFC 6265 contradicts for every local service on
   one address (F-B-214). ED-6 bound every declaring page to both carrier fields while ED-9 let it declare a subset,
   so a subset had no conformant meaning (F-B-215). The audit's probe put `{minWidth: 99999, zoom: 3}` under the key
@@ -2587,9 +2593,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `docs/specification/conformance.md` (the register row);
   - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
   - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
-  - fixtures: `fixtures/negative/service-dashboard-extension-*` (five new), `fixtures/semantic/service-well-known-dashboard-*`,
+  - fixtures: `fixtures/negative/service-dashboard-extension-*` (seven new), `fixtures/semantic/service-well-known-dashboard-*`,
     `fixtures/vectors/dashboard-declaration.json`, `fixtures/catalogue.json`;
-  - tests: `test/embedded-dashboard.test.ts`, `test/rule-tolerance.test.ts`, `test/schema-mutants.ts`; the floor in
+  - tests: `test/embedded-dashboard.test.ts`, `test/delegation-sealed.test.ts` (FB-6's scope), `test/rule-tolerance.test.ts`,
+    `test/schema-mutants.ts`; the floor in
     `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `docs/evidence/sources.md` (RFC 6265), `CONTEXT.md` (*Appearance carrier*), `docs/DOCMAP.md`,
     `docs/ux/foundation.md`, `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/ux/scenarios.md` (SCN-021, SCN-022),
