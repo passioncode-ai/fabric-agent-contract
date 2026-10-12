@@ -346,7 +346,7 @@
     },
     {
       "id": "N20-org-contexts",
-      "title": "Contexts (RM-28): the contract's part of the organization-contexts model (CX-CON-01…10) and workflow cells under FAC-SEM-067 (moved to the program on 2026-10-12: each waits on Fabric's organization ADR, D8, or its workflow fixed-executor field, CX-FAB-05)",
+      "title": "Contexts (RM-28): the contract's part of the organization-contexts model (CX-CON-01…10), a node summary and headless enrollment token (DV-CON-01, answered \"amend\" 2026-10-12) and workflow cells under FAC-SEM-067 (moved to the program on 2026-10-12: each waits on Fabric's organization ADR, D8, or its workflow fixed-executor field, CX-FAB-05)",
       "wave": null,
       "release": "this",
       "items": [
@@ -360,7 +360,8 @@
         "CX-CON-08",
         "CX-CON-09",
         "CX-CON-10",
-        "VES-WF-CELLS"
+        "VES-WF-CELLS",
+        "DV-CON-01"
       ]
     }
   ]

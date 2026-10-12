@@ -305,7 +305,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 | Meter | grant-check request/answer, `taskWindowKey`, `readProjectedGrant` | Project Observatory (OBS-55) | the onward token, window keys, denials |
 | Kits | reference verifiers, vectors | fabric-agent-adapter (Python, Node) | ports; asks (a)–(d) |
 | Hosts | well-known documents, dashboard, button, session handoff | Fabric Dashboards, Fabric | declarations, `fabric://` links, `session-handoff/1` |
-| Org edition | CON-OE schemas and rules | Fabric FAB-OE ADRs, Observatory, Vesta, Switchboard | events, policies, manifests, proposals |
+| Org edition | CON-OE schemas and rules | Fabric FAB-OE ADRs, Observatory, the first organization server, Switchboard | events, policies, manifests, proposals |
 | Board | `docs/backlog.md` via `backlog-sources.json` | fabric-workspace sync | rows and statuses |
 
 ## REQ → module → wave

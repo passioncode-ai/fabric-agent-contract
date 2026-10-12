@@ -4010,6 +4010,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   corrections against ADR-0109 and ADR-0029). Consumer adoption: Fabric keeps proposals and answers learning notes in
   this shape and refuses a private proposal at submit (CT-19); Project Observatory sends learning notes and Fix
   proposals by reference (CT-20); the first organization server receives approved rules and listings only (CT-04).
+- **Annotated (2026-10-12):** `FAC-SEM-103` also scans the proposal's URIs (`id`, `target.project`, `mergedInto`,
+  `supersededBy`, `appliedIn`), the goal's id and text, the finding's id, `approvedBy.policy` and `verifiedRun`, and finds a
+  home-folder path after `file://localhost` and after any character that cannot continue a path (a backtick, a bracket,
+  a comma), not only after a space, a quote or `(=:` (the board run's final verification; w7 close).
 - **Amends:** DEC-0023 (`memory.learning.propose` withdrawn). Implements the organization edition's CON-OE-05 (kept by
   its CROSSWALK-v4; `proposal.submit` also serves a listing, v4 Path 4). Closes the board run's inventory item
   CON-OE-05 (node N12, packet P6-03).
@@ -4095,6 +4099,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   limits and consent are taken whole). Consumer adoption: Project Observatory's node serves it and publishes
   `channels.local` (CT-20); Fabric, Fabric Switchboard and Fabric Dashboards connect to it, Fabric declaring
   `consent.ui` (CT-19, CT-03, CT-21).
+- **Annotated (2026-10-12):** `channelStep` answers `invalid-request` to every message whose envelope `$defs/request` refuses (not an
+  object, `jsonrpc` not `"2.0"`, an `id` not a 1–128 code-point string or an integer, a method that is not a method name,
+  `params` not an object, another member), tested against the schema on the same inputs; before, a malformed request
+  fell through to `hello-first` or was passed on (the board run's final verification; w7 close).
 - **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
   CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
   CON-OE-10 (node N12, packet P6-04).

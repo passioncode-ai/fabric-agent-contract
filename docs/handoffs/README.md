@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 the board run closes](2026-10-12-board-run-close.md) | DEC-0041…DEC-0075 (waves 1–6) | this pull request |
+| [2026-10-12 w7: the final verification's gaps](2026-10-12-w7-final.md) | DEC-0072 and DEC-0075 annotated | this pull request |
+| [2026-10-12 the board run closes](2026-10-12-board-run-close.md) | DEC-0041…DEC-0075 (waves 1–6) | merged, #82 `fe55fc6` |
 | [2026-10-12 the local channel (P6-04)](2026-10-12-w6-p6-04-local-channel.md) | DEC-0075 (board run P6-04; CON-OE-10) | merged, #80 `b4f0344` |
 | [2026-10-12 a role's secret slots (P6-10)](2026-10-12-w6-p6-10-mcp-secrets.md) | DEC-0074 (board run P6-10) | merged, #79 `146240a` |
 | [2026-10-12 proposals and learning notes (P6-03)](2026-10-12-w6-p6-03-proposals.md) | DEC-0072 (board run P6-03; CON-OE-05) | merged, #78 `fc4dda0` |

@@ -41,7 +41,12 @@ point.
 
 JSON-RPC 2.0, one JSON object per line, at most 1 MiB a line (over that, `invalid-request` and the node closes;
 `lineWithinLimit`). Every request carries an `id`; `consent.cancel` is the one notification, and a notification is
-never answered, before hello or after it; a request whose `id` is `null` is `invalid-request`. The 5 s hello deadline (`HELLO_DEADLINE_MS`) is the node's timer.
+never answered, before hello or after it. A message whose envelope the schema's `$defs/request` refuses is
+`invalid-request`, answered with `id: null` when its id cannot be read (JSON-RPC 2.0 §5): not an object (an array, a batch, a string), `jsonrpc`
+missing or not `"2.0"`, an `id` that is `null`, empty, longer than 128 code points or not a string or an integer, a
+method that is not a method name, `params` that is not an object, or another member (`channelStep`). The params a method's own definition refuses are not an envelope fault: a hello's
+are `invalid-params`, and a client's `consent.prompt` is `unknown-method` (`hello-first` before hello) whatever it carries. A message without
+an `id` that is otherwise well formed is a notification and is not answered; a malformed one is `invalid-request`. The 5 s hello deadline (`HELLO_DEADLINE_MS`) is the node's timer.
 
 1. **Hello first.** The first call is `channel.hello {protocols, client: {name, version}, capabilities?, token?}`,
    within 5 s of connecting; otherwise the node sends `{id: null, error: hello-first}` and closes. The node answers `{protocols}` — N and N−1 (DEC-0067) — or
