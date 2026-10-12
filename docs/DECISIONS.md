@@ -1972,6 +1972,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the adapter's kit implements `resolveModelProfile`, reads the catalogue and shows the slots; Project Observatory
   supplies prices and the tool-use probe, issues keys with the allow-list and meters by route; Fabric Dashboards shows
   each agent's configuration.
+- **Annotated (2026-10-12):** a usage report's `route` admits `platform-metered` beside `subscription` and `key`, and a
+  descriptor names its runner's credential kind, by DEC-0061.
 - **Amends:** DEC-0037 (`modelClasses` closed), DEC-0016 (three drives, the shared kind `pi`), DEC-0042 (SH-11 gains
   `pi`), DEC-0021 (a usage row's `route`). Implements Fabric [ADR-0147](https://github.com/passioncode-ai/fabric/blob/29e3f984670f63650c39f2c4abc2ef8249e50f20/docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md) with amendments 1 and 2 (written at
   `31a9d6ca`; its last change `29e3f984`, now on Fabric `main`), on the rulings the board brief records.
@@ -2814,6 +2816,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   waiting copy as `duplicate` under launchd today, derives it from systemd's `MainPID` or through the node off macOS, and
   fixes its Windows token reader (a signed mask, unknown ACE types, SID case; board CT-21); every Windows token reader
   runs the new vectors.
+- **Annotated (2026-10-12):** its *Not decided here* item on the node — `lifecycle.manager: node` in the descriptor,
+  `label`/`plist` beside it, the node's Install, Off, Uninstall and state read — is decided by DEC-0061.
 - **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
   paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
 - **Decision:** in [service](specification/service.md) —
@@ -3039,3 +3043,115 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
   run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
   record plane is `fs`.
+
+### DEC-0061 — The descriptor for listings: a service offered to others (`peer`), the kind of its runner's sign-in, who installed it, and the node as supervisor
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric writes its own descriptor
+  with `installedBy` and reads `lifecycle.manager` (CO-263, ADR-0139; board CT-19); Project Observatory's node writes
+  `lifecycle.manager: "node"` descriptors, serves the Install, Off, Code, Uninstall and state forms, and checks a
+  runner as `FAC-SEM-087` says before it places a service (CT-20); the adapter's kits write the new members and accept
+  `node` (CT-18); Fabric Dashboards starts, stops and reads a node's child through the node and shows `peer` (CT-21);
+  the first organization server's listings carry what `peer` carries (CT-04); Fabric Inbox's organization mode (its
+  B-87) writes a remote descriptor with `peer` and `runner.credentialKind: "platform-metered"` and reports usage on that
+  route.
+- **Amends:** DEC-0015 (`installedBy`), DEC-0019 (a remote placement may be offered to others), DEC-0021 and DEC-0046
+  (the usage report's `route`), DEC-0057 (its *Not decided here* item on the node), additively under the DEC-0016
+  extension policy except where *Compatibility* says. Closes V4-DESCRIPTOR (board run N08, packet P4-02).
+- **Decision:** in [service](specification/service.md) unless named otherwise —
+  1. **`peer`: a service offered to others.** A descriptor MAY carry `peer {endpoint, custody, residency, maxDataClass}`,
+     all four required: `endpoint` is where others reach the service, `https://<dns-name>[:<port>][/<path>]` with no
+     query, fragment or userinfo and never an IP literal (schema), never a reserved name (`FAC-SEM-085`, the list
+     `FAC-SEM-024` uses, now one constant); `custody` is `organization-managed` or `personal` (who controls the machine
+     or account); `residency` is 1–32 distinct ISO 3166-1 alpha-2 codes in upper case, `EU` admitted, the user-assigned
+     `AA`, `QM`–`QZ`, `XA`–`XZ` and `ZZ` refused, as the IANA Language Subtag Registry's region records list them;
+     `maxDataClass` is one of the organization edition's four classes, `public` < `internal` < `confidential` <
+     `restricted` (device policy's, DEC-0053). An offer is not a third placement value: a local placement (usually under
+     the node) or a remote one keeps every rule of its own, and `peer` sits beside either.
+  2. **What a host refuses.** A host routes a request from anyone but the service's operator only to a service that
+     declares `peer`, and only at or below `maxDataClass`, comparing the four classes exactly as written and refusing an
+     unknown class or maximum before any comparison (`peerRefusal`, `src/descriptor-rules.ts`, with vectors
+     `fixtures/vectors/service-peer.json`; `FAC-SEM-088`). An offer grants nothing: a share grant or a listing does, and
+     others present their own credential at `endpoint`, never the descriptor's token (DEC-0024).
+  3. **`runner.credentialKind`, a kind and never a value.** A descriptor MAY carry `runner {kind?, credentialKind}`:
+     `credentialKind` is `subscription`, `key`, `platform-metered` (the hosting platform's own metered models under the
+     deployment's account — Fabric Inbox's case) or `none`; `kind` is a shared runner kind, required for a subscription,
+     which names its vendor's runner (`claude-code`, `kimi-code`, `codex`; DEC-0046). A descriptor with `peer` MUST carry
+     `runner` and MUST NOT name `subscription` (schema). `FAC-SEM-086` refuses a value shaped like a credential anywhere in
+     `runner` or `installedBy`, with the shared detector (`secretArgument`, DEC-0044), naming the place and never the
+     value. `FAC-SEM-087` (`service-runner`) is what a node checks when it places a service: the kind is an entry of its
+     runner catalogue, a subscription names its vendor's runner, the declared kind is one of the four and equals the
+     kind the node derived from where the credential came from, and a service offered to others runs on no subscription
+     — declared, derived, or as a usage row.
+  4. **`installedBy`, by role.** It stays a string (the installer and its version) or becomes `{by, role?, tool}`: `by` is
+     `person` (with `role` `operator` or `administrator`), `node` (from a placement in the person's estate record) or
+     `organization` (from an organization's listing); `role` belongs to a person only; `tool` is the installer and its
+     version. It names a role, never a person.
+  5. **`lifecycle.manager: "node"`.** The descriptor admits `node`. Beside it `label`, `plist`, `unit` and `task` are
+     refused: the node keeps its children in its own record and there is no supervisor file. It stays a local
+     placement's supervisor: a remote placement's manager is `none`. The node restarts a child that exits no sooner than
+     10 s after the child's last start. Its forms: **Install** — the node installs the package (v4 §6 Path 2), writes the
+     descriptor, starts the child with the marker and polls the well-known document for at most 40 s; **Off** — a host
+     asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off, and to restart, and
+     never starts, stops or signals the child itself; **state** — the node answers whether the child is kept on, whether
+     it runs and its pid, which a host compares with the well-known `process.pid` as with systemd's `MainPID`;
+     **Code** — the node points its record at the new release and restarts the child; **Uninstall** — the node stops the
+     child and removes it from its record, then the descriptor is deleted. The operations' names and schemas are
+     Project Observatory's (OBS-79); these rows fix what each does.
+  6. **The usage report's shape for listings.** A service offered to others reports with the same object: `route`
+     admits `platform-metered` beside `subscription` and `key` (`schemas/service-usage.schema.json`); `byGrant`
+     attributes spend to the share grant or listing grant by its opaque reference; no row names a caller, member or
+     guest, and no per-member sum is in it (v4 Path 5 step 3: per-member totals come from lease returns inside the
+     organization record); its rows carry no `subscription` route.
+  7. **Rules:** `FAC-SEM-085` (`service-descriptor`), `FAC-SEM-086` (`service-descriptor`), `FAC-SEM-087`
+     (`service-runner`), `FAC-SEM-088` (`service-peer-request`), in `src/descriptor-rules.ts`.
+  8. **J10.** A data class is a property of the service, custody of the machine or account, residency of where the
+     service runs; `installedBy` names a role. No member names or describes a person.
+- **Why:** the first organization server's target architecture v4 lists this descriptor row among its contract changes
+  (§12), and Fabric Inbox's organization mode (its B-87) starts only once the descriptor and the usage report's shape
+  for a listing are fixed. A listing runs where its audience goes beyond its operator, so a host must know where others
+  reach it, who controls the machine, where it runs and what it may receive (v4 §9 *Hosting*: placements carry custody,
+  residency and a maximum data class), and must never let a subscription serve others (v4 §2 rule 8). A data-class
+  ceiling that compared case-insensitively or by index would let `Confidential` or `2` through, so the comparison is
+  exact and an unknown class is refused first. Fabric said it needs `installedBy` and `lifecycle.manager`, and that the
+  credential kind is the kind of a runner's sign-in, never a value; the node was the only supervisor DEC-0057 named
+  without a descriptor form.
+- **Compatibility:** Additive for every descriptor written before: `installedBy` keeps its string form, `peer` and
+  `runner` are optional, and `placement` keeps its two values. A host or validator pinned before this decision refuses a
+  descriptor that carries `peer`, `runner`, an object `installedBy` or `lifecycle.manager: "node"` (the descriptor is
+  closed), so a writer writes them only toward hosts at this pin or later — which is the safe failure, as for a remote
+  descriptor before DEC-0019. A usage report with `route: "platform-metered"` is likewise refused by an older reader.
+  Nothing written today narrows: no descriptor carried `peer` or `runner`, and `label`/`plist` beside `node` were never
+  valid because `node` was not admitted. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md` (Descriptor, Remote placement's table, *Offered to others*, Lifecycle, Usage
+    report, the semantic-rules table), `docs/specification/runners.md` (routes), `docs/specification/conformance.md`
+    (two reader rows, four register rows);
+  - schemas: `schemas/service-descriptor.schema.json` (`peer`, `runner`, `installedBy`, `lifecycle.manager`),
+    `schemas/service-usage.schema.json` (`route`);
+  - code: `src/descriptor-rules.ts` (new), `src/semantic-rules.ts` (dispatch; the reserved names now shared);
+  - fixtures: four positive descriptors and a usage report, 26 negative descriptors and one usage report
+    (`fixtures/catalogue.json`), fourteen `fixtures/semantic/service-*` files, vectors `fixtures/vectors/service-peer.json`;
+  - tests: `test/descriptor-rules.test.ts` (new), `test/rule-tolerance.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/evidence/sources.md` (the IANA Language Subtag Registry), `docs/backlog.md`
+    (CT-12, CT-04, CT-18…CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-02-descriptor.md` and `docs/handoffs/README.md`.
+- **Not decided here:** whether an assigned ISO 3166-1 code is checked (only the shape is), and how a caller's residency
+  requirement is matched against a service's (`EU` against `DE` needs a membership table); which data an organization
+  lets reach a `personal` host (v4 Path 4 step 2 says confidential only on organization-managed hosts — the
+  organization's placement policy, not a descriptor rule); how a host maps the contract's own `dataClass` vocabulary
+  onto the four classes; whether `key` is split by provenance (an organization's key or a person's, DEC-0053's
+  `api-org`); the node's operation names and schemas (OBS-79); a third placement value for a service with no local or
+  platform supervisor; Fabric writing its own descriptor at start although DEC-0015 says the running service does not
+  (ADR-0139, CO-263) — Fabric is an app, and the rule's wording for an app is owed.
+- **Source:** the first organization server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md`
+  at `9c6a780`), §2 rule 8, §5 (`lifecycle.manager: node` covers supervised children), §8, §9 *Hosting*, §12's descriptor
+  row and §13, §20 V2-18 (custody) and V2-19 (four classes and residency); Fabric (2026-10-12): it needs `installedBy`
+  and `lifecycle.manager`, and the credential kind is the kind of a runner's sign-in, never a value (ADR-0139, CO-263);
+  Fabric Inbox's backlog B-87 item 5 (`runner.credentialKind` platform-metered); the IANA Language Subtag Registry in the
+  [source ledger](evidence/sources.md). Board-waves inventory V4-DESCRIPTOR; packet P4-02; DEC-0057's *Not decided here*.
+  DEC-0061 and `FAC-SEM-085`…`FAC-SEM-088` were reserved by git CAS (`agent_sync.py reserve --key
+  w4-p4-02-descriptor-20261012 DEC`, `--key w4-p4-02-sem-{peer-endpoint,credential-value,runner-check,peer-request}-20261012
+  SEM`); this file, `conformance.md` and `backlog.md` travel as `docs/handoffs/2026-10-12-w4-p4-02-registers.patch`,
+  which the owner session applies under its leases when it merges, by the wave's arrangement (the agent-sync guard
+  refuses a commit of a guarded file by a run that holds no lease); the record plane is `fs`.
