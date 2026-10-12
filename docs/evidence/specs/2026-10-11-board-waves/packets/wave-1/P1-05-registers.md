@@ -13,7 +13,7 @@
    - one row per consumer adoption: DEC-0032…0036 (F-B-220), DEC-0037…0041 for Fabric, Observatory, the
      adapter and Dashboards; asks (a)–(f) from [findings/extra-items.json](../../findings/extra-items.json),
      each naming the consumer's own row id where one exists (read the consumer's board read-only:
-     `git -C /Users/sshlg/DATA/<repo> show origin/main:<board path>`);
+     `git -C <workspace>/<repo> show origin/main:<board path>`);
    - CT-03 and CT-04 re-measured against `findings/consumers.json` once it exists; if it does not exist yet,
      leave their status unchanged and say so in your report;
    - CT-04 enriched with the open consumers and their packets (CON-OE-04);
@@ -48,7 +48,7 @@
 ## Proof
 
 - The workspace's backlog contract accepts the board. Run org-index `check_backlog.py` over this repository
-  read-only (find the script in `/Users/sshlg/DATA/org-index`) and record its output.
+  read-only (find the script in `<workspace>/org-index`) and record its output.
 - `docs:check` green. Every new row's ids exist in `inventory.json`; verify with a one-line script and
   record it.
 

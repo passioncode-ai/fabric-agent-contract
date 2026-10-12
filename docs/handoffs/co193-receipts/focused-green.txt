@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 /Users/sshlg/DATA/_worktrees/fabric-agent-contract-co193-20261004
+ RUN  v4.1.11 <workspace>/_worktrees/fabric-agent-contract-co193-20261004
 
 
  Test Files  5 passed (5)

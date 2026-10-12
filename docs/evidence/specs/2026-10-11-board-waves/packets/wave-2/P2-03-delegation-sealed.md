@@ -31,7 +31,7 @@ Ruled by Fabric's session as Fabric ADR-0144's owner on 2026-10-11, recorded in 
    - "don't call a capability with another service's descriptor token" stays as attribution hygiene, and "never
      spend another agent's key or vault slot" stays in force (money).
 
-   Read amendment 4 at Fabric `19ad05ca` (`git -C /Users/sshlg/DATA/fabric show 19ad05ca --stat`, then the ADR
+   Read amendment 4 at Fabric `19ad05ca` (`git -C <workspace>/fabric show 19ad05ca --stat`, then the ADR
    file) and pin the link at that commit.
 
 ## What else to fix

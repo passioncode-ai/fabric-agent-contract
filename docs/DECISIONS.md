@@ -1761,7 +1761,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards' outage
-  watcher (FD-48) and Copylot read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
+  watcher (FD-48) and Example Console read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
   LC-21 (its own row); Fabric starts provider entries' stdio servers by `scope`.
 - **Decision:**
   - a well-known `degraded` entry MAY carry `setup: true`: the source waits for a person to finish setting it up,
