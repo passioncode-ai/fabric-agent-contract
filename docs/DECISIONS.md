@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0048`
+**Next free ID:** `DEC-0052`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -2047,3 +2047,134 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   N14, packet P2-04. DEC-0046 and `FAC-SEM-058`…`060` were reserved by git CAS (`agent_sync.py reserve --key
   runner-model-profiles-20261012 DEC`, `--key runner-model-profiles-{catalogue,runner-profile,resolution}-20261012
   SEM`); this file, `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0050 — The package, `fabric-package/1`: one folder per version, its digest over RFC 8785, and `agentRef`
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's `pack` writes
+  packages and runs the folder check, its `new` and `test` write the secret slots, `requires`, the result signal,
+  `state[]` and the evals receipt (its rows FAA-26, FAA-27); Fabric reads `resultSignal` and emits the `result` event
+  naming it, and records packages by `agentRef` and digest (its D2b amendment of ADR-0138); Project Observatory's node
+  installs from the folder check and the digest.
+- **Decision:** in [package](specification/package.md) —
+  1. **One format for agents and skill sets** (J8): `fabric.package.json` at the root of one folder, which is one
+     Claude Code plugin folder (D-SK1), schema `schemas/fabric-package.schema.json`. `kind` is `agent` or
+     `skill-set`; an agent requires `agentRef`, `provider` (its `fabric-agent.json`), `resultSignal` and `evals` with
+     the receipt, and may carry `service`, `secrets[]`, `costPresets` and `state[]`, which a skill set may not; a skill
+     set requires `layer` and at least one skill.
+  2. **Every item of v4 §12's row is typed:** the service template (`service`: id, name, entry argv, runtime — the
+     installing machine adds the origin, token file, supervisor and paths); `secrets[]` as slots with a name and a
+     purpose and no member that could hold a value (DEC-0013); `requires` (MCP servers, packages by publisher, id
+     and range, platforms, GPU); `costPresets` in the manifest's DEC-0037 shape, read without opening a file; the
+     result signal (`resultSignal`: a name and the card's "done when …"), which Fabric's `result` event names and on
+     whose run the meter's receipts join; `state[]`, what moves with a placement (absent: nothing); the evals
+     receipt (the suite's SHA-256, passed, failed, skipped, when); `dependencies[]`, vendored with a path or
+     hash-locked without; `files[]`, every file but `fabric.package.json` with its SHA-256.
+  3. **The digest** is `sha256:` and the hex SHA-256 of the UTF-8 RFC 8785 form (DEC-0043) of the package without
+     `digest` and `signatures` (`packageDigest`); a row in the
+     [canonical-forms register](specification/conformance.md#canonical-forms). Through `files[]` it covers the folder,
+     and `checkPackageFolder` checks the folder against the list (`file-missing`, `file-digest`, `file-unlisted`,
+     `plugin-manifest`, `provider-manifest`).
+  4. **`agentRef`** is `urn:fabric:agent:<publisher>:<id>`, derived and never chosen: one agent across its versions,
+     the name a placement keeps when it moves (v4 §3, §6). The schema's `$defs/agentRef` is the pattern other
+     documents reference.
+  5. **Rules:** `FAC-SEM-064` (a package is whole: its own digest, each path listed once and never
+     `fabric.package.json`, every named file listed with the same SHA-256 where repeated, a state path once, a skill
+     set's plugin manifest), `FAC-SEM-065` (no secret: slots named once and not credential-shaped, none in the
+     service's entry), `FAC-SEM-066` (`agentRef` derived).
+  6. **Reconciled with CON-OE-03's field list,** v4 winning where they differ: v4's "manifest" is this document and
+     the capability manifest a file it names; `evals` is a path and a receipt; one `signature` becomes
+     `signatures[]` (DEC-0051); `id` is kebab-case, equal to the plugin `name`, with the scope in `publisher` rather
+     than a dotted prefix, because Claude Code wants a kebab-case plugin name and `agentRef` already carries the
+     publisher. The table is in package.md.
+- **Why:** v4 §12 lists `fabric-package/1` first in the contract set and Stage 1's packing needs it (the adapter's
+  `pack`, FAA-27, is blocked on it); CON-OE-03's package part (SK-02a) was owed since wave 1 of the organization
+  plan. Without a digest that covers the folder, a signature over it signs a description, not the code; without a
+  derived `agentRef`, a placement could not follow an agent across versions.
+- **Compatibility:** Additive: a new schema, a new kind and three rule codes; `contractVersion` stays `0.1.0`. No
+  consumer writes or reads a package today (`git grep -i "fabric.package\|costPresets"` over the adapter at
+  `aebdc8f`: backlog rows only). CON-OE-03's dotted `id` example (`pc.release-basics`) does not validate: a writer
+  following that draft takes a kebab-case `id` and puts the scope in `publisher`. At its next pin the adapter ports
+  `packageDigest` and `checkPackageFolder` and runs `fixtures/vectors/package.json`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md` (new), `docs/specification/conformance.md` (two register rows, a reader
+    row, `FAC-SEM-064`…`066`);
+  - schema: `schemas/fabric-package.schema.json` (new);
+  - code: `src/package-rules.ts` (new), `src/semantic-rules.ts` (the `package` kind);
+  - fixtures: 3 positive and 8 negative (`fixtures/catalogue.json`), 16 semantic (`fixtures/semantic/package-*.json`),
+    vectors `fixtures/vectors/package.json`;
+  - tests: `test/package.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; the floor in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Package, agentRef, Package digest, Result signal), `docs/DOCMAP.md`, `README.md`,
+    `docs/evidence/sources.md` (semantic versioning, SPDX expressions, the plugin manifest), `docs/backlog.md`, the
+    handoff `docs/handoffs/2026-10-12-agent-package.md`.
+- **Not decided here:** where a package's bytes are fetched from (v4 §4: the relay's blob store by digest); which
+  keys a machine pins for a publisher and how a countersignature chains to an organization (`estate-record/1`,
+  `org-authority/1`); the `result` event's shape (DEC-0030's amendment, board item V4-RUN-RESULT); a skill set's
+  listing budget against an agent profile (`fabric-agent-profile/1`, CON-OE-03); Fabric's digests per version
+  (packaged, shared, published, revoked), which Fabric's ADR-0138 at `22426281` does not carry yet (its D2b
+  amendment).
+- **Source:** the first organization server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md`
+  at `91c0637`; §12 as adopted at `a040e68`), §3, §6, §7, §12, §15 D4; CON-OE-03 (aliases SK-02a, J-PKG) in
+  `docs/evidence/specs/2026-10-11-board-waves/findings/owed-decisions.json`, from the organization edition's
+  agent-skills design §2 and agent-network design; the Claude Code plugin manifest reference (retrieved 2026-10-12,
+  [source ledger](evidence/sources.md)); board run wave 3, node N17, packet P3-01. DEC-0050 and `FAC-SEM-064`…`066`
+  were reserved by git CAS (`agent_sync.py reserve --key agent-package-format-20261012 DEC`, `--key
+  agent-package-{whole,secrets,agent-ref}-20261012 SEM`); packet P3-02 reserved DEC-0048, DEC-0049 and
+  `FAC-SEM-061`…`063` first. This file and `conformance.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0051 — Package signatures: one publisher signature and organization countersignatures over the digest, each naming its algorithm
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's `pack` signs
+  (FAA-27) and its kits port `verifyPackage` with `fixtures/vectors/package.json`; Project Observatory's node verifies
+  before install; Fabric's hub signs packages for the person's own machines until the passkey does (v4 Stage 1).
+- **Decision:** in [package](specification/package.md#signatures) —
+  1. `signatures[]` holds exactly one `publisher` signature and any number of `organization` countersignatures, each
+     `{role, alg, kid, sig}`; absent, the package is unsigned and installs only where the installing machine's own
+     rules allow it.
+  2. **What is signed:** the UTF-8 RFC 8785 form of `{"type": "fabric-package-signature/1", "role", "digest"}`
+     (`packageSigningInput`), a row in the canonical-forms register. The role is inside, so a publisher's signature
+     never stands for a countersignature, even under one key; signatures stay outside the digest, so a
+     countersignature needs no repacking.
+  3. **Algorithms follow Fabric:** `alg` is named in every signature and every key names the one `alg` it is for (v4
+     rule 12). This version admits `EdDSA` (Ed25519) only. `ES256` joins the schema's enum and `PACKAGE_ALGORITHMS`
+     when Fabric records its decision D2 (ES256 beside EdDSA, ADR-0144); until then a verifier refuses it as
+     `unknown-algorithm`. Every Ed25519 key passes `isSmallOrderKey` (DEC-0045) before any verification.
+  4. **The verifier,** `verifyPackage(package, trust, {countersigned})`, in PK-1…PK-10's order: malformed, digest
+     mismatch, unsigned, not exactly one publisher signature, then per signature an unadmitted algorithm, an unknown
+     or duplicated `kid` in its role's pinned set, a key for another algorithm or not a public Ed25519 signing key, a
+     small-order key, a bad signature; with `countersigned`, no organization countersignature. Every signature present
+     must verify — a bad countersignature refuses the package.
+  5. **Vectors** (`fixtures/vectors/package.json`): one case per problem, the test keys' seeds (Ed25519 is
+     deterministic, so a port's signer reproduces every `sig`), the digest's canonical form and the signing input, and
+     a signature forged under the all-zero key with no private key, which Node 20 and 22's `crypto.verify` accept.
+- **Why:** v4 §12 lists an ES256 publisher signature and an organization countersignature; Fabric owns the
+  algorithm choice (D2), so the package names its algorithm now and admits what Fabric's delegation admits today.
+  Signing the digest inside a typed statement keeps a package signature from being replayed as any other signature
+  over the same 32 bytes. The small-order forgery in the vectors verifies on Node 20.20.2 and 22.23.3 (`crypto.verify`
+  answers true) and not on 24.19.0 or 26.10.0, the same split as CT-29; on Node 22 the verifier without `isSmallOrderKey`
+  answers `ok: true` for the forged package.
+- **Compatibility:** Additive (new fields of a new schema). Adding `ES256` later is additive for writers and needs a
+  verifier at that pin to admit it. v4 §7's countersignature is an administrator's passkey assertion over a typed
+  challenge carrying the listing's audience, grant and revision (`org-countersign/1`); when the signing-challenge
+  types and `org-authority/1` are decided, that form replaces this version's detached organization countersignature,
+  a breaking change for organization countersignatures that the deciding decision states. Publisher signatures are
+  unaffected.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md#signatures`, `docs/specification/conformance.md` (the statement's register
+    row, the reader row with PK-1…PK-10);
+  - schema: `schemas/fabric-package.schema.json` (`signatures`);
+  - code: `src/package-rules.ts` (`packageSigningInput`, `verifyPackage`, `PACKAGE_ALGORITHMS`), using
+    `src/ed25519.ts` and `src/canonical.ts`;
+  - vectors and tests: `fixtures/vectors/package.json`, `test/package.test.ts`;
+  - docs: `docs/evidence/sources.md` (RFC 7518 for `ES256`), the handoff `docs/handoffs/2026-10-12-agent-package.md`.
+- **Not decided here:** `ES256` itself (Fabric's D2); the passkey-assertion countersignature, its challenge and its
+  quorum (the signing-challenge types and `org-authority/1`, later waves); which keys a machine pins per role and how
+  they rotate (`estate-record/1`, `org-authority/1`); a revoked digest (the revocation delta, a later wave).
+- **Source:** the first organization server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md`
+  at `91c0637`), §2 rule 12, §6 Paths 2 and 4, §7, §12, §15 D2 and D4; Fabric ADR-0144 (D2 not yet recorded on
+  Fabric `main` at `5bf15e5c`); RFC 8032, RFC 8037, RFC 7518 §3.4 ([source ledger](evidence/sources.md)); DEC-0045
+  (`isSmallOrderKey`), DEC-0043; board run wave 3, node N17, packet P3-01. DEC-0051 was reserved by git CAS
+  (`agent_sync.py reserve --key agent-package-signatures-20261012 DEC`); this file was edited under a git lease; the
+  record plane is `fs`.

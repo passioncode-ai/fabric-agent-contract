@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 runner and model profiles](2026-10-12-runner-model-profiles.md) | DEC-0046 (board run P2-04; CT-05) | pull request open |
+| [2026-10-12 agent package](2026-10-12-agent-package.md) | DEC-0050, DEC-0051 (board run P3-01; V4-PACKAGE, V4-AGENTREF) | pull request open |
+| [2026-10-12 runner and model profiles](2026-10-12-runner-model-profiles.md) | DEC-0046 (board run P2-04; CT-05) | PR #46 `f41d8e6` |
 | [2026-10-12 delegation sealed](2026-10-12-delegation-sealed.md) | DEC-0045 (board run P2-03; CT-29) | PR #45 `2eb91c0` |
 | [2026-10-12 service hygiene](2026-10-12-service-hygiene.md) | DEC-0044 | PR #43 `c6c5af1` |
 | [2026-10-11 canonical forms](2026-10-11-canonical-forms.md) | DEC-0043 (board run P2-01) | PR #42 `4fdbd79` |

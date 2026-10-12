@@ -68,6 +68,7 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a host starting a declared stdio MCP server | starts it for a project or for one run as its `scope` says (absent: one run), and never writes it into a runtime's user-wide MCP configuration | `FAC-SEM-056` (the declaration) | the host's own test; `test/service-hygiene.test.ts` checks declarations ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044) |
 | a host launching an agent on a model profile | resolves the profile in the order request, agent, binding or project, estate default; keeps only the models every class of which the project's spend policy allows; refuses the launch with `model-classes-empty`, naming the policy, when none stays; uses a subscription only in its vendor's runner | `FAC-SEM-059`, `FAC-SEM-060` | `test/runner-model-profiles.test.ts`, `src/profile-rules.ts` `resolveModelProfile` ([runners](runners.md#resolution), DEC-0046) |
 | an issuer of a key route's key | admits exactly the models of the runner profile's model profile (`key.modelAllowList`), and a proxy applies a catalogue row's `provider` routing without changing the model | `FAC-SEM-059`, `FAC-SEM-058` (the declaration) | the issuer's own test; the contract checks the declarations ([runners](runners.md#routes), DEC-0046) |
+| a machine installing a package | checks the folder against `files[]` (`checkPackageFolder`), recomputes the digest, then verifies exactly one publisher signature and every organization countersignature under the keys it pinned for each role, refusing an algorithm it does not admit, a key for another algorithm and a small-order key before verifying, in PK-1…PK-10's order; installs an unsigned package only where its own rules allow it | PK-1…PK-10, `FAC-SEM-064` | `test/package.test.ts`, `src/package-rules.ts` `verifyPackage`, `checkPackageFolder`, vectors `fixtures/vectors/package.json` ([package](package.md#the-verifier), DEC-0050, DEC-0051) |
 | a device applying policy | applies a delivered policy only when it verifies and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` ([devices](devices.md#policy), DEC-0031) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
@@ -98,6 +99,8 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | a path-derived `sourceKey`, the HMAC over `{offset, path}` | settings form | `pathSourceKey` | [activity](activity.md#event-id), DEC-0030 |
 | an approval's `actionDigest`, over the action | RFC 8785 | `actionDigest` | [delegation](delegation.md#approval-approval1), DEC-0039 |
 | the board's idempotency digest, over the operation's arguments after `fabric-project-comms/0.1` NUL `<operation>` NUL | RFC 8785, the arguments holding integers within ±(2^53 − 1) only | `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) | [project comms](project-comms.md#idempotency), DEC-0022 |
+| a package's `digest`, over the package without `digest` and `signatures` | RFC 8785 | `packageDigest` | [package](package.md#the-digest), DEC-0050 |
+| a package signature's statement `{type, role, digest}` | RFC 8785 | `packageSigningInput` | [package](package.md#what-is-signed), DEC-0051 |
 | a revisioned object's `contentHash`, over the object without `contentHash` | RFC 8785 | `rfc8785`; no contract code computes it | [overview](overview.md#common-identity-and-references) |
 
 A JWS — the delegation token, the approval document — signs its own base64url segments as sent and needs no
@@ -128,7 +131,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-061`
+**Next free rule code:** `FAC-SEM-067`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -193,6 +196,9 @@ register and carry no receipt.
 | `FAC-SEM-058` | `model-catalogue`, `model-profiles` | [runners](runners.md#semantic-rules) | SEM-0058 |
 | `FAC-SEM-059` | `runner-profile` | [runners](runners.md#semantic-rules) | SEM-0059 |
 | `FAC-SEM-060` | `profile-resolution` | [runners](runners.md#semantic-rules) | SEM-0060 |
+| `FAC-SEM-064` | `package` | [package](package.md#semantic-rules) | SEM-0064 |
+| `FAC-SEM-065` | `package` | [package](package.md#semantic-rules) | SEM-0065 |
+| `FAC-SEM-066` | `package` | [package](package.md#semantic-rules) | SEM-0066 |
 
 ## Compatibility policy
 

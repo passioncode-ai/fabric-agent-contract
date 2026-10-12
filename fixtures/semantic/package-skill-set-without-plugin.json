@@ -1,0 +1,57 @@
+{
+  "schema": "fabric-package/1",
+  "kind": "skill-set",
+  "id": "writing-rules",
+  "version": "1.4.0",
+  "publisher": "example",
+  "licence": "MIT",
+  "layer": "org",
+  "runners": [
+    "claude-code",
+    "codex"
+  ],
+  "skills": [
+    "plain-words",
+    "release-notes"
+  ],
+  "allowedToolsCeiling": [
+    "Read",
+    "Grep"
+  ],
+  "listingChars": 410,
+  "requires": {
+    "packages": []
+  },
+  "evals": {
+    "suite": "evals/suite.json"
+  },
+  "files": [
+    {
+      "path": "evals/suite.json",
+      "sha256": "sha256:f350390c79736fa5136f5876efe489b34a70f72aaf14d5b0a52451184e62e4d7"
+    },
+    {
+      "path": "skills/plain-words/SKILL.md",
+      "sha256": "sha256:bf6e018d3da34113efaedc9d22c635be632fd5c96b963cf87e9240ce21db0690"
+    },
+    {
+      "path": "skills/release-notes/SKILL.md",
+      "sha256": "sha256:eb7594c8c6af400e05ecfc388b21d8c69c996bf10928ab48056bb9c31486c152"
+    }
+  ],
+  "digest": "sha256:a7c69d432910a446a5d074c002021b235711b006aa51d7f5da07901703f4ef0d",
+  "signatures": [
+    {
+      "role": "publisher",
+      "alg": "EdDSA",
+      "kid": "example-publisher-2026",
+      "sig": "9b_tJSvXzZ8akWPoaJN0Cc5pO8vN75jO7yETJzLb-Se78v3uxR4qO-Oc1_TM8eogspPXGiUsngZ115DFuVAFDA"
+    },
+    {
+      "role": "organization",
+      "alg": "EdDSA",
+      "kid": "example-org-admin-1",
+      "sig": "PP3Q63UEmx1hwUcDZYlMUnf_KbCFWgOsMA9tWz59rplCwAlkMXXEYgs5funOEvIiprom06eCmVKaUgii7GA8AQ"
+    }
+  ]
+}
