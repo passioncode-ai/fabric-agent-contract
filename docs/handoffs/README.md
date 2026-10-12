@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 revocation delta and heartbeat](2026-10-12-w4-p4-06-delta-heartbeat.md) | DEC-0054 (board run P4-06; V4-DELTA-HEARTBEAT; the id pre-reserved by the owner's P3-02 run) | PR #64 |
+| [2026-10-12 the descriptor for listings](2026-10-12-w4-p4-02-descriptor.md) | DEC-0061 (board run P4-02; V4-DESCRIPTOR) | PR #63 |
+| [2026-10-12 revocation delta and heartbeat](2026-10-12-w4-p4-06-delta-heartbeat.md) | DEC-0054 (board run P4-06; V4-DELTA-HEARTBEAT; the id pre-reserved by the owner's P3-02 run) | merged, #64 `5967bb1` |
 | [2026-10-12 a delegation key the estate certifies](2026-10-12-w4-p4-07-hubkey.md) | DEC-0060 (board run P4-07; DL-HUBKEY) | merged, #62 `557f30d` |
 | [2026-10-12 device transport and keys](2026-10-12-w4-p4-04-device-transport.md) | DEC-0056 (board run P4-04; DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST) | PR #58 |
 | [2026-10-12 services on every system](2026-10-12-w4-p4-01-services.md) | DEC-0057 (board run P4-01; CT-01) | merged, #57 `8c6211e` |

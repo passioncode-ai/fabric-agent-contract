@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file and well-known (FAC-SEM-080) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) and peer-request (FAC-SEM-088) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -9,7 +9,7 @@ const KINDS = [
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
-  "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key"
+  "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -24,7 +24,8 @@ const MEMBERS = [
   "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid",
   "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method",
   "head", "entries", "deltaHead", "estateRecord", "applied", "heartbeat", "broken", "revision", "prev", "sequence", "revocation",
-  "revokedAt", "estate", "issuedAt", "x"
+  "revokedAt", "estate", "issuedAt", "x",
+  "descriptor", "catalogue", "derived", "dataClass", "sent", "peer", "runner", "installedBy", "lifecycle", "commands", "placement", "origin"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
@@ -55,5 +56,14 @@ describe("activity and device rules tolerate malformed input", () => {
     for (const kind of KINDS) expect(() => evaluateSemanticRules(kind, device), kind).not.toThrow();
     const dashboard = "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1";
     for (const value of WRONG) expect(() => evaluateSemanticRules("service-well-known", { extensions: { [dashboard]: value, constructor: value } })).not.toThrow();
+  });
+  it("reads a descriptor, a runner record and a peer request with nested members of the wrong type without throwing (DEC-0061)", () => {
+    const descriptor = { runner: { kind: 1, credentialKind: {}, constructor: "x" }, peer: { maxDataClass: {}, endpoint: 5 }, installedBy: { by: [], tool: null, __proto__: 1 } };
+    for (const value of WRONG) {
+      expect(() => evaluateSemanticRules("service-descriptor", { ...descriptor, runner: value, installedBy: value, peer: { endpoint: value } })).not.toThrow();
+      expect(() => evaluateSemanticRules("service-runner", { descriptor: { ...descriptor, runner: value }, catalogue: [1, { kind: 2 }, value], derived: value })).not.toThrow();
+      expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: value } }, dataClass: value, sent: true })).not.toThrow();
+    }
+    expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: "toString" } }, dataClass: "valueOf", sent: true })).not.toThrow();
   });
 });

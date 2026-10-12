@@ -1,0 +1,139 @@
+{
+  "description": "A subscription declared for a runner that is not its vendor's (FAC-SEM-087, DEC-0046).",
+  "kind": "service-runner",
+  "document": {
+    "descriptor": {
+      "protocol": "fabric-service/0.1",
+      "id": "example-agent",
+      "instance": "default",
+      "name": "Example Agent",
+      "summary": "Drafts and files reports for its operator.",
+      "origin": "http://127.0.0.1:47195",
+      "auth": {
+        "tokenFile": "~/.config/example-agent/service.token",
+        "header": "X-Example-Token",
+        "scheme": "none"
+      },
+      "lifecycle": {
+        "manager": "launchd",
+        "label": "com.example.example-agent",
+        "plist": "~/Library/LaunchAgents/com.example.example-agent.plist"
+      },
+      "paths": {
+        "data": "~/Library/Application Support/example-agent",
+        "logs": [
+          "~/Library/Application Support/example-agent/logs/service.log"
+        ]
+      },
+      "commands": {
+        "doctor": [
+          "~/Code/example-agent/.venv/bin/publisher",
+          "doctor",
+          "--json"
+        ]
+      },
+      "source": {
+        "repository": "https://github.com/example/example-agent"
+      },
+      "installedAt": "2026-09-28T18:00:00Z",
+      "installedBy": {
+        "by": "person",
+        "role": "operator",
+        "tool": "example-agent service install 0.2.0"
+      },
+      "runner": {
+        "kind": "opencode",
+        "credentialKind": "subscription"
+      }
+    },
+    "catalogue": [
+      {
+        "kind": "claude-code",
+        "name": "Claude Code",
+        "binaries": [
+          "claude"
+        ],
+        "version": {
+          "argv": [
+            "--version"
+          ],
+          "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+          "timeoutMs": 5000
+        },
+        "drive": "claude-headless",
+        "drives": {
+          "claude-headless": {
+            "argv": [
+              "-p",
+              "--output-format",
+              "stream-json",
+              "--verbose",
+              "--strict-mcp-config",
+              "--mcp-config={mcpConfig}"
+            ]
+          },
+          "tui": {
+            "argv": [
+              "--mcp-config={mcpConfig}"
+            ]
+          }
+        },
+        "mcpConfig": {
+          "file": "~/.claude.json",
+          "format": "claude-json",
+          "key": "mcpServers"
+        },
+        "skillsDir": "~/.claude/skills",
+        "docs": "https://code.claude.com/docs/en/headless",
+        "auth": {
+          "argv": [
+            "auth",
+            "status",
+            "--json"
+          ],
+          "timeoutMs": 5000
+        }
+      },
+      {
+        "kind": "opencode",
+        "name": "OpenCode",
+        "binaries": [
+          "opencode"
+        ],
+        "version": {
+          "argv": [
+            "--version"
+          ],
+          "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+          "timeoutMs": 5000
+        },
+        "drive": "opencode-json",
+        "drives": {
+          "opencode-json": {
+            "argv": [
+              "run",
+              "--format",
+              "json",
+              "--pure"
+            ]
+          },
+          "tui": {
+            "argv": []
+          }
+        },
+        "mcpConfig": {
+          "file": "~/.config/opencode/opencode.json",
+          "format": "opencode-json",
+          "key": "mcp"
+        },
+        "docs": "https://opencode.ai/docs/cli/"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "code": "FAC-SEM-087",
+      "instancePath": "/descriptor/runner/kind"
+    }
+  ]
+}

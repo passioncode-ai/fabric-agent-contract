@@ -4,7 +4,8 @@
 [run brief](../evidence/specs/2026-09-28-fabric-service-brief.md) · DEC-0015;
 `covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019;
 settings backup and the feed client's token header · DEC-0025; one copy under every supervisor, the lifecycle per
-system and the Windows token-file reader · DEC-0057
+system and the Windows token-file reader · DEC-0057; the descriptor for listings — a service offered to others, the
+kind of its runner's sign-in, who installed it, and Project Observatory's node as supervisor · DEC-0061
 
 A **service** is a long-running agent process — on the operator's own computer (a **local**
 placement) or online at an `https` origin (a **remote** placement, [below](#remote-placement)): it keeps
@@ -75,6 +76,21 @@ descriptor describes an installation, not a run.
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
 - A host MUST preserve and ignore unknown `extensions`.
+- `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
+  `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
+  `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project
+  Observatory's node installed it from a placement in the person's [estate record](estate-record.md); or
+  `organization` — the node installed it from an organization's listing. `role` is a person's only. `tool` is the
+  installer and its version. It names a role, never a person: no name, address or account. A host shows it as where
+  the service came from.
+- `runner` says how the service's model calls are signed in (DEC-0061): `credentialKind` is `subscription` (the
+  operator's own vendor login), `key` (an issued key), `platform-metered` (the hosting platform's own metered models,
+  under the deployment's account) or `none` (no model calls). `kind` names a shared runner kind
+  ([runners](runners.md)) and is required for a subscription, which runs only in its vendor's runner: `claude-code`,
+  `kimi-code` or `codex` (DEC-0046). It is the kind of a credential, never the credential: `FAC-SEM-086` refuses a value
+  shaped like one anywhere in `runner` or `installedBy`, with the shared detector
+  ([profiles](profiles.md#no-secret-in-a-command-line)), naming the place and never the value.
+- `peer` says the service is offered to others ([Offered to others](#offered-to-others)).
 
 ## Well-known document
 
@@ -179,8 +195,11 @@ show every agent's spend beside its health without knowing any provider.
 - `costBasis` says where a row's cost came from: `provider` (the provider reported the charge),
   `price-list` (computed from a published price list), `mixed`, or `unknown`.
 - `route` MAY say how a row's calls were paid for: `subscription` (the operator's own login in its vendor's runner,
-  not metered) or `key` (an issued key, metered); calls of one model on both routes are two rows
-  ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated.
+  not metered), `key` (an issued key, metered) or `platform-metered` (the hosting platform's own metered models,
+  billed to the deployment's account, DEC-0061); calls of one model on two routes are two rows
+  ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated. A row's route SHOULD match the descriptor's
+  `runner.credentialKind` of the same name, and a service whose kind is `none` makes no model calls to report; no rule
+  checks this yet beyond FAC-SEM-087's refusal of `subscription` rows on an offered service (DEC-0061).
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),
@@ -191,6 +210,12 @@ show every agent's spend beside its health without knowing any provider.
   and MUST NOT put prompts, outputs or caller identities in it. `byGrant` names a grant only by its
   opaque reference — the `grant` claim of the delegation token the call carried — and never the
   person or the chain of agents behind it ([delegation](delegation.md) DL-22, DEC-0039).
+- **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
+  object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that
+  authorized it — a share grant or a listing's grant, by its opaque reference — and no row, total or grant names a
+  caller, a member or a guest. A per-member sum is never in it: per-member totals come from lease returns inside the
+  organization record (v4 Path 5 step 3), outside this report. Its rows MUST NOT carry `route: "subscription"`, because
+  such a service never runs on one (`FAC-SEM-087` reads the report beside the descriptor).
 
 ### Limits
 
@@ -302,7 +327,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 |---|---|---|
 | `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
 | Trust anchor | loopback and the Host/Origin guard | the origin's TLS certificate and the service token |
-| Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
+| Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), Project Observatory's node (any system), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
 | Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
 | Commands | `doctor`, `update` | `doctor` only |
@@ -352,6 +377,51 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
 Discovery still grants nothing: a remote descriptor makes an online service visible to the
 operator who installed it, on that operator's computer only.
 
+## Offered to others
+
+<a id="offered-to-others"></a>
+
+A service MAY be offered to others beside its operator — a colleague, an organization's members, a guest: a node-hosted
+listing on a machine, or a cloud-hosted one such as an agent in an organization's own cloud account (the first
+organization server's target architecture v4 at `9c6a780`, §12 and §13). The descriptor says so with `peer`
+(DEC-0061). An offer is not a third placement: the service still runs on this computer under a supervisor (a local
+placement, usually under the node) or online under its platform (a remote one), and every rule of that placement
+stays. `peer` adds where others reach it and what it may receive.
+
+| Member | Meaning | Values |
+|---|---|---|
+| `endpoint` | where others reach the service | `https://<dns-name>[:<port>][/<path>]`: no query, fragment or userinfo, never an IP literal, never a reserved name (`FAC-SEM-085`, the list of `FAC-SEM-024`) |
+| `custody` | who controls the machine or the account it runs on | `organization-managed` (an organization's managed machine or its own cloud account) or `personal` (a person's own machine or account) |
+| `residency` | where it runs and keeps what it receives | 1–32 distinct ISO 3166-1 alpha-2 codes in upper case; `EU`, which ISO 3166-1 reserves for the European Union, is admitted; the user-assigned `AA`, `QM`–`QZ`, `XA`–`XZ` and `ZZ` are refused ([sources](../evidence/sources.md)) |
+| `maxDataClass` | the most sensitive data it may receive | the organization edition's classes, least sensitive first: `public`, `internal`, `confidential`, `restricted` — the classes of device policy (DEC-0053) |
+
+All four are required. A data class is a property of the service, custody of the machine or account, and residency
+of where it runs; nothing in `peer` names or describes a person (J10).
+
+**The runner.** A service offered to others MUST carry `runner.credentialKind`, and it MUST NOT be `subscription`: a
+subscription serves only its owner's own sessions (v4 §2 rule 8; [runners](runners.md#routes)). The schema refuses
+both. A node placing the service checks the runner (`FAC-SEM-087`): its `kind`, when named, is an entry of the node's
+runner catalogue; a subscription names its vendor's runner; and the declared kind equals the kind the node derived from
+where the credential came from (v4 §8), so a descriptor that says `key` while its runner is signed in with its
+operator's subscription is refused. Read beside its usage report, a service offered to others reports no row on the
+`subscription` route.
+
+**The host.**
+
+- A host routes a request from anyone but the service's operator only to a service whose descriptor declares `peer`,
+  and only when the request's data class ranks at or below `maxDataClass` (`FAC-SEM-088`). Classes are compared
+  exactly as written: a class that is not one of the four — `Confidential`, the contract's own `project-internal`,
+  `personal` (a scope, not a class), an index — is refused before any comparison, and so is a peer whose
+  `maxDataClass` is not one of them. [`src/descriptor-rules.ts`](../../src/descriptor-rules.ts) `peerRefusal` is the
+  rule, with vectors a port runs ([`fixtures/vectors/service-peer.json`](../../fixtures/vectors/service-peer.json)).
+- **An offer grants nothing.** `peer` grants nobody access: a share grant in the person's estate record or an
+  organization's listing does ([estate record](estate-record.md), DEC-0055), and the caller presents its own
+  credential at `endpoint` — a delegation token ([delegation](delegation.md), DEC-0039) or a guest's through the relay.
+  The descriptor's token stays the host's: others never receive it ([MCP credentials](#mcp-credentials), DEC-0024).
+- `custody` and `residency` are shown beside the service. Which data an organization lets reach a `personal` host, and
+  whether a caller's residency requirement admits a service's, are the organization's placement policy and the
+  caller's, not this descriptor's rules (DEC-0061, *Not decided*).
+
 ## Windows token files
 
 <a id="windows-token-files"></a>
@@ -393,13 +463,13 @@ These rules are a local placement's; a remote one is supervised by its platform 
 | Rule | Requirement |
 |---|---|
 | One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. |
-| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`. The descriptor's `lifecycle.manager` admits `node` by a later change (board CT-12). A descriptor names one supervisor: `label` and `plist` are refused beside `systemd` and `task-scheduler`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057). No supervisor file carries a secret. |
-| Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. |
+| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler` and `node`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061). No supervisor file carries a secret. |
+| Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
-| Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run). A host MUST NOT start a service process itself. |
-| Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it. |
+| Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. Node: a host asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off until it is started again, and to restart (DEC-0061). A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run; from the node, whether the child is kept on, whether it runs and its pid, which a host compares with the well-known `process.pid` as it compares systemd's `MainPID`). A host MUST NOT start a service process itself, and MUST NOT stop or signal a node's child or write a supervisor file for it. The node's operations' names and schemas are Project Observatory's (its row OBS-79); this row fixes what each does. |
+| Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it; the node points its record of the child at the new release and restarts the child. |
 | State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task. Then delete the descriptor. Data stays unless the operator asks to purge it. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor. Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
 
 ### Directories per system
@@ -620,3 +690,7 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
 | `FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, saying the holder is unknown when it has no pid, or naming the markers |
 | `FAC-SEM-079` | `windows-token-file` | a Windows token file is a regular file in the profile, owned by the user, SYSTEM or Administrators, and every granting ACE names one of them (`windowsTokenAclProblem`) |
+| `FAC-SEM-085` | `service-descriptor` | a service offered to others is reached at a public DNS name: `peer.endpoint` is not a reserved name |
+| `FAC-SEM-086` | `service-descriptor` | `runner` and `installedBy` carry no value shaped like a credential (the shared detector); the finding names the place, never the value |
+| `FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
+| `FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
