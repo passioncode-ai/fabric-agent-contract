@@ -349,5 +349,16 @@
   {"name": "service-usage-route", "schema": "service-usage.schema.json", "path": "positive/service-usage-route.json", "valid": true},
   {"name": "service-usage-unknown-route", "schema": "service-usage.schema.json", "path": "negative/service-usage-unknown-route.json", "valid": false, "keyword": "enum"},
   {"name": "service-well-known-configuration", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-configuration.json", "valid": true},
-  {"name": "service-well-known-configuration-unknown-slot", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-configuration-unknown-slot.json", "valid": false, "keyword": "enum"}
+  {"name": "service-well-known-configuration-unknown-slot", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-configuration-unknown-slot.json", "valid": false, "keyword": "enum"},
+  {"name": "fabric-package-agent", "schema": "fabric-package.schema.json", "path": "positive/fabric-package-agent.json", "valid": true},
+  {"name": "fabric-package-skill-set", "schema": "fabric-package.schema.json", "path": "positive/fabric-package-skill-set.json", "valid": true},
+  {"name": "fabric-package-unsigned-person", "schema": "fabric-package.schema.json", "path": "positive/fabric-package-unsigned-person.json", "valid": true},
+  {"name": "fabric-package-secret-value", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-secret-value.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "fabric-package-unknown-algorithm", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-unknown-algorithm.json", "valid": false, "keyword": "enum"},
+  {"name": "fabric-package-agent-without-result-signal", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-agent-without-result-signal.json", "valid": false, "keyword": "required"},
+  {"name": "fabric-package-agent-without-receipt", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-agent-without-receipt.json", "valid": false, "keyword": "required"},
+  {"name": "fabric-package-path-escapes", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-escapes.json", "valid": false, "keyword": "pattern"},
+  {"name": "fabric-package-two-publisher-signatures", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-two-publisher-signatures.json", "valid": false, "keyword": "contains"},
+  {"name": "fabric-package-skill-set-with-secrets", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-skill-set-with-secrets.json", "valid": false, "keyword": "false schema"},
+  {"name": "fabric-package-scoped-reverse-id", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-scoped-reverse-id.json", "valid": false, "keyword": "pattern"}
 ]

@@ -11,6 +11,7 @@ import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
+import { packageRules } from "./package-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -32,6 +33,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "deep-link") return deepLinkRules(value);
   const profiles = profileRules(kind, value);
   if (profiles) return profiles;
+  const packaged = packageRules(kind, value);
+  if (packaged) return packaged;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const findings: Finding[] = [];
