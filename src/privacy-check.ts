@@ -10,7 +10,7 @@ import { privacyPlan } from "./privacy-plan.js";
 const root = projectRoot();
 let commonDir: string | undefined;
 try {
-  commonDir = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: root, encoding: "utf8" }).trim() || undefined;
+  commonDir = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || undefined;
 } catch {
   commonDir = undefined;
 }
@@ -20,6 +20,7 @@ const plan = privacyPlan({
   commonDir,
   denylistPresent: existsSync(path.join(homedir(), ".config", "passioncode", "private-terms.txt")),
   exists: existsSync,
+  home: homedir(),
 });
 if (plan.action === "skip") console.log(`privacy check skipped: ${plan.reason}`);
 else if (plan.action === "fail") {

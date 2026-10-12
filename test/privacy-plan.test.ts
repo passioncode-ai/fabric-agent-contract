@@ -14,6 +14,7 @@ const inputs = (over: Partial<PrivacyInputs>, present: string[] = []): PrivacyIn
   root: main,
   commonDir: path.join(main, ".git"),
   denylistPresent: true,
+  home: path.join(path.sep, "nohome"),
   exists: (file) => present.includes(file),
   ...over,
 });
@@ -49,5 +50,23 @@ describe("privacyPlan", () => {
     expect(privacyPlan(inputs({ orgIndex: explicit }, [sibling]))).toMatchObject({ action: "fail" });
     // An empty ORG_INDEX is unset.
     expect(privacyPlan(inputs({ orgIndex: "" }, [sibling]))).toEqual({ action: "run", script: sibling });
+  });
+  it("leaves out the main-checkout guess for a bare repository, a separate git dir or a submodule", () => {
+    for (const commonDir of [path.join(base, "contract.git"), path.join(base, "super", ".git", "modules", "contract")]) {
+      const plan = privacyPlan(inputs({ root: worktree, commonDir }, [path.join(base, "org-index", "scripts", "check_private.py"), path.join(path.dirname(commonDir), "..", "org-index", "scripts", "check_private.py")]));
+      expect(plan, commonDir).toMatchObject({ action: "fail" });
+    }
+  });
+  it("shows the home directory as ~ in a failure message", () => {
+    const home = path.join(base, "home-of-someone");
+    const plan = privacyPlan(inputs({ home, root: path.join(home, "contract"), commonDir: path.join(home, "contract", ".git") }));
+    expect(plan.action === "fail" && plan.reason).toContain(path.join("~", "org-index", "scripts", "check_private.py"));
+    expect(plan.action === "fail" && plan.reason).not.toContain(home);
+    const explicit = privacyPlan(inputs({ home, orgIndex: path.join(home, "x") }));
+    expect(explicit.action === "fail" && explicit.reason).not.toContain(home);
+    // A sibling folder whose name only starts like the home directory is not inside it.
+    const near = privacyPlan(inputs({ home, orgIndex: `${home}-other` }));
+    expect(near.action === "fail" && near.reason).toContain(`${home}-other`);
+    expect(privacyPlan(inputs({ home: "", orgIndex: path.join(home, "x") }))).toMatchObject({ action: "fail" });
   });
 });
