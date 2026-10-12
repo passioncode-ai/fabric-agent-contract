@@ -3591,6 +3591,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   writes `byProject` and moves its OpenRouter referer to its product page (CT-20); the adapter's kits offer the
   attribution setting, off by default (CT-18); Fabric attributes from its first model call through OpenRouter (CT-19).
   Board row CT-15.
+- **Annotated (2026-10-13):** `byProject`'s known costs add up as its calls do (CT-40): a project costs at least its
+  task runs when its own cost is known, and all projects together no more than the days, a `null` cost counting as
+  none, within the rounding the day's cost check allows (`src/usage-rules.ts`, test/usage-rules.test.ts).
 - **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured

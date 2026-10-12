@@ -70,6 +70,28 @@ describe("FAC-SEM-025: calls by project and task run", () => {
     expect(paths(rows([project, filler(7)]))).toEqual([]);
     expect(paths(rows([project, filler(8)]))).toEqual(["FAC-SEM-025 /byProject"]);
   });
+  it("CT-40: refuses task runs costing more than their project, at the rounding boundary", () => {
+    // The project costs 1.1 and its runs 0.8 + 0.3.
+    expect(paths(rows([{ ...project, costUsd: 1.1 - 0.0000009 }]))).toEqual([]);
+    expect(paths(rows([{ ...project, costUsd: 1.09 }]))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
+    expect(evaluateSemanticRules("service-usage", rows([{ ...project, costUsd: 1.09 }]))[0]?.message).toBe("a project's task runs cost more than the project (1.1 > 1.09)");
+  });
+  it("CT-40: refuses projects costing more than the days, at the boundary (the days cost 1.594)", () => {
+    const filler = (costUsd: number | null, calls = 1) => ({ projectId: "urn:project:filler", calls, unpricedCalls: costUsd === null ? calls : 0, costUsd });
+    expect(paths(rows([project, filler(0.494)]))).toEqual([]);
+    expect(paths(rows([project, filler(0.495)]))).toEqual(["FAC-SEM-025 /byProject"]);
+    expect(evaluateSemanticRules("service-usage", rows([project, filler(0.495)])).at(-1)?.message).toBe("the projects cost more than the days (1.595 > 1.594)");
+    // An unknown cost counts as none, on either side.
+    expect(paths(rows([project, filler(null)]))).toEqual([]);
+    const unpricedDays = { ...rows([project]), days: report.days.map((day: Json) => ({ ...day, costUsd: null })) };
+    expect(paths(unpricedDays)).toContain("FAC-SEM-025 /byProject");
+  });
+  it("CT-40 with DEC-0076: two spellings of one project are one project in the cost sum too", () => {
+    const spelled = String(project.projectId).replace(/^urn:/i, "URN:");
+    const twice = rows([project, { ...project, projectId: spelled, calls: 0, taskRuns: [] }]);
+    // The duplicate is refused, and the sum still counts both rows' costs (2.2) against the days (1.594).
+    expect(paths(twice)).toEqual(["FAC-SEM-025 /byProject/1/projectId", "FAC-SEM-025 /byProject"]);
+  });
   it("applies the unknown-cost rule to project and task-run rows", () => {
     expect(paths(rows([{ ...project, costUsd: null }]))).toEqual(["FAC-SEM-025 /byProject/0/costUsd"]);
     expect(paths(rows([{ projectId: "urn:project:x", calls: 2, unpricedCalls: 2, costUsd: 0 }]))).toEqual(["FAC-SEM-025 /byProject/0/costUsd"]);
