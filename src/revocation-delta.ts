@@ -312,16 +312,19 @@ export function acceptHeartbeat(state: DeltaState, heartbeat: unknown, trust: De
   const head = h.deltaHead as JsonObject;
   const revision = h.estateRecord as JsonObject;
   const broken = (reason: string) => fail("fork", { ...state, broken: true }, reason);
-  const held = isObject(state.heartbeat) ? state.heartbeat : undefined;
+  // A held heartbeat is one this function accepted; a corrupt held state never reads as "nothing newer is held".
+  if (state.heartbeat !== undefined && heartbeatShape(state.heartbeat) !== undefined) return fail("malformed", state, "the heartbeat held is not one the machine could have accepted");
+  // Past the check above, a held heartbeat is a well-formed one, or none.
+  const held = state.heartbeat as JsonObject | undefined;
   if (held !== undefined) {
-    if ((h.sequence as number) < Number(held.sequence)) return fail("not-newer", state, "the machine holds a newer heartbeat");
+    if ((h.sequence as number) < (held.sequence as number)) return fail("not-newer", state, "the machine holds a newer heartbeat");
     if (h.sequence === held.sequence) {
       if (sameBytes(h, held)) return { ok: true, state, newer: false };
       return broken(`two signed heartbeats carry sequence ${String(h.sequence)}`);
     }
     const heldHead = isObject(held.deltaHead) ? held.deltaHead : {};
     const heldRevision = isObject(held.estateRecord) ? held.estateRecord : {};
-    if (at < deltaTime(held.at) || (head.sequence as number) < Number(heldHead.sequence) || (revision.revision as number) < Number(heldRevision.revision)) {
+    if (at < deltaTime(held.at) || (head.sequence as number) < (heldHead.sequence as number) || (revision.revision as number) < (heldRevision.revision as number)) {
       return fail("regressed", state, "a newer heartbeat never moves its time, the head or the revision back");
     }
   }
