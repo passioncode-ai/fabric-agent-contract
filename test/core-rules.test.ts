@@ -119,6 +119,9 @@ describe("identifier equality in the core rules (DEC-0076)", () => {
     expect(paths("learning", approved("urn:fabric:agent:x", "urn:Fabric:agent:x"))).toEqual(["FAC-SEM-094 /approvedBy"]);
     expect(paths("promotion", { state: "approved", meta: { createdBy: "URN:FABRIC:agent:x" }, approvedBy: "urn:fabric:agent:x" })).toEqual(["FAC-SEM-094 /approvedBy"]);
     expect(paths("learning", approved("https://example.com/~x", "https://EXAMPLE.com/%7ex"))).toEqual(["FAC-SEM-094 /approvedBy"]);
+    // A leading dot segment of a rootless path names the same agent (RFC 3986 §5.2.4 step A, DEC-0076).
+    expect(paths("learning", approved("agent:x", "agent:./x"))).toEqual(["FAC-SEM-094 /approvedBy"]);
+    expect(paths("learning", approved("agent:x", "AGENT:../x"))).toEqual(["FAC-SEM-094 /approvedBy"]);
   });
 
   it("FAC-SEM-094 passes an approver whose id differs where case or encoding is significant", () => {
@@ -146,6 +149,13 @@ describe("identifier equality in the core rules (DEC-0076)", () => {
     // A project that differs in its significant part is another project, with its own one manager.
     const other = { ...manager, id: "urn:assignment:pm-3", scope: { project: `${project}-other` } };
     expect(codes("roles", { ...roles, assignments: [...roles.assignments, other] })).toEqual([]);
+  });
+
+  it("FAC-SEM-006 reads an active assignment whose scope is not an object as scoping no project", () => {
+    for (const scope of [7, null, undefined, "urn:project:x"]) {
+      const odd = { ...roles, assignments: [...roles.assignments, { id: "urn:assignment:dev-y", role: "developer", principal: roles.assignments[0].principal, scope, active: true }] };
+      expect(codes("roles", odd)).toEqual([]);
+    }
   });
 
   it("FAC-SEM-006 still keys a project that is not a string by itself", () => {

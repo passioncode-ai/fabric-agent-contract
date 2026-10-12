@@ -4,7 +4,7 @@
  *
  * The normal form of a URI is RFC 3986 §6.2.2 syntax-based normalization — the scheme and the host lower-cased and
  * percent-encoding hex upper-cased (§6.2.2.1), percent-encoded unreserved characters decoded (§6.2.2.2), dot segments
- * removed from a hierarchical path (§6.2.2.3) — and nothing scheme-based (§6.2.3: no default port removed, no empty path
+ * removed from a hierarchical path (§6.2.2.3), and only the leading ones from a rootless path — and nothing scheme-based (§6.2.3: no default port removed, no empty path
  * made "/"). A `urn:` URI follows RFC 8141 §3.1 instead: the scheme and the NID lower-cased, percent-encoding hex
  * upper-cased, nothing decoded, the NSS's case kept, and the r-, q- and f-components ignored. A string that is not a URI
  * by RFC 3986's `URI` production is its own normal form. Nothing here throws, and nothing is keyed by input in a plain
@@ -53,6 +53,19 @@ function percent(text: string, keepEncoded = false): string {
 }
 
 /**
+ * A rootless path (`agent:./x`) loses its leading "./" and "../" segments — §5.2.4's step A — while what is left stays
+ * rootless: not empty and not beginning with "/". Dot segments further in are kept, because removing them by §5.2.4 can
+ * turn a rootless path into an absolute one (`a/../b` → `/b`). That narrowing is the contract's own, under RFC 3986
+ * §6.1's aim of no false positives (DEC-0076).
+ */
+function stripLeadingDots(path: string): string {
+  let start = 0;
+  while (path.startsWith("./", start) || path.startsWith("../", start)) start += path.startsWith("./", start) ? 2 : 3;
+  const rest = path.slice(start);
+  return rest === "" || rest.startsWith("/") ? path : rest;
+}
+
+/**
  * RFC 3986 §5.2.4 remove_dot_segments, over a path whose `.` and `..` are already decoded. Its input buffer is read
  * segment by segment: the path split on "/" gives the same steps without copying the rest of the input at each one.
  */
@@ -85,9 +98,9 @@ function parse(text: string): Parts | undefined {
   if (query !== undefined && !QUERY.test(query)) return undefined;
   if (fragment !== undefined && !QUERY.test(fragment)) return undefined;
   if (authority !== undefined && !authorityParts(authority)) return undefined;
-  // Without an authority a path cannot begin with "//" (path-absolute's first segment is non-empty), and an empty one
-  // (`x:`, RFC 3986's path-empty) is left as it is: the schema's `format: uri` refuses it, so no admitted value has it.
-  if (authority === undefined && (path.startsWith("//") || path === "")) return undefined;
+  // An empty path with no authority (`x:`, RFC 3986's path-empty) is left as it is: the schema's `format: uri` refuses
+  // it, so no admitted value has it. (A path never begins with "//" here: Appendix B's split reads that as an authority.)
+  if (authority === undefined && path === "") return undefined;
   return { scheme, authority, path, query, fragment };
 }
 
@@ -125,7 +138,7 @@ function genericForm(parts: Parts): string {
   }
   const decoded = percent(parts.path);
   const hierarchical = parts.authority !== undefined || decoded.startsWith("/");
-  let path = hierarchical ? removeDotSegments(decoded) : decoded;
+  let path = hierarchical ? removeDotSegments(decoded) : stripLeadingDots(decoded);
   // A path left starting with "//" and no authority would read as one: keep the decoded path instead.
   if (parts.authority === undefined && path.startsWith("//")) path = decoded;
   const query = parts.query !== undefined ? `?${percent(parts.query)}` : "";

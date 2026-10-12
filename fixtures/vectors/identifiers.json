@@ -18,7 +18,11 @@
     { "name": "dot segments are removed (RFC 3986 §6.2.2.3, §5.2.4)", "input": "https://example.com/a/./b/../c", "expected": "https://example.com/a/c", "schema": true },
     { "name": "percent-encoded dots are dot segments once decoded", "input": "https://example.com/a/%2E%2E/b", "expected": "https://example.com/b", "schema": true },
     { "name": "a trailing dot segment leaves the path ending in '/'", "input": "https://example.com/a/b/..", "expected": "https://example.com/a/", "schema": true },
-    { "name": "a rootless path keeps its dot segments", "input": "agent:a/../b", "expected": "agent:a/../b", "schema": true },
+    { "name": "a rootless path loses its leading './' (RFC 3986 §5.2.4 step A)", "input": "agent:./x", "expected": "agent:x", "schema": true },
+    { "name": "a rootless path loses its leading '../' and './' segments", "input": "AGENT:.././x", "expected": "agent:x", "schema": true },
+    { "name": "a rootless path keeps its dot segments further in (the contract's own narrowing, RFC 3986 §6.1)", "input": "agent:a/../b", "expected": "agent:a/../b", "schema": true },
+    { "name": "a rootless path keeps a leading dot segment that would leave it empty", "input": "agent:./", "expected": "agent:./", "schema": true },
+    { "name": "a rootless path keeps a leading dot segment that would leave it absolute", "input": "agent:.//x", "expected": "agent:.//x", "schema": true },
     { "name": "no default port is removed and no empty path becomes '/' (no RFC 3986 §6.2.3)", "input": "HTTPS://Example.com:443", "expected": "https://example.com:443", "schema": true },
     { "name": "an IPv6 literal is lower-cased", "input": "http://[2001:DB8::1]/", "expected": "http://[2001:db8::1]/", "schema": true },
     { "name": "query and fragment: hex upper-cased, unreserved decoded", "input": "https://example.com/?q=%3a%41#f%7e", "expected": "https://example.com/?q=%3AA#f~", "schema": true },
@@ -38,7 +42,9 @@
     ["URN:EXAMPLE:a123%2cz456", "urn:example:a123%2Cz456"],
     ["https://example.com/%7Euser", "https://example.com/~user"],
     ["https://EXAMPLE.com/a/./b/../c", "https://example.com/a/c"],
-    ["urn:example:a123,z456#789", "urn:example:a123,z456"]
+    ["urn:example:a123,z456#789", "urn:example:a123,z456"],
+    ["agent:./x", "agent:x"],
+    ["agent:../x", "agent:x"]
   ],
   "different": [
     ["urn:fabric:agent:x", "urn:fabric:agent:X"],
@@ -47,7 +53,8 @@
     ["https://example.com", "https://example.com/"],
     ["https://example.com:443/", "https://example.com/"],
     ["agent:x", "agent:X"],
-    ["project-a", "Project-A"]
+    ["project-a", "Project-A"],
+    ["agent:a/../b", "agent:b"]
   ],
   "laxPorts": [
     { "name": "decoding a reserved character", "input": "https://example.com/a%2Fb", "wrong": "https://example.com/a/b", "expected": "https://example.com/a%2Fb" },

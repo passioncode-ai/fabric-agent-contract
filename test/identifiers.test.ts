@@ -108,6 +108,7 @@ describe("normalIdentifier and sameIdentifier", () => {
     expect(normalIdentifier(`HTTPS://EXAMPLE.com${path}/./..`)).toBe(`https://example.com${path.slice(0, -2)}/`);
     expect(normalIdentifier(`x:${"%".repeat(200_000)}`)).toBe(`x:${"%".repeat(200_000)}`);
     expect(normalIdentifier(`urn:a1:${"%2f".repeat(100_000)}`)).toBe(`urn:a1:${"%2F".repeat(100_000)}`);
+    expect(normalIdentifier(`agent:${"./".repeat(200_000)}x`)).toBe("agent:x");
     expect(Date.now() - started).toBeLessThan(5000);
   });
 
