@@ -2846,6 +2846,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   waiting copy as `duplicate` under launchd today, derives it from systemd's `MainPID` or through the node off macOS, and
   fixes its Windows token reader (a signed mask, unknown ACE types, SID case; board CT-21); every Windows token reader
   runs the new vectors.
+- **Annotated (2026-10-13):** the pending receipt is in: the Task Scheduler does not restart a task whose action exits 75
+  (the adapter's Windows CI run 38318280259, a task as the kit writes it with `RestartOnFailure` PT1M ×999: one start in
+  260 s, Last Result 75), so under it the marked copy's in-process wait is the only recovery; service.md "One copy" says
+  so. `S4U` and `SYSTEM` principals were not measured.
 - **Annotated (2026-10-12):** its *Not decided here* item on the node — `lifecycle.manager: node` in the descriptor,
   `label`/`plist` beside it, the node's Install, Off, Uninstall and state read — is decided by DEC-0061.
 - **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
