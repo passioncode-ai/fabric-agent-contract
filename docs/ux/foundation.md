@@ -328,6 +328,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-016: Operator sees what a second copy of a service did
+
+- **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, so that a duplicate start never costs me an outage or a restart loop.
+- **Traces:** JTBD-03, JRN-02/#3
+- **Acceptance criteria:**
+  - Given a service running, when I start a second copy by hand, then it exits at once with one sentence naming the running copy's pid (or saying it is unknown) and changes nothing.
+  - Given a service running, when its supervisor starts a second copy marked as supervised, then that copy waits up to 300 s touching nothing, the running copy keeps answering, and the host never shows an outage.
+  - Given launchd supervises it, then the host lists the waiting copy as two copies (`duplicate`); given the Task Scheduler, then the host shows the running copy as ready and nothing of the waiting one.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

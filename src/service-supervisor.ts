@@ -23,7 +23,11 @@ export type SupervisorMarker =
   | { kind: "manual"; unreadable?: string; forms: MarkerForm[] }
   | { kind: "conflict"; values: string[]; forms: MarkerForm[] };
 
-/** The marker values an argument vector carries: `--fabric-supervisor <m>` or `--fabric-supervisor=<m>`, after the executable and before `--`. */
+/**
+ * The marker values an argument vector carries: `--fabric-supervisor <m>` or `--fabric-supervisor=<m>`, after the
+ * executable and before `--`. A bare `--fabric-supervisor` followed by nothing, by `--` or by another `--…` flag is a
+ * marker with an empty value and consumes nothing, so a `--` after it still ends the scan.
+ */
 function argumentValues(argv: unknown): string[] {
   if (!Array.isArray(argv)) return [];
   const values: string[] = [];
@@ -32,8 +36,12 @@ function argumentValues(argv: unknown): string[] {
     if (item === "--") break;
     if (item === SUPERVISOR_ARG) {
       const next = argv[index + 1];
-      values.push(typeof next === "string" ? next : "");
-      index += 1;
+      if (typeof next === "string" && !next.startsWith("--")) {
+        values.push(next);
+        index += 1;
+      } else {
+        values.push("");
+      }
     } else if (typeof item === "string" && item.startsWith(`${SUPERVISOR_ARG}=`)) {
       values.push(item.slice(SUPERVISOR_ARG.length + 1));
     }
@@ -47,7 +55,8 @@ function argumentValues(argv: unknown): string[] {
  * - `supervised`: every marker present names the same manager, one of `SUPERVISORS`;
  * - `conflict`: the markers present name different values — the copy is unsupervised and exits 75 at once, naming
  *   the conflict, before it takes the lock;
- * - `manual`: no marker (an empty environment value counts as none), or one that names no manager (`unreadable`).
+ * - `manual`: no marker (only an empty environment value counts as none), or one that names no manager
+ *   (`unreadable`) — an argument with no value or an empty one names no manager, and beside a variable it disagrees.
  */
 export function supervisorMarker(start: unknown): SupervisorMarker {
   const declared = isObject(start) ? start : {};
@@ -69,6 +78,8 @@ export function lockWaitBudgetMs(marker: SupervisorMarker): number {
 
 const count = (value: unknown, integer: boolean) => typeof value === "number" && Number.isFinite(value) && value >= 0 && (!integer || Number.isInteger(value));
 const namesPid = (message: string, pid: number) => new RegExp(`(?<!\\d)${pid}(?!\\d)`).test(message);
+/** A copy that cannot learn the holder's pid (the lock records none yet, or cannot be read) says the holder is unknown. */
+const UNKNOWN_HOLDER = /\bunknown\b/i;
 
 /**
  * FAC-SEM-078 (DEC-0057): what a copy did when it started and the lock was held, as a kit's test records it —
@@ -76,7 +87,8 @@ const namesPid = (message: string, pid: number) => new RegExp(`(?<!\\d)${pid}(?!
  * `attempts` counts tries at the lock, `waitedMs` the time spent waiting for it, `sideEffects` what the copy did before
  * it held the lock. A copy touches nothing without the lock; an unmarked one tries once and does not wait; a marked one
  * waits at most 300 s; a conflicting marker never reaches the lock; a copy that does not get the lock exits 75 with a
- * sentence naming the holder's pid (or, for a conflict, the marker forms present).
+ * sentence naming the holder's pid, or with `holderPid: null` a sentence saying the holder is unknown (the word
+ * `unknown`), or, for a conflict, the marker forms present.
  */
 export function lockOutcomeRules(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -120,6 +132,8 @@ export function lockOutcomeRules(value: JsonObject): Finding[] {
   if (marker.kind === "conflict") {
     const named = marker.forms.every((form) => message.includes(form === "environment" ? SUPERVISOR_ENV : SUPERVISOR_ARG));
     if (!named) push("/outcome/message", `the sentence names the conflicting markers (${marker.forms.map((form) => (form === "environment" ? SUPERVISOR_ENV : SUPERVISOR_ARG)).join(" and ")})`);
+  } else if (value.holderPid === null) {
+    if (!UNKNOWN_HOLDER.test(message)) push("/outcome/message", "the holder's pid is unknown, so the sentence says the holder is unknown");
   } else if (!count(value.holderPid, true) || (value.holderPid as number) < 1) {
     push("/holderPid", "the holder's pid is unreadable");
   } else if (!namesPid(message, value.holderPid as number)) {

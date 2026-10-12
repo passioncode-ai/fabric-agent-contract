@@ -1,5 +1,5 @@
 {
-  "about": "The supervisor marker of service.md One copy (DEC-0057, CT-01), for the kits' ports: how a copy reads FABRIC_SERVICE_SUPERVISOR=<manager> from its environment or --fabric-supervisor <manager> from its argument vector, and how long it may wait for a held lock. supervisorMarker and lockWaitBudgetMs in src/service-supervisor.ts run these; argv[0] is the executable.",
+  "about": "The supervisor marker of service.md One copy (DEC-0057, CT-01), for the kits' ports: how a copy reads FABRIC_SERVICE_SUPERVISOR=<manager> from its environment or --fabric-supervisor <manager> from its argument vector, and how long it may wait for a held lock. supervisorMarker and lockWaitBudgetMs in src/service-supervisor.ts run these; argv[0] is the executable. An argument with no value (followed by nothing, by -- or by another --… flag, which it does not consume) or an empty one is a marker that names no manager, so beside a variable it is a conflict; only an empty variable counts as absent.",
   "managers": [
     "launchd",
     "systemd",
@@ -239,6 +239,66 @@
       ],
       "marker": {
         "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "a bare argument before --: an empty value, and -- still ends the scan",
+      "env": {},
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "serve",
+        "--fabric-supervisor",
+        "--",
+        "--fabric-supervisor",
+        "systemd"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "a bare argument before another flag: an empty value, the flag is not consumed",
+      "env": {},
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "--fabric-supervisor",
+        "--verbose",
+        "serve"
+      ],
+      "marker": {
+        "kind": "manual"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "a bare argument before another flag, beside a variable: a conflict",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "systemd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "--fabric-supervisor",
+        "--verbose"
+      ],
+      "marker": {
+        "kind": "conflict"
+      },
+      "waitBudgetMs": 0
+    },
+    {
+      "name": "an empty = argument beside a variable: a conflict",
+      "env": {
+        "FABRIC_SERVICE_SUPERVISOR": "launchd"
+      },
+      "argv": [
+        "/opt/example-agent/bin/example-agent",
+        "--fabric-supervisor=",
+        "serve"
+      ],
+      "marker": {
+        "kind": "conflict"
       },
       "waitBudgetMs": 0
     },

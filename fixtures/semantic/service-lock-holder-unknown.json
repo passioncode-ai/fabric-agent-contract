@@ -1,0 +1,18 @@
+{
+  "description": "A copy started by hand finds the lock held but cannot read the holder's pid (the lock records none yet); it tries once and exits 75 saying the holder is unknown: conforming (FAC-SEM-078, DEC-0057).",
+  "start": {
+    "env": {},
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": null,
+  "attempts": 1,
+  "waitedMs": 0,
+  "sideEffects": [],
+  "outcome": {
+    "exitStatus": 75,
+    "message": "Example Agent is already running; the holder's pid is unknown."
+  }
+}

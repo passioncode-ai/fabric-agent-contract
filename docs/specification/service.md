@@ -369,8 +369,11 @@ offending SID or reason — never the file's contents:
    any right is a refusal: `S-1-1-0` (Everyone), `S-1-5-11` (Authenticated Users), `S-1-5-32-545`
    (BUILTIN\Users), another user, a left-behind CREATOR OWNER. Deny ACEs do not change the decision.
 
-An `allow` ACE whose access mask is 0 grants nothing; an ACE of any type but allow and deny is refused, and so is a
-flag, SID or mask the reader cannot read (DEC-0057). [`src/windows-token.ts`](../../src/windows-token.ts)
+The mask is the ACE's unsigned 32-bit access mask: a reader that reads it signed converts it first (.NET
+`FileSystemRights` is an `int`, so `GENERIC_READ`, 0x80000000, arrives negative: `>>> 0`, `(uint)`). An `allow` ACE
+whose mask is 0 grants nothing. An ACE of a readable type other than allow and deny — an object or callback ACE among
+them — is refused, and so is a flag, an ACE type, a SID or a mask the reader cannot read. A SID is compared
+case-insensitively on its `S`, and each of its sub-authorities is at most 4294967295 (DEC-0057). [`src/windows-token.ts`](../../src/windows-token.ts)
 `windowsTokenAclProblem` is the rule over what a reader has read — the file's flags, its owner SID and its ACEs — and
 [`fixtures/vectors/windows-token.json`](../../fixtures/vectors/windows-token.json) holds the cases a port runs
 (`FAC-SEM-079`; [conformance](conformance.md#clients-and-readers)).
@@ -394,16 +397,18 @@ These rules are a local placement's; a remote one is supervised by its platform 
 | Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run). A host MUST NOT start a service process itself. |
-| Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor (systemd after `systemctl --user daemon-reload`). |
+| Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it. |
 | State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
 | Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task. Then delete the descriptor. Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
 
 ### Directories per system
 
-The descriptor's `paths` names the directories a service uses; these are where a writer puts them (DEC-0057). Linux
-follows the XDG Base Directory Specification; on Windows everything is under `%LOCALAPPDATA%`, which does not roam, as
-the services folder is (DEC-0032).
+The descriptor's `paths` names the directories a service uses; these are where a writer puts them (DEC-0057). On Linux
+data, logs (state) and cache follow the XDG Base Directory Specification's `XDG_DATA_HOME`, `XDG_STATE_HOME` and
+`XDG_CACHE_HOME`; configuration stays beside data on every system, by choice, as on macOS and in the adapter's kits,
+not in `XDG_CONFIG_HOME`. On Windows everything is under `%LOCALAPPDATA%`, which does not roam, as the services folder
+is (DEC-0032).
 
 | What | macOS | Linux | Windows |
 |---|---|---|---|
@@ -417,24 +422,34 @@ A copy that does not hold `service.lock` touches nothing: it binds no port, writ
 no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057).
 
 - **Started by hand,** a copy that finds the lock held tries once and exits 75 at once, printing one sentence naming
-  the holder's pid.
+  the holder's pid. When it cannot learn the pid (the lock records none yet, or cannot be read), the sentence says the
+  holder is unknown, with the word `unknown`.
 - **Started by its supervisor and marked so,** a copy MAY wait for the lock in-process for at most 300 s, touching
   nothing, and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. An immediate exit
-  under launchd's `KeepAlive` or systemd's `Restart=always` is a restart every 10 s, forever, and under the Task
-  Scheduler each failure spends one of a finite number of restarts ([sources](../evidence/sources.md)). How the copy
-  spaces its tries is its own; the adapter's kits back off from 0.5 s, doubling to 30 s.
+  under launchd's `KeepAlive` or systemd's `Restart=always` is a restart every 10 s, forever. The Task Scheduler restarts
+  a failed task a finite number of times (`RestartCount`, [sources](../evidence/sources.md)); whether an exit 75 counts
+  as such a failure is not yet proven — pending the adapter's Windows CI receipt (board CT-18). How the copy spaces its
+  tries is its own; the adapter's kits back off from 0.5 s, doubling to 30 s.
 - **The supervisor marker** is `FABRIC_SERVICE_SUPERVISOR=<manager>` in the copy's environment or
   `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`) in its argument vector, after the executable and
   before any `--`. `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor
   file writes the marker ([Supervisor](#lifecycle)); a host or node that starts a service as its supervisor sets it,
-  and a start by hand never does. A copy never infers supervision from its parent process. An empty variable is no
-  marker; a value that names no manager leaves the copy unsupervised.
+  and a start by hand never does. A copy never infers supervision from its parent process. Only an empty variable
+  counts as no marker. An argument with no value — followed by nothing, by `--` or by another `--…` flag, none of which
+  it consumes, so `--` still ends the scan — or with an empty value is a marker that names no manager: alone it leaves
+  the copy unsupervised, beside a variable it disagrees. Any other value that names no manager leaves the copy
+  unsupervised. A service's own argument parser accepts `--fabric-supervisor <manager>` and
+  `--fabric-supervisor=<manager>` and does nothing with them beyond reading the marker, so a parser that refuses
+  unknown flags does not exit on it.
 - **Markers that disagree** — both forms with different values, or the argument twice with different values — leave
   the copy unsupervised: it exits 75 at once, before it takes the lock and whether or not the lock is held, with one
   sentence naming the markers.
-- **The holder keeps answering** its well-known document for the whole wait, so a host shows the waiting copy as a
-  duplicate, not as an outage: Fabric Dashboards derives `down` only after 15 s without a health answer from a local
-  placement (60 s from a remote one) and shows a copy that waits for the lock as `duplicate` (FD-37).
+- **The holder keeps answering** its well-known document for the whole wait, so the wait is never an outage: Fabric
+  Dashboards derives `down` only after 15 s without a health answer from a local placement (60 s from a remote one)
+  (FD-37). What a host shows of the waiting copy depends on the supervisor's pid. Under launchd the supervisor's pid is
+  the waiting copy's, not the holder's, so the host shows `duplicate` (Fabric Dashboards at `e1fdd64`). Under systemd a
+  host can do the same once it compares the unit's `MainPID` with the well-known `process.pid`. Under the Task
+  Scheduler there is no supervisor pid to compare: the waiting copy is not visible and the holder shows `ready`.
 
 [`src/service-supervisor.ts`](../../src/service-supervisor.ts) `supervisorMarker` and `lockWaitBudgetMs` read the
 marker, run over [`fixtures/vectors/service-supervisor.json`](../../fixtures/vectors/service-supervisor.json);
@@ -603,5 +618,5 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
 | `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
 | `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
-| `FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, or the markers |
+| `FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, saying the holder is unknown when it has no pid, or naming the markers |
 | `FAC-SEM-079` | `windows-token-file` | a Windows token file is a regular file in the profile, owned by the user, SYSTEM or Administrators, and every granting ACE names one of them (`windowsTokenAclProblem`) |

@@ -51,7 +51,7 @@ describe("the supervisor marker (DEC-0057)", () => {
 });
 
 describe("one copy: what a copy does when the lock is held (FAC-SEM-078)", () => {
-  it.each(["service-lock-supervised-waited", "service-lock-supervised-took-over", "service-lock-task-argument", "service-lock-manual", "service-lock-conflict"])("%s conforms", (name) => {
+  it.each(["service-lock-supervised-waited", "service-lock-supervised-took-over", "service-lock-task-argument", "service-lock-manual", "service-lock-conflict", "service-lock-holder-unknown"])("%s conforms", (name) => {
     expect(findings(load(name))).toEqual([]);
   });
 
@@ -90,6 +90,12 @@ describe("one copy: what a copy does when the lock is held (FAC-SEM-078)", () =>
     // The pid is a whole number in the sentence: 42420 does not name 4242.
     expect(paths({ ...load("service-lock-manual"), outcome: { exitStatus: 75, message: "Held by pid 42420." } })).toEqual(["FAC-SEM-078 /outcome/message"]);
     expect(paths({ ...load("service-lock-manual"), outcome: { exitStatus: 75 } })).toEqual(["FAC-SEM-078 /outcome/message"]);
+  });
+
+  it("accepts an unknown holder only with a sentence that says so (holderPid null)", () => {
+    const unknown = load("service-lock-holder-unknown");
+    expect(findings(unknown)).toEqual([]);
+    expect(paths({ ...unknown, outcome: { exitStatus: 75, message: "Example Agent is already running." } })).toEqual(["FAC-SEM-078 /outcome/message"]);
   });
 
   it("refuses a supervised copy that never tried the lock", () => {

@@ -9,7 +9,11 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 export const SYSTEM_SID = "S-1-5-18";
 export const ADMINISTRATORS_SID = "S-1-5-32-544";
 
-/** One access control entry as read: `allow` or `deny`, the trustee's string SID and the access mask. */
+/**
+ * One access control entry as read: `allow` or `deny`, the trustee's string SID and the access mask — the ACE's
+ * unsigned 32-bit mask. A reader that reads it signed (.NET `FileSystemRights` is an `int`, so `GENERIC_READ`,
+ * 0x80000000, arrives negative) converts it first (`>>> 0`, `(uint)`).
+ */
 export interface WindowsAce { type: string; sid: string; mask: number }
 /** What a reader read about a token file before deciding. */
 export interface WindowsTokenFile {
@@ -22,9 +26,11 @@ export interface WindowsTokenFile {
 export type WindowsTokenProblemCode = "unreadable" | "not-regular-file" | "reparse-point" | "outside-profile" | "owner" | "ace-type" | "ace-sid";
 export interface WindowsTokenProblem { problem: WindowsTokenProblemCode; at: string; sid?: string; message: string }
 
-/** A string SID: revision 1, an identifier authority and up to 15 sub-authorities. Compared case-insensitively on its `S`. */
+/** A string SID: revision 1, an identifier authority and up to 15 sub-authorities of 32 bits each. Compared case-insensitively on its `S`. */
 const SID = /^S-1-\d{1,15}(-\d{1,10}){0,15}$/i;
-const sid = (value: unknown): string | undefined => (typeof value === "string" && SID.test(value) ? value.toUpperCase() : undefined);
+const MAX_SUB_AUTHORITY = 0xffffffff;
+const sid = (value: unknown): string | undefined =>
+  typeof value === "string" && SID.test(value) && value.split("-").slice(3).every((part) => Number(part) <= MAX_SUB_AUTHORITY) ? value.toUpperCase() : undefined;
 const MAX_MASK = 0xffffffff;
 
 /**
@@ -53,6 +59,7 @@ export function windowsTokenAclProblem(file: unknown, currentUserSid: unknown): 
   for (const [index, ace] of file.aces.entries()) {
     const at = `/file/aces/${index}`;
     if (!isObject(ace)) return { problem: "unreadable", at, message: `ACE ${index} is unreadable` };
+    if (typeof ace.type !== "string") return { problem: "unreadable", at: `${at}/type`, message: `ACE ${index} has an unreadable type` };
     const trustee = sid(ace.sid);
     if (trustee === undefined) return { problem: "unreadable", at: `${at}/sid`, message: `ACE ${index} names an unreadable SID` };
     if (typeof ace.mask !== "number" || !Number.isInteger(ace.mask) || ace.mask < 0 || ace.mask > MAX_MASK) return { problem: "unreadable", at: `${at}/mask`, message: `ACE ${index} has an unreadable access mask` };

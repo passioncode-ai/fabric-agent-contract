@@ -7,7 +7,7 @@ import { ADMINISTRATORS_SID, SYSTEM_SID, windowsTokenAclProblem } from "../src/w
 
 // DEC-0057 (F-B-210): the Windows token-file reader rule of service.md as a reference function with vectors, because a
 // consumer's reader got it wrong once (DEC-0033: an Administrators-owned file refused in Fabric Dashboards' CI).
-interface Case { name: string; file: Record<string, unknown>; problem: string | null; sid?: string }
+interface Case { name: string; file: Record<string, unknown>; problem: string | null; sid?: string; at?: string }
 const vectors = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/windows-token.json"), "utf8")) as { currentUserSid: string; cases: Case[] };
 const user = vectors.currentUserSid;
 const base = () => structuredClone(vectors.cases[0]!.file) as Record<string, unknown> & { aces: Array<Record<string, unknown>> };
@@ -17,6 +17,7 @@ describe("Windows token files: the reader (FAC-SEM-079)", () => {
     const problem = windowsTokenAclProblem(vector.file, user);
     expect(problem?.problem ?? null).toBe(vector.problem);
     if (vector.sid) expect(problem?.sid).toBe(vector.sid);
+    if (vector.at) expect(problem?.at).toBe(vector.at);
   });
 
   it("holds the four cases the receipt names", () => {

@@ -2480,7 +2480,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's kits read the
   marker in both forms and `task_xml`/`taskXml` write the argument (its row FAA-32); Fabric sets the marker when it
   starts a service as its supervisor; Project Observatory's node sets it and honours the wait; Fabric Dashboards shows a
-  waiting copy as `duplicate` (no change); every Windows token reader runs the new vectors.
+  waiting copy as `duplicate` under launchd today, derives it from systemd's `MainPID` or through the node off macOS, and
+  fixes its Windows token reader (a signed mask, unknown ACE types, SID case; board CT-21); every Windows token reader
+  runs the new vectors.
 - **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
   paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
 - **Decision:** in [service](specification/service.md) —
@@ -2488,16 +2490,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      75 with one sentence naming the holder's pid" stay. A copy whose start carries the supervisor marker MAY first wait
      for the lock in-process, at most 300 s, touching nothing (no port, no file written, no job resumed; it may read the
      lock), and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. A copy started
-     without the marker tries once and exits 75 at once. The holder keeps answering its well-known document for the
-     whole wait, so a host shows the waiting copy as a duplicate, not an outage. How the copy spaces its tries is its
-     own.
+     without the marker tries once and exits 75 at once. A copy that cannot learn the holder's pid says the holder is
+     unknown (`holderPid: null` in `FAC-SEM-078`'s record). The holder keeps answering its well-known document for the
+     whole wait, so the wait is never an outage; what a host shows of the waiting copy depends on the supervisor's pid:
+     `duplicate` under launchd (Fabric Dashboards at `e1fdd64`), the same under systemd once a host compares
+     `MainPID`, and nothing under the Task Scheduler, which has no supervisor pid, while the holder shows `ready`. How
+     the copy spaces its tries is its own.
   2. **The supervisor marker** is the environment variable `FABRIC_SERVICE_SUPERVISOR=<manager>` or the argument
      `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`), after the executable and before any `--`;
      `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor file writes
      it: the plist's `EnvironmentVariables`, the unit's `Environment=`, the task's `Arguments` — a task's `Exec` action
      has no environment. A host or node that starts a service as its supervisor sets it; a start by hand never does;
-     a copy never infers supervision from its parent process. An empty variable is no marker, and a value that names no
-     manager leaves the copy unsupervised. Markers that disagree (both forms with different values, or the argument
+     a copy never infers supervision from its parent process. Only an empty variable counts as no marker. An argument with
+     no value (followed by nothing, by `--` or by another `--…` flag, none of which it consumes) or an empty one is a
+     marker that names no manager: beside a variable it disagrees; any value that names no manager leaves the copy
+     unsupervised. A service's own argument parser accepts the flag in both spellings and ignores it beyond reading the
+     marker. Markers that disagree (both forms with different values, or the argument
      twice) leave the copy unsupervised: it exits 75 at once, before it takes the lock and whether or not the lock is
      held, naming the markers. `supervisorMarker` and `lockWaitBudgetMs` (`src/service-supervisor.ts`) are the
      reference, with vectors; `FAC-SEM-078` checks a kit's record of a start against a held lock.
@@ -2512,7 +2520,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      live: `~/Library/Application Support/<id>/`, `~/Library/Logs/<id>/`, `~/Library/Caches/<id>/` on macOS;
      `${XDG_DATA_HOME:-~/.local/share}/<id>/`, `${XDG_STATE_HOME:-~/.local/state}/<id>/logs/`,
      `${XDG_CACHE_HOME:-~/.cache}/<id>/` on Linux; `%LOCALAPPDATA%\<id>\` with `Logs\` and `Cache\` beneath it on Windows
-     — the directories the adapter's `building-fabric-services` lifecycle reference already names (at `a124ecb`).
+     — the directories the adapter's `building-fabric-services` lifecycle reference already names (at `a124ecb`). On
+     Linux data, logs and cache follow XDG's `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME`; configuration stays
+     beside data on every system, by choice.
   5. **The descriptor names one supervisor (F-B-209):** `label` and `plist` are refused beside `systemd` and
      `task-scheduler` (beside `none` they stay valid, as DEC-0015 allowed). **A share in either slash is never local
      (F-B-207):** `localPath`, and so `FAC-SEM-012`'s executable, refuses `//server/…` and `/\server…`, which Windows
@@ -2521,9 +2531,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      an unknown manager; and a test that the Supervisor row names every manager the schema admits.
   6. **The Windows token-file reader (F-B-210)** is a reference function, `windowsTokenAclProblem`
      (`src/windows-token.ts`), over what a reader has read — the file's flags, its owner SID, its ACEs — with vectors a
-     port runs (`FAC-SEM-079`) and a row in *Clients and readers*. It makes two readings explicit that the rule left
-     open: an `allow` ACE whose mask is 0 grants nothing, and an ACE of any type but allow and deny, or anything
-     unreadable, is refused.
+     port runs (`FAC-SEM-079`) and a row in *Clients and readers*. It makes explicit what the rule left open: SIDs compare
+     case-insensitively on their `S`, and a sub-authority above 4294967295 is unreadable; the mask is the ACE's unsigned
+     32-bit mask, converted first by a reader that reads it signed (.NET `FileSystemRights`), and an `allow` ACE whose mask
+     is 0 grants nothing; an ACE of a readable type other than allow and deny (an object or callback ACE among them) is
+     refused, and anything unreadable — a flag, an ACE type, a SID, a mask — is refused. (The marker's third reading,
+     empty argument values, is item 2's.)
   7. **Wording (F-A-013, F-B-208):** service.md is the *Service extension*, local and remote; the diagram's edge goes to
      a supervisor; `FAC-SEM-024`'s row says "no local supervisor field (`label`, `plist`, `unit`, `task`)"; the
      placement description names launchd, systemd, the Task Scheduler or nothing; the operator-channel status's
@@ -2531,8 +2544,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   8. **Rules:** `FAC-SEM-078` (one copy: what a copy does when the lock is held), `FAC-SEM-079` (a Windows token file
      the reader may read).
 - **Why:** CT-01 waited on a decision since 2026-10-04: under launchd's `KeepAlive` or systemd's `Restart=always` an
-  immediate exit 75 restarts every 10 s forever, and under the Task Scheduler each failure spends one of a finite
-  number of restarts, while the adapter's kits already waited up to 300 s under launchd and systemd. The marker could
+  immediate exit 75 restarts every 10 s forever, and the Task Scheduler restarts a failed task a finite number of times
+  (whether an exit 75 counts as a failure there is pending the adapter's Windows CI receipt, board CT-18), while the adapter's kits already waited up to 300 s under launchd and systemd. The marker could
   not stay an environment variable alone, because a Scheduled Task's action carries no environment (the `Exec`
   element, pinned in the [source ledger](evidence/sources.md)), so a Task Scheduler copy would never be marked. The
   lifecycle rows were macOS-only after DEC-0032, so a Linux or Windows writer had no install, upgrade or uninstall and
@@ -2540,7 +2553,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a forward-slash share passed `localPath`. DEC-0033 exists because a consumer's token reader got the rule wrong; a
   function and vectors let every port test against the same cases.
 - **Compatibility:** The wait is a MAY: a copy that exits 75 at once still conforms, so the adapter's current pin
-  conforms. Kits at 0.18.0 read only the variable and only `launchd`, `systemd` and `task-scheduler`: a copy the node
+  conforms. Binding the port is now named as a side effect that needs the lock; the adapter's kits already take the
+  lock before they bind. Kits at 0.18.0 read only the variable and only `launchd`, `systemd` and `task-scheduler`: a copy the node
   starts, or a Task Scheduler copy, exits at once until the kit reads the argument and `node` (FAA-32), which is the
   stricter behaviour. Two refusals narrow the schema: a descriptor naming launchd's `label` or `plist` beside `systemd`
   or `task-scheduler`, and a `localPath` starting `//` or `/\`. DEC-0032 already said a descriptor names one supervisor
@@ -2557,7 +2571,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     description);
   - code: `src/service-supervisor.ts` (new), `src/windows-token.ts` (new), `src/semantic-rules.ts` (the two kinds,
     `FAC-SEM-012`'s path);
-  - fixtures: seven negatives `fixtures/negative/service-descriptor-*` (`fixtures/catalogue.json`), ten
+  - fixtures: seven negatives `fixtures/negative/service-descriptor-*` (`fixtures/catalogue.json`), eleven
     `fixtures/semantic/service-lock-*.json`, vectors `fixtures/vectors/service-supervisor.json` and
     `fixtures/vectors/windows-token.json`;
   - tests: `test/service-supervisor.test.ts` (new), `test/windows-token.test.ts` (new), `test/service-rules.test.ts`,
@@ -2565,11 +2579,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md` (Supervisor, Supervisor marker), `docs/DOCMAP.md`, `docs/evidence/sources.md` (the `Exec`
     element, `MultipleInstancesPolicy`, systemd's `Environment=`, `launchd.plist(5)`, the XDG row), `docs/backlog.md`
-    (CT-01 closed, CT-12, CT-18…CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
+    (CT-01 closed, CT-12, CT-18…CT-21), the UX chain (`docs/ux/foundation.md` ST-016, `docs/ux/flows.md` FLW-13,
+    `docs/ux/screens.md` SCR-16, `docs/ux/scenarios.md` SCN-021), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
     `docs/handoffs/README.md`.
-- **Not decided here:** `lifecycle.manager: node` in the descriptor and whether `label`/`plist` are refused beside it
-  (P4-02); a Windows service (administrator rights) as a supervisor, and a Task Scheduler task that runs whether or not
-  the user is logged on (a host's S4U or SYSTEM principal in v4 §5), which the node's host units need; supervision of a
+- **Not decided here:** `lifecycle.manager: node` in the descriptor, whether `label`/`plist` are refused beside it, and
+  the node's Install, Off, Uninstall and state read (P4-02); a Windows service (administrator rights) as a supervisor, a
+  Task Scheduler task that runs whether or not the user is logged on (a host's S4U or SYSTEM principal in v4 §5), and
+  Linux lingering (`loginctl enable-linger`) so a user unit runs without a login, which the node's host units need; supervision of a
   remote placement (its platform's); the restart count a Task Scheduler writer sets.
 - **Source:** agreed with Fabric's session (CO-238: points 1–5 as written, 300 s is enough; Fabric is not a supervisor
   today, its one background job runs under launchd; when it starts services it sets the marker for a supervised start
