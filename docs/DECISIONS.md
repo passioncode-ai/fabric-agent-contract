@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0069`
+**Next free ID:** `DEC-0072`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3872,3 +3872,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-100` were reserved by git CAS (`--key w6-p6-02-session-join-20261012 DEC`, `--key
   w6-p6-02-sem-session-join-20261012 SEM`); the SEM counter at origin is consistent, but its receipt commit is not
   reachable on origin's SEM chain (the agent-sync defect AGENT-SYNC-IDS); the record plane is `fs`.
+
+### DEC-0071 — A consumer agent: `kind: agent` without a provider manifest, requiring MCP servers by role and tools
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for and agreed by the first organization
+  server's session on 2026-10-12 (its admin agents are plugins that only call its MCP at each organization's own
+  address). Consumer adoption: the first organization server repacks its admin agents as consumer agents (CT-04);
+  Project Observatory's node checks `requires.mcp` with `consumerPlacement` before it places one (CT-20); the adapter's
+  `pack` writes them (CT-18).
+- **Amends:** DEC-0050 (`fabric-package/1`: `provider` becomes optional for an agent that serves nothing;
+  `requires.mcp[]`). Packet P6-09.
+- **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
+  1. **A consumer agent** is `kind: agent` without `provider`: it keeps `agentRef`, `resultSignal` and `evals`, may carry
+     `secrets[]`, lists its `skills`, and has no `service` (schema).
+  2. **`requires.mcp[]`**: each server it calls by `role` — the server registered under that name in the placement's
+     configuration — with the `tools` it must expose and an optional `contract` name. Never an address or a token; those
+     come with the placement through the secret slots. Each role once (`FAC-SEM-102`, kind `package`).
+  3. **The placement's check.** `consumerPlacement(package, configured)` answers each required role the configuration
+     does not register (`missing-role`) and each tool a registered server lacks (`missing-tool`); role names compare
+     exactly.
+- **Why:** an agent that only consumes tools had to pack as a skill set, which cannot carry an `agentRef`, a secret slot
+  or a result signal; and "some MCP server is there" did not tell a placement whether the tools the skills call exist.
+- **Compatibility:** Additive for readers at this pin: every agent package valid before stays valid (`provider`
+  present). An older pinned reader refuses an agent without `provider`, so a consumer agent is placed by readers pinned
+  at or after this decision. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/fabric-package.schema.json`;
+  - code: `src/package-rules.ts` (`consumerPlacement`, `FAC-SEM-102`);
+  - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`, `fixtures/negative/fabric-package-consumer-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/consumer-agent.test.ts` (new);
+  - docs: `docs/backlog.md` (CT-04, CT-18, CT-20), `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** how a placement learns the tools a configured server exposes (its MCP `tools/list`, or a
+  pinned list); a consumer agent's evals against a server it does not control.
+- **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
+  DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
+  w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.
