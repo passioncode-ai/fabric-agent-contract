@@ -57,7 +57,7 @@ digest is what the passkey signs.
 
 A record is valid from `issuedAt` to `validUntil`, at most 30 days later (v4 §7, Freshness: "the estate record 30"); a
 verifier refuses it before or after, and the hub drafts a fresh revision before the window ends. The relay serves the
-latest revision and online machines fetch it hourly (v4 §7); how a revision travels is the relay protocol's (DEC-0047, reserved).
+latest revision and online machines fetch it hourly (v4 §7); how a revision travels is the relay protocol's ([DEC-0047](relay.md)).
 
 ## Authorities
 
@@ -77,7 +77,7 @@ kept outside the signed record, so the record carries no label a person chose:
 
 - **`deviceKeys`** — DEC-0053's device keys by role: exactly one `<id>#sig` (ES256 or Ed25519) and at most one
   `<id>#kem` (ECDH over P-256), each named for this machine, valid for its algorithm and never one key in both roles
-  (`FAC-SEM-073`). The relay seals a secret to the `#kem` key (DEC-0047, reserved).
+  (`FAC-SEM-073`). The relay seals a secret to the `#kem` key ([DEC-0047](relay.md#the-secret-envelope)).
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
@@ -107,8 +107,8 @@ digest) or `grant` (a grant's `meta.id`) — its `ref` in that kind's own form a
 revocation before it (`FAC-SEM-072`), lists each once, and lists nothing it revokes: revocation outranks addition (v4 §7;
 `FAC-SEM-076`). Removing a machine also revokes its DEC-0031 certificate where an organization server issued one; who revokes for a
 solo estate, with no organization server, belongs to the enrollment ceremony (not decided here). The fast
-revocation delta that reaches machines within seconds is DEC-0054's (reserved), carried by the relay (v4 §7, DEC-0047,
-reserved); the record is its durable state.
+revocation delta that reaches machines within seconds is DEC-0054's (reserved), carried by the relay (v4 §7, [DEC-0047](relay.md#revocation-and-heartbeat)); the record is its
+durable state.
 
 ## The signature
 
@@ -205,7 +205,7 @@ keys are DEC-0053's.
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key); fills
   only placed slots; and reports the applied revision in its check-in's
   `records.estateRecord.revision` (DEC-0053).
-- **The relay** serves the latest revision by digest (DEC-0047, reserved); it never decides trust.
+- **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
 
 ## Privacy
 

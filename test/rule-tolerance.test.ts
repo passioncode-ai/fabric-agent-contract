@@ -7,7 +7,7 @@ const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification",
-  "estate-record", "estate-record-revision", "estate-placement"
+  "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -17,7 +17,8 @@ const MEMBERS = [
   "checkIn", "health", "request", "response", "enrolled", "token", "proof", "issuedEpochs", "binding", "epochs", "root",
   "action", "decision", "pinned", "certification", "revocations", "data", "collector", "device", "user", "session", "kind",
   "seq", "record", "machine", "package", "parent", "machines", "authorities", "publisherKeys", "shareGrants",
-  "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation"
+  "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
+  "header", "ct", "sig", "type", "kid", "alg", "protocol", "ttl", "body"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {

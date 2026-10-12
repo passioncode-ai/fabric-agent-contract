@@ -1,0 +1,27 @@
+{
+  "description": "An envelope that lives a second longer than 24 hours (FAC-SEM-070).",
+  "kind": "secret-envelope",
+  "expect": [
+    "FAC-SEM-070"
+  ],
+  "input": {
+    "header": {
+      "type": "fabric-secret-envelope/1",
+      "alg": "ES256",
+      "suite": [
+        16,
+        1,
+        1
+      ],
+      "recipient": "urn:fabric:machine:example-gpu-box#kem",
+      "sender": "urn:fabric:machine:example-laptop#sig",
+      "slot": "EXAMPLE_API_KEY",
+      "placement": 7,
+      "iat": "2026-10-12T00:00:00Z",
+      "exp": "2026-10-13T00:00:01Z",
+      "enc": "BKknGcYZXVCFEE9GmouYFNWDj_crYFAeLERm5eZ7MlrJhTbXthoa9LeOW3-VHAkAvoY8QDzmXJv8uTgmVyItGMQ"
+    },
+    "ct": "RDDXL9nINzmFvIp6OJW4Fsr9UIWFlSz0aD_Z3XCkzhCA6kYvg7RFv1F1j8wn",
+    "sig": "3Ce6LvDl_5__xa28DsmdnhmfFQERvqxSuNJagWb71F7RZomi4d2kML0NpzphPf5bIJWOMX9UJhNCXMP9LwwrTA"
+  }
+}
