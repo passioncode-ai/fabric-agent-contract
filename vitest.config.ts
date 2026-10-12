@@ -23,6 +23,7 @@ export default defineConfig({
         "src/comms-digest.ts": { branches: 100 },
         "src/dashboard-declaration.ts": { branches: 100 },
         "src/delegation-rules.ts": { branches: 100 },
+        "src/descriptor-rules.ts": { branches: 100 },
         "src/delegation.ts": { branches: 100 },
         "src/device-rules.ts": { branches: 97.35 },
         "src/device-transport-rules.ts": { branches: 100 },

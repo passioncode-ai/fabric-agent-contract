@@ -120,3 +120,11 @@ branch off main's `31ed9f0`, after the review round: whole set 3528 / 3688 (95.6
 
 **Wave 4, P4-04 merged with main `8c6211e`** (P4-01, P4-03, the relay and #59): 42 files, 1991 tests, whole set
 4001 / 4161 (96.15 %), every floor met.
+
+**Wave 4, P4-02 (DEC-0061).** `src/descriptor-rules.ts` is new and reaches every branch (95 / 95), with no `v8 ignore`;
+its floor is 100. `service-descriptor`, `service-runner` and `service-peer-request` are in `test/rule-tolerance.test.ts`.
+26 plants (each check of the module or its dispatch removed or loosened once) each failed at least one test, and the
+schema's refusals are proved by 26 mutants in `test/descriptor-rules.test.ts`, each killed by a named negative fixture,
+with an identity mutant for each schema. `semantic-rules.ts` gains two dispatches (366 / 399, 91.72 %, floor
+unchanged). The whole-set floor stays at 86.85 %. Measured with `vitest run --coverage` on the P4-02 branch off main's
+`204f189`: 43 files, 2114 tests, whole set 4098 / 4258 (96.24 %).

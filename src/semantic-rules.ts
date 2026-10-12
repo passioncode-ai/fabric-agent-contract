@@ -18,6 +18,7 @@ import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
+import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -51,6 +52,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (estate) return estate;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
+  const descriptorBundle = descriptorBundleRules(kind, value);
+  if (descriptorBundle) return descriptorBundle;
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {
@@ -86,7 +89,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
-  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value));
+  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
@@ -144,9 +147,8 @@ function serviceCommands(value: JsonObject): Finding[] {
     .map(([name]) => ({ code: "FAC-SEM-012", instancePath: `/commands/${name}/0`, message: `command ${name} must start with an absolute or home-relative executable path (/…, ~/…, C:\\…, ~\\…), never a network share` }));
 }
 
-// DEC-0019: names that never reach the open internet. A remote origin on one of them is a local
-// service wearing the remote placement — it would skip the loopback guard it actually needs.
-const RESERVED_HOST = /(^|\.)(localhost|local|internal|home\.arpa|lan|localdomain)$/;
+// DEC-0019: a remote origin on a reserved name (RESERVED_HOST, src/descriptor-rules.ts, shared with a peer's
+// endpoint) is a local service wearing the remote placement — it would skip the loopback guard it actually needs.
 
 /** FAC-SEM-024: a remote placement is an https origin on a public name, with nothing of a local supervisor (launchd, systemd, Task Scheduler — DEC-0032). */
 function remoteShape(value: JsonObject): Finding[] {

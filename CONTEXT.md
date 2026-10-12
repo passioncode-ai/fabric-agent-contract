@@ -101,8 +101,17 @@ distinct from a grant's **Limit window**, which caps what a grant may spend.
 `%LOCALAPPDATA%\passioncode-fabric\services\` on Windows, or `FABRIC_SERVICES_DIR` (DEC-0015, DEC-0032).
 
 **Supervisor**: The system service manager that keeps a local service running — launchd, systemd or the
-Task Scheduler — named by the descriptor's `lifecycle.manager`, or Project Observatory's node for the services it starts
-as its children (DEC-0015, DEC-0032, DEC-0057).
+Task Scheduler — or Project Observatory's node for the services it starts as its children, named by the descriptor's
+`lifecycle.manager` (`node` for the node, with no supervisor file; DEC-0015, DEC-0032, DEC-0057, DEC-0061).
+
+**Peer (a service offered to others)**: A service a colleague, an organization's members or a guest may call beside
+its operator — a listing. Its descriptor's `peer` names the `endpoint` they reach, the `custody` of the machine or
+account (organization-managed or personal), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
+internal, confidential, restricted) a host never sends above. It grants nobody access (DEC-0061).
+
+**Credential kind**: The kind of a runner's sign-in, never its value: `subscription` (the operator's own vendor login,
+never offered to others), `key`, `platform-metered` (the hosting platform's own metered models) or `none` — the
+descriptor's `runner.credentialKind` and, for the same calls, a usage row's `route` (DEC-0046, DEC-0061).
 
 **Supervisor marker**: How a service's copy knows its supervisor started it: `FABRIC_SERVICE_SUPERVISOR=<manager>` in its
 environment or `--fabric-supervisor <manager>` in its arguments, written into the plist, unit or task. Only a marked

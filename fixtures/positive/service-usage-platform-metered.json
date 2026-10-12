@@ -1,0 +1,39 @@
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-inbox",
+    "instance": "default"
+  },
+  "generatedAt": "2026-10-12T09:00:00Z",
+  "currency": "USD",
+  "days": [
+    {
+      "date": "2026-10-11",
+      "calls": 40,
+      "unpricedCalls": 0,
+      "inputTokens": 96000,
+      "outputTokens": 12000,
+      "costUsd": 0.42,
+      "byModel": [
+        {
+          "provider": "cloudflare",
+          "model": "example/workers-model",
+          "costBasis": "provider",
+          "route": "platform-metered",
+          "calls": 40,
+          "unpricedCalls": 0,
+          "inputTokens": 96000,
+          "outputTokens": 12000,
+          "costUsd": 0.42
+        }
+      ]
+    }
+  ],
+  "byGrant": [
+    {
+      "grantRef": "grant-7f3a",
+      "calls": 40,
+      "costUsd": 0.42
+    }
+  ]
+}

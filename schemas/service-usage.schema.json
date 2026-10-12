@@ -185,9 +185,10 @@
         "route": {
           "enum": [
             "subscription",
-            "key"
+            "key",
+            "platform-metered"
           ],
-          "description": "DEC-0046: the route the row's calls took — the operator's own login in its vendor's runner, or an issued key. Absent: not stated (a report written before DEC-0046)."
+          "description": "DEC-0046, DEC-0061: the route the row's calls took — the operator's own login in its vendor's runner, an issued key, or the hosting platform's own metered models under the deployment's account (a listing in the cloud, the descriptor's runner.credentialKind platform-metered). Absent: not stated (a report written before DEC-0046)."
         }
       },
       "unevaluatedProperties": false
