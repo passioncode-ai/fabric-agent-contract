@@ -124,6 +124,9 @@ export interface VerifyDelegationOptions {
   estate?: unknown;
   /** The highest revision this verifier's machine has applied; a lower revision is a rollback (DL-14). */
   estateApplied?: AppliedRevision;
+  /** Revocations in force beyond the revision's own: the revocation delta's entries applied since it (DEC-0054), or a
+   * function returning them. */
+  estateRevocations?: unknown;
 }
 
 /** Where a callee records consumed approval ids. It MUST survive a restart for the approval's lifetime. */
@@ -143,6 +146,7 @@ export interface VerifyApprovalOptions {
   /** DL-14's estate check, as for a delegation token (DEC-0060). */
   estate?: unknown;
   estateApplied?: AppliedRevision;
+  estateRevocations?: unknown;
 }
 
 /** A store that consumes nothing: every approval may be replayed until it expires. Only on purpose, by name. */
@@ -255,15 +259,17 @@ const readableClock = (now: unknown): now is number => typeof now === "number" &
  * key must be certified by that revision. `undefined` when the check passes or does not run; else the refusal's fault
  * (the token's, or the trust source's: `issuer-unavailable`) and detail. A source that throws is unreadable, never a pass.
  */
-function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevision }, kid: string, x: string, now: number): { issuer: boolean; detail: string } | undefined {
+function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevision; estateRevocations?: unknown }, kid: string, x: string, now: number): { issuer: boolean; detail: string } | undefined {
   if (options.estate === undefined) return undefined;
   let record: unknown;
+  let extra: unknown;
   try {
     record = typeof options.estate === "function" ? (options.estate as () => unknown)() : options.estate;
+    extra = typeof options.estateRevocations === "function" ? (options.estateRevocations as () => unknown)() : options.estateRevocations;
   } catch {
     return { issuer: true, detail: "estate-unreadable" };
   }
-  const verdict = hubKeyCertified(record, kid, x, now, options.estateApplied);
+  const verdict = hubKeyCertified(record, kid, x, now, options.estateApplied, extra === undefined ? undefined : { extraRevocations: extra as unknown[] });
   // The clock was refused before row 1, so a verdict here is the token's or the trust source's.
   return verdict.certified ? undefined : { issuer: verdict.fault !== "token", detail: verdict.detail };
 }
@@ -461,6 +467,7 @@ export interface VerifyMeterOptions {
   /** DL-14's estate check, when the meter reads the estate record (DEC-0060). */
   estate?: unknown;
   estateApplied?: AppliedRevision;
+  estateRevocations?: unknown;
 }
 
 /** The meter's refusal of its own token (`grant-check.schema.json#/$defs/denied` with `principal-unproven`). */
@@ -489,8 +496,8 @@ export interface DelegationRefusalDocument {
  * `principal-unproven`, with the verifier's code in the reason.
  */
 export function verifyMeterToken(token: string, options: VerifyMeterOptions): DelegationAccepted | { ok: false; denial: GrantCheckDenied } {
-  const { meter, capability, jwks, now, issuer, estate, estateApplied } = options;
-  const verified = verifyAt(token, { audience: meter, capability, effect: "none", jwks, now, issuer, ...(estate === undefined ? {} : { estate }), ...(estateApplied === undefined ? {} : { estateApplied }) }, MAX_CHAIN_DEPTH + 1);
+  const { meter, capability, jwks, now, issuer, estate, estateApplied, estateRevocations } = options;
+  const verified = verifyAt(token, { audience: meter, capability, effect: "none", jwks, now, issuer, ...(estate === undefined ? {} : { estate }), ...(estateApplied === undefined ? {} : { estateApplied }), ...(estateRevocations === undefined ? {} : { estateRevocations }) }, MAX_CHAIN_DEPTH + 1);
   // DL-21 step 3: the meter reads its one capability; a wider token was not minted for it (F-B-312).
   const result: DelegationAccepted | Refusal = !verified.ok ? verified
     : verified.claims.scope !== capability ? refuse("scope-not-granted", "meter-scope-not-exact")

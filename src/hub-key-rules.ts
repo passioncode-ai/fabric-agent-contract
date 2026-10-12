@@ -16,6 +16,13 @@ const MAX_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export interface AppliedRevision { revision: number; digest?: string }
 
 /**
+ * Revocations in force beyond the revision's own, in its revocation form (`{kind, ref, revokedAt}`): the revocation
+ * delta's entries a node applied since the revision (DEC-0054, `deltaRevocations`). They revoke exactly as
+ * `record.revocations` do.
+ */
+export interface HubKeyOptions { extraRevocations?: readonly unknown[] }
+
+/**
  * Why a `kid` is not trusted, as `error.data.detail`:
  * - `kid-not-certified` — the token's fault: no machine's `hubKey` of the revision has this `kid` and this public key, or
  *   the revision revokes the hub key or its machine;
@@ -44,20 +51,24 @@ const clock = (at: unknown): number => (at instanceof Date ? at.getTime() : type
  * 1. `at` is not a `Date` with a time, nor a finite number of seconds → `no-clock`;
  * 2. the record is not an object with a revision (an integer from 1), a string `digest`, `issuedAt` and `validUntil` read
  *    strictly as RFC 3339 with a window more than 0 and at most 30 days, an array `machines`, and `revocations` absent or
- *    an array; or `applied` is given without a revision → `estate-unreadable`;
+ *    an array; `applied` is given without a revision; or `options.extraRevocations` is given and is not an array →
+ *    `estate-unreadable`;
  * 3. its revision is lower than `applied`'s → `estate-rolled-back`; the same number with another digest than `applied`'s
  *    → `estate-forked`;
  * 4. `at` is before `issuedAt` or after `validUntil` (both instants inside) → `estate-outside-window`;
- * 5. the revision revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, or two are; that machine's `hubKey.x` is
- *    not the string `x`; or the revision revokes `machine <id>` of that machine → `kid-not-certified`.
+ * 5. the revision, or `options.extraRevocations`, revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, or two are; that machine's `hubKey.x` is
+ *    not the string `x`; or the revision or `options.extraRevocations` revokes `machine <id>` of that machine →
+ *    `kid-not-certified`. A revocation's `ref` is compared exactly, never as a string conversion.
  *
  * Otherwise the key is certified, for that machine, by that revision. Never throws.
  */
-export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: Date | number, applied?: AppliedRevision): HubKeyVerdict {
+export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: Date | number, applied?: AppliedRevision, options?: HubKeyOptions): HubKeyVerdict {
   const now = clock(at);
   if (Number.isNaN(now)) return refused("clock", "no-clock");
   if (!isObject(record) || !isRevision(record.revision) || !isString(record.digest) || !Array.isArray(record.machines)) return refused("estate", "estate-unreadable");
   if (record.revocations !== undefined && !Array.isArray(record.revocations)) return refused("estate", "estate-unreadable");
+  const extra: unknown = options?.extraRevocations;
+  if (extra !== undefined && !Array.isArray(extra)) return refused("estate", "estate-unreadable");
   const issuedAt = strictTime(record.issuedAt);
   const validUntil = strictTime(record.validUntil);
   // A window that is not a time, not positive or longer than 30 days is no window: NaN would fail every comparison below.
@@ -70,7 +81,7 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
   }
   if (now < issuedAt || now > validUntil) return refused("estate", "estate-outside-window");
 
-  const revocations = (record.revocations ?? []) as unknown[];
+  const revocations = [...((record.revocations ?? []) as unknown[]), ...((extra ?? []) as unknown[])];
   const revokes = (kind: string, ref: unknown) => revocations.some((entry) => isObject(entry) && entry.kind === kind && entry.ref === ref);
   if (!isString(kid) || revokes("hub-key", kid)) return refused("token", "kid-not-certified");
   const holders = (record.machines as unknown[]).filter((machine): machine is JsonObject => isObject(machine) && isObject(machine.hubKey) && machine.hubKey.kid === kid);
@@ -89,7 +100,8 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
  * read strictly (an unreadable one answers `no-clock`).
  */
 function hubKeyAnswer(value: JsonObject): Finding[] {
-  const verdict = hubKeyCertified(value.record, value.kid, value.x, new Date(strictTime(value.at)), value.applied as AppliedRevision | undefined);
+  const extra = value.extraRevocations === undefined ? undefined : { extraRevocations: value.extraRevocations as unknown[] };
+  const verdict = hubKeyCertified(value.record, value.kid, value.x, new Date(strictTime(value.at)), value.applied as AppliedRevision | undefined, extra);
   const want = verdict.certified ? "certified" : verdict.detail;
   if (value.answer === want) return [];
   return [{

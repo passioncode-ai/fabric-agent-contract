@@ -44,9 +44,34 @@ const approval = (document: string, extra: Json = {}, now: unknown = AT + 30) =>
 const token = vectors.verifier[0].token as string;
 const approvalDocument = (vectors.verifier as Json[]).find((entry) => entry.document === "approval")?.token as string;
 
+describe("the revocation delta on top of the revision (DEC-0054, extraRevocations)", () => {
+  it("revokes the hub key or its machine as the revision's own revocations do, and refuses a non-array as unreadable", () => {
+    const extra = (revocations: unknown) => {
+      const answer = hubKeyCertified(second, K1, X1, AT, undefined, { extraRevocations: revocations as unknown[] });
+      return answer.certified ? "certified" : `${answer.fault}/${answer.detail}`;
+    };
+    expect(extra([])).toBe("certified");
+    expect(extra([{ kind: "hub-key", ref: K1, revokedAt: "2026-10-21T09:00:00Z" }])).toBe("token/kid-not-certified");
+    expect(extra([{ kind: "machine", ref: "m-4c1e", revokedAt: "2026-10-21T09:00:00Z" }])).toBe("token/kid-not-certified");
+    expect(extra([{ kind: "machine", ref: "m-other", revokedAt: "2026-10-21T09:00:00Z" }, null, 7])).toBe("certified");
+    expect(extra("hub-key")).toBe("estate/estate-unreadable");
+    expect(extra({ length: 1 })).toBe("estate/estate-unreadable");
+  });
+
+  it("reaches the verifiers through estateRevocations, a list or a function", () => {
+    const revoked = [{ kind: "hub-key", ref: K1, revokedAt: "2026-10-21T09:00:00Z" }];
+    expect(delegation(token, { estate: second })).toBe("ok");
+    expect(delegation(token, { estate: second, estateRevocations: revoked })).toBe("unauthenticated/kid-not-certified");
+    expect(delegation(token, { estate: second, estateRevocations: () => revoked })).toBe("unauthenticated/kid-not-certified");
+    expect(delegation(token, { estate: second, estateRevocations: () => { throw new Error("unreadable"); } })).toBe("issuer-unavailable/estate-unreadable");
+    expect(approval(approvalDocument, { estate: second, estateRevocations: revoked })).toBe("approval-invalid/kid-not-certified");
+  });
+});
+
 describe("the vectors (fixtures/vectors/hub-key.json)", () => {
   it.each(vectors.cases as Json[])("$name", (entry) => {
-    expect(hubKeyCertified(entry.record, entry.kid, entry.x, entry.at, entry.applied)).toEqual(entry.expected);
+    const options = entry.extraRevocations === undefined ? undefined : { extraRevocations: entry.extraRevocations };
+    expect(hubKeyCertified(entry.record, entry.kid, entry.x, entry.at, entry.applied, options)).toEqual(entry.expected);
   });
 
   it.each(vectors.verifier as Json[])("verifier: $name", (entry) => {
