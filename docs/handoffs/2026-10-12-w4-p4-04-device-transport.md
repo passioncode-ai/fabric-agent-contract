@@ -27,8 +27,18 @@ beside mutual TLS (the binding agreed with the first organization server, its AD
 - `src/http-signature.ts` (new): an RFC 8941 Dictionary parser, RFC 9421 §2.3 and §2.5 (`serializeSignatureParams`,
   `signatureBase`), RFC 9530's `contentDigest`, `deviceTargetUri`, the signer `signDeviceRequest`, the receiver
   `checkDeviceSignature` and `verifyDeviceRequest`, the `NonceStore` interface and a memory store.
-  `src/device-rules.ts`: FAC-SEM-044 counts roles (exactly one `#sig`, at most one `#kem`); FAC-SEM-077.
-- Vectors `fixtures/vectors/http-signature.json`: 44 binding cases with one fault each (good with each key, a rotation,
+  `src/device-rules.ts`: FAC-SEM-044 counts roles (exactly one `#sig`, at most one `#kem`). `src/device-transport-rules.ts`
+  (new): FAC-SEM-077, kept out of `device-rules.ts` so a consumer that vendors the device rules needs no HTTP layer.
+- **Review round (owner session's three readings):** mutual TLS beside the signature (a present signature is always
+  verified, `keyid` equals the client certificate's serial or `certificate-unknown`, an unsigned request only on a valid
+  client certificate, `binding: "mutual-tls"`); CT-20 unconditional; DEC-0056's open items under *Not decided here*;
+  RFC 8941's last-wins kept on other members and refused on ours, RFC 9651 Date and Display String parsed (pinned);
+  `revoked` refused whenever present and not `false`; a public verifier that answers `context-invalid` instead of
+  throwing; a signer that refuses what the receiver would; a lower-case method vector and a small-order forgery vector;
+  every difference of the first organization server named; forward compatibility of the check-in digest; J10; retries,
+  the signing key by epoch, serial uniqueness; the relay wording.
+- Vectors `fixtures/vectors/http-signature.json`: 54 binding cases with one fault each (44, then ten added in review:
+  mutual TLS ×6, a lower-case method ×2, another party's members, a repeated parameter on ours) (good with each key, a rotation,
   a query, the window's edges, altered body and target, Host ignored, another authority, missing signature, missing and
   malformed nonce, parameter order and set, covered components, keyid form, foreign algorithm, labels, a repeated nonce,
   foreign keys, the wrong `alg` for the key, a short signature, unknown, revoked and expired certificates, a small-order
@@ -61,19 +71,26 @@ pull request).
 - An unreadable clock or a malformed public base URL refuses everything as the receiver's own fault, not a 401.
 - The rule-kind form (`device-request-signature`) is the vectors' own shape plus `answer`, so a port runs one file.
 
+## Merge-time step
+
+Once #53 (DEC-0047, the relay) has merged, add one line to `devices.md#transport`: the relay's request signing
+(`relay-auth/1`, `relay-blob/1`) and this binding are two bindings on the same `#sig` key, over inputs that cannot be
+confused, with different windows and replay models.
+
 ## Open
 
-- The first organization server, at its next pin: verify under the `#sig` key when the enrollment listed a separate
-  one (its implementation verifies under the CSR's key); build `@method` without changing its case (it upper-cases);
-  run `fixtures/vectors/http-signature.json`.
-- Not decided here (DEC-0056): a response signature, the URL paths, revocation reach for a receiver behind a
-  TLS-terminating host, what a receiver does on seeing an estate fork.
+- The first organization server, at its next pin, closes the differences DEC-0056 *Compatibility* names (a)…(g) — another
+  signature beside ours, a throw on an off-curve key, an `http://` base URL, expired pairs refused until purge, no
+  small-order check at enrollment, `@method` upper-cased, the CSR's key instead of `#sig` — and runs the vectors.
+- Not decided here (DEC-0056, also in `devices.md`): a response signature, the URL paths, revocation reach for a receiver
+  behind a TLS-terminating host, what a receiver does on seeing an estate fork, RFC 9421's successors and
+  `Accept-Signature`, clock skew, several issuers behind one receiver.
 - The three-tier review (unit, seam, product), one fix round and a confirming reading, then the owner's merge.
 
 ## Next task
 
 The owner session reviews this branch's pull request, takes the leases on `docs/DECISIONS.md`,
 `docs/specification/conformance.md` and `docs/backlog.md`, applies `docs/handoffs/2026-10-12-w4-p4-04-registers.patch`
-and deletes it in the same commit, runs the gate, and merges, setting *Next free ID* to `DEC-0057` and the rule-code
-marker above every code merged by then, and marking DEV-HTTPSIG, DEV-KEY-ROLES and DEV-CHECKIN-DIGEST done at the
+and deletes it in the same commit, runs the gate, and merges; the owner sets *Next free ID* (`DEC-0060`) and the rule-code
+marker (`FAC-SEM-081`) at the end of the wave's merges, and marking DEV-HTTPSIG, DEV-KEY-ROLES and DEV-CHECKIN-DIGEST done at the
 wave-4 close.

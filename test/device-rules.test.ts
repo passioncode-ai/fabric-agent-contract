@@ -561,6 +561,18 @@ describe("DEC-0056: device-key roles are counted at enrollment", () => {
 
 // DEC-0056: FAC-SEM-077 holds a receiver's answer to the transport binding; the vectors run in test/http-signature.test.ts.
 describe("FAC-SEM-077: a receiver answers a device request as the binding says", () => {
+  it("lives in its own module, so a consumer that vendors device-rules.ts needs no HTTP layer", () => {
+    const source = readFileSync(path.join(projectRoot(), "src/device-rules.ts"), "utf8");
+    expect(source).not.toMatch(/http-signature|FAC-SEM-077/);
+    expect(readFileSync(path.join(projectRoot(), "src/device-transport-rules.ts"), "utf8")).toMatch(/"FAC-SEM-077"/);
+  });
+
+  it("reads the mutual-TLS client certificate's serial from the input", () => {
+    const value = load("semantic/device-request-signature-mtls-other-serial-accepted.json").input;
+    expect(codes("device-request-signature", { ...value, answer: "certificate-unknown" })).toEqual([]);
+    expect(codes("device-request-signature", { ...value, clientCertificateSerial: 7, answer: "accepted" })).toEqual([]);
+  });
+
   const input = () => load("semantic/device-request-signature-ok.json").input;
 
   it("refuses an unreadable receiver clock as the input's fault, strictly read", () => {

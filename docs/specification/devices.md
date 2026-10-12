@@ -127,8 +127,8 @@ platform keystore, listed by role in the enrollment request's `deviceKeys`:
   secrets to it.
 
 An enrollment that lists `deviceKeys` lists **exactly one `#sig` and at most one `#kem`** (`FAC-SEM-044`, DEC-0056), the
-counts the estate record holds per machine (`FAC-SEM-073`), so a receiver knows the one key that signs a device's
-requests and the relay the one key it seals to. One key is never used for the other role, and each kid names the
+counts the estate record holds per machine (`FAC-SEM-073`), so there is the one key that signs a device's requests,
+and the one key a sender seals to. One key is never used for the other role, and each kid names the
 enrolling device (`FAC-SEM-044`). A
 P-256 public key — a device key, a policy root key, an offline root or delegation key — is validated by
 SEC 1 §3.2.2 before use: not the point at infinity, coordinates in range, on the curve
@@ -142,13 +142,24 @@ passes the small-order check (DEC-0045).
 DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A host
 that terminates TLS — a platform's load balancer — never sees a client certificate, so mutual TLS alone cannot prove
 the device's key there. **A device signs every batch, check-in and rotation request with an HTTP message signature**
-([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. A receiver that
-sees the client certificate MAY accept mutual TLS alone; a receiver behind a TLS-terminating host requires the
-signature. Enrollment is unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
+([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. Enrollment is
+unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
+
+**Mutual TLS and the signature on one request** (DEC-0056 item 1, the owner session's ruling):
+
+- A signature that is present is always verified, whatever else the request carries.
+- When a client certificate is also present, `keyid` MUST equal that certificate's serial; otherwise the answer is 401
+  `certificate-unknown`.
+- An invalid signature over a valid mutual-TLS session is refused with the signature step's code: the session does not
+  excuse it.
+- An unsigned request — no `fabric-device` member in either field — is accepted only by a receiver that sees the client
+  certificate, and only while that certificate is known, not revoked and valid; a receiver behind a TLS-terminating host
+  refuses it as `signature-missing`.
 
 | Part | Value |
 |---|---|
 | Label | `fabric-device`: the member of `Signature-Input` and `Signature` a receiver reads (RFC 9421 §4.1, §4.2); other labels beside it are ignored, the same label twice is refused |
+| Repeats | a parameter named twice on the `fabric-device` member is refused; on any other member RFC 8941's rule holds (the last value wins), so another party's signature never hides this one |
 | Covered components | `("@method" "@target-uri" "content-digest")`, in this order, with no component parameters |
 | Parameters | `created`, `nonce`, `keyid`, `alg`, in this order, and no other (RFC 9421 §2.3) |
 | `created` | Unix time in seconds, an Integer; within 300 seconds of the receiver's clock, either way |
@@ -157,7 +168,8 @@ signature. Enrollment is unchanged: its proof travels in `Authorization` ([enrol
 | `alg` | `ecdsa-p256-sha256` (RFC 9421 §3.3.4) for an `es256` signing key, `ed25519` (§3.3.6) for an `ed25519` one |
 | `Content-Digest` | exactly one member, `sha-256=:<base64>:`: SHA-256 of the body's bytes as sent ([RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) §2) |
 
-The fields are Structured Fields ([RFC 8941](https://www.rfc-editor.org/rfc/rfc8941) Dictionaries, parsed by its §4.2);
+The fields are Structured Fields ([RFC 8941](https://www.rfc-editor.org/rfc/rfc8941) Dictionaries, parsed by its §4.2,
+with [RFC 9651](https://www.rfc-editor.org/rfc/rfc9651)'s Date and Display String items admitted on other members);
 the signature base is RFC 9421 §2.5's, with §2.3's signature parameters as its last line and no newline after it
 ([`deviceSignatureBase`](../../src/http-signature.ts)). For a check-in (the path is an example; the contract names
 none):
@@ -165,7 +177,7 @@ none):
 ```text
 Content-Digest: sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:
 Signature-Input: fabric-device=("@method" "@target-uri" "content-digest");created=1791795598;nonce="Qm9hcmQtcnVuLXdhdmUtNC1QNA";keyid="7b6578616d706c65";alg="ecdsa-p256-sha256"
-Signature: fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:
+Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+VmSZvFDav25DrSoU9mAZ9FF0OeiKVc3w==:
 
 "@method": POST
 "@target-uri": https://org.example/v1/devices/check-in
@@ -173,15 +185,19 @@ Signature: fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRp
 "@signature-params": ("@method" "@target-uri" "content-digest");created=1791795598;nonce="Qm9hcmQtcnVuLXdhdmUtNC1QNA";keyid="7b6578616d706c65";alg="ecdsa-p256-sha256"
 ```
 
-- **The signing key** is the device's `#sig` key from the enrollment that issued the certificate
-  ([device keys](#device-keys)), or, for an enrollment that listed no `deviceKeys`, the certified key itself (DEC-0031's
-  key on record). Its algorithm decides `alg`. An ES256 signature is SHA-256 then r ‖ s, 32 octets each (§3.3.4); an
+- **The signing key** is the `#sig` key of the enrollment whose epoch the certificate carries — rotation keeps it
+  ([device keys](#device-keys)) — or, for an enrollment that listed no `deviceKeys`, the certified key itself (DEC-0031's
+  key on record). Which of the two it is, the receiver's data model records with the certificate. Its algorithm decides
+  `alg`. An ES256 signature is SHA-256 then r ‖ s, 32 octets each (§3.3.4); an
   Ed25519 signature is over the base itself, 64 octets (§3.3.6). A P-256 key on record passes SEC 1 §3.2.2
   (`isValidP256Key`) and an Ed25519 key the small-order check (DEC-0045) before anything is verified under it.
 - **The target URI** (`@target-uri`, RFC 9421 §2.2.2) is the receiver's public base URL — `https://` and the authority
   the device enrolled with, host in lower case, no default port, no path — followed by the request target as received,
   its path and query. A receiver builds it from its own configuration, **never from the `Host` header**, which a proxy
   may rewrite ([`deviceTargetUri`](../../src/http-signature.ts)).
+- **Serials** are unique among the certificates one receiver accepts, so `keyid` names one certificate.
+- **A retry is signed afresh**, with a new `nonce` and a new `created`: a resent signature is a replay. A device that
+  receives `signature-stale` checks its clock before it signs again.
 - **Attribution is unchanged** ([below](#attribution)): the certificate the verified signature's `keyid` names stands
   where the client certificate stands — it gives the device and organization; each event's person comes from its
   epoch's binding (`FAC-SEM-045`).
@@ -191,12 +207,13 @@ Signature: fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRp
 
 | Step | Refused when | Code |
 |---|---|---|
-| 0 | the receiver's clock is unreadable, or its public base URL is not `https://` and an authority alone | nothing is accepted: the fault is the receiver's (`clock-unreadable`, `base-url-invalid`), not a 401 |
-| 1 | no `fabric-device` member in both fields, the label twice, or a member not exactly the shape above — a missing or malformed `nonce` among them | `signature-missing` |
+| 0 | the receiver's context is not usable — not an object, an unreadable clock, a public base URL that is not `https://` and an authority alone, a certificate lookup or nonce store that is not a function | nothing is accepted: the fault is the receiver's (`context-invalid`, `clock-unreadable`, `base-url-invalid`), not a 401, and the verifier answers rather than throws |
+| 1 | no `fabric-device` member in either field: unsigned. Accepted on a mutual-TLS client certificate that passes steps 4–6; without one | `signature-missing` |
+| 1 | a `fabric-device` member present, but not in both fields, the label twice, a parameter repeated, or a member not exactly the shape above — a missing or malformed `nonce` among them | `signature-missing` |
 | 2 | `Content-Digest` is not exactly `sha-256` of the body as received | `digest-mismatch` |
 | 3 | `created` is more than 300 seconds from the receiver's clock | `signature-stale` |
-| 4 | no certificate has the serial `keyid` names | `certificate-unknown` |
-| 5 | the certificate is revoked | `certificate-revoked` |
+| 4 | a client certificate is present and `keyid` is not its serial, or no certificate has the serial `keyid` names | `certificate-unknown` |
+| 5 | the certificate is revoked (a record's `revoked` present and not `false`) | `certificate-revoked` |
 | 6 | the receiver's clock is not in `notBefore` ≤ t < `notAfter`, each read as RFC 3339 with `T` and an offset | `certificate-expired` |
 | 7 | `alg` is not the signing key's, the key is not usable, the signature base cannot be built, or the signature does not verify | `signature-invalid` |
 | 8 | the pair (serial, `nonce`) is already held | `signature-replayed` |
@@ -208,13 +225,16 @@ request records nothing, so a forgery cannot burn a device's nonce. The store is
 nonce is what makes a replay visible: a check-in's `sequenceNum` drives the full-state request on a gap, not a refusal,
 so a check-in replayed inside the window would be read again and could bring back an old posture and hide `tampered`;
 batches are idempotent by event id as well. An ECDSA signature can be re-encoded as (r, n − s); the store is keyed on the
-nonce, not on the signature's bytes, so that changes nothing.
+nonce, not on the signature's bytes, so that changes nothing. **The store detects repeats and nothing else** (J10): a pair
+SHOULD be deleted once the clock passes its `keepUntil`, and the store is never read as a record of a device's or a
+person's activity.
 
 The vectors a receiver or a collector runs are [`fixtures/vectors/http-signature.json`](../../fixtures/vectors/http-signature.json):
-a good request with each key, the window's edges, an altered body and target, a stale `created`, a missing and a
-malformed `nonce`, a repeated one, a foreign key, the wrong `alg` for the key, unknown, revoked and expired certificates,
-unusable keys, and RFC 9421's own Ed25519 example with RFC 9530's digest. `FAC-SEM-077` holds a receiver's answer to
-them.
+a good request with each key, the window's edges, an altered body and target, a lower-case method signed as sent, a
+stale `created`, a missing and a malformed `nonce`, a repeated one, a foreign key, the wrong `alg` for the key, unknown,
+revoked and expired certificates, unusable keys (a small-order forgery among them), another party's members, mutual TLS
+with and without a signature, and RFC 9421's own Ed25519 example with RFC 9530's digest. `FAC-SEM-077` holds a receiver's
+answer to them.
 
 <a id="attribution"></a>
 
@@ -408,7 +428,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 - `certificate.serial` and `notAfter`.
 - optionally `records`, what the device holds of the records the relay protocol carries (DEC-0053):
   the `estateRecord.revision` it applies ([estate record](estate-record.md), DEC-0055) and optionally that revision's
-  `digest` (`sha256:` and 64 hex), so a receiver tells two revisions with one number apart (DEC-0056), the latest
+  `digest` (`sha256:` and 64 hex), so a receiver tells two revisions with one number apart (DEC-0056; a device omits it
+  toward a receiver pinned before DEC-0056, whose schema refuses an unknown member), the latest
   `heartbeat` (`sequence`, `at`), the head of the
   `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
   `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
@@ -491,7 +512,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
-| `FAC-SEM-077` | `device-request-signature` | a receiver's answer to a device request is the transport binding's: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold, and otherwise answers the 401 code of the first step that fails |
+| `FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold — naming the client certificate's serial when there is one — accepts an unsigned request only on a valid client certificate, and otherwise answers the 401 code of the first step that fails |
 
 Each kind checks one input:
 
@@ -505,7 +526,7 @@ Each kind checks one input:
 | `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
-| `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, key: {alg, publicKey}}], at, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `seen` its nonce store before the request, `answer` `accepted` or a code |
+| `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are
 `fixtures/semantic/device-*`; the transport's vectors `fixtures/vectors/http-signature.json`. Tests:
@@ -516,3 +537,12 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
 - (OQ-0010) Which attestation formats a server accepts for `build_channel.allowed: attested`.
   Deferred by the operator on 2026-10-08: `attestation` stays an opaque field until the first real
   organization server adopts DEC-0031.
+- A response signature: the server signing its answers (DEC-0056). A device trusts the TLS channel and the signed policy
+  and key sets.
+- How a receiver behind a TLS-terminating host learns of a certificate's revocation beyond its own records (DEC-0056).
+- What a receiver does when a check-in's `records.estateRecord.digest` shows a fork of the estate record (DEC-0056).
+- RFC 9421's successor drafts and its `Accept-Signature` field (DEC-0056).
+- Clock skew: whether a device reports a `signature-stale` refusal in a later check-in, and how a receiver tells skew from
+  replay (DEC-0056).
+- Several certificate issuers behind one receiver, whose serials could collide; `keyid` assumes serials unique per
+  receiver (DEC-0056).

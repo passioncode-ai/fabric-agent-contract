@@ -18,7 +18,7 @@ const MEMBERS = [
   "action", "decision", "pinned", "certification", "revocations", "data", "collector", "device", "user", "session", "kind",
   "seq", "record", "machine", "package", "parent", "machines", "authorities", "publisherKeys", "shareGrants",
   "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
-  "publicBaseUrl", "certificates", "seen", "answer", "headers", "target", "method", "body"
+  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method", "body"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {

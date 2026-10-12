@@ -47,14 +47,16 @@ export type SignatureRefusal =
   | "signature-invalid"
   | "signature-replayed";
 /** What a misconfigured receiver answers instead: it accepts nothing, and the fault is its own, not the device's. */
-export type ReceiverFault = "clock-unreadable" | "base-url-invalid";
+export type ReceiverFault = "clock-unreadable" | "base-url-invalid" | "context-invalid";
 
 // ---------------------------------------------------------------------------------------------------------------
-// RFC 8941 Structured Fields: the subset RFC 9421 needs — a Dictionary whose members are Items or Inner Lists.
+// RFC 8941 Structured Fields: the subset RFC 9421 needs — a Dictionary whose members are Items or Inner Lists — and
+// RFC 9651's Date and Display String, so a member another party sends in the newer revision does not hide ours.
 
-export type BareItem = number | string | boolean | Uint8Array | { token: string };
-export interface SfItem { value: BareItem; params: Array<[string, BareItem]> }
-export interface SfInnerList { items: SfItem[]; params: Array<[string, BareItem]> }
+export type BareItem = number | string | boolean | Uint8Array | { token: string } | { date: number } | { display: string };
+/** `repeated` is set when a parameter key occurred twice: RFC 8941 keeps the last value; the binding refuses it on its own member. */
+export interface SfItem { value: BareItem; params: Array<[string, BareItem]>; repeated?: true }
+export interface SfInnerList { items: SfItem[]; params: Array<[string, BareItem]>; repeated?: true }
 export type SfMember = SfItem | SfInnerList;
 /** A parsed Dictionary, members in order; `duplicates` names keys that occurred more than once (RFC 8941 keeps the last). */
 export interface SfDictionary { members: Map<string, SfMember>; duplicates: Set<string> }
@@ -81,6 +83,37 @@ class Parser {
     if (/[A-Za-z*]/.test(c)) return this.token();
     if (c === ":") return this.bytes();
     if (c === "?") return this.boolean();
+    if (c === "@") return this.date();
+    if (c === "%") return this.display();
+    return this.fail();
+  }
+
+  /** RFC 9651 §4.2.9: `@` and an Integer. */
+  date(): { date: number } {
+    this.i += 1;
+    const start = this.i;
+    const value = this.number();
+    if (this.s.slice(start, this.i).includes(".")) this.fail();
+    return { date: value };
+  }
+
+  /** RFC 9651 §4.2.10: `%"`, printable ASCII with `%xx` lower-case hex escapes, decoded as UTF-8. */
+  display(): { display: string } {
+    if (this.s[this.i + 1] !== "\"") this.fail();
+    this.i += 2;
+    const bytes: number[] = [];
+    while (this.rest) {
+      const c = this.s[this.i++]!;
+      if (c < " " || c > "~") { this.i -= 1; this.fail(); }
+      if (c === "%") {
+        const hex = this.s.slice(this.i, this.i + 2);
+        if (!/^[0-9a-f]{2}$/.test(hex)) this.fail();
+        bytes.push(Number.parseInt(hex, 16));
+        this.i += 2;
+      } else if (c === "\"") {
+        try { return { display: new TextDecoder("utf-8", { fatal: true }).decode(new Uint8Array(bytes)) }; } catch { return this.fail(); }
+      } else bytes.push(c.charCodeAt(0));
+    }
     return this.fail();
   }
 
@@ -145,22 +178,23 @@ class Parser {
     return c === "1";
   }
 
-  /** Parameters; a key named twice is refused here (RFC 8941 keeps the last; this binding admits one of each). */
-  params(): Array<[string, BareItem]> {
-    const out: Array<[string, BareItem]> = [];
+  /** RFC 8941 §4.2.3.2: a repeated key overwrites the value in its first position, and is reported as `repeated`. */
+  params(): { params: Array<[string, BareItem]>; repeated?: true } {
+    const params: Array<[string, BareItem]> = [];
+    let repeated = false;
     while (this.peek() === ";") {
       this.i += 1;
       this.skip(" ");
       const key = this.key();
       let value: BareItem = true;
       if (this.peek() === "=") { this.i += 1; value = this.bareItem(); }
-      if (out.some(([k]) => k === key)) this.fail();
-      out.push([key, value]);
+      const at = params.findIndex(([k]) => k === key);
+      if (at >= 0) { params[at] = [key, value]; repeated = true; } else params.push([key, value]);
     }
-    return out;
+    return repeated ? { params, repeated: true } : { params };
   }
 
-  item(): SfItem { const value = this.bareItem(); return { value, params: this.params() }; }
+  item(): SfItem { const value = this.bareItem(); return { value, ...this.params() }; }
 
   member(): SfMember {
     if (this.peek() !== "(") return this.item();
@@ -168,7 +202,7 @@ class Parser {
     const items: SfItem[] = [];
     while (this.rest) {
       this.skip(" ");
-      if (this.peek() === ")") { this.i += 1; return { items, params: this.params() }; }
+      if (this.peek() === ")") { this.i += 1; return { items, ...this.params() }; }
       items.push(this.item());
       if (this.peek() !== " " && this.peek() !== ")") this.fail();
     }
@@ -187,7 +221,7 @@ export function parseDictionary(field: string): SfDictionary | null {
     while (p.rest) {
       const key = p.key();
       let member: SfMember;
-      if (p.peek() === "=") { p.i += 1; member = p.member(); } else member = { value: true, params: p.params() };
+      if (p.peek() === "=") { p.i += 1; member = p.member(); } else member = { value: true, ...p.params() };
       if (members.has(key)) { duplicates.add(key); members.delete(key); }
       members.set(key, member);
       p.skip(" \t");
@@ -308,12 +342,19 @@ export interface DeviceSigningKey { alg: DeviceKeyAlg; privateKey: KeyObject }
 export function signDeviceRequest(input: { method: string; targetUri: string; body: Uint8Array | string; serial: string; key: DeviceSigningKey; created: number; nonce: string }): Record<"content-digest" | "signature-input" | "signature", string> {
   const alg = httpAlgFor(input.key.alg);
   if (!alg) throw new TypeError(`a ${String(input.key.alg)} key signs no request`);
+  // What a receiver refuses as signature-missing is never signed: a signer error is the device's to see, not a 401.
+  if (typeof input.nonce !== "string" || !NONCE_PATTERN.test(input.nonce)) throw new TypeError("the nonce is 22–64 base64url characters, fresh for each request");
+  if (typeof input.serial !== "string" || !SERIAL_PATTERN.test(input.serial)) throw new TypeError("keyid is the certificate's serial: 2–40 lower-case hex digits");
+  if (!Number.isSafeInteger(input.created)) throw new TypeError("created is Unix time in whole seconds");
   const digest = contentDigest(input.body);
   const params = deviceSignatureParams(input.created, input.nonce, input.serial, alg);
   const base = deviceSignatureBase(input.method, input.targetUri, digest, params);
   if (base === null) throw new TypeError("the signature base cannot be built from these values (RFC 9421 §2.5)");
   const bytes = Buffer.from(base, "ascii");
-  const signature = alg === "ed25519" ? sign(null, bytes, input.key.privateKey) : sign("sha256", bytes, { key: input.key.privateKey, dsaEncoding: "ieee-p1363" });
+  // A P-256 key is passed as a JWK beside dsaEncoding, the form workerd accepts as well as Node (see p256PublicJwk).
+  const signature = alg === "ed25519"
+    ? sign(null, bytes, input.key.privateKey)
+    : sign("sha256", bytes, { key: input.key.privateKey.export({ format: "jwk" }), format: "jwk", dsaEncoding: "ieee-p1363" });
   return {
     "content-digest": digest,
     "signature-input": `${DEVICE_SIGNATURE_LABEL}=${serializeSignatureParams(params)}`,
@@ -335,8 +376,12 @@ export interface DeviceCertificateRecord {
   serial: string;
   notBefore: string;
   notAfter: string;
+  /** Present and not `false` means revoked. */
   revoked?: boolean;
-  /** The device's `#sig` key from that enrollment (DEC-0053), or the certified key when it listed no `deviceKeys`. */
+  /**
+   * The `#sig` key of the enrollment whose epoch the certificate carries (DEC-0053; rotation keeps it), or the certified key
+   * when that enrollment listed no `deviceKeys`. Which one is the receiver's data model's to record.
+   */
   key: { alg: DeviceKeyAlg; publicKey: string };
 }
 
@@ -346,10 +391,17 @@ export interface DeviceSignatureContext {
   certificate: (serial: string) => DeviceCertificateRecord | undefined;
   /** The receiver's clock. */
   at: Date;
+  /**
+   * The serial of the client certificate of a mutual-TLS session, when the receiver sees one. A signature beside it names
+   * that serial; an unsigned request is accepted on it alone.
+   */
+  clientCertificateSerial?: string;
 }
 
+/** `binding` says what proved the key: the signature, or (unsigned) the mutual-TLS session's client certificate. */
 export type DeviceSignatureVerdict =
-  | { ok: true; serial: string; nonce: string; created: number; keepUntil: number }
+  | { ok: true; binding: "signature"; serial: string; nonce: string; created: number; keepUntil: number }
+  | { ok: true; binding: "mutual-tls"; serial: string }
   | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string };
 
 const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
@@ -382,6 +434,14 @@ const headerMap = (headers: unknown): Map<string, string> => {
 };
 
 const isInnerList = (member: SfMember): member is SfInnerList => "items" in member;
+const isObjectLike = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** Whether either field carries a `fabric-device` member; a field that does not parse is absent (RFC 8941 §4.2). */
+const signaturePresent = (headers: Map<string, string>): boolean =>
+  ["signature-input", "signature"].some((name) => {
+    const field = parseDictionary(headers.get(name) ?? "");
+    return field !== null && (field.members.has(DEVICE_SIGNATURE_LABEL) || field.duplicates.has(DEVICE_SIGNATURE_LABEL));
+  });
 const refuse = (code: SignatureRefusal | ReceiverFault, reason: string): DeviceSignatureVerdict => ({ ok: false, code, reason });
 
 /** The parsed binding: what a conforming `fabric-device` signature carries, or null when the request carries none. */
@@ -394,6 +454,8 @@ const parseDeviceSignature = (headers: Map<string, string>): ParsedSignature | n
   const list = input.members.get(DEVICE_SIGNATURE_LABEL);
   const sig = value.members.get(DEVICE_SIGNATURE_LABEL);
   if (!list || !isInnerList(list) || !sig || isInnerList(sig) || !(sig.value instanceof Uint8Array) || sig.params.length) return null;
+  // A parameter named twice is RFC 8941's last-wins elsewhere; on the binding's own member it is refused.
+  if (list.repeated || list.items.some((item) => item.repeated)) return null;
   const names = list.items.map((item) => (item.params.length === 0 && typeof item.value === "string" ? item.value : null));
   if (names.length !== DEVICE_COVERED_COMPONENTS.length || names.some((name, i) => name !== DEVICE_COVERED_COMPONENTS[i])) return null;
   if (list.params.length !== DEVICE_SIGNATURE_PARAMETERS.length || list.params.some(([key], i) => key !== DEVICE_SIGNATURE_PARAMETERS[i])) return null;
@@ -405,34 +467,60 @@ const parseDeviceSignature = (headers: Map<string, string>): ParsedSignature | n
   return { created, nonce, keyid, alg, signature: sig.value };
 };
 
-/** DER prefixes of SubjectPublicKeyInfo: Ed25519 (RFC 8410) and an uncompressed P-256 point (RFC 5480). */
+/** DER prefix of an Ed25519 SubjectPublicKeyInfo (RFC 8410). */
 const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
-const P256_SPKI_PREFIX = Buffer.from("3059301306072a8648ce3d020106082a8648ce3d030107034200", "hex");
+/**
+ * A raw uncompressed P-256 point (0x04 ‖ X ‖ Y) as a public JWK. A P-256 key goes to `verify` as `{key: jwk, format: "jwk",
+ * dsaEncoding}`: workerd (Cloudflare Workers) throws a TypeError on a KeyObject beside `dsaEncoding`, and Node accepts both.
+ * Local until `p256Jwk` (src/p256.ts, #59) lands.
+ */
+const p256PublicJwk = (raw: Uint8Array) => ({ kty: "EC", crv: "P-256", x: Buffer.from(raw.subarray(1, 33)).toString("base64url"), y: Buffer.from(raw.subarray(33, 65)).toString("base64url") });
 
 /**
- * Every check of the binding but the nonce store, in this order: a readable clock and a valid base URL (the receiver's
- * own faults), a conforming signature (`signature-missing`), the body's digest (`digest-mismatch`), the window
- * (`signature-stale`), the certificate (`certificate-unknown`, `-revoked`, `-expired`), the algorithm and key
- * (`signature-invalid`), and the signature over the rebuilt base (`signature-invalid`). The vectors carry one fault
- * each, so a port that orders the checks otherwise answers them alike.
+ * Every check of the binding but the nonce store, in this order: the receiver's own faults (`context-invalid`,
+ * `clock-unreadable`, `base-url-invalid`; never a throw); an unsigned request, accepted only on a mutual-TLS client
+ * certificate that is known, not revoked and valid now (`binding: "mutual-tls"`); a conforming signature
+ * (`signature-missing`), the body's digest (`digest-mismatch`), the window (`signature-stale`), `keyid` equal to the
+ * client certificate's serial when there is one, and the certificate (`certificate-unknown`, `-revoked`, `-expired`), the
+ * algorithm and key (`signature-invalid`), and the signature over the rebuilt base (`signature-invalid`). The vectors
+ * carry one fault each, so a port that orders the checks otherwise answers them alike.
  */
 export function checkDeviceSignature(request: DeviceRequest, context: DeviceSignatureContext): DeviceSignatureVerdict {
-  // A NaN clock makes every window comparison false and so would accept a signature of any age: refused first.
+  // The receiver's own faults first: a context that is not an object, an unreadable clock — a NaN clock makes every window
+  // comparison false and so would accept a signature of any age — a malformed base URL, a certificate lookup that is not a
+  // function. None of them throws: a public verifier answers.
+  if (!isObjectLike(context)) return refuse("context-invalid", "the receiver's context is not an object");
   const at = context.at instanceof Date ? context.at.getTime() : Number.NaN;
   if (Number.isNaN(at)) return refuse("clock-unreadable", "the receiver's clock is unreadable; it accepts nothing until it reads one");
   if (publicOrigin(context.publicBaseUrl) === null) return refuse("base-url-invalid", "the receiver's public base URL is not https:// and an authority alone");
+  if (typeof context.certificate !== "function") return refuse("context-invalid", "the receiver's certificate lookup is not a function");
+  const client = typeof context.clientCertificateSerial === "string" ? context.clientCertificateSerial : undefined;
+  if (!isObjectLike(request)) return refuse("signature-missing", "no request");
   const headers = headerMap(request.headers);
+  const certificateRefusal = (serial: string): DeviceSignatureVerdict | DeviceCertificateRecord => {
+    const record = context.certificate(serial);
+    if (!isObjectLike(record) || record.serial !== serial) return refuse("certificate-unknown", "no certificate with this serial");
+    if (record.revoked !== undefined && record.revoked !== false) return refuse("certificate-revoked", "the certificate is revoked: re-enroll");
+    const from = strictTime(record.notBefore), to = strictTime(record.notAfter);
+    if (!(at >= from && at < to)) return refuse("certificate-expired", "the certificate is not valid now: re-enroll");
+    return record;
+  };
+  // DEC-0056 item 1: a signature that is present is always verified; only an unsigned request rests on mutual TLS alone.
+  if (!signaturePresent(headers)) {
+    if (client === undefined) return refuse("signature-missing", "no fabric-device signature, and no client certificate");
+    const record = certificateRefusal(client);
+    return "ok" in record ? record : { ok: true, binding: "mutual-tls", serial: client };
+  }
   const parsed = parseDeviceSignature(headers);
   if (!parsed) return refuse("signature-missing", "no fabric-device signature with the three covered components and created, nonce, keyid and alg in that order");
   const body = typeof request.body === "string" || request.body instanceof Uint8Array ? request.body : "";
   const digest = headers.get("content-digest");
   if (digest !== contentDigest(body)) return refuse("digest-mismatch", "Content-Digest is not sha-256 of the body as received");
   if (Math.abs(at / 1000 - parsed.created) > MAX_SIGNATURE_SKEW_SECONDS) return refuse("signature-stale", `created is more than ${MAX_SIGNATURE_SKEW_SECONDS} s from the receiver's clock`);
-  const record = context.certificate(parsed.keyid);
-  if (!record || record.serial !== parsed.keyid) return refuse("certificate-unknown", "no certificate with this serial");
-  if (record.revoked === true) return refuse("certificate-revoked", "the certificate is revoked: re-enroll");
-  const from = strictTime(record.notBefore), to = strictTime(record.notAfter);
-  if (!(at >= from && at < to)) return refuse("certificate-expired", "the certificate is not valid now: re-enroll");
+  if (client !== undefined && client !== parsed.keyid) return refuse("certificate-unknown", "keyid is not the serial of the mutual-TLS session's client certificate");
+  const found = certificateRefusal(parsed.keyid);
+  if ("ok" in found) return found;
+  const record = found;
   const key = typeof record.key === "object" && record.key !== null ? record.key : { alg: undefined, publicKey: undefined };
   if (httpAlgFor(key.alg) !== parsed.alg) return refuse("signature-invalid", "wrong-alg: alg is not the algorithm of the device's signing key");
   const raw = Buffer.from(typeof key.publicKey === "string" ? key.publicKey : "", "base64");
@@ -449,13 +537,13 @@ export function checkDeviceSignature(request: DeviceRequest, context: DeviceSign
   try {
     ok = parsed.alg === "ed25519"
       ? verify(null, bytes, createPublicKey({ key: Buffer.concat([ED25519_SPKI_PREFIX, raw]), format: "der", type: "spki" }), signature)
-      : verify("sha256", bytes, { key: createPublicKey({ key: Buffer.concat([P256_SPKI_PREFIX, raw]), format: "der", type: "spki" }), dsaEncoding: "ieee-p1363" }, signature);
+      : verify("sha256", bytes, { key: p256PublicJwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, signature);
   } catch {
     // A key the platform cannot load verifies nothing; the checks above refuse every such key first.
     ok = false;
   }
   if (!ok) return refuse("signature-invalid", "bad-signature: the signature does not verify under the device's key");
-  return { ok: true, serial: parsed.keyid, nonce: parsed.nonce, created: parsed.created, keepUntil: parsed.created + MAX_SIGNATURE_SKEW_SECONDS };
+  return { ok: true, binding: "signature", serial: parsed.keyid, nonce: parsed.nonce, created: parsed.created, keepUntil: parsed.created + MAX_SIGNATURE_SKEW_SECONDS };
 }
 
 /**
@@ -484,13 +572,17 @@ export function createMemoryNonceStore(): NonceStore & { size(): number } {
 }
 
 /**
- * The reference receiver (DEC-0056): `checkDeviceSignature`, then — only after the signature verifies — the nonce store.
+ * The reference receiver (DEC-0056): `checkDeviceSignature`, then — only after a signature verifies — the nonce store
+ * (an unsigned request accepted on mutual TLS has no nonce). A store that is not an object with `recordOnce` is
+ * `context-invalid`.
  * A repeated (serial, nonce) inside its window is `signature-replayed`; a refused request records nothing, so a forged
  * request cannot burn a device's nonce.
  */
 export async function verifyDeviceRequest(request: DeviceRequest, context: DeviceSignatureContext & { nonces: NonceStore }): Promise<DeviceSignatureVerdict> {
   const verdict = checkDeviceSignature(request, context);
-  if (!verdict.ok) return verdict;
+  if (!verdict.ok || verdict.binding === "mutual-tls") return verdict;
+  // A store without `recordOnce` cannot detect a repeat, so nothing signed is accepted through it (and nothing throws).
+  if (!isObjectLike(context.nonces) || typeof context.nonces.recordOnce !== "function") return refuse("context-invalid", "the receiver's nonce store has no recordOnce function");
   const fresh = await context.nonces.recordOnce(verdict.serial, verdict.nonce, verdict.keepUntil, context.at.getTime() / 1000);
   return fresh ? verdict : refuse("signature-replayed", "this (serial, nonce) was already accepted; sign again with a new nonce");
 }
