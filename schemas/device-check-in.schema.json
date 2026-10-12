@@ -274,7 +274,7 @@
                 }
               },
               "additionalProperties": false,
-              "description": "The latest organization heartbeat the device holds."
+              "description": "The latest heartbeat the device accepted (heartbeat/1, DEC-0054): its sequence and at, unchanged."
             },
             "revocationDelta": {
               "type": "object",
@@ -294,7 +294,7 @@
                 }
               },
               "additionalProperties": false,
-              "description": "The head of the revocation delta the device has applied: its sequence and hash."
+              "description": "The head of the revocation delta the device has applied (DEC-0054): the sequence of its last entry (0 before any) and that entry's hash (the estate's genesis at 0)."
             },
             "leases": {
               "type": "array",
@@ -319,7 +319,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "What the device holds of the records the relay protocol carries (DEC-0053): fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the leases the window lease's decision (not yet taken)."
+          "description": "What the device holds of the records the relay protocol carries (DEC-0053): the estate revision it applies, the latest heartbeat and the revocation delta's head (DEC-0054), and the leases its meter holds (the window lease's decision, not yet taken)."
         },
         "fullState": {
           "type": "boolean"
@@ -396,14 +396,12 @@
           "type": "object",
           "properties": {
             "heartbeat": {
-              "type": "object",
-              "maxProperties": 64,
-              "description": "A newer signed heartbeat, as DEC-0054 (reserved) defines it; carried here unchanged."
+              "$ref": "heartbeat.schema.json",
+              "description": "A newer signed heartbeat (heartbeat/1, DEC-0054), carried unchanged."
             },
             "revocationDelta": {
-              "type": "object",
-              "maxProperties": 64,
-              "description": "The revocation delta since the head the device reported, as DEC-0054 (reserved) defines it; carried unchanged."
+              "$ref": "revocation-delta.schema.json",
+              "description": "The revocation delta since the head the device reported: a page (revocation-delta/1, DEC-0054), carried unchanged."
             },
             "leases": {
               "type": "array",
@@ -416,7 +414,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "Records the server hands the device at check-in (DEC-0053). The check-in carries them; their shapes are the relay protocol's."
+          "description": "Records the server hands the device at check-in (DEC-0053): a heartbeat and a page of the revocation delta (DEC-0054) and leases, each carried unchanged."
         },
         "certificate": {
           "type": "object",

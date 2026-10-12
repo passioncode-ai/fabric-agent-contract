@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, relay, one-copy, Windows token-file and well-known (FAC-SEM-080) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file and well-known (FAC-SEM-080) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
+  "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
@@ -21,7 +22,9 @@ const MEMBERS = [
   "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
   "header", "ct", "sig", "type", "kid", "alg", "protocol", "ttl", "body", "extensions", "status", "degraded",
   "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid",
-  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method"
+  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method",
+  "head", "entries", "deltaHead", "estateRecord", "applied", "heartbeat", "broken", "revision", "prev", "sequence", "revocation",
+  "revokedAt", "estate", "issuedAt"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
