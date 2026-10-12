@@ -141,6 +141,17 @@
     "F-A-023": "#68 (508e38a, DEC-0065)",
     "F-A-024": "#68 (508e38a, DEC-0065)",
     "F-A-029": "#68 (508e38a, DEC-0065)",
-    "RM-16": "#68 (508e38a, DEC-0065)"
+    "RM-16": "#68 (508e38a, DEC-0065)",
+    "CON-OE-07": "#71 (866d0b0, DEC-0067)",
+    "CON-OE-08": "#72 (0656aa1, DEC-0068)",
+    "CON-OE-05": "#78 (fc4dda0, DEC-0072)",
+    "CON-OE-03": "covered by DEC-0050 and DEC-0051 (the package), DEC-0053 and DEC-0063 (keys and algorithms by role, passkeys as the estate's authority), DEC-0055 (placement by the estate record) and DEC-0061 (listings); its node manifest, pool and job.run are removed by v4 (CROSSWALK-v4), its fork subkey moves to release tooling and its pool isolation to the node's service accounts (Project Observatory)",
+    "W4-READINGS-OWED": "the owed three-tier readings of #63, #64, #65, #67 and #68 ran on 2026-10-12 (no blocking defect); their follow-ups merged as #75 (3cb040c)",
+    "RELAY-AUDIT-1": "#70 (464c45e, DEC-0066)",
+    "CO-263": "#73 (fee53a2, DEC-0069)",
+    "FEED-DATA": "#77 (b9453a0, DEC-0070)",
+    "CONSUMER-AGENT": "#76 (9c0032a, DEC-0071)",
+    "MCP-SECRETS": "#79 (146240a, DEC-0074)",
+    "CON-OE-10": "#80 (b4f0344, DEC-0075)"
   }
 }

@@ -514,5 +514,53 @@
     "closable_in_one_pass": false,
     "needs": "the agent-sync owner",
     "proposed_fix": "one fetched ref per register, fetched with '+'"
+  },
+  {
+    "id": "CO-263",
+    "title": "Fabric: an app's own descriptor (lifecycle.manager person)",
+    "source": "Fabric's session, 2026-10-12",
+    "status_measured": "done 2026-10-12: #73 (fee53a2, DEC-0069)",
+    "area": "contract",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "Fabric: an app's own descriptor (lifecycle.manager person)"
+  },
+  {
+    "id": "FEED-DATA",
+    "title": "A machine-readable data object on service feed events",
+    "source": "a consumer service's request, 2026-10-12",
+    "status_measured": "done 2026-10-12: #77 (b9453a0, DEC-0070)",
+    "area": "contract",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "A machine-readable data object on service feed events"
+  },
+  {
+    "id": "CONSUMER-AGENT",
+    "title": "A consumer agent: kind agent without a provider, requires.mcp by role",
+    "source": "the first organization server's session, 2026-10-12",
+    "status_measured": "done 2026-10-12: #76 (9c0032a, DEC-0071)",
+    "area": "contract",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "A consumer agent: kind agent without a provider, requires.mcp by role"
+  },
+  {
+    "id": "MCP-SECRETS",
+    "title": "A required MCP role names its secret slots; source import closure",
+    "source": "the first organization server's session, 2026-10-12",
+    "status_measured": "done 2026-10-12: #79 (146240a, DEC-0074)",
+    "area": "contract",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "A required MCP role names its secret slots; source import closure"
   }
 ]
