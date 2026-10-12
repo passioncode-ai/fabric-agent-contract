@@ -197,6 +197,15 @@ describe("the verifier's context and edges (DEC-0062)", () => {
     expect(verifyWindowLease({ ...lease, amount: Number.NaN }, trust)).toEqual({ ok: false, problem: "malformed" });
   });
 
+  it("refuses a hub key the revocation delta revoked, and compares revocation refs exactly (DEC-0054, DEC-0060)", () => {
+    const machine = vectors.estateRecord.machines[0];
+    const revokedKey = [{ kind: "hub-key", ref: machine.hubKey.kid, revokedAt: "2026-10-12T09:00:00Z" }];
+    expect(verifyWindowLease(lease, trust).ok).toBe(true);
+    expect(verifyWindowLease(lease, { ...trust, estateRevocations: revokedKey })).toEqual({ ok: false, problem: "hub-key-uncertified" });
+    expect(verifyWindowLease(lease, { ...trust, estateRevocations: [{ kind: "machine", ref: machine.id, revokedAt: "2026-10-12T09:00:00Z" }] })).toEqual({ ok: false, problem: "hub-key-uncertified" });
+    expect(verifyWindowLease(lease, { ...trust, estateRevocations: [null, 7, { kind: "machine", ref: [machine.id] }] }).ok).toBe(true);
+  });
+
   it("refuses an estate record without a revision, a hub key for another algorithm and a private hub key", () => {
     expect(verifyWindowLease(lease, { ...trust, estateRecord: { ...vectors.estateRecord, revision: "1" } })).toEqual({ ok: false, problem: "wrong-estate" });
     const withKey = (change: Json) => ({ ...vectors.estateRecord, machines: [{ ...vectors.estateRecord.machines[0], hubKey: { ...vectors.estateRecord.machines[0].hubKey, ...change } }] });

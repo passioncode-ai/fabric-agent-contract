@@ -153,17 +153,18 @@ function wellFormed(lease: JsonObject): boolean {
 
 /**
  * The hub key the estate record certifies under `kid` (DEC-0055 item 4): the `hubKey` of one of its machines, when the
- * record revokes neither that hub key nor that machine. `undefined` otherwise. The window lease's own reading of the
- * certificate; when a shared reading of hub-key certification reaches `main`, this function adopts it.
+ * record, or the revocation delta's applied entries (`extra`, DEC-0054), revoke neither that hub key nor that machine.
+ * `undefined` otherwise. Revocation refs compare exactly, as DL-14's `hubKeyCertified` compares them (DEC-0060).
  */
-export function certifiedHubKey(record: unknown, kid: unknown): JsonObject | undefined {
+export function certifiedHubKey(record: unknown, kid: unknown, extra: readonly unknown[] = []): JsonObject | undefined {
   if (!isObject(record) || !isString(kid)) return undefined;
-  const revoked = new Set(list(record.revocations).map((entry) => `${String(entry.kind)} ${String(entry.ref)}`));
+  const entries = [...list(record.revocations), ...extra.filter(isObject)];
+  const revokes = (kind: string, ref: unknown) => entries.some((entry) => entry.kind === kind && entry.ref === ref);
   const holders = list(record.machines).filter((machine) => isObject(machine.hubKey) && machine.hubKey.kid === kid);
   // One kid is certified for one machine (FAC-SEM-073); a record that lists it twice certifies neither.
   if (holders.length !== 1) return undefined;
   const machine = holders[0] as JsonObject;
-  if (revoked.has(`hub-key ${kid}`) || revoked.has(`machine ${String(machine.id)}`)) return undefined;
+  if (revokes("hub-key", kid) || revokes("machine", machine.id)) return undefined;
   return machine.hubKey as JsonObject;
 }
 
@@ -205,6 +206,8 @@ export interface LeaseTrust {
   remainderUsd: string;
   /** The verified lease this machine holds for the same estate, machine, scope, window and period, if any. */
   held?: JsonObject;
+  /** The revocation delta's entries this machine applied since `estateRecord` (DEC-0054, `deltaRevocations`). */
+  estateRevocations?: readonly unknown[];
 }
 
 /** Whether `value` is a usable trust context, the clock aside. */
@@ -240,7 +243,7 @@ export function verifyWindowLease(lease: unknown, trust: LeaseTrust): LeaseVerdi
   if (lease.estate !== record.estate || !Number.isSafeInteger(record.revision) || (lease.estateRevision as number) > (record.revision as number)) {
     return { ok: false, problem: "wrong-estate" };
   }
-  const hubKey = certifiedHubKey(record, lease.kid);
+  const hubKey = certifiedHubKey(record, lease.kid, Array.isArray(trust.estateRevocations) ? trust.estateRevocations : []);
   if (!hubKey || hubKey.alg !== lease.alg) return { ok: false, problem: "hub-key-uncertified" };
   const x = hubKey.x;
   const raw = isString(x) && B64URL.test(x) ? Buffer.from(x, "base64url") : Buffer.alloc(0);
