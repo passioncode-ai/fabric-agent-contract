@@ -42,6 +42,7 @@ const isCount = (value: unknown, min: number): value is number => Number.isSafeI
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 const sha256hex = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
+// TODO(DEC-0060, #62): import `strictTime` from ./rfc3339.js once #62 merges, and drop this copy (owner session, 2026-10-12).
 const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
 /**
  * An RFC 3339 date-time as milliseconds, or NaN: `T`, an offset and a day that exists are required, as the estate
@@ -110,18 +111,27 @@ export function deltaHead(state: DeltaState): { sequence: number; sha256: string
 }
 
 /**
- * Every revocation in force on a machine, as `kind ref`: the applied revision's, the applied entries' and those of
- * signed entries that forked. A check that reads the estate record's revocations reads these instead (DEC-0054).
+ * The revocations the delta holds in force on a machine, in the estate record's revocation form (`{kind, ref,
+ * revokedAt}`): the applied entries', then those of signed entries that forked. They are what a check that reads the
+ * estate record's revocations applies on top of `record.revocations` — DL-14's `hubKeyCertified(..., {extraRevocations})`
+ * among them (DEC-0054).
  */
-export function effectiveRevocations(record: unknown, state: DeltaState | undefined): Set<string> {
-  const out = new Set<string>();
-  const add = (revocation: unknown) => {
-    if (isObject(revocation)) out.add(`${String(revocation.kind)} ${String(revocation.ref)}`);
-  };
-  for (const revocation of list(isObject(record) ? record.revocations : undefined)) add(revocation);
+export function deltaRevocations(state: DeltaState | undefined): JsonObject[] {
   const held: JsonObject = isObject(state) ? (state as unknown as JsonObject) : {};
-  for (const entry of [...list(held.entries), ...list(held.forked)]) add(entry.revocation);
-  return out;
+  return [...list(held.entries), ...list(held.forked)].map((entry) => entry.revocation).filter(isObject);
+}
+
+/** Every revocation in force on a machine: the applied revision's, then the delta's (`deltaRevocations`). */
+export function effectiveRevocations(record: unknown, state: DeltaState | undefined): JsonObject[] {
+  return [...list(isObject(record) ? record.revocations : undefined), ...deltaRevocations(state)];
+}
+
+/**
+ * Whether `revocations` revoke `ref` of `kind`, matched exactly: `kind` and `ref` are compared as the strings they are,
+ * never through `String()`, as DL-14's `hubKeyCertified` matches them (a number 5 never revokes the machine "5").
+ */
+export function isRevoked(revocations: readonly unknown[], kind: string, ref: unknown): boolean {
+  return isString(ref) && revocations.some((revocation) => isObject(revocation) && revocation.kind === kind && revocation.ref === ref);
 }
 
 export type SignerProblem = "unknown-signer" | "revoked-signer" | "unusable-key" | "small-order-key";
@@ -129,14 +139,14 @@ export type SignerProblem = "unknown-signer" | "revoked-signer" | "unusable-key"
 /**
  * The estate key a delta entry or a heartbeat is verified under: the `hubKey` of the machine of `record` whose kid is
  * `kid` (compared exactly), certified once, EdDSA, Ed25519 of full order (DEC-0045), and neither that kid (`hub-key`)
- * nor its machine (`machine`) in `revoked`.
+ * nor its machine (`machine`) revoked by `revocations` (`isRevoked`, exact matching).
  */
-export function estateSigner(record: unknown, kid: unknown, revoked: ReadonlySet<string>): { key: ReturnType<typeof createPublicKey> } | { problem: SignerProblem } {
+export function estateSigner(record: unknown, kid: unknown, revocations: readonly unknown[]): { key: ReturnType<typeof createPublicKey> } | { problem: SignerProblem } {
   const machines = list(isObject(record) ? record.machines : undefined).filter((machine) => isObject(machine.hubKey) && machine.hubKey.kid === kid);
   if (!isString(kid) || machines.length !== 1) return { problem: "unknown-signer" };
   const machine = machines[0] as JsonObject;
   const jwk = machine.hubKey as JsonObject;
-  if (revoked.has(`hub-key ${kid}`) || revoked.has(`machine ${String(machine.id)}`)) return { problem: "revoked-signer" };
+  if (isRevoked(revocations, "hub-key", kid) || isRevoked(revocations, "machine", machine.id)) return { problem: "revoked-signer" };
   if (jwk.alg !== DELTA_ALG || jwk.kty !== "OKP" || jwk.crv !== "Ed25519" || !isString(jwk.x) || jwk.d !== undefined) return { problem: "unusable-key" };
   const raw = Buffer.from(jwk.x, "base64url");
   if (raw.length !== 32 || raw.toString("base64url") !== jwk.x) return { problem: "unusable-key" };
@@ -388,17 +398,17 @@ export function deltaFreshness(state: DeltaState, trust: DeltaTrust): { answer: 
  */
 export function unreconciled(revision: unknown, entries: readonly unknown[]): { missing: Array<{ index: number; kind: string; ref: string }>; unreadable: boolean } {
   const issuedAt = deltaTime(isObject(revision) ? revision.issuedAt : undefined);
-  const listed = new Set(list(isObject(revision) ? revision.revocations : undefined).map((r) => `${String(r.kind)} ${String(r.ref)}`));
+  const listed = list(isObject(revision) ? revision.revocations : undefined);
   const missing: Array<{ index: number; kind: string; ref: string }> = [];
   let unreadable = Number.isNaN(issuedAt);
   entries.forEach((entry, index) => {
     const revocation = isObject(entry) && isObject(entry.revocation) ? entry.revocation : undefined;
     const at = deltaTime(isObject(entry) ? entry.at : undefined);
-    if (!revocation || Number.isNaN(at)) {
+    if (!revocation || !isString(revocation.kind) || !isString(revocation.ref) || Number.isNaN(at)) {
       unreadable = true;
       return;
     }
-    if (!unreadable && at <= issuedAt && !listed.has(`${String(revocation.kind)} ${String(revocation.ref)}`)) missing.push({ index, kind: String(revocation.kind), ref: String(revocation.ref) });
+    if (!unreadable && at <= issuedAt && !isRevoked(listed, revocation.kind as string, revocation.ref)) missing.push({ index, kind: String(revocation.kind), ref: String(revocation.ref) });
   });
   return { missing, unreadable };
 }

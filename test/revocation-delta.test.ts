@@ -15,7 +15,9 @@ import {
   deltaGenesis,
   deltaHead,
   deltaTime,
+  deltaRevocations,
   effectiveRevocations,
+  isRevoked,
   emptyDeltaState,
   estateSigner,
   freshnessAnswer,
@@ -190,10 +192,23 @@ describe("what a machine does with them", () => {
     const fork = (vectors.apply as Json[]).find((c) => c.expect.problem === "fork")!;
     const verdict = applyDelta(fork.state, fork.page, trust);
     const revoked = effectiveRevocations(record, verdict.state);
-    expect(revoked.has("hub-key hub-m-9a07-1")).toBe(true);
-    expect(revoked.has(`package ${e2.entry.revocation.ref}`)).toBe(true);
-    expect(revoked.has("machine m-9a07")).toBe(true);
-    expect(effectiveRevocations({ revocations: [{ kind: "grant", ref: "g-1" }] }, undefined)).toEqual(new Set(["grant g-1"]));
+    expect(isRevoked(revoked, "hub-key", "hub-m-9a07-1")).toBe(true);
+    expect(isRevoked(revoked, "package", e2.entry.revocation.ref)).toBe(true);
+    expect(isRevoked(revoked, "machine", "m-9a07")).toBe(true);
+    // DL-14's extraRevocations: the delta's revocations in the estate record's form, the record's own left out.
+    expect(deltaRevocations(verdict.state)).toEqual([e1.entry.revocation, e2.entry.revocation, (fork.page as Json).entries[0].revocation]);
+    expect(effectiveRevocations({ revocations: [{ kind: "grant", ref: "g-1" }] }, undefined)).toEqual([{ kind: "grant", ref: "g-1" }]);
+  });
+
+  it("matches a revocation exactly, as DL-14 does: no String() on the ref", () => {
+    const revocations = [{ kind: "machine", ref: "5" }, { kind: "hub-key", ref: 7 }];
+    expect(isRevoked(revocations, "machine", "5")).toBe(true);
+    expect(isRevoked(revocations, "machine", 5)).toBe(false);
+    expect(isRevoked(revocations, "hub-key", "7")).toBe(false);
+    expect(isRevoked(revocations, "Machine", "5")).toBe(false);
+    const numbered = { ...record, machines: [{ ...record.machines[0], id: 5 }] };
+    expect(estateSigner(numbered, record.machines[0].hubKey.kid, [{ kind: "machine", ref: "5" }])).toHaveProperty("key");
+    expect(reconcileRevision(held([e1.entry]), { issuedAt: "2026-10-12T10:00:00Z", revocations: [{ ...e1.entry.revocation, ref: [e1.entry.revocation.ref] }] })).toMatchObject({ ok: false, problem: "unreconciled" });
   });
 
   it("lets no relay break a machine: an unsigned or altered entry is refused without marking it broken", () => {
@@ -238,12 +253,12 @@ describe("what a machine does with them", () => {
     const last = x.at(-1)!;
     // The last character's two spare bits set: the same 32 bytes, a different spelling (a lax port accepts it).
     const twin = String.fromCharCode(last.charCodeAt(0) + 1);
-    expect(estateSigner(machine(x.slice(0, -1) + twin), "k", new Set())).toEqual({ problem: "unusable-key" });
-    expect(estateSigner(machine(x.slice(0, 20)), "k", new Set())).toEqual({ problem: "unusable-key" });
-    expect(estateSigner(machine(7), "k", new Set())).toEqual({ problem: "unusable-key" });
-    expect(estateSigner({ machines: [{ id: "m", hubKey: { kty: "OKP", crv: "Ed25519", alg: "EdDSA", kid: "k", x, d: x } }] }, "k", new Set())).toEqual({ problem: "unusable-key" });
-    expect(estateSigner({ machines: [record.machines[0], record.machines[0]] }, record.machines[0].hubKey.kid, new Set())).toEqual({ problem: "unknown-signer" });
-    expect(estateSigner(record, 7, new Set())).toEqual({ problem: "unknown-signer" });
+    expect(estateSigner(machine(x.slice(0, -1) + twin), "k", [])).toEqual({ problem: "unusable-key" });
+    expect(estateSigner(machine(x.slice(0, 20)), "k", [])).toEqual({ problem: "unusable-key" });
+    expect(estateSigner(machine(7), "k", [])).toEqual({ problem: "unusable-key" });
+    expect(estateSigner({ machines: [{ id: "m", hubKey: { kty: "OKP", crv: "Ed25519", alg: "EdDSA", kid: "k", x, d: x } }] }, "k", [])).toEqual({ problem: "unusable-key" });
+    expect(estateSigner({ machines: [record.machines[0], record.machines[0]] }, record.machines[0].hubKey.kid, [])).toEqual({ problem: "unknown-signer" });
+    expect(estateSigner(record, 7, [])).toEqual({ problem: "unknown-signer" });
   });
 });
 
@@ -330,8 +345,9 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
 
   it("answers a page entry or record that is not an object", () => {
     expect(applyDelta(held([null as unknown as Json]), { head: {}, entries: [e1.entry] }, trust)).toMatchObject({ ok: false, problem: "fork" });
-    expect(effectiveRevocations({}, held([{ revocation: 3 }]))).toEqual(new Set());
-    expect(estateSigner(7, "k", new Set())).toEqual({ problem: "unknown-signer" });
+    expect(effectiveRevocations({}, held([{ revocation: 3 }]))).toEqual([]);
+    expect(unreconciled({ issuedAt: "2026-10-12T10:00:00Z", revocations: [] }, [{ at: "2026-10-12T10:00:00Z", revocation: { kind: 5, ref: "x" } }])).toMatchObject({ unreadable: true });
+    expect(estateSigner(7, "k", [])).toEqual({ problem: "unknown-signer" });
     expect(freshnessAnswer({ at: AT.getTime(), applied: { sequence: 0, revision: 1 }, heartbeat: { at: "2026-10-12T11:00:00Z", deltaHead: { sequence: 0 }, estateRecord: 3 } }).answer).toBe("stale");
     expect(revocationDeltaRules("revocation-delta", 7)).toBeUndefined();
     expect(revocationDeltaRules("other", {})).toBeUndefined();
