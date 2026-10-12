@@ -31,6 +31,7 @@ const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 /** Every case of `relay.json`'s case groups, run through the reference. */
 export function relayVectorResults(vectors: Json): VectorResult[] {
   const out: VectorResult[] = [];
+  for (const c of cases(vectors.instant)) out.push({ group: "instant", name: c.name as string, actual: instantResult(c.value), expected: c.expect });
   for (const c of cases(vectors.admit)) {
     const ctx = c.context as Json;
     const actual = admit(c.frame as AuthFrame, {
@@ -49,7 +50,7 @@ export function relayVectorResults(vectors: Json): VectorResult[] {
     // The signer first, then the state: `expect` is what the two give together.
     const method = c.method as "PUT" | "GET";
     const verified = verifyBlobRequest(c.header as string | null, {
-      relay: blob.relay as string, method, digest: blob.digest as string, now: new Date(blob.now as string), admittedKey: keyring(c.admitted)
+      relay: blob.relay as string, method, digest: blob.digest as string, now: new Date((c.now ?? blob.now) as string), admittedKey: keyring(c.admitted)
     });
     const decided = verified.ok ? decideBlobAccess(method, verified, c.stored as { recipients: string[] } | undefined) : verified;
     const actual = decided.ok && verified.ok ? { ...verified, repeat: decided.repeat } : decided;

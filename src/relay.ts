@@ -13,7 +13,8 @@
  */
 import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
-import { isEd25519Key, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
+import { isEd25519Key, isLowS, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
+import { strictTime } from "./rfc3339.js";
 import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
 
@@ -72,22 +73,28 @@ export function relayBlobSigningInput(fields: { relay: string; method: "PUT" | "
 
 const RFC3339 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$/;
 
-/** The instant of an RFC 3339 UTC string, or undefined when it does not match or does not parse ("2026-13-45T25:61:61Z"). */
+/**
+ * The instant of an RFC 3339 UTC string, or undefined (DEC-0066). The relay's pattern is the syntax gate — `Z` only,
+ * an upper-case `T`, at most nine fraction digits — and `strictTime` then refuses a day its month does not have, hour
+ * 24 and a leap second, which `Date.parse` alone rolls forward ("2026-02-30" would be 2 March).
+ */
 export function instant(value: unknown): number | undefined {
   if (typeof value !== "string" || !RFC3339.test(value)) return undefined;
-  const t = Date.parse(value);
-  return Number.isFinite(t) ? t : undefined;
+  const t = strictTime(value);
+  return Number.isNaN(t) ? undefined : t;
 }
 
 /**
  * ES256 (raw r ‖ s) under a validated P-256 key in either form: `unsupported-alg` for an Ed25519 key, `bad-key` when the
- * key fails SEC 1, `false` when the signature is not 64 canonical bytes or does not verify.
+ * key fails SEC 1, `false` when the signature is not 64 canonical bytes, is not low-S (s > n/2, DEC-0066) or does not
+ * verify. Low-S means nobody but the signer can make a second valid encoding of a signature; a signer normalises with
+ * `toLowS` or signs with `signEs256`.
  */
 export function verifyEs256(key: P256Key, bytes: string, sig: string): boolean | "bad-key" | "unsupported-alg" {
   if (isEd25519Key(key)) return "unsupported-alg";
   if (p256KeyRefusal(key) !== null) return "bad-key";
   const raw = Buffer.from(sig, "base64url");
-  if (raw.length !== 64 || raw.toString("base64url") !== sig) return false;
+  if (raw.length !== 64 || raw.toString("base64url") !== sig || !isLowS(raw)) return false;
   return nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: p256Jwk(key), format: "jwk", dsaEncoding: "ieee-p1363" }, raw);
 }
 
@@ -129,6 +136,8 @@ export const MESSAGE_REFUSALS = [
 ] as const;
 export type MessageRefusal = (typeof MESSAGE_REFUSALS)[number];
 
+/** The only members a message body's JWS header may carry; `kid`, when present, is the signed `from`. */
+const JWS_HEADER_MEMBERS = new Set(["alg", "typ", "kid"]);
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 
 /**
@@ -154,9 +163,13 @@ export function verifyMessageBody(
   }
   if (!isRecord(header) || !isRecord(payload)) return { ok: false, reason: "malformed" };
   if (header.typ !== "fabric-relay-message+jwt" || payload.type !== "fabric-relay-message/1") return { ok: false, reason: "malformed" };
+  // The header is closed (DEC-0066): no `crit` can be honoured, and `jwk`, `jku`, `x5u`, `x5c` or `b64` would let the
+  // body name its own key or change what is signed.
+  if (!Object.keys(header).every((member) => JWS_HEADER_MEMBERS.has(member))) return { ok: false, reason: "malformed" };
   if (header.alg !== RELAY_ALG) return { ok: false, reason: "unsupported-alg" };
   const iat = instant(payload.iat), exp = instant(payload.exp);
   if (typeof payload.from !== "string" || iat === undefined || exp === undefined) return { ok: false, reason: "malformed" };
+  if (header.kid !== undefined && header.kid !== payload.from) return { ok: false, reason: "malformed" };
   const key = senderKey(payload.from);
   if (!key) return { ok: false, reason: "unknown-sender" };
   const verdict = verifyEs256(key, `${parts[0]}.${parts[1]}`, parts[2] as string);
@@ -207,7 +220,8 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   }
   if (!record) return { ok: false, refusal: "no-record" };
   const now = input.at.getTime();
-  const from = Date.parse(String(record.issuedAt)), until = Date.parse(String(record.validUntil));
+  // The window is read by the parser verifyEstateRecord uses, so the relay judges it as the record's verifier did.
+  const from = strictTime(record.issuedAt), until = strictTime(record.validUntil);
   if (!Number.isFinite(now) || !Number.isFinite(from) || !Number.isFinite(until) || now < from || now > until) return { ok: false, refusal: "expired" };
   const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
   const revoked = (kind: string) => new Set(list(record.revocations).filter((entry) => entry.kind === kind).map((entry) => entry.ref));

@@ -1,8 +1,9 @@
-import { createHash, generateKeyPairSync, sign } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { signEs256 } from "../src/p256.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import {
   AUTH_WINDOW_SECONDS, CLOCK_SKEW_SECONDS, CLOSE_CODES, IDLE_CLOSE_SECONDS, MAX_BODY_BYTES, MAX_FRAME_BYTES, MAX_MESSAGE_TTL_SECONDS,
@@ -60,7 +61,7 @@ describe("relay-blob/1", () => {
     const key = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const input = relayBlobSigningInput(fields);
     expect(JSON.parse(input)).toMatchObject({ type: "relay-blob/1", alg: "ES256" });
-    const sig = sign("sha256", Buffer.from(input), { key: key.privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url");
+    const sig = signEs256(key.privateKey, input);
     const pub = key.publicKey.export({ format: "jwk" });
     expect(verifyEs256(pub, input, sig)).toBe(true);
     expect(verifyEs256(pub, relayBlobSigningInput({ ...fields, method: "GET" }), sig)).toBe(false);

@@ -124,6 +124,28 @@ function authFrame(over: Json = {}, key: TestKey = MACHINE, signed: { relay?: st
   return { v: 1, type: "auth", id: "a1", protocol: RELAY_PROTOCOL, alg: RELAY_ALG, ...fields, sig: signDeterministic(key.d, input) };
 }
 
+function instantCases(): Json[] {
+  const c = (name: string, value: unknown, expect: string | null) => ({ name, value, expect });
+  return [
+    c("a real instant", "2026-10-12T00:00:00Z", "2026-10-12T00:00:00.000Z"),
+    c("nine fraction digits", "2026-10-12T00:00:00.123456789Z", "2026-10-12T00:00:00.123Z"),
+    c("ten fraction digits", "2026-10-12T00:00:00.1234567890Z", null),
+    c("month 13", "2026-13-45T25:61:61Z", null),
+    c("30 February", "2026-02-30T00:00:00Z", null),
+    c("31 April", "2026-04-31T12:00:00Z", null),
+    c("29 February in a common year", "2026-02-29T00:00:00Z", null),
+    c("29 February in a leap year", "2028-02-29T00:00:00Z", "2028-02-29T00:00:00.000Z"),
+    c("hour 24", "2026-10-12T24:00:00Z", null),
+    c("a leap second", "2026-12-31T23:59:60Z", null),
+    c("an offset", "2026-10-12T00:00:00+02:00", null),
+    c("a lowercase z", "2026-10-12T00:00:00z", null),
+    c("a lowercase t", "2026-10-12t00:00:00Z", null),
+    c("a date only", "2026-10-12", null),
+    c("not a string", 7, null),
+    c("null", null, null)
+  ];
+}
+
 function admitCases(): Json[] {
   const frame = authFrame();
   const context = (over: Json = {}) => ({ relay: RELAY, nonce: NONCE, nonceUsed: false, now: AUTH_NOW, admitted: { [LAPTOP]: MACHINE.jwk }, ...over });
@@ -152,7 +174,14 @@ function admitCases(): Json[] {
     c("a claimed estate other than the signed one", { ...frame, estate: "urn:fabric:estate:other" }, {}, no("unauthenticated")),
     c("a signature that is not 64 bytes", { ...frame, sig: "AAAA" }, {}, no("unauthenticated")),
     c("a 64-byte signature in a non-canonical spelling", { ...frame, sig: respell(frame.sig as string) }, {}, no("unauthenticated")),
-    c("a signature by another key under the admitted kid", authFrame({}, STRANGER), {}, no("unauthenticated"))
+    c("a signature by another key under the admitted kid", authFrame({}, STRANGER), {}, no("unauthenticated")),
+    // CON-015: the vector's own signature as (r, n − s) verifies under plain ECDSA; low-S refuses it.
+    c("high-S: the vector signature as (r, n - s)", { ...frame, sig: highS(frame.sig as string) }, {}, no("unauthenticated")),
+    // CON-004: a validly signed iat on a day that does not exist, checked inside the window Date.parse would roll it to.
+    c("iat 30 February, validly signed", authFrame({ iat: "2026-02-30T00:00:00Z" }), { now: "2026-03-02T00:00:30Z" }, no("unauthenticated")),
+    c("iat 31 April, validly signed", authFrame({ iat: "2026-04-31T12:00:00Z" }), { now: "2026-05-01T12:00:30Z" }, no("unauthenticated")),
+    c("iat T24:00:00, validly signed", authFrame({ iat: "2026-10-12T24:00:00Z" }), { now: "2026-10-13T00:00:30Z" }, no("unauthenticated")),
+    c("iat :60 (a leap second), validly signed", authFrame({ iat: "2026-12-31T23:59:60Z" }), { now: "2027-01-01T00:00:30Z" }, no("unauthenticated"))
   ];
 }
 
@@ -214,7 +243,15 @@ function messageBodyCases(): Json[] {
       return c(name as string, b, good ? ok(b) : no("lifetime-too-long"), { now: iso(MSG_IAT) });
     }),
     c("a 64-byte signature in a non-canonical spelling", `${h}.${p}.${respell(s)}`, no("bad-signature")),
-    ((b) => c("a header without kid, validly signed", b, ok(b)))(jws({}, { kid: null }))
+    ((b) => c("a header without kid, validly signed", b, ok(b)))(jws({}, { kid: null })),
+    c("high-S: the vector signature as (r, n - s)", `${h}.${p}.${highS(s)}`, no("bad-signature")),
+    // CON-016: the header is exactly {alg, typ, kid}, kid optional and equal to the signed from (DEC-0066).
+    c("a header with crit [\"exp\"], validly signed", jws({}, { crit: ["exp"] }), no("malformed")),
+    c("a header kid that is not the signed from, validly signed", jws({}, { kid: "urn:fabric:machine:evil#sig" }), no("malformed")),
+    c("a header with an embedded jwk, validly signed", jws({}, { jwk: MACHINE.jwk }), no("malformed")),
+    c("a header with b64 false and crit [\"b64\"], validly signed", jws({}, { b64: false, crit: ["b64"] }), no("malformed")),
+    c("a header with an unknown member, validly signed", jws({}, { cty: "json" }), no("malformed")),
+    c("iat 30 February, validly signed", jws({ iat: "2026-02-30T00:00:05Z", exp: "2026-03-02T01:00:05Z" }), no("malformed"), { now: "2026-03-02T00:10:00Z" })
   ];
 }
 
@@ -273,6 +310,8 @@ function blobRequestCases(): Json[] {
     c("a PUT signature used for a GET", "GET", blobHeader({ method: "PUT", kid: B, recipients: [B] }), no(401, "unauthenticated"), { stored: { recipients: [B] } }),
     c("iat 61 s old", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], iat: shift(BLOB_NOW, -61_000) }), no(401, "unauthenticated")),
     c("iat 61 s ahead", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], iat: shift(BLOB_NOW, 61_000) }), no(401, "not-yet-valid")),
+    c("high-S: a valid PUT's signature as (r, n - s)", "PUT", relayRequestHeader({ ...fields, sig: highS(fields.sig) }), no(401, "unauthenticated")),
+    c("iat 30 February, validly signed", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], iat: "2026-02-30T12:00:00Z" }), no(400, "malformed"), { now: "2026-03-02T12:00:30Z" }),
     c("iat that matches the pattern and is no date", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], iat: "2026-13-45T25:61:61Z" }), no(400, "malformed")),
     c("padding on the base64url", "PUT", `${put}=`, no(400, "malformed")),
     c("a non-canonical last base64url character", "PUT", respelledHeader(put), no(400, "malformed")),
@@ -303,6 +342,7 @@ function relayVectors(): Json {
       about: "Fabric-Relay-Request (DEC-0047 item 8): base64url of RFC 8785 {alg, kid, recipients, iat, sig}; sig is ES256 over relayBlobSigningInput. `admitted` is the relay's current admission set by kid; `stored` the blob's recipients when the relay holds it.",
       relay: BLOB_RELAY, digest: BLOB_DIGEST, now: BLOB_NOW, cases: blobRequestCases()
     },
+    instant: { about: "instant(value): RFC 3339 UTC (Z only, at most nine fraction digits) on a day that exists, as an ISO string with milliseconds, or null (DEC-0066).", cases: instantCases() },
     admit: { about: "admit(frame, context) (DEC-0047 item 4).", cases: admitCases() },
     messageBody: { about: "verifyMessageBody(body, frame, senders, now) (DEC-0047 item 5).", cases: messageBodyCases() }
   };

@@ -681,6 +681,55 @@
         }
       },
       {
+        "name": "high-S: a valid PUT's signature as (r, n - s)",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiQjA0OVhIejhaQy02WWFiU0gxZUJpNjlBT0I2eWZ4X0c1YXhELUhTaFRZT1p0aGpxQXZSOVhtZENMSkU0TFZ6RGZUZlhVNGw0U2NTV3pJOXU4aXBic1EifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "iat 30 February, validly signed",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMDItMzBUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiajJZX2VZOFRsSzNZcUNieDRLenZRMXpZV28zdFNMVGxSZjhJU25FM1h5VXpYZl96aWgzV3E3cmJHRHhOOWNtUjhpRGJaZjM2R1JJRTlKQWp2RWc2U0EifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "now": "2026-03-02T12:00:30Z",
+        "expect": {
+          "ok": false,
+          "status": 400,
+          "code": "malformed"
+        }
+      },
+      {
         "name": "iat that matches the pattern and is no date",
         "method": "PUT",
         "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTMtNDVUMjU6NjE6NjFaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoic19TX0lXUkVfX2RuUTlvQjRSeEM0ZHRDNUJuR3hOYlRSNW1VTW9kTXF0NXRvU0VoM3BBcTdobG5FdWh2NnJudk56WDdGd0gwMk9KS0xUaTRIbEVscWcifQ",
@@ -943,6 +992,91 @@
           "status": 400,
           "code": "malformed"
         }
+      }
+    ]
+  },
+  "instant": {
+    "about": "instant(value): RFC 3339 UTC (Z only, at most nine fraction digits) on a day that exists, as an ISO string with milliseconds, or null (DEC-0066).",
+    "cases": [
+      {
+        "name": "a real instant",
+        "value": "2026-10-12T00:00:00Z",
+        "expect": "2026-10-12T00:00:00.000Z"
+      },
+      {
+        "name": "nine fraction digits",
+        "value": "2026-10-12T00:00:00.123456789Z",
+        "expect": "2026-10-12T00:00:00.123Z"
+      },
+      {
+        "name": "ten fraction digits",
+        "value": "2026-10-12T00:00:00.1234567890Z",
+        "expect": null
+      },
+      {
+        "name": "month 13",
+        "value": "2026-13-45T25:61:61Z",
+        "expect": null
+      },
+      {
+        "name": "30 February",
+        "value": "2026-02-30T00:00:00Z",
+        "expect": null
+      },
+      {
+        "name": "31 April",
+        "value": "2026-04-31T12:00:00Z",
+        "expect": null
+      },
+      {
+        "name": "29 February in a common year",
+        "value": "2026-02-29T00:00:00Z",
+        "expect": null
+      },
+      {
+        "name": "29 February in a leap year",
+        "value": "2028-02-29T00:00:00Z",
+        "expect": "2028-02-29T00:00:00.000Z"
+      },
+      {
+        "name": "hour 24",
+        "value": "2026-10-12T24:00:00Z",
+        "expect": null
+      },
+      {
+        "name": "a leap second",
+        "value": "2026-12-31T23:59:60Z",
+        "expect": null
+      },
+      {
+        "name": "an offset",
+        "value": "2026-10-12T00:00:00+02:00",
+        "expect": null
+      },
+      {
+        "name": "a lowercase z",
+        "value": "2026-10-12T00:00:00z",
+        "expect": null
+      },
+      {
+        "name": "a lowercase t",
+        "value": "2026-10-12t00:00:00Z",
+        "expect": null
+      },
+      {
+        "name": "a date only",
+        "value": "2026-10-12",
+        "expect": null
+      },
+      {
+        "name": "not a string",
+        "value": 7,
+        "expect": null
+      },
+      {
+        "name": "null",
+        "value": null,
+        "expect": null
       }
     ]
   },
@@ -1593,6 +1727,166 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "high-S: the vector signature as (r, n - s)",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:00:00Z",
+          "sig": "RJbXBOyiw81mI0J2SKA1eKL9hkIbqNwrkwBS55NXsNn5_f4lk18185K90-zG7BnPEReAcpj9p4BFJsrX9JRNhw"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:30Z",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "iat 30 February, validly signed",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-02-30T00:00:00Z",
+          "sig": "4755z6pHDOJTmO_MmsVf8kPxsC6tNk8LK7OaZQgEj_d1boLQq5dujs74LITIHIx8_IcmWg4skubFPLYsW8rJlQ"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-03-02T00:00:30Z",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "iat 31 April, validly signed",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-04-31T12:00:00Z",
+          "sig": "MiWE5YmAUSf4wIvpVmjDQws5MmJ2o5qcCCskqqiDC3Q1THDs6CJEdwFgPDWo61ldKz7L3ZBZ2oZZAXr8R8W9sQ"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-05-01T12:00:30Z",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "iat T24:00:00, validly signed",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T24:00:00Z",
+          "sig": "zVjvtCuj3imSljKQ-6iiyjg7aDARwCez2SjeMJ3JHv0V9xFJcf23-gF09kQzn3oiZV0FEE_CHzWiYm670N346g"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-13T00:00:30Z",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "iat :60 (a leap second), validly signed",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-12-31T23:59:60Z",
+          "sig": "VRr-UG-k5mM9msecRkH408-TXBibiVX_9oNJSLxwGFxuZfTBJ2U-H2L3vlDDoctjShIp7Dp29PpFCPlJNLdXZg"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2027-01-01T00:00:30Z",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -2329,6 +2623,160 @@
             "to": "urn:fabric:machine:example-gpu-box#sig",
             "type": "fabric-relay-message/1"
           }
+        }
+      },
+      {
+        "name": "high-S: the vector signature as (r, n - s)",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.i7Kd7zq74oov7bYsKToFqDv4j2WVIkwH4cBVFpPsfbHSv2XlQtwPcI9o7nA9rW0iSTNk6LoB0LPvpRkw06A_Ig",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "bad-signature"
+        }
+      },
+      {
+        "name": "a header with crit [\"exp\"], validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImNyaXQiOlsiZXhwIl0sImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.kh0SP1y5FLZizZnUxMd-2ZZJe_oSCYPg1raV0Iw1r5x6NBY_KZPmMpSeyGyW4hFAAzaho4PKORhY4rBc_UjMIQ",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a header kid that is not the signed from, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpldmlsI3NpZyIsInR5cCI6ImZhYnJpYy1yZWxheS1tZXNzYWdlK2p3dCJ9.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.AYnf-ANgpXnaujFA8wdtZYFNxcBVslw5Zd_AaITt9jRMKiHYEBdYf4DaliXy0VvBV-nSgwxQ4d80mOdlAU8PQw",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a header with an embedded jwk, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImp3ayI6eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6IjBqVno5bERDdFdaaV9TM0NSTjR6YktGRkhDT2d5WVVzNlMxb3JoUFpCZXciLCJ5IjoidEc4YUw4STNCcGJVeUROalF2SjRXaFRTSm1MVC1UWmpCZ0RBSDE2bENyNCJ9LCJraWQiOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwidHlwIjoiZmFicmljLXJlbGF5LW1lc3NhZ2Urand0In0.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.s0zyUyhrl790aAxXHwcjzZWzGWhxkkiQkzSJ2luDLG1DEUZZZKGUD3Q21SNcY3fU7QGgtVKD7RdglzW0XA9L3A",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a header with b64 false and crit [\"b64\"], validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il0sImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.m9CHH2dz0bNARJ_UqGrFw37TbFvsPH6NpJuqT4JZrCwpqYTy5ZCh5u5jdbQP6RJGiJ91yLeo3tc2Hry2YVu7Qg",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a header with an unknown member, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImN0eSI6Impzb24iLCJraWQiOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwidHlwIjoiZmFicmljLXJlbGF5LW1lc3NhZ2Urand0In0.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.G3o6SIFQpvJsZp7F1-EoUOSrK_M1VTJZt-j45TnaJlNk1RlzJ46ESFLON72wbXwBw2dLvOjzvwYCCcQewlhhgw",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "iat 30 February, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTAzLTAyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0wMi0zMFQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.Nryy2WkNZYgydIy64TGsHlgO1QldAgdXWBOCZ9dXctgvYvJ-kRaC6I4HdmVp7JqCcoIjo9tA-pNtbNvnf8RAzQ",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "to": "urn:fabric:machine:example-gpu-box#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11"
+        },
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-03-02T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
         }
       }
     ]
