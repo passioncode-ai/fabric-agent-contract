@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "consent.prompt",
+  "params": {
+    "promptId": "p-1",
+    "purposeId": "time-tracking",
+    "noticeVersion": "2026-10"
+  }
+}

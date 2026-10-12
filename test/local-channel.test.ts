@@ -1,13 +1,17 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
-import { admitPeer, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, LOCAL_CHANNEL_PROTOCOL, mayPrompt, NODE_METHODS } from "../src/local-channel.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { createValidator, validateDocument } from "../src/validator.js";
+import { admitPeer, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, mayPrompt, NODE_METHODS } from "../src/local-channel.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0075 (CON-OE-10, v4 edition, agreed with Project Observatory's session): the local channel to the node.
 const dir = path.join(projectRoot(), "fixtures/semantic");
 const cases = readdirSync(dir).filter((name) => name.startsWith("local-channel-session-")).map((name) => [name, JSON.parse(readFileSync(path.join(dir, name), "utf8"))] as const);
+const validator = await createValidator();
+const def = (name: string, value: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/local-channel.schema.json#/$defs/${name}`, value).valid;
+const whole = (value: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/local-channel.schema.json`, value).valid;
 const fresh = { hello: false, accepted: [LOCAL_CHANNEL_PROTOCOL] };
 const hello = (params: unknown) => ({ jsonrpc: "2.0", id: 1, method: "channel.hello", params });
 
@@ -22,10 +26,10 @@ describe("admitPeer", () => {
 
 describe("channelStep", () => {
   it("answers nothing before hello, and anything the node serves after it", () => {
-    expect(channelStep(fresh, { method: "health" })).toMatchObject({ ok: false, code: "hello-first" });
+    expect(channelStep(fresh, { id: 1, method: "health" })).toMatchObject({ ok: false, code: "hello-first" });
     const after = channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric", version: "0.4.0" } }));
     expect(after).toMatchObject({ ok: true, state: { hello: true, capabilities: [] } });
-    expect(channelStep(after.state, { method: "health" })).toMatchObject({ ok: true });
+    expect(channelStep(after.state, { id: 2, method: "health" })).toMatchObject({ ok: true });
     // A second hello is refused and changes nothing.
     const again = channelStep(after.state, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric", version: "0.4.0" }, capabilities: ["consent.ui"] }));
     expect(again).toMatchObject({ ok: false, code: "invalid-request", state: after.state });
@@ -38,7 +42,7 @@ describe("channelStep", () => {
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric" } }))).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui", 7] }))).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: "consent.ui" }))).toMatchObject({ ok: false, code: "invalid-params" });
-    expect(channelStep(fresh, { method: "channel.hello" })).toMatchObject({ ok: false, code: "invalid-params" });
+    expect(channelStep(fresh, { id: 1, method: "channel.hello" })).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, null)).toMatchObject({ ok: false, code: "hello-first" });
   });
   it("prompts for consent only on a session whose client declared consent.ui", () => {
@@ -79,5 +83,65 @@ describe("methods, codes and consent outcomes", () => {
     expect(consentOutcome(t, t + 1000, [])).toBe("denied");
     expect(consentOutcome(Number.NaN, t, [{ at: t, state: "given" }])).toBe("denied");
     expect(consentOutcome(t, t + 1000, [{ at: Number.NaN, state: "given" }, { at: t + 1, state: "maybe" }])).toBe("denied");
+    expect(consentOutcome(t, t + 1000, [{ at: t - 3_600_000, state: "given" }])).toBe("denied");
+    expect(consentOutcome(t, t - 1000, [{ at: t - 2000, state: "given" }])).toBe("denied");
+    expect(consentOutcome(t, t, [{ at: t, state: "given" }])).toBe("denied");
+  });
+});
+
+describe("hello as the schema reads it, notifications, client methods, limits", () => {
+  const client = { name: "fabric", version: "0.4.0" };
+  const ok = { protocols: [LOCAL_CHANNEL_PROTOCOL], client };
+  it("refuses every hello the schema refuses, and agrees on a good one", () => {
+    const bad = [
+      { ...ok, client: { name: "Fabric App", version: "1" } },
+      { ...ok, tokn: "x" },
+      { ...ok, capabilities: ["consent.ui", "consent.ui"] },
+      { ...ok, client: { ...client, version: "v".repeat(65) } },
+      { ...ok, token: "short" },
+      { ...ok, protocols: [7, LOCAL_CHANNEL_PROTOCOL] },
+      { ...ok, protocols: [] },
+      { ...ok, client: { ...client, extra: 1 } }
+    ];
+    for (const params of bad) {
+      expect(def("hello", params), JSON.stringify(params)).toBe(false);
+      expect(channelStep(fresh, hello(params)), JSON.stringify(params)).toMatchObject({ ok: false, code: "invalid-params" });
+    }
+    expect(def("hello", { ...ok, token: "t".repeat(16), capabilities: ["consent.ui"] })).toBe(true);
+    expect(channelStep(fresh, hello({ ...ok, token: "t".repeat(16), capabilities: ["consent.ui"] }))).toMatchObject({ ok: true });
+  });
+  it("never answers a notification, and answers a client method sent to the node as unknown", () => {
+    expect(channelStep(fresh, { jsonrpc: "2.0", method: "consent.cancel", params: { promptId: "p" } })).toMatchObject({ ok: false, code: null });
+    const after = channelStep(fresh, hello(ok)).state;
+    expect(channelStep(after, { jsonrpc: "2.0", id: 3, method: "consent.prompt", params: {} })).toMatchObject({ ok: false, code: "unknown-method" });
+    expect(channelStep(fresh, { jsonrpc: "2.0", id: 3, method: "consent.prompt" })).toMatchObject({ ok: false, code: "hello-first" });
+    expect(NODE_METHODS.has("consent.prompt")).toBe(false);
+  });
+  it("holds a line to 1 MiB", () => {
+    expect(lineWithinLimit("x".repeat(MAX_LINE_BYTES))).toBe(true);
+    expect(lineWithinLimit("x".repeat(MAX_LINE_BYTES + 1))).toBe(false);
+    expect(lineWithinLimit("é".repeat(MAX_LINE_BYTES / 2 + 1))).toBe(false);
+  });
+});
+
+describe("the message definitions validate what they name", () => {
+  it("binds health, enroll.status, the consent prompt and result, and the hello result", () => {
+    expect(def("health", { status: "ready", version: "1", protocols: [LOCAL_CHANNEL_PROTOCOL], degraded: [] })).toBe(true);
+    expect(def("health", { status: "ready", version: "1", protocols: [LOCAL_CHANNEL_PROTOCOL] })).toBe(false);
+    expect(def("enrollStatus", { enrolled: true, org: "org-1" })).toBe(true);
+    expect(def("enrollStatus", {})).toBe(false);
+    expect(def("consentResult", { state: "given", at: "2026-10-12T10:00:00Z" })).toBe(true);
+    expect(def("consentResult", { state: "given" })).toBe(false);
+    expect(def("consentResult", { state: "denied" })).toBe(true);
+    expect(def("consentPrompt", { promptId: "p", purposeId: "Time Tracking!", noticeVersion: "2026-10", deadline: "2026-10-12T10:00:00Z" })).toBe(false);
+    expect(def("helloResult", { protocols: [LOCAL_CHANNEL_PROTOCOL] })).toBe(true);
+    expect(def("notification", { jsonrpc: "2.0", method: "consent.cancel", params: { promptId: "p" }, extra: 1 })).toBe(false);
+  });
+  it("ties each error code to its integer, both ways", () => {
+    for (const [code, integer] of ERROR_CODES) {
+      expect(whole({ jsonrpc: "2.0", id: 1, error: { code: integer, message: "m", data: { code } } }), code).toBe(true);
+      expect(whole({ jsonrpc: "2.0", id: 1, error: { code: integer + 1000, message: "m", data: { code } } }), code).toBe(false);
+    }
+    expect(whole({ jsonrpc: "2.0", id: 1, error: { code: -32004, message: "m" } })).toBe(false);
   });
 });

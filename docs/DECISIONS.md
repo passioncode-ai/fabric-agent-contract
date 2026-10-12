@@ -4056,7 +4056,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      under 100 bytes.
   4. **Consent.** The node sends `consent.prompt` with a deadline of at most 10 minutes to every client that declared
      `consent.ui` (`mayPrompt`); the first answer before the deadline wins (`given` carries its time), the others receive
-     `consent.cancel`, and no answer or a late one is denied (`consentOutcome`).
+     `consent.cancel`, and no answer or a late one is denied (`consentOutcome`, on the node's receipt time); a `given`
+     answer becomes DEC-0052's `consent`, a denied one records nothing; with no `consent.ui` client, denied at the
+     deadline.
   5. **Errors** in the JSON-RPC envelope with `error.data.code` from one set and one integer per code (`ERROR_CODES`);
      an Administrators process that opens a Windows pipe is admitted only with the node's user SID.
 - **Why:** three surfaces need to reach the node on one machine without a network port, a browser origin or a second
@@ -4067,14 +4069,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - spec: `docs/specification/local-channel.md` (new), `docs/specification/service.md`,
     `docs/specification/conformance.md`;
   - schemas: `schemas/local-channel.schema.json` (new), `schemas/service-descriptor.schema.json` (`channels`);
-  - code: `src/local-channel.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts`;
+  - code: `src/local-channel.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts` (named-only);
   - fixtures: `fixtures/positive/local-channel-*`, `fixtures/negative/local-channel-*`,
     `fixtures/positive/service-descriptor-local-channel.json`, `fixtures/negative/service-descriptor-local-channel-both.json`,
     `fixtures/semantic/local-channel-session-*`, `fixtures/catalogue.json`;
   - tests: `test/local-channel.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
     `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
   - docs: `docs/backlog.md` (CT-03, CT-16, CT-19, CT-20, CT-21), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
-- **Not decided here:** the key helper's code-signing check of its peer; payload methods' shapes.
+- **Not decided here:** the key helper's code-signing check of its peer; payload methods' shapes; which descriptor `id`
+  a client trusts as the node's (its configuration).
 - **Source:** the first organization server's target architecture v4 at `9c6a780` (§5); the organization architecture
   v2's contract plan row CON-OE-10 and its CROSSWALK-v4; Project Observatory's session (2026-10-12); DEC-0015,
   DEC-0033, DEC-0052, DEC-0067; packet P6-04. DEC-0075 and `FAC-SEM-106` were reserved by git CAS (`--key

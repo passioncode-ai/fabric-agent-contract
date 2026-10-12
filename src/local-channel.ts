@@ -41,7 +41,30 @@ export type ChannelState = { hello: boolean; accepted: readonly string[]; capabi
 /** Limits of a session (DEC-0075): hello within 5 s, one line at most 1 MiB. */
 export const HELLO_DEADLINE_MS = 5000;
 export const MAX_LINE_BYTES = 1024 * 1024;
-export type ChannelAnswer = { ok: true; state: ChannelState } | { ok: false; code: "hello-first" | "schema-unsupported" | "invalid-params" | "invalid-request"; state: ChannelState };
+export type ChannelAnswer =
+  | { ok: true; state: ChannelState }
+  | { ok: false; code: "hello-first" | "schema-unsupported" | "invalid-params" | "invalid-request" | "unknown-method"; state: ChannelState }
+  | { ok: false; code: null; state: ChannelState };
+
+const CLIENT_NAME = /^[a-z][a-z0-9-]{0,63}$/;
+const isText = (value: unknown, max: number, min = 1) => typeof value === "string" && value.length >= min && value.length <= max;
+
+/** Whether `channel.hello` params are what `local-channel.schema.json#/$defs/hello` accepts. */
+function helloParamsValid(params: Record<string, unknown>): boolean {
+  const allowed = new Set(["protocols", "client", "capabilities", "token"]);
+  if (Object.keys(params).some((key) => !allowed.has(key))) return false;
+  const { protocols, client, capabilities, token } = params;
+  if (!Array.isArray(protocols) || protocols.length === 0 || protocols.length > 64 || !protocols.every((entry) => typeof entry === "string") || new Set(protocols).size !== protocols.length) return false;
+  if (!isObject(client) || Object.keys(client).some((key) => key !== "name" && key !== "version") || typeof client.name !== "string" || !CLIENT_NAME.test(client.name) || !isText(client.version, 64)) return false;
+  if (capabilities !== undefined && (!Array.isArray(capabilities) || capabilities.length > 16 || !capabilities.every((entry) => entry === "consent.ui") || new Set(capabilities).size !== capabilities.length)) return false;
+  if (token !== undefined && !isText(token, 512, 16)) return false;
+  return true;
+}
+
+/** Whether a received line is within the session's limit; a longer one is `invalid-request` and the node closes. */
+export function lineWithinLimit(line: string): boolean {
+  return Buffer.byteLength(line, "utf8") <= MAX_LINE_BYTES;
+}
 
 /**
  * One request against the session: before `channel.hello` nothing else is answered (`hello-first`); a hello whose
@@ -49,16 +72,16 @@ export type ChannelAnswer = { ok: true; state: ChannelState } | { ok: false; cod
  * `invalid-params`. Method dispatch after hello is the node's.
  */
 export function channelStep(state: ChannelState, request: unknown): ChannelAnswer {
+  // A notification (no id) is never answered, whatever it is.
+  if (isObject(request) && request.id === undefined) return { ok: false, code: null, state };
   const method = isObject(request) ? request.method : undefined;
+  if (typeof method === "string" && CLIENT_METHODS.has(method)) return { ok: false, code: state.hello ? "unknown-method" : "hello-first", state };
   if (method !== "channel.hello") return state.hello ? { ok: true, state } : { ok: false, code: "hello-first", state };
   // One hello per session: a second never changes what the first agreed.
   if (state.hello) return { ok: false, code: "invalid-request", state };
   const params = isObject(request) && isObject(request.params) ? request.params : {};
-  const offered = Array.isArray(params.protocols) ? params.protocols : undefined;
-  const client = isObject(params.client) ? params.client : undefined;
-  const named = client !== undefined && typeof client.name === "string" && client.name.length > 0 && typeof client.version === "string" && client.version.length > 0;
-  const capabilitiesOk = params.capabilities === undefined || (Array.isArray(params.capabilities) && params.capabilities.every((entry) => entry === "consent.ui"));
-  if (!offered || !named || !capabilitiesOk) return { ok: false, code: "invalid-params", state };
+  if (!helloParamsValid(params)) return { ok: false, code: "invalid-params", state };
+  const offered = params.protocols as unknown[];
   const answers = offered.map((entry) => negotiateRevision(entry, state.accepted));
   if (!answers.some((answer) => "ok" in answer)) return { ok: false, code: "schema-unsupported", state };
   const capabilities = Array.isArray(params.capabilities) ? (params.capabilities as string[]) : [];
@@ -71,12 +94,14 @@ export function mayPrompt(state: ChannelState): boolean {
 }
 
 /**
- * A consent prompt's outcome (DEC-0075): the first `given` or `denied` answered before the deadline wins; no answer by
- * the deadline, or a deadline beyond 10 minutes from the prompt, is `denied`; a late answer is ignored. Times in ms.
+ * A consent prompt's outcome (DEC-0075): the first `given` or `denied` the node received between the prompt and the
+ * deadline wins; no answer by then, a deadline not after the prompt or more than 10 minutes after it is `denied`; a late
+ * answer is ignored. `at` here is the node's receipt time, never the client's own `consentResult.at`, so a client cannot
+ * backdate an answer. Times in ms.
  */
 export function consentOutcome(promptedAt: number, deadline: number, answers: ReadonlyArray<{ at: number; state: string }>): "given" | "denied" {
-  if (!Number.isFinite(promptedAt) || !Number.isFinite(deadline) || deadline - promptedAt > MAX_CONSENT_DEADLINE_MS) return "denied";
-  const first = answers.filter((answer) => Number.isFinite(answer.at) && answer.at <= deadline && (answer.state === "given" || answer.state === "denied")).sort((a, b) => a.at - b.at)[0];
+  if (!Number.isFinite(promptedAt) || !Number.isFinite(deadline) || deadline <= promptedAt || deadline - promptedAt > MAX_CONSENT_DEADLINE_MS) return "denied";
+  const first = answers.filter((answer) => Number.isFinite(answer.at) && answer.at >= promptedAt && answer.at <= deadline && (answer.state === "given" || answer.state === "denied")).sort((a, b) => a.at - b.at)[0];
   return first?.state === "given" ? "given" : "denied";
 }
 

@@ -10,13 +10,17 @@ machine, with no network port, no browser origin and no `policy.decide`.
 - **DEC-0075**, reserved by git CAS; rule code **FAC-SEM-106** (receipt SEM-0106). Agreed with Project Observatory's
   session, its changes taken whole (socket locations, the 0700 directory as access control, Windows pipe checks,
   hello within 5 s, 1 MiB lines, consent prompted only to `consent.ui` clients with a deadline and a cancel).
-- Schema `local-channel.schema.json`; the descriptor's `channels.local`; `src/local-channel.ts` (`admitPeer`,
-  `channelStep`, `mayPrompt`, `FAC-SEM-106`); the revision registered (DEC-0067).
+- Schema `local-channel.schema.json` (params bound by method, each error code tied to its integer); the descriptor's
+  `channels.local` (an absolute path of at most 99 bytes or a per-user pipe; none on a remote placement);
+  `src/local-channel.ts` (`admitPeer`, `channelStep`, `mayPrompt`, `consentOutcome`, `lineWithinLimit`, `NODE_METHODS`,
+  `CLIENT_METHODS`, `ERROR_CODES`, `FAC-SEM-106`); the revision registered (DEC-0067, named-only).
+- Two readings before merge: Project Observatory's session (node side) and an independent three-tier reading; both
+  fix rounds are in.
 - Spec [local channel](../specification/local-channel.md); service.md; CT-03, CT-16, CT-19, CT-20, CT-21.
 
 ## Checks run
 
-Off main `9c0032a`: `tsc --noEmit` exit 0; vitest 61 files, 3209 tests, every floor met (`local-channel.ts` 100 %);
+On main `146240a` (merged): `tsc --noEmit` exit 0; vitest 61 files, 3234 tests, every floor met (`local-channel.ts` 100 %);
 docs-check passed; markdownlint 0 errors; privacy 0 findings with `ORG_INDEX`.
 
 ## Open

@@ -49,7 +49,53 @@
           "type": "object"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "method"
+            ],
+            "properties": {
+              "method": {
+                "const": "channel.hello"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "params"
+            ],
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/hello"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "method"
+            ],
+            "properties": {
+              "method": {
+                "const": "consent.prompt"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "params"
+            ],
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/consentPrompt"
+              }
+            }
+          }
+        }
+      ]
     },
     "result": {
       "type": "object",
@@ -114,7 +160,8 @@
           "type": "object",
           "required": [
             "code",
-            "message"
+            "message",
+            "data"
           ],
           "properties": {
             "code": {
@@ -139,10 +186,218 @@
                     "invalid-params"
                   ]
                 }
-              }
+              },
+              "required": [
+                "code"
+              ]
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "invalid-request"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32600
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "unknown-method"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32601
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "invalid-params"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32602
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "unauthenticated"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32001
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "forbidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32003
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "schema-unsupported"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32004
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "properties": {
+                      "code": {
+                        "const": "hello-first"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": -32005
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -279,14 +534,10 @@
           "maxLength": 128
         },
         "purposeId": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128
+          "$ref": "activity-common.schema.json#/$defs/purposeId"
         },
         "noticeVersion": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 64
+          "$ref": "activity-common.schema.json#/$defs/noticeVersion"
         },
         "deadline": {
           "$ref": "common.schema.json#/$defs/timestamp"

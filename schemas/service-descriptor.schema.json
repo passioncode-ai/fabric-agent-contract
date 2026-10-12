@@ -160,15 +160,18 @@
           ],
           "properties": {
             "protocol": {
-              "const": "fabric-local-channel/0.1"
+              "type": "string",
+              "pattern": "^fabric-local-channel/[0-9]{1,4}(\\.[0-9]{1,4}){0,2}$"
             },
             "path": {
-              "$ref": "service-common.schema.json#/$defs/localPath",
-              "description": "POSIX: the socket, in a directory of mode 0700 the node owns."
+              "type": "string",
+              "pattern": "^/[^\\u0000]{1,98}$",
+              "maxLength": 99,
+              "description": "POSIX: the absolute socket path, at most 99 bytes as published (sun_path), in a directory of mode 0700 the node owns; never under ~."
             },
             "pipe": {
               "type": "string",
-              "pattern": "^\\\\\\\\\\.\\\\pipe\\\\[A-Za-z0-9._-]{1,64}-S-1-[0-9-]{3,180}$",
+              "pattern": "^\\\\\\\\\\.\\\\pipe\\\\[A-Za-z0-9._-]{1,64}-S-1-[0-9]+(-[0-9]+){1,14}$",
               "description": "Windows: \\\\.\\pipe\\<node>-<user SID>."
             }
           },
@@ -194,7 +197,10 @@
         }
       },
       "additionalProperties": false,
-      "description": "DEC-0075: where a client finds the node's local channel; a client never computes the path."
+      "description": "DEC-0075: where a client finds the node's local channel; a client never computes the path. Meaningful on the node's own descriptor; a remote placement carries none.",
+      "required": [
+        "local"
+      ]
     },
     "lifecycle": {
       "type": "object",
@@ -580,7 +586,8 @@
               "update": false
             },
             "type": "object"
-          }
+          },
+          "channels": false
         }
       },
       "else": {

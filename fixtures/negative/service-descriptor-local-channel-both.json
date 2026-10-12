@@ -13,7 +13,7 @@
   "channels": {
     "local": {
       "protocol": "fabric-local-channel/0.1",
-      "path": "~/Library/Application Support/example-node/run/node.sock",
+      "path": "/run/user/1000/example-node/node.sock",
       "pipe": "\\\\.\\pipe\\example-node-S-1-5-21-1-2-3-1001"
     }
   },
