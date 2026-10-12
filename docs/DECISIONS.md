@@ -395,6 +395,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; provider and consumer adoption pending
+- **Annotated (2026-10-12):** the reserved name `memory.learning.propose` is withdrawn by DEC-0072: learning lives in Fabric (Fabric ADR-0109) and a learning note is `learning-note/1`.
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Supersedes:** DEC-0014's pilot, for agent memory only (Fabric ADR-0105). DEC-0014 still
   governs Fabric's own domain memory.
@@ -4001,6 +4002,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
   DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
   w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0072 — Proposals and learning notes: `fabric-proposal/1` and `learning-note/1`, nothing applies itself, nothing private leaves
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Fabric's session on 2026-10-12 (its five
+  corrections against ADR-0109 and ADR-0029). Consumer adoption: Fabric keeps proposals and answers learning notes in
+  this shape and refuses a private proposal at submit (CT-19); Project Observatory sends learning notes and Fix
+  proposals by reference (CT-20); the first organization server receives approved rules and listings only (CT-04).
+- **Amends:** DEC-0023 (`memory.learning.propose` withdrawn). Implements the organization edition's CON-OE-05 (kept by
+  its CROSSWALK-v4; `proposal.submit` also serves a listing, v4 Path 4). Closes the board run's inventory item
+  CON-OE-05 (node N12, packet P6-03).
+- **Decision:** in [proposals](specification/proposals.md) —
+  1. **`fabric-proposal/1`**: `type` `rule` | `new-agent` | `skill-promotion` | `skill-retirement` | `listing` | `fix`;
+     `goal` required for the first four; `evidence[]` by reference only; a fix carries its `finding` and, once its source
+     stops reporting it, `verifiedAt` and `verifiedRun`; `target` the owning project's manager or the CEO; `private`
+     for a private agent's proposal (schema).
+  2. **Decisions.** `status` moves only along proposed → approved | refused | merged | superseded → applied → retired, and
+     `verified` for a fix (`FAC-SEM-104`, `PROPOSAL_TRANSITIONS`); `approvedBy` is a person (`operator`,
+     `administrator`) or a recorded autonomy policy — a project manager or the CEO, agent bindings in this contract,
+     decide only under a policy — and a rule's is the operator (`FAC-SEM-104`); an applied rule names the instruction
+     revision it entered (`appliedIn`), not a second approver.
+  3. **What leaves.** Only to an organization server or as an export (filing on the Board is not leaving); never a
+     private agent's proposal; an organization server receives an organization proposal (`sourceClass`) that is an
+     approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home path
+     (`FAC-SEM-103`).
+  4. **`learning-note/1`** from Project Observatory to Fabric, with the answer `accepted` | `duplicate` | `rejected`
+     (`learning-note-answer.schema.json`); evidence by reference, no transcript or secret; a `personal` or `unknown`
+     note never feeds an organization rollout (`FAC-SEM-105`).
+  5. **`memory.learning.propose`** (DEC-0023's reserved name) is withdrawn.
+- **Why:** problems seen in Dashboards and Observatory had no way to reach the system that fixes them, and learning had
+  two candidate homes; one open shape, one direction (Observatory notes, Fabric decides) and rules a test can fail keep
+  "nothing applies itself" and "private stays private" true by construction.
+- **Compatibility:** Additive: three new schemas and a withdrawn reserved name no provider served. `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/proposals.md` (new), `docs/specification/memory-and-learning.md`,
+    `schemas/memory-capability.schema.json` (the reserve removed),
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/fabric-proposal.schema.json`, `schemas/learning-note.schema.json`,
+    `schemas/learning-note-answer.schema.json` (new);
+  - code: `src/proposal-rules.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts` (the two revisions
+    registered, DEC-0067);
+  - fixtures: `fixtures/positive/fabric-proposal-*`, `fixtures/positive/learning-note*`,
+    `fixtures/negative/fabric-proposal-*`, `fixtures/negative/learning-note*`, `fixtures/catalogue.json`;
+  - tests: `test/proposal-rules.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/rule-tolerance.test.ts`;
+  - docs: `docs/backlog.md` (CT-04, CT-16, CT-19, CT-20), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** the v2 plan's `effect` and `measured_by` (not fields; see proposals.md, Relation to DEC-0012);
+  the Board's own screens; how a listing proposal carries the listing (v4 Path 4, with
+  `org-authority/1`); the per-kind autonomy policies' contents (Fabric's).
+- **Source:** Fabric ADR-0029, ADR-0109 and Fabric's session's corrections (2026-10-12); the organization architecture
+  v2's contract plan row CON-OE-05 and its CROSSWALK-v4; DEC-0012, DEC-0023; packet P6-03. DEC-0072 and
+  `FAC-SEM-103`…`FAC-SEM-105` were reserved by git CAS (`--key w6-p6-03-proposals-20261012 DEC`; `--key
+  w6-p6-03-sem-{proposal-submit,proposal-transition,learning-rollout}-20261012 SEM`); the record plane is `fs`.
 
 ### DEC-0074 — A required MCP role names the secret slots that configure it
 

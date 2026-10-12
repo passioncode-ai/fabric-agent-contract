@@ -340,8 +340,9 @@ ADR-0105).
 | `memory.recall` | Page through current records. | `observatory_recall` |
 
 **Rules:**
-- A provider serves all nine capabilities. The names `memory.learning.propose`,
-  `memory.explain` and `memory.forget` are reserved until a later revision defines them.
+- A provider serves all nine capabilities. The names `memory.explain` and `memory.forget` are reserved until a later
+  revision defines them; `memory.learning.propose` is withdrawn (DEC-0072): learning is Fabric's, and a learning note
+  is [`learning-note/1`](proposals.md#a-learning-note).
 - Inputs refuse unknown fields. An unknown capability or family revision is refused, never
   ignored.
 - Identity comes from the transport, never from `owner`. On Fabric's hub hop the provider
