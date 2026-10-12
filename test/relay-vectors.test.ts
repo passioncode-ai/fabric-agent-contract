@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
-import { ADMIT_REFUSALS, BLOB_REFUSALS, MESSAGE_REFUSALS } from "../src/relay.js";
+import { ADMIT_REFUSALS, BLOB_REFUSALS, MESSAGE_REFUSALS, RELAY_ORIGIN_PATTERN } from "../src/relay.js";
 import { ENVELOPE_REFUSALS } from "../src/secret-envelope.js";
 import { envelopeVectorResults, relayVectorResults } from "../src/relay-vectors.js";
 import { P256_CURVE } from "../src/p256.js";
@@ -48,6 +48,12 @@ describe("the shared relay vectors", () => {
 });
 
 describe("hello.relay: the schema and isRelayOrigin agree on every relayOrigin case", () => {
+  it("is one pattern: the schema carries RELAY_ORIGIN_PATTERN exactly", () => {
+    const schema = JSON.parse(read("schemas/relay-frame.schema.json")) as Json;
+    const hello = (schema.oneOf as Json[]).find((variant) => variant.properties.type.const === "hello") as Json;
+    expect(hello.properties.relay.pattern).toBe(RELAY_ORIGIN_PATTERN);
+  });
+
   it.each((relay.relayOrigin.cases as Json[]).map((c) => [c.name, c] as const))("%s", async (_name, c) => {
     const validator = await createValidator();
     const hello = { v: 1, type: "hello", id: "h", protocol: "fabric-relay/0.1", relay: c.value, nonce: "A".repeat(43), time: "2026-10-12T00:00:00Z" };

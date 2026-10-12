@@ -509,6 +509,54 @@
         }
       },
       {
+        "name": "a forged PUT naming a recipient outside the admission set",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YyNzaWciXSwic2lnIjoiUzcxUDBkNndzREE4aWJUU3FKUVhfTi1NNl9yLXh6Q295MzYtOUU5c2tuVkI3MHlfdDRsemhuUk9XMGw1eW1rMklyOXZmZ2dIa3lSbW03M0d3Vm5TNlEifQ",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "expect": {
+          "ok": false,
+          "status": 401,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a kid with a lone surrogate",
+        "method": "PUT",
+        "header": "eyJhbGciOiJFUzI1NiIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoiXHVkODAwI3NpZyIsInJlY2lwaWVudHMiOlsidXJuOmZhYnJpYzptYWNoaW5lOmIjc2lnIl0sInNpZyI6IkIwNDlYSHo4WkMtNllhYlNIMWVCaTY5QU9CNnlmeF9HNWF4RC1IU2hUWU5tU2VjVV9RdUNvcGk5MDI3SDBxTThQNjhqV2gyZlZNQmM3VHRVQ2pqSm9BIn0",
+        "admitted": {
+          "urn:fabric:machine:a#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "CV9tTbtrrzhVcqr_YvQ7-s79a72RLasXjaI0PLhrWCc",
+            "y": "5BdGIVXPo__Sy02UYP0AibMqu801JFqM3h61gNmte_g"
+          },
+          "urn:fabric:machine:b#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "pkmIbb_DHFjD10VAudmj56XR5WiLGdLwbmUvADCWyn4",
+            "y": "4Vwh2N7sNGrVE88ibZgVaUvulMBjIuVhqxYJwUQAOIg"
+          }
+        },
+        "expect": {
+          "ok": false,
+          "status": 400,
+          "code": "malformed"
+        }
+      },
+      {
         "name": "alg other than ES256",
         "method": "PUT",
         "header": "eyJhbGciOiJFZERTQSIsImlhdCI6IjIwMjYtMTAtMTJUMTI6MDA6MDBaIiwia2lkIjoidXJuOmZhYnJpYzptYWNoaW5lOmEjc2lnIiwicmVjaXBpZW50cyI6WyJ1cm46ZmFicmljOm1hY2hpbmU6YiNzaWciXSwic2lnIjoiQjA0OVhIejhaQy02WWFiU0gxZUJpNjlBT0I2eWZ4X0c1YXhELUhTaFRZTm1TZWNVX1F1Q29waTkwMjdIMHFNOFA2OGpXaDJmVk1CYzdUdFVDampKb0EifQ",
@@ -1095,6 +1143,41 @@
         "expect": true
       },
       {
+        "name": "an https origin with port 65535",
+        "value": "https://relay.example:65535",
+        "expect": true
+      },
+      {
+        "name": "https with port 65536",
+        "value": "https://relay.example:65536",
+        "expect": false
+      },
+      {
+        "name": "https with nothing after it",
+        "value": "https://",
+        "expect": false
+      },
+      {
+        "name": "https with a path",
+        "value": "https://x/p",
+        "expect": false
+      },
+      {
+        "name": "https with user information",
+        "value": "https://u@h",
+        "expect": false
+      },
+      {
+        "name": "https followed by a newline",
+        "value": "https://relay.example\nX",
+        "expect": false
+      },
+      {
+        "name": "https on an IPv6 literal",
+        "value": "https://[2001:db8::1]:8443",
+        "expect": true
+      },
+      {
         "name": "http on 127.0.0.1",
         "value": "http://127.0.0.1",
         "expect": true
@@ -1157,6 +1240,11 @@
       {
         "name": "http on 127.0.0.1 with a path",
         "value": "http://127.0.0.1:8787/v1",
+        "expect": false
+      },
+      {
+        "name": "http on 127.0.0.1 with port 99999",
+        "value": "http://127.0.0.1:99999",
         "expect": false
       }
     ]
@@ -2837,6 +2925,72 @@
         }
       },
       {
+        "name": "iat 60.000999999 s ahead, read to the millisecond",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:01:00.000999999Z",
+          "sig": "lcYs26aKuedjh5v97w0auFMCqUw6SLLWf-n9iMD9lRwLZzr1qwDtdE-Nou1mYU-nrwI1mWV3vz96hIfsRF991A"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:00Z",
+          "estate": "urn:fabric:estate:example",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": true,
+          "kid": "urn:fabric:machine:example-laptop#sig"
+        }
+      },
+      {
+        "name": "iat 60.001 s ahead",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:01:00.001Z",
+          "sig": "0H8dCN0vQ9O_CgTBmEYxPmglmsiiGQXMwJydcKM7XMpQ8qE-d5AuJZdK5qVLq_F5m4HIHvm-0ctq9S19FnKO4g"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:00Z",
+          "estate": "urn:fabric:estate:example",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "not-yet-valid"
+        }
+      },
+      {
         "name": "a valid signature over another estate",
         "frame": {
           "v": 1,
@@ -3866,6 +4020,126 @@
           }
         },
         "now": "2026-03-02T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a payload that is not RFC 8785 (pretty-printed), validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.ewogICJleHAiOiAiMjAyNi0xMC0xMlQwMTowMDowNVoiLAogICJmcm9tIjogInVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLAogICJpYXQiOiAiMjAyNi0xMC0xMlQwMDowMDowNVoiLAogICJtc2dJZCI6ICIwYjZmNWYzZS02YTUxLTRkNmUtOWQ1NS00YjhmNmEwZDJjMTEiLAogICJwYXlsb2FkIjogewogICAgImNvbW1hbmQiOiAicnVuLnN0YXJ0IiwKICAgICJydW4iOiAiZXhhbXBsZSIKICB9LAogICJ0byI6ICJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsCiAgInR5cGUiOiAiZmFicmljLXJlbGF5LW1lc3NhZ2UvMSIKfQ.zPruurb7t-q28PJCEXS5-93Q1lnr_Pnc651-re2Zud9zQLFyRRP7FZ5IZS3726UdMzTh_w_nKIqJCL0jqaCprA",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
+          "seq": 1,
+          "sentAt": "2026-10-12T00:00:06Z"
+        },
+        "self": "urn:fabric:machine:example-gpu-box#sig",
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a payload with a duplicate to, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6b3RoZXIjc2lnIiwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.swrK_TNlqoNv4DI6Munhbx_8BENilgf7Ku-8lTQiEqtmNsyGQkO9I0vcrdS8tkvoh5oIh5XJVqNcIWxLObwBmQ",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
+          "seq": 1,
+          "sentAt": "2026-10-12T00:00:06Z"
+        },
+        "self": "urn:fabric:machine:example-gpu-box#sig",
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a payload with an unknown member, validly signed",
+        "body": "eyJhbGciOiJFUzI1NiIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsIm5vdGUiOiJ4IiwicGF5bG9hZCI6eyJjb21tYW5kIjoicnVuLnN0YXJ0IiwicnVuIjoiZXhhbXBsZSJ9LCJ0byI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWdwdS1ib3gjc2lnIiwidHlwZSI6ImZhYnJpYy1yZWxheS1tZXNzYWdlLzEifQ.3IRMA0kDCvo1Gt223bXNXjhsZDydDOoRrh7sm4Hf3xI046DjbkoWW3J3qtt4YBKAPkOQHT6QyFCVrPPv5a5frA",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
+          "seq": 1,
+          "sentAt": "2026-10-12T00:00:06Z"
+        },
+        "self": "urn:fabric:machine:example-gpu-box#sig",
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "a header with a duplicate alg (none, then ES256), validly signed",
+        "body": "eyJhbGciOiJub25lIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwidHlwIjoiZmFicmljLXJlbGF5LW1lc3NhZ2Urand0In0.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMC0xMlQwMDowMDowNVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.288FkppzEATPrrPy-pnS6UoDelkW5CHcnd_KWuvLxaxhG64a2tdQIoHGYFloBkFXXlDdMBer99mShUasdrDQbQ",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
+          "seq": 1,
+          "sentAt": "2026-10-12T00:00:06Z"
+        },
+        "self": "urn:fabric:machine:example-gpu-box#sig",
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
+        "expect": {
+          "ok": false,
+          "reason": "malformed"
+        }
+      },
+      {
+        "name": "alg EdDSA and iat month 13 together",
+        "body": "eyJhbGciOiJFZERTQSIsImtpZCI6InVybjpmYWJyaWM6bWFjaGluZTpleGFtcGxlLWxhcHRvcCNzaWciLCJ0eXAiOiJmYWJyaWMtcmVsYXktbWVzc2FnZStqd3QifQ.eyJleHAiOiIyMDI2LTEwLTEyVDAxOjAwOjA1WiIsImZyb20iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1sYXB0b3Ajc2lnIiwiaWF0IjoiMjAyNi0xMy00NVQyNTo2MTo2MVoiLCJtc2dJZCI6IjBiNmY1ZjNlLTZhNTEtNGQ2ZS05ZDU1LTRiOGY2YTBkMmMxMSIsInBheWxvYWQiOnsiY29tbWFuZCI6InJ1bi5zdGFydCIsInJ1biI6ImV4YW1wbGUifSwidG8iOiJ1cm46ZmFicmljOm1hY2hpbmU6ZXhhbXBsZS1ncHUtYm94I3NpZyIsInR5cGUiOiJmYWJyaWMtcmVsYXktbWVzc2FnZS8xIn0.tKm8nYhIbjVSwGnwjShM8S0o_uSM5Q08LNdmqrWcYdI26nMOGKLPqaZ9WIcARMUIYx8KlYJB623GPbfDJTInew",
+        "frame": {
+          "from": "urn:fabric:machine:example-laptop#sig",
+          "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
+          "seq": 1,
+          "sentAt": "2026-10-12T00:00:06Z"
+        },
+        "self": "urn:fabric:machine:example-gpu-box#sig",
+        "senders": {
+          "urn:fabric:machine:example-laptop#sig": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+            "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+          }
+        },
+        "now": "2026-10-12T00:10:00Z",
         "expect": {
           "ok": false,
           "reason": "malformed"

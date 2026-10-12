@@ -165,6 +165,13 @@ function relayOriginCases(): Json[] {
   return [
     c("an https origin", "https://relay.example", true),
     c("an https origin with a port", "https://relay.example:8443", true),
+    c("an https origin with port 65535", "https://relay.example:65535", true),
+    c("https with port 65536", "https://relay.example:65536", false),
+    c("https with nothing after it", "https://", false),
+    c("https with a path", "https://x/p", false),
+    c("https with user information", "https://u@h", false),
+    c("https followed by a newline", "https://relay.example\nX", false),
+    c("https on an IPv6 literal", "https://[2001:db8::1]:8443", true),
     c("http on 127.0.0.1", "http://127.0.0.1", true),
     c("http on 127.0.0.1 with a port", "http://127.0.0.1:8787", true),
     c("http on another 127/8 address", "http://127.255.0.9:8787", true),
@@ -177,7 +184,8 @@ function relayOriginCases(): Json[] {
     c("http on [::2]", "http://[::2]:8787", false),
     c("http on 0.0.0.0", "http://0.0.0.0:8787", false),
     c("ws on 127.0.0.1", "ws://127.0.0.1:8787", false),
-    c("http on 127.0.0.1 with a path", "http://127.0.0.1:8787/v1", false)
+    c("http on 127.0.0.1 with a path", "http://127.0.0.1:8787/v1", false),
+    c("http on 127.0.0.1 with port 99999", "http://127.0.0.1:99999", false)
   ];
 }
 
@@ -241,6 +249,9 @@ function admitCases(): Json[] {
     c("iat 31 April, validly signed", authFrame({ iat: "2026-04-31T12:00:00Z" }), { now: "2026-05-01T12:00:30Z" }, no("unauthenticated")),
     c("iat T24:00:00, validly signed", authFrame({ iat: "2026-10-12T24:00:00Z" }), { now: "2026-10-13T00:00:30Z" }, no("unauthenticated")),
     c("iat :60 (a leap second), validly signed", authFrame({ iat: "2026-12-31T23:59:60Z" }), { now: "2027-01-01T00:00:30Z" }, no("unauthenticated")),
+    // F4: a time is read to the millisecond (relay.md, Times): 60.000999999 s ahead is 60.000 s ahead.
+    c("iat 60.000999999 s ahead, read to the millisecond", authFrame({ iat: "2026-10-12T00:01:00.000999999Z" }), { now: "2026-10-12T00:00:00Z" }, ok),
+    c("iat 60.001 s ahead", authFrame({ iat: "2026-10-12T00:01:00.001Z" }), { now: "2026-10-12T00:00:00Z" }, no("not-yet-valid")),
     // CON-010 / CX-22: the signed estate is compared with the context's held record inside admit, and is one answer.
     c("a valid signature over another estate", authFrame({ estate: "urn:fabric:estate:other" }), {}, no("unauthenticated")),
     c("a context that holds no record", frame, { estate: null, admitted: {} }, no("unauthenticated"))
@@ -263,6 +274,11 @@ function jws(payload: Json = {}, header: Record<string, unknown> = {}, key: Test
   return `${signed}.${signDeterministic(key.d, signed)}`;
 }
 const DELIVER = { from: LAPTOP, msgId: MSG_ID, seq: 1, sentAt: "2026-10-12T00:00:06Z" };
+/** A body over header and payload texts exactly as given (not RFC 8785), signed by `key`. */
+function jwsRaw(header: string, payload: string, key: TestKey = MACHINE): string {
+  const signed = `${b64(header)}.${b64(payload)}`;
+  return `${signed}.${signDeterministic(key.d, signed)}`;
+}
 const payloadOf = (body: string) => JSON.parse(Buffer.from(body.split(".")[1] as string, "base64url").toString("utf8")) as Json;
 
 function messageBodyCases(): Json[] {
@@ -316,7 +332,14 @@ function messageBodyCases(): Json[] {
     c("a header with an embedded jwk, validly signed", jws({}, { jwk: MACHINE.jwk }), no("malformed")),
     c("a header with b64 false and crit [\"b64\"], validly signed", jws({}, { b64: false, crit: ["b64"] }), no("malformed")),
     c("a header with an unknown member, validly signed", jws({}, { cty: "json" }), no("malformed")),
-    c("iat 30 February, validly signed", jws({ iat: "2026-02-30T00:00:05Z", exp: "2026-03-02T01:00:05Z" }), no("malformed"), { now: "2026-03-02T00:10:00Z" })
+    c("iat 30 February, validly signed", jws({ iat: "2026-02-30T00:00:05Z", exp: "2026-03-02T01:00:05Z" }), no("malformed"), { now: "2026-03-02T00:10:00Z" }),
+    // F5: the signed bytes are RFC 8785 of exactly the members the format names, or the body is malformed.
+    c("a payload that is not RFC 8785 (pretty-printed), validly signed", jwsRaw(rfc8785(JSON.parse(Buffer.from(h, "base64url").toString("utf8"))), JSON.stringify(payloadOf(body), null, 2)), no("malformed")),
+    c("a payload with a duplicate to, validly signed", jwsRaw(rfc8785(JSON.parse(Buffer.from(h, "base64url").toString("utf8"))), rfc8785(payloadOf(body)).replace('"to":', '"to":"urn:fabric:machine:other#sig","to":')), no("malformed")),
+    c("a payload with an unknown member, validly signed", jws({ note: "x" }), no("malformed")),
+    c("a header with a duplicate alg (none, then ES256), validly signed", jwsRaw(`{"alg":"none","alg":"ES256","kid":"${LAPTOP}","typ":"fabric-relay-message+jwt"}`, rfc8785(payloadOf(body))), no("malformed")),
+    // F6: malformed comes before unsupported-alg, as relay.md orders them.
+    c("alg EdDSA and iat month 13 together", jws({ iat: "2026-13-45T25:61:61Z" }, { alg: "EdDSA" }), no("malformed"))
   ];
 }
 
@@ -384,6 +407,10 @@ function blobRequestCases(): Json[] {
     c("a forged GET of a held blob", "GET", blobHeader({ method: "GET", kid: B, recipients: [B], key: STRANGER }), no(401, "unauthenticated"), { stored: { recipients: [B] } }),
     c("a forged GET of a blob the relay does not hold", "GET", blobHeader({ method: "GET", kid: B, recipients: [B], key: STRANGER }), no(401, "unauthenticated")),
     c("a forged GET by a kid outside the admission set", "GET", blobHeader({ method: "GET", kid: "urn:fabric:machine:c#sig", recipients: [B], key: STRANGER }), no(401, "unauthenticated"), { stored: { recipients: [B] } }),
+    // The owner's mutant M19: the recipients are checked only after the signer is proven.
+    c("a forged PUT naming a recipient outside the admission set", "PUT", blobHeader({ method: "PUT", kid: A, recipients: ["urn:fabric:machine:c#sig"], key: STRANGER }), no(401, "unauthenticated")),
+    // F3: a lone surrogate has no RFC 8785 form; the header is malformed, never a throw.
+    c("a kid with a lone surrogate", "PUT", raw(`{"alg":"ES256","iat":"${BLOB_IAT}","kid":"\\ud800#sig","recipients":["${B}"],"sig":"${fields.sig}"}`), no(400, "malformed")),
     c("alg other than ES256", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], alg: "EdDSA" }), no(401, "unsupported-alg")),
     c("a signature made for another digest", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], digest: `sha256:${"cd".repeat(32)}` }), no(401, "unauthenticated")),
     c("a signature made for another relay", "PUT", blobHeader({ method: "PUT", kid: A, recipients: [B], relay: "https://other-relay.example" }), no(401, "unauthenticated")),

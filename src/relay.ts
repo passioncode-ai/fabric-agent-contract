@@ -181,6 +181,17 @@ export const MESSAGE_REFUSALS = [
 ] as const;
 export type MessageRefusal = (typeof MESSAGE_REFUSALS)[number];
 
+/** Whether `bytes` are exactly the RFC 8785 form of `value`; a value that has none (a lone surrogate) is not. */
+function isCanonical(value: unknown, bytes: Buffer): boolean {
+  try {
+    return Buffer.from(rfc8785(value), "utf8").equals(bytes);
+  } catch {
+    return false;
+  }
+}
+
+/** The members a message body's payload carries, exactly (DEC-0066). */
+const PAYLOAD_MEMBERS = JSON.stringify(["exp", "from", "iat", "msgId", "payload", "to", "type"]);
 /** The only members a message body's JWS header may carry; `kid`, when present, is the signed `from`. */
 const JWS_HEADER_MEMBERS = new Set(["alg", "typ", "kid"]);
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
@@ -200,22 +211,27 @@ export function verifyMessageBody(
 ): { ok: true; payload: RelayMessagePayload } | { ok: false; reason: MessageRefusal } {
   const parts = body.split(".");
   if (parts.length !== 3) return { ok: false, reason: "malformed" };
+  const headerBytes = Buffer.from(parts[0] as string, "base64url"), payloadBytes = Buffer.from(parts[1] as string, "base64url");
   let header: unknown, payload: unknown;
   try {
-    header = JSON.parse(Buffer.from(parts[0] as string, "base64url").toString("utf8"));
-    payload = JSON.parse(Buffer.from(parts[1] as string, "base64url").toString("utf8"));
+    header = JSON.parse(headerBytes.toString("utf8"));
+    payload = JSON.parse(payloadBytes.toString("utf8"));
   } catch {
     return { ok: false, reason: "malformed" };
   }
   if (!isRecord(header) || !isRecord(payload)) return { ok: false, reason: "malformed" };
+  // Both are their own RFC 8785 bytes (DEC-0066): no duplicate member, no second spelling of the signed document.
+  if (!isCanonical(header, headerBytes) || !isCanonical(payload, payloadBytes)) return { ok: false, reason: "malformed" };
   if (header.typ !== "fabric-relay-message+jwt" || payload.type !== "fabric-relay-message/1") return { ok: false, reason: "malformed" };
   // The header is closed (DEC-0066): no `crit` can be honoured, and `jwk`, `jku`, `x5u`, `x5c` or `b64` would let the
-  // body name its own key or change what is signed.
+  // body name its own key or change what is signed. The payload carries exactly its seven members.
   if (!Object.keys(header).every((member) => JWS_HEADER_MEMBERS.has(member))) return { ok: false, reason: "malformed" };
-  if (header.alg !== RELAY_ALG) return { ok: false, reason: "unsupported-alg" };
+  if (JSON.stringify(Object.keys(payload).sort()) !== PAYLOAD_MEMBERS) return { ok: false, reason: "malformed" };
   const iat = instant(payload.iat), exp = instant(payload.exp);
   if (typeof payload.from !== "string" || iat === undefined || exp === undefined) return { ok: false, reason: "malformed" };
   if (header.kid !== undefined && header.kid !== payload.from) return { ok: false, reason: "malformed" };
+  // Every malformed answer comes first, then the algorithm (relay.md's order).
+  if (header.alg !== RELAY_ALG) return { ok: false, reason: "unsupported-alg" };
   const key = senderKey(payload.from);
   if (!key) return { ok: false, reason: "unknown-sender" };
   const verdict = verifyEs256(key, `${parts[0]}.${parts[1]}`, parts[2] as string);
@@ -357,8 +373,8 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
     return { ok: false, status: 400, code: "malformed" };
   }
   if (!isRecord(parsed) || JSON.stringify(Object.keys(parsed).sort()) !== JSON.stringify(REQUEST_MEMBERS)) return { ok: false, status: 400, code: "malformed" };
-  // Whatever JSON.parse returns has an RFC 8785 form, so this cannot throw; the bytes must be that form exactly.
-  if (rfc8785(parsed) !== bytes.toString("utf8")) return { ok: false, status: 400, code: "malformed" };
+  // The bytes must be their own RFC 8785 form, compared as bytes; a value with none (a lone surrogate) is malformed.
+  if (!isCanonical(parsed, bytes)) return { ok: false, status: 400, code: "malformed" };
   const { alg, kid, recipients, iat, sig } = parsed;
   if (typeof alg !== "string" || typeof kid !== "string" || typeof iat !== "string" || typeof sig !== "string" || !Array.isArray(recipients)) {
     return { ok: false, status: 400, code: "malformed" };
@@ -367,13 +383,17 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
 }
 
 const OCTET = "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)";
+const PORT = "(?::(?:6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3}|0))?";
+const LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?";
+const HOST = `(?:${LABEL}(?:\\.${LABEL})*|\\[[0-9A-Fa-f:.]+\\])`;
 /** The pattern of `hello.relay` in `relay-frame.schema.json`; `isRelayOrigin` is the same rule, and a test holds them equal. */
-export const RELAY_ORIGIN_PATTERN = `^(?:https://|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\])(?::\\d{1,5})?$)`;
+export const RELAY_ORIGIN_PATTERN = `^(?:https://${HOST}|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\]))${PORT}$`;
 const RELAY_ORIGIN = new RegExp(RELAY_ORIGIN_PATTERN);
 
 /**
- * What `hello.relay` may be (DEC-0066): an https origin, or — for a relay on the same machine — http on a loopback
- * literal, 127.0.0.0/8 or `[::1]`, with an optional port and nothing after it. A name such as `localhost` is refused:
+ * What `hello.relay` may be (DEC-0066): an https origin — a host name or an IP literal in brackets — or, for a relay on
+ * the same machine, http on a loopback literal, 127.0.0.0/8 or `[::1]`; either with an optional port up to 65535 and
+ * nothing after it (no path, no user information). A name such as `localhost` is refused:
  * a name resolves somewhere a literal cannot.
  */
 export function isRelayOrigin(value: unknown): boolean {

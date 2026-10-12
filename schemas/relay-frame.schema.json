@@ -32,8 +32,8 @@
         },
         "relay": {
           "type": "string",
-          "pattern": "^(?:https://|http://(?:127\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)|\\[::1\\])(?::\\d{1,5})?$)",
-          "description": "the relay's origin: https, or http on a loopback literal (127.0.0.0/8 or [::1]) for a relay on the same machine; never a name such as localhost (DEC-0066, isRelayOrigin)"
+          "pattern": "^(?:https://(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*|\\[[0-9A-Fa-f:.]+\\])|http://(?:127\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)|\\[::1\\]))(?::(?:6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3}|0))?$",
+          "description": "the relay's origin: https on a host name or a bracketed IP literal, or http on a loopback literal (127.0.0.0/8 or [::1]) for a relay on the same machine, either with an optional port up to 65535 and nothing after it; never a name such as localhost over http (DEC-0066, isRelayOrigin)"
         },
         "nonce": {
           "type": "string",
