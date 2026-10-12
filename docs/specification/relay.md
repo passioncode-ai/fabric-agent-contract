@@ -232,9 +232,25 @@ A secret moves to a machine only where a placed package declares it
   - A device's requests to its organization server carry a different signature under the same `#sig` key: an RFC 9421
     HTTP message signature with a nonce ([devices](devices.md#transport), DEC-0056). The two never sign the same
     bytes: RFC 8785 JSON starts with `{`, an RFC 9421 signature base with `"@method"`.
+- **The header's wire form** (annotated 2026-10-12; `parseRelayRequest`, `relayRequestHeader`):
+  - `Fabric-Relay-Request` is base64url without padding of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`:
+    `kid` the signer's `#sig`, `sig` the signature above.
+  - At most 8192 bytes; a longer value is refused 431 `too-large` before it is decoded.
+  - Parsed strictly, else 400 `malformed`: canonical base64url (re-encoding gives the same string), bytes that are
+    their own RFC 8785 form, exactly those five members, `recipients` 1–64 `#sig` kids of at most 256 characters,
+    `iat` a real instant.
+- **Who may ask** (`verifyBlobRequest`, in this order after the form and `alg`):
+  - `iat` within 60 s either way (401 `unauthenticated`, 401 `not-yet-valid`);
+  - the signer is in the current verified admission set (403 `not-admitted`);
+  - a PUT: every recipient is too (403 `unknown-recipient`); a blob the relay holds is accepted again only with the
+    same recipient list (200, no change), never another one (409 `recipients-mismatch`, never merged);
+  - a GET: the signer is one of the stored recipients and signs the stored list letter for letter (403
+    `not-admitted`). A GET signature reused within its 60 s fetches the same blob for the same machine again, which
+    reveals nothing new;
+  - then the signature (401 `unauthenticated`; 403 `bad-key`; 401 `unsupported-alg` for an Ed25519 key).
 - **Digest check.** The relay recomputes the digest and refuses a mismatch with `digest-mismatch`.
-- **Download.** A `GET` carries the same kind of signature by one of the `recipients`.
-- **Retention.** A relay keeps a blob until every recipient fetched it, or until 7 days pass.
+- **Retention.** A relay keeps a blob until every stored recipient fetched it (counted per kid), or until 7 days pass,
+  whichever comes first; a blob nobody fetched in 7 days is deleted without notice.
 
 ## Revocation and heartbeat
 
