@@ -2579,8 +2579,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md` (Supervisor, Supervisor marker), `docs/DOCMAP.md`, `docs/evidence/sources.md` (the `Exec`
     element, `MultipleInstancesPolicy`, systemd's `Environment=`, `launchd.plist(5)`, the XDG row), `docs/backlog.md`
-    (CT-01 closed, CT-12, CT-18…CT-21), the UX chain (`docs/ux/foundation.md` ST-016, `docs/ux/flows.md` FLW-13,
-    `docs/ux/screens.md` SCR-16, `docs/ux/scenarios.md` SCN-021), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
+    (CT-01 closed, CT-12, CT-18…CT-21), the UX chain (`docs/ux/foundation.md` ST-021, `docs/ux/flows.md` FLW-17,
+    `docs/ux/screens.md` SCR-20, `docs/ux/scenarios.md` SCN-026), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
     `docs/handoffs/README.md`.
 - **Not decided here:** `lifecycle.manager: node` in the descriptor, whether `label`/`plist` are refused beside it, and
   the node's Install, Off, Uninstall and state read (P4-02); a Windows service (administrator rights) as a supervisor, a

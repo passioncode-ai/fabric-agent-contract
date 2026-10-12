@@ -309,9 +309,9 @@ flowchart TD
 
 - **Screens traversed:** SCR-15 error; SCR-15 success.
 
-### FLW-13: A second copy of a service starts while one runs
+### FLW-17: A second copy of a service starts while one runs
 
-- **Traces:** ST-016 (JTBD-03, JRN-02/#3)
+- **Traces:** ST-021 (JTBD-03, JRN-02/#3)
 - **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage
 - **Entry points:** the operator runs the service by hand; its supervisor starts it again
 - **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left
@@ -332,7 +332,7 @@ flowchart TD
   W --> V
 ```
 
-- **Screens traversed:** SCR-16 loading (the wait); SCR-16 error (exit 75); SCR-16 success (one copy runs).
+- **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs).
 
 ## Practice compliance
 

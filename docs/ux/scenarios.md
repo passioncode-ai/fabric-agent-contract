@@ -26,7 +26,7 @@
 | SCN-018 | Approve one action for an outside caller | delegation | P-02 | ST-014, FLW-11 | draft | not audited |
 | SCN-019 | A dashboard session ends and the host signs in again | service | P-02 | ST-015, FLW-12 | draft | not audited |
 | SCN-020 | A launch the project's model classes leave without a model is refused, naming the policy | routing | P-02 | ST-006, FLW-05 | draft | not audited |
-| SCN-021 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-016, FLW-13 | draft | not audited |
+| SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 
 ## Personas
 
@@ -459,11 +459,11 @@ independent agent author and P-02 project operator.
 
 ## Services
 
-### SCN-021: A second copy of a service starts, by hand or by its supervisor
+### SCN-026: A second copy of a service starts, by hand or by its supervisor
 
 - **Persona:** P-02
 - **Feature:** service
-- **Traces:** ST-016, FLW-13 (JTBD-03, JRN-02/#3)
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3)
 - **Entry point:** a terminal where the operator runs the service, or its supervisor restarting it
 - **Preconditions:** the service runs under launchd and holds `service.lock`; Fabric Dashboards shows it `ready`
 - **Steps:**

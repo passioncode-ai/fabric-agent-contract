@@ -328,7 +328,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
-### ST-016: Operator sees what a second copy of a service did
+### ST-021: Operator sees what a second copy of a service did
 
 - **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, so that a duplicate start never costs me an outage or a restart loop.
 - **Traces:** JTBD-03, JRN-02/#3
