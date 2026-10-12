@@ -82,7 +82,9 @@ kept outside the signed record, so the record carries no label a person chose:
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
-  delegation verifier that reads the estate record trusts a token's `kid` only while a current revision certifies it.
+  delegation verifier that reads the estate record trusts a token's `kid` only while the revision it reads certifies
+  it — a revision `verifyEstateRecord` accepted, not lower than the highest its machine applied (DL-14) — and refuses otherwise with the codes of
+  [DL-14](delegation.md#keys-publication-and-rotation) (`hubKeyCertified`, `FAC-SEM-081`, DEC-0060).
 - **`packages[]`** — the agents placed on this machine: `agentRef` (DEC-0050), the placed version's package `digest`
   and the `publisherKid` of the key in `publisherKeys` its publisher signature verifies under. An agent is placed once
   per machine under a pinned key (`FAC-SEM-074`). `placementTrust(record, machine, agentRef)` is the `trust` the node
@@ -198,14 +200,15 @@ keys are DEC-0053's.
 ## Who adopts it
 
 - **Fabric** drafts revisions in the hub, renders the card, runs the signing ceremony in the person's Fabric or a
-  pinned static page (v4 §7), and certifies each machine's hub key; its delegation verifier trusts a `kid` a current
-  revision certifies.
+  pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
+  trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
   (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`); installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key); fills
   only placed slots; and reports the applied revision in its check-in's
-  `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056).
+  `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
+  revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
 
 ## Privacy

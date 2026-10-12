@@ -316,7 +316,7 @@
         },
         "hubKey": {
           "$ref": "#/$defs/edKey",
-          "description": "The certificate of the hub key on this machine: the passkey-signed record binds this kid and public key to this machine. A delegation verifier trusts a token's kid only when a current revision certifies it."
+          "description": "The certificate of the hub key on this machine: the passkey-signed record binds this kid and public key to this machine. A delegation verifier that reads the record trusts a token's kid only while the revision it reads certifies it: one it verified and the highest its machine applied (delegation.md DL-14, hubKeyCertified, DEC-0060)."
         },
         "packages": {
           "type": "array",

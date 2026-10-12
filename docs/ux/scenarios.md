@@ -416,7 +416,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the same push asked from the operator's own machine (T0) -> no approval is asked for; the operator's instruction stands (DL-26).
 - **UI elements:** action, callee, caller, lifetime, approve, decline.
 - **States covered:** success, error
-- **Errors & recovery:** the approval presented a second time -> `approval-reused`; for another action or callee -> `approval-invalid`; the caller asks for a new one.
+- **Errors & recovery:** the approval presented a second time -> `approval-reused`; for another action or callee -> `approval-invalid`; the caller asks for a new one. The callee's estate revision does not certify the issuer's key -> `approval-invalid` (`kid-not-certified`), or the revision is unreadable, outside its window, rolled back or forked -> `issuer-unavailable`; a new approval does not help until the callee's machine applies a revision that certifies the key (DL-14, DEC-0060).
 - **Status:** draft
 - **Coverage:** delegation DL-17, DL-18, DL-25, DL-26; `approval.schema.json`; the refusal wire `delegation-refusal.schema.json` with fixtures `delegation-refusal-approval-required` and `delegation-refusal-*`; `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
 - **Product:** unobserved

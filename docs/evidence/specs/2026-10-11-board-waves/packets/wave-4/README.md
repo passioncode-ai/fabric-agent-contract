@@ -26,3 +26,4 @@ These are added:
 | [P4-03 operator channel and embedded dashboard](P4-03-channel-dashboard.md) | N09 | `operator-channel.md`, `embedded-dashboard.md`, their schemas, `docs/ux/` scenarios | parallel with P4-01 |
 | [P4-04 device transport and keys](P4-04-device-transport.md) | N18 | `devices.md` (transport, enrollment key roles, check-in digest), `src/device-rules.ts`, `src/http-signature.ts` (new) | parallel with P4-01 |
 | [P4-05 window leases and signing challenges](P4-05-leases-challenges.md) | N18 | `window-lease/1`, the signing-challenge register | after #53 (DEC-0047) merges |
+| [P4-07 a delegation key the estate certifies](P4-07-hubkey.md) | N18 | DL-14's certification rule, `hubKeyCertified` in `src/estate-record-rules.ts`, the verifiers' `estate` option, `fixtures/vectors/hub-key.json` (new) | parallel; added 2026-10-12 from the adapter's FAA-31 report |
