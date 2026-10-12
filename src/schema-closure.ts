@@ -19,4 +19,22 @@ export function schemaClosure(schemasDir: string, schema: string): string[] {
   }
   return [...seen].sort();
 }
+
+/**
+ * The source files a consumer must copy to run one of this repository's modules: the file and every relative module it
+ * imports, transitively (`./x.js` resolved to `x.ts`). A consumer that vendors `device-rules.ts` without the files it
+ * imports — `protocol-revisions.ts` since DEC-0067 — fails to load it.
+ */
+export function sourceClosure(srcDir: string, file: string): string[] {
+  const seen = new Set<string>();
+  const queue = [file];
+  while (queue.length) {
+    const next = queue.shift() as string;
+    if (seen.has(next)) continue;
+    seen.add(next);
+    const text = readFileSync(path.join(srcDir, next), "utf8");
+    for (const match of text.matchAll(/from\s+"\.\/([^"]+)\.js"/g)) queue.push(`${match[1] as string}.ts`);
+  }
+  return [...seen].sort();
+}
 // #endregion schema-closure

@@ -249,6 +249,17 @@
                   "type": "string",
                   "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$"
                 }
+              },
+              "secrets": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+                },
+                "description": "DEC-0074: the secret slots (by name, from secrets[]) the placement uses to configure this role's server entry: its address and its token. Each named slot is declared in secrets[], and one slot feeds one role (FAC-SEM-102)."
               }
             },
             "additionalProperties": false
