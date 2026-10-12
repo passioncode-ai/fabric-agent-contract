@@ -47,6 +47,7 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | DEC-0047 | `src/secret-envelope.ts` (new) | 90 / 90 (100 %) | 100 % | HPKE base mode against RFC 9180 §A.3.1 and the envelope's open checks over `fixtures/vectors/secret-envelope.json` |
 | DEC-0047 | `src/relay-rules.ts` (new) | 51 / 51 (100 %) | 100 % | FAC-SEM-070 and FAC-SEM-071; one fixture per sub-check |
 | DEC-0047 | `src/p256.ts` | 46 / 46 (100 %) | 100 % | DEC-0053's copy merged with DEC-0047's; one helper turns SEC 1 octets or a JWK into the key every verifier uses |
+| P4-03 | `src/dashboard-declaration.ts` (new) | 20 / 20 (100 %) | 100 % | FAC-SEM-080 and `hostView` over `fixtures/vectors/dashboard-declaration.json` (DEC-0059); malformed input answered, never thrown |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -87,3 +88,11 @@ a revocation kind read from a `Map`) were each removed and a test failed. `seman
 **Wave 3, DEC-0047 (#53).** `src/relay.ts`, `src/secret-envelope.ts` and `src/relay-rules.ts` are new and reach every
 branch, with no `v8 ignore`; `src/p256.ts` keeps every branch after the merge with DEC-0053's copy and the key helper.
 The whole set: 3415 / 3574 (95.55 %). Measured with `vitest run --coverage` on the DEC-0047 branch rebased onto main's `b291bf0`, after the second reading.
+
+**Wave 4, P4-03 (DEC-0058, DEC-0059).** `src/dashboard-declaration.ts` is new and reaches every branch, with no
+`v8 ignore`; `service-well-known` joins `test/rule-tolerance.test.ts`. `semantic-rules.ts` only dispatches to it
+(91.51 %, floor unchanged). The schema invariants this packet proves are not branches: `test/schema-mutants.ts` removes
+each one from a copy of its schema and requires a negative fixture the copy accepts (22 mutants of
+`operator-channel-status`, 10 of `service-dashboard-extension`, and an identity mutant for each). The whole set: 3153 / 3312 (95.19 %). Measured with
+`vitest run --coverage` on the P4-03 branch off `main` `31ed9f0`. On its merge with `main` `8060254` (the relay, DEC-0047): 39 files, 1689 tests,
+whole set 3441 / 3600 (95.58 %).

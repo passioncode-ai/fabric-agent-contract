@@ -26,6 +26,11 @@
 | SCN-018 | Approve one action for an outside caller | delegation | P-02 | ST-014, FLW-11 | draft | not audited |
 | SCN-019 | A dashboard session ends and the host signs in again | service | P-02 | ST-015, FLW-12 | draft | not audited |
 | SCN-020 | A launch the project's model classes leave without a model is refused, naming the policy | routing | P-02 | ST-006, FLW-05 | draft | not audited |
+| SCN-021 | Widen the console beside a dashboard: navigation stays reachable, the page keeps its floor | embedded-dashboard | P-02 | ST-016, FLW-13 | draft | not audited |
+| SCN-022 | Choose a theme in the host: each page applies the fields it declared | embedded-dashboard | P-02 | ST-017, FLW-13 | draft | not audited |
+| SCN-023 | An agent finds a standing grant and proceeds without asking | spend | P-02 | ST-018, FLW-14 | draft | not audited |
+| SCN-024 | Restore settings after the data directory was lost | settings | P-02 | ST-019, FLW-15 | draft | not audited |
+| SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 
 ## Personas
 
@@ -283,9 +288,9 @@ independent agent author and P-02 project operator.
 - **Alt paths:** a code typed after 10 minutes -> refused, the operator issues a new one; a press by another group member -> no effect.
 - **UI elements:** proposal with four steps, link code, stop message, action buttons, status tile.
 - **States covered:** empty, success, error
-- **Errors & recovery:** a webhook already set on the bot -> the status is `degraded` (`webhook-set`) with the explanation, and the operator removes the webhook or switches the agent to it.
+- **Errors & recovery:** a webhook already set on the bot -> the status is `degraded` (`webhook-set`) with the explanation, and the operator removes the webhook or switches the agent to it. The agent's receiver stops while it waits for the code -> the status is `degraded` (`receiver-missing`, `receiver.lease: none`), never `unlinked`, and the operator restarts the receiver before typing the code (OC-17, DEC-0058).
 - **Status:** draft
-- **Coverage:** `operator-channel-status.schema.json`, fixtures `operator-channel-status-*`, `test/operator-channel.test.ts`
+- **Coverage:** `operator-channel-status.schema.json`, fixtures `operator-channel-status-*` (among them `operator-channel-status-unlinked-lease-none` and `operator-channel-status-degraded-receiver-missing-unlinked`), `test/operator-channel.test.ts`
 - **Product:** unobserved
 
 ### SCN-013: Confirm a paid action, or find it already decided
@@ -412,7 +417,7 @@ independent agent author and P-02 project operator.
 - **States covered:** success, error
 - **Errors & recovery:** the approval presented a second time -> `approval-reused`; for another action or callee -> `approval-invalid`; the caller asks for a new one.
 - **Status:** draft
-- **Coverage:** delegation DL-17, DL-18, DL-25, DL-26; `approval.schema.json`; `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
+- **Coverage:** delegation DL-17, DL-18, DL-25, DL-26; `approval.schema.json`; the refusal wire `delegation-refusal.schema.json` with fixtures `delegation-refusal-approval-required` and `delegation-refusal-*`; `test/delegation.test.ts`, `test/delegation-sealed.test.ts`
 - **Product:** unobserved
 
 ### SCN-019: A dashboard session ends and the host signs in again
@@ -455,3 +460,112 @@ independent agent author and P-02 project operator.
 - **Status:** draft
 - **Coverage:** runners specification, Resolution; `src/profile-rules.ts` `resolveModelProfile`; `test/runner-model-profiles.test.ts`, `fixtures/semantic/profile-resolution-refused.json`
 - **Product:** unobserved
+
+## Embedded dashboard
+
+### SCN-021: Widen the console beside a dashboard: navigation stays reachable, the page keeps its floor
+
+- **Persona:** P-02
+- **Feature:** embedded-dashboard
+- **Traces:** ST-016, FLW-13 (JTBD-08, JRN-07/#1, JRN-07/#2)
+- **Entry point:** `example-agent`'s dashboard in Fabric Dashboards, the agent console open beside it
+- **Preconditions:** the window is 1280 CSS pixels wide; the page declares `minWidth: 360` under the dashboard extension key; its navigation has 14 destinations
+- **Steps:**
+  1. Operator drags the console wider -> the page narrows, and its navigation wraps or moves the destinations that no longer fit into a visible *More* menu.
+  2. The page reaches 480 CSS pixels -> the console stops growing; the document does not scroll sideways.
+  3. Operator opens *More* -> every destination that left the bar is there.
+- **Expected result:** at every console width the host allows, every primary destination is reachable without sideways scrolling, and the page never gets less than the host floor `max(480, minWidth)`.
+- **Alt paths:** a page that declares `minWidth: 720` -> the console stops when the page has 720 CSS pixels. A window too narrow for the page's floor and the panes' minimums -> the host keeps the panes' minimums, the page keeps its floor layout and scrolls sideways; the host never zooms it.
+- **UI elements:** pane divider, the page's navigation, *More* menu.
+- **States covered:** success, narrow, below floor
+- **Errors & recovery:** a page whose navigation scrolls sideways in a strip -> the adapter's layout check reports ED-3 at 480 CSS pixels; the agent's author moves the extra destinations into a menu.
+- **Status:** draft
+- **Coverage:** embedded-dashboard ED-1, ED-2, ED-3, ED-7; `service-dashboard-extension.schema.json` (`minWidth` 360…1280); `hostView` in `src/dashboard-declaration.ts` (the host floor); `test/embedded-dashboard.test.ts`. ED-1…ED-3 (the floor layout, reachable navigation) are prose rules a service proves on its rendered page with the adapter's layout check; no contract test measures them.
+- **Product:** unobserved
+
+### SCN-022: Choose a theme in the host: each page applies the fields it declared
+
+- **Persona:** P-02
+- **Feature:** embedded-dashboard
+- **Traces:** ST-017, FLW-13 (JTBD-08, JRN-07/#3, JRN-07/#4)
+- **Entry point:** the host's appearance picker
+- **Preconditions:** `example-agent` declares `appearance: [scheme, theme]`; a second agent declares `appearance: [scheme]`; a third declares the dashboard key with `{minWidth: 99999}`
+- **Steps:**
+  1. Operator chooses dark and `ocean` -> the host writes `fabric_appearance=v=1&scheme=dark&theme=ocean` where each page reads it.
+  2. `example-agent`'s page -> shows dark `ocean` and hides its own scheme and theme controls.
+  3. The second agent's page -> turns dark and keeps its own theme control.
+  4. The third agent's page -> the host finds the declaration invalid, treats it as not declared (host floor 480) and logs it once for this load; the page takes nothing from the host's cookie and follows the system colour scheme unless the operator set the page's own control.
+- **Expected result:** each page applies exactly the carrier fields it declared, and an invalid declaration is a legacy dashboard, never a page given a floor no window can hold.
+- **Alt paths:** a host that gives each service its own cookie store (Fabric Dashboards' partition per service) -> the cookie is per service. Pages on a shared cookie store under one host name -> one cookie serves them all, so a per-service choice is not available there.
+- **UI elements:** scheme and theme picker, the pages' own appearance controls.
+- **States covered:** success, legacy
+- **Errors & recovery:** an unknown theme id in the cookie -> the page uses its default theme; the operator picks a theme the page lists in `themes`.
+- **Status:** draft
+- **Coverage:** embedded-dashboard ED-6, ED-8, ED-9 and DEC-0059; `FAC-SEM-080` and `hostView` in `src/dashboard-declaration.ts`; `fixtures/semantic/service-well-known-dashboard-invalid.json`, `fixtures/vectors/dashboard-declaration.json`; `test/embedded-dashboard.test.ts`
+- **Product:** unobserved
+
+## Standing grants
+
+### SCN-023: An agent finds a standing grant and proceeds without asking
+
+- **Persona:** P-02
+- **Feature:** spend
+- **Traces:** ST-018, FLW-14 (JTBD-07, JRN-06/#4)
+- **Entry point:** an agent of `project-a` about to call a paid model for 1.80 USD
+- **Preconditions:** `project-a` holds a standing grant with `spend.mode: limited` and a `month` limit of 40 USD with 12 USD spent; its spend policy's auto-approve threshold (L1) is 2 USD
+- **Steps:**
+  1. The agent asks the meter with the amount -> the meter answers `allowed` with a receipt and reserves 1.80 USD against the grant and every level above it.
+  2. The agent makes the call -> no question reaches the operator.
+  3. The agent's usage report settles the spend -> `byGrant` lists the receipt under the grant.
+- **Expected result:** the operator sees the spend under its grant afterwards and was not asked: the record was the proof.
+- **Alt paths:** the call would cost 2.40 USD, above the project policy's 2 USD threshold -> `denied` `limit-reached` at L1 with window `task` (the threshold is a per-task limit) and one filed approval request, as in SCN-017.
+- **UI elements:** usage report by grant, receipt.
+- **States covered:** success, error
+- **Errors & recovery:** the grant expired -> `denied` `grant-expired`, `level: null`; the agent relays the code unchanged and goes on with other work.
+- **Status:** draft
+- **Coverage:** spend-policy Grants and Checking; `grant-check.schema.json` (fixtures `grant-check-allowed`, `grant-check-denied`), `service-usage.schema.json` (fixture `service-usage-by-grant`); `test/spend-policy.test.ts`, `test/meter-grant.test.ts`
+- **Product:** unobserved
+
+## Settings restore
+
+### SCN-024: Restore settings after the data directory was lost
+
+- **Persona:** P-02
+- **Feature:** settings
+- **Traces:** ST-019, FLW-15 (JTBD-03, JRN-02/#5)
+- **Entry point:** `example-agent` starting after its data directory was purged
+- **Preconditions:** 14 snapshots in the service's settings-backup folder; the newest is damaged; the one before it is intact and holds 3 project bindings
+- **Steps:**
+  1. The service starts on a fresh database that has never started -> it skips the damaged snapshot, names it in the report, and restores from the newest intact one.
+  2. Operator reads the report -> 3 bindings inserted, the columns dropped and defaulted named, no row overwritten.
+- **Expected result:** every decision the operator made is back, and nothing that existed was changed.
+- **Alt paths:** the database already holds records -> no automatic restore; the operator opens a preview of a chosen snapshot and applies it.
+- **UI elements:** restore report, preview, apply.
+- **States covered:** preview, success, error
+- **Errors & recovery:** a row needs a required column the snapshot lacks -> the row is refused with its key and reason and not counted as inserted; the operator re-enters that binding.
+- **Status:** draft
+- **Coverage:** service Settings backup and Restore; `settings-backup.schema.json`; `src/settings-backup.ts` (FAC-SEM-035, the snapshot file); `test/settings-backup.test.ts`. The Restore steps (add, never overwrite; automatic restore only on a fresh database; the preview and the report) are prose rules the service proves; no contract test runs a restore.
+- **Product:** unobserved
+
+## Project board
+
+### SCN-025: Follow a request on the Project board to its result, or to outcome_unknown
+
+- **Persona:** P-02
+- **Feature:** project-board
+- **Traces:** ST-020, FLW-16 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
+- **Entry point:** a new thread on the board in which `project-a` asks `project-b`'s `publish` capability for a release
+- **Preconditions:** both Projects take part in the thread, fixed at its creation
+- **Steps:**
+  1. A responder of `project-b` claims and accepts the request -> the thread shows `accepted`, effect `not_started`.
+  2. The responder begins publishing -> `in_progress`, effect `started`.
+  3. The responder completes with the observed release -> `completed`.
+- **Expected result:** the operator reads the request state and the effect state as two facts, each set by its operation, never inferred from a delivery or a read mark.
+- **Alt paths:** the deadline passes before anyone accepts -> `expired`. The request is cancelled before an effect began -> `cancelled`.
+- **UI elements:** thread, participants, request state, effect state.
+- **States covered:** success, unknown, expired
+- **Errors & recovery:** the responder's result is lost after the effect began -> `outcome_unknown`; it stays until an observed reconciliation settles it `completed` or `failed_known`, and no expiry erases it.
+- **Status:** draft
+- **Coverage:** project-comms Request lifecycle; `comms-submit.schema.json`, `comms-message.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
+- **Product:** unobserved
+

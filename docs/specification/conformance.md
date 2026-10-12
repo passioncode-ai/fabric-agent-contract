@@ -141,7 +141,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-077`
+**Next free rule code:** `FAC-SEM-081`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -219,6 +219,7 @@ register and carry no receipt.
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0074 |
 | `FAC-SEM-075` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0075 |
 | `FAC-SEM-076` | `estate-record` | [estate record](estate-record.md#semantic-rules) | SEM-0076 |
+| `FAC-SEM-080` | `service-well-known` | [embedded dashboard](embedded-dashboard.md#semantic-rules) | SEM-0080 |
 
 ## Compatibility policy
 

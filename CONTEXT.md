@@ -244,9 +244,11 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 (`fabric-dashboard/0.1`, DEC-0036). The *host floor*, `max(480, minWidth)`, is the width a host
 keeps for the page when its own panes grow.
 
-**Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets on a
-dashboard's origin so the page shows the operator's colour scheme and theme (DEC-0036, ED-8).
-It carries no secret and no identity.
+**Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
+dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+is not isolated by port, so it is per host in a shared cookie store and per service where the host
+gives each service its own store; a page applies only the fields it declares in `appearance`
+(DEC-0059, ED-6). It carries no secret and no identity.
 
 **Operator channel**: An agent's own messenger channel to its operator
 (`fabric-operator-channel/0.1`, DEC-0034), first over the Telegram Bot API: it sends the events
@@ -259,7 +261,8 @@ binds the chat and the operator's numeric user id to an operator channel (OC-3).
 
 **Addressed message**: In a group, a message meant for one bot: `/command@ThatBot`, a reply to
 that bot's own message, or a press of its own button. A bare `/command` in a group is not
-addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DEC-0035).
+addressed. An operator channel answers nothing else in a group (OC-14, OC-15, DEC-0035), except a bare
+`/link CODE` that matches its own pending code (OC-15).
 
 **Settings backup**: A checksummed snapshot (`fabric-settings-backup/1`) of a service's
 operator decisions and bindings, kept outside its data directory. A restore only adds missing
