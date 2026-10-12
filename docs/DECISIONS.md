@@ -2509,6 +2509,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     nothing of it is on Fabric's main yet;
   - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
     source of admission and keeps the presence rule (item 5).
+- **Annotated (2026-10-12, CON-022):** item 7's open order and relay.md's are one order in two numberings: relay.md lists
+  eleven steps, its 9 and 10 (the life, then `now < exp`) being item 7's 9, and its 11 item 7's 10. Step 4's refusals are
+  `unsupported-alg` for a sender key that is not P-256, an Ed25519 key included, and `bad-key`; relay.md's step 4 now
+  names them. *Consequences / affects* also cover `test/relay-request.test.ts` (#60) and `src/webauthn.ts` (#59,
+  `ef7573a`, the JWK key form).
+- **Amended (2026-10-12) by DEC-0066:** items 2, 3, 4, 5, 7, 8 and 9 — low-S and strict instants, the close-code table
+  and frames, one `unauthenticated` until the signer is proven with the estate compared inside `admit`, revalidation of
+  open sessions, the recipient's own kid as `to` and the replay window, the envelope's sequence and mark, the blob
+  check order, and where delta entries come from. `fabric-relay/0.1` and `fabric-secret-envelope/1` are amended in
+  place; relay.md now lists twelve open steps.
 - **Amends:** nothing. It is a new protocol under the DEC-0016 extension policy. It builds on:
   - DEC-0053's P-256 device keys by role (`<device.id>#sig`, `<device.id>#kem`);
   - DEC-0045's trust tiers (DL-25, DL-26);
