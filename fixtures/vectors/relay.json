@@ -30,9 +30,9 @@
   "message": {
     "frame": {
       "from": "urn:fabric:machine:example-laptop#sig",
+      "to": "urn:fabric:machine:example-gpu-box#sig",
       "msgId": "0b6f5f3e-6a51-4d6e-9d55-4b8f6a0d2c11",
-      "seq": 1,
-      "sentAt": "2026-10-12T00:00:06Z"
+      "ttl": 3600
     },
     "self": "urn:fabric:machine:example-gpu-box#sig",
     "now": "2026-10-12T00:10:00Z",

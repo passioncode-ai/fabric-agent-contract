@@ -18,7 +18,7 @@ type Vector = {
   machineKey: Record<string, string>;
   machineKeyOctets: string;
   auth: { context: { relay: string; nonce: string; now: string }; signingInput: string; sha256: string; frame: AuthFrame };
-  message: { frame: { from: string; msgId: string; seq: number; sentAt: string }; self: string; now: string; body: string };
+  message: { frame: { from: string; to: string; msgId: string; ttl: number }; self: string; now: string; body: string };
   ed25519: { key: Record<string, string>; frame: AuthFrame; expect: string };
 };
 const v = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "relay.json"), "utf8")) as Vector;

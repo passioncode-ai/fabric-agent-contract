@@ -55,6 +55,21 @@ describe("hello.relay: the schema and isRelayOrigin agree on every relayOrigin c
   });
 });
 
+// A consumer pinned before DEC-0066 reads the legacy members (the relay's tests/contract.test.ts reads message.frame.to):
+// every member path the files had at 252fd25 is still there, cases aside.
+describe("the legacy members stay", () => {
+  const paths = (value: unknown, prefix = ""): string[] => (value && typeof value === "object" && !Array.isArray(value)
+    ? Object.entries(value as Json).flatMap(([key, inner]) => [`${prefix}/${key}`, ...(key === "cases" ? [] : paths(inner, `${prefix}/${key}`))])
+    : []);
+  it.each([
+    ["relay.json", relay, ["/about", "/auth", "/auth/context", "/auth/context/nonce", "/auth/context/now", "/auth/context/relay", "/auth/frame", "/auth/frame/alg", "/auth/frame/estate", "/auth/frame/iat", "/auth/frame/id", "/auth/frame/kid", "/auth/frame/protocol", "/auth/frame/sig", "/auth/frame/type", "/auth/frame/v", "/auth/sha256", "/auth/signingInput", "/blobRequest", "/blobRequest/about", "/blobRequest/cases", "/blobRequest/digest", "/blobRequest/now", "/blobRequest/relay", "/ed25519", "/ed25519/expect", "/ed25519/frame", "/ed25519/frame/alg", "/ed25519/frame/estate", "/ed25519/frame/iat", "/ed25519/frame/id", "/ed25519/frame/kid", "/ed25519/frame/protocol", "/ed25519/frame/sig", "/ed25519/frame/type", "/ed25519/frame/v", "/ed25519/key", "/ed25519/key/crv", "/ed25519/key/kty", "/ed25519/key/x", "/machineKey", "/machineKey/crv", "/machineKey/kty", "/machineKey/x", "/machineKey/y", "/machineKeyOctets", "/message", "/message/body", "/message/frame", "/message/frame/from", "/message/frame/msgId", "/message/frame/to", "/message/frame/ttl", "/message/now"]],
+    ["secret-envelope.json", envelope, ["/about", "/digest", "/envelope", "/envelope/ct", "/envelope/header", "/envelope/header/agentRef", "/envelope/header/alg", "/envelope/header/enc", "/envelope/header/exp", "/envelope/header/iat", "/envelope/header/placement", "/envelope/header/recipient", "/envelope/header/sender", "/envelope/header/slot", "/envelope/header/suite", "/envelope/header/type", "/envelope/sig", "/open", "/open/now", "/open/ownKemKid", "/open/placement", "/open/secret", "/recipientKemPrivateKey", "/recipientKey", "/recipientKey/crv", "/recipientKey/kty", "/recipientKey/x", "/recipientKey/y", "/recipientKeyOctets", "/senderKey", "/senderKey/crv", "/senderKey/kty", "/senderKey/x", "/senderKey/y", "/senderKeyOctets"]]
+  ] as const)("%s", (_name, file, legacy) => {
+    const now = new Set(paths(file));
+    expect(legacy.filter((member) => !now.has(member))).toEqual([]);
+  });
+});
+
 describe("the generator (tools/vectors/relay-crypto.ts)", () => {
   it("writes exactly the committed vector files", () => {
     const built = buildVectorFiles();
