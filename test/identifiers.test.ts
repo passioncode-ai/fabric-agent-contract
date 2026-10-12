@@ -72,13 +72,13 @@ describe("the normal form against the schema (common.schema.json#/$defs/uri)", (
       expect(isUri(text)).toBe(false);
       expect(normalIdentifier(text)).toBe(text);
     }
-    const admitted = ["X://U%41@H%41.com:1/%41?%41#%41", "X://[V1.Ab]/", "X://[::FFFF:1.2.3.4]/", "X://1.2.3.4/", "X:/a/./b", "URN:A1:b"];
+    const admitted = ["X://U%41@EX%41MPLE.com:1/%41?%41#%41", "X://[V1.Ab]/", "X://[::FFFF:1.2.3.4]/", "X://1.2.3.4/", "X:/a/./b", "URN:A1:b"];
     for (const text of admitted) {
       expect(isUri(text)).toBe(true);
       expect(normalIdentifier(text)).not.toBe(text);
       expect(isUri(normalIdentifier(text) as string)).toBe(true);
     }
-    expect(normalIdentifier("X://U%41@H%41.com:1/%41?%41#%41")).toBe("x://UA@ha.com:1/A?A#A");
+    expect(normalIdentifier("X://U%41@EX%41MPLE.com:1/%41?%41#%41")).toBe("x://UA@example.com:1/A?A#A");
   });
 });
 

@@ -4145,3 +4145,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   v2's contract plan row CON-OE-10 and its CROSSWALK-v4; Project Observatory's session (2026-10-12); DEC-0015,
   DEC-0033, DEC-0052, DEC-0067; packet P6-04. DEC-0075 and `FAC-SEM-106` were reserved by git CAS (`--key
   w6-p6-04-local-channel-20261012 DEC`, `--key w6-p6-04-sem-local-channel-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0076 — Identifier equality: two identifiers are the same when their normal forms are equal (RFC 3986 §6.2.2; RFC 8141 §3.1 for `urn:`)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). Closes the board row CT-39 (the owed readings of #67
+  and #68, 2026-10-12). Consumer adoption: a port of the reference code runs `fixtures/vectors/identifiers.json`; a
+  writer emits the normal form.
+- **Amends:** DEC-0064 (`FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-096` compare by normal form), DEC-0065 (`byProject`
+  duplicates), DEC-0029 (`FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034`), and `FAC-SEM-002`. No new rule code.
+- **Decision:** in [identifiers](specification/identifiers.md) —
+  1. **The normal form.** A URI — a string matching RFC 3986's `URI` production with an authority or a non-empty path —
+     is normalized by RFC 3986 §6.2.2: the scheme and the host lower-cased and percent-encoding hex upper-cased
+     (§6.2.2.1), percent-encoded unreserved characters decoded (§6.2.2.2), dot segments removed from a hierarchical path
+     (§6.2.2.3); nothing scheme-based (§6.2.3: no default port removed, no empty path made `/`).
+  2. **A URN** (`urn:`) is normalized by RFC 8141 §3.1 instead: `urn` and the NID lower-cased, percent-encoding hex
+     upper-cased, nothing decoded, the NSS's case kept, the r-, q- and f-components ignored. This refines the brief's
+     design, which decoded `%7E` everywhere: RFC 8141 §3.1 says percent-encoding normalization MUST NOT be applied to a
+     URN, so `urn:example:a%7E` and `urn:example:a~` are two identifiers.
+  3. **Anything else** — a string that is not such a URI — is its own normal form, and a value that is not a string is
+     compared as it is (`===`). Neither function throws; nothing is keyed by input in a plain object.
+  4. **Writers SHOULD emit the normal form; readers MUST compare by it** wherever a rule compares identifiers for
+     sameness. `normalIdentifier` and `sameIdentifier` (`src/identifiers.ts`, no rule code: G-13) are the reference.
+- **Why:** rules compared identifier strings byte for byte, so an author could approve their own proposal under
+  another spelling of their id (`AGENT:x` for `agent:x`, `urn:Fabric:x` for `urn:fabric:x`), and one project could split
+  its costs over two `byProject` rows. RFC 3986 §6.1 and RFC 8141 §3.1 already define when two spellings are one; the
+  contract adopts them rather than a scheme-specific rule of its own.
+- **Compatibility:** `contractVersion` stays `0.1.0`. Tightening for `FAC-SEM-094`, `FAC-SEM-006` and `FAC-SEM-025`
+  (`byProject`): two spellings of one id that passed as two now meet as one. Loosening for `FAC-SEM-002`, `FAC-SEM-096`,
+  `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034`: a reference spelled otherwise now agrees. A reader pinned before this
+  decision compares bytes; a writer that emits the normal form is read the same by both.
+- **Consequences / affects:**
+  - sites changed (each by `sameIdentifier` or a key in normal form): `FAC-SEM-094` approver against author and
+    `FAC-SEM-096` rollback basis id against the setting's (`src/core-rules.ts`); `FAC-SEM-025` `byProject[].projectId`
+    duplicates, the finding naming the second spelling (`src/usage-rules.ts`); `FAC-SEM-006` the scoped projects and their
+    managers, `FAC-SEM-002` the selected account against the pool (`src/semantic-rules.ts`); `FAC-SEM-030` the revision
+    reference key's id and the admission's capability, `FAC-SEM-032` the binding's project, capability, provider and
+    `runnerRoute`, `FAC-SEM-034` the event's project, capability and route (`src/route-rules.ts`);
+  - sites left as written, with the reason: the delegation token's and the approval's claims (`iss`, `sub`, `project`,
+    the grant's principal id and issuer, an onward token's parent claims) and the grant reference in
+    `src/delegation-rules.ts`, `src/delegation.ts`, `src/grant-projection.ts` — RFC 7519 §2 compares StringOrURI "with no
+    transformations or canonicalizations", and the hub copies them from the grant it signs, so another spelling is
+    refused, fail closed; `agentRef` in `src/estate-record-rules.ts` — its pattern admits only the normal form; opaque ids
+    (estates, machines, devices, users, sessions, leases: `src/estate-record-rules.ts`, `src/revocation-delta.ts`,
+    `src/window-lease.ts`, `src/device-rules.ts`, `src/activity-rules.ts`, `src/session-join.ts`, `src/relay.ts`), agent and
+    service ids, capability names (`src/pipeline-check.ts`), model ids (`src/profile-rules.ts`), runner kinds, MCP roles
+    and secret slots (`src/package-rules.ts`), provider ids (`src/registry-rules.ts`), key ids, `jti`, claim ids
+    (`FAC-SEM-093`) and limit ids (`FAC-SEM-031`) — names, not URIs;
+  - spec: `docs/specification/identifiers.md` (new), `docs/specification/conformance.md`,
+    `docs/specification/governance-and-roles.md`, `docs/specification/service.md`, `docs/specification/versioning.md`,
+    `docs/specification/runners.md`, `docs/specification/memory-and-learning.md`;
+  - code: `src/identifiers.ts` (new); floor in `vitest.config.ts`;
+  - fixtures: `fixtures/vectors/identifiers.json` (new);
+  - tests: `test/identifiers.test.ts` (new), `test/core-rules.test.ts`, `test/usage-rules.test.ts`,
+    `test/route-rules.test.ts`;
+  - docs: `docs/evidence/sources.md` (RFC 8141 pinned; RFC 3986 and RFC 7519 hashed), `docs/backlog.md` (CT-39),
+    `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
+- **Not decided here:** IRIs (RFC 3987) and Unicode normalization (a non-ASCII string is no URI and compares as it is);
+  scheme-based normalization for any scheme; URN namespace-specific equivalence (RFC 8141 §3.1 lets a namespace add rules;
+  none is adopted); whether a schema should refuse a non-normal spelling outright.
+- **Source:** the board row CT-39; RFC 3986 §6, RFC 8141 §2 and §3, RFC 7519 §2 (pinned with SHA-256 in
+  `docs/evidence/sources.md`). DEC-0076 was reserved by git CAS (`--key ct39-identifiers-20261013 DEC`); no `FAC-SEM` id;
+  the record plane is `fs`. The register was edited without a lease, by the owner session's arrangement; the owner applies
+  it under leases at merge.
