@@ -211,7 +211,8 @@ describe("what a machine does with them", () => {
     expect(isRevoked(revocations, "grant", "URN:grant:estate:g-1")).toBe(true);
     expect(isRevoked(revocations, "grant", "urn:grant:estate:G-1")).toBe(false);
     expect(isRevoked(revocations, "grant", "9")).toBe(false);
-    expect(isRevoked([{ kind: "machine", ref: "m-1" }], "machine", "M-1")).toBe(false);
+    expect(isRevoked([{ kind: "machine", ref: "Dev:m1" }], "machine", "dev:m1")).toBe(false);
+    expect(isRevoked([{ kind: "machine", ref: "Dev:m1" }], "machine", "Dev:m1")).toBe(true);
   });
 
   it("matches a revocation exactly, as DL-14 does: no String() on the ref", () => {

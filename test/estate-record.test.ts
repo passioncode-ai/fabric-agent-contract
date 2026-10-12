@@ -419,7 +419,9 @@ describe("FAC-SEM-076 reads another spelling of a grant id as that grant (DEC-00
     // Another grant stays apart, and a ref that is not a string is keyed by itself.
     expect(at076({ ...first, revocations: [revoke(`${id}-other`)] })).toEqual([]);
     expect(at076({ ...first, shareGrants: [{ ...grant, meta: { ...grant.meta, id: 7 } }], revocations: [revoke(7)] })).toEqual(["/revocations/0/ref"]);
-    // Other kinds still match exactly.
-    expect(at076({ ...first, revocations: [{ kind: "machine", ref: String(first.machines[0].id).toUpperCase(), revokedAt: "2026-10-20T09:00:00Z" }] })).toEqual([]);
+    // Other kinds still match exactly: an opaque machine id shaped like a URI is not normalized.
+    const machines = [{ ...first.machines[0], id: "Dev:m1" }, ...first.machines.slice(1)];
+    expect(at076({ ...first, machines, revocations: [{ kind: "machine", ref: "dev:m1", revokedAt: "2026-10-20T09:00:00Z" }] })).toEqual([]);
+    expect(at076({ ...first, machines, revocations: [{ kind: "machine", ref: "Dev:m1", revokedAt: "2026-10-20T09:00:00Z" }] })).toEqual(["/revocations/0/ref"]);
   });
 });
