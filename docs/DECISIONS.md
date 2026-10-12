@@ -4018,12 +4018,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      remote clients rejected and process owners checked both ways; another user is `unauthenticated` before anything
      is read; the client checks the server; a token file only where there are no peer credentials (`admitPeer`).
   2. **Discovery.** The node publishes the path in its descriptor's `channels.local`; a client never computes it.
-  3. **Session.** JSON-RPC 2.0, one object per line of at most 1 MiB; `channel.hello` within 5 s negotiates N and N−1
-     (DEC-0067); nothing else is answered before it (`FAC-SEM-106`, `channelStep`); base methods `health` and
-     `enroll.status`; payload methods belong to their owners' decisions.
-  4. **Consent.** The node sends `consent.prompt` with a deadline only to a client that declared `consent.ui`
-     (`mayPrompt`); no answer is denied; `consent.cancel` withdraws a prompt.
-  5. **Errors** in the JSON-RPC envelope with `error.data.code` from one set.
+  3. **Session.** JSON-RPC 2.0, one object per line of at most 1 MiB; `channel.hello` within 5 s (else `{id: null,
+     error: hello-first}` and close) negotiates N and N−1 (DEC-0067), refuses a missing client or an unknown capability,
+     and is answered once per session; nothing else is answered before it (`FAC-SEM-106`, `channelStep`). The node serves
+     `health` and `enroll.status`; payload methods belong to their owners' decisions. The node keeps its socket path
+     under 100 bytes.
+  4. **Consent.** The node sends `consent.prompt` with a deadline of at most 10 minutes to every client that declared
+     `consent.ui` (`mayPrompt`); the first answer before the deadline wins (`given` carries its time), the others receive
+     `consent.cancel`, and no answer or a late one is denied (`consentOutcome`).
+  5. **Errors** in the JSON-RPC envelope with `error.data.code` from one set and one integer per code (`ERROR_CODES`);
+     an Administrators process that opens a Windows pipe is admitted only with the node's user SID.
 - **Why:** three surfaces need to reach the node on one machine without a network port, a browser origin or a second
   copy of anyone's credentials; the operating system already proves who the peer is.
 - **Compatibility:** Additive: a new protocol, registered in the revision register (DEC-0067), and an optional

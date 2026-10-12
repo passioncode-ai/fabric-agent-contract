@@ -15,15 +15,15 @@ point.
 |---|---|---|
 | macOS | `~/Library/Application Support/<node bundle id>/run/node.sock` — not `$TMPDIR`, which macOS cleans | the node checks the peer's uid with `getpeereid` |
 | Linux | `$XDG_RUNTIME_DIR/<node>/node.sock`, or `${XDG_STATE_HOME:-~/.local/state}/<node>/run/node.sock` when that variable is unset | `SO_PEERCRED` |
-| Windows | the named pipe `\\.\pipe\<node>-<user SID>`, created with `FILE_FLAG_FIRST_PIPE_INSTANCE` and `PIPE_REJECT_REMOTE_CLIENTS`, its DACL the DEC-0033 set | the server checks the client with `GetNamedPipeClientProcessId` and the client the server with `GetNamedPipeServerProcessId` and the owner SID; an elevated Administrators process can connect, as the DEC-0033 set allows |
+| Windows | the named pipe `\\.\pipe\<node>-<user SID>`, created with `FILE_FLAG_FIRST_PIPE_INSTANCE` and `PIPE_REJECT_REMOTE_CLIENTS`, its DACL the DEC-0033 set | the server checks the client with `GetNamedPipeClientProcessId` and the client the server with `GetNamedPipeServerProcessId` and the owner SID; SYSTEM or an Administrators process may open the pipe (the DEC-0033 DACL) but is admitted only when its user SID is the node's |
 
 - **The directory is the access control.** On POSIX the socket's directory is mode 0700 and owned by the user; the
   node refuses to start otherwise (a socket file's own mode is not honoured everywhere). A peer of another user is
   refused, `unauthenticated`, before anything is read ([`admitPeer`](../../src/local-channel.ts)).
 - **The client checks the server too**: the directory's owner and mode and the server's uid (or, on Windows, the
   server process's owner) before it sends hello, so a squatted path is never trusted.
-- **A path too long** for `sun_path` (104 bytes on macOS, 108 on Linux) is reached by connecting relative to its
-  directory.
+- **The path is short.** The node keeps its published socket path under 100 bytes (`sun_path` holds 104 on macOS and
+  108 on Linux) and refuses to start otherwise; a client connects to that path as published.
 - **A stale socket.** At start the node takes a lock on `run/node.lock`, then probe-connects; it removes the path only
   when the connect is refused. A live socket is never removed.
 - **Discovery.** A client never computes the path: the node publishes it in its service descriptor as
@@ -38,19 +38,33 @@ JSON-RPC 2.0, one JSON object per line, at most 1 MiB a line (over that, `invali
 Every request carries an `id`; `consent.cancel` is the one notification.
 
 1. **Hello first.** The first call is `channel.hello {protocols, client: {name, version}, capabilities?, token?}`,
-   within 5 s of connecting or the node closes. The node answers `{protocols}` — N and N−1 (DEC-0067) — or
+   within 5 s of connecting; otherwise the node sends `{id: null, error: hello-first}` and closes. The node answers `{protocols}` — N and N−1 (DEC-0067) — or
    `schema-unsupported` and closes. No other method is answered before it (`hello-first`; `channelStep`;
-   `FAC-SEM-106`, kind `local-channel-session`).
-2. **Base methods**: `health` → `{status, version, protocols, degraded[]}` (an empty `degraded` asserts full health);
-   `enroll.status` → `{enrolled, org?}`. Payload methods (`node.lifecycle.*`, `grant.check`, …) are added by their
+   `FAC-SEM-106`, kind `local-channel-session`). A hello refuses a missing `client` or a capability other than
+   `consent.ui` (`invalid-params`), and a second hello is `invalid-request` and changes nothing.
+2. **The node's methods** (`NODE_METHODS`): `channel.hello`; `health` → `{status, version, protocols, degraded[]}` (an
+   empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`. The client's method (`CLIENT_METHODS`)
+   is `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`. Payload methods (`node.lifecycle.*`, `grant.check`, …) are added by their
    owners' decisions, in this envelope.
 3. **Consent, the other way.** After hello the channel is bidirectional. A client that declares `capabilities:
    ["consent.ui"]` may receive the node's `consent.prompt {promptId, purposeId, noticeVersion, deadline}` and answers
-   `{state: given | denied, at}`; no answer by the deadline is `denied`; the node sends `consent.cancel {promptId}` when
-   the prompt is no longer needed. The node prompts only a client that declared `consent.ui` (`mayPrompt`); a client
-   that calls a method it lacks the capability for is `forbidden`.
-4. **Errors** use the JSON-RPC envelope with `error.data.code`: `unauthenticated`, `forbidden`, `schema-unsupported`,
-   `hello-first`, `unknown-method`, `invalid-request`, `invalid-params`.
+   `{state: given | denied, at}` — `at` required for `given`, the receipt evidence (DEC-0052). The deadline is at most
+   10 minutes after the prompt. The node prompts every client that declared `consent.ui` (`mayPrompt`); the first answer
+   before the deadline wins and the others receive `consent.cancel {promptId}`; no answer by then is `denied`, and a late
+   answer is ignored (`consentOutcome`).
+4. **Errors** use the JSON-RPC envelope with `error.data.code` and one integer per code (`ERROR_CODES`):
+
+   | `data.code` | `code` |
+   |---|---|
+   | `invalid-request` | -32600 |
+   | `unknown-method` | -32601 |
+   | `invalid-params` | -32602 |
+   | `unauthenticated` | -32001 |
+   | `forbidden` | -32003 |
+   | `schema-unsupported` | -32004 |
+   | `hello-first` | -32005 |
+
+   `forbidden` is for payload methods whose owners require a capability; no base method needs one.
 
 ## Not decided here
 

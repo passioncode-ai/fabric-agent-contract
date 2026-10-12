@@ -311,7 +311,30 @@
           "$ref": "common.schema.json#/$defs/timestamp"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "state"
+            ],
+            "properties": {
+              "state": {
+                "const": "given"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "at"
+            ],
+            "properties": {
+              "at": true
+            }
+          }
+        }
+      ],
+      "description": "consent.prompt result: given (with its time, the receipt evidence, DEC-0052) or denied."
     },
     "notification": {
       "type": "object",
