@@ -10,7 +10,7 @@
  */
 import { createCipheriv, createDecipheriv, createECDH, createHash, createHmac, sign as nodeSign, verify as nodeVerify, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
-import { isEd25519Key, p256KeyRefusal, p256Point, p256PublicKey, type P256Key } from "./p256.js";
+import { isEd25519Key, p256Jwk, p256KeyRefusal, p256Point, type P256Key } from "./p256.js";
 import { CLOCK_SKEW_SECONDS, RELAY_ALG, instant } from "./relay.js";
 import { isObject, type JsonObject } from "./findings.js";
 
@@ -181,7 +181,7 @@ export function openEnvelope(value: unknown, ctx: OpenContext): { ok: true; secr
   if (!senderKey || p256KeyRefusal(senderKey) !== null || p256KeyRefusal(encPoint) !== null) return { ok: false, refusal: "bad-key" };
   const sig = Buffer.from(value.sig, "base64url");
   if (sig.length !== 64 || sig.toString("base64url") !== value.sig) return { ok: false, refusal: "bad-signature" };
-  const verified = nodeVerify("sha256", signingInput(value), { key: p256PublicKey(senderKey), dsaEncoding: "ieee-p1363" }, sig);
+  const verified = nodeVerify("sha256", signingInput(value), { key: p256Jwk(senderKey), format: "jwk", dsaEncoding: "ieee-p1363" }, sig);
   if (!verified) return { ok: false, refusal: "bad-signature" };
   if (!ctx.mayHold(header.sender, header.agentRef, header.slot)) return { ok: false, refusal: "sender-not-allowed" };
   const current = ctx.currentPlacement(header.agentRef, header.slot);
