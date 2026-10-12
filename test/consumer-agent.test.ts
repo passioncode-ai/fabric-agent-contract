@@ -68,6 +68,9 @@ describe("FAC-SEM-102: the slots a role names (DEC-0074)", () => {
   it("refuses one slot feeding two roles", () => {
     expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: ["ORG_URL"] }, { role: "other", tools: ["b"], secrets: ["ORG_URL"] }]))).toEqual(["FAC-SEM-102 /requires/mcp/1/secrets/0"]);
   });
+  it("lets a role required twice name the same slot, reporting only the repeated role", () => {
+    expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: ["ORG_URL"] }, { role: "org-server", tools: ["b"], secrets: ["ORG_URL"] }]))).toEqual(["FAC-SEM-102 /requires/mcp/1/role"]);
+  });
   it("reads malformed slots as nothing", () => {
     expect(codes(mcp([{ role: "org-server", tools: ["a"], secrets: [7, null] }, { role: "x", tools: ["b"], secrets: "ORG_URL" }]))).toEqual([]);
   });

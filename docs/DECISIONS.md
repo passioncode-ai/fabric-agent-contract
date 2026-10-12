@@ -4027,7 +4027,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `fixtures/negative/fabric-package-consumer-secret-twice.json`, `fixtures/catalogue.json`;
   - tests: `test/consumer-agent.test.ts`, `test/schema-closure.test.ts`;
   - docs: `docs/backlog.md` (CT-04, CT-20).
-- **Not decided here:** how a placement maps a slot's value onto a server entry's fields (a URL, a header); that is
-  the runner's configuration format.
+- **Not decided here:** how a placement maps a slot's value onto a server entry's fields (a URL, a header), which is
+  the runner's configuration format; whether a role may name a slot marked `optional`.
 - **Source:** the first organization server's session (2026-10-12); DEC-0071; packet P6-10. DEC-0074 was reserved by
-  git CAS (`--key w6-p6-10-mcp-secrets-20261012 DEC`); no new rule code; the record plane is `fs`.
+  git CAS (`--key w6-p6-10-mcp-secrets-20261012 DEC`); no new `FAC-SEM` id (`FAC-SEM-102` grew); the record plane is `fs`.

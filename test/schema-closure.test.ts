@@ -29,6 +29,11 @@ describe("sourceClosure", () => {
     expect(closure).toContain("protocol-revisions.ts");
     expect(closure).toContain("findings.ts");
   });
+  it("follows re-exports and multi-line imports, not only one-line imports", () => {
+    expect(sourceClosure(src, "relay-vectors.ts")).toContain("relay.ts");
+    const reexporting = sourceClosure(src, "semantic-rules.ts");
+    expect(reexporting.length).toBeGreaterThan(20);
+  });
   it("resolves for every module to files that exist", () => {
     for (const file of readdirSync(src).filter((name) => name.endsWith(".ts"))) {
       for (const reached of sourceClosure(src, file)) expect(existsSync(path.join(src, reached)), `${file} → ${reached}`).toBe(true);
