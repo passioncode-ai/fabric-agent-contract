@@ -135,7 +135,7 @@ takes the id from its `Next free ID`, OQ-0011 at this branch):
 Also open:
 
 - Consumers adopt as the cells above say; no consumer pin is moved by this change alone.
-- The seam tier of the owner's reading was cut off by a rate limit and is owed again.
+- The seam reading was rerun on `c5f89ee`; a confirming reading of `faf20ab` accepted every item. The owner applied the register text above at merge, with Compatibility completed for `FAC-SEM-014`, `isRevoked`/`FAC-SEM-084` and `FAC-SEM-076`, and OQ-0011 given a *Meanwhile* line.
 
 ## Checks run
 

@@ -79,7 +79,7 @@ only miss a sameness, never invent one — RFC 3986 §6.1's aim: avoid false pos
 
 DEC-0076 tightens some rules and loosens others. A reader pinned before it compares bytes.
 
-- **Tightened** — `FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-025` (`byProject`): two spellings of one id that passed as two
+- **Tightened** — `FAC-SEM-094`, `FAC-SEM-006`, `FAC-SEM-025` (`byProject`), `FAC-SEM-076` (share grants): two spellings of one id that passed as two
   now meet as one. A byte-comparing reader keeps letting `AGENT:x` approve `agent:x`'s proposal and keeps splitting one
   project over two rows; only a reader at this pin refuses them.
 - **Loosened** — a rule now accepts a reference spelled otherwise, and a reader that compares bytes then fails at the
@@ -90,6 +90,10 @@ DEC-0076 tightens some rules and loosens others. A reader pinned before it compa
     route, but a byte lookup misses the admitted revision and **the route walk moves on** to the next candidate;
   - `FAC-SEM-096`: a rollback basis spelled otherwise passes, but a byte lookup that finds a record under that exact
     spelling **reaches the other setting**.
+  - `FAC-SEM-014`: a `providerId` spelled otherwise passes, but a byte lookup of the manifest by it **misses**;
+  - `isRevoked`, and with it `reconcileRevision` (`FAC-SEM-084`), for a `grant` revocation: a reader at this pin
+    matches a revoked grant spelled otherwise, but a reader pinned before it **still lets that grant through** — the
+    fail-open this decision closes.
 
   So a writer emits the normal form (then both readers agree), and a host that accepts a spelling looks the record up by
   normal form (the previous section).

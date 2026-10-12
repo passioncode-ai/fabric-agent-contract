@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0076`
+**Next free ID:** `DEC-0077`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -194,6 +194,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-09-30
 - **Status:** Accepted
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-014` compares the entry's `providerId` with the manifest's `provider.id` by normal form; the slug and the file stem compare as written (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-11):** item 6 amended by DEC-0018 (every tool's `outputSchema` is rooted at `type: object`).
 - **Refines:** DEC-0016
 - **Decision:** The operator, who owns the contract design, ruled on the seven questions
@@ -646,6 +647,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034` compare a revision reference's id, a project and a capability by their normal forms (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Refines:** DEC-0026 (runner routes — additive, under the DEC-0016 extension policy); DEC-0010
   (admission unchanged); DEC-0013 (execution contexts unchanged)
@@ -2410,6 +2412,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   runs the signing ceremony and certifies hub keys (backlog CT-19); Project Observatory's node verifies each revision
   before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
   (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-076` keys share grants and `grant` revocations by the normal form of the grant's id (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** ER-10's window admits a revision from 60 s before `issuedAt` (the clock skew every
   relay time allows, `CLOCK_SKEW_SECONDS` in `src/rfc3339.ts`), not from `issuedAt` itself — DEC-0066. This text is
   unchanged; `verifyEstateRecord`, estate-record.md and `fixtures/vectors/estate-record.json` carry the skew.
@@ -3190,6 +3193,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the heartbeat in its check-in, refuses what arrives from other machines unless current and refuses an unreconciled
   revision (CT-20), and its relay client reads the frames as these documents (CT-34); the relay carries them unchanged
   (DEC-0047).
+- **Annotated (2026-10-13):** amended by DEC-0076: `isRevoked`, and so `reconcileRevision` (`FAC-SEM-084`), matches a `grant` revocation by the normal form of the grant's id; every other kind exactly (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** HB-0 — a held heartbeat the machine could not have accepted is refused `malformed`, never read as nothing held (the owed reading of #64; packet P6-08).
 - **Amends:** nothing; it gives DEC-0053 item 9's `records.heartbeat` and `records.revocationDelta`, and DEC-0047 item
   9's `delta`, `heartbeat` and `welcome` frames, the documents they named as this decision's. It adds a precondition to
@@ -3516,6 +3520,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's result writer lists every
   unproven done claim in `notVerified` by its id and refuses self-approval of learning and promotion (CT-19); the first
   organization server and Project Observatory check grant windows with `FAC-SEM-097` (CT-04, CT-20). Board row CT-14.
+- **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-094` (approver against author), `FAC-SEM-006` (the scoped projects) and `FAC-SEM-096` (a rollback basis's id) compare by normal form (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `FAC-SEM-093` also refuses one claim id on two done claims and names each done item by its own index; `FAC-SEM-097` names the field that failed; the grant window is written `[startsAt, expiresAt)` in governance-and-roles.md (the owed reading of #67; packet P6-08).
 - **Amends:** DEC-0011 (a rule for the claim/proof relation), DEC-0004 and DEC-0012 (a rule for approval separation),
   DEC-0006 (one product manager, now found), DEC-0007 (a rule for rollback), DEC-0008 (a rule for a grant's window;
@@ -3586,6 +3591,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   writes `byProject` and moves its OpenRouter referer to its product page (CT-20); the adapter's kits offer the
   attribution setting, off by default (CT-18); Fabric attributes from its first model call through OpenRouter (CT-19).
   Board row CT-15.
+- **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
   adoption. Implements the organization roadmap's RM-16 architecture phase. Closes the board run's inventory items
@@ -4289,6 +4295,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - Loosening, where a rule now accepts a reference spelled otherwise and a byte lookup after it misses: `FAC-SEM-002`
     (the pool's fallback then spends another account), `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` (the route walk moves
     on to the next candidate), `FAC-SEM-096` (a rollback reaches the other setting, one stored under that exact spelling).
+  - Also loosened: `FAC-SEM-014` (a `providerId` spelled otherwise passes, and a byte lookup of the manifest by it
+    misses); `isRevoked`, and with it `reconcileRevision` (`FAC-SEM-084`), for a `grant` revocation — a reader pinned
+    before this decision still lets a revoked grant spelled otherwise through, which is the fail-open this decision
+    closes. Also tightened: `FAC-SEM-076` (two spellings of one share grant are one grant).
   - Hence items 4 and 5: a writer that emits the normal form is read the same by both readers, and a host looks an
     accepted reference up by normal form, refusing a collision.
 - **Consequences / affects:**
