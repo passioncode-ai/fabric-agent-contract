@@ -1,6 +1,6 @@
 import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
-import { isValidP256Key } from "./p256.js";
+import { isValidP256Key, p256Jwk } from "./p256.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
@@ -467,7 +467,6 @@ function deviceAction(value: JsonObject): Finding[] {
  * dsaEncoding}`: workerd (Cloudflare Workers) throws a TypeError on a KeyObject beside `dsaEncoding`, and Node accepts both.
  * Local until `p256Jwk` (src/p256.ts, #59) lands.
  */
-const p256PublicJwk = (raw: Uint8Array) => ({ kty: "EC", crv: "P-256", x: Buffer.from(raw.subarray(1, 33)).toString("base64url"), y: Buffer.from(raw.subarray(33, 65)).toString("base64url") });
 
 /**
  * Whether `signature` (base64) over `bytes` verifies under `key` (`{alg, publicKey}`): `ed25519` with a raw 32-byte key
@@ -485,7 +484,7 @@ export function verifyWith(key: JsonObject, bytes: Buffer, signature: unknown): 
     }
     if (key.alg === "es256") {
       if (!isValidP256Key(raw)) return false;
-      return verify("sha256", bytes, { key: p256PublicJwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, value);
+      return verify("sha256", bytes, { key: p256Jwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, value);
     }
   } catch {
     return false;

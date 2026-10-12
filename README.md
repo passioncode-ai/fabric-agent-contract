@@ -20,7 +20,9 @@ Status: contract `0.1.0`. What ships: the JSON Schemas, the fixtures, the confor
 contract pin, and reference verifiers that consumers copy or port and test against this repository's
 vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`,
 `src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), `src/estate-record-rules.ts` with
-`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), and `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056). What does not ship: a runtime, a provider implementation, a model router,
+`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/relay.ts` (relay
+admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope) and
+`src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
@@ -34,7 +36,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Memory, retrospectives and learning](docs/specification/memory-and-learning.md)
 - [`mcp-memory-service` reference adapter](docs/reference-architecture/mcp-memory-service-adapter.md)
 - [Governance and roles](docs/specification/governance-and-roles.md)
-- [Services and their dashboards — local and online (`fabric-service/0.1`)](docs/specification/service.md)
+- [Services and their dashboards — local and online, on macOS, Linux and Windows (`fabric-service/0.1`, DEC-0057 for one copy under every supervisor)](docs/specification/service.md)
 - [Embedded dashboard — width, navigation, scrolling and themes inside a host (`fabric-dashboard/0.1`)](docs/specification/embedded-dashboard.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
@@ -48,6 +50,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Activity telemetry — sessions, usage, summaries and access logs (`fabric-activity/0.1`)](docs/specification/activity.md)
 - [Devices — enrollment, signed policy, check-in, health and the request signature beside mutual TLS (`fabric-device/0.1`)](docs/specification/devices.md)
+- [Relay — admission by device key, store-and-forward messages, trust tiers from the signed sender and the HPKE secret envelope (`fabric-relay/0.1`, `fabric-secret-envelope/1`, DEC-0047)](docs/specification/relay.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)

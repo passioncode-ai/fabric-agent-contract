@@ -1,6 +1,6 @@
 # Fabric's button and `fabric://` links
 
-DEC-0040 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
+DEC-0040, the cookie's scope DEC-0059 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
 `FAC-SEM-052` · parser and builder [`src/fabric-links.ts`](../../src/fabric-links.ts) · builds on
 [`fabric-dashboard/0.1`](embedded-dashboard.md) and [`fabric-service/0.1`](service.md)
 
@@ -65,9 +65,13 @@ which MAY check whether the hub document of [Fabric's lifecycle](https://github.
 exists. A web page cannot see which URL schemes a computer handles, so without either signal it falls back to
 the 1 500 ms test.
 
-**FB-6 — The host's cookie.** A host that embeds a dashboard MAY set the cookie `fabric_button` in the page's own storage
-partition on the service origin, with the attributes of the appearance carrier (ED-8: path `/`,
-`SameSite=Strict`, not `HttpOnly`, `Secure` on `https`). It is a session cookie, with no `Max-Age` and no
+**FB-6 — The host's cookie.** A host that embeds a dashboard MAY set the cookie `fabric_button` for the page's host
+in the cookie store the page reads, with the attributes of the appearance carrier (ED-8: path `/`,
+`SameSite=Strict`, not `HttpOnly`, `Secure` on `https`). Its scope is ED-8's (DEC-0059): **per host in a shared
+cookie store; per service where the host gives each service its own store**. A cookie is not isolated by port
+(RFC 6265 §8.5), so in a shared store an `owner=host` written for one local service hides the button of every
+local service on that host; a host that draws its own button over only some pages gives each service its own store
+(Fabric Dashboards: the partition `persist:svc-<key>`). It is a session cookie, with no `Max-Age` and no
 `Expires` (DEC-0045), so an `owner=host` written while the host showed the page never hides the page's button
 in a plain browser tab later, where no host draws one (FB-1). Its value is form-encoded:
 

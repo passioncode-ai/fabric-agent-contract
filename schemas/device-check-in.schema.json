@@ -319,7 +319,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "What the device holds of the records the relay protocol carries (DEC-0053; their own shapes are DEC-0047's): fields only."
+          "description": "What the device holds of the records the relay protocol carries (DEC-0053): fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the leases the window lease's decision (not yet taken)."
         },
         "fullState": {
           "type": "boolean"
@@ -398,12 +398,12 @@
             "heartbeat": {
               "type": "object",
               "maxProperties": 64,
-              "description": "A newer signed heartbeat, as the relay protocol defines it (DEC-0047, reserved); carried here unchanged."
+              "description": "A newer signed heartbeat, as DEC-0054 (reserved) defines it; carried here unchanged."
             },
             "revocationDelta": {
               "type": "object",
               "maxProperties": 64,
-              "description": "The revocation delta since the head the device reported, as the relay protocol defines it (DEC-0047); carried unchanged."
+              "description": "The revocation delta since the head the device reported, as DEC-0054 (reserved) defines it; carried unchanged."
             },
             "leases": {
               "type": "array",
@@ -411,7 +411,7 @@
               "items": {
                 "type": "object",
                 "maxProperties": 64,
-                "description": "A spending-window lease, as the relay protocol defines it (DEC-0047); carried unchanged."
+                "description": "A spending-window lease, as the window lease's decision (not yet taken) defines it; carried unchanged."
               }
             }
           },

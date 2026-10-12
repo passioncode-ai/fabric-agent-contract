@@ -1,0 +1,19 @@
+{
+  "description": "A copy systemd started waits 7.5 s and takes the lock when the holder leaves: conforming (FAC-SEM-078).",
+  "start": {
+    "env": {
+      "FABRIC_SERVICE_SUPERVISOR": "systemd"
+    },
+    "argv": [
+      "/opt/example-agent/bin/example-agent",
+      "serve"
+    ]
+  },
+  "holderPid": 4242,
+  "attempts": 5,
+  "waitedMs": 7500,
+  "sideEffects": [],
+  "outcome": {
+    "acquired": true
+  }
+}

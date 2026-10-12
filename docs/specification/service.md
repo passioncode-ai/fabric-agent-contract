@@ -1,9 +1,10 @@
-# Local service extension `fabric-service/0.1`
+# Service extension `fabric-service/0.1`
 
 `covers: REQ-S01, REQ-S02, REQ-S03, REQ-S04, REQ-S05` — see the
 [run brief](../evidence/specs/2026-09-28-fabric-service-brief.md) · DEC-0015;
 `covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019;
-settings backup and the feed client's token header · DEC-0025
+settings backup and the feed client's token header · DEC-0025; one copy under every supervisor, the lifecycle per
+system and the Windows token-file reader · DEC-0057
 
 A **service** is a long-running agent process — on the operator's own computer (a **local**
 placement) or online at an `https` origin (a **remote** placement, [below](#remote-placement)): it keeps
@@ -37,7 +38,7 @@ flowchart LR
   H -- GET /.well-known/fabric-service --> S[Service]
   H -- GET /fabric/v1/events --> S
   H -- POST /fabric/v1/login-code --> S
-  H -- start / stop / restart --> L[launchd]
+  H -- start / stop / restart --> L[Supervisor: launchd, systemd, Task Scheduler or the node]
   L -- supervises --> S
 ```
 
@@ -368,27 +369,92 @@ offending SID or reason — never the file's contents:
    any right is a refusal: `S-1-1-0` (Everyone), `S-1-5-11` (Authenticated Users), `S-1-5-32-545`
    (BUILTIN\Users), another user, a left-behind CREATOR OWNER. Deny ACEs do not change the decision.
 
+The mask is the ACE's unsigned 32-bit access mask: a reader that reads it signed converts it first (.NET
+`FileSystemRights` is an `int`, so `GENERIC_READ`, 0x80000000, arrives negative: `>>> 0`, `(uint)`). An `allow` ACE
+whose mask is 0 grants nothing. An ACE of a readable type other than allow and deny — an object or callback ACE among
+them — is refused, and so is a flag, an ACE type, a SID or a mask the reader cannot read. A SID is compared
+case-insensitively on its `S`, and each of its sub-authorities is at most 4294967295 (DEC-0057). [`src/windows-token.ts`](../../src/windows-token.ts)
+`windowsTokenAclProblem` is the rule over what a reader has read — the file's flags, its owner SID and its ACEs — and
+[`fixtures/vectors/windows-token.json`](../../fixtures/vectors/windows-token.json) holds the cases a port runs
+(`FAC-SEM-079`; [conformance](conformance.md#clients-and-readers)).
+
 A writer sets the ACL explicitly and protected (inheritance off): the current user, SYSTEM and
 Administrators, full control — so a file it writes passes whatever its folder inherits.
 A reader reads the ACL without loading a PowerShell module (`[System.IO.File]::GetAccessControl`),
 with `PSModulePath` removed from a Windows PowerShell 5.1 child's environment, and never synchronously
 on a UI or main thread: a cold PowerShell can take more than 15 s (DEC-0033). Descriptor
 paths and command executables (`FAC-SEM-012`) on Windows are drive-absolute (`C:\…` or `C:/…`) or under `~\`; a network share (`\\server\…`,
-`\\?\…`) is never a local path.
+`\\?\…`, and `//server/…` or `/\server\…`, which Windows reads as a share too: DEC-0057) is never a local path.
 
 ## Lifecycle
 
+These rules are a local placement's; a remote one is supervised by its platform ([Remote placement](#remote-placement)).
+
 | Rule | Requirement |
 |---|---|
-| One copy | Before any side effect (resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. If the lock is held it MUST print one sentence naming the holder's pid and exit with status 75. Binding a port is not a lock. |
-| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`. **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on. No supervisor file carries a secret. |
-| Install | Write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error), then poll the well-known document until `service.id` matches, for at most 40 seconds. |
+| One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. |
+| Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`. The descriptor's `lifecycle.manager` admits `node` by a later change (board CT-12). A descriptor names one supervisor: `label` and `plist` are refused beside `systemd` and `task-scheduler`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057). No supervisor file carries a secret. |
+| Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run). A host MUST NOT start a service process itself. |
-| Code | Code runs from an immutable release directory. An upgrade rewrites the plist and restarts. |
-| State | Data and configuration live in `~/Library/Application Support/<id>/`, logs in `~/Library/Logs/<id>/`, cache in `~/Library/Caches/<id>/` — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then `bootout`, delete the plist, delete the descriptor. Data stays unless the operator asks to purge it. |
+| Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it. |
+| State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task. Then delete the descriptor. Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
+
+### Directories per system
+
+The descriptor's `paths` names the directories a service uses; these are where a writer puts them (DEC-0057). On Linux
+data, logs (state) and cache follow the XDG Base Directory Specification's `XDG_DATA_HOME`, `XDG_STATE_HOME` and
+`XDG_CACHE_HOME`; configuration stays beside data on every system, by choice, as on macOS and in the adapter's kits,
+not in `XDG_CONFIG_HOME`. On Windows everything is under `%LOCALAPPDATA%`, which does not roam, as the services folder
+is (DEC-0032).
+
+| What | macOS | Linux | Windows |
+|---|---|---|---|
+| data and configuration (holds `service.lock`) | `~/Library/Application Support/<id>/` | `${XDG_DATA_HOME:-~/.local/share}/<id>/` | `%LOCALAPPDATA%\<id>\` |
+| logs | `~/Library/Logs/<id>/` | `${XDG_STATE_HOME:-~/.local/state}/<id>/logs/` | `%LOCALAPPDATA%\<id>\Logs\` |
+| cache (rebuilt when deleted) | `~/Library/Caches/<id>/` | `${XDG_CACHE_HOME:-~/.cache}/<id>/` | `%LOCALAPPDATA%\<id>\Cache\` |
+
+### One copy
+
+A copy that does not hold `service.lock` touches nothing: it binds no port, writes no file, resumes no job and starts
+no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057).
+
+- **Started by hand,** a copy that finds the lock held tries once and exits 75 at once, printing one sentence naming
+  the holder's pid. When it cannot learn the pid (the lock records none yet, or cannot be read), the sentence says the
+  holder is unknown, with the word `unknown`.
+- **Started by its supervisor and marked so,** a copy MAY wait for the lock in-process for at most 300 s, touching
+  nothing, and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. An immediate exit
+  under launchd's `KeepAlive` or systemd's `Restart=always` is a restart every 10 s, forever. The Task Scheduler restarts
+  a failed task a finite number of times (`RestartCount`, [sources](../evidence/sources.md)); whether an exit 75 counts
+  as such a failure is not yet proven — pending the adapter's Windows CI receipt (board CT-18). How the copy spaces its
+  tries is its own; the adapter's kits back off from 0.5 s, doubling to 30 s.
+- **The supervisor marker** is `FABRIC_SERVICE_SUPERVISOR=<manager>` in the copy's environment or
+  `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`) in its argument vector, after the executable and
+  before any `--`. `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor
+  file writes the marker ([Supervisor](#lifecycle)); a host or node that starts a service as its supervisor sets it,
+  and a start by hand never does. A copy never infers supervision from its parent process. Only an empty variable
+  counts as no marker. An argument with no value — followed by nothing, by `--` or by another `--…` flag, none of which
+  it consumes, so `--` still ends the scan — or with an empty value is a marker that names no manager: alone it leaves
+  the copy unsupervised, beside a variable it disagrees. Any other value that names no manager leaves the copy
+  unsupervised. A service's own argument parser accepts `--fabric-supervisor <manager>` and
+  `--fabric-supervisor=<manager>` and does nothing with them beyond reading the marker, so a parser that refuses
+  unknown flags does not exit on it.
+- **Markers that disagree** — both forms with different values, or the argument twice with different values — leave
+  the copy unsupervised: it exits 75 at once, before it takes the lock and whether or not the lock is held, with one
+  sentence naming the markers.
+- **The holder keeps answering** its well-known document for the whole wait, so the wait is never an outage: Fabric
+  Dashboards derives `down` only after 15 s without a health answer from a local placement (60 s from a remote one)
+  (FD-37). What a host shows of the waiting copy depends on the supervisor's pid. Under launchd the supervisor's pid is
+  the waiting copy's, not the holder's, so the host shows `duplicate` (Fabric Dashboards at `e1fdd64`). Under systemd a
+  host can do the same once it compares the unit's `MainPID` with the well-known `process.pid`. Under the Task
+  Scheduler there is no supervisor pid to compare: the waiting copy is not visible and the holder shows `ready`.
+
+[`src/service-supervisor.ts`](../../src/service-supervisor.ts) `supervisorMarker` and `lockWaitBudgetMs` read the
+marker, run over [`fixtures/vectors/service-supervisor.json`](../../fixtures/vectors/service-supervisor.json);
+`FAC-SEM-078` checks what a copy did when the lock was held, as a kit's test records it. Two installs that share one
+data directory remain a defect: the wait only stops the restart loop from costing the machine.
 
 ## Settings backup
 
@@ -546,9 +612,11 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port; no two descriptors claim one `id.instance` |
 | `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
-| `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no launchd field |
+| `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
 | `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat |
 | `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
 | `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
 | `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
 | `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
+| `FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, saying the holder is unknown when it has no pid, or naming the markers |
+| `FAC-SEM-079` | `windows-token-file` | a Windows token file is a regular file in the profile, owned by the user, SYSTEM or Administrators, and every granting ACE names one of them (`windowsTokenAclProblem`) |

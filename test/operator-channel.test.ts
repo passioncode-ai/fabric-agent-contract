@@ -1,7 +1,9 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { createValidator, validateDocument } from "../src/validator.js";
+import { type Mutant, killers } from "./schema-mutants.js";
 
 // fabric-operator-channel/0.1 (DEC-0034, group chats and liveness DEC-0035): the rules are prose, the status is a schema. These tests
 // keep the two from drifting apart and keep credentials and private ids out of the published shapes.
@@ -106,5 +108,97 @@ describe("fabric-operator-channel/0.1 (DEC-0034, DEC-0035)", () => {
     for (const rule of ["OC-14", "OC-15", "OC-16", "OC-17"]) expect(entry, rule).toContain(rule);
     expect(entry).toContain("receiver-missing");
     expect(spec).toContain("DEC-0035");
+  });
+
+  it("records DEC-0058: a channel nobody receives on is representable only as degraded, receiver-missing, lease none", async () => {
+    const decisions = await read("docs/DECISIONS.md");
+    const start = decisions.indexOf("### DEC-0058");
+    expect(start).toBeGreaterThanOrEqual(0);
+    const next = decisions.indexOf("\n### DEC-", start + 1);
+    const entry = decisions.slice(start, next === -1 ? undefined : next);
+    for (const text of ["DEC-0035", "operator-channel-status.schema.json", "receiver-missing", "F-B-204", "F-B-205", "F-B-219"]) expect(entry, text).toContain(text);
+    // OC-17's closing list names every state but degraded, and the status table says what unlinked's lease is.
+    expect(spec).toMatch(/never reported as `unlinked`, `linked`, `standby` or `off`/);
+    expect(spec).toMatch(/^\| `unlinked` \|[^\n]*`receiver\.lease: held` or `elsewhere`/m);
+    const glossary = await read("CONTEXT.md");
+    expect(glossary).toMatch(/\*\*Addressed message\*\*[^]*?except a bare\s+`\/link CODE` that matches its own pending code \(OC-15\)/);
+  });
+
+  it("accepts a waiting channel nobody receives on only as degraded with lease none", async () => {
+    const validator = await createValidator();
+    const id = `${SCHEMA_PREFIX}schemas/operator-channel-status.schema.json`;
+    const waiting = JSON.parse(await read("fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json")) as Record<string, unknown>;
+    expect(validateDocument(validator, id, waiting).valid).toBe(true);
+    for (const state of ["off", "unlinked", "linked", "standby"]) expect(validateDocument(validator, id, { ...waiting, state }).valid, state).toBe(false);
+    const unlinked = JSON.parse(await read("fixtures/positive/operator-channel-status-unlinked.json")) as Record<string, unknown>;
+    for (const lease of ["held", "elsewhere"]) expect(validateDocument(validator, id, { ...unlinked, receiver: { mode: "long-polling", lease } }).valid, lease).toBe(true);
+    // binding.chats: 16 is the limit, 17 one over it.
+    const linked = JSON.parse(await read("fixtures/positive/operator-channel-status-linked.json")) as Record<string, unknown>;
+    expect(validateDocument(validator, id, { ...linked, binding: { chats: 16, allowedUsers: 1, linkedAt: "2026-10-09T18:02:11Z" } }).valid).toBe(true);
+    expect(validateDocument(validator, id, { ...linked, binding: { chats: 17, allowedUsers: 1, linkedAt: "2026-10-09T18:02:11Z" } }).valid).toBe(false);
+  });
+
+  // F-B-205: every state invariant of the status schema, removed one at a time, lets a negative fixture through.
+  const branch = (schema: Record<string, any>, test: (cond: Record<string, any>) => boolean) => {
+    const found = (schema.allOf as Record<string, any>[]).find((item) => test(item.if));
+    if (!found) throw new Error("no such branch");
+    return found.then as Record<string, any>;
+  };
+  const state = (value: string) => (cond: Record<string, any>) => cond.properties?.state?.const === value;
+  const dropRequired = (schema: Record<string, any>, which: string, member: string) => {
+    const then = branch(schema, state(which));
+    then.required = (then.required as string[]).filter((name) => name !== member);
+  };
+  const MUTANTS: Mutant[] = [
+    { name: "standby and degraded need no reason", mutate: (s) => { s.allOf[0].if.properties.state.enum = ["degraded"]; } },
+    { name: "degraded needs no reason", mutate: (s) => { s.allOf[0].if.properties.state.enum = ["standby"]; } },
+    { name: "linked lease any", mutate: (s) => { delete branch(s, state("linked")).properties.receiver.properties.lease; } },
+    { name: "linked credential may be absent", mutate: (s) => { branch(s, state("linked")).properties.credential = true; } },
+    { name: "linked may carry a reason", mutate: (s) => { delete branch(s, state("linked")).not; } },
+    ...["credential", "receiver", "binding"].map((member) => ({ name: `linked without ${member}`, mutate: (s: Record<string, any>) => dropRequired(s, "linked", member) })),
+    { name: "standby lease any", mutate: (s) => { delete branch(s, state("standby")).properties.receiver.properties.lease; } },
+    ...["credential", "receiver", "binding"].map((member) => ({ name: `standby without ${member}`, mutate: (s: Record<string, any>) => dropRequired(s, "standby", member) })),
+    ...["credential", "receiver"].map((member) => ({ name: `unlinked without ${member}`, mutate: (s: Record<string, any>) => dropRequired(s, "unlinked", member) })),
+    { name: "unlinked may carry a binding", mutate: (s) => { delete branch(s, state("unlinked")).not; } },
+    { name: "unlinked with nobody receiving", mutate: (s) => { branch(s, state("unlinked")).properties.receiver = true; } },
+    { name: "degraded without credential", mutate: (s) => dropRequired(s, "degraded", "credential") },
+    { name: "receiver-missing in any state", mutate: (s) => { delete branch(s, (c) => c.properties?.reason?.properties?.code?.const === "receiver-missing").properties.state; } },
+    { name: "receiver-missing with any lease", mutate: (s) => { branch(s, (c) => c.properties?.reason?.properties?.code?.const === "receiver-missing").properties.receiver = true; } },
+    { name: "receiver-missing without receiver", mutate: (s) => { branch(s, (c) => c.properties?.reason?.properties?.code?.const === "receiver-missing").required = []; } },
+    { name: "binding.chats up to 1000", mutate: (s) => { s.properties.binding.properties.chats.maximum = 1000; } },
+    { name: "excluded.liftedAt any string", mutate: (s) => { s.properties.excluded.items.properties.liftedAt = { type: "string" }; } }
+  ];
+  it.each(MUTANTS)("a fixture kills the mutant: $name", async (mutant) => {
+    expect(await killers("operator-channel-status.schema.json", mutant)).not.toEqual([]);
+  });
+
+  it("the unchanged schema accepts no negative fixture (the identity mutant), so the filter reads negatives only", async () => {
+    expect(await killers("operator-channel-status.schema.json", { name: "identity", mutate: () => {} })).toEqual([]);
+  });
+});
+
+// The UX chain names fixtures as coverage; a name that is not in the catalogue is a claim nothing backs (the P4-03
+// review found SCN-012 naming one). Every backticked fixture name in docs/ux/*.md that begins with a catalogued
+// schema's base name (of two words or more) resolves to a catalogue entry; a pattern with `*` is a family, not a name.
+describe("fixture names in the UX chain", () => {
+  it("resolve to the catalogue", async () => {
+    const catalogue = JSON.parse(await read("fixtures/catalogue.json")) as { name: string; schema: string }[];
+    const names = new Set(catalogue.map((entry) => entry.name));
+    // Bases of two words or more: a one-word base such as `approval` prefixes refusal codes (`approval-reused`), not fixtures.
+    const bases = [...new Set(catalogue.map((entry) => entry.schema.replace(/\.schema\.json$/, "")))].filter((base) => base.includes("-"));
+    const ux = await readdir(path.join(root, "docs/ux"));
+    const missing: string[] = [];
+    let checked = 0;
+    for (const file of ux.filter((name) => name.endsWith(".md"))) {
+      const text = await read(`docs/ux/${file}`);
+      for (const [, token] of text.matchAll(/`([a-z0-9][a-z0-9-]*)`/g)) {
+        if (!bases.some((base) => token!.startsWith(`${base}-`))) continue;
+        checked += 1;
+        if (!names.has(token!)) missing.push(`${file}: ${token}`);
+      }
+    }
+    expect(missing).toEqual([]);
+    // The two families the review named are among those checked.
+    expect(checked).toBeGreaterThanOrEqual(5);
   });
 });

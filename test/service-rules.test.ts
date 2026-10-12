@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { createValidator, validateDocument } from "../src/validator.js";
 
 const descriptor = (id: string, instance: string, port: number, extra: Record<string, unknown> = {}) => ({
   protocol: "fabric-service/0.1", id, instance, origin: `http://127.0.0.1:${port}`, ...extra
@@ -44,6 +45,39 @@ describe("fabric-service/0.1 semantic rules", () => {
     const doctor = (executable: string) => codes("service-descriptor", descriptor("plan-board", "default", 47110, { commands: { doctor: [executable, "check"] } }));
     for (const accepted of ["/usr/local/bin/x", "~/bin/x", "C:\\Users\\example\\x.exe", "C:/Users/example/x.exe", "~\\bin\\x.exe"]) expect(doctor(accepted), accepted).not.toContain("FAC-SEM-012");
     for (const refused of ["example-agent.exe", ".\\bin\\x.exe", "bin/x", "\\\\srv\\share\\x.exe", "//srv/share/x.exe"]) expect(doctor(refused), refused).toContain("FAC-SEM-012");
+  });
+
+  it("FAC-SEM-012 and localPath accept and refuse the same paths: a share in either slash is never local (DEC-0057, F-B-207)", async () => {
+    const validator = await createValidator();
+    const positive = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-descriptor-task-scheduler.json"), "utf8")) as { auth: { tokenFile: string } };
+    const localPath = (value: string) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/service-descriptor.schema.json`, { ...positive, auth: { ...positive.auth, tokenFile: value } }).valid;
+    const executable = (value: string) => !codes("service-descriptor", descriptor("plan-board", "default", 47110, { commands: { doctor: [value] } })).includes("FAC-SEM-012");
+    const accepted = ["/", "/usr/local/bin/x", "~/bin/x", "~\\bin\\x.exe", "C:\\Users\\example\\x.exe", "C:/Users/example/x.exe", "/srv//share"];
+    const refused = ["//server/share/x", "/\\server\\share\\x", "\\\\server\\share\\x", "\\\\?\\C:\\x", "bin/x", "x.exe", "C:x"];
+    for (const value of accepted) expect([localPath(value), executable(value)], value).toEqual([true, true]);
+    for (const value of refused) expect([localPath(value), executable(value)], value).toEqual([false, false]);
+  });
+
+  it("service.md's Supervisor row names every manager the descriptor admits (DEC-0032, F-B-206)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/service-descriptor.schema.json"), "utf8")) as { properties: { lifecycle: { properties: { manager: { enum: string[] } } } } };
+    const spec = readFileSync(path.join(projectRoot(), "docs/specification/service.md"), "utf8");
+    const row = /^\| Supervisor \|(.*)$/m.exec(spec.slice(spec.indexOf("## Lifecycle")))?.[1] ?? "";
+    const managers = schema.properties.lifecycle.properties.manager.enum.filter((manager) => manager !== "none");
+    expect(managers.length).toBeGreaterThanOrEqual(3);
+    for (const manager of managers) expect(row, manager).toContain(`— \`${manager}\``);
+  });
+
+  it("a descriptor names one supervisor: launchd's fields beside none stay valid, beside systemd or the Task Scheduler they are refused (DEC-0057)", async () => {
+    const validator = await createValidator();
+    const read = (name: string) => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive", `${name}.json`), "utf8")) as { lifecycle: Record<string, unknown> };
+    const valid = (doc: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/service-descriptor.schema.json`, doc).valid;
+    const launchd = { label: "com.example.example-agent", plist: "~/Library/LaunchAgents/com.example.example-agent.plist" };
+    const unmanaged = read("service-descriptor-unmanaged");
+    expect(valid({ ...unmanaged, lifecycle: { manager: "none", ...launchd } })).toBe(true);
+    for (const name of ["service-descriptor-systemd", "service-descriptor-task-scheduler"]) {
+      const doc = read(name);
+      for (const field of ["label", "plist"] as const) expect(valid({ ...doc, lifecycle: { ...doc.lifecycle, [field]: launchd[field] } }), `${name} ${field}`).toBe(false);
+    }
   });
 
   it("FAC-SEM-010 lets a remote service share a port number with a local one (DEC-0019)", () => {

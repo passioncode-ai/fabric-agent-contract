@@ -309,6 +309,128 @@ flowchart TD
 
 - **Screens traversed:** SCR-15 error; SCR-15 success.
 
+### FLW-13: Operator works in a dashboard beside the console
+
+- **Traces:** ST-016, ST-017 (JTBD-08, JRN-07/#1, JRN-07/#2, JRN-07/#3, JRN-07/#4)
+- **Goal:** the page stays usable at every console width the host allows, and shows the appearance the operator chose for the fields it declared
+- **Entry points:** an agent's dashboard opened in a host pane beside the console
+- **Success exit:** the operator works in the page with the console as wide as the host allows, every destination reachable
+- **Task analysis:** the host reads the page's declaration and validates it → it keeps `max(480, minWidth)` CSS pixels for the page (480 when nothing valid is declared) → the operator drags the console → the console stops at the host floor → the operator picks a scheme and a theme → the host rewrites `fabric_appearance` → the page applies the fields it declared and hides only those controls.
+- **Rejected shape:** zooming the page to fit, or a sideways-scrolling tab strip — rejected because zoom changes what the page measured and a hidden scrollbar hides destinations (ED-3, ED-7).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  O[Dashboard opened in the host pane] --> V{Declaration valid against its schema?}
+  V -->|no, or none| L[Legacy dashboard: host floor 480; reported once per load when invalid]
+  V -->|yes| F[Host floor is the larger of 480 and minWidth]
+  L --> W[Operator drags the console wider]
+  F --> W
+  W --> S{Page at its host floor?}
+  S -->|no| W
+  S -->|yes| X[Console stops growing; navigation stays reachable]
+  X --> A[Operator picks a scheme and a theme in the host]
+  A --> C[Host rewrites fabric_appearance]
+  C --> D{Fields the page declared}
+  D -->|scheme and theme| B[Page follows both and hides both controls]
+  D -->|one field| H[Page follows that field and keeps its other control]
+  D -->|none| P[Page takes nothing from the cookie; its own controls stay]
+```
+
+- **Screens traversed:** SCR-16 success; SCR-16 narrow; SCR-16 legacy.
+
+### FLW-14: An agent proceeds under a standing grant
+
+- **Traces:** ST-018 (JTBD-07, JRN-06/#4)
+- **Goal:** a spend a standing grant allows goes ahead on the record, without a question to the operator
+- **Entry points:** an agent about to spend within a project that has a standing grant with `spend`
+- **Success exit:** the spend settled against the receipt, visible under the grant in the usage report
+- **Task analysis:** the agent asks the meter with the amount → the meter reads the grant and the levels → `allowed` with a receipt and a reservation → the agent spends → the usage report lists the receipt under the grant.
+- **Rejected shape:** asking the operator in a chat whether the spend is fine — rejected because a record that exists is the proof, and a chat message is never the approval (spend policy rule 3).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  S[Agent is about to spend] --> M{Grant check}
+  M -->|allowed| R[Receipt and reservation]
+  R --> P[Agent spends and goes on]
+  P --> U[Screen: Usage by grant shows the receipt]
+  M -->|denied| D[Code relayed unchanged; at most one approval request filed]
+```
+
+- **Screens traversed:** SCR-17 success; SCR-17 error.
+
+### FLW-15: Operator restores settings
+
+- **Traces:** ST-019 (JTBD-03, JRN-02/#5)
+- **Goal:** what the operator decided comes back after a lost or wrongly migrated data directory, and nothing that exists is overwritten
+- **Entry points:** a service starting on a fresh database; the operator choosing a snapshot by hand
+- **Success exit:** the restore report: rows inserted, rows refused with their reasons, snapshots skipped
+- **Task analysis:** the service finds its snapshots → on a fresh database it restores the newest intact one with content → otherwise the operator opens a preview → the operator applies it → the report names what was inserted, dropped, defaulted and refused.
+- **Rejected shape:** a restore that replaces existing rows, or an agent applying a manual restore — rejected because restore adds and never overwrites, and applying it is the operator's action (service, Settings backup).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  B[Service starts] --> F{Fresh database, never started?}
+  F -->|yes| A[Automatic restore from the newest intact snapshot with content]
+  F -->|no| M[Operator chooses a snapshot]
+  M --> V[Screen: Restore preview and report]
+  V -->|applied by the operator| I[Rows added; none overwritten]
+  A --> I
+  I --> R[Report: inserted, dropped, defaulted, refused, skipped]
+```
+
+- **Screens traversed:** SCR-18 preview; SCR-18 success; SCR-18 error.
+
+### FLW-16: Operator follows a request on the Project board
+
+- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
+- **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
+- **Entry points:** a request submitted to a Project's capability on the board
+- **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled
+- **Task analysis:** an agent submits a request → a responder claims and accepts it → it begins the effect → it completes with an observed result, or the result is lost → the operator reads the state in the thread.
+- **Rejected shape:** inferring completion from a delivery, a read mark or a live process — rejected because request state and effect state are separate facts (project comms, Request lifecycle).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  Q[Request queued] --> C[Claimed]
+  C --> A[Accepted]
+  A --> E[Effect started]
+  E -->|observed result| D[Completed or failed_known]
+  E -->|result lost| U[outcome_unknown]
+  U -->|observed reconciliation| D
+  Q -->|deadline before accept| X[Expired]
+```
+
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired.
+
+### FLW-17: A second copy of a service starts while one runs
+
+- **Traces:** ST-021 (JTBD-03, JRN-02/#3)
+- **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage
+- **Entry points:** the operator runs the service by hand; its supervisor starts it again
+- **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left
+- **Task analysis:** the second copy reads the supervisor marker → by hand it tries the lock once and exits 75 naming the holder → marked, it waits up to 300 s touching nothing and exits 75, or takes the lock if the holder leaves → markers that disagree exit 75 at once → the host keeps showing the holder's health.
+- **Rejected shape:** exiting at once under a supervisor — rejected because launchd and systemd restart it every 10 s, forever (service, One copy).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  S[Second copy starts; the lock is held] --> M{Marker?}
+  M -->|none| X[Exit 75 at once, naming the holder]
+  M -->|markers disagree| C[Exit 75 at once, naming the markers]
+  M -->|supervised| W[Wait up to 300 s, touching nothing]
+  W -->|holder leaves| T[Takes the lock and runs]
+  W -->|wait runs out| X
+  X --> V[Screen: Service card with a second copy]
+  C --> V
+  W --> V
+```
+
+- **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

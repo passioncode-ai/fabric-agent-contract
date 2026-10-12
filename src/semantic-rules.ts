@@ -1,7 +1,10 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
+import { relayRules } from "./relay-rules.js";
 import { feedRequestRules } from "./service-feed.js";
+import { lockOutcomeRules } from "./service-supervisor.js";
+import { windowsTokenRules } from "./windows-token.js";
 import { settingsBackupRules } from "./settings-backup.js";
 import { grantSpendRules, spendPolicyRules } from "./spend-rules.js";
 import { routeRules } from "./route-rules.js";
@@ -14,6 +17,7 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -34,7 +38,11 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (transport) return transport;
   const delegation = delegationRules(kind, value);
   if (delegation) return delegation;
+  const relay = relayRules(kind, value);
+  if (relay) return relay;
   if (kind === "deep-link") return deepLinkRules(value);
+  if (kind === "service-lock-outcome") return lockOutcomeRules(value);
+  if (kind === "windows-token-file") return windowsTokenRules(value);
   const profiles = profileRules(kind, value);
   if (profiles) return profiles;
   const packaged = packageRules(kind, value);
@@ -77,6 +85,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known" && value.status === "ready" && Array.isArray(value.degraded) && value.degraded.length > 0) {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
+  if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
@@ -122,10 +131,11 @@ function serviceClaims(value: JsonObject): Finding[] {
 
 /**
  * An executable's path as `localPath` admits it (schemas/service-common.schema.json, DEC-0032): POSIX `/…` or
- * `~/…`, Windows drive-absolute `C:\…`/`C:/…` or `~\…` — and never a network share (`//server/…`). `localPath` itself
- * still admits `//…` (F-B-207); wave 4 of the board run narrows it, and then this pattern and that one are one.
+ * `~/…`, Windows drive-absolute `C:\…`/`C:/…` or `~\…` — and never a network share: not `\\server\…`, and not
+ * `//server/…` or `/\server\…`, which Windows also reads as a share (DEC-0057). The prefix is `localPath`'s pattern;
+ * `test/service-rules.test.ts` holds the two to the same paths.
  */
-const EXECUTABLE_PATH = /^(~[\\/]|\/(?!\/)|[A-Za-z]:[\\/])/;
+const EXECUTABLE_PATH = /^(~[\\/]|\/(?![\\/])|[A-Za-z]:[\\/])/;
 
 function serviceCommands(value: JsonObject): Finding[] {
   const commands = isObject(value.commands) ? value.commands : {};

@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device and estate-record rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, relay, one-copy, Windows token-file and well-known (FAC-SEM-080) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
-  "estate-record", "estate-record-revision", "estate-placement"
+  "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
+  "service-well-known", "service-lock-outcome", "windows-token-file"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -18,7 +19,9 @@ const MEMBERS = [
   "action", "decision", "pinned", "certification", "revocations", "data", "collector", "device", "user", "session", "kind",
   "seq", "record", "machine", "package", "parent", "machines", "authorities", "publisherKeys", "shareGrants",
   "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
-  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method", "body"
+  "header", "ct", "sig", "type", "kid", "alg", "protocol", "ttl", "body", "extensions", "status", "degraded",
+  "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid",
+  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
@@ -47,5 +50,7 @@ describe("activity and device rules tolerate malformed input", () => {
     const headers = { "signature-input": ["fabric-device=(", 7, null], signature: { a: 1 }, "content-digest": [] };
     expect(() => evaluateSemanticRules("device-request-signature", { ...device, request: { method: 1, target: 2, headers, body: 3 } })).not.toThrow();
     for (const kind of KINDS) expect(() => evaluateSemanticRules(kind, device), kind).not.toThrow();
+    const dashboard = "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1";
+    for (const value of WRONG) expect(() => evaluateSemanticRules("service-well-known", { extensions: { [dashboard]: value, constructor: value } })).not.toThrow();
   });
 });

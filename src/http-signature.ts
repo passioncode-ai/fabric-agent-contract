@@ -1,7 +1,7 @@
 // #region http-signature — docs: docs/specification/devices.md#transport
 import { type KeyObject, createHash, createPublicKey, sign, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
-import { isValidP256Key } from "./p256.js";
+import { isValidP256Key, p256Jwk } from "./p256.js";
 
 /**
  * The device transport binding (DEC-0056): HTTP message signatures, a subset of RFC 9421, beside mutual TLS for
@@ -351,7 +351,7 @@ export function signDeviceRequest(input: { method: string; targetUri: string; bo
   const base = deviceSignatureBase(input.method, input.targetUri, digest, params);
   if (base === null) throw new TypeError("the signature base cannot be built from these values (RFC 9421 §2.5)");
   const bytes = Buffer.from(base, "ascii");
-  // A P-256 key is passed as a JWK beside dsaEncoding, the form workerd accepts as well as Node (see p256PublicJwk).
+  // A P-256 key is passed as a JWK beside dsaEncoding, the form workerd accepts as well as Node (`p256Jwk`, DEC-0047).
   const signature = alg === "ed25519"
     ? sign(null, bytes, input.key.privateKey)
     : sign("sha256", bytes, { key: input.key.privateKey.export({ format: "jwk" }), format: "jwk", dsaEncoding: "ieee-p1363" });
@@ -474,7 +474,6 @@ const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
  * dsaEncoding}`: workerd (Cloudflare Workers) throws a TypeError on a KeyObject beside `dsaEncoding`, and Node accepts both.
  * Local until `p256Jwk` (src/p256.ts, #59) lands.
  */
-const p256PublicJwk = (raw: Uint8Array) => ({ kty: "EC", crv: "P-256", x: Buffer.from(raw.subarray(1, 33)).toString("base64url"), y: Buffer.from(raw.subarray(33, 65)).toString("base64url") });
 
 /**
  * Every check of the binding but the nonce store, in this order: the receiver's own faults (`context-invalid`,
@@ -537,7 +536,7 @@ export function checkDeviceSignature(request: DeviceRequest, context: DeviceSign
   try {
     ok = parsed.alg === "ed25519"
       ? verify(null, bytes, createPublicKey({ key: Buffer.concat([ED25519_SPKI_PREFIX, raw]), format: "der", type: "spki" }), signature)
-      : verify("sha256", bytes, { key: p256PublicJwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, signature);
+      : verify("sha256", bytes, { key: p256Jwk(raw), format: "jwk", dsaEncoding: "ieee-p1363" }, signature);
   } catch {
     // A key the platform cannot load verifies nothing; the checks above refuse every such key first.
     ok = false;

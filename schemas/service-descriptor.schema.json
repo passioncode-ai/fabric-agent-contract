@@ -39,7 +39,7 @@
         "remote"
       ],
       "default": "local",
-      "description": "local: a process on this computer at http://127.0.0.1:<port>, supervised by launchd or by nothing. remote: an online agent or dashboard at an https origin, supervised by its platform (DEC-0019)."
+      "description": "local: a process on this computer at http://127.0.0.1:<port>, supervised by launchd, systemd, the Task Scheduler or nothing (DEC-0032). remote: an online agent or dashboard at an https origin, supervised by its platform (DEC-0019)."
     },
     "origin": {
       "type": "string",
@@ -163,6 +163,28 @@
             "properties": {
               "label": true,
               "plist": true
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "manager"
+            ],
+            "properties": {
+              "manager": {
+                "enum": [
+                  "systemd",
+                  "task-scheduler"
+                ]
+              }
+            }
+          },
+          "then": {
+            "description": "DEC-0057: a descriptor names one supervisor, so launchd's label and plist are refused beside systemd and the Task Scheduler.",
+            "properties": {
+              "label": false,
+              "plist": false
             }
           }
         },

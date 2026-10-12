@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0056`
+**Next free ID:** `DEC-0060`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -142,6 +142,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-09-28
 - **Status:** Accepted
 - **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
+- **Annotated (2026-10-12):** one copy amended by DEC-0057 (a copy its supervisor started and marked may wait for the lock, at most 300 s, before exit 75; the node supervises too).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -1017,6 +1018,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change; consumer adoption in progress (Fabric 0.3.4 CO-238, Fabric
   Dashboards FD-37)
 - **Annotated (2026-10-11):** rule 2 of Windows token files amended by DEC-0033 (the owner may be the user, SYSTEM or Administrators).
+- **Annotated (2026-10-12):** amended by DEC-0057 (the supervisor marker, the lifecycle and directories per system, one supervisor per descriptor, a forward-slash share refused, the token reader as a function with vectors).
 - **Amends:** the `fabric-service/0.1` descriptor and service rules of DEC-0015 (launchd as the only
   supervisor), additively under the DEC-0016 extension policy.
 - **Decision:**
@@ -1088,6 +1090,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
+- **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1164,6 +1167,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
 - **Amends:** DEC-0034 additively: four rules appended to the
   [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
   OC-13 are unchanged; OC-14 narrows the optional refusals of OC-3 and OC-7 to addressed input.
@@ -1226,6 +1230,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request); host and adapter adoption pending.
+- **Annotated (2026-10-12):** ED-6, ED-8 and ED-9, and its *Not decided here*, amended by DEC-0059 (the cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared, `FAC-SEM-080`).
 - **Amends:** DEC-0015 additively: a new profile, [embedded dashboard](specification/embedded-dashboard.md),
   beside `surfaces.dashboard`. No existing field, schema or rule changes.
 - **Decision:** A dashboard page and the host that shows it make each other promises about width,
@@ -1501,6 +1506,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the link
   handler), Fabric Dashboards (the first host, FD-45), the fabric-agent-adapter's dashboard kit (the component).
+- **Annotated (2026-10-12):** FB-6's cookie scope amended by DEC-0059 (per host in a shared cookie store, per service
+  where the host gives each service its own store).
 - **Decision:** the profile [Fabric's button](specification/fabric-button.md):
   - a dashboard MAY show one floating button, bottom-right, labelled with the Fabric mark and **Fabric**,
     accessible name **Open Fabric**, at least 44 × 44 CSS px, opening a menu of a chat and, when the page knows
@@ -1838,6 +1845,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   grant per token and the meter's five-actor token, and issues only `prompt` and `operator-channel` approvals
   (CT-19); Observatory's meter requires the exact scope and effect and answers `denied` as a result (CT-20); the
   adapter's kit ports pass the issuer and run this verifier's table (CT-18).
+- **Annotated (2026-10-12):** item 9's "in the page's own storage partition on the service origin, as ED-8's is" is
+  superseded by DEC-0059: FB-6's cookie, like ED-8's, is per host in a shared cookie store and per service where the
+  host gives each service its own store, so in a shared store an `owner=host` for one local service hides every local
+  service's button on that host (RFC 6265 §8.5).
 - **Amends:** DEC-0039 (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17, DL-19, DL-21; `FAC-SEM-050`), DEC-0040
   (FB-6), the session-lifetime paragraph of [service](specification/service.md#operator-session-lifetime). Implements
   Fabric ADR-0144 amendments 3 and 4 at
@@ -2473,6 +2484,455 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key w3-p3-03-estate-record-20261012 DEC`,
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0047 — The relay and the secret envelope: admission by device key inside the WebSocket, store-and-forward that never reports done, trust tiers from the signed sender, HPKE envelopes sealed to `#kem` (`fabric-relay/0.1`, `fabric-secret-envelope/1`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+  - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
+    sessions from this text (its RLY-02) and runs the vectors;
+  - Project Observatory's node is a relay client and opens envelopes into its vault;
+  - Fabric's remote surfaces are clients. An amendment of Fabric ADR-0088 §3 naming `fabric-relay/0.1` is owed:
+    nothing of it is on Fabric's main yet;
+  - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
+    source of admission and keeps the presence rule (item 5).
+- **Amends:** nothing. It is a new protocol under the DEC-0016 extension policy. It builds on:
+  - DEC-0053's P-256 device keys by role (`<device.id>#sig`, `<device.id>#kem`);
+  - DEC-0045's trust tiers (DL-25, DL-26);
+  - DEC-0043's register of canonical forms (every signed or hashed document here is RFC 8785).
+
+  It implements the relay half of the first organization server's target architecture v4 §12 row "secret envelope
+  (sealed to a device key)", and the transport of its "revocation delta and timestamp heartbeat" row. The documents
+  themselves are DEC-0054's.
+- **Decision:** in [relay](specification/relay.md) unless named otherwise —
+  1. **Roles.**
+     - A relay admits machines, queues and delivers opaque messages, stores envelopes and blobs by digest, reports
+       when a machine was last seen, and carries signed deltas and heartbeats unchanged.
+     - It holds no authority. It never reads a body or a secret, decides a tier, signs anything a node relies on,
+       reports a queued command done, or serves a signing page.
+  2. **Keys.**
+     - A relay participant's keys are P-256, two per machine, never one key in both roles.
+     - **Its `#sig` is ES256 only.** devices.md admits an Ed25519 `#sig` for a device; a relay refuses one, and any
+       `alg` other than `ES256`, as `unsupported-alg`. Every signed document names the algorithm in a signed field:
+       `relay-auth/1`, `relay-blob/1` and the envelope header carry `alg: "ES256"`, and the message body is a JWS.
+     - Every public key is validated before use by SEC 1 v2 §3.2.2 (`p256KeyRefusal` in `src/p256.ts`), one function
+       that names the refusal and that `isValidP256Key` is expressed by. A key that fails is refused as `bad-key`.
+     - A key reaches every check in either spelling: DEC-0053's base64 SEC 1 octets or a JWK (`p256Point`,
+       `p256PublicKey`), with the same answers for both.
+     - All signatures are ES256, raw `r ‖ s`.
+     - Times are RFC 3339 UTC; one that does not parse to an instant is refused, never compared. A signed `iat` more
+       than 60 s ahead of the verifier's clock is `not-yet-valid`, in admission, in a message body and in an
+       envelope.
+  3. **Transport.**
+     - One WebSocket (RFC 6455) per connection to `/v1/connect`, with subprotocol `fabric-relay.v1`, over TLS 1.2
+       or newer, TLS 1.3 (RFC 8446) SHOULD.
+     - No credential travels in the URL or in an HTTP header.
+     - UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
+       ([`relay-frame.schema.json`](../schemas/relay-frame.schema.json)).
+     - Unknown members are ignored. An unknown `type` is answered with `error` `unknown-type`.
+     - Close codes: 1009 for a frame over 1 MiB, 1003 for a binary frame, 4401 after `unauthenticated`, 4403 after
+       `not-admitted`, and 1001 after 90 s of silence (`CLOSE_CODES`, `IDLE_CLOSE_SECONDS`).
+  4. **Admission** (`admit`). A machine answers `hello`'s nonce, within 10 s, with an ES256 signature over the RFC
+     8785 bytes of `{type: "relay-auth/1", alg: "ES256", relay, nonce, estate, kid, iat}`. The relay admits it only
+     when all of these hold:
+     - the protocol is this one, and `alg` is `ES256`;
+     - `iat` is an instant at most 60 s old and at most 60 s ahead (`not-yet-valid` beyond that);
+     - the nonce is this connection's own, and is used once;
+     - `kid` is in the admission set;
+     - the signature verifies.
+
+     It then attributes every later frame on the connection to that `kid`.
+     - **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds,
+       minus revoked machines and keys (`relayAdmissionSet`). It is not authorization.
+     - **Only from a verified revision.** The relay pins the estate's first passkeys when it is set up for the
+       estate, the same act as a machine's enrollment pin. It applies a revision only when it is valid against the
+       schema and `verifyEstateRecord` accepts it against the revision it holds (revision 1: against the pinned
+       passkeys). A refused revision changes nothing, and a relay never starts with a configured set.
+     - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
+       revision arrives; open sessions end at their next re-authentication, and queued mail stays until its `ttl`.
+       Presence and `lastSeen` follow the same verified set.
+     - **No organization record yet.** An organization's relay has no admission source of its own until
+       `org-authority/1` (Fabric D8) is decided.
+     - `relayAdmissionSet` takes the schema check from its caller, which MUST pass the validator of
+       `estate-record.schema.json`; `() => true` is not conformant.
+  5. **Messages.**
+     - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
+     - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
+     - `ttl` is 1 s to 7 days and bounds only the mailbox. A body is at most 765 KiB decoded, so the largest frame
+       around it fits 1 MiB.
+     - **The body is end to end:** a compact JWS (`ES256`, `typ: fabric-relay-message+jwt`) over the RFC 8785 payload
+       `{type, from, to, msgId, iat, exp, payload}`. `exp` is signed: the recipient judges the message's life by it,
+       at most 7 days after `iat`, never by the frame's `ttl`. A recipient (`verifyMessageBody`) refuses a body whose
+       signed `from`, `to` or `msgId` differs from the frame's, and names `not-yet-valid`, `lifetime-too-long` and
+       `expired`.
+     - **A relay never reports a command done.** Only the recipient's own signed message back reports an outcome
+       (Fabric ADR-0088).
+     - Presence frames give `{kid, state, lastSeen}`, and **only to machines of the same owner** (J10/OD-1). An
+       organization's relay sends no presence from one member to another.
+  6. **Trust tiers follow the signed sender, never the connection.**
+     - Relay traffic is never T0.
+     - **T1** is a verified `from` that is an enrolled machine of the recipient's **same owner** (DL-25), current
+       and not revoked (DL-26).
+     - **T2** is anything else (DL-8): a machine listed only in an organization record, to a recipient of another
+       owner, and a body signed by an outsider and forwarded by a T1 session.
+  7. **The secret envelope** (`fabric-secret-envelope/1`,
+     [`secret-envelope.schema.json`](../schemas/secret-envelope.schema.json), `src/secret-envelope.ts`).
+     - **Seal:**
+       - HPKE base mode, DHKEM(P-256, HKDF-SHA256) / HKDF-SHA256 / AES-128-GCM, `[16, 1, 1]`, checked against RFC 9180
+         §A.3.1;
+       - recipient: the target's `#kem` key;
+       - `info`: the ASCII bytes `fabric-secret-envelope/1`;
+       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, agentRef, slot, placement, iat,
+         exp, enc}`: a slot is named with its agent, since one slot name can belong to two agents.
+     - A sealer refuses a recipient kid without `#kem` and a sender kid without `#sig`.
+     - The sender signs `{header, ct}` with its `#sig` key. The envelope is named by
+       `sha256:<hex of its RFC 8785 bytes>`.
+     - **A target opens an envelope only when all of these hold, checked in this order** (a refusal names the first
+       that failed; relay.md and `openEnvelope` keep the same order):
+       1. it is well formed, its times real instants (`malformed`);
+       2. `alg` is `ES256` (`unsupported-alg`);
+       3. the recipient is its own `#kem` (`wrong-recipient`);
+       4. the sender's key is P-256 and it and the encapsulated key pass SEC 1 (`unsupported-alg`, `bad-key`);
+       5. the signature is 64 canonical bytes and verifies (`bad-signature`);
+       6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
+          it from the sender's machine (`sender-not-allowed`);
+       7. `placement` is at least the revision from which that placement holds unchanged and at most the latest
+          revision the target has applied: a newer one is fetched and verified first (`placement-stale`);
+       8. `iat` is at most 60 s ahead (`not-yet-valid`);
+       9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
+       10. HPKE opens (`cannot-open`).
+
+       `estateEnvelopeContext` derives the holder, the sender's key and the current placement from the target's
+       applied revisions.
+  8. **Blobs.**
+     - `PUT`/`GET /v1/blobs/<digest>` carry `Fabric-Relay-Request`: an ES256 signature over the RFC 8785 bytes of
+       `{type: "relay-blob/1", alg: "ES256", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
+       method, the digest and the recipients, so it is not a bearer credential.
+     - A blob's name is always `sha256:` and the hex SHA-256 of its bytes. A package travels as its archive's
+       bytes; its DEC-0050 content digest is not its blob name.
+     - The relay recomputes every digest.
+     - A blob is kept until every recipient fetched it, or until 7 days pass.
+  9. **Revocation travels, it is not defined, here.**
+     - `welcome` carries `deltaHead {sequence, sha256}`, the shape of DEC-0053's check-in
+       `records.revocationDelta`, so a node reports it as it came, and `estateRevision`, the verified revision (1 or
+       more) the relay admits from — always present, since a relay without one admits nobody.
+     - New deltas and heartbeats are pushed to every connected machine they name. A node behind the head asks with
+       `delta-query`.
+     - A relay can delay revocation, which the signed heartbeat exposes, but it cannot forge it. The documents, keys,
+       head hash, the 72-hour rule and their vectors are DEC-0054.
+     - The check-in's `records` of DEC-0053 carry that head unchanged. Their `heartbeat` is DEC-0054's document,
+       and `leases` are the window lease's own decision.
+  10. **Rules:**
+      - `FAC-SEM-070`: an envelope is sealed to a `#kem` key by a `#sig` key under `ES256`, with the admitted suite,
+        a life of more than zero and at most 24 hours, and a valid encapsulated key;
+      - `FAC-SEM-071`: an `auth` frame names a `#sig` key, `ES256` and this protocol; a `send` frame addresses a
+        `#sig` key, with a bounded `ttl` and body.
+- **Why:**
+  - **The operator decided D6 on 2026-10-12:** the relay gets its own open repository, with Project Observatory as
+    code owner, and self-hosting stays (V2-21).
+  - **A relay is the one component every person's machines, and later colleagues' machines, must pass through.**
+    Putting authority anywhere but in end-to-end signatures and seals would make its compromise the estate's. With
+    this text, a compromised relay can deny service and see metadata, nothing more.
+  - **The two-key rule and SEC 1 validation close the invalid-curve attack on ECDH and the confusion of a signature
+    with a seal.** The envelope reuses a published, vector-checked construction (RFC 9180) rather than a bespoke one.
+  - **ES256 only for the relay, departing from devices.md's Ed25519 `#sig`** (in the way DEC-0053 item 7 departs):
+    the platform keystore holds P-256, and the envelope's `#kem` is P-256 anyway, so one curve and one verifier serve
+    every relay participant. The algorithm is named in each signed document, as the wave-3 rule asks.
+  - **The owner's rulings on the review of #53:** T1 is DL-25's same owner; presence stays within one owner; ES256
+    with a signed `alg`; one `{sequence, sha256}` head shape; not-before; a signed `exp`.
+- **Compatibility:** Additive under DEC-0016:
+  - two new schemas (`relay-frame`, `secret-envelope`), two rule codes, three vector files (`relay.json`,
+    `secret-envelope.json`, and `p256.json` extended with refusal names and JWK cases);
+  - `isValidP256Key` keeps its answers for every byte string, and now also accepts a JWK.
+
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/relay.md` (new), `docs/specification/conformance.md` (rule register, canonical forms),
+    `docs/specification/devices.md` (the `#kem` and `records` passages point here and to DEC-0054);
+  - schemas: `schemas/relay-frame.schema.json`, `schemas/secret-envelope.schema.json`,
+    `schemas/device-check-in.schema.json` (descriptions of `records` only);
+  - source: `src/relay.ts`, `src/secret-envelope.ts`, `src/relay-rules.ts`, `src/p256.ts` (`p256KeyRefusal`),
+    `src/semantic-rules.ts`;
+  - vectors and fixtures: `fixtures/vectors/{relay,secret-envelope,p256}.json`, `fixtures/semantic/relay-*.json`;
+  - tests: `test/relay.test.ts`, `test/secret-envelope.test.ts`, `test/relay-rules.test.ts`, `test/p256.test.ts`,
+    `test/schema-compilation.test.ts`;
+  - docs: `docs/DOCMAP.md`.
+- **Not decided here:**
+  - the guest OAuth page and its binding ceremony;
+  - attestation formats (OQ-0010);
+  - mailbox quotas;
+  - whether a self-hosted relay federates with the hosted one;
+  - the documents of the revocation delta and heartbeat (DEC-0054);
+  - the window lease.
+- **Source:**
+  - The operator's D6 decision and its relay transport ADR, private to Project Observatory, agreed with Fabric's,
+    the knowledge base's and the first organization server's owners. Its public part is relay ADR-0001.
+  - The contract owner's review of the draft (relay `docs/protocol/dec-0047-draft.md`), with its answers on P-256
+    keys, the DEC-0054 split and the admission removal point.
+  - RFC 9180, RFC 8785, SEC 1 v2, RFC 7518, RFC 6455 and RFC 8446.
+  - The contract owner's review of #53 and rulings (2026-10-12).
+  - The target architecture v4 at `9c6a780`, §4, §7 and §12.
+  - The board item `V4-SECURE-TRANSPORT`.
+  - DEC-0047 was reserved by git CAS (`agent_sync.py reserve --key relay-protocol-20261012 DEC`), and `FAC-SEM-070`
+    and `FAC-SEM-071` by `--key relay-protocol-20261012-sem-{envelope,frame} SEM`. This file and `conformance.md` were
+    edited under git leases of run `project-observatory-3d-relay`; the record plane is `fs`.
+
+### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: channel-status producers — every agent
+  that publishes the operator-channel status, and the fabric-agent-adapter's kits when they serve the status (a new
+  adapter row under backlog CT-18) — report a channel whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
+  link code, and never as `unlinked`.
+- **Amends:** DEC-0035, whose *Compatibility* said `operator-channel-status.schema.json` was unchanged: this decision
+  tightens that schema. DEC-0034's status table gains the lease `unlinked` requires. Closes F-B-204, F-B-205 and
+  F-B-219 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [operator channel](specification/operator-channel.md) and its status schema —
+  1. **`unlinked` has someone receiving.** A status in state `unlinked` carries `receiver.lease` `held` or `elsewhere`,
+     never `none` (schema, `unlinked` branch). A waiting channel nobody receives on is `degraded` with
+     `receiver-missing` (OC-17), and the status table says so.
+  2. **`receiver-missing` is one shape.** A status whose `reason.code` is `receiver-missing` has `state: degraded` and a
+     `receiver` with `lease: none` (schema, an `if`/`then` on `reason.code`). OC-17's closing list names `unlinked`
+     beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
+     `receiver.lease` reads `none` whenever the receiver is missing, even while a process still renews the lease (the
+     not-draining condition). In the first 120 seconds after a lease stops being renewed the receiver is not yet
+     missing: the last status stands and the lapse is never reported as `unlinked`; after 120 seconds the status is
+     `degraded` with `receiver-missing`. The lease's schema description says the same.
+  3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
+     `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
+     `linked`, `receiver-missing` in a state other than `degraded`, with a held lease and without a receiver, the
+     sixteen-chat limit and an `excluded.liftedAt` that is an absolute URL. `test/operator-channel.test.ts` removes
+     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted, and
+     an identity mutant must let none through;
+     one, `linked` without `receiver`, survived before this change, because the fixture of that name carried a receiver
+     with lease `none`.
+  4. **The glossary's *Addressed message*** names the one unaddressed input OC-15 honours: a bare `/link CODE` that
+     matches the agent's own pending code.
+- **Why:** the audit's probe (F-B-204) published the defect DEC-0035 was written for — on 2026-10-10 two bots had
+  nobody receiving while their status said nothing — as a valid status in state `unlinked` with `receiver.lease:
+  none`, and as `receiver-missing` with a held lease or no receiver at all, because the schema left both
+  representable. F-B-205 removed eight state invariants one at a time and every test still passed: the schema stated
+  them and nothing proved them.
+- **Compatibility:** tightening under DEC-0016, `contractVersion` stays `0.1.0`. A status that reported a channel
+  nobody receives on as `unlinked`, or `receiver-missing` with another lease or state, was already against OC-17's
+  text and is now refused by the schema; the agent reports `degraded` instead. No positive fixture changes; one is
+  added, a waiting channel nobody receives on. No semantic rule code is allocated.
+- **Consequences / affects:**
+  - spec: `docs/specification/operator-channel.md` (OC-17's closing paragraph, the `unlinked` row, the
+    `receiver-missing` code, *Not decided here*);
+  - schema: `schemas/operator-channel-status.schema.json` (the `unlinked` branch, the `receiver-missing` branch, the
+    `state` description);
+  - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json`,
+    `fixtures/negative/operator-channel-status-*` (seventeen new), `fixtures/catalogue.json`;
+  - tests: `test/operator-channel.test.ts` (this entry, the boundaries, the mutants), `test/schema-mutants.ts` (new);
+  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18),
+    `docs/DECISIONS.md` (DEC-0034 and DEC-0035 annotated), the
+    handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md` and `docs/handoffs/README.md`.
+- **Not decided here:** whether `off` may carry a `receiver` at all; reason codes other than `receiver-missing` keep an
+  open vocabulary and constrain no lease.
+- **Source:** the board-waves inventory F-B-204, F-B-205, F-B-219
+  (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P4-03. DEC-0058 was reserved by git CAS
+  (`agent_sync.py reserve --key w4-p4-03-channel-dashboard-20261012 DEC`); this file, `conformance.md` and `backlog.md`
+  were edited in the run's branch without a lease, by the wave-4 arrangement: the owner session takes those leases when
+  it merges; the record plane is `fs`.
+
+### DEC-0059 — Embedded dashboard amended: the appearance cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared (`FAC-SEM-080`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards consumes
+  ED-9 `appearance` and validates the declaration, logging an invalid one once per load (its own row, filed by its
+  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares, keeps the page's own saved value
+  for a field it does not list and hides only the listed fields' controls, and its `check_service.py` keeps checking
+  the declaration (a new adapter row under CT-18). Fabric Dashboards' FD-42 sentence that it "reloads only the pages
+  that do not declare appearance" is superseded: a page that lists no field reads no cookie (CT-21).
+- **Amends:** DEC-0036 (ED-6, ED-8, ED-9 and its *Not decided here*; its *Compatibility* said no semantic rule code is
+  allocated, and this decision allocates one); DEC-0040's FB-6 and DEC-0045 item 9 (the `fabric_button` cookie takes
+  ED-8's scope). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
+  Closes F-B-214, F-B-215, F-B-216 and F-B-217 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [embedded dashboard](specification/embedded-dashboard.md) —
+  1. **ED-8, the cookie's scope.** The appearance cookie is set for the page's host in the store the page reads. A
+     cookie is not isolated by port (RFC 6265 §8.5), so it is "per host in a shared cookie store; per service where
+     the host gives each service its own store": every local service on `127.0.0.1` sharing one store reads and can
+     overwrite one cookie, and Fabric Dashboards, which gives each service the partition `persist:svc-<key>`
+     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service. **FB-6's `fabric_button` cookie** has the same scope: in a
+     shared store an `owner=host` written for one local service hides the button of every local service on that host.
+  2. **ED-6 follows ED-9's `appearance`.** A page takes from the cookie exactly the fields its declaration lists, hides
+     only those fields' controls while the cookie is present, and keeps the others. A page that lists none — no
+     `appearance`, no declaration, or an invalid one — takes nothing from the cookie and follows
+     `prefers-color-scheme` only. (Fabric Dashboards already keeps that in agreement with the theme chosen in the app,
+     `nativeTheme.themeSource`.) ED-8's reload sentence follows: a page that lists no field reads no cookie.
+  3. **ED-9, an invalid declaration.** A host validates the value against
+     `service-dashboard-extension.schema.json`, treats an invalid one as not declared (a legacy dashboard: host floor
+     480, no carrier field) and reports it. **`FAC-SEM-080`** (`service-well-known`, receipt SEM-0080) reports it on the
+     well-known document, once per schema error, at the extension key; the well-known schema cannot, because
+     `extensions` is open. `hostView` in `src/dashboard-declaration.ts` is the reference reading, with vectors in
+     `fixtures/vectors/dashboard-declaration.json` for a host's port (21 cases: the floors 359, 360, 480, 481,
+     1280 and 1281, a valid floor beside a field named twice, and `360.0` given as raw JSON text).
+  4. **Killing fixtures for the declaration (F-B-217):** a declaration without `minWidth`, a fractional one, one above
+     1280, a theme or a carrier field twice, an empty `themes` and 33 themes. `test/embedded-dashboard.test.ts` removes
+     each of ten constraints from a copy of the schema and fails if no negative fixture is then accepted; an identity
+     mutant, which changes nothing, must let no negative fixture through.
+- **Why:** ED-8 said the cookie lived "on the service origin", which RFC 6265 contradicts for every local service on
+  one address (F-B-214). ED-6 bound every declaring page to both carrier fields while ED-9 let it declare a subset,
+  so a subset had no conformant meaning (F-B-215). The audit's probe put `{minWidth: 99999, zoom: 3}` under the key
+  and the well-known schema accepted it; a host computing `max(480, minWidth)` from it would give the page more than
+  any window, and only the adapter's script checked it (F-B-216). Four schema constraints survived their removal
+  (F-B-217). The three texts were agreed with Fabric Dashboards' session on 2026-10-12.
+- **Compatibility:** under DEC-0016, `contractVersion` stays `0.1.0`. ED-8's change describes what a cookie already
+  does. ED-6 narrows: a page that applied a field it did not list now falls short of ED-6 and lists it; a page that
+  listed both is unaffected. `FAC-SEM-080` is new: a well-known document carrying an invalid declaration was
+  schema-valid and stays so, and the checker now reports it; a host already treating it as not declared
+  (Fabric Dashboards) is unaffected. `service-dashboard-extension.schema.json` changes only its descriptions.
+- **Consequences / affects:**
+  - spec: `docs/specification/embedded-dashboard.md` (ED-6, ED-8, ED-9, *How a page shows that it holds*, *Semantic
+    rules* (new), *Not decided here*), `docs/specification/fabric-button.md` (FB-6),
+    `docs/specification/conformance.md` (the register row);
+  - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
+  - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/negative/service-dashboard-extension-*` (seven new), `fixtures/semantic/service-well-known-dashboard-*`,
+    `fixtures/vectors/dashboard-declaration.json`, `fixtures/catalogue.json`;
+  - tests: `test/embedded-dashboard.test.ts`, `test/delegation-sealed.test.ts` (FB-6's scope), `test/rule-tolerance.test.ts`,
+    `test/schema-mutants.ts`; the floor in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (RFC 6265), `CONTEXT.md` (*Appearance carrier*), `docs/DOCMAP.md`,
+    `docs/ux/foundation.md`, `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/ux/scenarios.md` (SCN-021, SCN-022),
+    `docs/backlog.md` (CT-13, CT-18, CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md`.
+- **Not decided here:** a per-service appearance choice for pages that share a cookie store; it needs another carrier
+  (a cookie name per service, a message to the page). The host's picker stays Fabric Dashboards' screen.
+- **Source:** Fabric Dashboards' session (FD-37), its `main` `e1fdd64`, on 2026-10-12; RFC 6265 in the
+  [source ledger](evidence/sources.md); the board-waves inventory F-B-214…F-B-217, packet P4-03. DEC-0059 and
+  `FAC-SEM-080` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-03-dashboard-20261012 DEC`,
+  `--key w4-p4-03-sem-dashboard-declaration-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in
+  the run's branch without a lease, by the wave-4 arrangement; the record plane is `fs`.
+
+### DEC-0057 — Services on every system: one copy under any supervisor and its marker (CT-01), the lifecycle per system, the descriptor's hygiene and the Windows token-file reader
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter's kits read the
+  marker in both forms and `task_xml`/`taskXml` write the argument (its row FAA-32); Fabric sets the marker when it
+  starts a service as its supervisor; Project Observatory's node sets it and honours the wait; Fabric Dashboards shows a
+  waiting copy as `duplicate` under launchd today, derives it from systemd's `MainPID` or through the node off macOS, and
+  fixes its Windows token reader (a signed mask, unknown ACE types, SID case; board CT-21); every Windows token reader
+  runs the new vectors.
+- **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
+  paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
+- **Decision:** in [service](specification/service.md) —
+  1. **One copy (CT-01).** "No side effect without the lock on `service.lock`" and "a copy that does not get it exits
+     75 with one sentence naming the holder's pid" stay. A copy whose start carries the supervisor marker MAY first wait
+     for the lock in-process, at most 300 s, touching nothing (no port, no file written, no job resumed; it may read the
+     lock), and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. A copy started
+     without the marker tries once and exits 75 at once. A copy that cannot learn the holder's pid says the holder is
+     unknown (`holderPid: null` in `FAC-SEM-078`'s record). The holder keeps answering its well-known document for the
+     whole wait, so the wait is never an outage; what a host shows of the waiting copy depends on the supervisor's pid:
+     `duplicate` under launchd (Fabric Dashboards at `e1fdd64`), the same under systemd once a host compares
+     `MainPID`, and nothing under the Task Scheduler, which has no supervisor pid, while the holder shows `ready`. How
+     the copy spaces its tries is its own.
+  2. **The supervisor marker** is the environment variable `FABRIC_SERVICE_SUPERVISOR=<manager>` or the argument
+     `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`), after the executable and before any `--`;
+     `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor file writes
+     it: the plist's `EnvironmentVariables`, the unit's `Environment=`, the task's `Arguments` — a task's `Exec` action
+     has no environment. A host or node that starts a service as its supervisor sets it; a start by hand never does;
+     a copy never infers supervision from its parent process. Only an empty variable counts as no marker. An argument with
+     no value (followed by nothing, by `--` or by another `--…` flag, none of which it consumes) or an empty one is a
+     marker that names no manager: beside a variable it disagrees; any value that names no manager leaves the copy
+     unsupervised. A service's own argument parser accepts the flag in both spellings and ignores it beyond reading the
+     marker. Markers that disagree (both forms with different values, or the argument
+     twice) leave the copy unsupervised: it exits 75 at once, before it takes the lock and whether or not the lock is
+     held, naming the markers. `supervisorMarker` and `lockWaitBudgetMs` (`src/service-supervisor.ts`) are the
+     reference, with vectors; `FAC-SEM-078` checks a kit's record of a start against a held lock.
+  3. **Supervisors per system (CON-OE-11).** DEC-0015's "launchd is the only supervisor", which DEC-0032 already made
+     one per system, now reads: launchd (macOS), `systemd --user` (Linux), the Task Scheduler (Windows, with
+     `MultipleInstancesPolicy` `IgnoreNew` recommended), and Project Observatory's node (`node.lifecycle`), which
+     supervises the services it starts as its children on any system. The Supervisor row lists each one's marker.
+     The descriptor's `lifecycle.manager` admits `node` by a later change (board CT-12, packet P4-02); this decision
+     defines only the marker value.
+  4. **The lifecycle per system (F-B-202, F-A-013).** Install, Code, State and Uninstall have a form for launchd,
+     systemd and the Task Scheduler, and *Directories per system* fixes where data and configuration, logs and cache
+     live: `~/Library/Application Support/<id>/`, `~/Library/Logs/<id>/`, `~/Library/Caches/<id>/` on macOS;
+     `${XDG_DATA_HOME:-~/.local/share}/<id>/`, `${XDG_STATE_HOME:-~/.local/state}/<id>/logs/`,
+     `${XDG_CACHE_HOME:-~/.cache}/<id>/` on Linux; `%LOCALAPPDATA%\<id>\` with `Logs\` and `Cache\` beneath it on Windows
+     — the directories the adapter's `building-fabric-services` lifecycle reference already names (at `a124ecb`). On
+     Linux data, logs and cache follow XDG's `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME`; configuration stays
+     beside data on every system, by choice.
+  5. **The descriptor names one supervisor (F-B-209):** `label` and `plist` are refused beside `systemd` and
+     `task-scheduler` (beside `none` they stay valid, as DEC-0015 allowed). **A share in either slash is never local
+     (F-B-207):** `localPath`, and so `FAC-SEM-012`'s executable, refuses `//server/…` and `/\server…`, which Windows
+     reads as a share, beside the `\\server\…` it already refused. **Killing fixtures (F-B-206)** for DEC-0032's
+     descriptor rules: a task beside another manager, a unit without `.service`, a task without its leading backslash,
+     an unknown manager; and a test that the Supervisor row names every manager the schema admits.
+  6. **The Windows token-file reader (F-B-210)** is a reference function, `windowsTokenAclProblem`
+     (`src/windows-token.ts`), over what a reader has read — the file's flags, its owner SID, its ACEs — with vectors a
+     port runs (`FAC-SEM-079`) and a row in *Clients and readers*. It makes explicit what the rule left open: SIDs compare
+     case-insensitively on their `S`, and a sub-authority above 4294967295 is unreadable; the mask is the ACE's unsigned
+     32-bit mask, converted first by a reader that reads it signed (.NET `FileSystemRights`), and an `allow` ACE whose mask
+     is 0 grants nothing; an ACE of a readable type other than allow and deny (an object or callback ACE among them) is
+     refused, and anything unreadable — a flag, an ACE type, a SID, a mask — is refused. (The marker's third reading,
+     empty argument values, is item 2's.)
+  7. **Wording (F-A-013, F-B-208):** service.md is the *Service extension*, local and remote; the diagram's edge goes to
+     a supervisor; `FAC-SEM-024`'s row says "no local supervisor field (`label`, `plist`, `unit`, `task`)"; the
+     placement description names launchd, systemd, the Task Scheduler or nothing; the operator-channel status's
+     `degraded` description adds "or nobody receives (OC-17)", as operator-channel.md has it.
+  8. **Rules:** `FAC-SEM-078` (one copy: what a copy does when the lock is held), `FAC-SEM-079` (a Windows token file
+     the reader may read).
+- **Why:** CT-01 waited on a decision since 2026-10-04: under launchd's `KeepAlive` or systemd's `Restart=always` an
+  immediate exit 75 restarts every 10 s forever, and the Task Scheduler restarts a failed task a finite number of times
+  (whether an exit 75 counts as a failure there is pending the adapter's Windows CI receipt, board CT-18), while the adapter's kits already waited up to 300 s under launchd and systemd. The marker could
+  not stay an environment variable alone, because a Scheduled Task's action carries no environment (the `Exec`
+  element, pinned in the [source ledger](evidence/sources.md)), so a Task Scheduler copy would never be marked. The
+  lifecycle rows were macOS-only after DEC-0032, so a Linux or Windows writer had no install, upgrade or uninstall and
+  no directories. The descriptor rules DEC-0032 added survived mutation, a descriptor could name two supervisors, and
+  a forward-slash share passed `localPath`. DEC-0033 exists because a consumer's token reader got the rule wrong; a
+  function and vectors let every port test against the same cases.
+- **Compatibility:** The wait is a MAY: a copy that exits 75 at once still conforms, so the adapter's current pin
+  conforms. Binding the port is now named as a side effect that needs the lock; the adapter's kits already take the
+  lock before they bind. Kits at 0.18.0 read only the variable and only `launchd`, `systemd` and `task-scheduler`: a copy the node
+  starts, or a Task Scheduler copy, exits at once until the kit reads the argument and `node` (FAA-32), which is the
+  stricter behaviour. Two refusals narrow the schema: a descriptor naming launchd's `label` or `plist` beside `systemd`
+  or `task-scheduler`, and a `localPath` starting `//` or `/\`. DEC-0032 already said a descriptor names one supervisor
+  per system and that a share is never a local path, so a descriptor refused now broke DEC-0032's text already; the
+  adapter at `a124ecb` writes `label` and `plist` only beside `launchd` (its sample service). The token reader's two explicit readings narrow
+  nothing a writer produces: the writer's protected ACL has three allow ACEs with full control. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md` (title, diagram, Lifecycle, *Directories per system*, *One copy*, *Windows
+    token files*, the semantic-rules table), `docs/specification/conformance.md` (two reader rows, `FAC-SEM-078`,
+    `FAC-SEM-079`);
+  - schemas: `schemas/service-descriptor.schema.json` (one supervisor, the placement description),
+    `schemas/service-common.schema.json` (`localPath`), `schemas/operator-channel-status.schema.json` (the `degraded`
+    description);
+  - code: `src/service-supervisor.ts` (new), `src/windows-token.ts` (new), `src/semantic-rules.ts` (the two kinds,
+    `FAC-SEM-012`'s path);
+  - fixtures: seven negatives `fixtures/negative/service-descriptor-*` (`fixtures/catalogue.json`), eleven
+    `fixtures/semantic/service-lock-*.json`, vectors `fixtures/vectors/service-supervisor.json` and
+    `fixtures/vectors/windows-token.json`;
+  - tests: `test/service-supervisor.test.ts` (new), `test/windows-token.test.ts` (new), `test/service-rules.test.ts`,
+    `test/rule-tolerance.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Supervisor, Supervisor marker), `docs/DOCMAP.md`, `docs/evidence/sources.md` (the `Exec`
+    element, `MultipleInstancesPolicy`, systemd's `Environment=`, `launchd.plist(5)`, the XDG row), `docs/backlog.md`
+    (CT-01 closed, CT-12, CT-18…CT-21), the UX chain (`docs/ux/foundation.md` ST-021, `docs/ux/flows.md` FLW-17,
+    `docs/ux/screens.md` SCR-20, `docs/ux/scenarios.md` SCN-026), the handoff `docs/handoffs/2026-10-12-w4-p4-01-services.md` and
+    `docs/handoffs/README.md`.
+- **Not decided here:** `lifecycle.manager: node` in the descriptor, whether `label`/`plist` are refused beside it, and
+  the node's Install, Off, Uninstall and state read (P4-02); a Windows service (administrator rights) as a supervisor, a
+  Task Scheduler task that runs whether or not the user is logged on (a host's S4U or SYSTEM principal in v4 §5), and
+  Linux lingering (`loginctl enable-linger`) so a user unit runs without a login, which the node's host units need; supervision of a
+  remote placement (its platform's); the restart count a Task Scheduler writer sets.
+- **Source:** agreed with Fabric's session (CO-238: points 1–5 as written, 300 s is enough; Fabric is not a supervisor
+  today, its one background job runs under launchd; when it starts services it sets the marker for a supervised start
+  and not for a manual one), with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`: an outage is only `down`, no
+  health answer for 15 s local or 60 s remote; a copy waiting for the lock shows `duplicate` provided the holder keeps
+  answering for the whole wait; off macOS, supervision goes through Project Observatory's node) and with the adapter's
+  session (its kits 0.18.0+: back-off from 0.5 s doubling to 30 s, at most 300 s, touching nothing, then exit 75 naming
+  the holder's pid); the owner session ruled the argument form and the conflict, 2026-10-12. The first organization
+  server's target architecture v4 (`docs/design/2026-10-12-target-architecture.md` at `9c6a780`), §2 rule 3 and §5
+  ("`lifecycle.manager: node` covers supervised children"). The `Exec` element, `MultipleInstancesPolicy`, systemd's
+  `Environment=`, `launchd.plist(5)` and XDG 0.8 in the [source ledger](evidence/sources.md). Board-waves inventory CT-01,
+  F-A-027, F-B-211, F-D-008, F-B-202, F-A-013, F-B-206…F-B-210, CON-OE-11; packet P4-01. DEC-0057 and `FAC-SEM-078`,
+  `FAC-SEM-079` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-01-services-20261012 DEC`,
+  `--key w4-p4-01-sem-{one-copy,windows-token}-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited
+  without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the record plane is
+  `fs`.
 
 ### DEC-0056 — Device transport: an HTTP message signature on every device request beside mutual TLS, key roles counted at enrollment, and the estate revision's digest in the check-in
 

@@ -123,8 +123,9 @@ DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 d
 platform keystore, listed by role in the enrollment request's `deviceKeys`:
 
 - **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
-- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol (DEC-0047, reserved) seals
-  secrets to it.
+- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol ([relay](relay.md), DEC-0047) seals
+  secrets to it, and admits a relay participant on an ES256 `#sig` only: an Ed25519 `#sig` stays valid for a device
+  and is `unsupported-alg` at a relay.
 
 An enrollment that lists `deviceKeys` lists **exactly one `#sig` and at most one `#kem`** (`FAC-SEM-044`, DEC-0056), the
 counts the estate record holds per machine (`FAC-SEM-073`), so there is the one key that signs a device's requests,
@@ -144,6 +145,12 @@ that terminates TLS — a platform's load balancer — never sees a client certi
 the device's key there. **A device signs every batch, check-in and rotation request with an HTTP message signature**
 ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. Enrollment is
 unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
+
+The same `#sig` key also signs a machine's relay requests (`relay-auth/1`, `relay-blob/1`,
+[relay](relay.md#blobs), DEC-0047). The two bindings cannot be confused: those sign RFC 8785 JSON, which starts with
+`{`, while this signature base starts with `"@method"`. They differ on purpose: the relay's are bound to their content
+within 60 s and need no nonce, while a device request is a side effect a nonce must keep from repeating within 300 s.
+A relay admits only an ES256 `#sig` key; this binding also admits Ed25519.
 
 **Mutual TLS and the signature on one request** (DEC-0056 item 1, the owner session's ruling):
 
@@ -432,8 +439,10 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   toward a receiver pinned before DEC-0056, whose schema refuses an unknown member), the latest
   `heartbeat` (`sequence`, `at`), the head of the
   `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
-  `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
-  protocol's (DEC-0047, reserved), and a check-in response carries them in `records` unchanged.
+  `expiresAt`). These are fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the
+  leases the window lease's decision (not yet taken); the relay ([DEC-0047](relay.md#revocation-and-heartbeat))
+  carries the first two unchanged, and a check-in response carries all three in `records` unchanged. A relay's
+  `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
