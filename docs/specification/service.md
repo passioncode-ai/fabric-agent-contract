@@ -171,6 +171,15 @@ Schema: [`service-events-page.schema.json`](../../schemas/service-events-page.sc
   events are returned. `limit` defaults to 50 and MUST NOT exceed 200.
 - A service MUST retain at least seven days or 1000 events, whichever is more.
 - `text` MUST be one sentence a person can read without the service's source code.
+- <a id="event-data"></a>`data` MAY carry the event's machine-readable fields (DEC-0070): `schema`, the absolute URI of
+  a payload schema the service publishes (under its origin or its repository), and `value`, an object of at most 32
+  members, each a scalar (a string of at most 500 characters, a number, a boolean, null), a list of at most 32 scalars
+  or an object of at most 32 scalar members — two levels at most (schema). A host that ignores `data` loses nothing:
+  `text` stays the sentence. A host validates `value` against `schema` when it knows that schema and otherwise treats
+  it as opaque, and never fails the event for it. `data` never carries a secret or personal data: no string sits under
+  a credential's name (a list's items and an object's members count under the outer name too) or has a credential's
+  shape, a URL with a credential included (`FAC-SEM-101`, the shared detector); personal data is the service's
+  duty, since no check can tell a name from another string.
 - `notify: true` asks a host to raise an operator notification; `link` is a path under
   the service origin that the notification opens. The host MAY suppress it by the
   operator's settings.
@@ -721,3 +730,4 @@ token, it never presents a service's own descriptor token to call that service's
 | `FAC-SEM-086` | `service-descriptor` | `runner` and `installedBy` carry no value shaped like a credential (the shared detector); the finding names the place, never the value |
 | `FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | `FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
+| `FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
