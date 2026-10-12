@@ -68,6 +68,6 @@ this document, not a memory capability.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-103` | `proposal-submit` | a proposal about a private agent is never exported or submitted; an organization server receives only an approved or applied rule, or a listing (DEC-0072) |
-| `FAC-SEM-104` | `proposal`, `proposal-transition` | a rule's `approvedBy` is a person's role, never a policy; a proposal moves only along `PROPOSAL_TRANSITIONS`, and only a fix is verified (DEC-0072) |
+| `FAC-SEM-103` | `proposal-submit` | a proposal leaves only to an organization server or as an export; never one about a private agent; an organization server receives an organization proposal (`sourceClass`) that is an approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home-folder path in its change, finding text, evidence references or payload (DEC-0072) |
+| `FAC-SEM-104` | `proposal`, `proposal-transition` | a rule's `approvedBy` is `{role: operator}`, never a policy or another role; a proposal moves only along `PROPOSAL_TRANSITIONS`, and only a fix is verified (DEC-0072) |
 | `FAC-SEM-105` | `learning-rollout` | a `personal` or `unknown` learning note never feeds an organization rollout (DEC-0072) |

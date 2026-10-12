@@ -39,12 +39,8 @@ function transitionFindings(value: JsonObject): Finding[] {
   return [];
 }
 
-/**
- * FAC-SEM-103 (kind `proposal-submit`, `{proposal, to}`, `to` `organization` or `export`): a proposal about a private agent
- * is never submitted or exported; to an organization server goes only an approved (or applied) rule, or a listing.
- */
 /** A path that names a home folder, which no proposal carries out of the estate. */
-const HOME_PATH = /(^|[\s"'(=])(\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)/;
+const HOME_PATH = /(^|[\s"'(=:]|file:\/\/)(\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)/;
 
 /** Every string a proposal carries out: its change, its finding's text, its evidence references and its payload. */
 function outgoingStrings(proposal: JsonObject): Array<[string, string]> {

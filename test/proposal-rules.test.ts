@@ -65,6 +65,8 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     expect(paths("proposal-submit", { proposal: leaking, to: "export" })).toEqual(["FAC-SEM-103 /proposal/change", "FAC-SEM-103 /proposal/evidence/0/ref", "FAC-SEM-103 /proposal/evidence/1/ref", "FAC-SEM-103 /proposal/payload/note"]);
     expect(paths("proposal-submit", { proposal: { ...fix, finding: { ...fix.finding, text: "see ~/x" } }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/finding/text"]);
     expect(paths("proposal-submit", { proposal: { ...fix, evidence: [null, { kind: "x" }] }, to: "export" })).toEqual([]);
+    const fileUrl = `file://${posixHome}`;
+    expect(paths("proposal-submit", { proposal: { ...fix, change: `path:${posixHome}`, evidence: [{ kind: "file", ref: fileUrl }] }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/change", "FAC-SEM-103 /proposal/evidence/0/ref"]);
   });
 });
 
