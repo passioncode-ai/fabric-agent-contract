@@ -26,6 +26,7 @@
 | SCR-18 | Restore preview and report | FLW-15 | disabled | proposed | `test/settings-backup.test.ts` |
 | SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
 | SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
+| SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 
 ## Design system
 
@@ -260,4 +261,15 @@
 - **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
 - **Scenarios:** SCN-026
 - **Resources:** service specification, One copy
+- **Status:** proposed
+
+### SCR-21: Project listing setting
+
+- **Used by:** FLW-18
+- **Purpose:** the operator chooses whether a Project appears in the project directory the agents of the estate read.
+- **Elements:** a per-Project "Listed in the project directory" switch with one line saying that a sender that knows the id still reaches the Project (primary action: the switch).
+- **States:** success — listed, or unlisted and absent from every directory page; error — the host could not save the change, and the switch says so and shows the setting as it was.
+- **Coverage:** `comms-directory.schema.json`, `test/comms-tools.test.ts` (the directory's boundary)
+- **Scenarios:** SCN-027
+- **Resources:** project-comms specification, Project directory
 - **Status:** proposed

@@ -536,9 +536,14 @@ no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057
 - **Started by its supervisor and marked so,** a copy MAY wait for the lock in-process for at most 300 s, touching
   nothing, and take it if the holder leaves; when the wait runs out it exits 75 naming the holder. An immediate exit
   under launchd's `KeepAlive` or systemd's `Restart=always` is a restart every 10 s, forever. The Task Scheduler restarts
-  a failed task a finite number of times (`RestartCount`, [sources](../evidence/sources.md)); whether an exit 75 counts
-  as such a failure is not yet proven — pending the adapter's Windows CI receipt (board CT-18). How the copy spaces its
-  tries is its own; the adapter's kits back off from 0.5 s, doubling to 30 s.
+  a failed task a finite number of times (`RestartCount`, [sources](../evidence/sources.md)), but an exit 75 does not
+  count as such a failure: measured on 2026-10-12 (the adapter's Windows CI run 38318280259, `windows-latest`; its report
+  `docs/reports/2026-10-13-faa-38-windows-exit75/` at fabric-agent-adapter `e335d39`), a task written as the kit writes
+  it — logon trigger, `InteractiveToken`, `RestartOnFailure` every minute up to 999 times, `IgnoreNew` — whose action
+  exits 75 started once in 260 s and stayed `Ready` with Last Result 75. Under the Task Scheduler the in-process wait is
+  therefore the only recovery, and a copy that still exits 75 after it stays down until the task's next trigger (the
+  next logon). The `S4U` and `SYSTEM` principals were not measured. How the copy spaces its tries is its own; the
+  adapter's kits back off from 0.5 s, doubling to 30 s.
 - **The supervisor marker** is `FABRIC_SERVICE_SUPERVISOR=<manager>` in the copy's environment or
   `--fabric-supervisor <manager>` (also `--fabric-supervisor=<manager>`) in its argument vector, after the executable and
   before any `--`. `<manager>` is exactly `launchd`, `systemd`, `task-scheduler` or `node`. The writer of the supervisor

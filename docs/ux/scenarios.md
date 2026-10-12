@@ -32,6 +32,7 @@
 | SCN-024 | Restore settings after the data directory was lost | settings | P-02 | ST-019, FLW-15 | draft | not audited |
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
+| SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
 
 ## Personas
 
@@ -562,12 +563,32 @@ independent agent author and P-02 project operator.
   2. The responder begins publishing -> `in_progress`, effect `started`.
   3. The responder completes with the observed release -> `completed`.
 - **Expected result:** the operator reads the request state and the effect state as two facts, each set by its operation, never inferred from a delivery or a read mark.
-- **Alt paths:** the deadline passes before anyone accepts -> `expired`. The request is cancelled before an effect began -> `cancelled`.
+- **Alt paths:** the deadline passes before anyone accepts -> `expired`. The request is cancelled before an effect began -> `cancelled`. The responder's session ends after it accepted -> its slot is released and the request is held `accepted`, not re-queued; a new responder continues it only by a checkpoint transfer.
 - **UI elements:** thread, participants, request state, effect state.
 - **States covered:** success, unknown, expired
 - **Errors & recovery:** the responder's result is lost after the effect began -> `outcome_unknown`; it stays until an observed reconciliation settles it `completed` or `failed_known`, and no expiry erases it.
 - **Status:** draft
-- **Coverage:** project-comms Request lifecycle; `comms-submit.schema.json`, `comms-message.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
+- **Coverage:** project-comms Request lifecycle, Tools arguments and answers, Slots end with the session; `comms-submit.schema.json`, `comms-message.schema.json`, `comms-claim.schema.json`, `comms-fenced.schema.json`, `comms-effect-begin.schema.json`, `comms-complete.schema.json`, `comms-reconcile.schema.json`, `comms-cancel.schema.json`, `comms-responder-replace.schema.json`, `comms-receipt.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027), `test/comms-tools.test.ts`
+- **Product:** unobserved
+
+### SCN-027: The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it
+
+- **Persona:** P-02
+- **Feature:** project-board
+- **Traces:** ST-022, FLW-18 (JTBD-09, JRN-08/#4)
+- **Entry point:** the host's Project settings, where `project-b`'s operator turns its listing off
+- **Preconditions:** `project-b` is listed with its `publish` capability; `project-a` already holds `project-b`'s id from an earlier thread; `project-c` does not
+- **Steps:**
+  1. The operator unlists `project-b` -> the next `com.directory` page read by any session of the estate omits it, with or without a `publish` capability filter.
+  2. `project-c`'s session pages through the directory -> `project-b` appears on no page.
+  3. `project-a` submits a request to `project-b`'s `publish` capability by id -> the board queues it as before; unlisting refuses no message.
+- **Expected result:** the Project is out of discovery and nothing else: no sender that knows it loses it, and the listing setting survives a restore.
+- **Alt paths:** the operator lists it again -> it is back on the pages and filters it qualifies for.
+- **UI elements:** the listing switch with its one-line explanation; the directory page an agent reads.
+- **States covered:** success, error
+- **Errors & recovery:** the host cannot save the setting -> it says the change was not saved, and the Project stays as it was.
+- **Status:** draft
+- **Coverage:** project-comms Project directory; `comms-directory.schema.json`, `comms-directory-args.schema.json`; `test/comms-tools.test.ts` (the directory's boundary)
 - **Product:** unobserved
 
 ## Services

@@ -431,6 +431,27 @@ flowchart TD
 
 - **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs).
 
+### FLW-18: Operator unlists a Project
+
+- **Traces:** ST-022 (JTBD-09, JRN-08/#4)
+- **Goal:** a Project the operator keeps to itself is absent from the project directory and still reachable by a sender that knows its id
+- **Entry points:** the host's Project settings (in Fabric, per Project); no tool sets it
+- **Success exit:** the Project absent from every directory page and capability filter; a request addressed to its id is queued as before
+- **Task analysis:** the operator turns the Project's listing off in the host → the next `com.directory` page of every session of the estate omits it → a sender that already knows its id submits a request → the board queues it as for any Project.
+- **Rejected shape:** unlisting as a block list that refuses messages — rejected because a listing is discovery, not authority (project comms, Project directory).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  S[Host: Project settings] -->|listing off| U[Project unlisted]
+  U --> D[com.directory: absent from every page and filter]
+  U --> K{Sender knows its id?}
+  K -->|yes| Q[Request queued as before]
+  K -->|no| N[Not discovered]
+```
+
+- **Screens traversed:** SCR-21 success (unlisted); SCR-21 error (the host could not save the change and says so).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

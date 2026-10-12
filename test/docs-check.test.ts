@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { checkLinks, decisionPathFindings, mermaidBodies } from "../src/docs-check.js";
+import { checkLinks, decisionPathFindings, mermaidBodies, outsideFences, scanFences } from "../src/docs-check.js";
 import { projectRoot } from "../src/contract.js";
 import { trackedFiles } from "../src/tracked-files.js";
 
@@ -60,5 +60,42 @@ describe("documentation helpers", () => {
   it("reports a broken relative link", async () => {
     const file = path.join(projectRoot(), "README.md");
     expect(await checkLinks(file, "[missing](docs/does-not-exist.md)")).toEqual(["README.md: broken link docs/does-not-exist.md"]);
+  });
+
+  // A handoff carries register text to paste into another file, its links relative to that file. Inside a fenced
+  // block Markdown renders them as text, so they are not links of the handoff; outside one they still are.
+  it("reads no link inside a fenced code block, and still reads one after it closes", async () => {
+    const file = path.join(projectRoot(), "README.md");
+    const text = "```markdown\n[elsewhere](specification/does-not-exist.md)\n```\n~~~\n[tilde](nope.md)\n~~~\n[after](docs/does-not-exist.md)\n";
+    expect(await checkLinks(file, text)).toEqual(["README.md: broken link docs/does-not-exist.md"]);
+  });
+
+  it("closes a fence only with a bare line of its own character, at least as long", () => {
+    expect(outsideFences("a\n````\n```\n~~~~\n```` x\nin\n````\nb")).toBe("a\nb");
+  });
+
+  // An unclosed fence is a finding, not a silent skip to the end of the file: a typo in one cannot hide a link.
+  it("reports a fence never closed, and still reads the links after it", async () => {
+    expect(scanFences("a\n```\nnever closed\n[x](y.md)")).toEqual({ outside: "a\nnever closed\n[x](y.md)", unclosed: 2 });
+    expect(scanFences("a\n````\n```\nb\n```\nc")).toEqual({ outside: "a\nc", unclosed: 2 });
+    expect(scanFences("a\n```\nb\n```").unclosed).toBeUndefined();
+    const file = path.join(projectRoot(), "README.md");
+    expect(await checkLinks(file, "a\n```\n[after](docs/does-not-exist.md)\n")).toEqual([
+      "README.md:2: code fence never closed",
+      "README.md: broken link docs/does-not-exist.md"
+    ]);
+  });
+
+  // CommonMark 0.31.2 §4.5: the info string of a backtick fence may not hold a backtick, so the line is inline code.
+  it("opens no fence on a backtick line whose info string holds a backtick", async () => {
+    expect(scanFences("```code``` text\n[x](y.md)\n")).toEqual({ outside: "```code``` text\n[x](y.md)\n" });
+    expect(outsideFences("~~~ a`b\nin\n~~~\nout")).toBe("out");
+    const file = path.join(projectRoot(), "README.md");
+    expect(await checkLinks(file, "```code``` text [gone](docs/does-not-exist.md)")).toEqual(["README.md: broken link docs/does-not-exist.md"]);
+  });
+
+  it("reports a link whose percent escape is malformed instead of throwing", async () => {
+    const file = path.join(projectRoot(), "README.md");
+    expect(await checkLinks(file, "[bad](docs/100%.md) [ok](README.md)")).toEqual(["README.md: malformed link docs/100%.md"]);
   });
 });
