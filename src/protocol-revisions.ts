@@ -23,6 +23,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["fabric-delegation", ["0.1"]],
   ["fabric-device", ["0.1"]],
   ["fabric-interop", ["0.1"]],
+  ["fabric-local-channel", ["0.1"]],
   ["fabric-local-runner", ["0.1"]],
   ["fabric-operator-channel", ["0.1"]],
   ["fabric-package", ["1"]],

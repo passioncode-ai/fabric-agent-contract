@@ -94,7 +94,8 @@ export const NOT_SWEPT: readonly string[] = [
   "service-dashboard-extension.schema.json",
   "schema-unsupported.schema.json",
   "service-login-code.schema.json",
-  "work.schema.json"
+  "work.schema.json",
+  "local-channel.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

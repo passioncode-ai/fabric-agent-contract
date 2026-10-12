@@ -150,6 +150,52 @@
       ],
       "additionalProperties": false
     },
+    "channels": {
+      "type": "object",
+      "properties": {
+        "local": {
+          "type": "object",
+          "required": [
+            "protocol"
+          ],
+          "properties": {
+            "protocol": {
+              "const": "fabric-local-channel/0.1"
+            },
+            "path": {
+              "$ref": "service-common.schema.json#/$defs/localPath",
+              "description": "POSIX: the socket, in a directory of mode 0700 the node owns."
+            },
+            "pipe": {
+              "type": "string",
+              "pattern": "^\\\\\\\\\\.\\\\pipe\\\\[A-Za-z0-9._-]{1,64}-S-1-[0-9-]{3,180}$",
+              "description": "Windows: \\\\.\\pipe\\<node>-<user SID>."
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": true
+              }
+            },
+            {
+              "required": [
+                "pipe"
+              ],
+              "properties": {
+                "pipe": true
+              }
+            }
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "DEC-0075: where a client finds the node's local channel; a client never computes the path."
+    },
     "lifecycle": {
       "type": "object",
       "required": [

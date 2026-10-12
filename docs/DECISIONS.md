@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0072`
+**Next free ID:** `DEC-0076`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -4000,3 +4000,47 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the first organization server's session (2026-10-12, its admin-agent packing); DEC-0050; packet P6-09.
   DEC-0071 and `FAC-SEM-102` were reserved by git CAS (`--key w6-p6-09-consumer-agent-20261012 DEC`, `--key
   w6-p6-09-sem-consumer-agent-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0075 — The local channel to the node: `fabric-local-channel/0.1`, the same OS user only, hello first, consent the other way
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Agreed with Project Observatory's session on
+  2026-10-12 (its node serves the channel; its changes on locations, the directory as access control, Windows pipes,
+  limits and consent are taken whole). Consumer adoption: Project Observatory's node serves it and publishes
+  `channels.local` (CT-20); Fabric, Fabric Switchboard and Fabric Dashboards connect to it, Fabric declaring
+  `consent.ui` (CT-19, CT-03, CT-21).
+- **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
+  CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
+  CON-OE-10 (node N12, packet P6-04).
+- **Decision:** in [the local channel](specification/local-channel.md) —
+  1. **Transport.** A Unix socket in a user-owned 0700 directory (macOS under Application Support, Linux under
+     `$XDG_RUNTIME_DIR` or the state directory) with the peer's uid checked, or a per-user named pipe on Windows with
+     remote clients rejected and process owners checked both ways; another user is `unauthenticated` before anything
+     is read; the client checks the server; a token file only where there are no peer credentials (`admitPeer`).
+  2. **Discovery.** The node publishes the path in its descriptor's `channels.local`; a client never computes it.
+  3. **Session.** JSON-RPC 2.0, one object per line of at most 1 MiB; `channel.hello` within 5 s negotiates N and N−1
+     (DEC-0067); nothing else is answered before it (`FAC-SEM-106`, `channelStep`); base methods `health` and
+     `enroll.status`; payload methods belong to their owners' decisions.
+  4. **Consent.** The node sends `consent.prompt` with a deadline only to a client that declared `consent.ui`
+     (`mayPrompt`); no answer is denied; `consent.cancel` withdraws a prompt.
+  5. **Errors** in the JSON-RPC envelope with `error.data.code` from one set.
+- **Why:** three surfaces need to reach the node on one machine without a network port, a browser origin or a second
+  copy of anyone's credentials; the operating system already proves who the peer is.
+- **Compatibility:** Additive: a new protocol, registered in the revision register (DEC-0067), and an optional
+  descriptor member. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/local-channel.md` (new), `docs/specification/service.md`,
+    `docs/specification/conformance.md`;
+  - schemas: `schemas/local-channel.schema.json` (new), `schemas/service-descriptor.schema.json` (`channels`);
+  - code: `src/local-channel.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts`;
+  - fixtures: `fixtures/positive/local-channel-*`, `fixtures/negative/local-channel-*`,
+    `fixtures/positive/service-descriptor-local-channel.json`, `fixtures/negative/service-descriptor-local-channel-both.json`,
+    `fixtures/semantic/local-channel-session-*`, `fixtures/catalogue.json`;
+  - tests: `test/local-channel.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+    `test/rule-tolerance.test.ts`; floor in `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-03, CT-16, CT-19, CT-20, CT-21), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`.
+- **Not decided here:** the key helper's code-signing check of its peer; payload methods' shapes.
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§5); the organization architecture
+  v2's contract plan row CON-OE-10 and its CROSSWALK-v4; Project Observatory's session (2026-10-12); DEC-0015,
+  DEC-0033, DEC-0052, DEC-0067; packet P6-04. DEC-0075 and `FAC-SEM-106` were reserved by git CAS (`--key
+  w6-p6-04-local-channel-20261012 DEC`, `--key w6-p6-04-sem-local-channel-20261012 SEM`); the record plane is `fs`.

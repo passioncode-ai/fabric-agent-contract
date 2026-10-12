@@ -430,6 +430,10 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
+**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
+a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
+[local channel](docs/specification/local-channel.md)).
+
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,
 [versioning](docs/specification/versioning.md#protocol-revisions)).

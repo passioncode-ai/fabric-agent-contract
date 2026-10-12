@@ -186,7 +186,7 @@ two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were al
 register and carry no receipt. `FAC-SEM-095` was reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-103`
+**Next free rule code:** `FAC-SEM-107`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -289,6 +289,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-100` | `session-join` | [activity](activity.md#semantic-rules) | SEM-0100 |
 | `FAC-SEM-101` | `service-events-page` | [service](service.md#semantic-rules) | SEM-0101 |
 | `FAC-SEM-102` | `package` | [package](package.md#semantic-rules) | SEM-0102 |
+| `FAC-SEM-106` | `local-channel-session` | [local channel](local-channel.md#semantic-rules) | SEM-0106 |
 
 ## Compatibility policy
 
