@@ -107,7 +107,7 @@ Exit criteria:
 - CON-OE-13 and RM-16 land. RM-16's OpenRouter source is re-read and pinned at writing.
 - Project Observatory's `memory/0.1` pin gap (F-A-029) is a board row on Observatory.
 
-### Wave 6 — the open organization-edition contracts, contexts, wave 4's follow-ups (N12, N20, N19; 20 items)
+### Wave 6 — the open organization-edition contracts, wave 4's follow-ups (N12, N19) — closed 2026-10-12; N20 moved to the program
 
 Depends on: Q1; wave 3 (CON-OE-01); for N20, Fabric's organization ADR (D8).
 
@@ -209,6 +209,34 @@ Each has a board row naming what it waits for.
 - **Re-cut:** N19 moves to wave 6 (each item waits on an outside event); N20 (RM-28 contexts, 11 items) added to wave 6.
 - **Gate on `main` `508e38a`:** 51 test files, 2689 tests, floors met, ux lint, docs-check, markdownlint, privacy 0.
 - **Inventory:** 189 items, 140 closed (`assign.mjs`).
+
+### Wave 6 — close record (2026-10-12)
+
+- **Merged:**
+  - Project Observatory's #70 `464c45e` (DEC-0066, the relay audit);
+  - #71 `866d0b0` (DEC-0067, protocol revisions N and N−1, CON-OE-07);
+  - #72 `0656aa1` (DEC-0068, the session join key, CON-OE-08);
+  - #73 `fee53a2` (DEC-0069, an app's own descriptor, Fabric CO-263);
+  - #75 `3cb040c` (the follow-ups of the owed readings of #63–#68);
+  - #77 `b9453a0` (DEC-0070, data on feed events, a consumer service's request);
+  - #76 `9c0032a` (DEC-0071, a consumer agent) and #79 `146240a` (DEC-0074, a role's secret slots), both asked by the
+    first organization server;
+  - #78 `fc4dda0` (DEC-0072, proposals and learning notes, CON-OE-05);
+  - #80 (DEC-0075, the local channel to the node, CON-OE-10).
+- **Readings:** every PR had three independent readings, one or two fix rounds and a confirming reading before merge;
+  #70 and #80 also had Project Observatory's reading from the node side. The owed readings of #63–#68 ran and found no
+  blocking defect.
+- **Agreements:** Fabric (CO-263 and its amendment; CON-OE-05's five corrections); Project Observatory (CON-OE-08,
+  CON-OE-10's node-side changes, the relay audit); the first organization server (the consumer agent, its slots, schema
+  vendoring by `$ref` closure); a consumer service (feed data). Each pinned its merge commit.
+- **Re-cut:** CON-OE-03 closed as covered by DEC-0050/0051/0053/0055/0061/0063 (v4's CROSSWALK removed the rest);
+  CON-OE-06 (`surfaces.a2a`, v4 *Later*) and AGENT-SYNC-IDS to the program; N20 (RM-28 contexts) to the program, each item
+  waiting on Fabric's organization ADR (D8) or its fixed-executor field (CX-FAB-05); CX-CON-10 refined by its owner.
+- **Found and fixed in readings:** a reference refusal that failed its own schema; a hello the node would have accepted
+  against its schema; a consent answer that could be backdated; a moved or translocated app's stale descriptor; private
+  data that could leave in a proposal's free text; a private agent's name in a pushed branch commit (renamed; the
+  squash merge kept it out of main's history).
+- **Inventory:** 193 items, 151 closed (`assign.mjs`).
 
 ## Questions for the operator — one batch
 
