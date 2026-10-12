@@ -256,12 +256,8 @@ export function verifyWindowLease(lease: unknown, trust: LeaseTrust): LeaseVerdi
   const sig = Buffer.from(lease.sig as string, "base64url");
   // The key and the signature are checked before use, as the package and delegation verifiers check theirs, so
   // `crypto.verify` answers false rather than throwing.
-  let key: ReturnType<typeof createPublicKey>;
-  try {
-    key = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: x as string }, format: "jwk" });
-  } catch {
-    return { ok: false, problem: "unusable-key" };
-  }
+  // The 32-byte, canonical `x` checked above is a key Node imports; nothing reaches a throw here.
+  const key = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: x as string }, format: "jwk" });
   if (sig.length !== 64 || sig.toString("base64url") !== lease.sig || !verifySignature(null, input, key, sig)) return { ok: false, problem: "bad-signature" };
 
   if (lease.machine !== trust.machine) return { ok: false, problem: "wrong-machine" };

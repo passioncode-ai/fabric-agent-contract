@@ -17,6 +17,8 @@ describe("FAC-SEM-093: a result's claims and proof", () => {
     const result = read("result.json");
     const twice = { ...result, done: [...result.done, { ...result.done[0], statement: "another statement" }] };
     expect(paths("result", twice)).toEqual([`FAC-SEM-093 /done/${result.done.length}/claimId`]);
+    const unprovenTwice = { ...twice, outcome: "partial", proof: [] };
+    expect(paths("result", unprovenTwice)).toEqual([`FAC-SEM-093 /done/${result.done.length}/claimId`, "FAC-SEM-093 /done/0"]);
     const shifted = { ...result, outcome: "partial", proof: [], done: [{ statement: "no id" }, result.done[0]] };
     expect(paths("result", shifted)).toEqual(["FAC-SEM-093 /done/1"]);
   });

@@ -3397,7 +3397,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-19); Project Observatory's meter verifies, holds and spends them and reports `spent` (CT-20); an organization server
   hands leases of organization windows once `org-authority/1` exists. Agreed with Project Observatory's session as the
   meter's owner on 2026-10-12 (its `METER.md` M3/M4).
-- **Annotated (2026-10-12):** a held lease without a whole `sequence` and a `leaseId` is `context-invalid`, and the hub key's import is guarded (`unusable-key`); the verifier's `estateRevocations` is named in window-lease.md; the check-in's `records.leases[]` was narrowed from any object to `window-lease/1`, a placeholder before, so the Compatibility line's "Additive" holds for every real check-in (the owed reading of #65; packet P6-08).
+- **Annotated (2026-10-12):** a held lease without a whole `sequence` and a `leaseId` is `context-invalid`; the verifier's `estateRevocations` is named in window-lease.md; the check-in's `records.leases[]` was narrowed from any object to `window-lease/1`, a placeholder before, so the Compatibility line's "Additive" holds for every real check-in (the owed reading of #65; packet P6-08).
 - **Amends:** nothing; it gives DEC-0053 item 9's check-in `records.leases` its document and adds an optional `spent`.
   Implements the first organization server's target architecture v4 (commit `9c6a780`) §6 Path 5 and §12's row
   "window lease". Closes V4-WINDOW-LEASE (board run N18, packet P4-05).
@@ -3459,7 +3459,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   computes challenges from the register (CT-19); Project Observatory's node verifies estate revisions under signing
   credentials only (CT-20); the first organization server pins administrators' signing credentials in `org-authority/1`
   and never serves a signing page (CT-04).
-- **Annotated (2026-10-12):** its affects list names `src/rfc3339.ts`, which the merge of #65 did not change (last changed by DEC-0060); the field limits of the register (a renamed field, a `jkt` end, a grant at revision 0) now have tests (packet P6-08).
+- **Annotated (2026-10-12):** its affects list names `src/rfc3339.ts`, which the merge of #65 did not change (at that merge last changed by DEC-0060; since then by the relay audit's DEC-0066); the field limits of the register (a renamed field, a `jkt` end, a grant at revision 0) now have tests (packet P6-08).
 - **Amends:** DEC-0055 (tightening): an estate record's authority must be a signing credential, `rpId` `sign.<domain>`,
   origins on that RP ID (schema and `FAC-SEM-092`). Implements v4 §7 *Signing surface* and §12's row "signing challenge
   types … over JCS, and the dedicated signing RP". Closes V4-SIGNING-CHALLENGE (board run N18, packet P4-05).

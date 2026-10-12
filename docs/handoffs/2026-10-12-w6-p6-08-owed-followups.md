@@ -12,7 +12,7 @@ fixes the ones that are code or tests and records the rest as board rows.
   index; `FAC-SEM-097` names the field that failed; the `startsAt` boundary is tested.
 - `src/openrouter-attribution.ts`: a missing request answers `not-openrouter`; vectors for the default port, a trailing
   dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug.
-- `src/window-lease.ts`: a corrupt held lease is `context-invalid`; the key import is guarded; tests for a report at
+- `src/window-lease.ts`: a corrupt held lease is `context-invalid`; tests for a report at
   the issue instant and a malformed lease in a division; floors for `window-lease.ts` and `signing-challenges.ts`.
 - `src/revocation-delta.ts`: a corrupt held heartbeat is `malformed` (HB-0); an applied sequence that is not a count
   stays behind.
