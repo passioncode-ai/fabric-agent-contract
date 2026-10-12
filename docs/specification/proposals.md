@@ -41,9 +41,11 @@ The schema holds the shapes. The rules:
   proposal about a private agent never leaves, by construction. An organization server receives a proposal whose
   `sourceClass` is `organization` and that is an approved or applied rule, or a live listing (proposed, approved or
   applied). Nothing leaving carries a credential-shaped value or URL (the shared detector) or a home-folder path, in its
-  goal's id and text, its change, its finding's id and text, its evidence references, its `verifiedRun` or its payload.
-  A home-folder path is one that starts the string, follows `file://`, or follows any character that cannot continue a
-  path (a space, a quote, a backtick, a bracket, a comma); `docs/Users/guide.md` is not one.
+  URIs (`id`, `target.project`, `mergedInto`, `supersededBy`, `appliedIn`), its goal's id and text, its change, its
+  finding's id and text, its evidence references, its `approvedBy.policy`, its `verifiedRun` or its payload. A home-folder
+  path is one that starts the string, follows `file://` (with or without `localhost`), or follows any character that
+  cannot continue a path (a space, a quote, a backtick, a bracket, a comma); `docs/Users/guide.md` is not one, nor is a
+  folder in any script before `/home/`.
 
 ## Relation to DEC-0012
 
@@ -70,6 +72,6 @@ this document, not a memory capability.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-103` | `proposal-submit` | a proposal leaves only to an organization server or as an export; never one about a private agent; an organization server receives an organization proposal (`sourceClass`) that is an approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home-folder path in its goal, change, finding id or text, evidence references, `verifiedRun` or payload (DEC-0072) |
+| `FAC-SEM-103` | `proposal-submit` | a proposal leaves only to an organization server or as an export; never one about a private agent; an organization server receives an organization proposal (`sourceClass`) that is an approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home-folder path in its URIs, goal, change, finding id or text, evidence references, approving policy, `verifiedRun` or payload (DEC-0072) |
 | `FAC-SEM-104` | `proposal`, `proposal-transition` | a rule's `approvedBy` is `{role: operator}`, never a policy or another role; a proposal moves only along `PROPOSAL_TRANSITIONS`, and only a fix is verified (DEC-0072) |
 | `FAC-SEM-105` | `learning-rollout` | a `personal` or `unknown` learning note never feeds an organization rollout (DEC-0072) |

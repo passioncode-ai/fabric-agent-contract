@@ -40,15 +40,16 @@ function transitionFindings(value: JsonObject): Finding[] {
 }
 
 /**
- * A path that names a home folder, which no proposal carries out of the estate: at the start, after `file://`, or after
- * any character that cannot continue a path (a space, a quote, a backtick, a bracket, a comma), so `docs/Users/x` and
- * `src/home/page` are not home folders.
+ * A path that names a home folder, which no proposal carries out of the estate: at the start, after `file://` (with or
+ * without `localhost`), or after any character that cannot continue a path (a space, a quote, a backtick, a bracket, a
+ * comma), so `docs/Users/x`, `src/home/page` and a folder in any script before `/home/` are not home folders.
  */
-const HOME_PATH = /(?:^|file:\/\/|[^A-Za-z0-9_.\-/~])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)/;
+const HOME_PATH = new RegExp(String.raw`(?:^|file:\/\/(?:localhost)?\/?|[^\p{L}\p{N}_.\-\/~@+])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:[\\/]Users[\\/])`, "u");
 
 /**
- * Every free string a proposal carries out: its goal, its change, its finding's id and text, its evidence references, the
- * run that verified it and its payload.
+ * Every string a proposal carries out: its URIs (`id`, `target.project`, `mergedInto`, `supersededBy`, `appliedIn`), its
+ * goal, its change, its finding's id and text, its evidence references, the policy that approved it, the run that
+ * verified it and its payload.
  */
 function outgoingStrings(proposal: JsonObject): Array<[string, string]> {
   const strings: Array<[string, string]> = [];
@@ -57,6 +58,7 @@ function outgoingStrings(proposal: JsonObject): Array<[string, string]> {
     else if (Array.isArray(value)) value.forEach((item, i) => add(`${path}/${i}`, item));
     else if (isObject(value)) for (const [key, item] of Object.entries(value)) add(`${path}/${key.replace(/~/g, "~0").replace(/\//g, "~1")}`, item);
   };
+  for (const key of ["id", "target", "mergedInto", "supersededBy", "appliedIn", "approvedBy"]) add(`/proposal/${key}`, proposal[key]);
   if (isObject(proposal.goal)) for (const key of ["id", "text"]) add(`/proposal/goal/${key}`, proposal.goal[key]);
   add("/proposal/change", proposal.change);
   if (isObject(proposal.finding)) for (const key of ["id", "text"]) add(`/proposal/finding/${key}`, proposal.finding[key]);

@@ -167,6 +167,11 @@ describe("the request envelope: the code refuses what $defs/request refuses", ()
     expect(def("notification", cancel)).toBe(true);
     for (const state of [fresh, after]) expect(channelStep(state, cancel)).toMatchObject({ ok: false, code: null });
     expect(channelStep(after, { jsonrpc: "2.0", method: "health" })).toMatchObject({ ok: false, code: null });
+    // JSON-RPC 2.0 §4.1: a notification is never answered, even one whose params its definition refuses.
+    for (const params of [{ promptId: 7 }, { promptId: "" }, {}]) {
+      expect(def("notification", { ...cancel, params })).toBe(false);
+      expect(channelStep(after, { ...cancel, params })).toMatchObject({ ok: false, code: null });
+    }
     for (const message of [{ method: "consent.cancel" }, { jsonrpc: "2.0", method: 7 }, { jsonrpc: "2.0" }, { ...cancel, params: [] }]) {
       expect(def("notification", message), JSON.stringify(message)).toBe(false);
       expect(channelStep(after, message), JSON.stringify(message)).toMatchObject({ ok: false, code: "invalid-request" });

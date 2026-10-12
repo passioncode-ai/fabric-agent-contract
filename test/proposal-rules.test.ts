@@ -82,6 +82,13 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     }
     const everywhere = { ...rule, goal: { id: posixHome, text: `serves ${linuxHome}` }, finding: { id: tildeHome, source: "lint", text: "ok" }, verifiedRun: `run ${posixHome}` };
     expect(paths("proposal-submit", { proposal: everywhere, to: "export" })).toEqual(["FAC-SEM-103 /proposal/goal/id", "FAC-SEM-103 /proposal/goal/text", "FAC-SEM-103 /proposal/finding/id", "FAC-SEM-103 /proposal/verifiedRun"]);
+    const fileHomes = [`file://localhost${posixHome}`, `file:///${["C:", "Users", "someone", "x"].join("/")}`, `file://${posixHome}`];
+    for (const home of fileHomes) expect(paths("proposal-submit", { proposal: { ...fix, change: home }, to: "export" }), home).toEqual(["FAC-SEM-103 /proposal/change"]);
+    const uris = { ...fix, id: `file://${posixHome}`, mergedInto: `file://${linuxHome}`, supersededBy: `file://localhost${posixHome}`, target: { kind: "project", project: `file://${posixHome}` }, approvedBy: { policy: `auto ${posixHome}` } };
+    expect(paths("proposal-submit", { proposal: uris, to: "export" })).toEqual(["FAC-SEM-103 /proposal/id", "FAC-SEM-103 /proposal/target/project", "FAC-SEM-103 /proposal/mergedInto", "FAC-SEM-103 /proposal/supersededBy", "FAC-SEM-103 /proposal/approvedBy/policy"]);
+    expect(paths("proposal-submit", { proposal: { ...fix, appliedIn: { id: `file://${posixHome}`, revision: "r1" } }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/appliedIn/id"]);
+    // A folder named in another script, or ending in @ or +, before a Users or home segment continues a relative path.
+    for (const text of ["проект", "Ωmega", "pkg@1", "c++"].map((folder) => `${folder}${linuxHome}`)) expect(paths("proposal-submit", { proposal: { ...fix, change: text }, to: "export" }), text).toEqual([]);
     const token = "ghp_" + "b".repeat(36);
     expect(paths("proposal-submit", { proposal: { ...rule, goal: { id: "g-1", text: token } }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/goal/text"]);
   });

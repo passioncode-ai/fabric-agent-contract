@@ -71,9 +71,10 @@ const REQUEST_MEMBERS: ReadonlySet<string> = new Set(["jsonrpc", "id", "method",
 const METHOD_NAME = /^[a-z][a-z0-9_]{0,31}(\.[a-z][a-z0-9_]{0,31}){0,4}$/;
 
 /**
- * Whether a message has the envelope `local-channel.schema.json#/$defs/request` (or, without an `id`, a notification's)
- * accepts: an object (not an array) with `jsonrpc: "2.0"`, a method name, an `id` that is a 1–128 code-point string or
- * an integer (as JSON Schema counts one: `1.0` is), params an object when present, and no other member.
+ * Whether a message has the envelope `local-channel.schema.json#/$defs/request` accepts: an object (not an array) with
+ * `jsonrpc: "2.0"`, a method name, an `id` that is a 1–128 code-point string or an integer (as JSON Schema counts one:
+ * `1.0` is), params an object when present, and no other member. Without an `id` the same envelope is a notification,
+ * whatever its method — wider than `$defs/notification`, because a notification is never answered (JSON-RPC 2.0 §4.1).
  */
 function envelopeValid(request: unknown): request is JsonObject {
   if (!isObject(request)) return false;
