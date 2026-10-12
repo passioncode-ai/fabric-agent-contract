@@ -67,22 +67,38 @@ export function lineWithinLimit(line: string): boolean {
   return Buffer.byteLength(line, "utf8") <= MAX_LINE_BYTES;
 }
 
+const REQUEST_MEMBERS: ReadonlySet<string> = new Set(["jsonrpc", "id", "method", "params"]);
+const METHOD_NAME = /^[a-z][a-z0-9_]{0,31}(\.[a-z][a-z0-9_]{0,31}){0,4}$/;
+
 /**
- * One request against the session: before `channel.hello` nothing else is answered (`hello-first`); a hello whose
- * protocols name no revision the node accepts is `schema-unsupported`; a hello without a protocols list is
- * `invalid-params`. Method dispatch after hello is the node's.
+ * Whether a message has the envelope `local-channel.schema.json#/$defs/request` (or, without an `id`, a notification's)
+ * accepts: an object (not an array) with `jsonrpc: "2.0"`, a method name, an `id` that is a 1–128 code-point string or
+ * an integer (as JSON Schema counts one: `1.0` is), params an object when present, and no other member.
+ */
+function envelopeValid(request: unknown): request is JsonObject {
+  if (!isObject(request)) return false;
+  if (Object.keys(request).some((key) => !REQUEST_MEMBERS.has(key))) return false;
+  if (request.jsonrpc !== "2.0" || typeof request.method !== "string" || !METHOD_NAME.test(request.method)) return false;
+  if (request.params !== undefined && !isObject(request.params)) return false;
+  return request.id === undefined || isText(request.id, 128) || Number.isInteger(request.id);
+}
+
+/**
+ * One request against the session: a message whose envelope the schema refuses is `invalid-request` (JSON-RPC 2.0 §5,
+ * answered with `id: null` when its id cannot be read); a well-formed notification (no `id`) is never answered; before
+ * `channel.hello` nothing else is answered (`hello-first`); a hello whose protocols name no revision the node accepts is
+ * `schema-unsupported`; a hello without valid params is `invalid-params`. Method dispatch after hello is the node's.
  */
 export function channelStep(state: ChannelState, request: unknown): ChannelAnswer {
-  // A notification (no id) is never answered, whatever it is.
-  if (isObject(request) && request.id === undefined) return { ok: false, code: null, state };
-  // A request's id is a string or an integer; null is not one (the schema refuses it).
-  if (isObject(request) && request.id === null) return { ok: false, code: "invalid-request", state };
-  const method = isObject(request) ? request.method : undefined;
-  if (typeof method === "string" && CLIENT_METHODS.has(method)) return { ok: false, code: state.hello ? "unknown-method" : "hello-first", state };
+  if (!envelopeValid(request)) return { ok: false, code: "invalid-request", state };
+  // A notification (no id) is never answered, whatever its method.
+  if (request.id === undefined) return { ok: false, code: null, state };
+  const method = request.method as string;
+  if (CLIENT_METHODS.has(method)) return { ok: false, code: state.hello ? "unknown-method" : "hello-first", state };
   if (method !== "channel.hello") return state.hello ? { ok: true, state } : { ok: false, code: "hello-first", state };
   // One hello per session: a second never changes what the first agreed.
   if (state.hello) return { ok: false, code: "invalid-request", state };
-  const params = isObject(request) && isObject(request.params) ? request.params : {};
+  const params = isObject(request.params) ? request.params : {};
   if (!helloParamsValid(params)) return { ok: false, code: "invalid-params", state };
   const offered = params.protocols as unknown[];
   const answers = offered.map((entry) => negotiateRevision(entry, state.accepted));

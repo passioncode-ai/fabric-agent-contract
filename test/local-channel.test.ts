@@ -26,10 +26,10 @@ describe("admitPeer", () => {
 
 describe("channelStep", () => {
   it("answers nothing before hello, and anything the node serves after it", () => {
-    expect(channelStep(fresh, { id: 1, method: "health" })).toMatchObject({ ok: false, code: "hello-first" });
+    expect(channelStep(fresh, { jsonrpc: "2.0", id: 1, method: "health" })).toMatchObject({ ok: false, code: "hello-first" });
     const after = channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric", version: "0.4.0" } }));
     expect(after).toMatchObject({ ok: true, state: { hello: true, capabilities: [] } });
-    expect(channelStep(after.state, { id: 2, method: "health" })).toMatchObject({ ok: true });
+    expect(channelStep(after.state, { jsonrpc: "2.0", id: 2, method: "health" })).toMatchObject({ ok: true });
     // A second hello is refused and changes nothing.
     const again = channelStep(after.state, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric", version: "0.4.0" }, capabilities: ["consent.ui"] }));
     expect(again).toMatchObject({ ok: false, code: "invalid-request", state: after.state });
@@ -42,8 +42,8 @@ describe("channelStep", () => {
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client: { name: "fabric" } }))).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui", 7] }))).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: "consent.ui" }))).toMatchObject({ ok: false, code: "invalid-params" });
-    expect(channelStep(fresh, { id: 1, method: "channel.hello" })).toMatchObject({ ok: false, code: "invalid-params" });
-    expect(channelStep(fresh, null)).toMatchObject({ ok: false, code: "hello-first" });
+    expect(channelStep(fresh, { jsonrpc: "2.0", id: 1, method: "channel.hello" })).toMatchObject({ ok: false, code: "invalid-params" });
+    expect(channelStep(fresh, null)).toMatchObject({ ok: false, code: "invalid-request" });
   });
   it("prompts for consent only on a session whose client declared consent.ui", () => {
     const client = { name: "fabric", version: "0.4.0" };
@@ -128,6 +128,49 @@ describe("hello as the schema reads it, notifications, client methods, limits", 
     expect(lineWithinLimit("x".repeat(MAX_LINE_BYTES))).toBe(true);
     expect(lineWithinLimit("x".repeat(MAX_LINE_BYTES + 1))).toBe(false);
     expect(lineWithinLimit("é".repeat(MAX_LINE_BYTES / 2 + 1))).toBe(false);
+  });
+});
+
+describe("the request envelope: the code refuses what $defs/request refuses", () => {
+  const client = { name: "fabric", version: "0.4.0" };
+  const after = channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client })).state;
+  const base = { jsonrpc: "2.0", id: 7, method: "health" };
+  const accepted: unknown[] = [base, { ...base, id: "a" }, { ...base, id: "x".repeat(128) }, { ...base, id: -5 }, { ...base, id: 2 ** 60 }, { ...base, method: "node.lifecycle.ensure_running" }, { ...base, params: {} }];
+  const refused: unknown[] = [
+    null, [], [base], "health", 7, true,
+    { id: 7, method: "health" }, { ...base, jsonrpc: "1.0" }, { ...base, jsonrpc: 2 },
+    { ...base, id: 1.5 }, { ...base, id: {} }, { ...base, id: [] }, { ...base, id: true }, { ...base, id: "" }, { ...base, id: "x".repeat(129) }, { ...base, id: null },
+    { ...base, method: 7 }, { ...base, method: "Health" }, { ...base, method: "" }, { jsonrpc: "2.0", id: 7 }, { ...base, method: "a..b" },
+    { ...base, params: [] }, { ...base, params: "x" }, { ...base, params: null }, { ...base, extra: 1 },
+  ];
+  it("accepts every request the schema accepts, after hello", () => {
+    for (const request of accepted) {
+      expect(def("request", request), JSON.stringify(request)).toBe(true);
+      expect(channelStep(after, request), JSON.stringify(request)).toMatchObject({ ok: true });
+    }
+  });
+  it("answers invalid-request to every message the schema refuses, before hello and after it", () => {
+    for (const request of refused) {
+      expect(def("request", request), JSON.stringify(request)).toBe(false);
+      for (const state of [fresh, after]) expect(channelStep(state, request), JSON.stringify(request)).toMatchObject({ ok: false, code: "invalid-request", state });
+    }
+  });
+  it("refuses a hello's envelope as invalid-request and its params as invalid-params, as the schema refuses both", () => {
+    expect(def("request", hello([]))).toBe(false);
+    expect(channelStep(fresh, hello([]))).toMatchObject({ ok: false, code: "invalid-request" });
+    const bare = { jsonrpc: "2.0", id: 1, method: "channel.hello" };
+    expect(def("request", bare)).toBe(false);
+    expect(channelStep(fresh, bare)).toMatchObject({ ok: false, code: "invalid-params" });
+  });
+  it("never answers a well-formed notification, and refuses a malformed one", () => {
+    const cancel = { jsonrpc: "2.0", method: "consent.cancel", params: { promptId: "p" } };
+    expect(def("notification", cancel)).toBe(true);
+    for (const state of [fresh, after]) expect(channelStep(state, cancel)).toMatchObject({ ok: false, code: null });
+    expect(channelStep(after, { jsonrpc: "2.0", method: "health" })).toMatchObject({ ok: false, code: null });
+    for (const message of [{ method: "consent.cancel" }, { jsonrpc: "2.0", method: 7 }, { jsonrpc: "2.0" }, { ...cancel, params: [] }]) {
+      expect(def("notification", message), JSON.stringify(message)).toBe(false);
+      expect(channelStep(after, message), JSON.stringify(message)).toMatchObject({ ok: false, code: "invalid-request" });
+    }
   });
 });
 

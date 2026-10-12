@@ -68,6 +68,22 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     const fileUrl = `file://${posixHome}`;
     expect(paths("proposal-submit", { proposal: { ...fix, change: `path:${posixHome}`, evidence: [{ kind: "file", ref: fileUrl }] }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/change", "FAC-SEM-103 /proposal/evidence/0/ref"]);
   });
+  it("finds a home path after any character that cannot continue a path, and in every free string", () => {
+    const posixHome = ["", "Users", "someone", "x"].join("/");
+    const linuxHome = ["", "home", "someone", "x"].join("/");
+    const tildeHome = ["~", "x"].join("/");
+    for (const wrap of [(p: string) => `\`${p}\``, (p: string) => `[${p}]`, (p: string) => `a,${p}`, (p: string) => `{${p}}`, (p: string) => `<${p}>`, (p: string) => `*${p}`, (p: string) => `see:${p}`]) {
+      for (const home of [posixHome, linuxHome, tildeHome]) expect(paths("proposal-submit", { proposal: { ...fix, change: wrap(home) }, to: "export" }), wrap(home)).toEqual(["FAC-SEM-103 /proposal/change"]);
+    }
+    // A path segment named Users or home inside a repository path, a route and a tilde inside a word are not home folders.
+    for (const text of [["docs", "Users", "guide.md"].join("/"), ["src", "home", "page.tsx"].join("/"), "GET /users/42", "x~/y", "a.b/Users/c", "v1-/home/x".replace("-", "_")]) {
+      expect(paths("proposal-submit", { proposal: { ...fix, change: text }, to: "export" }), text).toEqual([]);
+    }
+    const everywhere = { ...rule, goal: { id: posixHome, text: `serves ${linuxHome}` }, finding: { id: tildeHome, source: "lint", text: "ok" }, verifiedRun: `run ${posixHome}` };
+    expect(paths("proposal-submit", { proposal: everywhere, to: "export" })).toEqual(["FAC-SEM-103 /proposal/goal/id", "FAC-SEM-103 /proposal/goal/text", "FAC-SEM-103 /proposal/finding/id", "FAC-SEM-103 /proposal/verifiedRun"]);
+    const token = "ghp_" + "b".repeat(36);
+    expect(paths("proposal-submit", { proposal: { ...rule, goal: { id: "g-1", text: token } }, to: "export" })).toEqual(["FAC-SEM-103 /proposal/goal/text"]);
+  });
 });
 
 describe("FAC-SEM-105: a learning note's rollout", () => {
