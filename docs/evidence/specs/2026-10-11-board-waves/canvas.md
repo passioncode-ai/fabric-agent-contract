@@ -226,14 +226,14 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - device-key role counts at enrollment (DEV-KEY-ROLES) and the estate revision's digest in the check-in
     (DEV-CHECKIN-DIGEST), from #54's review.
 
-### N19 wave 4's follow-ups (wave 5)
+### N19 wave 4's follow-ups (wave 6; re-cut from wave 5 on 2026-10-12)
 
 - The three-tier readings owed for DEC-0054, DEC-0062 and DEC-0063 (W4-READINGS-OWED): merged after the owner's own
   review while subagent readers were at their weekly limit.
 - Project Observatory's audit of DEC-0047 (RELAY-AUDIT-1, CON-001…023), as one consolidated revision under #53's rules.
 - agent-sync's id registers (AGENT-SYNC-IDS): a tool defect, reported to its owner.
 
-### N10 core — the 0.1.0 rules keep their promises (wave 5)
+### N10 core — the 0.1.0 rules keep their promises (wave 5) — done: DEC-0064, #67 `252fd25`
 
 - As-is:
   - claim and proof are unchecked (F-A-002);
@@ -246,7 +246,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - Making standing-grant `channels` required is breaking for 0.1.0 grants, so the decision is a rule that
     refuses a grant authorising an external effect without them (F-A-016). Consumers pin, per DEC-0016.
 
-### N11 interop and usage (wave 5)
+### N11 interop and usage (wave 5) — done: DEC-0065, #68 `508e38a`
 
 - As-is:
   - `interop.md:122-124` still states the pre-DEC-0017 job result (F-A-005);
@@ -275,6 +275,18 @@ an owner. New contracts land designed against the whole, never as a shape a late
   `fabric-agent-profile/1`, TUF roles. It waits on Fabric ADR FAB-OE-19 for the estate-spans-nodes part.
 - Starting this module is question Q1 in [plan.md](plan.md): the org plan says H0 has not started, by the
   operator's instruction.
+
+### N20 contexts — the organization-contexts model's contract part (wave 6, RM-28)
+
+- As-is: a machine, a grant, a placement and a trust level each assume one person in one organization; the
+  organization-contexts report (fabric-workspace `docs/reports/2026-10-12-org-contexts`, `d8668299`) asks the contract
+  for ten changes (CX-CON-01…10), and the first organization server asks for workflow cells under FAC-SEM-067.
+- To-be: a context (personal or an organization) is named on a project, an instance, a grant and a session; placements
+  and trust levels key on (agent or owner, context); L0 stays personal; a grant carries `purpose` and a receipt its
+  declared context; project memory in a cloud Fabric is a `memory/0.1` revision agreed with Fabric and Project
+  Observatory; a host custodian is `processor-hosted`. Workflow cells keep a distinct-people floor, secondary
+  suppression, no person in an id, and a fixed executor never shown. Each waits on Fabric's organization ADR (D8) where
+  the verdict says so.
 
 ### N13 program — carried, never dropped
 
@@ -326,6 +338,8 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-12 — wave 5 closed: N10 and N11 done (DEC-0064, DEC-0065); N19 re-cut to wave 6; N20 (RM-28 contexts)
+  added to wave 6.
 - 2026-10-12 — wave 4 closed: N08, N09 and N18 done (DEC-0047, DEC-0054, DEC-0056…DEC-0063); N19 added to wave 5 with
   the owed readings, the relay audit and the agent-sync defect.
 - 2026-10-12 — wave 3 closed: N07 and N17 done (DEC-0050…0053, DEC-0055); OQ-0010 and F-D-028 move to N13 (the first

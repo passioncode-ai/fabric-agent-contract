@@ -6,8 +6,8 @@
     "2": "Delegation, spend and the operator session: the DEC-0037…0041 seam closed, one canonical-JSON register",
     "3": "The organization edition's first contracts and activity/devices: fabric-package/1 first, then DEC-0030/0031 hardened and amended (CON-OE-01, CON-OE-12, run/result, v4 device fields, CT-25), estate-record/1 last",
     "4": "Services on every system (with the v4 descriptor for listings), the operator channel and the embedded dashboard, and the agent network's transport (the relay, the delta and heartbeat, leases, signing challenges, device message signatures)",
-    "5": "The 0.1.0 core, interop and usage; wave 4's follow-ups (N19)",
-    "6": "The remaining open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, the rest of CON-OE-03"
+    "5": "The 0.1.0 core, interop and usage (closed 2026-10-12)",
+    "6": "The remaining open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, the rest of CON-OE-03; contexts (N20, RM-28); wave 4's follow-ups (N19)"
   },
   "nodes": [
     {
@@ -331,13 +331,32 @@
     },
     {
       "id": "N19-wave4-followups",
-      "title": "Wave 4's follow-ups: the owed readings of DEC-0054/0062/0063, the relay audit's consolidated revision, the agent-sync id defect",
-      "wave": 5,
+      "title": "Wave 4's follow-ups: the owed readings of DEC-0054/0062/0063, the relay audit's consolidated revision, the agent-sync id defect (re-cut to wave 6 on 2026-10-12: each waits on an outside event)",
+      "wave": 6,
       "release": "this",
       "items": [
         "W4-READINGS-OWED",
         "RELAY-AUDIT-1",
         "AGENT-SYNC-IDS"
+      ]
+    },
+    {
+      "id": "N20-org-contexts",
+      "title": "Contexts (RM-28): the contract's part of the organization-contexts model (CX-CON-01…10) and workflow cells under FAC-SEM-067",
+      "wave": 6,
+      "release": "this",
+      "items": [
+        "CX-CON-01",
+        "CX-CON-02",
+        "CX-CON-03",
+        "CX-CON-04",
+        "CX-CON-05",
+        "CX-CON-06",
+        "CX-CON-07",
+        "CX-CON-08",
+        "CX-CON-09",
+        "CX-CON-10",
+        "VES-WF-CELLS"
       ]
     }
   ]
