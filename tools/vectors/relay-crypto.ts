@@ -25,7 +25,9 @@ import { P256_CURVE } from "../../src/p256.js";
 import { RELAY_ALG, RELAY_PROTOCOL, relayAuthSigningInput, relayBlobSigningInput, relayRequestHeader } from "../../src/relay.js";
 import { ENVELOPE_SUITE, ENVELOPE_TYPE, envelopeDigest, hpkeSealBase, type SecretEnvelope } from "../../src/secret-envelope.js";
 
-export const VECTOR_FILES = ["fixtures/vectors/relay.json", "fixtures/vectors/secret-envelope.json", "fixtures/vectors/estate-record.json"] as const;
+export const VECTOR_FILES = [
+  "fixtures/vectors/relay.json", "fixtures/vectors/secret-envelope.json", "fixtures/vectors/estate-record.json", "fixtures/vectors/hub-key.json"
+] as const;
 type VectorFile = (typeof VECTOR_FILES)[number];
 type Json = Record<string, unknown>;
 
@@ -415,7 +417,9 @@ function relayVectors(): Json {
     machineKey: MACHINE.jwk,
     machineKeyOctets: MACHINE.octets,
     auth: { context: { relay: RELAY, nonce: NONCE, now: AUTH_NOW }, signingInput: input, sha256: sha256(input).toString("hex"), frame },
-    message: { frame: DELIVER, self: GPU_BOX, now: MSG_NOW, body },
+    // The legacy frame keeps its members (a consumer pinned before DEC-0066 reads frame.to); `self` is the recipient's
+    // own kid, the `to` it now expects.
+    message: { frame: { from: LAPTOP, to: GPU_BOX, msgId: MSG_ID, ttl: 3600 }, self: GPU_BOX, now: MSG_NOW, body },
     ed25519: { key: ED25519_JWK, frame: { ...frame, alg: "EdDSA", sig: nodeSign(null, Buffer.from(edInput, "utf8"), ED25519).toString("base64url") }, expect: "unsupported-alg" },
     blobRequest: {
       about: "Fabric-Relay-Request (DEC-0047 item 8): base64url of RFC 8785 {alg, kid, recipients, iat, sig}; sig is ES256 over relayBlobSigningInput. `admitted` is the relay's current admission set by kid; `stored` the blob's recipients when the relay holds it.",
@@ -598,6 +602,31 @@ function estateRecordVectors(committed: Json): Json {
   return { ...committed, cases: [...kept.slice(0, at), ...managed, ...kept.slice(at)] };
 }
 
+// ---- hub-key.json: the same window (DEC-0066, DL-14) --------------------------------------------------------------
+
+/**
+ * DL-14's hub-key vectors reuse revision 2's record at other clocks; this generator owns only the cases at the issuedAt
+ * skew boundary (`at` is a JWT NumericDate in seconds) and keeps every other case as it is.
+ */
+const HUB_ANCHOR = "certified at issuedAt exactly (the window holds both instants)";
+function hubKeyVectors(committed: Json): Json {
+  const cases = committed.cases as Json[];
+  const anchor = cases.find((entry) => entry.name === HUB_ANCHOR);
+  if (!anchor) throw new Error(`hub-key.json has no case ${HUB_ANCHOR}`);
+  const issued = Date.parse((anchor.record as Json).issuedAt as string) / 1000;
+  const outside = { certified: false, fault: "estate", detail: "estate-outside-window" };
+  const managed = [
+    { name: "one second before issuedAt: inside the 60 s skew, as verifyEstateRecord admits it", record: anchor.record, kid: anchor.kid, x: anchor.x, at: issued - 1, expected: anchor.expected },
+    { name: "60 s before issuedAt, at the clock skew", record: anchor.record, kid: anchor.kid, x: anchor.x, at: issued - 60, expected: anchor.expected },
+    { name: "60 s and one millisecond before issuedAt: the revision's window does not hold the clock", record: anchor.record, kid: anchor.kid, x: anchor.x, at: issued - 60.001, expected: outside }
+  ];
+  const legacy = "one second before issuedAt: the revision's window does not hold the clock";
+  const names = new Set([legacy, ...managed.map((entry) => entry.name)]);
+  const kept = cases.filter((entry) => !names.has(entry.name as string));
+  const at = kept.findIndex((entry) => entry.name === HUB_ANCHOR) + 1;
+  return { ...committed, cases: [...kept.slice(0, at), ...managed, ...kept.slice(at)] };
+}
+
 // ---- Output -------------------------------------------------------------------------------------------------------
 
 const text = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
@@ -608,7 +637,8 @@ export function buildVectorFiles(): Record<VectorFile, string> {
   return {
     "fixtures/vectors/relay.json": text(relayVectors()),
     "fixtures/vectors/secret-envelope.json": text(envelopeVectors()),
-    "fixtures/vectors/estate-record.json": text(estateRecordVectors(estate))
+    "fixtures/vectors/estate-record.json": text(estateRecordVectors(estate)),
+    "fixtures/vectors/hub-key.json": text(hubKeyVectors(JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/hub-key.json"), "utf8")) as Json))
   };
 }
 

@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { strictTime } from "./rfc3339.js";
+import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 
 // #region hub-key-rules — docs: docs/specification/delegation.md#keys-publication-and-rotation
 /**
@@ -79,7 +79,8 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
     if (record.revision < applied.revision) return refused("estate", "estate-rolled-back");
     if (record.revision === applied.revision && applied.digest !== undefined && record.digest !== applied.digest) return refused("estate", "estate-forked");
   }
-  if (now < issuedAt || now > validUntil) return refused("estate", "estate-outside-window");
+  // The window verifyEstateRecord admits the revision in: from 60 s before issuedAt (the clock skew) to validUntil (DEC-0066).
+  if (now < issuedAt - CLOCK_SKEW_SECONDS * 1000 || now > validUntil) return refused("estate", "estate-outside-window");
 
   const revocations = [...((record.revocations ?? []) as unknown[]), ...((extra ?? []) as unknown[])];
   const revokes = (kind: string, ref: unknown) => revocations.some((entry) => isObject(entry) && entry.kind === kind && entry.ref === ref);
