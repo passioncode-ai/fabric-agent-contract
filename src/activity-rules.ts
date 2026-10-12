@@ -135,10 +135,12 @@ export const MIN_POPULATION = 3;
 /**
  * The population of a set of events: distinct subjects, where an event's subject is its `user.id` when it carries one
  * and its `session.id` otherwise. A summary cell is published only when its population is at least MIN_POPULATION.
+ * A `session.annotation` adds no subject (DEC-0068): it never counts, so it cannot pad a cell to the minimum.
  */
 export function population(list: readonly JsonObject[]): number {
   const subjects = new Set<string>();
   for (const event of list) {
+    if (event.kind === "session.annotation") continue;
     if (isObject(event.user) && typeof event.user.id === "string") subjects.add(`user:${event.user.id}`);
     else if (isObject(event.session) && typeof event.session.id === "string") subjects.add(`session:${event.session.id}`);
   }

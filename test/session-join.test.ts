@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { population } from "../src/activity-rules.js";
 import { sessionJoinFindings, sessionTotals } from "../src/session-join.js";
 
 // DEC-0068 (CON-OE-08): the session join key, one writer per session, annotations never counted (FAC-SEM-100).
@@ -58,6 +59,31 @@ describe("FAC-SEM-100 boundaries", () => {
     expect(paths([iv("2026-02-30T09:00:00Z", "2026-10-07T09:30:00Z"), iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z"), iv("2026-10-07T09:05:00Z", "2026-10-07T09:20:00Z")])).toEqual(["/events/2/data/start"]);
     expect(paths([iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z"), iv("2026-10-07T09:05:00Z", "not a time"), iv("2026-10-07T09:05:00Z", "2026-10-07T09:20:00Z")])).toEqual(["/events/2/data/start"]);
   });
+  it("reports the later of two identical intervals", () => {
+    expect(paths([iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z"), iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z")])).toEqual(["/events/1/data/start"]);
+  });
+  it("gives the same answer for zero-length intervals at one instant, whatever their order", () => {
+    const zero = iv("2026-10-07T09:00:00Z", "2026-10-07T09:00:00Z");
+    const ten = iv("2026-10-07T09:00:00Z", "2026-10-07T09:10:00Z");
+    expect(paths([zero, ten])).toEqual([]);
+    expect(paths([ten, zero])).toEqual([]);
+  });
+  it("totals only readable intervals and counts tokens only as whole non-negative numbers", () => {
+    const at = (start: string, end: string) => ({ kind: "session.interval", session: { id: "s" }, data: { start, end, state: "idle" } });
+    expect(sessionTotals([at("2026-10-07T09:10:00Z", "2026-10-07T09:00:00Z"), at("2026-02-30T09:00:00Z", "2026-10-07T09:00:00Z"), at("2026-10-07T09:00:00", "2026-10-07T09:10:00")]).get("s")?.seconds).toEqual({});
+    const line = (dedupeKey: string, input: unknown) => ({ kind: "usage.line", session: { id: "s" }, data: { dedupeKey, tokens: { input, output: 1 } } });
+    expect(sessionTotals([line("a", -5), line("b", 1.5), line("c", 4)]).get("s")).toEqual({ seconds: {}, calls: 3, inputTokens: 4, outputTokens: 3 });
+  });
+  it("counts one call once across sessions, and lines with no key each on their own", () => {
+    const line = (session: string, extra: Record<string, unknown>) => ({ kind: "usage.line", session: { id: session }, data: { tokens: { input: 1 }, ...extra } });
+    const totals = sessionTotals([line("s1", { dedupeKey: "req" }), line("s2", { dedupeKey: "req" })]);
+    expect([totals.get("s1")?.calls, totals.get("s2")?.calls]).toEqual([1, 0]);
+    expect(sessionTotals([line("s", {}), line("s", {})]).get("s")?.calls).toBe(2);
+  });
+  it("keeps a state named like an object's own member as a state", () => {
+    const odd = (state: string) => ({ kind: "session.interval", session: { id: "s" }, data: { start: "2026-10-07T09:00:00Z", end: "2026-10-07T09:10:00Z", state } });
+    expect(sessionTotals([odd("constructor"), odd("__proto__")]).get("s")?.seconds).toEqual(Object.fromEntries([["constructor", 600], ["__proto__", 600]]));
+  });
   it("keeps sessions apart: two sessions may overlap and have different collectors", () => {
     expect(paths([iv("2026-10-07T09:00:00Z", "2026-10-07T10:00:00Z", "a", "s1"), iv("2026-10-07T09:10:00Z", "2026-10-07T09:20:00Z", "b", "s2")])).toEqual([]);
   });
@@ -76,5 +102,13 @@ describe("FAC-SEM-100 boundaries", () => {
     expect(() => sessionTotals(junk)).not.toThrow();
     expect(sessionTotals("x").size).toBe(0);
     expect(sessionTotals([{ kind: "session.interval", session: { id: "s" }, data: { start: "2026-10-07T09:00:00Z", end: "2026-10-07T09:10:00Z" } }]).get("s")?.seconds).toEqual({});
+  });
+});
+
+describe("annotations add nothing to a summary cell", () => {
+  it("adds no subject to a population", () => {
+    const note = (id: string) => ({ kind: "session.annotation", session: { id }, data: { by: "fabric", label: "session.ended", at: "2026-10-07T09:30:00Z" } });
+    const interval = (id: string) => ({ kind: "session.interval", session: { id }, data: {} });
+    expect(population([interval("a"), note("b"), note("c")])).toBe(1);
   });
 });
