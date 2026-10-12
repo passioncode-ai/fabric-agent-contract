@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "id": "urn:policy:checker:project-a",
+    "revision": 3,
+    "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "createdAt": "2026-08-26T10:05:00Z",
+    "createdBy": "urn:agent:pm:a"
+  },
+  "kind": "checker",
+  "parents": [
+    {
+      "id": "urn:policy:checker:project-a",
+      "revision": 2,
+      "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "reason": "Roll back to revision 1 after revision 2 failed its checks",
+  "payload": {
+    "requiredChecks": [
+      "schema",
+      "source-receipts"
+    ]
+  },
+  "approvals": [
+    "urn:approval:pm:a:1"
+  ],
+  "rollbackBasis": {
+    "id": "urn:policy:checker:project-a",
+    "revision": 1,
+    "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}
