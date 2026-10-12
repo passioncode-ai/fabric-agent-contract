@@ -1,0 +1,25 @@
+{
+  "description": "Expiring one second after October ends: a lease never outlives its window instance (FAC-SEM-089).",
+  "kind": "window-lease",
+  "expect": [
+    "FAC-SEM-089"
+  ],
+  "input": {
+    "type": "window-lease/1",
+    "leaseId": "lease-m9a07-2026-10-0010",
+    "sequence": 10,
+    "estate": "estate-5d0f1a",
+    "estateRevision": 1,
+    "machine": "m-9a07",
+    "scope": "estate",
+    "window": "month",
+    "period": "2026-10",
+    "amount": "250.5",
+    "unit": "USD",
+    "issuedAt": "2026-10-31T12:00:00Z",
+    "expiresAt": "2026-11-01T00:00:01Z",
+    "alg": "EdDSA",
+    "kid": "hub-m-4c1e-1",
+    "sig": "HxNEyw35jPevGJIfm2VQpbNOaHmlcHjR4uqNbrB-maHTWRJSFAM4agk89bNinYKyJWVLhrncybdo3i83-Y8-AA"
+  }
+}

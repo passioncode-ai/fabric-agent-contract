@@ -218,8 +218,8 @@
         "rpId": {
           "type": "string",
           "maxLength": 253,
-          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$",
-          "description": "The RP ID of the dedicated signing credential (v4 §7: sign.<domain>, never the sign-in one)."
+          "pattern": "^sign(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?){2,}$",
+          "description": "The RP ID of the dedicated signing credential: sign.<domain>, never the sign-in one (DEC-0063, FAC-SEM-092); every pinned origin is on it or a host under it."
         },
         "origins": {
           "type": "array",

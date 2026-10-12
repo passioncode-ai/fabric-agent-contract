@@ -38,7 +38,8 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "session-handoff.schema.json": "session-handoff",
   "settings-backup.schema.json": "settings-backup",
   "spend-policy.schema.json": "spend-policy",
-  "telemetry-event.schema.json": "telemetry-event"
+  "telemetry-event.schema.json": "telemetry-event",
+  "window-lease.schema.json": "window-lease"
 };
 
 /**
@@ -101,7 +102,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules"]
+    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "window-lease"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

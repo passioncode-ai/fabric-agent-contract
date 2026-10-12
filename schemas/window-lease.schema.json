@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/window-lease.schema.json",
+  "title": "Window lease, window-lease/1 (DEC-0062)",
+  "description": "The estate's hub signs, once per machine, that machine's share of one instance of a spending window: the most its meter may spend in that instance, for at most 24 hours. Signed by a hub key the estate record certifies (DEC-0055), over the RFC 8785 form of the lease without sig (DEC-0043, the register's window-lease/1, DEC-0063). Escalation above a lease is an approval (limit-reached, DEC-0034 OC-6), never a lease field.",
+  "type": "object",
+  "required": [
+    "type",
+    "leaseId",
+    "sequence",
+    "estate",
+    "estateRevision",
+    "machine",
+    "scope",
+    "window",
+    "period",
+    "amount",
+    "unit",
+    "issuedAt",
+    "expiresAt",
+    "alg",
+    "kid",
+    "sig"
+  ],
+  "properties": {
+    "type": {
+      "const": "window-lease/1"
+    },
+    "leaseId": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The lease's id: the check-in reports it (records.leases[].leaseId, DEC-0053)."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Rises with every lease the hub issues one machine for one scope, window and period; a lease with a sequence at or below the one held, other than the held lease itself, is superseded."
+    },
+    "estate": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The estate whose record certifies the signing hub key (estate-record/1 estate)."
+    },
+    "estateRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "The estate-record revision the hub followed; a meter that applies an earlier revision refuses the lease until it has the revision."
+    },
+    "machine": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The device id of the one machine whose meter holds this lease (DEC-0031, estate-record machines[].id)."
+    },
+    "scope": {
+      "type": "string",
+      "maxLength": 300,
+      "pattern": "^(estate|project:[^\\s#]{1,256}|grant:[^\\s#]{1,200}#[1-9][0-9]{0,15})$",
+      "description": "Whose window: estate (L0), project:<id> (L1) or grant:<id>#<revision>. The organization edition's v4 uses estate only."
+    },
+    "window": {
+      "enum": [
+        "day",
+        "week",
+        "month"
+      ],
+      "description": "The calendar window of the spend policy (DEC-0037, DEC-0038), in UTC; a week starts on Monday."
+    },
+    "period": {
+      "type": "string",
+      "description": "The window instance: YYYY-MM-DD for day, the ISO 8601 week YYYY-Www for week, YYYY-MM for month (FAC-SEM-089 refuses a day or week that does not exist)."
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,8})(\\.[0-9]{1,6})?$",
+      "description": "The machine's whole share of the window instance, a decimal string: a newer lease restates it, never adds to it."
+    },
+    "unit": {
+      "const": "USD"
+    },
+    "issuedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "expiresAt": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "After issuedAt and at most 24 hours later, and never after the window instance ends (FAC-SEM-089)."
+    },
+    "alg": {
+      "enum": [
+        "EdDSA"
+      ],
+      "description": "The hub key's algorithm: Ed25519 until Fabric records its decision D2 (ES256 beside EdDSA), when ES256 joins additively."
+    },
+    "kid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "The hub key's kid, as the estate record certifies it on one machine (machines[].hubKey.kid)."
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "description": "The Ed25519 signature (64 bytes, base64url without padding) over the UTF-8 RFC 8785 form of the lease without sig."
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "const": "day"
+          }
+        },
+        "required": [
+          "window"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "const": "week"
+          }
+        },
+        "required": [
+          "window"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "const": "month"
+          }
+        },
+        "required": [
+          "window"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+          }
+        }
+      }
+    }
+  ]
+}

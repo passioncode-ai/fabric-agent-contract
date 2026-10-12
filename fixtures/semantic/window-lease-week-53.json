@@ -1,0 +1,23 @@
+{
+  "description": "ISO week 53 of 2026, which has one: no finding (FAC-SEM-089).",
+  "kind": "window-lease",
+  "expect": [],
+  "input": {
+    "type": "window-lease/1",
+    "leaseId": "lease-m9a07-2026-w53-0001",
+    "sequence": 1,
+    "estate": "estate-5d0f1a",
+    "estateRevision": 1,
+    "machine": "m-9a07",
+    "scope": "estate",
+    "window": "week",
+    "period": "2026-W53",
+    "amount": "40",
+    "unit": "USD",
+    "issuedAt": "2027-01-01T06:00:00Z",
+    "expiresAt": "2027-01-02T06:00:00Z",
+    "alg": "EdDSA",
+    "kid": "hub-m-4c1e-1",
+    "sig": "s7TEkU3mVr5AXX4RPs6xsV_Nl8IZua_J0OyMEmbz7cU-CnjOJ5z1dVSAXmGY_Gkvt3uDV2flQyAr3jjkjDAwDQ"
+  }
+}

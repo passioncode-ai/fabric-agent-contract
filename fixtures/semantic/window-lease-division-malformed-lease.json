@@ -1,0 +1,49 @@
+{
+  "description": "A lease of the division is not a well-formed window-lease/1 (FAC-SEM-090).",
+  "kind": "window-lease-division",
+  "expect": [
+    "FAC-SEM-090"
+  ],
+  "input": {
+    "limitUsd": "1000",
+    "leases": [
+      {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0001",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-11T06:00:00Z",
+        "expiresAt": "2026-10-12T06:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+      },
+      {
+        "type": "window-lease/1",
+        "leaseId": "lease-m9a07-2026-10-0002",
+        "sequence": 2,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-13",
+        "amount": "100",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T07:00:00Z",
+        "expiresAt": "2026-10-13T07:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "A1vcLCFnuSO0e06Tdm2nqC3auHJSAjBo9aBH38lm5tzfkJ5WJn_5GEXKcVxw8engRZSRLRYoD1PmYIVFqpD3Dw"
+      }
+    ],
+    "reports": []
+  }
+}

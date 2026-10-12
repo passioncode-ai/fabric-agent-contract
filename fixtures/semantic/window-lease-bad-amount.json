@@ -1,0 +1,25 @@
+{
+  "description": "An amount with an exponent (FAC-SEM-089).",
+  "kind": "window-lease",
+  "expect": [
+    "FAC-SEM-089"
+  ],
+  "input": {
+    "type": "window-lease/1",
+    "leaseId": "lease-m9a07-2026-10-0003",
+    "sequence": 3,
+    "estate": "estate-5d0f1a",
+    "estateRevision": 1,
+    "machine": "m-9a07",
+    "scope": "estate",
+    "window": "month",
+    "period": "2026-10",
+    "amount": "2.505e2",
+    "unit": "USD",
+    "issuedAt": "2026-10-12T09:00:00Z",
+    "expiresAt": "2026-10-13T09:00:00Z",
+    "alg": "EdDSA",
+    "kid": "hub-m-4c1e-1",
+    "sig": "PNXyFKOJ89C6s6sQJnwXHzG1sfr37S-BTgjIVuIzu9iUyih12AehGfOHV1turlIt6Ql7GW_1K9AsaeX4QEdXBg"
+  }
+}

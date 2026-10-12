@@ -445,10 +445,21 @@
   {"name": "estate-record-later-without-parent", "schema": "estate-record.schema.json", "path": "negative/estate-record-later-without-parent.json", "valid": false, "keyword": "required"},
   {"name": "estate-record-machine-name", "schema": "estate-record.schema.json", "path": "negative/estate-record-machine-name.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "estate-record-secret-value", "schema": "estate-record.schema.json", "path": "negative/estate-record-secret-value.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "estate-record-authority-sign-in-rp", "schema": "estate-record.schema.json", "path": "negative/estate-record-authority-sign-in-rp.json", "valid": false, "keyword": "pattern"},
   {"name": "estate-record-unknown-agent-ref", "schema": "estate-record.schema.json", "path": "negative/estate-record-unknown-agent-ref.json", "valid": false, "keyword": "pattern"},
   {"name": "secret-envelope", "schema": "secret-envelope.schema.json", "path": "positive/secret-envelope.json", "valid": true},
   {"name": "relay-frame-send", "schema": "relay-frame.schema.json", "path": "positive/relay-frame-send.json", "valid": true},
   {"name": "secret-envelope-extra-member", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-extra-member.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "relay-frame-unknown-type", "schema": "relay-frame.schema.json", "path": "negative/relay-frame-unknown-type.json", "valid": false, "keyword": "oneOf"},
-  {"name": "secret-envelope-without-agent", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-without-agent.json", "valid": false, "keyword": "required"}
+  {"name": "secret-envelope-without-agent", "schema": "secret-envelope.schema.json", "path": "negative/secret-envelope-without-agent.json", "valid": false, "keyword": "required"},
+  {"name": "window-lease", "schema": "window-lease.schema.json", "path": "positive/window-lease.json", "valid": true},
+  {"name": "window-lease-week", "schema": "window-lease.schema.json", "path": "positive/window-lease-week.json", "valid": true},
+  {"name": "window-lease-month-with-week-period", "schema": "window-lease.schema.json", "path": "negative/window-lease-month-with-week-period.json", "valid": false, "keyword": "pattern"},
+  {"name": "window-lease-unit-lower-case", "schema": "window-lease.schema.json", "path": "negative/window-lease-unit-lower-case.json", "valid": false, "keyword": "const"},
+  {"name": "window-lease-amount-exponent", "schema": "window-lease.schema.json", "path": "negative/window-lease-amount-exponent.json", "valid": false, "keyword": "pattern"},
+  {"name": "window-lease-amount-number", "schema": "window-lease.schema.json", "path": "negative/window-lease-amount-number.json", "valid": false, "keyword": "type"},
+  {"name": "window-lease-es256", "schema": "window-lease.schema.json", "path": "negative/window-lease-es256.json", "valid": false, "keyword": "enum"},
+  {"name": "window-lease-scope-organization", "schema": "window-lease.schema.json", "path": "negative/window-lease-scope-organization.json", "valid": false, "keyword": "pattern"},
+  {"name": "window-lease-escalation-field", "schema": "window-lease.schema.json", "path": "negative/window-lease-escalation-field.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "window-lease-short-sig", "schema": "window-lease.schema.json", "path": "negative/window-lease-short-sig.json", "valid": false, "keyword": "pattern"}
 ]

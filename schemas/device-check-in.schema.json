@@ -311,15 +311,20 @@
                   },
                   "expiresAt": {
                     "$ref": "common.schema.json#/$defs/timestamp"
+                  },
+                  "spent": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]{0,8})(\\.[0-9]{1,6})?$",
+                    "description": "An upper bound on what the meter spent in the lease's window instance: settled receipts plus open reservations, a decimal USD string (DEC-0062). Absent, the lease is unreported, and the hub counts its whole amount as spent once it expires."
                   }
                 },
                 "additionalProperties": false
               },
-              "description": "The spending-window leases the device's meter holds."
+              "description": "The window leases the device's meter holds (window-lease/1, DEC-0062), each by leaseId and expiresAt, with what it spent."
             }
           },
           "additionalProperties": false,
-          "description": "What the device holds of the records the relay protocol carries (DEC-0053): fields only. The heartbeat and the revocation delta are DEC-0054's (reserved), the leases the window lease's decision (not yet taken)."
+          "description": "What the device holds of the records the relay protocol carries (DEC-0053): fields only. The heartbeat and the revocation delta are DEC-0054's (reserved); the leases are window-lease/1's (DEC-0062)."
         },
         "fullState": {
           "type": "boolean"
@@ -409,14 +414,13 @@
               "type": "array",
               "maxItems": 64,
               "items": {
-                "type": "object",
-                "maxProperties": 64,
-                "description": "A spending-window lease, as the window lease's decision (not yet taken) defines it; carried unchanged."
+                "$ref": "window-lease.schema.json",
+                "description": "A window lease (window-lease/1, DEC-0062), carried unchanged; the device's meter verifies it before it spends against it."
               }
             }
           },
           "additionalProperties": false,
-          "description": "Records the server hands the device at check-in (DEC-0053). The check-in carries them; their shapes are the relay protocol's."
+          "description": "Records the server hands the device at check-in (DEC-0053). The check-in carries them unchanged: the heartbeat and the delta are DEC-0054's (reserved), a lease is window-lease/1 (DEC-0062)."
         },
         "certificate": {
           "type": "object",

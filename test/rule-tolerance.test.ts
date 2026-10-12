@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, relay, one-copy, Windows token-file and well-known (FAC-SEM-080) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, relay, one-copy, Windows token-file, well-known (FAC-SEM-080), window-lease (FAC-SEM-089…091) and signing-credential (FAC-SEM-092) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
-  "service-well-known", "service-lock-outcome", "windows-token-file"
+  "service-well-known", "service-lock-outcome", "windows-token-file",
+  "window-lease", "window-lease-division", "lease-reservation", "signing-credential"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -21,7 +22,9 @@ const MEMBERS = [
   "revocations", "packages", "secrets", "sourceKey", "source", "eventId", "occurred", "monotonicNs", "acknowledgedAt", "producer", "from", "to", "minPopulation",
   "header", "ct", "sig", "type", "kid", "alg", "protocol", "ttl", "body", "extensions", "status", "degraded",
   "start", "env", "argv", "holderPid", "attempts", "waitedMs", "sideEffects", "outcome", "file", "currentUserSid", "aces", "ownerSid",
-  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method"
+  "publicBaseUrl", "certificates", "seen", "answer", "clientCertificateSerial", "headers", "target", "method",
+  "limitUsd", "leases", "reports", "lease", "decision", "window", "period", "amount", "issuedAt", "expiresAt", "sequence",
+  "leaseId", "estate", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
@@ -50,6 +53,12 @@ describe("activity and device rules tolerate malformed input", () => {
     const headers = { "signature-input": ["fabric-device=(", 7, null], signature: { a: 1 }, "content-digest": [] };
     expect(() => evaluateSemanticRules("device-request-signature", { ...device, request: { method: 1, target: 2, headers, body: 3 } })).not.toThrow();
     for (const kind of KINDS) expect(() => evaluateSemanticRules(kind, device), kind).not.toThrow();
+    // A division, a reservation and a credential whose members hold every wrong shape still answer with findings.
+    const lease = { type: "window-lease/1", window: "month", period: "2026-10", issuedAt: "2026-10-12T09:00:00Z", expiresAt: 4, amount: [] };
+    expect(() => evaluateSemanticRules("window-lease-division", { limitUsd: "1000", leases: [1, lease, { ...lease, constructor: 1 }], reports: [1, { leaseId: 2, receivedAt: 3 }] })).not.toThrow();
+    expect(() => evaluateSemanticRules("lease-reservation", { lease, request: { at: 1, amountUsd: [], spentUsd: {} }, decision: 2 })).not.toThrow();
+    expect(() => evaluateSemanticRules("signing-credential", { rpId: ["sign.example.org"], origins: [1, null, { a: 1 }] })).not.toThrow();
+    expect(() => evaluateSemanticRules("window-lease", { window: "__proto__", period: "constructor" })).not.toThrow();
     const dashboard = "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1";
     for (const value of WRONG) expect(() => evaluateSemanticRules("service-well-known", { extensions: { [dashboard]: value, constructor: value } })).not.toThrow();
   });

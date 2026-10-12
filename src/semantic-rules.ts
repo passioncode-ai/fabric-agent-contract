@@ -17,6 +17,8 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { signingRules } from "./signing-challenges.js";
+import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
@@ -49,6 +51,10 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (packaged) return packaged;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
+  const lease = windowLeaseRules(kind, value);
+  if (lease) return lease;
+  const signing = signingRules(kind, value);
+  if (signing) return signing;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const findings: Finding[] = [];

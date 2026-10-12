@@ -1,0 +1,598 @@
+{
+  "about": "Vectors for the register of signed statements (DEC-0063). statements: signingStatement(type, fields) is the UTF-8 RFC 8785 form of {type, ...fields}; for a passkey type, signingChallenge is its SHA-256 (base64url here), the WebAuthn challenge. refusals: inputs that have no statement. rpIds and origins: the signing RP (isSigningRpId, originWithin). assertions: verifySigningAssertion(assertion, credential, type, fields) with the EdDSA test passkey of fixtures/vectors/estate-record.json (keys.passkeyEdDSA; Ed25519 is deterministic, so a port reproduces each sig). The share grant's jkt is RFC 7638 §3.1's example thumbprint. Never real credentials.",
+  "statements": [
+    {
+      "type": "estate-revision/1",
+      "fields": {
+        "digest": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "statement": "{\"digest\":\"sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6\",\"type\":\"estate-revision/1\"}",
+      "challenge": "H_PlvXAXuzN4WXf8V0NViYWzQwbaioUVny262OFO8Ec"
+    },
+    {
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "members",
+        "grant": "g-listing-4410#3",
+        "revision": 17
+      },
+      "statement": "{\"audience\":\"members\",\"digest\":\"sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee\",\"grant\":\"g-listing-4410#3\",\"organization\":\"org-3b7e\",\"revision\":17,\"type\":\"org-countersign/1\"}",
+      "challenge": "cZz0p7Rm2Oz2HksmOFqKvJvogAL2K6ADq9DdlVITQA8"
+    },
+    {
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "statement": "{\"estate\":\"estate-5d0f1a\",\"expiresAt\":\"2026-10-26T09:00:00Z\",\"grant\":\"g-share-7c21#1\",\"jkt\":\"NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs\",\"type\":\"share-grant/1\"}",
+      "challenge": "OAjUnaguoegWqwzrCdM28Fs24EO2F-DWJyEY3K7ueDA"
+    },
+    {
+      "type": "limits/1",
+      "fields": {
+        "scope": "estate:estate-5d0f1a",
+        "digest": "sha256:e5b0504d1bdf0b2ec4e87c4dd9a953537ab63a570d543921d219d621c59ce301"
+      },
+      "statement": "{\"digest\":\"sha256:e5b0504d1bdf0b2ec4e87c4dd9a953537ab63a570d543921d219d621c59ce301\",\"scope\":\"estate:estate-5d0f1a\",\"type\":\"limits/1\"}",
+      "challenge": "E775XG7T3avhBq7f8fsr4Mh_zfPPE8AnXuBP5VAMGIM"
+    },
+    {
+      "type": "fabric-package-signature/1",
+      "fields": {
+        "role": "publisher",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee"
+      },
+      "statement": "{\"digest\":\"sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee\",\"role\":\"publisher\",\"type\":\"fabric-package-signature/1\"}",
+      "challenge": null
+    },
+    {
+      "type": "window-lease/1",
+      "fields": {
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1"
+      },
+      "statement": "{\"alg\":\"EdDSA\",\"amount\":\"250.5\",\"estate\":\"estate-5d0f1a\",\"estateRevision\":1,\"expiresAt\":\"2026-10-13T09:00:00Z\",\"issuedAt\":\"2026-10-12T09:00:00Z\",\"kid\":\"hub-m-4c1e-1\",\"leaseId\":\"lease-m9a07-2026-10-0003\",\"machine\":\"m-9a07\",\"period\":\"2026-10\",\"scope\":\"estate\",\"sequence\":3,\"type\":\"window-lease/1\",\"unit\":\"USD\",\"window\":\"month\"}",
+      "challenge": null
+    },
+    {
+      "type": "relay-auth/1",
+      "fields": {
+        "alg": "ES256",
+        "relay": "https://relay.example",
+        "nonce": "Qm9hcmQtcnVuLXdhdmUtNC1QNQ",
+        "estate": "estate-5d0f1a",
+        "kid": "m-9a07#sig",
+        "iat": "2026-10-12T09:00:00Z"
+      },
+      "statement": "{\"alg\":\"ES256\",\"estate\":\"estate-5d0f1a\",\"iat\":\"2026-10-12T09:00:00Z\",\"kid\":\"m-9a07#sig\",\"nonce\":\"Qm9hcmQtcnVuLXdhdmUtNC1QNQ\",\"relay\":\"https://relay.example\",\"type\":\"relay-auth/1\"}",
+      "challenge": null
+    },
+    {
+      "type": "relay-blob/1",
+      "fields": {
+        "alg": "ES256",
+        "relay": "https://relay.example",
+        "method": "PUT",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "recipients": [
+          "m-4c1e#sig"
+        ],
+        "iat": "2026-10-12T09:00:00Z"
+      },
+      "statement": "{\"alg\":\"ES256\",\"digest\":\"sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee\",\"iat\":\"2026-10-12T09:00:00Z\",\"method\":\"PUT\",\"recipients\":[\"m-4c1e#sig\"],\"relay\":\"https://relay.example\",\"type\":\"relay-blob/1\"}",
+      "challenge": null
+    }
+  ],
+  "refusals": [
+    {
+      "why": "an unregistered version",
+      "type": "estate-revision/2",
+      "fields": {
+        "digest": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "statement": null
+    },
+    {
+      "why": "a type named like an Object.prototype member",
+      "type": "__proto__",
+      "fields": {
+        "digest": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "statement": null
+    },
+    {
+      "why": "a member the type does not list",
+      "type": "estate-revision/1",
+      "fields": {
+        "digest": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+        "revision": 1
+      },
+      "statement": null
+    },
+    {
+      "why": "type among the fields",
+      "type": "estate-revision/1",
+      "fields": {
+        "digest": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+        "type": "org-countersign/1"
+      },
+      "statement": null
+    },
+    {
+      "why": "a missing member",
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "members",
+        "grant": "g-listing-4410#3"
+      },
+      "statement": null
+    },
+    {
+      "why": "a digest in upper-case hex",
+      "type": "estate-revision/1",
+      "fields": {
+        "digest": "sha256:4D7C9D5653D99158DD358BB5242B5F8811CEDF2F813355DDF9FB0CFCBAE9B5C6"
+      },
+      "statement": null
+    },
+    {
+      "why": "a revision of 0",
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "members",
+        "grant": "g-listing-4410#3",
+        "revision": 0
+      },
+      "statement": null
+    },
+    {
+      "why": "a revision as a string",
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "members",
+        "grant": "g-listing-4410#3",
+        "revision": "17"
+      },
+      "statement": null
+    },
+    {
+      "why": "a grant without its revision",
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "members",
+        "grant": "g-listing-4410",
+        "revision": 17
+      },
+      "statement": null
+    },
+    {
+      "why": "an audience with a space",
+      "type": "org-countersign/1",
+      "fields": {
+        "organization": "org-3b7e",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee",
+        "audience": "all members",
+        "grant": "g-listing-4410#3",
+        "revision": 17
+      },
+      "statement": null
+    },
+    {
+      "why": "a jkt of 44 characters (padded)",
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs=",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "statement": null
+    },
+    {
+      "why": "an expiry without an offset",
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00"
+      },
+      "statement": null
+    },
+    {
+      "why": "an expiry on 31 September",
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-09-31T09:00:00Z"
+      },
+      "statement": null
+    },
+    {
+      "why": "limits of a person",
+      "type": "limits/1",
+      "fields": {
+        "scope": "person:p-1",
+        "digest": "sha256:e5b0504d1bdf0b2ec4e87c4dd9a953537ab63a570d543921d219d621c59ce301"
+      },
+      "statement": null
+    },
+    {
+      "why": "a package signature for a maintainer role",
+      "type": "fabric-package-signature/1",
+      "fields": {
+        "role": "maintainer",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee"
+      },
+      "statement": null
+    }
+  ],
+  "noChallenge": [
+    {
+      "why": "a key-signed statement has no challenge",
+      "type": "window-lease/1",
+      "fields": {
+        "leaseId": "lease-m9a07-2026-10-0003",
+        "sequence": 3,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-9a07",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "250.5",
+        "unit": "USD",
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "expiresAt": "2026-10-13T09:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1"
+      }
+    },
+    {
+      "why": "a key-signed statement has no challenge",
+      "type": "fabric-package-signature/1",
+      "fields": {
+        "role": "publisher",
+        "digest": "sha256:faca8faf8f69930d6bb3fb1e3b3f902531cf2b97f54297e87569cf4a94a5d1ee"
+      }
+    },
+    {
+      "why": "a statement with no bytes has no challenge",
+      "type": "limits/1",
+      "fields": {
+        "scope": "person:p-1",
+        "digest": "sha256:e5b0504d1bdf0b2ec4e87c4dd9a953537ab63a570d543921d219d621c59ce301"
+      }
+    }
+  ],
+  "rpIds": [
+    {
+      "rpId": "sign.example.org",
+      "signing": true
+    },
+    {
+      "rpId": "sign.passioncode.ai",
+      "signing": true
+    },
+    {
+      "rpId": "sign.a.example.co.uk",
+      "signing": true
+    },
+    {
+      "rpId": "example.org",
+      "signing": false
+    },
+    {
+      "rpId": "sign.org",
+      "signing": false
+    },
+    {
+      "rpId": "SIGN.example.org",
+      "signing": false
+    },
+    {
+      "rpId": "signer.example.org",
+      "signing": false
+    },
+    {
+      "rpId": "www.sign.example.org",
+      "signing": false
+    },
+    {
+      "rpId": "sign.example.org.",
+      "signing": false
+    },
+    {
+      "rpId": "sign..example.org",
+      "signing": false
+    },
+    {
+      "rpId": "sign.-x.example.org",
+      "signing": false
+    },
+    {
+      "rpId": "sign",
+      "signing": false
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://sign.example.org",
+      "rpId": "sign.example.org",
+      "within": true
+    },
+    {
+      "origin": "https://a.sign.example.org",
+      "rpId": "sign.example.org",
+      "within": true
+    },
+    {
+      "origin": "https://notsign.example.org",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "https://example.org",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "https://sign.example.org:443",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "http://sign.example.org",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "https://sign.example.org/",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "https://SIGN.example.org",
+      "rpId": "sign.example.org",
+      "within": false
+    },
+    {
+      "origin": "https://sign.example.org.evil.example",
+      "rpId": "sign.example.org",
+      "within": false
+    }
+  ],
+  "assertions": [
+    {
+      "name": "a share grant's binding, signed by the owner's signing passkey",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "sign.example.org",
+        "origins": [
+          "https://sign.example.org"
+        ]
+      },
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+        "sig": "KD9nuCcwm0iM86fd4MPyhNB4I0mq7jh1f3v11sJJVANtT7eyB3DZvvshthV2wh2XmCvTfl1ZE-5TIPWgRrWXDQ"
+      },
+      "expected": {
+        "ok": true,
+        "flags": 5,
+        "signCount": 0
+      }
+    },
+    {
+      "name": "the same assertion presented as a limits/1 approval",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "sign.example.org",
+        "origins": [
+          "https://sign.example.org"
+        ]
+      },
+      "type": "limits/1",
+      "fields": {
+        "scope": "estate:estate-5d0f1a",
+        "digest": "sha256:e5b0504d1bdf0b2ec4e87c4dd9a953537ab63a570d543921d219d621c59ce301"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+        "sig": "KD9nuCcwm0iM86fd4MPyhNB4I0mq7jh1f3v11sJJVANtT7eyB3DZvvshthV2wh2XmCvTfl1ZE-5TIPWgRrWXDQ"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-challenge"
+      }
+    },
+    {
+      "name": "the same assertion presented for another grant",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "sign.example.org",
+        "origins": [
+          "https://sign.example.org"
+        ]
+      },
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#2",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+        "sig": "KD9nuCcwm0iM86fd4MPyhNB4I0mq7jh1f3v11sJJVANtT7eyB3DZvvshthV2wh2XmCvTfl1ZE-5TIPWgRrWXDQ"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-challenge"
+      }
+    },
+    {
+      "name": "a sign-in credential (RP ID example.org), its assertion otherwise valid",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "example.org",
+        "origins": [
+          "https://example.org"
+        ]
+      },
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "v6vDdDKViwYzYNOtZGHJxHNa5_jt1GWSpeDwFFKy5LUFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS5vcmcifQ",
+        "sig": "2Dvuz6EeF1SX73GYAvB7_zZpvUH9KLoANnR-9s_Qj6uTstmsRKKhpjJQoZMdf1ytILfEn4Pt9mXr50eTZA1QAA"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-rp"
+      }
+    },
+    {
+      "name": "a ceremony in a pinned origin outside the signing RP ID",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "sign.example.org",
+        "origins": [
+          "https://sign.example.org",
+          "https://app.example.org"
+        ]
+      },
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vYXBwLmV4YW1wbGUub3JnIn0",
+        "sig": "Bso5zzgIYBh-5-kV8Krc50qp-XRK5gcVXU3y3BDbItb0muL9p3pcklsf502oD5VbaMM0ASHRgWXtQ-H8bXknBw"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-origin"
+      }
+    },
+    {
+      "name": "fields the type does not admit",
+      "credential": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "OcuXW5w2VW4qc5B2yo5tY7DI_14AzhA9fSid4CKMyfo"
+        },
+        "rpId": "sign.example.org",
+        "origins": [
+          "https://sign.example.org"
+        ]
+      },
+      "type": "share-grant/1",
+      "fields": {
+        "estate": "estate-5d0f1a",
+        "grant": "g-share-7c21#1",
+        "jkt": "short",
+        "expiresAt": "2026-10-26T09:00:00Z"
+      },
+      "assertion": {
+        "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+        "alg": "EdDSA",
+        "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiT0FqVW5hZ3VvZWdXcXd6ckNkTTI4RnMyNEVPMkYtRFdKeUVZM0s3dWVEQSIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+        "sig": "KD9nuCcwm0iM86fd4MPyhNB4I0mq7jh1f3v11sJJVANtT7eyB3DZvvshthV2wh2XmCvTfl1ZE-5TIPWgRrWXDQ"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    }
+  ]
+}

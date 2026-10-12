@@ -1,0 +1,49 @@
+{
+  "description": "One leaseId issued twice (FAC-SEM-090).",
+  "kind": "window-lease-division",
+  "expect": [
+    "FAC-SEM-090"
+  ],
+  "input": {
+    "limitUsd": "1000",
+    "leases": [
+      {
+        "type": "window-lease/1",
+        "leaseId": "lease-m4c1e-2026-10-0000",
+        "sequence": 1,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-4c1e",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "400",
+        "unit": "USD",
+        "issuedAt": "2026-10-11T08:00:00Z",
+        "expiresAt": "2026-10-12T08:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "1nsau7JYALTLyss366i86eQVCnPvqp3DcTyj-MpnxpdoX8GMMRFGZ4F1x9Ky_EDbukHXOikkOTmOxONxP9g-Cg"
+      },
+      {
+        "type": "window-lease/1",
+        "leaseId": "lease-m4c1e-2026-10-0000",
+        "sequence": 2,
+        "estate": "estate-5d0f1a",
+        "estateRevision": 1,
+        "machine": "m-4c1e",
+        "scope": "estate",
+        "window": "month",
+        "period": "2026-10",
+        "amount": "1",
+        "unit": "USD",
+        "issuedAt": "2026-10-11T09:00:00Z",
+        "expiresAt": "2026-10-12T06:00:00Z",
+        "alg": "EdDSA",
+        "kid": "hub-m-4c1e-1",
+        "sig": "-LUNjW0v2j9cLSBRhLbjmfg_hgGU72pi8OfNVINv9LPiRqMS9BaSInInFkAHKxKXoDCB3KwEyWWR-WuSget_Cg"
+      }
+    ],
+    "reports": []
+  }
+}
