@@ -147,7 +147,8 @@ function serviceClaims(value: JsonObject): Finding[] {
     const key = serviceKey(descriptor);
     // DEC-0019: a port is a claim on THIS computer, so only local placements claim one. A remote
     // origin's port belongs to another host and collides with nothing here.
-    if (descriptor.placement !== "remote") {
+    // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it claims no port.
+    if (descriptor.placement !== "remote" && descriptor.origin !== undefined) {
       const port = /:(\d+)$/.exec(String(descriptor.origin))?.[1] ?? "";
       const holder = byPort.get(port);
       if (holder !== undefined && holder !== key) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}/origin`, message: `port ${port} is claimed by both ${holder} and ${key}` });

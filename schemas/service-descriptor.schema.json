@@ -8,7 +8,6 @@
     "id",
     "instance",
     "name",
-    "origin",
     "auth",
     "lifecycle",
     "installedAt",
@@ -163,9 +162,14 @@
             "systemd",
             "task-scheduler",
             "node",
+            "person",
             "none"
           ],
-          "description": "The one supervisor (DEC-0032, DEC-0057, DEC-0061): launchd (label, plist), systemd (unit), the Task Scheduler (task), Project Observatory's node, which supervises the service as its child and keeps no supervisor file here (no label, plist, unit or task), or none."
+          "description": "The one supervisor (DEC-0032, DEC-0057, DEC-0061): launchd (label, plist), systemd (unit), the Task Scheduler (task), Project Observatory's node, which supervises the service as its child and keeps no supervisor file here (no label, plist, unit or task), or none. person (DEC-0069): an app a person installs and starts, with no supervisor; its descriptor says it is installed, never that it runs."
+        },
+        "app": {
+          "$ref": "service-common.schema.json#/$defs/localPath",
+          "description": "DEC-0069, for manager person only: the installed app (a bundle or an executable). A reader that finds it gone treats the descriptor as stale."
         },
         "label": {
           "type": "string",
@@ -224,13 +228,14 @@
                 "enum": [
                   "systemd",
                   "task-scheduler",
-                  "node"
+                  "node",
+                  "person"
                 ]
               }
             }
           },
           "then": {
-            "description": "DEC-0057, DEC-0061: a descriptor names one supervisor, so launchd's label and plist are refused beside systemd, the Task Scheduler and the node.",
+            "description": "DEC-0057, DEC-0061: a descriptor names one supervisor, so launchd's label and plist are refused beside systemd, the Task Scheduler, the node and a person (DEC-0069).",
             "properties": {
               "label": false,
               "plist": false
@@ -288,6 +293,31 @@
               "properties": {
                 "task": true
               }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "manager"
+            ],
+            "properties": {
+              "manager": {
+                "const": "person"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "app"
+            ],
+            "properties": {
+              "app": true
+            }
+          },
+          "else": {
+            "properties": {
+              "app": false
             }
           }
         }
@@ -546,6 +576,51 @@
             }
           }
         }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "lifecycle"
+        ],
+        "properties": {
+          "lifecycle": {
+            "type": "object",
+            "required": [
+              "manager"
+            ],
+            "properties": {
+              "manager": {
+                "const": "person"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "description": "DEC-0069: an app's descriptor names who installed it as a person, with the installer's or the app's version in tool; its origin is optional, since a live origin is in the app's own liveness file.",
+        "properties": {
+          "installedBy": {
+            "type": "object",
+            "required": [
+              "by",
+              "role",
+              "tool"
+            ],
+            "properties": {
+              "by": {
+                "const": "person"
+              },
+              "role": true,
+              "tool": true
+            }
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "origin"
+        ]
       }
     }
   ]
