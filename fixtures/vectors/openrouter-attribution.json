@@ -451,6 +451,231 @@
         "headers": {},
         "none": "invalid-setting"
       }
+    },
+    {
+      "name": "default-port",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai:443/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      },
+      "note": "WHATWG URL parsing drops the default port, so :443 is the same origin"
+    },
+    {
+      "name": "trailing-dot",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai./api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      },
+      "note": "a fully qualified name with its root dot is another host string"
+    },
+    {
+      "name": "backslash-form",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai\\@evil.example/",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      },
+      "note": "WHATWG reads the backslash as a path separator, so the host is openrouter.ai; an RFC 3986 parser reads another host, and a port follows WHATWG"
+    },
+    {
+      "name": "no-slashes",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https:openrouter.ai/api",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/observatory/",
+          "X-OpenRouter-Title": "Project Observatory",
+          "X-OpenRouter-Categories": "programming-app,cli-agent"
+        }
+      },
+      "note": "WHATWG parses a special scheme without slashes as that host; a port follows WHATWG"
+    },
+    {
+      "name": "user-set-referer-header",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "Referer": "https://example.org/"
+        }
+      },
+      "expect": {
+        "headers": {},
+        "none": "user-set"
+      }
+    },
+    {
+      "name": "user-set-title",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "X-OpenRouter-Title": "Mine"
+        }
+      },
+      "expect": {
+        "headers": {},
+        "none": "user-set"
+      }
+    },
+    {
+      "name": "user-set-categories",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true,
+        "headers": {
+          "x-openrouter-categories": "game"
+        }
+      },
+      "expect": {
+        "headers": {},
+        "none": "user-set"
+      }
+    },
+    {
+      "name": "password-only-userinfo",
+      "setting": {
+        "product": "observatory",
+        "title": "Project Observatory",
+        "categories": [
+          "programming-app",
+          "cli-agent"
+        ]
+      },
+      "request": {
+        "url": "https://:pw@openrouter.ai/api/v1",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "not-openrouter"
+      }
+    },
+    {
+      "name": "empty-categories",
+      "setting": {
+        "product": "fabric",
+        "title": "Fabric",
+        "categories": []
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/fabric/",
+          "X-OpenRouter-Title": "Fabric"
+        }
+      },
+      "note": "an empty list sends no categories header"
+    },
+    {
+      "name": "slug-63",
+      "setting": {
+        "product": "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "title": "T"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {
+          "HTTP-Referer": "https://passioncode.ai/abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/",
+          "X-OpenRouter-Title": "T"
+        }
+      }
+    },
+    {
+      "name": "slug-64",
+      "setting": {
+        "product": "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "title": "T"
+      },
+      "request": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "originated": true
+      },
+      "expect": {
+        "headers": {},
+        "none": "invalid-setting"
+      }
     }
   ]
 }

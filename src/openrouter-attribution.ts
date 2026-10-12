@@ -69,7 +69,8 @@ function isOpenRouter(url: string): boolean {
  * default); a setting `FAC-SEM-098` refuses; a request not to `https://openrouter.ai`; traffic the product forwards for
  * someone else; a request that already carries an attribution header (the user's own setting wins, whole).
  */
-export function attributionHeaders(setting: unknown, request: AttributionRequest): AttributionAnswer {
+export function attributionHeaders(setting: unknown, given: AttributionRequest): AttributionAnswer {
+  const request: Partial<AttributionRequest> = isObject(given) ? given : {};
   if (setting === undefined || setting === null) return { headers: {}, none: "no-setting" };
   if (attributionSettingFindings(setting).length) return { headers: {}, none: "invalid-setting" };
   if (typeof request.url !== "string" || !isOpenRouter(request.url)) return { headers: {}, none: "not-openrouter" };

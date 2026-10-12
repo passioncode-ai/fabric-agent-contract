@@ -74,7 +74,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   const findings: Finding[] = [];
 
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {
-    findings.push({ code: "FAC-SEM-001", instancePath: "/notVerified", message: "succeeded result cannot retain unverified required claims" });
+    findings.push({ code: "FAC-SEM-001", instancePath: "/notVerified", message: "a succeeded result lists no claim in notVerified" });
   }
   if (kind === "execution-bundle") {
     const pool = isObject(value.pool) && Array.isArray(value.pool.accounts) ? value.pool.accounts : [];

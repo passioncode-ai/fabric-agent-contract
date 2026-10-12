@@ -13,6 +13,13 @@ const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRule
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
 describe("FAC-SEM-093: a result's claims and proof", () => {
+  it("refuses one claim id on two done claims, and names each done item by its own index", () => {
+    const result = read("result.json");
+    const twice = { ...result, done: [...result.done, { ...result.done[0], statement: "another statement" }] };
+    expect(paths("result", twice)).toEqual([`FAC-SEM-093 /done/${result.done.length}/claimId`]);
+    const shifted = { ...result, outcome: "partial", proof: [], done: [{ statement: "no id" }, result.done[0]] };
+    expect(paths("result", shifted)).toEqual(["FAC-SEM-093 /done/1"]);
+  });
   const result = read("result.json");
   it("passes a result whose every done claim is proven", () => expect(codes("result", result)).toEqual([]));
   it("refuses a proof that names a claim the result does not report as done", () => {
@@ -85,6 +92,8 @@ describe("FAC-SEM-097: a standing grant's window", () => {
     expect(paths("grant-window", { ...grant, expiresAt: grant.startsAt })).toEqual(["FAC-SEM-097 /expiresAt"]);
     expect(paths("grant-window", { ...grant, startsAt: "2026-02-30T00:00:00Z" })).toEqual(["FAC-SEM-097 /startsAt"]);
     expect(paths("grant-window", { grant, at: grant.expiresAt })).toEqual(["FAC-SEM-097 /grant/state"]);
+    expect(paths("grant-window", { grant, at: grant.startsAt })).toEqual([]);
+    expect(paths("grant-window", { ...grant, expiresAt: "2026-13-01T00:00:00Z" })).toEqual(["FAC-SEM-097 /expiresAt"]);
     expect(paths("grant-window", { grant, at: "2026-08-26T10:07:59Z" })).toEqual(["FAC-SEM-097 /grant/state"]);
     expect(paths("grant-window", { grant, at: "yesterday" })).toEqual(["FAC-SEM-097 /at"]);
     expect(codes("grant-window", { grant: { ...grant, state: "expired" }, at: "2027-01-01T00:00:00Z" })).toEqual([]);

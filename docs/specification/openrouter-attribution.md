@@ -42,8 +42,9 @@ For a request that passes every rule below, a product adds exactly these headers
 1. `no-setting`: there is no setting.
 2. `invalid-setting`: `FAC-SEM-098` refuses the setting.
 3. `not-openrouter`: the request does not go to `https://openrouter.ai` exactly. Another host, a subdomain, a lookalike
-   such as `openrouter.ai.example.org`, plain `http`, an explicit port or user information in the URL all fail. The
-   host is compared after WHATWG URL parsing, which lower-cases it.
+   such as `openrouter.ai.example.org`, a trailing root dot, plain `http`, a non-default port or user information in the
+   URL all fail. The host is compared after WHATWG URL parsing, which lower-cases it and drops the default port `:443`;
+   a port follows WHATWG for the forms RFC 3986 reads differently (a backslash, a missing `//`), as the vectors show.
 4. `forwarded`: the product did not originate the request. A request it forwards for someone else's agent (a router, a
    proxy, an agent a user built with the adapter) keeps that agent's attribution; crediting it to the product would
    misstate who used the model.

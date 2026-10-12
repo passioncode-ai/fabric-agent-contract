@@ -12,11 +12,18 @@ const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.fil
 const isString = (value: unknown): value is string => typeof value === "string";
 const revisionOf = (ref: unknown): number | undefined => (isObject(ref) && Number.isSafeInteger(ref.revision) ? (ref.revision as number) : undefined);
 
-/** FAC-SEM-093: every proof names done claims, and every done claim without proof is listed in `notVerified` by its id. */
+/**
+ * FAC-SEM-093: each done claim has its own id, every proof names done claims, and every done claim without proof is
+ * listed in `notVerified` by its id. A finding names the done item's own index.
+ */
 function resultIntegrity(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
-  const done = list(value.done).map((item) => item.claimId).filter(isString);
-  const doneIds = new Set(done);
+  const done = (Array.isArray(value.done) ? value.done : []).map((item: unknown, index: number) => ({ claimId: isObject(item) ? item.claimId : undefined, index })).filter((item): item is { claimId: string; index: number } => isString(item.claimId));
+  const doneIds = new Set<string>();
+  done.forEach(({ claimId, index }) => {
+    if (doneIds.has(claimId)) findings.push({ code: "FAC-SEM-093", instancePath: `/done/${index}/claimId`, message: `claim id ${claimId} names two done claims; each done claim has its own id` });
+    doneIds.add(claimId);
+  });
   const proven = new Set<string>();
   list(value.proof).forEach((proof, p) => {
     (Array.isArray(proof.claimIds) ? proof.claimIds : []).forEach((claimId: unknown, c: number) => {
@@ -26,7 +33,10 @@ function resultIntegrity(value: JsonObject): Finding[] {
     });
   });
   const listed = new Set(list(value.notVerified).map((item) => item.claim).filter(isString));
-  done.forEach((claimId, index) => {
+  const reported = new Set<string>();
+  done.forEach(({ claimId, index }) => {
+    if (reported.has(claimId)) return;
+    reported.add(claimId);
     if (!proven.has(claimId) && !listed.has(claimId)) {
       findings.push({ code: "FAC-SEM-093", instancePath: `/done/${index}`, message: `claim ${claimId} has no proof and is not listed in notVerified by its id` });
     }
@@ -70,7 +80,8 @@ function grantWindow(value: JsonObject): Finding[] {
   const prefix = isObject(value.grant) ? "/grant" : "";
   const startsAt = strictTime(grant.startsAt);
   const expiresAt = strictTime(grant.expiresAt);
-  if (Number.isNaN(startsAt) || Number.isNaN(expiresAt)) return [{ code: "FAC-SEM-097", instancePath: `${prefix}/startsAt`, message: "startsAt and expiresAt are RFC 3339 date-times with an offset" }];
+  if (Number.isNaN(startsAt)) return [{ code: "FAC-SEM-097", instancePath: `${prefix}/startsAt`, message: "startsAt is an RFC 3339 date-time with an offset" }];
+  if (Number.isNaN(expiresAt)) return [{ code: "FAC-SEM-097", instancePath: `${prefix}/expiresAt`, message: "expiresAt is an RFC 3339 date-time with an offset" }];
   if (expiresAt <= startsAt) return [{ code: "FAC-SEM-097", instancePath: `${prefix}/expiresAt`, message: "a grant expires after it starts" }];
   if (value.at !== undefined && grant.state === "active") {
     const at = strictTime(value.at);
