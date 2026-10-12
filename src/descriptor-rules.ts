@@ -113,7 +113,9 @@ function runnerCheck(value: JsonObject): Finding[] {
   const kind = runner.kind;
   if (kind !== undefined) {
     if (typeof kind !== "string" || !RUNNER_KIND.test(kind)) add("/descriptor/runner/kind", "the runner kind is not a runner kind's name");
-    else if (!catalogue.has(kind)) add("/descriptor/runner/kind", `runner kind ${kind} is not in the runner catalogue`);
+    // The value is never echoed: a provider key can match the kind pattern (lower case, digits, dashes), and FAC-SEM-086
+    // names only the place of a credential-shaped value.
+    else if (!catalogue.has(kind)) add("/descriptor/runner/kind", "the runner kind is not in the runner catalogue");
   }
   const declared = runner.credentialKind;
   if (typeof declared !== "string" || !CREDENTIAL_KINDS.includes(declared)) {

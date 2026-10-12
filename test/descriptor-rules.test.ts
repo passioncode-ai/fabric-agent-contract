@@ -99,6 +99,13 @@ describe("FAC-SEM-087: what a node placing a service checks of its runner", () =
     for (const runner of SUBSCRIPTION_RUNNERS.keys()) expect(check({ ...own, runner: { kind: runner, credentialKind: "subscription" } }, "subscription"), runner).toEqual([]);
   });
 
+  it("never echoes a runner kind missing from the catalogue, since a provider key can match the kind pattern", () => {
+    const key = ["sk", "abcdefghijklmnopqrstuvwx12"].join("-");
+    const findings = evaluateSemanticRules("service-runner", { descriptor: { ...peer, runner: { kind: key, credentialKind: "key" } }, catalogue });
+    expect(findings.length).toBeGreaterThan(0);
+    expect(JSON.stringify(findings)).not.toContain(key);
+  });
+
   it("refuses a kind that is not a runner kind's name, without echoing it", () => {
     const findings = evaluateSemanticRules("service-runner", { descriptor: { ...peer, runner: { kind: fake, credentialKind: "key" } }, catalogue });
     expect(findings.map((finding) => finding.instancePath)).toEqual(["/descriptor/runner/kind"]);
@@ -201,11 +208,22 @@ describe("peerRefusal and FAC-SEM-088: the host's check before it routes a reque
 
 describe("the descriptor schema of DEC-0061: every refusal has a fixture that kills it", () => {
   const D = "service-descriptor.schema.json";
+  /** A pattern edit that must change the pattern: a no-op edit would pass as a killed mutant. */
+  const edit = (pattern: string, from: string, to: string): string => {
+    if (!pattern.includes(from)) throw new Error(`the mutant's edit does not apply: ${from}`);
+    return pattern.replace(from, to);
+  };
   const MUTANTS: Array<Mutant & { killer: string; schema?: string }> = [
     { name: "label and plist beside the node", killer: "service-descriptor-node-with-label", mutate: (s) => { s.properties.lifecycle.allOf[1].if.properties.manager.enum = ["systemd", "task-scheduler"]; } },
     { name: "an endpoint of any shape", killer: "service-descriptor-peer-endpoint-ip", mutate: (s) => { delete s.properties.peer.properties.endpoint.pattern; } },
-    { name: "an http endpoint", killer: "service-descriptor-peer-endpoint-http", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = s.properties.peer.properties.endpoint.pattern.replace("^https://", "^https?://"); } },
-    { name: "an endpoint with a query", killer: "service-descriptor-peer-endpoint-query", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = s.properties.peer.properties.endpoint.pattern.replace("%/-]*)?$", "%/?=-]*)?$"); } },
+    { name: "an http endpoint", killer: "service-descriptor-peer-endpoint-http", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = edit(s.properties.peer.properties.endpoint.pattern, "^https://", "^https?://"); } },
+    { name: "an endpoint with a query", killer: "service-descriptor-peer-endpoint-query", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = edit(s.properties.peer.properties.endpoint.pattern, "%/-]*)?$", "%/?=-]*)?$"); } },
+    { name: "an endpoint with userinfo", killer: "service-descriptor-peer-endpoint-userinfo", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = edit(s.properties.peer.properties.endpoint.pattern, "^https://(", "^https://([^@/]+@)?("); } },
+    { name: "an endpoint with a fragment", killer: "service-descriptor-peer-endpoint-fragment", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = edit(s.properties.peer.properties.endpoint.pattern, "%/-]*)?$", "%/-]*)?(#.*)?$"); } },
+    { name: "a port of any size", killer: "service-descriptor-peer-endpoint-port", mutate: (s) => { s.properties.peer.properties.endpoint.pattern = edit(s.properties.peer.properties.endpoint.pattern, "(:([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?", "(:[0-9]+)?"); } },
+    { name: "a peer without its endpoint", killer: "service-descriptor-peer-without-endpoint", mutate: (s) => { s.properties.peer.required = ["custody", "residency", "maxDataClass"]; } },
+    { name: "a peer without its custody", killer: "service-descriptor-peer-without-custody", mutate: (s) => { s.properties.peer.required = ["endpoint", "residency", "maxDataClass"]; } },
+    { name: "a peer without its residency", killer: "service-descriptor-peer-without-residency", mutate: (s) => { s.properties.peer.required = ["endpoint", "custody", "maxDataClass"]; } },
     { name: "any custody", killer: "service-descriptor-peer-custody-unknown", mutate: (s) => { s.properties.peer.properties.custody = { type: "string" }; } },
     { name: "residency of any shape", killer: "service-descriptor-peer-residency-lowercase", mutate: (s) => { delete s.properties.peer.properties.residency.items.pattern; } },
     { name: "residency admits a user-assigned code", killer: "service-descriptor-peer-residency-user-assigned", mutate: (s) => { s.properties.peer.properties.residency.items.pattern = "^[A-Z]{2}$"; } },

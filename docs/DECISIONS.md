@@ -3152,6 +3152,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   [source ledger](evidence/sources.md). Board-waves inventory V4-DESCRIPTOR; packet P4-02; DEC-0057's *Not decided here*.
   DEC-0061 and `FAC-SEM-085`…`FAC-SEM-088` were reserved by git CAS (`agent_sync.py reserve --key
   w4-p4-02-descriptor-20261012 DEC`, `--key w4-p4-02-sem-{peer-endpoint,credential-value,runner-check,peer-request}-20261012
-  SEM`); this file, `conformance.md` and `backlog.md` travel as `docs/handoffs/2026-10-12-w4-p4-02-registers.patch`,
-  which the owner session applies under its leases when it merges, by the wave's arrangement (the agent-sync guard
-  refuses a commit of a guarded file by a run that holds no lease); the record plane is `fs`.
+  SEM`); this file, `conformance.md` and `backlog.md` travelled as a patch the owner session applied under its leases
+  (the agent-sync guard refuses a commit of a guarded file by a run that holds no lease); the record plane is `fs`.
