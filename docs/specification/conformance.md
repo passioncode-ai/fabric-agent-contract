@@ -82,7 +82,7 @@ above U+FFFF, fractions — so a document never says only "canonical JSON".
 
 | Form | Function | Key order | Separators | Numbers | Strings | Refuses |
 |---|---|---|---|---|---|---|
-| the settings form (DEC-0025) | `settingsCanonicalJson` | by Unicode code point, at every level | `", "` between members and elements, `": "` after a key | integers within ±(2^53 − 1), in decimal | `"`, `\` and the control characters escaped as `JSON.stringify` escapes them; every other character as itself | a fraction, an unsafe or non-finite number, `undefined`, a function, a bigint. It does not check prototypes, and writes a lone surrogate as `\udxxx` where Python cannot encode one, so a backup reader refuses one in a cell (`FAC-SEM-035`) |
+| the settings form (DEC-0025) | `settingsCanonicalJson` | by Unicode code point, at every level | `", "` between members and elements, `": "` after a key | integers within ±(2^53 − 1), in decimal | `"`, `\` and the control characters escaped as `JSON.stringify` escapes them; every other character as itself | a fraction, an unsafe or non-finite number, `undefined`, a function, a bigint, and a lone surrogate in any string or key, which Python cannot encode (CT-25, DEC-0052; a rule that derives from the form refuses its input rather than throw). It does not check prototypes |
 | RFC 8785, JCS (DEC-0039) | `rfc8785` | by UTF-16 code unit, at every level | none | ECMAScript form: `1e+30`, `0.002`, `-0` as `0` | as `JSON.stringify` escapes them | a non-finite number, a lone surrogate, a value that is not plain JSON: a date, a map, a class instance, an `undefined` member |
 
 The settings form equals Python's `json.dumps(value, sort_keys=True, ensure_ascii=False)`; RFC 8785 is pinned in

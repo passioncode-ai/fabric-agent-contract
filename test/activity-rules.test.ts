@@ -329,3 +329,13 @@ describe("F-B-107: a clause no rule checks is not attributed to one", () => {
     expect(readFileSync(path.join(projectRoot(), "src/activity-rules.ts"), "utf8")).not.toMatch(/["']mixed["']/);
   });
 });
+
+// CT-25 (DEC-0052): the settings form refuses a lone surrogate, and the activity rule refuses the event rather than throw.
+describe("CT-25: an event whose sourceKey has no canonical form is refused, not thrown", () => {
+  it("flags the sourceKey of a usage line with a lone surrogate", () => {
+    const event = load("positive/telemetry-event-usage.json");
+    event.sourceKey = "req\ud800";
+    expect(() => evaluateSemanticRules("telemetry-event", event)).not.toThrow();
+    expect(paths("telemetry-event", event)).toContain("FAC-SEM-039 /sourceKey");
+  });
+});

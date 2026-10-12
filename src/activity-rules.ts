@@ -221,8 +221,11 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
     if (num(d.dropped.events) !== size) flag("/data/dropped/events", `${String(d.dropped.events)} dropped events for ranges that hold ${size}`);
     if (merged.some(([, to]) => to >= num(event.seq))) flag("/data/dropped/ranges", "an overflow names only seqs assigned before its own");
   }
-  if (typeof event.sourceKey === "string" && typeof event.source === "string" && event.eventId !== activityEventId(event.source, event.sourceKey)) {
-    flag("/eventId", "an event that names its sourceKey carries the derived id, so a re-read of the source yields the same eventId");
+  if (typeof event.sourceKey === "string" && typeof event.source === "string") {
+    // CT-25 (DEC-0052): the settings form refuses a lone surrogate, so the derivation is refused, never thrown.
+    let derived: string | null = null;
+    try { derived = activityEventId(event.source, event.sourceKey); } catch { flag("/sourceKey", "a source or sourceKey with a lone surrogate has no canonical form, so no eventId derives from it"); }
+    if (derived !== null && event.eventId !== derived) flag("/eventId", "an event that names its sourceKey carries the derived id, so a re-read of the source yields the same eventId");
   }
   return findings;
 }
