@@ -26,4 +26,4 @@ killed by a null `installedBy` vector).
 
 - Merges after #70, #71 and #72; registers rebased then, under this run's leases. Tell Fabric's session the DEC and
   the merge commit to pin (CO-263 stays open until then).
-- **Next task:** P6-07, an optional `data` object on service feed events (nicegramappbot's request).
+- **Next task:** P6-07, an optional `data` object on service feed events (a consumer service's request).
