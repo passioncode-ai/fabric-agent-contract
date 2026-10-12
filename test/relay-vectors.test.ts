@@ -77,7 +77,7 @@ describe("the runner reads what a case leaves out as empty", () => {
     const out = relayVectorResults({
       admit: { cases: [{ ...admitCase, context }] },
       replay: { cases: [{ name: "no steps" }] },
-      admissionSet: { cases: [{ name: "no extra", held: (relay.admissionSet.cases as Json[])[0].held, at: "2026-10-13T00:00:00Z" }] },
+      admissionSet: { cases: [{ name: "no extra", held: (relay.admissionSet.cases as Json[])[0]!.held, at: "2026-10-13T00:00:00Z" }] },
       blobRequest: { relay: "https://relay.example", digest: `sha256:${"ab".repeat(32)}`, now: "2026-10-12T12:00:30Z", cases: [{ name: "no header", method: "GET", header: null }] }
     });
     // The runner's group order: admissionSet, admit, replay, blobRequest.

@@ -2407,6 +2407,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   runs the signing ceremony and certifies hub keys (backlog CT-19); Project Observatory's node verifies each revision
   before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
   (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
+- **Annotated (2026-10-12):** ER-10's window admits a revision from 60 s before `issuedAt` (the clock skew every
+  relay time allows, `CLOCK_SKEW_SECONDS` in `src/rfc3339.ts`), not from `issuedAt` itself — DEC-0066. This text is
+  unchanged; `verifyEstateRecord`, estate-record.md and `fixtures/vectors/estate-record.json` carry the skew.
 - **Implements:** the first organization server's target architecture v4 (commit `9c6a780`) §12 row "`estate-record/1`:
   machines (device key, hub `kid` certificate), packages per machine, secret placements, share grants, revocations,
   revision; passkey-signed", with §3's noun, §6 Paths 2, 6 and 7, and §7's estate authority and freshness. Closes
@@ -2509,10 +2512,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     nothing of it is on Fabric's main yet;
   - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
     source of admission and keeps the presence rule (item 5).
-- **Annotated (2026-10-12, CON-022):** item 7's open order and relay.md's are one order in two numberings: relay.md lists
-  eleven steps, its 9 and 10 (the life, then `now < exp`) being item 7's 9, and its 11 item 7's 10. Step 4's refusals are
-  `unsupported-alg` for a sender key that is not P-256, an Ed25519 key included, and `bad-key`; relay.md's step 4 now
-  names them. *Consequences / affects* also cover `test/relay-request.test.ts` (#60) and `src/webauthn.ts` (#59,
+- **Annotated (2026-10-12, CON-022):** this describes relay.md as it stood before DEC-0066. Item 7's open order and
+  relay.md's were one order in two numberings: relay.md listed eleven steps, its 9 and 10 (the life, then `now < exp`)
+  being item 7's 9, and its 11 item 7's 10. (DEC-0066 adds `replayed`/`sequence-reused` as relay.md's step 8, so relay.md
+  now lists twelve: its 1–7 are item 7's 1–7, its 9–11 item 7's 8–9, its 12 item 7's 10.) Step 4's refusals are
+  `unsupported-alg` for an Ed25519 sender key and `bad-key` for a key the record does not list, any other key that is
+  not a valid P-256 key and an encapsulated key that fails SEC 1, as `openEnvelope` answers; relay.md's step 4 now names
+  them. *Consequences / affects* also cover `test/relay-request.test.ts` (#60) and `src/webauthn.ts` (#59,
   `ef7573a`, the JWK key form).
 - **Amended (2026-10-12) by DEC-0066:** items 2, 3, 4, 5, 7, 8 and 9 — low-S and strict instants, the close-code table
   and frames, one `unauthenticated` until the signer is proven with the estate compared inside `admit`, revalidation of
@@ -3071,6 +3077,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter repins and holds both
   kits to `fixtures/vectors/hub-key.json` (backlog CT-18); Fabric's delegation verifier and its key rotation follow DL-14
   (CT-19); Project Observatory's node, as a delegation callee, reads the revision it applied and passes its mark (CT-20).
+- **Annotated (2026-10-12):** DL-14's window is the estate record's: `hubKeyCertified` certifies from 60 s before
+  `issuedAt` (`CLOCK_SKEW_SECONDS`), so a revision `verifyEstateRecord` admits never has its hub key refused
+  `estate-outside-window` — DEC-0066. delegation.md's row 4 and `fixtures/vectors/hub-key.json` say so.
 - **Amends:** DEC-0055 item 4's last sentence ("a delegation verifier that reads the estate record trusts a `kid` only
   while a current revision certifies it") and DEC-0039's verifier (DL-13, DL-14, DL-15, DL-19), additively except where
   *Compatibility* says. Closes DL-HUBKEY (board run N18, packet P4-07).
@@ -3631,8 +3640,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (its RP, A-3…A-7, B-1, C-1, D-1, D-2, H-1, H-2; CT-33); Project Observatory's node seals with a sequence, keeps the
   mark with its vault and checks replays (CT-34); every relay client signs low-S.
 - **Amends:** DEC-0047 items 2, 3, 4, 5, 7, 8 and 9, in place: nothing is deployed (the hosted relay's RLY-05 is
-  open, and no envelope exists outside tests). Folds in DEC-0047's 2026-10-12 annotation of the blob request. Closes the
-  relay audit's CON-001…CON-016, CON-019…CON-022, RLY-023, RLY-024, PLN-090…PLN-092 (board RELAY-AUDIT-1, node N19).
+  open, and no envelope exists outside tests). Folds in DEC-0047's 2026-10-12 annotation of the blob request. Also
+  amends the window of DEC-0055 (ER-10) and DEC-0060 (DL-14), each annotated. Closes the relay audit's CON-001…CON-017,
+  CON-019…CON-022, RLY-023, RLY-024, PLN-090…PLN-092 (board RELAY-AUDIT-1, node N19); CON-018 was closed before by #64
+  (DEC-0054), and CON-023 (organization relays) waits on Fabric D8 (*Not decided here*).
 - **Decision:** in [relay](specification/relay.md) unless named otherwise —
   1. **Keys and times** (item 2). A relay-family signature (`relay-auth/1`, `relay-blob/1`, a message body, an
      envelope) is low-S, `s ≤ n/2`, and `verifyEs256` refuses `(r, n − s)`; signers use `signEs256` or `toLowS`
@@ -3640,10 +3651,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `(sender, agentRef, slot, envelopeSequence)` for an envelope, never the digest. `instant` keeps the relay's pattern
      (`Z`, upper-case `T`, at most nine fraction digits) and reads through `strictTime`, so a day its month lacks, hour 24
      and `:60` are refused; FAC-SEM-070 and `relayAdmissionSet` read times the same way. `CLOCK_SKEW_SECONDS` (60) lives
-     in `src/rfc3339.ts` and also allows an estate record's `issuedAt` to be 60 s ahead in `verifyEstateRecord` (the
-     owner's P3); DEC-0055's text stays as it was.
-  2. **Transport and frames** (item 3). `hello.relay` is https, or http on a loopback literal (127.0.0.0/8, `[::1]`),
-     never a name (`isRelayOrigin`, the schema's pattern; the owner's P9). `unknown-type` is a type not in
+     in `src/rfc3339.ts` and is the one skew for every signed time: an estate record's `issuedAt` may be 60 s ahead in
+     `verifyEstateRecord` (ER-10, the owner's P3), DL-14's `hubKeyCertified` holds the same window (DEC-0060), and
+     DEC-0054's `MAX_FUTURE_SECONDS` is the same constant; DEC-0055's and DEC-0060's texts stay as they were and carry a
+     dated annotation. A time is read to the millisecond.
+  2. **Transport and frames** (item 3). `hello.relay` is an origin and nothing more: https on a host name or a bracketed
+     IP literal, or http on a loopback literal (127.0.0.0/8, `[::1]`), never a name over http, with a port up to 65535
+     and no path or user information (`isRelayOrigin` and the schema's pattern are `RELAY_ORIGIN_PATTERN`; the owner's
+     P9). `bad-key` stays a relay error code only as reserved: no relay sends it. `unknown-type` is a type not in
      `FRAME_TYPES` or one a node never sends; `malformed` a known type that fails the schema or FAC-SEM-071. An answer
      carries `replyTo` (`error`, `accepted`, `pong`, `presence-result`, `delta`); `presence-query` gets one
      `presence-result {replyTo, presences, unknown}`; `error` may carry `retryAfter`; `welcome.limits` advertises the
@@ -3653,7 +3668,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **Admission** (item 4). `admit` checks the frame's own bytes first (protocol, `alg`, the times), then the nonce,
      then, as one step with one answer, the signed estate against the estate of the record the context admits from
      (`AuthContext.estate`), the kid's key in the set and the signature: any failure is `unauthenticated`, so a forged or
-     unknown signer learns nothing (the owner's position on CON-001). The estate is compared there and nowhere else, and
+     unknown signer learns nothing (the owner's position on CON-001). A relay MUST verify exactly one signature of equal
+     cost on every such path, under a fixed dummy key when it has no usable key, and apply low-S after it, so the work
+     tells nothing either (the adversarial round's F1). The estate is compared there and nowhere else, and
      relay.md forbids the estate id as an identifier a connection can see or that links one person's contexts (CX-22;
      multi-context admission is relay RLY-08). `relayAdmissionSet` leaves out every `#sig` key that could never verify
      (`excluded`), subtracts `extraRevocations` (verified delta entries), and answers `not-yet-valid` before the window.
@@ -3662,14 +3679,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   4. **Messages** (item 5). A recipient passes its own `#sig` kid as `to` (the parameter is renamed `expect`); `deliver`
      keeps no `to`. `checkReplay` keeps each accepted `(from, msgId)` until its signed `exp` (`replay`, a new
      `MessageRefusal`; after `exp`, `expired`). The JWS header is exactly `{alg, typ, kid}`, `kid` optional and the
-     signed `from`; anything else is `malformed` (the owner's P7). `rate-limited`, `mailbox-full`, `expired` and
+     signed `from`; anything else is `malformed` (the owner's P7). The header and payload are their own RFC 8785 bytes and
+     the payload carries exactly its seven members; every `malformed` comes before `unsupported-alg`. `rate-limited`, `mailbox-full`, `expired` and
      `internal` have their triggers, and relay.md lists every message refusal.
   5. **The envelope** (item 7). `envelopeSequence` (1 to 2^53 − 1) is required and signed. `OpenContext.lastOpened`
      returns the target's mark `{since, sequence, digest}`; after `placement-stale` a sequence below the mark of the
      current run, or a mark ahead of it, is `replayed`, and another envelope at the mark's sequence is
      `sequence-reused` (the owner's condition); an equal sequence passes only with the same digest. A successful open
      returns the mark, written with the secret in one transaction. A sealer keeps its last sequence per (agentRef,
-     slot), recovers at `max(last + 1, now_ms)` and never seals under a used sequence. Step 1 is `envelopeShape`,
+     slot), recovers at `max(last + 1, now_ms)` and never seals under a used sequence; `sealEnvelope` refuses a sequence
+     outside 1 to 2^53 − 1. Step 1 is `envelopeShape`,
      exactly the schema plus real instants, held equal to it by a parity test. One verifier (`verifyEs256`) and one
      signer (`signEs256`) serve the envelope.
   6. **Blobs** (item 8). The signer first: form, `alg`, shape, `iat`, then the signer's key and signature as one 401
@@ -3681,7 +3700,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   7. **Delta ingress** (item 9; the owner's P1, option a). An admitted hub machine sends `delta` and `heartbeat` frames
      on its own session; the relay accepts one only when it verifies under its held record by DEC-0054's rules (an
      estate key the record certifies as DL-14/DEC-0060 do, `applyDelta`, `acceptHeartbeat`, the sequence and `sha256`
-     chain unchanged), subtracts the revocations from its admission set and closes the revoked sessions.
+     chain unchanged), answers a refused page with `applyDelta`'s own problem code (`gap` included), keeps a forked
+     entry's revocations in force (RD-10), subtracts the revocations in force from its admission set and closes the
+     revoked sessions. revocation-delta.md's "SHOULD subtract" becomes this rule.
   8. **Shared vectors.** Every refusal of `admit`, `verifyMessageBody`/`checkReplay`, `verifyBlobRequest`/
      `decideBlobAccess` and `openEnvelope` is a case in `fixtures/vectors/relay.json` (groups `instant`, `relayOrigin`,
      `admissionSet`, `admit`, `messageBody`, `replay`, `blobRequest`) or `fixtures/vectors/secret-envelope.json`
@@ -3690,7 +3711,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      low-S), and a test holds the committed files equal to its output (the owner's P8); it also owns the estate-record
      cases at the `issuedAt` skew boundary.
 - **Why:**
-  - **The relay audit of 2026-10-12** (release iteration 1, dossiers AD, BC, E and FG) reproduced each item: a forged
+  - **The relay audit of 2026-10-12** (Project Observatory's release iteration 1; its canvas and dossiers AD, BC, E and
+    FG live in a private repository, so the shared vectors here are the public proof) reproduced each item: a forged
     PUT learned blob state (409); `admit` named `not-admitted` before the signature; `2026-02-30` rolled forward to
     2 March inside a valid window; `(r, n − s)` verified; a JWS with `crit` and a foreign `kid` verified; an old envelope
     re-opened after a rotation; envelopes the schema refuses opened; refusals existed only as TypeScript tests; open
@@ -3706,29 +3728,40 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Changes of answer: an unknown kid, an unusable admitted key and a forged blob signer answer 401/4401
   `unauthenticated` (were 403/4403 `not-admitted`, `bad-key`, `unsupported-alg`); a high-S signature is refused; a day
   that does not exist is refused; a held window not yet started is `not-yet-valid` (was `expired`); an estate record
-  60 s ahead verifies; an envelope without `envelopeSequence`, and a signature that is not 86 characters, are
-  `malformed`. API: `BlobRequestContext.stored` is gone (`decideBlobAccess`), `AuthContext.estate` and
+  60 s ahead verifies, and so does its hub key; an envelope without `envelopeSequence`, and a signature that is not 86
+  characters, are `malformed`; a message body whose header or payload is not its own RFC 8785 bytes or whose payload
+  has another member is `malformed`, and `malformed` now precedes `unsupported-alg`; a blob request header that has no
+  RFC 8785 form is 400 `malformed` (it threw); `hello.relay` with a path, user information or a port above 65535 is
+  refused. API: `BlobRequestContext.stored` is gone (`decideBlobAccess`), `AuthContext.estate` and
   `OpenContext.lastOpened` are required, `SealInput.envelopeSequence` is required, `openEnvelope`'s result carries
   `mark`. The vector files keep their legacy members; their values are regenerated. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/relay.md`, `docs/specification/estate-record.md` (ER-10's skew),
-    `docs/specification/conformance.md` (the estate-record row);
+    `docs/specification/conformance.md` (the estate-record row), `docs/specification/delegation.md` (DL-14 row 4),
+    `docs/specification/revocation-delta.md` (who adopts it);
   - schemas: `schemas/relay-frame.schema.json`, `schemas/secret-envelope.schema.json`;
   - code: `src/relay.ts`, `src/relay-rules.ts`, `src/p256.ts`, `src/secret-envelope.ts`, `src/rfc3339.ts`,
-    `src/estate-record-rules.ts`, `src/relay-vectors.ts` (new), `tools/vectors/relay-crypto.ts` (new);
+    `src/estate-record-rules.ts`, `src/hub-key-rules.ts`, `src/revocation-delta.ts` (`MAX_FUTURE_SECONDS`),
+    `src/relay-vectors.ts` (new, with a coverage floor in `vitest.config.ts`), `tools/vectors/relay-crypto.ts` (new);
   - vectors and fixtures: `fixtures/vectors/relay.json`, `fixtures/vectors/secret-envelope.json`,
-    `fixtures/vectors/estate-record.json`, `fixtures/positive/secret-envelope.json`,
+    `fixtures/vectors/estate-record.json`, `fixtures/vectors/hub-key.json`, `fixtures/positive/secret-envelope.json`,
     `fixtures/negative/secret-envelope-*.json`, `fixtures/semantic/relay-envelope-*.json`, `fixtures/catalogue.json`;
-  - tests: `test/relay-vectors.test.ts` (new), `test/worker-key-form.test.ts` (new), `test/relay.test.ts`,
+  - tests: `test/relay-vectors.test.ts` (new), `test/worker-key-form.test.ts` (new), `test/relay-constant-work.test.ts`
+    (new), `test/hub-key.test.ts`, `test/relay.test.ts`,
     `test/relay-request.test.ts`, `test/relay-rules.test.ts`, `test/secret-envelope.test.ts`, `test/p256.test.ts`,
     `test/estate-record.test.ts`; `tsconfig.json` covers `tools/`;
-  - docs: `docs/DOCMAP.md`, `docs/backlog.md` (CT-33), `docs/handoffs/2026-10-12-relay.md`, `docs/evidence/sources.md`
-    (RFC 6979), `CONTEXT.md`.
+  - docs: `docs/DOCMAP.md`, `docs/handoffs/2026-10-12-relay.md`, `docs/evidence/sources.md` (RFC 6979; RFC 6455's
+    1008, 1011 and 4403), `CONTEXT.md`, `README.md`;
+  - consumer rows in `docs/backlog.md`, each with a "DEC-0066:" clause: CT-18 (the adapter's estate ports), CT-19 (the
+    hub's delta frames), CT-20 and CT-33 (the relay's session wrapper), CT-34 (the node's sequence, mark, replay window,
+    own kid and low-S), CT-35 (Fabric's surfaces sign low-S).
 - **Not decided here:** grants for a second recipient set (409 stays); how a relay serves several contexts (relay
-  RLY-08, with Fabric D8); low-S for the contract's other ES256 users (DEC-0056 HTTP signatures, DEC-0060 delegation
+  RLY-08, with Fabric D8); organization relays and their admission source (CON-023, waiting on Fabric D8,
+  `org-authority/1`); low-S for the contract's other ES256 users (DEC-0056 HTTP signatures, DEC-0060 delegation
   keys); how a target tells a sealer that lost its state its mark; removing the legacy vector members.
 - **Source:** Project Observatory's release iteration 1 of 2026-10-12 (its canvas S10, S11, S15 and S16, dossiers AD
-  §3.2–3.6, BC §3.1 and §3.5, E, FG §3.8); the contract owner's positions (C1–C5) and answers P1–P10 of
+  §3.2–3.6, BC §3.1 and §3.5, E, FG §3.8 — private; the vectors in this change are the public proof); the owner's review
+  of #70 (three readings, rulings A–C, items 1–16) and an adversarial round (F1, F3–F8); the contract owner's positions (C1–C5) and answers P1–P10 of
   2026-10-12, relayed by the coordinator; RFC 6979, RFC 7515, RFC 8785, RFC 9180, SEC 1 v2. DEC-0066 was reserved by
   git CAS (`agent_sync.py reserve --key relay-audit-n19-20261012 DEC`); no rule code was reserved. This file,
   `docs/backlog.md` and `conformance.md` were edited under git leases of run `N19-relay-audit`; the record plane is

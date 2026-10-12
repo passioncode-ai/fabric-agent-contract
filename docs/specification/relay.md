@@ -57,8 +57,10 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   randomised, so the legitimate signer can always make another valid envelope of the same content.
 - **Times** are RFC 3339 UTC: `Z`, an upper-case `T`, at most nine fractional digits, on a day its month has (`instant`,
   through `strictTime`). `2026-02-30`, hour 24 and a leap second `:60` are refused, never rolled forward or compared. A
-  signed `iat` more than 60 s ahead of the verifier's clock is `not-yet-valid` (`CLOCK_SKEW_SECONDS`, the same skew the
-  estate record's `issuedAt` has, DEC-0066).
+  time is read to the millisecond: fraction digits past the third are dropped, so `00:01:00.000999999Z` is the instant
+  `00:01:00.000Z` (vectors `instant`, and `admit`'s "iat 60.000999999 s ahead"). A signed `iat` more than 60 s ahead of
+  the verifier's clock is `not-yet-valid` (`CLOCK_SKEW_SECONDS`, the same skew the estate record's `issuedAt`, a hub
+  key's window and a delta entry have, DEC-0066).
 
 ## Transport
 
@@ -67,9 +69,11 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
     `fabric-relay.v1`.
   - A relay that receives no matching subprotocol refuses the upgrade.
   - **No credential travels in the URL or in an HTTP header.**
-- **The relay's origin** (`hello.relay`, `isRelayOrigin`) is `https://…`, or — for a relay on the same machine — `http://`
-  on a loopback literal, 127.0.0.0/8 or `[::1]`, with an optional port and nothing after it. A name such as `localhost`
-  is refused: a name resolves somewhere a literal cannot (DEC-0066; vectors `relayOrigin`).
+- **The relay's origin** (`hello.relay`, `isRelayOrigin`, the schema's pattern `RELAY_ORIGIN_PATTERN`) is an origin and
+  nothing more: `https://` and a host name or a bracketed IP literal, or — for a relay on the same machine — `http://`
+  on a loopback literal, 127.0.0.0/8 or `[::1]`; either with an optional port up to 65535, and no path, user information
+  or anything after it. A name such as `localhost` is refused over http: a name resolves somewhere a literal cannot
+  (DEC-0066; vectors `relayOrigin`).
 - **Frames** are UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
   ([`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)).
   - Unknown members are ignored.
@@ -96,7 +100,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   | a node that keeps sending after `rate-limited` | `rate-limited` | 1008 |
   | a relay fault | `internal`, where the socket still allows it | 1011 |
 
-  4403 is only ever sent to a session whose signer was proven. Every other error leaves the connection open.
+  4403 is only ever sent to a session whose signer was proven. Every other error leaves the connection open. The code
+  `bad-key` is reserved: since DEC-0066 no relay sends it (an unusable admitted key is left out of the admission set,
+  and its request is `unauthenticated`), and it stays in the error codes only so a frame from an older relay validates.
 - **Blobs travel over HTTPS by digest**, never in frames (see [Blobs](#blobs)).
 
 ## Admission
@@ -113,7 +119,10 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
    - **one step, one answer:** the signed `estate` is the estate of the record the relay admits from, `kid` is in the
      admission set, and the signature verifies under that key. Any failure here — an unknown kid, a revoked one, a relay
      that holds no record, another estate, a bad or high-S signature — is `unauthenticated`. Until the signer is proven,
-     nothing the relay holds changes the answer (DEC-0066).
+     nothing the relay holds changes the answer (DEC-0066), **nor the work**: the relay MUST verify exactly one signature
+     of equal cost on every path past the frame's own bytes, under a fixed valid dummy key when it has no usable key for
+     the kid or the estate differs, and apply the low-S rule after that verification (`admit` and `verifyBlobRequest`
+     do; `test/relay-constant-work.test.ts` counts the verifications).
 
    Then it answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat, limits?}`.
    `deltaHead` has the shape of a device check-in's `records.revocationDelta` (DEC-0054's head), so a node passes it on
@@ -122,6 +131,12 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
    [Messages](#messages)). Otherwise it answers `error` with the refusal's code and closes 4401. The message is fixed per
    code; the reason (no record, expired, unverified, another estate) goes to the relay's log, never to the client.
 4. The relay attributes every later frame on the connection to the admitted `kid`, and to nothing a frame claims.
+
+**A reasonless 4401, seen from the client.** A node or a surface refused with `unauthenticated` and close 4401 learns
+no reason, by design. It tells the person, in this order: check that this machine is in the estate's current revision
+(not revoked, its device key the one the record lists) — the estate's owner sees that in the hub; then update the client,
+since a client that signs high-S or an old protocol is refused the same way. It retries no more often than its backoff,
+and never asks the person to re-enter a secret for it.
 
 **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
 machines and keys, minus the revocations of verified delta entries it applied (`extraRevocations`, see [Revocation and
@@ -193,9 +208,11 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   `{alg, typ, kid}`: `kid` is optional and, when present, the signed `from`.
   - A recipient (`verifyMessageBody`) checks the body against what it expects: `from` and `msgId` from the `deliver`
     frame, and `to` **its own `#sig` kid**, never a value a relay asserts. It refuses, by name and in this order:
-    `malformed` (not a three-part JWS; a header or payload that is not an object; another `typ` or payload `type`; a
-    header member other than `alg`, `typ` and `kid`, so `crit`, `b64`, `jwk`, `jku`, `x5u` and `x5c` included; a time
-    that is not an instant; a `from` that is not a string; a header `kid` that is not the signed `from`);
+    `malformed` (not a three-part JWS; a header or payload that is not an object; a header or payload whose bytes are not
+    its own RFC 8785 form, so pretty-printing and a duplicate member included; another `typ` or payload `type`; a header
+    member other than `alg`, `typ` and `kid`, so `crit`, `b64`, `jwk`, `jku`, `x5u` and `x5c` included; a payload whose
+    members are not exactly `type`, `from`, `to`, `msgId`, `iat`, `exp` and `payload`; a time that is not an instant; a
+    `from` that is not a string; a header `kid` that is not the signed `from`) — every `malformed` before anything else;
     `unsupported-alg` (another `alg`, or an Ed25519 sender); `unknown-sender`; `bad-key`; `bad-signature` (including
     high-S); `mismatch` (the signed `from`, `to` or `msgId` differs from what it expects); `not-yet-valid` (`iat` more
     than 60 s ahead); `lifetime-too-long` (`exp` not after `iat`, or more than 7 days after it); `expired`
@@ -261,8 +278,8 @@ A secret moves to a machine only where a placed package declares it
      to the schema by a parity test);
   2. `alg` is `ES256`;
   3. `recipient` is its own `#kem` key;
-  4. the sender's key is a P-256 key (`unsupported-alg` for one that is not, an Ed25519 key included) and it and the
-     encapsulated key pass SEC 1 (`bad-key`);
+  4. the sender's key is usable: an Ed25519 key is `unsupported-alg`; a key the record does not list, any other key that
+     is not a valid P-256 key, and an encapsulated key that fails SEC 1 are `bad-key`;
   5. the signature is 64 canonical bytes, low-S, and verifies;
   6. the latest estate-record revision this machine verified and applied places `(agentRef, slot)` on it from the
      sender's machine ([estate record](estate-record.md), DEC-0055);
@@ -371,7 +388,11 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   `hubKeyCertified` and DEC-0060 certify it, revoked neither by the record nor by an entry applied before
   (`estateSigner`) — applied through `applyDelta` and `acceptHeartbeat`, with the delta's sequence and `sha256` chain
   unchanged (the next sequence, `prev` its head). The relay never stores what does not verify and never rewrites a
-  page. A frame that does not verify is answered `malformed` and changes nothing.
+  page. A page `applyDelta` refuses is answered `error` with `applyDelta`'s own problem code in its message — `gap`
+  included, so the hub resends from the relay's head — and the relay applies exactly what DEC-0054 applies: a page that
+  forks the chain (`fork`) or breaks it (`broken-chain`) with correctly signed entries is not carried as the chain, but
+  the revocations of a forked entry stay in force (RD-10, `effectiveRevocations`) and leave the admission set like any
+  other.
 - **Catching up.** A node behind the head asks with `delta-query` `{fromSeq}`, its applied head's sequence plus one, and
   is answered with `delta` pages carrying `replyTo`, and an empty page at the head.
 - **Delay is detected; forgery is impossible.** A relay that withholds an entry is detected by the heartbeat: its head
