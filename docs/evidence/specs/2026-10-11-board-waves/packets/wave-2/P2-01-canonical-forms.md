@@ -39,7 +39,7 @@ Two implementations of the same document can therefore disagree on a digest or a
    - state the two-form register.
 
    Pick the DEC-0022 form by reading `project-comms.md` and its consumers' code (Fabric's board, read-only via
-   `git -C /Users/sshlg/DATA/fabric grep -n -i "idempotency" origin/main -- '*.ts'`). If a consumer already
+   `git -C <workspace>/fabric grep -n -i "idempotency" origin/main -- '*.ts'`). If a consumer already
    computes it, the decision follows the consumer and says so. *Compatibility*: additive if nobody computed it
    differently; otherwise name who must change.
 4. **Shared vectors, `fixtures/vectors/canonical.json`.** For each form: inputs and expected outputs — RFC 8785's

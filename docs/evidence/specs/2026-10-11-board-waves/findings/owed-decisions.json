@@ -217,7 +217,7 @@
       "only Fabric writes insights, rule proposals and rules (ADR-0109)",
       "free text passes FAC-SEM-037 and a secret scanner (fixtures with a planted path and key)",
       "explicitly drop the DEC-0023 reserve memory.learning.propose (fabric-agent-contract docs/DECISIONS.md:392, 425; schemas/memory-capability.schema.json:33; memory-and-learning.md:339)",
-      "keep out (PRIVATE): type modernization, OM* metrics, payload people counts and smallGroup (J3)"
+      "keep out (PRIVATE): type modernization, OM* metrics, payload persons counts and smallGroup (J3)"
     ],
     "depends_on": ["CON-OE-01"],
     "operator_answers": [
@@ -417,7 +417,7 @@
     "id": "J-ENV / AL-01 / AS-01c / access-log/1",
     "aliases": ["W0 seven decisions: J-ENV, AS-01c", "J-AGG open half"],
     "tracks": ["RM-22", "RM-23", "RM-26"],
-    "title": "Activity event envelope, receiver-built activity-summary/1 without people, access-log/1",
+    "title": "Activity event envelope, receiver-built activity-summary/1 without persons, access-log/1",
     "visibility": "OPEN",
     "must_define": ["delivered: session.interval, usage.line, envelope, x-<namespace>.<kind> extensions, stream (collector.id, epoch, seq), summary cells agent x skill x project x day x outcome with k >= 3, access log", "residual not scheduled in v2: the rest of the integration kind registry (session.started/ended, run.*, tool.used, skill.activated, skill.package_loaded, model.error, approval.*, manual.step, network kinds), the outcome/error-class vocabularies and identity fields org.id/node.id/workplace.id/agent.id/agent.version; DEC-0030 item 2 makes new core kinds additive; skillset.digest goes to CON-OE-03"],
     "depends_on": [],
@@ -457,19 +457,19 @@
       "person-work-aggregate/1 (HPKE-encrypted to module and person keys)",
       "consent-record/1 (subject, purpose, scope, notice version, given, withdrawn)",
       "connector event kinds issue.*, pr.*, commit.pushed, message.posted, meeting.held, survey.answer, interview.note, person.erased, collection.gap",
-      "fabric-proposal/1 type modernization and OM* metrics; proposal payload people counts and smallGroup",
+      "fabric-proposal/1 type modernization and OM* metrics; proposal payload persons counts and smallGroup",
       "job.run collector payload (collector.run {engagement_id, sources[]})",
       "team.id, process.id, person.id mapping (J-IDMAP), thresholds {team: 5, manager_cut: 10}, small-group consent mode (J3)",
       "site assessment.* fields and estimate/2"
     ],
     "depends_on": [],
-    "operator_answers": [{"id": "J10 people assessment is private", "state": "answered 2026-10-07", "cite": "split README:47, 112-138"}, {"id": "Q1/Q6 private repository (now passioncode-vesta)", "state": "answered", "cite": "split README:364, 369"}],
-    "consumers_and_seam": "passioncode-vesta (private).",
+    "operator_answers": [{"id": "J10 persons assessment is private", "state": "answered 2026-10-07", "cite": "split README:47, 112-138"}, {"id": "Q1/Q6 private repository (now the first organization server's repository)", "state": "answered", "cite": "split README:364, 369"}],
+    "consumers_and_seam": "the first organization server's repository (private).",
     "external_specs": [],
     "status": "out of scope here",
     "receipts": [],
     "blocked_by": [],
-    "writable_now": {"answer": "not here", "why": "J10: nothing about assessing people in a public repository."},
+    "writable_now": {"answer": "not here", "why": "J10: nothing about assessing persons in a public repository."},
     "source": "fabric-workspace docs/reports/2026-10-07-wave1-open-private-split/README.md:112-138, 289-291"
   }
 ]

@@ -9,7 +9,7 @@
   for more than 5 minutes. A well-known's `degraded[]` entry carries only `source` and `reason`, so the watcher
   cannot tell a setup state ("generation not configured") from a failure under the same source ("pinned model
   unavailable"). Source: the operator's decision in fabric-workspace `knowledge/authority.md`, *Telling the
-  operator about outages* (2026-10-11). First consumers: Copylot and Dashboards.
+  operator about outages* (2026-10-11). First consumers: Example Console and Dashboards.
 - **CT-23 (LC-19).** On 2026-10-11 about 35 sessions each held their own copies of five stdio MCP servers, about
   10 GB RSS, which helped fill the disk three times. Source: fabric-workspace `knowledge/lifecycle.md` LC-19
   (PR #136, `34e5fa1`).
@@ -41,7 +41,7 @@
      `src/session-handoff.ts` imports from the new module. If you keep the copy, the agreement test stays; the
      module is meant to stay copyable, so prefer importing and drop the "dependency-free" claim only if nothing
      depends on it. Check who copies `session-handoff.ts` (Fabric vendors it — read
-     `git -C /Users/sshlg/DATA/fabric grep -n session-handoff origin/agent/w2-handoff -- '*.mjs' '*.ts'`). If a
+     `git -C <workspace>/fabric grep -n session-handoff origin/agent/w2-handoff -- '*.mjs' '*.ts'`). If a
      consumer copies the file byte for byte, keep the copy and keep the agreement test.
    - Add a rule (`FAC-SEM-…`) that applies the detector to every launch argument and MCP entry the contract
      declares: runner drives' `argv`, manifest MCP `args` and `url` query, descriptor `commands`.

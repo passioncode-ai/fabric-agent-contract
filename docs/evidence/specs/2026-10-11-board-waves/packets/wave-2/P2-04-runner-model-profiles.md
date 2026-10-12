@@ -6,7 +6,7 @@
 
 - Fabric ADR-0147 at `31a9d6ca`, on Fabric's branch `agent/release-040-wave2`, not yet on main:
   `docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md`. Read it with
-  `git -C /Users/sshlg/DATA/fabric show 31a9d6ca:<path>` and pin every link at that commit (or at its merge commit
+  `git -C <workspace>/fabric show 31a9d6ca:<path>` and pin every link at that commit (or at its merge commit
   if it has reached main by then).
 - The private proposal *Runner and model profiles* (2026-10-11, commit `9f05a3f`), §3.2 items 1–7. It lives in a
   private repository of the operator's: cite it in this public repository **by title and commit only — no

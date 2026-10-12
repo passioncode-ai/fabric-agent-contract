@@ -6,7 +6,7 @@ Wave 3 of the [plan](../../plan.md): nodes N17 and N07 of the [canvas](../../can
 - **The organization edition's design is a proposal to this repository.** The target architecture v4 of the first
   organization server says each module's part is a proposal to that module's owner, and this repository's owner
   session accepted its §12 contract set into this plan. Read it read-only:
-  `git -C /Users/sshlg/DATA/passioncode-vesta show origin/main:docs/design/2026-10-12-target-architecture.md`
+  `git -C <workspace>/the first organization server's repository show origin/main:docs/design/2026-10-12-target-architecture.md`
   (§3 nouns, §6 paths, §7 authority, §12 contract changes, §15 decisions). Cite it in this public repository as *the
   first organization server's target architecture v4* with its commit. Name neither the server nor its repository, as
   CON-OE-04 asks.

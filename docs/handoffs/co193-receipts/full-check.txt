@@ -2,7 +2,7 @@ $ pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check
 $ tsc --noEmit
 $ vitest run
 
- RUN  v4.1.11 /Users/sshlg/DATA/_worktrees/fabric-agent-contract-co193-20261004
+ RUN  v4.1.11 <workspace>/_worktrees/fabric-agent-contract-co193-20261004
 
 
  Test Files  10 passed (10)
