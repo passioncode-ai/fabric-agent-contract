@@ -392,3 +392,15 @@ describe("CON-OE-01 (DEC-0052): account class and policy violations", () => {
     expect(paths("telemetry-event", violation)).toEqual(["FAC-SEM-039 /occurred"]);
   });
 });
+
+// v4 (DEC-0052): a `result` kind and a root `run` that a usage line and a result join on, with no person dimension.
+describe("DEC-0052: results and the root run", () => {
+  it("passes a result and a usage line that carry the same root run", () => {
+    const result = load("positive/telemetry-event-result.json");
+    const usage = load("positive/telemetry-event-usage-run.json");
+    expect(codes("telemetry-event", result)).toEqual([]);
+    expect(codes("telemetry-event", usage)).toEqual([]);
+    expect(result.run.root).toBe(usage.run.root);
+    expect(result.user).toBeUndefined();
+  });
+});

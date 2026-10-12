@@ -348,7 +348,8 @@ function attribution(value: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-046: `{root: {keyId, publicKey}, current?, next}` — a policy key set is signed by the root key from enrollment,
+ * FAC-SEM-046: `{root: {keyId, alg?, publicKey}, current?, next}` — a policy key set is signed by the root key from enrollment
+ * in that key's algorithm, Ed25519 or ES256 (DEC-0053),
  * moves its revision forward in its organization, names each key once with a window that ends after it starts and none
  * of small order (DEC-0045, CT-29), keeps
  * a key valid at `issuedAt`, and rotates with overlap: a key of the current set still valid at the next set's
@@ -362,7 +363,7 @@ function keySet(value: JsonObject): Finding[] {
   const current = isObject(value.current) ? value.current : null;
   const signature = isObject(next.signature) ? next.signature : {};
   if (signature.keyId !== root.keyId) flag("/next/signature/keyId", "a key set is signed by the root key from enrollment");
-  else if (typeof root.publicKey !== "string" || !verifyPolicySignature(next, root.publicKey)) flag("/next/signature/value", "the key set's signature does not verify under the root key");
+  else if (signature.alg !== (root.alg ?? "ed25519") || !verifyWith(root, policySigningInput(next), signature.value)) flag("/next/signature/value", "the key set's signature does not verify under the root key, in the root key's algorithm");
   const at = Date.parse(String(next.issuedAt ?? ""));
   const keys = Array.isArray(next.keys) ? next.keys.filter(isObject) : [];
   const ids = new Set<unknown>();

@@ -50,7 +50,10 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
 
 1. The device generates a key pair in hardware that does not export it, and a PKCS#10 certificate
    signing request (RFC 2986) signed by that key. The key's `storage` is `secure-enclave`, `tpm` or
-   `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`.
+   `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`. The first
+   organization server's target architecture v4 makes a non-extractable `ecdsa-p256` key in the
+   `platform-keystore`, held by a signed key helper, the device key; DEC-0031 already admits it, and
+   DEC-0053 records it as the target without changing the schema.
    `publicKeySha256` is the SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it
    against the CSR and records it as the device's key on record.
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
@@ -70,8 +73,11 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
      `org.id`, `device.id` and, when known, `user.id`;
    - **`streamEpoch`**: the epoch every collector on the device uses from now on, greater than every
      epoch issued to this device before (`FAC-SEM-044`);
-   - **`policyRootKey`**: the organization's root key (`keyId` and the raw Ed25519 key), which signs
-     [policy key sets](#key-sets) and nothing else, and optionally the current key set;
+   - **`policyRootKey`**: the organization's root key (`keyId`, `alg` and the public key), which signs
+     [policy key sets](#key-sets) and nothing else, and optionally the current key set. Its `alg` is
+     `ed25519` (the default, a raw 32-byte key) or `es256` (a raw 65-byte P-256 point), DEC-0053;
+   - when the installer pinned an offline root, its `rootCertification` and the current
+     `delegationRevocations` ([root certification](#root-certification));
    - the check-in interval;
    - optionally the current signed server policy (never a `user` layer, schema).
 
@@ -237,6 +243,11 @@ Schema: [`device-key-set.schema.json`](../../schemas/device-key-set.schema.json)
   set, and a device never verifies a policy or a key set under one (`verifyPolicySignature`,
   [`src/ed25519.ts`](../../src/ed25519.ts) `isSmallOrderKey`).
 - How a root key itself is replaced is a re-enrollment: the enrollment response carries the new one.
+- **A root key names its algorithm** (DEC-0053): `ed25519` (the default) or `es256`, ECDSA over P-256
+  with a 64-byte R ‖ S signature (RFC 7518 §3.4). The key set's `signature.alg` is the root's, and a
+  device verifies it only in that algorithm ([`verifyWith`](../../src/device-rules.ts), `FAC-SEM-046`).
+  Policy signing keys in a set stay Ed25519. This is the contract's own decision: Fabric's ES256 ruling
+  (its D2, ADR-0144) covers delegation tokens, not device policy.
 
 <a id="root-certification"></a>
 
@@ -288,6 +299,11 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   `server` layer is always reported, revision 0 when none arrived (schema), so a device cannot hide a
   revision by omitting the layer.
 - `certificate.serial` and `notAfter`.
+- optionally `records`, what the device holds of the records the relay protocol carries (DEC-0053):
+  the `estateRecord.revision` it applies, the latest `heartbeat` (`sequence`, `at`), the head of the
+  `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
+  `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
+  protocol's (DEC-0047, reserved), and a check-in response carries them in `records` unchanged.
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
@@ -363,7 +379,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
-| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
+| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 
@@ -372,7 +388,7 @@ Each kind checks one input:
 | Kind | Input |
 |---|---|
 | `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?, at}`; `publicKey` is the raw 32-byte Ed25519 key in base64; `at` is the device's clock when it verifies |
-| `device-key-set` | `{root: {keyId, publicKey}, current?, next}` |
+| `device-key-set` | `{root: {keyId, alg?, publicKey}, current?, next}` |
 | `device-policy-resolution` | `{layers, effective}` |
 | `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, pending?, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
 | `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names |

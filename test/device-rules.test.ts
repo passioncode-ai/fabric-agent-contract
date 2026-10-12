@@ -485,3 +485,16 @@ describe("CON-OE-12 and FAC-SEM-069: the edges the plants found", () => {
     expect(verifyWith({ ...ed, alg: "es256" }, certificationSigningInput(direct.certification), direct.certification.signature.value)).toBe(false);
   });
 });
+
+// v4 (DEC-0053): an ES256 form for policyRootKey; a key set verifies only in its root key's algorithm.
+describe("DEC-0053: a key set signed by an ES256 root", () => {
+  it("verifies in the root's algorithm and refuses a signature that names another", () => {
+    const fixture = load("semantic/device-key-set-es256-root.json").input;
+    expect(paths("device-key-set", fixture)).toEqual([]);
+    fixture.next.signature.alg = "ed25519";
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/signature/value"]);
+    const ed = load("semantic/device-key-set-ok.json").input;
+    ed.next.signature.alg = "es256";
+    expect(paths("device-key-set", ed)).toEqual(["FAC-SEM-046 /next/signature/value"]);
+  });
+});

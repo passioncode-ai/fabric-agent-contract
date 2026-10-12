@@ -1,0 +1,62 @@
+{
+  "description": "A key set signed by an ES256 root key, in that key's algorithm: no finding (FAC-SEM-046, DEC-0053).",
+  "kind": "device-key-set",
+  "expect": [],
+  "input": {
+    "root": {
+      "keyId": "org-7f3a.root",
+      "alg": "es256",
+      "publicKey": "BD2dg41P8kjyMLp7vi7L1KHeG1OTPHd/fGDhR3hqVjCVCbw0bSrn6+Q98mGDO9VoFcz0hNgUC68pnvWHGM4lqdc="
+    },
+    "current": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy-key-set",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "revision": 1,
+      "issuedAt": "2026-09-01T00:00:00Z",
+      "keys": [
+        {
+          "keyId": "org-7f3a.policy-2026",
+          "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+          "notBefore": "2026-01-01T00:00:00Z",
+          "notAfter": "2026-12-31T23:59:59Z"
+        }
+      ],
+      "signature": {
+        "alg": "es256",
+        "keyId": "org-7f3a.root",
+        "value": "f+77L/NdCYAfwM8t+lzrjpaS78yaQqYlkFSxuz9c61PgyNUyhkgUI/ZfFZnLeaV1WdoE2LJSp0vcBhyw9f7SVA=="
+      }
+    },
+    "next": {
+      "protocol": "fabric-device/0.1",
+      "kind": "policy-key-set",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "revision": 2,
+      "issuedAt": "2026-10-07T00:00:00Z",
+      "keys": [
+        {
+          "keyId": "org-7f3a.policy-2026",
+          "publicKey": "qVPRq70e5BWlbMOlUJu/xprQqt+Rb0Vy9ahteJ4PoqQ=",
+          "notBefore": "2026-01-01T00:00:00Z",
+          "notAfter": "2026-12-31T23:59:59Z"
+        },
+        {
+          "keyId": "org-7f3a.policy-2027",
+          "publicKey": "x6LottHlLXvMNePzR0VULfgmR0mWUC9CiF0abgRUaPA=",
+          "notBefore": "2026-12-01T00:00:00Z",
+          "notAfter": "2027-12-31T23:59:59Z"
+        }
+      ],
+      "signature": {
+        "alg": "es256",
+        "keyId": "org-7f3a.root",
+        "value": "J38sex9s2+glb4V0HNqfSDGXzEb3JrwgpaO4CZVk2E7eKwl3+RthwOtj2qsy2dW0M+fHbw/nxsuIfknZV0ilFA=="
+      }
+    }
+  }
+}

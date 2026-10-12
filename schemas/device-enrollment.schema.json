@@ -209,8 +209,8 @@
           "description": "The epoch every collector on the device uses from now on; greater than every epoch issued to this device before."
         },
         "policyRootKey": {
-          "$ref": "device-key-set.schema.json#/$defs/publicKey",
-          "description": "The organization's root key. It signs policy key sets only, never a policy (FAC-SEM-046)."
+          "$ref": "device-common.schema.json#/$defs/signingKey",
+          "description": "The organization's root key. It signs policy key sets only, never a policy (FAC-SEM-046). It names its algorithm: ed25519 (the default) or es256 (DEC-0053)."
         },
         "rootCertification": {
           "$ref": "device-root-certification.schema.json#/$defs/certification",

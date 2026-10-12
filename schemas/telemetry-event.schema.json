@@ -149,15 +149,36 @@
     },
     "run": {
       "type": "object",
-      "required": [
-        "task"
-      ],
       "properties": {
+        "root": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId",
+          "description": "The root run id every hop of one execution carries (DEC-0052): a random per-run id, so a usage line and a result join on the device without naming a person."
+        },
         "task": {
           "$ref": "activity-common.schema.json#/$defs/opaqueId"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "root": true
+          },
+          "required": [
+            "root"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "task": true
+          },
+          "required": [
+            "task"
+          ]
+        }
+      ]
     },
     "data": {
       "type": "object"
@@ -316,11 +337,47 @@
         "type": "object",
         "properties": {
           "kind": {
+            "const": "result"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "type": "object",
+            "properties": {
+              "root": true
+            },
+            "required": [
+              "root"
+            ]
+          },
+          "user": false,
+          "session": false,
+          "data": {
+            "$ref": "#/$defs/result"
+          }
+        },
+        "required": [
+          "run"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
             "enum": [
               "session.interval",
               "usage.line",
               "buffer.overflow",
-              "policy.violation"
+              "policy.violation",
+              "result"
             ]
           }
         },
@@ -482,6 +539,33 @@
           "minimum": 1,
           "maximum": 1000000,
           "description": "How many times that day; one event per day, provider, account class and reason."
+        }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "signal",
+        "outcome"
+      ],
+      "properties": {
+        "signal": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "The result signal the agent's package declares: what counts as done for that agent."
+        },
+        "outcome": {
+          "enum": [
+            "met",
+            "not_met"
+          ],
+          "description": "Whether the run met its result signal."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "description": "How many units of the result, when the signal counts them."
         }
       },
       "additionalProperties": false

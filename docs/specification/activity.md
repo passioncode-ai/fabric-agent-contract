@@ -99,7 +99,7 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `buffer.overflow`, `policy.violation`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `buffer.overflow`, `policy.violation`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
@@ -115,7 +115,7 @@ policy key names).
 | `launch.via` | How the session was started: `fabric`, `terminal`, `ide`, `desktop`, `switchboard`, `cron`, `agent`, `other`. |
 | `git.branch` | The branch, at most 100 characters from `[A-Za-z0-9._/-]`. When the policy key `telemetry.git_branch` says `hash`, it is `hmac-sha256:` of the name under the device's telemetry key, so a dictionary of common branch names cannot reverse it. When the key says `omit`, the field is absent. |
 | `task.ref.system`, `task.ref.key` | The task the session served, in the tracker that owns it. |
-| `run.task` | The host's run or work-graph node, when a host launched the session. |
+| `run.root`, `run.task` | `run.root`: the root run id every hop of one execution carries (DEC-0052) — a random per-run id, so a usage line and a `result` join on the device without naming a person. `run.task`: the host's run or work-graph node, when a host launched the session. At least one of the two. |
 | `data` | The kind's own fields. |
 
 <a id="clocks"></a>
@@ -180,6 +180,12 @@ vocabulary: `personal_account_in_work_folder`, `unknown_account`, `personal_key_
 (`FAC-SEM-039` checks it is the same day), `monotonicNs` is `"0"`, and it carries no `session`, `run`,
 `task`, `git`, `skill` or `launch` that would tie it to a timed interval (schema). A collector emits a
 day's violations after the day ends, so the stream position tells no more than the day.
+
+**`result`** — a run met, or did not meet, the result signal its agent declares (DEC-0052, the first
+organization server's target architecture v4 §12). It requires `run.root`, and carries **no `user` and no
+`session`** (schema): results leave a device as counts and enums joined to cost by the run, never per
+person, and a receiver never attaches a user to one. `data`: `signal` (the declared signal's name),
+`outcome` (`met`, `not_met`) and an optional `count`. A summary gains no person dimension from it.
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any
 kind a reader does not know — an extension, or a core kind a later revision of this protocol adds —
@@ -439,7 +445,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `bootId`, `monotonicNs` | attributes `fabric.boot_id`, `fabric.monotonic_ns` |
 | `user.id` | attribute `user.id` |
 | `session.id`, `session.parent` | attributes `session.id`, `fabric.session.parent` |
-| `project.id`, `skill`, `launch.via`, `task.ref.*`, `run.task` | attributes `fabric.project.id`, `fabric.skill`, `fabric.launch.via`, `fabric.task.system` / `fabric.task.key`, `fabric.run.task` |
+| `project.id`, `skill`, `launch.via`, `task.ref.*`, `run.root`, `run.task` | attributes `fabric.project.id`, `fabric.skill`, `fabric.launch.via`, `fabric.task.system` / `fabric.task.key`, `fabric.run.root`, `fabric.run.task` |
 | `runtime.name`, `runtime.version` | resource `service.name`, `service.version` |
 | `git.branch` | attribute `vcs.ref.head.name` |
 | `data.model` | attribute `gen_ai.request.model` |

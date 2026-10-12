@@ -235,6 +235,88 @@
           },
           "additionalProperties": false
         },
+        "records": {
+          "type": "object",
+          "properties": {
+            "estateRecord": {
+              "type": "object",
+              "required": [
+                "revision"
+              ],
+              "properties": {
+                "revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "additionalProperties": false,
+              "description": "The estate-record revision the device applies."
+            },
+            "heartbeat": {
+              "type": "object",
+              "required": [
+                "sequence",
+                "at"
+              ],
+              "properties": {
+                "sequence": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "at": {
+                  "$ref": "common.schema.json#/$defs/timestamp"
+                }
+              },
+              "additionalProperties": false,
+              "description": "The latest organization heartbeat the device holds."
+            },
+            "revocationDelta": {
+              "type": "object",
+              "required": [
+                "sequence",
+                "sha256"
+              ],
+              "properties": {
+                "sequence": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "additionalProperties": false,
+              "description": "The head of the revocation delta the device has applied: its sequence and hash."
+            },
+            "leases": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "required": [
+                  "leaseId",
+                  "expiresAt"
+                ],
+                "properties": {
+                  "leaseId": {
+                    "$ref": "activity-common.schema.json#/$defs/opaqueId"
+                  },
+                  "expiresAt": {
+                    "$ref": "common.schema.json#/$defs/timestamp"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "The spending-window leases the device's meter holds."
+            }
+          },
+          "additionalProperties": false,
+          "description": "What the device holds of the records the relay protocol carries (DEC-0053; their own shapes are DEC-0047's): fields only."
+        },
         "fullState": {
           "type": "boolean"
         }
@@ -305,6 +387,32 @@
               }
             }
           ]
+        },
+        "records": {
+          "type": "object",
+          "properties": {
+            "heartbeat": {
+              "type": "object",
+              "maxProperties": 64,
+              "description": "A newer signed heartbeat, as the relay protocol defines it (DEC-0047, reserved); carried here unchanged."
+            },
+            "revocationDelta": {
+              "type": "object",
+              "maxProperties": 64,
+              "description": "The revocation delta since the head the device reported, as the relay protocol defines it (DEC-0047); carried unchanged."
+            },
+            "leases": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "maxProperties": 64,
+                "description": "A spending-window lease, as the relay protocol defines it (DEC-0047); carried unchanged."
+              }
+            }
+          },
+          "additionalProperties": false,
+          "description": "Records the server hands the device at check-in (DEC-0053). The check-in carries them; their shapes are the relay protocol's."
         },
         "certificate": {
           "type": "object",
