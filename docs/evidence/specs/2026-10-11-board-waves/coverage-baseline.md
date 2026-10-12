@@ -53,6 +53,9 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P4-04 | `src/http-signature.ts` (new) | 350 / 350 (100 %) | 100 % | the device transport binding (DEC-0056): RFC 8941 parsing with RFC 9651's Date and Display String, RFC 9421 §2.3 and §2.5, mutual TLS beside the signature, the receiver's steps and the nonce store, over `fixtures/vectors/http-signature.json`; every refusal planted |
 | P4-04 | `src/device-transport-rules.ts` (new) | 40 / 40 (100 %) | 100 % | FAC-SEM-077, moved out of `device-rules.ts` so a consumer that vendors the device rules needs no HTTP layer |
 | P4-04 | `src/device-rules.ts` | 515 / 529 (97.35 %) | 97.35 % | FAC-SEM-044's key-role counts, every new branch covered |
+| P4-07 | `src/hub-key-rules.ts` (new) | 79 / 79 (100 %) | 100 % | `hubKeyCertified` and FAC-SEM-081 over `fixtures/vectors/hub-key.json` (DEC-0060); every check planted (39 plants with the verifier's, all killed) |
+| P4-07 | `src/rfc3339.ts` (new) | 11 / 11 (100 %) | 100 % | the strict date reader moved out of `src/estate-record-rules.ts` (179 / 179 after the move), unchanged |
+| P4-07 | `src/delegation.ts` | 324 / 324 (100 %) | 100 % | DL-13 row 4a (the `estate` option), the clock refused before row 1, the meter's `checkedAt` on an unreadable clock |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link

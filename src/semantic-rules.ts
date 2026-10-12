@@ -17,6 +17,7 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { hubKeyRules } from "./hub-key-rules.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
@@ -49,6 +50,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (packaged) return packaged;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
+  const hubKey = hubKeyRules(kind, value);
+  if (hubKey) return hubKey;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const findings: Finding[] = [];

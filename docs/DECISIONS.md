@@ -3039,3 +3039,90 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
   run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
   record plane is `fs`.
+
+### DEC-0060 — A delegation key the estate record certifies: `hubKeyCertified`, whose fault each refusal is, the highest applied revision, and an unreadable clock refused first
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the adapter repins and holds both
+  kits to `fixtures/vectors/hub-key.json` (backlog CT-18); Fabric's delegation verifier and its key rotation follow DL-14
+  (CT-19); Project Observatory's node, as a delegation callee, reads the revision it applied and passes its mark (CT-20).
+- **Amends:** DEC-0055 item 4's last sentence ("a delegation verifier that reads the estate record trusts a `kid` only
+  while a current revision certifies it") and DEC-0039's verifier (DL-13, DL-14, DL-15, DL-19), additively except where
+  *Compatibility* says. Closes DL-HUBKEY (board run N18, packet P4-07).
+- **Decision:** in [delegation](specification/delegation.md#keys-publication-and-rotation) unless named otherwise —
+  1. **The rule.** A verifier that reads the estate record trusts a token's or an approval's `kid` only while the
+     revision it reads certifies it: exactly one machine's `hubKey` has that `kid`, compared exactly, and the published
+     key's `x`; the clock is inside the revision's window, both instants included; and the revision revokes neither
+     `hub-key <kid>` nor `machine <id>` of that machine. It is checked right after the signature, as DL-13 row 4a.
+  2. **The revision it reads** MUST be one `verifyEstateRecord` (DEC-0055) accepted and its machine applied, and the
+     highest its machine applied or a later one: an older revision can still be inside its 30-day window and list a hub
+     key the applied one revokes (a rollback; the adapter's review, FAA-31). A verifier that keeps the applied number,
+     and its digest when it has it, refuses a lower revision and another revision with that number.
+  3. **Whose fault, and the codes.** The token's fault — no such certification, or a revoked hub key or machine — is
+     `unauthenticated` (`approval-invalid` for an approval, the meter's `principal-unproven` by DL-21) with `detail`
+     `kid-not-certified`, the adapter's choice (its kits 0.21.0). The revision's fault is `issuer-unavailable` with
+     `estate-unreadable` (a source that throws, or a revision that cannot be read), `estate-outside-window`,
+     `estate-rolled-back` or `estate-forked`: DEC-0045's wire gives `issuer-unavailable` to "no usable published keys",
+     a 503 the caller cannot cure by minting again. The table in DL-14 lists, in order, what each detail covers.
+  4. **The reference function** is `hubKeyCertified(record, kid, x, at, applied?)` in a new module
+     `src/hub-key-rules.ts`, kept apart from `src/estate-record-rules.ts` so a callee that vendors the delegation
+     verifier needs no WebAuthn or package code. It answers `{certified: true, machine, revision}` or
+     `{certified: false, fault, detail}` and never throws. The verifiers take `estate` (a revision, or a function
+     returning it) and `estateApplied`; without `estate` nothing changes.
+  5. **Vectors** `fixtures/vectors/hub-key.json`, generated from the reference functions: certified; the window's exact
+     edges and one second outside; another key under the same `kid`; an unknown `kid` and one in another case; a
+     rotation (revision 3 certifies a new hub key, revokes the old one and verifies against revision 2); the hub key
+     and the machine revoked while listed; a `kid` on two machines; a missing `x` against a missing `x`; the rollback,
+     the fork and the applied mark's boundaries; unreadable records (a revision above 2⁵³ − 1, dates without an offset,
+     with a space, on a day that does not exist, a leap second, a window of 30 days and one second); lower-case `t` and
+     `z` and an offset, which are read; and the verifiers' answers, in DL-13's order, for tokens and an approval under
+     the test hub keys, whose seeds reproduce every signature.
+  6. **An unreadable clock is refused first.** `verifyDelegation`, `verifyApproval` and `verifyMeterToken` refuse a
+     clock that is not a number of seconds a `Date` can hold — NaN, an infinity, text, beyond ±8.64 × 10¹² s — with
+     `unknown-state` and `no-clock`, before DL-13 row 1 (for an approval, after a missing approval and a missing jti
+     store). Before this, a NaN clock made every time row false, so an expired token passed; and the meter's denial
+     threw on such a clock while it formatted `checkedAt`, which now falls back to the system time.
+  7. **Rotation (DL-15).** Where callees read the estate record, a new hub key is certified by a revision before the
+     issuer signs with it; a callee whose applied revision does not certify it refuses its tokens `kid-not-certified`.
+  8. **`FAC-SEM-081`** (`delegation-hub-key`, receipt SEM-0081): on `{record, kid, x, at, applied?, answer}`, a
+     verifier's answer is the one DL-14 gives.
+  9. **The strict date reader** moves to `src/rfc3339.ts` (`strictTime`), used by `src/estate-record-rules.ts` and the
+     new module; its behaviour is ER-10's, unchanged.
+- **Why:** DEC-0055 stated the rule in one sentence, with no function, no vectors and no codes, so the adapter chose its
+  own (FAA-31) and its review found the rollback the sentence allowed. A port in another language needs the order, the
+  codes, the details and the boundaries as data. The split between the token's fault and the trust source's is the
+  adapter's own principle; this decision applies it to the window as well, because an expired revision says the hub has
+  not drafted a fresh one, and a 401 would send every caller to mint a token that is refused the same way.
+- **Compatibility:** Additive for a verifier that does not read the estate record: `estate` absent changes nothing, and
+  the vectors of DEC-0039 and DEC-0045 keep their answers. Tightening, each with what a consumer does: a clock that is
+  not a number of seconds is refused `unknown-state` (`no-clock`) — a caller passes a NumericDate, as DL-2 says. The
+  adapter's kits 0.21.0 (its commit `0badd8f`) differ in four places for its repin (CT-18): (a) a revision outside its
+  window answers `kid-not-certified` there, `issuer-unavailable` `estate-outside-window` here; (b) a source that
+  answers `null` or a non-object answers `kid-not-certified` there (and `estate: null` skips the check), `estate-unreadable`
+  here, where only an absent `estate` skips it; (c) a `kid` on two machines is certified there when either matches,
+  refused here; (d) the applied mark, the rollback and the fork are new. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/delegation.md` (DL-13 row 4a and the clock, DL-14, DL-15, DL-19's `issuer-unavailable`,
+    rules, *Not decided here*), `docs/specification/estate-record.md` (machines, who adopts it),
+    `docs/specification/conformance.md` (readers, register);
+  - schemas: `schemas/estate-record.schema.json` (`hubKey`'s description);
+  - code: `src/hub-key-rules.ts` (new), `src/rfc3339.ts` (new), `src/delegation.ts`, `src/estate-record-rules.ts`,
+    `src/semantic-rules.ts`;
+  - fixtures: `fixtures/vectors/hub-key.json` (new), `fixtures/semantic/delegation-hub-key-*`;
+  - tests: `test/hub-key.test.ts` (new), `test/rule-tolerance.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/backlog.md`, the board run's
+    `docs/evidence/specs/2026-10-11-board-waves/packets/wave-4/P4-07-hubkey.md`, `findings/extra-items.json`,
+    `waves.json` and `inventory.json`, the handoff `docs/handoffs/2026-10-12-w4-p4-07-hubkey.md` and
+    `docs/handoffs/README.md`.
+- **Not decided here:** how a callee learns the revision its node applied (a file, a call to the node, the relay); what a
+  callee reports beyond its refusal on a fork; whether the hub key is the machine's `#sig` key (Fabric's D3, DEC-0055);
+  `ES256` hub keys (Fabric's D2); a revocation that reaches a callee before the next revision (DEC-0054, the revocation
+  delta).
+- **Source:** DEC-0055 item 4; the adapter's FAA-31 report of 2026-10-12 (fabric-agent-adapter 0.21.0, its commit
+  `0badd8f`, handoff `docs/handoffs/2026-10-12-faa-31-estate-record.md`, and its kits' `hubKeyCertified` and `estate`
+  option); DEC-0045's refusal wire; RFC 3339 and RFC 7519 in the [source ledger](evidence/sources.md); the board-waves
+  inventory DL-HUBKEY, packet P4-07. DEC-0060 and `FAC-SEM-081` were reserved by git CAS
+  (`agent_sync.py reserve --key w4-p4-07-hubkey-20261012 DEC`, `--key w4-p4-07-sem-hubkey-20261012 SEM`); this file,
+  `conformance.md` and `backlog.md` were edited in the run's branch without a lease, by the wave's arrangement (the owner
+  session takes the leases when it merges); the record plane is `fs`.
