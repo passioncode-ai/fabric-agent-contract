@@ -1246,6 +1246,101 @@
         "name": "http on 127.0.0.1 with port 99999",
         "value": "http://127.0.0.1:99999",
         "expect": false
+      },
+      {
+        "name": "https on [.]",
+        "value": "https://[.]",
+        "expect": false
+      },
+      {
+        "name": "https on [:]",
+        "value": "https://[:]",
+        "expect": false
+      },
+      {
+        "name": "https on [1]",
+        "value": "https://[1]",
+        "expect": false
+      },
+      {
+        "name": "https on [::1]",
+        "value": "https://[::1]",
+        "expect": true
+      },
+      {
+        "name": "https on an IPv6 literal without a port",
+        "value": "https://[2001:db8::1]",
+        "expect": true
+      },
+      {
+        "name": "https on an upper-case IPv6 literal",
+        "value": "https://[2001:DB8::1]",
+        "expect": false
+      },
+      {
+        "name": "https on an IPv6 group with a leading zero",
+        "value": "https://[2001:0db8::1]",
+        "expect": false
+      },
+      {
+        "name": "https on 999.999.999.999",
+        "value": "https://999.999.999.999",
+        "expect": false
+      },
+      {
+        "name": "https on 127.0.0.1",
+        "value": "https://127.0.0.1",
+        "expect": true
+      },
+      {
+        "name": "https on 0x7f.1 (a number a URL parser reads as IPv4)",
+        "value": "https://0x7f.1",
+        "expect": false
+      },
+      {
+        "name": "https on a name whose last label is a number",
+        "value": "https://relay.1",
+        "expect": false
+      },
+      {
+        "name": "https on an upper-case host",
+        "value": "https://Relay.example",
+        "expect": false
+      },
+      {
+        "name": "https with the default port 443",
+        "value": "https://relay.example:443",
+        "expect": false
+      },
+      {
+        "name": "https with port 0",
+        "value": "https://relay.example:0",
+        "expect": false
+      },
+      {
+        "name": "https with a port with a leading zero",
+        "value": "https://relay.example:08443",
+        "expect": false
+      },
+      {
+        "name": "http on 127.0.0.1 with port 0",
+        "value": "http://127.0.0.1:0",
+        "expect": false
+      },
+      {
+        "name": "http on 127.0.0.1 with the default port 80",
+        "value": "http://127.0.0.1:80",
+        "expect": false
+      },
+      {
+        "name": "https on a host of 253 characters",
+        "value": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.examp",
+        "expect": true
+      },
+      {
+        "name": "https on a host of 254 characters",
+        "value": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ex",
+        "expect": false
       }
     ]
   },
@@ -2988,6 +3083,72 @@
         "expect": {
           "ok": false,
           "code": "not-yet-valid"
+        }
+      },
+      {
+        "name": "a kid with a lone surrogate",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "\ud800#sig",
+          "iat": "2026-10-12T00:00:00Z",
+          "sig": "RJbXBOyiw81mI0J2SKA1eKL9hkIbqNwrkwBS55NXsNkGAgHZbKDKDW1CLBM5E-Ywq896Ow4Z9wSukv_rB87Xyg"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "an estate with a lone surrogate",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:\ud800",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:00:00Z",
+          "sig": "RJbXBOyiw81mI0J2SKA1eKL9hkIbqNwrkwBS55NXsNkGAgHZbKDKDW1CLBM5E-Ywq896Ow4Z9wSukv_rB87Xyg"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
         }
       },
       {

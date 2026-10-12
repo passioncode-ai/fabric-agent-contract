@@ -146,6 +146,11 @@ export function sealEnvelope(input: SealInput): SecretEnvelope {
   if (input.ephemeralPrivateKey) ephemeral.setPrivateKey(input.ephemeralPrivateKey);
   else ephemeral.generateKeys();
   const header: EnvelopeHeader = { ...partial, enc: ephemeral.getPublicKey(null, "uncompressed").toString("base64url") } as EnvelopeHeader;
+  // A sealer never consumes a sequence on an envelope every target refuses: the shape (with a placeholder ct and sig)
+  // and the life, both read to the whole second as written, are checked before anything is sealed or signed.
+  if (!envelopeShape({ header, ct: "AA", sig: "A".repeat(86) })) throw new Error("malformed: the envelope would not have the schema's shape");
+  const life = (instant(header.exp) as number) - (instant(header.iat) as number);
+  if (life <= 0 || life > MAX_ENVELOPE_LIFETIME_SECONDS * 1000) throw new Error("lifetime-too-long: an envelope lives more than zero and at most 24 hours");
   const { ct } = hpkeSealBase(pkR, INFO, Buffer.from(rfc8785(header), "utf8"), input.secret, ephemeral.getPrivateKey());
   const unsigned = { header, ct: ct.toString("base64url") };
   const sig = signEs256(input.senderKey, signingInput(unsigned));

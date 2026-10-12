@@ -185,7 +185,27 @@ function relayOriginCases(): Json[] {
     c("http on 0.0.0.0", "http://0.0.0.0:8787", false),
     c("ws on 127.0.0.1", "ws://127.0.0.1:8787", false),
     c("http on 127.0.0.1 with a path", "http://127.0.0.1:8787/v1", false),
-    c("http on 127.0.0.1 with port 99999", "http://127.0.0.1:99999", false)
+    c("http on 127.0.0.1 with port 99999", "http://127.0.0.1:99999", false),
+    // R3: only a serialised origin — lowercase, no default port, no port 0, a real IP literal, a host of at most 253.
+    c("https on [.]", "https://[.]", false),
+    c("https on [:]", "https://[:]", false),
+    c("https on [1]", "https://[1]", false),
+    c("https on [::1]", "https://[::1]", true),
+    c("https on an IPv6 literal without a port", "https://[2001:db8::1]", true),
+    c("https on an upper-case IPv6 literal", "https://[2001:DB8::1]", false),
+    c("https on an IPv6 group with a leading zero", "https://[2001:0db8::1]", false),
+    c("https on 999.999.999.999", "https://999.999.999.999", false),
+    c("https on 127.0.0.1", "https://127.0.0.1", true),
+    c("https on 0x7f.1 (a number a URL parser reads as IPv4)", "https://0x7f.1", false),
+    c("https on a name whose last label is a number", "https://relay.1", false),
+    c("https on an upper-case host", "https://Relay.example", false),
+    c("https with the default port 443", "https://relay.example:443", false),
+    c("https with port 0", "https://relay.example:0", false),
+    c("https with a port with a leading zero", "https://relay.example:08443", false),
+    c("http on 127.0.0.1 with port 0", "http://127.0.0.1:0", false),
+    c("http on 127.0.0.1 with the default port 80", "http://127.0.0.1:80", false),
+    c("https on a host of 253 characters", `https://${"a".repeat(61)}.${"b".repeat(61)}.${"c".repeat(61)}.${"d".repeat(61)}.example`.slice(0, 8 + 253), true),
+    c("https on a host of 254 characters", `https://${"a".repeat(62)}.${"b".repeat(62)}.${"c".repeat(62)}.${"d".repeat(62)}.ex`, false)
   ];
 }
 
@@ -252,6 +272,9 @@ function admitCases(): Json[] {
     // F4: a time is read to the millisecond (relay.md, Times): 60.000999999 s ahead is 60.000 s ahead.
     c("iat 60.000999999 s ahead, read to the millisecond", authFrame({ iat: "2026-10-12T00:01:00.000999999Z" }), { now: "2026-10-12T00:00:00Z" }, ok),
     c("iat 60.001 s ahead", authFrame({ iat: "2026-10-12T00:01:00.001Z" }), { now: "2026-10-12T00:00:00Z" }, no("not-yet-valid")),
+    // R1: a kid or an estate with a lone surrogate has no RFC 8785 form, so no signature can cover it: unauthenticated.
+    c("a kid with a lone surrogate", { ...frame, kid: "\ud800#sig" }, {}, no("unauthenticated")),
+    c("an estate with a lone surrogate", { ...frame, estate: "urn:fabric:estate:\ud800" }, {}, no("unauthenticated")),
     // CON-010 / CX-22: the signed estate is compared with the context's held record inside admit, and is one answer.
     c("a valid signature over another estate", authFrame({ estate: "urn:fabric:estate:other" }), {}, no("unauthenticated")),
     c("a context that holds no record", frame, { estate: null, admitted: {} }, no("unauthenticated"))

@@ -91,13 +91,14 @@ describe("fabric-secret-envelope/1", () => {
     expect(() => sealEnvelope({ ...base, recipientKey: { ...recipientKey, y: recipientKey.x } })).toThrow(/bad-key/);
   });
 
-  it("refuses a validly signed envelope that lives longer than 24 hours or cannot be opened", () => {
+  it("never seals one that lives longer than 24 hours, and refuses one that cannot be opened", () => {
     const sender = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const senderKey = sender.publicKey.export({ format: "jwk" }) as Record<string, string>;
     const seal = (over: Record<string, unknown>) => sealEnvelope({ recipientKid: vector.open.ownKemKid, recipientKey: vector.recipientKey,
       senderKid: SENDER, senderKey: sender.privateKey, agentRef: vector.envelope.header.agentRef, slot: vector.envelope.header.slot, placement: vector.open.placement, envelopeSequence: 1,
       iat: new Date("2026-10-12T00:00:00Z"), exp: new Date("2026-10-13T00:00:01Z"), secret: Buffer.from("x"), ...over });
-    expect(openEnvelope(seal({}), ctx({ senderKey: () => senderKey }))).toEqual({ ok: false, refusal: "lifetime-too-long" });
+    // The opener's refusal of a long life is a shared vector; the sealer refuses to make one at all (DEC-0066).
+    expect(() => seal({})).toThrow(/lifetime-too-long/);
     const otherKem = createECDH("prime256v1");
     otherKem.generateKeys();
     const sealed = seal({ exp: new Date("2026-10-12T12:00:00Z") });
@@ -133,6 +134,19 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
       expect(() => seal({ envelopeSequence }), String(envelopeSequence)).toThrow(/envelopeSequence/);
     }
     expect(seal({ envelopeSequence: Number.MAX_SAFE_INTEGER }).header.envelopeSequence).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
+  it("never consumes a sequence on an envelope every target refuses: the shape and the life are checked before signing (R4)", () => {
+    const refused = (over: Record<string, unknown>) => expect(() => seal(over), JSON.stringify(over)).toThrow(/malformed|lifetime/);
+    for (const placement of [0, -1, 1.5, 2 ** 53]) refused({ placement });
+    refused({ slot: "lower" });
+    refused({ agentRef: "agent:Inbox" });
+    refused({ recipientKid: `${"m".repeat(296)}#kem` });
+    refused({ exp: new Date(T0) });
+    refused({ exp: new Date(T0 - 1000) });
+    refused({ exp: new Date(T0 + 86_401_000) });
+    refused({ exp: new Date(T0 + 300) }); // 0.3 s: both read to the whole second, so exp is iat
+    expect(seal({ exp: new Date(T0 + 86_400_000) }).header.exp).toBe("2026-10-13T00:00:00Z");
   });
 
   it("seals only to a #kem key, signed by a #sig key", () => {

@@ -13,7 +13,7 @@
  */
 import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
-import { P256_CURVE, isEd25519Key, isLowS, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
+import { P256_CURVE, isEd25519Key, isLowS, p256KeyRefusal, type P256Key } from "./p256.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
@@ -124,9 +124,21 @@ export function verifyEs256(key: P256Key, bytes: string, sig: unknown): boolean 
   return proveEs256(key, bytes, sig);
 }
 
-const hex32 = (value: bigint) => Buffer.from(value.toString(16).padStart(64, "0"), "hex").toString("base64url");
-/** A valid P-256 key nothing signs under (the base point G): the key a pre-proof check verifies under when it has none. */
-const DUMMY_KEY = { kty: "EC", crv: "P-256", x: hex32(P256_CURVE.gx), y: hex32(P256_CURVE.gy) } as const;
+const bytes32 = (value: bigint) => Buffer.from(value.toString(16).padStart(64, "0"), "hex");
+/**
+ * A valid P-256 key nothing signs under (the base point G), in the SEC 1 octet form the admission set holds: the key a
+ * pre-proof check validates and verifies under when it has none.
+ */
+const DUMMY_KEY = new Uint8Array(Buffer.concat([Buffer.from([0x04]), bytes32(P256_CURVE.gx), bytes32(P256_CURVE.gy)]));
+
+/** The JWK of a key SEC 1 already accepted, without validating it again (so every path validates exactly once). */
+function jwkOf(key: P256Key): { kty: "EC"; crv: "P-256"; x: string; y: string } {
+  if (key instanceof Uint8Array) {
+    const octets = Buffer.from(key);
+    return { kty: "EC", crv: "P-256", x: octets.subarray(1, 33).toString("base64url"), y: octets.subarray(33).toString("base64url") };
+  }
+  return { kty: "EC", crv: "P-256", x: key.x as string, y: key.y as string };
+}
 /** 64 bytes that are no signature, verified in place of a signature that is not 64 canonical bytes. */
 const DUMMY_SIG = Buffer.alloc(64, 0x5a);
 
@@ -137,13 +149,28 @@ const DUMMY_SIG = Buffer.alloc(64, 0x5a);
  * that verifies. `admit` and `verifyBlobRequest` call this for every request past its own bytes, so neither the answer
  * nor the work tells an unproven caller whether the relay holds its kid, its estate or a record at all.
  */
-function proveEs256(key: P256Key | undefined, bytes: string, sig: unknown): boolean {
-  const usable = key !== undefined && !isEd25519Key(key) && p256KeyRefusal(key) === null;
-  const jwk = usable ? p256Jwk(key) : p256Jwk(DUMMY_KEY);
+function proveEs256(key: P256Key | undefined, bytes: string | undefined, sig: unknown): boolean {
+  // One key validation, one verification and one low-S check on every path, combined without short-circuiting.
+  const ed = isEd25519Key(key);
+  const candidate = key === undefined || ed ? DUMMY_KEY : key;
+  const valid = p256KeyRefusal(candidate) === null;
+  const usable = key !== undefined && !ed && valid && bytes !== undefined;
+  const jwk = jwkOf(valid ? candidate : DUMMY_KEY);
   const raw = typeof sig === "string" ? Buffer.from(sig, "base64url") : DUMMY_SIG;
   const canonical = typeof sig === "string" && raw.length === 64 && raw.toString("base64url") === sig;
-  const verified = nodeVerify("sha256", Buffer.from(bytes, "utf8"), { key: jwk, format: "jwk", dsaEncoding: "ieee-p1363" }, canonical ? raw : DUMMY_SIG);
-  return usable && canonical && verified && isLowS(raw);
+  const signature = canonical ? raw : DUMMY_SIG;
+  const verified = nodeVerify("sha256", Buffer.from(bytes ?? "", "utf8"), { key: jwk, format: "jwk", dsaEncoding: "ieee-p1363" }, signature);
+  const low = isLowS(signature);
+  return (Number(usable) & Number(canonical) & Number(verified) & Number(low)) === 1;
+}
+
+/** RFC 8785 of a signing input, or undefined when a field has no canonical form (a lone surrogate): it cannot be signed. */
+function signable(build: () => string): string | undefined {
+  try {
+    return build();
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -167,9 +194,12 @@ export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: stri
   if (iat - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, code: "not-yet-valid" };
   if (ctx.now.getTime() - iat > AUTH_WINDOW_SECONDS * 1000) return { ok: false, code: "unauthenticated" };
   if (ctx.nonceUsed) return { ok: false, code: "replay" };
-  // The signed estate must be the held record's; a mismatch is the same answer, and the same work, as a bad signature.
-  const key = ctx.estate !== undefined && frame.estate === ctx.estate ? ctx.admittedKey(frame.kid) : undefined;
-  const proven = proveEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig);
+  // The signed estate must be the held record's; a mismatch is the same answer, and the same work — the lookup included,
+  // its result discarded — as a bad signature. A kid or estate with no canonical form cannot be signed: the same answer.
+  const found = ctx.admittedKey(frame.kid);
+  const key = ctx.estate !== undefined && frame.estate === ctx.estate ? found : undefined;
+  const input = signable(() => relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }));
+  const proven = proveEs256(key, input, frame.sig);
   return proven ? { ok: true, kid: frame.kid } : { ok: false, code: "unauthenticated" };
 }
 
@@ -388,17 +418,27 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
 }
 
 const OCTET = "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)";
-const PORT = "(?::(?:6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3}|0))?";
-const LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?";
-const HOST = `(?:${LABEL}(?:\\.${LABEL})*|\\[[0-9A-Fa-f:.]+\\])`;
+const IPV4 = `${OCTET}(?:\\.${OCTET}){3}`;
+const H16 = "(?:0|[1-9a-f][0-9a-f]{0,3})";
+const IPV6 = [
+  `(?:${H16}:){7}${H16}`, `(?:${H16}:){1,7}:`, `(?:${H16}:){1,6}:${H16}`, `(?:${H16}:){1,5}(?::${H16}){1,2}`,
+  `(?:${H16}:){1,4}(?::${H16}){1,3}`, `(?:${H16}:){1,3}(?::${H16}){1,4}`, `(?:${H16}:){1,2}(?::${H16}){1,5}`,
+  `${H16}:(?::${H16}){1,6}`, `:(?:(?::${H16}){1,7}|:)`
+].join("|");
+const LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
+// A host name of at most 253 characters whose last label is not a number (a URL parser reads `0x7f.1` or `relay.1` as IPv4).
+const NAME = `(?=[a-z0-9.-]{1,253}(?::|$))(?:${LABEL}\\.)*(?![0-9]+(?::|$))(?!0x[0-9a-f]*(?::|$))${LABEL}`;
+const PORT = "(?:6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3})";
 /** The pattern of `hello.relay` in `relay-frame.schema.json`; `isRelayOrigin` is the same rule, and a test holds them equal. */
-export const RELAY_ORIGIN_PATTERN = `^(?:https://${HOST}|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\]))${PORT}$`;
+export const RELAY_ORIGIN_PATTERN =
+  `^(?:https://(?:${IPV4}|\\[(?:${IPV6})\\]|${NAME})(?::(?!443$)${PORT})?|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\])(?::(?!80$)${PORT})?)$`;
 const RELAY_ORIGIN = new RegExp(RELAY_ORIGIN_PATTERN);
 
 /**
- * What `hello.relay` may be (DEC-0066): an https origin — a host name or an IP literal in brackets — or, for a relay on
- * the same machine, http on a loopback literal, 127.0.0.0/8 or `[::1]`; either with an optional port up to 65535 and
- * nothing after it (no path, no user information). A name such as `localhost` is refused:
+ * What `hello.relay` may be (DEC-0066): a serialised origin and nothing else. https on a lowercase host name of at most
+ * 253 characters whose last label is not a number, a dotted IPv4 address, or a bracketed lowercase IPv6 address without
+ * leading zeros; or, for a relay on the same machine, http on a loopback literal, 127.0.0.0/8 or `[::1]`. The port is
+ * 1 to 65535 without leading zeros and never the scheme's default (443, 80); there is no path or user information. A name such as `localhost` is refused:
  * a name resolves somewhere a literal cannot.
  */
 export function isRelayOrigin(value: unknown): boolean {
