@@ -90,6 +90,8 @@
   {"name": "service-usage-model-without-basis", "schema": "service-usage.schema.json", "path": "negative/service-usage-model-without-basis.json", "valid": false, "keyword": "required"},
   {"name": "service-usage-unknown-field", "schema": "service-usage.schema.json", "path": "negative/service-usage-unknown-field.json", "valid": false, "keyword": "unevaluatedProperties"},
   {"name": "service-usage-bad-date", "schema": "service-usage.schema.json", "path": "negative/service-usage-bad-date.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-usage-by-project", "schema": "service-usage.schema.json", "path": "positive/service-usage-by-project.json", "valid": true},
+  {"name": "service-usage-by-project-session", "schema": "service-usage.schema.json", "path": "negative/service-usage-by-project-session.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "service-usage-budgets", "schema": "service-usage.schema.json", "path": "positive/service-usage-budgets.json", "valid": true},
   {"name": "service-usage-budgets-bad-scope", "schema": "service-usage.schema.json", "path": "negative/service-usage-budgets-bad-scope.json", "valid": false, "keyword": "enum"},
   {"name": "service-usage-budgets-unknown-field", "schema": "service-usage.schema.json", "path": "negative/service-usage-budgets-unknown-field.json", "valid": false, "keyword": "additionalProperties"},

@@ -35,6 +35,7 @@ export default defineConfig({
         "src/revocation-delta.ts": { branches: 100 },
         "src/revocation-delta-rules.ts": { branches: 100 },
         "src/core-rules.ts": { branches: 100 },
+        "src/usage-rules.ts": { branches: 100 },
         "src/rfc3339.ts": { branches: 100 },
         "src/secret-envelope.ts": { branches: 100 },
         "src/fabric-links.ts": { branches: 97.61 },
