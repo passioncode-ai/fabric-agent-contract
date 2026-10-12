@@ -77,7 +77,7 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     }
     // A path segment named Users or home inside a repository path, a route, a tilde inside a word, and either after a
     // character that continues a path (`.`, `-`, `_`, `/`, `~`) are not home folders.
-    for (const text of [["docs", "Users", "guide.md"].join("/"), ["src", "home", "page.tsx"].join("/"), "GET /users/42", "x~/y", ...[".", "-", "_", "/", "~"].flatMap((c) => [`a${c}${["", "Users", "c"].join("/")}`, `a${c}${["", "home", "c"].join("/")}`])]) {
+    for (const text of [["docs", "Users", "guide.md"].join("/"), ["src", "home", "page.tsx"].join("/"), "GET /users/42", "x~/y", ...[".", "-", "_", "/", "~", "1", "B"].flatMap((c) => [`a${c}${["", "Users", "c"].join("/")}`, `a${c}${["", "home", "c"].join("/")}`])]) {
       expect(paths("proposal-submit", { proposal: { ...fix, change: text }, to: "export" }), text).toEqual([]);
     }
     const everywhere = { ...rule, goal: { id: posixHome, text: `serves ${linuxHome}` }, finding: { id: tildeHome, source: "lint", text: "ok" }, verifiedRun: `run ${posixHome}` };
