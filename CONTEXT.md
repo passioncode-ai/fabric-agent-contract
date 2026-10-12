@@ -113,11 +113,20 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 ([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
 
 **Key set**: The device's set of trusted policy keys, signed by the organization's **Policy root key** and
-rotated with overlap; a policy counts only when signed by a key of the current set valid at its `issuedAt` (`FAC-SEM-041`), and the set
+rotated with overlap; a policy counts only when signed by a key of the current set valid when the device verifies (`FAC-SEM-041`, DEC-0053), and the set
 itself is checked under the root key (`FAC-SEM-046`) ([devices](docs/specification/devices.md), DEC-0031).
 
 **Policy root key**: The organization's root key, delivered at enrollment, that signs **Key sets** and nothing
-else (DEC-0031).
+else (DEC-0031); Ed25519 or ES256, naming its algorithm, and certified by the offline root an installer pinned when
+it pinned one (**Root certification**, `FAC-SEM-069`, DEC-0053).
+
+**Device key**: A device's non-exportable key. Beside DEC-0031's enrollment key, `deviceKeys` lists a signing key
+`<device.id>#sig` (ES256 or Ed25519) and a key-agreement key `<device.id>#kem` (ECDH over P-256), never one key in
+both roles; a P-256 key is a valid point by SEC 1 §3.2.2 (`isValidP256Key`, DEC-0053).
+
+**Collection start**: When a device starts collecting for the organization: the notice's acknowledgement, or under
+device management the earlier of that and the policy's deadline. Nothing that occurred before it is uploaded
+(`FAC-SEM-068`, DEC-0053).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
 every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
@@ -281,8 +290,15 @@ device in batches. It carries no content and no person attribute; a person appea
 opaque `user.id`.
 
 **Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`) — a
-`session.interval`, a `usage.line`, a `buffer.overflow`, or a kind the reader does not know — positioned
-in a stream by `(device.id, collector.id, collector.epoch, seq)`.
+`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, or a
+kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+may name its `account.class` and its root `run` (DEC-0052).
+
+**Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),
+`personal` or `unknown`; a statement about an account, never a person (DEC-0052).
+
+**Root run**: `run.root`, the random per-run id every hop of one execution carries, on which usage lines and a
+`result` join without naming a person (DEC-0052).
 
 **Collector node**: One sequence-emitting collector instance on a device. With the device it names a
 stream; its epoch is issued by the organization server at enrollment, so a reinstall starts a new

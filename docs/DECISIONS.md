@@ -732,6 +732,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
   Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
   (head `19e2b58`).
+- **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
 - **Amends:** nothing — a new protocol beside `fabric-service/0.1`, added under the DEC-0016
   extension policy
 - **Decision:** The contract defines activity telemetry for debugging, work memory and spend
@@ -885,6 +886,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-08
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
   Revised before merge by the contract owner's review of PR #22 and its re-review.
+- **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -1700,6 +1702,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's board already
   computes the pinned digest (`apps/desktop/src/main/boardService.ts` `commsDigest`); the adapter's kit ports run
   the shared vectors (ask (c), CT-18).
+- **Annotated (2026-10-12):** its *Not decided here* on lone surrogates is decided by DEC-0052 item 9 (CT-25): the settings form refuses one in any string or key.
 - **Decision:**
   1. The contract has exactly two canonical JSON forms, both in `src/canonical.ts`, and every signed or hashed JSON
      document names one of them in the register
@@ -2047,3 +2050,187 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   N14, packet P2-04. DEC-0046 and `FAC-SEM-058`…`060` were reserved by git CAS (`agent_sync.py reserve --key
   runner-model-profiles-20261012 DEC`, `--key runner-model-profiles-{catalogue,runner-profile,resolution}-20261012
   SEM`); this file, `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.
+
+### DEC-0052 — Activity amended: account class, violations by day, notice and consent, OD-1 in neutral form, results and the root run, and the audit's fixes
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: a collector on the device
+  labels sessions `account.class`, emits `policy.violation` by day and carries `run.root`; Fabric emits `result`; the
+  first organization server, as receiver, keeps check-in drops out of its acks, serves another person's view of a
+  member only as `FAC-SEM-067` allows and stores consent its own way; Project Observatory's node joins usage lines and
+  results on `run.root` (backlog CT-04).
+- **Amends:** DEC-0030 (items 1, 4, 6, 7 and 10; this decision's items 1–8), DEC-0043 (its *Not decided here* on lone
+  surrogates; item 9). Implements CON-OE-01 and the first organization server's target architecture v4 §12 row
+  "DEC-0030: `result` kind; root `run` on receipts" (commit `9c6a780`), and closes F-B-102, F-B-107, F-B-108 and CT-25.
+- **Decision:** in [activity](specification/activity.md) unless named otherwise —
+  1. **Account class.** An event MAY carry `account.class` (`organization`, `personal`, `unknown`) — a statement about
+     the account a session ran on, never a person. An organization account carries the `tenantRef` its tenant has in
+     the policy's `accounts.tenants` (DEC-0053): `sha256:` of the RFC 8785 form of `{provider, tenant}` (`tenantRef`).
+     A personal or unknown account carries none, so no hash of a person's own tenant leaves the device.
+  2. **`policy.violation`**, a new core kind: `{day, provider, accountClass, reason, count?}` with `project`. It
+     carries a UTC day and no finer time: `occurred` is that day's midnight (`FAC-SEM-039` checks the day),
+     `monotonicNs` is `"0"`, and no `session`, `run`, `task`, `git`, `skill` or `launch` (schema).
+  3. **Notice and consent.** The device policy names its `noticeVersion` (DEC-0053's schema). Neutral messages
+     (`activity-notice.schema.json`): `notice.acknowledgement {noticeVersion, purposeIds, at}` and
+     `consent {purposeId, state: given | withdrawn, at}`, the person taken from the authenticated session, never the
+     body. How a receiver stores consent records is private to it and not part of the contract.
+  4. **The operator's OD-1, in neutral form.** A read served to a person other than the subject shows the subject's
+     time or presence (`activity.raw`, `activity.presence`) only under a `purposeId` the subject confirmed — the latest
+     `consent` for it at the read says `given` — and the subject's usage and cost (`activity.usage`) only as sums per
+     UTC day or billing period. `access-log/1` entries gain `purposeId` and `step`. **`FAC-SEM-067`**
+     (`access-log-disclosure`, receipt SEM-0067) checks a log against the subject's consents. The subject reading their
+     own data, and a service that serves no person, are not narrowed.
+  5. **DEC-0030 item 10 is narrowed by OD-1 for owner and administrator views**: the per-person presence estimates
+     stay in the schema, labelled by `method` and logged; what a receiver serves another person of them is item 4's.
+  6. **`result` and the root run** (v4 §12). The envelope's `run` gains `root`, the root run id every hop of one
+     execution carries — a random per-run id — beside `task`, at least one of the two; a usage line carries it, so
+     cost and result join on the device. A new core kind `result` `{signal, outcome: met | not_met, count?}` requires
+     `run.root` and carries no `user` and no `session`; a receiver never attaches a user to one. No person dimension is
+     added anywhere.
+  7. **One definition of consumed (F-B-108).** An ack moves over seqs held, rejected or accounted for by an overflow
+     event. A check-in's `dropped` ranges are **pending** (`StreamState.pending`): tamper evidence counts them, an ack
+     never does.
+  8. **A summary's `mixed` basis is the receiver's duty (F-B-107)**, not `FAC-SEM-038`'s: a summary does not carry its
+     lines. F-B-102's four clauses each have a test that fails without them.
+  9. **The settings form refuses a lone surrogate (CT-25)** in any string or key (`settingsCanonicalJson`), instead of
+     writing `\udxxx`, which Python cannot encode. A rule that derives from the form refuses its input rather than
+     throw: `FAC-SEM-039` flags the `sourceKey`, `FAC-SEM-035` a table or column name. Three settings-form refusals join
+     the shared vectors.
+- **Why:** the organization edition's v2 slice and the operator's decisions of 2026-10-08 (OD-1, N4, R10-L1, R06-M1,
+  R06-M6, R06-M7, R10-M2) left these fields owed by DEC-0030 (CON-OE-01); v4 §12 adds the result and the run id
+  (its D4). Checked against the open/private split of 2026-10-07 (J10): every field describes an account, a machine,
+  a run or a purpose; none assesses a person, results carry no user, and per-person usage leaves a receiver only as
+  day or period sums. The audit found an ack definition the code and the text disagreed on (F-B-108) and a claim no
+  rule checked (F-B-107). CT-25: Python cannot encode the bytes the settings form wrote, so a signer and a verifier in
+  the two languages disagreed.
+- **Compatibility:** Additive in schema for a receiver at its next pin: optional fields, two new core kinds (which a
+  reader at an older pin already accepts as unknown kinds under `extData`) and a new schema. A collector sends
+  `account` and `run.root` only to a receiver that pinned this decision, since an older `telemetry-event` closes the
+  envelope. Tightening, each with what a consumer does: an ack no longer moves over check-in drops (a receiver
+  recomputes acks; none is deployed); `FAC-SEM-067` narrows what a receiver serves (the first organization server
+  builds its views to it); the settings form throws on a lone surrogate (an input no Python peer could encode, so no
+  interoperable signature changes); the positive access log now reads usage per day. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/activity.md`, `docs/specification/devices.md` (pending ranges, `re_enrolled`),
+    `docs/specification/conformance.md` (register, canonical forms);
+  - schemas: `schemas/activity-common.schema.json`, `schemas/telemetry-event.schema.json`,
+    `schemas/access-log.schema.json`, `schemas/activity-notice.schema.json` (new), `schemas/device-health.schema.json`;
+  - code: `src/activity-rules.ts`, `src/device-rules.ts` (pending ranges), `src/canonical.ts`, `src/settings-backup.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/telemetry-event-*`, `fixtures/positive/activity-notice-*`,
+    `fixtures/positive/access-log.json`, `fixtures/negative/telemetry-event-*`, `fixtures/negative/activity-notice-*`,
+    `fixtures/semantic/access-log-disclosure-*`, `fixtures/semantic/telemetry-event-violation-other-day.json`,
+    `fixtures/vectors/canonical.json`;
+  - tests: `test/activity-rules.test.ts`, `test/canonical.test.ts`, `test/settings-backup.test.ts`,
+    `test/rule-tolerance.test.ts` (new), `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; floors in
+    `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-04, CT-11, CT-25), the handoff
+    `docs/handoffs/2026-10-12-activity-devices.md`.
+- **Not decided here:** the minimum cell stays k = 3 (DEC-0030); the first organization server's own floor of 5 is its
+  stricter choice, not the contract's; which scopes beyond `activity.raw`, `activity.presence` and `activity.usage` a
+  receiver names; a summary cell of results.
+- **Source:** CON-OE-01 in fabric-workspace `docs/reports/2026-10-08-org-architecture-v2/plans/fabric-agent-contract.md`
+  (at `7c9f134`) and its crosswalk to v4 (`CROSSWALK-v4.md`, CON-OE-01 kept); the open/private split
+  `docs/reports/2026-10-07-wave1-open-private-split/README.md` (J10); the first organization server's target
+  architecture v4 at `9c6a780`, §2 rule 10, §9, §12; the board-waves inventory F-B-102, F-B-107, F-B-108, CT-25,
+  V4-RUN-RESULT (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P3-02. DEC-0052 and `FAC-SEM-067`
+  were reserved by git CAS (`agent_sync.py reserve --key w3-p3-02-activity-20261012 DEC`, `--key
+  w3-p3-02-sem-access-log-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited under git leases;
+  the record plane is `fs`.
+
+### DEC-0053 — Devices amended: verification-time key validity, bound users, organization policy keys, expiry and collection start, a certified root, ES256 and device keys by role
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: a collector and Project
+  Observatory's node judge policy keys at verification, keep locks after expiry, decide by `FAC-SEM-068`, report
+  `components[]` and `records`, and enroll with `deviceKeys`; the first organization server, as organization server,
+  binds the proven user, states `collectionStart`, signs key sets in its root's algorithm and, for organizations a
+  vendor hosts, delivers the root's certification (backlog CT-04). The relay protocol (DEC-0047, reserved) builds on
+  the `#kem` key and the check-in's `records`.
+- **Amends:** DEC-0031 (items 1, 3, 4 and 7). Implements CON-OE-12 as the v4 crosswalk keeps it and the first
+  organization server's target architecture v4 §12 row "DEC-0031: `platform-keystore` device keys; ES256
+  `policyRootKey` form; check-in carries the record revision, heartbeat, delta and leases" (commit `9c6a780`), and closes
+  F-B-101, F-B-103…F-B-106, F-B-109 and F-B-114.
+- **Decision:** in [devices](specification/devices.md) unless named otherwise —
+  1. **A policy key is judged when the device verifies (F-B-106).** The trusted keys are those of the current key set
+     valid on the device's clock at verification (`FAC-SEM-041`'s input `at`), never at the `issuedAt` the signer
+     chose, and a policy is never issued before the one the device holds for its layer. This replaces DEC-0031 item 7's
+     "valid at the policy's `issuedAt`": a policy signed under a key that has since expired is refused, and the server
+     signs again.
+  2. **The bound user is the proven one (F-B-105).** An SSO certificate binds the user the `Authorization` proof names;
+     a token certificate binds a user only when the token names that person (`FAC-SEM-044`'s inputs `proof.userId`,
+     `token.userId`).
+  3. **No path in free text (F-B-104).** `device-common#/$defs/detail` refuses a slash, backslash or tilde at the start
+     of a word anywhere in the line, a drive letter, an encoded slash and the home directory's slash and dash forms.
+     F-B-103: a hashed branch is `hmac-sha256:`. F-B-109: the reader row of a device applying policy names
+     `FAC-SEM-046`. F-B-101's ten branches each have a test that fails without them.
+  4. **Organization policy keys** (CON-OE-12): `accounts.tenants`, `models.credentials` (organization API keys only —
+     `credentialKind: api-org`, an `hmac-sha256:` fingerprint, data classes; never a subscription or a person's key),
+     `models.personal_key_sharing` (absent means forbidden), `workspace.folders` (relative to home, never naming a
+     user) and `machine.mode` (`C` by default; `A` only from an mdm layer). Unset keys resolve to defaults
+     (`POLICY_DEFAULTS`): `build_channel.allowed` `official`, `machine.mode` `C`, `models.personal_key_sharing`
+     `forbidden` (`FAC-SEM-042`).
+  5. **Expiry and collection start.** A delivered layer MAY carry `expiresAt`: after it, locks stay, and grants, remote
+     execution and a person's key for others stop. A device collects only from its `collectionStart` — the notice's
+     acknowledgement, or under device management the earlier of that and the mdm layer's `noticeDeadline` — which the
+     enrollment and check-in responses state; an event that occurred before it is never uploaded. **`FAC-SEM-068`**
+     (`device-action`, receipt SEM-0068): a device's decision is the one its policy gives (`expectedDecision`).
+  6. **A certified root.** When the installer pins offline root keys, the enrollment's root key carries a
+     `rootCertification` by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key
+     signed and whose id the pinned key's `delegationRevocations` do not name, all checked at enrollment
+     (`device-root-certification.schema.json`, signed over RFC 8785). With nothing pinned, the organization's root is
+     its own. **`FAC-SEM-069`** (receipt SEM-0069). This is CON-OE-12's offline-root counter-signature as v4 narrows
+     it: a vendor's offline root counter-signs only the organizations it hosts (v4 §11, §20 V2-13).
+  7. **ES256 beside Ed25519 for the root key.** `policyRootKey.alg` is `ed25519` (default) or `es256`; a key set is
+     signed and verified in its root's algorithm, and every signed document here names its algorithm and is verified
+     only in it (`verifyWith`). Policy signing keys stay Ed25519. This decision is the contract's own: Fabric's ES256
+     ruling (its D2, ADR-0144) covers delegation tokens, not device policy.
+  8. **Device keys by role.** Beside the Ed25519 device key DEC-0031 admits, P-256 keys held in the platform keystore:
+     `deviceKeys` lists a signing key as `<device.id>#sig` (ES256 or Ed25519) and a key-agreement key as
+     `<device.id>#kem` (ECDH over P-256 only), never one key in both roles (`FAC-SEM-044`). v4's device key, a
+     non-extractable `ecdsa-p256` key in the `platform-keystore`, was already admitted; it is recorded as the target
+     without a schema change. **Every P-256 public key is validated by SEC 1 §3.2.2** — not the point at infinity,
+     coordinates in range, on the curve (`isValidP256Key`, `src/p256.ts`, vectors `fixtures/vectors/p256.json`) — and
+     every Ed25519 key still passes the small-order check (DEC-0045).
+  9. **Check-in fields.** `components[]` (name and version); `records` — the estate-record revision applied, the latest
+     heartbeat, the revocation delta's head applied (`sequence`, `sha256`) and the leases held — and the response's
+     `records`, carrying the heartbeat, the delta and leases unchanged. Fields only: their shapes are the relay
+     protocol's (DEC-0047, reserved). Health reason `re_enrolled` carries `gapSeconds` and `count`: posture, not tamper
+     evidence (CON-OE-01).
+- **Why:** the audit found a key-validity rule a leaked expired key could pass (F-B-106), a bound user no rule
+  compared with the proof (F-B-105) and path forms the detail pattern let through (F-B-104). CON-OE-12 owed the
+  organization edition's policy keys, expiry, collection start (the operator's N9) and the root's counter-signature (N7,
+  R10-M3); v4 §2 rule 12 sets algorithms by role, P-256 for hardware-held keys. The relay protocol needs a key-agreement
+  key that is never a signing key. J10: every key describes an account, a machine or a folder relative to home; none
+  assesses a person.
+- **Compatibility:** Additive in schema: new optional policy keys and fields, a new schema, `es256` beside `ed25519`.
+  Tightening, each with what a consumer does: a policy whose key expired before the device verifies is refused (the
+  server re-signs under a current key); an SSO or token certificate must bind the proven user; a detail string with a
+  path inside it is refused (a collector strips paths from errors); an unset `build_channel.allowed` now resolves to
+  `official`, so an organization's device refuses an unofficial build unless a layer says `any`; a device that pinned
+  an offline root refuses an uncertified root. Nothing is deployed against DEC-0031 yet (CT-04), so no consumer
+  breaks in the field. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/devices.md`, `docs/specification/conformance.md` (register, canonical forms, readers);
+  - schemas: `schemas/device-common.schema.json`, `schemas/device-policy.schema.json`,
+    `schemas/device-enrollment.schema.json`, `schemas/device-check-in.schema.json`, `schemas/device-key-set.schema.json`,
+    `schemas/device-root-certification.schema.json` (new);
+  - code: `src/device-rules.ts`, `src/p256.ts` (new);
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/device-*`, `fixtures/negative/device-*`,
+    `fixtures/semantic/device-*`, `fixtures/vectors/p256.json`;
+  - tests: `test/device-rules.test.ts`, `test/p256.test.ts` (new), `test/rule-tolerance.test.ts` (new),
+    `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (TUF v1.0.37, RFC 7518, SEC 1 and SEC 2), `docs/handoffs/2026-10-08-activity-telemetry.md`
+    (F-B-114), `CONTEXT.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoff
+    `docs/handoffs/2026-10-12-activity-devices.md`.
+- **Not decided here:** attestation formats (OQ-0010, deferred: the first organization server answers it); the shapes
+  of the heartbeat, the revocation delta, the leases and sealed envelopes (DEC-0047); the organization root as a pair of
+  keys (v4 §3) and its replacement, beyond one `policyRootKey` per enrollment; how the organization's fingerprint salt
+  reaches a node; ES256 policy signing keys in a key set.
+- **Source:** CON-OE-12 in fabric-workspace `docs/reports/2026-10-08-org-architecture-v2/plans/fabric-agent-contract.md`
+  (at `7c9f134`) and `CROSSWALK-v4.md` (CON-OE-12 changed); the first organization server's target architecture v4 at
+  `9c6a780`, §2 rule 12, §7, §11, §12, §20; TUF v1.0.37, RFC 7518 and SEC 1 v2 in the [source ledger](evidence/sources.md);
+  the board-waves inventory F-B-101, F-B-103…F-B-106, F-B-109, F-B-114, V4-DEVICE, packet P3-02. DEC-0053 and
+  `FAC-SEM-068`, `FAC-SEM-069` were reserved by git CAS (`agent_sync.py reserve --key w3-p3-02-devices-20261012 DEC`,
+  `--key w3-p3-02-sem-{device-action,root-certification}-20261012 SEM`); this file, `conformance.md` and `backlog.md`
+  were edited under git leases; the record plane is `fs`.

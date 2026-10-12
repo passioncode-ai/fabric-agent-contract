@@ -1,0 +1,36 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "enrollment-request",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "device": {
+    "id": "dev-01j9a",
+    "platform": "macos"
+  },
+  "key": {
+    "algorithm": "ecdsa-p256",
+    "storage": "secure-enclave",
+    "exportable": false,
+    "publicKeySha256": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+  },
+  "deviceKeys": [
+    {
+      "kid": "dev-01j9a#sig",
+      "use": "sig",
+      "alg": "es256",
+      "publicKey": "BBK2Bugxr84iKq5dQUmzNKMGrX59LFvv5fUdyQ+J4iJV43Q4gm+MuF0HKMGnk039agOVz5fgs0hcO7fwkqeIOfU="
+    },
+    {
+      "kid": "dev-01j9a#kem",
+      "use": "kem",
+      "alg": "ecdh-p256",
+      "publicKey": "BB8sca8fep0WKeXZW/Tk90HooUktQ9unwj3nw/78Y1SjUSUVcPnnOOSjSQ/dLb1Ag5a9T0XOQBMsQK1t95E3l9A="
+    }
+  ],
+  "csr": "MIIBDzCBtgIBADBUMQ8wDQYDVQQKDAZvcmctN2YzYTESMBAGA1UEAwwJZGV2LTAxajlh",
+  "auth": {
+    "method": "sso"
+  },
+  "requestedAt": "2026-10-07T08:30:00Z"
+}

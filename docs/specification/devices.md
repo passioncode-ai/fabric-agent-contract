@@ -111,6 +111,23 @@ step 2 when any of these happens:
 collector starts again at seq 1 and reports the policy revisions it holds now, and neither is
 evidence of tampering. Nothing is renewed silently past `notAfter`.
 
+<a id="device-keys"></a>
+
+### Device keys by role
+
+DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 device keys held in the
+platform keystore, listed by role in the enrollment request's `deviceKeys`:
+
+- **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
+- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol (DEC-0047, reserved) seals
+  secrets to it.
+
+One key is never used for the other role, and each kid names the enrolling device (`FAC-SEM-044`). A
+P-256 public key — a device key, a policy root key, an offline root or delegation key — is validated by
+SEC 1 §3.2.2 before use: not the point at infinity, coordinates in range, on the curve
+([`isValidP256Key`](../../src/p256.ts), vectors `fixtures/vectors/p256.json`). Every Ed25519 key still
+passes the small-order check (DEC-0045).
+
 <a id="attribution"></a>
 
 ## Attribution
@@ -377,7 +394,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
 | `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default, then the contract's default for an unset key — with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; the stream epoch is above every epoch issued before |
+| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
 | `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |

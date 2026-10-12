@@ -1,0 +1,59 @@
+{
+  "$comment": "P-256 public keys for isValidP256Key (src/p256.ts), SEC 1 v2 §3.2.2, as raw uncompressed points in base64 (DEC-0053). The generator G is SEC 2 v2 §2.4.2's; the fresh key was generated for the purpose.",
+  "valid": [
+    {
+      "name": "the generator G",
+      "publicKey": "BGsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKWT+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UfU="
+    },
+    {
+      "name": "a fresh key",
+      "publicKey": "BAHGBUpk86a7T8dKfivt0reHA9K98y8wGqK7KxYsfTST0vLrMClgedhguTryzFDbMOvr8znzujd70eanEI5AoB4="
+    },
+    {
+      "name": "the point with x = 0",
+      "publicKey": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZkhceA4vg9ckM71dhKBrtlQcKvMdrocXKL+FahdPk/Q="
+    }
+  ],
+  "invalid": [
+    {
+      "name": "the point at infinity (the single byte 0x00)",
+      "publicKey": "AA=="
+    },
+    {
+      "name": "a compressed point (prefix 0x02)",
+      "publicKey": "AmsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKW"
+    },
+    {
+      "name": "the uncompressed prefix with 64 bytes",
+      "publicKey": "BGsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKWT+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UQ=="
+    },
+    {
+      "name": "a hybrid prefix (0x06)",
+      "publicKey": "BmsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKWT+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UfU="
+    },
+    {
+      "name": "y off the curve (G with y + 1)",
+      "publicKey": "BGsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKWT+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UfY="
+    },
+    {
+      "name": "x = p, out of range",
+      "publicKey": "BP////8AAAABAAAAAAAAAAAAAAAA////////////////T+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UfU="
+    },
+    {
+      "name": "y = 2^256 − 1, out of range",
+      "publicKey": "BGsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKW//////////////////////////////////////////8="
+    },
+    {
+      "name": "x = 0, y = 0",
+      "publicKey": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    },
+    {
+      "name": "the same point with x + p: on the curve modulo p, out of range",
+      "publicKey": "BP////8AAAABAAAAAAAAAAAAAAAA////////////////ZkhceA4vg9ckM71dhKBrtlQcKvMdrocXKL+FahdPk/Q="
+    },
+    {
+      "name": "x = 0 with y = p, out of range",
+      "publicKey": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////wAAAAEAAAAAAAAAAAAAAAD///////////////8="
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
+import { isValidP256Key } from "./p256.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
@@ -306,6 +307,18 @@ function enrollment(value: JsonObject): Finding[] {
     const deviceToken = auth.method === "enrollment-token" && token.deviceId !== undefined && token.deviceId === id(request.device);
     if (!sameKey && !deviceToken) flag("/request/device/id", "this device is already enrolled: re-enrollment needs a CSR from the key on record or a device-management token issued for this device");
   }
+  // DEC-0053: the device's keys by role — `<device.id>#sig` signs, `<device.id>#kem` agrees keys, never one key for both.
+  const roles = new Map<unknown, number>();
+  (Array.isArray(request.deviceKeys) ? request.deviceKeys.filter(isObject) : []).forEach((key, i) => {
+    const at = `/request/deviceKeys/${i}`;
+    if (key.kid !== `${String(id(request.device))}#${String(key.use)}`) flag(`${at}/kid`, "a device key is listed as <device.id>#sig or <device.id>#kem, by its role");
+    if (key.use === "kem" ? key.alg !== "ecdh-p256" : key.alg !== "es256" && key.alg !== "ed25519") flag(`${at}/alg`, "a sig key signs with ES256 or Ed25519; a kem key agrees keys over P-256 only");
+    const raw = Buffer.from(String(key.publicKey ?? ""), "base64");
+    if (key.alg === "ed25519" ? raw.length !== 32 || isSmallOrderKey(raw) : !isValidP256Key(raw)) flag(`${at}/publicKey`, "an Ed25519 key is never of small order (DEC-0045) and a P-256 key is a valid point (SEC 1 §3.2.2)");
+    const seen = roles.get(key.publicKey);
+    if (seen !== undefined) flag(`${at}/publicKey`, `the same key is already listed at /request/deviceKeys/${seen}: one key is never used for the other role`);
+    else roles.set(key.publicKey, i);
+  });
   const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];
   if (issued.length && num(response.streamEpoch) <= Math.max(...issued)) flag("/response/streamEpoch", `an enrollment issues an epoch above every epoch issued to the device before (${Math.max(...issued)})`);
   return findings;
@@ -445,8 +458,8 @@ const P256_SPKI_PREFIX = Buffer.from("3059301306072a8648ce3d020106082a8648ce3d03
 
 /**
  * Whether `signature` (base64) over `bytes` verifies under `key` (`{alg, publicKey}`): `ed25519` with a raw 32-byte key
- * (never one of small order, DEC-0045), or `es256` with a raw 65-byte uncompressed P-256 point and a 64-byte r‖s
- * signature (DEC-0053). A verifier accepts only the algorithm the key names.
+ * (never one of small order, DEC-0045), or `es256` with a raw 65-byte uncompressed P-256 point valid by SEC 1 §3.2.2
+ * (`isValidP256Key`) and a 64-byte r‖s signature (DEC-0053). A verifier accepts only the algorithm the key names.
  */
 export function verifyWith(key: JsonObject, bytes: Buffer, signature: unknown): boolean {
   if (typeof key.publicKey !== "string" || typeof signature !== "string") return false;
@@ -458,7 +471,7 @@ export function verifyWith(key: JsonObject, bytes: Buffer, signature: unknown): 
       return verify(null, bytes, createPublicKey({ key: Buffer.concat([ED25519_SPKI_PREFIX, raw]), format: "der", type: "spki" }), value);
     }
     if (key.alg === "es256") {
-      if (raw.length !== 65 || raw[0] !== 0x04) return false;
+      if (!isValidP256Key(raw)) return false;
       return verify("sha256", bytes, { key: createPublicKey({ key: Buffer.concat([P256_SPKI_PREFIX, raw]), format: "der", type: "spki" }), dsaEncoding: "ieee-p1363" }, value);
     }
   } catch {

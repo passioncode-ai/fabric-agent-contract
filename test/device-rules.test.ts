@@ -498,3 +498,26 @@ describe("DEC-0053: a key set signed by an ES256 root", () => {
     expect(paths("device-key-set", ed)).toEqual(["FAC-SEM-046 /next/signature/value"]);
   });
 });
+
+// DEC-0053 (for the relay protocol, DEC-0047): a device's keys by role, <device.id>#sig and <device.id>#kem.
+describe("DEC-0053: device keys by role", () => {
+  const input = () => load("semantic/device-enrollment-device-keys.json").input;
+  const where = (value: unknown) => paths("device-enrollment", value);
+
+  it("refuses a kid that is not <device.id>#<use>, a kem key that signs, and an invalid or small-order key", () => {
+    const kid = input(); kid.request.deviceKeys[0].kid = "dev-other#sig";
+    expect(where(kid)).toEqual(["FAC-SEM-044 /request/deviceKeys/0/kid"]);
+    const alg = input(); alg.request.deviceKeys[1].alg = "es256";
+    expect(where(alg)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/alg"]);
+    const off = input(); const point = Buffer.from(off.request.deviceKeys[1].publicKey, "base64"); point[64] = point[64]! ^ 1; off.request.deviceKeys[1].publicKey = point.toString("base64");
+    expect(where(off)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/publicKey"]);
+    const small = input(); small.request.deviceKeys[0] = { kid: "dev-01j9a#sig", use: "sig", alg: "ed25519", publicKey: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" };
+    expect(where(small)).toEqual(["FAC-SEM-044 /request/deviceKeys/0/publicKey"]);
+    const ed = input(); ed.request.deviceKeys[0] = { kid: "dev-01j9a#sig", use: "sig", alg: "ed25519", publicKey: generateKeyPairSync("ed25519").publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64") };
+    expect(where(ed)).toEqual([]);
+  });
+
+  it("refuses one key in both roles", () => {
+    expect(where(load("semantic/device-enrollment-device-key-both-roles.json").input)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/publicKey"]);
+  });
+});
