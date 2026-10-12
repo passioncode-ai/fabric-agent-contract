@@ -5,6 +5,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | Handoff | Decisions | Merge |
 |---|---|---|
 | [2026-10-12 channel status and embedded dashboard](2026-10-12-w4-p4-03-channel-dashboard.md) | DEC-0058, DEC-0059 (board run P4-03; CT-13) | PR #56 open |
+| [2026-10-12 relay and secret envelope](2026-10-12-relay.md) | DEC-0047 (`fabric-relay/0.1`, `fabric-secret-envelope/1`; relay RLY-01) | PR #53, in review |
 | [2026-10-12 estate record](2026-10-12-w3-p3-03-estate-record.md) | DEC-0055 (board run P3-03; V4-ESTATE-RECORD) | pull request open |
 | [2026-10-12 activity and devices](2026-10-12-activity-devices.md) | DEC-0052, DEC-0053 (board run P3-02; CT-11, CT-25) | merged, #52 `92de756` |
 | [2026-10-12 agent package](2026-10-12-agent-package.md) | DEC-0050, DEC-0051 (board run P3-01; V4-PACKAGE, V4-AGENTREF) | merged, #50 `9d29d71` |

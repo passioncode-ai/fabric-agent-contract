@@ -216,7 +216,7 @@ A missing receiver makes the channel `degraded` with the reason `receiver-missin
 `receiver.lease: none`. While the receiver is missing, `receiver.lease` reads `none` even if a process still renews
 the lease, as under the second condition, where a holder renews but the updates do not drain (DEC-0058). In the
 first 120 seconds after a lease stops being renewed the receiver is not yet missing: the agent publishes no new state
-for the lapse, its last status stands, and it does not report the lapse as `unlinked`; from the 120th second it
+for the lapse, its last status stands, and it does not report the lapse as `unlinked`; after 120 seconds it
 publishes `degraded` with `receiver-missing`. `reason.detail` SHOULD give the pending count and since when nobody has
 received. The check MUST NOT call `getUpdates` itself: that would make it a second receiver
 (OC-2). It also MUST NOT drop the pending updates, since dropping them is the operator's choice. A

@@ -366,6 +366,19 @@ effect; every effectful stage has one on every path from the start.
 **Contract pin**: The one record (`fabric-contract.lock.json`) naming the contract
 version and commit a consuming repository builds against.
 
+**Relay**: A server that admits machines on their device keys and carries their messages,
+sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
+authority: it reads nothing it carries, decides no trust tier and never reports a queued command done.
+
+**Admission set**: The signing keys a **Relay** admits — the machines of the estate record it holds,
+applied only after `verifyEstateRecord`, minus revoked machines and keys; none once the record's window ends. It
+keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
+organization's relay has none of its own until `org-authority/1` (Fabric D8).
+
+**Secret envelope**: One secret sealed with HPKE to one machine's key-agreement key (`#kem`) and
+signed by the machine that holds its slot (`fabric-secret-envelope/1`, DEC-0047); carried by a
+**Relay** as a blob and opened only in the target's vault.
+
 ## Relationships
 
 - A **Host** registers many **Providers**.

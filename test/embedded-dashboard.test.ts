@@ -127,8 +127,8 @@ describe("the declaration as a host reads it (DEC-0059, ED-6, ED-8, ED-9, FAC-SE
   it("reads only the document's own key, never one inherited from Object.prototype", () => {
     const proto = Object.prototype as Record<string, unknown>;
     try {
-      // Not enumerable: an enumerable member would also reach every object the validator walks with for…in and make
-      // the inherited declaration itself invalid, which would hide a reader that used `in`.
+      // Not enumerable: the test's own object literals would otherwise inherit an enumerable member, and assigning to
+      // it can throw (a read-only inherited property), so the test would fail for that reason, not the reader's.
       Object.defineProperty(proto, EXTENSION_KEYS.dashboard, { value: { minWidth: 1280 }, configurable: true, enumerable: false });
       expect(hostView({ extensions: {} }).declared).toBe(false);
       expect(hostView({ extensions: {} }).hostFloor).toBe(480);

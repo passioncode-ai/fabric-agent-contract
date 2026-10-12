@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0056`
+**Next free ID:** `DEC-0060`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -2481,6 +2481,198 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
 
+### DEC-0047 — The relay and the secret envelope: admission by device key inside the WebSocket, store-and-forward that never reports done, trust tiers from the signed sender, HPKE envelopes sealed to `#kem` (`fabric-relay/0.1`, `fabric-secret-envelope/1`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+  - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
+    sessions from this text (its RLY-02) and runs the vectors;
+  - Project Observatory's node is a relay client and opens envelopes into its vault;
+  - Fabric's remote surfaces are clients. An amendment of Fabric ADR-0088 §3 naming `fabric-relay/0.1` is owed:
+    nothing of it is on Fabric's main yet;
+  - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
+    source of admission and keeps the presence rule (item 5).
+- **Amends:** nothing. It is a new protocol under the DEC-0016 extension policy. It builds on:
+  - DEC-0053's P-256 device keys by role (`<device.id>#sig`, `<device.id>#kem`);
+  - DEC-0045's trust tiers (DL-25, DL-26);
+  - DEC-0043's register of canonical forms (every signed or hashed document here is RFC 8785).
+
+  It implements the relay half of the first organization server's target architecture v4 §12 row "secret envelope
+  (sealed to a device key)", and the transport of its "revocation delta and timestamp heartbeat" row. The documents
+  themselves are DEC-0054's.
+- **Decision:** in [relay](specification/relay.md) unless named otherwise —
+  1. **Roles.**
+     - A relay admits machines, queues and delivers opaque messages, stores envelopes and blobs by digest, reports
+       when a machine was last seen, and carries signed deltas and heartbeats unchanged.
+     - It holds no authority. It never reads a body or a secret, decides a tier, signs anything a node relies on,
+       reports a queued command done, or serves a signing page.
+  2. **Keys.**
+     - A relay participant's keys are P-256, two per machine, never one key in both roles.
+     - **Its `#sig` is ES256 only.** devices.md admits an Ed25519 `#sig` for a device; a relay refuses one, and any
+       `alg` other than `ES256`, as `unsupported-alg`. Every signed document names the algorithm in a signed field:
+       `relay-auth/1`, `relay-blob/1` and the envelope header carry `alg: "ES256"`, and the message body is a JWS.
+     - Every public key is validated before use by SEC 1 v2 §3.2.2 (`p256KeyRefusal` in `src/p256.ts`), one function
+       that names the refusal and that `isValidP256Key` is expressed by. A key that fails is refused as `bad-key`.
+     - A key reaches every check in either spelling: DEC-0053's base64 SEC 1 octets or a JWK (`p256Point`,
+       `p256PublicKey`), with the same answers for both.
+     - All signatures are ES256, raw `r ‖ s`.
+     - Times are RFC 3339 UTC; one that does not parse to an instant is refused, never compared. A signed `iat` more
+       than 60 s ahead of the verifier's clock is `not-yet-valid`, in admission, in a message body and in an
+       envelope.
+  3. **Transport.**
+     - One WebSocket (RFC 6455) per connection to `/v1/connect`, with subprotocol `fabric-relay.v1`, over TLS 1.2
+       or newer, TLS 1.3 (RFC 8446) SHOULD.
+     - No credential travels in the URL or in an HTTP header.
+     - UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
+       ([`relay-frame.schema.json`](../schemas/relay-frame.schema.json)).
+     - Unknown members are ignored. An unknown `type` is answered with `error` `unknown-type`.
+     - Close codes: 1009 for a frame over 1 MiB, 1003 for a binary frame, 4401 after `unauthenticated`, 4403 after
+       `not-admitted`, and 1001 after 90 s of silence (`CLOSE_CODES`, `IDLE_CLOSE_SECONDS`).
+  4. **Admission** (`admit`). A machine answers `hello`'s nonce, within 10 s, with an ES256 signature over the RFC
+     8785 bytes of `{type: "relay-auth/1", alg: "ES256", relay, nonce, estate, kid, iat}`. The relay admits it only
+     when all of these hold:
+     - the protocol is this one, and `alg` is `ES256`;
+     - `iat` is an instant at most 60 s old and at most 60 s ahead (`not-yet-valid` beyond that);
+     - the nonce is this connection's own, and is used once;
+     - `kid` is in the admission set;
+     - the signature verifies.
+
+     It then attributes every later frame on the connection to that `kid`.
+     - **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds,
+       minus revoked machines and keys (`relayAdmissionSet`). It is not authorization.
+     - **Only from a verified revision.** The relay pins the estate's first passkeys when it is set up for the
+       estate, the same act as a machine's enrollment pin. It applies a revision only when it is valid against the
+       schema and `verifyEstateRecord` accepts it against the revision it holds (revision 1: against the pinned
+       passkeys). A refused revision changes nothing, and a relay never starts with a configured set.
+     - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
+       revision arrives; open sessions end at their next re-authentication, and queued mail stays until its `ttl`.
+       Presence and `lastSeen` follow the same verified set.
+     - **No organization record yet.** An organization's relay has no admission source of its own until
+       `org-authority/1` (Fabric D8) is decided.
+     - `relayAdmissionSet` takes the schema check from its caller, which MUST pass the validator of
+       `estate-record.schema.json`; `() => true` is not conformant.
+  5. **Messages.**
+     - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
+     - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
+     - `ttl` is 1 s to 7 days and bounds only the mailbox. A body is at most 765 KiB decoded, so the largest frame
+       around it fits 1 MiB.
+     - **The body is end to end:** a compact JWS (`ES256`, `typ: fabric-relay-message+jwt`) over the RFC 8785 payload
+       `{type, from, to, msgId, iat, exp, payload}`. `exp` is signed: the recipient judges the message's life by it,
+       at most 7 days after `iat`, never by the frame's `ttl`. A recipient (`verifyMessageBody`) refuses a body whose
+       signed `from`, `to` or `msgId` differs from the frame's, and names `not-yet-valid`, `lifetime-too-long` and
+       `expired`.
+     - **A relay never reports a command done.** Only the recipient's own signed message back reports an outcome
+       (Fabric ADR-0088).
+     - Presence frames give `{kid, state, lastSeen}`, and **only to machines of the same owner** (J10/OD-1). An
+       organization's relay sends no presence from one member to another.
+  6. **Trust tiers follow the signed sender, never the connection.**
+     - Relay traffic is never T0.
+     - **T1** is a verified `from` that is an enrolled machine of the recipient's **same owner** (DL-25), current
+       and not revoked (DL-26).
+     - **T2** is anything else (DL-8): a machine listed only in an organization record, to a recipient of another
+       owner, and a body signed by an outsider and forwarded by a T1 session.
+  7. **The secret envelope** (`fabric-secret-envelope/1`,
+     [`secret-envelope.schema.json`](../schemas/secret-envelope.schema.json), `src/secret-envelope.ts`).
+     - **Seal:**
+       - HPKE base mode, DHKEM(P-256, HKDF-SHA256) / HKDF-SHA256 / AES-128-GCM, `[16, 1, 1]`, checked against RFC 9180
+         §A.3.1;
+       - recipient: the target's `#kem` key;
+       - `info`: the ASCII bytes `fabric-secret-envelope/1`;
+       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, agentRef, slot, placement, iat,
+         exp, enc}`: a slot is named with its agent, since one slot name can belong to two agents.
+     - A sealer refuses a recipient kid without `#kem` and a sender kid without `#sig`.
+     - The sender signs `{header, ct}` with its `#sig` key. The envelope is named by
+       `sha256:<hex of its RFC 8785 bytes>`.
+     - **A target opens an envelope only when all of these hold, checked in this order** (a refusal names the first
+       that failed; relay.md and `openEnvelope` keep the same order):
+       1. it is well formed, its times real instants (`malformed`);
+       2. `alg` is `ES256` (`unsupported-alg`);
+       3. the recipient is its own `#kem` (`wrong-recipient`);
+       4. the sender's key is P-256 and it and the encapsulated key pass SEC 1 (`unsupported-alg`, `bad-key`);
+       5. the signature is 64 canonical bytes and verifies (`bad-signature`);
+       6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
+          it from the sender's machine (`sender-not-allowed`);
+       7. `placement` is at least the revision from which that placement holds unchanged and at most the latest
+          revision the target has applied: a newer one is fetched and verified first (`placement-stale`);
+       8. `iat` is at most 60 s ahead (`not-yet-valid`);
+       9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
+       10. HPKE opens (`cannot-open`).
+
+       `estateEnvelopeContext` derives the holder, the sender's key and the current placement from the target's
+       applied revisions.
+  8. **Blobs.**
+     - `PUT`/`GET /v1/blobs/<digest>` carry `Fabric-Relay-Request`: an ES256 signature over the RFC 8785 bytes of
+       `{type: "relay-blob/1", alg: "ES256", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
+       method, the digest and the recipients, so it is not a bearer credential.
+     - A blob's name is always `sha256:` and the hex SHA-256 of its bytes. A package travels as its archive's
+       bytes; its DEC-0050 content digest is not its blob name.
+     - The relay recomputes every digest.
+     - A blob is kept until every recipient fetched it, or until 7 days pass.
+  9. **Revocation travels, it is not defined, here.**
+     - `welcome` carries `deltaHead {sequence, sha256}`, the shape of DEC-0053's check-in
+       `records.revocationDelta`, so a node reports it as it came, and `estateRevision`, the verified revision (1 or
+       more) the relay admits from — always present, since a relay without one admits nobody.
+     - New deltas and heartbeats are pushed to every connected machine they name. A node behind the head asks with
+       `delta-query`.
+     - A relay can delay revocation, which the signed heartbeat exposes, but it cannot forge it. The documents, keys,
+       head hash, the 72-hour rule and their vectors are DEC-0054.
+     - The check-in's `records` of DEC-0053 carry that head unchanged. Their `heartbeat` is DEC-0054's document,
+       and `leases` are the window lease's own decision.
+  10. **Rules:**
+      - `FAC-SEM-070`: an envelope is sealed to a `#kem` key by a `#sig` key under `ES256`, with the admitted suite,
+        a life of more than zero and at most 24 hours, and a valid encapsulated key;
+      - `FAC-SEM-071`: an `auth` frame names a `#sig` key, `ES256` and this protocol; a `send` frame addresses a
+        `#sig` key, with a bounded `ttl` and body.
+- **Why:**
+  - **The operator decided D6 on 2026-10-12:** the relay gets its own open repository, with Project Observatory as
+    code owner, and self-hosting stays (V2-21).
+  - **A relay is the one component every person's machines, and later colleagues' machines, must pass through.**
+    Putting authority anywhere but in end-to-end signatures and seals would make its compromise the estate's. With
+    this text, a compromised relay can deny service and see metadata, nothing more.
+  - **The two-key rule and SEC 1 validation close the invalid-curve attack on ECDH and the confusion of a signature
+    with a seal.** The envelope reuses a published, vector-checked construction (RFC 9180) rather than a bespoke one.
+  - **ES256 only for the relay, departing from devices.md's Ed25519 `#sig`** (in the way DEC-0053 item 7 departs):
+    the platform keystore holds P-256, and the envelope's `#kem` is P-256 anyway, so one curve and one verifier serve
+    every relay participant. The algorithm is named in each signed document, as the wave-3 rule asks.
+  - **The owner's rulings on the review of #53:** T1 is DL-25's same owner; presence stays within one owner; ES256
+    with a signed `alg`; one `{sequence, sha256}` head shape; not-before; a signed `exp`.
+- **Compatibility:** Additive under DEC-0016:
+  - two new schemas (`relay-frame`, `secret-envelope`), two rule codes, three vector files (`relay.json`,
+    `secret-envelope.json`, and `p256.json` extended with refusal names and JWK cases);
+  - `isValidP256Key` keeps its answers for every byte string, and now also accepts a JWK.
+
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/relay.md` (new), `docs/specification/conformance.md` (rule register, canonical forms),
+    `docs/specification/devices.md` (the `#kem` and `records` passages point here and to DEC-0054);
+  - schemas: `schemas/relay-frame.schema.json`, `schemas/secret-envelope.schema.json`,
+    `schemas/device-check-in.schema.json` (descriptions of `records` only);
+  - source: `src/relay.ts`, `src/secret-envelope.ts`, `src/relay-rules.ts`, `src/p256.ts` (`p256KeyRefusal`),
+    `src/semantic-rules.ts`;
+  - vectors and fixtures: `fixtures/vectors/{relay,secret-envelope,p256}.json`, `fixtures/semantic/relay-*.json`;
+  - tests: `test/relay.test.ts`, `test/secret-envelope.test.ts`, `test/relay-rules.test.ts`, `test/p256.test.ts`,
+    `test/schema-compilation.test.ts`;
+  - docs: `docs/DOCMAP.md`.
+- **Not decided here:**
+  - the guest OAuth page and its binding ceremony;
+  - attestation formats (OQ-0010);
+  - mailbox quotas;
+  - whether a self-hosted relay federates with the hosted one;
+  - the documents of the revocation delta and heartbeat (DEC-0054);
+  - the window lease.
+- **Source:**
+  - The operator's D6 decision and its relay transport ADR, private to Project Observatory, agreed with Fabric's,
+    the knowledge base's and the first organization server's owners. Its public part is relay ADR-0001.
+  - The contract owner's review of the draft (relay `docs/protocol/dec-0047-draft.md`), with its answers on P-256
+    keys, the DEC-0054 split and the admission removal point.
+  - RFC 9180, RFC 8785, SEC 1 v2, RFC 7518, RFC 6455 and RFC 8446.
+  - The contract owner's review of #53 and rulings (2026-10-12).
+  - The target architecture v4 at `9c6a780`, §4, §7 and §12.
+  - The board item `V4-SECURE-TRANSPORT`.
+  - DEC-0047 was reserved by git CAS (`agent_sync.py reserve --key relay-protocol-20261012 DEC`), and `FAC-SEM-070`
+    and `FAC-SEM-071` by `--key relay-protocol-20261012-sem-{envelope,frame} SEM`. This file and `conformance.md` were
+    edited under git leases of run `project-observatory-3d-relay`; the record plane is `fs`.
+
 ### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
 
 - **Date:** 2026-10-12
@@ -2500,7 +2692,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
      `receiver.lease` reads `none` whenever the receiver is missing, even while a process still renews the lease (the
      not-draining condition). In the first 120 seconds after a lease stops being renewed the receiver is not yet
-     missing: the last status stands and the lapse is never reported as `unlinked`; from the 120th second the status is
+     missing: the last status stands and the lapse is never reported as `unlinked`; after 120 seconds the status is
      `degraded` with `receiver-missing`. The lease's schema description says the same.
   3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
      `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
