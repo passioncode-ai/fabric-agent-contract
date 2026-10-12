@@ -101,7 +101,8 @@ describe("hello as the schema reads it, notifications, client methods, limits", 
       { ...ok, token: "short" },
       { ...ok, protocols: [7, LOCAL_CHANNEL_PROTOCOL] },
       { ...ok, protocols: [] },
-      { ...ok, client: { ...client, extra: 1 } }
+      { ...ok, client: { ...client, extra: 1 } },
+      { ...ok, protocols: [LOCAL_CHANNEL_PROTOCOL, LOCAL_CHANNEL_PROTOCOL] }
     ];
     for (const params of bad) {
       expect(def("hello", params), JSON.stringify(params)).toBe(false);
