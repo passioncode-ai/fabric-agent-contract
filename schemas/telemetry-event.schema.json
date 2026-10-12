@@ -414,7 +414,8 @@
           "runtime": true,
           "data": {
             "$ref": "#/$defs/annotation"
-          }
+          },
+          "user": false
         },
         "required": [
           "session",

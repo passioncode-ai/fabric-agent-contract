@@ -192,8 +192,10 @@ it never attaches a user to a result and serves results only as project or agent
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
-(the surface), `label` (what it reported) and `at`. It carries no start, end, tokens or cost (schema), so it is never
-counted ([one writer per session](#one-writer-per-session)).
+(the surface), `label` (what it reported) and `at`. It carries no start, end, tokens or cost, and no `user` (schema):
+it is never counted ([one writer per session](#one-writer-per-session)), adds no subject to a summary cell's
+population ([`population`](../../src/activity-rules.ts)), and is a raw event served to another person only under
+`activity.raw` with a confirmed purpose.
 
 <a id="one-writer-per-session"></a>
 
@@ -203,7 +205,8 @@ every counted event of one `session.id` carries one `collector.id`, and the sess
 session is in one state at a time (`FAC-SEM-100`, kind `session-join`). A surface's own events about the session —
 Fabric's, Switchboard's — are annotations, never counters: when the collector reads them it writes
 `session.annotation`. A reader counts interval seconds by state and one usage line per `dedupeKey`, and nothing else
-([`sessionTotals`](../../src/session-join.ts)), so a session seen by three writers totals as its collector wrote it
+([`sessionTotals`](../../src/session-join.ts); one call once by its `dedupeKey` across sessions, as `FAC-SEM-038`
+reads it), so a session seen by three writers totals as its collector wrote it
 (`fixtures/semantic/session-join-three-writers.json`).
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any

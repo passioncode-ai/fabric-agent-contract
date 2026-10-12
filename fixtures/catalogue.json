@@ -33,6 +33,8 @@
   {"name": "schema-unsupported", "schema": "schema-unsupported.schema.json", "path": "positive/schema-unsupported.json", "valid": true},
   {"name": "schema-unsupported-empty-accepted", "schema": "schema-unsupported.schema.json", "path": "negative/schema-unsupported-empty-accepted.json", "valid": false, "keyword": "minItems"},
   {"name": "telemetry-event-session-annotation", "schema": "telemetry-event.schema.json", "path": "positive/telemetry-event-session-annotation.json", "valid": true},
+  {"name": "telemetry-event-annotation-without-session", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-annotation-without-session.json", "valid": false, "keyword": "required"},
+  {"name": "telemetry-event-annotation-with-user", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-annotation-with-user.json", "valid": false, "keyword": "false schema"},
   {"name": "telemetry-event-annotation-with-duration", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-annotation-with-duration.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "service-well-known", "schema": "service-well-known.schema.json", "path": "positive/service-well-known.json", "valid": true},
   {"name": "service-events-page", "schema": "service-events-page.schema.json", "path": "positive/service-events-page.json", "valid": true},

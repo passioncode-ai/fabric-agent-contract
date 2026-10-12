@@ -41,7 +41,7 @@ export function sessionJoinFindings(value: JsonObject): Finding[] {
     }
   });
   for (const [session, list] of intervals) {
-    list.sort((a, b) => a.start - b.start || a.index - b.index);
+    list.sort((a, b) => a.start - b.start || a.end - b.end || a.index - b.index);
     let reach = Number.NEGATIVE_INFINITY;
     for (const interval of list) {
       if (interval.start < reach) findings.push({ code: "FAC-SEM-100", instancePath: `/events/${interval.index}/data/start`, message: `session ${session} has overlapping intervals; a session is in one state at a time` });
@@ -54,35 +54,37 @@ export function sessionJoinFindings(value: JsonObject): Finding[] {
 export type SessionTotals = { seconds: Record<string, number>; calls: number; inputTokens: number; outputTokens: number };
 
 /**
- * What a reader counts per session: interval seconds by state and usage lines (one per `dedupeKey`). Annotations and
- * every other kind count for nothing, so a session that three writers reported totals as its collector reported it.
+ * What a reader counts per session: interval seconds by state and usage lines, each call once by its `dedupeKey` across
+ * all sessions (as the activity dedupe rule and the batch cost read it; a line without one counts by its `eventId`, and a line with
+ * neither counts on its own). Annotations and every other kind count for nothing, so a session that three writers
+ * reported totals as its collector wrote it.
  */
 export function sessionTotals(events: unknown): Map<string, SessionTotals> {
-  const totals = new Map<string, SessionTotals>();
+  const totals = new Map<string, { seconds: Map<string, number>; calls: number; inputTokens: number; outputTokens: number }>();
   const seenCalls = new Set<string>();
   for (const event of Array.isArray(events) ? events : []) {
     if (!isObject(event) || !COUNTED.has(event.kind as string) || !isObject(event.data)) continue;
     const session = sessionOf(event);
     if (session === undefined) continue;
-    const entry = totals.get(session) ?? { seconds: {}, calls: 0, inputTokens: 0, outputTokens: 0 };
+    const entry = totals.get(session) ?? { seconds: new Map<string, number>(), calls: 0, inputTokens: 0, outputTokens: 0 };
     totals.set(session, entry);
     const data = event.data;
     if (event.kind === "session.interval") {
       const start = strictTime(data.start);
       const end = strictTime(data.end);
       if (Number.isNaN(start) || Number.isNaN(end) || end < start || typeof data.state !== "string") continue;
-      entry.seconds[data.state] = (entry.seconds[data.state] ?? 0) + (end - start) / 1000;
+      entry.seconds.set(data.state, (entry.seconds.get(data.state) ?? 0) + (end - start) / 1000);
     } else {
-      const key = `${session}\u0000${typeof data.dedupeKey === "string" ? data.dedupeKey : String(event.eventId)}`;
-      if (seenCalls.has(key)) continue;
-      seenCalls.add(key);
+      const key = typeof data.dedupeKey === "string" ? `dedupe:${data.dedupeKey}` : typeof event.eventId === "string" ? `event:${event.eventId}` : undefined;
+      if (key !== undefined && seenCalls.has(key)) continue;
+      if (key !== undefined) seenCalls.add(key);
       const tokens = isObject(data.tokens) ? data.tokens : {};
       entry.calls += 1;
       entry.inputTokens += count(tokens.input);
       entry.outputTokens += count(tokens.output);
     }
   }
-  return totals;
+  return new Map([...totals].map(([session, entry]) => [session, { ...entry, seconds: Object.fromEntries(entry.seconds) }]));
 }
 
 export function sessionJoinRules(kind: string, value: JsonObject): Finding[] | undefined {
