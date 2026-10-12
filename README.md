@@ -19,8 +19,8 @@ Status: contract `0.1.0`. What ships: the JSON Schemas, the fixtures, the confor
 (`pnpm run check`: schemas, semantic rules, documents), the `pin:check` CLI that reports a consumer's
 contract pin, and reference verifiers that consumers copy or port and test against this repository's
 vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`,
-`src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), and `src/estate-record-rules.ts` with
-`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier). What does not ship: a runtime, a provider implementation, a model router,
+`src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), `src/estate-record-rules.ts` with
+`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), and `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
 ## Start here
@@ -47,7 +47,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Session handoff — the folder a host hands a coding-agent session (`session-handoff/1`, DEC-0042)](docs/specification/session-handoff.md)
 - [Capability names and product tool underscores (DEC-0020)](docs/specification/interop.md#capability-names)
 - [Activity telemetry — sessions, usage, summaries and access logs (`fabric-activity/0.1`)](docs/specification/activity.md)
-- [Devices — enrollment, signed policy, check-in and health (`fabric-device/0.1`)](docs/specification/devices.md)
+- [Devices — enrollment, signed policy, check-in, health and the request signature beside mutual TLS (`fabric-device/0.1`)](docs/specification/devices.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)

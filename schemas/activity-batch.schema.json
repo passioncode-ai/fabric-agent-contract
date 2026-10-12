@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/activity-batch.schema.json",
   "title": "Activity batch: what a device sends (fabric-activity/0.1, DEC-0030)",
-  "description": "device.id is checked against the client certificate; the receiver attributes the batch to the certificate, never to the body (FAC-SEM-045).",
+  "description": "device.id is checked against the client certificate, or the certificate a verified request signature names (DEC-0056); the receiver attributes the batch to the certificate, never to the body (FAC-SEM-045).",
   "type": "object",
   "required": [
     "protocol",

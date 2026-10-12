@@ -14,12 +14,12 @@ const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, r
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069)", () => {
+describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069, FAC-SEM-077)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069", "FAC-SEM-077"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {
@@ -535,3 +535,71 @@ describe("review of DEC-0053: the offline root's revocation list on a delegated 
   });
 });
 
+
+// DEV-KEY-ROLES (DEC-0056): an enrollment that lists device keys counts their roles, as the estate record's FAC-SEM-073 does.
+describe("DEC-0056: device-key roles are counted at enrollment", () => {
+  const exactlyAt = (name: string) => evaluateSemanticRules("device-enrollment", load(`semantic/${name}.json`).input).map((finding) => `${finding.code} ${finding.instancePath} ${finding.message}`);
+
+  it("admits one #sig, alone or with one #kem, and an enrollment that lists no device keys (DEC-0031)", () => {
+    expect(exactlyAt("device-enrollment-device-keys-sig-only")).toEqual([]);
+    expect(exactlyAt("device-enrollment-device-keys")).toEqual([]);
+    expect(exactlyAt("device-enrollment-ok")).toEqual([]);
+  });
+
+  it("refuses no #sig, two #sig and two #kem, each with its count", () => {
+    expect(exactlyAt("device-enrollment-device-keys-no-sig")).toEqual(["FAC-SEM-044 /request/deviceKeys an enrollment that lists device keys lists exactly one signing key, <device.id>#sig; this one lists 0"]);
+    expect(exactlyAt("device-enrollment-device-keys-two-sig")).toEqual(["FAC-SEM-044 /request/deviceKeys an enrollment that lists device keys lists exactly one signing key, <device.id>#sig; this one lists 2"]);
+    expect(exactlyAt("device-enrollment-device-keys-two-kem")).toEqual(["FAC-SEM-044 /request/deviceKeys an enrollment lists at most one key-agreement key, <device.id>#kem; this one lists 2"]);
+  });
+
+  it("counts an empty list as listing no signing key", () => {
+    const empty = load("semantic/device-enrollment-device-keys.json").input;
+    empty.request.deviceKeys = [];
+    expect(paths("device-enrollment", empty)).toEqual(["FAC-SEM-044 /request/deviceKeys"]);
+  });
+});
+
+// DEC-0056: FAC-SEM-077 holds a receiver's answer to the transport binding; the vectors run in test/http-signature.test.ts.
+describe("FAC-SEM-077: a receiver answers a device request as the binding says", () => {
+  const input = () => load("semantic/device-request-signature-ok.json").input;
+
+  it("refuses an unreadable receiver clock as the input's fault, strictly read", () => {
+    for (const at of ["2026-10-12T09:00:00", "2026-10-12 09:00:00Z", 7, undefined]) {
+      const value = { ...input(), at };
+      expect(paths("device-request-signature", value)).toEqual(["FAC-SEM-077 /at"]);
+    }
+  });
+
+  it("treats a held pair whose keepUntil has passed as not held, and one held until the clock as held", () => {
+    const value = input();
+    const nonce = /nonce="([^"]+)"/.exec(value.request.headers["signature-input"])![1];
+    const serial = value.certificates[0].serial;
+    const at = Date.parse(value.at) / 1000;
+    expect(codes("device-request-signature", { ...value, seen: [{ serial, nonce, keepUntil: at - 1 }] })).toEqual([]);
+    expect(codes("device-request-signature", { ...value, seen: [{ serial, nonce, keepUntil: at }] })).toEqual(["FAC-SEM-077"]);
+    expect(codes("device-request-signature", { ...value, seen: [{ serial, nonce, keepUntil: at }], answer: "signature-replayed" })).toEqual([]);
+  });
+
+  it("says what the receiver must answer", () => {
+    const refused = { ...input(), answer: "signature-stale" };
+    expect(evaluateSemanticRules("device-request-signature", refused)[0]!.message).toMatch(/accepts it, not signature-stale/);
+    const replay = load("semantic/device-request-signature-replay-accepted.json").input;
+    expect(evaluateSemanticRules("device-request-signature", replay)[0]!.message).toMatch(/answers signature-replayed/);
+    const missing = { ...input(), request: { ...input().request, headers: {} } };
+    expect(evaluateSemanticRules("device-request-signature", missing)[0]!.message).toMatch(/answers signature-missing/);
+  });
+
+  it("reads a request, certificates and a base URL of the wrong shape as absent, with a readable clock", () => {
+    const at = input().at;
+    expect(evaluateSemanticRules("device-request-signature", { at, answer: "base-url-invalid" })).toEqual([]);
+    expect(evaluateSemanticRules("device-request-signature", { at, publicBaseUrl: "https://org.example", request: 7, certificates: 8, answer: "signature-missing" })).toEqual([]);
+    const value = input();
+    expect(evaluateSemanticRules("device-request-signature", { ...value, request: { ...value.request, headers: 7, body: 8 }, answer: "signature-missing" })).toEqual([]);
+  });
+
+  it("reads certificates by serial in a Map, so an input key named constructor finds nothing", () => {
+    const value = input();
+    value.certificates = [{ ...value.certificates[0], serial: "constructor" }, 7, { serial: 9 }];
+    expect(evaluateSemanticRules("device-request-signature", { ...value, answer: "certificate-unknown" })).toEqual([]);
+  });
+});

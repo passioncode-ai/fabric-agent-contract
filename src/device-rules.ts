@@ -5,6 +5,7 @@ import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.j
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { uncovered } from "./seq-ranges.js";
+import { type DeviceCertificateRecord, type DeviceRequest, checkDeviceSignature, strictTime } from "./http-signature.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
@@ -319,6 +320,15 @@ function enrollment(value: JsonObject): Finding[] {
     if (seen !== undefined) flag(`${at}/publicKey`, `the same key is already listed at /request/deviceKeys/${seen}: one key is never used for the other role`);
     else roles.set(key.publicKey, i);
   });
+  // DEV-KEY-ROLES (DEC-0056): an enrollment that lists device keys lists exactly one signing key and at most one
+  // key-agreement key, as the estate record's FAC-SEM-073 counts a machine's — so a receiver of a request signature
+  // (devices.md, transport) knows the one key that signs, and the relay the one key it seals to.
+  if (Array.isArray(request.deviceKeys)) {
+    const listed = request.deviceKeys.filter(isObject);
+    const count = (use: string) => listed.filter((key) => key.use === use).length;
+    if (count("sig") !== 1) flag("/request/deviceKeys", `an enrollment that lists device keys lists exactly one signing key, <device.id>#sig; this one lists ${count("sig")}`);
+    if (count("kem") > 1) flag("/request/deviceKeys", `an enrollment lists at most one key-agreement key, <device.id>#kem; this one lists ${count("kem")}`);
+  }
   const issued = Array.isArray(value.issuedEpochs) ? value.issuedEpochs.filter((e): e is number => typeof e === "number") : [];
   if (issued.length && num(response.streamEpoch) <= Math.max(...issued)) flag("/response/streamEpoch", `an enrollment issues an epoch above every epoch issued to the device before (${Math.max(...issued)})`);
   return findings;
@@ -546,6 +556,38 @@ function rootCertification(value: JsonObject): Finding[] {
   return findings;
 }
 
+/**
+ * FAC-SEM-077: `{request: {method, target, headers, body}, publicBaseUrl, certificates, at, seen?, answer}` — a receiver's
+ * answer to a device request is the one the transport binding gives (DEC-0056): `accepted`, or the 401 code
+ * `checkDeviceSignature` names, or `signature-replayed` when `seen` — the (serial, nonce) pairs the receiver holds, each
+ * with its `keepUntil` — already holds the pair at `at`. `certificates` are the receiver's records by serial; `body` is
+ * the body as a UTF-8 string; `at` is the receiver's clock, RFC 3339 read strictly.
+ */
+function requestSignature(value: JsonObject): Finding[] {
+  const flag = (instancePath: string, message: string): Finding[] => [{ code: "FAC-SEM-077", instancePath, message }];
+  const at = strictTime(value.at);
+  if (Number.isNaN(at)) return flag("/at", "the input names the receiver's clock as an RFC 3339 date-time with an offset; an unreadable clock decides nothing");
+  const request = isObject(value.request) ? value.request : {};
+  const certificates = new Map<string, DeviceCertificateRecord>();
+  for (const record of Array.isArray(value.certificates) ? value.certificates.filter(isObject) : []) {
+    if (typeof record.serial === "string") certificates.set(record.serial, record as unknown as DeviceCertificateRecord);
+  }
+  const seen = new Map<string, number>();
+  for (const pair of Array.isArray(value.seen) ? value.seen.filter(isObject) : []) seen.set(`${String(pair.serial)} ${String(pair.nonce)}`, num(pair.keepUntil));
+  const verdict = checkDeviceSignature(
+    { method: request.method as string, target: request.target as string, headers: (isObject(request.headers) ? request.headers : {}) as DeviceRequest["headers"], body: typeof request.body === "string" ? request.body : "" },
+    { publicBaseUrl: String(value.publicBaseUrl ?? ""), certificate: (serial) => certificates.get(serial), at: new Date(at) }
+  );
+  let want: string = verdict.ok ? "accepted" : verdict.code;
+  let reason = verdict.ok ? "" : verdict.reason;
+  if (verdict.ok) {
+    const until = seen.get(`${verdict.serial} ${verdict.nonce}`);
+    if (until !== undefined && at / 1000 <= until) { want = "signature-replayed"; reason = "this (serial, nonce) is already held"; }
+  }
+  if (value.answer === want) return [];
+  return flag("/answer", want === "accepted" ? `the request carries a valid fabric-device signature; the receiver accepts it, not ${String(value.answer)}` : `the receiver answers ${want}: ${reason}`);
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -556,6 +598,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-key-set") return keySet(value);
   if (kind === "device-action") return deviceAction(value);
   if (kind === "device-root-certification") return rootCertification(value);
+  if (kind === "device-request-signature") return requestSignature(value);
   return undefined;
 }
 // #endregion device-rules

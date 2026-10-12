@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -32,7 +32,7 @@ it. The device side — enrollment, signed policy, check-in, health and attribut
 ```mermaid
 flowchart LR
   R[Runtime: OTel, transcript, rollout] --> C[Collector node on the device]
-  C -- activity-batch over mutual TLS --> S[Receiver]
+  C -- activity-batch over mutual TLS, signed --> S[Receiver]
   S -- activity-batch-ack --> C
   S --> M[activity-summary/1]
   S --> A[access-log/1]
@@ -294,7 +294,9 @@ Schemas: [`activity-batch.schema.json`](../../schemas/activity-batch.schema.json
 [`activity-batch-ack.schema.json`](../../schemas/activity-batch-ack.schema.json).
 
 A device sends `{protocol, device.id, batchId?, sent, events[1..1000]}` over its enrolled
-mutual-TLS channel. **The receiver attributes the batch to the client certificate**, not to the body:
+mutual-TLS channel, signed with an HTTP message signature that a receiver behind a TLS-terminating host verifies
+instead ([devices, transport](devices.md#transport), DEC-0056). **The receiver attributes the batch to the client
+certificate** — or to the certificate the verified signature names — not to the body:
 
 - `device.id` MUST equal the certificate's device;
 - every event's `user.id` MUST equal the user bound when the event's epoch was issued, or be absent
@@ -426,7 +428,8 @@ their own log. Reads of summaries, which carry no person, are not logged per sub
 **OTLP intake** (operator decision 2026-10-08). Beside HTTPS batches, a receiver MAY accept the same
 events as OTLP logs, mapped by the table below. The second intake changes no rule:
 
-- events arrive over the same enrolled mutual-TLS channel, attributed by certificate and epoch
+- events arrive over the same enrolled mutual-TLS channel, signed as every device request is
+  ([devices, transport](devices.md#transport), DEC-0056), attributed by certificate and epoch
   ([devices](devices.md#attribution));
 - each log record is mapped back to a telemetry event and checked against the same schema and the
   same `FAC-SEM-037`…`039` rules;

@@ -1,0 +1,43 @@
+{
+  "description": "The body and its Content-Digest changed after signing: the receiver accepted it, where the signature does not verify and it answers 401 signature-invalid (FAC-SEM-077, DEC-0056).",
+  "kind": "device-request-signature",
+  "expect": [
+    "FAC-SEM-077"
+  ],
+  "input": {
+    "request": {
+      "method": "POST",
+      "target": "/v1/devices/check-in",
+      "headers": {
+        "content-type": "application/json",
+        "content-digest": "sha-256=:XLe+J9ZjrAUDWjZNomrdZOcsmRvWP51puIsOjZctslc=:",
+        "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+        "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+      },
+      "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":290}"
+    },
+    "publicBaseUrl": "https://org.example",
+    "certificates": [
+      {
+        "serial": "7b6578616d706c65",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "es256",
+          "publicKey": "BAU5VuAKUxh7f2xAbPDGzmKRdgyfUjxXLpq41bbes+lT37pnvNGtl+rsyBhHF8E7Q2kbS1wrUsvEnIMCJe5oC60="
+        }
+      },
+      {
+        "serial": "5e1f0c2a9b3d4e6f",
+        "notBefore": "2026-10-07T08:30:05Z",
+        "notAfter": "2026-10-14T08:30:05Z",
+        "key": {
+          "alg": "ed25519",
+          "publicKey": "yPm+YXbDXD7EicSFoZw6z1jLeB9+7LDKnt1ZGwRS2Ys="
+        }
+      }
+    ],
+    "at": "2026-10-12T09:00:00Z",
+    "answer": "accepted"
+  }
+}

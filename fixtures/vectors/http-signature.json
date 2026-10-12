@@ -1,0 +1,826 @@
+{
+  "$comment": "The device transport binding's vectors (DEC-0056, devices.md#transport): HTTP message signatures (RFC 9421 subset) with Content-Digest (RFC 9530). Each case is a FAC-SEM-077 rule input without `answer`: merge the top-level publicBaseUrl, certificates and at into it; `seen` is the receiver's nonce store before the request; `expect` is accepted or the 401 code. Every case carries one fault (`fault`). Keys are fresh, generated for these vectors; only their public halves are here, and ECDSA signatures are not reproducible, so a signer port is tested by verifying its own output. `rfc9421` and `rfc9530` are the RFCs' own examples, run by test/http-signature.test.ts.",
+  "rfc9421": {
+    "section": "RFC 9421 Appendix B.2.6, the key test-key-ed25519 (Appendix B.1.4), public half only",
+    "publicKey": "JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=",
+    "components": [
+      "date",
+      "@method",
+      "@path",
+      "@authority",
+      "content-type",
+      "content-length"
+    ],
+    "values": {
+      "date": "Tue, 20 Apr 2021 02:07:55 GMT",
+      "@method": "POST",
+      "@path": "/foo",
+      "@authority": "example.com",
+      "content-type": "application/json",
+      "content-length": "18"
+    },
+    "parameters": [
+      [
+        "created",
+        1618884473
+      ],
+      [
+        "keyid",
+        "test-key-ed25519"
+      ]
+    ],
+    "signatureParams": "(\"date\" \"@method\" \"@path\" \"@authority\" \"content-type\" \"content-length\");created=1618884473;keyid=\"test-key-ed25519\"",
+    "signatureBase": "\"date\": Tue, 20 Apr 2021 02:07:55 GMT\n\"@method\": POST\n\"@path\": /foo\n\"@authority\": example.com\n\"content-type\": application/json\n\"content-length\": 18\n\"@signature-params\": (\"date\" \"@method\" \"@path\" \"@authority\" \"content-type\" \"content-length\");created=1618884473;keyid=\"test-key-ed25519\"",
+    "signatureInput": "sig-b26=(\"date\" \"@method\" \"@path\" \"@authority\" \"content-type\" \"content-length\");created=1618884473;keyid=\"test-key-ed25519\"",
+    "signature": "sig-b26=:wqcAqbmYJ2ji2glfAMaRy4gruYYnx2nEFN2HN6jrnDnQCK1u02Gb04v9EDgwUPiu4A0w6vuQv5lIp5WPpBKRCw==:"
+  },
+  "rfc9530": {
+    "section": "RFC 9530 Appendix D",
+    "body": "{\"hello\": \"world\"}",
+    "contentDigest": "sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:"
+  },
+  "publicBaseUrl": "https://org.example",
+  "at": "2026-10-12T09:00:00Z",
+  "certificates": [
+    {
+      "serial": "7b6578616d706c65",
+      "notBefore": "2026-10-07T08:30:05Z",
+      "notAfter": "2026-10-14T08:30:05Z",
+      "key": {
+        "alg": "es256",
+        "publicKey": "BAU5VuAKUxh7f2xAbPDGzmKRdgyfUjxXLpq41bbes+lT37pnvNGtl+rsyBhHF8E7Q2kbS1wrUsvEnIMCJe5oC60="
+      }
+    },
+    {
+      "serial": "5e1f0c2a9b3d4e6f",
+      "notBefore": "2026-10-07T08:30:05Z",
+      "notAfter": "2026-10-14T08:30:05Z",
+      "key": {
+        "alg": "ed25519",
+        "publicKey": "yPm+YXbDXD7EicSFoZw6z1jLeB9+7LDKnt1ZGwRS2Ys="
+      }
+    },
+    {
+      "serial": "0a0b0c0d0e0f1011",
+      "notBefore": "2026-10-07T08:30:05Z",
+      "notAfter": "2026-10-14T08:30:05Z",
+      "revoked": true,
+      "key": {
+        "alg": "es256",
+        "publicKey": "BAU5VuAKUxh7f2xAbPDGzmKRdgyfUjxXLpq41bbes+lT37pnvNGtl+rsyBhHF8E7Q2kbS1wrUsvEnIMCJe5oC60="
+      }
+    },
+    {
+      "serial": "1213141516171819",
+      "notBefore": "2026-10-05T09:00:00Z",
+      "notAfter": "2026-10-12T09:00:00Z",
+      "key": {
+        "alg": "es256",
+        "publicKey": "BAU5VuAKUxh7f2xAbPDGzmKRdgyfUjxXLpq41bbes+lT37pnvNGtl+rsyBhHF8E7Q2kbS1wrUsvEnIMCJe5oC60="
+      }
+    },
+    {
+      "serial": "2a2b2c2d2e2f3031",
+      "notBefore": "2026-10-07T08:30:05Z",
+      "notAfter": "2026-10-14T08:30:05Z",
+      "key": {
+        "alg": "ed25519",
+        "publicKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    },
+    {
+      "serial": "3a3b3c3d3e3f4041",
+      "notBefore": "2026-10-07T08:30:05Z",
+      "notAfter": "2026-10-14T08:30:05Z",
+      "key": {
+        "alg": "es256",
+        "publicKey": "BGsX0fLhLEJH+Lzm5WOkQPJ3A32BLeszoPShOUXYmMKWT+NC4v4af5uO5+tKfA+eFivOM1drMV7Oy7ZAaDe/UfY="
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "good: a check-in signed with an ES256 #sig key",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "signatureBase": "\"@method\": POST\n\"@target-uri\": https://org.example/v1/devices/check-in\n\"content-digest\": sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:\n\"@signature-params\": (\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+      "expect": "accepted"
+    },
+    {
+      "name": "good: an activity batch signed with an Ed25519 #sig key",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/activity/batches",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"5e1f0c2a9b3d4e6f\";alg=\"ed25519\"",
+          "signature": "fabric-device=:n4yp27VEv8tzuPDAaQnYVemGpAxsmPvUArTy2Wo4JXNJBwmmWplBlpk1lG4eJp6rOdzPV0CdTakKRHajQCYhAw==:"
+        },
+        "body": "{\"protocol\":\"fabric-activity/0.1\",\"device\":{\"id\":\"dev-01j9a\"},\"sent\":\"2026-10-12T08:59:58Z\",\"events\":[]}"
+      },
+      "signatureBase": "\"@method\": POST\n\"@target-uri\": https://org.example/v1/activity/batches\n\"content-digest\": sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:\n\"@signature-params\": (\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"5e1f0c2a9b3d4e6f\";alg=\"ed25519\"",
+      "expect": "accepted"
+    },
+    {
+      "name": "good: a rotation request (certificate.action rotate) signed by the same key",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/rotate",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bJfoKPutBx3jsqKm73ioEd8sTNJjrjxJrxpbWVwOUiE=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"cm90YXRpb24tcmVxdWVzdC1ub25jZQ\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:I/ucVu0ZjhMz6eoo/FPNxNHQ3oE/sHKE/xlBghB3lNXKn+4JX5qC1qcEHkq3BCcGyhXPHmA7sb4B0q81kLNbaA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"rotation-request\",\"csr\":\"MIIBDzCBtgIBADBUMQ8wDQYDVQQKDAZvcmctN2YzYTESMBAGA1UEAwwJZGV2LTAxajlh\"}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "good: a query string is part of the target URI",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in?full=1",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:kqQIgbefSOuoNJUPg0t1LAinfxQq35OU252h/soLWaP/cLtATLPZ7CtcowdkNHGH0sm+JYXkJQgbpJROZLefMg==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "good: created exactly 300 s before the receiver's clock",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795300;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:QrPfgKFvdlTbtURxpHRt7/d8KYTvlRdRD+mVSMwtG7qpbnEI4cKmMr0aUA09Oj1229lK0rCj2EdQtOcs5RNXFg==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "good: created exactly 300 s after the receiver's clock",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795900;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:17c06khymB15al458jEh+vCqXY4SXYS6cuk1Cd2n7HJUHKUr0xSCJtvo48I+m9zuj8JfYIK9mrVb7qXP4rUzMA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "stale: created 301 s before the receiver's clock",
+      "fault": "created",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795299;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:MhohpEPZaKAX20disEg/QGNDjbF6+p18RrVHUmy4Fn7j3JCF6dL2j/C35k4AtWpDKLu4HGCuLbMYLrEwMHYOkQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-stale"
+    },
+    {
+      "name": "stale: created 301 s after the receiver's clock",
+      "fault": "created",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795901;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:ToY4AvfkgoSNz15Y2cp+R5vBjWK4ZU0yxn5qvlEHNCbBUa0bHtJpDI8eUZ//6tlrFcvLAy1HciAb7H5ICdGsKg==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-stale"
+    },
+    {
+      "name": "altered body: the body changed after signing, Content-Digest left as signed",
+      "fault": "body",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":290}"
+      },
+      "expect": "digest-mismatch"
+    },
+    {
+      "name": "altered body: the body and its Content-Digest changed after signing",
+      "fault": "body",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:XLe+J9ZjrAUDWjZNomrdZOcsmRvWP51puIsOjZctslc=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":290}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "digest: Content-Digest carries a second member; the binding sends exactly sha-256",
+      "fault": "content-digest",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:, sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "digest-mismatch"
+    },
+    {
+      "name": "digest: no Content-Digest",
+      "fault": "content-digest",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "digest-mismatch"
+    },
+    {
+      "name": "altered target: signed for /v1/devices/check-in, received at /v1/devices/rotate",
+      "fault": "target",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/rotate",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "Host ignored: a proxy rewrote Host; the target URI comes from the public base URL",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:",
+          "host": "internal.example:8080"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "other authority: signed for another host than the receiver's public base URL",
+      "fault": "target",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:hp8qWTIt9qu7e2ahmwWh+/Nfj0R1CvbAP/zrPCwrASlfQlqFKpP0HhzGyqpeDjHaP9WFAJ5Q4kYOT7IZM5KdiQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "missing: no Signature-Input and no Signature",
+      "fault": "signature",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "missing: Signature-Input without Signature",
+      "fault": "signature",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\""
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "missing nonce: created;keyid;alg, signed",
+      "fault": "nonce",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:Rbq1Q6/trsPXeT+Yc/0TQhv/7yoRqZvU5zbt/hgApeokn+3gH4W+psLw0HbYIXvE9iRoYlCH/uyGGLkv1oI04g==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "nonce of 21 characters",
+      "fault": "nonce",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"AAAAAAAAAAAAAAAAAAAAA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:XNge3p+NakQuKAcfuQDJZqY0DTbVUvdW9MeffCTe3vdz27Y8HTQylyJh2IKuYOTncffJzTG9BsBgmOH3B+/YoQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "nonce of 22 characters",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"AAAAAAAAAAAAAAAAAAAAA_\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:ecs6pgNTKMUHIrl4DSNxG63ODx7+n/vWtfMAy3Sl3cFMeP7p2HivGJxqVuZKMSMmoPFqQcWwDfm3l0KWEKntJA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "nonce of 64 characters",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"----------------------------------------------------------------\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:EhFlZE2ZsLuwVoCgWT06yIfXnCNmsBJCVHLBgw/QHX+FpwXwwVkHMswTe3QdSw+H/+qJy/R2JlbRm+lJutk9Lg==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "nonce of 65 characters",
+      "fault": "nonce",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:7vxAr0jj53y3TFma2AeS1eM4cuclchy2hWduqO7BmtV5Ll3LaAW2F58kY4qD5xRDl3+Gdp+JMixLkW2FzYzMQw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "nonce with a character outside base64url",
+      "fault": "nonce",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA+\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:9MgOWMf3tyihM7yWuEcCKeKpvfQOvyGdm4ouLQqYF2sjriEgtG+yz3uwy60Zm7ohTzRQcdrmk5rK0Kg9+u9miA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "parameters out of order: created;keyid;nonce;alg",
+      "fault": "parameters",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;keyid=\"7b6578616d706c65\";nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:juaetSA+qONAk24jRge/v2EBTfKTZELja8v5sGL19eHMuB+Udqp8PaBGs+WAN2arfZyDX1Vm+YuKuu+Od2hbyA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "an extra parameter: expires",
+      "fault": "parameters",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\";expires=1791795660",
+          "signature": "fabric-device=:zO0QtBRP1m0EfZv+YlRNlJ5533bUCuis6Swpk974jhWhJiaINkIKEGUXgRlwYPsPe1kezPrSUj4BKH6EJjjZ6Q==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "an extra covered component: @authority",
+      "fault": "components",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\" \"@authority\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:JVy0NYUOzGOl4pw38fffdg6cKjI3mccqTy+fB1083fDHwJSpZDYewzyknpLgvQjplTTbJKvdO0uA7HBjoL6LIw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "covered components out of order",
+      "fault": "components",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@target-uri\" \"@method\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:yUQwsSNF/U0xlSD1KmwllGOMXQdsl2nhgIXuHB1bQtA7Fh52pdJc/+eTNmH1IyPzMqasiPBUyou7UkR/4LYb6w==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "keyid not a certificate serial (upper-case hex)",
+      "fault": "keyid",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7B6578616D706C65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:NJrRi9imPcjkknlDOxZ0ef9YctloInn9v8DgyErK1CwXvLyKzuy5ST5qL2kS4ax2d7JyVLLCIh6UPrTWh2bMrA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "an algorithm outside the binding: rsa-pss-sha512",
+      "fault": "alg",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"rsa-pss-sha512\"",
+          "signature": "fabric-device=:R+lfoCZmNlAkJze2GeQR0t2DMPed/7qTU5VHZo9wA07NtSt0MGYSlg/3kVWb/srBFtqeB+PuvZ0k2+96Cr+5Pw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "another label only: sig1",
+      "fault": "label",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "sig1=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "sig1=:l8qRoSNMmjaWkZF2JvcfNVrkPHZ6tepwn6qVBvu3Q+bFimDQN4oKvCzfj5x4kk4MnDpQsUxS2Th+4HW5gD6HkQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "another signature beside it: the receiver reads fabric-device and ignores proxy",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "proxy=(\"@method\");created=1791795598;keyid=\"edge\", fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "proxy=:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBw==:, fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "accepted"
+    },
+    {
+      "name": "the fabric-device label twice: labels are unique (RFC 9421 §4.1)",
+      "fault": "label",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": [
+            "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+            "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\""
+          ],
+          "signature": [
+            "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:",
+            "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+          ]
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-missing"
+    },
+    {
+      "name": "repeated nonce: the (serial, nonce) pair is already held",
+      "fault": "nonce",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "seen": [
+        {
+          "serial": "7b6578616d706c65",
+          "nonce": "Qm9hcmQtcnVuLXdhdmUtNC1QNA",
+          "keepUntil": 1791795898
+        }
+      ],
+      "expect": "signature-replayed"
+    },
+    {
+      "name": "the same nonce under another certificate is not a repeat",
+      "fault": "none",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6LDQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "seen": [
+        {
+          "serial": "5e1f0c2a9b3d4e6f",
+          "nonce": "Qm9hcmQtcnVuLXdhdmUtNC1QNA",
+          "keepUntil": 1791795898
+        }
+      ],
+      "expect": "accepted"
+    },
+    {
+      "name": "a foreign key: signed by a P-256 key that is not the device's",
+      "fault": "key",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:W+FwA0XF0uCvYK9JJoOBssm66Agmu2EbkXBEfLfHZ8eS8FwkkQIB/ta3hReE+sW3+lVjp9UxtUetur1JuJkWsA==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "a foreign key: signed by an Ed25519 key that is not the device's",
+      "fault": "key",
+      "request": {
+        "method": "POST",
+        "target": "/v1/activity/batches",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"5e1f0c2a9b3d4e6f\";alg=\"ed25519\"",
+          "signature": "fabric-device=:Xue1P4eYDRQvqje/Xg2Vu+zP2e76+ZOgGpYR+hn5uZFuuFqEDzMB/R9T4qa2i5y+KlzPXYARI8ooQM8GyFFjBw==:"
+        },
+        "body": "{\"protocol\":\"fabric-activity/0.1\",\"device\":{\"id\":\"dev-01j9a\"},\"sent\":\"2026-10-12T08:59:58Z\",\"events\":[]}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "the wrong alg for the key: ed25519 named for an ES256 key",
+      "fault": "alg",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ed25519\"",
+          "signature": "fabric-device=:7Hfu8SnpcjIXAzHa+EWe4RPgyWUpkULylkOOjLPalKbknrtYfsfbrwyIdTYoVNXKNByZdga8cV6JShLQ2Zd+Dw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "the wrong alg for the key: ecdsa-p256-sha256 named for an Ed25519 key",
+      "fault": "alg",
+      "request": {
+        "method": "POST",
+        "target": "/v1/activity/batches",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"5e1f0c2a9b3d4e6f\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:s+wkz3j3yRT0maBC2v34rCkr4lNEGCLqKhrmGSguYiljXKEEgiLZEnlC0o91LhCCFgAO2xfDgmD4GFwYyq77RA==:"
+        },
+        "body": "{\"protocol\":\"fabric-activity/0.1\",\"device\":{\"id\":\"dev-01j9a\"},\"sent\":\"2026-10-12T08:59:58Z\",\"events\":[]}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "a signature of 63 octets",
+      "fault": "signature",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"7b6578616d706c65\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:0fu4X5uSl3411vevXf6FmaPOOctW+OqbpLxGSCI10YKU07/X4r8rRphVL0MeHC31vdn1t0VEalPHMUho/f6L:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "certificate unknown: no certificate with this serial",
+      "fault": "certificate",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"ffeeddccbbaa9988\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:mhSr7o8wNGRoq3N4QF9PMEPhZ5UR5tuxOG2orOv0Py7sigl5xDCzT5TeDK97BJVsIIuiKoG1EjHuoWL1YgfK0w==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "certificate-unknown"
+    },
+    {
+      "name": "certificate revoked",
+      "fault": "certificate",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"0a0b0c0d0e0f1011\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:AIDUDw5op2Qm7tRqQh2TVBjRMgVt/omi4KJoY85lptuCujFfp84HTiquZRnZTHhODzLhkOo2BIMXMaEvZsQUuw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "certificate-revoked"
+    },
+    {
+      "name": "certificate expired: the receiver's clock is the certificate's notAfter",
+      "fault": "certificate",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"1213141516171819\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:QyEcu1drsEPxnUi5sIFAC6G7ttTwsgE3/PibJ3IgA4goFbHIuNLxYPL2GQ1AhJ3rjeR8CXHinIREXJgsUfLNeQ==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "certificate-expired"
+    },
+    {
+      "name": "a small-order Ed25519 key on record (DEC-0045) verifies nothing",
+      "fault": "key",
+      "request": {
+        "method": "POST",
+        "target": "/v1/activity/batches",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:p0RDjx1MiyO8gSKQh8uIx3nXHRk6YfQ3DfT8NpKIXGs=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"c2Vjb25kLW5vbmNlLWZvci1lZDI1NTE5\";keyid=\"2a2b2c2d2e2f3031\";alg=\"ed25519\"",
+          "signature": "fabric-device=:y+vXjTnbPWaoC0T5LtZxVtiQx6QHGZiiMw5dWfX2h6WH1d1QYPovR1B7Vaj5suBG45InCNyzTMwm5F814w9MBA==:"
+        },
+        "body": "{\"protocol\":\"fabric-activity/0.1\",\"device\":{\"id\":\"dev-01j9a\"},\"sent\":\"2026-10-12T08:59:58Z\",\"events\":[]}"
+      },
+      "expect": "signature-invalid"
+    },
+    {
+      "name": "a P-256 key on record off the curve (SEC 1 §3.2.2) verifies nothing",
+      "fault": "key",
+      "request": {
+        "method": "POST",
+        "target": "/v1/devices/check-in",
+        "headers": {
+          "content-type": "application/json",
+          "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
+          "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"3a3b3c3d3e3f4041\";alg=\"ecdsa-p256-sha256\"",
+          "signature": "fabric-device=:vbgOi6KG4R/m2YpZ+CRmDy5i/LFUkDvMhOwLVRILSGaCAcok69YXYDXrOoseIj/9TUIcp1+Z86sasEjeyVw1Uw==:"
+        },
+        "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
+      },
+      "expect": "signature-invalid"
+    }
+  ]
+}

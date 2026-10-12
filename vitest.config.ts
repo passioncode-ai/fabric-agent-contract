@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/webauthn.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/webauthn.ts", "src/http-signature.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -23,11 +23,12 @@ export default defineConfig({
         "src/comms-digest.ts": { branches: 100 },
         "src/delegation-rules.ts": { branches: 100 },
         "src/delegation.ts": { branches: 100 },
-        "src/device-rules.ts": { branches: 97.08 },
+        "src/device-rules.ts": { branches: 97.5 },
         "src/ed25519.ts": { branches: 100 },
         "src/estate-record-rules.ts": { branches: 100 },
         "src/fabric-links.ts": { branches: 97.61 },
         "src/grant-projection.ts": { branches: 87.8 },
+        "src/http-signature.ts": { branches: 100 },
         "src/interop-rules.ts": { branches: 88.46 },
         "src/operator-session.ts": { branches: 100 },
         "src/package-rules.ts": { branches: 100 },

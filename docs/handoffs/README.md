@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-12 device transport and keys](2026-10-12-w4-p4-04-device-transport.md) | DEC-0056 (board run P4-04; DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST) | pull request open |
 | [2026-10-12 estate record](2026-10-12-w3-p3-03-estate-record.md) | DEC-0055 (board run P3-03; V4-ESTATE-RECORD) | pull request open |
 | [2026-10-12 activity and devices](2026-10-12-activity-devices.md) | DEC-0052, DEC-0053 (board run P3-02; CT-11, CT-25) | merged, #52 `92de756` |
 | [2026-10-12 agent package](2026-10-12-agent-package.md) | DEC-0050, DEC-0051 (board run P3-01; V4-PACKAGE, V4-AGENTREF) | merged, #50 `9d29d71` |

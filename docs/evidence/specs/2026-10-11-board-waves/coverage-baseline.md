@@ -43,6 +43,8 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P3-03 | `src/estate-record-rules.ts` (new) | 190 / 190 (100 %) | 100 % | FAC-SEM-072…076, the digest, the challenge, `verifyEstateRecord` and `placementTrust`; one fixture or vector case per rule and problem, the chain checks planted |
 | P3-03 | `src/webauthn.ts` (new) | 78 / 78 (100 %) | 100 % | the offline WebAuthn Level 3 §7.2 assertion checks, ER-4…ER-9 |
 | P3-02 | `src/p256.ts` (new) | 8 / 8 (100 %) | 100 % | SEC 1 §3.2.2 P-256 key validation over `fixtures/vectors/p256.json` (DEC-0053) |
+| P4-04 | `src/http-signature.ts` (new) | 280 / 280 (100 %) | 100 % | the device transport binding (DEC-0056): RFC 8941 parsing, RFC 9421 §2.3 and §2.5, the receiver's steps and the nonce store, over `fixtures/vectors/http-signature.json`; every refusal planted |
+| P4-04 | `src/device-rules.ts` | 547 / 561 (97.5 %) | 97.5 % | FAC-SEM-044's key-role counts and FAC-SEM-077, every new branch covered |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -80,3 +82,9 @@ throwing; the verifier's checks added in review (issued before the parent, a dro
 rules, an unreadable clock, the day of the month, one hub key under two kids, a canonical JWK, an unadmitted algorithm,
 a revocation kind read from a `Map`) were each removed and a test failed. `semantic-rules.ts` only dispatches to the new module. The whole-set floor stays at 86.85 %; measured whole set
 3131 / 3290 (95.16 %). Measured with `vitest run --coverage` on the P3-03 branch off main's `92de756`.
+
+**Wave 4, P4-04 (DEC-0056).** `src/http-signature.ts` is new and reaches every branch, with no `v8 ignore`: the RFC 8941
+parser's refusals case by case, RFC 9421 Appendix B.2.6 and RFC 9530 Appendix D as vectors, and one binding vector per
+receiver step. `device-rules.ts` gains FAC-SEM-077 and FAC-SEM-044's counts, every new branch covered (97.5 %, its floor
+raised from 97.08 %); the new rule kind joins `test/rule-tolerance.test.ts`. The whole-set floor stays at 86.85 %;
+measured whole set 3448 / 3608 (95.56 %). Measured with `vitest run --coverage` on the P4-04 branch off main's `31ed9f0`.
