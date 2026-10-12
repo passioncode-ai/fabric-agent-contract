@@ -1,9 +1,9 @@
-import { createPublicKey, generateKeyPairSync } from "node:crypto";
+import { createPublicKey, generateKeyPairSync, verify } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { P256_CURVE, isEd25519Key, isValidP256Key, p256Jwk, p256KeyRefusal, p256Point, p256PublicKey, type P256Key } from "../src/p256.js";
+import { P256_CURVE, isEd25519Key, isLowS, isValidP256Key, p256Jwk, p256KeyRefusal, p256Point, p256PublicKey, signEs256, toLowS, type P256Key } from "../src/p256.js";
 
 // DEC-0053, DEC-0047: a P-256 public key is validated by SEC 1 v2 §3.2.2 before anything is verified or sealed under
 // it, over the shared vectors a port runs too — SEC 1 octets (device keys, roots) and JWKs (relay keys). The curve
@@ -101,5 +101,42 @@ describe("one key, two forms (DEC-0053 octets, DEC-0047 JWKs)", () => {
     expect(isEd25519Key(new Uint8Array(65))).toBe(false);
     expect(isEd25519Key({ kty: "EC", crv: "P-256" })).toBe(false);
     expect(isEd25519Key(null)).toBe(false);
+  });
+});
+
+// DEC-0066 (CON-015): one ES256 rule for the relay family. A signature's s is at most n/2; a signer normalises after
+// signing, so a third party (the relay included) cannot mint a second valid encoding of the same signature.
+describe("low-S ES256", () => {
+  const half = P256_CURVE.n / 2n;
+  const s = (raw: Uint8Array) => BigInt(`0x${Buffer.from(raw).subarray(32).toString("hex")}`);
+  const key = generateKeyPairSync("ec", { namedCurve: "P-256" });
+  const flip = (raw: Uint8Array) => Buffer.concat([Buffer.from(raw).subarray(0, 32), Buffer.from((P256_CURVE.n - s(raw)).toString(16).padStart(64, "0"), "hex")]);
+
+  it("signEs256 always gives the low-S form, and it verifies (1000 signatures)", () => {
+    for (let i = 0; i < 1000; i += 1) {
+      const sig = Buffer.from(signEs256(key.privateKey, `message ${i}`), "base64url");
+      expect(sig.length).toBe(64);
+      expect(s(sig) <= half).toBe(true);
+      expect(isLowS(sig)).toBe(true);
+      expect(verify("sha256", Buffer.from(`message ${i}`), { key: key.publicKey, dsaEncoding: "ieee-p1363" }, sig)).toBe(true);
+    }
+  });
+
+  it("toLowS maps (r, s) and (r, n − s) to one form, idempotently, and both verify under plain ECDSA", () => {
+    const low = Buffer.from(signEs256(key.privateKey, Buffer.from("m")), "base64url");
+    const high = flip(low);
+    expect(isLowS(high)).toBe(false);
+    expect(verify("sha256", Buffer.from("m"), { key: key.publicKey, dsaEncoding: "ieee-p1363" }, high)).toBe(true);
+    expect(Buffer.from(toLowS(high)).equals(low)).toBe(true);
+    expect(Buffer.from(toLowS(low)).equals(low)).toBe(true);
+    expect(Buffer.from(toLowS(toLowS(high))).equals(Buffer.from(toLowS(high)))).toBe(true);
+  });
+
+  it("puts the boundary at n/2 and refuses what is not 64 bytes", () => {
+    const at = (value: bigint) => Buffer.concat([Buffer.alloc(32, 1), Buffer.from(value.toString(16).padStart(64, "0"), "hex")]);
+    expect(isLowS(at(half))).toBe(true);
+    expect(isLowS(at(half + 1n))).toBe(false);
+    expect(isLowS(new Uint8Array(63))).toBe(false);
+    expect(() => toLowS(new Uint8Array(65))).toThrow(/64 bytes/);
   });
 });
