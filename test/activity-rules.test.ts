@@ -204,6 +204,39 @@ describe("FAC-SEM-039: event ids, streams and acknowledgements", () => {
   });
 });
 
+// F-B-102: the four FAC-SEM-038/039 clauses the spec states and no test killed, each on an input where it alone fires.
+describe("F-B-102: every activity clause the spec states has a test that fails without it", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+
+  it("FAC-SEM-039 refuses an overflow that names a seq at or above its own", () => {
+    const overflow = load("positive/telemetry-event-overflow.json");
+    const [range] = overflow.data.dropped.ranges;
+    overflow.seq = range.toSeq;
+    expect(exactly("telemetry-event", overflow)).toEqual(["FAC-SEM-039 /data/dropped/ranges an overflow names only seqs assigned before its own"]);
+  });
+
+  it("FAC-SEM-039 refuses a dropped range that runs backwards", () => {
+    const overflow = load("positive/telemetry-event-overflow.json");
+    overflow.data.dropped.ranges = [{ fromSeq: 40, toSeq: 38 }];
+    expect(exactly("telemetry-event", overflow)).toContain("FAC-SEM-039 /data/dropped/ranges a dropped range runs forward");
+  });
+
+  it("FAC-SEM-039 refuses a rejection that names an event the batch did not carry", () => {
+    const fixture = load("semantic/activity-ack-ok.json").input;
+    fixture.ack.accepted -= 1;
+    fixture.ack.rejected = [{ eventId: "01K6Z3ZZZZZZZZZZZZZZZZZZZZ", reason: "schema" }];
+    expect(paths("activity-ack", fixture)).toEqual(["FAC-SEM-039 /ack/rejected/0/eventId"]);
+  });
+
+  it("FAC-SEM-038 refuses a summary cell with priced lines whose cost is null", () => {
+    const summary = load("positive/activity-summary.json");
+    const cell = summary.cells.find((c: Json) => c.counts.usageLines > c.counts.unpricedLines);
+    cell.usage.cost = { usd: null };
+    const at = summary.cells.indexOf(cell);
+    expect(exactly("activity-summary", summary)).toEqual([`FAC-SEM-038 /cells/${at}/usage/cost/usd priced lines carry a cost; null is only for a cell with no priced line`]);
+  });
+});
+
 describe("batch size", () => {
   it("refuses a batch of 1001 events (generated here rather than kept as a fixture)", () => {
     const batch = load("positive/activity-batch.json");

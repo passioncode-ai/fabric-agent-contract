@@ -174,6 +174,100 @@ describe("FAC-SEM-046: policy key sets", () => {
   });
 });
 
+/** A fresh Ed25519 pair: the raw public key in base64 and a signer of the settings form without `signature`. */
+function ed25519Signer(keyId: string) {
+  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+  const raw = publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64");
+  const signDoc = (doc: Json) => {
+    delete doc.signature;
+    doc.signature = { alg: "ed25519", keyId, value: sign(null, policySigningInput(doc), privateKey).toString("base64") };
+    return doc;
+  };
+  return { keyId, publicKey: raw, signDoc };
+}
+
+// F-B-101: each FAC-SEM-041/043/044/045/046 branch the audit's mutation probe found unkilled, with an input on which that
+// branch alone fires, so removing it fails the test.
+describe("F-B-101: every device branch has a test that fails without it", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+  const observation = () => load("semantic/device-health-ok.json").input as { known: DeviceState; batch: Json; checkIn: Json };
+
+  it("FAC-SEM-041 refuses a user layer delivered as an update, with no current layer to compare", () => {
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    delete fixture.current;
+    fixture.next = { ...fixture.next, source: "user" };
+    delete fixture.next.signature;
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/source"]);
+  });
+
+  it("FAC-SEM-041 refuses an update that replaces another layer than the one it names", () => {
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    fixture.current.source = "mdm";
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/source"]);
+  });
+
+  const keySet = () => {
+    const root = ed25519Signer("org-7f3a.root");
+    const fixture = load("semantic/device-key-set-ok.json").input;
+    fixture.root = { keyId: root.keyId, publicKey: root.publicKey };
+    root.signDoc(fixture.current);
+    return { fixture, root };
+  };
+
+  it("FAC-SEM-046 refuses the root key listed as a policy signing key", () => {
+    const { fixture, root } = keySet();
+    fixture.next.keys.push({ ...fixture.next.keys[1], keyId: root.keyId });
+    root.signDoc(fixture.next);
+    expect(exactly("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/keys/2/keyId the root key is never a policy signing key"]);
+  });
+
+  it("FAC-SEM-046 refuses a key whose window ends before it starts", () => {
+    const { fixture, root } = keySet();
+    fixture.next.keys[1].notAfter = fixture.next.keys[1].notBefore;
+    root.signDoc(fixture.next);
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/keys/1/notAfter"]);
+  });
+
+  it("FAC-SEM-046 refuses a key set that moves to another organization", () => {
+    const { fixture, root } = keySet();
+    fixture.next.org.id = "org-other";
+    root.signDoc(fixture.next);
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/org/id"]);
+  });
+
+  it("FAC-SEM-044 refuses a certificate bound to another organization", () => {
+    const fixture = load("semantic/device-enrollment-ok.json").input;
+    fixture.response.certificate.binding.org.id = "org-other";
+    expect(paths("device-enrollment", fixture)).toEqual(["FAC-SEM-044 /response/certificate/binding/org/id"]);
+  });
+
+  it("FAC-SEM-044 refuses a certificate that ends before it starts", () => {
+    const fixture = load("semantic/device-enrollment-ok.json").input;
+    fixture.response.certificate.notAfter = "2026-10-07T08:30:00Z";
+    expect(exactly("device-enrollment", fixture)).toEqual(["FAC-SEM-044 /response/certificate/notAfter a certificate ends after it starts"]);
+  });
+
+  it("FAC-SEM-043 finds a check-in whose buffer starts after its last seq", () => {
+    const o = observation();
+    o.checkIn.collectors[0].bufferedFrom = 46;
+    const found = tamperEvidence(o.known, o.batch, o.checkIn).map((e) => e.message);
+    expect(found).toEqual(["cc-otel#2 reports a buffer that starts after its last seq"]);
+  });
+
+  it("FAC-SEM-043 finds a check-in under an epoch the server never issued", () => {
+    const o = observation();
+    o.known.epochs = [1];
+    const where = tamperEvidence(o.known, null, o.checkIn).map((e) => e.instancePath);
+    expect(where).toContain("/checkIn/collectors/0/collector/epoch");
+  });
+
+  it("FAC-SEM-045 refuses a user on an event of an epoch issued with no user bound", () => {
+    const fixture = load("semantic/device-attribution-ok.json").input;
+    delete fixture.epochs[0].binding.user;
+    expect(new Set(paths("device-attribution", fixture))).toEqual(new Set(fixture.batch.events.flatMap((event: Json, i: number) => (event.user ? [`FAC-SEM-045 /batch/events/${i}/user`] : []))));
+  });
+});
+
 describe("FAC-SEM-045: attribution comes from the client certificate", () => {
   it("refuses a check-in under another device, and an event of an epoch with no recorded binding", () => {
     const fixture = load("semantic/device-attribution-ok.json").input;
