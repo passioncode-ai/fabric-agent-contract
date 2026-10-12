@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 the 0.1.0 core (P5-01)](2026-10-12-w5-p5-01-core.md) | DEC-0064 (board run P5-01; CT-14) | this pull request |
+| [2026-10-12 interop and usage (P5-02)](2026-10-12-w5-p5-02-interop-usage.md) | DEC-0065 (board run P5-02; CT-15) | this pull request |
+| [2026-10-12 the 0.1.0 core (P5-01)](2026-10-12-w5-p5-01-core.md) | DEC-0064 (board run P5-01; CT-14) | merged, #67 `252fd25` |
 | [2026-10-12 window leases and signing challenges](2026-10-12-w4-p4-05-leases-challenges.md) | DEC-0062, DEC-0063 (board run P4-05; V4-WINDOW-LEASE, V4-SIGNING-CHALLENGE) | merged, #65 `7b238c7` |
 | [2026-10-12 the descriptor for listings](2026-10-12-w4-p4-02-descriptor.md) | DEC-0061 (board run P4-02; V4-DESCRIPTOR) | merged, #63 `335e736` |
 | [2026-10-12 revocation delta and heartbeat](2026-10-12-w4-p4-06-delta-heartbeat.md) | DEC-0054 (board run P4-06; V4-DELTA-HEARTBEAT; the id pre-reserved by the owner's P3-02 run) | merged, #64 `5967bb1` |

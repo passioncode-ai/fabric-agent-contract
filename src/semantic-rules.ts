@@ -1,5 +1,6 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { coreRules } from "./core-rules.js";
+import { usageRules } from "./usage-rules.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { relayRules } from "./relay-rules.js";
@@ -21,6 +22,7 @@ import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
+import { attributionRules } from "./openrouter-attribution.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
@@ -63,6 +65,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (lease) return lease;
   const signing = signingRules(kind, value);
   if (signing) return signing;
+  const attribution = attributionRules(kind, value);
+  if (attribution) return attribution;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const descriptorBundle = descriptorBundleRules(kind, value);
@@ -107,7 +111,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
-  if (kind === "service-usage") findings.push(...usageArithmetic(value), ...usageLimits(value));
+  if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
   if (kind === "spend-policy") findings.push(...spendPolicyRules(value));
@@ -184,47 +188,6 @@ function remoteShape(value: JsonObject): Finding[] {
   return findings;
 }
 
-// #region usage-arithmetic — docs: docs/specification/service.md#usage-report
-/** FAC-SEM-025 (DEC-0021): a usage report adds up, an unknown cost is null rather than 0, and the
- *  days run forward without a repeat — so a host may sum days without double-counting. */
-function usageArithmetic(value: JsonObject): Finding[] {
-  const findings: Finding[] = [];
-  const days = Array.isArray(value.days) ? value.days.filter(isObject) : [];
-  const money = (x: unknown) => (typeof x === "number" ? x : null);
-  const close = (a: number, b: number) => Math.abs(a - b) <= 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
-  const priced = (row: JsonObject, at: string) => {
-    const calls = Number(row.calls ?? 0), unpriced = Number(row.unpricedCalls ?? 0);
-    if (unpriced > calls) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/unpricedCalls`, message: "more unpriced calls than calls" });
-    if (calls > 0 && unpriced === calls && row.costUsd !== null) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "every call is unpriced, so the cost is unknown (null), not a number" });
-    if (unpriced < calls && row.costUsd === null) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "priced calls carry a cost; null is only for a row with no priced call" });
-  };
-  let previous = "";
-  days.forEach((day, i) => {
-    const at = `/days/${i}`;
-    const date = String(day.date ?? "");
-    if (date <= previous) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/date`, message: `days must run forward without a repeat (${date} after ${previous})` });
-    previous = date;
-    priced(day, at);
-    const models = Array.isArray(day.byModel) ? day.byModel.filter(isObject) : [];
-    models.forEach((m, j) => priced(m, `${at}/byModel/${j}`));
-    if (!models.length) {
-      // No rows means nothing to sum: such a day can only be empty.
-      const spent = ["calls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"].some((f) => Number(day[f] ?? 0) > 0) || Number(day.costUsd ?? 0) > 0;
-      if (spent) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/byModel`, message: "a day with calls, tokens or cost names the models they belong to" });
-      return;
-    }
-    for (const field of ["calls", "unpricedCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
-      const sum = models.reduce((n, m) => n + Number(m[field] ?? 0), 0);
-      if (Number(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${String(day[field] ?? 0)} ≠ ${sum})` });
-    }
-    const known = models.map((m) => money(m.costUsd)).filter((x): x is number => x !== null);
-    const dayCost = money(day.costUsd);
-    if (dayCost !== null && !close(dayCost, known.reduce((n, x) => n + x, 0))) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "the day's cost is not the sum of its models' known costs" });
-  });
-  return findings;
-}
-// #endregion usage-arithmetic
-
 // #region usage-limits — docs: docs/specification/service.md#limits
 /** FAC-SEM-031 (DEC-0027): every limit in `budgets[]` is readable on its own — a unique id, a subject
  *  exactly when the scope names one, one window that agrees with its kind, no spend against a
@@ -284,7 +247,7 @@ function usageLimits(value: JsonObject): Finding[] {
 // #endregion usage-limits
 
 // #region comms-rules — docs: docs/specification/project-comms.md#semantic-rules
-/** FAC-SEM-026 (DEC-0022, proposed): a submit is coherent — a request's target can read the new
+/** FAC-SEM-026 (DEC-0022): a submit is coherent — a request's target can read the new
  *  thread, participants name no Project twice, and a reply answers a message. Identity is never in
  *  the payload: the schema already refuses estate, sender, principal and session fields. */
 function commsSubmit(value: JsonObject): Finding[] {
@@ -300,7 +263,7 @@ function commsSubmit(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** The request lifecycle (DEC-0022, proposed). Request state and effect state are separate facts:
+/** The request lifecycle (DEC-0022). Request state and effect state are separate facts:
  *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
  *  `outcome_unknown`. Accepted work is held on expiry and on responder replacement. */
 export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {

@@ -29,9 +29,9 @@ overrides), mode 0600, written only by the agent's installer, removed by its uni
 | `extensions` | object of absolute-URI keys | optional; unknown keys preserved |
 
 Rules: **FAC-SEM-013** an id appears in at most one of `services/` and `providers/`;
-**FAC-SEM-014** `manifest` resolves and its `provider.id` equals the entry's `id`;
-**FAC-SEM-015** `run.mcp.stdio.env` holds no literal secret (a value matching the secret patterns
-the adapter already refuses fails validation).
+**FAC-SEM-014** and **FAC-SEM-015** are as ruled below (DEC-0017): the entry's `providerId` equals the resolved
+manifest's `provider.id`, and an `env` value is checked by its form. The text locked on 2026-09-29 (`provider.id`
+equal to the slug `id`; an `env` value refused by name patterns) is superseded.
 
 ## Rulings (DEC-0017)
 

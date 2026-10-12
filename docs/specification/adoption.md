@@ -9,6 +9,12 @@ record plane is Git; its coordination plane is Notion with Git-ref leases. The
 generated `docs/AGENT_SYNC.md` snapshot is descriptive, while the live tool is
 authoritative. Credentials live only in an ignored `.env.agent-sync` file.
 
+## Measured pins
+
+Which commit each organization repository pins, and which decisions that commit holds, is measured, not assumed:
+[adoption](../evidence/adoption.md) (DEC-0065). A pin that contains a decision is a precondition of adopting it, not
+proof; the consumer's own test is the proof.
+
 ## Fabric consumer
 
 Fabric consumes this repository by canonical private Git URL and release/commit,

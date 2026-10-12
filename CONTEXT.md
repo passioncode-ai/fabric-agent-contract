@@ -93,7 +93,8 @@ fault (the meter: `principal-unproven`, with the detail in its reason) (delegati
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
 
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
-it applies, enforced or not (DEC-0021, DEC-0027).
+it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never
+to a caller (DEC-0065).
 
 **Spending limit**: A cap a service applies to its own spend — per day or UTC month, per order, a velocity limit, or
 a rolling window of `windowSeconds` — each listed in its usage report, enforced or not (DEC-0021, DEC-0027);
@@ -411,6 +412,11 @@ in its check-in ([window lease](docs/specification/window-lease.md)).
 **Signing credential**: A passkey registered under the dedicated signing RP `sign.<domain>` and used for nothing else;
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
+
+**OpenRouter attribution**: The three headers (`HTTP-Referer` = the product page, `X-OpenRouter-Title`,
+`X-OpenRouter-Categories`) an organization product adds to a request it originates to `https://openrouter.ai`, never
+to forwarded traffic and never over a user's own attribution; off without a setting (DEC-0065,
+[OpenRouter attribution](docs/specification/openrouter-attribution.md)).
 
 **Heartbeat**: A signed timestamp (`heartbeat/1`, DEC-0054) committing to the **Revocation delta**'s head and the
 estate revision. A machine whose heartbeat is more than 72 hours old, or that has not applied up to it, refuses what
