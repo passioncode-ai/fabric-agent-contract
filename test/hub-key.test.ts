@@ -250,3 +250,27 @@ describe("FAC-SEM-081 fixtures (delegation-hub-key)", () => {
     expect(evaluateSemanticRules("delegation-hub-key", "not an object")).toEqual([{ code: "FAC-SEM-000", instancePath: "", message: "value must be an object" }]);
   });
 });
+
+// DEC-0066 (the owner's ruling A): one estate-record window everywhere. A revision verifyEstateRecord admits at an
+// instant certifies its hub key at that instant, and the 60 s issuedAt skew is the same constant in both.
+describe("hubKeyCertified and verifyEstateRecord agree on the window", () => {
+  const estate = read("fixtures/vectors/estate-record.json");
+  const entry = (estate.cases as Json[]).find((c) => c.name === "checked at the instant it was issued (EdDSA, re-signed revision 1)") as Json;
+  const record = entry.record as Json;
+  const hub = (record.machines as Json[]).find((m) => m.hubKey)?.hubKey as Json;
+  const issued = strictTime(record.issuedAt), until = strictTime(record.validUntil);
+
+  it.each([
+    ["60 s before issuedAt", issued - 60_000, true],
+    ["60 s and 1 ms before issuedAt", issued - 60_001, false],
+    ["one ms before issuedAt", issued - 1, true],
+    ["at validUntil", until, true],
+    ["one ms after validUntil", until + 1, false]
+  ] as const)("%s", (_name, at, inside) => {
+    const verified = verifyEstateRecord(record, { ...(entry.trust as Json), at: new Date(at) } as never);
+    const certified = hubKeyCertified(record, hub.kid, hub.x, new Date(at));
+    expect(verified.ok).toBe(inside);
+    expect(certified.certified).toBe(inside);
+    if (!inside) expect(certified).toMatchObject({ detail: "estate-outside-window" });
+  });
+});

@@ -1,13 +1,13 @@
-import { createHash, generateKeyPairSync, sign } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { rfc8785 } from "../src/canonical.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { signEs256 } from "../src/p256.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import {
   AUTH_WINDOW_SECONDS, CLOCK_SKEW_SECONDS, CLOSE_CODES, IDLE_CLOSE_SECONDS, MAX_BODY_BYTES, MAX_FRAME_BYTES, MAX_MESSAGE_TTL_SECONDS,
-  RELAY_ERROR_CODES, admit, instant, relayAdmissionSet, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
+  ADMIT_REFUSALS, FRAME_TYPES, RELAY_ERROR_CODES, admit, closeCodeFor, instant, relayAdmissionSet, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
   type AuthContext, type AuthFrame
 } from "../src/relay.js";
 
@@ -18,18 +18,16 @@ type Vector = {
   machineKey: Record<string, string>;
   machineKeyOctets: string;
   auth: { context: { relay: string; nonce: string; now: string }; signingInput: string; sha256: string; frame: AuthFrame };
-  message: { frame: { from: string; to: string; msgId: string; ttl: number }; now: string; body: string };
+  message: { frame: { from: string; to: string; msgId: string; ttl: number }; self: string; now: string; body: string };
   ed25519: { key: Record<string, string>; frame: AuthFrame; expect: string };
 };
 const v = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "relay.json"), "utf8")) as Vector;
 const validator = await createValidator();
 const octets = Buffer.from(v.machineKeyOctets, "base64");
-const ctx = (over: Partial<AuthContext> = {}): AuthContext => ({
-  relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false,
+const ctx = (over: Partial<Omit<AuthContext, "estate">> = {}): AuthContext => ({
+  relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false, estate: v.auth.frame.estate,
   admittedKey: (kid) => (kid === v.auth.frame.kid ? v.machineKey : undefined), now: new Date(v.auth.context.now), ...over
 });
-const iatMs = Date.parse(v.auth.frame.iat);
-const at = (offsetMs: number) => new Date(iatMs + offsetMs);
 
 describe("relay-auth/1", () => {
   it("signs the RFC 8785 bytes the vector pins, naming ES256", () => {
@@ -45,45 +43,24 @@ describe("relay-auth/1", () => {
     expect(admit(v.auth.frame, ctx({ admittedKey: () => octets }))).toEqual({ ok: true, kid: v.auth.frame.kid });
   });
 
-  const cases: Array<[string, AuthFrame, Partial<AuthContext>, string]> = [
-    ["another protocol", { ...v.auth.frame, protocol: "fabric-relay/9" }, {}, "protocol-unsupported"],
-    ["an alg other than ES256", { ...v.auth.frame, alg: "EdDSA" }, {}, "unsupported-alg"],
-    ["no alg at all", { ...v.auth.frame, alg: undefined as unknown as string }, {}, "unsupported-alg"],
-    ["a signature made for another relay", v.auth.frame, { relay: "https://other-relay.example" }, "unauthenticated"],
-    ["another connection's nonce", v.auth.frame, { nonce: "BBECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8" }, "unauthenticated"],
-    ["the nonce used once already", v.auth.frame, { nonceUsed: true }, "replay"],
-    ["iat 61 s in the past", v.auth.frame, { now: at(61_000) }, "unauthenticated"],
-    ["iat 61 s ahead of the clock", v.auth.frame, { now: at(-61_000) }, "not-yet-valid"],
-    ["iat not RFC 3339", { ...v.auth.frame, iat: "yesterday" }, {}, "unauthenticated"],
-    ["iat that matches the pattern and is no date", { ...v.auth.frame, iat: "2026-13-45T25:61:61Z" }, {}, "unauthenticated"],
-    ["a kid outside the admission set", v.auth.frame, { admittedKey: () => undefined }, "not-admitted"],
-    ["an admitted key off the curve", v.auth.frame, { admittedKey: () => ({ ...v.machineKey, y: v.machineKey.x }) }, "bad-key"],
-    ["an admitted Ed25519 #sig", v.auth.frame, { admittedKey: () => v.ed25519.key }, "unsupported-alg"],
-    ["a claimed estate other than the signed one", { ...v.auth.frame, estate: "urn:fabric:estate:other" }, {}, "unauthenticated"],
-    ["a signature that is not 64 bytes", { ...v.auth.frame, sig: "AAAA" }, {}, "unauthenticated"],
-    ["a 64-byte signature in a non-canonical spelling", { ...v.auth.frame, sig: `${v.auth.frame.sig.slice(0, -1)}h` }, {}, "unauthenticated"]
-  ];
-  it.each(cases)("refuses %s, by code", (_name, frame, over, code) => {
-    expect(admit(frame, ctx(over))).toEqual({ ok: false, code });
-  });
-
-  it("gives the same answer for every case whether the admitted key is a JWK or octets", () => {
-    for (const [name, frame, over] of cases) {
-      if (over.admittedKey) continue;
-      expect(admit(frame, ctx({ ...over, admittedKey: () => octets })), name).toEqual(admit(frame, ctx(over)));
-    }
-  });
-
-  it("admits an iat exactly 60 s off either way and names the window it uses", () => {
+  // The refusals are shared vectors (fixtures/vectors/relay.json `admit`), run by test/relay-vectors.test.ts.
+  it("names the window it uses", () => {
     expect(AUTH_WINDOW_SECONDS).toBe(60);
     expect(CLOCK_SKEW_SECONDS).toBe(60);
-    expect(admit(v.auth.frame, ctx({ now: at(60_000) })).ok).toBe(true);
-    expect(admit(v.auth.frame, ctx({ now: at(-60_000) })).ok).toBe(true);
   });
 
   it("refuses the vector's Ed25519 participant as unsupported-alg", () => {
     expect(admit(v.ed25519.frame, ctx({ admittedKey: () => v.ed25519.key }))).toEqual({ ok: false, code: v.ed25519.expect });
     expect(RELAY_ERROR_CODES).toContain(v.ed25519.expect);
+  });
+});
+
+describe("a signature that is not a string (owner's item 10)", () => {
+  it("is false in verifyEs256 and unauthenticated in admit, never a throw", () => {
+    for (const sig of [undefined, null, 7, ["x"], {}]) {
+      expect(verifyEs256(v.machineKey, v.auth.signingInput, sig), String(sig)).toBe(false);
+      expect(admit({ ...v.auth.frame, sig: sig as never }, ctx()), String(sig)).toEqual({ ok: false, code: "unauthenticated" });
+    }
   });
 });
 
@@ -93,7 +70,7 @@ describe("relay-blob/1", () => {
     const key = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const input = relayBlobSigningInput(fields);
     expect(JSON.parse(input)).toMatchObject({ type: "relay-blob/1", alg: "ES256" });
-    const sig = sign("sha256", Buffer.from(input), { key: key.privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url");
+    const sig = signEs256(key.privateKey, input);
     const pub = key.publicKey.export({ format: "jwk" });
     expect(verifyEs256(pub, input, sig)).toBe(true);
     expect(verifyEs256(pub, relayBlobSigningInput({ ...fields, method: "GET" }), sig)).toBe(false);
@@ -102,23 +79,10 @@ describe("relay-blob/1", () => {
 });
 
 describe("fabric-relay-message/1", () => {
-  const frame = { from: v.message.frame.from, to: v.message.frame.to, msgId: v.message.frame.msgId };
+  // A recipient expects the deliver frame's from and msgId, and its own kid as the signed `to` (DEC-0066, CON-012).
+  const frame = { from: v.message.frame.from, to: v.message.self, msgId: v.message.frame.msgId };
   const senderKey = (kid: string) => (kid === frame.from ? v.machineKey : undefined);
   const now = new Date(v.message.now);
-  const b64 = (value: unknown) => Buffer.from(typeof value === "string" ? value : rfc8785(value)).toString("base64url");
-  // A one-off sender for the boundary cases: the vector pins the format, these pin each line of the check.
-  const own = generateKeyPairSync("ec", { namedCurve: "P-256" });
-  const ownKey = () => own.publicKey.export({ format: "jwk" });
-  const T0 = Date.parse("2026-10-12T00:00:00Z");
-  const iso = (ms: number) => new Date(ms).toISOString().replace(/\.000Z$/, "Z");
-  const jws = (over: Record<string, unknown> = {}, header: Record<string, unknown> = {}) => {
-    const signed = `${b64({ alg: "ES256", typ: "fabric-relay-message+jwt", ...header })}.${b64({
-      type: "fabric-relay-message/1", ...frame, iat: iso(T0), exp: iso(T0 + 3_600_000), payload: {}, ...over
-    })}`;
-    return `${signed}.${sign("sha256", Buffer.from(signed), { key: own.privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
-  };
-  const check = (body: string, nowMs: number) => verifyMessageBody(body, frame, () => ownKey(), new Date(nowMs));
-
   it("verifies the vector's body against its frame, with the sender's key as a JWK or as octets", () => {
     expect(verifyMessageBody(v.message.body, frame, senderKey, now).ok).toBe(true);
     expect(verifyMessageBody(v.message.body, frame, () => Buffer.from(v.machineKeyOctets, "base64"), now).ok).toBe(true);
@@ -131,51 +95,7 @@ describe("fabric-relay-message/1", () => {
     expect(verifyMessageBody(v.message.body, frame, senderKey, new Date(exp))).toEqual({ ok: false, reason: "expired" });
   });
 
-  it("refuses a body that does not match its frame, or that a relay could have altered", () => {
-    const [h, p, s] = v.message.body.split(".") as [string, string, string];
-    const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8")) as Record<string, unknown>;
-    const reencoded = (over: Record<string, unknown>) => `${h}.${b64({ ...payload, ...over })}.${s}`;
-    const cases: Array<[string, string, Partial<typeof frame>, string]> = [
-      ["not a JWS", "x.y", {}, "malformed"],
-      ["a payload that is not JSON", `${h}.!!!.${s}`, {}, "malformed"],
-      ["a header that is JSON null", `${b64("null")}.${b64("{}")}.AAAA`, {}, "malformed"],
-      ["a payload that is an array", `${h}.${b64("[]")}.${s}`, {}, "malformed"],
-      ["a frame naming another sender", v.message.body, { from: "urn:fabric:machine:stranger#sig" }, "mismatch"],
-      ["a frame naming another recipient", v.message.body, { to: "urn:fabric:machine:other#sig" }, "mismatch"],
-      ["a frame with another msgId", v.message.body, { msgId: "another" }, "mismatch"],
-      ["a payload changed in transit", reencoded({ payload: { command: "run.cancel" } }), {}, "bad-signature"],
-      ["an exp moved in transit", reencoded({ exp: "2026-10-19T00:00:00Z" }), {}, "bad-signature"]
-    ];
-    for (const [name, body, frameOver, reason] of cases) {
-      expect(verifyMessageBody(body, { ...frame, ...frameOver }, senderKey, now), name).toEqual({ ok: false, reason });
-    }
-    expect(verifyMessageBody(v.message.body, frame, () => undefined, now)).toEqual({ ok: false, reason: "unknown-sender" });
-    expect(verifyMessageBody(v.message.body, frame, () => ({ ...v.machineKey, y: v.machineKey.x }), now)).toEqual({ ok: false, reason: "bad-key" });
-    expect(verifyMessageBody(v.message.body, frame, () => v.ed25519.key, now)).toEqual({ ok: false, reason: "unsupported-alg" });
-  });
-
-  it("names the algorithm and the type it refuses", () => {
-    expect(check(jws({}, { alg: "none" }), T0)).toEqual({ ok: false, reason: "unsupported-alg" });
-    expect(check(jws({}, { alg: "EdDSA" }), T0)).toEqual({ ok: false, reason: "unsupported-alg" });
-    expect(check(jws({}, { typ: "JWT" }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ type: "fabric-relay-message/2" }), T0)).toEqual({ ok: false, reason: "malformed" });
-  });
-
-  it("refuses an iat or an exp that does not parse to an instant", () => {
-    expect(check(jws({ iat: "2026-13-45T25:61:61Z" }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ exp: null }), T0)).toEqual({ ok: false, reason: "malformed" });
-    expect(check(jws({ from: 7 }), T0)).toEqual({ ok: false, reason: "malformed" });
-  });
-
-  it("holds each time boundary: not-before skew, the 7-day life and the expiry", () => {
-    expect(check(jws(), T0 - 60_000).ok).toBe(true);
-    expect(check(jws(), T0 - 61_000)).toEqual({ ok: false, reason: "not-yet-valid" });
-    expect(check(jws({ exp: iso(T0) }), T0)).toEqual({ ok: false, reason: "lifetime-too-long" });
-    expect(check(jws({ exp: iso(T0 + MAX_MESSAGE_TTL_SECONDS * 1000) }), T0).ok).toBe(true);
-    expect(check(jws({ exp: iso(T0 + MAX_MESSAGE_TTL_SECONDS * 1000 + 1000) }), T0)).toEqual({ ok: false, reason: "lifetime-too-long" });
-    expect(check(jws(), T0 + 3_600_000 - 1).ok).toBe(true);
-    expect(check(jws(), T0 + 3_600_000)).toEqual({ ok: false, reason: "expired" });
-  });
+  // Every refusal and time boundary is a shared vector (fixtures/vectors/relay.json `messageBody`).
 });
 
 describe("limits and constants", () => {
@@ -195,27 +115,64 @@ describe("limits and constants", () => {
     expect(MAX_FRAME_BYTES).toBe(1_048_576);
   });
 
-  it("closes with the codes and the idle time DEC-0047 item 3 names", () => {
-    expect(CLOSE_CODES).toEqual({ unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001 });
+  it("closes with the codes and the idle time DEC-0047 item 3 and DEC-0066 name", () => {
+    expect(CLOSE_CODES).toEqual({ unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001, policy: 1008, internal: 1011 });
     expect(IDLE_CLOSE_SECONDS).toBe(90);
+  });
+
+  it("maps every code admit refuses with to a close code: 4401 before the signer is proven", () => {
+    for (const code of ADMIT_REFUSALS) expect(closeCodeFor(code), code).toBe(4401);
+  });
+
+  it("closes 4403 only for a proven session that left the set or whose record expired, and leaves the rest open", () => {
+    expect(closeCodeFor("not-admitted")).toBe(4403);
+    expect(closeCodeFor("expired")).toBe(4403);
+    expect([closeCodeFor("too-large"), closeCodeFor("rate-limited"), closeCodeFor("internal")]).toEqual([1009, 1008, 1011]);
+    for (const code of ["unknown-type", "malformed", "unknown-recipient", "mailbox-full", "digest-mismatch", "recipients-mismatch"] as const) {
+      expect(closeCodeFor(code), code).toBeUndefined();
+    }
+    for (const code of RELAY_ERROR_CODES) expect([undefined, 4401, 4403, 1008, 1009, 1011], code).toContain(closeCodeFor(code));
   });
 });
 
-/** The same 64 bytes in a non-canonical spelling: the 86th character carries four spare bits a lenient decoder drops. */
-const respell = (sig: string): string => {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-  const last = alphabet.indexOf(sig[sig.length - 1] as string);
-  const other = alphabet[(last & 0b110000) | ((last + 1) & 0b001111)] as string;
-  return sig.slice(0, -1) + other;
-};
+describe("frames DEC-0066 adds: replyTo, presence-result, retryAfter and welcome.limits", () => {
+  const frame = `${SCHEMA_PREFIX}schemas/relay-frame.schema.json`;
+  const valid = (value: unknown) => validateDocument(validator, frame, value).valid;
+  const head = { sequence: 0, sha256: "a".repeat(64) };
 
-describe("a signature's spelling (review of #53, non-blocking 1)", () => {
-  it("refuses the same bytes spelled non-canonically, in admit and in verifyEs256", () => {
-    const sig = respell(v.auth.frame.sig);
-    expect(sig).not.toBe(v.auth.frame.sig);
-    expect(Buffer.from(sig, "base64url").equals(Buffer.from(v.auth.frame.sig, "base64url"))).toBe(true);
-    expect(admit({ ...v.auth.frame, sig }, ctx())).toEqual({ ok: false, code: "unauthenticated" });
-    expect(verifyEs256(v.machineKey, v.auth.signingInput, sig)).toBe(false);
+  it("names in FRAME_TYPES exactly the types the schema's variants carry (owner's item 12)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/relay-frame.schema.json"), "utf8")) as { oneOf: Array<{ properties: { type: { const: string } } }> };
+    expect(schema.oneOf.map((variant) => variant.properties.type.const).sort()).toEqual([...FRAME_TYPES].sort());
+  });
+
+  it("answers a presence-query with one presence-result, correlated by replyTo", () => {
+    expect(FRAME_TYPES).toContain("presence-result");
+    const result = { v: 1, type: "presence-result", id: "r1", replyTo: "q1", presences: [{ kid: "m#sig", state: "online", lastSeen: "2026-10-12T00:00:00Z" }], unknown: ["n#sig"] };
+    expect(valid(result)).toBe(true);
+    const { replyTo: _r, ...uncorrelated } = result;
+    expect(valid(uncorrelated)).toBe(false);
+    expect(valid({ ...result, presences: [{ kid: "m#sig", state: "away", lastSeen: "2026-10-12T00:00:00Z" }] })).toBe(false);
+    expect(valid({ ...result, unknown: Array.from({ length: 257 }, (_, i) => `k${i}#sig`) })).toBe(false);
+  });
+
+  it("carries replyTo on an answer and retryAfter on rate-limited", () => {
+    for (const answer of [
+      { v: 1, type: "accepted", id: "x", replyTo: "s1", msgId: "m", seq: 1 },
+      { v: 1, type: "pong", id: "x", replyTo: "p1" },
+      { v: 1, type: "error", id: "x", replyTo: "s1", code: "rate-limited", message: "slow down", retryAfter: 5 },
+      { v: 1, type: "delta", id: "x", replyTo: "d1", head, entries: [] }
+    ]) {
+      expect(valid(answer), answer.type).toBe(true);
+      expect(valid({ ...answer, replyTo: "" }), `${answer.type} empty replyTo`).toBe(false);
+    }
+    expect(valid({ v: 1, type: "error", id: "x", code: "rate-limited", message: "m", retryAfter: -1 })).toBe(false);
+  });
+
+  it("advertises the relay's limits on welcome, every member optional", () => {
+    const welcome = { v: 1, type: "welcome", id: "w", session: "s", estateRevision: 1, deltaHead: head, heartbeat: null };
+    expect(valid({ ...welcome, limits: { sendPerMinute: 600, presenceQueryPerMinute: 30, deltaQueryPerMinute: 30, mailboxMessages: 1000, blobBytes: 33554432 } })).toBe(true);
+    expect(valid({ ...welcome, limits: {} })).toBe(true);
+    expect(valid({ ...welcome, limits: { sendPerMinute: 0 } })).toBe(false);
   });
 });
 
@@ -231,7 +188,9 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
 
   it("admits from revision 1 verified against the passkeys pinned at setup", () => {
     const result = relayAdmissionSet({ candidate: rev1, pinned, at: at1, schemaValid });
-    expect(result.ok && [...result.set.keys()].sort()).toEqual(["m-4c1e#sig", "m-9a07#sig"]);
+    // m-9a07's #sig is Ed25519, which devices.md admits and a relay participant may not use: it is left out, and named.
+    expect(result.ok && [...result.set.keys()].sort()).toEqual(["m-4c1e#sig"]);
+    expect(result.ok && result.excluded).toEqual([{ kid: "m-9a07#sig", reason: "unsupported-alg" }]);
     expect(result.ok && result.revision).toBe(1);
   });
 
@@ -259,17 +218,28 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
     expect(relayAdmissionSet({ candidate: rev1, pinned, at: new Date(rev1.validUntil), schemaValid }).ok).toBe(true);
     const after = new Date(Date.parse(rev1.validUntil) + 1000);
     expect(relayAdmissionSet({ held: rev1, pinned, at: after, schemaValid })).toEqual({ ok: false, refusal: "expired" });
-    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 1000), schemaValid })).toEqual({ ok: false, refusal: "expired" });
+    // Before its window: 60 s of skew, then not-yet-valid, never `expired` (DEC-0066, CON-017).
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 60_000), schemaValid }).ok).toBe(true);
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 61_000), schemaValid })).toEqual({ ok: false, refusal: "not-yet-valid" });
     expect(relayAdmissionSet({ pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "no-record" });
   });
 
   it("drops a machine revoked while still listed, and reads a record without revocations", () => {
-    const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-9a07", revokedAt: "2026-10-12T10:00:00Z" }] };
+    const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-4c1e", revokedAt: "2026-10-12T10:00:00Z" }] };
     const result = relayAdmissionSet({ held, pinned, at: at1, schemaValid });
-    expect(result.ok && [...result.set.keys()]).toEqual(["m-4c1e#sig"]);
+    expect(result.ok && [...result.set.keys()]).toEqual([]);
     const { revocations: _none, ...bare } = rev1;
     const all = relayAdmissionSet({ held: bare, pinned, at: at1, schemaValid });
-    expect(all.ok && all.set.size).toBe(2);
+    expect(all.ok && all.set.size + all.excluded.length).toBe(2);
+  });
+
+  it("leaves out a #sig key SEC 1 refuses, naming it bad-key, so admit and a blob request never meet it", () => {
+    const offCurve = Buffer.from(rev1.machines[0].deviceKeys[0].publicKey, "base64");
+    offCurve[64] = offCurve[64]! ^ 1;
+    const machines = rev1.machines.map((m: any, i: number) => (i === 0 ? { ...m, deviceKeys: m.deviceKeys.map((k: any) => (k.use === "sig" ? { ...k, publicKey: offCurve.toString("base64") } : k)) } : m));
+    const result = relayAdmissionSet({ held: { ...rev1, machines }, pinned, at: at1, schemaValid });
+    expect(result.ok && result.set.size).toBe(0);
+    expect(result.ok && result.excluded).toEqual([{ kid: "m-4c1e#sig", reason: "bad-key" }, { kid: "m-9a07#sig", reason: "unsupported-alg" }]);
   });
 
   it("drops a revoked device key, and admits exactly what the set holds", () => {

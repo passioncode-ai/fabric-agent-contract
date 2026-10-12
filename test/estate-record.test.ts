@@ -284,14 +284,17 @@ describe("the verifier (DEC-0055, WebAuthn Level 3 §7.2)", () => {
     expect(verifyEstateRecord(first, { authorities: "x", at: AT } as never)).toEqual({ ok: false, problem: "no-trusted-authority" });
   });
 
-  it("holds the window's edges: valid from issuedAt to validUntil inclusive, never a zero-length window", () => {
+  it("holds the window's edges: valid from 60 s before issuedAt (the clock skew) to validUntil inclusive, never a zero-length window", () => {
     const signed = resign(first);
     const trust = (at: number) => ({ authorities: [edAuthority], at: new Date(at) });
     const issued = Date.parse(first.issuedAt);
     const until = Date.parse(first.validUntil);
     expect(verifyEstateRecord(signed, trust(issued)).ok).toBe(true);
     expect(verifyEstateRecord(signed, trust(until)).ok).toBe(true);
-    expect(verifyEstateRecord(signed, trust(issued - 1))).toEqual({ ok: false, problem: "not-yet-valid" });
+    // A revision issued a moment ahead of the verifier's clock is admitted within the skew (DEC-0066, CON-017).
+    expect(verifyEstateRecord(signed, trust(issued - 1)).ok).toBe(true);
+    expect(verifyEstateRecord(signed, trust(issued - 60_000)).ok).toBe(true);
+    expect(verifyEstateRecord(signed, trust(issued - 60_001))).toEqual({ ok: false, problem: "not-yet-valid" });
     expect(verifyEstateRecord(signed, trust(until + 1))).toEqual({ ok: false, problem: "expired" });
     expect(verifyEstateRecord(resign({ ...first, validUntil: first.issuedAt }), trust(issued))).toEqual({ ok: false, problem: "too-long-lived" });
   });
