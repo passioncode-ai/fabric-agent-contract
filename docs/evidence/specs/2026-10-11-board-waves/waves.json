@@ -6,7 +6,7 @@
     "2": "Delegation, spend and the operator session: the DEC-0037…0041 seam closed, one canonical-JSON register",
     "3": "The organization edition's first contracts and activity/devices: fabric-package/1 first, then DEC-0030/0031 hardened and amended (CON-OE-01, CON-OE-12, run/result, v4 device fields, CT-25), estate-record/1 last",
     "4": "Services on every system (with the v4 descriptor for listings), the operator channel and the embedded dashboard, and the agent network's transport (the relay, the delta and heartbeat, leases, signing challenges, device message signatures)",
-    "5": "The 0.1.0 core, interop and usage",
+    "5": "The 0.1.0 core, interop and usage; wave 4's follow-ups (N19)",
     "6": "The remaining open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, the rest of CON-OE-03"
   },
   "nodes": [
@@ -327,6 +327,17 @@
         "DEV-KEY-ROLES",
         "DEV-CHECKIN-DIGEST",
         "DL-HUBKEY"
+      ]
+    },
+    {
+      "id": "N19-wave4-followups",
+      "title": "Wave 4's follow-ups: the owed readings of DEC-0054/0062/0063, the relay audit's consolidated revision, the agent-sync id defect",
+      "wave": 5,
+      "release": "this",
+      "items": [
+        "W4-READINGS-OWED",
+        "RELAY-AUDIT-1",
+        "AGENT-SYNC-IDS"
       ]
     }
   ]

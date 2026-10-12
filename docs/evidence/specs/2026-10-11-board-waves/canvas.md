@@ -176,7 +176,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
   Nothing about assessing people lands here (J10). OQ-0010 stays deferred.
 
-### N08 services — every system, CT-01 decided (wave 4)
+### N08 services — every system, CT-01 decided (wave 4) — done: DEC-0057 #57 `8c6211e`, DEC-0061 #63 `335e736`
 
 - As-is:
   - CT-01 is undecided and DEC-0032 widened it to every supervisor;
@@ -192,7 +192,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - Windows token-file readers checked by a reference function;
   - the title and rows cover local and remote placements.
 
-### N09 operator channel and embedded dashboard (wave 4)
+### N09 operator channel and embedded dashboard (wave 4) — done: DEC-0058, DEC-0059, #56 `32c01ea`
 
 - As-is:
   - the status schema accepts `unlinked` without a receiver lease, and `receiver-missing` with a held lease
@@ -210,7 +210,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - scenarios exist for the embedded dashboard, delegation approval, spend checks, settings restore and
     the Project board.
 
-### N18 the agent network's transport (wave 4) — re-cut 2026-10-12 from V4-SECURE-TRANSPORT and the device transport ask
+### N18 the agent network's transport (wave 4) — re-cut 2026-10-12 from V4-SECURE-TRANSPORT and the device transport ask — done: DEC-0047 #53, DEC-0056 #58, DEC-0060 #62, DEC-0054 #64, DEC-0062/0063 #65
 
 - As-is: the check-in carries `records` (DEC-0053) whose shapes no decision owns yet; the relay and the secret envelope
   are in review (#53, DEC-0047); a TLS-terminating host cannot see a device's client certificate, so mutual TLS is the
@@ -225,6 +225,13 @@ an owner. New contracts land designed against the whole, never as a shape a late
     repeated), agreed with the first organization server;
   - device-key role counts at enrollment (DEV-KEY-ROLES) and the estate revision's digest in the check-in
     (DEV-CHECKIN-DIGEST), from #54's review.
+
+### N19 wave 4's follow-ups (wave 5)
+
+- The three-tier readings owed for DEC-0054, DEC-0062 and DEC-0063 (W4-READINGS-OWED): merged after the owner's own
+  review while subagent readers were at their weekly limit.
+- Project Observatory's audit of DEC-0047 (RELAY-AUDIT-1, CON-001…023), as one consolidated revision under #53's rules.
+- agent-sync's id registers (AGENT-SYNC-IDS): a tool defect, reported to its owner.
 
 ### N10 core — the 0.1.0 rules keep their promises (wave 5)
 
@@ -319,6 +326,8 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-12 — wave 4 closed: N08, N09 and N18 done (DEC-0047, DEC-0054, DEC-0056…DEC-0063); N19 added to wave 5 with
+  the owed readings, the relay audit and the agent-sync defect.
 - 2026-10-12 — wave 3 closed: N07 and N17 done (DEC-0050…0053, DEC-0055); OQ-0010 and F-D-028 move to N13 (the first
   organization server answers them); V4-SECURE-TRANSPORT split into N18 (wave 4) with the device message-signature
   binding.
