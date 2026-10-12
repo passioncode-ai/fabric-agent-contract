@@ -30,7 +30,8 @@ describe("the shared relay vectors", () => {
     const outcomes = (group: string) => results.filter((r) => r.group === group).map((r) => r.expected as Json);
     const admitCodes = new Set(outcomes("admit").filter((e) => e.ok === false).map((e) => e.code));
     expect([...admitCodes].sort()).toEqual([...ADMIT_REFUSALS].sort());
-    const reasons = new Set(outcomes("messageBody").filter((e) => e.ok === false).map((e) => e.reason));
+    const replays = outcomes("replay").flatMap((steps) => steps as unknown as Json[]);
+    const reasons = new Set([...outcomes("messageBody"), ...replays].filter((e) => e.ok === false).map((e) => e.reason));
     expect([...reasons].sort()).toEqual([...MESSAGE_REFUSALS].sort());
     const pairs = new Set(outcomes("blobRequest").filter((e) => e.ok === false).map((e) => `${e.status} ${e.code}`));
     expect([...pairs].sort()).toEqual(BLOB_REFUSALS.map(([status, code]) => `${status} ${code}`).sort());

@@ -200,12 +200,14 @@ function jws(payload: Json = {}, header: Record<string, unknown> = {}, key: Test
   })}`;
   return `${signed}.${signDeterministic(key.d, signed)}`;
 }
+const DELIVER = { from: LAPTOP, msgId: MSG_ID, seq: 1, sentAt: "2026-10-12T00:00:06Z" };
 const payloadOf = (body: string) => JSON.parse(Buffer.from(body.split(".")[1] as string, "base64url").toString("utf8")) as Json;
 
 function messageBodyCases(): Json[] {
   const body = jws();
-  const frame = { from: LAPTOP, to: GPU_BOX, msgId: MSG_ID };
-  const c = (name: string, b: string, expect: Json, over: Json = {}) => ({ name, body: b, frame, senders: { [LAPTOP]: MACHINE.jwk }, now: MSG_NOW, expect, ...over });
+  // The frame is the deliver frame the recipient got; `self` is the recipient's own #sig, the `to` it expects (CON-012).
+  const frame = DELIVER;
+  const c = (name: string, b: string, expect: Json, over: Json = {}) => ({ name, body: b, frame, self: GPU_BOX, senders: { [LAPTOP]: MACHINE.jwk }, now: MSG_NOW, expect, ...over });
   const ok = (b: string) => ({ ok: true, payload: payloadOf(b) });
   const no = (reason: string) => ({ ok: false, reason });
   const [h, p, s] = body.split(".") as [string, string, string];
@@ -228,7 +230,8 @@ function messageBodyCases(): Json[] {
     c("exp null", jws({ exp: null }), no("malformed")),
     c("from a number", jws({ from: 7 }), no("malformed")),
     c("a frame naming another sender", body, no("mismatch"), { frame: { ...frame, from: "urn:fabric:machine:stranger#sig" }, senders: { [LAPTOP]: MACHINE.jwk, "urn:fabric:machine:stranger#sig": STRANGER.jwk } }),
-    c("a frame naming another recipient", body, no("mismatch"), { frame: { ...frame, to: "urn:fabric:machine:other#sig" } }),
+    c("a recipient other than the signed to", body, no("mismatch"), { self: "urn:fabric:machine:other#sig" }),
+    c("a body signed to another machine, delivered here", jws({ to: "urn:fabric:machine:other#sig" }), no("mismatch")),
     c("a frame naming another msgId", body, no("mismatch"), { frame: { ...frame, msgId: "another" } }),
     c("a payload changed in transit", reencoded({ payload: { command: "run.cancel" } }), no("bad-signature")),
     c("an exp moved in transit", reencoded({ exp: "2026-10-19T00:00:00Z" }), no("bad-signature")),
@@ -252,6 +255,22 @@ function messageBodyCases(): Json[] {
     c("a header with b64 false and crit [\"b64\"], validly signed", jws({}, { b64: false, crit: ["b64"] }), no("malformed")),
     c("a header with an unknown member, validly signed", jws({}, { cty: "json" }), no("malformed")),
     c("iat 30 February, validly signed", jws({ iat: "2026-02-30T00:00:05Z", exp: "2026-03-02T01:00:05Z" }), no("malformed"), { now: "2026-03-02T00:10:00Z" })
+  ];
+}
+
+function replayCases(): Json[] {
+  const body = jws();
+  const exp = MSG_IAT + 3_600_000;
+  const step = (b: string, now: string, expect: Json) => ({ body: b, now, expect });
+  const ok = { ok: true };
+  const stranger = "urn:fabric:machine:stranger#sig";
+  return [
+    { name: "a body accepted, then the same body again, then after its exp", steps: [
+      step(body, MSG_NOW, ok), step(body, shift(MSG_NOW, 1_000), { ok: false, reason: "replay" }), step(body, iso(exp), { ok: false, reason: "expired" })
+    ] },
+    { name: "two msgIds from one sender", steps: [step(body, MSG_NOW, ok), step(jws({ msgId: "another" }), MSG_NOW, ok)] },
+    { name: "one msgId from two senders", steps: [step(body, MSG_NOW, ok), step(jws({ from: stranger }, { kid: stranger }, STRANGER), MSG_NOW, ok)] },
+    { name: "an exp that is not an instant fails closed as expired", steps: [step(jws({ exp: "2026-02-30T00:00:00Z" }), MSG_NOW, { ok: false, reason: "expired" })] }
   ];
 }
 
@@ -336,7 +355,7 @@ function relayVectors(): Json {
     machineKey: MACHINE.jwk,
     machineKeyOctets: MACHINE.octets,
     auth: { context: { relay: RELAY, nonce: NONCE, now: AUTH_NOW }, signingInput: input, sha256: sha256(input).toString("hex"), frame },
-    message: { frame: { from: LAPTOP, to: GPU_BOX, msgId: MSG_ID, ttl: 3600 }, now: MSG_NOW, body },
+    message: { frame: DELIVER, self: GPU_BOX, now: MSG_NOW, body },
     ed25519: { key: ED25519_JWK, frame: { ...frame, alg: "EdDSA", sig: nodeSign(null, Buffer.from(edInput, "utf8"), ED25519).toString("base64url") }, expect: "unsupported-alg" },
     blobRequest: {
       about: "Fabric-Relay-Request (DEC-0047 item 8): base64url of RFC 8785 {alg, kid, recipients, iat, sig}; sig is ES256 over relayBlobSigningInput. `admitted` is the relay's current admission set by kid; `stored` the blob's recipients when the relay holds it.",
@@ -344,7 +363,8 @@ function relayVectors(): Json {
     },
     instant: { about: "instant(value): RFC 3339 UTC (Z only, at most nine fraction digits) on a day that exists, as an ISO string with milliseconds, or null (DEC-0066).", cases: instantCases() },
     admit: { about: "admit(frame, context) (DEC-0047 item 4).", cases: admitCases() },
-    messageBody: { about: "verifyMessageBody(body, frame, senders, now) (DEC-0047 item 5).", cases: messageBodyCases() }
+    messageBody: { about: "verifyMessageBody(body, {from: frame.from, msgId: frame.msgId, to: self}, senders, now) (DEC-0047 item 5, DEC-0066): `frame` is the deliver frame, `self` the recipient's own #sig.", cases: messageBodyCases() },
+    replay: { about: "checkReplay(seen, payload, now) after verifyMessageBody (DEC-0066): steps run in order against one recipient's store of accepted (from, msgId), which an accepted step adds to.", cases: replayCases() }
   };
 }
 

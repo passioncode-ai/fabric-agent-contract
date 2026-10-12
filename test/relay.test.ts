@@ -18,7 +18,7 @@ type Vector = {
   machineKey: Record<string, string>;
   machineKeyOctets: string;
   auth: { context: { relay: string; nonce: string; now: string }; signingInput: string; sha256: string; frame: AuthFrame };
-  message: { frame: { from: string; to: string; msgId: string; ttl: number }; now: string; body: string };
+  message: { frame: { from: string; msgId: string; seq: number; sentAt: string }; self: string; now: string; body: string };
   ed25519: { key: Record<string, string>; frame: AuthFrame; expect: string };
 };
 const v = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "relay.json"), "utf8")) as Vector;
@@ -70,7 +70,8 @@ describe("relay-blob/1", () => {
 });
 
 describe("fabric-relay-message/1", () => {
-  const frame = { from: v.message.frame.from, to: v.message.frame.to, msgId: v.message.frame.msgId };
+  // A recipient expects the deliver frame's from and msgId, and its own kid as the signed `to` (DEC-0066, CON-012).
+  const frame = { from: v.message.frame.from, to: v.message.self, msgId: v.message.frame.msgId };
   const senderKey = (kid: string) => (kid === frame.from ? v.machineKey : undefined);
   const now = new Date(v.message.now);
   it("verifies the vector's body against its frame, with the sender's key as a JWK or as octets", () => {

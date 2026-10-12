@@ -7,7 +7,7 @@
  *
  * A key in a case is a JWK object or a string of base64 SEC 1 octets; a time is RFC 3339.
  */
-import { admit, decideBlobAccess, instant, verifyBlobRequest, verifyMessageBody, type AuthFrame } from "./relay.js";
+import { admit, checkReplay, decideBlobAccess, instant, verifyBlobRequest, verifyMessageBody, type AuthFrame, type RelayMessagePayload } from "./relay.js";
 import { openEnvelope, type OpenContext } from "./secret-envelope.js";
 import type { P256Key } from "./p256.js";
 
@@ -41,9 +41,21 @@ export function relayVectorResults(vectors: Json): VectorResult[] {
     out.push({ group: "admit", name: c.name as string, actual, expected: c.expect });
   }
   for (const c of cases(vectors.messageBody)) {
-    const frame = c.frame as { from: string; to: string; msgId: string };
-    const actual = verifyMessageBody(c.body as string, frame, keyring(c.senders), new Date(c.now as string));
+    // A recipient checks the body against the deliver frame's from and msgId, and against its own kid as `to`.
+    const frame = c.frame as { from: string; msgId: string };
+    const actual = verifyMessageBody(c.body as string, { from: frame.from, msgId: frame.msgId, to: c.self as string }, keyring(c.senders), new Date(c.now as string));
     out.push({ group: "messageBody", name: c.name as string, actual: plain(actual), expected: c.expect });
+  }
+  for (const c of cases(vectors.replay)) {
+    const seen = new Set<string>();
+    const steps = (c.steps ?? []) as Array<{ body: string; now: string; expect: unknown }>;
+    const actual = steps.map((step) => {
+      const payload = JSON.parse(Buffer.from(step.body.split(".")[1] as string, "base64url").toString("utf8")) as RelayMessagePayload;
+      const result = checkReplay((from, msgId) => seen.has(`${from}\n${msgId}`), payload, new Date(step.now));
+      if (result.ok) seen.add(`${payload.from}\n${payload.msgId}`);
+      return result;
+    });
+    out.push({ group: "replay", name: c.name as string, actual, expected: steps.map((step) => step.expect) });
   }
   const blob = (vectors.blobRequest ?? {}) as Json;
   for (const c of cases(blob)) {

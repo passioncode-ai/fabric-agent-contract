@@ -132,7 +132,8 @@ export interface RelayMessagePayload { type: "fabric-relay-message/1"; from: str
 
 /** Every refusal `verifyMessageBody` names, in the order it checks; the shared vectors carry each (DEC-0066). */
 export const MESSAGE_REFUSALS = [
-  "malformed", "unsupported-alg", "unknown-sender", "bad-key", "bad-signature", "mismatch", "not-yet-valid", "lifetime-too-long", "expired"
+  "malformed", "unsupported-alg", "unknown-sender", "bad-key", "bad-signature", "mismatch", "not-yet-valid", "lifetime-too-long", "expired",
+  "replay"
 ] as const;
 export type MessageRefusal = (typeof MESSAGE_REFUSALS)[number];
 
@@ -141,14 +142,15 @@ const JWS_HEADER_MEMBERS = new Set(["alg", "typ", "kid"]);
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 
 /**
- * A recipient's check of a delivered body (a compact JWS, ES256): the signed `from`, `to` and `msgId` equal the frame's,
- * `iat` is not ahead of the clock by more than the skew, `exp` follows `iat` by at most 7 days and has not passed. The
- * tier (T1/T2) is then the recipient's decision from the verified `from`, never from the connection the frame arrived
- * on (DEC-0047 item 6).
+ * A recipient's check of a delivered body (a compact JWS, ES256): the signed `from`, `to` and `msgId` equal what the
+ * recipient expects — `from` and `msgId` from the `deliver` frame, and `to` its **own** `#sig` kid, never a value a relay
+ * asserts (DEC-0066, CON-012) — `iat` is not ahead of the clock by more than the skew, `exp` follows `iat` by at most 7
+ * days and has not passed. The tier (T1/T2) is then the recipient's decision from the verified `from`, never from the
+ * connection the frame arrived on (DEC-0047 item 6). `checkReplay` follows it.
  */
 export function verifyMessageBody(
   body: string,
-  frame: { from: string; to: string; msgId: string },
+  expect: { from: string; to: string; msgId: string },
   senderKey: (kid: string) => P256Key | undefined,
   now: Date
 ): { ok: true; payload: RelayMessagePayload } | { ok: false; reason: MessageRefusal } {
@@ -175,11 +177,28 @@ export function verifyMessageBody(
   const verdict = verifyEs256(key, `${parts[0]}.${parts[1]}`, parts[2] as string);
   if (verdict === "bad-key" || verdict === "unsupported-alg") return { ok: false, reason: verdict };
   if (!verdict) return { ok: false, reason: "bad-signature" };
-  if (payload.from !== frame.from || payload.to !== frame.to || payload.msgId !== frame.msgId) return { ok: false, reason: "mismatch" };
+  if (payload.from !== expect.from || payload.to !== expect.to || payload.msgId !== expect.msgId) return { ok: false, reason: "mismatch" };
   if (iat - now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, reason: "not-yet-valid" };
   if (exp <= iat || exp - iat > MAX_MESSAGE_TTL_SECONDS * 1000) return { ok: false, reason: "lifetime-too-long" };
   if (now.getTime() >= exp) return { ok: false, reason: "expired" };
   return { ok: true, payload: payload as unknown as RelayMessagePayload };
+}
+
+/**
+ * The recipient's replay window (DEC-0066, CON-011), after `verifyMessageBody` accepted the body: a recipient keeps
+ * each accepted `(from, msgId)` until that body's signed `exp`, and refuses a second delivery of a kept pair as `replay`
+ * (it acks the duplicate without acting on it, or the relay redelivers it until its `ttl`). After `exp` the body is
+ * `expired` whatever the store holds, so the window is exactly the message's signed life and a relay cannot push a
+ * replay past it; an `exp` that is not an instant fails closed as `expired`. `seen` is the recipient's own store; a
+ * port keeps it as it likes.
+ */
+export function checkReplay(
+  seen: (from: string, msgId: string) => boolean,
+  payload: Pick<RelayMessagePayload, "from" | "msgId" | "exp">,
+  now: Date
+): { ok: true } | { ok: false; reason: "replay" | "expired" } {
+  if (now.getTime() >= (instant(payload.exp) ?? Number.NEGATIVE_INFINITY)) return { ok: false, reason: "expired" };
+  return seen(payload.from, payload.msgId) ? { ok: false, reason: "replay" } : { ok: true };
 }
 
 /**
