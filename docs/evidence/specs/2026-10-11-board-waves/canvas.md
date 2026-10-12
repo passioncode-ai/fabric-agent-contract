@@ -137,7 +137,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
   Each form has a reference function in `src/` and shared vectors in `fixtures/`. DEC-0022's digest is
   pinned to one named form by a decision. A new document picks from the register, never a fourth form.
 
-### N17 organization edition, first contracts (wave 3, first) — from the first organization server's v4 §12 (D4)
+### N17 organization edition, first contracts (wave 3, first) — from the first organization server's v4 §12 (D4) — done: DEC-0050, DEC-0051, #50 `9d29d71`; DEC-0055, #54
 
 - `fabric-package/1` (CON-OE-03's package part, moved forward because Stage 1 packing needs it): manifest, service
   template, `secrets[]`, `requires`, `costPresets`, result signal, `state[]`, evals receipt, vendored dependencies,
@@ -146,7 +146,7 @@ an owner. New contracts land designed against the whole, never as a shape a late
 - `agentRef` as a rule beside the package.
 - `estate-record/1` (passkey-signed) last in wave 3, needed from Stage 3.
 
-### N07 activity and devices — DEC-0030/0031 hardened and amended together (wave 3)
+### N07 activity and devices — DEC-0030/0031 hardened and amended together (wave 3) — done: DEC-0052, DEC-0053, #52 `92de756`
 
 - As-is:
   - ten device and four activity branches die untested (F-B-101/102);
@@ -209,6 +209,22 @@ an owner. New contracts land designed against the whole, never as a shape a late
   - a host ignores an invalid declaration and reports it;
   - scenarios exist for the embedded dashboard, delegation approval, spend checks, settings restore and
     the Project board.
+
+### N18 the agent network's transport (wave 4) — re-cut 2026-10-12 from V4-SECURE-TRANSPORT and the device transport ask
+
+- As-is: the check-in carries `records` (DEC-0053) whose shapes no decision owns yet; the relay and the secret envelope
+  are in review (#53, DEC-0047); a TLS-terminating host cannot see a device's client certificate, so mutual TLS is the
+  only device transport the contract names.
+- To-be:
+  - the relay and the secret envelope land (DEC-0047, V4-RELAY), with one `{sequence, sha256}` head shared with the
+    check-in;
+  - the revocation delta and the heartbeat (DEC-0054, V4-DELTA-HEARTBEAT);
+  - window leases (V4-WINDOW-LEASE);
+  - signing challenges over RFC 8785 (V4-SIGNING-CHALLENGE), adopting or replacing DEC-0055's `estate-revision/1`;
+  - HTTP message signatures beside mutual TLS for devices (DEV-HTTPSIG; label `fabric-device`, a nonce refused when
+    repeated), agreed with the first organization server;
+  - device-key role counts at enrollment (DEV-KEY-ROLES) and the estate revision's digest in the check-in
+    (DEV-CHECKIN-DIGEST), from #54's review.
 
 ### N10 core — the 0.1.0 rules keep their promises (wave 5)
 
@@ -303,6 +319,9 @@ an owner. New contracts land designed against the whole, never as a shape a late
 
 - 2026-10-11 — first cut.
 - 2026-10-11 — N05's questions ruled by Fabric; N14 added to wave 2 (CT-05 unblocked by Fabric ADR-0147); PR #32 merged at `7931c1d`.
+- 2026-10-12 — wave 3 closed: N07 and N17 done (DEC-0050…0053, DEC-0055); OQ-0010 and F-D-028 move to N13 (the first
+  organization server answers them); V4-SECURE-TRANSPORT split into N18 (wave 4) with the device message-signature
+  binding.
 - 2026-10-12 — wave 2 closed: N05, N06, N14, N15 done (DEC-0043…0046) and CT-29, CT-31 fixed; wave 3 re-cut with N17
   (v4 D4: package first, estate record last), N07 gains run/result, v4 device fields and CT-25, N08 the v4 descriptor;
   the v4 delegation amendment waits on Fabric D2 and the secure transport on the relay draft (DEC-0047 reserved).

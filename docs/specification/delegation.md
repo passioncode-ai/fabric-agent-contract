@@ -193,7 +193,9 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   verifies anything under it (DL-13 row 3; DEC-0045, CT-29).
   The hub serves it at its `/.well-known/jwks.json` and in its hub document, and Fabric publishes the same set
   where an online service can read it without reaching the operator's computer. The private key never leaves
-  the issuer (Fabric keeps it in the estate's vault and holds it in memory).
+  the issuer (Fabric keeps it in the estate's vault and holds it in memory). A verifier that also reads the
+  estate's record ([estate record](estate-record.md#machines), DEC-0055) trusts a `kid` only while a current revision
+  certifies it for a machine and does not revoke it.
 - **DL-15 — Rotation.** The issuer publishes a new key before it signs with it. It keeps the previous key
   published for at least one token lifetime plus the leeway after the last token it signed (660 s), and for 24
   hours plus the leeway when the key signed an approval, because an approval lives up to 24 hours. A callee

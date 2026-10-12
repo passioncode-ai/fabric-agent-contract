@@ -12,6 +12,7 @@ import { deepLinkRules } from "./fabric-links.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
+import { estateRecordRules } from "./estate-record-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
 
 export type { Finding } from "./findings.js";
@@ -35,6 +36,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (profiles) return profiles;
   const packaged = packageRules(kind, value);
   if (packaged) return packaged;
+  const estate = estateRecordRules(kind, value);
+  if (estate) return estate;
   const handoff = sessionHandoffRules(kind, value);
   if (handoff) return handoff;
   const findings: Finding[] = [];

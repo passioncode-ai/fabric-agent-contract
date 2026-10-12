@@ -40,6 +40,8 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P3-01 | `src/package-rules.ts` (new) | 152 / 152 (100 %) | 100 % | FAC-SEM-064…066, the digest, the folder check and `verifyPackage`; one fixture or vector case per sub-check and problem, each planted |
 | P3-02 | `src/device-rules.ts` | 500 / 515 (97.08 %) | 97.08 % | F-B-101, F-B-103…F-B-109; FAC-SEM-068, FAC-SEM-069, device keys by role; every check planted, and malformed input refused rather than thrown |
 | P3-02 | `src/activity-rules.ts` | 260 / 284 (91.54 %) | 91.54 % | F-B-102, F-B-107, F-B-108, CT-25, CON-OE-01, FAC-SEM-067; every check planted |
+| P3-03 | `src/estate-record-rules.ts` (new) | 190 / 190 (100 %) | 100 % | FAC-SEM-072…076, the digest, the challenge, `verifyEstateRecord` and `placementTrust`; one fixture or vector case per rule and problem, the chain checks planted |
+| P3-03 | `src/webauthn.ts` (new) | 78 / 78 (100 %) | 100 % | the offline WebAuthn Level 3 §7.2 assertion checks, ER-4…ER-9 |
 | P3-02 | `src/p256.ts` (new) | 8 / 8 (100 %) | 100 % | SEC 1 §3.2.2 P-256 key validation over `fixtures/vectors/p256.json` (DEC-0053) |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
@@ -71,3 +73,10 @@ expects findings, never an exception. The uncovered branches left are `?? ""` an
 `src/p256.ts` is new, every branch covered. The whole-set floor stays at 86.85 %, since P3-01's new files land beside
 these; measured whole set 2683 / 2844 (94.33 %). Measured with `vitest run --coverage` on the P3-02 branch after main's
 `0cacd08`.
+
+**Wave 3, P3-03 (DEC-0055).** `src/estate-record-rules.ts` and `src/webauthn.ts` are new and reach every branch, with
+no `v8 ignore`; the estate rule kinds join `test/rule-tolerance.test.ts`, so input of the wrong shape is refused without
+throwing; the verifier's checks added in review (issued before the parent, a dropped revocation, a revoked signer, the record's
+rules, an unreadable clock, the day of the month, one hub key under two kids, a canonical JWK, an unadmitted algorithm,
+a revocation kind read from a `Map`) were each removed and a test failed. `semantic-rules.ts` only dispatches to the new module. The whole-set floor stays at 86.85 %; measured whole set
+3131 / 3290 (95.16 %). Measured with `vitest run --coverage` on the P3-03 branch off main's `92de756`.

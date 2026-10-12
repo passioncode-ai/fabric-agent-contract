@@ -228,8 +228,9 @@ package records no use and no user (the organization edition's open/private spli
 
 - `ES256` — when Fabric records D2; the passkey-assertion countersignature and its challenge type with
   `org-authority/1` and the signing-challenge types (v4 §12, later waves).
-- Which keys a machine pins for a publisher, and how a countersignature chains to an organization's root: the estate
-  record (`estate-record/1`) and `org-authority/1`.
+- How a countersignature chains to an organization's root: `org-authority/1`. Which keys a machine pins for a
+  publisher is decided by the [estate record](estate-record.md#machines) (DEC-0055: `publisherKeys` and
+  `placementTrust`).
 - Where a package's bytes are fetched from (v4 §4: the relay's blob store, by digest), and how a machine reports a
   refused package.
 - A skill-set listing's budget check against an agent profile (`fabric-agent-profile/1`, CON-OE-03).

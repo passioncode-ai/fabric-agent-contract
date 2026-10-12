@@ -80,7 +80,7 @@ Exit criteria:
   `personalKeySharing`, expired policy keeps locks).
 - No private schema lands (J10).
 
-### Wave 4 — services, operator channel, embedded dashboard (N08, N09; 21 items)
+### Wave 4 — services, operator channel, embedded dashboard, the network's transport (N08, N09, N18; 29 items)
 
 Depends on: wave 1's sweep test; agreement with Fabric (CO-238) and Fabric Dashboards (FD-37) on the
 lifecycle decision.
@@ -92,6 +92,8 @@ Exit criteria:
 - Status-state invariants in the schema and tested.
 - ED-6/ED-9 reconciled.
 - UX scenarios for the five uncovered surfaces.
+- N18: DEC-0047 merged; DEC-0054, the window lease, the signing challenges and the device message-signature binding
+  each a decision with fixtures and vectors; the first organization server runs the binding's vectors.
 
 ### Wave 5 — the 0.1.0 core, interop and usage (N10, N11; 17 items)
 
@@ -148,6 +150,23 @@ Each has a board row naming what it waits for.
   D2 and its secure transport on the relay protocol (DEC-0047 reserved for Project Observatory's draft).
 - **Still open from wave 1:** fabric-workspace #138 (rebasing); the wiki card (blocked on that vault's history).
   org-index #56 merged.
+
+### Wave 3 — close record (2026-10-12)
+
+- **Merged:** #50 `9d29d71` (DEC-0050, DEC-0051, the package), #52 `92de756` (DEC-0052, DEC-0053, activity and devices),
+  #54 (DEC-0055, the estate record). Each was read by three independent verifiers (unit, seam, product) and fixed in
+  one round.
+- **Gate:** `pnpm run check` on #54's head after its review round — 36 test files, 1493 tests, floors met, whole set
+  95.16 % of branches.
+- **Found during the wave and fixed in it:** in P3-03, a verifier that accepted a revision dropping a revocation or
+  signed by a passkey its parent revoked, an unreadable clock that accepted any record, and a revocation kind that made
+  a rule throw (the owner's review and the three tiers); a scope that sidestepped OD-1 and a stale revocation list for a delegated root (P3-02's review).
+- **Peer work reviewed:** #53 (DEC-0047, the relay, Project Observatory's session) failed its first reading on all
+  three tiers (a NaN date passing every time check, octet keys that crash, a check-in shape it misstated); the review
+  and the owner's rulings are on the pull request, and it lands after #54.
+- **New work:** N18 in wave 4 (the network's transport, split from V4-SECURE-TRANSPORT) with the device
+  message-signature binding the first organization server asked for; OQ-0010 and F-D-028 move to N13.
+- **Inventory:** 174 items, 93 closed (`assign.mjs`).
 
 ## Questions for the operator — one batch
 

@@ -82,7 +82,8 @@ window at L3, not a grant limit (DEC-0041).
 
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
-DEC-0039).
+DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it
+trusts a `kid` only while a current revision certifies it.
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
@@ -164,6 +165,12 @@ listed files it covers the whole folder, and a countersignature does not change 
 
 **Result signal**: What counts as done for an agent, declared in its **Package** (`resultSignal`: a name and the
 card's "done when …"). Fabric's `result` event names it; that event and the meter's receipts join on the root run.
+
+**Estate record**: One person's estate as signed state (`estate-record/1`, DEC-0055): the passkeys that sign the
+next revision, the machines with their device keys and a certificate of each machine's hub key, the packages placed on
+each machine by `agentRef`, digest and publisher key, where each secret slot is filled from (never a value), share
+grants and revocations. Each revision is whole, names its parent's digest, is valid for at most 30 days and is signed
+by a passkey assertion every machine verifies offline ([estate record](docs/specification/estate-record.md)).
 
 **Principal**: In delegation, the person on whose behalf the work runs: the operator, or an external
 person under a share grant (a token's `sub`). A grant's `principal` field names who the grant is

@@ -399,5 +399,17 @@
   {"name": "fabric-package-path-escapes", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-escapes.json", "valid": false, "keyword": "pattern"},
   {"name": "fabric-package-two-publisher-signatures", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-two-publisher-signatures.json", "valid": false, "keyword": "contains"},
   {"name": "fabric-package-skill-set-with-secrets", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-skill-set-with-secrets.json", "valid": false, "keyword": "false schema"},
-  {"name": "fabric-package-scoped-reverse-id", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-scoped-reverse-id.json", "valid": false, "keyword": "pattern"}
+  {"name": "fabric-package-scoped-reverse-id", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-scoped-reverse-id.json", "valid": false, "keyword": "pattern"},
+  {"name": "estate-record-first", "schema": "estate-record.schema.json", "path": "positive/estate-record-first.json", "valid": true},
+  {"name": "estate-record-second", "schema": "estate-record.schema.json", "path": "positive/estate-record-second.json", "valid": true},
+  {"name": "estate-record-assertion-rs256", "schema": "estate-record.schema.json", "path": "negative/estate-record-assertion-rs256.json", "valid": false, "keyword": "enum"},
+  {"name": "estate-record-assertion-user-handle", "schema": "estate-record.schema.json", "path": "negative/estate-record-assertion-user-handle.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "estate-record-first-with-parent", "schema": "estate-record.schema.json", "path": "negative/estate-record-first-with-parent.json", "valid": false, "keyword": "false schema"},
+  {"name": "estate-record-grant-not-external", "schema": "estate-record.schema.json", "path": "negative/estate-record-grant-not-external.json", "valid": false, "keyword": "const"},
+  {"name": "estate-record-hub-small-order", "schema": "estate-record.schema.json", "path": "negative/estate-record-hub-small-order.json", "valid": false, "keyword": "not"},
+  {"name": "estate-record-hub-without-alg", "schema": "estate-record.schema.json", "path": "negative/estate-record-hub-without-alg.json", "valid": false, "keyword": "required"},
+  {"name": "estate-record-later-without-parent", "schema": "estate-record.schema.json", "path": "negative/estate-record-later-without-parent.json", "valid": false, "keyword": "required"},
+  {"name": "estate-record-machine-name", "schema": "estate-record.schema.json", "path": "negative/estate-record-machine-name.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "estate-record-secret-value", "schema": "estate-record.schema.json", "path": "negative/estate-record-secret-value.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "estate-record-unknown-agent-ref", "schema": "estate-record.schema.json", "path": "negative/estate-record-unknown-agent-ref.json", "valid": false, "keyword": "pattern"}
 ]

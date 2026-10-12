@@ -5,7 +5,7 @@
     "1": "Integrate and make the gate trustworthy: land the incoming PRs, a hermetic gate, the finding classes as scripts, the board and registers telling the truth",
     "2": "Delegation, spend and the operator session: the DEC-0037…0041 seam closed, one canonical-JSON register",
     "3": "The organization edition's first contracts and activity/devices: fabric-package/1 first, then DEC-0030/0031 hardened and amended (CON-OE-01, CON-OE-12, run/result, v4 device fields, CT-25), estate-record/1 last",
-    "4": "Services on every system (with the v4 descriptor for listings), the operator channel and the embedded dashboard",
+    "4": "Services on every system (with the v4 descriptor for listings), the operator channel and the embedded dashboard, and the agent network's transport (the relay, the delta and heartbeat, leases, signing challenges, device message signatures)",
     "5": "The 0.1.0 core, interop and usage",
     "6": "The remaining open organization-edition contracts: CON-OE-05, -06, -07, -08, -10, the rest of CON-OE-03"
   },
@@ -170,8 +170,6 @@
         "F-B-114",
         "CON-OE-01",
         "CON-OE-12",
-        "OQ-0010",
-        "F-D-028",
         "J-ENV / AL-01 / AS-01c / access-log/1",
         "V4-RUN-RESULT",
         "V4-DEVICE",
@@ -279,7 +277,9 @@
         "ORG-LAYER",
         "V4-DELEGATION",
         "V4-SECURE-TRANSPORT",
-        "CT-30"
+        "CT-30",
+        "OQ-0010",
+        "F-D-028"
       ]
     },
     {
@@ -311,6 +311,21 @@
         "V4-PACKAGE",
         "V4-AGENTREF",
         "V4-ESTATE-RECORD"
+      ]
+    },
+    {
+      "id": "N18-network-transport",
+      "title": "The agent network's transport: the relay and the secret envelope, the revocation delta and heartbeat, window leases, signing challenges, and HTTP message signatures for devices behind a TLS-terminating host",
+      "wave": 4,
+      "release": "this",
+      "items": [
+        "V4-RELAY",
+        "V4-DELTA-HEARTBEAT",
+        "V4-WINDOW-LEASE",
+        "V4-SIGNING-CHALLENGE",
+        "DEV-HTTPSIG",
+        "DEV-KEY-ROLES",
+        "DEV-CHECKIN-DIGEST"
       ]
     }
   ]

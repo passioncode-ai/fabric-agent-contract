@@ -382,5 +382,89 @@
     "closable_in_one_pass": true,
     "needs": "",
     "proposed_fix": "with N08; notify Inbox on landing"
+  },
+  {
+    "id": "V4-RELAY",
+    "title": "fabric-relay/0.1 and fabric-secret-envelope/1: admission by device key, store-and-forward, HPKE envelopes sealed to #kem keys (DEC-0047)",
+    "source": "v4 §12; split from V4-SECURE-TRANSPORT on 2026-10-12",
+    "status_measured": "in review: PR #53 (Project Observatory's session), review round 1 posted 2026-10-12",
+    "area": "schema",
+    "severity": "major",
+    "owner": "contract (drafted by Project Observatory)",
+    "closable_in_one_pass": true,
+    "needs": "lands after P3-03 (#54)",
+    "proposed_fix": "merge #53 after its review fixes"
+  },
+  {
+    "id": "V4-DELTA-HEARTBEAT",
+    "title": "revocation delta and timestamp heartbeat: documents, keys, head hash, the 72-hour rule and vectors (DEC-0054, reserved)",
+    "source": "v4 §7, §12; split from V4-SECURE-TRANSPORT on 2026-10-12",
+    "status_measured": "open: DEC-0054 reserved by the revocation-delta run",
+    "area": "schema",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "DEC-0047 merged",
+    "proposed_fix": "one decision; reuse the 7-day revocation-list freshness of DEC-0053 where it applies"
+  },
+  {
+    "id": "V4-WINDOW-LEASE",
+    "title": "window lease: the estate window's static split per machine, re-split by the hub when awake; check-in records.leases",
+    "source": "v4 §6, §12; split from V4-SECURE-TRANSPORT on 2026-10-12",
+    "status_measured": "open",
+    "area": "schema",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "DEC-0047 merged",
+    "proposed_fix": "one decision with the shape DEC-0053's records.leases refers to"
+  },
+  {
+    "id": "V4-SIGNING-CHALLENGE",
+    "title": "signing challenges over RFC 8785 and the dedicated signing RP as a contract; adopts or replaces DEC-0055's estate-revision/1 challenge",
+    "source": "v4 §7, §12; split from V4-SECURE-TRANSPORT on 2026-10-12",
+    "status_measured": "open",
+    "area": "schema",
+    "severity": "minor",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "one decision naming each challenge type"
+  },
+  {
+    "id": "DEV-HTTPSIG",
+    "title": "HTTP message signatures (RFC 9421 subset, RFC 9530 content-digest) as a transport binding beside mutual TLS for fabric-device/0.1 and fabric-activity/0.1: label fabric-device, created;nonce;keyid;alg, keyid the certificate serial, ±300 s, (serial, nonce) refused when repeated, 401 signature-missing / signature-replayed; the rotation CSR signed by the same key",
+    "source": "the first organization server's ADR-0007 (amended 2026-10-12, its commit 7a47447), agreed with this repository's owner session 2026-10-12",
+    "status_measured": "open: terms agreed",
+    "area": "schema",
+    "severity": "major",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "one decision amending DEC-0031's transport, with a rule, fixtures and vectors the organization server runs"
+  },
+  {
+    "id": "DEV-KEY-ROLES",
+    "title": "FAC-SEM-044 counts device-key roles at enrollment (exactly one #sig, at most one #kem), as the estate record's FAC-SEM-073 already does",
+    "source": "PR #54 seam review, 2026-10-12",
+    "status_measured": "open",
+    "area": "rule",
+    "severity": "minor",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "tighten FAC-SEM-044 with a fixture per count; a DEC-0053 annotation"
+  },
+  {
+    "id": "DEV-CHECKIN-DIGEST",
+    "title": "the check-in reports the applied estate revision's digest beside its number, so a receiver tells two revisions with one number apart",
+    "source": "PR #54 seam review, 2026-10-12",
+    "status_measured": "open",
+    "area": "schema",
+    "severity": "minor",
+    "owner": "contract",
+    "closable_in_one_pass": true,
+    "needs": "",
+    "proposed_fix": "an optional records.estateRecord.digest, additive to DEC-0053"
   }
 ]

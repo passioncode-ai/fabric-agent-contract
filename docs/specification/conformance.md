@@ -70,6 +70,7 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | an issuer of a key route's key | admits exactly the models of the runner profile's model profile (`key.modelAllowList`), and a proxy applies a catalogue row's `provider` routing without changing the model | `FAC-SEM-059`, `FAC-SEM-058` (the declaration) | the issuer's own test; the contract checks the declarations ([runners](runners.md#routes), DEC-0046) |
 | a machine installing a package | checks the folder against `files[]` (`checkPackageFolder`), recomputes the digest, then verifies exactly one publisher signature and every organization countersignature under the keys it pinned for each role, refusing an algorithm it does not admit, a key for another algorithm and a small-order key before verifying, in PK-1…PK-10's order; installs an unsigned package only where its own rules allow it | PK-1…PK-10, `FAC-SEM-064` | `test/package.test.ts`, `src/package-rules.ts` `verifyPackage`, `checkPackageFolder`, vectors `fixtures/vectors/package.json` ([package](package.md#the-verifier), DEC-0050, DEC-0051) |
 | a device applying policy | applies a delivered policy only when it verifies under a key valid when it verifies and moves its revision forward, applies a key set only when it verifies under the root key, stays in its organization and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042`, `FAC-SEM-046` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` and `fixtures/semantic/device-key-set-*` ([devices](devices.md#policy), [key sets](devices.md#key-sets), DEC-0031, DEC-0053) |
+| a machine applying an estate record | applies a revision only when it is valid against `schemas/estate-record.schema.json` and verifies offline (`verifyEstateRecord`): its own digest, the parent's next number and digest (revision 1 under the passkey it pinned at enrollment), a passkey its parent lists and does not revoke, the WebAuthn Level 3 §7.2 checks — type, challenge over the digest, a pinned origin, top-level, `rpIdHash`, UP and UV — the signature, a validity window of at most 30 days around a readable clock, and the record's own rules; installs only a package the record places on it, under the publisher key the record pins (`placementTrust`), and fills only placed slots | `FAC-SEM-072`…`FAC-SEM-076` | `test/estate-record.test.ts`, fixtures `fixtures/semantic/estate-*`, vectors `fixtures/vectors/estate-record.json` ([estate record](estate-record.md#what-is-verified-offline), DEC-0055) |
 | a device deciding under its policy | keeps every lock after its policy expires, stops grants, remote execution and a person's key for others then, lets a person's key serve others only where sharing is `allowed`, uploads nothing that occurred before its collection start, and accepts a root key only certified by the offline root its installer pinned | `FAC-SEM-068`, `FAC-SEM-069` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-action-*` and `fixtures/semantic/device-root-certification-*` ([devices](devices.md#policy), [root certification](devices.md#root-certification), DEC-0053) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
@@ -104,6 +105,8 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | the board's idempotency digest, over the operation's arguments after `fabric-project-comms/0.1` NUL `<operation>` NUL | RFC 8785, the arguments holding integers within ±(2^53 − 1) only | `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) | [project comms](project-comms.md#idempotency), DEC-0022 |
 | a package's `digest`, over the package without `digest` and `signatures` | RFC 8785 | `packageDigest` | [package](package.md#the-digest), DEC-0050 |
 | a package signature's statement `{type, role, digest}` | RFC 8785 | `packageSigningInput` | [package](package.md#what-is-signed), DEC-0051 |
+| an estate record's `digest`, over the record without `digest` and `signature` | RFC 8785 | `estateRecordDigest` | [estate record](estate-record.md#the-digest), DEC-0055 |
+| an estate revision's passkey challenge, SHA-256 over `{type: "estate-revision/1", digest}` | RFC 8785 | `estateChallenge` (`estateChallengeInput` for the bytes) | [estate record](estate-record.md#the-signature), DEC-0055 |
 | a revisioned object's `contentHash`, over the object without `contentHash` | RFC 8785 | `rfc8785`; no contract code computes it | [overview](overview.md#common-identity-and-references) |
 
 A JWS — the delegation token, the approval document — signs its own base64url segments as sent and needs no
@@ -134,7 +137,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-072`
+**Next free rule code:** `FAC-SEM-077`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -205,6 +208,11 @@ register and carry no receipt.
 | `FAC-SEM-067` | `access-log-disclosure` | [activity](activity.md#semantic-rules) | SEM-0067 |
 | `FAC-SEM-068` | `device-action` | [devices](devices.md#semantic-rules) | SEM-0068 |
 | `FAC-SEM-069` | `device-root-certification` | [devices](devices.md#semantic-rules) | SEM-0069 |
+| `FAC-SEM-072` | `estate-record`, `estate-record-revision` | [estate record](estate-record.md#semantic-rules) | SEM-0072 |
+| `FAC-SEM-073` | `estate-record` | [estate record](estate-record.md#semantic-rules) | SEM-0073 |
+| `FAC-SEM-074` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0074 |
+| `FAC-SEM-075` | `estate-record`, `estate-placement` | [estate record](estate-record.md#semantic-rules) | SEM-0075 |
+| `FAC-SEM-076` | `estate-record` | [estate record](estate-record.md#semantic-rules) | SEM-0076 |
 
 ## Compatibility policy
 
