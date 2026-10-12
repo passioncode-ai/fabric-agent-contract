@@ -75,8 +75,9 @@ describe("FAC-SEM-103: what leaves the estate", () => {
     for (const wrap of [(p: string) => `\`${p}\``, (p: string) => `[${p}]`, (p: string) => `a,${p}`, (p: string) => `{${p}}`, (p: string) => `<${p}>`, (p: string) => `*${p}`, (p: string) => `see:${p}`]) {
       for (const home of [posixHome, linuxHome, tildeHome]) expect(paths("proposal-submit", { proposal: { ...fix, change: wrap(home) }, to: "export" }), wrap(home)).toEqual(["FAC-SEM-103 /proposal/change"]);
     }
-    // A path segment named Users or home inside a repository path, a route and a tilde inside a word are not home folders.
-    for (const text of [["docs", "Users", "guide.md"].join("/"), ["src", "home", "page.tsx"].join("/"), "GET /users/42", "x~/y", "a.b/Users/c", "v1-/home/x".replace("-", "_")]) {
+    // A path segment named Users or home inside a repository path, a route, a tilde inside a word, and either after a
+    // character that continues a path (`.`, `-`, `_`, `/`, `~`) are not home folders.
+    for (const text of [["docs", "Users", "guide.md"].join("/"), ["src", "home", "page.tsx"].join("/"), "GET /users/42", "x~/y", ...[".", "-", "_", "/", "~"].flatMap((c) => [`a${c}${["", "Users", "c"].join("/")}`, `a${c}${["", "home", "c"].join("/")}`])]) {
       expect(paths("proposal-submit", { proposal: { ...fix, change: text }, to: "export" }), text).toEqual([]);
     }
     const everywhere = { ...rule, goal: { id: posixHome, text: `serves ${linuxHome}` }, finding: { id: tildeHome, source: "lint", text: "ok" }, verifiedRun: `run ${posixHome}` };
