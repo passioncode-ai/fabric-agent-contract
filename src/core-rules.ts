@@ -5,7 +5,7 @@ import { strictTime } from "./rfc3339.js";
 /**
  * The 0.1.0 core keeps its promises (DEC-0064): the claim/proof relation of a result (DEC-0011), approval separation for
  * learning and promotion (DEC-0004, DEC-0012), a version's rollback basis and parents (DEC-0007), and a standing grant's
- * window (DEC-0037). Every rule reads malformed input as findings or none, never by throwing.
+ * window (DEC-0008). Every rule reads malformed input as findings or none, never by throwing.
  */
 
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
