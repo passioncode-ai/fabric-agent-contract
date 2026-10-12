@@ -23,6 +23,7 @@ import { estateRecordRules } from "./estate-record-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
 import { attributionRules } from "./openrouter-attribution.js";
+import { localChannelRules } from "./local-channel.js";
 import { proposalRules } from "./proposal-rules.js";
 import { embeddedProtocolsFindings, protocolRules } from "./protocol-revisions.js";
 import { sessionJoinRules } from "./session-join.js";
@@ -71,6 +72,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (signing) return signing;
   const attribution = attributionRules(kind, value);
   if (attribution) return attribution;
+  const channel = localChannelRules(kind, value);
+  if (channel) return channel;
   const proposal = proposalRules(kind, value);
   if (proposal) return proposal;
   const protocols = protocolRules(kind, value);

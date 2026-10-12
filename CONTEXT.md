@@ -430,6 +430,9 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
+**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
+a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
+[local channel](docs/specification/local-channel.md)).
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).

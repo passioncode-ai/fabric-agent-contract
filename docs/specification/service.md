@@ -79,6 +79,8 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 
 - The file name MUST be `<id>.<instance>.json`, written atomically (temporary file,
   `fsync`, rename) with mode `0600`.
+- `channels.local` MAY name where a client reaches the service's local channel (`{protocol, path | pipe}`; Project
+  Observatory's node, [local channel](local-channel.md), DEC-0075); a client never computes that path.
 - `id` and `instance` together MUST be unique on the machine. A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document

@@ -1,0 +1,7 @@
+{
+  "jsonrpc": "2.0",
+  "method": "consent.cancel",
+  "params": {
+    "promptId": "p-1"
+  }
+}
