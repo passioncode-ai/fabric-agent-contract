@@ -2489,6 +2489,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+- **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
   - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
     sessions from this text (its RLY-02) and runs the vectors;
   - Project Observatory's node is a relay client and opens envelopes into its vault;
