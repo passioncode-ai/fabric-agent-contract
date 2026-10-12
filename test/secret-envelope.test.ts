@@ -128,6 +128,13 @@ describe("the review's boundaries (DEC-0047 items 3, 7 and 8)", () => {
     expect(open(sealed)).toMatchObject({ ok: true, secret: Buffer.from("x") });
   });
 
+  it("seals only under a sequence from 1 to 2^53 - 1 (owner's item 11)", () => {
+    for (const envelopeSequence of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, Number.NaN]) {
+      expect(() => seal({ envelopeSequence }), String(envelopeSequence)).toThrow(/envelopeSequence/);
+    }
+    expect(seal({ envelopeSequence: Number.MAX_SAFE_INTEGER }).header.envelopeSequence).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
   it("seals only to a #kem key, signed by a #sig key", () => {
     expect(() => seal({ recipientKid: "urn:fabric:machine:example-gpu-box#sig" })).toThrow(/wrong-recipient/);
     expect(() => seal({ senderKid: "urn:fabric:machine:example-laptop#kem" })).toThrow(/bad-key/);

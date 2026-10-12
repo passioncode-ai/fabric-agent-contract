@@ -135,6 +135,7 @@ export function sealEnvelope(input: SealInput): SecretEnvelope {
   if (!input.recipientKid.endsWith("#kem")) throw new Error("wrong-recipient: an envelope is sealed to a #kem key");
   if (!input.senderKid.endsWith("#sig")) throw new Error("bad-key: an envelope is signed by a #sig key");
   if (p256KeyRefusal(input.recipientKey) !== null) throw new Error("bad-key: the recipient key is not a valid P-256 key");
+  if (!counter(input.envelopeSequence)) throw new Error("malformed: envelopeSequence is an integer from 1 to 2^53 - 1");
   const pkR = p256Point(input.recipientKey);
   const partial = {
     type: ENVELOPE_TYPE, alg: RELAY_ALG, suite: [...ENVELOPE_SUITE], recipient: input.recipientKid, sender: input.senderKid, agentRef: input.agentRef, slot: input.slot,

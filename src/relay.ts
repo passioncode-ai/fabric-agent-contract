@@ -42,6 +42,11 @@ export const FRAME_TYPES = [
 ] as const;
 export type FrameType = (typeof FRAME_TYPES)[number];
 
+/**
+ * Every code a relay `error` frame or blob refusal may carry. `bad-key` is **reserved** since DEC-0066: no relay emits
+ * it any more (an unusable admitted key is left out of the admission set and the request is `unauthenticated`); it stays
+ * in the list, the frame schema and `closeCodeFor` so that a frame from a relay built before DEC-0066 still validates.
+ */
 export const RELAY_ERROR_CODES = [
   "protocol-unsupported", "unauthenticated", "not-admitted", "bad-key", "unsupported-alg", "not-yet-valid", "replay",
   "unknown-type", "unknown-recipient", "too-large", "rate-limited", "mailbox-full", "expired", "digest-mismatch", "internal",

@@ -140,6 +140,11 @@ describe("frames DEC-0066 adds: replyTo, presence-result, retryAfter and welcome
   const valid = (value: unknown) => validateDocument(validator, frame, value).valid;
   const head = { sequence: 0, sha256: "a".repeat(64) };
 
+  it("names in FRAME_TYPES exactly the types the schema's variants carry (owner's item 12)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/relay-frame.schema.json"), "utf8")) as { oneOf: Array<{ properties: { type: { const: string } } }> };
+    expect(schema.oneOf.map((variant) => variant.properties.type.const).sort()).toEqual([...FRAME_TYPES].sort());
+  });
+
   it("answers a presence-query with one presence-result, correlated by replyTo", () => {
     expect(FRAME_TYPES).toContain("presence-result");
     const result = { v: 1, type: "presence-result", id: "r1", replyTo: "q1", presences: [{ kid: "m#sig", state: "online", lastSeen: "2026-10-12T00:00:00Z" }], unknown: ["n#sig"] };

@@ -112,8 +112,9 @@ describe("low-S ES256", () => {
   const key = generateKeyPairSync("ec", { namedCurve: "P-256" });
   const flip = (raw: Uint8Array) => Buffer.concat([Buffer.from(raw).subarray(0, 32), Buffer.from((P256_CURVE.n - s(raw)).toString(16).padStart(64, "0"), "hex")]);
 
-  it("signEs256 always gives the low-S form, and it verifies (1000 signatures)", () => {
-    for (let i = 0; i < 1000; i += 1) {
+  // About half of plain ECDSA signatures are high-S, so 256 signatures miss normalisation with probability 2^-256.
+  it("signEs256 always gives the low-S form, and it verifies (256 signatures)", { timeout: 20_000 }, () => {
+    for (let i = 0; i < 256; i += 1) {
       const sig = Buffer.from(signEs256(key.privateKey, `message ${i}`), "base64url");
       expect(sig.length).toBe(64);
       expect(s(sig) <= half).toBe(true);

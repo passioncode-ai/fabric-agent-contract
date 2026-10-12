@@ -63,6 +63,37 @@ describe("hello.relay: the schema and isRelayOrigin agree on every relayOrigin c
 
 // A consumer pinned before DEC-0066 reads the legacy members (the relay's tests/contract.test.ts reads message.frame.to):
 // every member path the files had at 252fd25 is still there, cases aside.
+// The runner is vendored by ports (src/relay-vectors.ts): a file without a group, or a case that leaves an optional
+// member out, runs with that member empty rather than throwing.
+describe("the runner reads what a case leaves out as empty", () => {
+  it("runs nothing for a file without groups", () => {
+    expect(relayVectorResults({})).toEqual([]);
+    expect(envelopeVectorResults({})).toEqual([]);
+  });
+
+  it("treats a missing key map, step list, revocation list, holders, placements and marks as empty", () => {
+    const admitCase = (relay.admit.cases as Json[])[0] as Json;
+    const { admitted: _a, ...context } = admitCase.context as Json;
+    const out = relayVectorResults({
+      admit: { cases: [{ ...admitCase, context }] },
+      replay: { cases: [{ name: "no steps" }] },
+      admissionSet: { cases: [{ name: "no extra", held: (relay.admissionSet.cases as Json[])[0].held, at: "2026-10-13T00:00:00Z" }] },
+      blobRequest: { relay: "https://relay.example", digest: `sha256:${"ab".repeat(32)}`, now: "2026-10-12T12:00:30Z", cases: [{ name: "no header", method: "GET", header: null }] }
+    });
+    // The runner's group order: admissionSet, admit, replay, blobRequest.
+    expect(out.map((r) => r.actual)).toEqual([
+      { ok: true, revision: 4, kids: ["m-a#sig", "m-b#sig", "m-c#sig"], excluded: [{ kid: "m-ed#sig", reason: "unsupported-alg" }, { kid: "m-bad#sig", reason: "bad-key" }] },
+      { ok: false, code: "unauthenticated" }, [],
+      { ok: false, status: 400, code: "malformed" }
+    ]);
+    const first = (envelope.cases as Json[])[0] as Json;
+    const { holders: _h, placements: _p, marks: _m, ...bare } = first.context as Json;
+    expect(envelopeVectorResults({ cases: [{ ...first, context: bare }] })[0]?.actual).toEqual({ ok: false, refusal: "sender-not-allowed" });
+    const { marks: _marks, ...unmarked } = first.context as Json;
+    expect(envelopeVectorResults({ cases: [{ ...first, context: unmarked }] })[0]?.actual).toEqual(first.expect);
+  });
+});
+
 describe("the legacy members stay", () => {
   const paths = (value: unknown, prefix = ""): string[] => (value && typeof value === "object" && !Array.isArray(value)
     ? Object.entries(value as Json).flatMap(([key, inner]) => [`${prefix}/${key}`, ...(key === "cases" ? [] : paths(inner, `${prefix}/${key}`))])

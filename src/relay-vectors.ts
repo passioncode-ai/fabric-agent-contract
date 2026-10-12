@@ -25,9 +25,10 @@ const cases = (group: unknown): Json[] => ((group as { cases?: Json[] } | undefi
 export function vectorKey(key: KeyData): P256Key {
   return typeof key === "string" ? new Uint8Array(Buffer.from(key, "base64")) : (key as P256Key);
 }
-const keyring = (keys: unknown) => (kid: string): P256Key | undefined => {
-  const map = (keys ?? {}) as Record<string, KeyData>;
-  return Object.hasOwn(map, kid) ? vectorKey(map[kid] as KeyData) : undefined;
+/** A case's keys by kid, as a Map: a kid such as `__proto__` or `constructor` is a key like any other. */
+const keyring = (keys: unknown) => {
+  const map = new Map(Object.entries((keys ?? {}) as Record<string, KeyData>).map(([kid, key]) => [kid, vectorKey(key)] as const));
+  return (kid: string): P256Key | undefined => map.get(kid);
 };
 /** A refusal or a result as plain JSON, so a result with bytes compares by value. */
 const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
