@@ -17,7 +17,12 @@ cross-repository asks — in its final form, wave by wave, each change read by t
   DEC-0074 `146240a`), a consumer service (DEC-0070 `b9453a0`), the relay, the adapter and Fabric Dashboards (their
   board rows).
 
-## Open — the program (42 items, each with a board row)
+## Open — 42 items: 37 in the program, 5 left from wave 1
+
+Corrected by the [w7 close](2026-10-12-w7-final.md): this section first said "42 items in the program, each with a board
+row". The program held 37 (N13 14, N16 12, N20 11); five wave-1 board items (F-D-010, F-A-028, F-D-019, F-D-021,
+F-D-022) were open without a row. The w7 close receipts F-D-010 and F-A-028 (fabric-workspace #138 `7c9f134`) and
+gives the other three rows CT-44 and CT-45.
 
 - N13: CON-OE-02 and CON-OE-09 (wait on Fabric's ADR FAB-OE-14), RM-01, the RM-03 residue, an organization layer,
   `org-authority/1` and the v4 decisions that wait on Fabric's D2/D3/D8, CON-OE-06 (`surfaces.a2a`, v4 *Later*),

@@ -21,11 +21,11 @@
     "operator_answers": [
       {"id": "OD-1", "state": "answered 2026-10-08", "cite": "fabric-workspace docs/reports/2026-10-08-org-architecture-v2/README.md:1299"},
       {"id": "V2-7", "state": "answered 2026-10-08 (OD-1 form)", "cite": "fabric-workspace docs/reports/2026-10-08-org-architecture-v2/README.md:1324"},
-      {"id": "V2-1", "state": "answered (k = 3 in contract; Vesta stricter)", "cite": "fabric-workspace docs/reports/2026-10-08-org-architecture-v2/README.md:1318"},
+      {"id": "V2-1", "state": "answered (k = 3 in contract; the first organization server stricter)", "cite": "fabric-workspace docs/reports/2026-10-08-org-architecture-v2/README.md:1318"},
       {"id": "Q5 (consent at first run, signed template)", "state": "answered 2026-10-07", "cite": "fabric-workspace docs/reports/2026-10-07-wave1-open-private-split/README.md:368"},
       {"id": "Q9 (logging via consent; mandatory in org)", "state": "answered 2026-10-07", "cite": "fabric-workspace docs/reports/2026-10-07-wave1-open-private-split/README.md:372"}
     ],
-    "consumers_and_seam": "Observatory engine OBS-OE-01b (emits events), observatory-net NET-02/NET-03 (enrollment, upload), the organization server (Vesta, must stay unnamed in the contract), Fabric FAB-OE-01 (notice screen). Seam: activity events, policy, access-log reads.",
+    "consumers_and_seam": "Observatory engine OBS-OE-01b (emits events), observatory-net NET-02/NET-03 (enrollment, upload), the organization server (must stay unnamed in the contract), Fabric FAB-OE-01 (notice screen). Seam: activity events, policy, access-log reads.",
     "external_specs": ["OpenTelemetry log data model (already mapped in activity.md)"],
     "status": "open",
     "receipts": [],
@@ -103,7 +103,7 @@
       "semantic rule plus dedupe fixture: one session seen by three writers yields one set of intervals"
     ],
     "depends_on": ["CON-OE-01"],
-    "operator_answers": [{"id": "D-OE1 -> Observatory is the journal", "state": "answered 2026-10-08 (Vesta ADR-0002)", "cite": "fabric-workspace docs/reports/2026-10-07-org-edition-architecture/README.md:354"}],
+    "operator_answers": [{"id": "D-OE1 -> Observatory is the journal", "state": "answered 2026-10-08 (the first organization server's ADR-0002)", "cite": "fabric-workspace docs/reports/2026-10-07-org-edition-architecture/README.md:354"}],
     "consumers_and_seam": "Observatory OBS-OE-01b, Fabric FAB-OE-09/FAB-OE-03, Switchboard AL-06.",
     "external_specs": [],
     "status": "open",
@@ -190,7 +190,7 @@
       "CT-04 names Observatory (OBS-OE-01b) and observatory-net (NET-02, NET-03); the organization server without the private product name",
       "pin 623bf61 now and the CON-OE-01 merge as the next pin; pin divergence tracked as IDX-OE-04",
       "consumers do not build per-person presence output for owner/admin; DEC-0030 item 10 estimates go only to the assessment module behind its gates (OD-1, R10-M2)",
-      "acceptance: git grep -i vesta origin/main -- docs/backlog.md is empty"
+      "acceptance: the first organization server's product name does not appear in docs/backlog.md"
     ],
     "depends_on": ["CON-OE-01"],
     "operator_answers": [{"id": "OD-1", "state": "answered", "cite": "v2 README:1299"}],
@@ -222,7 +222,7 @@
     "depends_on": ["CON-OE-01"],
     "operator_answers": [
       {"id": "J7 one proposal format, owner RM-02", "state": "answered as recommended 2026-10-07", "cite": "integration README:183; split README:374"},
-      {"id": "D-OE2 memory in Observatory", "state": "answered 2026-10-08 (Vesta ADR-0003)", "cite": "org-edition README:408"}
+      {"id": "D-OE2 memory in Observatory", "state": "answered 2026-10-08 (the first organization server's ADR-0003)", "cite": "org-edition README:408"}
     ],
     "consumers_and_seam": "Observatory OBS-OE-07 (writes notes), Fabric FAB-OE-07 (intake via loopback MCP FAB-OE-11) and FAB-OE-21 (submit to org), organization queue VES-PROP, RM-02 optimizer, FAB-OE-20 measurement.",
     "external_specs": [],

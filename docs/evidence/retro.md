@@ -37,7 +37,8 @@
 - `2026-10-11-meter-and-handoff` — PR #32 `7931c1d` (DEC-0041), PR #31 `213e5a3` (DEC-0042).
 - `2026-10-11-board-waves` — PR #33 `2afbe60` (inventory, canvas, six waves); wave 1 in PRs #34…#38 and this one.
 - `2026-10-12-board-waves-close` — waves 2–6 in PRs #39…#81; the last wave closed at `d54b69a` (DEC-0043…DEC-0075, without
-  DEC-0073); 193 inventory items, 151 closed, 42 in the program with a row each.
+  DEC-0073); 193 inventory items, 151 closed, 42 open: 37 in the program and 5 wave-1 board items without a row, given rows or
+  receipts by the w7 close (`2026-10-12-w7-final`).
 
 ## Recent log
 

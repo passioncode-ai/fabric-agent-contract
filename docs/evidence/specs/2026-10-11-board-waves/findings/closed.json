@@ -152,6 +152,8 @@
     "FEED-DATA": "#77 (b9453a0, DEC-0070)",
     "CONSUMER-AGENT": "#76 (9c0032a, DEC-0071)",
     "MCP-SECRETS": "#79 (146240a, DEC-0074)",
-    "CON-OE-10": "#80 (b4f0344, DEC-0075)"
+    "CON-OE-10": "#80 (b4f0344, DEC-0075)",
+    "F-D-010": "fabric-workspace #138 (7c9f134): the settings-backup pointer in LC-14, not under LC-16",
+    "F-A-028": "fabric-workspace #138 (7c9f134): the DEC-0025 pointer landed in LC-14 under its own wording"
   }
 }
