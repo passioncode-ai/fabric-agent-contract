@@ -37,6 +37,7 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P2-03 | `src/delegation-rules.ts` | 232 / 232 (100 %) | 100 % | FAC-SEM-050's one grant, depth, spend against grant and parent; one fixture per sub-check |
 | P2-03 | `src/operator-session.ts` | 11 / 11 (100 %) | 100 % | the 7-day clamp under use, and a session live before its end |
 | P2-04 | `src/profile-rules.ts` (new) | 64 / 64 (100 %) | 100 % | FAC-SEM-058…060 and `resolveModelProfile`; one fixture or case per sub-check, each planted |
+| P3-01 | `src/package-rules.ts` (new) | 152 / 152 (100 %) | 100 % | FAC-SEM-064…066, the digest, the folder check and `verifyPackage`; one fixture or vector case per sub-check and problem, each planted |
 | P3-02 | `src/device-rules.ts` | 500 / 515 (97.08 %) | 97.08 % | F-B-101, F-B-103…F-B-109; FAC-SEM-068, FAC-SEM-069, device keys by role; every check planted, and malformed input refused rather than thrown |
 | P3-02 | `src/activity-rules.ts` | 260 / 284 (91.54 %) | 91.54 % | F-B-102, F-B-107, F-B-108, CT-25, CON-OE-01, FAC-SEM-067; every check planted |
 | P3-02 | `src/p256.ts` (new) | 8 / 8 (100 %) | 100 % | SEC 1 §3.2.2 P-256 key validation over `fixtures/vectors/p256.json` (DEC-0053) |
@@ -60,6 +61,9 @@ the wrong shape is refused without throwing. `src/session-handoff.ts` gains the 
 89.16 %, floor unchanged at 88.91 %); `semantic-rules.ts` only dispatches to the new module (91.38 %, floor unchanged).
 The whole set: 2353 / 2580 (91.2 %). Measured with `vitest run --coverage` on the P2-04 branch after P2-03's merge.
 
+**Wave 3, P3-01 (DEC-0050, DEC-0051).** `src/package-rules.ts` is new and reaches every branch, with no `v8 ignore`;
+input of the wrong shape is refused without throwing. `semantic-rules.ts` only dispatches to it (91.42 %, floor unchanged).
+The whole set: 2513 / 2740 (91.71 %). Measured with `vitest run --coverage` on the P3-01 branch at `bcada4a`.
 **Wave 3, P3-02 (DEC-0052, DEC-0053).** `device-rules.ts` rises from 80.36 % to 97.08 % and `activity-rules.ts` from
 83.55 % to 91.54 %: tests that kill each audit branch (F-B-101, F-B-102), a test per new check with its defect planted
 back, and `test/rule-tolerance.test.ts`, which feeds every activity and device rule kind members of the wrong type and

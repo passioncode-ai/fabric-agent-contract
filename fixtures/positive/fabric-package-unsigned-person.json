@@ -1,0 +1,35 @@
+{
+  "schema": "fabric-package/1",
+  "kind": "skill-set",
+  "id": "my-shortcuts",
+  "version": "1.4.0",
+  "publisher": "example",
+  "licence": "MIT",
+  "layer": "person",
+  "runners": [
+    "claude-code",
+    "codex"
+  ],
+  "skills": [
+    "shortcuts"
+  ],
+  "allowedToolsCeiling": [
+    "Read",
+    "Grep"
+  ],
+  "listingChars": 410,
+  "requires": {
+    "packages": []
+  },
+  "files": [
+    {
+      "path": ".claude-plugin/plugin.json",
+      "sha256": "sha256:c6aa024dc118ef402fefda82df334156ef452cdb431705b6bfd8b4d15d8866ba"
+    },
+    {
+      "path": "skills/shortcuts/SKILL.md",
+      "sha256": "sha256:dcecd18200b01acb8575f94f1b21bc23ab838b40bc798f2905bc06fbbdc22eb4"
+    }
+  ],
+  "digest": "sha256:ab51910ef7043eb63aeeaa2c40b0ed0d7dc6cebe81207f2f7c4deec8bb82d053"
+}

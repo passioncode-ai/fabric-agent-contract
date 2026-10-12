@@ -150,6 +150,21 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 ignored. Anyone can forge a signature under one, and Node 20 and 22 accept the forgery, so every Ed25519 check in
 the contract refuses such a key before verifying (`src/ed25519.ts`, DEC-0045, CT-29).
 
+**Package**: One version of an agent or a skill set as one folder, described by its `fabric.package.json`
+(`fabric-package/1`, DEC-0050): the files with their SHA-256, the service template, secret slots by name, what it
+requires, cost presets, the **Result signal**, the state that moves, the evals receipt and its dependencies. Its
+**Package digest** names it; its publisher signs it and an organization countersigns it (DEC-0051)
+([package](docs/specification/package.md)).
+
+**agentRef**: `urn:fabric:agent:<publisher>:<id>`, the name of one agent across its versions, derived from its
+package and never chosen. A placement names an agent by it and keeps it when it moves (`FAC-SEM-066`, DEC-0050).
+
+**Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
+listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
+
+**Result signal**: What counts as done for an agent, declared in its **Package** (`resultSignal`: a name and the
+card's "done when …"). Fabric's `result` event names it; that event and the meter's receipts join on the root run.
+
 **Principal**: In delegation, the person on whose behalf the work runs: the operator, or an external
 person under a share grant (a token's `sub`). A grant's `principal` field names who the grant is
 given to; for an agent or session grant that is the actor: `urn:agent:<agent id>` names the agent whose id is
