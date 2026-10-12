@@ -25,4 +25,30 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
     expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "failed_known" })).toContain("FAC-SEM-027");
     expect(codes("comms-transition", { op: "complete", from: "accepted", to: "completed" })).toEqual([]);
   });
+
+  describe("FAC-SEM-107: a directory page lists each Project once and each capability once per Project (DEC-0077)", () => {
+    const entry = (id: string, capabilities: Array<[string, string]>, name = id) => ({ id, name, capabilities: capabilities.map(([capability, responder]) => ({ capability, responder })) });
+    const page = (...projects: unknown[]) => ({ protocol: "fabric-project-comms/0.1", snapshot: { readAt: "2026-10-13T10:00:00Z", stale: false }, projects });
+    const paths = (value: unknown) => evaluateSemanticRules("comms-directory", value).map((f) => `${f.code} ${f.instancePath}`);
+    it("accepts distinct Projects, one capability under two Projects, and an empty page", () => {
+      expect(paths(page(entry("proj-a", [["a.b", "active"], ["a.c", "absent"]]), entry("proj-b", [["a.b", "stale"]])))).toEqual([]);
+      expect(paths(page())).toEqual([]);
+    });
+    it("refuses a Project listed twice, even under another name, naming the second entry", () => {
+      expect(paths(page(entry("proj-a", []), entry("proj-b", []), entry("proj-a", [], "Other name")))).toEqual(["FAC-SEM-107 /projects/2/id"]);
+      expect(evaluateSemanticRules("comms-directory", page(entry("proj-a", []), entry("proj-a", [])))[0]?.message).toBe("a directory page lists each Project once: proj-a is listed again");
+    });
+    it("refuses one capability listed twice in a Project, even with two responder states", () => {
+      expect(paths(page(entry("proj-a", [["a.b", "active"], ["a.b", "absent"]])))).toEqual(["FAC-SEM-107 /projects/0/capabilities/1/capability"]);
+    });
+    it("compares ids and capability names as written: they are opaque and names, not URIs (DEC-0076)", () => {
+      expect(paths(page(entry("proj-a", [["a.b", "active"], ["A.b", "active"]]), entry("Proj-a", [])))).toEqual([]);
+    });
+    it("answers malformed pages with findings or none, never by throwing", () => {
+      for (const value of [{}, { projects: "x" }, { projects: [null, 3, { id: 7, capabilities: "x" }, { capabilities: [null, { capability: 7 }] }] }]) {
+        expect(() => evaluateSemanticRules("comms-directory", value)).not.toThrow();
+        expect(paths(value)).toEqual([]);
+      }
+    });
+  });
 });

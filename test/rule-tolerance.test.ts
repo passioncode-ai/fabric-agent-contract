@@ -13,7 +13,8 @@ const KINDS = [
   "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "local-channel-session", "session-join", "service-events-page", "proposal", "proposal-transition", "proposal-submit", "learning-rollout",
   "result", "learning", "promotion", "versioned-setting", "grant-window", "roles",
   // The kinds whose rules compare identifiers by normal form (DEC-0076).
-  "execution-bundle", "service-usage", "runner-route", "route-bundle", "route-event", "provider-observation"
+  "execution-bundle", "service-usage", "runner-route", "route-bundle", "route-event", "provider-observation",
+  "comms-directory"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -34,7 +35,7 @@ const MEMBERS = [
   "assignments", "limitUsd", "leases", "reports", "lease", "window", "period", "amount", "expiresAt",
   "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd",
   "context", "pool", "days", "byProject", "generatedAt", "route", "admissions", "event", "candidates", "project", "capability",
-  "entry", "manifest"
+  "entry", "manifest", "projects"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {

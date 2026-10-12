@@ -275,7 +275,8 @@ The boundary:
   a `com.list` page, `comms-page.schema.json`): a Project listed or unlisted, or a responder enrolled or lapsed, may
   not show yet.
 
-A page holds at most 100 Projects, ordered by name and then id. Its cursor is bound to the reader, its grant
+A page holds at most 100 Projects, each listed once and each capability once per Project (`FAC-SEM-107`), ordered by
+name and then id in the host's collation. Its cursor is bound to the reader, its grant
 revision, the filter and the restore epoch. A changed filter, a revoked grant, a restore or an expired cursor
 returns `cursor_reset_required`.
 
@@ -313,6 +314,7 @@ a hidden Project, a participant set or a body.
 |---|---|---|
 | `FAC-SEM-026` | `comms-submit` | a request's target is a participant of the new thread; a reply names what it answers; only a request carries request details |
 | `FAC-SEM-027` | `comms-transition` | a request moves only along the lifecycle table; an effect that began is settled only by an observed result |
+| `FAC-SEM-107` | `comms-directory` | a directory page lists each Project once and each capability once per Project; ids and capability names compare as written (DEC-0077) |
 
 ## Limits
 
