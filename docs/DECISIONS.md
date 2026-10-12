@@ -3040,3 +3040,104 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
   run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
   record plane is `fs`.
+
+### DEC-0054 — The revocation delta and the timestamp heartbeat: entries signed by the estate key and chained by hash, a heartbeat that commits to the head, the 72-hour rule, and reconciliation with the next revision (`revocation-delta/1`, `heartbeat/1`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's hub issues entries and
+  heartbeats under a certified hub key, keeps one chain per estate and lists every entry in the next revision it drafts
+  (backlog CT-19); Project Observatory's node applies them under the highest revision it applied, reports the head and
+  the heartbeat in its check-in, refuses what arrives from other machines unless current and refuses an unreconciled
+  revision (CT-20), and its relay client reads the frames as these documents (CT-34); the relay carries them unchanged
+  (DEC-0047).
+- **Amends:** nothing; it gives DEC-0053 item 9's `records.heartbeat` and `records.revocationDelta`, and DEC-0047 item
+  9's `delta`, `heartbeat` and `welcome` frames, the documents they named as this decision's. It adds a precondition to
+  DEC-0055's application of a revision (reconciliation, item 6). Implements the first organization server's target
+  architecture v4 (commit `9c6a780`) §7 *Freshness* and §12's row "revocation delta and timestamp heartbeat" for an
+  estate. Closes V4-DELTA-HEARTBEAT (board run N18, packet P4-06).
+- **Decision:** in [revocation delta](specification/revocation-delta.md) unless named otherwise —
+  1. **The estate key signs.** Every entry and heartbeat is signed by a `hubKey` that the highest estate-record revision
+     the verifier verified and applied certifies (DEC-0055 item 4): compared by exact kid, certified for one machine,
+     Ed25519 of full order (DEC-0045), revoked neither there (`hub-key`, `machine`) nor by an entry applied before
+     (`estateSigner`). `alg` is `EdDSA`, signed; ES256 joins with Fabric's D2. The passkey cannot sign an hourly
+     heartbeat (UP and UV every time); the relay holds no authority (DEC-0047 item 1); the hub key is not the estate's
+     record key, as v4 §7 asks of a timestamp key.
+  2. **`revocation-delta/1`** ([`revocation-delta.schema.json`](../schemas/revocation-delta.schema.json)): an entry is
+     `{type, alg, estate, sequence, prev, at, revocation, kid, sig}`, one revocation in the estate record's shape and
+     kinds without `authority` (a passkey is revoked only by a revision a passkey signs). The signing input is the RFC
+     8785 form without `sig`; the entry's hash, the next head, is its hex SHA-256 (`deltaEntryHash`); entry 1's `prev`
+     is the genesis, SHA-256 of `{type, estate, sequence: 0}` (`deltaGenesis`). The head is `{sequence, sha256}` —
+     DEC-0053's `records.revocationDelta` and DEC-0047's `welcome.deltaHead`. A page `{head, entries}` (at most 256) is
+     what a `delta` frame and a check-in response carry; its `head` is a hint.
+  3. **`heartbeat/1`** ([`heartbeat.schema.json`](../schemas/heartbeat.schema.json)): `{type, alg, estate, sequence, at,
+     deltaHead, estateRecord: {revision, digest}, kid, sig}`; a check-in reports its `sequence` and `at` (DEC-0053). A
+     running hub signs one after every entry and every revision, SHOULD sign one hourly, and lets at most 24 hours pass
+     (v4 §7 "daily").
+  4. **Applying a page** (`applyDelta`, RD-1…RD-10): the clock first, then each entry's shape, estate, `EdDSA`, kind, not
+     more than 60 s ahead, the estate key, the signature — and only then its place: held (skipped), a `gap` (ask with
+     `delta-query`), or a second signed history (`broken-chain`, `fork`), which marks the machine broken and keeps that
+     entry's revocation in force. The entries before a refused one stay applied.
+  5. **Accepting a heartbeat** (`acceptHeartbeat`, HB-1…HB-3): the same checks, then `not-newer`, `fork` (the held
+     sequence with other bytes, a head or revision contradicting what the machine holds) or `regressed`.
+  6. **The 72-hour rule** (`deltaFreshness`, `freshnessAnswer`): `broken`, `stale` (no readable clock, no heartbeat, or
+     one more than 72 hours old; exactly 72 is fresh), `behind` (the heartbeat's head or revision past what is applied),
+     else `current`. Unless `current`, a machine places no caller in T1 and accepts no T2 call (DL-25, DL-26) — no
+     delegated call, command message, share-grant call or new secret envelope from another machine — and keeps the
+     person's own work (T0), every revocation in force, and the way back. Revocations in force are the revision's, the
+     applied entries' and forked ones' (`effectiveRevocations`); every check that reads the record's revocations reads
+     these.
+  7. **Reconciliation** (`reconcileRevision`): a revision issued at or after an entry's `at` lists its revocation; a
+     machine holding the entry refuses it as `unreconciled`. A machine applies a revision only when it is schema-valid,
+     `verifyEstateRecord` accepts it and it is reconciled.
+  8. **Rules:** `FAC-SEM-082` (a page), `FAC-SEM-083` (a heartbeat; a machine's freshness answer), `FAC-SEM-084`
+     (reconciliation). Times everywhere are RFC 3339 with `T`, an offset and a day that exists (`deltaTime`), refused
+     before any comparison.
+- **Why:** v4 §7 makes revocation take effect within seconds online and at most by the next heartbeat, and closes the
+  dropped-revocation gap by having the heartbeat sign the delta's head (its R4-8). A revision is a whole record a person
+  signs and machines fetch hourly, so it cannot be the fast path; a relay carries everything but must be able to delay
+  revocation only, never forge or hide it. A compromised estate key can only revoke and stop heartbeats — denial of
+  service, and less than it can already do with delegation tokens — and cannot revoke a passkey, so the person can
+  always sign the revision that revokes it. J10: an entry names a machine id, a kid, a digest or a grant id; a heartbeat
+  a counter, a time, a head and a revision; neither names a person.
+- **Compatibility:** Additive: two schemas, three rule codes, one module. Tightening, each with what a consumer does: a
+  check-in response's `records.heartbeat` and `records.revocationDelta`, and a relay's `welcome.heartbeat`, `delta` and
+  `heartbeat` frames, which DEC-0053 and DEC-0047 left as any object, must now be these documents (a server or relay
+  sends them as signed); a machine holding a delta entry refuses a revision that leaves it out (a hub lists every
+  entry). Nothing is deployed against the placeholders (CT-04, CT-34). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/revocation-delta.md` (new), `docs/specification/relay.md` (revocation and heartbeat,
+    welcome), `docs/specification/devices.md` (check-in), `docs/specification/estate-record.md` (revocations, who adopts
+    it, not decided), `docs/specification/conformance.md` (register, readers, canonical forms);
+  - schemas: `schemas/revocation-delta.schema.json` (new), `schemas/heartbeat.schema.json` (new),
+    `schemas/device-check-in.schema.json`, `schemas/relay-frame.schema.json`;
+  - code: `src/revocation-delta.ts` (new), `src/revocation-delta-rules.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/revocation-delta-page.json`, `fixtures/positive/heartbeat*.json`,
+    `fixtures/positive/relay-frame-delta.json`, `fixtures/positive/relay-frame-heartbeat.json`,
+    `fixtures/positive/device-check-in-response-records.json`, `fixtures/negative/revocation-delta-authority.json`,
+    `fixtures/negative/heartbeat-*.json`, `fixtures/negative/relay-frame-delta-unsigned-entry.json`,
+    `fixtures/negative/device-check-in-response-heartbeat-placeholder.json`,
+    `fixtures/semantic/{revocation-delta,heartbeat,delta-freshness,delta-reconciliation}-*`,
+    `fixtures/vectors/revocation-delta.json` (new);
+  - tests: `test/revocation-delta.test.ts` (new), `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+    `test/schema-compilation.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (RFC 8032 and RFC 8785 rows), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
+    `docs/backlog.md`, the packet `docs/evidence/specs/2026-10-11-board-waves/packets/wave-4/P4-06-delta-heartbeat.md`,
+    the handoff `docs/handoffs/2026-10-12-w4-p4-06-delta-heartbeat.md` and `docs/handoffs/README.md`.
+- **Not decided here:** the organization's documents and their key (`org-authority/1`, Fabric D8, or a role in
+  DEC-0031's key set), the 7-day validity of the organization's records and the heartbeat extension of up to 7 days the
+  organization root or a quorum of administrators may sign (v4 §7); DEC-0053's 7-day revocation list stays the
+  certified root's and is not reused here, because an estate's record lives 30 days and its heartbeat 72 hours.
+  Recovery from a fork (a new chain anchored in a revision); compaction (a checkpoint for a machine that enrolls late);
+  how two hubs agree on the next sequence (Fabric's); the organization's kinds (members, `subject.erase`); Fabric's D3
+  (which key is the hub key) and D2 (ES256 for it). DL-14's reference function (packet P4-07, in review beside this one) reads the
+  estate record's revocations; item 6 asks every such check to read the applied entries' too, which the owner session
+  reconciles when both land.
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§7 *Freshness*, §12, §20 V2-15 and
+  V2-22); DEC-0047, DEC-0053, DEC-0055; RFC 8785 and RFC 8032 in the [source ledger](evidence/sources.md); the
+  board-waves inventory V4-DELTA-HEARTBEAT, packet P4-06. DEC-0054 was reserved by git CAS before this run, by the relay
+  run (`agent_sync.py reserve --key revocation-delta-20261012 DEC`, run `r-51535649e`, commit `776e807`,
+  2026-10-12T00:43:06Z); this run reserved no decision id. `FAC-SEM-082`…`FAC-SEM-084` were reserved by git CAS
+  (`--key w4-p4-06-sem-{delta,heartbeat,reconcile}-20261012 SEM`, receipts SEM-0082…SEM-0084). This file,
+  `conformance.md` and `backlog.md` were edited in the run's branch without a lease, by the wave's arrangement (the owner
+  session takes the leases when it merges); the record plane is `fs`.

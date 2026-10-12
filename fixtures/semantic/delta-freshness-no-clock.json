@@ -1,5 +1,5 @@
 {
-  "description": "An unreadable clock decides nothing.",
+  "description": "An unreadable clock (no offset) decides nothing, not even stale.",
   "kind": "delta-freshness",
   "expect": [
     "FAC-SEM-083"
@@ -23,6 +23,6 @@
       }
     },
     "broken": false,
-    "answer": "current"
+    "answer": "stale"
   }
 }

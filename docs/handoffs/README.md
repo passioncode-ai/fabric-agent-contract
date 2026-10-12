@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-12 revocation delta and heartbeat](2026-10-12-w4-p4-06-delta-heartbeat.md) | DEC-0054 (board run P4-06; V4-DELTA-HEARTBEAT; the id pre-reserved by the relay run) | pull request open |
 | [2026-10-12 device transport and keys](2026-10-12-w4-p4-04-device-transport.md) | DEC-0056 (board run P4-04; DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST) | PR #58 |
 | [2026-10-12 services on every system](2026-10-12-w4-p4-01-services.md) | DEC-0057 (board run P4-01; CT-01) | merged, #57 `8c6211e` |
 | [2026-10-12 channel status and embedded dashboard](2026-10-12-w4-p4-03-channel-dashboard.md) | DEC-0058, DEC-0059 (board run P4-03; CT-13) | merged, #56 `32c01ea` |

@@ -1,5 +1,5 @@
 {
-  "description": "Entries 1 and 3 on one page: a page is consecutive.",
+  "description": "Entry 3 right after entry 1, its prev entry 1's hash: a page is consecutive, even when the hashes chain.",
   "kind": "revocation-delta",
   "expect": [
     "FAC-SEM-082"
@@ -7,7 +7,7 @@
   "input": {
     "head": {
       "sequence": 3,
-      "sha256": "460ead10497f2b77eb5a9a086e3f51c4c694d2020a5459466bad5aaf4edce57a"
+      "sha256": "6a8265b9540c45e9d8965bb7b8723c029e30d3bbc1bbfde562fb875426dfde03"
     },
     "entries": [
       {
@@ -30,7 +30,7 @@
         "alg": "EdDSA",
         "estate": "estate-5d0f1a",
         "sequence": 3,
-        "prev": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe",
+        "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
         "at": "2026-10-12T10:30:00Z",
         "revocation": {
           "kind": "grant",
@@ -38,7 +38,7 @@
           "revokedAt": "2026-10-12T10:29:00Z"
         },
         "kid": "hub-m-4c1e-1",
-        "sig": "M2hp5b8GfdKTzLwzYVuG63BC6rhN4GxoeU_eHPxiC8kPo3poASEZlTVIwdIRR62_0DZqxrTCDHTuBWwgXliQDw"
+        "sig": "JhDYjhGH8mpEmG5qEi1AvO8xdxDoGJJnryZgSgENBgy6-Mme4uD6LeuhvYP7MqgIfw-Sk5BE9HB01g56iLhPDg"
       }
     ]
   }

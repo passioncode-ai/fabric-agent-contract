@@ -53,6 +53,8 @@ Total (also the floor of the whole set): 1983 / 2283 (86.85 %).
 | P4-04 | `src/http-signature.ts` (new) | 350 / 350 (100 %) | 100 % | the device transport binding (DEC-0056): RFC 8941 parsing with RFC 9651's Date and Display String, RFC 9421 §2.3 and §2.5, mutual TLS beside the signature, the receiver's steps and the nonce store, over `fixtures/vectors/http-signature.json`; every refusal planted |
 | P4-04 | `src/device-transport-rules.ts` (new) | 40 / 40 (100 %) | 100 % | FAC-SEM-077, moved out of `device-rules.ts` so a consumer that vendors the device rules needs no HTTP layer |
 | P4-04 | `src/device-rules.ts` | 515 / 529 (97.35 %) | 97.35 % | FAC-SEM-044's key-role counts, every new branch covered |
+| P4-06 | `src/revocation-delta.ts` (new) | 262 / 262 (100 %) | 100 % | the revocation delta and the heartbeat (DEC-0054): `applyDelta` RD-1…RD-10, `acceptHeartbeat` HB-1…HB-3, the 72-hour rule and reconciliation over `fixtures/vectors/revocation-delta.json`; malformed input answered, never thrown; every refusal planted |
+| P4-06 | `src/revocation-delta-rules.ts` (new) | 73 / 73 (100 %) | 100 % | FAC-SEM-082…084; one fixture per sub-check, each planted |
 
 **Wave 2, P2-02 (DEC-0044).** The credential detector moved from `src/fabric-links.ts` into `src/secret-shape.ts`
 with its branches, all covered, which alone lowered `fabric-links.ts` to 78 / 84 (92.85 %); tests of the link
@@ -120,3 +122,9 @@ branch off main's `31ed9f0`, after the review round: whole set 3528 / 3688 (95.6
 
 **Wave 4, P4-04 merged with main `8c6211e`** (P4-01, P4-03, the relay and #59): 42 files, 1991 tests, whole set
 4001 / 4161 (96.15 %), every floor met.
+
+**Wave 4, P4-06 (DEC-0054).** `src/revocation-delta.ts` and `src/revocation-delta-rules.ts` are new and reach every
+branch, with no `v8 ignore`; the four kinds join `test/rule-tolerance.test.ts`, and 50 planted defects (35 in the
+verifier, 15 in the rules) each failed a test. The whole-set floor stays at 86.85 %. Measured with `vitest run
+--coverage` on the P4-06 branch merged with main's `51719e4`: 44 files, 2173 tests, whole set 4407 / 4567 (96.49 %),
+every floor met.
