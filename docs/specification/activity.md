@@ -206,7 +206,8 @@ session is in one state at a time (`FAC-SEM-100`, kind `session-join`). A surfac
 Fabric's, Switchboard's — are annotations, never counters: when the collector reads them it writes
 `session.annotation`. A reader counts interval seconds by state and one usage line per `dedupeKey`, and nothing else
 ([`sessionTotals`](../../src/session-join.ts); one call once by its `dedupeKey` across sessions, as `FAC-SEM-038`
-reads it), so a session seen by three writers totals as its collector wrote it
+reads it, credited to the first session that reports it), so a session seen by three writers totals as its collector
+wrote it
 (`fixtures/semantic/session-join-three-writers.json`).
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any

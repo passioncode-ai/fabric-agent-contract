@@ -44,6 +44,12 @@ describe("FAC-SEM-070 and FAC-SEM-071 at the edges", () => {
     expect(at("secret-envelope", { header: "x" })).toEqual(["/header/recipient", "/header/sender", "/header/alg", "/header/suite", "/header/exp", "/header/enc"]);
   });
 
+  it("reads an envelope's iat and exp as strict instants: a day that does not exist is refused, not rolled over (CON-004)", () => {
+    // Date.parse reads 2026-02-30 as 2 March, which would make each of these a life of an hour or so.
+    expect(at("secret-envelope", { ...envelope, header: { ...envelope.header, iat: "2026-03-01T23:00:00Z", exp: "2026-02-30T00:00:00Z" } })).toEqual(["/header/exp"]);
+    expect(at("secret-envelope", { ...envelope, header: { ...envelope.header, iat: "2026-02-30T00:00:00Z", exp: "2026-03-02T01:00:00Z" } })).toEqual(["/header/exp"]);
+  });
+
   it("checks send and auth frames and lets every other frame through", () => {
     const send = load("semantic/relay-frame-send-ok.json").input;
     expect(at("relay-frame", { ...send, to: "m#kem", ttl: 0, body: "A".repeat(1_048_600) })).toEqual(["/to", "/ttl", "/body"]);

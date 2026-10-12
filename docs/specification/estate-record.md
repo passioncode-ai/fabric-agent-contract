@@ -56,7 +56,9 @@ digest is what the passkey signs.
 ### Freshness
 
 A record is valid from `issuedAt` to `validUntil`, at most 30 days later (v4 §7, Freshness: "the estate record 30"); a
-verifier refuses it before or after, and the hub drafts a fresh revision before the window ends. The relay serves the
+verifier admits it from 60 s before `issuedAt` — the clock skew every relay time allows (`CLOCK_SKEW_SECONDS`,
+DEC-0066), so a revision issued a moment ahead of the verifier's clock is not refused — and refuses it before that or
+after `validUntil`, and the hub drafts a fresh revision before the window ends. The relay serves the
 latest revision and online machines fetch it hourly (v4 §7); how a revision travels is the relay protocol's ([DEC-0047](relay.md)).
 
 ## Authorities
@@ -175,7 +177,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-7 | `wrong-type`, `wrong-challenge`, `wrong-origin`, `cross-origin` | the client data's `type`, `challenge` or `origin` — an origin the authority does not pin, or one it pins outside its RP ID (DEC-0063) — or a cross-origin frame |
 | ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the authority's RP ID is not a signing RP, `sign.<domain>` (DEC-0063: checked as soon as ER-4 has chosen the authority, before any check of the assertion); the `rpIdHash`; AT set or BS without BE; UP clear; UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
-| ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is before `issuedAt` or after `validUntil` (both instants are inside the window) |
+| ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants are inside the window) |
 | ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`; the verdict names the codes |
 
 The vectors hold one case or more per problem, the EdDSA test passkey's seed (Ed25519 is deterministic, so a port's
