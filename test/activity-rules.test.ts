@@ -404,3 +404,14 @@ describe("DEC-0052: results and the root run", () => {
     expect(result.user).toBeUndefined();
   });
 });
+
+describe("review of DEC-0052: no scope sidesteps OD-1", () => {
+  it("refuses an unnamed activity scope and any results scope served to a person other than the subject", () => {
+    const base = load("semantic/access-log-disclosure-ok.json").input;
+    const withEntry = (entry: Json) => ({ ...base, log: { ...base.log, entries: [{ ...base.log.entries[0], ...entry }] } });
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.cost", step: "event" }))).toContain("FAC-SEM-067 /log/entries/0/scope");
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.results", step: "day" }))).toContain("FAC-SEM-067 /log/entries/0/scope");
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.usage", step: "day" }))).toEqual([]);
+  });
+});
+

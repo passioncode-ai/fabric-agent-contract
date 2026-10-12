@@ -886,7 +886,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-08
 - **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
   Revised before merge by the contract owner's review of PR #22 and its re-review.
-- **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
+- **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and item 9 records the posture reason `re_enrolled` (CON-OE-01); DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -2244,8 +2244,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `account` and `run.root` only to a receiver that pinned this decision, since an older `telemetry-event` closes the
   envelope. Tightening, each with what a consumer does: an ack no longer moves over check-in drops (a receiver
   recomputes acks; none is deployed); `FAC-SEM-067` narrows what a receiver serves (the first organization server
-  builds its views to it); the settings form throws on a lone surrogate (an input no Python peer could encode, so no
-  interoperable signature changes); the positive access log now reads usage per day. `contractVersion` stays `0.1.0`.
+  builds its views to it), and it now also refuses an unnamed `activity.*` scope and any `activity.results` read keyed
+  on a person, and `activity.raw` served to another person excludes usage and cost; the settings form throws on a lone
+  surrogate — no Python peer could encode one, but a backup, policy, key set or `sourceKey` that a TypeScript-only
+  signer wrote with a lone surrogate in a table, column or key name verified before and is now refused (cells were
+  already refused); the positive access log now reads usage per day. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/activity.md`, `docs/specification/devices.md` (pending ranges, `re_enrolled`),
     `docs/specification/conformance.md` (register, canonical forms);
@@ -2343,7 +2346,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   server re-signs under a current key); an SSO or token certificate must bind the proven user; a detail string with a
   path inside it is refused (a collector strips paths from errors); an unset `build_channel.allowed` now resolves to
   `official`, so an organization's device refuses an unofficial build unless a layer says `any`; a device that pinned
-  an offline root refuses an uncertified root. Nothing is deployed against DEC-0031 yet (CT-04), so no consumer
+  an offline root refuses an uncertified root, and a delegated certification without the offline root's revocation
+  list, or with one issued more than 7 days before enrollment. Nothing is deployed against DEC-0031 yet (CT-04), so no consumer
   breaks in the field. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/devices.md`, `docs/specification/conformance.md` (register, canonical forms, readers);

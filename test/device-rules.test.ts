@@ -521,3 +521,17 @@ describe("DEC-0053: device keys by role", () => {
     expect(where(load("semantic/device-enrollment-device-key-both-roles.json").input)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/publicKey"]);
   });
 });
+
+describe("review of DEC-0053: the offline root's revocation list on a delegated certification", () => {
+  it("is required and fresh: a delegated certification without it, or with one older than seven days, is refused", () => {
+    const delegated = load("semantic/device-root-certification-delegated.json");
+    expect(paths(delegated.kind, delegated.input).filter((path: string) => path.includes("/revocations"))).toEqual([]);
+    const without = structuredClone(delegated.input);
+    delete without.revocations;
+    expect(paths(delegated.kind, without)).toContain("FAC-SEM-069 /revocations");
+    const stale = structuredClone(delegated.input);
+    stale.at = new Date(Date.parse(stale.revocations.issuedAt) + 8 * 86_400_000).toISOString();
+    expect(paths(delegated.kind, stale)).toContain("FAC-SEM-069 /revocations/issuedAt");
+  });
+});
+

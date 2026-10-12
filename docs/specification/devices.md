@@ -279,7 +279,9 @@ and a self-hosted organization's root is its own (DEC-0053).
   `rootCertification` of the organization's root key, checked at enrollment time (`FAC-SEM-069`).
 - It is signed by a pinned key, or by a **delegation key** whose certificate (`delegation`) a pinned key
   signed. A delegation certificate lives at most 30 days, is valid at enrollment, and its key is not on the
-  pinned key's `delegationRevocations` list.
+  pinned key's `delegationRevocations` list. A delegated certification **must** carry that list, issued at most 7 days
+  before enrollment (TUF: metadata expires); without it, or with an older one, a compromised delegation key could
+  certify until its own certificate expires.
 - Each of the three documents is signed over the RFC 8785 form of itself without `signature`
   ([`certificationSigningInput`](../../src/device-rules.ts); [canonical forms](conformance.md#canonical-forms)),
   and names its algorithm, `ed25519` or `es256` ([`verifyWith`](../../src/device-rules.ts)): a verifier

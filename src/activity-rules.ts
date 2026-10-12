@@ -387,6 +387,10 @@ function summaryShape(value: JsonObject): Finding[] {
 export const PRESENCE_SCOPES: ReadonlySet<string> = new Set(["activity.raw", "activity.presence"]);
 /** The scope of a person's usage and cost: served to another person only as sums per UTC day or billing period. */
 export const USAGE_SCOPE = "activity.usage";
+/** The scope of runs' results: never read as one person's data, only as project or agent cells (k ≥ 3, DEC-0030). */
+export const RESULTS_SCOPE = "activity.results";
+/** Every `activity.*` scope this profile names; another is refused when it is served to a person other than the subject. */
+export const ACTIVITY_SCOPES: ReadonlySet<string> = new Set([...PRESENCE_SCOPES, USAGE_SCOPE, RESULTS_SCOPE]);
 
 /**
  * The purposes a subject has confirmed at `at`: those whose latest `consent` message at or before `at` says `given`.
@@ -420,6 +424,12 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
     const reader = isObject(entry.reader) && isObject(entry.reader.user) ? entry.reader.user.id : undefined;
     if (reader === undefined || reader === subject) return;
     const scope = String(entry.scope ?? "");
+    if (scope.startsWith("activity.") && !ACTIVITY_SCOPES.has(scope)) {
+      flag(`/log/entries/${i}/scope`, `${scope} is not a scope this profile names; a person's activity reaches another person only through the named scopes`);
+    }
+    if (scope === RESULTS_SCOPE) {
+      flag(`/log/entries/${i}/scope`, "results never reach another person keyed by one person: only as project or agent cells of at least 3");
+    }
     if (scope === USAGE_SCOPE && entry.step !== "day" && entry.step !== "period") {
       flag(`/log/entries/${i}/step`, "a person's usage and cost reach another person only as sums per UTC day or billing period");
     }

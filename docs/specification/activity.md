@@ -183,8 +183,11 @@ day's violations after the day ends, so the stream position tells no more than t
 
 **`result`** — a run met, or did not meet, the result signal its agent declares (DEC-0052, the first
 organization server's target architecture v4 §12). It requires `run.root`, and carries **no `user` and no
-`session`** (schema): results leave a device as counts and enums joined to cost by the run, never per
-person, and a receiver never attaches a user to one. `data`: `signal` (the declared signal's name),
+`session`** (schema): results leave a device as counts and enums joined to cost by the run. The event arrives on
+the device's stream, which the receiver attributes to a user by certificate (`FAC-SEM-045`), and a usage line with a
+`user` carries the same `run.root`, so keeping results from being read per person is the **receiver's restraint**:
+it never attaches a user to a result and serves results only as project or agent cells of at least 3
+(`activity.results`, `FAC-SEM-067`). `data`: `signal` (the declared signal's name),
 `outcome` (`met`, `not_met`) and an optional `count`. A summary gains no person dimension from it.
 
 **Extension and unknown kinds.** A collector MAY emit its own kinds as `x-<namespace>.<kind>`. Any
@@ -397,8 +400,13 @@ that the device is `logging_disabled`. Each entry records:
 
 - `at`: when the read happened;
 - `reader`: an opaque `user.id` or a `service`, and its `role`;
-- `scope`: what was read (open vocabulary: `activity.raw`, `device.health`, `device.check_in`,
-  `device.policy`);
+- `scope`: what was read. The `activity.*` scopes are closed: `activity.raw`, `activity.presence`,
+  `activity.usage` and `activity.results`; `device.*` stays open (`device.health`, `device.check_in`,
+  `device.policy`). Served to a person other than the subject (`FAC-SEM-067`): another `activity.*` scope is
+  refused; `activity.results` is refused, since results are read only as project or agent cells of at least 3;
+  `activity.usage` only per UTC day or billing period; `activity.raw` and `activity.presence` only under a purpose the
+  subject confirmed — and `activity.raw` served to another person never includes `usage.line` events or cost, which
+  reach another person only as `activity.usage` sums;
 - `device`: the device, when the read was keyed by one;
 - `range`: the time range read;
 - `purpose`: a sentence, and `purposeId`: the purpose as the notice names it (DEC-0052);

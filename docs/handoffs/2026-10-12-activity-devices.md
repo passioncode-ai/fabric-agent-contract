@@ -14,7 +14,7 @@ Added mid-run at the lead's request: P-256 device keys by role for the relay pro
   (devices); DEC-0030, DEC-0031 and DEC-0043 annotated (item 10 narrowed by OD-1 for owner and administrator views;
   item 7 replaced; lone surrogates decided). Rule codes **FAC-SEM-067** (`access-log-disclosure`), **FAC-SEM-068**
   (`device-action`), **FAC-SEM-069** (`device-root-certification`), receipts SEM-0067…SEM-0069; next free
-  `FAC-SEM-070`.
+  `FAC-SEM-072` (FAC-SEM-070/071 are reserved for the relay protocol, DEC-0047).
 - [Activity](../specification/activity.md): `account.class`/`tenantRef`, `policy.violation` by UTC day, notice and
   consent messages (new schema `activity-notice`), OD-1 in neutral form over the access log (`purposeId`, `step`),
   `result` and `run.root`, pending check-in drops never moving an ack, the `mixed` basis a receiver duty.
@@ -39,7 +39,7 @@ Added mid-run at the lead's request: P-256 device keys by role for the relay pro
 ## Checks run
 
 Gate parts on the branch after merging `main` at `0cacd08`: `tsc --noEmit` clean; `vitest run --coverage` 34 files,
-1282 tests passed, every floor met; `python3 docs/ux/lint.py` exit 0; `tsx src/docs-check.ts` "Documentation checks
+1282 tests passed before the merge of P3-01 (1354 in 35 files after it; 1356 after the review fixes), every floor met; `python3 docs/ux/lint.py` exit 0; `tsx src/docs-check.ts` "Documentation checks
 passed"; `tsx src/lint-md.ts` 0 errors; `tsx src/privacy-check.ts` with `ORG_INDEX` set to the org-index checkout:
 0 findings. Every check added or fixed was planted back and failed at least one test; the table is in the pull
 request. One plant survives by design: removing `isValidP256Key` from `verifyWith` leaves the suite green, because
@@ -64,10 +64,10 @@ Node's key import refuses an invalid point first; the check stays as defence in 
   node are not decided (DEC-0053 *Not decided here*).
 - Knowledge base: fabric-workspace `knowledge/` rows for DEC-0052/0053 and the consumers' plans are the owner
   session's at the wave close, with `node scripts/workspace.mjs sync`.
-- `test/schema-compilation.test.ts` counts 72 schemas; P3-01 adds its own, so the merge sums both.
+- `test/schema-compilation.test.ts` counts 73 schemas after the merge with P3-01.
 
 ## Next task
 
-The owner session reviews and merges the P3-02 pull request after P3-01, resolving the schema count and the
-register's order with P3-01's codes, then starts P3-03 (estate record), which references device keys by role
+The owner session merges the P3-02 pull request (P3-01 merged in, review fixes applied), then starts P3-03 (estate
+record), which references device keys by role
 (`#sig`, `#kem`) and the check-in's `records.estateRecord.revision` from DEC-0053.

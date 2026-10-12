@@ -488,6 +488,8 @@ export function certificationSigningInput(document: JsonObject): Buffer {
 
 /** The longest a delegation key's certificate may live (DEC-0053, the operator's R10-M3). */
 export const MAX_DELEGATION_DAYS = 30;
+/** The oldest offline-root revocation list a delegated certification may carry (TUF: metadata expires). */
+export const MAX_REVOCATION_LIST_AGE_DAYS = 7;
 
 /**
  * FAC-SEM-069: `{pinned?, root, certification?, revocations?, at}` — when the device's installer pinned offline root keys
@@ -524,6 +526,13 @@ function rootCertification(value: JsonObject): Finding[] {
     if (!(to > from) || to - from > MAX_DELEGATION_DAYS * DAY_MS) flag("/certification/delegation/notAfter", `a delegation key's certificate lives at most ${MAX_DELEGATION_DAYS} days`);
     else if (!(at >= from && at <= to)) flag("/certification/delegation/notAfter", "the delegation key's certificate is not valid at enrollment time");
     const revocations = isObject(value.revocations) ? value.revocations : null;
+    // A delegated certification carries the offline root's current revocation list (devices.md, key sets): without it, or
+    // with a stale one, a compromised delegation key could certify until its own certificate expires.
+    if (!revocations) flag("/revocations", "a delegated certification carries the offline root's current revocation list");
+    else {
+      const issued = Date.parse(String(revocations.issuedAt ?? ""));
+      if (!(issued <= at) || at - issued > MAX_REVOCATION_LIST_AGE_DAYS * DAY_MS) flag("/revocations/issuedAt", `the revocation list was issued at most ${MAX_REVOCATION_LIST_AGE_DAYS} days before enrollment`);
+    }
     if (revocations) {
       const listSignature = isObject(revocations.signature) ? revocations.signature : {};
       const listSigner = pinnedKey(listSignature.keyId);
