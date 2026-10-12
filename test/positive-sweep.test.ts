@@ -91,6 +91,7 @@ export const NOT_SWEPT: readonly string[] = [
   "runner-route-event.schema.json",
   "service-dashboard-extension.schema.json",
   "service-events-page.schema.json",
+  "schema-unsupported.schema.json",
   "service-login-code.schema.json",
   "versioned-setting.schema.json",
   "work.schema.json"

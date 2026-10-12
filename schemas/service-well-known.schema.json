@@ -15,6 +15,10 @@
     "protocol": {
       "$ref": "service-common.schema.json#/$defs/protocol"
     },
+    "protocols": {
+      "$ref": "common.schema.json#/$defs/protocols",
+      "description": "DEC-0067: the protocol revisions this service accepts, N and N−1 per protocol. A request in another revision is refused with schema-unsupported before it is read."
+    },
     "service": {
       "type": "object",
       "required": [

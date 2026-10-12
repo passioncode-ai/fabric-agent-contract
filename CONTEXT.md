@@ -413,6 +413,10 @@ in its check-in ([window lease](docs/specification/window-lease.md)).
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
 
+**Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
+of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,
+[versioning](docs/specification/versioning.md#protocol-revisions)).
+
 **OpenRouter attribution**: The three headers (`HTTP-Referer` = the product page, `X-OpenRouter-Title`,
 `X-OpenRouter-Categories`) an organization product adds to a request it originates to `https://openrouter.ai`, never
 to forwarded traffic and never over a user's own attribution; off without a setting (DEC-0065,
