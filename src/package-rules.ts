@@ -277,14 +277,27 @@ function agentRef(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-066", instancePath: "/agentRef", message: `the agent is ${expected}: agentRef is derived from publisher and id` }];
 }
 
-/** FAC-SEM-102 (DEC-0071): a package names each MCP role it requires once, so a placement maps one server to one role. */
+/**
+ * FAC-SEM-102 (DEC-0071, DEC-0074): a package names each MCP role it requires once, so a placement maps one server to one
+ * role; each secret slot a role names is declared in `secrets[]`, and one slot feeds one role.
+ */
 function mcpRoles(value: JsonObject): Finding[] {
   const seen = new Set<string>();
+  const declared = new Set(list(value.secrets).map((slot) => slot.name).filter(isString));
+  const feeds = new Map<string, string>();
   const findings: Finding[] = [];
   mcpRequirements(value).forEach((requirement, index) => {
     if (!isString(requirement.role)) return;
     if (seen.has(requirement.role)) findings.push({ code: "FAC-SEM-102", instancePath: `/requires/mcp/${index}/role`, message: `role ${requirement.role} is required twice: one role, one server` });
     seen.add(requirement.role);
+    (Array.isArray(requirement.secrets) ? requirement.secrets : []).forEach((slot: unknown, s: number) => {
+      if (!isString(slot)) return;
+      const at = `/requires/mcp/${index}/secrets/${s}`;
+      if (!declared.has(slot)) findings.push({ code: "FAC-SEM-102", instancePath: at, message: `slot ${slot} is not declared in secrets[]` });
+      const other = feeds.get(slot);
+      if (other !== undefined && other !== requirement.role) findings.push({ code: "FAC-SEM-102", instancePath: at, message: `slot ${slot} already feeds role ${other}: one slot, one role` });
+      feeds.set(slot, other ?? (requirement.role as string));
+    });
   });
   return findings;
 }

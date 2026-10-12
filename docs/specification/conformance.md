@@ -186,7 +186,7 @@ two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were al
 register and carry no receipt. `FAC-SEM-095` was reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-106`
+**Next free rule code:** `FAC-SEM-107`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|

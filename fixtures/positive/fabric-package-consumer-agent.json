@@ -35,6 +35,10 @@
         "tools": [
           "activation_status",
           "members_list"
+        ],
+        "secrets": [
+          "ORG_URL",
+          "ORG_AGENT_TOKEN"
         ]
       }
     ],
@@ -75,5 +79,5 @@
       "sha256": "sha256:ed96c4bfca338a1fece48fde5dba3da979166ff6f5c11980e884ddc3e4a95098"
     }
   ],
-  "digest": "sha256:2521e05ff2e1dbb243b8cce6eb3efc227066928f5352e629a681cc86b62200d8"
+  "digest": "sha256:0024e852eea56880d2165c4a496f8b98f944a50ee01cb6fb066ce07850910083"
 }

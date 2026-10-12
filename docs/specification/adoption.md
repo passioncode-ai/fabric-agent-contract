@@ -21,7 +21,11 @@ A consumer that copies schemas into its own repository copies the `$ref` closure
 schema and every file its references reach — never a list of name prefixes: a later decision may make a schema refer to
 a new file (a device check-in refers to `heartbeat`, `revocation-delta` and `window-lease` since DEC-0053 and
 DEC-0054), and a missing file fails every document. [`schemaClosure`](../../src/schema-closure.ts) lists the closure;
-`test/schema-closure.test.ts` checks that every schema's closure resolves. (Reported by the first organization
+`test/schema-closure.test.ts` checks that every schema's closure resolves. A consumer that vendors this repository's
+reference code does the same with a module's import closure ([`sourceClosure`](../../src/schema-closure.ts)): a module
+may import a file a later decision added (`device-rules.ts` imports `protocol-revisions.ts` since DEC-0067). The
+closure covers static imports and re-exports of sibling modules (`from "./x.js"`); a module that loads another
+through a variable at run time, as `session-handoff.ts` loads its validator, names it in its own comment. (Reported by the first organization
 server's session on 2026-10-12, after its prefix copy refused every check-in.)
 
 ## Fabric consumer

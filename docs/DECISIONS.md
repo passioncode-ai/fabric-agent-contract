@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0073`
+**Next free ID:** `DEC-0076`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3969,6 +3969,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   address). Consumer adoption: the first organization server repacks its admin agents as consumer agents (CT-04);
   Project Observatory's node checks `requires.mcp` with `consumerPlacement` before it places one (CT-20); the adapter's
   `pack` writes them (CT-18).
+- **Annotated (2026-10-12):** its open question (which secret slot feeds which role's server entry) is decided by DEC-0074 (`requires.mcp[].secrets`).
 - **Amends:** DEC-0050 (`fabric-package/1`: `provider` becomes optional for an agent that serves nothing;
   `requires.mcp[]`). Packet P6-09.
 - **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
@@ -4055,3 +4056,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   v2's contract plan row CON-OE-05 and its CROSSWALK-v4; DEC-0012, DEC-0023; packet P6-03. DEC-0072 and
   `FAC-SEM-103`…`FAC-SEM-105` were reserved by git CAS (`--key w6-p6-03-proposals-20261012 DEC`; `--key
   w6-p6-03-sem-{proposal-submit,proposal-transition,learning-rollout}-20261012 SEM`); the record plane is `fs`.
+
+### DEC-0074 — A required MCP role names the secret slots that configure it
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Proposed by the first organization server's session
+  after it repacked its admin agents under DEC-0071. Consumer adoption: the first organization server's packages name
+  their slots per role (CT-04); Project Observatory's node configures each role's server entry from the slots it names
+  (CT-20).
+- **Amends:** DEC-0071 (its open question). Packet P6-10.
+- **Decision:** in [package → A consumer agent](specification/package.md#a-consumer-agent) —
+  1. **`requires.mcp[].secrets`** names, by slot name, the secret slots a placement uses to configure that role's server
+     entry (its address and its token) (schema).
+  2. **Each named slot is declared** in the package's `secrets[]`, and **one slot feeds one role** (`FAC-SEM-102`).
+  3. **Vendoring.** A consumer that vendors this repository's reference code copies a module's import closure
+     (`sourceClosure`, beside `schemaClosure`), as it copies a schema's `$ref` closure ([adoption](specification/adoption.md#vendoring-schemas)).
+- **Why:** DEC-0071 said the address and token come through the secret slots but not which slot configures which
+  server; a placement had to guess, and a slot meant for one server could reach another.
+- **Compatibility:** Additive: an optional member, and a rule over it. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/package.md`, `docs/specification/adoption.md`;
+  - schemas: `schemas/fabric-package.schema.json`;
+  - code: `src/package-rules.ts` (`FAC-SEM-102`), `src/schema-closure.ts` (`sourceClosure`);
+  - fixtures: `fixtures/positive/fabric-package-consumer-agent.json`,
+    `fixtures/negative/fabric-package-consumer-secret-twice.json`, `fixtures/catalogue.json`;
+  - tests: `test/consumer-agent.test.ts`, `test/schema-closure.test.ts`;
+  - docs: `docs/backlog.md` (CT-04, CT-20).
+- **Not decided here:** how a placement maps a slot's value onto a server entry's fields (a URL, a header), which is
+  the runner's configuration format; whether a role may name a slot marked `optional`.
+- **Source:** the first organization server's session (2026-10-12); DEC-0071; packet P6-10. DEC-0074 was reserved by
+  git CAS (`--key w6-p6-10-mcp-secrets-20261012 DEC`); no new `FAC-SEM` id (`FAC-SEM-102` grew); the record plane is `fs`.
