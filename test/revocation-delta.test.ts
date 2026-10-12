@@ -347,6 +347,8 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
   it("refuses a held heartbeat without its head or revision: a held state the machine could not have accepted", () => {
     const newer = resign(hb, { sequence: 6 });
     expect(acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: { sequence: 5, at: "2026-10-12T10:00:00Z" } }), newer, trust)).toMatchObject({ ok: false, problem: "malformed" });
+    // The same newer heartbeat over a well-formed held one moves nothing back, so it is accepted.
+    expect(acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: hb }), newer, trust)).toMatchObject({ ok: true, newer: true });
   });
 
   it("answers a page entry or record that is not an object", () => {

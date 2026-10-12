@@ -322,8 +322,8 @@ export function acceptHeartbeat(state: DeltaState, heartbeat: unknown, trust: De
       if (sameBytes(h, held)) return { ok: true, state, newer: false };
       return broken(`two signed heartbeats carry sequence ${String(h.sequence)}`);
     }
-    const heldHead = isObject(held.deltaHead) ? held.deltaHead : {};
-    const heldRevision = isObject(held.estateRecord) ? held.estateRecord : {};
+    const heldHead = held.deltaHead as JsonObject;
+    const heldRevision = held.estateRecord as JsonObject;
     if (at < deltaTime(held.at) || (head.sequence as number) < (heldHead.sequence as number) || (revision.revision as number) < (heldRevision.revision as number)) {
       return fail("regressed", state, "a newer heartbeat never moves its time, the head or the revision back");
     }
