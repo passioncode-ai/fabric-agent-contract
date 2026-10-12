@@ -14,7 +14,7 @@
 import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { isEd25519Key, isLowS, p256Jwk, p256KeyRefusal, type P256Key } from "./p256.js";
-import { strictTime } from "./rfc3339.js";
+import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
 
@@ -31,13 +31,13 @@ export const MAX_FRAME_BYTES = 1_048_576;
 export const MAX_BODY_BYTES = 783_360;
 export const MAX_MESSAGE_TTL_SECONDS = 604_800;
 export const AUTH_WINDOW_SECONDS = 60;
-/** How far ahead of the verifier's clock a signed `iat` may be before it is `not-yet-valid`. */
-export const CLOCK_SKEW_SECONDS = 60;
+/** How far ahead of the verifier's clock a signed `iat` may be before it is `not-yet-valid` (shared with the estate record). */
+export { CLOCK_SKEW_SECONDS };
 export const AUTH_DEADLINE_SECONDS = 10;
 export const IDLE_CLOSE_SECONDS = 90;
 
 export const FRAME_TYPES = [
-  "hello", "auth", "welcome", "send", "accepted", "deliver", "ack", "presence", "presence-query",
+  "hello", "auth", "welcome", "send", "accepted", "deliver", "ack", "presence", "presence-query", "presence-result",
   "delta", "heartbeat", "delta-query", "ping", "pong", "error"
 ] as const;
 export type FrameType = (typeof FRAME_TYPES)[number];
@@ -49,12 +49,35 @@ export const RELAY_ERROR_CODES = [
 ] as const;
 export type RelayErrorCode = (typeof RELAY_ERROR_CODES)[number];
 
-/** WebSocket close codes the relay uses after an `error` frame. */
-export const CLOSE_CODES = { unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001 } as const;
+/** WebSocket close codes the relay uses (DEC-0047 item 3, DEC-0066). */
+export const CLOSE_CODES = { unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001, policy: 1008, internal: 1011 } as const;
+
+const CLOSE_FOR: Partial<Record<RelayErrorCode, number>> = {
+  "protocol-unsupported": CLOSE_CODES.unauthenticated, unauthenticated: CLOSE_CODES.unauthenticated, "unsupported-alg": CLOSE_CODES.unauthenticated,
+  "not-yet-valid": CLOSE_CODES.unauthenticated, replay: CLOSE_CODES.unauthenticated, "bad-key": CLOSE_CODES.unauthenticated,
+  "not-admitted": CLOSE_CODES.notAdmitted, expired: CLOSE_CODES.notAdmitted,
+  "too-large": CLOSE_CODES.tooLarge, "rate-limited": CLOSE_CODES.policy, internal: CLOSE_CODES.internal
+};
+
+/**
+ * The close code that follows an `error` of this code when the relay closes the connection for it, or undefined when
+ * that error leaves the connection open (DEC-0066's table): 4401 for every refusal of `auth` and for the auth deadline
+ * — before the signer is proven there is one answer; 4403 only for a proven session whose kid left the admission set
+ * (`not-admitted`) or whose held record expired (`expired`); 1009 for a frame over 1 MiB; 1008 for a node that keeps
+ * sending after `rate-limited`; 1011 after `internal`. A binary frame closes 1003, and 90 s of silence or a relay
+ * shutting down 1001, with no error frame.
+ */
+export function closeCodeFor(code: RelayErrorCode): number | undefined {
+  return CLOSE_FOR[code];
+}
 
 export interface AuthFrame { v: 1; type: "auth"; id: string; protocol: string; alg: string; estate: string; kid: string; iat: string; sig: string }
 export interface AuthContext {
   relay: string; // this relay's origin, e.g. "https://relay.example"
+  // The `estate` of the record this context admits from (its held record), or undefined when it holds none. `admit`
+  // compares the signed estate with it and nowhere else: it is never an identifier or a key a connection can see
+  // (DEC-0066; a relay keeps sessions, mailboxes, presence and blobs under its own per-context key).
+  estate: string | undefined;
   nonce: string; // the nonce this relay sent in `hello` on this connection
   nonceUsed: boolean; // whether that nonce has already admitted a machine
   admittedKey: (kid: string) => P256Key | undefined; // the admission set (DEC-0047 item 3)
@@ -119,7 +142,8 @@ export function admit(frame: AuthFrame, ctx: AuthContext): { ok: true; kid: stri
   if (iat - ctx.now.getTime() > CLOCK_SKEW_SECONDS * 1000) return { ok: false, code: "not-yet-valid" };
   if (ctx.now.getTime() - iat > AUTH_WINDOW_SECONDS * 1000) return { ok: false, code: "unauthenticated" };
   if (ctx.nonceUsed) return { ok: false, code: "replay" };
-  const key = ctx.admittedKey(frame.kid);
+  // The signed estate must be the held record's; a mismatch is the same answer as a bad signature.
+  const key = ctx.estate !== undefined && frame.estate === ctx.estate ? ctx.admittedKey(frame.kid) : undefined;
   const proven = key !== undefined && verifyEs256(key, relayAuthSigningInput({ relay: ctx.relay, nonce: ctx.nonce, estate: frame.estate, kid: frame.kid, iat: frame.iat }), frame.sig) === true;
   return proven ? { ok: true, kid: frame.kid } : { ok: false, code: "unauthenticated" };
 }
@@ -212,6 +236,9 @@ export interface AdmissionInput {
   pinned: readonly unknown[]; // the estate's first passkeys, pinned at setup
   at: Date;
   schemaValid: (record: unknown) => boolean;
+  // Revocations the relay applied from verified `revocation-delta/1` entries (DEC-0054 `deltaRevocations`), subtracted
+  // like the record's own: `{kind: "machine" | "device-key", ref}` (DEC-0066).
+  extraRevocations?: readonly JsonObject[];
 }
 
 /** A `#sig` key of the record that the admission set leaves out, and why: it could never verify a relay signature. */
@@ -219,7 +246,7 @@ export interface ExcludedKey { kid: string; reason: "unsupported-alg" | "bad-key
 
 export type AdmissionResult =
   | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array>; excluded: ExcludedKey[] }
-  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "expired"; problem?: EstateRecordProblem };
+  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "not-yet-valid" | "expired"; problem?: EstateRecordProblem };
 
 /**
  * The admission set — kid → `#sig` key as SEC 1 octets — of the machines in the verified estate record, minus revoked
@@ -241,9 +268,12 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   const now = input.at.getTime();
   // The window is read by the parser verifyEstateRecord uses, so the relay judges it as the record's verifier did.
   const from = strictTime(record.issuedAt), until = strictTime(record.validUntil);
-  if (!Number.isFinite(now) || !Number.isFinite(from) || !Number.isFinite(until) || now < from || now > until) return { ok: false, refusal: "expired" };
+  if (!Number.isFinite(now) || !Number.isFinite(from) || !Number.isFinite(until) || now > until) return { ok: false, refusal: "expired" };
+  // A window not yet started is not-yet-valid, within the same skew as verifyEstateRecord (DEC-0066, CON-017).
+  if (now < from - CLOCK_SKEW_SECONDS * 1000) return { ok: false, refusal: "not-yet-valid" };
   const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
-  const revoked = (kind: string) => new Set(list(record.revocations).filter((entry) => entry.kind === kind).map((entry) => entry.ref));
+  const revocations = [...list(record.revocations), ...list(input.extraRevocations)];
+  const revoked = (kind: string) => new Set(revocations.filter((entry) => entry.kind === kind).map((entry) => entry.ref));
   const machines = revoked("machine"), keys = revoked("device-key");
   const set = new Map<string, Uint8Array>();
   const excluded: ExcludedKey[] = [];
@@ -314,6 +344,20 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
     return { ok: false, status: 400, code: "malformed" };
   }
   return { ok: true, request: { alg, kid, recipients: recipients as string[], iat, sig } };
+}
+
+const OCTET = "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)";
+/** The pattern of `hello.relay` in `relay-frame.schema.json`; `isRelayOrigin` is the same rule, and a test holds them equal. */
+export const RELAY_ORIGIN_PATTERN = `^(?:https://|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\])(?::\\d{1,5})?$)`;
+const RELAY_ORIGIN = new RegExp(RELAY_ORIGIN_PATTERN);
+
+/**
+ * What `hello.relay` may be (DEC-0066): an https origin, or — for a relay on the same machine — http on a loopback
+ * literal, 127.0.0.0/8 or `[::1]`, with an optional port and nothing after it. A name such as `localhost` is refused:
+ * a name resolves somewhere a literal cannot.
+ */
+export function isRelayOrigin(value: unknown): boolean {
+  return typeof value === "string" && RELAY_ORIGIN.test(value);
 }
 
 /**

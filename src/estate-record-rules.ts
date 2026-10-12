@@ -4,7 +4,7 @@ import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { isValidP256Key } from "./p256.js";
 import { type PackageTrust, packageDigest } from "./package-rules.js";
-import { strictTime } from "./rfc3339.js";
+import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { secretValue } from "./secret-shape.js";
 import { signingCredentialFindings, verifySigningAssertion } from "./signing-challenges.js";
 import { type AssertionProblem, type PasskeyCredential, credentialKey } from "./webauthn.js";
@@ -145,7 +145,8 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
   const issuedAt = time(record.issuedAt);
   const validUntil = time(record.validUntil);
   if (!Number.isFinite(issuedAt) || !Number.isFinite(validUntil) || validUntil <= issuedAt || validUntil - issuedAt > MAX_VALIDITY_SECONDS * 1000) return { ok: false, problem: "too-long-lived" };
-  if (at < issuedAt) return { ok: false, problem: "not-yet-valid" };
+  // A revision issued a moment ahead of this clock is admitted within the skew every relay time allows (DEC-0066).
+  if (at < issuedAt - CLOCK_SKEW_SECONDS * 1000) return { ok: false, problem: "not-yet-valid" };
   if (at > validUntil) return { ok: false, problem: "expired" };
   // The record's own rules (FAC-SEM-072…076) hold too, so passing this function is enough to apply a revision.
   const codes = [...new Set(recordFindings(record).map((finding) => finding.code))];

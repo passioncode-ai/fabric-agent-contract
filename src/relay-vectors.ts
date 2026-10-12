@@ -7,7 +7,11 @@
  *
  * A key in a case is a JWK object or a string of base64 SEC 1 octets; a time is RFC 3339.
  */
-import { admit, checkReplay, decideBlobAccess, instant, verifyBlobRequest, verifyMessageBody, type AuthFrame, type RelayMessagePayload } from "./relay.js";
+import {
+  admit, checkReplay, decideBlobAccess, instant, isRelayOrigin, relayAdmissionSet, verifyBlobRequest, verifyMessageBody,
+  type AuthFrame, type RelayMessagePayload
+} from "./relay.js";
+import type { JsonObject } from "./findings.js";
 import { openEnvelope, type OpenContext } from "./secret-envelope.js";
 import type { P256Key } from "./p256.js";
 
@@ -32,10 +36,20 @@ const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 export function relayVectorResults(vectors: Json): VectorResult[] {
   const out: VectorResult[] = [];
   for (const c of cases(vectors.instant)) out.push({ group: "instant", name: c.name as string, actual: instantResult(c.value), expected: c.expect });
+  for (const c of cases(vectors.relayOrigin)) out.push({ group: "relayOrigin", name: c.name as string, actual: isRelayOrigin(c.value), expected: c.expect });
+  for (const c of cases(vectors.admissionSet)) {
+    // A held record only: no candidate is offered, so the schema check is never called.
+    const result = relayAdmissionSet({
+      ...(c.held ? { held: c.held as JsonObject } : {}), pinned: [], at: new Date(c.at as string), schemaValid: () => false,
+      extraRevocations: (c.extraRevocations ?? []) as JsonObject[]
+    });
+    const actual = result.ok ? { ok: true, revision: result.revision, kids: [...result.set.keys()].sort(), excluded: result.excluded } : result;
+    out.push({ group: "admissionSet", name: c.name as string, actual, expected: c.expect });
+  }
   for (const c of cases(vectors.admit)) {
     const ctx = c.context as Json;
     const actual = admit(c.frame as AuthFrame, {
-      relay: ctx.relay as string, nonce: ctx.nonce as string, nonceUsed: ctx.nonceUsed as boolean,
+      relay: ctx.relay as string, nonce: ctx.nonce as string, nonceUsed: ctx.nonceUsed as boolean, estate: (ctx.estate ?? undefined) as string | undefined,
       admittedKey: keyring(ctx.admitted), now: new Date(ctx.now as string)
     });
     out.push({ group: "admit", name: c.name as string, actual, expected: c.expect });

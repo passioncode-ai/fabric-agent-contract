@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { createValidator, validateDocument } from "../src/validator.js";
 import { ADMIT_REFUSALS, BLOB_REFUSALS, MESSAGE_REFUSALS } from "../src/relay.js";
 import { ENVELOPE_REFUSALS } from "../src/secret-envelope.js";
 import { envelopeVectorResults, relayVectorResults } from "../src/relay-vectors.js";
@@ -43,6 +44,14 @@ describe("the shared relay vectors", () => {
     for (const group of ["admit", "messageBody", "blobRequest", "envelope"]) {
       expect(results.some((r) => r.group === group && (r.expected as Json).ok === true), group).toBe(true);
     }
+  });
+});
+
+describe("hello.relay: the schema and isRelayOrigin agree on every relayOrigin case", () => {
+  it.each((relay.relayOrigin.cases as Json[]).map((c) => [c.name, c] as const))("%s", async (_name, c) => {
+    const validator = await createValidator();
+    const hello = { v: 1, type: "hello", id: "h", protocol: "fabric-relay/0.1", relay: c.value, nonce: "A".repeat(43), time: "2026-10-12T00:00:00Z" };
+    expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/relay-frame.schema.json`, hello).valid).toBe(c.expect);
   });
 });
 

@@ -7,7 +7,7 @@ import { signEs256 } from "../src/p256.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import {
   AUTH_WINDOW_SECONDS, CLOCK_SKEW_SECONDS, CLOSE_CODES, IDLE_CLOSE_SECONDS, MAX_BODY_BYTES, MAX_FRAME_BYTES, MAX_MESSAGE_TTL_SECONDS,
-  RELAY_ERROR_CODES, admit, instant, relayAdmissionSet, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
+  ADMIT_REFUSALS, FRAME_TYPES, RELAY_ERROR_CODES, admit, closeCodeFor, instant, relayAdmissionSet, relayAuthSigningInput, relayBlobSigningInput, verifyEs256, verifyMessageBody,
   type AuthContext, type AuthFrame
 } from "../src/relay.js";
 
@@ -24,8 +24,8 @@ type Vector = {
 const v = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "vectors", "relay.json"), "utf8")) as Vector;
 const validator = await createValidator();
 const octets = Buffer.from(v.machineKeyOctets, "base64");
-const ctx = (over: Partial<AuthContext> = {}): AuthContext => ({
-  relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false,
+const ctx = (over: Partial<Omit<AuthContext, "estate">> = {}): AuthContext => ({
+  relay: v.auth.context.relay, nonce: v.auth.context.nonce, nonceUsed: false, estate: v.auth.frame.estate,
   admittedKey: (kid) => (kid === v.auth.frame.kid ? v.machineKey : undefined), now: new Date(v.auth.context.now), ...over
 });
 
@@ -106,9 +106,59 @@ describe("limits and constants", () => {
     expect(MAX_FRAME_BYTES).toBe(1_048_576);
   });
 
-  it("closes with the codes and the idle time DEC-0047 item 3 names", () => {
-    expect(CLOSE_CODES).toEqual({ unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001 });
+  it("closes with the codes and the idle time DEC-0047 item 3 and DEC-0066 name", () => {
+    expect(CLOSE_CODES).toEqual({ unauthenticated: 4401, notAdmitted: 4403, tooLarge: 1009, binary: 1003, idle: 1001, policy: 1008, internal: 1011 });
     expect(IDLE_CLOSE_SECONDS).toBe(90);
+  });
+
+  it("maps every code admit refuses with to a close code: 4401 before the signer is proven", () => {
+    for (const code of ADMIT_REFUSALS) expect(closeCodeFor(code), code).toBe(4401);
+  });
+
+  it("closes 4403 only for a proven session that left the set or whose record expired, and leaves the rest open", () => {
+    expect(closeCodeFor("not-admitted")).toBe(4403);
+    expect(closeCodeFor("expired")).toBe(4403);
+    expect([closeCodeFor("too-large"), closeCodeFor("rate-limited"), closeCodeFor("internal")]).toEqual([1009, 1008, 1011]);
+    for (const code of ["unknown-type", "malformed", "unknown-recipient", "mailbox-full", "digest-mismatch", "recipients-mismatch"] as const) {
+      expect(closeCodeFor(code), code).toBeUndefined();
+    }
+    for (const code of RELAY_ERROR_CODES) expect([undefined, 4401, 4403, 1008, 1009, 1011], code).toContain(closeCodeFor(code));
+  });
+});
+
+describe("frames DEC-0066 adds: replyTo, presence-result, retryAfter and welcome.limits", () => {
+  const frame = `${SCHEMA_PREFIX}schemas/relay-frame.schema.json`;
+  const valid = (value: unknown) => validateDocument(validator, frame, value).valid;
+  const head = { sequence: 0, sha256: "a".repeat(64) };
+
+  it("answers a presence-query with one presence-result, correlated by replyTo", () => {
+    expect(FRAME_TYPES).toContain("presence-result");
+    const result = { v: 1, type: "presence-result", id: "r1", replyTo: "q1", presences: [{ kid: "m#sig", state: "online", lastSeen: "2026-10-12T00:00:00Z" }], unknown: ["n#sig"] };
+    expect(valid(result)).toBe(true);
+    const { replyTo: _r, ...uncorrelated } = result;
+    expect(valid(uncorrelated)).toBe(false);
+    expect(valid({ ...result, presences: [{ kid: "m#sig", state: "away", lastSeen: "2026-10-12T00:00:00Z" }] })).toBe(false);
+    expect(valid({ ...result, unknown: Array.from({ length: 257 }, (_, i) => `k${i}#sig`) })).toBe(false);
+  });
+
+  it("carries replyTo on an answer and retryAfter on rate-limited", () => {
+    for (const answer of [
+      { v: 1, type: "accepted", id: "x", replyTo: "s1", msgId: "m", seq: 1 },
+      { v: 1, type: "pong", id: "x", replyTo: "p1" },
+      { v: 1, type: "error", id: "x", replyTo: "s1", code: "rate-limited", message: "slow down", retryAfter: 5 },
+      { v: 1, type: "delta", id: "x", replyTo: "d1", head, entries: [] }
+    ]) {
+      expect(valid(answer), answer.type).toBe(true);
+      expect(valid({ ...answer, replyTo: "" }), `${answer.type} empty replyTo`).toBe(false);
+    }
+    expect(valid({ v: 1, type: "error", id: "x", code: "rate-limited", message: "m", retryAfter: -1 })).toBe(false);
+  });
+
+  it("advertises the relay's limits on welcome, every member optional", () => {
+    const welcome = { v: 1, type: "welcome", id: "w", session: "s", estateRevision: 1, deltaHead: head, heartbeat: null };
+    expect(valid({ ...welcome, limits: { sendPerMinute: 600, presenceQueryPerMinute: 30, deltaQueryPerMinute: 30, mailboxMessages: 1000, blobBytes: 33554432 } })).toBe(true);
+    expect(valid({ ...welcome, limits: {} })).toBe(true);
+    expect(valid({ ...welcome, limits: { sendPerMinute: 0 } })).toBe(false);
   });
 });
 
@@ -154,7 +204,9 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
     expect(relayAdmissionSet({ candidate: rev1, pinned, at: new Date(rev1.validUntil), schemaValid }).ok).toBe(true);
     const after = new Date(Date.parse(rev1.validUntil) + 1000);
     expect(relayAdmissionSet({ held: rev1, pinned, at: after, schemaValid })).toEqual({ ok: false, refusal: "expired" });
-    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 1000), schemaValid })).toEqual({ ok: false, refusal: "expired" });
+    // Before its window: 60 s of skew, then not-yet-valid, never `expired` (DEC-0066, CON-017).
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 60_000), schemaValid }).ok).toBe(true);
+    expect(relayAdmissionSet({ held: rev1, pinned, at: new Date(Date.parse(rev1.issuedAt) - 61_000), schemaValid })).toEqual({ ok: false, refusal: "not-yet-valid" });
     expect(relayAdmissionSet({ pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "no-record" });
   });
 

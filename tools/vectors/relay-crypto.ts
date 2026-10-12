@@ -25,7 +25,7 @@ import { P256_CURVE } from "../../src/p256.js";
 import { RELAY_ALG, RELAY_PROTOCOL, relayAuthSigningInput, relayBlobSigningInput, relayRequestHeader } from "../../src/relay.js";
 import { ENVELOPE_SUITE, ENVELOPE_TYPE, envelopeDigest, hpkeSealBase, type SecretEnvelope } from "../../src/secret-envelope.js";
 
-export const VECTOR_FILES = ["fixtures/vectors/relay.json", "fixtures/vectors/secret-envelope.json"] as const;
+export const VECTOR_FILES = ["fixtures/vectors/relay.json", "fixtures/vectors/secret-envelope.json", "fixtures/vectors/estate-record.json"] as const;
 type VectorFile = (typeof VECTOR_FILES)[number];
 type Json = Record<string, unknown>;
 
@@ -124,6 +124,61 @@ function authFrame(over: Json = {}, key: TestKey = MACHINE, signed: { relay?: st
   return { v: 1, type: "auth", id: "a1", protocol: RELAY_PROTOCOL, alg: RELAY_ALG, ...fields, sig: signDeterministic(key.d, input) };
 }
 
+/** A held estate record as a relay holds it after verifying it: only the members relayAdmissionSet reads. */
+function heldRecord(over: Json = {}): Json {
+  const key = (k: TestKey | string) => (typeof k === "string" ? k : Buffer.from(k.octets, "base64").toString("base64"));
+  const machine = (id: string, sig: TestKey | string) => ({ id, deviceKeys: [{ kid: `${id}#sig`, use: "sig", publicKey: key(sig) }] });
+  const edOctets = Buffer.from((ED25519_JWK.x), "base64url").toString("base64");
+  const bad = Buffer.from(MACHINE.octets, "base64");
+  bad[64] = (bad[64] as number) ^ 1;
+  return {
+    schema: "estate-record/1", estate: ESTATE, revision: 4, issuedAt: "2026-10-12T09:00:00Z", validUntil: "2026-11-11T09:00:00Z",
+    machines: [machine("m-a", MACHINE), machine("m-b", GPU), machine("m-c", STRANGER), machine("m-ed", edOctets), machine("m-bad", bad.toString("base64"))],
+    revocations: [], ...over
+  };
+}
+
+function admissionSetCases(): Json[] {
+  const c = (name: string, at: string, expect: Json, over: Json = {}) => ({ name, held: heldRecord(), at, extraRevocations: [], ...over, expect });
+  const excluded = [{ kid: "m-ed#sig", reason: "unsupported-alg" }, { kid: "m-bad#sig", reason: "bad-key" }];
+  const ok = (kids: string[]) => ({ ok: true, revision: 4, kids, excluded });
+  const all = ["m-a#sig", "m-b#sig", "m-c#sig"];
+  return [
+    c("the held record's usable #sig keys, the unusable ones named", "2026-10-13T00:00:00Z", ok(all)),
+    c("a machine the record revokes", "2026-10-13T00:00:00Z", ok(["m-b#sig", "m-c#sig"]), { held: heldRecord({ revocations: [{ kind: "machine", ref: "m-a", revokedAt: "2026-10-12T10:00:00Z" }] }) }),
+    c("a key the record revokes", "2026-10-13T00:00:00Z", ok(["m-a#sig", "m-c#sig"]), { held: heldRecord({ revocations: [{ kind: "device-key", ref: "m-b#sig", revokedAt: "2026-10-12T10:00:00Z" }] }) }),
+    c("a machine a verified delta revokes (extraRevocations)", "2026-10-13T00:00:00Z", ok(["m-b#sig", "m-c#sig"]), { extraRevocations: [{ kind: "machine", ref: "m-a" }] }),
+    c("a key a verified delta revokes (extraRevocations)", "2026-10-13T00:00:00Z", ok(["m-a#sig", "m-b#sig"]), { extraRevocations: [{ kind: "device-key", ref: "m-c#sig" }] }),
+    c("60 s before issuedAt, at the clock skew", "2026-10-12T08:59:00Z", ok(all)),
+    c("61 s before issuedAt", "2026-10-12T08:58:59Z", { ok: false, refusal: "not-yet-valid" }),
+    c("at validUntil", "2026-11-11T09:00:00Z", ok(all)),
+    c("one ms after validUntil", "2026-11-11T09:00:00.001Z", { ok: false, refusal: "expired" }),
+    c("a held window that is not a real date", "2026-10-13T00:00:00Z", { ok: false, refusal: "expired" }, { held: heldRecord({ validUntil: "2026-11-31T09:00:00Z" }) }),
+    c("no record held", "2026-10-13T00:00:00Z", { ok: false, refusal: "no-record" }, { held: null })
+  ];
+}
+
+function relayOriginCases(): Json[] {
+  const c = (name: string, value: string, expect: boolean) => ({ name, value, expect });
+  return [
+    c("an https origin", "https://relay.example", true),
+    c("an https origin with a port", "https://relay.example:8443", true),
+    c("http on 127.0.0.1", "http://127.0.0.1", true),
+    c("http on 127.0.0.1 with a port", "http://127.0.0.1:8787", true),
+    c("http on another 127/8 address", "http://127.255.0.9:8787", true),
+    c("http on [::1] with a port", "http://[::1]:8787", true),
+    c("http on localhost (a name resolves somewhere a literal cannot)", "http://localhost:8787", false),
+    c("http on a public name", "http://relay.example", false),
+    c("http on 128.0.0.1", "http://128.0.0.1:8787", false),
+    c("http on 127.0.0.256", "http://127.0.0.256", false),
+    c("http on a name that starts with 127.0.0.1", "http://127.0.0.1.relay.example", false),
+    c("http on [::2]", "http://[::2]:8787", false),
+    c("http on 0.0.0.0", "http://0.0.0.0:8787", false),
+    c("ws on 127.0.0.1", "ws://127.0.0.1:8787", false),
+    c("http on 127.0.0.1 with a path", "http://127.0.0.1:8787/v1", false)
+  ];
+}
+
 function instantCases(): Json[] {
   const c = (name: string, value: unknown, expect: string | null) => ({ name, value, expect });
   return [
@@ -148,7 +203,9 @@ function instantCases(): Json[] {
 
 function admitCases(): Json[] {
   const frame = authFrame();
-  const context = (over: Json = {}) => ({ relay: RELAY, nonce: NONCE, nonceUsed: false, now: AUTH_NOW, admitted: { [LAPTOP]: MACHINE.jwk }, ...over });
+  // `estate` is the estate of the record this context admits from: admit compares the signed one with it, and with
+  // nothing else; `null` is a context that holds no record.
+  const context = (over: Json = {}) => ({ relay: RELAY, nonce: NONCE, nonceUsed: false, now: AUTH_NOW, estate: ESTATE, admitted: { [LAPTOP]: MACHINE.jwk }, ...over });
   const c = (name: string, f: Json, ctx: Json, expect: Json) => ({ name, frame: f, context: context(ctx), expect });
   const ok = { ok: true, kid: LAPTOP };
   const no = (code: string) => ({ ok: false, code });
@@ -181,7 +238,10 @@ function admitCases(): Json[] {
     c("iat 30 February, validly signed", authFrame({ iat: "2026-02-30T00:00:00Z" }), { now: "2026-03-02T00:00:30Z" }, no("unauthenticated")),
     c("iat 31 April, validly signed", authFrame({ iat: "2026-04-31T12:00:00Z" }), { now: "2026-05-01T12:00:30Z" }, no("unauthenticated")),
     c("iat T24:00:00, validly signed", authFrame({ iat: "2026-10-12T24:00:00Z" }), { now: "2026-10-13T00:00:30Z" }, no("unauthenticated")),
-    c("iat :60 (a leap second), validly signed", authFrame({ iat: "2026-12-31T23:59:60Z" }), { now: "2027-01-01T00:00:30Z" }, no("unauthenticated"))
+    c("iat :60 (a leap second), validly signed", authFrame({ iat: "2026-12-31T23:59:60Z" }), { now: "2027-01-01T00:00:30Z" }, no("unauthenticated")),
+    // CON-010 / CX-22: the signed estate is compared with the context's held record inside admit, and is one answer.
+    c("a valid signature over another estate", authFrame({ estate: "urn:fabric:estate:other" }), {}, no("unauthenticated")),
+    c("a context that holds no record", frame, { estate: null, admitted: {} }, no("unauthenticated"))
   ];
 }
 
@@ -362,7 +422,9 @@ function relayVectors(): Json {
       relay: BLOB_RELAY, digest: BLOB_DIGEST, now: BLOB_NOW, cases: blobRequestCases()
     },
     instant: { about: "instant(value): RFC 3339 UTC (Z only, at most nine fraction digits) on a day that exists, as an ISO string with milliseconds, or null (DEC-0066).", cases: instantCases() },
-    admit: { about: "admit(frame, context) (DEC-0047 item 4).", cases: admitCases() },
+    relayOrigin: { about: "isRelayOrigin(value): what hello.relay may be (DEC-0066): https, or http on a loopback literal (127.0.0.0/8, [::1]) for a relay on this machine; never a name such as localhost.", cases: relayOriginCases() },
+    admissionSet: { about: "relayAdmissionSet({held, at, extraRevocations}) over a record the relay already verified and holds (no candidate, so no schema check runs): kids is the set's keys, sorted (DEC-0047 item 4, DEC-0066).", cases: admissionSetCases() },
+    admit: { about: "admit(frame, context) (DEC-0047 item 4, DEC-0066): context.estate is the estate of the record the context admits from.", cases: admitCases() },
     messageBody: { about: "verifyMessageBody(body, {from: frame.from, msgId: frame.msgId, to: self}, senders, now) (DEC-0047 item 5, DEC-0066): `frame` is the deliver frame, `self` the recipient's own #sig.", cases: messageBodyCases() },
     replay: { about: "checkReplay(seen, payload, now) after verifyMessageBody (DEC-0066): steps run in order against one recipient's store of accepted (from, msgId), which an accepted step adds to.", cases: replayCases() }
   };
@@ -475,13 +537,49 @@ function envelopeVectors(): Json {
   };
 }
 
+// ---- estate-record.json: the issuedAt skew (DEC-0066) -------------------------------------------------------------
+
+/**
+ * The estate-record vectors are passkey-signed elsewhere; this generator owns only the cases at the issuedAt boundary,
+ * which reuse already-signed records at other verifier times. It replaces those cases in the committed file and keeps
+ * every other case as it is.
+ */
+const SKEW_ANCHOR = "checked at the instant it was issued (EdDSA, re-signed revision 1)";
+function estateRecordVectors(committed: Json): Json {
+  const cases = committed.cases as Json[];
+  const find = (name: string) => {
+    const found = cases.find((entry) => entry.name === name);
+    if (!found) throw new Error(`estate-record.json has no case ${name}`);
+    return found;
+  };
+  const es = find("revision 1, signed by the passkey the machine pinned at enrollment (ES256)");
+  const ed = find(SKEW_ANCHOR);
+  const before = (entry: Json, ms: number) => ({ ...(entry.trust as Json), at: new Date(Date.parse((entry.record as Json).issuedAt as string) - ms).toISOString() });
+  const notYet = { ok: false, problem: "not-yet-valid" };
+  const managed = [
+    { name: "checked one millisecond before it was issued", record: ed.record, trust: before(ed, 1), expected: ed.expected },
+    { name: "checked 60 s before it was issued, at the clock skew", record: ed.record, trust: before(ed, 60_000), expected: ed.expected },
+    { name: "checked 60 s and one millisecond before it was issued", record: ed.record, trust: before(ed, 60_001), expected: notYet },
+    { name: "checked before it was issued", record: es.record, trust: before(es, 61_000), expected: notYet }
+  ];
+  const names = new Set(managed.map((entry) => entry.name));
+  const kept = cases.filter((entry) => !names.has(entry.name as string));
+  const at = kept.findIndex((entry) => entry.name === SKEW_ANCHOR) + 1;
+  return { ...committed, cases: [...kept.slice(0, at), ...managed, ...kept.slice(at)] };
+}
+
 // ---- Output -------------------------------------------------------------------------------------------------------
 
 const text = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
 
 /** What `--write` writes: each vector file's exact text, by its path in the repository. */
 export function buildVectorFiles(): Record<VectorFile, string> {
-  return { "fixtures/vectors/relay.json": text(relayVectors()), "fixtures/vectors/secret-envelope.json": text(envelopeVectors()) };
+  const estate = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/estate-record.json"), "utf8")) as Json;
+  return {
+    "fixtures/vectors/relay.json": text(relayVectors()),
+    "fixtures/vectors/secret-envelope.json": text(envelopeVectors()),
+    "fixtures/vectors/estate-record.json": text(estateRecordVectors(estate))
+  };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

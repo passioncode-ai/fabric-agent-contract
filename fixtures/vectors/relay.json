@@ -1081,8 +1081,916 @@
       }
     ]
   },
+  "relayOrigin": {
+    "about": "isRelayOrigin(value): what hello.relay may be (DEC-0066): https, or http on a loopback literal (127.0.0.0/8, [::1]) for a relay on this machine; never a name such as localhost.",
+    "cases": [
+      {
+        "name": "an https origin",
+        "value": "https://relay.example",
+        "expect": true
+      },
+      {
+        "name": "an https origin with a port",
+        "value": "https://relay.example:8443",
+        "expect": true
+      },
+      {
+        "name": "http on 127.0.0.1",
+        "value": "http://127.0.0.1",
+        "expect": true
+      },
+      {
+        "name": "http on 127.0.0.1 with a port",
+        "value": "http://127.0.0.1:8787",
+        "expect": true
+      },
+      {
+        "name": "http on another 127/8 address",
+        "value": "http://127.255.0.9:8787",
+        "expect": true
+      },
+      {
+        "name": "http on [::1] with a port",
+        "value": "http://[::1]:8787",
+        "expect": true
+      },
+      {
+        "name": "http on localhost (a name resolves somewhere a literal cannot)",
+        "value": "http://localhost:8787",
+        "expect": false
+      },
+      {
+        "name": "http on a public name",
+        "value": "http://relay.example",
+        "expect": false
+      },
+      {
+        "name": "http on 128.0.0.1",
+        "value": "http://128.0.0.1:8787",
+        "expect": false
+      },
+      {
+        "name": "http on 127.0.0.256",
+        "value": "http://127.0.0.256",
+        "expect": false
+      },
+      {
+        "name": "http on a name that starts with 127.0.0.1",
+        "value": "http://127.0.0.1.relay.example",
+        "expect": false
+      },
+      {
+        "name": "http on [::2]",
+        "value": "http://[::2]:8787",
+        "expect": false
+      },
+      {
+        "name": "http on 0.0.0.0",
+        "value": "http://0.0.0.0:8787",
+        "expect": false
+      },
+      {
+        "name": "ws on 127.0.0.1",
+        "value": "ws://127.0.0.1:8787",
+        "expect": false
+      },
+      {
+        "name": "http on 127.0.0.1 with a path",
+        "value": "http://127.0.0.1:8787/v1",
+        "expect": false
+      }
+    ]
+  },
+  "admissionSet": {
+    "about": "relayAdmissionSet({held, at, extraRevocations}) over a record the relay already verified and holds (no candidate, so no schema check runs): kids is the set's keys, sorted (DEC-0047 item 4, DEC-0066).",
+    "cases": [
+      {
+        "name": "the held record's usable #sig keys, the unusable ones named",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-a#sig",
+            "m-b#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "a machine the record revokes",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "machine",
+              "ref": "m-a",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-b#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "a key the record revokes",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "device-key",
+              "ref": "m-b#sig",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-a#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "a machine a verified delta revokes (extraRevocations)",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [
+          {
+            "kind": "machine",
+            "ref": "m-a"
+          }
+        ],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-b#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "a key a verified delta revokes (extraRevocations)",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [
+          {
+            "kind": "device-key",
+            "ref": "m-c#sig"
+          }
+        ],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-a#sig",
+            "m-b#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "60 s before issuedAt, at the clock skew",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-12T08:59:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-a#sig",
+            "m-b#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "61 s before issuedAt",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-12T08:58:59Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": false,
+          "refusal": "not-yet-valid"
+        }
+      },
+      {
+        "name": "at validUntil",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-11-11T09:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": true,
+          "revision": 4,
+          "kids": [
+            "m-a#sig",
+            "m-b#sig",
+            "m-c#sig"
+          ],
+          "excluded": [
+            {
+              "kid": "m-ed#sig",
+              "reason": "unsupported-alg"
+            },
+            {
+              "kid": "m-bad#sig",
+              "reason": "bad-key"
+            }
+          ]
+        }
+      },
+      {
+        "name": "one ms after validUntil",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-11-11T09:00:00.001Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": false,
+          "refusal": "expired"
+        }
+      },
+      {
+        "name": "a held window that is not a real date",
+        "held": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-31T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "publicKey": "BCYA3QkIU0zqwV6Hr+8GPu7JWe2TTFd14A0q2pnBOgkKUka6mYokNqjyUwPFgPDD5H186lAkDRpfscuOsSuKs1g="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "publicKey": "BIMFEyCsajunMxvIj3PISmu6gR4nHhZnvSXzx8rMq1pCo2Cx8W6NHZti1GaJH4yF4DIC434QFxgKa6HC53FfD4c="
+                }
+              ]
+            },
+            {
+              "id": "m-ed",
+              "deviceKeys": [
+                {
+                  "kid": "m-ed#sig",
+                  "use": "sig",
+                  "publicKey": "YfRakzBwmwI8lrSJ3wh6R8cmJivoFaKiJX6sEvonkaE="
+                }
+              ]
+            },
+            {
+              "id": "m-bad",
+              "deviceKeys": [
+                {
+                  "kid": "m-bad#sig",
+                  "use": "sig",
+                  "publicKey": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr8="
+                }
+              ]
+            }
+          ],
+          "revocations": []
+        },
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": false,
+          "refusal": "expired"
+        }
+      },
+      {
+        "name": "no record held",
+        "held": null,
+        "at": "2026-10-13T00:00:00Z",
+        "extraRevocations": [],
+        "expect": {
+          "ok": false,
+          "refusal": "no-record"
+        }
+      }
+    ]
+  },
   "admit": {
-    "about": "admit(frame, context) (DEC-0047 item 4).",
+    "about": "admit(frame, context) (DEC-0047 item 4, DEC-0066): context.estate is the estate of the record the context admits from.",
     "cases": [
       {
         "name": "the vector machine, key as a JWK",
@@ -1102,6 +2010,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1134,6 +2043,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": "BNI1c/ZQwrVmYv0twkTeM2yhRRwjoMmFLOktaK4T2QXstG8aL8I3BpbUyDNjQvJ4WhTSJmLT+TZjBgDAH16lCr4="
           }
@@ -1161,6 +2071,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:01:00Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1193,6 +2104,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-11T23:59:00Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1225,6 +2137,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1257,6 +2170,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1288,6 +2202,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1320,6 +2235,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1352,6 +2268,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1384,6 +2301,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": true,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1416,6 +2334,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:01:01Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1448,6 +2367,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-11T23:58:59Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1480,6 +2400,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1512,6 +2433,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1544,6 +2466,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {}
         },
         "expect": {
@@ -1569,6 +2492,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1601,6 +2525,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "OKP",
@@ -1632,6 +2557,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1664,6 +2590,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1696,6 +2623,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1728,6 +2656,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1760,6 +2689,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1792,6 +2722,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-03-02T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1824,6 +2755,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-05-01T12:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1856,6 +2788,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2026-10-13T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1888,6 +2821,7 @@
           "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
           "nonceUsed": false,
           "now": "2027-01-01T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
           "admitted": {
             "urn:fabric:machine:example-laptop#sig": {
               "kty": "EC",
@@ -1896,6 +2830,65 @@
               "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
             }
           }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a valid signature over another estate",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:other",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:00:00Z",
+          "sig": "7wcq2-jF48yl8qoNtLLlzPABUQL4eKv3ok869xmFlp55KpQQ9-0dHAPufF3daVhCT6AeUOeSd7Pa77DLYR0MxA"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:30Z",
+          "estate": "urn:fabric:estate:example",
+          "admitted": {
+            "urn:fabric:machine:example-laptop#sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "0jVz9lDCtWZi_S3CRN4zbKFFHCOgyYUs6S1orhPZBew",
+              "y": "tG8aL8I3BpbUyDNjQvJ4WhTSJmLT-TZjBgDAH16lCr4"
+            }
+          }
+        },
+        "expect": {
+          "ok": false,
+          "code": "unauthenticated"
+        }
+      },
+      {
+        "name": "a context that holds no record",
+        "frame": {
+          "v": 1,
+          "type": "auth",
+          "id": "a1",
+          "protocol": "fabric-relay/0.1",
+          "alg": "ES256",
+          "estate": "urn:fabric:estate:example",
+          "kid": "urn:fabric:machine:example-laptop#sig",
+          "iat": "2026-10-12T00:00:00Z",
+          "sig": "RJbXBOyiw81mI0J2SKA1eKL9hkIbqNwrkwBS55NXsNkGAgHZbKDKDW1CLBM5E-Ywq896Ow4Z9wSukv_rB87Xyg"
+        },
+        "context": {
+          "relay": "https://relay.example",
+          "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+          "nonceUsed": false,
+          "now": "2026-10-12T00:00:30Z",
+          "estate": null,
+          "admitted": {}
         },
         "expect": {
           "ok": false,
