@@ -46,6 +46,17 @@ describe("FAC-SEM-025: calls by project and task run", () => {
     expect(paths(rows([project, { ...project, calls: 0, costUsd: 0, taskRuns: [] }]))).toEqual(["FAC-SEM-025 /byProject/1/projectId"]);
     expect(paths(rows([{ ...project, taskRuns: [project.taskRuns[0], { ...project.taskRuns[1], taskRunId: project.taskRuns[0].taskRunId }] }]))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns/1/taskRunId"]);
   });
+  it("DEC-0076: refuses two spellings of one project, naming the second, and keeps significant differences apart", () => {
+    const id = String(project.projectId);
+    const spelled = id.replace(/^urn:/i, "URN:");
+    expect(spelled).not.toBe(id);
+    const second = { ...project, projectId: spelled, calls: 0, costUsd: 0, taskRuns: [] };
+    const findings = evaluateSemanticRules("service-usage", rows([project, second]));
+    expect(findings.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual(["FAC-SEM-025 /byProject/1/projectId"]);
+    expect(findings[0]?.message).toBe(`each project is one row: ${spelled} names the project ${id} already names`);
+    expect(paths(rows([project, { ...second, projectId: `${id}-other` }]))).toEqual([]);
+    expect(paths(rows([{ ...project, projectId: 7 }, { ...second, projectId: 7 }]))).toEqual([]);
+  });
   it("lets one task run id appear under two projects", () => {
     const other = { projectId: "urn:project:other", calls: 2, unpricedCalls: 0, costUsd: 0.1, taskRuns: [{ ...project.taskRuns[0], calls: 2, costUsd: 0.1 }] };
     expect(paths(rows([project, other]))).toEqual([]);

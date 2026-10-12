@@ -1,13 +1,17 @@
 // #region route-rules — docs: docs/specification/runners.md#runner-routes
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 
 const candidates = (value: JsonObject) => (Array.isArray(value.candidates) ? value.candidates.filter(isObject) : []);
 const objectAt = (value: JsonObject, key: string): JsonObject => {
   const found = value[key];
   return isObject(found) ? found : {};
 };
-/** A revision reference compared whole: id, revision and content hash. Two revisions that share an id and a number but not a hash are two different objects. */
-const refKey = (ref: unknown) => (isObject(ref) ? `${String(ref.id)}@${String(ref.revision)}#${String(ref.contentHash)}` : "");
+/**
+ * A revision reference compared whole: id, revision and content hash. Two revisions that share an id and a number but
+ * not a hash are two different objects. The id is an identifier, so it enters the key in its normal form (DEC-0076).
+ */
+const refKey = (ref: unknown) => (isObject(ref) ? `${String(normalIdentifier(ref.id) ?? ref.id)}@${String(ref.revision)}#${String(ref.contentHash)}` : "");
 const sameRef = (a: unknown, b: unknown) => refKey(a) !== "" && refKey(a) === refKey(b);
 
 /**
@@ -54,7 +58,7 @@ function routeBundle(value: JsonObject): Finding[] {
   const admissions = Array.isArray(value.admissions) ? value.admissions.filter(isObject) : [];
   const admitted = new Set(
     admissions
-      .filter((admission) => admission.state === "admitted" && admission.capability === route.capability)
+      .filter((admission) => admission.state === "admitted" && sameIdentifier(admission.capability, route.capability))
       .map((admission) => refKey(admission.provider))
   );
   const findings: Finding[] = [];
@@ -70,8 +74,8 @@ function routeBundle(value: JsonObject): Finding[] {
 function bindingAgreement(binding: JsonObject, route: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const disagree = (path: string, message: string) => findings.push({ code: "FAC-SEM-032", instancePath: `/binding/${path}`, message });
-  if (binding.project !== route.project) disagree("project", `the binding is for ${String(binding.project)}, the route for ${String(route.project)}`);
-  if (binding.capability !== route.capability) disagree("capability", `the binding binds ${String(binding.capability)}, the route orders ${String(route.capability)}`);
+  if (!sameIdentifier(binding.project, route.project)) disagree("project", `the binding is for ${String(binding.project)}, the route for ${String(route.project)}`);
+  if (!sameIdentifier(binding.capability, route.capability)) disagree("capability", `the binding binds ${String(binding.capability)}, the route orders ${String(route.capability)}`);
   if (binding.profileKind !== "local-runner") disagree("profileKind", `a runner route serves the local-runner profile, not ${String(binding.profileKind)}`);
   if (!candidates(route).some((candidate) => sameRef(candidate.provider, binding.provider))) disagree("provider", `the binding's provider ${refKey(binding.provider)} is not a candidate of the route`);
   if (binding.runnerRoute !== undefined && !sameRef(binding.runnerRoute, route.meta)) disagree("runnerRoute", `the binding pins ${refKey(binding.runnerRoute)}, not this route ${refKey(route.meta)}`);
@@ -112,8 +116,8 @@ function routeEvent(value: JsonObject): Finding[] {
   const wrong = (path: string, message: string) => findings.push({ code: "FAC-SEM-034", instancePath: `/event${path}`, message });
 
   if (!sameRef(event.route, route.meta)) wrong("/route", `the event names route ${refKey(event.route)}, not ${refKey(route.meta)}`);
-  if (event.project !== route.project) wrong("/project", `the event is for ${String(event.project)}, the route for ${String(route.project)}`);
-  if (event.capability !== route.capability) wrong("/capability", `the event names ${String(event.capability)}, the route orders ${String(route.capability)}`);
+  if (!sameIdentifier(event.project, route.project)) wrong("/project", `the event is for ${String(event.project)}, the route for ${String(route.project)}`);
+  if (!sameIdentifier(event.capability, route.capability)) wrong("/capability", `the event names ${String(event.capability)}, the route orders ${String(route.capability)}`);
 
   const indexOf = (ref: JsonObject) => (typeof ref.index === "number" && Number.isInteger(ref.index) ? ref.index : -1);
   const candidateAt = (ref: JsonObject, path: string): JsonObject | undefined => {

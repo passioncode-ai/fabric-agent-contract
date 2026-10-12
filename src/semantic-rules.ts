@@ -1,5 +1,6 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { coreRules } from "./core-rules.js";
+import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 import { usageRules } from "./usage-rules.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
@@ -95,7 +96,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     const pool = isObject(value.pool) && Array.isArray(value.pool.accounts) ? value.pool.accounts : [];
     const selected = isObject(value.context) ? value.context.selectedAccount : undefined;
     const refs = pool.filter(isObject).map((item) => item.accountRef);
-    if (selected !== undefined && !refs.includes(selected)) findings.push({ code: "FAC-SEM-002", instancePath: "/context/selectedAccount", message: "selected account is outside the pinned project pool" });
+    // Account references compare by normal form (DEC-0076).
+    if (selected !== undefined && !refs.some((ref) => sameIdentifier(ref, selected))) findings.push({ code: "FAC-SEM-002", instancePath: "/context/selectedAccount", message: "selected account is outside the pinned project pool" });
   }
   if (kind === "learning" && value.selfApply !== false) findings.push({ code: "FAC-SEM-003", instancePath: "/selfApply", message: "learning proposal cannot apply itself" });
   if (kind === "promotion") {
@@ -107,11 +109,20 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     const ceos = active.filter((item) => item.role === "ceo");
     if (ceos.length !== 1) findings.push({ code: "FAC-SEM-005", instancePath: "/assignments", message: "estate requires exactly one active CEO" });
     // Every project any active assignment scopes needs its one product manager (F-A-004, DEC-0064): a project with
-    // developers and no manager is found, not skipped.
-    const projects = new Set(active.filter((item) => isObject(item.scope) && (item.scope as JsonObject).project !== undefined).map((item) => (item.scope as JsonObject).project));
-    for (const project of projects) {
-      const managers = active.filter((item) => item.role === "product-manager" && isObject(item.scope) && item.scope.project === project);
-      if (managers.length !== 1) findings.push({ code: "FAC-SEM-006", instancePath: "/assignments", message: `project ${String(project)} requires exactly one active product manager` });
+    // developers and no manager is found, not skipped. Two spellings of one project id are one project (DEC-0076).
+    // A project that is not a string (schema-invalid) is still a project, keyed by itself as before.
+    const scoped = (item: JsonObject): unknown => {
+      const project = isObject(item.scope) ? item.scope.project : undefined;
+      return typeof project === "string" ? normalIdentifier(project) : project;
+    };
+    const projects = new Map<unknown, unknown>();
+    for (const item of active) {
+      const project = scoped(item);
+      if (project !== undefined && !projects.has(project)) projects.set(project, (item.scope as JsonObject).project);
+    }
+    for (const [project, spelling] of projects) {
+      const managers = active.filter((item) => item.role === "product-manager" && scoped(item) === project);
+      if (managers.length !== 1) findings.push({ code: "FAC-SEM-006", instancePath: "/assignments", message: `project ${String(spelling)} requires exactly one active product manager` });
     }
   }
   if (kind === "coordination" && value.kind === "renew" && value.claim === undefined) findings.push({ code: "FAC-SEM-007", instancePath: "/claim", message: "renew requires a claim reference" });

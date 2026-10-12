@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { sameIdentifier } from "./identifiers.js";
 import { strictTime } from "./rfc3339.js";
 
 // #region core-rules — docs: docs/specification/results-and-evidence.md, governance-and-roles.md, versioning.md
@@ -44,16 +45,19 @@ function resultIntegrity(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** FAC-SEM-094: an approved learning proposal or promotion names its approver, who is not its author. */
+/**
+ * FAC-SEM-094: an approved learning proposal or promotion names its approver, who is not its author — compared by
+ * normal form (DEC-0076), so another spelling of the author's own id (`AGENT:x` for `agent:x`) is still the author.
+ */
 function approvalSeparation(value: JsonObject): Finding[] {
   if (value.state !== "approved") return [];
   const author = isObject(value.meta) ? value.meta.createdBy : undefined;
   if (!isString(value.approvedBy)) return [{ code: "FAC-SEM-094", instancePath: "/approvedBy", message: "an approved record names who approved it" }];
-  if (value.approvedBy === author) return [{ code: "FAC-SEM-094", instancePath: "/approvedBy", message: "the author of a learning proposal or a promotion never approves it" }];
+  if (sameIdentifier(value.approvedBy, author)) return [{ code: "FAC-SEM-094", instancePath: "/approvedBy", message: "the author of a learning proposal or a promotion never approves it" }];
   return [];
 }
 
-/** FAC-SEM-096: a rollback names an earlier revision of the same setting, and every parent is earlier. */
+/** FAC-SEM-096: a rollback names an earlier revision of the same setting (its id compared by normal form, DEC-0076), and every parent is earlier. */
 function rollback(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const meta = isObject(value.meta) ? value.meta : {};
@@ -61,7 +65,7 @@ function rollback(value: JsonObject): Finding[] {
   if (value.rollbackBasis !== undefined) {
     const basis = value.rollbackBasis;
     const basisRevision = revisionOf(basis);
-    if (!isObject(basis) || basis.id !== meta.id) findings.push({ code: "FAC-SEM-096", instancePath: "/rollbackBasis/id", message: "a rollback returns to a revision of the same setting" });
+    if (!isObject(basis) || !sameIdentifier(basis.id, meta.id)) findings.push({ code: "FAC-SEM-096", instancePath: "/rollbackBasis/id", message: "a rollback returns to a revision of the same setting" });
     if (own === undefined || basisRevision === undefined || basisRevision >= own) findings.push({ code: "FAC-SEM-096", instancePath: "/rollbackBasis/revision", message: "a rollback returns to an earlier revision" });
   }
   list(value.parents).forEach((parent, index) => {
