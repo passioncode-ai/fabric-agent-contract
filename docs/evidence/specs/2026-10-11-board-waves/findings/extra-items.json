@@ -159,7 +159,7 @@
     "id": "CT-22",
     "title": "`degraded[].setup: true` in the service well-known: a state that needs a person to finish setup, not an outage; watchers do not alert on it",
     "source": "fabric-workspace knowledge/authority.md 'Telling the operator about outages' (operator decision 2026-10-11); fabric-workspace session message",
-    "status_measured": "requested 2026-10-11; first consumers Copylot and Fabric Dashboards (FD-48)",
+    "status_measured": "requested 2026-10-11; first consumers Example Console and Fabric Dashboards (FD-48)",
     "area": "schema",
     "severity": "major",
     "owner": "contract",

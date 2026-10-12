@@ -362,7 +362,7 @@
       "decision": "DEC-0025",
       "closable_in_one_pass": true,
       "needs": "",
-      "evidence": "Next task: 'after merge, add the LC-16 pointer in fabric-workspace to docs/specification/service.md#settings-backup'. In /Users/sshlg/DATA/fabric-workspace (b04b083, 2026-10-10), knowledge/lifecycle.md:37 defines LC-16 as 'Every installed copy updates itself'. `grep -rln settings-backup knowledge` finds only roadmap.md:62 (an FAA-13 mention).",
+      "evidence": "Next task: 'after merge, add the LC-16 pointer in fabric-workspace to docs/specification/service.md#settings-backup'. In <workspace>/fabric-workspace (b04b083, 2026-10-10), knowledge/lifecycle.md:37 defines LC-16 as 'Every installed copy updates itself'. `grep -rln settings-backup knowledge` finds only roadmap.md:62 (an FAA-13 mention).",
       "proposed_fix": "Add a lifecycle row in fabric-workspace knowledge/lifecycle.md linking service.md#settings-backup at the merge commit, under a new id rather than LC-16. Or record in this repo's backlog that the pointer was dropped.",
       "file": "audit-dec-0001-0029.json",
       "node": "N03-board",
@@ -570,7 +570,7 @@
     {
       "id": "F-D-021",
       "title": "Obsidian project card is a stale navigation stub",
-      "source": "/Users/sshlg/DATA/obsidian-memory-vault/sshlg-projects-vault/projects/fabric-agent-contract/fabric-agent-contract.md",
+      "source": "<workspace>/<the operator's projects wiki>/projects/fabric-agent-contract/fabric-agent-contract.md",
       "status": "stale",
       "area": "wiki",
       "severity": "low",
@@ -588,7 +588,7 @@
     {
       "id": "F-D-022",
       "title": "agent-estate.md names an old normative contract commit",
-      "source": "/Users/sshlg/DATA/obsidian-memory-vault/sshlg-projects-vault/synthesis/agent-estate.md:103-106",
+      "source": "<workspace>/<the operator's projects wiki>/synthesis/agent-estate.md:103-106",
       "status": "stale",
       "area": "wiki",
       "severity": "low",
@@ -1691,7 +1691,7 @@
     },
     {
       "id": "J-ENV / AL-01 / AS-01c / access-log/1",
-      "title": "Activity event envelope, receiver-built activity-summary/1 without people, access-log/1",
+      "title": "Activity event envelope, receiver-built activity-summary/1 without persons, access-log/1",
       "source": "fabric-workspace knowledge/plans.md:58; split README:279-288",
       "status": "done (residual optional)",
       "area": "OPEN",
@@ -2514,8 +2514,8 @@
       "decision": "DEC-0023",
       "closable_in_one_pass": false,
       "needs": "Consumer owners: Observatory must repin to a commit with memory/0.1 (PB-137 N-025). Recording adoption needs each consumer's published pin, not local checkouts.",
-      "evidence": "Local fabric-contract.lock.json pins: project-observatory 20a818e (2026-08-27, before DEC-0023's memory/0.1 of 2026-10-04); asset-foundry 94b1829 (DEC-0027); cmo-creative-agent 058fb78 (DEC-0029); fabric-agent-adapter, copylot-agent, frame-agent 23f9fda (DEC-0024); webpilot d4c8831. The workspace roadmap (fabric-workspace knowledge/roadmap.md:62) says the adapter released pin 623bf61. Local checkouts may lag origin.",
-      "proposed_fix": "Annotate each Status with the measured adopting pins (from origin), e.g. 'adopted by asset-foundry @94b1829'. Track the Observatory repin as a backlog row.",
+      "evidence": "Local fabric-contract.lock.json pins: project-observatory 20a818e (2026-08-27, before DEC-0023's memory/0.1 of 2026-10-04); a-private-media-agent 94b1829 (DEC-0027); a-private-agent 058fb78 (DEC-0029); fabric-agent-adapter, a-private-agent, a-private-agent 23f9fda (DEC-0024); a-private-agent d4c8831. The workspace roadmap (fabric-workspace knowledge/roadmap.md:62) says the adapter released pin 623bf61. Local checkouts may lag origin.",
+      "proposed_fix": "Annotate each Status with the measured adopting pins (from origin), e.g. 'adopted by a-private-media-agent @94b1829'. Track the Observatory repin as a backlog row.",
       "file": "audit-dec-0001-0029.json",
       "node": "N11-interop-usage",
       "wave": 5,
@@ -2601,7 +2601,7 @@
         "only Fabric writes insights, rule proposals and rules (ADR-0109)",
         "free text passes FAC-SEM-037 and a secret scanner (fixtures with a planted path and key)",
         "explicitly drop the DEC-0023 reserve memory.learning.propose (fabric-agent-contract docs/DECISIONS.md:392, 425; schemas/memory-capability.schema.json:33; memory-and-learning.md:339)",
-        "keep out (PRIVATE): type modernization, OM* metrics, payload people counts and smallGroup (J3)"
+        "keep out (PRIVATE): type modernization, OM* metrics, payload persons counts and smallGroup (J3)"
       ],
       "file": "owed-decisions.json",
       "node": "N12-org-edition",
@@ -2849,7 +2849,7 @@
         "person-work-aggregate/1 (HPKE-encrypted to module and person keys)",
         "consent-record/1 (subject, purpose, scope, notice version, given, withdrawn)",
         "connector event kinds issue.*, pr.*, commit.pushed, message.posted, meeting.held, survey.answer, interview.note, person.erased, collection.gap",
-        "fabric-proposal/1 type modernization and OM* metrics; proposal payload people counts and smallGroup",
+        "fabric-proposal/1 type modernization and OM* metrics; proposal payload persons counts and smallGroup",
         "job.run collector payload (collector.run {engagement_id, sources[]})",
         "team.id, process.id, person.id mapping (J-IDMAP), thresholds {team: 5, manager_cut: 10}, small-group consent mode (J3)",
         "site assessment.* fields and estimate/2"

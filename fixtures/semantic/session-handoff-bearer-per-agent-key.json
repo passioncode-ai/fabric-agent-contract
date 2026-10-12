@@ -7,7 +7,7 @@
   "writtenAt": "2026-10-11T12:00:00Z",
   "lifetime": {
     "kind": "agent-key",
-    "agentKey": "copylot.default"
+    "agentKey": "example-console.default"
   },
   "files": [
     "context.md",

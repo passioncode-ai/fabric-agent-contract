@@ -11,7 +11,7 @@ Read this page, then your packet, then the files it names.
 - **Disk.** The machine's disk is nearly full and fluctuates to zero. Do not run `pnpm install` and do not
   copy the repository.
   - Link the main checkout's dependencies with
-    `ln -sfn /Users/sshlg/DATA/fabric-agent-contract/node_modules node_modules`.
+    `ln -sfn <workspace>/fabric-agent-contract/node_modules node_modules`.
   - Run the gate's parts directly: `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`,
     `python3 docs/ux/lint.py`, `./node_modules/.bin/tsx src/docs-check.ts`,
     `./node_modules/.bin/markdownlint-cli2 $(git ls-files '*.md')`. pnpm's wrapper refuses a linked
@@ -20,7 +20,7 @@ Read this page, then your packet, then the files it names.
 - **Registers.** `docs/DECISIONS.md`, `docs/OPEN_QUESTIONS.md`, `docs/backlog.md`, `docs/backlog-sources.json`
   and `docs/specification/conformance.md` are guarded.
   - Take a lease before the first edit with
-    `python3 /Users/sshlg/.claude/plugins/cache/agent-sync/agent-sync/1.21.7/skills/agent-sync/scripts/agent_sync.py acquire <path>`,
+    `python3 <agent-sync scripts>/agent_sync.py acquire <path>`,
     and release it on every path.
   - Reserve ids with `… reserve DEC` / `… reserve SEM`; never by hand.
   - `DECISIONS.md` is append-only: a status annotation or an erratum line is allowed, never a rewrite of

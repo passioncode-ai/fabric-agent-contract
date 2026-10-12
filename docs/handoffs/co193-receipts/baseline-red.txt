@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 /Users/sshlg/DATA/_worktrees/fabric-agent-contract-co193-20261004
+ RUN  v4.1.11 <workspace>/_worktrees/fabric-agent-contract-co193-20261004
 
  ❯ test/capability-names.test.ts (77 tests | 17 failed) 80ms
      × accepts product tool name read_message 6ms

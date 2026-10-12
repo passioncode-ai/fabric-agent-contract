@@ -7,7 +7,7 @@
   "writtenAt": "2026-10-11T12:00:00Z",
   "lifetime": {
     "kind": "agent-key",
-    "agentKey": "copylot.default"
+    "agentKey": "example-console.default"
   },
   "files": [
     "context.md",
@@ -18,17 +18,17 @@
     "server": "fabric-dashboards",
     "tool": "service_context",
     "arguments": {
-      "key": "copylot.default"
+      "key": "example-console.default"
     }
   },
-  "preamble": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said.",
+  "preamble": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key example-console.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said.",
   "mcp": {
     "auth": "none",
     "strict": false
   },
   "brief": {
     "delivery": "inline",
-    "text": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+    "text": "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key example-console.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
   },
   "launch": {
     "runtime": "codex",
@@ -37,7 +37,7 @@
       "mcp_servers.fabric-dashboards.command=\"/Applications/Fabric Dashboards.app/Contents/MacOS/fabric-dashboards-mcp\"",
       "-c",
       "mcp_servers.fabric-dashboards.args=[]",
-      "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key copylot.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
+      "You are working on a Fabric agent, opened from Fabric Dashboards. Call the fabric-dashboards tool service_context with key example-console.default before you do anything else: it returns the agent's live state, its errors, events, repository and descriptor, and the rules for this console. If the call fails, say so and stop rather than guessing what it would have said."
     ],
     "env": {}
   }

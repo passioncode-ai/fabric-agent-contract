@@ -31,7 +31,7 @@ in a declared command line (LC-21).
 
 - Receipts for CT-22…CT-24 on the board and in `findings/closed.json` once the pull request merges (the owner
   session records them with the merge commit, as in wave 1).
-- Consumers: Fabric Dashboards' watcher (FD-48) skips `setup: true`; Copylot marks its `execution` source `setup`;
+- Consumers: Fabric Dashboards' watcher (FD-48) skips `setup: true`; Example Console marks its `execution` source `setup`;
   Fabric starts a provider entry's stdio server by `scope`; the adapter checks Claude Code plugin configurations
   against LC-19 and LC-21 (its own row) and may import `src/secret-shape.ts`.
 - `runners.md` (P2-04's this wave) may point at `FAC-SEM-057` beside its own rules.
@@ -42,4 +42,4 @@ The owner session rebased this branch on `4fdbd79` (P2-01, DEC-0043) and re-ran 
 records CT-22, CT-23 and CT-24 as done with the merge commit. Consumer rows filed on the contract's board: CT-27
 (Fabric's `agentRegistry.ts:236` accepts `run.mcp.stdio.scope`) and CT-28 (the adapter's `fabric_provider.py:119`
 does too, and checks Claude Code plugin configs for session-wide stdio servers), beside FD-48 (Dashboards' watcher
-honours `setup`) and Copylot's well-known emitting `setup` for its configuration state.
+honours `setup`) and Example Console's well-known emitting `setup` for its configuration state.
