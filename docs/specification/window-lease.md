@@ -126,7 +126,8 @@ nothing and decides nothing.
 
 ## The verifier
 
-`verifyWindowLease(lease, {at, machine, estateRecord, remainderUsd, held})` checks, with no network, in this order,
+`verifyWindowLease(lease, {at, machine, estateRecord, remainderUsd, held, estateRevocations})` checks (`estateRevocations`: the
+revocation delta's entries in force, DEC-0062 item 3), with no network, in this order,
 and answers without throwing. `estateRecord` is the record the machine applies, which `verifyEstateRecord` accepted;
 `remainderUsd` is what the record that owns the window still allows this machine — the hub's own `windowRemainder`
 when it checks before signing, and for a meter at most the window's limit it knows (the estate's L0 for the month);
@@ -135,7 +136,7 @@ nothing).
 
 | Row | Problem | When |
 |---|---|---|
-| WL-1 | `context-invalid`, `no-clock` | the context is not an object (first), then the clock is not a readable time (before any comparison, so none runs on NaN), then `machine` is not a string, `estateRecord` not an object, `remainderUsd` not a decimal string or `held` not an object |
+| WL-1 | `context-invalid`, `no-clock` | the context is not an object (first), then the clock is not a readable time (before any comparison, so none runs on NaN), then `machine` is not a string, `estateRecord` not an object, `remainderUsd` not a decimal string, or `held` not an object with a whole `sequence` of 1 or more and a `leaseId` (a corrupt held state never reads as nothing held) |
 | WL-2 | `malformed` | the lease is not an object, its `type` is not `window-lease/1`, a member is missing or one the register does not list is present, an id is not opaque, `sequence` or `estateRevision` is not a positive integer, `scope` is not one of its three forms, `period` is not an instance of `window` that exists, `amount` is not a decimal string, `unit` is not `USD`, a time is not a strict RFC 3339 date-time (`T` or `t`, an offset, a day that exists), `kid` is empty or `sig` is not base64url |
 | WL-3 | `too-long-lived`, `past-window` | `expiresAt` is not after `issuedAt` or is more than 24 hours later; `expiresAt` is after the window instance ends |
 | WL-4 | `unknown-algorithm` | `alg` is not `EdDSA` |

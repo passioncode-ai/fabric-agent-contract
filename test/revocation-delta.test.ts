@@ -183,6 +183,12 @@ describe("what a machine does with them", () => {
     expect(deltaFreshness({ ...accepted.state, broken: true }, trust)).toMatchObject({ answer: "broken", remote: "refuse" });
     const ahead = acceptHeartbeat(applied.state, (vectors.heartbeats as Json[])[1]!.heartbeat, trust);
     expect(deltaFreshness(ahead.state, trust)).toMatchObject({ answer: "behind", remote: "refuse" });
+    // A held heartbeat the machine could not have accepted is refused, never read as "nothing newer held".
+    for (const corrupt of [{ ...heartbeat, sequence: "nine" }, { ...heartbeat, at: "not a time" }, { ...heartbeat, deltaHead: "x" }]) {
+      expect(acceptHeartbeat({ ...accepted.state, heartbeat: corrupt } as DeltaState, (vectors.heartbeats as Json[])[1]!.heartbeat, trust)).toMatchObject({ ok: false, problem: "malformed" });
+    }
+    // An applied sequence that is not a count is behind everything, never caught up.
+    expect(freshnessAnswer({ at: deltaTime(heartbeat.at), applied: { sequence: "3", revision: 1 }, heartbeat, broken: false } as never).answer).toBe("behind");
     // Catching up makes it current again.
     const caught = applyDelta(ahead.state, { head: {}, entries: [e3.entry] }, trust);
     expect(deltaFreshness(caught.state, trust)).toMatchObject({ answer: "current", remote: "accept" });
@@ -300,7 +306,7 @@ describe("tolerance: every verifier answers, never throws", () => {
     expect(freshnessAnswer({ at: AT.getTime(), applied: { sequence: "x", revision: null }, heartbeat: { at: "2026-10-12T11:00:00Z", deltaHead: { sequence: 0 }, estateRecord: { revision: 1 } } }).answer).toBe("behind");
     const hb = (vectors.heartbeats as Json[])[0]!.heartbeat as Json;
     const weird = acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: { ...hb, at: Number.NaN, extra: new Date(0) } as unknown as Json }), hb, trust);
-    expect(weird).toMatchObject({ ok: false, problem: "fork" });
+    expect(weird).toMatchObject({ ok: false, problem: "malformed" });
   });
 });
 
@@ -338,9 +344,11 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
     expect(acceptHeartbeat(state2, { ...hb, ...patch }, trust)).toMatchObject({ ok: false, problem: "malformed" });
   });
 
-  it("reads a held heartbeat without its head or revision as the beginning", () => {
+  it("refuses a held heartbeat without its head or revision: a held state the machine could not have accepted", () => {
     const newer = resign(hb, { sequence: 6 });
-    expect(acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: { sequence: 5, at: "2026-10-12T10:00:00Z" } }), newer, trust)).toMatchObject({ ok: true, newer: true });
+    expect(acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: { sequence: 5, at: "2026-10-12T10:00:00Z" } }), newer, trust)).toMatchObject({ ok: false, problem: "malformed" });
+    // The same newer heartbeat over a well-formed held one moves nothing back, so it is accepted.
+    expect(acceptHeartbeat(held([e1.entry, e2.entry], { heartbeat: hb }), newer, trust)).toMatchObject({ ok: true, newer: true });
   });
 
   it("answers a page entry or record that is not an object", () => {
