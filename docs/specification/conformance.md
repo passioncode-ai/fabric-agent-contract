@@ -285,7 +285,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-096` | `versioned-setting` | [versioning](versioning.md#semantic-rules) | SEM-0096 |
 | `FAC-SEM-097` | `grant-window` | [governance and roles](governance-and-roles.md#semantic-rules) | SEM-0097 |
 | `FAC-SEM-098` | `openrouter-attribution` | [OpenRouter attribution](openrouter-attribution.md#semantic-rules) | SEM-0098 |
-| `FAC-SEM-099` | `protocols` | [versioning](versioning.md#semantic-rules) | SEM-0099 |
+| `FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | [versioning](versioning.md#semantic-rules) | SEM-0099 |
 
 ## Compatibility policy
 
