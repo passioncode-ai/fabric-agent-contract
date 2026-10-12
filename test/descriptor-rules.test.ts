@@ -99,6 +99,12 @@ describe("FAC-SEM-087: what a node placing a service checks of its runner", () =
     for (const runner of SUBSCRIPTION_RUNNERS.keys()) expect(check({ ...own, runner: { kind: runner, credentialKind: "subscription" } }, "subscription"), runner).toEqual([]);
   });
 
+  it("tells a malformed runner kind from one missing in the catalogue, even when the catalogue lists it", () => {
+    const messages = (kind: unknown, entries: unknown) => evaluateSemanticRules("service-runner", { descriptor: { ...peer, runner: { kind, credentialKind: "key" } }, catalogue: entries }).map((finding) => finding.message);
+    expect(messages("Bad Kind", [...catalogue, { kind: "Bad Kind" }])).toContain("the runner kind is not a runner kind's name");
+    expect(messages("absent-kind", catalogue)).toContain("the runner kind is not in the runner catalogue");
+  });
+
   it("never echoes a runner kind missing from the catalogue, since a provider key can match the kind pattern", () => {
     const key = ["sk", "abcdefghijklmnopqrstuvwx12"].join("-");
     const findings = evaluateSemanticRules("service-runner", { descriptor: { ...peer, runner: { kind: key, credentialKind: "key" } }, catalogue });

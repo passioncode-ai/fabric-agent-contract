@@ -37,6 +37,8 @@ export default defineConfig({
         "src/core-rules.ts": { branches: 100 },
         "src/usage-rules.ts": { branches: 100 },
         "src/openrouter-attribution.ts": { branches: 100 },
+        "src/window-lease.ts": { branches: 100 },
+        "src/signing-challenges.ts": { branches: 100 },
         "src/rfc3339.ts": { branches: 100 },
         "src/secret-envelope.ts": { branches: 100 },
         "src/fabric-links.ts": { branches: 97.61 },

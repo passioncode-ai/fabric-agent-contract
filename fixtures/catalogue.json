@@ -11,6 +11,7 @@
   {"name": "coordination", "schema": "coordination.schema.json", "path": "positive/coordination-claim.json", "valid": true},
   {"name": "coordination-reconcile-residue-extension", "schema": "coordination.schema.json", "path": "positive/coordination-reconcile-residue-extension.json", "valid": true},
   {"name": "coordination-residue-unnamespaced", "schema": "coordination.schema.json", "path": "negative/coordination-residue-unnamespaced.json", "valid": false, "keyword": "anyOf"},
+  {"name": "coordination-residue-no-namespace", "schema": "coordination.schema.json", "path": "negative/coordination-residue-no-namespace.json", "valid": false, "keyword": "anyOf"},
   {"name": "versioned-setting-rollback", "schema": "versioned-setting.schema.json", "path": "positive/versioned-setting-rollback.json", "valid": true},
   {"name": "execution-context", "schema": "execution-context.schema.json", "path": "positive/execution-context.json", "valid": true},
   {"name": "governance", "schema": "governance.schema.json", "path": "positive/governance-grant.json", "valid": true},

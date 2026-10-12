@@ -68,6 +68,8 @@ describe("FAC-SEM-025: calls by project and task run", () => {
   it("answers malformed attribution with findings or none, never by throwing", () => {
     expect(() => usageRules({ byProject: [null, 3, { projectId: 5, calls: -1, taskRuns: "x" }, { taskRuns: [null, { taskRunId: 7 }] }] })).not.toThrow();
     expect(usageRules({ byProject: "x", days: "y" })).toEqual([]);
+    const negative = { ...report, byProject: [{ projectId: "urn:project:n", calls: -3, costUsd: 0, taskRuns: [{ taskRunId: "r", calls: 2, costUsd: 0 }] }] };
+    expect(usageRules(negative).map((finding) => finding.instancePath)).toContain("/byProject/0/taskRuns");
   });
   it("reads a day with no date, no model list or a missing total as findings (the arithmetic moved here, DEC-0065)", () => {
     const found = usageRules({ generatedAt: "2026-10-04T00:00:00Z", days: [{ byModel: "x" }, { date: "2026-10-04", byModel: [{ costUsd: 1, calls: 1 }] }] });
