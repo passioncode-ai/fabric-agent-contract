@@ -2,7 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, pathSourceKey } from "../src/activity-rules.js";
+import { createHash } from "node:crypto";
+import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, mergeStreams, pathSourceKey, tenantRef } from "../src/activity-rules.js";
 import { contiguousFrom, mergeRanges, uncovered } from "../src/seq-ranges.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -204,6 +205,39 @@ describe("FAC-SEM-039: event ids, streams and acknowledgements", () => {
   });
 });
 
+// F-B-102: the four FAC-SEM-038/039 clauses the spec states and no test killed, each on an input where it alone fires.
+describe("F-B-102: every activity clause the spec states has a test that fails without it", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+
+  it("FAC-SEM-039 refuses an overflow that names a seq at or above its own", () => {
+    const overflow = load("positive/telemetry-event-overflow.json");
+    const [range] = overflow.data.dropped.ranges;
+    overflow.seq = range.toSeq;
+    expect(exactly("telemetry-event", overflow)).toEqual(["FAC-SEM-039 /data/dropped/ranges an overflow names only seqs assigned before its own"]);
+  });
+
+  it("FAC-SEM-039 refuses a dropped range that runs backwards", () => {
+    const overflow = load("positive/telemetry-event-overflow.json");
+    overflow.data.dropped.ranges = [{ fromSeq: 40, toSeq: 38 }];
+    expect(exactly("telemetry-event", overflow)).toContain("FAC-SEM-039 /data/dropped/ranges a dropped range runs forward");
+  });
+
+  it("FAC-SEM-039 refuses a rejection that names an event the batch did not carry", () => {
+    const fixture = load("semantic/activity-ack-ok.json").input;
+    fixture.ack.accepted -= 1;
+    fixture.ack.rejected = [{ eventId: "01K6Z3ZZZZZZZZZZZZZZZZZZZZ", reason: "schema" }];
+    expect(paths("activity-ack", fixture)).toEqual(["FAC-SEM-039 /ack/rejected/0/eventId"]);
+  });
+
+  it("FAC-SEM-038 refuses a summary cell with priced lines whose cost is null", () => {
+    const summary = load("positive/activity-summary.json");
+    const cell = summary.cells.find((c: Json) => c.counts.usageLines > c.counts.unpricedLines);
+    cell.usage.cost = { usd: null };
+    const at = summary.cells.indexOf(cell);
+    expect(exactly("activity-summary", summary)).toEqual([`FAC-SEM-038 /cells/${at}/usage/cost/usd priced lines carry a cost; null is only for a cell with no priced line`]);
+  });
+});
+
 describe("batch size", () => {
   it("refuses a batch of 1001 events (generated here rather than kept as a fixture)", () => {
     const batch = load("positive/activity-batch.json");
@@ -265,3 +299,119 @@ describe("FAC-SEM-040: a summary has no person dimension", () => {
     expect(paths("activity-summary", summary)).toContain("FAC-SEM-040 /to");
   });
 });
+
+// F-B-108 (DEC-0052): one definition of consumed — held, rejected or accounted for by an overflow event. A check-in's
+// dropped ranges are pending and never move an ack.
+describe("F-B-108: a check-in's dropped ranges never move an ack", () => {
+  it("acks only up to the first seq neither held nor accounted for by an overflow event", () => {
+    const collector = { id: "cc-otel", epoch: 2 };
+    const known = [{ collector, held: [[1, 37]] as [number, number][], accounted: [], pending: [[38, 40]] as [number, number][] }];
+    const batch = { device: { id: "dev-01j9a" }, events: [41, 42].map((seq) => ({ collector, seq, kind: "session.interval" })) };
+    expect(contiguousAcks(known, batch)).toEqual([{ collector, seq: 37, held: [[41, 42]] }]);
+    const overflow = { collector, seq: 43, kind: "buffer.overflow", data: { dropped: { events: 3, ranges: [{ fromSeq: 38, toSeq: 40 }] } } };
+    expect(contiguousAcks(known, { ...batch, events: [...batch.events, overflow] })).toEqual([{ collector, seq: 43, held: [] }]);
+  });
+
+  it("keeps the ranges a check-in reports apart from what an overflow accounts for", () => {
+    const collector = { id: "cc-otel", epoch: 2 };
+    const checkIn = { collectors: [{ collector, lastSeq: 44, bufferedFrom: 41, dropped: [{ fromSeq: 38, toSeq: 40 }] }] };
+    const [state] = mergeStreams([{ collector, held: [[1, 37]], accounted: [] }], null, checkIn);
+    expect(state).toMatchObject({ accounted: [], pending: [[38, 40]], bufferedFrom: 41 });
+  });
+});
+
+describe("F-B-107: a clause no rule checks is not attributed to one", () => {
+  it("names the summary's mixed basis a receiver duty, not FAC-SEM-038, which never reads a cell's lines", () => {
+    const spec = readFileSync(path.join(projectRoot(), "docs/specification/activity.md"), "utf8");
+    const clause = spec.split("\n\n").find((block) => block.includes("`mixed` when its lines differ") || block.includes("is `mixed` when its lines differ"));
+    expect(clause).toBeDefined();
+    expect(clause).toContain("receiver's duty");
+    expect(clause).not.toContain("FAC-SEM-038");
+    expect(readFileSync(path.join(projectRoot(), "src/activity-rules.ts"), "utf8")).not.toMatch(/["']mixed["']/);
+  });
+});
+
+// CT-25 (DEC-0052): the settings form refuses a lone surrogate, and the activity rule refuses the event rather than throw.
+describe("CT-25: an event whose sourceKey has no canonical form is refused, not thrown", () => {
+  it("flags the sourceKey of a usage line with a lone surrogate", () => {
+    const event = load("positive/telemetry-event-usage.json");
+    event.sourceKey = "req\ud800";
+    expect(() => evaluateSemanticRules("telemetry-event", event)).not.toThrow();
+    expect(paths("telemetry-event", event)).toContain("FAC-SEM-039 /sourceKey");
+  });
+});
+
+// DEC-0052 (CON-OE-01): account class, policy violations by UTC day, neutral notice and consent messages, and OD-1 in
+// neutral form over the access log (FAC-SEM-067).
+describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
+  const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("access-log-"));
+
+  it("has a passing and a failing input", () => {
+    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))]).toEqual(["FAC-SEM-067"]);
+    expect(files.some((name) => (load(`semantic/${name}`).expect as string[]).length === 0)).toBe(true);
+  });
+
+  it.each(files)("%s yields exactly its expected codes, and its log is schema-valid", (name) => {
+    const fixture = load(`semantic/${name}`);
+    expect([...new Set(codes(fixture.kind, fixture.input))]).toEqual(fixture.expect);
+    const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/access-log.schema.json`, fixture.input.log);
+    expect(result.valid, JSON.stringify(result.errors, null, 2)).toBe(true);
+  });
+
+  it("refuses a person's usage served to another person without a step, and narrows nothing the subject reads", () => {
+    const fixture = load("semantic/access-log-disclosure-ok.json").input;
+    delete fixture.log.entries[0].step;
+    expect(paths("access-log-disclosure", fixture)).toEqual(["FAC-SEM-067 /log/entries/0/step"]);
+    const self = load("semantic/access-log-disclosure-ok.json").input;
+    self.consents = [];
+    self.log.entries = self.log.entries.filter((entry: Json) => entry.reader.user?.id !== "m-0031");
+    self.log.entries.push({ ...self.log.entries[0], reader: { user: { id: "m-4821" }, role: "self" }, step: "event" });
+    expect(paths("access-log-disclosure", self)).toEqual([]);
+  });
+
+  it("reads a consent at the read's time: given after the read does not count, the latest message before it does", () => {
+    const fixture = load("semantic/access-log-disclosure-ok.json").input;
+    fixture.consents[0].at = "2026-10-07T19:00:00Z";
+    expect(paths("access-log-disclosure", fixture)).toEqual(["FAC-SEM-067 /log/entries/2/purposeId"]);
+    const again = load("semantic/access-log-disclosure-withdrawn.json").input;
+    again.consents.push({ ...again.consents[0], state: "given", at: "2026-10-07T18:54:00Z" });
+    expect(paths("access-log-disclosure", again)).toEqual([]);
+  });
+});
+
+describe("CON-OE-01 (DEC-0052): account class and policy violations", () => {
+  it("derives a tenant reference from the RFC 8785 form of {provider, tenant}", () => {
+    expect(tenantRef("anthropic", "org-0b6c1f2e-acme")).toBe(`sha256:${createHash("sha256").update('{"provider":"anthropic","tenant":"org-0b6c1f2e-acme"}', "utf8").digest("hex")}`);
+    expect(load("positive/telemetry-event-organization-account.json").account.tenantRef).toBe(tenantRef("anthropic", "org-0b6c1f2e-acme"));
+  });
+
+  it("passes a violation on its own day and refuses one whose occurred is another day", () => {
+    const violation = load("positive/telemetry-event-policy-violation.json");
+    expect(codes("telemetry-event", violation)).toEqual([]);
+    violation.occurred = "2026-10-06T00:00:00Z";
+    expect(paths("telemetry-event", violation)).toEqual(["FAC-SEM-039 /occurred"]);
+  });
+});
+
+// v4 (DEC-0052): a `result` kind and a root `run` that a usage line and a result join on, with no person dimension.
+describe("DEC-0052: results and the root run", () => {
+  it("passes a result and a usage line that carry the same root run", () => {
+    const result = load("positive/telemetry-event-result.json");
+    const usage = load("positive/telemetry-event-usage-run.json");
+    expect(codes("telemetry-event", result)).toEqual([]);
+    expect(codes("telemetry-event", usage)).toEqual([]);
+    expect(result.run.root).toBe(usage.run.root);
+    expect(result.user).toBeUndefined();
+  });
+});
+
+describe("review of DEC-0052: no scope sidesteps OD-1", () => {
+  it("refuses an unnamed activity scope and any results scope served to a person other than the subject", () => {
+    const base = load("semantic/access-log-disclosure-ok.json").input;
+    const withEntry = (entry: Json) => ({ ...base, log: { ...base.log, entries: [{ ...base.log.entries[0], ...entry }] } });
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.cost", step: "event" }))).toContain("FAC-SEM-067 /log/entries/0/scope");
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.results", step: "day" }))).toContain("FAC-SEM-067 /log/entries/0/scope");
+    expect(paths("access-log-disclosure", withEntry({ scope: "activity.usage", step: "day" }))).toEqual([]);
+  });
+});
+

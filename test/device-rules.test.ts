@@ -3,8 +3,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { type DeviceState, mergeDeviceState, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature } from "../src/device-rules.js";
+import { type DeviceState, certificationSigningInput, collectionStart, expectedDecision, mergeDeviceState, policyExpiry, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature, verifyWith } from "../src/device-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { mergeRanges, uncovered } from "../src/seq-ranges.js";
 
 // DEC-0031: fabric-device/0.1 — enrollment, signed policy, check-in, health and attribution.
 type Json = Record<string, any>;
@@ -13,12 +14,12 @@ const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, r
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…046)", () => {
+describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {
@@ -174,6 +175,100 @@ describe("FAC-SEM-046: policy key sets", () => {
   });
 });
 
+/** A fresh Ed25519 pair: the raw public key in base64 and a signer of the settings form without `signature`. */
+function ed25519Signer(keyId: string) {
+  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+  const raw = publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64");
+  const signDoc = (doc: Json) => {
+    delete doc.signature;
+    doc.signature = { alg: "ed25519", keyId, value: sign(null, policySigningInput(doc), privateKey).toString("base64") };
+    return doc;
+  };
+  return { keyId, publicKey: raw, signDoc };
+}
+
+// F-B-101: each FAC-SEM-041/043/044/045/046 branch the audit's mutation probe found unkilled, with an input on which that
+// branch alone fires, so removing it fails the test.
+describe("F-B-101: every device branch has a test that fails without it", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+  const observation = () => load("semantic/device-health-ok.json").input as { known: DeviceState; batch: Json; checkIn: Json };
+
+  it("FAC-SEM-041 refuses a user layer delivered as an update, with no current layer to compare", () => {
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    delete fixture.current;
+    fixture.next = { ...fixture.next, source: "user" };
+    delete fixture.next.signature;
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/source"]);
+  });
+
+  it("FAC-SEM-041 refuses an update that replaces another layer than the one it names", () => {
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    fixture.current.source = "mdm";
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/source"]);
+  });
+
+  const keySet = () => {
+    const root = ed25519Signer("org-7f3a.root");
+    const fixture = load("semantic/device-key-set-ok.json").input;
+    fixture.root = { keyId: root.keyId, publicKey: root.publicKey };
+    root.signDoc(fixture.current);
+    return { fixture, root };
+  };
+
+  it("FAC-SEM-046 refuses the root key listed as a policy signing key", () => {
+    const { fixture, root } = keySet();
+    fixture.next.keys.push({ ...fixture.next.keys[1], keyId: root.keyId });
+    root.signDoc(fixture.next);
+    expect(exactly("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/keys/2/keyId the root key is never a policy signing key"]);
+  });
+
+  it("FAC-SEM-046 refuses a key whose window ends before it starts", () => {
+    const { fixture, root } = keySet();
+    fixture.next.keys[1].notAfter = fixture.next.keys[1].notBefore;
+    root.signDoc(fixture.next);
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/keys/1/notAfter"]);
+  });
+
+  it("FAC-SEM-046 refuses a key set that moves to another organization", () => {
+    const { fixture, root } = keySet();
+    fixture.next.org.id = "org-other";
+    root.signDoc(fixture.next);
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/org/id"]);
+  });
+
+  it("FAC-SEM-044 refuses a certificate bound to another organization", () => {
+    const fixture = load("semantic/device-enrollment-ok.json").input;
+    fixture.response.certificate.binding.org.id = "org-other";
+    expect(paths("device-enrollment", fixture)).toEqual(["FAC-SEM-044 /response/certificate/binding/org/id"]);
+  });
+
+  it("FAC-SEM-044 refuses a certificate that ends before it starts", () => {
+    const fixture = load("semantic/device-enrollment-ok.json").input;
+    fixture.response.certificate.notAfter = "2026-10-07T08:30:00Z";
+    expect(exactly("device-enrollment", fixture)).toEqual(["FAC-SEM-044 /response/certificate/notAfter a certificate ends after it starts"]);
+  });
+
+  it("FAC-SEM-043 finds a check-in whose buffer starts after its last seq", () => {
+    const o = observation();
+    o.checkIn.collectors[0].bufferedFrom = 46;
+    const found = tamperEvidence(o.known, o.batch, o.checkIn).map((e) => e.message);
+    expect(found).toEqual(["cc-otel#2 reports a buffer that starts after its last seq"]);
+  });
+
+  it("FAC-SEM-043 finds a check-in under an epoch the server never issued", () => {
+    const o = observation();
+    o.known.epochs = [1];
+    const where = tamperEvidence(o.known, null, o.checkIn).map((e) => e.instancePath);
+    expect(where).toContain("/checkIn/collectors/0/collector/epoch");
+  });
+
+  it("FAC-SEM-045 refuses a user on an event of an epoch issued with no user bound", () => {
+    const fixture = load("semantic/device-attribution-ok.json").input;
+    delete fixture.epochs[0].binding.user;
+    expect(new Set(paths("device-attribution", fixture))).toEqual(new Set(fixture.batch.events.flatMap((event: Json, i: number) => (event.user ? [`FAC-SEM-045 /batch/events/${i}/user`] : []))));
+  });
+});
+
 describe("FAC-SEM-045: attribution comes from the client certificate", () => {
   it("refuses a check-in under another device, and an event of an epoch with no recorded binding", () => {
     const fixture = load("semantic/device-attribution-ok.json").input;
@@ -188,3 +283,255 @@ describe("FAC-SEM-045: attribution comes from the client certificate", () => {
     expect(paths("device-attribution", fixture)).toContain("FAC-SEM-045 /batch/events/0/collector/epoch");
   });
 });
+
+// F-B-103…F-B-108 (DEC-0053, DEC-0052): each fix with a test that fails without it.
+describe("F-B-103…F-B-108: the audit's device fixes", () => {
+  const exactly = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+
+  it("F-B-103: devices.md names the keyed hmac-sha256: branch the schema requires, never a bare sha256:", () => {
+    const spec = readFileSync(path.join(projectRoot(), "docs/specification/devices.md"), "utf8");
+    const row = spec.split("\n").find((line) => line.startsWith("| `telemetry.git_branch`"));
+    expect(row).toContain("`hmac-sha256:`");
+    expect(row).not.toMatch(/[^-]`?sha256:/);
+    const branch = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/activity-common.schema.json"), "utf8")).$defs.branch.pattern as string;
+    expect(branch).toContain("hmac-sha256:");
+  });
+
+  /** A server policy pair under one fresh key whose window is the first half of 2026. */
+  const backdated = () => {
+    const signer = ed25519Signer("org-7f3a.policy-h1");
+    const fixture = load("semantic/device-policy-update-ok.json").input;
+    fixture.trustedKeys = [{ keyId: signer.keyId, publicKey: signer.publicKey, notBefore: "2026-01-01T00:00:00Z", notAfter: "2026-06-30T23:59:59Z" }];
+    fixture.current.issuedAt = "2026-03-01T08:00:00Z";
+    fixture.next.issuedAt = "2026-05-01T08:00:00Z";
+    signer.signDoc(fixture.current);
+    signer.signDoc(fixture.next);
+    return { fixture, signer };
+  };
+
+  it("F-B-106: a key is judged when the device verifies, so a backdated policy under an expired key is refused", () => {
+    const { fixture } = backdated();
+    fixture.at = "2026-05-02T08:00:00Z";
+    expect(paths("device-policy-update", fixture)).toEqual([]);
+    fixture.at = "2026-10-07T09:00:00Z";
+    expect(exactly("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/signature/keyId key org-7f3a.policy-h1 is outside its validity window when the device verifies"]);
+  });
+
+  it("F-B-106: a policy issued before the one the device holds is refused, and the rule needs the verification time", () => {
+    const { fixture, signer } = backdated();
+    fixture.at = "2026-05-02T08:00:00Z";
+    fixture.next.issuedAt = "2026-02-01T08:00:00Z";
+    signer.signDoc(fixture.next);
+    expect(paths("device-policy-update", fixture)).toEqual(["FAC-SEM-041 /next/issuedAt"]);
+    const timeless = backdated().fixture;
+    delete timeless.at;
+    expect(paths("device-policy-update", timeless)).toEqual(["FAC-SEM-041 /at"]);
+  });
+
+  it("F-B-105: an SSO certificate binds the user the proof names; a token one only the user the token names", () => {
+    const sso = load("semantic/device-enrollment-ok.json").input;
+    sso.proof.userId = "m-0007";
+    expect(exactly("device-enrollment", sso)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id an SSO enrollment binds the user its sign-in proves, never another"]);
+    const token = load("semantic/device-enrollment-token-names-user.json").input;
+    expect(paths("device-enrollment", token)).toEqual([]);
+    token.token.userId = "m-0007";
+    expect(paths("device-enrollment", token)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id"]);
+    token.token = { ...token.token, tokenId: "tok-other", userId: "m-4821" };
+    expect(paths("device-enrollment", token)).toEqual(["FAC-SEM-044 /response/certificate/binding/user/id", "FAC-SEM-044 /request/device/id"]);
+  });
+
+  it("F-B-108: a check-in's dropped ranges are pending: tamper evidence counts them, an ack never does", () => {
+    const o = load("semantic/device-health-overflow-pending.json").input as { known: DeviceState; batch: Json; checkIn: Json };
+    expect(tamperEvidence(o.known, o.batch, o.checkIn)).toEqual([]);
+    const state = mergeDeviceState(o.known, o.batch, o.checkIn);
+    const stream = state.streams.find((s) => s.collector.id === o.checkIn.collectors[0].collector.id)!;
+    expect(stream.pending).toEqual(mergeRanges(o.checkIn.collectors[0].dropped.map((r: Json) => [r.fromSeq, r.toSeq])));
+    expect(uncovered([...stream.held, ...stream.accounted], ...stream.pending![0]!)).toEqual([stream.pending![0]]);
+  });
+});
+
+describe("F-B-109: the reader row of a device applying policy names its key-set duty", () => {
+  it("lists FAC-SEM-046 and the key-set fixtures beside FAC-SEM-041 and FAC-SEM-042", () => {
+    const conformance = readFileSync(path.join(projectRoot(), "docs/specification/conformance.md"), "utf8");
+    const row = conformance.split("\n").find((line) => line.startsWith("| a device applying policy |"));
+    expect(row).toContain("`FAC-SEM-046`");
+    expect(row).toContain("fixtures/semantic/device-key-set-*");
+  });
+});
+
+// CON-OE-12 (DEC-0053): defaults, machine mode, expiry, a person's key for others, collection start, and the root key's
+// certification by an installer-pinned offline root.
+describe("CON-OE-12: what a device resolves and decides under its policy", () => {
+  const organization = () => load("positive/device-policy-organization.json");
+  const managed = () => load("positive/device-policy-mdm-managed.json");
+
+  it("resolves an unset build channel to official, machine mode to C and a person's key sharing to forbidden", () => {
+    const effective = resolvePolicy([organization()]);
+    expect(effective["build_channel.allowed"]).toEqual({ value: "official", from: "default" });
+    expect(effective["machine.mode"]).toEqual({ value: "C", from: "default" });
+    expect(effective["models.personal_key_sharing"]).toEqual({ value: "forbidden", from: "server" });
+    const open = organization();
+    delete open.keys["models.personal_key_sharing"];
+    expect(resolvePolicy([open])["models.personal_key_sharing"]).toEqual({ value: "forbidden", from: "default" });
+  });
+
+  it("takes machine mode A only from an mdm layer", () => {
+    expect(resolvePolicy([managed(), organization()])["machine.mode"]).toEqual({ value: "A", from: "mdm" });
+    const server = organization();
+    server.keys["machine.mode"] = { value: "A", locked: true };
+    expect(resolvePolicy([server])["machine.mode"]).toEqual({ value: "C", from: "default" });
+    server.keys["machine.mode"] = { value: "C" };
+    expect(resolvePolicy([server])["machine.mode"]).toEqual({ value: "C", from: "server" });
+  });
+
+  it("starts collection at the acknowledgement, or under device management at the earlier of it and the deadline", () => {
+    expect(collectionStart([organization()], "2026-10-12T10:00:00Z")).toBe(Date.parse("2026-10-12T10:00:00Z"));
+    expect(collectionStart([organization()])).toBeNaN();
+    expect(collectionStart([managed(), organization()])).toBe(Date.parse("2026-10-15T00:00:00Z"));
+    expect(collectionStart([managed(), organization()], "2026-10-13T00:00:00Z")).toBe(Date.parse("2026-10-13T00:00:00Z"));
+    expect(collectionStart([managed(), organization()], "2026-10-20T00:00:00Z")).toBe(Date.parse("2026-10-15T00:00:00Z"));
+  });
+
+  it("expires at the earliest delivered layer's expiresAt, and a user layer's never counts", () => {
+    expect(policyExpiry([organization()])).toBe(Date.parse("2026-10-19T08:00:00Z"));
+    expect(policyExpiry([managed()])).toBeNaN();
+    const user = { source: "user", expiresAt: "2026-10-13T00:00:00Z", keys: {} };
+    expect(policyExpiry([organization(), user])).toBe(Date.parse("2026-10-19T08:00:00Z"));
+  });
+
+  it("decides each action as its policy says", () => {
+    const layers = [managed(), organization()];
+    const before = "2026-10-13T09:00:00Z", after = "2026-10-20T09:00:00Z";
+    expect(expectedDecision(layers, before, { kind: "grant" }).decision).toBe("allow");
+    expect(expectedDecision(layers, after, { kind: "personal-key-call" }).decision).toBe("refuse");
+    expect(expectedDecision(layers, after, { kind: "local-change", key: "retention.raw_days" }).decision).toBe("allow");
+    expect(expectedDecision(layers, after, { kind: "local-change", key: "build_channel.allowed" }).decision).toBe("refuse");
+    expect(expectedDecision([organization()], before, { kind: "upload", occurred: before }).decision).toBe("refuse");
+    expect(expectedDecision(layers, before, { kind: "x-example.unknown" }).decision).toBe("allow");
+    const exactly = (value: unknown) => evaluateSemanticRules("device-action", value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+    expect(exactly({ layers, at: before, action: { kind: "grant" }, decision: "refuse" })).toEqual(["FAC-SEM-068 /decision nothing in the policy refuses this grant"]);
+  });
+});
+
+describe("FAC-SEM-069: the organization's root key chains to an installer-pinned offline root", () => {
+  const fixture = (name: string) => load(`semantic/device-root-certification-${name}.json`).input;
+  const where = (value: unknown) => paths("device-root-certification", value);
+
+  it("verifies ES256 and Ed25519 signatures only under the algorithm the key names", () => {
+    const { input } = { input: fixture("delegated") };
+    const delegation = input.certification.delegation;
+    const offline = input.pinned.find((key: Json) => key.keyId === delegation.signature.keyId);
+    expect(verifyWith(offline, certificationSigningInput(delegation), delegation.signature.value)).toBe(true);
+    expect(verifyWith({ ...offline, alg: "ed25519" }, certificationSigningInput(delegation), delegation.signature.value)).toBe(false);
+    expect(verifyWith({ ...offline, alg: "rs256" }, certificationSigningInput(delegation), delegation.signature.value)).toBe(false);
+    const direct = fixture("direct").certification;
+    const ed = fixture("direct").pinned.find((key: Json) => key.keyId === direct.signature.keyId);
+    expect(verifyWith(ed, certificationSigningInput(direct), direct.signature.value)).toBe(true);
+    expect(verifyWith({ ...ed, publicKey: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" }, certificationSigningInput(direct), direct.signature.value)).toBe(false);
+  });
+
+  it("refuses a certification of another key, one changed after signing, and a direct one signed by a delegation-shaped key", () => {
+    const other = fixture("direct");
+    other.root = { ...other.root, keyId: "org-7f3a.root-2" };
+    expect(where(other)).toEqual(["FAC-SEM-069 /certification/subject"]);
+    const altered = fixture("direct");
+    altered.certification.notAfter = "2030-10-12T08:00:00Z";
+    expect(where(altered)).toEqual(["FAC-SEM-069 /certification/signature/value"]);
+    const late = fixture("direct");
+    late.at = "2028-01-01T00:00:00Z";
+    expect(where(late)).toEqual(["FAC-SEM-069 /certification/notAfter"]);
+  });
+
+  it("refuses a delegated certification whose delegation or revocation list a pinned key did not sign", () => {
+    const forged = fixture("delegated");
+    forged.certification.delegation.notAfter = "2026-10-29T00:00:00Z";
+    expect(where(forged)).toContain("FAC-SEM-069 /certification/delegation/signature");
+    const list = fixture("delegated");
+    list.revocations.revision = 9;
+    expect(where(list)).toEqual(["FAC-SEM-069 /revocations/signature"]);
+    const signer = fixture("delegated");
+    signer.certification.signature.keyId = signer.pinned[0].keyId;
+    expect(where(signer)).toEqual(["FAC-SEM-069 /certification/signature/keyId"]);
+  });
+});
+
+describe("CON-OE-12 and FAC-SEM-069: the edges the plants found", () => {
+  it("stops a person's key for others after expiry even where sharing is allowed", () => {
+    const sharing = load("positive/device-policy-organization.json");
+    sharing.keys["models.personal_key_sharing"] = { value: "allowed" };
+    expect(expectedDecision([sharing], "2026-10-13T09:00:00Z", { kind: "personal-key-call" }).decision).toBe("allow");
+    expect(expectedDecision([sharing], "2026-10-20T09:00:00Z", { kind: "personal-key-call" }).decision).toBe("refuse");
+  });
+
+  it("names the unpinned signer of a certification as outside the chain", () => {
+    expect(paths("device-root-certification", load("semantic/device-root-certification-outside-chain.json").input)).toEqual(["FAC-SEM-069 /certification/signature/keyId"]);
+  });
+
+  it("refuses a signature whose declared algorithm is not its key's", () => {
+    const delegated = load("semantic/device-root-certification-delegated.json").input;
+    delegated.certification.delegation.signature.alg = "ed25519";
+    expect(paths("device-root-certification", delegated)).toContain("FAC-SEM-069 /certification/delegation/signature");
+    const list = load("semantic/device-root-certification-delegated.json").input;
+    list.revocations.signature.alg = "ed25519";
+    expect(paths("device-root-certification", list)).toEqual(["FAC-SEM-069 /revocations/signature"]);
+    const direct = load("semantic/device-root-certification-direct.json").input;
+    direct.certification.signature.alg = "es256";
+    expect(paths("device-root-certification", direct)).toEqual(["FAC-SEM-069 /certification/signature/value"]);
+  });
+
+  it("never verifies an Ed25519 key labelled es256, nor a P-256 key labelled ed25519", () => {
+    const direct = load("semantic/device-root-certification-direct.json").input;
+    const ed = direct.pinned.find((key: Json) => key.keyId === direct.certification.signature.keyId);
+    expect(verifyWith({ ...ed, alg: "es256" }, certificationSigningInput(direct.certification), direct.certification.signature.value)).toBe(false);
+  });
+});
+
+// v4 (DEC-0053): an ES256 form for policyRootKey; a key set verifies only in its root key's algorithm.
+describe("DEC-0053: a key set signed by an ES256 root", () => {
+  it("verifies in the root's algorithm and refuses a signature that names another", () => {
+    const fixture = load("semantic/device-key-set-es256-root.json").input;
+    expect(paths("device-key-set", fixture)).toEqual([]);
+    fixture.next.signature.alg = "ed25519";
+    expect(paths("device-key-set", fixture)).toEqual(["FAC-SEM-046 /next/signature/value"]);
+    const ed = load("semantic/device-key-set-ok.json").input;
+    ed.next.signature.alg = "es256";
+    expect(paths("device-key-set", ed)).toEqual(["FAC-SEM-046 /next/signature/value"]);
+  });
+});
+
+// DEC-0053 (for the relay protocol, DEC-0047): a device's keys by role, <device.id>#sig and <device.id>#kem.
+describe("DEC-0053: device keys by role", () => {
+  const input = () => load("semantic/device-enrollment-device-keys.json").input;
+  const where = (value: unknown) => paths("device-enrollment", value);
+
+  it("refuses a kid that is not <device.id>#<use>, a kem key that signs, and an invalid or small-order key", () => {
+    const kid = input(); kid.request.deviceKeys[0].kid = "dev-other#sig";
+    expect(where(kid)).toEqual(["FAC-SEM-044 /request/deviceKeys/0/kid"]);
+    const alg = input(); alg.request.deviceKeys[1].alg = "es256";
+    expect(where(alg)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/alg"]);
+    const off = input(); const point = Buffer.from(off.request.deviceKeys[1].publicKey, "base64"); point[64] = point[64]! ^ 1; off.request.deviceKeys[1].publicKey = point.toString("base64");
+    expect(where(off)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/publicKey"]);
+    const small = input(); small.request.deviceKeys[0] = { kid: "dev-01j9a#sig", use: "sig", alg: "ed25519", publicKey: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" };
+    expect(where(small)).toEqual(["FAC-SEM-044 /request/deviceKeys/0/publicKey"]);
+    const ed = input(); ed.request.deviceKeys[0] = { kid: "dev-01j9a#sig", use: "sig", alg: "ed25519", publicKey: generateKeyPairSync("ed25519").publicKey.export({ format: "der", type: "spki" }).subarray(12).toString("base64") };
+    expect(where(ed)).toEqual([]);
+  });
+
+  it("refuses one key in both roles", () => {
+    expect(where(load("semantic/device-enrollment-device-key-both-roles.json").input)).toEqual(["FAC-SEM-044 /request/deviceKeys/1/publicKey"]);
+  });
+});
+
+describe("review of DEC-0053: the offline root's revocation list on a delegated certification", () => {
+  it("is required and fresh: a delegated certification without it, or with one older than seven days, is refused", () => {
+    const delegated = load("semantic/device-root-certification-delegated.json");
+    expect(paths(delegated.kind, delegated.input).filter((path: string) => path.includes("/revocations"))).toEqual([]);
+    const without = structuredClone(delegated.input);
+    delete without.revocations;
+    expect(paths(delegated.kind, without)).toContain("FAC-SEM-069 /revocations");
+    const stale = structuredClone(delegated.input);
+    stale.at = new Date(Date.parse(stale.revocations.issuedAt) + 8 * 86_400_000).toISOString();
+    expect(paths(delegated.kind, stale)).toContain("FAC-SEM-069 /revocations/issuedAt");
+  });
+});
+

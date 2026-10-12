@@ -1,0 +1,70 @@
+{
+  "description": "A delegation key whose 29-day certificate a pinned key signed certifies the organization's root, and the revocation list does not name it: no finding.",
+  "kind": "device-root-certification",
+  "expect": [],
+  "input": {
+    "pinned": [
+      {
+        "keyId": "vendor.offline-root-a",
+        "alg": "es256",
+        "publicKey": "BH6BpvFgvs7UrSum/gbx57TG7+zWffx7MXCScRB5+oiZ3pdrJr9lR0ddwLIku39KibndpuHL2bzP+TY2TSdKVNw="
+      },
+      {
+        "keyId": "vendor.offline-root-b",
+        "alg": "ed25519",
+        "publicKey": "Um6RaIfuIMzWqUO7WikdJ/rvg5io3TcAUqS8v08gQ3c="
+      }
+    ],
+    "root": {
+      "keyId": "org-7f3a.root",
+      "alg": "es256",
+      "publicKey": "BO5AsWmy1nb8yh9auZXB1ULzAk2yqN53Rh//fxS6GEV9Yb+D7UOPkfX/RJylS/V1InoNY+kMyvG2qOFGEg05i4g="
+    },
+    "certification": {
+      "protocol": "fabric-device/0.1",
+      "kind": "root-certification",
+      "org": {
+        "id": "org-7f3a"
+      },
+      "subject": {
+        "keyId": "org-7f3a.root",
+        "alg": "es256",
+        "publicKey": "BO5AsWmy1nb8yh9auZXB1ULzAk2yqN53Rh//fxS6GEV9Yb+D7UOPkfX/RJylS/V1InoNY+kMyvG2qOFGEg05i4g="
+      },
+      "issuedAt": "2026-10-12T08:00:00Z",
+      "notAfter": "2027-10-12T08:00:00Z",
+      "delegation": {
+        "keyId": "vendor.delegation-2026-10",
+        "alg": "es256",
+        "publicKey": "BNo06DaqAPmw5BoERaKB5Y7QQOCG+u8TJTdsKH42zh+fU2vC+IlusdEn2GXAkdVxTrkteG/qfwpp5ssypRNslEM=",
+        "notBefore": "2026-10-01T00:00:00Z",
+        "notAfter": "2026-10-30T00:00:00Z",
+        "signature": {
+          "alg": "es256",
+          "keyId": "vendor.offline-root-a",
+          "value": "VNULmH6qkhds1e3UIraHrXLSNVf9if3lqP50KNTbP8l9XxFADzcAteiaoSjD7oR/oIfb91fxtBgotbP2Oc/yQA=="
+        }
+      },
+      "signature": {
+        "alg": "es256",
+        "keyId": "vendor.delegation-2026-10",
+        "value": "3lOlKx5g5UTNByENf6bA47sGQEq7/JMzfG2DdHmPtbJ5lfATkos0jYKrRAjOtFNzhDeVoOOYlxnrXu8Xj9bTCg=="
+      }
+    },
+    "revocations": {
+      "protocol": "fabric-device/0.1",
+      "kind": "delegation-revocations",
+      "revision": 4,
+      "issuedAt": "2026-10-11T00:00:00Z",
+      "revoked": [
+        "vendor.delegation-2026-08"
+      ],
+      "signature": {
+        "alg": "es256",
+        "keyId": "vendor.offline-root-a",
+        "value": "tbRsLUtuAyXtNMvz0ZjtN8R5yO7B1Pt4Lo5R7qGo1vXGiyboqpDqAk6OVr/cLPuapGUdVfBhemeZMIXQqrwGsg=="
+      }
+    },
+    "at": "2026-10-12T09:00:00Z"
+  }
+}

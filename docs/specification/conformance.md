@@ -69,7 +69,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a host launching an agent on a model profile | resolves the profile in the order request, agent, binding or project, estate default; keeps only the models every class of which the project's spend policy allows; refuses the launch with `model-classes-empty`, naming the policy, when none stays; uses a subscription only in its vendor's runner | `FAC-SEM-059`, `FAC-SEM-060` | `test/runner-model-profiles.test.ts`, `src/profile-rules.ts` `resolveModelProfile` ([runners](runners.md#resolution), DEC-0046) |
 | an issuer of a key route's key | admits exactly the models of the runner profile's model profile (`key.modelAllowList`), and a proxy applies a catalogue row's `provider` routing without changing the model | `FAC-SEM-059`, `FAC-SEM-058` (the declaration) | the issuer's own test; the contract checks the declarations ([runners](runners.md#routes), DEC-0046) |
 | a machine installing a package | checks the folder against `files[]` (`checkPackageFolder`), recomputes the digest, then verifies exactly one publisher signature and every organization countersignature under the keys it pinned for each role, refusing an algorithm it does not admit, a key for another algorithm and a small-order key before verifying, in PK-1…PK-10's order; installs an unsigned package only where its own rules allow it | PK-1…PK-10, `FAC-SEM-064` | `test/package.test.ts`, `src/package-rules.ts` `verifyPackage`, `checkPackageFolder`, vectors `fixtures/vectors/package.json` ([package](package.md#the-verifier), DEC-0050, DEC-0051) |
-| a device applying policy | applies a delivered policy only when it verifies and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` ([devices](devices.md#policy), DEC-0031) |
+| a device applying policy | applies a delivered policy only when it verifies under a key valid when it verifies and moves its revision forward, applies a key set only when it verifies under the root key, stays in its organization and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042`, `FAC-SEM-046` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` and `fixtures/semantic/device-key-set-*` ([devices](devices.md#policy), [key sets](devices.md#key-sets), DEC-0031, DEC-0053) |
+| a device deciding under its policy | keeps every lock after its policy expires, stops grants, remote execution and a person's key for others then, lets a person's key serve others only where sharing is `allowed`, uploads nothing that occurred before its collection start, and accepts a root key only certified by the offline root its installer pinned | `FAC-SEM-068`, `FAC-SEM-069` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-action-*` and `fixtures/semantic/device-root-certification-*` ([devices](devices.md#policy), [root certification](devices.md#root-certification), DEC-0053) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
@@ -83,7 +84,7 @@ above U+FFFF, fractions — so a document never says only "canonical JSON".
 
 | Form | Function | Key order | Separators | Numbers | Strings | Refuses |
 |---|---|---|---|---|---|---|
-| the settings form (DEC-0025) | `settingsCanonicalJson` | by Unicode code point, at every level | `", "` between members and elements, `": "` after a key | integers within ±(2^53 − 1), in decimal | `"`, `\` and the control characters escaped as `JSON.stringify` escapes them; every other character as itself | a fraction, an unsafe or non-finite number, `undefined`, a function, a bigint. It does not check prototypes, and writes a lone surrogate as `\udxxx` where Python cannot encode one, so a backup reader refuses one in a cell (`FAC-SEM-035`) |
+| the settings form (DEC-0025) | `settingsCanonicalJson` | by Unicode code point, at every level | `", "` between members and elements, `": "` after a key | integers within ±(2^53 − 1), in decimal | `"`, `\` and the control characters escaped as `JSON.stringify` escapes them; every other character as itself | a fraction, an unsafe or non-finite number, `undefined`, a function, a bigint, and a lone surrogate in any string or key, which Python cannot encode (CT-25, DEC-0052; a rule that derives from the form refuses its input rather than throw). It does not check prototypes |
 | RFC 8785, JCS (DEC-0039) | `rfc8785` | by UTF-16 code unit, at every level | none | ECMAScript form: `1e+30`, `0.002`, `-0` as `0` | as `JSON.stringify` escapes them | a non-finite number, a lone surrogate, a value that is not plain JSON: a date, a map, a class instance, an `undefined` member |
 
 The settings form equals Python's `json.dumps(value, sort_keys=True, ensure_ascii=False)`; RFC 8785 is pinned in
@@ -95,7 +96,9 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | a settings backup's `sha256`, over `tables` | settings form | `settingsBackupDigest` | [service](service.md#settings-backup), DEC-0025 |
 | a device policy's Ed25519 signature, over the policy without `signature` — DEC-0031's "its canonical JSON" | settings form | `policySigningInput` | [devices](devices.md#policy), DEC-0031 |
 | a policy key set's signature under the root key | settings form | `policySigningInput`, as a policy | [devices](devices.md#key-sets), DEC-0031 |
+| a root certification, a delegation key's certificate and a delegation revocation list, each without `signature` | RFC 8785 | `certificationSigningInput` | [devices](devices.md#root-certification), DEC-0053 |
 | an activity event's derived `eventId`, over `{key, source}` | settings form | `activityEventId` | [activity](activity.md#event-id), DEC-0030 |
+| an organization tenant's `tenantRef`, over `{provider, tenant}` | RFC 8785 | `tenantRef` | [activity](activity.md#envelope), DEC-0052 |
 | a path-derived `sourceKey`, the HMAC over `{offset, path}` | settings form | `pathSourceKey` | [activity](activity.md#event-id), DEC-0030 |
 | an approval's `actionDigest`, over the action | RFC 8785 | `actionDigest` | [delegation](delegation.md#approval-approval1), DEC-0039 |
 | the board's idempotency digest, over the operation's arguments after `fabric-project-comms/0.1` NUL `<operation>` NUL | RFC 8785, the arguments holding integers within ±(2^53 − 1) only | `commsDigest` in [`src/comms-digest.ts`](../../src/comms-digest.ts) | [project comms](project-comms.md#idempotency), DEC-0022 |
@@ -131,7 +134,7 @@ in the specifications, given other kinds there than here, named by `src/` withou
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
 register and carry no receipt.
 
-**Next free rule code:** `FAC-SEM-067`
+**Next free rule code:** `FAC-SEM-072`
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
@@ -199,6 +202,9 @@ register and carry no receipt.
 | `FAC-SEM-064` | `package` | [package](package.md#semantic-rules) | SEM-0064 |
 | `FAC-SEM-065` | `package` | [package](package.md#semantic-rules) | SEM-0065 |
 | `FAC-SEM-066` | `package` | [package](package.md#semantic-rules) | SEM-0066 |
+| `FAC-SEM-067` | `access-log-disclosure` | [activity](activity.md#semantic-rules) | SEM-0067 |
+| `FAC-SEM-068` | `device-action` | [devices](devices.md#semantic-rules) | SEM-0068 |
+| `FAC-SEM-069` | `device-root-certification` | [devices](devices.md#semantic-rules) | SEM-0069 |
 
 ## Compatibility policy
 

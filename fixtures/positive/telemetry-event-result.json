@@ -1,0 +1,28 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "01K7B3A1C2D3E4F5G6H7J8K9M0",
+  "kind": "result",
+  "source": "fabric",
+  "collector": {
+    "id": "fabric-runs",
+    "epoch": 2
+  },
+  "seq": 7,
+  "occurred": "2026-10-12T09:41:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "190112003118220",
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code"
+  },
+  "run": {
+    "root": "run-9f2c41d7"
+  },
+  "data": {
+    "signal": "doc_written",
+    "outcome": "met",
+    "count": 1
+  }
+}

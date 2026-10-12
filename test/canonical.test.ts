@@ -49,10 +49,14 @@ describe("the settings form (settingsCanonicalJson)", () => {
     expect(() => settingsCanonicalJson(valueOf(c))).toThrow(TypeError);
   });
 
-  it("refuses what JSON cannot carry, and does not check prototypes or lone surrogates (its comment says so)", () => {
+  it("refuses what JSON cannot carry and does not check prototypes (its comment says so)", () => {
     for (const value of [undefined, () => 1, 1n, Number.NaN, Number.POSITIVE_INFINITY]) expect(() => settingsCanonicalJson(value)).toThrow(TypeError);
     expect(settingsCanonicalJson(new Map([["a", 1]]))).toBe("{}");
-    expect(settingsCanonicalJson("\ud800")).toBe('"\\ud800"');
+  });
+
+  it("CT-25: refuses a lone surrogate in a value or a key, high or low, and writes a well-formed pair as itself", () => {
+    for (const value of ["\ud800", "x\udfff", { "\udc00": 1 }, [{ a: "\ud83d" }]]) expect(() => settingsCanonicalJson(value)).toThrow(/lone surrogate/);
+    expect(settingsCanonicalJson({ "\ud83d\ude00": "\ud83d\ude00" })).toBe('{"\ud83d\ude00": "\ud83d\ude00"}');
   });
 });
 

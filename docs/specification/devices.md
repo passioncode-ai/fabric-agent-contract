@@ -1,11 +1,13 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031 · rule codes `FAC-SEM-041`…`FAC-SEM-046` · schemas
+DEC-0031, amended by DEC-0052 and DEC-0053 · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+`FAC-SEM-069` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
 [`device-health`](../../schemas/device-health.schema.json),
-[`device-key-set`](../../schemas/device-key-set.schema.json), shared definitions in
+[`device-key-set`](../../schemas/device-key-set.schema.json),
+[`device-root-certification`](../../schemas/device-root-certification.schema.json), shared definitions in
 [`device-common`](../../schemas/device-common.schema.json)
 
 A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an
@@ -48,16 +50,20 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
 
 1. The device generates a key pair in hardware that does not export it, and a PKCS#10 certificate
    signing request (RFC 2986) signed by that key. The key's `storage` is `secure-enclave`, `tpm` or
-   `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`.
+   `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`. The first
+   organization server's target architecture v4 makes a non-extractable `ecdsa-p256` key in the
+   `platform-keystore`, held by a signed key helper, the device key; DEC-0031 already admits it, and
+   DEC-0053 records it as the target without changing the schema.
    `publicKeySha256` is the SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it
    against the CSR and records it as the device's key on record.
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
    description, the CSR, and `auth.method`:
    - `sso` — a person signs in through the organization's single sign-on; the server binds the
-     certificate to that person's `user.id`;
+     certificate to the `user.id` the sign-in proves, never another (`FAC-SEM-044`, F-B-105);
    - `enrollment-token` — unattended creation by device management (MDM); `tokenId` names the
      token. The certificate binds a `user.id` only when the token names the person the device is
-     assigned to. Otherwise the device is enrolled unassigned until an SSO sign-in re-enrolls it.
+     assigned to, and then that person (`FAC-SEM-044`). Otherwise the device is enrolled unassigned
+     until an SSO sign-in re-enrolls it.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
@@ -67,8 +73,11 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
      `org.id`, `device.id` and, when known, `user.id`;
    - **`streamEpoch`**: the epoch every collector on the device uses from now on, greater than every
      epoch issued to this device before (`FAC-SEM-044`);
-   - **`policyRootKey`**: the organization's root key (`keyId` and the raw Ed25519 key), which signs
-     [policy key sets](#key-sets) and nothing else, and optionally the current key set;
+   - **`policyRootKey`**: the organization's root key (`keyId`, `alg` and the public key), which signs
+     [policy key sets](#key-sets) and nothing else, and optionally the current key set. Its `alg` is
+     `ed25519` (the default, a raw 32-byte key) or `es256` (a raw 65-byte P-256 point), DEC-0053;
+   - when the installer pinned an offline root, its `rootCertification` and the current
+     `delegationRevocations` ([root certification](#root-certification));
    - the check-in interval;
    - optionally the current signed server policy (never a `user` layer, schema).
 
@@ -102,6 +111,23 @@ step 2 when any of these happens:
 collector starts again at seq 1 and reports the policy revisions it holds now, and neither is
 evidence of tampering. Nothing is renewed silently past `notAfter`.
 
+<a id="device-keys"></a>
+
+### Device keys by role
+
+DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 device keys held in the
+platform keystore, listed by role in the enrollment request's `deviceKeys`:
+
+- **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
+- **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol (DEC-0047, reserved) seals
+  secrets to it.
+
+One key is never used for the other role, and each kid names the enrolling device (`FAC-SEM-044`). A
+P-256 public key — a device key, a policy root key, an offline root or delegation key — is validated by
+SEC 1 §3.2.2 before use: not the point at infinity, coordinates in range, on the curve
+([`isValidP256Key`](../../src/p256.ts), vectors `fixtures/vectors/p256.json`). Every Ed25519 key still
+passes the small-order check (DEC-0045).
+
 <a id="attribution"></a>
 
 ## Attribution
@@ -131,8 +157,9 @@ attribute events to another person.
 
 Schema: [`device-policy.schema.json`](../../schemas/device-policy.schema.json).
 
-A policy document is one **layer**, with a `revision`, `issuedAt` and `keys`. Each key is
-`{value, locked?}`. The layer's `source` is one of:
+A policy document is one **layer**, with a `revision`, `issuedAt`, `keys` and optionally the
+`noticeVersion` of the organization's notice it is issued under ([notice](activity.md#notice),
+DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 
 - `mdm`: delivered by device management;
 - `server`: delivered by the organization server;
@@ -143,8 +170,19 @@ A policy document is one **layer**, with a `revision`, `issuedAt` and `keys`. Ea
 | `logging.required` | boolean | Activity telemetry must be on. Usually locked. |
 | `build_channel.allowed` | `any`, `official`, `attested` | Which collector builds may run: any build, the organization's official build, or a build whose platform attestation verifies. |
 | `telemetry.endpoint` | `https://` URL | Where batches go. Optional; when it is absent, batches go to the endpoint the device enrolled with. |
-| `telemetry.git_branch` | `omit`, `hash`, `plain` | Whether events carry `git.branch`, its `sha256:`, or nothing. |
+| `telemetry.git_branch` | `omit`, `hash`, `plain` | `omit`: events carry no `git.branch`; `hash`: `hmac-sha256:` of the name under the device's telemetry key ([activity](activity.md#event-id), F-B-103); `plain`: the name. |
 | `retention.raw_days` | integer, 1…3650 | How long raw events are kept before only summaries remain. |
+| `accounts.tenants` | list of `{provider, tenantRef, accountClass: "organization"}` | The organization's provider tenants. A session on one is an organization session, labelled `account.class` with the tenant's `tenantRef` ([activity](activity.md#envelope), DEC-0052); any other is personal or unknown. |
+| `models.credentials` | list of `{credentialRef, provider, credentialKind: "api-org", fingerprint, callers?, quota?, dataClasses}` | The organization's API keys a device may use — never a subscription, a seat or a person's own key (schema). `fingerprint` is `hmac-sha256:` of the key under the organization's salt, so a node recognises the slot that holds it, and so its provenance, without the policy carrying the key. `quota.usd` is a decimal string. |
+| `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
+| `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
+| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine. `A`: it administers the whole machine — taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`). |
+
+Key names are dotted `snake_case` identifiers, so the `models.personalKeySharing` of the organization
+edition's plan is spelled `models.personal_key_sharing` here. **A key no layer sets resolves to a
+default** (DEC-0053, [`POLICY_DEFAULTS`](../../src/device-rules.ts)): `build_channel.allowed` to
+`official` — an organization's device runs only the official build — `machine.mode` to `C`, and
+`models.personal_key_sharing` to `forbidden`.
 
 **Unknown keys are kept and ignored**: a device that does not know a key MUST NOT reject the policy
 for it. Extension keys are spelled `x-<namespace>.<key>`. A value has no fraction (schema). A
@@ -156,17 +194,34 @@ operating system's managed preferences. A `user` layer is never signed and never
 signature is Ed25519 (RFC 8032) over the UTF-8 canonical JSON of the document without `signature`
 ([`policySigningInput`](../../src/device-rules.ts)), named by `keyId`. The canonical JSON is the settings form,
 not RFC 8785: the two give different bytes ([canonical forms](conformance.md#canonical-forms), DEC-0043).
-The trusted keys are those of
-the device's current [key set](#key-sets) that are valid at the policy's `issuedAt`. A policy signed
-by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
+The trusted keys are those of the device's current [key set](#key-sets) that are valid **when the device
+verifies** — on its own clock, never at the `issuedAt` the signer chose — and a policy is never issued before
+the one the device holds for its layer (DEC-0053, F-B-106). Judged at `issuedAt`, a leaked key past its
+`notAfter` that is still in the set would sign a backdated policy with a higher revision. So a policy signed
+by a key that has since expired is refused too, and the server signs again under a current key. A policy
+signed by the root key, or by a key outside its window, is refused (`FAC-SEM-041`).
 
-**Revision.** A device applies a delivered policy only when both hold:
+**Revision.** A device applies a delivered policy only when all hold:
 
 - its signature verifies under a trusted key;
-- its revision is greater than the one the device holds for the same organization and layer
-  (`FAC-SEM-041`).
+- its revision is greater than the one the device holds for the same organization and layer;
+- its `issuedAt` is not before the held policy's (`FAC-SEM-041`).
 
 It reports the revision it holds for each delivered layer in every check-in.
+
+**Expiry** (DEC-0053). A delivered layer MAY carry `expiresAt`. After the earliest one passes, and until
+a newer policy arrives, the device keeps every lock in force but stops honouring grants, stops remote
+execution, and lets no person's key serve someone else ([`expectedDecision`](../../src/device-rules.ts),
+`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked.
+
+<a id="collection-start"></a>
+
+**Collection start** (DEC-0053). A device collects for the organization only from its
+`collectionStart`: the time the person acknowledged the notice ([activity](activity.md#notice)) or,
+under device management, the earlier of that and the `mdm` layer's `noticeDeadline`
+([`collectionStart`](../../src/device-rules.ts)). The server states it in the enrollment and check-in
+responses. Without either, nothing is collected. An event that occurred before it is never uploaded,
+even after it passes: it stays on the device (`FAC-SEM-068`).
 
 **Precedence and locks.** Precedence is `mdm` > `server` > `user`. The effective value of a key is
 ([`resolvePolicy`](../../src/device-rules.ts)):
@@ -205,6 +260,37 @@ Schema: [`device-key-set.schema.json`](../../schemas/device-key-set.schema.json)
   set, and a device never verifies a policy or a key set under one (`verifyPolicySignature`,
   [`src/ed25519.ts`](../../src/ed25519.ts) `isSmallOrderKey`).
 - How a root key itself is replaced is a re-enrollment: the enrollment response carries the new one.
+- **A root key names its algorithm** (DEC-0053): `ed25519` (the default) or `es256`, ECDSA over P-256
+  with a 64-byte R ‖ S signature (RFC 7518 §3.4). The key set's `signature.alg` is the root's, and a
+  device verifies it only in that algorithm ([`verifyWith`](../../src/device-rules.ts), `FAC-SEM-046`).
+  Policy signing keys in a set stay Ed25519. This is the contract's own decision: Fabric's ES256 ruling
+  (its D2, ADR-0144) covers delegation tokens, not device policy.
+
+<a id="root-certification"></a>
+
+### Root certification
+
+Schema: [`device-root-certification.schema.json`](../../schemas/device-root-certification.schema.json).
+Operator decision 2026-10-08 (the organization edition's N7, R10-M3), as the first organization server's
+target architecture v4 narrowed it: a vendor's offline root counter-signs only the organizations it hosts,
+and a self-hosted organization's root is its own (DEC-0053).
+
+- When the device's installer **pins offline root keys**, the enrollment response carries a
+  `rootCertification` of the organization's root key, checked at enrollment time (`FAC-SEM-069`).
+- It is signed by a pinned key, or by a **delegation key** whose certificate (`delegation`) a pinned key
+  signed. A delegation certificate lives at most 30 days, is valid at enrollment, and its key is not on the
+  pinned key's `delegationRevocations` list. A delegated certification **must** carry that list, issued at most 7 days
+  before enrollment (TUF: metadata expires); without it, or with an older one, a compromised delegation key could
+  certify until its own certificate expires.
+- Each of the three documents is signed over the RFC 8785 form of itself without `signature`
+  ([`certificationSigningInput`](../../src/device-rules.ts); [canonical forms](conformance.md#canonical-forms)),
+  and names its algorithm, `ed25519` or `es256` ([`verifyWith`](../../src/device-rules.ts)): a verifier
+  accepts only the algorithm the key names.
+- Nothing pinned: no certification is required, and the root key from enrollment is the organization's
+  own.
+
+This follows The Update Framework's delegation from an offline root to short-lived online keys
+([TUF](https://theupdateframework.github.io/specification/v1.0.37/), pinned in the source ledger).
 
 <a id="check-in"></a>
 
@@ -217,7 +303,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 - `sequenceNum` increases by one per check-in. On a gap the server answers with the flag
   `report_full_state`, and the next check-in carries `fullState: true`. A gap in check-ins is lost
   synchronisation, not tampering.
-- `agent.version` and `agent.buildChannel` (`official`, `attested`, `unofficial`).
+- `agent.version` and `agent.buildChannel` (`official`, `attested`, `unofficial`), and optionally
+  `components[]`: each component's `name` and `version` — collector, node, key helper (DEC-0053).
 - `health.state` as the device sees itself, and `logging.enabled`.
 - `collectors[]`, one per collector node:
   - `collector.id` and `collector.epoch`;
@@ -231,14 +318,22 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   `server` layer is always reported, revision 0 when none arrived (schema), so a device cannot hide a
   revision by omitting the layer.
 - `certificate.serial` and `notAfter`.
+- optionally `records`, what the device holds of the records the relay protocol carries (DEC-0053):
+  the `estateRecord.revision` it applies, the latest `heartbeat` (`sequence`, `at`), the head of the
+  `revocationDelta` it applied (`sequence`, `sha256`) and the `leases` its meter holds (`leaseId`,
+  `expiresAt`). These are fields only: the heartbeat, the delta and the leases themselves are the relay
+  protocol's (DEC-0047, reserved), and a check-in response carries them in `records` unchanged.
 
-The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, a
-newer [key set](#key-sets) and a newer signed `policy` when there are some (never a `user` layer),
-and a `certificate.action` (`rotate` or `re-enroll`) when one is due.
+The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
+device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
+newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
+or `re-enroll`) when one is due.
 
 **Free text stays bounded.** Every `detail` and `error` string is one line of at most 200
-characters with no absolute or home path (schema `device-common#/$defs/detail`). It MUST NOT name a
-username or carry content.
+characters with no path in it (schema `device-common#/$defs/detail`, F-B-104): no slash, backslash or
+tilde at the start of a word anywhere in the line, no drive letter, no URL-encoded slash, and no home
+directory in its slash or dash form (`Users/<name>`, `-Users-<name>-`). It MUST NOT name a username
+or carry content.
 
 <a id="health"></a>
 
@@ -261,7 +356,10 @@ an open vocabulary; known states:
 | `outdated` | The collector's version or build channel is not allowed by policy. |
 
 `reasons[]` names what the judgement rests on (`code`, bounded `detail`). A reader shows an unknown
-state as it is. Reads of a device's health are logged in its person's
+state as it is. **`re_enrolled`** is posture, not tamper evidence (DEC-0052): it carries `gapSeconds`,
+the time between the last check-in under the earlier epoch and the re-enrollment, and `count`, the
+re-enrollments in the server's window. A re-enrollment resets the baseline and so hides nothing from
+the rules above, but a device that re-enrolls often, or after long gaps, is visible. Reads of a device's health are logged in its person's
 [access log](activity.md#access-log).
 
 <a id="tamper-evidence"></a>
@@ -269,14 +367,17 @@ state as it is. Reads of a device's health are logged in its person's
 ### Tamper evidence
 
 The server keeps, per stream and across batches, the seq ranges it **holds** (received, accepted or
-rejected) and the ranges **accounted for** by overflows and by check-ins' `dropped`. All coverage is
+rejected), the ranges **accounted for** by overflow events, and the ranges **pending**: a check-in's
+`dropped` whose overflow event has not arrived. Pending ranges count here and never in an ack, which
+moves only over what the receiver holds or an overflow accounts for ([activity](activity.md), DEC-0052,
+F-B-108). All coverage is
 computed by merging ranges, never seq by seq ([`tamperEvidence`](../../src/device-rules.ts),
 [`mergeDeviceState`](../../src/device-rules.ts)). Evidence is:
 
 - **a hole inside one batch**: a batch carries a contiguous slice of each stream;
 - **a gap below `bufferedFrom`**: once a check-in says every seq below `bufferedFrom` was sent or
-  dropped, a seq there that is neither held nor accounted for. Before that, a gap between batches is
-  pending — its overflow may still be buffered;
+  dropped, a seq there that is neither held, nor accounted for, nor pending. Before that, a gap
+  between batches is pending — its overflow may still be buffered;
 - **an epoch the server never issued** to the device;
 - **a collector counter that went back**: a `lastSeq` below a seq already held;
 - **a buffer floor that went back**: a `bufferedFrom` below one the device reported before. Events
@@ -292,23 +393,27 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a trusted key, stays in its organization and layer, and moves its revision forward; a user layer is never delivered |
-| `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default — with one layer per source and no lock in the user layer |
+| `FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
+| `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default, then the contract's default for an unset key — with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, and the signed-in user for SSO; it lives at most 30 days; the stream epoch is above every epoch issued before |
+| `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles; the stream epoch is above every epoch issued before |
 | `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device; every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
-| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
+| `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
+| `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
+| `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 
 Each kind checks one input:
 
 | Kind | Input |
 |---|---|
-| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?}`; `publicKey` is the raw 32-byte Ed25519 key in base64 |
-| `device-key-set` | `{root: {keyId, publicKey}, current?, next}` |
+| `device-policy-update` | `{current?, next, trustedKeys[{keyId, publicKey, notBefore?, notAfter?}], rootKeyId?, at}`; `publicKey` is the raw 32-byte Ed25519 key in base64; `at` is the device's clock when it verifies |
+| `device-key-set` | `{root: {keyId, alg?, publicKey}, current?, next}` |
 | `device-policy-resolution` | `{layers, effective}` |
-| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
-| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?}}` |
+| `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, pending?, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
+| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names |
 | `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
+| `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
+| `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are
 `fixtures/semantic/device-*`. Tests: `test/device-rules.test.ts`.

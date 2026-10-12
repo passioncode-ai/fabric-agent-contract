@@ -65,6 +65,13 @@ describe("fabric-settings-backup/1 (DEC-0025, FAC-SEM-035)", () => {
     expect(findings(surrogate)).toContainEqual(expect.objectContaining({ instancePath: "/tables/projects/rows/0/1" }));
   });
 
+  it("CT-25: refuses a column name with a lone surrogate instead of throwing", () => {
+    const backup = load("positive/settings-backup.json");
+    backup.tables.projects!.columns[0] = "id\uDC00";
+    expect(() => findings(backup)).not.toThrow();
+    expect(findings(backup)).toContainEqual(expect.objectContaining({ code: "FAC-SEM-035", instancePath: "/tables" }));
+  });
+
   it("refuses tables that hold connections, sessions, login codes or credentials, and keeps bindings by name", () => {
     const backup = load("positive/settings-backup.json");
     const withTable = (name: string) => ({ ...backup, counts: { ...backup.counts, [name]: 0 }, tables: { ...backup.tables, [name]: { columns: ["id"], rows: [] } } });

@@ -1,0 +1,11 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "kind": "notice.acknowledgement",
+  "noticeVersion": "2026-10.1",
+  "purposeIds": [
+    "spend.reconciliation",
+    "debugging",
+    "cost.result"
+  ],
+  "at": "2026-10-12T08:15:00Z"
+}

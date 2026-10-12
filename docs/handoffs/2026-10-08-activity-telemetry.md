@@ -22,12 +22,14 @@ check-in, health, and attribution by client certificate.
   - Content: enrollment, `streamEpoch`, re-enrollment resetting the policy baseline, attribution,
     policy layers, check-in with `bufferedFrom` and `dropped`, health, and tamper evidence kept
     across batches.
-  - Schemas: `device-common`, `device-enrollment`, `device-policy`, `device-check-in`,
-    `device-health`.
-  - Rules `FAC-SEM-041`…`045` live in [`src/device-rules.ts`](../../src/device-rules.ts).
+  - Schemas: `device-common`, `device-enrollment`, `device-policy`, `device-key-set`,
+    `device-check-in`, `device-health` (six; `device-key-set` came with the operator's key-set ruling below).
+  - Rules `FAC-SEM-041`…`046` live in [`src/device-rules.ts`](../../src/device-rules.ts).
+  - *Erratum 2026-10-12 (F-B-114):* this list first said five schemas and `041`…`045`, from before the
+    key-set ruling; the register in `conformance.md` owns the next free code.
 - Registers:
-  - [conformance](../specification/conformance.md#semantic-rule-codes): the register rows, and next
-    free code `FAC-SEM-046`;
+  - [conformance](../specification/conformance.md#semantic-rule-codes): the register rows (it owns
+    the next free code);
   - OQ-0009 and OQ-0010, narrowed by the review;
   - UX: persona P-03, JTBD-04, JRN-03, ST-007/008, FLW-06/07, SCR-09/10, SCN-010/011;
   - `CONTEXT.md` ("Telemetry event", "Collector node"), `docs/DOCMAP.md`, `README.md`,

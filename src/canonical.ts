@@ -25,12 +25,18 @@ function byCodePoint(a: string, b: string): number {
  * code point at every level, `", "` between members and elements, `": "` after a key, strings escaped as
  * `JSON.stringify` escapes them (`"`, `\` and the control characters; every other character written as itself),
  * integers in decimal. It equals Python's `json.dumps(value, sort_keys=True, ensure_ascii=False)`.
- * Refuses a non-finite number, a fraction, an integer outside ±(2^53 − 1), `undefined`, a function and a bigint.
- * It takes parsed JSON and does not check prototypes: a date or a map reads as `{}`. It does not refuse a lone
- * surrogate: `JSON.stringify` writes it as `\udxxx`, where Python writes the raw code unit and its UTF-8
- * encoding fails, so the settings-backup rule in `src/settings-backup.ts` refuses one in a cell.
+ * Refuses a non-finite number, a fraction, an integer outside ±(2^53 − 1), `undefined`, a function, a bigint, and a
+ * lone surrogate in any string or key (CT-25, DEC-0052): `JSON.stringify` would write it as `\udxxx`, where Python
+ * writes the raw code unit and its UTF-8 encoding fails, so the two would never agree on the bytes.
+ * It takes parsed JSON and does not check prototypes: a date or a map reads as `{}`.
  * Signs and hashes settings backups, device policies and key sets, activity `eventId` and `sourceKey`.
  */
+/** A string or key of the settings form; with the `u` flag `\p{Surrogate}` matches only a lone surrogate, never a pair. */
+function settingsString(text: string): string {
+  if (/\p{Surrogate}/u.test(text)) throw new TypeError("a lone surrogate has no canonical form: Python cannot encode it as UTF-8");
+  return JSON.stringify(text);
+}
+
 export function settingsCanonicalJson(value: unknown): string {
   if (value === null) return "null";
   if (typeof value === "boolean") return value ? "true" : "false";
@@ -38,11 +44,11 @@ export function settingsCanonicalJson(value: unknown): string {
     if (!Number.isSafeInteger(value)) throw new TypeError(`${value} has no canonical form: a settings backup stores a fraction as a string`);
     return String(value);
   }
-  if (typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "string") return settingsString(value);
   if (Array.isArray(value)) return `[${value.map(settingsCanonicalJson).join(", ")}]`;
   if (isObject(value)) {
     const keys = Object.keys(value).sort(byCodePoint);
-    return `{${keys.map((key) => `${JSON.stringify(key)}: ${settingsCanonicalJson(value[key])}`).join(", ")}}`;
+    return `{${keys.map((key) => `${settingsString(key)}: ${settingsCanonicalJson(value[key])}`).join(", ")}}`;
   }
   throw new TypeError(`${typeof value} is not a JSON value`);
 }

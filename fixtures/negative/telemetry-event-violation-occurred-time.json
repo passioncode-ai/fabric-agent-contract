@@ -1,0 +1,27 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "01K7B2V0Q8M3ZX4D6E9F1G2H3J",
+  "kind": "policy.violation",
+  "source": "switchboard",
+  "collector": {
+    "id": "switchboard",
+    "epoch": 2
+  },
+  "seq": 19,
+  "occurred": "2026-10-07T14:03:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "0",
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code"
+  },
+  "data": {
+    "day": "2026-10-07",
+    "provider": "anthropic",
+    "accountClass": "personal",
+    "reason": "personal_account_in_work_folder",
+    "count": 2
+  }
+}

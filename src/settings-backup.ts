@@ -52,8 +52,11 @@ export function settingsBackupRules(value: JsonObject): Finding[] {
   for (const name of Object.keys(counts)) {
     if (!Object.hasOwn(tables, name)) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts names ${name}, which the backup does not carry` });
   }
-  if (canonical && value.sha256 !== settingsBackupDigest(tables)) {
-    findings.push({ code: "FAC-SEM-035", instancePath: "/sha256", message: "the checksum does not match the tables: the file is damaged and a reader refuses it" });
+  if (canonical) {
+    // CT-25 (DEC-0052): a table or column name with a lone surrogate has no canonical form either; refused, never thrown.
+    let digest: string | null = null;
+    try { digest = settingsBackupDigest(tables); } catch { findings.push({ code: "FAC-SEM-035", instancePath: "/tables", message: "a table or column name with a lone surrogate has no canonical form" }); }
+    if (digest !== null && value.sha256 !== digest) findings.push({ code: "FAC-SEM-035", instancePath: "/sha256", message: "the checksum does not match the tables: the file is damaged and a reader refuses it" });
   }
   return findings;
 }

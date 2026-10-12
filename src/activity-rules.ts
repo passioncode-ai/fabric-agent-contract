@@ -1,6 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
-import { settingsCanonicalJson } from "./canonical.js";
+import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { type SeqRange, contiguousFrom, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
 
 // #region activity-rules — docs: docs/specification/activity.md#semantic-rules
@@ -109,6 +109,16 @@ export function pathSourceKey(telemetryKey: Uint8Array, relativePath: string, of
 /** `git.branch` when the policy asks for a hash: `hmac-sha256:` of the name under the device's telemetry key. */
 export function hashedBranch(telemetryKey: Uint8Array, branch: string): string {
   return `hmac-sha256:${createHmac("sha256", telemetryKey).update(branch, "utf8").digest("hex")}`;
+}
+
+/**
+ * The `tenantRef` of one of an organization's provider tenants (DEC-0052, DEC-0053): `sha256:` and the hex SHA-256 of the
+ * RFC 8785 form of `{provider, tenant}`. The policy lists the organization's tenants by it (`accounts.tenants`); a collector
+ * computes it for a session's tenant and, when it matches, labels the event `account.class: organization`. It never sends
+ * the reference of a tenant the policy does not list, so no hash of a person's own account leaves the device.
+ */
+export function tenantRef(provider: string, tenant: string): string {
+  return `sha256:${createHash("sha256").update(rfc8785({ provider, tenant }), "utf8").digest("hex")}`;
 }
 
 const events = (value: JsonObject) => (Array.isArray(value.events) ? value.events.filter(isObject) : []);
@@ -221,8 +231,14 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
     if (num(d.dropped.events) !== size) flag("/data/dropped/events", `${String(d.dropped.events)} dropped events for ranges that hold ${size}`);
     if (merged.some(([, to]) => to >= num(event.seq))) flag("/data/dropped/ranges", "an overflow names only seqs assigned before its own");
   }
-  if (typeof event.sourceKey === "string" && typeof event.source === "string" && event.eventId !== activityEventId(event.source, event.sourceKey)) {
-    flag("/eventId", "an event that names its sourceKey carries the derived id, so a re-read of the source yields the same eventId");
+  if (event.kind === "policy.violation" && typeof d.day === "string" && typeof event.occurred === "string" && !event.occurred.startsWith(`${d.day}T`)) {
+    flag("/occurred", "a policy violation carries its UTC day and no finer time: occurred is that day's midnight (DEC-0052)");
+  }
+  if (typeof event.sourceKey === "string" && typeof event.source === "string") {
+    // CT-25 (DEC-0052): the settings form refuses a lone surrogate, so the derivation is refused, never thrown.
+    let derived: string | null = null;
+    try { derived = activityEventId(event.source, event.sourceKey); } catch { flag("/sourceKey", "a source or sourceKey with a lone surrogate has no canonical form, so no eventId derives from it"); }
+    if (derived !== null && event.eventId !== derived) flag("/eventId", "an event that names its sourceKey carries the derived id, so a re-read of the source yields the same eventId");
   }
   return findings;
 }
@@ -251,19 +267,21 @@ function batchIntegrity(value: JsonObject): Finding[] {
 }
 
 /** What a receiver holds about one stream of one device, across batches: seqs held (received, accepted or rejected), seqs
- *  accounted for by overflows or a check-in's `dropped`, and the last `bufferedFrom` the device reported. */
-export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; bufferedFrom?: number }
+ *  accounted for by overflow events, seqs a check-in reports `dropped` whose overflow has not arrived (`pending`), and the
+ *  last `bufferedFrom` the device reported. Only held and accounted seqs are consumed, so only they move an ack; a pending
+ *  range is the device's word until its overflow event arrives, and counts for tamper evidence only (F-B-108, DEC-0052). */
+export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; pending?: SeqRange[]; bufferedFrom?: number }
 
 const stateKey = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
 
 /** The streams of one device after `batch` and `checkIn`, merged into what the receiver already holds. Ranges stay merged. */
 export function mergeStreams(known: readonly StreamState[], batch: JsonObject | null, checkIn: JsonObject | null): StreamState[] {
   const streams = new Map<string, StreamState>();
-  for (const s of known) streams.set(stateKey(s.collector as unknown as JsonObject), { ...s, held: [...s.held], accounted: [...s.accounted] });
+  for (const s of known) streams.set(stateKey(s.collector as unknown as JsonObject), { ...s, held: [...s.held], accounted: [...s.accounted], pending: [...(s.pending ?? [])] });
   const stream = (collector: JsonObject) => {
     const key = stateKey(collector);
     let s = streams.get(key);
-    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [] }; streams.set(key, s); }
+    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [], pending: [] }; streams.set(key, s); }
     return s;
   };
   for (const event of batch ? events(batch) : []) {
@@ -273,10 +291,10 @@ export function mergeStreams(known: readonly StreamState[], batch: JsonObject | 
   }
   for (const c of checkIn && Array.isArray(checkIn.collectors) ? checkIn.collectors.filter(isObject) : []) {
     const s = stream(isObject(c.collector) ? c.collector : {});
-    s.accounted.push(...rangesOf(c.dropped));
+    s.pending!.push(...rangesOf(c.dropped));
     if (typeof c.bufferedFrom === "number") s.bufferedFrom = Math.max(s.bufferedFrom ?? 0, c.bufferedFrom);
   }
-  return [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted) }));
+  return [...streams.values()].map((s) => ({ ...s, held: mergeRanges(s.held), accounted: mergeRanges(s.accounted), pending: mergeRanges(s.pending ?? []) }));
 }
 
 export interface StreamAck { collector: { id: string; epoch: number }; seq: number; held: SeqRange[] }
@@ -284,7 +302,8 @@ export interface StreamAck { collector: { id: string; epoch: number }; seq: numb
 /**
  * The ack of each stream after `batch`, over everything the receiver holds for it across batches: `seq` is the highest
  * seq up to which every seq is consumed — held, rejected (consumed with a rejection, never resent) or accounted for by an
- * overflow — and `held` the consumed ranges above it, which the device may drop as well.
+ * overflow event — and `held` the consumed ranges above it, which the device may drop as well. A check-in's `dropped`
+ * ranges (`pending`) are not consumed and never move an ack.
  */
 export function contiguousAcks(known: readonly StreamState[], batch: JsonObject): StreamAck[] {
   return mergeStreams(known, batch, null).map((s) => {
@@ -294,10 +313,12 @@ export function contiguousAcks(known: readonly StreamState[], batch: JsonObject)
   });
 }
 
-const asStreams = (value: unknown): StreamState[] => (Array.isArray(value) ? value.filter(isObject) : []).map((s) => ({
+/** Stream states as a receiver stores them (`[{collector, held, accounted, pending?, bufferedFrom?}]`). */
+export const asStreams = (value: unknown): StreamState[] => (Array.isArray(value) ? value.filter(isObject) : []).map((s) => ({
   collector: (isObject(s.collector) ? s.collector : {}) as StreamState["collector"],
   held: rangesOf(s.held),
   accounted: rangesOf(s.accounted),
+  pending: rangesOf(s.pending),
   ...(typeof s.bufferedFrom === "number" ? { bufferedFrom: s.bufferedFrom } : {})
 }));
 
@@ -362,12 +383,70 @@ function summaryShape(value: JsonObject): Finding[] {
   return findings;
 }
 
+/** Scopes whose rows carry a person's time or presence: served to another person only under a purpose the subject confirmed. */
+export const PRESENCE_SCOPES: ReadonlySet<string> = new Set(["activity.raw", "activity.presence"]);
+/** The scope of a person's usage and cost: served to another person only as sums per UTC day or billing period. */
+export const USAGE_SCOPE = "activity.usage";
+/** The scope of runs' results: never read as one person's data, only as project or agent cells (k ≥ 3, DEC-0030). */
+export const RESULTS_SCOPE = "activity.results";
+/** Every `activity.*` scope this profile names; another is refused when it is served to a person other than the subject. */
+export const ACTIVITY_SCOPES: ReadonlySet<string> = new Set([...PRESENCE_SCOPES, USAGE_SCOPE, RESULTS_SCOPE]);
+
+/**
+ * The purposes a subject has confirmed at `at`: those whose latest `consent` message at or before `at` says `given`.
+ * A consent message is neutral (DEC-0052); where a receiver keeps the record is its own business.
+ */
+export function confirmedPurposes(consents: readonly JsonObject[], at: string): Set<string> {
+  const latest = new Map<string, { when: number; consent: JsonObject }>();
+  const until = Date.parse(at);
+  for (const consent of consents) {
+    const when = Date.parse(String(consent.at ?? ""));
+    if (consent.kind !== "consent" || typeof consent.purposeId !== "string" || !(when <= until)) continue;
+    const before = latest.get(consent.purposeId);
+    if (!before || when >= before.when) latest.set(consent.purposeId, { when, consent });
+  }
+  return new Set([...latest].filter(([, { consent }]) => consent.state === "given").map(([purpose]) => purpose));
+}
+
+/**
+ * FAC-SEM-067 (OD-1 in neutral form, DEC-0052): `{log, consents?}` — of the reads an access log records, those served to
+ * a person other than the subject show the subject's time or presence only under a purpose the subject confirmed, and
+ * the subject's usage and cost only as sums per UTC day or billing period. `consents` are the subject's consent messages.
+ * The subject reading their own data, and a service that serves no person (a summary build), are not narrowed.
+ */
+function accessLogDisclosure(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-067", instancePath, message });
+  const log = isObject(value.log) ? value.log : {};
+  const subject = isObject(log.subject) && isObject(log.subject.user) ? log.subject.user.id : undefined;
+  const consents = Array.isArray(value.consents) ? value.consents.filter(isObject) : [];
+  (Array.isArray(log.entries) ? log.entries.filter(isObject) : []).forEach((entry, i) => {
+    const reader = isObject(entry.reader) && isObject(entry.reader.user) ? entry.reader.user.id : undefined;
+    if (reader === undefined || reader === subject) return;
+    const scope = String(entry.scope ?? "");
+    if (scope.startsWith("activity.") && !ACTIVITY_SCOPES.has(scope)) {
+      flag(`/log/entries/${i}/scope`, `${scope} is not a scope this profile names; a person's activity reaches another person only through the named scopes`);
+    }
+    if (scope === RESULTS_SCOPE) {
+      flag(`/log/entries/${i}/scope`, "results never reach another person keyed by one person: only as project or agent cells of at least 3");
+    }
+    if (scope === USAGE_SCOPE && entry.step !== "day" && entry.step !== "period") {
+      flag(`/log/entries/${i}/step`, "a person's usage and cost reach another person only as sums per UTC day or billing period");
+    }
+    if (PRESENCE_SCOPES.has(scope) && !(typeof entry.purposeId === "string" && confirmedPurposes(consents, String(entry.at ?? "")).has(entry.purposeId))) {
+      flag(`/log/entries/${i}/purposeId`, "a person's time and presence reach another person only under a purpose the subject confirmed");
+    }
+  });
+  return findings;
+}
+
 export function activityRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, "")];
   if (kind === "activity-batch") return [...noContentOrPerson(value, events(value).map((_, i) => `/events/${i}`)), ...batchCost(value), ...batchIntegrity(value)];
   if (kind === "activity-ack") return ackIntegrity(value);
   if (kind === "activity-summary") return [...summaryCost(value), ...summaryShape(value)];
+  if (kind === "access-log-disclosure") return accessLogDisclosure(value);
   return undefined;
 }
 // #endregion activity-rules

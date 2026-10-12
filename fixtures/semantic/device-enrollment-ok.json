@@ -116,6 +116,9 @@
     },
     "issuedEpochs": [
       1
-    ]
+    ],
+    "proof": {
+      "userId": "m-4821"
+    }
   }
 }

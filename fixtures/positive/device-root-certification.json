@@ -1,0 +1,31 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "root-certification",
+  "org": {
+    "id": "org-7f3a"
+  },
+  "subject": {
+    "keyId": "org-7f3a.root",
+    "alg": "es256",
+    "publicKey": "BO5AsWmy1nb8yh9auZXB1ULzAk2yqN53Rh//fxS6GEV9Yb+D7UOPkfX/RJylS/V1InoNY+kMyvG2qOFGEg05i4g="
+  },
+  "issuedAt": "2026-10-12T08:00:00Z",
+  "notAfter": "2027-10-12T08:00:00Z",
+  "delegation": {
+    "keyId": "vendor.delegation-2026-10",
+    "alg": "es256",
+    "publicKey": "BNo06DaqAPmw5BoERaKB5Y7QQOCG+u8TJTdsKH42zh+fU2vC+IlusdEn2GXAkdVxTrkteG/qfwpp5ssypRNslEM=",
+    "notBefore": "2026-10-01T00:00:00Z",
+    "notAfter": "2026-10-30T00:00:00Z",
+    "signature": {
+      "alg": "es256",
+      "keyId": "vendor.offline-root-a",
+      "value": "VNULmH6qkhds1e3UIraHrXLSNVf9if3lqP50KNTbP8l9XxFADzcAteiaoSjD7oR/oIfb91fxtBgotbP2Oc/yQA=="
+    }
+  },
+  "signature": {
+    "alg": "es256",
+    "keyId": "vendor.delegation-2026-10",
+    "value": "3lOlKx5g5UTNByENf6bA47sGQEq7/JMzfG2DdHmPtbJ5lfATkos0jYKrRAjOtFNzhDeVoOOYlxnrXu8Xj9bTCg=="
+  }
+}

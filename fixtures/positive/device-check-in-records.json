@@ -1,0 +1,81 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "check-in",
+  "device": {
+    "id": "dev-01j9a"
+  },
+  "sequenceNum": 288,
+  "at": "2026-10-07T09:32:05Z",
+  "agent": {
+    "version": "0.4.0",
+    "buildChannel": "official"
+  },
+  "health": {
+    "state": "healthy",
+    "since": "2026-10-07T08:30:10Z"
+  },
+  "logging": {
+    "enabled": true
+  },
+  "collectors": [
+    {
+      "collector": {
+        "id": "cc-otel",
+        "epoch": 2
+      },
+      "source": "claude_code.otel",
+      "lastSeq": 44,
+      "bufferedFrom": 45,
+      "dropped": [],
+      "healthy": true
+    },
+    {
+      "collector": {
+        "id": "switchboard",
+        "epoch": 2
+      },
+      "source": "switchboard",
+      "lastSeq": 7,
+      "bufferedFrom": 8,
+      "dropped": [],
+      "healthy": true
+    }
+  ],
+  "policy": {
+    "layers": [
+      {
+        "source": "mdm",
+        "revision": 3,
+        "status": "applied"
+      },
+      {
+        "source": "server",
+        "revision": 12,
+        "status": "applied"
+      }
+    ]
+  },
+  "certificate": {
+    "serial": "7b6578616d706c65",
+    "notAfter": "2026-10-14T08:30:05Z"
+  },
+  "records": {
+    "estateRecord": {
+      "revision": 12
+    },
+    "heartbeat": {
+      "sequence": 41,
+      "at": "2026-10-12T06:00:00Z"
+    },
+    "revocationDelta": {
+      "sequence": 318,
+      "sha256": "9b1c0e4f2a7d6c5b8e3f1a0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b"
+    },
+    "leases": [
+      {
+        "leaseId": "lease-org-7f3a-0412",
+        "expiresAt": "2026-10-13T06:00:00Z"
+      }
+    ]
+  }
+}

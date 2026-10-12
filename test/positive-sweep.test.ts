@@ -47,6 +47,7 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
 export const NOT_SWEPT: readonly string[] = [
   "access-log.schema.json",
   "activity-batch-ack.schema.json",
+  "activity-notice.schema.json",
   "admission.schema.json",
   "binding.schema.json",
   "comms-complete.schema.json",
@@ -59,6 +60,7 @@ export const NOT_SWEPT: readonly string[] = [
   "delegation-jwks.schema.json",
   "delegation-refusal.schema.json",
   "device-check-in.schema.json",
+  "device-root-certification.schema.json",
   "device-enrollment.schema.json",
   "device-health.schema.json",
   "device-key-set.schema.json",

@@ -338,6 +338,70 @@
         ]
       },
       "description": "The data of an extension kind or of a kind this reader does not know: at most two levels, scalar values, strings of at most 64 characters with no whitespace and no absolute path."
+    },
+    "accountClass": {
+      "enum": [
+        "organization",
+        "personal",
+        "unknown"
+      ],
+      "description": "The class of the account a session ran on: one of the organization's tenants, a person's own account, or not known (DEC-0052). It describes an account, never a person."
+    },
+    "tenantRef": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "sha256: and the hex SHA-256 of the RFC 8785 form of {provider, tenant} — the reference the organization's policy gives one of its tenants (accounts.tenants, DEC-0053). Only an organization account carries one (DEC-0052)."
+    },
+    "account": {
+      "type": "object",
+      "required": [
+        "class"
+      ],
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/accountClass"
+        },
+        "tenantRef": {
+          "$ref": "#/$defs/tenantRef"
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "type": "object",
+        "properties": {
+          "class": {
+            "const": "organization"
+          }
+        },
+        "required": [
+          "class"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "tenantRef": true
+        },
+        "required": [
+          "tenantRef"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "tenantRef": false
+        }
+      },
+      "description": "The account a session ran on (DEC-0052): its class, and for an organization account the tenant reference from the policy. A personal or unknown account carries no tenant reference, so no hash of a person's own tenant ever leaves the device."
+    },
+    "purposeId": {
+      "$ref": "#/$defs/name",
+      "description": "A purpose the organization's notice names (open vocabulary, DEC-0052)."
+    },
+    "noticeVersion": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "description": "The version of the organization's notice to the people concerned (DEC-0052)."
     }
   }
 }
