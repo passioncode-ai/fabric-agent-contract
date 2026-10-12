@@ -59,6 +59,7 @@ export const NOT_SWEPT: readonly string[] = [
   "delegation-jwks.schema.json",
   "delegation-refusal.schema.json",
   "device-check-in.schema.json",
+  "device-root-certification.schema.json",
   "device-enrollment.schema.json",
   "device-health.schema.json",
   "device-key-set.schema.json",

@@ -69,6 +69,7 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a host launching an agent on a model profile | resolves the profile in the order request, agent, binding or project, estate default; keeps only the models every class of which the project's spend policy allows; refuses the launch with `model-classes-empty`, naming the policy, when none stays; uses a subscription only in its vendor's runner | `FAC-SEM-059`, `FAC-SEM-060` | `test/runner-model-profiles.test.ts`, `src/profile-rules.ts` `resolveModelProfile` ([runners](runners.md#resolution), DEC-0046) |
 | an issuer of a key route's key | admits exactly the models of the runner profile's model profile (`key.modelAllowList`), and a proxy applies a catalogue row's `provider` routing without changing the model | `FAC-SEM-059`, `FAC-SEM-058` (the declaration) | the issuer's own test; the contract checks the declarations ([runners](runners.md#routes), DEC-0046) |
 | a device applying policy | applies a delivered policy only when it verifies under a key valid when it verifies and moves its revision forward, applies a key set only when it verifies under the root key, stays in its organization and moves its revision forward, and never lets a lower layer override a locked key | `FAC-SEM-041`, `FAC-SEM-042`, `FAC-SEM-046` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-policy-*` and `fixtures/semantic/device-key-set-*` ([devices](devices.md#policy), [key sets](devices.md#key-sets), DEC-0031, DEC-0053) |
+| a device deciding under its policy | keeps every lock after its policy expires, stops grants, remote execution and a person's key for others then, lets a person's key serve others only where sharing is `allowed`, uploads nothing that occurred before its collection start, and accepts a root key only certified by the offline root its installer pinned | `FAC-SEM-068`, `FAC-SEM-069` | `test/device-rules.test.ts`, fixtures `fixtures/semantic/device-action-*` and `fixtures/semantic/device-root-certification-*` ([devices](devices.md#policy), [root certification](devices.md#root-certification), DEC-0053) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
@@ -94,6 +95,7 @@ the [source ledger](../evidence/sources.md). The old names `canonicalJson` (`src
 | a settings backup's `sha256`, over `tables` | settings form | `settingsBackupDigest` | [service](service.md#settings-backup), DEC-0025 |
 | a device policy's Ed25519 signature, over the policy without `signature` — DEC-0031's "its canonical JSON" | settings form | `policySigningInput` | [devices](devices.md#policy), DEC-0031 |
 | a policy key set's signature under the root key | settings form | `policySigningInput`, as a policy | [devices](devices.md#key-sets), DEC-0031 |
+| a root certification, a delegation key's certificate and a delegation revocation list, each without `signature` | RFC 8785 | `certificationSigningInput` | [devices](devices.md#root-certification), DEC-0053 |
 | an activity event's derived `eventId`, over `{key, source}` | settings form | `activityEventId` | [activity](activity.md#event-id), DEC-0030 |
 | an organization tenant's `tenantRef`, over `{provider, tenant}` | RFC 8785 | `tenantRef` | [activity](activity.md#envelope), DEC-0052 |
 | a path-derived `sourceKey`, the HMAC over `{offset, path}` | settings form | `pathSourceKey` | [activity](activity.md#event-id), DEC-0030 |
@@ -195,6 +197,8 @@ register and carry no receipt.
 | `FAC-SEM-059` | `runner-profile` | [runners](runners.md#semantic-rules) | SEM-0059 |
 | `FAC-SEM-060` | `profile-resolution` | [runners](runners.md#semantic-rules) | SEM-0060 |
 | `FAC-SEM-067` | `access-log-disclosure` | [activity](activity.md#semantic-rules) | SEM-0067 |
+| `FAC-SEM-068` | `device-action` | [devices](devices.md#semantic-rules) | SEM-0068 |
+| `FAC-SEM-069` | `device-root-certification` | [devices](devices.md#semantic-rules) | SEM-0069 |
 
 ## Compatibility policy
 

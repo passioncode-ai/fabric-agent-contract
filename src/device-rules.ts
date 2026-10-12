@@ -2,7 +2,7 @@ import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
-import { settingsCanonicalJson } from "./canonical.js";
+import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { uncovered } from "./seq-ranges.js";
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
@@ -42,17 +42,34 @@ export function verifyPolicySignature(policy: JsonObject, publicKeyBase64: strin
   }
 }
 
-export interface EffectiveSetting { value: unknown; from: Source }
+export interface EffectiveSetting { value: unknown; from: Source | "default" }
+
+/**
+ * What a key resolves to when no layer sets it (DEC-0053): an organization's device runs only the official build,
+ * the organization manages only its own work (`machine.mode` C), and a person's key serves nobody else.
+ */
+export const POLICY_DEFAULTS: Readonly<Record<string, unknown>> = {
+  "build_channel.allowed": "official",
+  "machine.mode": "C",
+  "models.personal_key_sharing": "forbidden"
+};
 
 /**
  * The effective value of every key across policy layers (DEC-0031): a key locked by any layer takes the
  * value of the highest layer that locks it; otherwise the user's own value; otherwise the highest layer
  * that sets it. Unlocked values above the user layer are defaults; a locked one is never overridden by a
- * lower layer.
+ * lower layer. A key no layer sets takes its `POLICY_DEFAULTS` value, and `machine.mode` A counts only from
+ * an mdm layer — a server or user layer cannot hand the whole machine to the organization (DEC-0053).
  */
 export function resolvePolicy(layers: readonly JsonObject[]): Record<string, EffectiveSetting> {
   const ordered = POLICY_PRECEDENCE.map((source) => layers.find((layer) => layer.source === source)).filter((layer): layer is JsonObject => layer !== undefined);
-  const keysOf = (layer: JsonObject) => (isObject(layer.keys) ? layer.keys : {});
+  const keysOf = (layer: JsonObject): JsonObject => {
+    const keys = isObject(layer.keys) ? layer.keys : {};
+    const mode = keys["machine.mode"];
+    if (layer.source === "mdm" || !isObject(mode) || mode.value !== "A") return keys;
+    const { "machine.mode": _ignored, ...rest } = keys;
+    return rest;
+  };
   const names = new Set(ordered.flatMap((layer) => Object.keys(keysOf(layer))));
   const effective: Record<string, EffectiveSetting> = {};
   for (const name of names) {
@@ -63,7 +80,25 @@ export function resolvePolicy(layers: readonly JsonObject[]): Record<string, Eff
     const winner = locker ?? user ?? top;
     if (winner) effective[name] = { value: (setting(winner) as JsonObject).value, from: winner.source as Source };
   }
+  for (const [name, value] of Object.entries(POLICY_DEFAULTS)) if (!(name in effective)) effective[name] = { value, from: "default" };
   return effective;
+}
+
+/** The earliest `expiresAt` of the delivered layers, or NaN when none expires. */
+export function policyExpiry(layers: readonly JsonObject[]): number {
+  const times = layers.filter((layer) => layer.source !== "user" && typeof layer.expiresAt === "string").map((layer) => Date.parse(String(layer.expiresAt)));
+  return times.length ? Math.min(...times) : Number.NaN;
+}
+
+/**
+ * When a device starts collecting for the organization (DEC-0053, the operator's N9): the person's acknowledgement of the
+ * notice, or — under device management — the earlier of that and the mdm layer's `noticeDeadline`. NaN when neither is
+ * known: nothing is collected. Events that occurred before it stay on the device, even after it passes.
+ */
+export function collectionStart(layers: readonly JsonObject[], acknowledgedAt?: string): number {
+  const mdm = layers.find((layer) => layer.source === "mdm");
+  const times = [acknowledgedAt, mdm?.noticeDeadline].filter((t): t is string => typeof t === "string").map(Date.parse).filter((t) => !Number.isNaN(t));
+  return times.length ? Math.min(...times) : Number.NaN;
 }
 
 /**
@@ -357,6 +392,137 @@ function keySet(value: JsonObject): Finding[] {
   return findings;
 }
 
+/** Actions a device decides under its policy (FAC-SEM-068). */
+export type DeviceActionKind = "grant" | "remote-execution" | "personal-key-call" | "local-change" | "upload";
+
+/**
+ * What a device must decide for `action` at `at` under `layers` (DEC-0053), with the reason when it must refuse:
+ * - after the earliest `expiresAt`, grants, remote execution and a person's key serving others stop;
+ * - a local change to a locked key is refused, expired or not: locks stay in force;
+ * - a person's key serves someone else's call only when `models.personal_key_sharing` resolves to `allowed`, and absent
+ *   means forbidden;
+ * - an event is uploaded only when it occurred at or after the device's collection start.
+ */
+export function expectedDecision(layers: readonly JsonObject[], at: string, action: JsonObject, acknowledgedAt?: string): { decision: "allow" | "refuse"; reason: string } {
+  const now = Date.parse(at);
+  const expired = now > policyExpiry(layers);
+  const effective = resolvePolicy(layers);
+  const allow = { decision: "allow" as const, reason: "" };
+  const refuse = (reason: string) => ({ decision: "refuse" as const, reason });
+  switch (action.kind) {
+    case "grant":
+    case "remote-execution":
+      return expired ? refuse(`the policy expired, so ${String(action.kind)} stops until a newer policy arrives`) : allow;
+    case "personal-key-call":
+      if (expired) return refuse("the policy expired, so a person's key serves nobody else");
+      return effective["models.personal_key_sharing"]?.value === "allowed" ? allow : refuse("a person's key serves someone else only where the policy says allowed; absent means forbidden");
+    case "local-change": {
+      const locked = layers.some((layer) => layer.source !== "user" && isObject(layer.keys) && isObject(layer.keys[String(action.key)]) && (layer.keys[String(action.key)] as JsonObject).locked === true);
+      return locked ? refuse(`${String(action.key)} is locked, and locks stay in force after the policy expires`) : allow;
+    }
+    case "upload": {
+      const start = collectionStart(layers, acknowledgedAt);
+      if (Number.isNaN(start)) return refuse("collection has not started: the notice is not acknowledged and no deadline applies");
+      return Date.parse(String(action.occurred ?? "")) >= start ? allow : refuse("the event occurred before collection started; it stays on the device");
+    }
+    default:
+      return allow;
+  }
+}
+
+/** FAC-SEM-068: `{layers, at, acknowledgedAt?, action, decision}` — the device's decision is the one its policy gives. */
+function deviceAction(value: JsonObject): Finding[] {
+  const layers = Array.isArray(value.layers) ? value.layers.filter(isObject) : [];
+  const action = isObject(value.action) ? value.action : {};
+  const want = expectedDecision(layers, String(value.at ?? ""), action, typeof value.acknowledgedAt === "string" ? value.acknowledgedAt : undefined);
+  if (value.decision === want.decision) return [];
+  return [{ code: "FAC-SEM-068", instancePath: "/decision", message: want.decision === "refuse" ? `the device must refuse: ${want.reason}` : `nothing in the policy refuses this ${String(action.kind)}` }];
+}
+
+/** DER prefix of a P-256 SubjectPublicKeyInfo (RFC 5480); the 65-byte uncompressed point follows it. */
+const P256_SPKI_PREFIX = Buffer.from("3059301306072a8648ce3d020106082a8648ce3d030107034200", "hex");
+
+/**
+ * Whether `signature` (base64) over `bytes` verifies under `key` (`{alg, publicKey}`): `ed25519` with a raw 32-byte key
+ * (never one of small order, DEC-0045), or `es256` with a raw 65-byte uncompressed P-256 point and a 64-byte r‖s
+ * signature (DEC-0053). A verifier accepts only the algorithm the key names.
+ */
+export function verifyWith(key: JsonObject, bytes: Buffer, signature: unknown): boolean {
+  if (typeof key.publicKey !== "string" || typeof signature !== "string") return false;
+  const raw = Buffer.from(key.publicKey, "base64");
+  const value = Buffer.from(signature, "base64");
+  try {
+    if ((key.alg ?? "ed25519") === "ed25519") {
+      if (raw.length !== 32 || isSmallOrderKey(raw)) return false;
+      return verify(null, bytes, createPublicKey({ key: Buffer.concat([ED25519_SPKI_PREFIX, raw]), format: "der", type: "spki" }), value);
+    }
+    if (key.alg === "es256") {
+      if (raw.length !== 65 || raw[0] !== 0x04) return false;
+      return verify("sha256", bytes, { key: createPublicKey({ key: Buffer.concat([P256_SPKI_PREFIX, raw]), format: "der", type: "spki" }), dsaEncoding: "ieee-p1363" }, value);
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+/** The bytes a root certification, a delegation certificate or a revocation list is signed over: RFC 8785 without `signature`. */
+export function certificationSigningInput(document: JsonObject): Buffer {
+  const { signature: _signature, ...signed } = document;
+  return Buffer.from(rfc8785(signed), "utf8");
+}
+
+/** The longest a delegation key's certificate may live (DEC-0053, the operator's R10-M3). */
+export const MAX_DELEGATION_DAYS = 30;
+
+/**
+ * FAC-SEM-069: `{pinned?, root, certification?, revocations?, at}` — when the device's installer pinned offline root keys
+ * (`pinned`), the organization's root key from enrollment (`root`, `policyRootKey`) is certified by one of them, checked at
+ * enrollment time `at`: directly, or by a delegation key whose certificate a pinned key signed, that lives at most 30 days,
+ * is valid at `at` and is not on the revocation list a pinned key signed. With nothing pinned the organization's root is its
+ * own (a self-hosted organization) and nothing is required (DEC-0053).
+ */
+function rootCertification(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-069", instancePath, message });
+  const pinned = Array.isArray(value.pinned) ? value.pinned.filter(isObject) : [];
+  if (!pinned.length) return findings;
+  const certification = isObject(value.certification) ? value.certification : null;
+  if (!certification) { flag("/certification", "the installer pinned an offline root, so the organization's root key carries its counter-signature"); return findings; }
+  const root = isObject(value.root) ? value.root : {};
+  const subject = isObject(certification.subject) ? certification.subject : {};
+  const algOf = (key: JsonObject) => key.alg ?? "ed25519";
+  if (subject.keyId !== root.keyId || subject.publicKey !== root.publicKey || algOf(subject) !== algOf(root)) flag("/certification/subject", "the certification names another key than the organization's root key from enrollment");
+  const at = Date.parse(String(value.at ?? ""));
+  if (!(at <= Date.parse(String(certification.notAfter ?? "")) && at >= Date.parse(String(certification.issuedAt ?? "")))) flag("/certification/notAfter", "the certification is not valid at enrollment time");
+  const signature = isObject(certification.signature) ? certification.signature : {};
+  const pinnedKey = (keyId: unknown) => pinned.find((key) => key.keyId === keyId);
+  const delegation = isObject(certification.delegation) ? certification.delegation : null;
+  let signer: JsonObject | undefined;
+  if (!delegation) {
+    signer = pinnedKey(signature.keyId);
+    if (!signer) flag("/certification/signature/keyId", "a key outside the pinned chain signed the certification");
+  } else {
+    const issuer = isObject(delegation.signature) ? delegation.signature : {};
+    const offline = pinnedKey(issuer.keyId);
+    if (!offline || algOf(offline) !== issuer.alg || !verifyWith(offline, certificationSigningInput(delegation), issuer.value)) flag("/certification/delegation/signature", "the delegation key's certificate is not signed by a pinned offline root key");
+    const from = Date.parse(String(delegation.notBefore ?? "")), to = Date.parse(String(delegation.notAfter ?? ""));
+    if (!(to > from) || to - from > MAX_DELEGATION_DAYS * DAY_MS) flag("/certification/delegation/notAfter", `a delegation key's certificate lives at most ${MAX_DELEGATION_DAYS} days`);
+    else if (!(at >= from && at <= to)) flag("/certification/delegation/notAfter", "the delegation key's certificate is not valid at enrollment time");
+    const revocations = isObject(value.revocations) ? value.revocations : null;
+    if (revocations) {
+      const listSignature = isObject(revocations.signature) ? revocations.signature : {};
+      const listSigner = pinnedKey(listSignature.keyId);
+      if (!listSigner || algOf(listSigner) !== listSignature.alg || !verifyWith(listSigner, certificationSigningInput(revocations), listSignature.value)) flag("/revocations/signature", "the revocation list is not signed by a pinned offline root key");
+      else if (Array.isArray(revocations.revoked) && revocations.revoked.includes(delegation.keyId)) flag("/certification/delegation/keyId", "the delegation key is revoked by the offline root's list");
+    }
+    signer = signature.keyId === delegation.keyId ? delegation : undefined;
+    if (!signer) flag("/certification/signature/keyId", "a delegated certification is signed by the delegation key it carries");
+  }
+  if (signer && (algOf(signer) !== signature.alg || !verifyWith(signer, certificationSigningInput(certification), signature.value))) flag("/certification/signature/value", "the certification's signature does not verify");
+  return findings;
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -365,6 +531,8 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-enrollment") return enrollment(value);
   if (kind === "device-attribution") return attribution(value);
   if (kind === "device-key-set") return keySet(value);
+  if (kind === "device-action") return deviceAction(value);
+  if (kind === "device-root-certification") return rootCertification(value);
   return undefined;
 }
 // #endregion device-rules

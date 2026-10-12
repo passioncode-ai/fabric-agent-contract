@@ -1,0 +1,14 @@
+{
+  "protocol": "fabric-device/0.1",
+  "kind": "delegation-revocations",
+  "revision": 4,
+  "issuedAt": "2026-10-11T00:00:00Z",
+  "revoked": [
+    "vendor.delegation-2026-08"
+  ],
+  "signature": {
+    "alg": "es256",
+    "keyId": "vendor.offline-root-a",
+    "value": "tbRsLUtuAyXtNMvz0ZjtN8R5yO7B1Pt4Lo5R7qGo1vXGiyboqpDqAk6OVr/cLPuapGUdVfBhemeZMIXQqrwGsg=="
+  }
+}

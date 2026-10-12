@@ -108,6 +108,14 @@
       "x-example.banner": {
         "value": "quiet",
         "from": "user"
+      },
+      "machine.mode": {
+        "value": "C",
+        "from": "default"
+      },
+      "models.personal_key_sharing": {
+        "value": "forbidden",
+        "from": "default"
       }
     }
   }

@@ -1,0 +1,13 @@
+{
+  "description": "Nothing pinned: a self-hosted organization's root is its own, and no certification is required (DEC-0053).",
+  "kind": "device-root-certification",
+  "expect": [],
+  "input": {
+    "root": {
+      "keyId": "org-7f3a.root",
+      "alg": "es256",
+      "publicKey": "BO5AsWmy1nb8yh9auZXB1ULzAk2yqN53Rh//fxS6GEV9Yb+D7UOPkfX/RJylS/V1InoNY+kMyvG2qOFGEg05i4g="
+    },
+    "at": "2026-10-12T09:00:00Z"
+  }
+}

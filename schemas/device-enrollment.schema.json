@@ -212,6 +212,14 @@
           "$ref": "device-key-set.schema.json#/$defs/publicKey",
           "description": "The organization's root key. It signs policy key sets only, never a policy (FAC-SEM-046)."
         },
+        "rootCertification": {
+          "$ref": "device-root-certification.schema.json#/$defs/certification",
+          "description": "The root key's certification by an offline root the installer pinned, when it pinned one (FAC-SEM-069, DEC-0053)."
+        },
+        "delegationRevocations": {
+          "$ref": "device-root-certification.schema.json#/$defs/revocations",
+          "description": "The pinned offline root's current list of revoked delegation keys (FAC-SEM-069)."
+        },
         "checkIn": {
           "type": "object",
           "required": [
@@ -225,6 +233,10 @@
             }
           },
           "additionalProperties": false
+        },
+        "collectionStart": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "As in the check-in response: when this device's collection for the organization started (DEC-0053)."
         },
         "keySet": {
           "$ref": "device-key-set.schema.json"

@@ -65,6 +65,28 @@
           },
           "additionalProperties": false
         },
+        "components": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "activity-common.schema.json#/$defs/name"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "The device's components and their versions — collector, node, key helper — so the server can tell an outdated one (DEC-0053)."
+        },
         "health": {
           "type": "object",
           "required": [
@@ -256,6 +278,10 @@
               "report_full_state"
             ]
           }
+        },
+        "collectionStart": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When this device's collection for the organization started: the notice's acknowledgement, or under device management the earlier of it and the deadline (DEC-0053). Absent: not started. Events that occurred before it are never uploaded."
         },
         "keySet": {
           "$ref": "device-key-set.schema.json"

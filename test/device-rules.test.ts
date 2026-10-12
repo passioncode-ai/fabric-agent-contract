@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { type DeviceState, mergeDeviceState, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature } from "../src/device-rules.js";
+import { type DeviceState, certificationSigningInput, collectionStart, expectedDecision, mergeDeviceState, policyExpiry, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature, verifyWith } from "../src/device-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { mergeRanges, uncovered } from "../src/seq-ranges.js";
 
@@ -14,12 +14,12 @@ const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, r
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…046)", () => {
+describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {
@@ -356,5 +356,132 @@ describe("F-B-109: the reader row of a device applying policy names its key-set 
     const row = conformance.split("\n").find((line) => line.startsWith("| a device applying policy |"));
     expect(row).toContain("`FAC-SEM-046`");
     expect(row).toContain("fixtures/semantic/device-key-set-*");
+  });
+});
+
+// CON-OE-12 (DEC-0053): defaults, machine mode, expiry, a person's key for others, collection start, and the root key's
+// certification by an installer-pinned offline root.
+describe("CON-OE-12: what a device resolves and decides under its policy", () => {
+  const organization = () => load("positive/device-policy-organization.json");
+  const managed = () => load("positive/device-policy-mdm-managed.json");
+
+  it("resolves an unset build channel to official, machine mode to C and a person's key sharing to forbidden", () => {
+    const effective = resolvePolicy([organization()]);
+    expect(effective["build_channel.allowed"]).toEqual({ value: "official", from: "default" });
+    expect(effective["machine.mode"]).toEqual({ value: "C", from: "default" });
+    expect(effective["models.personal_key_sharing"]).toEqual({ value: "forbidden", from: "server" });
+    const open = organization();
+    delete open.keys["models.personal_key_sharing"];
+    expect(resolvePolicy([open])["models.personal_key_sharing"]).toEqual({ value: "forbidden", from: "default" });
+  });
+
+  it("takes machine mode A only from an mdm layer", () => {
+    expect(resolvePolicy([managed(), organization()])["machine.mode"]).toEqual({ value: "A", from: "mdm" });
+    const server = organization();
+    server.keys["machine.mode"] = { value: "A", locked: true };
+    expect(resolvePolicy([server])["machine.mode"]).toEqual({ value: "C", from: "default" });
+    server.keys["machine.mode"] = { value: "C" };
+    expect(resolvePolicy([server])["machine.mode"]).toEqual({ value: "C", from: "server" });
+  });
+
+  it("starts collection at the acknowledgement, or under device management at the earlier of it and the deadline", () => {
+    expect(collectionStart([organization()], "2026-10-12T10:00:00Z")).toBe(Date.parse("2026-10-12T10:00:00Z"));
+    expect(collectionStart([organization()])).toBeNaN();
+    expect(collectionStart([managed(), organization()])).toBe(Date.parse("2026-10-15T00:00:00Z"));
+    expect(collectionStart([managed(), organization()], "2026-10-13T00:00:00Z")).toBe(Date.parse("2026-10-13T00:00:00Z"));
+    expect(collectionStart([managed(), organization()], "2026-10-20T00:00:00Z")).toBe(Date.parse("2026-10-15T00:00:00Z"));
+  });
+
+  it("expires at the earliest delivered layer's expiresAt, and a user layer's never counts", () => {
+    expect(policyExpiry([organization()])).toBe(Date.parse("2026-10-19T08:00:00Z"));
+    expect(policyExpiry([managed()])).toBeNaN();
+    const user = { source: "user", expiresAt: "2026-10-13T00:00:00Z", keys: {} };
+    expect(policyExpiry([organization(), user])).toBe(Date.parse("2026-10-19T08:00:00Z"));
+  });
+
+  it("decides each action as its policy says", () => {
+    const layers = [managed(), organization()];
+    const before = "2026-10-13T09:00:00Z", after = "2026-10-20T09:00:00Z";
+    expect(expectedDecision(layers, before, { kind: "grant" }).decision).toBe("allow");
+    expect(expectedDecision(layers, after, { kind: "personal-key-call" }).decision).toBe("refuse");
+    expect(expectedDecision(layers, after, { kind: "local-change", key: "retention.raw_days" }).decision).toBe("allow");
+    expect(expectedDecision(layers, after, { kind: "local-change", key: "build_channel.allowed" }).decision).toBe("refuse");
+    expect(expectedDecision([organization()], before, { kind: "upload", occurred: before }).decision).toBe("refuse");
+    expect(expectedDecision(layers, before, { kind: "x-example.unknown" }).decision).toBe("allow");
+    const exactly = (value: unknown) => evaluateSemanticRules("device-action", value).map((f) => `${f.code} ${f.instancePath} ${f.message}`);
+    expect(exactly({ layers, at: before, action: { kind: "grant" }, decision: "refuse" })).toEqual(["FAC-SEM-068 /decision nothing in the policy refuses this grant"]);
+  });
+});
+
+describe("FAC-SEM-069: the organization's root key chains to an installer-pinned offline root", () => {
+  const fixture = (name: string) => load(`semantic/device-root-certification-${name}.json`).input;
+  const where = (value: unknown) => paths("device-root-certification", value);
+
+  it("verifies ES256 and Ed25519 signatures only under the algorithm the key names", () => {
+    const { input } = { input: fixture("delegated") };
+    const delegation = input.certification.delegation;
+    const offline = input.pinned.find((key: Json) => key.keyId === delegation.signature.keyId);
+    expect(verifyWith(offline, certificationSigningInput(delegation), delegation.signature.value)).toBe(true);
+    expect(verifyWith({ ...offline, alg: "ed25519" }, certificationSigningInput(delegation), delegation.signature.value)).toBe(false);
+    expect(verifyWith({ ...offline, alg: "rs256" }, certificationSigningInput(delegation), delegation.signature.value)).toBe(false);
+    const direct = fixture("direct").certification;
+    const ed = fixture("direct").pinned.find((key: Json) => key.keyId === direct.signature.keyId);
+    expect(verifyWith(ed, certificationSigningInput(direct), direct.signature.value)).toBe(true);
+    expect(verifyWith({ ...ed, publicKey: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" }, certificationSigningInput(direct), direct.signature.value)).toBe(false);
+  });
+
+  it("refuses a certification of another key, one changed after signing, and a direct one signed by a delegation-shaped key", () => {
+    const other = fixture("direct");
+    other.root = { ...other.root, keyId: "org-7f3a.root-2" };
+    expect(where(other)).toEqual(["FAC-SEM-069 /certification/subject"]);
+    const altered = fixture("direct");
+    altered.certification.notAfter = "2030-10-12T08:00:00Z";
+    expect(where(altered)).toEqual(["FAC-SEM-069 /certification/signature/value"]);
+    const late = fixture("direct");
+    late.at = "2028-01-01T00:00:00Z";
+    expect(where(late)).toEqual(["FAC-SEM-069 /certification/notAfter"]);
+  });
+
+  it("refuses a delegated certification whose delegation or revocation list a pinned key did not sign", () => {
+    const forged = fixture("delegated");
+    forged.certification.delegation.notAfter = "2026-10-29T00:00:00Z";
+    expect(where(forged)).toContain("FAC-SEM-069 /certification/delegation/signature");
+    const list = fixture("delegated");
+    list.revocations.revision = 9;
+    expect(where(list)).toEqual(["FAC-SEM-069 /revocations/signature"]);
+    const signer = fixture("delegated");
+    signer.certification.signature.keyId = signer.pinned[0].keyId;
+    expect(where(signer)).toEqual(["FAC-SEM-069 /certification/signature/keyId"]);
+  });
+});
+
+describe("CON-OE-12 and FAC-SEM-069: the edges the plants found", () => {
+  it("stops a person's key for others after expiry even where sharing is allowed", () => {
+    const sharing = load("positive/device-policy-organization.json");
+    sharing.keys["models.personal_key_sharing"] = { value: "allowed" };
+    expect(expectedDecision([sharing], "2026-10-13T09:00:00Z", { kind: "personal-key-call" }).decision).toBe("allow");
+    expect(expectedDecision([sharing], "2026-10-20T09:00:00Z", { kind: "personal-key-call" }).decision).toBe("refuse");
+  });
+
+  it("names the unpinned signer of a certification as outside the chain", () => {
+    expect(paths("device-root-certification", load("semantic/device-root-certification-outside-chain.json").input)).toEqual(["FAC-SEM-069 /certification/signature/keyId"]);
+  });
+
+  it("refuses a signature whose declared algorithm is not its key's", () => {
+    const delegated = load("semantic/device-root-certification-delegated.json").input;
+    delegated.certification.delegation.signature.alg = "ed25519";
+    expect(paths("device-root-certification", delegated)).toContain("FAC-SEM-069 /certification/delegation/signature");
+    const list = load("semantic/device-root-certification-delegated.json").input;
+    list.revocations.signature.alg = "ed25519";
+    expect(paths("device-root-certification", list)).toEqual(["FAC-SEM-069 /revocations/signature"]);
+    const direct = load("semantic/device-root-certification-direct.json").input;
+    direct.certification.signature.alg = "es256";
+    expect(paths("device-root-certification", direct)).toEqual(["FAC-SEM-069 /certification/signature/value"]);
+  });
+
+  it("never verifies an Ed25519 key labelled es256, nor a P-256 key labelled ed25519", () => {
+    const direct = load("semantic/device-root-certification-direct.json").input;
+    const ed = direct.pinned.find((key: Json) => key.keyId === direct.certification.signature.keyId);
+    expect(verifyWith({ ...ed, alg: "es256" }, certificationSigningInput(direct.certification), direct.certification.signature.value)).toBe(false);
   });
 });
