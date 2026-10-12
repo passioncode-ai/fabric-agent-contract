@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | this pull request |
+| [2026-10-12 data on feed events (P6-07)](2026-10-12-w6-p6-07-feed-data.md) | DEC-0070 (board run P6-07) | this pull request |
+| [2026-10-12 an app's own descriptor (P6-06)](2026-10-12-w6-p6-06-app-descriptor.md) | DEC-0069 (board run P6-06; Fabric CO-263) | merged, #73 `fee53a2` |
 | [2026-10-12 the owed readings' follow-ups (P6-08)](2026-10-12-w6-p6-08-owed-followups.md) | annotations on DEC-0054, 0062–0065 (board run P6-08) | merged, #75 `3cb040c` |
 | [2026-10-12 the session join key (P6-02)](2026-10-12-w6-p6-02-session-join.md) | DEC-0068 (board run P6-02; CON-OE-08) | merged, #72 `0656aa1` |
 | [2026-10-12 protocol revisions (P6-01)](2026-10-12-w6-p6-01-protocols.md) | DEC-0067 (board run P6-01; CON-OE-07) | merged, #71 `866d0b0` |

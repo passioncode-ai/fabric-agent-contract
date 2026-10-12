@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0070`
+**Next free ID:** `DEC-0071`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -3921,3 +3921,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** Fabric's session, CO-263 and its amendment (2026-10-12, Fabric `main` `bb0e6870`); DEC-0015, DEC-0032,
   DEC-0061; packet P6-06. DEC-0069 was reserved by git CAS (`--key w6-p6-06-app-descriptor-20261012 DEC`); no rule code
   was needed; the record plane is `fs`.
+
+### DEC-0070 — A service feed event may carry machine-readable `data`: a published schema and a bounded value, never a secret
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Asked for by a consumer service that publishes
+  daily activity summaries and unanswered community questions on its feed (2026-10-12), following option (b) of Fabric's
+  answer of 2026-10-11 (contract `1e7a7d6`). Consumer adoption: the adapter's kits let a service add `data` (CT-18);
+  Fabric reads it when it knows its schema and shows `text` otherwise (CT-19).
+- **Amends:** DEC-0015's events feed (`service-events-page.schema.json`, an optional member of an event). Packet P6-07.
+- **Decision:** in [service → Events feed](specification/service.md#event-data) —
+  1. **`data`** is optional: `{schema, value}`. `schema` is the absolute URI of a payload schema the service publishes;
+     `value` is an object of at most 32 members, each a scalar (a string of at most 500 characters, a number, a boolean,
+     null), a list of at most 32 scalars, or an object of at most 32 scalar members (schema).
+  2. **`text` stays the event.** A host that ignores `data` loses nothing; a host validates `value` against `schema` when
+     it knows that schema, otherwise treats it as opaque, and never fails an event for it.
+  3. **No secret, no personal data.** No string in `value` sits under a credential's name or has a credential's shape
+     (`FAC-SEM-101`, kind `service-events-page`, the shared detector of `src/secret-shape.ts`, values and URLs); a
+     list's items and an object's members count under the outer name too; a number under a name such as
+     `inputTokens` is a count. Personal data is the service's duty: no check tells a name from another string.
+- **Why:** consumers of a feed could only read the sentence; a summary or a question carried counts and ids a host had
+  to parse out of prose. A published schema keeps the fields the service's own, and the bounds keep a feed a feed.
+- **Compatibility:** Additive in the schema. The feed is pulled, so a service cannot know its readers' pins: a host that
+  validates events against a copy pinned before this decision refuses the new member (the event object is closed) until
+  it adopts this decision; a host that ignores unknown members, as Fabric Dashboards does, shows `text` as before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md`, `docs/specification/conformance.md`;
+  - schemas: `schemas/service-events-page.schema.json`;
+  - code: `src/feed-data.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/positive/service-events-page-data.json`, `fixtures/negative/service-events-page-data-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/feed-data.test.ts` (new), `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`; floor in
+    `vitest.config.ts`;
+  - docs: `docs/backlog.md` (CT-18, CT-19), `README.md`, `CONTEXT.md`, `docs/DOCMAP.md`.
+- **Not decided here:** a registry of payload schemas; `data` on the Server-Sent Events stream beyond "the same event
+  objects" it already carries.
+- **Source:** the consumer service's request (2026-10-12); Fabric's answer (contract `1e7a7d6`); DEC-0015; packet P6-07.
+  DEC-0070 and `FAC-SEM-101` were reserved by git CAS (`--key w6-p6-07-feed-data-20261012 DEC`, `--key
+  w6-p6-07-sem-feed-data-20261012 SEM`); the record plane is `fs`.

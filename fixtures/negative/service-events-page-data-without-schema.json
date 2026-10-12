@@ -1,0 +1,40 @@
+{
+  "events": [
+    {
+      "id": "4213",
+      "at": "2026-09-28T17:55:10Z",
+      "kind": "community.question_unanswered",
+      "level": "notice",
+      "text": "A question in the community chat has had no answer for 2 hours.",
+      "subject": {
+        "type": "report",
+        "id": "q3",
+        "label": "Q3 report"
+      },
+      "link": "/dashboard#/approvals/77",
+      "notify": true,
+      "data": {
+        "value": {
+          "questionId": "q-8812",
+          "waitingMinutes": 120,
+          "topics": [
+            "billing",
+            "export"
+          ],
+          "counts": {
+            "inputTokens": 1834,
+            "replies": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "4214",
+      "at": "2026-09-28T17:56:00Z",
+      "kind": "service.started",
+      "level": "info",
+      "text": "Service started on build 8b80be9."
+    }
+  ],
+  "cursor": "4214"
+}
