@@ -74,6 +74,26 @@
     "CT-05": "P2-04 #46 DEC-0046 (f41d8e6)",
     "CT-29": "P2-03 #45 DEC-0045 (2eb91c0)",
     "CT-31": "#47 (0b1cc4f)",
-    "F-D-004": "org-index #56 merged (X-4 pins)"
+    "F-D-004": "org-index #56 merged (X-4 pins)",
+    "CON-OE-01": "#52 (92de756)",
+    "CON-OE-12": "#52 (92de756)",
+    "CT-25": "#52 (92de756)",
+    "F-B-101": "#52 (92de756)",
+    "F-B-102": "#52 (92de756)",
+    "F-B-103": "#52 (92de756)",
+    "F-B-104": "#52 (92de756)",
+    "F-B-105": "#52 (92de756)",
+    "F-B-106": "#52 (92de756)",
+    "F-B-107": "#52 (92de756)",
+    "F-B-108": "#52 (92de756)",
+    "F-B-109": "#52 (92de756)",
+    "F-B-114": "#52 (92de756)",
+    "V4-DEVICE": "#52 (92de756)",
+    "V4-RUN-RESULT": "#52 (92de756)",
+    "V4-PACKAGE": "#50 (9d29d71)",
+    "V4-AGENTREF": "#50 (9d29d71)",
+    "V4-ESTATE-RECORD": "#54 (DEC-0055)",
+    "J-ENV / AL-01 / AS-01c / access-log/1": "measured done before the run (DEC-0030); the residual kinds are additive by DEC-0030 item 2 and skillset.digest moved to CON-OE-03 (N12)",
+    "V4-SECURE-TRANSPORT": "split on 2026-10-12 into V4-RELAY, V4-DELTA-HEARTBEAT, V4-WINDOW-LEASE and V4-SIGNING-CHALLENGE (node N18, wave 4)"
   }
 }
