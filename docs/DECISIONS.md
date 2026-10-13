@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0078`
+**Next free ID:** `DEC-0079`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -4082,6 +4082,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric serves the tools
   against these schemas after repinning (COM-02.3/COM-03); the adapter's kits read receipts and the directory
   (FAA-12a/b). Board rows CT-41 to CT-43.
+- **Annotated (2026-10-13):** amended by DEC-0078: a replacement's receipt carries `transferred`, each transferred request's revision and attempt.
 - **Annotated (2026-10-13):** its open question on a directory page's uniqueness is decided by DEC-0077 (`FAC-SEM-107`).
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
@@ -4378,3 +4379,37 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   own Project being absent is board state, not in the page, so no rule on the page can check it.
 - **Source:** the board row CT-43 (DEC-0073 *Not decided here*). DEC-0077 and `FAC-SEM-107` were reserved by git CAS
   (`--key ct43-directory-rule-20261013 DEC` and `SEM`); the record plane is `fs`.
+
+### DEC-0078 — A replacement's receipt carries the attempt of every request it transferred
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). Found by Fabric while it built COM-03 (its main
+  `3d7e7752`, pinned at DEC-0073): it now lets a `com.claim` naming such a request read the attempt back, a reading of
+  its own (its ADR-0149 Amendment 1 §3) that this decision replaces. Consumer adoption: Fabric answers
+  `com.responder_replace` with `transferred` (CT-41); the adapter's kits take the attempt from it (CT-42).
+- **Amends:** DEC-0073 (the receipt gains one optional member; no tool, argument or state changes).
+- **Decision:**
+  1. When `com.responder_replace` transfers accepted requests (`transfer.requests`), its receipt
+     (`comms-receipt.schema.json`) carries `transferred`: one `{request, revision, attempt}` per transferred request,
+     each request once, the `attempt` in the shape of the receipt's own `attempt` (`id`, `generation`, `digest`,
+     `leaseExpiresAt`), at most 64 (the replacement's own limit). The new holder's next fence on each request carries
+     those values, its `expectedRevision` from `revision`.
+  2. Only `com.responder_replace` answers `transferred`, and only for the requests it transferred. That receipt is the
+     only place the contract gives the attempt: a `com.claim` never moves an accepted request, and the contract defines
+     no read of an attempt through it.
+- **Why:** after a transfer the new holder owns accepted requests but had no attempt id, so it could not build a fence
+  for them. Of the two ways Fabric named — the receipt carries the attempts, or `com.claim` on an accepted request reads
+  its attempt without a transition — the receipt is one call, needs no second read, and adds no state-machine exception
+  to `com.claim`.
+- **Compatibility:** additive. A reader pinned at DEC-0073 validates receipts against a closed schema, so it refuses a
+  receipt that carries `transferred`; no reader does yet (the adapter's kits validate receipts from FAA-12b on, CT-42),
+  and Fabric, the one writer, adopts this with its repin (CT-41). A host that answers a transfer without `transferred`
+  leaves the new holder unable to fence those requests.
+- **Consequences / affects:** `schemas/comms-receipt.schema.json` (`transferred`); `fixtures/positive/comms-receipt-replace-transferred.json`
+  and seven negatives (`fixtures/negative/comms-receipt-transferred-*.json`) with `fixtures/catalogue.json`;
+  `test/comms-tools.test.ts` (the shape test and seven plants); `docs/specification/project-comms.md` (the tool table's
+  `com.responder_replace` answer, *Slots end with the session*); board rows CT-41 and CT-42.
+- **Not decided here:** what a `com.claim` naming an accepted request answers (it is not a claim; the board's refusal for
+  a request it cannot claim applies).
+- **Source:** Fabric's COM-03 finding (2026-10-13). DEC-0078 was reserved by git CAS (`--key receipt-transferred-20261013 DEC`);
+  no `FAC-SEM` id; the record plane is `fs`.
