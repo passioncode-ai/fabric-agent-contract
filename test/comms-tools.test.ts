@@ -67,8 +67,17 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
 
   it("answers a mutation with the one receipt, which names no sequence number", async () => {
     const receipt = await schema("comms-receipt.schema.json");
-    expect(Object.keys(receipt.properties).sort()).toEqual(["at", "attempt", "message", "ok", "repeated", "request", "slot", "thread"]);
+    expect(Object.keys(receipt.properties).sort()).toEqual(["at", "attempt", "message", "ok", "repeated", "request", "slot", "thread", "transferred"]);
     for (const row of TOOLS.filter((cells) => cells[3] !== "— (a read)")) expect(ticked(row[2] as string)[0], row[0]).toBe("comms-receipt.schema.json");
+  });
+
+  it("DEC-0078: a replacement's receipt gives each transferred request the attempt in the shape of `attempt`, and nothing else", async () => {
+    const receipt = await schema("comms-receipt.schema.json");
+    const item = receipt.properties.transferred.items;
+    expect(Object.keys(item.properties).sort()).toEqual(["attempt", "request"]);
+    expect(item.additionalProperties).toBe(false);
+    expect(item.properties.attempt).toEqual({ $ref: "#/properties/attempt" });
+    expect(receipt.properties.transferred.maxItems).toBe(64);
   });
 
   it("keeps the directory to ids, names, capabilities and responder state", async () => {
@@ -109,6 +118,10 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-request-with-seq", name: "request open", mutate: (s) => { s.properties.request.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-slot-with-holder", name: "slot open", mutate: (s) => { s.properties.slot.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-attempt-with-seq", name: "attempt open", mutate: (s) => { s.properties.attempt.additionalProperties = true; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-with-holder", name: "transferred item open", mutate: (s) => { s.properties.transferred.items.additionalProperties = true; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-over-limit", name: "transferred unbounded", mutate: (s) => { delete s.properties.transferred.maxItems; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-attempt", name: "transferred attempt optional", mutate: (s) => { s.properties.transferred.items.required = ["request"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-attempt-with-seq", name: "transferred attempt not the attempt shape", mutate: (s) => { s.properties.transferred.items.properties.attempt = { type: "object" }; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "responder reply open", mutate: (s) => { responderBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "participant reply open", mutate: (s) => { participantBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-neither", name: "responder reply without fence", mutate: (s) => { responderBranch(s).required = ["body"]; } },

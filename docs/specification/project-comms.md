@@ -185,7 +185,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 | `com.effect_begin` | `comms-effect-begin.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.complete` | `comms-complete.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.reconcile` | `comms-reconcile.schema.json` | `comms-receipt.schema.json`: `request` | yes |
-| `com.responder_replace` | `comms-responder-replace.schema.json` | `comms-receipt.schema.json`: `slot` | yes |
+| `com.responder_replace` | `comms-responder-replace.schema.json` | `comms-receipt.schema.json`: `slot`, and `transferred` when it transferred requests | yes |
 
 ### Receipts
 
@@ -223,7 +223,10 @@ each request afterwards is an operation that table already has:
 
 - a released `claimed` request stays `claimed`, and the next `com.claim` takes it as a lapsed claim (`com.claim`,
   `claimed` → `claimed` with a new attempt);
-- an `accepted` one is held (C4), and a new responder continues it only by a checkpoint transfer;
+- an `accepted` one is held (C4), and a new responder continues it only by a checkpoint transfer: the replacement's
+  receipt gives it, for each request it transferred, the attempt it continues under (`transferred`, DEC-0078), the
+  values its next fence on that request carries. That receipt is the only place the contract gives the attempt; a
+  `com.claim` never moves an accepted request;
 - an `in_progress` one becomes `outcome_unknown` by the lost-result operation (`lost_result`) when the next holder
   takes the slot.
 
