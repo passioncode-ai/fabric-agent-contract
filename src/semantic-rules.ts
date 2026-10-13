@@ -145,6 +145,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "grant-spend") findings.push(...grantSpendRules(value));
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
   if (kind === "comms-transition") findings.push(...commsTransition(value));
+  if (kind === "comms-directory") findings.push(...commsDirectory(value));
 
   return findings;
 }
@@ -318,6 +319,30 @@ function commsTransition(value: JsonObject): Finding[] {
     return [{ code: "FAC-SEM-027", instancePath: "/observed", message: "an effect that began is settled only by an observed result" }];
   }
   return [];
+}
+/**
+ * FAC-SEM-107 (DEC-0077): a `com.directory` page lists each Project once and each capability once per Project. JSON
+ * Schema cannot say it: `uniqueItems` compares whole objects, so two entries of one Project with other names, or one
+ * capability with two responder states, pass it. Project ids are opaque and capability names are names, so both compare
+ * as written (DEC-0076). The page's order (by name, then id) is the host's collation and is not checked here.
+ */
+function commsDirectory(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const projects = new Set<string>();
+  (Array.isArray(value.projects) ? value.projects : []).forEach((project: unknown, p: number) => {
+    if (!isObject(project)) return;
+    if (typeof project.id === "string") {
+      if (projects.has(project.id)) findings.push({ code: "FAC-SEM-107", instancePath: `/projects/${p}/id`, message: `a directory page lists each Project once: ${project.id} is listed again` });
+      projects.add(project.id);
+    }
+    const capabilities = new Set<string>();
+    (Array.isArray(project.capabilities) ? project.capabilities : []).forEach((entry: unknown, c: number) => {
+      if (!isObject(entry) || typeof entry.capability !== "string") return;
+      if (capabilities.has(entry.capability)) findings.push({ code: "FAC-SEM-107", instancePath: `/projects/${p}/capabilities/${c}/capability`, message: `a Project lists each capability once: ${entry.capability} is listed again` });
+      capabilities.add(entry.capability);
+    });
+  });
+  return findings;
 }
 // #endregion comms-rules
 

@@ -120,6 +120,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 
 **Compared as written** — fields that are not URIs, or whose comparison another specification fixes:
 
+- board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
+  (`FAC-SEM-107`, DEC-0077): neither is a URI;
+
 - a delegation token's and an approval's claims (`iss`, `sub`, `project`, a grant's principal and issuer, an onward
   token's parent claims): JWT claims, which [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) §2 compares "as
   case-sensitive strings with no transformations or canonicalizations applied"; the hub copies them from the grant it

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0077`
+**Next free ID:** `DEC-0078`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -4082,6 +4082,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric serves the tools
   against these schemas after repinning (COM-02.3/COM-03); the adapter's kits read receipts and the directory
   (FAA-12a/b). Board rows CT-41 to CT-43.
+- **Annotated (2026-10-13):** its open question on a directory page's uniqueness is decided by DEC-0077 (`FAC-SEM-107`).
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
 - **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
@@ -4350,3 +4351,30 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/sources.md`). DEC-0076 was reserved by git CAS (`--key ct39-identifiers-20261013 DEC`); no `FAC-SEM` id;
   the record plane is `fs`. The register was edited without a lease, by the owner session's arrangement; the owner applies
   it under leases at merge.
+
+### DEC-0077 — A directory page lists each Project once and each capability once per Project (`FAC-SEM-107`)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's board answers
+  `com.directory` pages that pass it (CT-41); the adapter's kits check a page with it before they look a Project up
+  (CT-42).
+- **Amends:** DEC-0073 (tightens what a directory page may list; changes no schema).
+- **Decision:**
+  1. A `com.directory` page (`comms-directory.schema.json`) lists each Project once, by `id`, and each capability once
+     within a Project, by `capability` (`FAC-SEM-107`, kind `comms-directory`, `src/semantic-rules.ts`). The finding names
+     the second entry.
+  2. Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names
+     (`common.schema.json#/$defs/capabilityName`) compare as written, not by normal form: neither is a URI (DEC-0076).
+  3. One capability may appear under several Projects; that is the directory's purpose.
+- **Why:** JSON Schema's `uniqueItems` compares whole objects, so two entries of one Project with other names, or one
+  capability with two responder states, pass the schema while telling a sender two things about one Project. CT-43
+  asked whether a rule should say it; a reader that indexes a page by id needs it to.
+- **Compatibility:** a tightening of what DEC-0073 allowed. A board that already lists each Project and capability once,
+  as its own prose required, is unaffected.
+- **Consequences / affects:** `src/semantic-rules.ts` (`commsDirectory`); `test/comms-rules.test.ts`;
+  `test/rule-tolerance.test.ts`; `docs/specification/project-comms.md` (Project directory, Semantic rules);
+  `docs/specification/conformance.md` (the register row and the next free code); the board row CT-43.
+- **Not decided here:** the page's order (by name, then id) stays the host's collation and is not checked; the caller's
+  own Project being absent is board state, not in the page, so no rule on the page can check it.
+- **Source:** the board row CT-43 (DEC-0073 *Not decided here*). DEC-0077 and `FAC-SEM-107` were reserved by git CAS
+  (`--key ct43-directory-rule-20261013 DEC` and `SEM`); the record plane is `fs`.
