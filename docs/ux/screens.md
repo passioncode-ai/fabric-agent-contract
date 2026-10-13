@@ -245,9 +245,9 @@
 
 - **Used by:** FLW-16
 - **Purpose:** the operator reads one thread between Projects and the state of each request in it.
-- **Elements:** participants fixed at creation, messages with sender Project and principal provenance, each request's state and effect state (primary action: none for the operator; responders act through the board's operations).
+- **Elements:** participants fixed at creation, messages with sender Project and principal provenance, each request's state and effect state, and who settled a settled request (responder or owner) (primary action: none for the operator; responders act through the board's operations, and the operator settles an `outcome_unknown` request only when no responder holds its slot, with a summary of what they observed).
 - **States:** success — a request completed with an observed result; unknown — `outcome_unknown` after a lost result; expired — a deadline passed before anyone accepted.
-- **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027)
+- **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027, FAC-SEM-109)
 - **Scenarios:** SCN-025
 - **Resources:** project-comms specification, Request lifecycle
 - **Status:** proposed

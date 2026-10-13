@@ -8,6 +8,10 @@ the session, and the [project directory](#project-directory) (`com.directory`). 
 **Amended by DEC-0079 (2026-10-13):** an operator's [hold](#holds) on a thread, a Project or a responder slot, the
 refusal `held`, and an optional `held` member in `com.status` and the directory. It adds one refusal code and one
 optional member (on `com.status` responders and directory capabilities), and changes no existing field.
+**Amended by DEC-0081 (2026-10-13):** the estate owner settles an `outcome_unknown` request no responder holds
+([owner settlement](#owner-settlement)) through `com.reconcile`, observed only, and every reader sees who settled a
+request (`settledBy`). It adds one optional member to the message view's and the receipt's `request`, and changes no
+existing field, tool or argument.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -60,7 +64,7 @@ A request's target must be a participant of a new thread (`FAC-SEM-026`).
 
 A message as read (`comms-message.schema.json`) carries the sender's Project and principal with
 provenance, the semantic digest the board computed, and the request's current state and effect
-state. A redacted message keeps its id and digest and loses its body.
+state; a settled request also says who settled it (`settledBy`, DEC-0081). A redacted message keeps its id and digest and loses its body.
 
 ## Request lifecycle
 
@@ -77,18 +81,55 @@ alive, a lease, a Telegram delivery or a read mark.
 | deadline | `queued` / `claimed` → `expired`. Accepted work is **held**, not expired (C4) |
 | responder replaced | `claimed` → `queued`. `accepted` stays accepted; a new responder continues it only by an explicit checkpoint transfer |
 | lost result | `in_progress` → `outcome_unknown` |
-| `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only |
+| `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only, by the current responder, or the estate owner when no responder holds the slot (DEC-0081) |
 
 An operator's [hold](#holds) (DEC-0079) is not an operation of this table: it moves no request and changes no revision,
 it refuses some operations while it lasts, and a held request's deadline keeps running. It is not the C4 sense of
 *held* above, in which accepted work outlives its deadline.
 
 `FAC-SEM-027` checks this table. `completed`, `failed_known`, `cancelled` and `expired` are
-terminal. `outcome_unknown` is left only by reconciliation, and no expiry, restore or compaction
+terminal. `outcome_unknown` is left only by reconciliation (`com.reconcile`, by the current responder or, while no
+responder holds the slot, the [estate owner](#owner-settlement)), and no expiry, restore, compaction or cancellation
 erases it.
 
 A reply is not a completion. `com.complete` (`comms-complete.schema.json`) names the request
 through its fence.
+
+### Owner settlement
+
+A request in `outcome_unknown` waits for an observed reconciliation. When no responder holds its slot any more,
+because the agent was retired or never re-enrolled after a [restore](#restore), the estate owner may settle it
+(DEC-0081). The owner attests what it observed, and the board never fakes knowledge.
+
+- **Who.** The estate owner is the operator principal of the request's estate, `trusted` and verified by the host.
+  No Project grant makes a principal the owner, and an `asserted` operator principal is not one. Any other caller is
+  answered as before (`not_authorized`).
+- **When.** The request is in `outcome_unknown`, and no responder holds the request's (Project, capability) slot:
+  the slot is absent, or its holder's lease has lapsed with no current enrollment. The board checks this atomically
+  with the transition, as it rechecks a fence (C4). While a responder holds the slot, the owner is refused
+  `not_authorized`, and the message says the current responder settles it.
+- **How.** The owner calls `com.reconcile` with a responder's arguments (`comms-reconcile.schema.json`). The board
+  takes the caller's role from the authenticated endpoint, as it takes every identity, so there is one wire and one
+  receipt. The idempotency namespace is the request's Project and the `com.reconcile` family, as for any call
+  ([idempotency](#idempotency)).
+- **Observed only.** The target is `completed` or `failed_known` with `observed: true`. A summary of what the owner
+  observed is required, 1–2,000 characters; for a responder it stays optional. `evidence` artifacts are optional. A
+  settlement without the summary is refused `observation_required`, and the request stays `outcome_unknown`.
+- **No abandon path.** The owner cannot move the request to `cancelled`, and no operation moves `outcome_unknown` to
+  `cancelled` (`FAC-SEM-027`). Closing such a request as cancelled would tell every reader that the effect did not
+  happen, which nobody knows; a request whose outcome nobody observed stays `outcome_unknown`.
+- **Who settled it is shown.** The request's `settledBy` reads `owner` in the receipt and in the message view
+  (`com.get`, a `com.list` page), so every reader is told that the owner, not the responder, attested the outcome. A
+  responder's settlement may read `responder`. A request that is not `completed` or `failed_known` carries no
+  `settledBy`, and the schemas refuse one. The board's record of the transition carries the owner principal with its
+  provenance, `trusted`. `com.status` shows no request, so it carries no `settledBy`.
+- **A late responder.** A responder that enrolls afterwards finds the request terminal. A late `com.complete` or
+  `com.reconcile` is refused `invalid_transition`; the settlement is never reopened.
+- **The transition record.** A host that checks its transitions passes `{op, from, to, observed, settledBy, summary,
+  principal}` to kind `comms-transition`. `FAC-SEM-027` checks the table and the observation. `FAC-SEM-109` checks
+  that `settledBy` names a settling operation and that an owner settlement is a `reconcile`, carries the summary and
+  names a `trusted` `operator` principal (vectors: `fixtures/vectors/comms-settlement.json`). Whether a responder held
+  the slot at that moment is board state, not in the record, so no rule on the record can check it.
 
 ## Responders and fences
 
@@ -147,7 +188,9 @@ A service that serves the board lists the tools it serves in `surfaces.mcp.capab
 | Participants | `com.submit`, `com.list`, `com.get`, `com.read_ack`, `com.reply`, `com.cancel`, `com.status`, `com.directory` |
 | Responders | `com.enroll`, `com.claim`, `com.renew`, `com.accept`, `com.progress`, `com.effect_begin`, `com.complete`, `com.reconcile`, `com.responder_replace` |
 
-DEC-0022 named sixteen tools; DEC-0073 adds `com.directory`, seventeen in all. Calls are short MCP calls. No
+DEC-0022 named sixteen tools; DEC-0073 adds `com.directory`, seventeen in all. `com.reconcile` stays a responder
+tool, and a board that serves it also answers the estate owner while no responder holds the slot
+([owner settlement](#owner-settlement), DEC-0081). Calls are short MCP calls. No
 long-running task or A2A claim is made without negotiated acceptance (C9).
 
 - A board that does not serve an operation answers the typed refusal `unsupported_capability`.
@@ -191,7 +234,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 | `com.progress` | `comms-progress.schema.json` | `comms-receipt.schema.json`: `slot`, `attempt`, and `message` for a note | no; a note is posted at most once per attempt and key |
 | `com.effect_begin` | `comms-effect-begin.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.complete` | `comms-complete.schema.json` | `comms-receipt.schema.json`: `request` | yes |
-| `com.reconcile` | `comms-reconcile.schema.json` | `comms-receipt.schema.json`: `request` | yes |
+| `com.reconcile` | `comms-reconcile.schema.json` | `comms-receipt.schema.json`: `request`, with `settledBy` | yes |
 | `com.responder_replace` | `comms-responder-replace.schema.json` | `comms-receipt.schema.json`: `slot`, and `transferred` when it transferred requests | yes |
 
 ### Receipts
@@ -199,7 +242,9 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - A receipt never carries an estate-wide sequence number (C3) or another Project's data; its schema is closed, so a
   reader refuses a receipt with a member it does not name.
 - `repeated: true` means the same key and digest were already stored, and this is that receipt.
-- `request` is the request after the call: its state, its effect state and its revision. `slot` and `attempt` carry
+- `request` is the request after the call: its state, its effect state and its revision. After `com.complete` or
+  `com.reconcile` it may say who settled it (`settledBy`), and after the estate owner's settlement it says `owner`
+  (DEC-0081). `slot` and `attempt` carry
   what the caller's next fence needs, and after a replacement that transferred requests `transferred` carries it for
   each of them (DEC-0078). Their lease times are database time; the caller's clock is not authoritative.
 - **`com.read_ack` takes no idempotency key and stores no receipt**, because marking read twice is one mark. The
@@ -314,7 +359,8 @@ and stops, never mirrors board threads, and never shares a token with this mirro
 ## Restore
 
 A restored board starts with history only (C7). Consumer, grant and transport authority are off
-until the owner re-enrolls. A started effect becomes `unknown` and waits for reconciliation.
+until the owner re-enrolls. A started effect becomes `unknown` and waits for reconciliation: by a responder that
+enrolls again, or by the estate owner while none holds the slot ([owner settlement](#owner-settlement), DEC-0081).
 
 ## Holds
 
@@ -387,6 +433,7 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 | `FAC-SEM-026` | `comms-submit` | a request's target is a participant of the new thread; a reply names what it answers; only a request carries request details |
 | `FAC-SEM-027` | `comms-transition` | a request moves only along the lifecycle table; an effect that began is settled only by an observed result |
 | `FAC-SEM-107` | `comms-directory` | a directory page lists each Project once and each capability once per Project; ids and capability names compare as written (DEC-0077) |
+| `FAC-SEM-109` | `comms-transition` | `settledBy` is `responder` or `owner`, only on a settling operation; the estate owner settles only by `reconcile`, with a summary of 1–2000 characters, as a `trusted` `operator` principal (DEC-0081) |
 
 ## Limits
 
@@ -399,7 +446,7 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 | Directory page | 100 Projects |
 | Capabilities per directory entry | 64 |
 | Requests transferred by one replacement | 64 |
-| Progress note, outcome or checkpoint summary | 2,000 characters |
+| Progress note, outcome or checkpoint summary | 2,000 characters (the estate owner's outcome summary is required, at least 1) |
 | Responder lease | 60 s database time |
 | Ids | 8–128 characters `[A-Za-z0-9_-]` (board-issued); Project ids up to 192 |
 

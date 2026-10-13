@@ -388,7 +388,7 @@ flowchart TD
 - **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
 - **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
 - **Entry points:** a request submitted to a Project's capability on the board
-- **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled
+- **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner
 - **Task analysis:** an agent submits a request → a responder claims and accepts it → it begins the effect → it completes with an observed result, or the result is lost → the operator reads the state in the thread.
 - **Rejected shape:** inferring completion from a delivery, a read mark or a live process — rejected because request state and effect state are separate facts (project comms, Request lifecycle).
 - **Flow:**
@@ -401,6 +401,7 @@ flowchart TD
   E -->|observed result| D[Completed or failed_known]
   E -->|result lost| U[outcome_unknown]
   U -->|observed reconciliation| D
+  U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
   Q -->|deadline before accept| X[Expired]
 ```
 

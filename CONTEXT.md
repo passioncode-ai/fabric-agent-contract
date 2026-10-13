@@ -152,6 +152,11 @@ authority change and bumps no generation
 ([project communication](docs/specification/project-comms.md#holds), DEC-0079). Not the C4 sense in which accepted
 work is *held* past its deadline.
 
+**Owner settlement**: The estate owner (the estate's operator principal, `trusted`) settling an `outcome_unknown`
+request through `com.reconcile` while no responder holds its slot: observed only, with a required summary, never to
+`cancelled`; the request then reads `settledBy: "owner"` ([project communication](docs/specification/project-comms.md#owner-settlement),
+DEC-0081).
+
 **memory/0.1**: The wire on which agent memory is served, first by Project Observatory
 ([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
 

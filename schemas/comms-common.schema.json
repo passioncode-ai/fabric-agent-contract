@@ -66,6 +66,13 @@
         "unknown"
       ]
     },
+    "settledBy": {
+      "description": "Who settled a completed or failed_known request (DEC-0081): responder, the holder of the request's (Project, capability) slot, through com.complete or com.reconcile; owner, the estate owner, a trusted operator principal, through com.reconcile of an outcome_unknown request while no responder held the slot. An owner settlement always reads owner, so a reader is told the owner, not the responder, attested the outcome.",
+      "enum": [
+        "responder",
+        "owner"
+      ]
+    },
     "transportState": {
       "enum": [
         "pending",
