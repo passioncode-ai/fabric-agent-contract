@@ -85,9 +85,31 @@
         "revision": {
           "type": "integer",
           "minimum": 1
+        },
+        "settledBy": {
+          "$ref": "comms-common.schema.json#/$defs/settledBy"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "settledBy": true
+        },
+        "required": [
+          "settledBy"
+        ]
+      },
+      "then": {
+        "description": "Only a settled request can have been settled by the owner (DEC-0081).",
+        "properties": {
+          "state": {
+            "enum": [
+              "completed",
+              "failed_known"
+            ]
+          }
+        }
+      }
     },
     "artifacts": {
       "$ref": "comms-common.schema.json#/$defs/artifacts"

@@ -362,6 +362,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Annotated (2026-10-12):** the tool list amended by DEC-0073 (`com.directory`, seventeen tools; every tool's arguments and answer a closed schema, one receipt).
 - **Annotated (2026-10-13):** amended by DEC-0079: an operator's hold on a thread, a Project or a responder slot refuses new work `held` (retryable) and never refuses started work, a cancel or a read.
+- **Annotated (2026-10-13):** amended by DEC-0081: `outcome_unknown` is still left only by `com.reconcile`, and its caller widens to the estate owner while no responder holds the slot, observed only and with a required summary; a request the owner settled says so (`settledBy: "owner"`, sent only then).
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -4086,6 +4087,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0078: a replacement's receipt carries `transferred`, each transferred request's revision and attempt.
 - **Annotated (2026-10-13):** its open question on a directory page's uniqueness is decided by DEC-0077 (`FAC-SEM-107`).
 - **Annotated (2026-10-13):** amended by DEC-0079: `com.status` responders and directory capabilities gain an optional `held`, and the refusal codes gain `held`.
+- **Annotated (2026-10-13):** amended by DEC-0081: `com.reconcile` also answers the estate owner while no responder holds the slot (same arguments, the summary required for the owner); the receipt's and the message view's `request` gain an optional `settledBy: "owner"`, sent only on an owner settlement.
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
 - **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
@@ -4493,3 +4495,107 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** Fabric's board wave 4 draft (operator controls D9, awareness COM-05) and the owner's ruling on it
   (2026-10-13). DEC-0079 was reserved by git CAS by the owner session (`--key comms-host-hold DEC`); no `FAC-SEM` id;
   the record plane is `fs`.
+
+### DEC-0081 — The estate owner settles an `outcome_unknown` request whose responder is gone (`fabric-project-comms/0.1`, amended)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). The ruling is the owner's, given on 2026-10-13 in
+  answer to Fabric's question (its board wave 4, operator controls D9): may an estate owner attest an observed outcome?
+  Yes, narrowly. The independent reading of PR #102 returned "merge after fixes", and the owner's rulings on its
+  findings are applied here. Consumer adoption: Fabric serves owner settlement, runs the transition rule, and amends
+  its ADR-0117 §4 and its Comms screen (CT-41); the adapter's kits read `settledBy` (CT-42).
+- **Amends:** DEC-0022 (who may call `com.reconcile`) and DEC-0073 (the receipt's `request`; the message view). No tool,
+  argument, state, transition or refusal code is added.
+- **Decision:** in [project communication → Owner settlement](specification/project-comms.md#owner-settlement) —
+  1. **Who.** The settler is the operator principal that owns the request's target Project, `trusted` and verified by
+     the host; in an organization estate, that member only. No Project grant makes one. Every other caller, another
+     member's operator included, is refused `not_authorized`. Who owns the target Project is host state when the call
+     commits, not part of the transition record, so this item is normative and checked by the board, not by a rule.
+  2. **When.** The request is in `outcome_unknown` and no responder holds its (Project, capability) slot: the slot is
+     absent, or its holder's lease has lapsed with no current enrollment. The board checks this atomically with the
+     transition (C4). While a slot is held, the owner is refused `not_authorized`, and the message says the current
+     responder settles it.
+  3. **The paths in.** A request reaches `outcome_unknown` only by:
+     - the sender's `com.cancel` after the effect began;
+     - a restore, after which a started effect is `unknown`;
+     - the lost-result operation when a holder took the slot and then left.
+
+     That operation runs only when the next holder takes the slot (DEC-0073 item 5), so an `in_progress` request whose
+     responder retired with no successor stays `in_progress`. It reaches the owner through the sender's `com.cancel`.
+     No transition is added.
+  4. **The surface: `com.reconcile`, option (a).** The owner calls `com.reconcile` with the same arguments
+     (`comms-reconcile.schema.json`, unchanged in shape); the caller's role comes from the authenticated endpoint, as
+     every identity does. One wire and one receipt. `com.reconcile` stays in the Responders tool group, and a board that
+     serves it answers both callers. The idempotency namespace is the request's Project and the `com.reconcile` family.
+  5. **Observed only.** The target is `completed` or `failed_known` with `observed: true`. A summary of what the owner
+     observed is required, 1–2000 characters; for a responder it stays optional. `evidence` stays optional. A
+     settlement without the summary is refused `observation_required`, and the request stays `outcome_unknown`.
+  6. **No abandon path.** The owner cannot move the request to `cancelled`, and no operation moves `outcome_unknown` to
+     `cancelled` (`COMMS_TRANSITIONS`, `FAC-SEM-027`): a request whose outcome nobody observed stays `outcome_unknown`,
+     because closing it as cancelled would tell every reader that the effect did not happen, which nobody knows.
+  7. **Every reader sees an owner settlement.** The receipt's and the message view's `request` gain an optional
+     `settledBy` whose only value is `"owner"` (`comms-common.schema.json#/$defs/settledBy`, a `const`), allowed only on
+     `completed` and `failed_known`. A board sends it on every owner settlement and on nothing else, so its absence
+     means the responder settled the request. The board's record of the transition carries the owner principal with its
+     provenance, `trusted`. `com.status` shows no request, so it gains nothing.
+  8. **A late responder** that enrolls afterwards finds the request terminal. A late `com.complete` or `com.reconcile` is
+     refused (`invalid_transition`, or `fenced` / `revision_conflict` when its fence or revision is stale), never
+     committed, never reopened.
+  9. **The rule.** `FAC-SEM-109`, kind `comms-transition`, on the transition record `{op, from, to, observed?,
+     settledBy?, summary?, principal?}`, a host journal document, not a receipt. Every `complete` and `reconcile` record
+     carries `settledBy`, `"responder"` or `"owner"` (the value `"responder"` exists in the record only), and no other
+     operation's record does; so a record cannot pass as the responder's by leaving the member out. An owner settlement
+     is a `reconcile`, carries a summary of 1–2000 characters, counted as the schema counts them (code points), and names
+     an `operator` principal with provenance `trusted`. `FAC-SEM-027` keeps the table and the observation. The shared
+     vectors are `fixtures/vectors/comms-settlement.json`.
+- **Why:** a request in `outcome_unknown` is left only by `com.reconcile`, which only the holder of the current slot
+  could call. A request gets there by the sender's cancel after the effect began, by a restore, or by a lost result
+  after a holder took the slot and left. If no responder holds that slot afterwards, because the agent was retired or
+  never re-enrolled, the request stayed non-terminal forever. The owner of the target Project is the one principal
+  who can look at the outside world and say what happened. Option (a) keeps one wire and one receipt, and needs no
+  tool a board would have to negotiate. Option (b), a host operator control with no board tool, would give the same
+  transition a second path and a second record that the contract could only describe. The summary is required of the
+  owner and not of a responder because the owner did not run the effect: the summary is the observation it attests.
+  `com.reconcile`'s schema cannot see the caller, so the requirement is semantic, and the transition record, which
+  names the caller's role, is where a checker can see it. The wire names only the owner because the responder's
+  settlement is what every reader already assumes; sending nothing for it keeps every existing receipt and message
+  unchanged.
+- **Compatibility:** additive on the wire: one optional member, no new tool, argument, state or refusal code;
+  `contractVersion` stays `0.1.0`. One rule tightens: `FAC-SEM-109` newly requires `settledBy` on a `complete` or
+  `reconcile` journal record, a shape no rule stated before and no consumer ran kind `comms-transition` on. A responder's arguments are unchanged, and so is its receipt: a board sends
+  `settledBy` only on an owner settlement. The owner's receipt goes to the owner caller, the host's operator endpoint,
+  not to a kit. The adapter's kits (0.28.0, pinned at `f00a768`) read message views loosely, so a kit that predates
+  this decision never sees the member in a receipt and is not broken by it in a message. So the rollout needs no
+  order: Fabric may serve owner settlement on adopting this (CT-41), and the kits read `settledBy` when they repin
+  (CT-42). A board that has not adopted this refuses the owner as before (`not_authorized`), and the request stays
+  `outcome_unknown`.
+- **Consequences / affects:**
+  - spec: `docs/specification/project-comms.md` (the amendment note, Messages and requests, the lifecycle table and its
+    sentence, Owner settlement, the capability groups' note, the tool table's `com.reconcile` answer, Receipts, Restore,
+    Semantic rules, Limits), `docs/specification/conformance.md` (the `FAC-SEM-109` row);
+  - schemas: `schemas/comms-common.schema.json` (`settledBy`), `schemas/comms-message.schema.json` and
+    `schemas/comms-receipt.schema.json` (`request.settledBy`, only when settled), `schemas/comms-reconcile.schema.json`
+    (descriptions: the caller, `request`, `summary`);
+  - code: `src/semantic-rules.ts` (`FAC-SEM-109`, `commsSettlement`; `FAC-SEM-027` looks an op up among its own members
+    only, so an op named `constructor` or `__proto__` answers a finding instead of throwing); `src/profile-rules.ts`
+    (`FAC-SEM-059` looks a login up among `SUBSCRIPTION_RUNNER`'s own members, so a login named `constructor` gets the
+    plain refusal, an adjacent defect the reading found);
+  - fixtures: `fixtures/vectors/comms-settlement.json` (new); `fixtures/positive/comms-reconcile-owner.json`,
+    `fixtures/positive/comms-receipt-reconcile-owner.json`, `fixtures/positive/comms-receipt-complete-responder.json`,
+    `fixtures/positive/comms-message-settled-by-owner.json`; `fixtures/negative/comms-receipt-settled-by-unknown.json`,
+    `fixtures/negative/comms-receipt-settled-by-responder.json`,
+    `fixtures/negative/comms-receipt-settled-while-unknown.json`, `fixtures/negative/comms-receipt-settled-cancelled.json`,
+    `fixtures/negative/comms-message-settled-while-unknown.json`, `fixtures/negative/comms-message-settled-by-unknown.json`,
+    `fixtures/negative/comms-message-settled-by-responder.json`, `fixtures/negative/comms-message-settled-expired.json`;
+    `fixtures/catalogue.json`;
+  - tests: `test/comms-rules.test.ts`, `test/comms-tools.test.ts` (the shape, the spec's phrases and eight plants),
+    `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`, `test/runner-model-profiles.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-025), `docs/ux/foundation.md`, `docs/ux/flows.md`,
+    `docs/ux/screens.md`, `docs/backlog.md` (CT-21, CT-41, CT-42), `docs/handoffs/2026-10-13-owner-settlement.md`.
+- **Not decided here:** how the operator observes the outcome (the operator's own check); notifications of a
+  settlement; an expiry on `outcome_unknown`, which stays forbidden; how the host's operator endpoint learns the
+  Project's open idempotency epoch (the host serves both).
+- **Source:** Fabric's question (its board wave 4, operator controls D9, awareness COM-05) and its ADR-0117 §4 ("only
+  `com.reconcile` leaves it", Fabric main); the owner's ruling of 2026-10-13 and its rulings on the reading of PR #102;
+  DEC-0022, DEC-0073. DEC-0081 was reserved by the owner session; `FAC-SEM-109` was reserved by git CAS (`--key
+  comms-settle-sem-20261013 SEM`); the record plane is `fs`. The registers are edited under the owner session's leases.

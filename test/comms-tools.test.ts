@@ -80,6 +80,44 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(receipt.properties.transferred.maxItems).toBe(64);
   });
 
+  it("DEC-0081: the message view and the receipt name only an owner settlement, and only once the request is settled", async () => {
+    const common = await schema("comms-common.schema.json");
+    // A board sends settledBy on an owner settlement and on nothing else: absent means the responder settled it.
+    expect(common.$defs.settledBy).toMatchObject({ const: "owner" });
+    expect(common.$defs.settledBy.enum).toBeUndefined();
+    const message = await schema("comms-message.schema.json");
+    const receipt = await schema("comms-receipt.schema.json");
+    for (const request of [message.properties.request, receipt.properties.request]) {
+      expect(request.properties.settledBy).toEqual({ $ref: "comms-common.schema.json#/$defs/settledBy" });
+      expect(request.required).not.toContain("settledBy");
+      expect(request.then.properties.state.enum).toEqual(["completed", "failed_known"]);
+    }
+    // com.status reports responders and health, never a request, so it carries no settledBy.
+    expect(JSON.stringify(await schema("comms-status.schema.json"))).not.toContain("settledBy");
+    // The owner calls com.reconcile with the same closed arguments: no caller, role or principal member.
+    const reconcile = await schema("comms-reconcile.schema.json");
+    expect(Object.keys(reconcile.properties).sort()).toEqual(["digest", "expectedRevision", "idempotency", "outcome", "request"]);
+    expect(reconcile.properties.outcome.required).toEqual(["state", "observed"]);
+  });
+
+  it("DEC-0081: states who may reconcile, the owner's conditions and the absent abandon path", () => {
+    const flat = spec.replace(/\s+/g, " ");
+    const lifecycle = rows("## Request lifecycle").find((row) => row[0] === "`com.reconcile`");
+    expect(lifecycle?.[1]).toContain("the current responder, or the estate owner when no responder holds the slot (DEC-0081)");
+    const section = flat.slice(flat.indexOf("### Owner settlement"), flat.indexOf("## Responders and fences"));
+    const phrases = [
+      "`trusted`", "No Project grant makes", "`outcome_unknown`", "the slot is absent", "no current enrollment",
+      "`not_authorized`", "the current responder settles it", "`observed: true`", "1–2,000 characters", "`observation_required`",
+      "No abandon path", "never fakes knowledge", "`settledBy`", "`invalid_transition`", "never reopened", "`FAC-SEM-109`",
+      // The owner's review (PR #102): only the target Project's owner, the real paths in, a late responder's refusals,
+      // and a settling record that names its settler.
+      "owns the request's target Project", "another member's operator included", "the sender's `com.cancel` after the effect began",
+      "This decision adds no transition", "`fenced` / `revision_conflict`", "never committed", "on nothing else",
+      "Every `complete` and `reconcile` record carries `settledBy`"
+    ];
+    for (const phrase of phrases) expect(section, phrase).toContain(phrase);
+  });
+
   it("keeps the directory to ids, names, capabilities, responder state and the operator's hold", async () => {
     const directory = await schema("comms-directory.schema.json");
     const entry = directory.properties.projects.items;
@@ -139,6 +177,14 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-empty", name: "transferred may be empty", mutate: (s) => { delete s.properties.transferred.minItems; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-request", name: "transferred request optional", mutate: (s) => { s.properties.transferred.items.required = ["revision", "attempt"]; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-revision", name: "transferred revision optional", mutate: (s) => { s.properties.transferred.items.required = ["request", "attempt"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-by-unknown", name: "settledBy any string", mutate: (s) => { s.properties.request.properties.settledBy = { type: "string" }; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-while-unknown", name: "settledBy on any state", mutate: (s) => { delete s.properties.request.if; delete s.properties.request.then; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-cancelled", name: "settledBy on any terminal state", mutate: (s) => { s.properties.request.then.properties.state.enum = ["completed", "failed_known", "cancelled", "expired"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-by-responder", name: "settledBy names the responder too", mutate: (s) => { s.properties.request.properties.settledBy = { enum: ["responder", "owner"] }; } },
+  { schema: "comms-message.schema.json", killer: "comms-message-settled-by-responder", name: "message settledBy names the responder too", mutate: (s) => { s.properties.request.properties.settledBy = { enum: ["responder", "owner"] }; } },
+  { schema: "comms-message.schema.json", killer: "comms-message-settled-by-unknown", name: "message settledBy any string", mutate: (s) => { s.properties.request.properties.settledBy = { type: "string" }; } },
+  { schema: "comms-message.schema.json", killer: "comms-message-settled-while-unknown", name: "message settledBy on any state", mutate: (s) => { delete s.properties.request.if; delete s.properties.request.then; } },
+  { schema: "comms-message.schema.json", killer: "comms-message-settled-expired", name: "message settledBy on any terminal state", mutate: (s) => { s.properties.request.then.properties.state.enum = ["completed", "failed_known", "cancelled", "expired"]; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "responder reply open", mutate: (s) => { responderBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "participant reply open", mutate: (s) => { participantBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-neither", name: "responder reply without fence", mutate: (s) => { responderBranch(s).required = ["body"]; } },

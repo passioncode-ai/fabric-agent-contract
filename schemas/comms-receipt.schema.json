@@ -48,10 +48,32 @@
         "revision": {
           "type": "integer",
           "minimum": 1
+        },
+        "settledBy": {
+          "$ref": "comms-common.schema.json#/$defs/settledBy"
         }
       },
       "additionalProperties": false,
-      "description": "The request this call created or moved, after the call."
+      "if": {
+        "properties": {
+          "settledBy": true
+        },
+        "required": [
+          "settledBy"
+        ]
+      },
+      "then": {
+        "description": "Only a settled request can have been settled by the owner (DEC-0081).",
+        "properties": {
+          "state": {
+            "enum": [
+              "completed",
+              "failed_known"
+            ]
+          }
+        }
+      },
+      "description": "The request this call created or moved, after the call. After the estate owner settled it, settledBy is owner; absent, the responder settled it (DEC-0081)."
     },
     "slot": {
       "type": "object",

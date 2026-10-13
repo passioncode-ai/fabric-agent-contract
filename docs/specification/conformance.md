@@ -300,6 +300,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-105` | `learning-rollout` | [proposals](proposals.md#semantic-rules) | SEM-0105 |
 | `FAC-SEM-106` | `local-channel-session` | [local channel](local-channel.md#semantic-rules) | SEM-0106 |
 | `FAC-SEM-107` | `comms-directory` | [project-comms](project-comms.md#semantic-rules) | SEM-0107 |
+| `FAC-SEM-109` | `comms-transition` | [project-comms](project-comms.md#semantic-rules) | SEM-0109 |
 
 ## Compatibility policy
 

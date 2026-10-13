@@ -178,7 +178,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 |---|---|---|---|---|---|---|
 | 1 | Notice | sees a new request to one of the Projects | the Project board | 3 | a request lost in a chat | one thread per request, fixed participants (priority 8) |
 | 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
-| 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried | `outcome_unknown`, left only by an observed reconciliation (priority 9) |
+| 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried, or a request stuck forever because its responder is gone | `outcome_unknown`, left only by an observed reconciliation, which the operator gives as the estate owner when no responder holds the slot, shown as the owner's (priority 9) |
 | 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
 
 ## 4. User stories
@@ -418,6 +418,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
   - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
+  - Given such a request whose slot no responder holds, when the operator settles it with a summary of what they observed, then the thread shows it `completed` or `failed_known`, settled by the owner; without a summary it stays `outcome_unknown`, and it can never be closed as cancelled.
   - Given a deadline that passes before anyone accepts, then the request shows `expired`; accepted work is held, not expired.
 - **Priority:** should
 - **Status:** draft

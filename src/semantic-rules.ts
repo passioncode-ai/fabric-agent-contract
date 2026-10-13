@@ -144,7 +144,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "spend-policy") findings.push(...spendPolicyRules(value));
   if (kind === "grant-spend") findings.push(...grantSpendRules(value));
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
-  if (kind === "comms-transition") findings.push(...commsTransition(value));
+  if (kind === "comms-transition") findings.push(...commsTransition(value), ...commsSettlement(value));
   if (kind === "comms-directory") findings.push(...commsDirectory(value));
 
   return findings;
@@ -294,7 +294,9 @@ function commsSubmit(value: JsonObject): Finding[] {
 
 /** The request lifecycle (DEC-0022). Request state and effect state are separate facts:
  *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
- *  `outcome_unknown`. Accepted work is held on expiry and on responder replacement. */
+ *  `outcome_unknown` — by the current responder, or by the estate owner when no responder holds the
+ *  slot (DEC-0081). No operation moves `outcome_unknown` to `cancelled`: there is no abandon path.
+ *  Accepted work is held on expiry and on responder replacement. */
 export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {
   claim: [["queued", "claimed"], ["claimed", "claimed"]],
   accept: [["claimed", "accepted"]],
@@ -311,7 +313,8 @@ export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string
 function commsTransition(value: JsonObject): Finding[] {
   const op = String(value.op ?? "");
   const pair = [String(value.from ?? ""), String(value.to ?? "")];
-  const allowed = COMMS_TRANSITIONS[op] ?? [];
+  // Own members only: an op named `constructor` or `__proto__` must not reach Object.prototype (DEC-0081's tolerance fix).
+  const allowed = Object.hasOwn(COMMS_TRANSITIONS, op) ? COMMS_TRANSITIONS[op] ?? [] : [];
   if (!allowed.some(([from, to]) => from === pair[0] && to === pair[1])) {
     return [{ code: "FAC-SEM-027", instancePath: "/to", message: `${op || "(no op)"} cannot move a request from ${pair[0]} to ${pair[1]}` }];
   }
@@ -319,6 +322,46 @@ function commsTransition(value: JsonObject): Finding[] {
     return [{ code: "FAC-SEM-027", instancePath: "/observed", message: "an effect that began is settled only by an observed result" }];
   }
   return [];
+}
+
+/** The operations after which a request is settled and its record says who settled it (DEC-0081). */
+const SETTLING_OPS = new Set(["complete", "reconcile"]);
+/** The owner's summary bound, in characters as JSON Schema counts them: code points, not UTF-16 units. */
+const OWNER_SUMMARY_MAX = 2000;
+
+/**
+ * FAC-SEM-109 (DEC-0081): who settled a request, on its transition record `{op, from, to, observed?, settledBy?,
+ * summary?, principal?}`, a host journal document, not a receipt. Every `complete` and `reconcile` record names who
+ * settled the request, `responder` or `owner`, and no other operation's record does: a record cannot pass as the
+ * responder's by leaving the member out. The estate owner settles only by `reconcile` (FAC-SEM-027 checks that it leaves
+ * `outcome_unknown`, observed), with a summary of what it observed (1–2000 characters, required: the schema of
+ * `com.reconcile` cannot see the caller) and as an `operator` principal the host verified (`trusted`). Whether a responder
+ * held the slot, and whether that operator owns the target Project, are the host's state at that moment, not in the
+ * record, so no rule on the record can check them.
+ */
+function commsSettlement(value: JsonObject): Finding[] {
+  const op = typeof value.op === "string" ? value.op : "";
+  if (value.settledBy === undefined) {
+    return SETTLING_OPS.has(op) ? [{ code: "FAC-SEM-109", instancePath: "/settledBy", message: `a ${op} record names who settled the request: responder or owner` }] : [];
+  }
+  if (value.settledBy !== "responder" && value.settledBy !== "owner") {
+    return [{ code: "FAC-SEM-109", instancePath: "/settledBy", message: "settledBy is responder or owner" }];
+  }
+  if (!SETTLING_OPS.has(op)) {
+    return [{ code: "FAC-SEM-109", instancePath: "/settledBy", message: `only a settlement names who settled it, and ${op || "(no op)"} settles nothing` }];
+  }
+  if (value.settledBy === "responder") return [];
+  const findings: Finding[] = [];
+  if (op !== "reconcile") findings.push({ code: "FAC-SEM-109", instancePath: "/op", message: "the estate owner settles only by reconciling an outcome_unknown request" });
+  const length = typeof value.summary === "string" ? [...value.summary].length : 0;
+  if (length < 1 || length > OWNER_SUMMARY_MAX) {
+    findings.push({ code: "FAC-SEM-109", instancePath: "/summary", message: "the estate owner's settlement carries a summary of what it observed, 1–2000 characters" });
+  }
+  const principal = isObject(value.principal) ? value.principal : {};
+  if (principal.kind !== "operator" || principal.provenance !== "trusted") {
+    findings.push({ code: "FAC-SEM-109", instancePath: "/principal", message: "the estate owner is an operator principal the host verified (trusted)" });
+  }
+  return findings;
 }
 /**
  * FAC-SEM-107 (DEC-0077): a `com.directory` page lists each Project once and each capability once per Project. JSON

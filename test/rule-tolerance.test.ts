@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100) and directory-page (FAC-SEM-107) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107) and comms-transition (FAC-SEM-027, FAC-SEM-109) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -15,7 +15,9 @@ const KINDS = [
   // The kinds whose rules compare identifiers by normal form (DEC-0076).
   "execution-bundle", "service-usage", "runner-route", "route-bundle", "route-event", "provider-observation",
   // A directory page (FAC-SEM-107, DEC-0077), whose ids and capability names compare as written.
-  "comms-directory"
+  "comms-directory",
+  // A request's transition record: the lifecycle table (FAC-SEM-027) and who settled it (FAC-SEM-109, DEC-0081).
+  "comms-transition"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -36,7 +38,7 @@ const MEMBERS = [
   "assignments", "limitUsd", "leases", "reports", "lease", "window", "period", "amount", "expiresAt",
   "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd",
   "context", "pool", "days", "byProject", "generatedAt", "route", "admissions", "event", "candidates", "project", "capability",
-  "entry", "manifest", "projects"
+  "entry", "manifest", "projects", "op", "observed", "settledBy", "summary", "principal"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {
