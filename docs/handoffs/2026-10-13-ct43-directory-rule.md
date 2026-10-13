@@ -23,7 +23,27 @@ compares whole objects and lets one Project or one capability appear twice under
 
 ## Checks run
 
-See the pull request: the full gate and the plants.
+- Gate at the branch head:
+  - `tsc --noEmit` exit 0;
+  - vitest with coverage: 65 files, 3518 tests, floors met;
+  - UX lint passed;
+  - docs-check passed;
+  - lint-md 0 errors;
+  - privacy 0 findings without `ORG_INDEX`.
+- Plants, each caught:
+  - the Project check;
+  - the capability check;
+  - each `add`;
+  - a set shared across Projects;
+  - the kind wiring;
+  - the non-string id and capability guards;
+  - a duplicate Project planted in `fixtures/positive/comms-directory.json`, which the positive sweep now catches.
+- After the reading:
+  - the directory fixture is swept, and now ordered by name and then id;
+  - CT-41 and CT-42 name `FAC-SEM-107`;
+  - DEC-0077 has *Amends*;
+  - identifiers.md lists the comparison;
+  - the tolerance comment is fixed.
 
 ## Next task
 

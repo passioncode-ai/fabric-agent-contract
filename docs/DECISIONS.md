@@ -4358,6 +4358,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's board answers
   `com.directory` pages that pass it (CT-41); the adapter's kits check a page with it before they look a Project up
   (CT-42).
+- **Amends:** DEC-0073 (tightens what a directory page may list; changes no schema).
 - **Decision:**
   1. A `com.directory` page (`comms-directory.schema.json`) lists each Project once, by `id`, and each capability once
      within a Project, by `capability` (`FAC-SEM-107`, kind `comms-directory`, `src/semantic-rules.ts`). The finding names
