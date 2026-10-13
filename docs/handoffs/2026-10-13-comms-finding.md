@@ -21,10 +21,24 @@ count, and subscriptions left undecided.
 - project-comms.md: Findings, Dedupe, Redacted items, the Receipts bullet, the semantic-rules row, three limits rows.
   conformance.md register row; identifiers.md (compared as written); CONTEXT (Board finding); DOCMAP; DEC-0022 and
   DEC-0073 annotated; CT-41 and CT-42 clauses.
-- Fixtures: three positives, thirty-three negatives (each with a plant), seven rule fixtures, and
-  `fixtures/vectors/comms-finding.json` (54 schema cases with each bound and one past it; 500 astral-plane characters
+- Fixtures: three positives, thirty-seven negatives (each with a plant), seven rule fixtures, and
+  `fixtures/vectors/comms-finding.json` (61 schema cases with each bound and one past it; 500 astral-plane characters
   for a port that counts UTF-16 units).
 - `test/schema-mutants.ts` `killers` takes the schema whose fixtures prove a mutant of a shared definition.
+
+## Fix round after the independent reading (merge after fixes)
+
+- A moderator's redaction (`redacted: true`) removes `finding` with the body (`comms-message` `then`); the board keeps
+  the `dedupeKey` internally.
+- The digest oracle: a submit carrying `finding` MUST use an idempotency key of at least 128 bits from a CSPRNG; the
+  submit schema checks at least 22 characters only for that case; the residual (an oracle against the key's entropy)
+  is stated, and the redaction text no longer claims a reader learns nothing.
+- A hold is checked before dedupe (DEC-0079 annotated); dedupe is atomic and never across Projects; `receipt.thread`
+  may differ from the named thread. `src/comms-finding.ts` `findingSubmitAnswer` models the order, with tests.
+- `{task}` is the host's task in DEC-0041's grammar (`hostTaskId`), not a board-issued `opaqueId`; `backlogRowId`
+  cites the backlog contract and is a deliberate narrowing; the rules row says "unredacted"; two lax-port vectors
+  (a trailing newline in a path, a row repeated with its members reordered); the Telegram mirror's redaction is Not
+  decided; the test's own `__proto__` key is built with `JSON.parse`.
 
 ## Open
 
@@ -41,7 +55,7 @@ count, and subscriptions left undecided.
 
 - Gate at the rebased branch head: `tsc --noEmit`, vitest with coverage, UX lint, docs-check, lint-md, privacy. The
   exact numbers are in the pull request.
-- Thirty-three schema plants in `test/comms-tools.test.ts`, each killed by its named negative fixture.
+- Thirty-seven schema plants in `test/comms-tools.test.ts`, each killed by its named negative fixture.
 - Four rule plants, each made by hand in `commsFinding` with a test failing, then restored: the kind check removed, the
   duplicate check removed, the redacted-in-submit check removed, and rows compared case-folded instead of as written.
   The failing tests are listed in the pull request.

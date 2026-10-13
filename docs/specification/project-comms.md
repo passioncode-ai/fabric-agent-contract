@@ -68,7 +68,10 @@ A request's target must be a participant of a new thread (`FAC-SEM-026`).
 
 A message as read (`comms-message.schema.json`) carries the sender's Project and principal with
 provenance, the semantic digest the board computed, and the request's current state and effect
-state; a request the estate owner settled says so (`settledBy: "owner"`, DEC-0081). A redacted message keeps its id and digest and loses its body.
+state; a request the estate owner settled says so (`settledBy: "owner"`, DEC-0081).
+A redacted message keeps its id and digest and loses its body and, for a finding, its
+`finding` too (DEC-0080): `consequence` is the sender's text, a second body. The board keeps the finding's `dedupeKey`
+internally, so [dedupe](#dedupe) still answers for it.
 
 ## Findings
 
@@ -92,13 +95,18 @@ DEC-0022. Any other kind that carries it is refused `invalid_arguments` (the sch
     `docs/backlog-sources.json` names;
   - `path` is the source file relative to the repository's root, with no leading or trailing slash, no empty segment
     and no segment that starts with a dot, so no `..` and no hidden path;
-  - `id` is the row's stable id.
+  - `id` is the row's stable id. The backlog contract asks only for a nonempty string id; `backlogRowId` deliberately
+    narrows it to 1–64 of `[A-Za-z0-9._-]` starting with a letter or digit, so no id holds a space, a colon or a slash.
 
   The item carries no title, status or text of the row: it is closed (`comms-submit-finding-row-copied`), and a reader
-  follows it to the row's canonical source. A task is `{task}`, its opaque id.
+  follows it to the row's canonical source.
+- **A task is `{task}`:** a task of the host that serves the board, named as a delegation token names the issuing
+  host's task (DEC-0041; `hostTaskId`, 1–128 of `[A-Za-z0-9._:-]`). The host issues it, not the board, and it is
+  opaque. It is not a service's own task run (`taskRunId` in a usage report, DEC-0065), which only that service names.
 - **Each item once.** Two rows are the same when `repository`, `path` and `id` are each equal as written, two tasks when
-  their ids are, and a row is never a task. They compare as written: none of them is a URI (no pattern admits `:`), so
-  [identifier equality](identifiers.md)'s normal form (DEC-0076) leaves each as it is and the two comparisons agree.
+  their ids are, and a row is never a task. They compare as written. A row's fields are no URI (no row pattern admits
+  `:`), and a task id is an opaque id, which [identifier equality](identifiers.md) (DEC-0076) leaves as written, so
+  its normal form and comparison as written agree.
   A submit's schema refuses a repeat (`uniqueItems`); in a message `FAC-SEM-108` does, because redacted items are
   alike and the schema cannot.
 - **Severity is descriptive.** What it changes in notifications, the Telegram mirror or a hold is not decided
@@ -108,22 +116,31 @@ DEC-0022. Any other kind that carries it is refused `invalid_arguments` (the sch
 
 A second report of the same thing is not a second finding (Fabric COM-05: "duplicate notification does not duplicate
 finding"). The board dedupes by **the sender's Project and `dedupeKey`**: the Project from the authenticated endpoint,
-the key compared as written.
+the key compared as written. Dedupe is **never across Projects**: two Projects that name one `dedupeKey` make two
+findings, because a hit across Projects would hand one Project the other's message and thread ids.
 
 1. The board authorizes and validates the call and checks its idempotency key first. A stored key answers as
    [idempotency](#idempotency) says, whatever the dedupe key: the same digest its receipt with `repeated: true`, another
    digest `idempotency_conflict`.
-2. A fresh key whose `finding` names the `dedupeKey` of a finding its Project sent, and the board still retains, answers
+2. A [hold](#holds) on the thread the call writes into answers `held` next, before dedupe, and stores nothing: a dedupe
+   hit into a held thread is refused like any other submit into it.
+3. A fresh key whose `finding` names the `dedupeKey` of a finding its Project sent, and the board still retains, answers
    that finding's receipt: its `message`, `thread` and `at`, with `repeated: true`. No message is stored. The board
    stores this receipt under the fresh key, so a retry of that key and digest answers it again, and the key counts
    toward its epoch's capacity like any other.
-3. Otherwise the finding is stored as a new message.
+4. Otherwise the finding is stored as a new message.
+
+The dedupe check and the store are one atomic step; of concurrent submits with one (Project, `dedupeKey`), exactly one
+stores a message, the rest answer its receipt with `repeated: true`. `findingSubmitAnswer` in
+[`src/comms-finding.ts`](../../src/comms-finding.ts) is a reference model of this order (`test/comms-rules.test.ts`).
 
 **A repeat updates nothing.** The standing finding keeps its body, severity, consequence, affects, artifacts and `at`.
 No read mark, unread count or notification moves, and the transport mirror sends nothing. The repeat's own thread is
 not used: a repeat that names another thread, or a new one, creates no thread and reaches no new reader, because
-widening the audience is a new, explicit sharing command ([threads](#threads-participants-and-reads)). A sender whose
-finding changed, such as a higher severity or another consequence, sends it under a new `dedupeKey`.
+widening the audience is a new, explicit sharing command ([threads](#threads-participants-and-reads)). So a repeat's
+`receipt.thread` may differ from the thread the call named. Until a sharing command exists, a finding reaches another
+audience only under another `dedupeKey`. A sender whose finding changed, such as a higher severity or another
+consequence, sends it under a new `dedupeKey`.
 
 **Dedupe is not idempotency:**
 
@@ -135,7 +152,8 @@ finding changed, such as a higher severity or another consequence, sends it unde
 | Makes | a retry of one call one call | a second report of one thing one finding |
 
 **A `dedupeKey` is remembered exactly as long as its finding is retained.** While the board retains the finding's
-message, a redacted one included (redaction keeps the id and digest), its key answers a repeat. When the finding leaves
+message, a redacted one included (redaction keeps the id and digest; the board keeps the `dedupeKey` internally,
+although a reader of the redacted message no longer sees the finding), its key answers a repeat. When the finding leaves
 retention, the key is forgotten and the next finding that names it is a new message. That retention is the host's; the
 contract sets no other bound. Epochs do not move it: a closed or retired epoch neither forgets a `dedupeKey` nor keeps
 one longer. A restored board keeps the findings its history holds, and their keys with them ([restore](#restore)).
@@ -150,16 +168,24 @@ The board shows a reader the `affects` items its grants cover. Each item outside
 is the host's decision; the contract fixes the answer's form.
 
 - **The count stays visible.** The array keeps its length and order, so a reader learns that the finding affects that
-  many things it may not see, and nothing about them: no repository, path, id or task. A reader shown fewer items would
-  take a partial finding for a whole one. A finding whose every item is redacted still lists them all.
+  many things it may not see, and the message names none of them: no repository, path, id or task. A reader shown
+  fewer items would take a partial finding for a whole one. A finding whose every item is redacted still lists them all.
 - **Only `affects` is redacted.** `severity`, `consequence`, the body, the artifacts and `dedupeKey` are the sender's
   text, read by every participant of the thread; a sender keeps out of them what it would not show every participant.
 - **Only a reader's copy.** `{redacted: true}` is valid in a message as read (`comms-message.schema.json`) and refused in
   `com.submit` (the submit schema's `not`; `FAC-SEM-108`).
-- The message's `digest` stays the one the board computed at submit, as for a redacted body.
+- **The digest and the key.** The message's `digest` stays the one the board computed at submit, as for a redacted
+  body. It is an unkeyed SHA-256 over the whole submit, hidden items and idempotency key included
+  ([idempotency](#idempotency)), so a reader who guessed every hidden item and the key could confirm the guess. A
+  submit that carries `finding` MUST therefore use an idempotency key with at least 128 bits from a cryptographically
+  secure random generator. The submit schema checks the length that can hold them, at least 22 characters of the
+  key's 66-character alphabet (`comms-submit-finding-key-short`); the general key keeps its 8. The residual: the digest
+  remains an oracle only against that key's entropy, so confirming a guessed item costs about 2^128 guesses of the key.
+  A reader never sees the key: no message member carries it.
 
 Who else hears of a finding is not decided here: sharing findings that affect X with Project Y would be an explicit,
-grant-bound sharing command, never implicit (DEC-0080, *Not decided here*).
+grant-bound sharing command, never implicit. How the Telegram mirror redacts a finding's `affects` for a chat is not
+decided either (DEC-0080, *Not decided here*).
 
 ## Request lifecycle
 
@@ -284,6 +310,8 @@ computes the same digests (the vectors in `fixtures/vectors/canonical.json`).
 - `com.status` reports the epoch the caller's Project submits under now (`idempotency.epoch`, DEC-0073).
 - The same key with the same digest returns the same receipt after current authorization.
 - The same key with a different digest is `idempotency_conflict`.
+- A submit that carries a `finding` uses a key with at least 128 random bits, because the digest covers what a reader
+  may not see ([redacted items](#redacted-items), DEC-0080).
 - An epoch is **open**, **closed** or **retired**, and a Project has one open epoch. An epoch has a finite key
   capacity. A full epoch refuses before any effect (`capacity_exceeded`).
 - A **closed** epoch (full, aged or ended by a restore) takes no new key: a new key under it is
@@ -499,7 +527,8 @@ Project hold, enrollment and replacement wait for the lift, and its accepted wor
 - **Deadlines keep running.** A held `queued` or `claimed` request expires at its deadline like any other. Accepted
   work is kept past its deadline (C4), held or not.
 - **A refusal stores nothing.** `held` moves no request and stores no receipt, so the same call with the same key
-  commits once the hold is lifted. A repeat of a key and digest whose receipt was stored before the hold answers that
+  commits once the hold is lifted. For a finding the hold check comes before [dedupe](#dedupe): a dedupe hit into a held
+  thread answers `held` and stores nothing (DEC-0080). A repeat of a key and digest whose receipt was stored before the hold answers that
   receipt (`repeated: true`), because it commits nothing.
 - **Visible state.** `com.status` shows `held: true` on a responder whose slot or Project is held, and the
   [project directory](#project-directory) shows it on that capability. A Project hold refuses only slot work, and slot
@@ -548,7 +577,7 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 | `FAC-SEM-026` | `comms-submit` | a request's target is a participant of the new thread; a reply names what it answers; only a request carries request details |
 | `FAC-SEM-027` | `comms-transition` | a request moves only along the lifecycle table; an effect that began is settled only by an observed result |
 | `FAC-SEM-107` | `comms-directory` | a directory page lists each Project once and each capability once per Project; ids and capability names compare as written (DEC-0077) |
-| `FAC-SEM-108` | `comms-submit`, `comms-message` | only a message of kind `finding` carries `finding`; no two `affects` items are the same, compared as written; a redacted item only in a message, never in a submit (DEC-0080) |
+| `FAC-SEM-108` | `comms-submit`, `comms-message` | only a message of kind `finding` carries `finding`; no two unredacted `affects` items are the same, compared as written; a redacted item only in a message, never in a submit (DEC-0080) |
 | `FAC-SEM-109` | `comms-transition` | every `complete` and `reconcile` record names who settled the request, `responder` or `owner`, and no other record does; the estate owner settles only by `reconcile`, with a summary of 1–2000 characters, as a `trusted` `operator` principal (DEC-0081) |
 
 ## Limits
@@ -560,6 +589,7 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 | Items a finding affects | 16 |
 | A finding's consequence | 500 characters (code points) |
 | A finding's `dedupeKey` | 8–128 characters `[A-Za-z0-9._:-]` |
+| A finding's idempotency key | at least 128 random bits; the schema checks at least 22 characters |
 | Participants of a new thread | 16 |
 | Page | 100 messages |
 | Directory page | 100 Projects |

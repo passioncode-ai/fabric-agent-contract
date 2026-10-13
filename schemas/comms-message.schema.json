@@ -132,7 +132,8 @@
   },
   "then": {
     "properties": {
-      "body": false
+      "body": false,
+      "finding": false
     }
   },
   "else": {

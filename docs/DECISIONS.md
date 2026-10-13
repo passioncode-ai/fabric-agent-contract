@@ -4426,6 +4426,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Asked for by Fabric's board wave 4 (its operator
   controls, decision D9), drafted there and adopted by the owner with refinements. Consumer adoption: Fabric serves
   `held` per the matrix (CT-41); the adapter's kits retry it with backoff (CT-42).
+- **Annotated (2026-10-13):** amended by DEC-0080: for a finding the hold check comes before dedupe, so a dedupe hit into a held thread answers `held` and stores nothing.
 - **Amends:** DEC-0022 and DEC-0073 (one refusal code, one optional member in `com.status` and in the directory; no
   tool, argument, state or transition changes).
 - **Decision:** in [project communication](specification/project-comms.md#holds) —
@@ -4504,8 +4505,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Drafted by Fabric for its board's wave 4, work
   awareness (Fabric COM-05); the owner ruled to adopt it with the refinements recorded here. Consumer adoption: Fabric
   stores and serves `finding`, dedupes and redacts (CT-41); the adapter's kits send and read findings (CT-42).
-- **Amends:** DEC-0022 (a message of kind `finding` gains an optional structured member) and DEC-0073 (the receipt's
-  `repeated` gains a second cause; no tool, state or receipt member is added).
+- **Amends:** DEC-0022 (a message of kind `finding` gains an optional structured member), DEC-0073 (the receipt's
+  `repeated` gains a second cause; no tool, state or receipt member is added) and DEC-0079 (a hold is checked before
+  dedupe).
 - **Decision:** in [project communication](specification/project-comms.md#findings) —
   1. **The finding.** `com.submit` (`comms-submit.schema.json`) and a message as read (`comms-message.schema.json`) gain
      an optional `finding` (`comms-common.schema.json#/$defs/finding`), allowed only when `kind` is `finding`. `finding`
@@ -4513,72 +4515,92 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      required and nothing else:
      - `severity`: `info`, `warning` or `blocking`;
      - `consequence`: 1–500 characters, counted as code points;
-     - `affects`: 1–16 items, each a backlog row `{repository, path, id}` or a task `{task}` (an `opaqueId`). A row is
+     - `affects`: 1–16 items, each a backlog row `{repository, path, id}` or a task `{task}`. A row is
        linked by its identity in the common backlog (repository + path + ID) and never copied: the item is closed.
        `repository` is `<owner>/<name>` (`repositoryName`: an owner of 1–39 of `[A-Za-z0-9-]` starting with a letter or
        digit, a name of 1–100 of `[A-Za-z0-9._-]`, at most one leading dot, never `.` or `..`); `path` is relative to the
        repository's root (`repositoryPath`: segments of `[A-Za-z0-9._-]` that do not start with a dot, single slashes, no
        leading or trailing slash, at most 256); `id` is the row's stable id (`backlogRowId`: 1–64 of `[A-Za-z0-9._-]`
-       starting with a letter or digit). No pattern uses a lookaround, so a port with an RE2-class engine reads them.
+       starting with a letter or digit, a deliberate narrowing of the backlog contract's "nonempty string id"). A task
+       is the host's task, named as a delegation token names the issuing host's task (`hostTaskId`, DEC-0041's grammar,
+       1–128 of `[A-Za-z0-9._:-]`), issued by the host, not the board; not a service's own task run (`taskRunId`,
+       DEC-0065). No pattern uses a lookaround, so a port with an RE2-class engine reads them.
        `fabric-package.schema.json#/$defs/path` was not reused: it admits a hidden segment (`.github/x`) the backlog
        contract refuses, and a `$ref` to it would add the package schema to every comms consumer's schema closure;
      - `dedupeKey`: 8–128 of `[A-Za-z0-9._:-]`, the idempotency key's characters.
 
-     Evidence is the message's existing `artifacts`; the finding adds no evidence member.
-  2. **Dedupe.** After authorization, validation and the idempotency check, a fresh key whose finding names the
+     Evidence is the message's existing `artifacts`; the finding adds no evidence member. A submit that carries
+     `finding` MUST use an idempotency key with at least 128 bits from a cryptographically secure generator; the submit
+     schema checks the length that can hold them, at least 22 characters of the key's 66-character alphabet, and the
+     general key keeps its 8 (item 3 says why).
+  2. **Dedupe.** After authorization, validation, the idempotency check and the hold check, a fresh key whose finding names the
      `dedupeKey` (compared as written: a key like the idempotency key, not an identifier under DEC-0076) of a finding the
      same sender Project sent and the board retains answers that finding's receipt
      (`message`, `thread`, `at`) with `repeated: true` and stores no message. The board stores that receipt under the
      fresh key (a retry of key and digest answers it again; the key counts toward the epoch's capacity).
+     - Never across Projects: a hit across Projects would hand one Project another's message and thread ids.
+     - The hold check comes first (DEC-0079): a dedupe hit into a held thread answers `held` and stores nothing.
+     - The dedupe check and the store are one atomic step; of concurrent submits with one (Project, `dedupeKey`),
+       exactly one stores a message, the rest answer its receipt with `repeated: true`. `findingSubmitAnswer`
+       (`src/comms-finding.ts`) is a reference model of the order.
      - It differs from idempotency: idempotency is (key, digest), and a reused key with another digest is
        `idempotency_conflict`; dedupe is semantic, and another body, severity, consequence, affects, artifacts, thread or
        key with the same `dedupeKey` still answers `repeated`. A stored idempotency key answers by idempotency first.
      - A repeat updates nothing: not the standing finding's body, members, artifacts or `at`, no read mark, unread count
        or notification, and the transport mirror sends nothing. Its own thread is not used: it creates no thread and
-       reaches no new reader. A changed finding is sent under a new `dedupeKey`.
+       reaches no new reader, so `receipt.thread` may differ from the thread the call named, and until a sharing command
+       exists another audience takes another `dedupeKey`. A changed finding is sent under a new `dedupeKey`.
      - A `dedupeKey` is remembered exactly as long as the finding's message is retained, a redacted one included; when it
-       leaves retention the key is forgotten. That retention is the host's and the bound; epochs neither shorten nor
+       leaves retention the key is forgotten. The board keeps it internally after a redaction removes the finding. That retention is the host's and the bound; epochs neither shorten nor
        lengthen it, and a restore keeps the keys of the findings its history holds.
      - `repeated` is the receipt's existing required member (DEC-0073), so no member is added; its description gains the
        second cause. A receipt does not say which cause answered it.
   3. **Redaction.** A reader sees `{redacted: true}` (`affectedRedacted`, closed, `redacted` const `true`) in place of
      each `affects` item outside its grants; which grants cover an item is the host's decision. The item `oneOf` admits
      the redacted form, and `comms-submit` refuses it (`not`), so it is valid in a message and never in a submit. The
-     count and order stay visible: a reader learns how many items it may not see, and nothing they name. Only `affects`
-     is redacted; `severity`, `consequence`, the body, artifacts and `dedupeKey` are the sender's text for every
-     participant.
+     count and order stay visible: a reader learns how many items it may not see, and the message names none of them.
+     Only `affects` is redacted per reader; `severity`, `consequence`, the body, artifacts and `dedupeKey` are the
+     sender's text for every participant. A moderator's redaction of the message (`redacted: true`) removes `finding`
+     with the body (`comms-message.schema.json` `then`), because `consequence` is a second body. The message's
+     `digest` is an unkeyed SHA-256 over the whole submit, hidden items and idempotency key included, so it confirms a
+     guessed set of hidden items only to a reader who also guesses the key: the residual is an oracle against the key's
+     entropy, 128 bits by item 1.
   4. **`FAC-SEM-108`** (kinds `comms-submit` and `comms-message`, `src/semantic-rules.ts` `commsFinding`), a new code
      rather than `FAC-SEM-026`'s, whose kind is a submit only and whose rules concern requests and replies: `finding` is
      present only when `kind` is `finding`; no two unredacted `affects` items are the same; a redacted item is only in a
      message. Two rows are the same when `repository`, `path` and `id` are each equal as written, two tasks when their
-     ids are; a row is never a task. Comparison as written, like DEC-0077: none of the three fields is a URI (no pattern
-     admits `:`), so DEC-0076's normal form leaves each unchanged and the two agree. The submit schema also refuses a
+     ids are; a row is never a task. Comparison as written, like DEC-0077: none of a row's three fields is a URI (no row
+     pattern admits `:`) and a task id is an opaque id, so DEC-0076's normal form leaves each unchanged and the two
+     agree. The submit schema also refuses a
      repeat (`uniqueItems`); a message cannot use it, because redacted items are alike.
 - **Why:** Fabric COM-05 asks for a structured important finding with affected tasks, evidence, consequence and
   severity, whose duplicate notification does not duplicate the finding, whose unauthorized task references are
   redacted, and whose dependencies link canonical owner tasks without a second editable backlog. A free-text finding
-  could do none of these: a reader could not tell what it affects, two agents reporting one fault made two findings,
+  could do none of these: a reader could not tell what it affects, two agents of one Project reporting one fault made two findings,
   and a reference a reader may not see could only be hidden by dropping it, which makes a partial finding look whole.
 - **Compatibility:** additive; `contractVersion` stays `0.1.0`. A reader pinned before this decision validates
   `comms-message` and `comms-page` against closed schemas, so it refuses a message that carries `finding`: Fabric, the
   writer, sends `finding` to a session only once that session's kit is pinned at or after this decision (CT-41), as
   DEC-0073 did for `idempotency`. A submit without `finding` and a receipt are unchanged for every reader: `repeated` was
   already required. A board pinned before this decision refuses a submit that carries `finding` (`invalid_arguments`),
-  so a kit sends it only to a board that serves this revision.
+  so a kit sends it only to a board that serves this revision, under a key of at least 128 random bits.
 - **Consequences / affects:**
   - schemas: `schemas/comms-common.schema.json` (`findingSeverity`, `repositoryName`, `repositoryPath`, `backlogRowId`,
-    `dedupeKey`, `affectedRow`, `affectedTask`, `affectedRedacted`, `finding`), `schemas/comms-submit.schema.json` and
-    `schemas/comms-message.schema.json` (`finding`, the kind condition), `schemas/comms-receipt.schema.json` (`repeated`'s
-    description);
-  - code: `src/semantic-rules.ts` (`commsFinding`, `FAC-SEM-108`);
+    `dedupeKey`, `hostTaskId`, `affectedRow`, `affectedTask`, `affectedRedacted`, `finding`),
+    `schemas/comms-submit.schema.json` (`finding`, the kind condition, a finding's key length) and
+    `schemas/comms-message.schema.json` (`finding`, the kind condition, no `finding` on a redacted message),
+    `schemas/comms-receipt.schema.json` (`repeated`'s description);
+  - code: `src/semantic-rules.ts` (`commsFinding`, `FAC-SEM-108`); `src/comms-finding.ts` (`findingSubmitAnswer`, the
+    order of a submit's answer), with its floor in `vitest.config.ts`;
   - fixtures: `fixtures/positive/comms-submit-finding.json`, `fixtures/positive/comms-message-finding.json`,
-    `fixtures/positive/comms-receipt-finding-repeated.json`, thirty-three negatives (`fixtures/negative/comms-submit-finding-*.json`,
+    `fixtures/positive/comms-receipt-finding-repeated.json`, thirty-seven negatives (`fixtures/negative/comms-submit-finding-*.json`,
     `fixtures/negative/comms-message-finding-*.json`) with `fixtures/catalogue.json`; seven rule fixtures
     `fixtures/semantic/comms-finding-*.json`; the shared vectors `fixtures/vectors/comms-finding.json`;
-  - tests: `test/comms-tools.test.ts` (the shape test and thirty-three plants), `test/schema-mutants.ts` (a shared
+  - tests: `test/comms-tools.test.ts` (the shape test and thirty-seven plants), `test/schema-mutants.ts` (a shared
     definition proven by the fixtures of the schema that refers to it), `test/comms-rules.test.ts` (`FAC-SEM-108`, its
-    fixtures and the vectors), `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts` (`comms-message`);
-  - docs: `docs/specification/project-comms.md` (Findings, Dedupe, Redacted items, Receipts, Semantic rules, Limits),
+    fixtures, the vectors and the answer's order), `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts` (`comms-message`);
+  - docs: `docs/specification/project-comms.md` (Messages and requests, Findings, Dedupe, Redacted items, Idempotency,
+    Receipts, Holds, Semantic rules, Limits),
     `docs/specification/conformance.md` (the register row), `docs/specification/identifiers.md` (compared as written),
     `CONTEXT.md`, `docs/DOCMAP.md`, `docs/handoffs/2026-10-13-comms-finding.md`; board rows CT-41 and CT-42.
 - **Not decided here:**
@@ -4587,10 +4609,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     never an implicit forward"); Fabric may ask for that separately;
   - what severity changes in notifications or the Telegram mirror;
   - how a blocking finding interacts with holds;
-  - which grants cover a backlog row or a task for a reader (the host's; the contract fixes the redacted form).
+  - which grants cover a backlog row or a task for a reader (the host's; the contract fixes the redacted form);
+  - how the Telegram mirror redacts a finding's `affects` for a chat.
 - **Source:** Fabric's project-communications plan, COM-05 "awareness and dependency findings" (Fabric `origin/main`
   `56b0e3de`, `docs/evidence/plans/2026-10-04-project-communications.md`), Fabric's draft and the owner's ruling of
-  2026-10-13; the knowledge base's backlog contract (fabric-workspace `knowledge/backlog.md` at `2d490612`: "aggregate
+  2026-10-13 and its rulings on the independent reading of PR #103; the knowledge base's backlog contract (fabric-workspace `knowledge/backlog.md` at `2d490612`: "aggregate
   identity is repository + path + ID"; absolute, hidden and traversal paths refused). DEC-0080 was reserved by the owner
   session; `FAC-SEM-108` by git CAS (`--key comms-finding-20261013 SEM`, receipt SEM-0108); the record plane is `fs`. The
   registers were committed under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md`

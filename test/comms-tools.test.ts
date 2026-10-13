@@ -126,7 +126,10 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(finding.additionalProperties).toBe(false);
     expect(common.$defs.findingSeverity.enum).toEqual(["info", "warning", "blocking"]);
     expect(Object.keys(common.$defs.affectedRow.properties).sort()).toEqual(["id", "path", "repository"]);
-    expect(common.$defs.affectedTask.properties.task).toEqual({ $ref: "#/$defs/opaqueId" });
+    expect(common.$defs.affectedTask.properties.task).toEqual({ $ref: "#/$defs/hostTaskId" });
+    // A task is the host's task in a delegation token's grammar (DEC-0041), not a board-issued opaque id.
+    const delegation = await schema("delegation-token.schema.json");
+    expect(common.$defs.hostTaskId.pattern).toBe(delegation.$defs.task.pattern);
     expect(common.$defs.affectedRedacted.properties).toEqual({ redacted: { const: true } });
     expect(common.$defs.messageKind.enum).toContain("finding");
     const [submit, message] = [await schema("comms-submit.schema.json"), await schema("comms-message.schema.json")];
@@ -134,6 +137,12 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(submit.properties.finding.properties.affects.items).toEqual({ not: { $ref: "comms-common.schema.json#/$defs/affectedRedacted" } });
     expect(message.properties.finding).toMatchObject({ $ref: "comms-common.schema.json#/$defs/finding" });
     expect(message.properties.finding.properties).toBeUndefined();
+    // A moderator's redaction removes the finding with the body; a finding's submit key holds 128 random bits.
+    expect(message.then.properties).toEqual({ body: false, finding: false });
+    const keyRule = (submit.allOf as Record<string, any>[]).find((branch) => branch.if?.required?.includes("finding"));
+    expect(keyRule?.then.properties.idempotency.properties.key.minLength).toBe(22);
+    expect(Math.floor(22 * Math.log2(66))).toBeGreaterThanOrEqual(128);
+    expect(Math.floor(21 * Math.log2(66))).toBeLessThan(128);
     // The limits table states the schema's bounds.
     const limits = new Map(rows("## Limits").map((cells) => [cells[0], cells[1]]));
     expect(finding.properties.affects.maxItems).toBe(16);
@@ -229,6 +238,10 @@ const PLANTS: Array<{ schema: string; killer: string; fixtures?: string } & Muta
   { schema: MESSAGE, killer: "comms-message-finding-on-message", name: "finding on any kind of message", mutate: (s) => { s.allOf[findingRule(s)] = true; } },
   { schema: C, fixtures: MESSAGE, killer: "comms-message-finding-redacted-false", name: "redacted any boolean", mutate: (s) => { common(s).affectedRedacted.properties.redacted = { type: "boolean" }; } },
   { schema: C, fixtures: MESSAGE, killer: "comms-message-finding-redacted-with-row", name: "a redacted item keeps what it names", mutate: (s) => { common(s).affectedRedacted.additionalProperties = true; } },
+  { schema: MESSAGE, killer: "comms-message-finding-redacted-message", name: "a redacted message keeps its finding", mutate: (s) => { delete s.then.properties.finding; } },
+  { schema: SUBMIT, killer: "comms-submit-finding-key-short", name: "a finding's key any length", mutate: (s) => { s.allOf[(s.allOf as Record<string, any>[]).findIndex((branch) => branch.if?.required?.includes("finding"))] = true; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-task-too-long", name: "task id unbounded", mutate: (s) => { common(s).hostTaskId.pattern = "^[A-Za-z0-9._:-]{1,}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-task-slash", name: "task id any character", mutate: (s) => { common(s).hostTaskId.pattern = "^.{1,128}$"; } },
 
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-with-seq", name: "receipt open to unknown members", mutate: (s) => { s.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-not-ok", name: "ok any boolean", mutate: (s) => { s.properties.ok = { type: "boolean" }; } },

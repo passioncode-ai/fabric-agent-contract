@@ -1,10 +1,10 @@
 {
-  "$comment": "Shared vectors of the structured finding (DEC-0080, docs/specification/project-comms.md#findings). A port puts `finding` into `base.submit` (com.submit arguments, comms-submit.schema.json) or `base.message` (a message as read, comms-message.schema.json), both of kind finding, and checks that its validator answers `valid`. `lax` names the mistake a lax port makes on that case. Lengths count Unicode code points. The rule cases (FAC-SEM-108) are fixtures/semantic/comms-finding-*.json.",
+  "$comment": "Shared vectors of the structured finding (DEC-0080, docs/specification/project-comms.md#findings). A port puts `finding` into `base.submit` (com.submit arguments, comms-submit.schema.json) or `base.message` (a message as read, comms-message.schema.json), both of kind finding, and, where a case gives `key`, that idempotency key, and checks that its validator answers `valid`. `lax` names the mistake a lax port makes on that case. Lengths count Unicode code points. The rule cases (FAC-SEM-108) are fixtures/semantic/comms-finding-*.json.",
   "base": {
     "submit": {
       "idempotency": {
         "epoch": 3,
-        "key": "find-2026-10-13-0001"
+        "key": "fnd_Q7mX2cL9pZ4tVb1Nk8Rw"
       },
       "thread": {
         "id": "thr_Q1w2E3r4T5"
@@ -917,14 +917,14 @@
       "valid": true
     },
     {
-      "name": "task id of 8 characters",
+      "name": "task id of 1 character",
       "on": "submit",
       "finding": {
         "severity": "warning",
         "consequence": "The kit cannot fence a transferred request.",
         "affects": [
           {
-            "task": "tttttttt"
+            "task": "t"
           }
         ],
         "dedupeKey": "transferred-missing:CT-41"
@@ -932,19 +932,105 @@
       "valid": true
     },
     {
-      "name": "task id of 7 characters",
+      "name": "task id of 128 characters",
       "on": "submit",
       "finding": {
         "severity": "warning",
         "consequence": "The kit cannot fence a transferred request.",
         "affects": [
           {
-            "task": "ttttttt"
+            "task": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": true
+    },
+    {
+      "name": "task id of 129 characters",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "task": "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
           }
         ],
         "dedupeKey": "transferred-missing:CT-41"
       },
       "valid": false
+    },
+    {
+      "name": "task id with a colon, as a delegation token's task may hold",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "task": "fabric:task:42"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": true
+    },
+    {
+      "name": "task id with a slash",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "task": "tasks/42"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": false
+    },
+    {
+      "name": "path with a trailing newline",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "repository": "passioncode-ai/fabric-agent-contract",
+            "path": "docs/backlog.md\n",
+            "id": "CT-41"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": false,
+      "lax": "Python's re `$` matches before a final newline, so re.match(pattern) accepts it; use re.fullmatch or \\Z"
+    },
+    {
+      "name": "the same row twice with its members in another order",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "repository": "passioncode-ai/fabric-agent-contract",
+            "path": "docs/backlog.md",
+            "id": "CT-41"
+          },
+          {
+            "id": "CT-41",
+            "path": "docs/backlog.md",
+            "repository": "passioncode-ai/fabric-agent-contract"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": false,
+      "lax": "uniqueItems compares JSON values, not their text; a port that compares serialized items sees two"
     },
     {
       "name": "a row and a task",
@@ -1100,6 +1186,43 @@
         "dedupeKey": "transferred-missing:CT-41"
       },
       "valid": true
+    },
+    {
+      "name": "idempotency key of 22 characters with a finding",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "repository": "passioncode-ai/fabric-agent-contract",
+            "path": "docs/backlog.md",
+            "id": "CT-41"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": true,
+      "key": "kkkkkkkkkkkkkkkkkkkkkk"
+    },
+    {
+      "name": "idempotency key of 21 characters with a finding",
+      "on": "submit",
+      "finding": {
+        "severity": "warning",
+        "consequence": "The kit cannot fence a transferred request.",
+        "affects": [
+          {
+            "repository": "passioncode-ai/fabric-agent-contract",
+            "path": "docs/backlog.md",
+            "id": "CT-41"
+          }
+        ],
+        "dedupeKey": "transferred-missing:CT-41"
+      },
+      "valid": false,
+      "key": "kkkkkkkkkkkkkkkkkkkkk",
+      "lax": "the general key admits 8 characters; a submit that carries a finding needs 22, the least that holds 128 random bits"
     },
     {
       "name": "an evidence member",

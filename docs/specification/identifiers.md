@@ -122,9 +122,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;
-- a board finding's `affects` items, a backlog row's `repository`, `path` and `id` and a task's id (`FAC-SEM-108`,
-  DEC-0080): no pattern admits `:`, so none is a URI and the normal form leaves each unchanged; its `dedupeKey`, a key
-  like the idempotency key, not an identifier;
+- a board finding's `affects` items (`FAC-SEM-108`, DEC-0080): a backlog row's `repository`, `path` and `id`, whose
+  patterns admit no `:`, so none is a URI; a task's id, an opaque id of the host's task (DEC-0041's grammar); and its
+  `dedupeKey`, a key like the idempotency key, not an identifier;
 
 - a delegation token's and an approval's claims (`iss`, `sub`, `project`, a grant's principal and issuer, an onward
   token's parent claims): JWT claims, which [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) §2 compares "as
