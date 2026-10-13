@@ -31,20 +31,16 @@ count, and subscriptions left undecided.
 - Fabric stores, dedupes and redacts findings and repins (CT-41); the adapter's kits send and read them (CT-42).
 - Not decided: subscriptions (an explicit, grant-bound sharing command, never implicit); severity's effect on
   notifications or Telegram; a blocking finding and holds; which grants cover a row or a task.
-- **The registers are in [`2026-10-13-comms-finding.registers.patch`](2026-10-13-comms-finding.registers.patch),
-  not in this branch's commits.** DEC-0080 itself with the annotations on DEC-0022 and DEC-0073 (`docs/DECISIONS.md`),
-  the `FAC-SEM-108` row (`docs/specification/conformance.md`) and the CT-41 and CT-42 clauses (`docs/backlog.md`) are
-  guarded files: agent-sync's commit guard refuses them without a lease, and this run was told to take none. The owner
-  applies the patch under the leases at merge (`git apply`, checked clean against `1166127`). The patch sets the
-  `FAC-SEM` next-free marker to `FAC-SEM-109`, because the consistency test (G-13) fails while the marker equals an
-  allocated code; the `DEC` marker is left as on main. Without the patch the branch fails G-13 alone: `FAC-SEM-108` is
-  named by `src/semantic-rules.ts` and project-comms.md and has no register row.
+- The registers (DEC-0080 after DEC-0079 with the annotations on DEC-0022 and DEC-0073, the `FAC-SEM-108` row, and the
+  CT-41 and CT-42 clauses after DEC-0079's) were first kept as a patch, because agent-sync's commit guard refuses those
+  files without a lease and this run took none. After DEC-0079 merged (`d194dd9`, #101), the branch was rebased onto
+  it and the registers committed under the owner session's leases, at the owner's request; main's markers
+  (`DEC-0082`, `FAC-SEM-110`) are kept.
 
 ## Checks run
 
-- Gate with the registers patch applied: `tsc --noEmit`, vitest with coverage, UX lint, docs-check, lint-md, privacy.
-  At the branch head without it, only G-13 fails (one test, and docs-check's two `FAC-SEM-108` lines). The exact
-  numbers are in the pull request.
+- Gate at the rebased branch head: `tsc --noEmit`, vitest with coverage, UX lint, docs-check, lint-md, privacy. The
+  exact numbers are in the pull request.
 - Thirty-three schema plants in `test/comms-tools.test.ts`, each killed by its named negative fixture.
 - Four rule plants, each made by hand in `commsFinding` with a test failing, then restored: the kind check removed, the
   duplicate check removed, the redacted-in-submit check removed, and rows compared case-folded instead of as written.
@@ -52,4 +48,4 @@ count, and subscriptions left undecided.
 
 ## Next task
 
-Merge, set the markers, tell Fabric's builder the merge commit for COM-05, and record adoption on CT-41 and CT-42.
+Merge, tell Fabric's builder the merge commit for COM-05, and record adoption on CT-41 and CT-42.
