@@ -15,7 +15,7 @@
       "$ref": "comms-common.schema.json#/$defs/idempotency"
     },
     "request": {
-      "description": "A request in outcome_unknown. Called by a responder: a request of the caller's Project, for a capability whose current slot the caller holds. Called by the estate owner (a trusted operator principal the host verified; no Project grant makes one): a request of the owner's estate whose (Project, capability) slot no responder holds, absent or lapsed with no current enrollment; while a responder holds it the owner is refused not_authorized (DEC-0081).",
+      "description": "A request in outcome_unknown. Called by a responder: a request of the caller's Project, for a capability whose current slot the caller holds. Called by the estate owner (the trusted operator principal, verified by the host, that owns the request's target Project; in an organization estate that member only; no Project grant makes one): a request whose (Project, capability) slot no responder holds, absent or lapsed with no current enrollment; while a responder holds it, or for any other operator, the call is refused not_authorized (DEC-0081).",
       "$ref": "comms-common.schema.json#/$defs/opaqueId"
     },
     "digest": {

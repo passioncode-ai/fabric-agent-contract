@@ -63,7 +63,7 @@
         ]
       },
       "then": {
-        "description": "Only a settled request names who settled it (DEC-0081).",
+        "description": "Only a settled request can have been settled by the owner (DEC-0081).",
         "properties": {
           "state": {
             "enum": [
@@ -73,7 +73,7 @@
           }
         }
       },
-      "description": "The request this call created or moved, after the call. After a settlement, settledBy says who settled it (DEC-0081)."
+      "description": "The request this call created or moved, after the call. After the estate owner settled it, settledBy is owner; absent, the responder settled it (DEC-0081)."
     },
     "slot": {
       "type": "object",

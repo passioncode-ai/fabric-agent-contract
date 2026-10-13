@@ -1,5 +1,5 @@
 {
-  "description": "Who settled a request (DEC-0081, project-comms.md#owner-settlement): a transition record `{op, from, to, observed, settledBy?, summary?, principal?}` checked by kind `comms-transition`, FAC-SEM-027 (the lifecycle table) then FAC-SEM-109 (settlement attribution). `expect` lists `<code> <instancePath>` in that order. Characters are code points, as JSON Schema's maxLength counts them; strings compare as written (case matters); a null settledBy is present, not absent.",
+  "description": "Who settled a request (DEC-0081, project-comms.md#owner-settlement): a transition record `{op, from, to, observed?, settledBy?, summary?, principal?}` (a host journal document, not a receipt; settledBy is required on every complete and reconcile record) checked by kind `comms-transition`, FAC-SEM-027 (the lifecycle table) then FAC-SEM-109 (settlement attribution). `expect` lists `<code> <instancePath>` in that order. Characters are code points, as JSON Schema's maxLength counts them; strings compare as written (case matters); a null settledBy is present, not absent.",
   "cases": [
     {
       "name": "responder-complete",
@@ -24,14 +24,55 @@
       "expect": []
     },
     {
-      "name": "record-without-settled-by",
+      "name": "reconcile-record-without-settled-by",
       "record": {
         "op": "reconcile",
         "from": "outcome_unknown",
         "to": "completed",
         "observed": true
       },
+      "expect": [
+        "FAC-SEM-109 /settledBy"
+      ]
+    },
+    {
+      "name": "complete-record-without-settled-by",
+      "record": {
+        "op": "complete",
+        "from": "accepted",
+        "to": "completed",
+        "observed": true
+      },
+      "expect": [
+        "FAC-SEM-109 /settledBy"
+      ]
+    },
+    {
+      "name": "cancel-record-without-settled-by",
+      "record": {
+        "op": "cancel",
+        "from": "in_progress",
+        "to": "outcome_unknown"
+      },
       "expect": []
+    },
+    {
+      "name": "owner-settles-without-observed-and-without-settled-by",
+      "record": {
+        "op": "reconcile",
+        "from": "outcome_unknown",
+        "to": "completed",
+        "summary": "Seen on the registry.",
+        "principal": {
+          "kind": "operator",
+          "id": "operator:estate-owner",
+          "provenance": "trusted"
+        }
+      },
+      "expect": [
+        "FAC-SEM-027 /observed",
+        "FAC-SEM-109 /settledBy"
+      ]
     },
     {
       "name": "owner-reconcile",

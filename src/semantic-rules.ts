@@ -330,16 +330,20 @@ const SETTLING_OPS = new Set(["complete", "reconcile"]);
 const OWNER_SUMMARY_MAX = 2000;
 
 /**
- * FAC-SEM-109 (DEC-0081): who settled a request, on its transition record `{op, from, to, observed, settledBy?, summary?,
- * principal?}`. `settledBy` is `responder` or `owner` and only on a settling operation (`complete`, `reconcile`). The
- * estate owner settles only by `reconcile` (FAC-SEM-027 checks that it leaves `outcome_unknown`, observed), with a summary
- * of what it observed (1–2000 characters, required: the schema of `com.reconcile` cannot see the caller) and as an
- * `operator` principal the host verified (`trusted`). Whether a responder held the slot at that moment is board state,
- * not in the record, so no rule on the record can check it.
+ * FAC-SEM-109 (DEC-0081): who settled a request, on its transition record `{op, from, to, observed?, settledBy?,
+ * summary?, principal?}`, a host journal document, not a receipt. Every `complete` and `reconcile` record names who
+ * settled the request, `responder` or `owner`, and no other operation's record does: a record cannot pass as the
+ * responder's by leaving the member out. The estate owner settles only by `reconcile` (FAC-SEM-027 checks that it leaves
+ * `outcome_unknown`, observed), with a summary of what it observed (1–2000 characters, required: the schema of
+ * `com.reconcile` cannot see the caller) and as an `operator` principal the host verified (`trusted`). Whether a responder
+ * held the slot, and whether that operator owns the target Project, are the host's state at that moment, not in the
+ * record, so no rule on the record can check them.
  */
 function commsSettlement(value: JsonObject): Finding[] {
-  if (value.settledBy === undefined) return [];
   const op = typeof value.op === "string" ? value.op : "";
+  if (value.settledBy === undefined) {
+    return SETTLING_OPS.has(op) ? [{ code: "FAC-SEM-109", instancePath: "/settledBy", message: `a ${op} record names who settled the request: responder or owner` }] : [];
+  }
   if (value.settledBy !== "responder" && value.settledBy !== "owner") {
     return [{ code: "FAC-SEM-109", instancePath: "/settledBy", message: "settledBy is responder or owner" }];
   }

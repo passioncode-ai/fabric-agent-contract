@@ -91,6 +91,15 @@ describe("runner profiles: the route and its rule (DEC-0046, FAC-SEM-059)", () =
     expect(evaluateSemanticRules("runner-profile", { ...base, subscription: { login: "gemini" } })[0]?.message).toMatch(/its vendor's runner/);
   });
 
+  it("answers a login named after an Object.prototype member with the plain refusal, never a prototype's text", () => {
+    const base = load("positive/runner-profile-subscription.json");
+    for (const login of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+      const findings = evaluateSemanticRules("runner-profile", { ...base, subscription: { login } });
+      expect(findings.map((f) => f.code), login).toEqual(["FAC-SEM-059"]);
+      expect(findings[0]?.message, login).toBe(`a ${login} subscription runs only in its vendor's runner, not in ${String(base.runnerKind)}; another runner takes the key route`);
+    }
+  });
+
   it("refuses a key that admits another profile's models, and a key written as its value", () => {
     for (const f of ["semantic/runner-profile-key-other-allow-list.json", "semantic/runner-profile-key-value.json"]) {
       expect(valid("runner-profile.schema.json", load(f)), f).toBe(true);

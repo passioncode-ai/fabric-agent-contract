@@ -80,9 +80,11 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(receipt.properties.transferred.maxItems).toBe(64);
   });
 
-  it("DEC-0081: the message view and the receipt say who settled a request, from one enum, only once it is settled", async () => {
+  it("DEC-0081: the message view and the receipt name only an owner settlement, and only once the request is settled", async () => {
     const common = await schema("comms-common.schema.json");
-    expect(common.$defs.settledBy.enum).toEqual(["responder", "owner"]);
+    // A board sends settledBy on an owner settlement and on nothing else: absent means the responder settled it.
+    expect(common.$defs.settledBy).toMatchObject({ const: "owner" });
+    expect(common.$defs.settledBy.enum).toBeUndefined();
     const message = await schema("comms-message.schema.json");
     const receipt = await schema("comms-receipt.schema.json");
     for (const request of [message.properties.request, receipt.properties.request]) {
@@ -106,7 +108,12 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     const phrases = [
       "`trusted`", "No Project grant makes", "`outcome_unknown`", "the slot is absent", "no current enrollment",
       "`not_authorized`", "the current responder settles it", "`observed: true`", "1–2,000 characters", "`observation_required`",
-      "No abandon path", "never fakes knowledge", "`settledBy`", "`invalid_transition`", "never reopened", "`FAC-SEM-109`"
+      "No abandon path", "never fakes knowledge", "`settledBy`", "`invalid_transition`", "never reopened", "`FAC-SEM-109`",
+      // The owner's review (PR #102): only the target Project's owner, the real paths in, a late responder's refusals,
+      // and a settling record that names its settler.
+      "owns the request's target Project", "another member's operator included", "the sender's `com.cancel` after the effect began",
+      "This decision adds no transition", "`fenced` / `revision_conflict`", "never committed", "on nothing else",
+      "Every `complete` and `reconcile` record carries `settledBy`"
     ];
     for (const phrase of phrases) expect(section, phrase).toContain(phrase);
   });
@@ -173,6 +180,8 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-by-unknown", name: "settledBy any string", mutate: (s) => { s.properties.request.properties.settledBy = { type: "string" }; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-while-unknown", name: "settledBy on any state", mutate: (s) => { delete s.properties.request.if; delete s.properties.request.then; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-cancelled", name: "settledBy on any terminal state", mutate: (s) => { s.properties.request.then.properties.state.enum = ["completed", "failed_known", "cancelled", "expired"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-settled-by-responder", name: "settledBy names the responder too", mutate: (s) => { s.properties.request.properties.settledBy = { enum: ["responder", "owner"] }; } },
+  { schema: "comms-message.schema.json", killer: "comms-message-settled-by-responder", name: "message settledBy names the responder too", mutate: (s) => { s.properties.request.properties.settledBy = { enum: ["responder", "owner"] }; } },
   { schema: "comms-message.schema.json", killer: "comms-message-settled-by-unknown", name: "message settledBy any string", mutate: (s) => { s.properties.request.properties.settledBy = { type: "string" }; } },
   { schema: "comms-message.schema.json", killer: "comms-message-settled-while-unknown", name: "message settledBy on any state", mutate: (s) => { delete s.properties.request.if; delete s.properties.request.then; } },
   { schema: "comms-message.schema.json", killer: "comms-message-settled-expired", name: "message settledBy on any terminal state", mutate: (s) => { s.properties.request.then.properties.state.enum = ["completed", "failed_known", "cancelled", "expired"]; } },

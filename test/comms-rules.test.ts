@@ -17,7 +17,9 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
 
   it("FAC-SEM-027 allows every table transition and refuses the rest", () => {
     for (const [op, pairs] of Object.entries(COMMS_TRANSITIONS)) for (const [from, to] of pairs) {
-      expect(codes("comms-transition", { op, from, to, observed: true }), `${op} ${from}->${to}`).toEqual([]);
+      // A settling record names who settled the request (FAC-SEM-109, DEC-0081).
+      const settledBy = op === "complete" || op === "reconcile" ? { settledBy: "responder" } : {};
+      expect(codes("comms-transition", { op, from, to, observed: true, ...settledBy }), `${op} ${from}->${to}`).toEqual([]);
     }
     expect(codes("comms-transition", { op: "complete", from: "queued", to: "completed", observed: true })).toContain("FAC-SEM-027");
     expect(codes("comms-transition", { op: "expire", from: "accepted", to: "expired" })).toContain("FAC-SEM-027");
@@ -27,17 +29,19 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
   it("FAC-SEM-027 settles a started effect only by an observed result", () => {
     expect(codes("comms-transition", { op: "complete", from: "in_progress", to: "completed", observed: false })).toContain("FAC-SEM-027");
     expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "failed_known" })).toContain("FAC-SEM-027");
-    expect(codes("comms-transition", { op: "complete", from: "accepted", to: "completed" })).toEqual([]);
+    expect(codes("comms-transition", { op: "complete", from: "accepted", to: "completed", settledBy: "responder" })).toEqual([]);
+    // A settling record without settledBy is refused, so a record cannot pass as the responder's by omission (DEC-0081).
+    expect(codes("comms-transition", { op: "complete", from: "accepted", to: "completed" })).toEqual(["FAC-SEM-109"]);
   });
 
   it("FAC-SEM-027 has no abandon path and never reopens a settlement (DEC-0081)", () => {
     // outcome_unknown leaves only by an observed reconciliation: no operation moves it to cancelled.
     for (const [op, pairs] of Object.entries(COMMS_TRANSITIONS)) expect(pairs.some(([from, to]) => from === "outcome_unknown" && to === "cancelled"), op).toBe(false);
     expect(codes("comms-transition", { op: "cancel", from: "outcome_unknown", to: "cancelled", observed: true })).toEqual(["FAC-SEM-027"]);
-    expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "cancelled", observed: true })).toEqual(["FAC-SEM-027"]);
+    expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "cancelled", observed: true, settledBy: "owner", summary: "x", principal: { kind: "operator", id: "o", provenance: "trusted" } })).toEqual(["FAC-SEM-027"]);
     // A late responder finds the request terminal: neither a completion nor a reconciliation moves it again.
     for (const from of ["completed", "failed_known"]) for (const op of ["complete", "reconcile"]) for (const to of ["completed", "failed_known"]) {
-      expect(codes("comms-transition", { op, from, to, observed: true }), `${op} ${from}->${to}`).toEqual(["FAC-SEM-027"]);
+      expect(codes("comms-transition", { op, from, to, observed: true, settledBy: "responder" }), `${op} ${from}->${to}`).toEqual(["FAC-SEM-027"]);
     }
   });
 
@@ -53,7 +57,7 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
     const paths = (value: unknown) => evaluateSemanticRules("comms-transition", value).map((f) => `${f.code} ${f.instancePath}`);
     it("covers the boundaries a port must hold", () => {
       const names = vectors.cases.map((c) => c.name);
-      for (const name of ["owner-summary-2000-astral-characters", "owner-summary-2001-characters", "owner-summary-empty", "owner-abandons-to-cancelled", "settled-by-null", "owner-provenance-capitalised"]) expect(names).toContain(name);
+      for (const name of ["owner-summary-2000-astral-characters", "owner-summary-2001-characters", "owner-summary-empty", "owner-abandons-to-cancelled", "settled-by-null", "owner-provenance-capitalised", "reconcile-record-without-settled-by", "complete-record-without-settled-by"]) expect(names).toContain(name);
       expect(new Set(names).size).toBe(names.length);
     });
     it.each(vectors.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => {

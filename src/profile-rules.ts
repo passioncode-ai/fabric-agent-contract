@@ -97,7 +97,8 @@ function runnerProfile(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   if (value.route === "subscription" && isObject(value.subscription)) {
     const login = String(value.subscription.login);
-    const runner = SUBSCRIPTION_RUNNER[login];
+    // Own members only: a login named `constructor` or `__proto__` must not read Object.prototype into the message.
+    const runner = Object.hasOwn(SUBSCRIPTION_RUNNER, login) ? SUBSCRIPTION_RUNNER[login] : undefined;
     if (runner !== value.runnerKind) findings.push({ code: "FAC-SEM-059", instancePath: "/runnerKind", message: `a ${login} subscription runs only in ${runner ?? "its vendor's runner"}, not in ${String(value.runnerKind)}; another runner takes the key route` });
   }
   if (value.route === "key" && isObject(value.key)) {
