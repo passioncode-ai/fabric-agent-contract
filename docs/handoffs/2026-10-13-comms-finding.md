@@ -40,6 +40,10 @@ count, and subscriptions left undecided.
   (a trailing newline in a path, a row repeated with its members reordered); the Telegram mirror's redaction is Not
   decided; the test's own `__proto__` key is built with `JSON.parse`.
 
+- Rebased onto DEC-0081 (`43bef18`, #102): DEC-0080 sits between DEC-0079 and DEC-0081, the `FAC-SEM-108` row
+  between 107 and 109, the CT-41 and CT-42 clauses between DEC-0079's and DEC-0081's; `comms-message` leaves the
+  positive sweep's not-swept list, because `FAC-SEM-108` now reads a message whole.
+
 ## Open
 
 - Fabric stores, dedupes and redacts findings and repins (CT-41); the adapter's kits send and read them (CT-42).

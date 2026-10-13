@@ -73,7 +73,6 @@ export const NOT_SWEPT: readonly string[] = [
   "comms-fenced.schema.json",
   "comms-list.schema.json",
   "comms-message-ref.schema.json",
-  "comms-message.schema.json",
   "comms-page.schema.json",
   "comms-progress.schema.json",
   "comms-receipt.schema.json",
