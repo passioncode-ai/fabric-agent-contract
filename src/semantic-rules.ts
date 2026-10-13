@@ -146,6 +146,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "comms-submit") findings.push(...commsSubmit(value));
   if (kind === "comms-transition") findings.push(...commsTransition(value), ...commsSettlement(value));
   if (kind === "comms-directory") findings.push(...commsDirectory(value));
+  if (kind === "comms-submit" || kind === "comms-message") findings.push(...commsFinding(value, kind === "comms-submit"));
 
   return findings;
 }
@@ -384,6 +385,37 @@ function commsDirectory(value: JsonObject): Finding[] {
       if (capabilities.has(entry.capability)) findings.push({ code: "FAC-SEM-107", instancePath: `/projects/${p}/capabilities/${c}/capability`, message: `a Project lists each capability once: ${entry.capability} is listed again` });
       capabilities.add(entry.capability);
     });
+  });
+  return findings;
+}
+/**
+ * FAC-SEM-108 (DEC-0080): a structured finding is coherent. Only a message of kind `finding` carries `finding`; no two
+ * `affects` items name the same thing; a `{redacted: true}` item is only in a message as read, never in a submit. Two
+ * backlog rows are the same when repository, path and id are each equal as written, two tasks when their ids are: none of
+ * these is a URI (each pattern refuses `:`), so DEC-0076's normal form leaves them as they are. A backlog row and a task
+ * are never the same, and redacted items, alike by construction, are not compared. The schema refuses a duplicate or a
+ * redacted item in a submit too (`uniqueItems`, the item `oneOf`); this rule says it for a message, where the schema
+ * cannot, and for a submit read without the schema.
+ */
+function commsFinding(value: JsonObject, submit: boolean): Finding[] {
+  if (value.finding === undefined) return [];
+  const findings: Finding[] = [];
+  if (value.kind !== "finding") findings.push({ code: "FAC-SEM-108", instancePath: "/finding", message: "only a message of kind finding carries finding details" });
+  const affects = isObject(value.finding) && Array.isArray(value.finding.affects) ? value.finding.affects : [];
+  const seen = new Map<string, number>();
+  affects.forEach((item: unknown, i: number) => {
+    if (!isObject(item)) return;
+    if (item.redacted !== undefined) {
+      if (submit) findings.push({ code: "FAC-SEM-108", instancePath: `/finding/affects/${i}`, message: "a submit names what its finding affects: only a reader's copy is redacted" });
+      return;
+    }
+    const key = typeof item.task === "string" ? JSON.stringify(["task", item.task])
+      : typeof item.repository === "string" && typeof item.path === "string" && typeof item.id === "string" ? JSON.stringify(["row", item.repository, item.path, item.id])
+      : undefined;
+    if (key === undefined) return;
+    const first = seen.get(key);
+    if (first !== undefined) findings.push({ code: "FAC-SEM-108", instancePath: `/finding/affects/${i}`, message: `a finding names each thing it affects once: item ${i} repeats item ${first}` });
+    else seen.set(key, i);
   });
   return findings;
 }

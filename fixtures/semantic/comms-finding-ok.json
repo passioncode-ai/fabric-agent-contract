@@ -1,0 +1,33 @@
+{
+  "description": "A finding names a row and a task, each once (FAC-SEM-108 passes).",
+  "kind": "comms-submit",
+  "expect": [],
+  "input": {
+    "idempotency": {
+      "epoch": 3,
+      "key": "find-2026-10-13-0001"
+    },
+    "thread": {
+      "id": "thr_Q1w2E3r4T5"
+    },
+    "kind": "finding",
+    "body": {
+      "text": "A finding."
+    },
+    "finding": {
+      "severity": "warning",
+      "consequence": "The kit cannot fence a transferred request.",
+      "affects": [
+        {
+          "repository": "passioncode-ai/fabric-agent-contract",
+          "path": "docs/backlog.md",
+          "id": "CT-41"
+        },
+        {
+          "task": "tsk_7Hn3Kq9Lm2"
+        }
+      ],
+      "dedupeKey": "transferred-missing:CT-41"
+    }
+  }
+}

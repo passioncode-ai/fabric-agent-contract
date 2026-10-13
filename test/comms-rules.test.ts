@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { COMMS_TRANSITIONS, evaluateSemanticRules } from "../src/semantic-rules.js";
-import { createValidator, validateDocument } from "../src/validator.js";
+import { createValidator, createValidatorSync, validateDocument } from "../src/validator.js";
 
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => f.code);
 const submit = { idempotency: { epoch: 1, key: "k-00000001" }, thread: { new: { participants: ["proj-a"] } }, kind: "request", body: { text: "x" }, request: { target: "proj-a", capability: "a.b" } };
@@ -111,6 +111,84 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
         expect(() => evaluateSemanticRules("comms-directory", value)).not.toThrow();
         expect(paths(value)).toEqual([]);
       }
+    });
+  });
+
+  describe("FAC-SEM-108: a structured finding is coherent (DEC-0080)", () => {
+    const row = (id = "CT-41", repository = "passioncode-ai/fabric-agent-contract", file = "docs/backlog.md") => ({ repository, path: file, id });
+    const finding = (...affects: unknown[]) => ({ severity: "warning", consequence: "c", affects, dedupeKey: "dedupe-key-1" });
+    const sent = (value: unknown, kind = "finding") => ({ idempotency: { epoch: 1, key: "k-00000001" }, thread: { id: "thr_00000001" }, kind, body: { text: "x" }, finding: value });
+    const read = (value: unknown, kind = "finding") => ({ id: "msg_00000001", thread: "thr_00000001", kind, finding: value });
+    const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((f) => `${f.code} ${f.instancePath}`);
+
+    it("accepts a finding naming distinct rows and tasks, on a submit and on a message", () => {
+      expect(paths("comms-submit", sent(finding(row(), row("CT-42"), { task: "tsk_00000001" })))).toEqual([]);
+      expect(paths("comms-message", read(finding(row(), { redacted: true }, { redacted: true }, { task: "tsk_00000001" })))).toEqual([]);
+    });
+    it("refuses finding details on any other kind, and leaves a kind finding without them alone", () => {
+      for (const kind of ["message", "request", "reply", "announcement"]) {
+        expect(paths("comms-submit", sent(finding(row()), kind)), kind).toContain("FAC-SEM-108 /finding");
+        expect(paths("comms-message", read(finding(row()), kind)), kind).toContain("FAC-SEM-108 /finding");
+      }
+      expect(paths("comms-submit", { ...sent(undefined), finding: undefined })).toEqual([]);
+      expect(paths("comms-message", { id: "msg_00000001", kind: "message" })).toEqual([]);
+    });
+    it("refuses an item that repeats an earlier one, naming the repeat and the item it repeats", () => {
+      expect(paths("comms-message", read(finding(row(), { redacted: true }, row())))).toEqual(["FAC-SEM-108 /finding/affects/2"]);
+      expect(evaluateSemanticRules("comms-message", read(finding(row(), { redacted: true }, row())))[0]?.message).toBe("a finding names each thing it affects once: item 2 repeats item 0");
+      expect(paths("comms-submit", sent(finding({ task: "tsk_00000001" }, row(), { task: "tsk_00000001" })))).toEqual(["FAC-SEM-108 /finding/affects/2"]);
+    });
+    it("compares rows and tasks as written: another case is another item, and a row is never a task", () => {
+      expect(paths("comms-message", read(finding(row(), row("ct-41"), row("CT-41", "Passioncode-AI/fabric-agent-contract"), row("CT-41", undefined, "docs/Backlog.md"), { task: "CT-41-task" }, { task: "ct-41-task" })))).toEqual([]);
+    });
+    it("refuses a redacted item in a submit and keeps it in a message", () => {
+      expect(paths("comms-submit", sent(finding(row(), { redacted: true })))).toEqual(["FAC-SEM-108 /finding/affects/1"]);
+      expect(paths("comms-submit", sent(finding({ redacted: false })))).toEqual(["FAC-SEM-108 /finding/affects/0"]);
+      expect(paths("comms-message", read(finding({ redacted: true })))).toEqual([]);
+    });
+    it("answers malformed findings with findings or none, never by throwing", () => {
+      const odd: unknown[] = [null, 7, "x", [], {}, { affects: "x" }, { affects: [null, 3, "y", [], { task: 7 }, { repository: 1, path: 2, id: 3 }, { __proto__: 1 }, { constructor: "x" }] }, { affects: [{ task: "constructor" }, { task: "constructor" }] }];
+      for (const value of odd) for (const kind of ["comms-submit", "comms-message"]) {
+        expect(() => evaluateSemanticRules(kind, { kind: "finding", finding: value }), kind).not.toThrow();
+      }
+      expect(paths("comms-message", { kind: "finding", finding: { affects: [{ task: "constructor" }, { task: "constructor" }] } })).toEqual(["FAC-SEM-108 /finding/affects/1"]);
+      expect(paths("comms-message", { kind: "finding", finding: { affects: [{ task: 7 }, { task: 7 }, { repository: "a/b", path: "p" }, { repository: "a/b", path: "p" }] } })).toEqual([]);
+    });
+
+    type Case = { description: string; kind: string; expect: string[]; input: unknown };
+    const dir = path.join(projectRoot(), "fixtures/semantic");
+    const cases = readdirSync(dir).filter((name) => name.startsWith("comms-finding-")).map((name) => [name, JSON.parse(readFileSync(path.join(dir, name), "utf8")) as Case] as const);
+    it("has its seven semantic fixtures, three of them refused", () => {
+      expect(cases).toHaveLength(7);
+      expect(cases.filter(([, c]) => c.expect.length > 0)).toHaveLength(3);
+    });
+    it.each(cases)("%s", (_name, c) => expect([...new Set(evaluateSemanticRules(c.kind, c.input).map((f) => f.code))]).toEqual(c.expect));
+
+    const validator = createValidatorSync();
+    const schemaOf = { "comms-submit": "comms-submit.schema.json", "comms-message": "comms-message.schema.json" } as const;
+    it.each(cases)("%s is schema-valid unless it is a refused submit", (_name, c) => {
+      const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/${schemaOf[c.kind as keyof typeof schemaOf]}`, c.input);
+      // A message's duplicate is the rule's to refuse; a submit's duplicate or redacted item, and a finding on another
+      // kind, the schema refuses as well.
+      expect(result.valid, JSON.stringify(result.errors)).toBe(c.expect.length === 0 || c.kind === "comms-message");
+    });
+  });
+
+  describe("the finding's shared vectors (DEC-0080, fixtures/vectors/comms-finding.json)", () => {
+    type Vector = { name: string; on: "submit" | "message"; finding: unknown; valid: boolean; lax?: string };
+    const vectors = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/comms-finding.json"), "utf8")) as { base: Record<"submit" | "message", Record<string, unknown>>; cases: Vector[] };
+    const validator = createValidatorSync();
+    const schemaOf = { submit: "comms-submit.schema.json", message: "comms-message.schema.json" } as const;
+    it.each(vectors.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => {
+      const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/${schemaOf[c.on]}`, { ...vectors.base[c.on], finding: c.finding });
+      expect(result.valid, JSON.stringify(result.errors)).toBe(c.valid);
+    });
+    it("covers each limit at its bound and one past it", () => {
+      const names = vectors.cases.map((c) => c.name);
+      for (const name of ["dedupeKey of 8 characters", "dedupeKey of 7 characters", "dedupeKey of 128 characters", "dedupeKey of 129 characters", "consequence of 500 astral-plane characters", "consequence of 501 astral-plane characters", "16 affects items", "17 affects items", "path of 256 characters", "path of 257 characters", "row id of 64 characters", "row id of 65 characters"]) expect(names).toContain(name);
+      const astral = vectors.cases.find((c) => c.name === "consequence of 500 astral-plane characters") as Vector & { finding: { consequence: string } };
+      expect(astral.finding.consequence.length).toBe(1000);
+      expect([...astral.finding.consequence]).toHaveLength(500);
     });
   });
 });
