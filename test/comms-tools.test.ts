@@ -74,7 +74,7 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
   it("DEC-0078: a replacement's receipt gives each transferred request the attempt in the shape of `attempt`, and nothing else", async () => {
     const receipt = await schema("comms-receipt.schema.json");
     const item = receipt.properties.transferred.items;
-    expect(Object.keys(item.properties).sort()).toEqual(["attempt", "request"]);
+    expect(Object.keys(item.properties).sort()).toEqual(["attempt", "request", "revision"]);
     expect(item.additionalProperties).toBe(false);
     expect(item.properties.attempt).toEqual({ $ref: "#/properties/attempt" });
     expect(receipt.properties.transferred.maxItems).toBe(64);
@@ -120,8 +120,11 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-attempt-with-seq", name: "attempt open", mutate: (s) => { s.properties.attempt.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-with-holder", name: "transferred item open", mutate: (s) => { s.properties.transferred.items.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-over-limit", name: "transferred unbounded", mutate: (s) => { delete s.properties.transferred.maxItems; } },
-  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-attempt", name: "transferred attempt optional", mutate: (s) => { s.properties.transferred.items.required = ["request"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-attempt", name: "transferred attempt optional", mutate: (s) => { s.properties.transferred.items.required = ["request", "revision"]; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-attempt-with-seq", name: "transferred attempt not the attempt shape", mutate: (s) => { s.properties.transferred.items.properties.attempt = { type: "object" }; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-empty", name: "transferred may be empty", mutate: (s) => { delete s.properties.transferred.minItems; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-request", name: "transferred request optional", mutate: (s) => { s.properties.transferred.items.required = ["revision", "attempt"]; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-transferred-without-revision", name: "transferred revision optional", mutate: (s) => { s.properties.transferred.items.required = ["request", "attempt"]; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "responder reply open", mutate: (s) => { responderBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-fence-and-replyto", name: "participant reply open", mutate: (s) => { participantBranch(s).additionalProperties = true; } },
   { schema: "comms-reply.schema.json", killer: "comms-reply-neither", name: "responder reply without fence", mutate: (s) => { responderBranch(s).required = ["body"]; } },

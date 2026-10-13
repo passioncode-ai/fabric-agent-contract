@@ -4082,6 +4082,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric serves the tools
   against these schemas after repinning (COM-02.3/COM-03); the adapter's kits read receipts and the directory
   (FAA-12a/b). Board rows CT-41 to CT-43.
+- **Annotated (2026-10-13):** amended by DEC-0078: a replacement's receipt carries `transferred`, each transferred request's revision and attempt.
 - **Annotated (2026-10-13):** its open question on a directory page's uniqueness is decided by DEC-0077 (`FAC-SEM-107`).
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
@@ -4389,9 +4390,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Amends:** DEC-0073 (the receipt gains one optional member; no tool, argument or state changes).
 - **Decision:**
   1. When `com.responder_replace` transfers accepted requests (`transfer.requests`), its receipt
-     (`comms-receipt.schema.json`) carries `transferred`: one `{request, attempt}` per transferred request, the
-     `attempt` in the shape of the receipt's own `attempt` (`id`, `generation`, `digest`, `leaseExpiresAt`), at most 64
-     (the replacement's own limit). The new holder's next fence on each request carries those values.
+     (`comms-receipt.schema.json`) carries `transferred`: one `{request, revision, attempt}` per transferred request,
+     each request once, the `attempt` in the shape of the receipt's own `attempt` (`id`, `generation`, `digest`,
+     `leaseExpiresAt`), at most 64 (the replacement's own limit). The new holder's next fence on each request carries
+     those values, its `expectedRevision` from `revision`.
   2. Only `com.responder_replace` answers `transferred`, and only for the requests it transferred. That receipt is the
      only place the contract gives the attempt: a `com.claim` never moves an accepted request, and the contract defines
      no read of an attempt through it.
@@ -4404,8 +4406,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and Fabric, the one writer, adopts this with its repin (CT-41). A host that answers a transfer without `transferred`
   leaves the new holder unable to fence those requests.
 - **Consequences / affects:** `schemas/comms-receipt.schema.json` (`transferred`); `fixtures/positive/comms-receipt-replace-transferred.json`
-  and four negatives (`fixtures/negative/comms-receipt-transferred-*.json`) with `fixtures/catalogue.json`;
-  `test/comms-tools.test.ts` (the shape test and four plants); `docs/specification/project-comms.md` (the tool table's
+  and seven negatives (`fixtures/negative/comms-receipt-transferred-*.json`) with `fixtures/catalogue.json`;
+  `test/comms-tools.test.ts` (the shape test and seven plants); `docs/specification/project-comms.md` (the tool table's
   `com.responder_replace` answer, *Slots end with the session*); board rows CT-41 and CT-42.
 - **Not decided here:** what a `com.claim` naming an accepted request answers (it is not a claim; the board's refusal for
   a request it cannot claim applies).

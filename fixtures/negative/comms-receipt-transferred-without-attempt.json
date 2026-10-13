@@ -9,14 +9,16 @@
   },
   "transferred": [
     {
-      "request": "req_A1b2C3d4E5"
+      "request": "req_A1b2C3d4E5",
+      "revision": 4
     },
     {
       "request": "req_F6g7H8i9J0",
+      "revision": 2,
       "attempt": {
         "id": "att_Tr4nsF3rB2",
         "generation": 3,
-        "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "leaseExpiresAt": "2026-10-13T10:02:00Z"
       }
     }

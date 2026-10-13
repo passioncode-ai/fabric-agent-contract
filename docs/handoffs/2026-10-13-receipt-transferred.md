@@ -8,11 +8,11 @@ the receipt carrying the attempts and a `com.claim` read-back.
 
 ## Done
 
-- DEC-0078: the receipt. `comms-receipt.schema.json` gains `transferred` (one `{request, attempt}` per transferred
-  request, `attempt` by `$ref` to the receipt's own `attempt`, 1–64 items, closed items). Only `com.responder_replace`
+- DEC-0078: the receipt. `comms-receipt.schema.json` gains `transferred` (one `{request, revision, attempt}` per
+  transferred request, each once, `attempt` by `$ref` to the receipt's own `attempt`, 1–64 items, closed items). Only `com.responder_replace`
   answers it; the contract defines no read of an attempt through `com.claim`.
 - project-comms.md: the tool table's `com.responder_replace` answer and *Slots end with the session*.
-- One positive and four negative fixtures in the catalogue; a shape test and four plants in `test/comms-tools.test.ts`.
+- One positive and seven negative fixtures in the catalogue; a shape test and seven plants in `test/comms-tools.test.ts`.
 - CT-41 (Fabric answers `transferred`, replacing its read-back) and CT-42 (the kits read it).
 
 ## Open
@@ -29,10 +29,13 @@ the receipt carrying the attempts and a `com.claim` read-back.
   - docs-check passed;
   - lint-md 0 errors;
   - privacy 0 findings.
-- The four plants in `test/comms-tools.test.ts` were each killed by their named negative fixture:
+- The seven plants in `test/comms-tools.test.ts` were each killed by their named negative fixture:
   - the item opened;
-  - the bound removed;
+  - the upper bound removed;
+  - the lower bound removed;
   - `attempt` made optional;
+  - `request` made optional;
+  - `revision` made optional;
   - `attempt` loosened to any object.
 - The exact numbers are in the pull request.
 

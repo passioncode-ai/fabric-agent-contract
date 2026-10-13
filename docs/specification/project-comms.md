@@ -193,7 +193,8 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
   reader refuses a receipt with a member it does not name.
 - `repeated: true` means the same key and digest were already stored, and this is that receipt.
 - `request` is the request after the call: its state, its effect state and its revision. `slot` and `attempt` carry
-  what the caller's next fence needs. Their lease times are database time; the caller's clock is not authoritative.
+  what the caller's next fence needs, and after a replacement that transferred requests `transferred` carries it for
+  each of them (DEC-0078). Their lease times are database time; the caller's clock is not authoritative.
 - **`com.read_ack` takes no idempotency key and stores no receipt**, because marking read twice is one mark. The
   reader's read mark is its own record. The first mark answers `repeated: false` and `at`, the time of the mark. A
   second mark of the same message by the same reader changes nothing and answers `repeated: true` with the first
@@ -224,8 +225,8 @@ each request afterwards is an operation that table already has:
 - a released `claimed` request stays `claimed`, and the next `com.claim` takes it as a lapsed claim (`com.claim`,
   `claimed` → `claimed` with a new attempt);
 - an `accepted` one is held (C4), and a new responder continues it only by a checkpoint transfer: the replacement's
-  receipt gives it, for each request it transferred, the attempt it continues under (`transferred`, DEC-0078), the
-  values its next fence on that request carries. That receipt is the only place the contract gives the attempt; a
+  receipt gives it, once for each request it transferred, the request's revision and the attempt it continues under
+  (`transferred`, DEC-0078): the values its next fence on that request carries. That receipt is the only place the contract gives the attempt; a
   `com.claim` never moves an accepted request;
 - an `in_progress` one becomes `outcome_unknown` by the lost-result operation (`lost_result`) when the next holder
   takes the slot.
