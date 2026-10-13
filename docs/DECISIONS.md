@@ -4560,8 +4560,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   names the caller's role, is where a checker can see it. The wire names only the owner because the responder's
   settlement is what every reader already assumes; sending nothing for it keeps every existing receipt and message
   unchanged.
-- **Compatibility:** additive for the contract: one optional member, no new tool, argument, state or refusal code;
-  `contractVersion` stays `0.1.0`. A responder's arguments are unchanged, and so is its receipt: a board sends
+- **Compatibility:** additive on the wire: one optional member, no new tool, argument, state or refusal code;
+  `contractVersion` stays `0.1.0`. One rule tightens: `FAC-SEM-109` newly requires `settledBy` on a `complete` or
+  `reconcile` journal record, a shape no rule stated before and no consumer ran kind `comms-transition` on. A responder's arguments are unchanged, and so is its receipt: a board sends
   `settledBy` only on an owner settlement. The owner's receipt goes to the owner caller, the host's operator endpoint,
   not to a kit. The adapter's kits (0.28.0, pinned at `f00a768`) read message views loosely, so a kit that predates
   this decision never sees the member in a receipt and is not broken by it in a message. So the rollout needs no

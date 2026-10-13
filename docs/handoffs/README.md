@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-13 the estate owner settles an `outcome_unknown` request whose responder is gone](2026-10-13-owner-settlement.md) | DEC-0081 (`FAC-SEM-109`; CT-41, CT-42) | open, #102 |
+| [2026-10-13 the estate owner settles an `outcome_unknown` request whose responder is gone](2026-10-13-owner-settlement.md) | DEC-0081 (`FAC-SEM-109`; CT-41, CT-42) | this pull request |
 | [2026-10-13 an operator's hold on the Project board](2026-10-13-comms-hold.md) | DEC-0079 (Fabric board wave 4, D9) | merged, #101 `d194dd9` |
 | [2026-10-13 consumer receipts and the private server name](2026-10-13-consumer-receipts.md) | none (board: CT-18, CT-41, CT-42, CT-47, CT-49) | merged, #99 `4797334` |
 | [2026-10-13 a replacement's receipt carries transferred attempts](2026-10-13-receipt-transferred.md) | DEC-0078 | merged, #93 `f00a768` |
