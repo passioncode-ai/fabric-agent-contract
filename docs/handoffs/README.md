@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-13 CT-43: a directory page lists each Project once](2026-10-13-ct43-directory-rule.md) | DEC-0077 (CT-43; `FAC-SEM-107`) | this pull request |
+| [2026-10-13 CT-43: a directory page lists each Project once](2026-10-13-ct43-directory-rule.md) | DEC-0077 (CT-43; `FAC-SEM-107`) | merged, #90 `a046f57` |
 | [2026-10-13 CT-40, part two: costs by project add up](2026-10-13-ct40-byproject-costs.md) | DEC-0065 annotated (CT-40) | merged, #89 `aafdc8e` |
 | [2026-10-13 CT-39: identifier equality](2026-10-13-ct39-identifiers.md) | DEC-0076 (CT-39) | merged, #87 `4762876` |
 | [2026-10-12 the board's tool shapes and the project directory](2026-10-12-comms-tools-registers.md) | DEC-0073 (Fabric COM-02.3/03 Task 0; register text applied at merge) | merged, #83 `f8ae4e1` |
