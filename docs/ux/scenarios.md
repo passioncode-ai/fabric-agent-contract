@@ -563,12 +563,12 @@ independent agent author and P-02 project operator.
   2. The responder begins publishing -> `in_progress`, effect `started`.
   3. The responder completes with the observed release -> `completed`.
 - **Expected result:** the operator reads the request state and the effect state as two facts, each set by its operation, never inferred from a delivery or a read mark.
-- **Alt paths:** the deadline passes before anyone accepts -> `expired`. The request is cancelled before an effect began -> `cancelled`. The responder's session ends after it accepted -> its slot is released and the request is held `accepted`, not re-queued; a new responder continues it only by a checkpoint transfer.
+- **Alt paths:** the deadline passes before anyone accepts -> `expired`. The request is cancelled before an effect began -> `cancelled`. The responder's session ends after it accepted -> its slot is released and the request is held `accepted`, not re-queued; a new responder continues it only by a checkpoint transfer. The operator holds the thread or `project-b`'s `publish` slot before the responder accepts -> the accept is refused `held` (retryable) and the request waits, its deadline running; a hold set after the effect began refuses nothing the responder still owes, so it completes.
 - **UI elements:** thread, participants, request state, effect state.
 - **States covered:** success, unknown, expired
 - **Errors & recovery:** the responder's result is lost after the effect began -> `outcome_unknown`; it stays until an observed reconciliation settles it `completed` or `failed_known`, and no expiry erases it.
 - **Status:** draft
-- **Coverage:** project-comms Request lifecycle, Tools arguments and answers, Slots end with the session; `comms-submit.schema.json`, `comms-message.schema.json`, `comms-claim.schema.json`, `comms-fenced.schema.json`, `comms-effect-begin.schema.json`, `comms-complete.schema.json`, `comms-reconcile.schema.json`, `comms-cancel.schema.json`, `comms-responder-replace.schema.json`, `comms-receipt.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027), `test/comms-tools.test.ts`
+- **Coverage:** project-comms Request lifecycle, Tools arguments and answers, Slots end with the session; `comms-submit.schema.json`, `comms-message.schema.json`, `comms-claim.schema.json`, `comms-fenced.schema.json`, `comms-effect-begin.schema.json`, `comms-complete.schema.json`, `comms-reconcile.schema.json`, `comms-cancel.schema.json`, `comms-responder-replace.schema.json`, `comms-receipt.schema.json`; `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027), `test/comms-tools.test.ts`; project-comms Holds, `src/comms-hold.ts`, `test/comms-hold.test.ts` (DEC-0079)
 - **Product:** unobserved
 
 ### SCN-027: The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it

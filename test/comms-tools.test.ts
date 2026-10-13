@@ -80,17 +80,31 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(receipt.properties.transferred.maxItems).toBe(64);
   });
 
-  it("keeps the directory to ids, names, capabilities and responder state", async () => {
+  it("keeps the directory to ids, names, capabilities, responder state and the operator's hold", async () => {
     const directory = await schema("comms-directory.schema.json");
     const entry = directory.properties.projects.items;
     expect(Object.keys(entry.properties).sort()).toEqual(["capabilities", "id", "name"]);
     expect(entry.additionalProperties).toBe(false);
     const item = entry.properties.capabilities.items;
-    expect(Object.keys(item.properties).sort()).toEqual(["capability", "responder"]);
+    expect(Object.keys(item.properties).sort()).toEqual(["capability", "held", "responder"]);
     expect(item.additionalProperties).toBe(false);
     expect(Object.keys(directory.properties).sort()).toEqual(["cursor", "projects", "protocol", "snapshot"]);
     const status = await schema("comms-status.schema.json");
     expect(item.properties.responder.enum).toEqual(status.properties.responders.items.properties.state.enum);
+  });
+
+  it("DEC-0079: shows a hold as one optional boolean per capability, in com.status and the directory alike", async () => {
+    const directory = await schema("comms-directory.schema.json");
+    const status = await schema("comms-status.schema.json");
+    const item = directory.properties.projects.items.properties.capabilities.items;
+    const responder = status.properties.responders.items;
+    for (const member of [item.properties.held, responder.properties.held]) expect(member.type).toBe("boolean");
+    expect(item.required).not.toContain("held");
+    expect(responder.required).not.toContain("held");
+    expect(directory.properties.projects.items.properties).not.toHaveProperty("held");
+    const refusal = await schema("comms-refusal.schema.json");
+    expect(refusal.properties.error.if.properties.code).toEqual({ const: "held" });
+    expect(refusal.properties.error.then.properties.retryable).toEqual({ const: true });
   });
 
   it("states the directory's boundary: same estate and owner, no content, operator opt-out that is discovery only", () => {
@@ -149,10 +163,14 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-directory.schema.json", killer: "comms-directory-over-page", name: "page unbounded", mutate: (s) => { delete s.properties.projects.maxItems; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-entry-with-content", name: "entry open", mutate: (s) => { s.properties.projects.items.additionalProperties = true; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-entry-with-generation", name: "capability item open", mutate: (s) => { s.properties.projects.items.properties.capabilities.items.additionalProperties = true; } },
-  { schema: "comms-directory.schema.json", killer: "comms-directory-with-count", name: "directory open", mutate: (s) => { s.additionalProperties = true; } }
+  { schema: "comms-directory.schema.json", killer: "comms-directory-with-count", name: "directory open", mutate: (s) => { s.additionalProperties = true; } },
+  { schema: "comms-directory.schema.json", killer: "comms-directory-held-not-boolean", name: "held any value", mutate: (s) => { s.properties.projects.items.properties.capabilities.items.properties.held = {}; } },
+  { schema: "comms-directory.schema.json", killer: "comms-directory-entry-held", name: "held on the Project entry", mutate: (s) => { s.properties.projects.items.properties.held = { type: "boolean" }; } },
+  { schema: "comms-status.schema.json", killer: "comms-status-held-not-boolean", name: "responder held any value", mutate: (s) => { s.properties.responders.items.properties.held = {}; } },
+  { schema: "comms-refusal.schema.json", killer: "comms-refusal-held-not-retryable", name: "held may be final", mutate: (s) => { delete s.properties.error.if; delete s.properties.error.then; } }
 ];
 
-describe("every refusal of DEC-0073 is killed by its fixture", () => {
+describe("every refusal of DEC-0073 and DEC-0079 is killed by its fixture", () => {
   it.each(PLANTS)("$schema: $name → $killer", async ({ schema: file, killer, name, mutate }) => {
     expect(await killers(file, { name, mutate })).toContain(killer);
   });

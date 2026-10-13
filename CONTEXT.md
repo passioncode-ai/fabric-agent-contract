@@ -144,6 +144,12 @@ a Project: that hides it from discovery only, and it stays addressable by id
 **Board receipt**: The one answer of every successful board mutation (`comms-receipt.schema.json`): `ok`,
 `repeated`, and the message, request, slot or attempt the call touched; never a sequence number (DEC-0073).
 
+**Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
+While it lasts the board refuses new work in its scope `held` (retryable) and never refuses settling, reporting on or
+renewing started work, a cancel or a read; it is not an authority change and bumps no generation
+([project communication](docs/specification/project-comms.md#holds), DEC-0079). Not the C4 sense in which accepted
+work is *held* past its deadline.
+
 **memory/0.1**: The wire on which agent memory is served, first by Project Observatory
 ([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
 
