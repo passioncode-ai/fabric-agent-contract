@@ -145,8 +145,10 @@ a Project: that hides it from discovery only, and it stays addressable by id
 `repeated`, and the message, request, slot or attempt the call touched; never a sequence number (DEC-0073).
 
 **Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
-While it lasts the board refuses new work in its scope `held` (retryable) and never refuses settling, reporting on or
-renewing started work, a cancel or a read; it is not an authority change and bumps no generation
+While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
+never refuses the current responder's calls on started work; if that responder's session ends under a slot or
+Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says. It is not an
+authority change and bumps no generation
 ([project communication](docs/specification/project-comms.md#holds), DEC-0079). Not the C4 sense in which accepted
 work is *held* past its deadline.
 

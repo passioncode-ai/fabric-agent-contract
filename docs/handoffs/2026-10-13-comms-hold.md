@@ -21,13 +21,18 @@ what a hold refuses; the owner ruled to adopt the draft with refinements.
   - repeats;
   - the lax-port cases: a fenced reply into a held thread, case and prefix comparisons, a request to a held Project
     queuing.
-  - The vectors were generated from the decision's matrix written as data, not from `src/comms-hold.ts`.
+  - `tools/vectors/comms-hold.ts` writes them from the decision's matrix written as data; it does not import
+    `src/comms-hold.ts`, and `test/comms-hold.test.ts` checks that the committed file is exactly its output.
 - `test/comms-hold.test.ts`: runs the vectors, checks their coverage and the spec's hold table row for row, and
   feeds malformed input. `test/comms-tools.test.ts`: the shape test and four schema plants.
 - project-comms.md: the amendment line, the lifecycle note (and the C4 *held* that is not a hold), *Holds* with its
   table, `com.status`, the directory, *Refusals*.
-- Also: conformance.md's board-hold obligation row; CONTEXT *Board hold*; DOCMAP row; SCN-025 alt path; CT-41 and
-  CT-42 clauses.
+- Also: conformance.md's board-hold obligation row; CONTEXT *Board hold*; DOCMAP row; SCN-025 alt path; CT-21,
+  CT-41 and CT-42 clauses; `src/comms-hold.ts` at a 100% branch floor.
+- Review fixes (the independent reading of #101): a hold never refuses the current responder's calls on started work,
+  and if that responder's session ends under a slot or Project hold, enrollment and replacement wait for the lift (the
+  earlier "never strands started work" was false); the compatibility rule is in the spec; Fabric omits `held` for
+  viewer principals until Dashboards repins (CT-21); `com.read_ack` in the conformance row; the generator committed.
 - No `FAC-SEM` code: the matrix is decided on board state that no checked document carries. The registers
   (DECISIONS, conformance, backlog) were edited without a lease, by the owner's arrangement; the owner takes the
   leases at merge.
@@ -35,7 +40,7 @@ what a hold refuses; the owner ruled to adopt the draft with refinements.
 ## Open
 
 - Fabric serves `held` per the matrix and sends it only to readers pinned at or after DEC-0079 (CT-41); until then it
-  answers a hold `not_authorized`.
+  answers a hold `not_authorized`. Fabric Dashboards may show `held` once it repins (CT-21).
 - The adapter's kits retry `held` with backoff and never stop accepted work (CT-42).
 - Not decided:
   - the operator control's tool shape;

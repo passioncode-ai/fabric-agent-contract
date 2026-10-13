@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { COMMS_TOOLS, HOLD_SCOPES, NEVER_HELD, holdRefuses } from "../src/comms-hold.js";
 import { projectRoot } from "../src/contract.js";
+import { VECTOR_FILE, buildCommsHoldVectors } from "../tools/vectors/comms-hold.js";
 
 // DEC-0079: the operator's hold on the Project board — the matrix of what a hold refuses (`held`, retryable) and what it
 // never refuses, run from the shared vectors a port runs (fixtures/vectors/comms-hold.json).
@@ -31,13 +32,26 @@ describe("the vectors (fixtures/vectors/comms-hold.json)", () => {
     expect(holdRefuses(entry.tool, entry.target, entry.holds)).toBe(entry.refused);
   });
 
-  it("cover every board tool with no hold, under each scope alone and under all three", () => {
+  it("are exactly what the generator writes from the decision's matrix (tools/vectors/comms-hold.ts)", () => {
+    expect(buildCommsHoldVectors()).toBe(read(VECTOR_FILE));
+  });
+
+  it("cover every board tool with no hold, under each scope alone and under all three, each case holding what its name says", () => {
     expect([...vectors.tools].sort()).toEqual([...COMMS_TOOLS].sort());
     expect(vectors.scopes).toEqual(["thread", "project", "slot"]);
+    const bySuffix: Array<[string, Json]> = [
+      ["no hold", {}],
+      ["thread held", { threads: ALL.threads }],
+      ["project held", { projects: ALL.projects }],
+      ["slot held", { slots: ALL.slots }],
+      ["thread, Project and slot all held", ALL]
+    ];
     for (const tool of COMMS_TOOLS) {
-      const names = vectors.cases.filter((entry) => entry.tool === tool).map((entry) => entry.name as string);
-      for (const suffix of ["no hold", "thread held", "project held", "slot held", "thread, Project and slot all held"]) {
-        expect(names.some((name) => name.endsWith(suffix)), `${tool}: ${suffix}`).toBe(true);
+      const cases = vectors.cases.filter((entry) => entry.tool === tool);
+      for (const [suffix, holds] of bySuffix) {
+        const matching = cases.filter((entry) => (entry.name as string).endsWith(`, ${suffix}`));
+        expect(matching.length, `${tool}: ${suffix}`).toBeGreaterThanOrEqual(1);
+        for (const entry of matching) expect(entry.holds, entry.name).toEqual(holds);
       }
     }
   });

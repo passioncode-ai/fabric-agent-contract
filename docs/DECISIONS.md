@@ -4439,7 +4439,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      submitted into an unheld thread to a held Project or slot is not refused; it queues, and its deadline runs.
   4. **What a hold never refuses:** `com.complete`, `com.reconcile`, `com.progress` and `com.renew`, a responder's
      fenced `com.reply`, `com.cancel`, and every read (`com.list`, `com.get`, `com.status`, `com.directory`) and
-     `com.read_ack`. A hold must never strand started work or hide state.
+     `com.read_ack`. A hold never hides state, and it never refuses the current responder's calls on started work; if
+     that responder's session ends under a slot or Project hold, enrollment and replacement wait for the lift, and its
+     accepted work stays held as C4 says.
   5. **Held work** is a request whose thread, target Project or target (Project, capability) slot is held. A
      `com.claim` without a named request on an unheld slot passes over requests in held threads, and answers nothing
      claimable when only held ones are left.
@@ -4458,21 +4460,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a held thread; ids and capability names compared as written, never folded or by prefix). No `FAC-SEM` rule: the
      matrix is decided on board state that no document the checker reads carries, and the one property a document
      carries, that `held` is retryable, is a schema constraint.
-- **Why:** Fabric's operator needs to stop new work on a thread, a Project or a responder without stranding what has
-  started. Fabric says it answers a hold `not_authorized` today, which reads as missing authority rather than a pause
+- **Why:** Fabric's operator needs to stop new work on a thread, a Project or a responder without refusing the current
+  responder's calls on what has started. Fabric says it answers a hold `not_authorized` today, which reads as missing authority rather than a pause
   the operator will lift. A retryable code with a fixed matrix lets every kit back off and resume, and keeps
-  settlement, cancellation and reads open so a hold never turns started work into `outcome_unknown` or hides it.
+  settlement, cancellation and reads open so the current responder can always settle started work and no reader is
+  shown less.
 - **Compatibility:** additive for the contract; `contractVersion` stays `0.1.0`. `comms-status`, `comms-directory` and
   the refusal-code enum are closed, so a reader pinned before this decision refuses an answer that carries `held`,
   as a member or as a code. A host therefore sends both only to a reader pinned at or after DEC-0079. To an older
-  reader it omits the member and answers a hold as it does today (`not_authorized`, CT-41), the same staging DEC-0073
-  used for `idempotency`.
+  reader it omits `held` and answers the same matrix with `not_authorized`, as it does today (CT-41), the same staging
+  DEC-0073 used for `idempotency`. Fabric Dashboards reads `com.status` as a viewer principal and is pinned before this
+  decision (DEC-0073 *Compatibility* item 3), so Fabric omits `held` for viewer principals until Dashboards repins at or
+  after DEC-0079 (CT-21). A viewer makes no mutation, so it never receives the refusal code.
 - **Consequences / affects:**
   - spec: `docs/specification/project-comms.md` (the amendment line, the lifecycle note, *Holds*, `com.status`, the
     project directory, *Refusals*); `docs/specification/conformance.md` (the board's hold obligation);
   - schemas: `schemas/comms-common.schema.json` (`held`), `schemas/comms-refusal.schema.json` (retryable),
     `schemas/comms-status.schema.json` and `schemas/comms-directory.schema.json` (`held`);
-  - code: `src/comms-hold.ts` (new);
+  - code: `src/comms-hold.ts` (new), measured at a 100% branch floor in `vitest.config.ts`;
+    `tools/vectors/comms-hold.ts` (new), the generator that writes the vectors from the matrix as data;
   - fixtures: `fixtures/vectors/comms-hold.json` (new); `fixtures/positive/comms-refusal-held.json`,
     `fixtures/positive/comms-status-held.json`, `fixtures/positive/comms-directory-held.json`,
     `fixtures/negative/comms-refusal-held-not-retryable.json`, `fixtures/negative/comms-status-held-not-boolean.json`,
@@ -4480,7 +4486,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `fixtures/catalogue.json`;
   - tests: `test/comms-hold.test.ts` (new), `test/comms-tools.test.ts` (the shape test and four plants);
   - docs: `CONTEXT.md` (*Board hold*), `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-025),
-    `docs/handoffs/2026-10-13-comms-hold.md`; board rows CT-41 and CT-42.
+    `docs/handoffs/2026-10-13-comms-hold.md`; board rows CT-21, CT-41 and CT-42.
 - **Not decided here:** the operator control's own tool shape; the hold's audit record; the Telegram mirror's text for
   a hold; a page or message member that shows a thread hold; whether a hold survives a board restore (after one, every
   responder authority is off until the owner re-enrolls, C7, so no held work proceeds either way).

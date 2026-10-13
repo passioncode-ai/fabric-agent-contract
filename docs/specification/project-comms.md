@@ -6,7 +6,8 @@
 the session, and the [project directory](#project-directory) (`com.directory`). It adds schemas and one optional
 `com.status` member, and changes no existing field.
 **Amended by DEC-0079 (2026-10-13):** an operator's [hold](#holds) on a thread, a Project or a responder slot, the
-refusal `held`, and an optional `held` member in `com.status` and the directory. It changes no existing field.
+refusal `held`, and an optional `held` member in `com.status` and the directory. It adds one refusal code and one
+optional member (on `com.status` responders and directory capabilities), and changes no existing field.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -320,6 +321,8 @@ until the owner re-enrolls. A started effect becomes `unknown` and waits for rec
 The operator can **hold** a thread, a Project or a (Project, capability) responder slot through the host's own operator
 controls (Fabric's board operator controls, its decision D9). While a hold lasts, the board refuses new work in its
 scope with `held` and never refuses a call that settles, reports on or keeps alive work already started (DEC-0079).
+A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
+Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says.
 
 - **Who sets it.** Only the operator, in the host. The contract defines no tool that sets, lifts or lists a hold, so an
   agent can neither hold nor release work. A hold is not a grant change and not an authority revision: it never
@@ -342,6 +345,9 @@ scope with `held` and never refuses a call that settles, reports on or keeps ali
   work exists only per capability, so one per-capability member carries both scopes and agrees with `com.status`.
   Absent means not held. A thread hold is seen through the refusal; no page or message member shows it in this
   revision.
+- **Compatibility.** A host sends the code and the member only to a reader pinned at or after DEC-0079; to an older
+  reader it omits `held` and answers the same matrix with `not_authorized`. A viewer principal such as Fabric
+  Dashboards is such a reader until it repins.
 
 ### What a hold refuses
 
