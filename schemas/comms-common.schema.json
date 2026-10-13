@@ -181,7 +181,8 @@
         "reconcile_required",
         "observation_required",
         "cursor_reset_required",
-        "immutable_participants"
+        "immutable_participants",
+        "held"
       ]
     }
   }

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0079`
+**Next free ID:** `DEC-0082`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -361,6 +361,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted 2026-10-05 — the operator accepted C1–C9 as written (OQ-0008); consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Annotated (2026-10-12):** the tool list amended by DEC-0073 (`com.directory`, seventeen tools; every tool's arguments and answer a closed schema, one receipt).
+- **Annotated (2026-10-13):** amended by DEC-0079: an operator's hold on a thread, a Project or a responder slot refuses new work `held` (retryable) and never refuses started work, a cancel or a read.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -4084,6 +4085,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (FAA-12a/b). Board rows CT-41 to CT-43.
 - **Annotated (2026-10-13):** amended by DEC-0078: a replacement's receipt carries `transferred`, each transferred request's revision and attempt.
 - **Annotated (2026-10-13):** its open question on a directory page's uniqueness is decided by DEC-0077 (`FAC-SEM-107`).
+- **Annotated (2026-10-13):** amended by DEC-0079: `com.status` responders and directory capabilities gain an optional `held`, and the refusal codes gain `held`.
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
 - **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
@@ -4413,3 +4415,81 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a request it cannot claim applies).
 - **Source:** Fabric's COM-03 finding (2026-10-13). DEC-0078 was reserved by git CAS (`--key receipt-transferred-20261013 DEC`);
   no `FAC-SEM` id; the record plane is `fs`.
+
+### DEC-0079 — An operator's hold on the Project board refuses new work `held`, and never started work, a cancel or a read (`fabric-project-comms/0.1`, additive)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). Asked for by Fabric's board wave 4 (its operator
+  controls, decision D9), drafted there and adopted by the owner with refinements. Consumer adoption: Fabric serves
+  `held` per the matrix (CT-41); the adapter's kits retry it with backoff (CT-42).
+- **Amends:** DEC-0022 and DEC-0073 (one refusal code, one optional member in `com.status` and in the directory; no
+  tool, argument, state or transition changes).
+- **Decision:** in [project communication](specification/project-comms.md#holds) —
+  1. **The refusal.** `held` joins `comms-common.schema.json#/$defs/refusalCode`. It is always `retryable: true`
+     (`comms-refusal.schema.json` refuses it with `false`). Its message is one sentence that says the operator resumes
+     the work, and it never names a hidden Project or who set the hold.
+  2. **Visible state.** `com.status` answers `responders[].held: true` when the operator holds that slot or its
+     Project; the directory answers `held: true` on each capability whose slot or Project is held. The member sits per
+     capability, not on the directory entry: a Project hold refuses only slot work, which exists only per capability,
+     so one per-capability member carries both scopes and is the same fact as `com.status`'s. Absent or `false` means
+     not held. `held` never names who set the hold. A thread hold is seen through the refusal only.
+  3. **What a hold refuses: new work only.** `com.submit`, and a participant's `com.reply`, into a held thread;
+     `com.enroll` and `com.responder_replace` on a held slot or a slot of a held Project; `com.claim` of held work
+     (without a named request: on a held slot or Project); `com.accept` and `com.effect_begin` on held work. A request
+     submitted into an unheld thread to a held Project or slot is not refused; it queues, and its deadline runs.
+  4. **What a hold never refuses:** `com.complete`, `com.reconcile`, `com.progress` and `com.renew`, a responder's
+     fenced `com.reply`, `com.cancel`, and every read (`com.list`, `com.get`, `com.status`, `com.directory`) and
+     `com.read_ack`. A hold never hides state, and it never refuses the current responder's calls on started work; if
+     that responder's session ends under a slot or Project hold, enrollment and replacement wait for the lift, and its
+     accepted work stays held as C4 says.
+  5. **Held work** is a request whose thread, target Project or target (Project, capability) slot is held. A
+     `com.claim` without a named request on an unheld slot passes over requests in held threads, and answers nothing
+     claimable when only held ones are left.
+  6. **Timing.** The board checks holds when a call commits, inside the atomic recheck of the fence, the authority
+     revision and the lease (C4). A hold refuses calls that commit after it and undoes none that committed before. A
+     held request's deadline keeps running; accepted work outlives its deadline as C4 already says. A `held` refusal
+     stores nothing, so the same call and key commit once the hold is lifted; a repeat of a receipt stored before the
+     hold answers that receipt.
+  7. **Who sets it.** The operator, through the host's operator controls. The contract defines no tool that sets,
+     lifts or lists a hold. A hold is not a grant change and not an authority revision (no `authority_changed`, no
+     cursor reset), and it bumps no slot generation, attempt or request revision: it is checked at commit time like a
+     lease, so the responder continues under its fence once the hold is lifted.
+  8. **Testable for ports.** `holdRefuses(tool, target, holds)` in `src/comms-hold.ts` is the matrix; the shared
+     vectors `fixtures/vectors/comms-hold.json` cover every tool with no hold, under each scope alone and under all
+     three, the never-refused tools under every hold, repeats, and the cases a lax port gets wrong (a fenced reply into
+     a held thread; ids and capability names compared as written, never folded or by prefix). No `FAC-SEM` rule: the
+     matrix is decided on board state that no document the checker reads carries, and the one property a document
+     carries, that `held` is retryable, is a schema constraint.
+- **Why:** Fabric's operator needs to stop new work on a thread, a Project or a responder without refusing the current
+  responder's calls on what has started. Fabric says it answers a hold `not_authorized` today, which reads as missing authority rather than a pause
+  the operator will lift. A retryable code with a fixed matrix lets every kit back off and resume, and keeps
+  settlement, cancellation and reads open so the current responder can always settle started work and no reader is
+  shown less.
+- **Compatibility:** additive for the contract; `contractVersion` stays `0.1.0`. `comms-status`, `comms-directory` and
+  the refusal-code enum are closed, so a reader pinned before this decision refuses an answer that carries `held`,
+  as a member or as a code. A host therefore sends both only to a reader pinned at or after DEC-0079. To an older
+  reader it omits `held` and answers the same matrix with `not_authorized`, as it does today (CT-41), the same staging
+  DEC-0073 used for `idempotency`. Fabric Dashboards reads `com.status` as a viewer principal and is pinned before this
+  decision (DEC-0073 *Compatibility* item 3), so Fabric omits `held` for viewer principals until Dashboards repins at or
+  after DEC-0079 (CT-21). A viewer makes no mutation, so it never receives the refusal code.
+- **Consequences / affects:**
+  - spec: `docs/specification/project-comms.md` (the amendment line, the lifecycle note, *Holds*, `com.status`, the
+    project directory, *Refusals*); `docs/specification/conformance.md` (the board's hold obligation);
+  - schemas: `schemas/comms-common.schema.json` (`held`), `schemas/comms-refusal.schema.json` (retryable),
+    `schemas/comms-status.schema.json` and `schemas/comms-directory.schema.json` (`held`);
+  - code: `src/comms-hold.ts` (new), measured at a 100% branch floor in `vitest.config.ts`;
+    `tools/vectors/comms-hold.ts` (new), the generator that writes the vectors from the matrix as data;
+  - fixtures: `fixtures/vectors/comms-hold.json` (new); `fixtures/positive/comms-refusal-held.json`,
+    `fixtures/positive/comms-status-held.json`, `fixtures/positive/comms-directory-held.json`,
+    `fixtures/negative/comms-refusal-held-not-retryable.json`, `fixtures/negative/comms-status-held-not-boolean.json`,
+    `fixtures/negative/comms-directory-held-not-boolean.json`, `fixtures/negative/comms-directory-entry-held.json`,
+    `fixtures/catalogue.json`;
+  - tests: `test/comms-hold.test.ts` (new), `test/comms-tools.test.ts` (the shape test and four plants);
+  - docs: `CONTEXT.md` (*Board hold*), `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-025),
+    `docs/handoffs/2026-10-13-comms-hold.md`; board rows CT-21, CT-41 and CT-42.
+- **Not decided here:** the operator control's own tool shape; the hold's audit record; the Telegram mirror's text for
+  a hold; a page or message member that shows a thread hold; whether a hold survives a board restore (after one, every
+  responder authority is off until the owner re-enrolls, C7, so no held work proceeds either way).
+- **Source:** Fabric's board wave 4 draft (operator controls D9, awareness COM-05) and the owner's ruling on it
+  (2026-10-13). DEC-0079 was reserved by git CAS by the owner session (`--key comms-host-hold DEC`); no `FAC-SEM` id;
+  the record plane is `fs`.
