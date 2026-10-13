@@ -226,6 +226,12 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
       for (const value of odd) expect(() => findingSubmitAnswer(call, value as never)).not.toThrow();
       expect(findingSubmitAnswer(call, odd[2] as never)).toEqual({ refused: "idempotency_conflict", stores: "nothing" });
       expect(findingSubmitAnswer({ ...call, key: "other-key-0001" }, odd[2] as never)).toEqual({ repeated: false, stores: "message" });
+      // A state that is not an object holds nothing; a call that is not an object, or lacks its strings, is refused.
+      for (const value of [null, 7, "x", []]) expect(findingSubmitAnswer(call, value as never)).toEqual({ repeated: false, stores: "message" });
+      for (const value of [null, 7, "x", [], {}, { ...call, project: 7 }, { ...call, key: null }, { ...call, digest: undefined }]) {
+        expect(findingSubmitAnswer(value as never, state)).toEqual({ refused: "invalid_arguments", stores: "nothing" });
+        expect(findingSubmitAnswer(value as never, null as never)).toEqual({ refused: "invalid_arguments", stores: "nothing" });
+      }
     });
   });
 });

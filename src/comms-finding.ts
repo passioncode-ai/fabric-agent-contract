@@ -31,22 +31,30 @@ export interface SubmitState {
 /** The call as the board resolved it: the sender Project from the endpoint, the thread it writes into (absent: new). */
 export interface SubmitCall { project: string; thread?: string | undefined; key: string; digest: string; dedupeKey?: string | undefined }
 export type SubmitAnswer =
-  | { refused: "idempotency_conflict" | "held"; stores: "nothing" }
+  | { refused: "invalid_arguments" | "idempotency_conflict" | "held"; stores: "nothing" }
   | { receipt: FindingReceipt; repeated: true; stores: "nothing" | "receipt" }
   | { repeated: false; stores: "message" };
 
 const text = (value: unknown): string | undefined => (typeof value === "string" ? value : undefined);
 const list = (value: unknown, key: string): unknown[] => (isObject(value) && Array.isArray(value[key]) ? value[key] as unknown[] : []);
 
-/** The answer to `call` under `state`. Ids and keys compare as written; malformed input never throws. */
+/**
+ * The answer to `call` under `state`. Ids and keys compare as written; malformed input never throws: a call that is not
+ * an object, or lacks a string Project, key or digest, is refused `invalid_arguments`, and a state that is not an object
+ * holds nothing.
+ */
 export function findingSubmitAnswer(call: SubmitCall, state: SubmitState): SubmitAnswer {
+  const given: unknown = call;
+  if (!isObject(given) || text(given.project) === undefined || text(given.key) === undefined || text(given.digest) === undefined) {
+    return { refused: "invalid_arguments", stores: "nothing" };
+  }
   const stored = list(state, "keys").find((entry) => isObject(entry) && entry.project === call.project && entry.key === call.key);
   if (isObject(stored)) {
     return stored.digest === call.digest && isObject(stored.receipt)
       ? { receipt: stored.receipt as unknown as FindingReceipt, repeated: true, stores: "nothing" }
       : { refused: "idempotency_conflict", stores: "nothing" };
   }
-  if (holdRefuses("com.submit", { thread: text(call.thread) }, state.holds)) return { refused: "held", stores: "nothing" };
+  if (holdRefuses("com.submit", { thread: text(call.thread) }, isObject(state) ? state.holds : undefined)) return { refused: "held", stores: "nothing" };
   const dedupeKey = text(call.dedupeKey);
   const standing = dedupeKey === undefined ? undefined : list(state, "findings").find((entry) => isObject(entry) && entry.project === call.project && entry.dedupeKey === dedupeKey);
   if (isObject(standing) && isObject(standing.receipt)) return { receipt: standing.receipt as unknown as FindingReceipt, repeated: true, stores: "receipt" };

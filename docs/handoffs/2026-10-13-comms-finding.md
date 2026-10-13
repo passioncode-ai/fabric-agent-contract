@@ -48,7 +48,8 @@ count, and subscriptions left undecided.
 
 - Fabric stores, dedupes and redacts findings and repins (CT-41); the adapter's kits send and read them (CT-42).
 - Not decided: subscriptions (an explicit, grant-bound sharing command, never implicit); severity's effect on
-  notifications or Telegram; a blocking finding and holds; which grants cover a row or a task.
+  notifications or Telegram; a blocking finding and holds; which grants cover a row or a task; how the Telegram
+  mirror redacts a finding.
 - The registers (DEC-0080 after DEC-0079 with the annotations on DEC-0022 and DEC-0073, the `FAC-SEM-108` row, and the
   CT-41 and CT-42 clauses after DEC-0079's) were first kept as a patch, because agent-sync's commit guard refuses those
   files without a lease and this run took none. After DEC-0079 merged (`d194dd9`, #101), the branch was rebased onto
