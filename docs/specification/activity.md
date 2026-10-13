@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052 and DEC-0068; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052, DEC-0068 and DEC-0082; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -99,7 +99,7 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
@@ -181,6 +181,17 @@ vocabulary: `personal_account_in_work_folder`, `unknown_account`, `personal_key_
 `task`, `git`, `skill` or `launch` that would tie it to a timed interval (schema). A collector emits a
 day's violations after the day ends, so the stream position tells no more than the day.
 
+**`grant.usage`** — one grant's metered usage for one **UTC day** (DEC-0082, [contexts](contexts.md#usage-per-grant)).
+`data`: `day`, `grantRef` (the opaque grant reference of DEC-0045, 1–256 characters), `calls` (at least 1),
+`unpricedCalls` (never more than `calls`) and `costUsd`, a number of at least 0 or `null` when no call was priced — an
+unknown cost is `null`, never `0` (`FAC-SEM-038`). Like `policy.violation` it carries a day and no finer time:
+`occurred` is that day's midnight UTC (`FAC-SEM-039`), `monotonicNs` is `"0"`, and it carries no `session`, `user`,
+`run`, `task`, `git`, `skill` or `launch` (schema). Its source is what the device's meter settled under the grant
+(grant-check receipts, DEC-0037) and services' `byGrant` rows: sums and states only, never a per-call line, because
+usage under a share grant is data about a person (CX-VES-08). A collector emits it after the day ends, one per (day,
+`grantRef`) per stream (`FAC-SEM-039` refuses a second in one batch), and sends it only to the organization server of the
+grant's own context ([routing](contexts.md#routing), `routeGrantUsage`).
+
 **`result`** — a run met, or did not meet, the result signal its agent declares (DEC-0052, the first
 organization server's target architecture v4 §12). It requires `run.root`, and carries **no `user` and no
 `session`** (schema): results leave a device as counts and enums joined to cost by the run. The event arrives on
@@ -216,7 +227,18 @@ carries bounded `data`: at most two levels, scalar values, strings of at most 64
 whitespace and no absolute path (schema `activity-common#/$defs/extData`). A receiver MUST accept
 and store an event of an unknown kind, count it in its stream, and never reject the batch for it.
 It MUST NOT interpret the event's `data`. A new core kind is therefore an additive change within
-`0.1`.
+`0.1`: a receiver pinned before `grant.usage` (DEC-0082) reads it as an unknown kind, so it accepts one whose
+`grantRef` fits the 64 characters without whitespace and rejects a longer one as that event's `schema` rejection
+([contexts → compatibility](contexts.md#compatibility)).
+
+<a id="routing-by-context"></a>
+
+**Routing by context** (DEC-0082). No event carries the context of its session: the receiver knows its organization
+from the device certificate ([attribution](devices.md#attribution)), and a context field could leak `personal` or
+another organization's id. A collector sends an event of a session only to the organization server of the one
+enrollment whose organization is the session's `org:<orgId>`, compared as written, and never an event of a `personal`
+session (`routeTarget`, the shared vectors [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json),
+[contexts → routing](contexts.md#routing)).
 
 ### No content, no person
 
@@ -490,8 +512,8 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | Code | Kind | Rule |
 |---|---|---|
 | `FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no home directory, plain or encoded, in any value |
-| `FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced |
-| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; a policy violation's `occurred` is the day it names; an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`, and one with no canonical form is refused; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
+| `FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced; a `grant.usage` has no more unpriced calls than calls, and its cost is `null` exactly when every call is unpriced (DEC-0082) |
+| `FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; a policy violation's and a `grant.usage`'s `occurred` is the day it names; one stream of a batch carries one `grant.usage` per (day, `grantRef`) (DEC-0082); an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`, and one with no canonical form is refused; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 | `FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 | `FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |

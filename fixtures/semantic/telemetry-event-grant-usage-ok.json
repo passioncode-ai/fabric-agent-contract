@@ -1,0 +1,26 @@
+{
+  "description": "One grant's metered usage for one UTC day: two of twelve calls unpriced, so the cost is a lower bound (DEC-0082).",
+  "kind": "telemetry-event",
+  "expect": [],
+  "input": {
+    "protocol": "fabric-activity/0.1",
+    "eventId": "01K7GV0A1B2C3D4E5F6G7H8J9K",
+    "kind": "grant.usage",
+    "source": "meter",
+    "collector": {
+      "id": "observatory-node",
+      "epoch": 3
+    },
+    "seq": 41,
+    "occurred": "2026-10-12T00:00:00Z",
+    "bootId": "boot-7c41e2",
+    "monotonicNs": "0",
+    "data": {
+      "day": "2026-10-12",
+      "grantRef": "urn:grant:estate:share-inbox-digest-org-a#1",
+      "calls": 12,
+      "unpricedCalls": 2,
+      "costUsd": 0.84
+    }
+  }
+}

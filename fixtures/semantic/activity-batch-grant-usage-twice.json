@@ -1,0 +1,59 @@
+{
+  "description": "One grant's usage for one day sent twice in one stream under two ids (FAC-SEM-039, DEC-0082).",
+  "kind": "activity-batch",
+  "expect": [
+    "FAC-SEM-039"
+  ],
+  "input": {
+    "protocol": "fabric-activity/0.1",
+    "device": {
+      "id": "dev-01j9a"
+    },
+    "batchId": "01K7GV1A1B2C3D4E5F6G7H8J9K",
+    "sent": "2026-10-13T00:05:00Z",
+    "events": [
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K7GV0A1B2C3D4E5F6G7H8J9K",
+        "kind": "grant.usage",
+        "source": "meter",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 3
+        },
+        "seq": 41,
+        "occurred": "2026-10-12T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-10-12",
+          "grantRef": "urn:grant:estate:share-inbox-digest-org-a#1",
+          "calls": 12,
+          "unpricedCalls": 2,
+          "costUsd": 0.84
+        }
+      },
+      {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01K7GV0A1B2C3D4E5F6G7H8J9M",
+        "kind": "grant.usage",
+        "source": "meter",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 3
+        },
+        "seq": 42,
+        "occurred": "2026-10-12T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-10-12",
+          "grantRef": "urn:grant:estate:share-inbox-digest-org-a#1",
+          "calls": 13,
+          "unpricedCalls": 2,
+          "costUsd": 0.84
+        }
+      }
+    ]
+  }
+}

@@ -723,5 +723,22 @@
   {"name": "window-lease-es256", "schema": "window-lease.schema.json", "path": "negative/window-lease-es256.json", "valid": false, "keyword": "enum"},
   {"name": "window-lease-scope-organization", "schema": "window-lease.schema.json", "path": "negative/window-lease-scope-organization.json", "valid": false, "keyword": "pattern"},
   {"name": "window-lease-escalation-field", "schema": "window-lease.schema.json", "path": "negative/window-lease-escalation-field.json", "valid": false, "keyword": "additionalProperties"},
-  {"name": "window-lease-short-sig", "schema": "window-lease.schema.json", "path": "negative/window-lease-short-sig.json", "valid": false, "keyword": "pattern"}
+  {"name": "window-lease-short-sig", "schema": "window-lease.schema.json", "path": "negative/window-lease-short-sig.json", "valid": false, "keyword": "pattern"},
+  {"name": "governance-grant-share-context", "schema": "governance.schema.json", "path": "positive/governance-grant-share-context.json", "valid": true},
+  {"name": "governance-grant-context-capitalized", "schema": "governance.schema.json", "path": "negative/governance-grant-context-capitalized.json", "valid": false, "keyword": "pattern"},
+  {"name": "governance-grant-context-empty-org", "schema": "governance.schema.json", "path": "negative/governance-grant-context-empty-org.json", "valid": false, "keyword": "pattern"},
+  {"name": "estate-record-contexts", "schema": "estate-record.schema.json", "path": "positive/estate-record-contexts.json", "valid": true},
+  {"name": "estate-record-placement-context-too-long", "schema": "estate-record.schema.json", "path": "negative/estate-record-placement-context-too-long.json", "valid": false, "keyword": "pattern"},
+  {"name": "estate-record-placement-grant-not-uri", "schema": "estate-record.schema.json", "path": "negative/estate-record-placement-grant-not-uri.json", "valid": false, "keyword": "format"},
+  {"name": "estate-record-secret-context-malformed", "schema": "estate-record.schema.json", "path": "negative/estate-record-secret-context-malformed.json", "valid": false, "keyword": "pattern"},
+  {"name": "telemetry-event-grant-usage", "schema": "telemetry-event.schema.json", "path": "positive/telemetry-event-grant-usage.json", "valid": true},
+  {"name": "telemetry-event-grant-usage-unpriced", "schema": "telemetry-event.schema.json", "path": "positive/telemetry-event-grant-usage-unpriced.json", "valid": true},
+  {"name": "telemetry-event-grant-usage-with-session", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-with-session.json", "valid": false, "keyword": "false schema"},
+  {"name": "telemetry-event-grant-usage-with-user", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-with-user.json", "valid": false, "keyword": "false schema"},
+  {"name": "telemetry-event-grant-usage-timed", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-timed.json", "valid": false, "keyword": "pattern"},
+  {"name": "telemetry-event-grant-usage-monotonic", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-monotonic.json", "valid": false, "keyword": "const"},
+  {"name": "telemetry-event-grant-usage-negative-cost", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-negative-cost.json", "valid": false, "keyword": "minimum"},
+  {"name": "telemetry-event-grant-usage-no-calls", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-no-calls.json", "valid": false, "keyword": "minimum"},
+  {"name": "telemetry-event-grant-usage-long-ref", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-long-ref.json", "valid": false, "keyword": "maxLength"},
+  {"name": "telemetry-event-grant-usage-per-call", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-per-call.json", "valid": false, "keyword": "additionalProperties"}
 ]

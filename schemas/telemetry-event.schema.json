@@ -337,6 +337,44 @@
         "type": "object",
         "properties": {
           "kind": {
+            "const": "grant.usage"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "occurred": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T00:00:00(\\.0+)?Z$"
+          },
+          "monotonicNs": {
+            "const": "0"
+          },
+          "user": false,
+          "session": false,
+          "run": false,
+          "task": false,
+          "git": false,
+          "skill": false,
+          "launch": false,
+          "data": {
+            "$ref": "#/$defs/grantUsage"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
             "const": "result"
           }
         },
@@ -377,6 +415,7 @@
               "usage.line",
               "buffer.overflow",
               "policy.violation",
+              "grant.usage",
               "result",
               "session.annotation"
             ]
@@ -572,6 +611,54 @@
         }
       },
       "additionalProperties": false
+    },
+    "grantUsage": {
+      "type": "object",
+      "required": [
+        "day",
+        "grantRef",
+        "calls",
+        "unpricedCalls",
+        "costUsd"
+      ],
+      "properties": {
+        "day": {
+          "$ref": "activity-common.schema.json#/$defs/day",
+          "description": "The UTC day the usage was metered on, never a time (DEC-0082): the event's occurred is that day's midnight and its monotonicNs is 0."
+        },
+        "grantRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "The grant the usage was metered under: the opaque grant reference of DEC-0045, as a grant check names it (grant-check-request.grantRef)."
+        },
+        "calls": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "The calls metered under the grant that day; a day with none emits no event."
+        },
+        "unpricedCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Of calls, those with no known cost; never more than calls (FAC-SEM-038)."
+        },
+        "costUsd": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The day's known cost in USD, or null when no call was priced: an unknown cost is null, never 0 (DEC-0021, FAC-SEM-038). A number with some calls unpriced is a lower bound."
+        }
+      },
+      "additionalProperties": false,
+      "description": "DEC-0082: one grant's metered usage for one UTC day — sums and states only, never a per-call line, because usage under a share grant is data about a person. Built from what the device's meter settled under the grant (grant-check receipts, DEC-0037) and services' byGrant rows (DEC-0045)."
     },
     "result": {
       "type": "object",

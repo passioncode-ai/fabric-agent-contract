@@ -160,8 +160,23 @@ function noContentOrPerson(value: JsonObject, roots: string[]): Finding[] {
   }));
 }
 
-/** FAC-SEM-038 for one event: a zero estimate for a call that used tokens is an unknown cost. */
+/**
+ * FAC-SEM-038 for a grant's daily usage (DEC-0082), as for a summary cell: no more unpriced calls than calls, and the cost
+ * is `null` exactly when every call is unpriced — an unknown cost is never `0`, and priced calls carry their cost.
+ */
+function grantUsageCost(event: JsonObject, at: string): Finding[] {
+  const d = data(event);
+  if (typeof d.calls !== "number" || typeof d.unpricedCalls !== "number") return [];
+  const flag = (path: string, message: string): Finding => ({ code: "FAC-SEM-038", instancePath: `${at}/data${path}`, message });
+  if (d.unpricedCalls > d.calls) return [flag("/unpricedCalls", "more unpriced calls than calls")];
+  if (d.unpricedCalls === d.calls && d.costUsd !== null) return [flag("/costUsd", "every call is unpriced, so the cost is unknown (null), not a number")];
+  if (d.unpricedCalls < d.calls && d.costUsd === null) return [flag("/costUsd", "priced calls carry a cost; null is only for a day with no priced call")];
+  return [];
+}
+
+/** FAC-SEM-038 for one event: a zero estimate for a call that used tokens is an unknown cost; a grant's daily usage as `grantUsageCost` says. */
 function eventCost(event: JsonObject, at: string): Finding[] {
+  if (event.kind === "grant.usage") return grantUsageCost(event, at);
   if (event.kind !== "usage.line") return [];
   const line = data(event);
   const cost = isObject(line.cost) ? line.cost : {};
@@ -236,6 +251,9 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
   if (event.kind === "policy.violation" && typeof d.day === "string" && typeof event.occurred === "string" && !event.occurred.startsWith(`${d.day}T`)) {
     flag("/occurred", "a policy violation carries its UTC day and no finer time: occurred is that day's midnight (DEC-0052)");
   }
+  if (event.kind === "grant.usage" && typeof d.day === "string" && typeof event.occurred === "string" && !event.occurred.startsWith(`${d.day}T`)) {
+    flag("/occurred", "a grant's daily usage carries its UTC day and no finer time: occurred is that day's midnight (DEC-0082)");
+  }
   if (typeof event.sourceKey === "string" && typeof event.source === "string") {
     // CT-25 (DEC-0052): the settings form refuses a lone surrogate, so the derivation is refused, never thrown.
     let derived: string | null = null;
@@ -245,11 +263,15 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
   return findings;
 }
 
-/** FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is sent twice. */
+/**
+ * FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is
+ * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantRef) of one stream twice (DEC-0082).
+ */
 function batchIntegrity(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const last = new Map<string, number>();
   const ids = new Set<string>();
+  const grantDays = new Set<string>();
   const device = deviceId(value);
   events(value).forEach((event, i) => {
     const at = `/events/${i}`;
@@ -258,6 +280,12 @@ function batchIntegrity(value: JsonObject): Finding[] {
     if (ids.has(id)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/eventId`, message: `${id} appears twice in one batch` });
     ids.add(id);
     const key = streamKey(device, collectorOf(event));
+    if (event.kind === "grant.usage") {
+      const d = data(event);
+      const day = JSON.stringify([key, d.day, d.grantRef]);
+      if (grantDays.has(day)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/data/grantRef`, message: `the usage of grant ${String(d.grantRef)} on ${String(d.day)} is sent twice in one stream: one event per day and grant` });
+      grantDays.add(day);
+    }
     const seq = num(event.seq);
     const before = last.get(key);
     if (before !== undefined && seq !== before + 1) {

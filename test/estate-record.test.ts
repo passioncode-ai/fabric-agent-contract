@@ -70,7 +70,8 @@ describe("the schema (DEC-0055)", () => {
 
   it("gives a secret placement no member that could hold a value (DEC-0013)", () => {
     const secret = schema.$defs.machine.properties.secrets.items;
-    expect(Object.keys(secret.properties).sort()).toEqual(["agentRef", "from", "slot"]);
+    // DEC-0082 adds the instance's context, which FAC-SEM-075 checks for a credential's shape like the other three.
+    expect(Object.keys(secret.properties).sort()).toEqual(["agentRef", "context", "from", "slot"]);
     expect(secret.additionalProperties).toBe(false);
     expect(valid(load("negative/estate-record-secret-value.json"))).toBe(false);
   });
@@ -96,13 +97,13 @@ describe("the schema (DEC-0055)", () => {
   });
 });
 
-describe("estate-record semantic fixtures (FAC-SEM-072…076)", () => {
+describe("estate-record semantic fixtures (FAC-SEM-072…076, FAC-SEM-110, FAC-SEM-111)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("estate-"));
   const schemaInvalid = ["estate-grant-not-external.json", "estate-hub-small-order.json", "estate-machine-small-order-key.json"];
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-072", "FAC-SEM-073", "FAC-SEM-074", "FAC-SEM-075", "FAC-SEM-076"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-072", "FAC-SEM-073", "FAC-SEM-074", "FAC-SEM-075", "FAC-SEM-076", "FAC-SEM-110", "FAC-SEM-111"]);
     expect(files.filter((name) => (load(`semantic/${name}`).expect as string[]).length === 0).length).toBeGreaterThanOrEqual(3);
   });
 

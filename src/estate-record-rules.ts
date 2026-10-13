@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
+import { PERSONAL_CONTEXT } from "./context-route.js";
+import { grantContextFindings } from "./context-rules.js";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { normalIdentifier } from "./identifiers.js";
@@ -156,12 +158,21 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
 }
 
 /**
- * What `verifyPackage` (DEC-0051) trusts for a package placed on a machine: the publisher key the placement names, from
- * the record's `publisherKeys`. `undefined` when the record places no such agent on that machine.
+ * A placement's context (DEC-0082): its `context`, `personal` when absent. A placement and a secret placement are keyed
+ * by it, compared as written.
  */
-export function placementTrust(record: JsonObject, machineId: string, agentRef: string): PackageTrust | undefined {
+const contextOf = (entry: JsonObject): unknown => (entry.context === undefined ? PERSONAL_CONTEXT : entry.context);
+/** A collision-free key over JSON values (a placement's agent and context, a slot's agent, slot and context). */
+const keyOf = (...parts: unknown[]): string => JSON.stringify(parts);
+
+/**
+ * What `verifyPackage` (DEC-0051) trusts for a package placed on a machine in a context (DEC-0082; `personal` when not
+ * given, so a caller written before contexts is unchanged): the publisher key the placement names, from the record's
+ * `publisherKeys`. `undefined` when the record places no such agent on that machine in that context.
+ */
+export function placementTrust(record: JsonObject, machineId: string, agentRef: string, context: string = PERSONAL_CONTEXT): PackageTrust | undefined {
   const machine = list(record.machines).find((entry) => entry.id === machineId);
-  const placement = list(machine?.packages).find((entry) => entry.agentRef === agentRef);
+  const placement = list(machine?.packages).find((entry) => entry.agentRef === agentRef && contextOf(entry) === context);
   if (!placement) return undefined;
   return { publisher: list(record.publisherKeys).filter((key) => key.kid === placement.publisherKid) };
 }
@@ -257,7 +268,8 @@ function keys(value: JsonObject, flag: Flag): void {
 }
 
 /**
- * FAC-SEM-074 on one record: a machine places an agent once, under a publisher key the record pins, named once.
+ * FAC-SEM-074 on one record: a machine places an agent once per context (DEC-0082; absent is `personal`), under a
+ * publisher key the record pins, named once.
  */
 function placements(value: JsonObject, flag: Flag): void {
   const kids = new Set<unknown>();
@@ -266,11 +278,12 @@ function placements(value: JsonObject, flag: Flag): void {
     kids.add(key.kid);
   });
   list(value.machines).forEach((machine, m) => {
-    const agents = new Set<unknown>();
+    const agents = new Set<string>();
     list(machine.packages).forEach((placement, p) => {
       const at = `/machines/${m}/packages/${p}`;
-      if (agents.has(placement.agentRef)) flag(`${at}/agentRef`, `${String(placement.agentRef)} is placed twice on one machine`);
-      agents.add(placement.agentRef);
+      const key = keyOf(placement.agentRef, contextOf(placement));
+      if (agents.has(key)) flag(`${at}/agentRef`, `${String(placement.agentRef)} is placed twice on one machine in the context ${String(contextOf(placement))}`);
+      agents.add(key);
       if (!kids.has(placement.publisherKid)) flag(`${at}/publisherKid`, `publisher key ${String(placement.publisherKid)} is not in publisherKeys, so the machine pins no key to verify the package under`);
     });
   });
@@ -278,25 +291,57 @@ function placements(value: JsonObject, flag: Flag): void {
 
 /**
  * FAC-SEM-075 on one record (DEC-0013): a secret placement is a reference — none of its strings is shaped like a
- * credential; it fills a slot of an agent placed on that machine, from a machine of this record, once.
+ * credential; it fills a slot of an agent placed on that machine in its context (DEC-0082; absent is `personal`), from a
+ * machine of this record, once per agent, slot and context.
  */
 function secretReferences(value: JsonObject, flag: Flag): void {
   const machineIds = new Set(list(value.machines).map((machine) => machine.id));
   list(value.machines).forEach((machine, m) => {
-    const placed = new Set(list(machine.packages).map((placement) => placement.agentRef));
+    const placed = new Set(list(machine.packages).map((placement) => keyOf(placement.agentRef, contextOf(placement))));
     const slots = new Set<string>();
     list(machine.secrets).forEach((secret, s) => {
       const at = `/machines/${m}/secrets/${s}`;
-      // The message never repeats the value.
-      for (const field of ["slot", "from", "agentRef"] as const) {
+      // The message never repeats the value, and no message of this rule repeats a secret placement's context.
+      for (const field of ["slot", "from", "agentRef", "context"] as const) {
         const text = secret[field];
         if (isString(text) && secretValue(text)) flag(`${at}/${field}`, "a secret placement names a slot, never a value: this looks like a credential");
       }
-      if (!placed.has(secret.agentRef)) flag(`${at}/agentRef`, "a secret goes only where a placed package declares it (v4 Path 2): this agent is not placed on this machine");
+      if (!placed.has(keyOf(secret.agentRef, contextOf(secret)))) flag(`${at}/agentRef`, "a secret goes only where a placed package declares it (v4 Path 2): this agent is not placed on this machine in the secret's context");
       if (!machineIds.has(secret.from)) flag(`${at}/from`, "the slot is filled from a machine of this estate");
-      const key = `${String(secret.agentRef)} ${String(secret.slot)}`;
-      if (slots.has(key)) flag(`${at}/slot`, `slot ${String(secret.slot)} is placed twice for one agent on one machine`);
+      const key = keyOf(secret.agentRef, secret.slot, contextOf(secret));
+      if (slots.has(key)) flag(`${at}/slot`, `slot ${String(secret.slot)} is placed twice for one agent in one context on one machine`);
       slots.add(key);
+    });
+  });
+}
+
+/**
+ * FAC-SEM-111 (DEC-0082) for one placement: an instance placed in an organization's context runs under a share grant of
+ * the same record — the placement names it in `grant`, matched by the normal form of the grant's id (DEC-0076); the
+ * grant's `context` is the placement's, compared as written; the record does not revoke it. A personal placement (no
+ * `context`, or `personal`) names no grant. Any other context counts as an organization's, so a malformed one fails
+ * closed. Answers the problems as `[instancePath suffix, message]` pairs.
+ */
+function placementGrantProblems(record: JsonObject, placement: JsonObject): Array<[string, string]> {
+  const context = contextOf(placement);
+  if (context === PERSONAL_CONTEXT) {
+    return placement.grant === undefined ? [] : [["/grant", "a personal instance runs under no share grant: only a placement in an organization's context names one"]];
+  }
+  if (typeof placement.grant !== "string") return [["/grant", `an instance placed in the context ${String(context)} names the share grant it runs under, by its id`]];
+  const id = normalIdentifier(placement.grant);
+  const grants = list(record.shareGrants).filter((grant) => isObject(grant.meta) && typeof grant.meta.id === "string" && normalIdentifier(grant.meta.id) === id);
+  const problems: Array<[string, string]> = [];
+  if (grants.length === 0) problems.push(["/grant", `the record has no share grant ${placement.grant}`]);
+  else if (!grants.some((grant) => grant.context === context)) problems.push(["/grant", `the share grant ${placement.grant} is not for the context ${String(context)}: its context must be the placement's, as written`]);
+  if (list(record.revocations).some((entry) => entry.kind === "grant" && typeof entry.ref === "string" && normalIdentifier(entry.ref) === id)) problems.push(["/grant", `the record revokes the share grant ${placement.grant}, so no instance runs under it`]);
+  return problems;
+}
+
+/** FAC-SEM-111 on one record: every placement's grant, as `placementGrantProblems` says. */
+function placementGrants(value: JsonObject, flag: Flag): void {
+  list(value.machines).forEach((machine, m) => {
+    list(machine.packages).forEach((placement, p) => {
+      for (const [suffix, message] of placementGrantProblems(value, placement)) flag(`/machines/${m}/packages/${p}${suffix}`, message);
     });
   });
 }
@@ -337,7 +382,10 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
   });
 }
 
-/** FAC-SEM-072…076 over one record, and FAC-SEM-092 (DEC-0063) on each passkey it lists. */
+/**
+ * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant and
+ * FAC-SEM-111 on each placement (DEC-0082).
+ */
 function recordFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   revisionWhole(value, flagger(findings, "FAC-SEM-072"));
@@ -345,13 +393,17 @@ function recordFindings(value: JsonObject): Finding[] {
   placements(value, flagger(findings, "FAC-SEM-074"));
   secretReferences(value, flagger(findings, "FAC-SEM-075"));
   grantsAndRevocations(value, flagger(findings, "FAC-SEM-076"));
+  list(value.shareGrants).forEach((grant, index) => findings.push(...grantContextFindings(grant, `/shareGrants/${index}`)));
+  placementGrants(value, flagger(findings, "FAC-SEM-111"));
   list(value.authorities).forEach((authority, index) => findings.push(...signingCredentialFindings(authority, `/authorities/${index}`)));
   return findings;
 }
 
 /**
- * FAC-SEM-074 and FAC-SEM-075 for one installation: `{record, machine, package}` — the package is the one placed on that
- * machine (its own digest, the placement's `agentRef` and digest), and every slot placed for it is one it declares.
+ * FAC-SEM-074, FAC-SEM-075 and FAC-SEM-111 for one installation: `{record, machine, package, context?}` — the package is
+ * the one placed on that machine in that context (DEC-0082; `personal` when absent): its own digest, the placement's
+ * `agentRef` and digest; every slot placed for that instance is one it declares; and an instance in an organization's
+ * context names a share grant of the record for that context that the record does not revoke.
  */
 function installation(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -371,14 +423,20 @@ function installation(value: JsonObject): Finding[] {
     return findings;
   }
   if (digest === undefined || digest !== pkg.digest) flag074("/package/digest", "the package is not the one its digest names: it changed after it was packed");
-  const placement = list(machine.packages).find((entry) => entry.agentRef === pkg.agentRef);
-  if (!placement) flag074("/package/agentRef", `the record places no ${String(pkg.agentRef)} on machine ${String(value.machine)}`);
-  else if (placement.digest !== digest) flag074("/package", `the record places ${String(placement.digest)} of this agent on this machine, not this package`);
+  const context = contextOf(value);
+  const placementIndex = list(machine.packages).findIndex((entry) => entry.agentRef === pkg.agentRef && contextOf(entry) === context);
+  const placement = list(machine.packages)[placementIndex];
+  if (!placement) flag074("/package/agentRef", `the record places no ${String(pkg.agentRef)} on machine ${String(value.machine)} in the context ${String(context)}`);
+  else if (placement.digest !== digest) flag074("/package", `the record places ${String(placement.digest)} of this agent on this machine in this context, not this package`);
   const declared = new Set(list(pkg.secrets).map((slot) => slot.name));
   const flag075 = flagger(findings, "FAC-SEM-075");
   list(machine.secrets).forEach((secret, index) => {
-    if (secret.agentRef === pkg.agentRef && !declared.has(secret.slot)) flag075(`/record/machines/${machineIndex}/secrets/${index}/slot`, `the package declares no slot ${String(secret.slot)}: a secret goes only where a placed package declares it`);
+    if (secret.agentRef === pkg.agentRef && contextOf(secret) === context && !declared.has(secret.slot)) flag075(`/record/machines/${machineIndex}/secrets/${index}/slot`, `the package declares no slot ${String(secret.slot)}: a secret goes only where a placed package declares it`);
   });
+  if (placement) {
+    const flag111 = flagger(findings, "FAC-SEM-111");
+    for (const [suffix, message] of placementGrantProblems(record, placement)) flag111(`/record/machines/${machineIndex}/packages/${placementIndex}${suffix}`, message);
+  }
   return findings;
 }
 
