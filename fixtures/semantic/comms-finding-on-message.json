@@ -1,0 +1,32 @@
+{
+  "description": "A message of kind message carries finding details: only a message of kind finding may.",
+  "kind": "comms-submit",
+  "expect": [
+    "FAC-SEM-108"
+  ],
+  "input": {
+    "idempotency": {
+      "epoch": 3,
+      "key": "fnd_Q7mX2cL9pZ4tVb1Nk8Rw"
+    },
+    "thread": {
+      "id": "thr_Q1w2E3r4T5"
+    },
+    "kind": "message",
+    "body": {
+      "text": "A finding."
+    },
+    "finding": {
+      "severity": "warning",
+      "consequence": "The kit cannot fence a transferred request.",
+      "affects": [
+        {
+          "repository": "passioncode-ai/fabric-agent-contract",
+          "path": "docs/backlog.md",
+          "id": "CT-41"
+        }
+      ],
+      "dedupeKey": "transferred-missing:CT-41"
+    }
+  }
+}

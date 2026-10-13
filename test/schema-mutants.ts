@@ -14,8 +14,12 @@ const root = projectRoot();
 /** One mutant: a name and the change it makes to a deep copy of the schema. */
 export interface Mutant { name: string; mutate: (schema: Record<string, any>) => void }
 
-/** The negative fixtures of `schemaFile` that `mutant` accepts, by catalogue name. */
-export async function killers(schemaFile: string, mutant: Mutant): Promise<string[]> {
+/**
+ * The negative fixtures of `fixturesOf` (by default `schemaFile` itself) that `mutant` of `schemaFile` accepts, by
+ * catalogue name. A shared definition (`comms-common`) is mutated in place and proven by the fixtures of the schema that
+ * refers to it.
+ */
+export async function killers(schemaFile: string, mutant: Mutant, fixturesOf: string = schemaFile): Promise<string[]> {
   const schemas = await loadSchemas();
   const target = schemas.find((schema) => schema.$id.endsWith(`/schemas/${schemaFile}`));
   if (!target) throw new Error(`unknown schema ${schemaFile}`);
@@ -24,9 +28,11 @@ export async function killers(schemaFile: string, mutant: Mutant): Promise<strin
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   (addFormatsImport as unknown as (instance: Ajv2020) => Ajv2020)(ajv);
   for (const schema of schemas) ajv.addSchema(schema === target ? mutated : schema);
-  const validate = ajv.getSchema(target.$id) as ValidateFunction;
+  const validated = schemas.find((schema) => schema.$id.endsWith(`/schemas/${fixturesOf}`));
+  if (!validated) throw new Error(`unknown schema ${fixturesOf}`);
+  const validate = ajv.getSchema(validated.$id) as ValidateFunction;
   const catalogue = JSON.parse(await readFile(path.join(root, "fixtures/catalogue.json"), "utf8")) as Entry[];
-  const negatives = catalogue.filter((entry) => entry.schema === schemaFile && !entry.valid);
+  const negatives = catalogue.filter((entry) => entry.schema === fixturesOf && !entry.valid);
   const accepted: string[] = [];
   for (const entry of negatives) {
     const value = JSON.parse(await readFile(path.join(root, "fixtures", entry.path), "utf8")) as unknown;

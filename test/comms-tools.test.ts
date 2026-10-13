@@ -118,6 +118,41 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     for (const phrase of phrases) expect(section, phrase).toContain(phrase);
   });
 
+  it("DEC-0080: a finding is four members, links a row by repository, path and id, and adds no evidence member", async () => {
+    const common = await schema("comms-common.schema.json");
+    const finding = common.$defs.finding;
+    expect(Object.keys(finding.properties).sort()).toEqual(["affects", "consequence", "dedupeKey", "severity"]);
+    expect([...finding.required].sort()).toEqual(["affects", "consequence", "dedupeKey", "severity"]);
+    expect(finding.additionalProperties).toBe(false);
+    expect(common.$defs.findingSeverity.enum).toEqual(["info", "warning", "blocking"]);
+    expect(Object.keys(common.$defs.affectedRow.properties).sort()).toEqual(["id", "path", "repository"]);
+    expect(common.$defs.affectedTask.properties.task).toEqual({ $ref: "#/$defs/hostTaskId" });
+    // A task is the host's task in a delegation token's grammar (DEC-0041), not a board-issued opaque id.
+    const delegation = await schema("delegation-token.schema.json");
+    expect(common.$defs.hostTaskId.pattern).toBe(delegation.$defs.task.pattern);
+    expect(common.$defs.affectedRedacted.properties).toEqual({ redacted: { const: true } });
+    expect(common.$defs.messageKind.enum).toContain("finding");
+    const [submit, message] = [await schema("comms-submit.schema.json"), await schema("comms-message.schema.json")];
+    expect(submit.properties.finding.$ref).toBe("comms-common.schema.json#/$defs/finding");
+    expect(submit.properties.finding.properties.affects.items).toEqual({ not: { $ref: "comms-common.schema.json#/$defs/affectedRedacted" } });
+    expect(message.properties.finding).toMatchObject({ $ref: "comms-common.schema.json#/$defs/finding" });
+    expect(message.properties.finding.properties).toBeUndefined();
+    // A moderator's redaction removes the finding with the body; a finding's submit key holds 128 random bits.
+    expect(message.then.properties).toEqual({ body: false, finding: false });
+    const keyRule = (submit.allOf as Record<string, any>[]).find((branch) => branch.if?.required?.includes("finding"));
+    expect(keyRule?.then.properties.idempotency.properties.key.minLength).toBe(22);
+    expect(Math.floor(22 * Math.log2(66))).toBeGreaterThanOrEqual(128);
+    expect(Math.floor(21 * Math.log2(66))).toBeLessThan(128);
+    // The limits table states the schema's bounds.
+    const limits = new Map(rows("## Limits").map((cells) => [cells[0], cells[1]]));
+    expect(finding.properties.affects.maxItems).toBe(16);
+    expect(limits.get("Items a finding affects")).toBe("16");
+    expect(finding.properties.consequence.maxLength).toBe(500);
+    expect(limits.get("A finding's consequence")).toBe("500 characters (code points)");
+    expect(common.$defs.dedupeKey.pattern).toBe("^[A-Za-z0-9._:-]{8,128}$");
+    expect(limits.get("A finding's `dedupeKey`")).toBe("8–128 characters `[A-Za-z0-9._:-]`");
+  });
+
   it("keeps the directory to ids, names, capabilities, responder state and the operator's hold", async () => {
     const directory = await schema("comms-directory.schema.json");
     const entry = directory.properties.projects.items;
@@ -161,8 +196,53 @@ const responderBranch = (s: Record<string, any>) => s.oneOf.find((branch: Record
 const participantBranch = (s: Record<string, any>) => s.oneOf.find((branch: Record<string, any>) => branch.required.includes("replyTo"));
 const without = (list: string[], member: string) => list.filter((name) => name !== member);
 
-/** Each refusal of a new schema, the mutant that removes it, and the negative fixture that must kill the mutant. */
-const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
+const common = (s: Record<string, any>) => s.$defs as Record<string, any>;
+const findingOf = (s: Record<string, any>) => common(s).finding as Record<string, any>;
+const finding = (s: Record<string, any>) => s.properties.finding as Record<string, any>;
+const findingRule = (s: Record<string, any>) => (s.allOf as Record<string, any>[]).findIndex((branch) => branch.if?.properties?.kind?.const === "finding");
+const C = "comms-common.schema.json";
+const SUBMIT = "comms-submit.schema.json";
+const MESSAGE = "comms-message.schema.json";
+
+/**
+ * Each refusal of a new schema, the mutant that removes it, and the negative fixture that must kill the mutant. A plant
+ * with `fixtures` mutates a shared definition and is proven by the fixtures of the schema that refers to it.
+ */
+const PLANTS: Array<{ schema: string; killer: string; fixtures?: string } & Mutant> = [
+  // DEC-0080: the structured finding.
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-with-evidence", name: "finding open", mutate: (s) => { findingOf(s).additionalProperties = true; } },
+  ...["severity", "consequence", "affects", "dedupeKey"].map((member) => ({ schema: C, fixtures: SUBMIT, killer: `comms-submit-finding-without-${member === "dedupeKey" ? "dedupe-key" : member}`, name: `${member} optional`, mutate: (s: Record<string, any>) => { findingOf(s).required = without(findingOf(s).required, member); } })),
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-bad-severity", name: "severity any string", mutate: (s) => { common(s).findingSeverity = { type: "string" }; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-consequence-too-long", name: "consequence unbounded", mutate: (s) => { delete findingOf(s).properties.consequence.maxLength; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-consequence-empty", name: "consequence may be empty", mutate: (s) => { delete findingOf(s).properties.consequence.minLength; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-affects-over-limit", name: "affects unbounded", mutate: (s) => { delete findingOf(s).properties.affects.maxItems; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-affects-empty", name: "affects may be empty", mutate: (s) => { delete findingOf(s).properties.affects.minItems; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-row-copied", name: "a row reference copies the row", mutate: (s) => { common(s).affectedRow.additionalProperties = true; } },
+  ...["repository", "path", "id"].map((member) => ({ schema: C, fixtures: SUBMIT, killer: `comms-submit-finding-row-without-${member}`, name: `row ${member} optional`, mutate: (s: Record<string, any>) => { common(s).affectedRow.required = without(common(s).affectedRow.required, member); } })),
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-task-open", name: "task reference open", mutate: (s) => { common(s).affectedTask.additionalProperties = true; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-repository-url", name: "repository any owner/name-ish string", mutate: (s) => { common(s).repositoryName.pattern = "^.+/.+$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-repository-dot", name: "repository name may be . or ..", mutate: (s) => { common(s).repositoryName.pattern = "^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9._-]{1,100}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-path-traversal", name: "path segment may be ..", mutate: (s) => { common(s).repositoryPath.pattern = "^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-path-hidden", name: "path segment may start with a dot", mutate: (s) => { common(s).repositoryPath.pattern = "^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-path-absolute", name: "path may start with a slash", mutate: (s) => { common(s).repositoryPath.pattern = "^/?[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-path-empty-segment", name: "path may hold an empty segment", mutate: (s) => { common(s).repositoryPath.pattern = "^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9._-]*)*$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-path-too-long", name: "path unbounded", mutate: (s) => { delete common(s).repositoryPath.maxLength; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-row-id-too-long", name: "row id unbounded", mutate: (s) => { common(s).backlogRowId.pattern = "^[A-Za-z0-9][A-Za-z0-9._-]*$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-row-id-space", name: "row id may hold a space", mutate: (s) => { common(s).backlogRowId.pattern = "^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-dedupe-key-short", name: "dedupeKey below 8", mutate: (s) => { common(s).dedupeKey.pattern = "^[A-Za-z0-9._:-]{1,128}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-dedupe-key-long", name: "dedupeKey above 128", mutate: (s) => { common(s).dedupeKey.pattern = "^[A-Za-z0-9._:-]{8,}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-dedupe-key-slash", name: "dedupeKey any character", mutate: (s) => { common(s).dedupeKey.pattern = "^.{8,128}$"; } },
+  { schema: SUBMIT, killer: "comms-submit-finding-duplicate-affects", name: "a submit may repeat an item", mutate: (s) => { delete finding(s).properties.affects.uniqueItems; } },
+  { schema: SUBMIT, killer: "comms-submit-finding-redacted-item", name: "a submit may carry a redacted item", mutate: (s) => { delete finding(s).properties.affects.items; } },
+  { schema: SUBMIT, killer: "comms-submit-finding-on-message", name: "finding on any kind of submit", mutate: (s) => { s.allOf[findingRule(s)] = true; } },
+  { schema: MESSAGE, killer: "comms-message-finding-on-message", name: "finding on any kind of message", mutate: (s) => { s.allOf[findingRule(s)] = true; } },
+  { schema: C, fixtures: MESSAGE, killer: "comms-message-finding-redacted-false", name: "redacted any boolean", mutate: (s) => { common(s).affectedRedacted.properties.redacted = { type: "boolean" }; } },
+  { schema: C, fixtures: MESSAGE, killer: "comms-message-finding-redacted-with-row", name: "a redacted item keeps what it names", mutate: (s) => { common(s).affectedRedacted.additionalProperties = true; } },
+  { schema: MESSAGE, killer: "comms-message-finding-redacted-message", name: "a redacted message keeps its finding", mutate: (s) => { delete s.then.properties.finding; } },
+  { schema: SUBMIT, killer: "comms-submit-finding-key-short", name: "a finding's key any length", mutate: (s) => { s.allOf[(s.allOf as Record<string, any>[]).findIndex((branch) => branch.if?.required?.includes("finding"))] = true; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-task-too-long", name: "task id unbounded", mutate: (s) => { common(s).hostTaskId.pattern = "^[A-Za-z0-9._:-]{1,}$"; } },
+  { schema: C, fixtures: SUBMIT, killer: "comms-submit-finding-task-slash", name: "task id any character", mutate: (s) => { common(s).hostTaskId.pattern = "^.{1,128}$"; } },
+
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-with-seq", name: "receipt open to unknown members", mutate: (s) => { s.additionalProperties = true; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-not-ok", name: "ok any boolean", mutate: (s) => { s.properties.ok = { type: "boolean" }; } },
   { schema: "comms-receipt.schema.json", killer: "comms-receipt-without-ok", name: "ok optional", mutate: (s) => { s.required = without(s.required, "ok"); } },
@@ -216,13 +296,16 @@ const PLANTS: Array<{ schema: string; killer: string } & Mutant> = [
   { schema: "comms-refusal.schema.json", killer: "comms-refusal-held-not-retryable", name: "held may be final", mutate: (s) => { delete s.properties.error.if; delete s.properties.error.then; } }
 ];
 
-describe("every refusal of DEC-0073 and DEC-0079 is killed by its fixture", () => {
-  it.each(PLANTS)("$schema: $name → $killer", async ({ schema: file, killer, name, mutate }) => {
-    expect(await killers(file, { name, mutate })).toContain(killer);
+describe("every refusal of DEC-0073 and its amendments (DEC-0078, DEC-0079, DEC-0080) is killed by its fixture", () => {
+  it.each(PLANTS)("$schema: $name → $killer", async ({ schema: file, killer, name, mutate, fixtures }) => {
+    expect(await killers(file, { name, mutate }, fixtures)).toContain(killer);
   });
 
   // One compilation of the whole catalogue per schema: slower than vitest's 5 s default on a loaded machine.
   it("an unchanged schema accepts none of its negative fixtures", { timeout: 60_000 }, async () => {
-    for (const file of new Set(PLANTS.map((plant) => plant.schema))) expect(await killers(file, { name: "identity", mutate: () => {} }), file).toEqual([]);
+    for (const pair of new Set(PLANTS.map((plant) => `${plant.schema} ${plant.fixtures ?? plant.schema}`))) {
+      const [file, fixtures] = pair.split(" ") as [string, string];
+      expect(await killers(file, { name: "identity", mutate: () => {} }, fixtures), pair).toEqual([]);
+    }
   });
 });

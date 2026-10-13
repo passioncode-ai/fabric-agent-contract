@@ -1,0 +1,35 @@
+{
+  "description": "A submit carries a redacted item: a sender names what it found, only a reader's copy is redacted.",
+  "kind": "comms-submit",
+  "expect": [
+    "FAC-SEM-108"
+  ],
+  "input": {
+    "idempotency": {
+      "epoch": 3,
+      "key": "fnd_Q7mX2cL9pZ4tVb1Nk8Rw"
+    },
+    "thread": {
+      "id": "thr_Q1w2E3r4T5"
+    },
+    "kind": "finding",
+    "body": {
+      "text": "A finding."
+    },
+    "finding": {
+      "severity": "warning",
+      "consequence": "The kit cannot fence a transferred request.",
+      "affects": [
+        {
+          "repository": "passioncode-ai/fabric-agent-contract",
+          "path": "docs/backlog.md",
+          "id": "CT-41"
+        },
+        {
+          "redacted": true
+        }
+      ],
+      "dedupeKey": "transferred-missing:CT-41"
+    }
+  }
+}

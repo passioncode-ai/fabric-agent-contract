@@ -158,6 +158,13 @@ its slot: observed only, with a required summary, never to `cancelled`; the requ
 which a board sends on nothing else ([project communication](docs/specification/project-comms.md#owner-settlement),
 DEC-0081).
 
+**Board finding**: A message of kind `finding` with a structured `finding`: a severity (`info`, `warning`,
+`blocking`), a consequence, 1–16 items it affects (a backlog row linked by repository, path and id, never copied, or a
+task) and a `dedupeKey`. The same sender Project and `dedupeKey` answer the standing finding's receipt with
+`repeated: true` instead of a second message, for as long as that finding is retained; a reader sees
+`{redacted: true}` in place of an item outside its grants, the count kept
+([project communication](docs/specification/project-comms.md#findings), DEC-0080).
+
 **memory/0.1**: The wire on which agent memory is served, first by Project Observatory
 ([memory and learning](docs/specification/memory-and-learning.md), DEC-0023).
 

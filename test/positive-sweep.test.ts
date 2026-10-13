@@ -13,6 +13,7 @@ const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.js
 /** The rule kind that reads one document of a schema whole. */
 export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "comms-directory.schema.json": "comms-directory",
+  "comms-message.schema.json": "comms-message",
   "activity-batch.schema.json": "activity-batch",
   "fabric-proposal.schema.json": "proposal",
   "versioned-setting.schema.json": "versioned-setting",
@@ -72,7 +73,6 @@ export const NOT_SWEPT: readonly string[] = [
   "comms-fenced.schema.json",
   "comms-list.schema.json",
   "comms-message-ref.schema.json",
-  "comms-message.schema.json",
   "comms-page.schema.json",
   "comms-progress.schema.json",
   "comms-receipt.schema.json",
