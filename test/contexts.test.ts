@@ -43,7 +43,7 @@ describe("the schemas (DEC-0082)", () => {
   const governance = JSON.parse(readText("schemas/governance.schema.json")) as Json;
 
   it("define one context id and refer to it from the grant, the placement and the secret placement", () => {
-    expect(common.$defs.contextId.pattern).toBe("^(?:personal|org:[A-Za-z0-9_-]{1,128})$");
+    expect(common.$defs.contextId.pattern).toBe("^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$");
     expect(governance.$defs.grant.properties.context.$ref).toBe("common.schema.json#/$defs/contextId");
     const machine = estate.$defs.machine.properties;
     expect(machine.packages.items.properties.context.$ref).toBe("common.schema.json#/$defs/contextId");

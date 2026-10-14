@@ -12,7 +12,7 @@ import {
   type AuthFrame, type RelayMessagePayload
 } from "./relay.js";
 import type { JsonObject } from "./findings.js";
-import { openEnvelope, type OpenContext } from "./secret-envelope.js";
+import { estateEnvelopeContext, openEnvelope, type OpenContext } from "./secret-envelope.js";
 import type { P256Key } from "./p256.js";
 
 export interface VectorResult { group: string; name: string; actual: unknown; expected: unknown }
@@ -110,6 +110,20 @@ export function envelopeVectorResults(vectors: Json): VectorResult[] {
     const result = openEnvelope(c.envelope, context);
     const actual = result.ok ? { ...result, secret: result.secret.toString("utf8") } : result;
     return { group: "envelope", name: c.name as string, actual, expected: c.expect };
+  });
+}
+
+/**
+ * Every case of `secret-envelope.json`'s `placement` group (DEC-0082), run through `estateEnvelopeContext`: whether each
+ * sender kid may hold the slot, and the revision its placement run starts at (null for none).
+ */
+export function placementVectorResults(vectors: Json): VectorResult[] {
+  return cases(vectors.placement).map((c) => {
+    const ctx = estateEnvelopeContext(c.applied as JsonObject[], c.machine as string);
+    const agentRef = c.agentRef as string, slot = c.slot as string;
+    const holds = ((c.expect as Json).holds as Array<{ sender: string }>).map((h) => ({ sender: h.sender, mayHold: ctx.mayHold(h.sender, agentRef, slot) }));
+    const actual = { holds, currentPlacement: ctx.currentPlacement(agentRef, slot) ?? null };
+    return { group: "placement", name: c.name as string, actual, expected: c.expect };
   });
 }
 

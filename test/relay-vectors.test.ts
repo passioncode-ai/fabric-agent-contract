@@ -5,7 +5,7 @@ import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { ADMIT_REFUSALS, BLOB_REFUSALS, MESSAGE_REFUSALS, RELAY_ORIGIN_PATTERN } from "../src/relay.js";
 import { ENVELOPE_REFUSALS } from "../src/secret-envelope.js";
-import { envelopeVectorResults, relayVectorResults } from "../src/relay-vectors.js";
+import { envelopeVectorResults, placementVectorResults, relayVectorResults } from "../src/relay-vectors.js";
 import { P256_CURVE } from "../src/p256.js";
 import { VECTOR_FILES, buildVectorFiles, signDeterministic } from "../tools/vectors/relay-crypto.js";
 
@@ -15,11 +15,18 @@ type Json = Record<string, any>;
 const read = (relative: string) => readFileSync(path.join(projectRoot(), relative), "utf8");
 const relay = JSON.parse(read("fixtures/vectors/relay.json")) as Json;
 const envelope = JSON.parse(read("fixtures/vectors/secret-envelope.json")) as Json;
-const results = [...relayVectorResults(relay), ...envelopeVectorResults(envelope)];
+const results = [...relayVectorResults(relay), ...envelopeVectorResults(envelope), ...placementVectorResults(envelope)];
 
 describe("the shared relay vectors", () => {
   it.each(results.map((r) => [`${r.group}: ${r.name}`, r] as const))("%s", (_label, r) => {
     expect(r.actual).toEqual(r.expected);
+  });
+
+  it("carry an organization's secret placement listed before the personal one (DEC-0082)", () => {
+    const placement = results.filter((r) => r.group === "placement");
+    expect(placement.length).toBeGreaterThanOrEqual(5);
+    expect(placement.some((r) => r.name.includes("listed before the personal one"))).toBe(true);
+    expect(placementVectorResults({})).toEqual([]);
   });
 
   it("names every case once within its group", () => {

@@ -15,7 +15,7 @@ readings of PR #107, as DEC-0082 (board row CT-51).
 - A home for contexts: [`docs/specification/contexts.md`](../specification/contexts.md), linked from README, DOCMAP,
   CONTEXT (*Context*) and conformance. The grant, the estate record, the collector's routing and Switchboard compare the
   context id, so it has one page rather than a section in one of them.
-- The context id `common.schema.json#/$defs/contextId`: `personal` or `org:<orgId>`, `orgId` 1–128 of `[A-Za-z0-9_-]`,
+- The context id `common.schema.json#/$defs/contextId`: `personal` or `org:<orgId>`, `orgId` `[A-Za-z0-9][A-Za-z0-9_-]{0,127}` (1–128 characters),
   compared as written. An organization server that takes part in contexts issues `org.id` within that set (devices.md);
   the vectors show an enrolled `org.example` cannot be routed. The first organization server's `org_<base32>` is marked
   informative, at its commit `03d454b`.

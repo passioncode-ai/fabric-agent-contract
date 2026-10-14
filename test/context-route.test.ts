@@ -98,7 +98,9 @@ describe("routeTarget (DEC-0082 item 5)", () => {
     // An enrollment whose org is only inherited from its prototype is not the entry's own.
     expect(routeTarget("org:a", [Object.create({ org: "a" })])).toEqual({ route: "none", reason: "not-enrolled" });
     expect(routeTarget("org:a", [Object.create({ org: "a" }), { org: "a" }])).toEqual({ route: "enrollment", org: "a", index: 1 });
-    expect(routeTarget("org:__proto__", [{}])).toEqual({ route: "none", reason: "not-enrolled" });
+    // An id may not start with an underscore, so org:__proto__ is no context at all.
+    expect(routeTarget("org:__proto__", [{ org: "__proto__" }])).toEqual({ route: "none", reason: "not-a-context" });
+    expect(routeTarget("org:hasOwnProperty", [{}])).toEqual({ route: "none", reason: "not-enrolled" });
   });
 
   it("is named in the specification with its vectors", () => {

@@ -284,7 +284,10 @@ A secret moves to a machine only where a placed package declares it
      is not a valid P-256 key, and an encapsulated key that fails SEC 1 are `bad-key`;
   5. the signature is 64 canonical bytes, low-S, and verifies;
   6. the latest estate-record revision this machine verified and applied places `(agentRef, slot)` on it from the
-     sender's machine ([estate record](estate-record.md), DEC-0055);
+     sender's machine in a personal secret placement — one with no `context`, or `context: "personal"`
+     ([estate record](estate-record.md), DEC-0055, DEC-0082). An envelope names no context: an organization's secret
+     placement is filled on its own machine and never admits an envelope, whatever its position among the machine's
+     secret placements ([contexts](contexts.md#one-instance-per-context-on-a-machine));
   7. `placement` is at least the revision from which that placement holds unchanged (the current placement run), and at
      most the latest revision this machine has applied. An envelope sealed under a placement since replaced, or placed
      by a revision the target has not yet fetched and verified, is `placement-stale` (`estateEnvelopeContext` derives 6

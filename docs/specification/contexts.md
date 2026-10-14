@@ -24,8 +24,8 @@ alike.
 `common.schema.json#/$defs/contextId` is one of:
 
 - `personal` — the person's own work;
-- `org:<orgId>` — an organization, where `orgId` is the organization server's opaque id of it: 1–128 characters of
-  `[A-Za-z0-9_-]`. (Informative: the first organization server, at its commit `03d454b`, issues ids of the form
+- `org:<orgId>` — an organization, where `orgId` is the organization server's opaque id of it: a letter or digit, then
+  up to 127 of `[A-Za-z0-9_-]` (1–128 characters). (Informative: the first organization server, at its commit `03d454b`, issues ids of the form
   `org_<base32>`.)
 
 Context ids compare **as written**: never case-folded, never trimmed, never by prefix, as DEC-0077 compares board ids.
@@ -36,10 +36,10 @@ an identifier under DEC-0076: its pattern admits no upper-case prefix and no `%`
 normal form and the two comparisons agree ([identifiers](identifiers.md#where-identifiers-are-compared)).
 
 A device's enrollment names its organization by `org.id`, an opaque id (`activity-common.schema.json#/$defs/opaqueId`,
-DEC-0031), whose set differs from `orgId`'s: an id that holds `.`, `:` or `~`, or starts with `_` or `-`, can be enrolled
-but is no context, so nothing of a context is routed to it (the vectors carry `org.example`). So **an organization server
-that takes part in contexts MUST issue its `org.id` within `[A-Za-z0-9_-]{1,128}`** (DEC-0082; [devices](devices.md#enrollment)),
-where the two sets agree.
+DEC-0031). `orgId`'s pattern is the part of that set a context can name, so every valid organization context can name an
+enrollment; an `org.id` that holds `.`, `:` or `~` can be enrolled but is no context, so nothing of a context is routed to
+it (the vectors carry `org.example`). So **an organization server that takes part in contexts MUST issue its `org.id`
+within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)).
 
 Fabric Switchboard uses the same form for its pool's context attribute (its SB-109, the pilot's answer of 2026-10-13).
 
@@ -245,7 +245,7 @@ Fixtures: `fixtures/semantic/grant-context-*`, `fixtures/semantic/estate-share-g
   - its meter reads the hub's projection of a grant that carries `context` (it repins before the hub writes one);
   - shipping `grant.usage` from the meter's settled receipts, routed as `routeGrantUsage` answers, needs a new
     Observatory row, requested through the pilot's §4 table or the board (`com.submit`).
-- **The first organization server** issues `org.id` within `[A-Za-z0-9_-]{1,128}`, reads a share grant's `context`, and
+- **The first organization server** issues `org.id` within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`, reads a share grant's `context`, and
   ingests `grant.usage` to show a shared agent's usage per grant as sums and states, counting the first per (stream,
   day, `grantId`), every read in the access log (CX-VES-08).
 - **fabric-agent-adapter** (its FAA-41): the kits run `FAC-SEM-110` and `FAC-SEM-111` and accept per-context

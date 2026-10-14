@@ -83,8 +83,8 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
    - optionally the current signed server policy (never a `user` layer, schema).
 
 An organization server that takes part in [contexts](contexts.md) (DEC-0082) MUST issue `org.id` within
-`[A-Za-z0-9_-]{1,128}`, the set of a context's `orgId`: an `org.id` outside it can be enrolled but no context names it,
-so nothing of a context is routed to it.
+`[A-Za-z0-9][A-Za-z0-9_-]{0,127}`, the pattern of a context's `orgId`: an `org.id` outside it can be enrolled but no
+context names it, so nothing of a context is routed to it.
 
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment

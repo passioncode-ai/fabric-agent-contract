@@ -908,7 +908,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Revised before merge by the contract owner's review of PR #22 and its re-review.
 - **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and item 9 records the posture reason `re_enrolled` (CON-OE-01); DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
 - **Annotated (2026-10-12):** items 1 and 2 extended by DEC-0056 — every request after enrollment carries an HTTP message signature beside mutual TLS, and a receiver behind a TLS-terminating host attributes by the certificate the verified signature names.
-- **Annotated (2026-10-13):** DEC-0082: a device enrolled in several organizations holds one enrollment per organization and sends each enrollment's check-ins to that enrollment's own server, on its interval, reporting only its streams, with no context; a session's events go where `routeTarget` answers and `grant.usage` where `routeGrantUsage` answers (`fixtures/vectors/context-route.json`); an organization server that takes part in contexts issues `org.id` within `[A-Za-z0-9_-]{1,128}`.
+- **Annotated (2026-10-13):** DEC-0082: a device enrolled in several organizations holds one enrollment per organization and sends each enrollment's check-ins to that enrollment's own server, on its interval, reporting only its streams, with no context; a session's events go where `routeTarget` answers and `grant.usage` where `routeGrantUsage` answers (`fixtures/vectors/context-route.json`); an organization server that takes part in contexts issues `org.id` within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`.
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -4742,12 +4742,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   slot), DEC-0055 (a placement's `context` and `grant`, a secret placement's `context`; `FAC-SEM-074` and `FAC-SEM-075`
   per context).
 - **Decision:** in [contexts](specification/contexts.md) —
-  1. **The context id.** `common.schema.json#/$defs/contextId`: `personal`, or `org:<orgId>` where `orgId` is 1–128 of
-     `[A-Za-z0-9_-]`, the organization server's opaque id of the organization. Compared as written: never case-folded,
-     trimmed or matched by prefix, as DEC-0077 compares board ids. Every valid value is already its DEC-0076 normal form.
-     An organization server that takes part in contexts MUST issue its `org.id` (DEC-0031) within the same set, since an
-     enrollment's `org.id` (an opaque id) may hold `.`, `:` or `~`, which no context names (the vectors carry
-     `org.example`). Informative: the first organization server, at its commit `03d454b`, issues `org_<base32>`. Fabric
+  1. **The context id.** `common.schema.json#/$defs/contextId`: `personal`, or `org:<orgId>` where `orgId` is
+     `[A-Za-z0-9][A-Za-z0-9_-]{0,127}` (1–128 characters), the organization server's opaque id of the organization: the
+     part of an enrollment's `org.id` set (an opaque id) a context can name, so every valid organization context can name
+     an enrollment. Compared as written: never case-folded, trimmed or matched by prefix, as DEC-0077 compares board ids.
+     Every valid value is already its DEC-0076 normal form. An organization server that takes part in contexts MUST issue
+     its `org.id` (DEC-0031) within that pattern, since an `org.id` may hold `.`, `:` or `~`, which no context names (the
+     vectors carry `org.example`). Informative: the first organization server, at its commit `03d454b`, issues `org_<base32>`. Fabric
      Switchboard's pool attribute uses the same form (its SB-109).
   2. **The grant's context.** `governance.schema.json#/$defs/grant` gains an optional `context`: the context in which the
      grant's principal uses it; a share grant into an organization carries that organization's `org:` id. Absent means

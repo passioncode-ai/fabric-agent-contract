@@ -16,16 +16,18 @@ export const PERSONAL_CONTEXT = "personal";
 /** The prefix of an organization's context. */
 export const ORG_CONTEXT_PREFIX = "org:";
 /**
- * An organization's id inside a context: 1–128 of `[A-Za-z0-9_-]` (the first organization server issues `org_<base32>`).
+ * An organization's id inside a context: a letter or digit, then up to 127 of `[A-Za-z0-9_-]` — the ids an enrollment's
+ * `org.id` (an opaque id) can hold that a context names too (informative: the first organization server issues
+ * `org_<base32>`).
  * No `m` flag, so `$` is the end of the text and `org:abc\n` is not a context.
  */
-const ORG_ID = /^[A-Za-z0-9_-]{1,128}$/;
+const ORG_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
 export type Context = { kind: "personal" } | { kind: "org"; org: string };
 
 /**
  * The context `value` names, or `undefined` when it names none: `personal` exactly, or `org:` and an id of 1–128 of
- * `[A-Za-z0-9_-]` — the same set as `common.schema.json#/$defs/contextId`. Compared as written: `Personal`, `ORG:x`, a
+ * `[A-Za-z0-9_-]` starting with a letter or digit — the same set as `common.schema.json#/$defs/contextId`. Compared as written: `Personal`, `ORG:x`, a
  * surrounding space or a trailing newline name no context. Never throws.
  */
 export function parseContext(value: unknown): Context | undefined {
