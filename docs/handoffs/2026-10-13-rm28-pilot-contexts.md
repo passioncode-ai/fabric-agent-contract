@@ -101,6 +101,11 @@ readings of PR #107 and on the re-verification of its fix round, as DEC-0082 (bo
 
 ## Next task
 
-The owner session corrects §4 item (5) in fabric-workspace to name `grant.usage` (the answer itself already landed in
-fabric-workspace #207), then reviews and merges PR #107 and tells Fabric's, Project Observatory's, the adapter's,
-Fabric Dashboards' and the first organization server's builders the merge commit (CT-51).
+Done on 2026-10-14:
+
+- §4 item (5) of the pilot packet is corrected to name `grant.usage` (fabric-workspace #229 `62b2dc73`);
+- PR #107 is merged (`92cd1d7`), and the board and index row say so (#108 `82e1636`);
+- the roadmap's contract row reads through DEC-0082;
+- the merge commit was sent to the builders of Fabric, Project Observatory, the adapter, Fabric Dashboards and the first organization server.
+
+The next task is the consumers'. Each adopts at its next pin, as CT-51 names. The contract session records each adoption on CT-51 when its receipt lands, and Observatory files a row for the `grant.usage` collector item. Fabric's D8 may still change the context form or the placement key. If it does, a later DEC changes them with a compatibility note.
