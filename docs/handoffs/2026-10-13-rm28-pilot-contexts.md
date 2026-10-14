@@ -73,26 +73,31 @@ readings of PR #107 and on the re-verification of its fix round, as DEC-0082 (bo
 
 ## Checks run
 
-- Gate at the branch head, each step's exit code and count:
+- Gate at the branch head (the final round), each step's exit code and count:
   - `tsc --noEmit`: exit 0;
-  - `vitest run --coverage`: exit 0, 68 files, 4078 tests; statements 99.37 %, branches 97.85 %, functions 99.8 %,
-    lines 99.7 %;
+  - `vitest run --coverage`: exit 0, 68 files, 4593 tests; statements 99.47 %, branches 98.8 %, functions 99.8 %,
+    lines 99.73 %;
   - `python3 docs/ux/lint.py`: exit 0 (22 stories, 18 flows, 21 screens, 27 scenarios);
   - `tsx src/docs-check.ts`: exit 0;
   - `tsx src/lint-md.ts`: exit 0, 167 files, 0 errors;
   - `tsx src/privacy-check.ts`: exit 0, 0 findings.
-- Plants: 57, each a removed or loosened clause confirmed failing the named test file, then restored. All killed.
-  - `test/contexts.test.ts`: 27 rule plants on `FAC-SEM-110`, `FAC-SEM-074`/`075`, `FAC-SEM-111`, `estate-placement`,
-    `placementTrust` and the `grant.usage` clauses of `FAC-SEM-038`/`039` (many also fail `test/estate-record.test.ts` or
-    `test/activity-rules.test.ts`); the fix round's `FAC-SEM-075` local slot, `FAC-SEM-111` malformed context, filtered
-    index and `grantId` written-as plants.
-  - `test/context-route.test.ts`: 9 routing plants (personal, 0/129 characters, a multiline `$`, case-folding, prefix,
-    `Personal`, ambiguous, no context) and the inherited-`org` plant.
-  - `test/secret-envelope.test.ts`: the envelope reading every secret placement.
-  - `test/rule-tolerance.test.ts`: `show()` and `toNumber()` falling back to `String()` and `Number()`.
-  - `test/fixtures.test.ts` (with `test/contexts.test.ts`, `test/context-route.test.ts`): 13 schema plants (the context
-    id's bound, the new members' types, and each `grant.usage` constraint, `grantId`'s length and URI form included).
-- The exact plant list is in the pull request.
+- Floors raised to the measured branch coverage the exhaustive `{"toString": 1}` test reaches: `src/activity-rules.ts`
+  97.16, `src/device-rules.ts` 98.87, `src/interop-rules.ts` 93.26, `src/registry-rules.ts` 98.64, `src/route-rules.ts`
+  96.85, `src/semantic-rules.ts` 98.49, `src/session-handoff.ts` 93.45, `src/spend-rules.ts` 100.
+- Plants, each a removed or loosened clause confirmed failing the named test file, then restored; all killed:
+  - first round, at `5ddfefb` (re-run at `9b2c934`), 49: `test/contexts.test.ts` 27 rule plants (`FAC-SEM-110`,
+    `FAC-SEM-074`/`075`, `FAC-SEM-111`, `estate-placement`, `placementTrust`, the `grant.usage` clauses of
+    `FAC-SEM-038`/`039`); `test/context-route.test.ts` 9 routing plants; `test/fixtures.test.ts` with
+    `test/contexts.test.ts` 13 schema plants;
+  - first fix round, at `9b2c934`, 8: `test/secret-envelope.test.ts` 1 (envelopes read every placement);
+    `test/contexts.test.ts` 4 (the local organization slot, a malformed context, the filtered index, `grantId` as
+    written); `test/rule-tolerance.test.ts` 2 (`show`, `toNumber`); `test/context-route.test.ts` 1 (an inherited `org`);
+  - final round, 12: `test/relay-vectors.test.ts` 1 (relay step 6 reading every placement, killed by the `placement`
+    vectors); `test/context-route.test.ts` 2 (`orgId` admitting a leading `_` or `-`, or 129 characters);
+    `test/rule-tolerance.test.ts` 3 (`show` and `toNumber` without their catch, the device-health baseline read by any
+    key); `test/activity-rules.test.ts` 4 (the filtered event, summary cell, access-log entry and user-root indexes);
+    `test/context-route.test.ts` with `test/contexts.test.ts` 1 schema plant (`contextId` admitting a leading `_` or `-`)
+    and `test/fixtures.test.ts` with `test/contexts.test.ts` 1 (`grantId` admitting `#`).
 
 ## Next task
 
