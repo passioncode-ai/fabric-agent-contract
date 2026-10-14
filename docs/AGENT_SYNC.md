@@ -1,4 +1,4 @@
-<!-- agent-sync:generated source=fabric-agent-contract@2afbe60 cfg=29e28bf679d2 at=2026-10-11T19:44:18Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
+<!-- agent-sync:generated source=fabric-agent-contract@82e1636 cfg=29e28bf679d2 at=2026-10-14T17:44:54Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
 
 # How documentation and coordination work in fabric-agent-contract
 
@@ -19,7 +19,8 @@ them is the finding.** Reconcile before starting a task and after finishing it.
 
 - record plane: **fs** · lease: **git** — exclusive across machines · runs recorded **gated**
 - lease TTL 2700s, renewed every 300s
-- credentials read from `(none found)` — gitignored, never committed
+- record-plane token: the Observatory vault slot `fabric-agent-contract/AGENT_SYNC_NOTION_TOKEN` first — every command that writes to Notion re-runs itself under `use_secret.py run --vault-only`; `(none found)` only as a DEGRADED fallback (`status` names which one served). Never sourced, never committed
+- other settings (parent page, collection) read from `(none found)` — gitignored, never committed
 
 ### Id registers — reserve before you write
 
