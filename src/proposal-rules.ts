@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { secretUrl, secretValue } from "./secret-shape.js";
 
 // #region proposal-rules — docs: docs/specification/proposals.md
@@ -33,7 +33,7 @@ function proposalFindings(value: JsonObject): Finding[] {
 function transitionFindings(value: JsonObject): Finding[] {
   const next = typeof value.from === "string" ? PROPOSAL_TRANSITIONS.get(value.from) : undefined;
   if (!next || typeof value.to !== "string" || !next.includes(value.to)) {
-    return [{ code: "FAC-SEM-104", instancePath: "/to", message: `a proposal does not move from ${String(value.from)} to ${String(value.to)}` }];
+    return [{ code: "FAC-SEM-104", instancePath: "/to", message: `a proposal does not move from ${show(value.from)} to ${show(value.to)}` }];
   }
   if (value.to === "verified" && value.type !== "fix") return [{ code: "FAC-SEM-104", instancePath: "/to", message: "only a fix is verified, when its source stops reporting the finding" }];
   return [];

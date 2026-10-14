@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { settingsCanonicalJson } from "./canonical.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 
 // #region settings-backup — docs: docs/specification/service.md#settings-backup
 /** The one format string of a settings backup file (DEC-0025). */
@@ -47,7 +47,7 @@ export function settingsBackupRules(value: JsonObject): Finding[] {
         }
       });
     });
-    if (counts[name] !== rows.length) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts says ${String(counts[name] ?? "nothing")} for ${rows.length} rows` });
+    if (counts[name] !== rows.length) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts says ${show(counts[name] ?? "nothing")} for ${rows.length} rows` });
   }
   for (const name of Object.keys(counts)) {
     if (!Object.hasOwn(tables, name)) findings.push({ code: "FAC-SEM-035", instancePath: `/counts/${name}`, message: `counts names ${name}, which the backup does not carry` });

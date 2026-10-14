@@ -1,5 +1,5 @@
 // #region route-rules — docs: docs/specification/runners.md#runner-routes
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 
 const candidates = (value: JsonObject) => (Array.isArray(value.candidates) ? value.candidates.filter(isObject) : []);
@@ -11,7 +11,7 @@ const objectAt = (value: JsonObject, key: string): JsonObject => {
  * A revision reference compared whole: id, revision and content hash. Two revisions that share an id and a number but
  * not a hash are two different objects. The id is an identifier, so it enters the key in its normal form (DEC-0076).
  */
-const refKey = (ref: unknown) => (isObject(ref) ? `${String(normalIdentifier(ref.id) ?? ref.id)}@${String(ref.revision)}#${String(ref.contentHash)}` : "");
+const refKey = (ref: unknown) => (isObject(ref) ? `${show(normalIdentifier(ref.id) ?? ref.id)}@${show(ref.revision)}#${show(ref.contentHash)}` : "");
 const sameRef = (a: unknown, b: unknown) => refKey(a) !== "" && refKey(a) === refKey(b);
 
 /**
@@ -26,7 +26,7 @@ function runnerRoute(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const kinds = new Set<string>();
   candidates(value).forEach((candidate, index) => {
-    const kind = String(candidate.runnerKind);
+    const kind = show(candidate.runnerKind);
     if (kinds.has(kind)) findings.push({ code: "FAC-SEM-028", instancePath: `/candidates/${index}/runnerKind`, message: `runner kind ${kind} appears in the route more than once` });
     kinds.add(kind);
     const session = objectAt(candidate, "session");
@@ -64,7 +64,7 @@ function routeBundle(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   candidates(route).forEach((candidate, index) => {
     const key = refKey(candidate.provider);
-    if (!admitted.has(key)) findings.push({ code: "FAC-SEM-030", instancePath: `/route/candidates/${index}/provider`, message: `candidate ${String(candidate.runnerKind)} names provider ${key}, which is not a revision admitted for ${String(route.capability)}` });
+    if (!admitted.has(key)) findings.push({ code: "FAC-SEM-030", instancePath: `/route/candidates/${index}/provider`, message: `candidate ${show(candidate.runnerKind)} names provider ${key}, which is not a revision admitted for ${show(route.capability)}` });
   });
   if (isObject(value.binding)) findings.push(...bindingAgreement(value.binding, route));
   if (Array.isArray(value.catalogue)) findings.push(...catalogueAgreement(value.catalogue.filter(isObject), route));
@@ -74,26 +74,26 @@ function routeBundle(value: JsonObject): Finding[] {
 function bindingAgreement(binding: JsonObject, route: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const disagree = (path: string, message: string) => findings.push({ code: "FAC-SEM-032", instancePath: `/binding/${path}`, message });
-  if (!sameIdentifier(binding.project, route.project)) disagree("project", `the binding is for ${String(binding.project)}, the route for ${String(route.project)}`);
-  if (!sameIdentifier(binding.capability, route.capability)) disagree("capability", `the binding binds ${String(binding.capability)}, the route orders ${String(route.capability)}`);
-  if (binding.profileKind !== "local-runner") disagree("profileKind", `a runner route serves the local-runner profile, not ${String(binding.profileKind)}`);
+  if (!sameIdentifier(binding.project, route.project)) disagree("project", `the binding is for ${show(binding.project)}, the route for ${show(route.project)}`);
+  if (!sameIdentifier(binding.capability, route.capability)) disagree("capability", `the binding binds ${show(binding.capability)}, the route orders ${show(route.capability)}`);
+  if (binding.profileKind !== "local-runner") disagree("profileKind", `a runner route serves the local-runner profile, not ${show(binding.profileKind)}`);
   if (!candidates(route).some((candidate) => sameRef(candidate.provider, binding.provider))) disagree("provider", `the binding's provider ${refKey(binding.provider)} is not a candidate of the route`);
   if (binding.runnerRoute !== undefined && !sameRef(binding.runnerRoute, route.meta)) disagree("runnerRoute", `the binding pins ${refKey(binding.runnerRoute)}, not this route ${refKey(route.meta)}`);
   return findings;
 }
 
 function catalogueAgreement(catalogue: JsonObject[], route: JsonObject): Finding[] {
-  const byKind = new Map(catalogue.map((entry) => [String(entry.kind), entry]));
+  const byKind = new Map(catalogue.map((entry) => [show(entry.kind), entry]));
   const findings: Finding[] = [];
   candidates(route).forEach((candidate, index) => {
-    const kind = String(candidate.runnerKind);
+    const kind = show(candidate.runnerKind);
     const entry = byKind.get(kind);
     if (!entry) {
       findings.push({ code: "FAC-SEM-033", instancePath: `/route/candidates/${index}/runnerKind`, message: `runner kind ${kind} has no entry in the host's catalogue` });
       return;
     }
-    if (candidate.drive !== undefined && !Object.hasOwn(objectAt(entry, "drives"), String(candidate.drive))) {
-      findings.push({ code: "FAC-SEM-033", instancePath: `/route/candidates/${index}/drive`, message: `the catalogue entry for ${kind} offers no drive ${String(candidate.drive)}` });
+    if (candidate.drive !== undefined && !Object.hasOwn(objectAt(entry, "drives"), show(candidate.drive))) {
+      findings.push({ code: "FAC-SEM-033", instancePath: `/route/candidates/${index}/drive`, message: `the catalogue entry for ${kind} offers no drive ${show(candidate.drive)}` });
     }
   });
   return findings;
@@ -116,15 +116,15 @@ function routeEvent(value: JsonObject): Finding[] {
   const wrong = (path: string, message: string) => findings.push({ code: "FAC-SEM-034", instancePath: `/event${path}`, message });
 
   if (!sameRef(event.route, route.meta)) wrong("/route", `the event names route ${refKey(event.route)}, not ${refKey(route.meta)}`);
-  if (!sameIdentifier(event.project, route.project)) wrong("/project", `the event is for ${String(event.project)}, the route for ${String(route.project)}`);
-  if (!sameIdentifier(event.capability, route.capability)) wrong("/capability", `the event names ${String(event.capability)}, the route orders ${String(route.capability)}`);
+  if (!sameIdentifier(event.project, route.project)) wrong("/project", `the event is for ${show(event.project)}, the route for ${show(route.project)}`);
+  if (!sameIdentifier(event.capability, route.capability)) wrong("/capability", `the event names ${show(event.capability)}, the route orders ${show(route.capability)}`);
 
   const indexOf = (ref: JsonObject) => (typeof ref.index === "number" && Number.isInteger(ref.index) ? ref.index : -1);
   const candidateAt = (ref: JsonObject, path: string): JsonObject | undefined => {
     const index = indexOf(ref);
     const candidate = index >= 0 ? list[index] : undefined;
     if (!candidate || candidate.runnerKind !== ref.runnerKind || (ref.provider !== undefined && !sameRef(candidate.provider, ref.provider))) {
-      wrong(path, `candidate ${String(ref.index)} (${String(ref.runnerKind)}) is not that position of the route`);
+      wrong(path, `candidate ${show(ref.index)} (${show(ref.runnerKind)}) is not that position of the route`);
       return undefined;
     }
     return candidate;
@@ -134,10 +134,10 @@ function routeEvent(value: JsonObject): Finding[] {
   probes.forEach((probe, position) => {
     const candidate = candidateAt(probe, `/probes/${position}`);
     if (candidate && probe.result === "no-held-session" && objectAt(candidate, "session").spawn !== "never") {
-      wrong(`/probes/${position}/result`, `${String(probe.runnerKind)} may spawn, so finding no held session does not pass it over`);
+      wrong(`/probes/${position}/result`, `${show(probe.runnerKind)} may spawn, so finding no held session does not pass it over`);
     }
     if (candidate && probe.result === "spawn-failed" && objectAt(candidate, "session").spawn !== "allowed") {
-      wrong(`/probes/${position}/result`, `${String(probe.runnerKind)} has spawn: never, so it cannot have failed to spawn`);
+      wrong(`/probes/${position}/result`, `${show(probe.runnerKind)} has spawn: never, so it cannot have failed to spawn`);
     }
   });
   const expectProbes = (count: number) => {
@@ -158,9 +158,9 @@ function routeEvent(value: JsonObject): Finding[] {
   const chosen = candidateAt(selected, "/selected");
   if (chosen) {
     const session = objectAt(chosen, "session");
-    if (selected.session === "attached" && session.attach !== "preferred") wrong("/selected/session", `${String(selected.runnerKind)} has attach: never, so the host cannot attach it`);
-    if (selected.session === "spawned" && session.spawn !== "allowed") wrong("/selected/session", `${String(selected.runnerKind)} has spawn: never, so the host cannot spawn it`);
-    if (chosen.drive !== undefined && selected.drive !== undefined && selected.drive !== chosen.drive) wrong("/selected/drive", `the route runs ${String(selected.runnerKind)} through ${String(chosen.drive)}, not ${String(selected.drive)}`);
+    if (selected.session === "attached" && session.attach !== "preferred") wrong("/selected/session", `${show(selected.runnerKind)} has attach: never, so the host cannot attach it`);
+    if (selected.session === "spawned" && session.spawn !== "allowed") wrong("/selected/session", `${show(selected.runnerKind)} has spawn: never, so the host cannot spawn it`);
+    if (chosen.drive !== undefined && selected.drive !== undefined && selected.drive !== chosen.drive) wrong("/selected/drive", `the route runs ${show(selected.runnerKind)} through ${show(chosen.drive)}, not ${show(selected.drive)}`);
     if (event.sticky === true) {
       // A sticky relaunch keeps the conversation's runner and walks nothing above it.
       if (route.recovery === "reprobe") wrong("/sticky", "a route with recovery: reprobe walks from the top at every launch");

@@ -1,3 +1,4 @@
+import { show } from "./findings.js";
 import { createHash } from "node:crypto";
 import { closeSync, constants, existsSync, fstatSync, lstatSync, openSync, readdirSync, readSync, realpathSync } from "node:fs";
 import path from "node:path";
@@ -304,7 +305,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
   // SH-7 — a pack kept per agent key opens that agent's console, no other.
   const callArguments = isObject(firstCall.arguments) ? firstCall.arguments : undefined;
   if (lifetime.kind === "agent-key" && callArguments && typeof callArguments.key === "string" && callArguments.key !== lifetime.agentKey) {
-    findings.push(sem053("/firstCall/arguments/key", `a pack kept for agent key ${String(lifetime.agentKey)} opens that agent's console; the first call names ${callArguments.key}`));
+    findings.push(sem053("/firstCall/arguments/key", `a pack kept for agent key ${show(lifetime.agentKey)} opens that agent's console; the first call names ${callArguments.key}`));
   }
 
   // SH-6 — the preamble names one tool, the first call, and holds no rule; it is one line.
@@ -532,11 +533,11 @@ export function snapshotFromFixture(value: Json): HandoffSnapshot {
     if (!isObject(raw)) continue;
     const kind = raw.kind === "directory" || raw.kind === "symlink" || raw.kind === "other" ? raw.kind : "file";
     const text = typeof raw.text === "string" ? raw.text : raw.json !== undefined ? `${JSON.stringify(raw.json, null, 2)}\n` : undefined;
-    entries[name] = { mode: String(raw.mode ?? "600"), kind, ...(kind === "file" && text !== undefined ? { text } : {}), ...(raw.tooLarge === true ? { tooLarge: true } : {}) };
+    entries[name] = { mode: show(raw.mode ?? "600"), kind, ...(kind === "file" && text !== undefined ? { text } : {}), ...(raw.tooLarge === true ? { tooLarge: true } : {}) };
   }
   return {
-    path: String(value.path ?? ""),
-    mode: String(value.mode ?? "700"),
+    path: show(value.path ?? ""),
+    mode: show(value.mode ?? "700"),
     kind: value.kind === "symlink" ? "symlink" : "directory",
     permissions: value.permissions === "acl" ? "acl" : "posix",
     repository: typeof value.repository === "string" ? value.repository : null,

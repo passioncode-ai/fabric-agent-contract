@@ -2,7 +2,7 @@ import { createHash, createPublicKey, verify } from "node:crypto";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
-import { type JsonObject, isObject } from "./findings.js";
+import { type JsonObject, isObject, show } from "./findings.js";
 import { sameIdentifier } from "./identifiers.js";
 
 // #region revocation-delta — docs: docs/specification/revocation-delta.md#the-verifier
@@ -117,7 +117,7 @@ export function effectiveRevocations(record: unknown, state: DeltaState | undefi
 
 /**
  * Whether `revocations` revoke `ref` of `kind`, matched exactly: `kind` and `ref` are compared as the strings they are,
- * never through `String()`, as DL-14's `hubKeyCertified` matches them (a number 5 never revokes the machine "5"). A
+ * never through `show()`, as DL-14's `hubKeyCertified` matches them (a number 5 never revokes the machine "5"). A
  * `grant` ref is a grant's URI id, so it matches by normal form (DEC-0076): another spelling of a revoked grant is
  * revoked, never let through.
  */
@@ -232,12 +232,12 @@ export function applyDelta(state: DeltaState, page: unknown, trust: DeltaTrust):
     if (shape !== undefined) return fail("malformed", index, current, shape);
     const e = entry as JsonObject;
     const revocation = e.revocation as JsonObject;
-    if (e.estate !== current.estate) return fail("wrong-estate", index, current, `the entry is estate ${String(e.estate)}'s`);
+    if (e.estate !== current.estate) return fail("wrong-estate", index, current, `the entry is estate ${show(e.estate)}'s`);
     if (e.alg !== DELTA_ALG) return fail("unsupported-alg", index, current, `an estate key signs with ${DELTA_ALG}`);
-    if (!DELTA_KINDS.includes(revocation.kind as string)) return fail("not-revocable", index, current, `the delta does not carry a ${String(revocation.kind)} revocation: a passkey is revoked only by a revision`);
+    if (!DELTA_KINDS.includes(revocation.kind as string)) return fail("not-revocable", index, current, `the delta does not carry a ${show(revocation.kind)} revocation: a passkey is revoked only by a revision`);
     if (deltaTime(e.at) > now + MAX_FUTURE_SECONDS * 1000) return fail("not-yet-valid", index, current, "the entry is dated more than 60 s ahead of the verifier's clock");
     const signer = estateSigner(record, e.kid, effectiveRevocations(record, current));
-    if ("problem" in signer) return fail(signer.problem, index, current, `no estate key the trusted revision certifies signs as ${String(e.kid)}`);
+    if ("problem" in signer) return fail(signer.problem, index, current, `no estate key the trusted revision certifies signs as ${show(e.kid)}`);
     if (!verifies(signingInput(e), e.sig as string, signer.key)) return fail("bad-signature", index, current, "the signature does not verify");
     const sequence = e.sequence as number;
     const held = current.entries.length;
@@ -306,12 +306,12 @@ export function acceptHeartbeat(state: DeltaState, heartbeat: unknown, trust: De
   const h = heartbeat as JsonObject;
   // A readable clock means `trust` is an object.
   const record: unknown = (trust as DeltaTrust).record;
-  if (h.estate !== state.estate || !isObject(record) || record.estate !== state.estate) return fail("wrong-estate", state, `the heartbeat is estate ${String(h.estate)}'s`);
+  if (h.estate !== state.estate || !isObject(record) || record.estate !== state.estate) return fail("wrong-estate", state, `the heartbeat is estate ${show(h.estate)}'s`);
   if (h.alg !== DELTA_ALG) return fail("unsupported-alg", state, `an estate key signs with ${DELTA_ALG}`);
   const at = deltaTime(h.at);
   if (at > now + MAX_FUTURE_SECONDS * 1000) return fail("not-yet-valid", state, "the heartbeat is dated more than 60 s ahead of the verifier's clock");
   const signer = estateSigner(record, h.kid, effectiveRevocations(record, state));
-  if ("problem" in signer) return fail(signer.problem, state, `no estate key the trusted revision certifies signs as ${String(h.kid)}`);
+  if ("problem" in signer) return fail(signer.problem, state, `no estate key the trusted revision certifies signs as ${show(h.kid)}`);
   if (!verifies(signingInput(h), h.sig as string, signer.key)) return fail("bad-signature", state, "the signature does not verify");
   const head = h.deltaHead as JsonObject;
   const revision = h.estateRecord as JsonObject;
@@ -324,7 +324,7 @@ export function acceptHeartbeat(state: DeltaState, heartbeat: unknown, trust: De
     if ((h.sequence as number) < (held.sequence as number)) return fail("not-newer", state, "the machine holds a newer heartbeat");
     if (h.sequence === held.sequence) {
       if (sameBytes(h, held)) return { ok: true, state, newer: false };
-      return broken(`two signed heartbeats carry sequence ${String(h.sequence)}`);
+      return broken(`two signed heartbeats carry sequence ${show(h.sequence)}`);
     }
     const heldHead = held.deltaHead as JsonObject;
     const heldRevision = held.estateRecord as JsonObject;
@@ -334,7 +334,7 @@ export function acceptHeartbeat(state: DeltaState, heartbeat: unknown, trust: De
   }
   const sequence = head.sequence as number;
   if (sequence <= state.entries.length && headAt(state, sequence) !== head.sha256) return broken(`the heartbeat's head at ${sequence} is not the entry this machine holds there`);
-  if (revision.revision === record.revision && revision.digest !== record.digest) return broken(`the heartbeat names another revision ${String(revision.revision)} than the one this machine applied`);
+  if (revision.revision === record.revision && revision.digest !== record.digest) return broken(`the heartbeat names another revision ${show(revision.revision)} than the one this machine applied`);
   return { ok: true, state: { ...state, heartbeat: h }, newer: true };
 }
 
@@ -403,7 +403,7 @@ export function unreconciled(revision: unknown, entries: readonly unknown[]): { 
       unreadable = true;
       return;
     }
-    if (!unreadable && at <= issuedAt && !isRevoked(listed, revocation.kind as string, revocation.ref)) missing.push({ index, kind: String(revocation.kind), ref: String(revocation.ref) });
+    if (!unreadable && at <= issuedAt && !isRevoked(listed, revocation.kind as string, revocation.ref)) missing.push({ index, kind: show(revocation.kind), ref: show(revocation.ref) });
   });
   return { missing, unreadable };
 }

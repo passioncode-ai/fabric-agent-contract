@@ -1,7 +1,7 @@
 import { createPublicKey, verify } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { isValidP256Key, p256Jwk } from "./p256.js";
-import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
 import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { uncovered } from "./seq-ranges.js";
@@ -88,7 +88,7 @@ export function resolvePolicy(layers: readonly JsonObject[]): Record<string, Eff
 
 /** The earliest `expiresAt` of the delivered layers, or NaN when none expires. */
 export function policyExpiry(layers: readonly JsonObject[]): number {
-  const times = layers.filter((layer) => layer.source !== "user" && typeof layer.expiresAt === "string").map((layer) => Date.parse(String(layer.expiresAt)));
+  const times = layers.filter((layer) => layer.source !== "user" && typeof layer.expiresAt === "string").map((layer) => Date.parse(show(layer.expiresAt)));
   return times.length ? Math.min(...times) : Number.NaN;
 }
 
@@ -116,15 +116,15 @@ function policyUpdate(value: JsonObject): Finding[] {
   const next = isObject(value.next) ? value.next : {};
   const current = isObject(value.current) ? value.current : null;
   const keys = Array.isArray(value.trustedKeys) ? value.trustedKeys.filter(isObject) : [];
-  const at = Date.parse(String(value.at ?? ""));
+  const at = Date.parse(show(value.at ?? ""));
   if (next.source === "user") flag("/next/source", "a user layer is set on the device; it is never delivered as an update");
   const signature = isObject(next.signature) ? next.signature : null;
   if (signature) {
     const key = keys.find((k) => k.keyId === signature.keyId);
     if (signature.keyId === value.rootKeyId) flag("/next/signature/keyId", "the root key signs key sets only, never a policy");
-    else if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${String(signature.keyId)}`);
+    else if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${show(signature.keyId)}`);
     else if (Number.isNaN(at)) flag("/at", "a key's validity is judged when the device verifies; the input names that time");
-    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${String(signature.keyId)} is outside its validity window when the device verifies`);
+    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${show(signature.keyId)} is outside its validity window when the device verifies`);
     else if (!verifyPolicySignature(next, key.publicKey)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
   } else if (next.source === "server") {
     flag("/next/signature", "a server policy is signed");
@@ -132,8 +132,8 @@ function policyUpdate(value: JsonObject): Finding[] {
   if (current) {
     const org = (doc: JsonObject) => (isObject(doc.org) ? doc.org.id : undefined);
     if (org(current) !== org(next)) flag("/next/org/id", "a policy update stays in its organization");
-    if (current.source !== next.source) flag("/next/source", `an update replaces the ${String(current.source)} layer, not the ${String(next.source)} layer`);
-    if (Date.parse(String(next.issuedAt ?? "")) < Date.parse(String(current.issuedAt ?? ""))) flag("/next/issuedAt", "a policy is issued no earlier than the one the device holds");
+    if (current.source !== next.source) flag("/next/source", `an update replaces the ${show(current.source)} layer, not the ${show(next.source)} layer`);
+    if (Date.parse(show(next.issuedAt ?? "")) < Date.parse(show(current.issuedAt ?? ""))) flag("/next/issuedAt", "a policy is issued no earlier than the one the device holds");
     if (typeof current.revision === "number" && typeof next.revision === "number" && next.revision <= current.revision) {
       flag("/next/revision", `revision ${next.revision} does not move past ${current.revision}: a device applies only a newer revision`);
     }
@@ -149,7 +149,7 @@ function policyResolution(value: JsonObject): Finding[] {
   const effective = isObject(value.effective) ? value.effective : {};
   const sources = new Set<unknown>();
   layers.forEach((layer, i) => {
-    if (sources.has(layer.source)) flag(`/layers/${i}/source`, `two ${String(layer.source)} layers`);
+    if (sources.has(layer.source)) flag(`/layers/${i}/source`, `two ${show(layer.source)} layers`);
     sources.add(layer.source);
     if (layer.source === "user" && isObject(layer.keys)) {
       for (const [name, setting] of Object.entries(layer.keys)) {
@@ -161,7 +161,7 @@ function policyResolution(value: JsonObject): Finding[] {
   for (const [name, want] of Object.entries(resolved)) {
     const got = effective[name];
     if (!isObject(got)) { flag(`/effective/${name}`, `${name} is set by the ${want.from} layer and missing from the effective settings`); continue; }
-    if (!jsonEqual(got.value, want.value) || got.from !== want.from) flag(`/effective/${name}`, `${name} resolves to the ${want.from} layer's value; ${String(got.from)} cannot override it`);
+    if (!jsonEqual(got.value, want.value) || got.from !== want.from) flag(`/effective/${name}`, `${name} resolves to the ${want.from} layer's value; ${show(got.from)} cannot override it`);
   }
   for (const name of Object.keys(effective)) if (!(name in resolved)) flag(`/effective/${name}`, `${name} is set by no layer`);
   return findings;
@@ -176,7 +176,7 @@ export type { StreamState } from "./activity-rules.js";
 /** What a receiver knows about one device before a batch or a check-in. The epochs and the policy baseline are reset by each enrollment. */
 export interface DeviceState { deviceId: string; epochs: number[]; policyBaseline: Partial<Record<"mdm" | "server", number>>; streams: StreamState[] }
 
-const keyOf = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
+const keyOf = (collector: JsonObject) => `${show(collector.id)}#${show(collector.epoch)}`;
 
 /** The device state after `batch` and `checkIn` — the same stream state the batch ack is computed from (`mergeStreams`). */
 export function mergeDeviceState(known: DeviceState, batch: JsonObject | null, checkIn: JsonObject | null): DeviceState {
@@ -228,9 +228,10 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
   });
   const layers = checkIn && isObject(checkIn.policy) && Array.isArray(checkIn.policy.layers) ? checkIn.policy.layers.filter(isObject) : [];
   layers.forEach((layer, i) => {
-    const baseline = known.policyBaseline[layer.source as "mdm" | "server"];
+    // An own member only, read by a string key: a source of another type (an object, `{"toString": 1}`) reads no baseline.
+    const baseline = typeof layer.source === "string" && Object.hasOwn(known.policyBaseline, layer.source) ? known.policyBaseline[layer.source as "mdm" | "server"] : undefined;
     if (typeof baseline === "number" && num(layer.revision) < baseline) {
-      evidence.push({ instancePath: `/checkIn/policy/layers/${i}/revision`, message: `${String(layer.source)} policy revision ${num(layer.revision)} is below ${baseline}, which the device acknowledged since it enrolled` });
+      evidence.push({ instancePath: `/checkIn/policy/layers/${i}/revision`, message: `${show(layer.source)} policy revision ${num(layer.revision)} is below ${baseline}, which the device acknowledged since it enrolled` });
     }
   });
   return evidence;
@@ -239,7 +240,7 @@ export function tamperEvidence(known: DeviceState, batch: JsonObject | null, che
 const asState = (value: unknown): DeviceState => {
   const k = isObject(value) ? value : {};
   return {
-    deviceId: String(k.deviceId ?? ""),
+    deviceId: show(k.deviceId ?? ""),
     epochs: Array.isArray(k.epochs) ? k.epochs.filter((e): e is number => typeof e === "number") : [],
     policyBaseline: isObject(k.policyBaseline) ? k.policyBaseline as DeviceState["policyBaseline"] : {},
     streams: asStreams(k.streams)
@@ -259,7 +260,7 @@ function healthObservation(value: JsonObject): Finding[] {
   const effective = isObject(value.effective) ? value.effective : {};
   const required = isObject(effective["logging.required"]) && (effective["logging.required"] as JsonObject).value === true;
   const logging = checkIn && isObject(checkIn.logging) ? checkIn.logging : {};
-  if (required && logging.enabled === false && !["logging_disabled", "tampered"].includes(String(health.state))) {
+  if (required && logging.enabled === false && !["logging_disabled", "tampered"].includes(show(health.state))) {
     findings.push({ code: "FAC-SEM-043", instancePath: "/health/state", message: "logging is required and the device reports it disabled: the state is logging_disabled" });
   }
   return findings;
@@ -300,7 +301,7 @@ function enrollment(value: JsonObject): Finding[] {
   } else if (auth.method === "enrollment-token" && bound !== undefined && bound !== token.userId) {
     flag("/response/certificate/binding/user/id", "a token enrollment binds a user only when the token names that person");
   }
-  const from = Date.parse(String(certificate.notBefore ?? "")), to = Date.parse(String(certificate.notAfter ?? ""));
+  const from = Date.parse(show(certificate.notBefore ?? "")), to = Date.parse(show(certificate.notAfter ?? ""));
   if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
   else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
   if (isObject(value.enrolled)) {
@@ -313,9 +314,9 @@ function enrollment(value: JsonObject): Finding[] {
   const roles = new Map<unknown, number>();
   (Array.isArray(request.deviceKeys) ? request.deviceKeys.filter(isObject) : []).forEach((key, i) => {
     const at = `/request/deviceKeys/${i}`;
-    if (key.kid !== `${String(id(request.device))}#${String(key.use)}`) flag(`${at}/kid`, "a device key is listed as <device.id>#sig or <device.id>#kem, by its role");
+    if (key.kid !== `${show(id(request.device))}#${show(key.use)}`) flag(`${at}/kid`, "a device key is listed as <device.id>#sig or <device.id>#kem, by its role");
     if (key.use === "kem" ? key.alg !== "ecdh-p256" : key.alg !== "es256" && key.alg !== "ed25519") flag(`${at}/alg`, "a sig key signs with ES256 or Ed25519; a kem key agrees keys over P-256 only");
-    const raw = Buffer.from(String(key.publicKey ?? ""), "base64");
+    const raw = Buffer.from(show(key.publicKey ?? ""), "base64");
     if (key.alg === "ed25519" ? raw.length !== 32 || isSmallOrderKey(raw) : !isValidP256Key(raw)) flag(`${at}/publicKey`, "an Ed25519 key is never of small order (DEC-0045) and a P-256 key is a valid point (SEC 1 §3.2.2)");
     const seen = roles.get(key.publicKey);
     if (seen !== undefined) flag(`${at}/publicKey`, `the same key is already listed at /request/deviceKeys/${seen}: one key is never used for the other role`);
@@ -388,16 +389,16 @@ function keySet(value: JsonObject): Finding[] {
   const signature = isObject(next.signature) ? next.signature : {};
   if (signature.keyId !== root.keyId) flag("/next/signature/keyId", "a key set is signed by the root key from enrollment");
   else if (signature.alg !== (root.alg ?? "ed25519") || !verifyWith(root, policySigningInput(next), signature.value)) flag("/next/signature/value", "the key set's signature does not verify under the root key, in the root key's algorithm");
-  const at = Date.parse(String(next.issuedAt ?? ""));
+  const at = Date.parse(show(next.issuedAt ?? ""));
   const keys = Array.isArray(next.keys) ? next.keys.filter(isObject) : [];
   const ids = new Set<unknown>();
   let validNow = false;
   keys.forEach((key, i) => {
-    if (ids.has(key.keyId)) flag(`/next/keys/${i}/keyId`, `key ${String(key.keyId)} is named twice`);
+    if (ids.has(key.keyId)) flag(`/next/keys/${i}/keyId`, `key ${show(key.keyId)} is named twice`);
     ids.add(key.keyId);
     if (key.keyId === root.keyId) flag(`/next/keys/${i}/keyId`, "the root key is never a policy signing key");
     if (typeof key.publicKey === "string" && isSmallOrderKey(Buffer.from(key.publicKey, "base64"))) flag(`/next/keys/${i}/publicKey`, "a key of small order verifies forged signatures and is never published (DEC-0045)");
-    const from = Date.parse(String(key.notBefore ?? "")), to = Date.parse(String(key.notAfter ?? ""));
+    const from = Date.parse(show(key.notBefore ?? "")), to = Date.parse(show(key.notAfter ?? ""));
     if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts");
     if (at >= from && at <= to) validNow = true;
   });
@@ -409,9 +410,9 @@ function keySet(value: JsonObject): Finding[] {
     const revoked = new Set(Array.isArray(next.revoked) ? next.revoked : []);
     const kept = new Map(keys.map((key) => [key.keyId, key]));
     (Array.isArray(current.keys) ? current.keys.filter(isObject) : []).forEach((key) => {
-      if (revoked.has(key.keyId) || Date.parse(String(key.notAfter ?? "")) <= at) return;
+      if (revoked.has(key.keyId) || Date.parse(show(key.notAfter ?? "")) <= at) return;
       const same = kept.get(key.keyId);
-      if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${String(key.keyId)} is still valid until ${String(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
+      if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${show(key.keyId)} is still valid until ${show(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
     });
   }
   return findings;
@@ -437,18 +438,18 @@ export function expectedDecision(layers: readonly JsonObject[], at: string, acti
   switch (action.kind) {
     case "grant":
     case "remote-execution":
-      return expired ? refuse(`the policy expired, so ${String(action.kind)} stops until a newer policy arrives`) : allow;
+      return expired ? refuse(`the policy expired, so ${show(action.kind)} stops until a newer policy arrives`) : allow;
     case "personal-key-call":
       if (expired) return refuse("the policy expired, so a person's key serves nobody else");
       return effective["models.personal_key_sharing"]?.value === "allowed" ? allow : refuse("a person's key serves someone else only where the policy says allowed; absent means forbidden");
     case "local-change": {
-      const locked = layers.some((layer) => layer.source !== "user" && isObject(layer.keys) && isObject(layer.keys[String(action.key)]) && (layer.keys[String(action.key)] as JsonObject).locked === true);
-      return locked ? refuse(`${String(action.key)} is locked, and locks stay in force after the policy expires`) : allow;
+      const locked = layers.some((layer) => layer.source !== "user" && isObject(layer.keys) && isObject(layer.keys[show(action.key)]) && (layer.keys[show(action.key)] as JsonObject).locked === true);
+      return locked ? refuse(`${show(action.key)} is locked, and locks stay in force after the policy expires`) : allow;
     }
     case "upload": {
       const start = collectionStart(layers, acknowledgedAt);
       if (Number.isNaN(start)) return refuse("collection has not started: the notice is not acknowledged and no deadline applies");
-      return Date.parse(String(action.occurred ?? "")) >= start ? allow : refuse("the event occurred before collection started; it stays on the device");
+      return Date.parse(show(action.occurred ?? "")) >= start ? allow : refuse("the event occurred before collection started; it stays on the device");
     }
     default:
       return allow;
@@ -459,9 +460,9 @@ export function expectedDecision(layers: readonly JsonObject[], at: string, acti
 function deviceAction(value: JsonObject): Finding[] {
   const layers = Array.isArray(value.layers) ? value.layers.filter(isObject) : [];
   const action = isObject(value.action) ? value.action : {};
-  const want = expectedDecision(layers, String(value.at ?? ""), action, typeof value.acknowledgedAt === "string" ? value.acknowledgedAt : undefined);
+  const want = expectedDecision(layers, show(value.at ?? ""), action, typeof value.acknowledgedAt === "string" ? value.acknowledgedAt : undefined);
   if (value.decision === want.decision) return [];
-  return [{ code: "FAC-SEM-068", instancePath: "/decision", message: want.decision === "refuse" ? `the device must refuse: ${want.reason}` : `nothing in the policy refuses this ${String(action.kind)}` }];
+  return [{ code: "FAC-SEM-068", instancePath: "/decision", message: want.decision === "refuse" ? `the device must refuse: ${want.reason}` : `nothing in the policy refuses this ${show(action.kind)}` }];
 }
 
 /**
@@ -523,8 +524,8 @@ function rootCertification(value: JsonObject): Finding[] {
   const subject = isObject(certification.subject) ? certification.subject : {};
   const algOf = (key: JsonObject) => key.alg ?? "ed25519";
   if (subject.keyId !== root.keyId || subject.publicKey !== root.publicKey || algOf(subject) !== algOf(root)) flag("/certification/subject", "the certification names another key than the organization's root key from enrollment");
-  const at = Date.parse(String(value.at ?? ""));
-  if (!(at <= Date.parse(String(certification.notAfter ?? "")) && at >= Date.parse(String(certification.issuedAt ?? "")))) flag("/certification/notAfter", "the certification is not valid at enrollment time");
+  const at = Date.parse(show(value.at ?? ""));
+  if (!(at <= Date.parse(show(certification.notAfter ?? "")) && at >= Date.parse(show(certification.issuedAt ?? "")))) flag("/certification/notAfter", "the certification is not valid at enrollment time");
   const signature = isObject(certification.signature) ? certification.signature : {};
   const pinnedKey = (keyId: unknown) => pinned.find((key) => key.keyId === keyId);
   const delegation = isObject(certification.delegation) ? certification.delegation : null;
@@ -536,7 +537,7 @@ function rootCertification(value: JsonObject): Finding[] {
     const issuer = isObject(delegation.signature) ? delegation.signature : {};
     const offline = pinnedKey(issuer.keyId);
     if (!offline || algOf(offline) !== issuer.alg || !verifyWith(offline, certificationSigningInput(delegation), issuer.value)) flag("/certification/delegation/signature", "the delegation key's certificate is not signed by a pinned offline root key");
-    const from = Date.parse(String(delegation.notBefore ?? "")), to = Date.parse(String(delegation.notAfter ?? ""));
+    const from = Date.parse(show(delegation.notBefore ?? "")), to = Date.parse(show(delegation.notAfter ?? ""));
     if (!(to > from) || to - from > MAX_DELEGATION_DAYS * DAY_MS) flag("/certification/delegation/notAfter", `a delegation key's certificate lives at most ${MAX_DELEGATION_DAYS} days`);
     else if (!(at >= from && at <= to)) flag("/certification/delegation/notAfter", "the delegation key's certificate is not valid at enrollment time");
     const revocations = isObject(value.revocations) ? value.revocations : null;
@@ -544,7 +545,7 @@ function rootCertification(value: JsonObject): Finding[] {
     // with a stale one, a compromised delegation key could certify until its own certificate expires.
     if (!revocations) flag("/revocations", "a delegated certification carries the offline root's current revocation list");
     else {
-      const issued = Date.parse(String(revocations.issuedAt ?? ""));
+      const issued = Date.parse(show(revocations.issuedAt ?? ""));
       if (!(issued <= at) || at - issued > MAX_REVOCATION_LIST_AGE_DAYS * DAY_MS) flag("/revocations/issuedAt", `the revocation list was issued at most ${MAX_REVOCATION_LIST_AGE_DAYS} days before enrollment`);
     }
     if (revocations) {

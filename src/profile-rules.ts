@@ -1,5 +1,5 @@
 // #region profile-rules — docs: docs/specification/runners.md#runner-and-model-profiles
-import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show, toNumber } from "./findings.js";
 import { secretValue } from "./secret-shape.js";
 
 /**
@@ -56,7 +56,7 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
   });
   if (within.length) return { from: level, profile: id, models: within };
   const meta = isObject(policy.meta) ? policy.meta : {};
-  return { refused: "model-classes-empty", profile: id, policy: { id: String(meta.id), revision: Number(meta.revision) } };
+  return { refused: "model-classes-empty", profile: id, policy: { id: show(meta.id), revision: toNumber(meta.revision) } };
 }
 
 /** FAC-SEM-058: the catalogue holds a model once, and its routing object never orders a provider it ignores. */
@@ -64,14 +64,14 @@ function modelCatalogue(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
   list(value.models).forEach((row, index) => {
-    if (seen.has(row.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/id`, message: `model ${String(row.id)} is catalogued more than once` });
+    if (seen.has(row.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/id`, message: `model ${show(row.id)} is catalogued more than once` });
     seen.add(row.id);
     const routing = isObject(row.provider) ? row.provider : {};
     const ignored = new Set(strings(routing.ignore));
     for (const slug of strings(routing.order)) {
       // A base slug covers its variants (`deepinfra` covers `deepinfra/turbo`), so an ordered variant of an ignored
       // provider is ordered and ignored at once.
-      if (ignored.has(slug) || ignored.has(slug.split("/")[0] as string)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/provider`, message: `model ${String(row.id)} both orders and ignores provider ${slug}` });
+      if (ignored.has(slug) || ignored.has(slug.split("/")[0] as string)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/provider`, message: `model ${show(row.id)} both orders and ignores provider ${slug}` });
     }
   });
   return findings;
@@ -82,7 +82,7 @@ function modelProfiles(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
   list(value.profiles).forEach((profile, index) => {
-    if (seen.has(profile.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/profiles/${index}/id`, message: `model profile ${String(profile.id)} is declared more than once` });
+    if (seen.has(profile.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/profiles/${index}/id`, message: `model profile ${show(profile.id)} is declared more than once` });
     seen.add(profile.id);
   });
   return findings;
@@ -96,13 +96,13 @@ function modelProfiles(value: JsonObject): Finding[] {
 function runnerProfile(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   if (value.route === "subscription" && isObject(value.subscription)) {
-    const login = String(value.subscription.login);
+    const login = show(value.subscription.login);
     // Own members only: a login named `constructor` or `__proto__` must not read Object.prototype into the message.
     const runner = Object.hasOwn(SUBSCRIPTION_RUNNER, login) ? SUBSCRIPTION_RUNNER[login] : undefined;
-    if (runner !== value.runnerKind) findings.push({ code: "FAC-SEM-059", instancePath: "/runnerKind", message: `a ${login} subscription runs only in ${runner ?? "its vendor's runner"}, not in ${String(value.runnerKind)}; another runner takes the key route` });
+    if (runner !== value.runnerKind) findings.push({ code: "FAC-SEM-059", instancePath: "/runnerKind", message: `a ${login} subscription runs only in ${runner ?? "its vendor's runner"}, not in ${show(value.runnerKind)}; another runner takes the key route` });
   }
   if (value.route === "key" && isObject(value.key)) {
-    if (value.key.modelAllowList !== value.modelProfile) findings.push({ code: "FAC-SEM-059", instancePath: "/key/modelAllowList", message: `the key admits the models of ${String(value.key.modelAllowList)}, but the profile runs ${String(value.modelProfile)}` });
+    if (value.key.modelAllowList !== value.modelProfile) findings.push({ code: "FAC-SEM-059", instancePath: "/key/modelAllowList", message: `the key admits the models of ${show(value.key.modelAllowList)}, but the profile runs ${show(value.modelProfile)}` });
     if (typeof value.key.ref === "string" && secretValue(value.key.ref)) findings.push({ code: "FAC-SEM-059", instancePath: "/key/ref", message: "the key is named by its secret reference, never by its value" });
   }
   return findings;
@@ -119,10 +119,10 @@ function profileResolution(value: JsonObject): Finding[] {
   const ids = new Set<unknown>();
   list(value.profiles).forEach((profile, i) => {
     // An agent's profile and an estate profile never share an id: the resolver would take whichever came first.
-    if (ids.has(profile.id)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/id`, message: `profile id ${String(profile.id)} is offered more than once to one resolution` });
+    if (ids.has(profile.id)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/id`, message: `profile id ${show(profile.id)} is offered more than once to one resolution` });
     ids.add(profile.id);
     strings(profile.models).forEach((model, j) => {
-      if (!catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${String(profile.id)} names ${model}, which the catalogue does not hold` });
+      if (!catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${show(profile.id)} names ${model}, which the catalogue does not hold` });
     });
   });
   const choices = isObject(value.choices) ? (value.choices as ResolutionInput["choices"]) : {};

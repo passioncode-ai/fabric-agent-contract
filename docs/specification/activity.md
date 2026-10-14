@@ -182,14 +182,16 @@ vocabulary: `personal_account_in_work_folder`, `unknown_account`, `personal_key_
 day's violations after the day ends, so the stream position tells no more than the day.
 
 **`grant.usage`** — one grant's metered usage for one **UTC day** (DEC-0082, [contexts](contexts.md#usage-per-grant)).
-`data`: `day`, `grantId` (the grant's `meta.id` without its revision, a URI of 1–256 characters compared by normal
-form, DEC-0076), `calls` (at least 1),
+`data`: `day`, `grantId` (the grant's `meta.id`, a URI of 1–256 characters with no `#`, compared by normal form,
+DEC-0076), `calls` (at least 1),
 `unpricedCalls` (never more than `calls`) and `costUsd`, a number of at least 0 or `null` when no call was priced — an
 unknown cost is `null`, never `0` (`FAC-SEM-038`). Like `policy.violation` it carries a day and no finer time:
 `occurred` is that day's midnight UTC (`FAC-SEM-039`), `monotonicNs` is `"0"`, and it carries no `session`, `user`,
-`run`, `task`, `git`, `skill` or `launch` (schema). Its source is the meter's settled grant-check receipts of that day
-(DEC-0037), each counted once, and only those receipts of services' `byGrant` rows the meter does not hold, deduplicated
-by receipt id; `unpricedCalls` counts the receipts with an unknown cost. It holds sums and states only, never a per-call
+`run`, `task`, `git`, `skill` or `launch` (schema). `calls` and `unpricedCalls` count calls. Its source is the meter's
+settled grant-check receipts (DEC-0037), each counted once and assigned to the UTC day of its `allowed` answer's
+`checkedAt`; `unpricedCalls` counts the calls of receipts whose cost is unknown. A service's `byGrant` row is used only
+when it lists `receipts`, the meter holds none of them and the report's `days` hold one date; otherwise it is not used,
+and the collector reports what the meter holds ([contexts](contexts.md#usage-per-grant)). It holds sums and states only, never a per-call
 line, because usage under a share grant is data about a person (CX-VES-08). A collector emits it after the day ends, one
 per (day, `grantId`) per stream (`FAC-SEM-039` refuses a second in one batch, the ids compared by normal form), and
 sends it only to the organization server of the grant's own context ([routing](contexts.md#routing),

@@ -4794,18 +4794,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      extended), `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`, `skill` or `launch`
      (schema). `data` (`telemetry-event.schema.json#/$defs/grantUsage`, closed):
      - `day`;
-     - `grantId`: the grant's `meta.id` without the revision, a URI of 1–256 characters compared by normal form
+     - `grantId`: the grant's `meta.id`, a URI of 1–256 characters with no `#` (schema pattern), compared by normal form
        (DEC-0076), so one grant revised during the day is one row and the organization server joins it to the share
-       grant it holds. The collector on the issuer's own device derives it from the receipts its meter settled. That is
-       the issuer's side: DL-22's opacity binds callees, which name a grant only by the token's `grant` claim, so it is
-       not broken;
-     - `calls` (at least 1), `unpricedCalls` (at most `calls`: the receipts with an unknown cost) and `costUsd` (a number
+       grant it holds. The collector on the issuer's own device derives it from the receipts its meter settled, dropping
+       a grant reference's `#<revision>` by taking the receipt's grant `meta.id`, which carries no revision. That is the
+       issuer's side: DL-22's opacity binds callees, which name a grant only by the token's `grant` claim, so it is not
+       broken. Hosts keep grant ids within 256 characters; a grant whose `meta.id` is longer reports no `grant.usage`;
+     - `calls` (at least 1) and `unpricedCalls` (at most `calls`: the calls of receipts whose cost is unknown) count
+       calls, and `costUsd` (a number
        of at least 0, or `null` when nothing was priced, never `0` for unknown, as DEC-0021 and `FAC-SEM-025` do;
        `FAC-SEM-038`, extended, checks the three together).
 
-     It is built from the meter's settled grant-check receipts of that UTC day (DEC-0037), each receipt counted once; a
-     service's `byGrant` rows add only receipts the meter does not hold, deduplicated by receipt id. Sums and states
-     only, never a per-call line. A collector emits it after the day ends, one per (day, `grantId`) per stream; a second
+     It is built from the meter's settled grant-check receipts (DEC-0037), each counted once and assigned to the UTC day
+     of the receipt's own timestamp, the `checkedAt` of the `allowed` answer that issued it
+     (`grant-check.schema.json#/$defs/allowed`). A service's `byGrant` row is used only when it lists `receipts`, the
+     meter holds none of them, and the report's window lies within one UTC day (its `days` hold one date); otherwise it is
+     not used, and the collector reports what the meter holds. Sums and states only, never a per-call line. A collector emits it after the day ends, one per (day, `grantId`) per stream; a second
      one for the same (stream, day, normal form of `grantId`) in a batch is refused by `FAC-SEM-039`, folded into its
      clause "no event is sent twice" rather than a new code, since it is the same fact sent twice under a new id. A
      receiver counts the first `grant.usage` per (stream, day, `grantId`) and ignores later ones.

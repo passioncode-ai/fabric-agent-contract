@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
 import { DELTA_ALG, DELTA_KINDS, deltaEntryHash, deltaGenesis, deltaTime, freshnessAnswer, unreconciled } from "./revocation-delta.js";
 
 // #region revocation-delta-rules — docs: docs/specification/revocation-delta.md#semantic-rules
@@ -44,7 +44,7 @@ function page(value: JsonObject): Finding[] {
     if (hashOf(item) === undefined) add(at, "the entry has no RFC 8785 form, so it has no hash");
     if (previous !== undefined) {
       if (item.estate !== previous.estate) add(`${at}/estate`, "one page carries one estate's chain");
-      if (item.sequence !== Number(previous.sequence) + 1) add(`${at}/sequence`, `the entry after ${String(previous.sequence)} is ${Number(previous.sequence) + 1}: a page is consecutive`);
+      if (item.sequence !== toNumber(previous.sequence) + 1) add(`${at}/sequence`, `the entry after ${show(previous.sequence)} is ${toNumber(previous.sequence) + 1}: a page is consecutive`);
       if (item.prev !== hashOf(previous)) add(`${at}/prev`, "prev is the hash of the entry before it (RFC 8785, without sig)");
     } else if (item.sequence === 1 && typeof item.estate === "string" && item.prev !== deltaGenesis(item.estate)) {
       add(`${at}/prev`, "entry 1's prev is the estate's genesis, SHA-256 of {type, estate, sequence: 0}");

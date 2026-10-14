@@ -139,20 +139,25 @@ no activity event kind carried a grant reference: a usage report's `byGrant` and
 DEC-0045) stay on the device, with its meter. So the activity protocol gains the kind **`grant.usage`**: one grant's
 metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemetry-event.schema.json#/$defs/grantUsage`).
 
-- **Its data**: `day`; `grantId`, the grant's `meta.id` without its revision, a URI of 1–256 characters compared by
-  normal form (DEC-0076), so one grant revised during the day is one row and the organization server joins it to the
-  share grant it holds; `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`;
-  and
-  `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
+- **Its data**: `day`; `grantId`, the grant's `meta.id`, a URI of 1–256 characters with no `#`, compared by normal form
+  (DEC-0076), so one grant revised during the day is one row and the organization server joins it to the share grant it
+  holds; `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
   `FAC-SEM-025` say (`FAC-SEM-038` checks the three together).
 - **A day and no finer time**, like `policy.violation`: `occurred` is that day's midnight UTC (`FAC-SEM-039`),
   `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`, `skill` or `launch` (schema).
-- **Its source** is the meter's settled grant-check receipts of that UTC day (DEC-0037), each receipt counted once. A
-  service's `byGrant` rows add only receipts the meter does not hold, deduplicated by receipt id. `unpricedCalls` counts
-  the receipts with an unknown cost. It holds only sums and states, never a per-call line: usage under a share grant is
-  data about a person (CX-VES-08, the operator's OD-1).
+- **Its source** is the meter's settled grant-check receipts (DEC-0037), each counted once and assigned to the UTC day
+  of the receipt's own timestamp: the `checkedAt` of the `allowed` answer that issued it
+  (`grant-check.schema.json#/$defs/allowed`). `calls` and `unpricedCalls` count calls, not receipts: `calls` is the calls
+  the day's receipts settle, and `unpricedCalls` the calls of those receipts whose cost is unknown. A service's
+  `byGrant` row (`service-usage.schema.json`) is used only when it lists `receipts`, the meter holds none of them, and the
+  report's window lies within one UTC day (its `days` hold one date); it then adds its `calls` and `costUsd` to that day.
+  Any other `byGrant` row is not used, and the collector reports what the meter holds. It holds only sums and states,
+  never a per-call line: usage under a share grant is data about a person (CX-VES-08, the operator's OD-1).
 - **Who derives the id**: the collector on the issuer's own device, from the receipts its meter settled, where the
-  grant's id is known. DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
+  grant's id is known. A grant reference may end in `#<revision>` (`<id>#<revision>`, as the register's `share-grant/1`
+  names a grant); the collector drops it by taking the receipt's grant `meta.id`, which carries no revision, so the
+  schema refuses a `#`. Hosts keep grant ids within 256 characters; a grant whose `meta.id` is longer reports no
+  `grant.usage`. DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
   this is the issuer's side, so it is not broken.
 - **Once**: a collector emits it after the day ends, one per (day, `grantId`) per stream; a batch that carries two for
   one (day, `grantId`) of one stream, the ids compared by normal form, is refused (`FAC-SEM-039`). A receiver counts the

@@ -3,7 +3,7 @@ import { rfc8785 } from "./canonical.js";
 import { PERSONAL_CONTEXT, parseContext } from "./context-route.js";
 import { grantContextFindings } from "./context-rules.js";
 import { isSmallOrderKey } from "./ed25519.js";
-import { type Finding, type JsonObject, isObject, show } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
 import { normalIdentifier } from "./identifiers.js";
 import { isValidP256Key } from "./p256.js";
 import { type PackageTrust, packageDigest } from "./package-rules.js";
@@ -26,8 +26,6 @@ const isString = (value: unknown): value is string => typeof value === "string";
  * even when a non-object precedes it.
  */
 const indexed = (value: unknown): Array<[JsonObject, number]> => (Array.isArray(value) ? value.flatMap((item, index): Array<[JsonObject, number]> => (isObject(item) ? [[item, index]] : [])) : []);
-/** A number read without `Number()`, which throws on an object such as `{"toString": 1}`; a numeric string reads as before. */
-const toNumber = (value: unknown): number => (typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN);
 
 export const ESTATE_RECORD_SCHEMA = "estate-record/1";
 /** The challenge type an estate revision's passkey assertion covers: the first row of the register (DEC-0063). */

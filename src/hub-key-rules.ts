@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 
 // #region hub-key-rules — docs: docs/specification/delegation.md#keys-publication-and-rotation
@@ -93,7 +93,7 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
   // A missing x never equals a missing x: the published key must be the certified one.
   if (!isString(x) || (machine.hubKey as JsonObject).x !== x) return refused("token", "kid-not-certified");
   if (revokes("machine", machine.id)) return refused("token", "kid-not-certified");
-  return { certified: true, machine: String(machine.id), revision: record.revision };
+  return { certified: true, machine: show(machine.id), revision: record.revision };
 }
 
 /**
@@ -110,8 +110,8 @@ function hubKeyAnswer(value: JsonObject): Finding[] {
     code: "FAC-SEM-081",
     instancePath: "/answer",
     message: verdict.certified
-      ? `revision ${verdict.revision} certifies this kid for machine ${verdict.machine}; the verifier trusts it, not ${String(value.answer)}`
-      : `the verifier answers ${want} (${verdict.fault === "token" ? "the token's fault: unauthenticated, approval-invalid for an approval" : verdict.fault === "estate" ? "the trust source's fault: issuer-unavailable" : "its own clock: unknown-state"}), not ${String(value.answer)}`
+      ? `revision ${verdict.revision} certifies this kid for machine ${verdict.machine}; the verifier trusts it, not ${show(value.answer)}`
+      : `the verifier answers ${want} (${verdict.fault === "token" ? "the token's fault: unauthenticated, approval-invalid for an approval" : verdict.fault === "estate" ? "the trust source's fault: issuer-unavailable" : "its own clock: unknown-state"}), not ${show(value.answer)}`
   }];
 }
 

@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, toNumber } from "./findings.js";
 
 // #region windows-token — docs: docs/specification/service.md#windows-token-files
 /**
@@ -30,7 +30,7 @@ export interface WindowsTokenProblem { problem: WindowsTokenProblemCode; at: str
 const SID = /^S-1-\d{1,15}(-\d{1,10}){0,15}$/i;
 const MAX_SUB_AUTHORITY = 0xffffffff;
 const sid = (value: unknown): string | undefined =>
-  typeof value === "string" && SID.test(value) && value.split("-").slice(3).every((part) => Number(part) <= MAX_SUB_AUTHORITY) ? value.toUpperCase() : undefined;
+  typeof value === "string" && SID.test(value) && value.split("-").slice(3).every((part) => toNumber(part) <= MAX_SUB_AUTHORITY) ? value.toUpperCase() : undefined;
 const MAX_MASK = 0xffffffff;
 
 /**
