@@ -31,7 +31,10 @@ classes. Default authorization is `draft-only`. A standing grant MUST name:
   ceiling (`effectCeiling`) — a delegation grant ([delegation](delegation.md), DEC-0039). A delegation grant
   MAY omit the effect classes: it then authorises reads and drafts only;
 - idempotency policy;
-- issuer and revocation status.
+- issuer and revocation status;
+- optionally the context in which the principal uses it (`context`: `personal` or `org:<orgId>`), never `personal` for
+  an external principal (`FAC-SEM-110`, [contexts](contexts.md), DEC-0082). The grant's access level is these fields
+  themselves; a named level is a host's preset that fills them.
 
 An effect outside the grant is denied and returned as a draft or approval request.
 An expired or revoked grant is never extended implicitly.

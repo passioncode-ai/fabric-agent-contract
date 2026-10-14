@@ -1,6 +1,6 @@
 import { createPublicKey, verify as verifySignature } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
 import { strictTime } from "./rfc3339.js";
 import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
 
@@ -70,7 +70,7 @@ function weekOneMonday(year: number): number {
   return january4.getTime() - ((january4.getUTCDay() + 6) % 7) * DAY_MS;
 }
 
-const pad = (value: number, width: number) => String(value).padStart(width, "0");
+const pad = (value: number, width: number) => show(value).padStart(width, "0");
 
 /**
  * The window instance a period names, as `[start, end)` in milliseconds, or `undefined` when `period` is not that
@@ -81,20 +81,20 @@ export function periodBounds(window: unknown, period: unknown): { start: number;
   if (!isString(period)) return undefined;
   let match: RegExpExecArray | null;
   if (window === "day" && (match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(period))) {
-    const start = utcDate(Number(match[1]), Number(match[2]), Number(match[3]));
-    return Number.isNaN(start) || Number(match[1]) < 1 ? undefined : { start, end: start + DAY_MS };
+    const start = utcDate(toNumber(match[1]), toNumber(match[2]), toNumber(match[3]));
+    return Number.isNaN(start) || toNumber(match[1]) < 1 ? undefined : { start, end: start + DAY_MS };
   }
   if (window === "week" && (match = /^(\d{4})-W(\d{2})$/.exec(period))) {
-    const year = Number(match[1]);
-    const week = Number(match[2]);
+    const year = toNumber(match[1]);
+    const week = toNumber(match[2]);
     const weeks = (weekOneMonday(year + 1) - weekOneMonday(year)) / WEEK_MS;
     if (year < 1 || week < 1 || week > weeks) return undefined;
     const start = weekOneMonday(year) + (week - 1) * WEEK_MS;
     return { start, end: start + WEEK_MS };
   }
   if (window === "month" && (match = /^(\d{4})-(\d{2})$/.exec(period))) {
-    const year = Number(match[1]);
-    const month = Number(match[2]);
+    const year = toNumber(match[1]);
+    const month = toNumber(match[2]);
     if (year < 1 || month < 1 || month > 12) return undefined;
     return { start: utcDate(year, month, 1), end: month === 12 ? utcDate(year + 1, 1, 1) : utcDate(year, month + 1, 1) };
   }
@@ -132,7 +132,7 @@ export function windowLeaseSigningInput(lease: unknown): Buffer | undefined {
 }
 
 /** The key a window instance is held under on one machine: one active lease per scope, window and period. */
-export const leaseSlot = (lease: JsonObject) => `${String(lease.estate)} ${String(lease.machine)} ${String(lease.scope)} ${String(lease.window)} ${String(lease.period)}`;
+export const leaseSlot = (lease: JsonObject) => `${show(lease.estate)} ${show(lease.machine)} ${show(lease.scope)} ${show(lease.window)} ${show(lease.period)}`;
 
 /** Whether a lease's members have the shapes the verifier relies on (the schema's, without the signature's bytes). */
 function wellFormed(lease: JsonObject): boolean {
@@ -399,7 +399,7 @@ type Flag = (instancePath: string, message: string) => void;
 /** FAC-SEM-089 on one lease: its period is its window's form, its life is positive and at most 24 hours, inside the instance. */
 function leaseDocument(value: JsonObject, flag: Flag): void {
   const bounds = periodBounds(value.window, value.period);
-  if (!bounds) flag("/period", `a ${String(value.window)} window's period is ${value.window === "week" ? "an ISO 8601 week, YYYY-Www" : value.window === "day" ? "a date, YYYY-MM-DD" : "a month, YYYY-MM"}, and one that exists`);
+  if (!bounds) flag("/period", `a ${show(value.window)} window's period is ${value.window === "week" ? "an ISO 8601 week, YYYY-Www" : value.window === "day" ? "a date, YYYY-MM-DD" : "a month, YYYY-MM"}, and one that exists`);
   const issuedAt = strictTime(value.issuedAt);
   const expiresAt = strictTime(value.expiresAt);
   if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt)) {
@@ -426,7 +426,7 @@ function division(value: JsonObject): Finding[] {
   }
   const leases = Array.isArray(value.leases) ? value.leases : [];
   const reports = list(value.reports) as unknown as LeaseReport[];
-  const instance = (lease: JsonObject) => `${String(lease.estate)} ${String(lease.scope)} ${String(lease.window)} ${String(lease.period)}`;
+  const instance = (lease: JsonObject) => `${show(lease.estate)} ${show(lease.scope)} ${show(lease.window)} ${show(lease.period)}`;
   const first = isObject(leases[0]) ? instance(leases[0]) : undefined;
   const ids = new Set<unknown>();
   const usable: Array<{ lease: JsonObject; index: number }> = [];
@@ -436,7 +436,7 @@ function division(value: JsonObject): Finding[] {
       return;
     }
     if (instance(lease) !== first) flag(`/leases/${index}`, "a division covers one window instance: one estate, scope, window and period");
-    if (ids.has(lease.leaseId)) flag(`/leases/${index}/leaseId`, `lease ${String(lease.leaseId)} is listed twice`);
+    if (ids.has(lease.leaseId)) flag(`/leases/${index}/leaseId`, `lease ${show(lease.leaseId)} is listed twice`);
     ids.add(lease.leaseId);
     usable.push({ lease, index });
   });
@@ -446,7 +446,7 @@ function division(value: JsonObject): Finding[] {
     const issuedAt = strictTime(lease.issuedAt);
     const machine = lease.machine as string;
     const previous = lastSequence.get(machine);
-    if (previous !== undefined && (lease.sequence as number) <= previous) flag(`/leases/${index}/sequence`, `machine ${machine}'s leases rise in sequence as they are issued: ${String(lease.sequence)} follows ${previous}`);
+    if (previous !== undefined && (lease.sequence as number) <= previous) flag(`/leases/${index}/sequence`, `machine ${machine}'s leases rise in sequence as they are issued: ${show(lease.sequence)} follows ${previous}`);
     lastSequence.set(machine, Math.max(previous ?? 0, lease.sequence as number));
     // Every lease issued before it, and one issued at the same instant but listed earlier: two leases signed together
     // still share one window.

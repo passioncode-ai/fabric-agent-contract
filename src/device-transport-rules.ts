@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { type DeviceCertificateRecord, type DeviceRequest, checkDeviceSignature, strictTime } from "./http-signature.js";
 
 // #region device-transport-rules — docs: docs/specification/devices.md#semantic-rules
@@ -23,11 +23,11 @@ function requestSignature(value: JsonObject): Finding[] {
     if (typeof record.serial === "string") certificates.set(record.serial, record as unknown as DeviceCertificateRecord);
   }
   const seen = new Map<string, number>();
-  for (const pair of Array.isArray(value.seen) ? value.seen.filter(isObject) : []) seen.set(`${String(pair.serial)} ${String(pair.nonce)}`, typeof pair.keepUntil === "number" ? pair.keepUntil : 0);
+  for (const pair of Array.isArray(value.seen) ? value.seen.filter(isObject) : []) seen.set(`${show(pair.serial)} ${show(pair.nonce)}`, typeof pair.keepUntil === "number" ? pair.keepUntil : 0);
   const verdict = checkDeviceSignature(
     { method: request.method as string, target: request.target as string, headers: (isObject(request.headers) ? request.headers : {}) as DeviceRequest["headers"], body: typeof request.body === "string" ? request.body : "" },
     {
-      publicBaseUrl: String(value.publicBaseUrl ?? ""),
+      publicBaseUrl: show(value.publicBaseUrl ?? ""),
       certificate: (serial) => certificates.get(serial),
       at: new Date(at),
       ...(typeof value.clientCertificateSerial === "string" ? { clientCertificateSerial: value.clientCertificateSerial } : {})
@@ -40,7 +40,7 @@ function requestSignature(value: JsonObject): Finding[] {
     if (until !== undefined && at / 1000 <= until) { want = "signature-replayed"; reason = "this (serial, nonce) is already held"; }
   }
   if (value.answer === want) return [];
-  return flag("/answer", want === "accepted" ? `the binding accepts this request; the receiver accepts it, not ${String(value.answer)}` : `the receiver answers ${want}: ${reason}`);
+  return flag("/answer", want === "accepted" ? `the binding accepts this request; the receiver accepts it, not ${show(value.answer)}` : `the receiver answers ${want}: ${reason}`);
 }
 
 export function deviceTransportRules(kind: string, value: unknown): Finding[] | undefined {

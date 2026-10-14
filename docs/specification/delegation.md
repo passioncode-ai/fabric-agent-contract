@@ -344,7 +344,9 @@ and `effectCeiling` (the effects a token may carry) and `principalKind`; the sch
 `audience` (`dependentRequired`). `effectCeiling` may hold `none` and `draft`; every other member is one of the
 grant's `effects` (`FAC-SEM-050`). A delegation grant MAY omit `effects`: it then authorises reads and drafts
 only, and a **read-only grant** has `effectCeiling: ["none"]`. A grant without `audience` stays valid and authorizes what it authorized
-before; no token is minted under it. The payer is the owner (DEC-0038).
+before; no token is minted under it. The payer is the owner (DEC-0038). A grant MAY name the `context` its principal
+uses it in; a share grant's is never `personal` (`FAC-SEM-110`, [contexts](contexts.md), DEC-0082). A token carries no
+context of its own.
 
 ## Spend and usage
 

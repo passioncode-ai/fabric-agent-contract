@@ -1,7 +1,7 @@
 import { createHash, createPublicKey, verify as verifySignature, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
-import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
 import { secretArgument, secretValue } from "./secret-shape.js";
 
 // #region package-rules — docs: docs/specification/package.md#semantic-rules
@@ -163,7 +163,7 @@ const parsed = (bytes: Uint8Array | undefined): JsonObject | undefined => {
  */
 export function checkPackageFolder(pkg: JsonObject, files: ReadonlyMap<string, Uint8Array>): Array<{ problem: FolderProblem; path: string }> {
   const problems: Array<{ problem: FolderProblem; path: string }> = [];
-  const listed = new Map(list(pkg.files).map((entry) => [String(entry.path), entry.sha256] as const));
+  const listed = new Map(list(pkg.files).map((entry) => [show(entry.path), entry.sha256] as const));
   for (const [path, sha256] of listed) {
     const bytes = files.get(path);
     if (bytes === undefined) problems.push({ problem: "file-missing", path });
@@ -203,7 +203,7 @@ function whole(value: JsonObject): Finding[] {
   }
   const sha = new Map<string, unknown>();
   list(value.files).forEach((entry, index) => {
-    const path = String(entry.path);
+    const path = show(entry.path);
     if (sha.has(path)) flag(`/files/${index}/path`, `${path} is listed twice`);
     if (path === PACKAGE_FILE) flag(`/files/${index}/path`, `${PACKAGE_FILE} carries the digest and is never listed in files[]`);
     sha.set(path, entry.sha256);
@@ -223,11 +223,11 @@ function whole(value: JsonObject): Finding[] {
   list(value.dependencies).forEach((dependency, index) => {
     if (!isString(dependency.path)) return;
     named(`/dependencies/${index}/path`, dependency.path, "the vendored dependency");
-    if (sha.has(dependency.path) && sha.get(dependency.path) !== dependency.sha256) flag(`/dependencies/${index}/sha256`, `the vendored ${String(dependency.name)} is not the file packed at ${dependency.path}`);
+    if (sha.has(dependency.path) && sha.get(dependency.path) !== dependency.sha256) flag(`/dependencies/${index}/sha256`, `the vendored ${show(dependency.name)} is not the file packed at ${dependency.path}`);
   });
   const paths = new Set<unknown>();
   list(value.state).forEach((entry, index) => {
-    if (paths.has(entry.path)) flag(`/state/${index}/path`, `state ${String(entry.path)} is declared twice`);
+    if (paths.has(entry.path)) flag(`/state/${index}/path`, `state ${show(entry.path)} is declared twice`);
     paths.add(entry.path);
   });
   if (value.kind === "skill-set" && !sha.has(PLUGIN_MANIFEST)) flag("/files", `a skill set is one Claude Code plugin folder and lists ${PLUGIN_MANIFEST}`);
@@ -245,7 +245,7 @@ function noSecret(value: JsonObject): Finding[] {
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-065", instancePath, message });
   const names = new Set<unknown>();
   list(value.secrets).forEach((slot, index) => {
-    if (names.has(slot.name)) flag(`/secrets/${index}/name`, `secret slot ${String(slot.name)} is declared twice`);
+    if (names.has(slot.name)) flag(`/secrets/${index}/name`, `secret slot ${show(slot.name)} is declared twice`);
     names.add(slot.name);
     // The message never repeats the value.
     for (const field of ["name", "purpose"] as const) {

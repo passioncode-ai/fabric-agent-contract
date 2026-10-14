@@ -1,7 +1,7 @@
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { createValidatorSync } from "./validator.js";
 
 // fabric-dashboard/0.1 (DEC-0036, amended by DEC-0059): how a host reads a service's dashboard declaration, and the
@@ -53,7 +53,7 @@ export function hostView(wellKnown: unknown): HostView {
   const validate = shape();
   if (validate(value) !== true) {
     // Ajv sets `errors` whenever a validation fails, and a message on each (its default `messages: true`).
-    const errors = (validate.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}: ${String(error.message)}`);
+    const errors = (validate.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}: ${show(error.message)}`);
     return { ...LEGACY, reported: true, errors };
   }
   const declaration = value as JsonObject;

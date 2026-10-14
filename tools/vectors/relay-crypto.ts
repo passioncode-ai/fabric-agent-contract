@@ -605,6 +605,32 @@ function envelopeCases(vector: SecretEnvelope): Json[] {
   ];
 }
 
+/**
+ * DEC-0082: a target reads only its personal secret placements, so an organization's secret placement listed before the
+ * personal one decides nothing. Each case is the applied revisions (minimal records: the fields estateEnvelopeContext
+ * reads), the target machine, and for each sender kid whether it may hold the slot, with the current placement run.
+ */
+function placementCases(): Json[] {
+  const target = "m-target", laptop = "m-laptop", org = "org:org_7kq2m4xw";
+  const keys = (id: string) => [{ kid: `${id}#sig`, use: "sig", alg: "es256", publicKey: MACHINE.octets }];
+  const record = (revision: number, secrets: Json[]) => ({
+    revision, revocations: [],
+    machines: [{ id: target, deviceKeys: keys(target), secrets }, { id: laptop, deviceKeys: keys(laptop), secrets: [] }]
+  });
+  const personal = { agentRef: AGENT, slot: SLOT, from: laptop };
+  const orgSlot = { agentRef: AGENT, slot: SLOT, from: target, context: org };
+  const query = (expectLaptop: boolean, expectTarget: boolean, currentPlacement: number | null) => ({
+    holds: [{ sender: `${laptop}#sig`, mayHold: expectLaptop }, { sender: `${target}#sig`, mayHold: expectTarget }], currentPlacement
+  });
+  return [
+    { name: "an organization's secret placement listed before the personal one: the personal one decides (a port that reads the first match fails)", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, personal])], expect: query(true, false, 4) },
+    { name: "the personal secret placement listed first: the same answer", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal, orgSlot])], expect: query(true, false, 4) },
+    { name: "context personal spelled out, after the organization's: it is the personal placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, { ...personal, context: "personal" }])], expect: query(true, false, 4) },
+    { name: "only an organization's secret placement: no sender may hold the slot, and it has no current placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot])], expect: query(false, false, null) },
+    { name: "the run of the personal placement is unbroken when an organization's placement is added before it", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(3, [personal]), record(4, [orgSlot, personal])], expect: query(true, false, 3) }
+  ];
+}
+
 function envelopeVectors(): Json {
   const envelope = seal(baseHeader(), RFC9180.skEm);
   return {
@@ -617,7 +643,11 @@ function envelopeVectors(): Json {
     open: { ownKemKid: GPU_KEM, placement: 7, now: ENV_NOW, secret: SECRET },
     recipientKeyOctets: PK_R.toString("base64"),
     senderKeyOctets: MACHINE.octets,
-    cases: envelopeCases(envelope)
+    cases: envelopeCases(envelope),
+    placement: {
+      about: "DEC-0082: the open context a target derives from its applied estate-record revisions (estateEnvelopeContext, relay.md open steps 6 and 7) reads only personal secret placements (no context, or personal). Each case: the applied revisions, oldest first, the target machine, the agentRef and slot; expect.holds says whether each sender kid may hold the slot, expect.currentPlacement the revision the placement's run starts at, or null.",
+      cases: placementCases()
+    }
   };
 }
 

@@ -1,14 +1,15 @@
 # The estate record — `estate-record/1`
 
-DEC-0055 · rule codes `FAC-SEM-072`…`FAC-SEM-076` · schema
+DEC-0055, amended by DEC-0082 ([contexts](contexts.md)) · rule codes `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-111` (and
+`FAC-SEM-110`, [contexts](contexts.md#semantic-rules)) · schema
 [`estate-record`](../../schemas/estate-record.schema.json) · code
 [`src/estate-record-rules.ts`](../../src/estate-record-rules.ts), [`src/webauthn.ts`](../../src/webauthn.ts) · vectors
 [`fixtures/vectors/estate-record.json`](../../fixtures/vectors/estate-record.json)
 
 An **estate** is one person's authority: their passkeys, their machines, the hubs on them, their grants. The **estate
 record** is its signed state, one revision at a time. It lists the passkeys that sign the next revision, the machines
-with their device keys and a certificate of each machine's hub key, the packages placed on each machine, where each
-secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
+with their device keys and a certificate of each machine's hub key, the packages placed on each machine in each context
+(DEC-0082), where each secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
 signs it; every machine of the estate applies the latest revision it can verify and reports its number, and optionally
 its digest, in its check-in (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
 
@@ -30,7 +31,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `parent` | the parent revision's `digest`; absent exactly in revision 1 (schema) |
 | `issuedAt`, `validUntil` | the validity window: positive and at most 30 days ([freshness](#freshness)) |
 | `authorities[]` | the passkeys that may sign the next revision ([authorities](#authorities)) |
-| `machines[]` | each machine: `id`, `deviceKeys`, `hubKey`, `packages[]`, `secrets[]` ([machines](#machines)) |
+| `machines[]` | each machine: `id`, `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
 | `publisherKeys[]` | the publisher keys the estate's machines pin, as public Ed25519 JWKs naming their `alg` |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
 | `revocations[]` | every revocation of the estate so far ([revocations](#revocations)) |
@@ -89,15 +90,25 @@ kept outside the signed record, so the record carries no label a person chose:
   delegation verifier that reads the estate record trusts a token's `kid` only while the revision it reads certifies
   it — a revision `verifyEstateRecord` accepted, not lower than the highest its machine applied (DL-14) — and refuses otherwise with the codes of
   [DL-14](delegation.md#keys-publication-and-rotation) (`hubKeyCertified`, `FAC-SEM-081`, DEC-0060).
-- **`packages[]`** — the agents placed on this machine: `agentRef` (DEC-0050), the placed version's package `digest`
-  and the `publisherKid` of the key in `publisherKeys` its publisher signature verifies under. An agent is placed once
-  per machine under a pinned key (`FAC-SEM-074`). `placementTrust(record, machine, agentRef)` is the `trust` the node
-  hands `verifyPackage` (DEC-0051); `FAC-SEM-074`'s kind `estate-placement` (`{record, machine, package}`) checks that
-  the package is the one placed — its own digest, the placement's `agentRef` and digest.
-- **`secrets[]`** — secret placements, by reference only: `{agentRef, slot, from}` names a slot of a package placed on
-  this machine and the machine of this estate whose vault holds it. No member can hold a value (schema, DEC-0013); none
-  of the three is shaped like a credential (`src/secret-shape.ts`); the agent is placed here; `from` is a machine of the
-  record; a slot is placed once per agent (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
+- **`packages[]`** — the agent instances placed on this machine: `agentRef` (DEC-0050), the placed version's package
+  `digest`, the `publisherKid` of the key in `publisherKeys` its publisher signature verifies under, and the instance's
+  [context](contexts.md) (DEC-0082): `context`, absent meaning `personal`, and for an organization's instance the
+  `grant` it runs under. An agent is placed once per machine and context under a pinned key (`FAC-SEM-074`), so one agent
+  runs on one machine as the person's own instance and as a separate instance in each organization it is shared into. An
+  instance in `org:<orgId>` names in `grant` the id of a share grant of this record, matched by normal form (DEC-0076),
+  whose `context` is the placement's as written, and which the record does not revoke; a personal instance names no
+  grant (`FAC-SEM-111`). `placementTrust(record, machine, agentRef, context)` is the `trust` the node hands
+  `verifyPackage` (DEC-0051), `context` defaulting to `personal`; kind `estate-placement`
+  (`{record, machine, package, context?}`, `context` defaulting to `personal`) checks that the package is the one placed
+  in that context — its own digest, the placement's `agentRef` and digest (`FAC-SEM-074`) — and that an organization's
+  instance names its grant (`FAC-SEM-111`).
+- **`secrets[]`** — secret placements, by reference only: `{agentRef, slot, from, context?}` names a slot of the
+  instance of a package placed on this machine in `context` (absent meaning `personal`, DEC-0082) and the machine of this
+  estate whose vault holds it. No member can hold a value (schema, DEC-0013); none of the four is shaped like a credential
+  (`src/secret-shape.ts`); the agent is placed here in that context; `from` is a machine of the record, and for an
+  organization's instance this machine itself, since a secret envelope names no context and fills only a personal slot
+  ([contexts](contexts.md#one-instance-per-context-on-a-machine)); a slot is placed once per (machine, agent, slot,
+  context) (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
   `estate-placement`). The value travels sealed to this machine's `#kem` key (v4 Path 2 step 3), never in the record.
 
 ## Share grants
@@ -106,7 +117,11 @@ A share grant is DEC-0039's standing grant (`governance.schema.json#/$defs/grant
 an `audience`: a person or organization outside the estate may call one agent, the owner paying (DEC-0037, DEC-0038).
 Signed once into the record, it does not depend on the owner's laptop being awake (v4 Path 7). Each grant's id is listed
 once (`FAC-SEM-076`); a grant's id is a URI, so two spellings with one normal form are one grant
-([identifiers](identifiers.md), DEC-0076).
+([identifiers](identifiers.md), DEC-0076). A share grant into an organization carries that organization's
+[context](contexts.md#the-grants-context), `org:<orgId>`, and is never `personal` (`FAC-SEM-110`, DEC-0082); the
+organization's instance of the agent names it (`FAC-SEM-111`). Its access level is its own `capabilities`,
+`effectCeiling`, `dataClasses`, `spend` and `expiresAt`: two share grants of one agent into two organizations with
+different values are two access levels ([access levels](contexts.md#access-levels)).
 
 ## Revocations
 
@@ -149,7 +164,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
   revocation of the parent kept (`FAC-SEM-072` holds here too, so a passkey cannot quietly un-revoke a machine);
 - the authority is one the verifier trusts: its parent's and not revoked by the parent, or for revision 1 the one it
   pinned. A revision may revoke its own signer when it removes it (a passkey rotated out signs its own removal);
-- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`. The schema is not checked here: a machine applies a
+- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` and `FAC-SEM-111` (DEC-0082). The schema is not checked here: a machine applies a
   revision only when it is valid against [`estate-record`](../../schemas/estate-record.schema.json) and
   `verifyEstateRecord` accepts it — a signed record of the wrong shape (say `authorities: null`) would otherwise lock
   the estate out at the next revision.
@@ -181,7 +196,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the authority's RP ID is not a signing RP, `sign.<domain>` (DEC-0063: checked as soon as ER-4 has chosen the authority, before any check of the assertion); the `rpIdHash`; AT set or BS without BE; UP clear; UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
 | ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants are inside the window) |
-| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`; the verdict names the codes |
+| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` or `FAC-SEM-111`; the verdict names the codes |
 
 The vectors hold one case or more per problem, the EdDSA test passkey's seed (Ed25519 is deterministic, so a port's
 signer reproduces its signatures), the ES256 test passkey (ECDSA signatures are randomized, so a port verifies rather
@@ -201,9 +216,10 @@ keys are DEC-0053's.
 |---|---|---|
 | `FAC-SEM-072` | `estate-record`, `estate-record-revision` | a revision is whole and follows its parent: its `digest` is its own, its window is positive and at most 30 days; across `{parent, next}`, the same estate, the next number, the parent's digest, not issued before the parent, every parent revocation kept |
 | `FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once |
-| `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine under a publisher key the record pins, each pinned once; an installed package is the one placed — its own digest, the placement's `agentRef` and digest, on a machine of the record |
-| `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine, a source machine of the record, a slot once per agent, and a slot the placed package declares |
+| `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine and context (absent: `personal`, DEC-0082) under a publisher key the record pins, each pinned once; an installed package is the one placed in its context — its own digest, the placement's `agentRef` and digest, on a machine of the record |
+| `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record — its own machine for an organization's instance — a slot once per (machine, agent, slot, context) (DEC-0082), and a slot the placed package declares |
 | `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076) |
+| `FAC-SEM-111` | `estate-record`, `estate-placement` | a placement whose context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076), whose `context` equals the placement's as written and is an `org:<orgId>` (a malformed context fails closed), and which the record does not revoke; a personal placement (no context, or `personal`) names no grant (DEC-0082). It reads revisions only: a revocation delta stops the grant's calls at the hub and the meter at once, and this rule refuses the instance from the next revision |
 
 ## Who adopts it
 
@@ -211,11 +227,11 @@ keys are DEC-0053's.
   pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
-  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`) and it is
+  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` and `FAC-SEM-111`) and it is
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054); installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
-  is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key); fills
-  only placed slots; and reports the applied revision in its check-in's
+  is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
+  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision in its check-in's
   `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.

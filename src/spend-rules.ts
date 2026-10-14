@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 
 // #region spend-policy — docs: docs/specification/spend-policy.md#semantic-rules
 /**
@@ -33,7 +33,7 @@ export function grantSpendRules(value: JsonObject): Finding[] {
   const limits = spend.limits.filter(isObject);
   const seen = new Set<unknown>();
   limits.forEach((l, i) => {
-    if (seen.has(l.window)) findings.push({ code: "FAC-SEM-048", instancePath: `/spend/limits/${i}/window`, message: `the window ${String(l.window)} is limited twice` });
+    if (seen.has(l.window)) findings.push({ code: "FAC-SEM-048", instancePath: `/spend/limits/${i}/window`, message: `the window ${show(l.window)} is limited twice` });
     seen.add(l.window);
   });
   const amounts = limits.map((l) => l.limitUsd).filter((n): n is number => typeof n === "number");

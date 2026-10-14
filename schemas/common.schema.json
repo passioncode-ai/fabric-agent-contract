@@ -150,6 +150,11 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9._-]{1,127}$"
     },
+    "contextId": {
+      "type": "string",
+      "pattern": "^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$",
+      "description": "DEC-0082: the context a grant is used in or an agent instance runs in: personal, or org:<orgId>, where orgId is the organization server's opaque id of the organization: a letter or digit, then up to 127 of [A-Za-z0-9_-] (1-128 characters, an enrollment's org.id can be any such id). Compared as written: never case-folded, never by prefix (docs/specification/contexts.md)."
+    },
     "traceId": {
       "type": "string",
       "pattern": "^(?!0{32}$)[0-9a-f]{32}$"

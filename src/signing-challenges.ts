@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { strictTime } from "./rfc3339.js";
 import { type AssertionVerdict, type PasskeyCredential, verifyAssertion } from "./webauthn.js";
 
@@ -152,7 +152,7 @@ export function signingCredentialFindings(credential: unknown, path: string): Fi
   }
   const origins = Array.isArray(value.origins) ? value.origins : [];
   origins.forEach((origin, index) => {
-    if (!originWithin(origin, value.rpId as string)) flag(`${path}/origins/${index}`, `a signing ceremony runs only on ${String(value.rpId)} or a host under it, over https without a port`);
+    if (!originWithin(origin, value.rpId as string)) flag(`${path}/origins/${index}`, `a signing ceremony runs only on ${show(value.rpId)} or a host under it, over https without a port`);
   });
   return findings;
 }

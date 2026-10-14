@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
 import { normalIdentifier } from "./identifiers.js";
 import { strictTime } from "./rfc3339.js";
 
@@ -26,7 +26,7 @@ const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.fil
 const cost = (value: unknown): number => (typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 0);
 /** Whether `a` exceeds `b` by more than rounding (the tolerance the day's cost check uses). */
 const exceeds = (a: number, b: number) => a - b > 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
-const usd = (value: number) => String(Math.round(value * 1e6) / 1e6);
+const usd = (value: number) => show(Math.round(value * 1e6) / 1e6);
 
 /** Midnight UTC of a `YYYY-MM-DD` date that exists, or NaN. */
 export function utcDate(value: unknown): number {
@@ -76,8 +76,8 @@ function usageProjects(value: JsonObject): Finding[] {
     const projectId = normalIdentifier(project.projectId);
     if (projectId !== undefined) {
       const first = projects.get(projectId);
-      if (first !== undefined) findings.push(flag(`${at}/projectId`, `each project is one row: ${String(project.projectId)} names the project ${first} already names`));
-      else projects.set(projectId, String(project.projectId));
+      if (first !== undefined) findings.push(flag(`${at}/projectId`, `each project is one row: ${show(project.projectId)} names the project ${first} already names`));
+      else projects.set(projectId, show(project.projectId));
     }
     projectCalls += count(project.calls);
     projectCost += cost(project.costUsd);
@@ -122,7 +122,7 @@ function usageArithmetic(value: JsonObject): Finding[] {
   let previous = "";
   days.forEach((day, i) => {
     const at = `/days/${i}`;
-    const date = String(day.date ?? "");
+    const date = show(day.date ?? "");
     if (date <= previous) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/date`, message: `days must run forward without a repeat (${date} after ${previous})` });
     previous = date;
     priced(day, at);
@@ -130,13 +130,13 @@ function usageArithmetic(value: JsonObject): Finding[] {
     models.forEach((m, j) => priced(m, `${at}/byModel/${j}`));
     if (!models.length) {
       // No rows means nothing to sum: such a day can only be empty.
-      const spent = ["calls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"].some((f) => Number(day[f] ?? 0) > 0) || Number(day.costUsd ?? 0) > 0;
+      const spent = ["calls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"].some((f) => toNumber(day[f] ?? 0) > 0) || toNumber(day.costUsd ?? 0) > 0;
       if (spent) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/byModel`, message: "a day with calls, tokens or cost names the models they belong to" });
       return;
     }
     for (const field of ["calls", "unpricedCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
-      const sum = models.reduce((n, m) => n + Number(m[field] ?? 0), 0);
-      if (Number(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${String(day[field] ?? 0)} ≠ ${sum})` });
+      const sum = models.reduce((n, m) => n + toNumber(m[field] ?? 0), 0);
+      if (toNumber(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${show(day[field] ?? 0)} ≠ ${sum})` });
     }
     const known = models.map((m) => money(m.costUsd)).filter((x): x is number => x !== null);
     const dayCost = money(day.costUsd);

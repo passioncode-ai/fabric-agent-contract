@@ -8,6 +8,7 @@
  * (`alg: "ES256"`); the sender signs `{header, ct}` (ES256, RFC 8785 bytes). Every key passes SEC 1 validation
  * (`p256KeyRefusal`) before it is used, in either form (SEC 1 octets as DEC-0053 records them, or a JWK).
  */
+import { PERSONAL_CONTEXT } from "./context-route.js";
 import { createCipheriv, createDecipheriv, createECDH, createHash, createHmac, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { isEd25519Key, p256KeyRefusal, p256Point, signEs256, type P256Key } from "./p256.js";
@@ -254,10 +255,15 @@ const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.fil
 const revokedRefs = (record: JsonObject, kind: string) =>
   new Set(list(record.revocations).filter((entry) => entry.kind === kind).map((entry) => entry.ref));
 
-/** The `from` of a machine's placement of (agentRef, slot) in one revision, or undefined. */
+/**
+ * The `from` of a machine's personal placement of (agentRef, slot) in one revision, or undefined. Only a personal
+ * secret placement (no `context`, or `personal`) is read (DEC-0082): an envelope names no context, and an organization's
+ * instance fills its slot on its own machine, never by an envelope (the estate record's slot rule), so the answer never depends on the
+ * order of the record's secret placements.
+ */
 function placedFrom(record: JsonObject, machineId: string, agentRef: string, slot: string): unknown {
   const machine = list(record.machines).find((entry) => entry.id === machineId);
-  return list(machine?.secrets).find((secret) => secret.agentRef === agentRef && secret.slot === slot)?.from;
+  return list(machine?.secrets).find((secret) => secret.agentRef === agentRef && secret.slot === slot && (secret.context === undefined || secret.context === PERSONAL_CONTEXT))?.from;
 }
 
 /** A machine's `#sig` key in one revision, as its kid and SEC 1 octets; none when the machine or the key is revoked. */

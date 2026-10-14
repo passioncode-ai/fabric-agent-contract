@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { coreRules } from "./core-rules.js";
 import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 import { usageRules } from "./usage-rules.js";
@@ -21,6 +21,7 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { contextRules } from "./context-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
 import { attributionRules } from "./openrouter-attribution.js";
@@ -65,6 +66,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (packaged) return packaged;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
+  const context = contextRules(kind, value);
+  if (context) return context;
   const hubKey = hubKeyRules(kind, value);
   if (hubKey) return hubKey;
   const lease = windowLeaseRules(kind, value);
@@ -102,7 +105,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "learning" && value.selfApply !== false) findings.push({ code: "FAC-SEM-003", instancePath: "/selfApply", message: "learning proposal cannot apply itself" });
   if (kind === "promotion") {
     const disallowed = new Set(["personal", "credential", "regulated"]);
-    if (disallowed.has(String(value.classification))) findings.push({ code: "FAC-SEM-004", instancePath: "/classification", message: "sensitive raw content cannot promote globally" });
+    if (disallowed.has(show(value.classification))) findings.push({ code: "FAC-SEM-004", instancePath: "/classification", message: "sensitive raw content cannot promote globally" });
   }
   if (kind === "roles" && Array.isArray(value.assignments)) {
     const active = value.assignments.filter(isObject).filter((item) => item.active === true);
@@ -122,7 +125,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     }
     for (const [project, spelling] of projects) {
       const managers = active.filter((item) => item.role === "product-manager" && scoped(item) === project);
-      if (managers.length !== 1) findings.push({ code: "FAC-SEM-006", instancePath: "/assignments", message: `project ${String(spelling)} requires exactly one active product manager` });
+      if (managers.length !== 1) findings.push({ code: "FAC-SEM-006", instancePath: "/assignments", message: `project ${show(spelling)} requires exactly one active product manager` });
     }
   }
   if (kind === "coordination" && value.kind === "renew" && value.claim === undefined) findings.push({ code: "FAC-SEM-007", instancePath: "/claim", message: "renew requires a claim reference" });
@@ -151,13 +154,13 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   return findings;
 }
 
-const serviceKey = (value: JsonObject) => `${String(value.id)}.${String(value.instance ?? "default")}`;
+const serviceKey = (value: JsonObject) => `${show(value.id)}.${show(value.instance ?? "default")}`;
 
 function serviceIdentity(value: JsonObject): Finding[] {
   const descriptor = isObject(value.descriptor) ? value.descriptor : {};
   const answered = isObject(value.wellKnown) && isObject(value.wellKnown.service) ? value.wellKnown.service : {};
   if (serviceKey(descriptor) === serviceKey(answered)) return [];
-  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${descriptor.origin === undefined ? serviceKey(descriptor) : String(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
+  return [{ code: "FAC-SEM-009", instancePath: "/wellKnown/service", message: `${descriptor.origin === undefined ? serviceKey(descriptor) : show(descriptor.origin)} answers as ${serviceKey(answered)}, not ${serviceKey(descriptor)}` }];
 }
 
 function serviceClaims(value: JsonObject): Finding[] {
@@ -171,7 +174,7 @@ function serviceClaims(value: JsonObject): Finding[] {
     // origin's port belongs to another host and collides with nothing here.
     // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it claims no port.
     if (descriptor.placement !== "remote" && descriptor.origin !== undefined) {
-      const port = /:(\d+)$/.exec(String(descriptor.origin))?.[1] ?? "";
+      const port = /:(\d+)$/.exec(show(descriptor.origin))?.[1] ?? "";
       const holder = byPort.get(port);
       if (holder !== undefined && holder !== key) findings.push({ code: "FAC-SEM-010", instancePath: `/descriptors/${index}/origin`, message: `port ${port} is claimed by both ${holder} and ${key}` });
       else byPort.set(port, key);
@@ -193,7 +196,7 @@ const EXECUTABLE_PATH = /^(~[\\/]|\/(?![\\/])|[A-Za-z]:[\\/])/;
 function serviceCommands(value: JsonObject): Finding[] {
   const commands = isObject(value.commands) ? value.commands : {};
   return Object.entries(commands)
-    .filter(([, argv]) => Array.isArray(argv) && !EXECUTABLE_PATH.test(String(argv[0])))
+    .filter(([, argv]) => Array.isArray(argv) && !EXECUTABLE_PATH.test(show(argv[0])))
     .map(([name]) => ({ code: "FAC-SEM-012", instancePath: `/commands/${name}/0`, message: `command ${name} must start with an absolute or home-relative executable path (/…, ~/…, C:\\…, ~\\…), never a network share` }));
 }
 
@@ -205,7 +208,7 @@ function remoteShape(value: JsonObject): Finding[] {
   if (value.placement !== "remote") return [];
   const findings: Finding[] = [];
   let host = "";
-  try { host = new URL(String(value.origin)).hostname; } catch { /* the schema reports the shape */ }
+  try { host = new URL(show(value.origin)).hostname; } catch { /* the schema reports the shape */ }
   if (host && RESERVED_HOST.test(host)) findings.push({ code: "FAC-SEM-024", instancePath: "/origin", message: `a remote service cannot live on the reserved name ${host}` });
   const lifecycle = isObject(value.lifecycle) ? value.lifecycle : {};
   for (const field of ["label", "plist"]) {
@@ -234,17 +237,17 @@ function usageLimits(value: JsonObject): Finding[] {
   const seen = new Set<string>();
   limits.forEach((limit, i) => {
     const at = `/budgets/${i}`;
-    const id = String(limit.id ?? "");
+    const id = show(limit.id ?? "");
     if (seen.has(id)) flag(`${at}/id`, `limit id ${id} appears twice`);
     seen.add(id);
 
     const named = limit.scope === "project" || limit.scope === "pool";
-    if (named && limit.subject === undefined) flag(`${at}/subject`, `a ${String(limit.scope)} limit names its ${String(limit.scope)} in subject`);
-    if (!named && limit.subject !== undefined) flag(`${at}/subject`, `a ${String(limit.scope)} limit has no subject`);
+    if (named && limit.subject === undefined) flag(`${at}/subject`, `a ${show(limit.scope)} limit names its ${show(limit.scope)} in subject`);
+    if (!named && limit.subject !== undefined) flag(`${at}/subject`, `a ${show(limit.scope)} limit has no subject`);
 
     const windows = (["period", "windowSeconds", "since"] as const).filter((f) => limit[f] !== undefined);
     if (windows.length > 1) flag(`${at}/${windows[1]}`, `a limit has one window, not ${windows.join(" and ")}`);
-    const kind = String(limit.kind ?? "");
+    const kind = show(limit.kind ?? "");
     const seconds = typeof limit.windowSeconds === "number" ? limit.windowSeconds : null;
     if (PER_ORDER_KINDS.has(kind)) {
       if (windows.length) flag(`${at}/${windows[0]}`, `${kind} bounds one order and has no window`);
@@ -270,7 +273,7 @@ function usageLimits(value: JsonObject): Finding[] {
     const kind = b.period === "day" ? "daily" : "monthly";
     const same = (x: unknown, y: unknown) => (x === null || y === null ? x === y : typeof x === "number" && typeof y === "number" && Math.abs(x - y) <= 0.000001);
     const twin = limits.some((l) => l.scope === "machine" && l.enforced === true && l.kind === kind && l.period === b.period && same(l.limitUsd, b.limitUsd) && same(l.spentUsd, b.spentUsd));
-    if (!twin) flag("/budget", `budget repeats one enforced machine ${kind} limit with period ${String(b.period)} in budgets[], so old and new readers agree`);
+    if (!twin) flag("/budget", `budget repeats one enforced machine ${kind} limit with period ${show(b.period)} in budgets[], so old and new readers agree`);
   }
   return findings;
 }
@@ -312,8 +315,8 @@ export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string
 
 /** FAC-SEM-027: a transition `{from, op, to}` is in the table; `complete` after an effect began needs `observed`. */
 function commsTransition(value: JsonObject): Finding[] {
-  const op = String(value.op ?? "");
-  const pair = [String(value.from ?? ""), String(value.to ?? "")];
+  const op = show(value.op ?? "");
+  const pair = [show(value.from ?? ""), show(value.to ?? "")];
   // Own members only: an op named `constructor` or `__proto__` must not reach Object.prototype (DEC-0081's tolerance fix).
   const allowed = Object.hasOwn(COMMS_TRANSITIONS, op) ? COMMS_TRANSITIONS[op] ?? [] : [];
   if (!allowed.some(([from, to]) => from === pair[0] && to === pair[1])) {

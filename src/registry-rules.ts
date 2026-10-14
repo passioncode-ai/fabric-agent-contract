@@ -1,17 +1,17 @@
 // #region registry-rules — docs: docs/specification/provider.md#semantic-rules
 import { EXTENSION_KEYS } from "./extensions.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { sameIdentifier } from "./identifiers.js";
 
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 
 /** FAC-SEM-013: an id appears in at most one of services/ and providers/, and once in providers/. */
 function providerDirectory(value: JsonObject): Finding[] {
-  const services = new Set(list(value.services).map((descriptor) => String(descriptor.id)));
+  const services = new Set(list(value.services).map((descriptor) => show(descriptor.id)));
   const seen = new Set<string>();
   const findings: Finding[] = [];
   list(value.providers).forEach((entry, index) => {
-    const id = String(entry.id);
+    const id = show(entry.id);
     if (services.has(id)) findings.push({ code: "FAC-SEM-013", instancePath: `/providers/${index}/id`, message: `${id} is both a service and a provider` });
     if (seen.has(id)) findings.push({ code: "FAC-SEM-013", instancePath: `/providers/${index}/id`, message: `${id} is declared more than once in providers/` });
     seen.add(id);
@@ -30,13 +30,13 @@ function providerObservation(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   if (typeof value.file === "string") {
     const stem = value.file.replace(/^.*\//, "").replace(/\.json$/, "");
-    if (stem !== entry.id) findings.push({ code: "FAC-SEM-014", instancePath: "/entry/id", message: `entry ${String(entry.id)} is stored as ${value.file}; the file is named <id>.json` });
+    if (stem !== entry.id) findings.push({ code: "FAC-SEM-014", instancePath: "/entry/id", message: `entry ${show(entry.id)} is stored as ${value.file}; the file is named <id>.json` });
   }
   const manifest = value.manifest;
   if (!(isObject(manifest) && isObject(manifest.provider) && Array.isArray(manifest.capabilities))) {
-    findings.push({ code: "FAC-SEM-014", instancePath: "/manifest", message: `the manifest of ${String(entry.id)} does not resolve to a provider manifest` });
+    findings.push({ code: "FAC-SEM-014", instancePath: "/manifest", message: `the manifest of ${show(entry.id)} does not resolve to a provider manifest` });
   } else if (!sameIdentifier(manifest.provider.id, entry.providerId)) {
-    findings.push({ code: "FAC-SEM-014", instancePath: "/entry/providerId", message: `entry ${String(entry.id)} names provider ${String(entry.providerId)}, but its manifest is ${String(manifest.provider.id)}` });
+    findings.push({ code: "FAC-SEM-014", instancePath: "/entry/providerId", message: `entry ${show(entry.id)} names provider ${show(entry.providerId)}, but its manifest is ${show(manifest.provider.id)}` });
   }
   return findings;
 }
@@ -70,7 +70,7 @@ function providerEntry(value: JsonObject): Finding[] {
   const env = isObject(run.stdio) && isObject(run.stdio.env) ? run.stdio.env : {};
   const findings: Finding[] = [];
   for (const [name, raw] of Object.entries(env)) {
-    const text = String(raw);
+    const text = show(raw);
     const reference = /^secret-ref:(.+)$/.exec(text)?.[1];
     if (reference === undefined || looksLikeCredential(reference)) {
       findings.push({ code: "FAC-SEM-015", instancePath: `/run/mcp/stdio/env/${name}`, message: `env ${name} must be a secret reference, not a secret value` });
@@ -83,7 +83,7 @@ function providerEntry(value: JsonObject): Finding[] {
 function runner(value: JsonObject, at = ""): Finding[] {
   const drives = isObject(value.drives) ? value.drives : {};
   if (typeof value.drive === "string" && Object.hasOwn(drives, value.drive)) return [];
-  return [{ code: "FAC-SEM-016", instancePath: `${at}/drive`, message: `runner ${String(value.kind)} names default drive ${String(value.drive)}, which is not in drives` }];
+  return [{ code: "FAC-SEM-016", instancePath: `${at}/drive`, message: `runner ${show(value.kind)} names default drive ${show(value.drive)}, which is not in drives` }];
 }
 
 /** FAC-SEM-016 per entry, and FAC-SEM-021: one catalogue entry per runner kind. */
@@ -92,7 +92,7 @@ function runnerCatalogue(value: unknown): Finding[] {
   const kinds = new Set<string>();
   list(value).forEach((entry, index) => {
     findings.push(...runner(entry, `/${index}`));
-    const kind = String(entry.kind);
+    const kind = show(entry.kind);
     if (kinds.has(kind)) findings.push({ code: "FAC-SEM-021", instancePath: `/${index}/kind`, message: `runner kind ${kind} is catalogued more than once` });
     kinds.add(kind);
   });
@@ -103,7 +103,7 @@ function runnerCatalogue(value: unknown): Finding[] {
 function serviceManifest(value: JsonObject): Finding[] {
   const descriptor = isObject(value.descriptor) ? value.descriptor : {};
   if (descriptor.fabricManifest === undefined) return [];
-  const key = `${String(descriptor.id)}.${String(descriptor.instance ?? "default")}`;
+  const key = `${show(descriptor.id)}.${show(descriptor.instance ?? "default")}`;
   const manifest = value.manifest;
   const provider = isObject(manifest) && isObject(manifest.provider) ? manifest.provider : undefined;
   if (!provider) return [{ code: "FAC-SEM-020", instancePath: "/descriptor/fabricManifest", message: `${key} names a manifest that does not resolve` }];
@@ -111,7 +111,7 @@ function serviceManifest(value: JsonObject): Finding[] {
   const block = extensions[EXTENSION_KEYS.service];
   const named = isObject(block) ? block.descriptor : undefined;
   if (named === key) return [];
-  return [{ code: "FAC-SEM-020", instancePath: "/manifest/provider/extensions", message: named === undefined ? `the manifest of ${key} does not carry the service extension key naming it` : `the manifest of ${key} names ${String(named)} instead` }];
+  return [{ code: "FAC-SEM-020", instancePath: "/manifest/provider/extensions", message: named === undefined ? `the manifest of ${key} does not carry the service extension key naming it` : `the manifest of ${key} names ${show(named)} instead` }];
 }
 
 export function registryRules(kind: string, value: unknown): Finding[] | undefined {

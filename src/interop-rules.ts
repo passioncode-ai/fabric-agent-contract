@@ -1,11 +1,11 @@
 // #region interop-rules — docs: docs/specification/interop.md#semantic-rules
-import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
 
 /** C3.1: the tool annotations a capability's declared effect and idempotency imply. */
 export function expectedAnnotations(effect: unknown, idempotency: unknown): Record<string, true> {
   const hints: Record<string, true> = {};
   if (effect === "none") hints.readOnlyHint = true;
-  if (["delete", "merge", "deploy", "change-policy"].includes(String(effect))) hints.destructiveHint = true;
+  if (["delete", "merge", "deploy", "change-policy"].includes(show(effect))) hints.destructiveHint = true;
   if (idempotency === "required") hints.idempotentHint = true;
   return hints;
 }
@@ -36,7 +36,7 @@ function objectRootFinding(tool: JsonObject, at: string): Finding | undefined {
   if (tool.outputSchema === undefined) return undefined;
   const schema = tool.outputSchema;
   if (isObject(schema) && schema.type === "object") return undefined;
-  return { code: "FAC-SEM-023", instancePath: `${at}/outputSchema/type`, message: `tool ${String(tool.name)} declares an outputSchema whose root is not type "object"; MCP requires an object root and a client rejects the whole tool list otherwise` };
+  return { code: "FAC-SEM-023", instancePath: `${at}/outputSchema/type`, message: `tool ${show(tool.name)} declares an outputSchema whose root is not type "object"; MCP requires an object root and a client rejects the whole tool list otherwise` };
 }
 
 const isJobCapability = (capability: JsonObject): boolean => {
@@ -70,7 +70,7 @@ const SECRET_WORDS = /pass(word|phrase)|secret|api[\s_-]?key|access[\s_-]?key|pr
 function toolFindings(value: JsonObject): Finding[] {
   const capability = isObject(value.capability) ? value.capability : {};
   const schemas = isObject(value.schemas) ? value.schemas : {};
-  const name = String(capability.name);
+  const name = show(capability.name);
   const tool = value.tool;
   const out = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-017", instancePath, message });
   if (!isObject(tool) || tool.name !== name) return [out("/tool", `capability ${name} is not served as an MCP tool named ${name}`)];
@@ -82,7 +82,7 @@ function toolFindings(value: JsonObject): Finding[] {
   if (root) findings.push(root);
   const annotations = isObject(tool.annotations) ? tool.annotations : {};
   for (const [hint, expected] of Object.entries(expectedAnnotations(capability.effect, capability.idempotency))) {
-    if (annotations[hint] !== expected) findings.push(out(`/tool/annotations/${hint}`, `effect ${String(capability.effect)} / idempotency ${String(capability.idempotency)} requires ${hint}: true`));
+    if (annotations[hint] !== expected) findings.push(out(`/tool/annotations/${hint}`, `effect ${show(capability.effect)} / idempotency ${show(capability.idempotency)} requires ${hint}: true`));
   }
   return findings;
 }
@@ -119,7 +119,7 @@ function resultTraceFindings(result: unknown, metaValue: unknown, label: string,
 function traceFindings(value: JsonObject): Finding[] {
   const job = isObject(value.job) ? value.job : {};
   if (job.status !== "completed" && job.result === undefined) return [];
-  return resultTraceFindings(job.result, value.meta, `job ${String(job.id)}`, "/job/result");
+  return resultTraceFindings(job.result, value.meta, `job ${show(job.id)}`, "/job/result");
 }
 
 export function interopRules(kind: string, value: JsonObject): Finding[] | undefined {
