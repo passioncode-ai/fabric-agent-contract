@@ -13,7 +13,7 @@
   "monotonicNs": "0",
   "data": {
     "day": "2026-10-12",
-    "grantRef": "urn:grant:estate:share-inbox-digest-org-a#1",
+    "grantId": "urn:grant:estate:share-inbox-digest-org-a",
     "calls": 0,
     "unpricedCalls": 0,
     "costUsd": null

@@ -43,7 +43,7 @@ const MEMBERS = [
   "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd",
   "context", "pool", "days", "byProject", "generatedAt", "route", "admissions", "event", "candidates", "project", "capability",
   "entry", "manifest", "projects", "op", "observed", "settledBy", "summary", "principal", "finding", "affects", "thread",
-  "principalKind", "calls", "unpricedCalls", "costUsd", "grantRef", "day"
+  "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day"
 ];
 
 describe("activity and device rules tolerate malformed input", () => {

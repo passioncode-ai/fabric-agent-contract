@@ -1,5 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
-import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
+import { normalIdentifier } from "./identifiers.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { type SeqRange, contiguousFrom, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
 
@@ -265,7 +266,8 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
 
 /**
  * FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is
- * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantRef) of one stream twice (DEC-0082).
+ * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantId) of one stream twice, the grant's id
+ * compared by normal form (DEC-0082, DEC-0076).
  */
 function batchIntegrity(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -276,14 +278,15 @@ function batchIntegrity(value: JsonObject): Finding[] {
   events(value).forEach((event, i) => {
     const at = `/events/${i}`;
     findings.push(...eventIntegrity(event, at));
-    const id = String(event.eventId ?? "");
+    const id = show(event.eventId ?? "");
     if (ids.has(id)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/eventId`, message: `${id} appears twice in one batch` });
     ids.add(id);
     const key = streamKey(device, collectorOf(event));
     if (event.kind === "grant.usage") {
       const d = data(event);
-      const day = JSON.stringify([key, d.day, d.grantRef]);
-      if (grantDays.has(day)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/data/grantRef`, message: `the usage of grant ${String(d.grantRef)} on ${String(d.day)} is sent twice in one stream: one event per day and grant` });
+      // One grant is one row whatever its revision, and two spellings of its id are one grant (DEC-0076).
+      const day = JSON.stringify([key, d.day, normalIdentifier(d.grantId) ?? d.grantId]);
+      if (grantDays.has(day)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/data/grantId`, message: `the usage of grant ${show(d.grantId)} on ${show(d.day)} is sent twice in one stream: one event per day and grant` });
       grantDays.add(day);
     }
     const seq = num(event.seq);

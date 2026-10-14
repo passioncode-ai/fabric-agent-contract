@@ -616,7 +616,7 @@
       "type": "object",
       "required": [
         "day",
-        "grantRef",
+        "grantId",
         "calls",
         "unpricedCalls",
         "costUsd"
@@ -626,11 +626,12 @@
           "$ref": "activity-common.schema.json#/$defs/day",
           "description": "The UTC day the usage was metered on, never a time (DEC-0082): the event's occurred is that day's midnight and its monotonicNs is 0."
         },
-        "grantRef": {
+        "grantId": {
           "type": "string",
+          "format": "uri",
           "minLength": 1,
           "maxLength": 256,
-          "description": "The grant the usage was metered under: the opaque grant reference of DEC-0045, as a grant check names it (grant-check-request.grantRef)."
+          "description": "The grant the usage was metered under: its meta.id without the revision, compared by normal form (DEC-0076), so one grant revised mid-day is one row. The collector on the issuer's own device derives it from the grant-check receipts its meter settled; the organization server joins it to the share grant it holds."
         },
         "calls": {
           "type": "integer",
@@ -642,7 +643,7 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991,
-          "description": "Of calls, those with no known cost; never more than calls (FAC-SEM-038)."
+          "description": "Of calls, the receipts with an unknown cost; never more than calls (FAC-SEM-038)."
         },
         "costUsd": {
           "oneOf": [
@@ -658,7 +659,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "DEC-0082: one grant's metered usage for one UTC day — sums and states only, never a per-call line, because usage under a share grant is data about a person. Built from what the device's meter settled under the grant (grant-check receipts, DEC-0037) and services' byGrant rows (DEC-0045)."
+      "description": "DEC-0082: one grant's metered usage for one UTC day — sums and states only, never a per-call line, because usage under a share grant is data about a person. Built from the meter's settled grant-check receipts of that UTC day, each counted once (DEC-0037), and only those receipts of services' byGrant rows (DEC-0045) the meter does not hold, deduplicated by receipt id."
     },
     "result": {
       "type": "object",

@@ -739,6 +739,7 @@
   {"name": "telemetry-event-grant-usage-monotonic", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-monotonic.json", "valid": false, "keyword": "const"},
   {"name": "telemetry-event-grant-usage-negative-cost", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-negative-cost.json", "valid": false, "keyword": "minimum"},
   {"name": "telemetry-event-grant-usage-no-calls", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-no-calls.json", "valid": false, "keyword": "minimum"},
-  {"name": "telemetry-event-grant-usage-long-ref", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-long-ref.json", "valid": false, "keyword": "maxLength"},
+  {"name": "telemetry-event-grant-usage-long-id", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-long-id.json", "valid": false, "keyword": "maxLength"},
+  {"name": "telemetry-event-grant-usage-id-not-uri", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-id-not-uri.json", "valid": false, "keyword": "format"},
   {"name": "telemetry-event-grant-usage-per-call", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-per-call.json", "valid": false, "keyword": "additionalProperties"}
 ]

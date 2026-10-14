@@ -25,7 +25,7 @@
         "monotonicNs": "0",
         "data": {
           "day": "2026-10-12",
-          "grantRef": "urn:grant:estate:share-inbox-digest-org-a#1",
+          "grantId": "urn:grant:estate:share-inbox-digest-org-a",
           "calls": 12,
           "unpricedCalls": 2,
           "costUsd": 0.84
@@ -46,7 +46,7 @@
         "monotonicNs": "0",
         "data": {
           "day": "2026-10-12",
-          "grantRef": "urn:grant:estate:share-inbox-digest-org-b#1",
+          "grantId": "urn:grant:estate:share-inbox-digest-org-b",
           "calls": 1,
           "unpricedCalls": 0,
           "costUsd": 0.05

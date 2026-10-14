@@ -135,7 +135,7 @@ describe("FAC-SEM-074 and FAC-SEM-075 amended: once per context", () => {
   });
   it("refuse one slot twice in one context, and a slot for an instance not placed in its context", () => {
     expect(at("estate-record", changed((r) => { r.machines[0].secrets.push(clone(r.machines[0].secrets[2])); }), "FAC-SEM-075")).toEqual(["/machines/0/secrets/3/slot"]);
-    expect(at("estate-record", changed((r) => { r.machines[1].secrets[0].context = ORG_B; }), "FAC-SEM-075")).toEqual(["/machines/1/secrets/0/agentRef"]);
+    expect(at("estate-record", changed((r) => { r.machines[1].secrets[0].context = ORG_B; r.machines[1].secrets[0].from = "m-9a07"; }), "FAC-SEM-075")).toEqual(["/machines/1/secrets/0/agentRef"]);
     // A personal slot with context personal spelled out fills the personal instance.
     expect(codes("estate-record", changed((r) => { r.machines[0].secrets[0].context = "personal"; }))).toEqual([]);
   });
@@ -233,15 +233,15 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
     const branch = (telemetry.allOf as Json[]).find((entry) => entry.if?.properties?.kind?.const === "grant.usage") as Json;
     for (const member of ["user", "session", "run", "task", "git", "skill", "launch"]) expect(branch.then.properties[member], member).toBe(false);
     expect(branch.then.properties.monotonicNs).toEqual({ const: "0" });
-    expect(Object.keys(telemetry.$defs.grantUsage.properties).sort()).toEqual(["calls", "costUsd", "day", "grantRef", "unpricedCalls"]);
-    expect(telemetry.$defs.grantUsage.properties.grantRef).toMatchObject({ minLength: 1, maxLength: 256 });
+    expect(Object.keys(telemetry.$defs.grantUsage.properties).sort()).toEqual(["calls", "costUsd", "day", "grantId", "unpricedCalls"]);
+    expect(telemetry.$defs.grantUsage.properties.grantId).toMatchObject({ format: "uri", minLength: 1, maxLength: 256 });
     expect(valid(usage, "telemetry-event.schema.json")).toBe(true);
     expect(codes("telemetry-event", usage)).toEqual([]);
   });
 
-  it("holds the grant reference's bounds: 1 and 256 characters, never 0 or 257", () => {
-    const withRef = (grantRef: string) => valid({ ...usage, data: { ...usage.data, grantRef } }, "telemetry-event.schema.json");
-    expect([withRef("g"), withRef("g".repeat(256)), withRef(""), withRef("g".repeat(257))]).toEqual([true, true, false, false]);
+  it("holds the grant id's bounds: a URI of 1 to 256 characters, never 0 or 257", () => {
+    const withId = (grantId: string) => valid({ ...usage, data: { ...usage.data, grantId } }, "telemetry-event.schema.json");
+    expect([withId("u:g"), withId(`urn:g:${"g".repeat(250)}`), withId(""), withId(`urn:g:${"g".repeat(251)}`), withId("not a uri")]).toEqual([true, true, false, false, false]);
   });
 
   it("carries a cost that is null exactly when no call was priced, never more unpriced calls than calls (FAC-SEM-038)", () => {
@@ -258,18 +258,27 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
 
   it("is one per day and grant in one stream of a batch, and its occurred is the day it names (FAC-SEM-039)", () => {
     const batch = load("semantic/activity-batch-grant-usage-twice.json").input;
-    expect(at("activity-batch", batch, "FAC-SEM-039")).toEqual(["/events/1/data/grantRef"]);
+    expect(at("activity-batch", batch, "FAC-SEM-039")).toEqual(["/events/1/data/grantId"]);
     // Another stream may report the same grant and day: the rule is per stream.
     const otherStream = { ...batch, events: [batch.events[0], { ...batch.events[1], collector: { id: "other-collector", epoch: 1 }, seq: 1 }] };
     expect(at("activity-batch", otherStream, "FAC-SEM-039")).toEqual([]);
     expect(at("telemetry-event", { ...usage, occurred: "2026-10-11T00:00:00Z" }, "FAC-SEM-039")).toEqual(["/occurred"]);
   });
 
-  it("reads to a receiver pinned before DEC-0082 as an unknown kind's data, while its grant reference fits 64 characters", () => {
-    expect(extData(usage.data)).toBe(true);
+  it("reads to a receiver pinned before DEC-0082 as an unknown kind's data exactly when its grantId satisfies extScalar's string branch", () => {
+    // The documented condition (contexts.md, DEC-0082 compatibility item 5): at most 64 characters, no whitespace, no
+    // leading / ~ \\ or drive prefix, no /Users/, /home/ or \\Users\\ anywhere.
+    const documented = (id: string) => id.length <= 64 && !/\s/.test(id) && !/^[/~\\]/.test(id) && !/^[A-Za-z]:[\\/]/.test(id)
+      && !id.includes("/Users/") && !id.includes("/home/") && !id.includes("\\Users\\");
+    const samples = [
+      String(usage.data.grantId), "urn:grant:x", `urn:g:${"g".repeat(58)}`, `urn:g:${"g".repeat(59)}`, "urn:grant:a b", "urn:grant:a\tb",
+      "/grant/x", "~grant", "\\grant", "C:\\grants\\x", "c:/grants/x", "https://host/Users/x", "file:/home/x", "urn:x:\\Users\\y",
+      "https://example.org/grants/x", "urn:grant:C:/x"
+    ];
+    for (const grantId of samples) expect(extData({ ...usage.data, grantId }), grantId).toBe(documented(grantId));
+    expect(samples.filter(documented).length).toBeGreaterThanOrEqual(4);
+    expect(samples.filter((id) => !documented(id)).length).toBeGreaterThanOrEqual(8);
     expect(extData({ ...usage.data, costUsd: null })).toBe(true);
-    expect(extData({ ...usage.data, grantRef: "g".repeat(64) })).toBe(true);
-    expect(extData({ ...usage.data, grantRef: "g".repeat(65) })).toBe(false);
-    expect(contextsSpec).toContain("at most 64 characters with no whitespace");
+    for (const phrase of ["at most 64 characters", "no whitespace", "drive prefix", "`/Users/`", "FAC-SEM-037"]) expect(contextsSpec, phrase).toContain(phrase);
   });
 });
