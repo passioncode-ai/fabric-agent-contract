@@ -1316,7 +1316,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   usage (Switchboard), and showing policies, grants and requests (Fabric Dashboards).
 - **Annotated (2026-10-12):** `modelClasses` closed to a vocabulary, and how a policy's classes restrict a launch, by
   DEC-0046.
-- **Annotated (2026-10-13):** DEC-0082: a share grant into an organization carries that organization's `context`, never `personal` (`FAC-SEM-110`); its usage reaches the organization as a daily `grant.usage` activity event keyed by the grant's id and built from the meter's settled receipts (and `byGrant` receipts the meter does not hold) (`docs/specification/contexts.md#usage-per-grant`).
+- **Annotated (2026-10-13):** DEC-0082: a share grant into an organization carries that organization's `context`, never `personal` (`FAC-SEM-110`); its usage reaches the organization as a daily `grant.usage` activity event keyed by the grant's id and built from the meter's settled receipts (a service's `byGrant` row only when it lists receipts the meter holds none of and covers one UTC day) (`docs/specification/contexts.md#usage-per-grant`).
 - **Decision:**
   - **Four levels, the most specific deciding:**
     - L0 estate total across all provider keys;
@@ -4763,9 +4763,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      - `FAC-SEM-074` (amended): an agent is placed once per (machine, `agentRef`, context), not once per machine.
      - `FAC-SEM-075` (amended): a slot is placed once per (machine, `agentRef`, slot, context), for an instance placed in
        that context; an organization's instance fills its slot from its own machine (`from` is that machine).
-     - **Secret envelopes name no context.** `estateEnvelopeContext` (`src/secret-envelope.ts`) reads only personal
-       secret placements (no `context`, or `personal`), so the sealer it admits, the current placement and the marks do
-       not depend on the order of the record's secret placements; an organization's slot never admits an envelope.
+     - **Secret envelopes name no context.** `estateEnvelopeContext` (`src/secret-envelope.ts`) and relay.md's open
+       step 6 read only personal secret placements (no `context`, or `personal`), so the sealer admitted, the current
+       placement and the marks do not depend on the order of the record's secret placements; an organization's slot
+       never admits an envelope. The shared vectors' `placement` group lists an organization's secret placement before
+       the personal one, so a port that reads the first match fails.
      - **`FAC-SEM-111`** (kinds `estate-record` and `estate-placement`, `src/estate-record-rules.ts`): a placement whose
        context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076),
        whose `context` equals the placement's as written and is an `org:<orgId>` (`parseContext`), and which the record
@@ -4871,7 +4873,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     per organization, `org.id` for contexts), `docs/specification/conformance.md` (the two register rows, the estate row,
     the collector row, the receiver row, the identifiers row), `docs/specification/identifiers.md`,
     `docs/specification/spend-policy.md`, `docs/specification/governance-and-roles.md`,
-    `docs/specification/delegation.md`;
+    `docs/specification/delegation.md`, `docs/specification/relay.md` (open step 6: a personal secret placement only);
   - schemas: `schemas/common.schema.json` (`contextId`), `schemas/governance.schema.json` (`context`),
     `schemas/estate-record.schema.json` (a placement's `context` and `grant`, a secret placement's `context`),
     `schemas/telemetry-event.schema.json` (`grant.usage`, `grantUsage`), `schemas/secret-envelope.schema.json` (its
@@ -4880,9 +4882,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `FAC-SEM-110`), `src/estate-record-rules.ts` (`FAC-SEM-074`, `FAC-SEM-075` per context, `FAC-SEM-111`,
     `placementTrust`; raw array indexes in instancePaths; messages that never throw), `src/activity-rules.ts`
     (`FAC-SEM-038`, `FAC-SEM-039` for `grant.usage`; messages and keys that never throw), `src/secret-envelope.ts`
-    (personal secret placements only), `src/findings.ts` (`show`), `src/semantic-rules.ts`,
-    `tools/vectors/context-route.ts` (new), `vitest.config.ts` (floors);
-  - fixtures: `fixtures/vectors/context-route.json` (new); `fixtures/positive/estate-record-contexts.json`,
+    (personal secret placements only), `src/findings.ts` (`show`, `toNumber`), `src/relay-vectors.ts`
+    (`placementVectorResults`), `src/semantic-rules.ts`; every other rule module reads input text through `show` and
+    `toNumber` and so never throws on a `{"toString": 1}` member, an adjacent defect (`src/*-rules.ts`,
+    `src/window-lease.ts`, `src/revocation-delta.ts`, `src/session-handoff.ts`, `src/settings-backup.ts`,
+    `src/signing-challenges.ts`, `src/dashboard-declaration.ts`, `src/windows-token.ts`);
+    `tools/vectors/context-route.ts` (new), `tools/vectors/relay-crypto.ts` (the `placement` group of
+    `fixtures/vectors/secret-envelope.json`), `vitest.config.ts` (floors);
+  - fixtures: `fixtures/vectors/context-route.json` (new); `fixtures/vectors/secret-envelope.json` (the `placement`
+    group: an organization's secret placement listed before the personal one); `fixtures/positive/estate-record-contexts.json`,
     `fixtures/positive/governance-grant-share-context.json`, `fixtures/positive/telemetry-event-grant-usage.json`,
     `fixtures/positive/telemetry-event-grant-usage-unpriced.json`; `fixtures/negative/governance-grant-context-*.json`,
     `fixtures/negative/estate-record-placement-*.json`, `fixtures/negative/estate-record-secret-context-malformed.json`,
@@ -4890,7 +4898,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `fixtures/semantic/estate-*.json`, `fixtures/semantic/telemetry-event-grant-usage-*.json`,
     `fixtures/semantic/activity-batch-grant-usage-*.json`; `fixtures/catalogue.json`;
   - tests: `test/contexts.test.ts` (new), `test/context-route.test.ts` (new), `test/estate-record.test.ts`,
-    `test/secret-envelope.test.ts`, `test/rule-tolerance.test.ts`;
+    `test/secret-envelope.test.ts`, `test/relay-vectors.test.ts`, `test/rule-tolerance.test.ts`,
+    `test/activity-rules.test.ts`;
   - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/backlog.md` (CT-51, CT-38),
     `docs/handoffs/2026-10-13-rm28-pilot-contexts.md`, `docs/handoffs/README.md`.
 - **Not decided here:**

@@ -78,9 +78,10 @@ record's ([machines](estate-record.md#machines), [semantic rules](estate-record.
   fails closed.
 
 **Secrets of an organization's instance stay on its machine.** A secret envelope (`fabric-secret-envelope/1`, DEC-0047)
-names an `agentRef` and a slot, never a context, so the target's open context (`estateEnvelopeContext`) reads only its
-personal secret placements: the personal instance's slot alone is filled by an envelope, and the answer does not depend
-on the order of the record's secret placements. An organization's instance fills its slot from its own machine's vault
+names an `agentRef` and a slot, never a context, so the target's open context (`estateEnvelopeContext`, relay.md's
+[open step 6](relay.md#the-secret-envelope)) reads only its personal secret placements: the personal instance's slot alone
+is filled by an envelope, and the answer does not depend on the order of the record's secret placements (the `placement`
+group of `fixtures/vectors/secret-envelope.json` lists an organization's placement first). An organization's instance fills its slot from its own machine's vault
 and never admits an envelope for it (`FAC-SEM-075`). An envelope that names a context is not decided here.
 
 `FAC-SEM-111` reads record revisions only. A revoked share grant stops calls at once where it is checked — the hub

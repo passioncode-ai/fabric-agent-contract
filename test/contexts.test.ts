@@ -242,6 +242,8 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
   it("holds the grant id's bounds: a URI of 1 to 256 characters, never 0 or 257", () => {
     const withId = (grantId: string) => valid({ ...usage, data: { ...usage.data, grantId } }, "telemetry-event.schema.json");
     expect([withId("u:g"), withId(`urn:g:${"g".repeat(250)}`), withId(""), withId(`urn:g:${"g".repeat(251)}`), withId("not a uri")]).toEqual([true, true, false, false, false]);
+    // grantId is the grant's meta.id, which carries no revision: a reference's #<revision> is never part of it.
+    expect([withId("urn:grant:x#1"), withId("urn:grant:x#"), withId("https://h/grants/x")]).toEqual([false, false, true]);
   });
 
   it("carries a cost that is null exactly when no call was priced, never more unpriced calls than calls (FAC-SEM-038)", () => {

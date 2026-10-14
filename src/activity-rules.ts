@@ -123,6 +123,11 @@ export function tenantRef(provider: string, tenant: string): string {
 }
 
 const events = (value: JsonObject) => (Array.isArray(value.events) ? value.events.filter(isObject) : []);
+/**
+ * The object items of an array with their index in the array as written, so an instancePath names the item it flags even
+ * when a non-object precedes it.
+ */
+const indexed = (value: unknown): Array<[JsonObject, number]> => (Array.isArray(value) ? value.flatMap((item, index): Array<[JsonObject, number]> => (isObject(item) ? [[item, index]] : [])) : []);
 const collectorOf = (event: JsonObject) => (isObject(event.collector) ? event.collector : {});
 const deviceId = (value: JsonObject) => (isObject(value.device) ? show(value.device.id) : "");
 /** A stream is (device.id, collector.id, collector.epoch): collector ids are unique only within their device. */
@@ -193,7 +198,7 @@ function eventCost(event: JsonObject, at: string): Finding[] {
 function batchCost(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Map<string, JsonObject>();
-  events(value).forEach((event, i) => {
+  indexed(value.events).forEach(([event, i]) => {
     findings.push(...eventCost(event, `/events/${i}`));
     if (event.kind !== "usage.line") return;
     const line = data(event);
@@ -210,8 +215,7 @@ function batchCost(value: JsonObject): Finding[] {
 /** FAC-SEM-038 for a summary: unpriced lines make the cost unknown or a lower bound, never zero. */
 function summaryCost(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
-  const cells = Array.isArray(value.cells) ? value.cells.filter(isObject) : [];
-  cells.forEach((cell, i) => {
+  indexed(value.cells).forEach(([cell, i]) => {
     const at = `/cells/${i}`;
     const counts = isObject(cell.counts) ? cell.counts : {};
     const usage = isObject(cell.usage) ? cell.usage : {};
@@ -275,7 +279,7 @@ function batchIntegrity(value: JsonObject): Finding[] {
   const ids = new Set<string>();
   const grantDays = new Set<string>();
   const device = deviceId(value);
-  events(value).forEach((event, i) => {
+  indexed(value.events).forEach(([event, i]) => {
     const at = `/events/${i}`;
     findings.push(...eventIntegrity(event, at));
     const id = show(event.eventId ?? "");
@@ -400,10 +404,9 @@ function summaryShape(value: JsonObject): Finding[] {
   if (isObject(value.producer) && value.producer.kind !== undefined) findings.push({ code: "FAC-SEM-040", instancePath: "/producer/kind", message: "a summary is built by a receiver from many devices; a device never produces one" });
   const from = show(value.from ?? ""), to = show(value.to ?? "");
   if (from > to) findings.push({ code: "FAC-SEM-040", instancePath: "/to", message: `the range ends (${to}) before it starts (${from})` });
-  const cells = Array.isArray(value.cells) ? value.cells.filter(isObject) : [];
   const tuples = new Set<string>();
   const k = Math.max(MIN_POPULATION, num(value.minPopulation));
-  cells.forEach((cell, i) => {
+  indexed(value.cells).forEach(([cell, i]) => {
     const counts = isObject(cell.counts) ? cell.counts : {};
     if (num(counts.population) < k) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/counts/population`, message: `a cell covering ${num(counts.population)} subjects is below the minimum of ${k}: fold it into the day's other cell or suppress it` });
     if (num(counts.population) > num(counts.sessions)) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/counts/population`, message: "a cell covers no more subjects than sessions" });
@@ -453,7 +456,7 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
   const log = isObject(value.log) ? value.log : {};
   const subject = isObject(log.subject) && isObject(log.subject.user) ? log.subject.user.id : undefined;
   const consents = Array.isArray(value.consents) ? value.consents.filter(isObject) : [];
-  (Array.isArray(log.entries) ? log.entries.filter(isObject) : []).forEach((entry, i) => {
+  indexed(log.entries).forEach(([entry, i]) => {
     const reader = isObject(entry.reader) && isObject(entry.reader.user) ? entry.reader.user.id : undefined;
     if (reader === undefined || reader === subject) return;
     const scope = show(entry.scope ?? "");
@@ -476,7 +479,7 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
 export function activityRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, "")];
-  if (kind === "activity-batch") return [...noContentOrPerson(value, events(value).map((_, i) => `/events/${i}`)), ...batchCost(value), ...batchIntegrity(value)];
+  if (kind === "activity-batch") return [...noContentOrPerson(value, indexed(value.events).map(([, i]) => `/events/${i}`)), ...batchCost(value), ...batchIntegrity(value)];
   if (kind === "activity-ack") return ackIntegrity(value);
   if (kind === "activity-summary") return [...summaryCost(value), ...summaryShape(value)];
   if (kind === "access-log-disclosure") return accessLogDisclosure(value);

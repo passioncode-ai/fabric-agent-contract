@@ -415,3 +415,32 @@ describe("review of DEC-0052: no scope sidesteps OD-1", () => {
   });
 });
 
+
+// DEC-0082 review: an instancePath names the item by its index in the array as written, a non-object before it included.
+describe("activity rules number items by their raw array index", () => {
+  const paths = (kind: string, value: unknown, code: string) => evaluateSemanticRules(kind, value).filter((finding) => finding.code === code).map((finding) => finding.instancePath);
+  const withLeading = (fixture: string, member: (input: Record<string, any>) => unknown[]): Record<string, any> => {
+    const input = structuredClone(load(`semantic/${fixture}`).input) as Record<string, any>;
+    member(input).unshift(7);
+    return input;
+  };
+  it("keeps a summary cell's index", () => {
+    const original = paths("activity-summary", load("semantic/activity-summary-small-cell.json").input, "FAC-SEM-040");
+    const shifted = paths("activity-summary", withLeading("activity-summary-small-cell.json", (input) => input.cells), "FAC-SEM-040");
+    expect(original.length).toBeGreaterThan(0);
+    expect(shifted).toEqual(original.map((at) => at.replace(/^\/cells\/(\d+)/, (_m, n) => `/cells/${Number(n) + 1}`)));
+  });
+  it("keeps an access-log entry's index", () => {
+    const original = paths("access-log-disclosure", load("semantic/access-log-disclosure-unconfirmed.json").input, "FAC-SEM-067");
+    const shifted = paths("access-log-disclosure", withLeading("access-log-disclosure-unconfirmed.json", (input) => input.log.entries), "FAC-SEM-067");
+    expect(original.length).toBeGreaterThan(0);
+    expect(shifted).toEqual(original.map((at) => at.replace(/^\/log\/entries\/(\d+)/, (_m, n) => `/log/entries/${Number(n) + 1}`)));
+  });
+  it("keeps an event's index in a batch, and lets a user stand only on its own event", () => {
+    const usage = load("positive/telemetry-event-grant-usage.json");
+    const batch = { protocol: "fabric-activity/0.1", device: { id: "dev-01j9a" }, sent: "2026-10-13T00:05:00Z", events: [7, usage, { ...usage, eventId: "01K7GV0A1B2C3D4E5F6G7H8J9M", seq: 42, data: { ...usage.data, calls: 1, unpricedCalls: 2, costUsd: null } }] };
+    expect(paths("activity-batch", batch, "FAC-SEM-038")).toEqual(["/events/2/data/unpricedCalls"]);
+    const usageLine = load("positive/telemetry-event-usage.json");
+    expect(paths("activity-batch", { ...batch, events: [null, usageLine] }, "FAC-SEM-037")).toEqual([]);
+  });
+});
