@@ -11,8 +11,8 @@ A person works in their own **personal** context and in each organization they b
 person, their personal context and two organizations on one machine, and shares the person's own agents into both
 organizations as separate instances with different access levels. This page is the contract's slice of that pilot:
 the context id, a grant's context, one placement per context in the estate record, a grant's daily usage for the
-organization it is shared into, and where a collector sends an event or a check-in. It is the pilot slice of N20 (board row CT-38): CX-CON-01 for grants and placements only, and
-CX-CON-02 whole. The rest of N20 waits on Fabric's organization decision (D8).
+organization it is shared into, and where a collector sends what it sends. It is the pilot slice of N20 (board row
+CT-38): CX-CON-01 for grants and placements only, and CX-CON-02 whole. The rest of N20 waits on Fabric's organization decision (D8).
 
 The context id has a page of its own because four readers compare it — the grant ([governance](governance-and-roles.md)),
 the [estate record](estate-record.md)'s placements, the collector's routing ([activity](activity.md),
@@ -25,7 +25,8 @@ alike.
 
 - `personal` — the person's own work;
 - `org:<orgId>` — an organization, where `orgId` is the organization server's opaque id of it: 1–128 characters of
-  `[A-Za-z0-9_-]`. The first organization server issues ids of the form `org_<base32>`.
+  `[A-Za-z0-9_-]`. (Informative: the first organization server, at its commit `03d454b`, issues ids of the form
+  `org_<base32>`.)
 
 Context ids compare **as written**: never case-folded, never trimmed, never by prefix, as DEC-0077 compares board ids.
 `Personal`, `ORG:x`, `org:` with an empty or a 129-character id, a surrounding space and a trailing newline are not
@@ -35,8 +36,10 @@ an identifier under DEC-0076: its pattern admits no upper-case prefix and no `%`
 normal form and the two comparisons agree ([identifiers](identifiers.md#where-identifiers-are-compared)).
 
 A device's enrollment names its organization by `org.id`, an opaque id (`activity-common.schema.json#/$defs/opaqueId`,
-DEC-0031), whose set differs from `orgId`'s: an organization whose id holds `.`, `:` or `~`, or starts with `_` or `-`,
-cannot be both enrolled and a context, so nothing is routed to it. The first organization server's ids are in both sets.
+DEC-0031), whose set differs from `orgId`'s: an id that holds `.`, `:` or `~`, or starts with `_` or `-`, can be enrolled
+but is no context, so nothing of a context is routed to it (the vectors carry `org.example`). So **an organization server
+that takes part in contexts MUST issue its `org.id` within `[A-Za-z0-9_-]{1,128}`** (DEC-0082; [devices](devices.md#enrollment)),
+where the two sets agree.
 
 Fabric Switchboard uses the same form for its pool's context attribute (its SB-109, the pilot's answer of 2026-10-13).
 
@@ -67,25 +70,46 @@ placement (`machines[].secrets[]`) gains `context` too, so a slot fills one inst
 record's ([machines](estate-record.md#machines), [semantic rules](estate-record.md#semantic-rules)):
 
 - `FAC-SEM-074`: an agent is placed once per (machine, `agentRef`, context);
-- `FAC-SEM-075`: a slot is placed once per (`agentRef`, slot, context), for an instance placed in that context;
+- `FAC-SEM-075`: a slot is placed once per (machine, `agentRef`, slot, context), for an instance placed in that
+  context; an organization's instance fills its slot from its own machine (`from` is that machine);
 - `FAC-SEM-111`: an instance in `org:<orgId>` names its share grant — one of the record's, matched by normal form
   (DEC-0076), whose `context` is the placement's as written, and which the record does not revoke; a personal instance
-  names none.
+  names none, and a context that is not `personal` and not an `org:<orgId>` (such as `Personal`) matches no grant, so it
+  fails closed.
+
+**Secrets of an organization's instance stay on its machine.** A secret envelope (`fabric-secret-envelope/1`, DEC-0047)
+names an `agentRef` and a slot, never a context, so the target's open context (`estateEnvelopeContext`) reads only its
+personal secret placements: the personal instance's slot alone is filled by an envelope, and the answer does not depend
+on the order of the record's secret placements. An organization's instance fills its slot from its own machine's vault
+and never admits an envelope for it (`FAC-SEM-075`). An envelope that names a context is not decided here.
+
+`FAC-SEM-111` reads record revisions only. A revoked share grant stops calls at once where it is checked — the hub
+mints no token under it and the meter denies it (`grant-revoked`, DL-24), both reading the revocation delta (DEC-0054) —
+and `FAC-SEM-111` refuses the instance from the next revision, which lists the revocation (`FAC-SEM-084`).
 
 `placementTrust(record, machine, agentRef, context)` and kind `estate-placement` (`{record, machine, package, context?}`)
 take the context, `personal` when it is not given, so a caller written before DEC-0082 is unchanged.
+
+<a id="routing"></a>
 
 ## Routing
 
 **No document on the telemetry or check-in wire carries a context.** An organization server already knows the
 organization from the device certificate: the certificate binds `org.id`, and a receiver attributes by it, never by the
 body (DEC-0031, `FAC-SEM-045`). A context field would add nothing it does not know, and it could leak `personal` or
-another organization's id to a receiver, which unlinkable memberships forbid (the RM-28 report's CX-22).
+another organization's id to a receiver, which unlinkable memberships forbid (the RM-28 report's CX-22). What a device
+sends, and to which organization server, is decided three ways:
 
-Instead the collector routes. `routeTarget(sessionContext, enrollments)` in `src/context-route.ts` answers where a
-collector may send an event or a check-in of a session in a given context; `enrollments` lists the `org.id` of each of
-the device's enrollments (DEC-0031). The session's context is the collector's own record of the session, never a field
-of the event.
+- **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per
+  organization and sends each enrollment's check-ins to that enrollment's own server, on that enrollment's interval,
+  reporting only that enrollment's streams ([devices → check-in](devices.md#check-in), DEC-0031).
+- **A session's events** go where `routeTarget(sessionContext, enrollments)` in `src/context-route.ts` answers;
+  `enrollments` lists the `org.id` of each of the device's enrollments, and the session's context is the collector's own
+  record of the session, never a field of the event.
+- **A grant's usage** (`grant.usage`, [below](#usage-per-grant)) goes where `routeGrantUsage(grantContext, enrollments)`
+  answers: by the grant's own `context`, not by any session.
+
+`routeTarget` answers:
 
 | Session context | Answer |
 |---|---|
@@ -95,13 +119,15 @@ of the event.
 | `personal` | `{route: "none", reason: "personal"}`, always: personal work never goes to an organization server |
 | anything that is not a context id (`Personal`, `org:`, a non-string) | `{route: "none", reason: "not-a-context"}`: the collector sends nothing |
 
-The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous`, and for a grant's usage `no-context`
-(below). The function is total: malformed input answers `none` and never throws, an enrollment that is not an object with an own
+`routeGrantUsage` answers as `routeTarget` with the grant's context, and `{route: "none", reason: "no-context"}` for a
+grant that states none. The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous` and `no-context`. Both
+functions are total: malformed input answers `none` and never throws, an enrollment that is not an object with an own
 string `org` is skipped, and nothing is read from an object's prototype. The shared vectors
 `fixtures/vectors/context-route.json` hold every answer and the cases a lax port gets wrong: a case-folded id, a prefix
 of an enrolled id, an enrolled id that is a prefix, `org:` with an empty or a 129-character id, `Personal`, a trailing
-newline, a bare organization id, non-string input, and an `org` only inherited through `__proto__`. The conformance row
-is [a collector that sends events or check-ins to an organization server](conformance.md#clients-and-readers).
+newline, a bare organization id, an enrolled `org.example` no context names, non-string input, and an `org` only
+inherited through `__proto__`. The conformance row is
+[a collector that sends events or check-ins to an organization server](conformance.md#clients-and-readers).
 
 <a id="usage-per-grant"></a>
 
@@ -113,57 +139,83 @@ no activity event kind carried a grant reference: a usage report's `byGrant` and
 DEC-0045) stay on the device, with its meter. So the activity protocol gains the kind **`grant.usage`**: one grant's
 metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemetry-event.schema.json#/$defs/grantUsage`).
 
-- **Its data**: `day`; `grantRef`, the opaque grant reference of DEC-0045 (1–256 characters, as in a grant check's
-  request); `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and
+- **Its data**: `day`; `grantId`, the grant's `meta.id` without its revision, a URI of 1–256 characters compared by
+  normal form (DEC-0076), so one grant revised during the day is one row and the organization server joins it to the
+  share grant it holds; `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`;
+  and
   `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
   `FAC-SEM-025` say (`FAC-SEM-038` checks the three together).
 - **A day and no finer time**, like `policy.violation`: `occurred` is that day's midnight UTC (`FAC-SEM-039`),
   `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`, `skill` or `launch` (schema).
-- **Its source** is what the device's meter settled under that grant (grant-check receipts, DEC-0037) and services'
-  `byGrant` rows. It holds only sums and states, never a per-call line: usage under a share grant is data about a person
-  (CX-VES-08, the operator's OD-1).
-- **Once**: a collector emits it after the day ends, one per (day, `grantRef`) per stream; a batch that carries two for
-  one (day, `grantRef`) of one stream is refused (`FAC-SEM-039`).
+- **Its source** is the meter's settled grant-check receipts of that UTC day (DEC-0037), each receipt counted once. A
+  service's `byGrant` rows add only receipts the meter does not hold, deduplicated by receipt id. `unpricedCalls` counts
+  the receipts with an unknown cost. It holds only sums and states, never a per-call line: usage under a share grant is
+  data about a person (CX-VES-08, the operator's OD-1).
+- **Who derives the id**: the collector on the issuer's own device, from the receipts its meter settled, where the
+  grant's id is known. DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
+  this is the issuer's side, so it is not broken.
+- **Once**: a collector emits it after the day ends, one per (day, `grantId`) per stream; a batch that carries two for
+  one (day, `grantId`) of one stream, the ids compared by normal form, is refused (`FAC-SEM-039`). A receiver counts the
+  first `grant.usage` per (stream, day, `grantId`) it holds and ignores later ones
+  ([conformance](conformance.md#clients-and-readers)).
 - **Routing**: a `grant.usage` event goes only to the organization server of the grant's own `context`, `org:<orgId>`
   (`routeGrantUsage(grantContext, enrollments)` in `src/context-route.ts`, the vectors' `grantUsage`). A grant that
   states no context answers `none` with reason `no-context`, and a personal one `personal`: neither produces a
   `grant.usage` toward any organization.
 
-A grant reference is not put on `usage.line`: a reference on each call would let the organization join every model call
+A grant's id is not put on `usage.line`: a reference on each call would let the organization join every model call
 to the grant, finer than CX-VES-08's sums, and a shared agent's spend is metered by grant check and often has no session
 at all. A purpose mark (CX-CON-10) is not in this slice.
 
 ## Membership and its expiry
 
 A person's membership in an organization, and its `external` and `expiresAt` attributes (CX-VES-03), are the
-organization server's record, not the contract's. Its expiry acts through revocations that exist: the device
-certificate (DEC-0031), and the share grant's own `expiresAt` and its `grant` revocation in the estate record
-(`FAC-SEM-076`, carried fast by the revocation delta, DEC-0054). An instance whose share grant is revoked fails
-`FAC-SEM-111`, and its usage stops when no call is metered under it.
+organization server's record, not the contract's. Only the device certificate (DEC-0031) follows the membership by
+itself: the organization server stops renewing or revokes it. The share grant does not: it runs to its own `expiresAt`
+or to its `grant` revocation in the estate record (`FAC-SEM-076`, carried fast by the revocation delta, DEC-0054). So
+Fabric's share flow (CX-FAB-04) sets a share grant's `expiresAt` no later than the membership's expiry the organization
+server shows. An instance whose share grant is revoked fails `FAC-SEM-111` from the next revision, and its usage stops
+when no call is metered under it.
 
 ## Linkability
 
-Until CX-CON-06 lands (a `kid` and an `iss` per context; it waits on Fabric's D3), the pilot is **linkable**. One
-machine shows both organizations the same device key and hub key, and its check-in reports the same estate-record
-revision and digest to each (DEC-0053, DEC-0056), so the two organization servers can tell that one person's machine is
-enrolled in both. That is acceptable only while both organizations belong to one person, as in the pilot. A membership
+This slice does **not** meet CX-22 (unlinkable memberships), which is the operator's decision. Until CX-CON-06 lands (a
+`kid` and an `iss` per context; it waits on Fabric's D3), a machine shows both organizations:
+
+- the same device key and hub key;
+- in every check-in, the same `records`: the estate record's `revision` and `digest`, the `heartbeat`, the
+  `revocationDelta` head and the `leases` (DEC-0053, DEC-0054, DEC-0056, DEC-0062).
+
+So the two organization servers can tell that one person's machine is enrolled in both. Running the pilot linkable waits
+on Fabric's recorded decision: the coordinator's K-1 in the pilot report and fabric-workspace #215, both still open.
+Project Observatory's plan for a device identity per organization is the open divergence from this slice. A membership
 in an organization another person controls does not run on this slice.
 
 ## Compatibility
 
-The schemas are closed (`additionalProperties: false`). A reader pinned before DEC-0082 refuses a grant that carries
-`context`, and an estate record whose placement carries `context` or `grant` or whose secret placement carries
-`context`. A `grant.usage` event is a kind such a receiver does not know: it validates the event's `data` as an unknown
-kind's (`activity-common.schema.json#/$defs/extData`: at most two levels, scalars, strings of at most 64 characters with
-no whitespace), and when that holds it MUST accept, store and count the event without interpreting it ([activity →
-extension and unknown kinds](activity.md#kinds)). `day`, the counts and `costUsd` (a number or `null`) are such scalars,
-so an older receiver accepts a `grant.usage` whose `grantRef` is at most 64 characters with no whitespace. A longer one
-it rejects as that event's `schema` rejection, which consumes the event and leaves the batch standing
-([batch and acknowledgement](activity.md#batch-and-acknowledgement)), and the usage is lost to it; so a writer sends a
-longer reference only to a receiver pinned at or after DEC-0082. `FAC-SEM-074` and `FAC-SEM-075` are relaxed: a record that places one agent on one machine in two contexts
-fails an older node's `FAC-SEM-074`. So a writer publishes such documents only once every reader is pinned at or after
-DEC-0082; for the estate record, that is every machine of the person. `FAC-SEM-110` and `FAC-SEM-111` refuse only
-documents that carry the new members. A record or grant without them reads as before.
+1. **Closed schemas.** The grant and estate-record schemas are closed (`additionalProperties: false`). A reader pinned
+   before DEC-0082 refuses a grant that carries `context`, and an estate record whose share grant carries `context`
+   (`shareGrants[].context`), whose placement carries `context` or `grant`, or whose secret placement carries `context`.
+   So sharing alone, a share grant with its context, triggers item 3's gate.
+2. **Relaxed rules.** `FAC-SEM-074` and `FAC-SEM-075` are relaxed: a record that places one agent on one machine in two
+   contexts fails an older node's `FAC-SEM-074`.
+3. **The gate.** A writer publishes such documents only once every reader is pinned at or after DEC-0082: for the
+   estate record, every machine of the person; for a grant, also the meter that reads the hub's projection of it, since
+   `src/grant-projection.ts` validates a projected grant against its pinned `governance.schema.json#/$defs/grant`. So a hub
+   writes `context` on a grant only once that meter is pinned at or after DEC-0082.
+4. **New refusals.** `FAC-SEM-110` and `FAC-SEM-111` refuse only documents that carry the new members, and the new
+   clauses of `FAC-SEM-038`, `FAC-SEM-039` and `FAC-SEM-075` concern only the new kind and the new member. A record or
+   grant without them reads as before.
+5. **`grant.usage` at an older receiver.** The event's `kind` is open, and a receiver that does not know a kind
+   validates its `data` only as an unknown kind's (`activity-common.schema.json#/$defs/extData`), then MUST accept, store
+   and count it without interpreting it ([activity → extension and unknown kinds](activity.md#kinds)). `day`, the counts
+   and `costUsd` (a number or `null`) always pass. A receiver pinned before DEC-0082 therefore accepts a `grant.usage`
+   whose `grantId` satisfies `activity-common.schema.json#/$defs/extScalar`'s string branch: at most 64 characters, no
+   whitespace, no leading `/`, `~` or `\` or drive prefix (`C:\`, `C:/`), and no `/Users/`, `/home/` or `\Users\`
+   anywhere. Any other it rejects as that event's `schema` rejection, which consumes the event and leaves the batch
+   standing ([batch and acknowledgement](activity.md#batch-and-acknowledgement)), and the usage is lost to it; so a writer
+   sends such an id only to a receiver pinned at or after DEC-0082. `FAC-SEM-037`'s home-path check applies to every
+   event on every receiver, so a `grantId` that names a home directory is refused at any pin.
 
 ## Semantic rules
 
@@ -180,14 +232,25 @@ Fixtures: `fixtures/semantic/grant-context-*`, `fixtures/semantic/estate-share-g
 
 ## Who adopts it
 
-- **Fabric** writes a share grant's `context` when it shares an agent into an organization (its CX-FAB-04), drafts
-  placements by context with their grants, and runs `FAC-SEM-110` and `FAC-SEM-111` before the passkey signs a revision.
-- **Project Observatory** enrolls the machine in each organization separately (DEC-0031), routes each event and
-  check-in as `routeTarget` answers (the vectors), ships `grant.usage` from what its meter settled, routed as
-  `routeGrantUsage` answers (its OE-05), and installs and fills an organization's instance only as kind
-  `estate-placement` with its context finds it placed.
-- **The organization server** reads a share grant's `context`, and ingests `grant.usage` to show a shared agent's usage
-  per grant as sums and states, every read in the access log (CX-VES-08).
+- **Fabric** writes a share grant's `context` when it shares an agent into an organization (its CX-FAB-04), sets that
+  grant's `expiresAt` no later than the membership's expiry the organization server shows, drafts placements by context
+  with their grants and an organization's slots filled locally, runs `FAC-SEM-110` and `FAC-SEM-111` before the passkey
+  signs a revision, and writes `context` on a grant only once the meter reading its projection is pinned at or after
+  DEC-0082.
+- **Project Observatory**:
+  - enrolls the machine in each organization separately and sends each enrollment's check-ins to its own server
+    (DEC-0031; its OE-05, the enrollment client);
+  - routes a session's events as `routeTarget` answers (the vectors), and installs and fills an organization's instance
+    only as kind `estate-placement` with its context finds it placed;
+  - its meter reads the hub's projection of a grant that carries `context` (it repins before the hub writes one);
+  - shipping `grant.usage` from the meter's settled receipts, routed as `routeGrantUsage` answers, needs a new
+    Observatory row, requested through the pilot's §4 table or the board (`com.submit`).
+- **The first organization server** issues `org.id` within `[A-Za-z0-9_-]{1,128}`, reads a share grant's `context`, and
+  ingests `grant.usage` to show a shared agent's usage per grant as sums and states, counting the first per (stream,
+  day, `grantId`), every read in the access log (CX-VES-08).
+- **fabric-agent-adapter** (its FAA-41): the kits run `FAC-SEM-110` and `FAC-SEM-111` and accept per-context
+  placements at their next pin.
+- **Fabric Dashboards** (its FD-52) groups instances by the placement's context; a service descriptor carries none.
 - **Fabric Switchboard** uses the context-id form for its pool's context attribute.
 
 The board row is CT-51.
@@ -200,5 +263,6 @@ The board row is CT-51.
   (Fabric's CX-FAB-08).
 - Whether a share grant's `audience` names the placed agent: `audience` is an agent id and a placement names an
   `agentRef`, and the contract does not map one to the other.
+- A context on a secret envelope: until one is decided, an organization's slot is filled on its own machine only.
 - Fabric confirms the context form and the placement key in its organization decision (D8). If D8 decides otherwise, a
   later decision changes them with a compatibility note.

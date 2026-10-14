@@ -105,8 +105,10 @@ kept outside the signed record, so the record carries no label a person chose:
 - **`secrets[]`** — secret placements, by reference only: `{agentRef, slot, from, context?}` names a slot of the
   instance of a package placed on this machine in `context` (absent meaning `personal`, DEC-0082) and the machine of this
   estate whose vault holds it. No member can hold a value (schema, DEC-0013); none of the four is shaped like a credential
-  (`src/secret-shape.ts`); the agent is placed here in that context; `from` is a machine of the record; a slot is placed
-  once per agent and context (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
+  (`src/secret-shape.ts`); the agent is placed here in that context; `from` is a machine of the record, and for an
+  organization's instance this machine itself, since a secret envelope names no context and fills only a personal slot
+  ([contexts](contexts.md#one-instance-per-context-on-a-machine)); a slot is placed once per (machine, agent, slot,
+  context) (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
   `estate-placement`). The value travels sealed to this machine's `#kem` key (v4 Path 2 step 3), never in the record.
 
 ## Share grants
@@ -215,9 +217,9 @@ keys are DEC-0053's.
 | `FAC-SEM-072` | `estate-record`, `estate-record-revision` | a revision is whole and follows its parent: its `digest` is its own, its window is positive and at most 30 days; across `{parent, next}`, the same estate, the next number, the parent's digest, not issued before the parent, every parent revocation kept |
 | `FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once |
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine and context (absent: `personal`, DEC-0082) under a publisher key the record pins, each pinned once; an installed package is the one placed in its context — its own digest, the placement's `agentRef` and digest, on a machine of the record |
-| `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record, a slot once per agent and context (DEC-0082), and a slot the placed package declares |
+| `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record — its own machine for an organization's instance — a slot once per (machine, agent, slot, context) (DEC-0082), and a slot the placed package declares |
 | `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076) |
-| `FAC-SEM-111` | `estate-record`, `estate-placement` | a placement whose context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076), whose `context` equals the placement's as written and which the record does not revoke; a personal placement (no context, or `personal`) names no grant (DEC-0082) |
+| `FAC-SEM-111` | `estate-record`, `estate-placement` | a placement whose context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076), whose `context` equals the placement's as written and is an `org:<orgId>` (a malformed context fails closed), and which the record does not revoke; a personal placement (no context, or `personal`) names no grant (DEC-0082). It reads revisions only: a revocation delta stops the grant's calls at the hub and the meter at once, and this rule refuses the instance from the next revision |
 
 ## Who adopts it
 

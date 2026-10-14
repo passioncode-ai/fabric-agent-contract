@@ -1,6 +1,6 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053 and DEC-0056; routed by context by DEC-0082 · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056 and DEC-0082 (one enrollment per organization, `org.id` for contexts) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
@@ -81,6 +81,10 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
      `delegationRevocations` ([root certification](#root-certification));
    - the check-in interval;
    - optionally the current signed server policy (never a `user` layer, schema).
+
+An organization server that takes part in [contexts](contexts.md) (DEC-0082) MUST issue `org.id` within
+`[A-Za-z0-9_-]{1,128}`, the set of a context's `orgId`: an `org.id` outside it can be enrolled but no context names it,
+so nothing of a context is routed to it.
 
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment
@@ -453,14 +457,15 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   unchanged, and a check-in response carries a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
 
-**One enrollment per organization, routed by context** (DEC-0082). A device enrolled in two organizations holds one
-enrollment, certificate and stream epoch in each, and a check-in carries no context: the organization is the one the
-certificate binds ([attribution](#attribution)). A collector sends the check-ins, and the batches, of a session in
-`org:<orgId>` only to the organization server of the one enrollment whose `org.id` is that id, compared as written, and
-nothing of a `personal` session to any organization server (`routeTarget` in `src/context-route.ts`, the shared vectors
+**One enrollment per organization** (DEC-0082). A device enrolled in several organizations holds one enrollment,
+certificate and stream epoch in each. It sends each enrollment's check-ins to that enrollment's own server, on that
+enrollment's interval, reporting only that enrollment's streams; a check-in carries no context, and the organization is
+the one its certificate binds ([attribution](#attribution)). A check-in has no session, so no session's context routes
+it. A session's events go where `routeTarget` answers, and a grant's daily usage where `routeGrantUsage` answers
+(`src/context-route.ts`, the shared vectors
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json), [contexts](contexts.md#routing)).
 Until a key per context exists (CX-CON-06), the device shows both organizations the same device key and reports the same
-`records.estateRecord` to each, so the two can link it ([contexts → linkability](contexts.md#linkability)).
+`records` to each, so the two can link it ([contexts → linkability](contexts.md#linkability)).
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a

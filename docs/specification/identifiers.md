@@ -116,6 +116,7 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 | `FAC-SEM-014` ([provider](provider.md#semantic-rules)) | an entry's `providerId` against its manifest's `provider.id` (the slug against the file stem stays as written) |
 | `FAC-SEM-076` ([estate record](estate-record.md#semantic-rules)) | a share grant's `meta.id` against the grants before it, and a `grant` revocation's `ref` against the grants and the revocations before it |
 | `FAC-SEM-111` ([estate record](estate-record.md#semantic-rules), DEC-0082) | a placement's `grant` against the share grants' `meta.id` and the `grant` revocations' `ref` |
+| `FAC-SEM-039` ([activity](activity.md#semantic-rules), DEC-0082) | a `grant.usage`'s `grantId` against the `grant.usage` events before it in the same stream and day |
 | `isRevoked` (`src/revocation-delta.ts`; [revocation delta](revocation-delta.md), and through it `reconcileRevision`, `FAC-SEM-084`) | a `grant` revocation's `ref` against the grant asked about; every other kind exactly |
 | `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and the `capability` of an admission, a binding or an event against the route's — there `capability` is a capability's URI (`common.schema.json#/$defs/uri` in `runner-route`, `runner-route-event`, `binding` and `admission`) |
 
