@@ -96,7 +96,9 @@ Three rules apply to every grant and every reader:
 
 A **share grant** (`principalKind: external`) lets a person or organization outside the estate call one of
 the owner's agents for a project. It carries a limit, an expiry and a payer, and it can be revoked. Usage
-reports attribute spend to it through `byGrant`.
+reports attribute spend to it through `byGrant`. A share grant into an organization carries that organization's
+`context`, `org:<orgId>`, never `personal` (`FAC-SEM-110`); its access level is its own fields, and the organization
+sees its usage as one `grant.usage` activity event per day ([contexts](contexts.md), DEC-0082).
 
 ## Checking
 

@@ -115,6 +115,7 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 | `FAC-SEM-096` ([versioning](versioning.md#semantic-rules)) | a rollback basis's `id` against the setting's own |
 | `FAC-SEM-014` ([provider](provider.md#semantic-rules)) | an entry's `providerId` against its manifest's `provider.id` (the slug against the file stem stays as written) |
 | `FAC-SEM-076` ([estate record](estate-record.md#semantic-rules)) | a share grant's `meta.id` against the grants before it, and a `grant` revocation's `ref` against the grants and the revocations before it |
+| `FAC-SEM-111` ([estate record](estate-record.md#semantic-rules), DEC-0082) | a placement's `grant` against the share grants' `meta.id` and the `grant` revocations' `ref` |
 | `isRevoked` (`src/revocation-delta.ts`; [revocation delta](revocation-delta.md), and through it `reconcileRevision`, `FAC-SEM-084`) | a `grant` revocation's `ref` against the grant asked about; every other kind exactly |
 | `FAC-SEM-030`, `FAC-SEM-032`, `FAC-SEM-034` ([runners](runners.md#semantic-rules)) | a revision reference's `id`, and the project and the `capability` of an admission, a binding or an event against the route's — there `capability` is a capability's URI (`common.schema.json#/$defs/uri` in `runner-route`, `runner-route-event`, `binding` and `admission`) |
 
@@ -122,6 +123,10 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;
+- context ids (`common.schema.json#/$defs/contextId`: `personal`, `org:<orgId>`; [contexts](contexts.md), DEC-0082) — a
+  grant's `context` against a placement's (`FAC-SEM-111`), a session's or a grant's against an enrollment's `org.id`
+  (`routeTarget`, `routeGrantUsage`): never case-folded or by prefix; the pattern admits no upper-case prefix and no `%`,
+  so every valid value is already its normal form and the two comparisons agree;
 - a board finding's `affects` items (`FAC-SEM-108`, DEC-0080): a backlog row's `repository`, `path` and `id`, whose
   patterns admit no `:`, so none is a URI; a task's id, an opaque id of the host's task (DEC-0041's grammar); and its
   `dedupeKey`, a key like the idempotency key, not an identifier;

@@ -64,6 +64,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Proposals and learning notes — `fabric-proposal/1`, `learning-note/1` (DEC-0072)](docs/specification/proposals.md)
 - [OpenRouter attribution — the organization's products as apps on OpenRouter (DEC-0065)](docs/specification/openrouter-attribution.md)
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
+- [Contexts — `personal` and `org:<orgId>`: a grant's context, one agent instance per context on a machine, routing by context and a grant's daily usage (DEC-0082)](docs/specification/contexts.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
 - [The runner catalogue of installed coding agents](docs/specification/runners.md)

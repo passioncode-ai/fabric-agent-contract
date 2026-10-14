@@ -80,6 +80,13 @@ the person ([spend policy](docs/specification/spend-policy.md), DEC-0037).
 or `month`; several apply together and the first reached stops the spend (DEC-0038). `call` is a refusal
 window at L3, not a grant limit (DEC-0041).
 
+**Context**: Where work happens and whose it is: `personal`, the person's own, or `org:<orgId>`, an organization by the
+organization server's opaque id (`common.schema.json#/$defs/contextId`), compared as written. A grant names the context
+its principal uses it in, never `personal` for an external one; an agent is placed on a machine once per context, an
+organization's instance under its own share grant; no event or check-in carries a context, and a collector routes each
+only to its context's organization; a grant's usage reaches its organization as a daily `grant.usage` event
+([contexts](docs/specification/contexts.md), DEC-0082).
+
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
 DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it

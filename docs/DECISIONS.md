@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0082`
+**Next free ID:** `DEC-0083`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -752,6 +752,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (head `19e2b58`).
 - **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
 - **Annotated (2026-10-12):** amended by DEC-0068 (the core kind `session.annotation`; one writer per session, `FAC-SEM-100`).
+- **Annotated (2026-10-13):** amended by DEC-0082: the core kind `grant.usage` (one grant's metered usage for one UTC day, sums only, no session or user), `FAC-SEM-038` and `FAC-SEM-039` extended to it, and no event carries its session's context: a collector routes by it (`docs/specification/contexts.md`).
 - **Amends:** nothing — a new protocol beside `fabric-service/0.1`, added under the DEC-0016
   extension policy
 - **Decision:** The contract defines activity telemetry for debugging, work memory and spend
@@ -907,6 +908,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Revised before merge by the contract owner's review of PR #22 and its re-review.
 - **Annotated (2026-10-12):** item 7's "valid at the policy's `issuedAt`" is replaced by DEC-0053 item 1 — a key is judged when the device verifies — and item 9 records the posture reason `re_enrolled` (CON-OE-01); DEC-0053 amends items 1, 3 and 4 (bound users, organization policy keys, expiry, collection start, a certified root, ES256, device keys by role).
 - **Annotated (2026-10-12):** items 1 and 2 extended by DEC-0056 — every request after enrollment carries an HTTP message signature beside mutual TLS, and a receiver behind a TLS-terminating host attributes by the certificate the verified signature names.
+- **Annotated (2026-10-13):** DEC-0082: a device enrolled in several organizations holds one enrollment per organization, its check-ins carry no context, and a collector sends a session's check-ins and batches only to the enrollment of that session's organization, never a personal session's (`routeTarget`, `fixtures/vectors/context-route.json`).
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
@@ -1314,6 +1316,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   usage (Switchboard), and showing policies, grants and requests (Fabric Dashboards).
 - **Annotated (2026-10-12):** `modelClasses` closed to a vocabulary, and how a policy's classes restrict a launch, by
   DEC-0046.
+- **Annotated (2026-10-13):** DEC-0082: a share grant into an organization carries that organization's `context`, never `personal` (`FAC-SEM-110`); its usage reaches the organization as a daily `grant.usage` activity event built from the meter's settled receipts and `byGrant` (`docs/specification/contexts.md#usage-per-grant`).
 - **Decision:**
   - **Four levels, the most specific deciding:**
     - L0 estate total across all provider keys;
@@ -1411,6 +1414,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   [adoption plan](https://github.com/passioncode-ai/fabric/blob/agent/release-040-wave1/docs/evidence/plans/2026-10-11-delegation-model/README.md).
 - **Annotated (2026-10-11):** tightens the service's operator-session lifetime (12 hours after last use, 7 days after sign-in): not additive for that rule, so a kit's longer cookie stops conforming at its next pin (ruled with Fabric's session, ADR-0144's owner, 2026-10-11).
 - **Annotated (2026-10-12):** amended by DEC-0045 (one grant per token, the meter's hop, no `device` approval, the meter's refusal wire, a mandatory issuer, a strict verifier, trust tiers T0/T1/T2).
+- **Annotated (2026-10-13):** amended by DEC-0082: a standing grant gains an optional `context` (`personal` or `org:<orgId>`), never `personal` for `principalKind: external` (`FAC-SEM-110`); a grant's access level stays its own fields (`docs/specification/contexts.md`).
 - **Amends:** interop C3.5 (the hub is the only issuer, not the only route); DEC-0024 additively
   (`surfaces.mcp.auth: "delegation"`); DEC-0037 (the registry's per-session token is the hub's delegation
   token; its grant-check codes become a subset of one code set); DEC-0037's L0 wording; DEC-0038's grant gains
@@ -2416,6 +2420,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
   (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
 - **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-076` keys share grants and `grant` revocations by the normal form of the grant's id (`docs/specification/identifiers.md`).
+- **Annotated (2026-10-13):** amended by DEC-0082: a placement gains `context` (absent: `personal`) and, in an organization's context, `grant`; a secret placement gains `context`; `FAC-SEM-074` places an agent once per (machine, `agentRef`, context) and `FAC-SEM-075` a slot once per (`agentRef`, slot, context); `FAC-SEM-110` and `FAC-SEM-111` join the record's rules (`docs/specification/contexts.md`).
 - **Annotated (2026-10-12):** ER-10's window admits a revision from 60 s before `issuedAt` (the clock skew every
   relay time allows, `CLOCK_SKEW_SECONDS` in `src/rfc3339.ts`), not from `issuedAt` itself — DEC-0066. This text is
   unchanged; `verifyEstateRecord`, estate-record.md and `fixtures/vectors/estate-record.json` carry the skew.
@@ -4722,3 +4727,144 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `com.reconcile` leaves it", Fabric main); the owner's ruling of 2026-10-13 and its rulings on the reading of PR #102;
   DEC-0022, DEC-0073. DEC-0081 was reserved by the owner session; `FAC-SEM-109` was reserved by git CAS (`--key
   comms-settle-sem-20261013 SEM`); the record plane is `fs`. The registers are edited under the owner session's leases.
+
+### DEC-0082 — Contexts for the RM-28 pilot: a context id, a grant's context, one placement per context, routing by context, and a grant's daily usage (`FAC-SEM-110`, `FAC-SEM-111`)
+
+- **Date:** 2026-10-13
+- **Status:** Accepted source change (on merge of its pull request). The owner's answer to the RM-28 pilot request
+  (fabric-workspace `b7ac2188`, `docs/reports/2026-10-12-org-contexts/pilot-2026-10-13.md` §4, the row
+  "fabric-agent-contract"), with the owner's later replacement of item 6 (a `grant.usage` event in place of "usage per
+  grant already exists"). Consumer adoption: board row CT-51.
+- **Amends:** DEC-0030 (one core kind), DEC-0031 (routing by context, no wire change), DEC-0037 and DEC-0039 (a grant's
+  optional `context`), DEC-0055 (a placement's `context` and `grant`, a secret placement's `context`; `FAC-SEM-074` and
+  `FAC-SEM-075` per context).
+- **Decision:** in [contexts](specification/contexts.md) —
+  1. **The context id.** `common.schema.json#/$defs/contextId`: `personal`, or `org:<orgId>` where `orgId` is 1–128 of
+     `[A-Za-z0-9_-]`, the organization server's opaque id of the organization (the first organization server issues
+     `org_<base32>`). Compared as written: never case-folded, trimmed or matched by prefix, as DEC-0077 compares board ids.
+     Every valid value is already its DEC-0076 normal form. Fabric Switchboard's pool attribute uses the same form (its
+     SB-109).
+  2. **The grant's context.** `governance.schema.json#/$defs/grant` gains an optional `context`: the context in which the
+     grant's principal uses it; a share grant into an organization carries that organization's `org:` id. Absent means
+     not stated and stays valid. **`FAC-SEM-110`** (kinds `grant` and `estate-record`, `src/context-rules.ts`): a grant
+     with `principalKind: external` never has `context: "personal"`, on a grant and on each of an estate record's
+     `shareGrants[]`.
+  3. **Access levels: no new field.** A grant's access level is its own `capabilities`, `effectCeiling`, `dataClasses`,
+     `spend` and `expiresAt`. Named levels are a host's interface presets that fill those fields.
+  4. **One instance per context on a machine (CX-CON-02).** An estate-record placement gains an optional `context`
+     (absent means `personal`) and an optional `grant` (a share grant's id, a URI); a secret placement gains `context`,
+     which `FAC-SEM-075` checks for a credential's shape like its other members.
+     - `FAC-SEM-074` (amended): an agent is placed once per (machine, `agentRef`, context), not once per machine.
+     - `FAC-SEM-075` (amended): a slot is placed once per (`agentRef`, slot, context), for an instance placed in that
+       context.
+     - **`FAC-SEM-111`** (kinds `estate-record` and `estate-placement`, `src/estate-record-rules.ts`): a placement whose
+       context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076),
+       whose `context` equals the placement's as written, and which the record does not revoke (a `grant` revocation
+       matched by normal form). A personal placement (no context, or `personal`) names no grant. Any other value counts
+       as an organization's context, so a malformed one fails closed.
+     - `placementTrust(record, machine, agentRef, context)` and kind `estate-placement` (`{record, machine, package,
+       context?}`) take the context, `personal` by default, so an existing caller is unchanged.
+  5. **No context on the telemetry or check-in wire; a collector routes.** `routeTarget(sessionContext, enrollments)` in
+     `src/context-route.ts` answers where an event or a check-in of a session may go: for `org:<orgId>`, the one
+     enrollment whose `org` is exactly that id (`{route: "enrollment", org, index}`); otherwise `{route: "none", reason}`
+     — `personal` always for a personal session, `not-a-context`, `not-enrolled`, or `ambiguous` for two enrollments in
+     one organization. It is total and never throws. The shared vectors are `fixtures/vectors/context-route.json`,
+     written by `tools/vectors/context-route.ts`. The conformance row is "a collector that sends events or check-ins to
+     an organization server".
+  6. **A grant's daily usage: the core activity kind `grant.usage`** (replacing the brief's "already exists"). One
+     grant's metered usage for one UTC day, modelled on `policy.violation`: `occurred` is that day's midnight UTC
+     (`FAC-SEM-039`, extended), `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`,
+     `skill` or `launch` (schema). `data` (`telemetry-event.schema.json#/$defs/grantUsage`, closed): `day`, `grantRef`
+     (the opaque DEC-0045 reference, 1–256 characters as in `grant-check-request`), `calls` (at least 1), `unpricedCalls`
+     (at most `calls`) and `costUsd` (a number of at least 0, or `null` when nothing was priced, never `0` for unknown,
+     as DEC-0021 and `FAC-SEM-025` do; `FAC-SEM-038`, extended, checks the three together). Its source is what the
+     device's meter settled under that grant (grant-check receipts, DEC-0037) and services' `byGrant` rows: sums and
+     states only, never a per-call line. A collector emits it after the day ends, one per (day, `grantRef`) per stream;
+     a second one for the same (day, `grantRef`) in one stream of a batch is refused by `FAC-SEM-039`, folded into its
+     batch clause "no event is sent twice" rather than a new code, since it is the same fact sent twice under a new id.
+     It goes only to the organization server of the grant's own `context`: `routeGrantUsage(grantContext, enrollments)`
+     answers as `routeTarget` with the grant's context, and `{route: "none", reason: "no-context"}` for a grant that
+     states none; a `personal` grant answers `personal`. Its vectors are the same file's `grantUsage`.
+  7. **Membership `external` and `expiresAt` (CX-VES-03)** is the organization server's record. Its expiry acts through
+     revocations that exist: the device certificate (DEC-0031), and the share grant's `expiresAt` and `grant` revocation
+     (`FAC-SEM-076`, carried fast by DEC-0054's delta). No change.
+- **Why:**
+  - A person in two organizations runs one agent as two instances on one machine; `FAC-SEM-074` allowed one placement
+    per machine, so the pilot could not even be recorded. Keying the placement by context, and binding an organization's
+    instance to its own share grant, lets each organization's instance carry its own access level and be revoked alone.
+  - An access-level field would be a second source of truth beside the grant's own fields: it would need a rule
+    reconciling the two, and a checker would have to choose between them. Two grants with different fields already are
+    two levels.
+  - A context field on events and check-ins adds nothing an organization server does not know from the certificate
+    (DEC-0031, `FAC-SEM-045`), and it could leak `personal` or another organization's id (the RM-28 report's CX-22). A
+    pure routing function with shared vectors fixes the one decision that matters, where the data goes, and lets every
+    port agree on the edge cases.
+  - The organization server ingests only DEC-0030 activity batches over the DEC-0056 transport, and no activity event
+    kind carried a grant reference, so CX-VES-08 (usage per grant as sums and states) had no input. A grant reference
+    is not put on `usage.line`: a per-call reference would let the organization join every model call to the grant,
+    finer than CX-VES-08's sums, and a shared agent's spend is metered by grant check and often has no session at all.
+    A daily sum per grant is the coarsest record that answers the administrator's question, and usage under a share
+    grant is data about a person (CX-VES-08, OD-1).
+  - Until CX-CON-06 (a `kid` and an `iss` per context, waiting on Fabric's D3) the pilot is linkable: one machine shows
+    both organizations the same device key and hub key and reports the same estate-record revision and digest in its
+    check-ins. That is acceptable only while both organizations belong to one person, as in the pilot; a membership in
+    an organization another person controls does not run on this slice.
+- **Compatibility:** `contractVersion` stays `0.1.0`, but this is not purely additive for readers.
+  1. The grant and estate-record schemas are closed (`additionalProperties: false`): a reader pinned before DEC-0082
+     refuses a grant with `context`, and an estate record whose placement carries `context` or `grant` or whose secret
+     placement carries `context`.
+  2. `FAC-SEM-074` and `FAC-SEM-075` are relaxed: a record with two contexts' placements of one agent on one machine fails
+     an older node's `FAC-SEM-074`.
+  3. So a writer publishes such documents only once every reader is pinned at or after DEC-0082; for the estate record,
+     that means every machine of the person.
+  4. `FAC-SEM-110` and `FAC-SEM-111` are new refusals of documents that carry the new members only; a record or grant
+     without them reads as before. The `grant.usage` clauses of `FAC-SEM-038` and `FAC-SEM-039` concern only the new kind.
+  5. `grant.usage`: the telemetry schema's `kind` is open, and a kind a receiver does not know is validated only as an
+     unknown kind's data (`activity-common.schema.json#/$defs/extData`: two levels, scalars, strings of at most 64
+     characters with no whitespace), then accepted, stored and counted uninterpreted (activity.md, *Extension and unknown
+     kinds*). A receiver pinned before DEC-0082 therefore accepts a `grant.usage` whose `grantRef` is at most 64
+     characters with no whitespace, and rejects a longer one as that event's `schema` rejection, which consumes the
+     event and leaves the batch standing. A writer sends a longer reference only to a receiver pinned at or after
+     DEC-0082.
+- **Consequences / affects:**
+  - spec: `docs/specification/contexts.md` (new), `docs/specification/estate-record.md` (fields, machines, share grants,
+    the verifier's rule list, the rules table, who adopts it), `docs/specification/activity.md` (the kind table,
+    `grant.usage`, unknown kinds, routing by context, the rules table), `docs/specification/devices.md` (one enrollment
+    per organization, routed by context), `docs/specification/conformance.md` (the two register rows, the estate row,
+    the collector row, the identifiers row), `docs/specification/identifiers.md`, `docs/specification/spend-policy.md`,
+    `docs/specification/governance-and-roles.md`, `docs/specification/delegation.md`;
+  - schemas: `schemas/common.schema.json` (`contextId`), `schemas/governance.schema.json` (`context`),
+    `schemas/estate-record.schema.json` (a placement's `context` and `grant`, a secret placement's `context`),
+    `schemas/telemetry-event.schema.json` (`grant.usage`, `grantUsage`);
+  - code: `src/context-route.ts` (new: `parseContext`, `routeTarget`, `routeGrantUsage`), `src/context-rules.ts` (new:
+    `FAC-SEM-110`), `src/estate-record-rules.ts` (`FAC-SEM-074`, `FAC-SEM-075` per context, `FAC-SEM-111`,
+    `placementTrust`), `src/activity-rules.ts` (`FAC-SEM-038`, `FAC-SEM-039` for `grant.usage`), `src/semantic-rules.ts`,
+    `tools/vectors/context-route.ts` (new), `vitest.config.ts` (floors);
+  - fixtures: `fixtures/vectors/context-route.json` (new); `fixtures/positive/estate-record-contexts.json`,
+    `fixtures/positive/governance-grant-share-context.json`, `fixtures/positive/telemetry-event-grant-usage.json`,
+    `fixtures/positive/telemetry-event-grant-usage-unpriced.json`; `fixtures/negative/governance-grant-context-*.json`,
+    `fixtures/negative/estate-record-placement-*.json`, `fixtures/negative/estate-record-secret-context-malformed.json`,
+    `fixtures/negative/telemetry-event-grant-usage-*.json`; `fixtures/semantic/grant-context-*.json`,
+    `fixtures/semantic/estate-*.json`, `fixtures/semantic/telemetry-event-grant-usage-*.json`,
+    `fixtures/semantic/activity-batch-grant-usage-*.json`; `fixtures/catalogue.json`;
+  - tests: `test/contexts.test.ts` (new), `test/context-route.test.ts` (new), `test/estate-record.test.ts`,
+    `test/rule-tolerance.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/backlog.md` (CT-51, CT-38),
+    `docs/handoffs/2026-10-13-rm28-pilot-contexts.md`, `docs/handoffs/README.md`.
+- **Not decided here:**
+  - CX-CON-04 (`person` and `organization` in place of `external`), CX-CON-03, CX-CON-05, and CX-CON-07…10, the
+    purpose mark (CX-CON-10) included;
+  - CX-CON-06 (a `kid` and an `iss` per context), which waits on Fabric's D3; until it lands the pilot is linkable, as
+    *Why* says;
+  - a context on a project, a session or an event (the rest of CX-CON-01); who fixes a session to a context (the host's);
+  - whether a share grant's `audience` names the placed agent (an agent id against an `agentRef`, which the contract
+    does not map);
+  - corrections of a day's `grant.usage` after it was emitted, and two collectors of one device reporting one grant;
+  - Fabric confirms the context form and the placement key in its organization decision (D8). If D8 differs, a later
+    decision changes them with a compatibility note.
+- **Source:** the RM-28 pilot request and the owner's answer to it (fabric-workspace `b7ac2188`,
+  `docs/reports/2026-10-12-org-contexts/pilot-2026-10-13.md` §4; the decisions CX-CON-01…10, CX-22, CX-VES-03 and
+  CX-VES-08 in that report's README at the same commit); the owner's replacement of item 6 (2026-10-13). DEC-0082,
+  `FAC-SEM-110` and `FAC-SEM-111` were reserved by the owner session (receipts SEM-0110, SEM-0111); no further code was
+  reserved, the duplicate clause being folded into `FAC-SEM-039`; the record plane is `fs`. The registers are edited
+  under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and `docs/backlog.md`.
