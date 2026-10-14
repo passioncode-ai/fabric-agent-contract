@@ -502,6 +502,19 @@
       }
     },
     {
+      "name": "an enrollment whose org.id is outside orgId's set (org.example) cannot be routed: no context names it, so an organization server taking part in contexts issues ids of [A-Za-z0-9_-]{1,128}",
+      "session": "org:org_example",
+      "enrollments": [
+        {
+          "org": "org.example"
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "not-enrolled"
+      }
+    },
+    {
       "name": "non-string: null is no context",
       "session": null,
       "enrollments": [

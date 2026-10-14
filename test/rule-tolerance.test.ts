@@ -91,3 +91,32 @@ describe("activity and device rules tolerate malformed input", () => {
     expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: "toString" } }, dataClass: "valueOf", sent: true })).not.toThrow();
   });
 });
+
+// DEC-0082 review: a member that is an object whose toString is not a function (valid JSON) reaches no String() call.
+describe("members shaped {toString: 1} answer with findings, never a throw (DEC-0082)", () => {
+  const bad = { toString: 1 };
+  it("reads nested placements and secrets of that shape", () => {
+    const record = {
+      machines: [{ id: bad, deviceKeys: [{ kid: bad, use: bad, publicKey: "AA" }], hubKey: { kid: bad, x: "AA" },
+        packages: [{ agentRef: bad, digest: bad, publisherKid: bad, context: bad, grant: bad }, { agentRef: bad, context: bad, grant: "urn:g" }],
+        secrets: [{ agentRef: bad, slot: bad, from: bad, context: bad }, { agentRef: bad, slot: bad, from: bad, context: bad }] }],
+      publisherKeys: [{ kid: bad }, { kid: bad }], shareGrants: [{ meta: { id: bad }, principalKind: "external", context: bad }],
+      revocations: [{ kind: bad, ref: bad }, { kind: "grant", ref: bad }], authorities: [{ credentialId: bad, alg: bad }],
+      issuedAt: bad, validUntil: bad, revision: bad
+    };
+    expect(() => evaluateSemanticRules("estate-record", record)).not.toThrow();
+    expect(() => evaluateSemanticRules("estate-record-revision", { parent: record, next: record })).not.toThrow();
+    for (const context of [undefined, bad, "org:a"]) {
+      expect(() => evaluateSemanticRules("estate-placement", { record, machine: bad, package: { agentRef: bad, secrets: [{ name: bad }] }, context })).not.toThrow();
+    }
+    expect(() => evaluateSemanticRules("grant", { principalKind: "external", context: bad })).not.toThrow();
+  });
+  it("reads grant.usage events whose members are objects", () => {
+    const event = (data: unknown) => ({ kind: "grant.usage", eventId: bad, occurred: bad, collector: { id: bad, epoch: bad }, seq: bad, data });
+    const shapes = [{ day: bad, grantId: bad, calls: bad, unpricedCalls: bad, costUsd: bad }, { day: "2026-10-12", grantId: bad, calls: 2, unpricedCalls: 3, costUsd: bad }, bad];
+    for (const data of shapes) {
+      expect(() => evaluateSemanticRules("telemetry-event", event(data))).not.toThrow();
+      expect(() => evaluateSemanticRules("activity-batch", { device: { id: bad }, events: [event(data), event(data)] })).not.toThrow();
+    }
+  });
+});

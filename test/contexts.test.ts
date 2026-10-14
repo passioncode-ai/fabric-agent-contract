@@ -282,3 +282,35 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
     for (const phrase of ["at most 64 characters", "no whitespace", "drive prefix", "`/Users/`", "FAC-SEM-037"]) expect(contextsSpec, phrase).toContain(phrase);
   });
 });
+
+describe("the fix round's hardening (DEC-0082 review)", () => {
+  it("FAC-SEM-111 refuses a malformed context even when the grant carries the same malformed one", () => {
+    const record = changed((r) => { r.machines[0].packages[1].context = "Personal"; r.shareGrants[1].context = "Personal"; });
+    expect(at("estate-record", record, "FAC-SEM-111")).toEqual(["/machines/0/packages/1/context"]);
+  });
+
+  it("FAC-SEM-075 fills an organization's slot only from its own machine", () => {
+    expect(at("estate-record", changed((r) => { r.machines[0].secrets[1].from = "m-9a07"; }), "FAC-SEM-075")).toEqual(["/machines/0/secrets/1/from"]);
+    expect(at("estate-record", changed((r) => { r.machines[0].secrets[0].from = "m-9a07"; }), "FAC-SEM-075")).toEqual([]);
+  });
+
+  it("keeps the array index in every instancePath when a non-object comes first", () => {
+    const grantFirst = changed((r) => { r.shareGrants = [7, ...r.shareGrants]; r.shareGrants[2] = { ...r.shareGrants[2], context: "personal" }; });
+    expect(at("estate-record", grantFirst, "FAC-SEM-110")).toEqual(["/shareGrants/2/context"]);
+    const twice = changed((r) => { r.shareGrants = [null, r.shareGrants[0], r.shareGrants[0]]; });
+    expect(at("estate-record", twice, "FAC-SEM-076")).toEqual(["/shareGrants/2/meta/id"]);
+    const revoked = changed((r) => { r.revocations = ["x", { kind: "grant", ref: r.shareGrants[0].meta.id, revokedAt: "2026-10-12T10:00:00Z" }]; });
+    expect(at("estate-record", revoked, "FAC-SEM-076")).toEqual(["/revocations/1/ref"]);
+    const install = changed((r) => {
+      r.machines = [1, ...r.machines];
+      r.machines[1].packages = [null, ...r.machines[1].packages];
+      r.machines[1].secrets = ["s", ...r.machines[1].secrets];
+      delete r.machines[1].packages[2].grant;
+      r.machines[1].secrets[2].slot = "UNDECLARED_SLOT";
+    });
+    const findings = evaluateSemanticRules("estate-placement", { record: install, machine: "m-4c1e", package: agentPkg, context: ORG_A });
+    expect(findings.map((finding) => `${finding.code} ${finding.instancePath}`).sort()).toEqual([
+      "FAC-SEM-075 /record/machines/1/secrets/2/slot", "FAC-SEM-111 /record/machines/1/packages/2/grant"
+    ]);
+  });
+});

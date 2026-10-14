@@ -82,6 +82,7 @@ export function contextRouteVectors(): Json {
     { name: "lax: ORG: in capitals is no context", session: `ORG:${A}`, enrollments: both, answer: none("not-a-context") },
     { name: "lax: a bare organization id is no context, even when it is enrolled", session: A, enrollments: both, answer: none("not-a-context") },
     { name: "lax: a dot in the id is no context, even when an enrollment has that id", session: "org:org.example", enrollments: [{ org: "org.example" }], answer: none("not-a-context") },
+    { name: "an enrollment whose org.id is outside orgId's set (org.example) cannot be routed: no context names it, so an organization server taking part in contexts issues ids of [A-Za-z0-9_-]{1,128}", session: "org:org_example", enrollments: [{ org: "org.example" }], answer: none("not-enrolled") },
     { name: "non-string: null is no context", session: null, enrollments: both, answer: none("not-a-context") },
     { name: "non-string: a number is no context", session: 7, enrollments: [{ org: "7" }], answer: none("not-a-context") },
     { name: "non-string: a boolean is no context", session: true, enrollments: both, answer: none("not-a-context") },

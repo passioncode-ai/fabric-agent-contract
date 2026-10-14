@@ -276,3 +276,49 @@ describe("envelopeShape is the schema (parity)", async () => {
     expect(envelopeShape(input)).toBe(schemaValid(input) && realInstants(input));
   });
 });
+
+// DEC-0082: an envelope names no context, so a target reads only its personal secret placements, and an organization's
+// instance fills its slot on its own machine (FAC-SEM-075), never by an envelope.
+describe("the open context with per-context secret placements (DEC-0082)", () => {
+  type Rec = Record<string, any>;
+  const contexts = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures", "positive", "estate-record-contexts.json"), "utf8")) as Rec;
+  const placement = contexts.machines[0].packages[1] as Rec; // the first organization's instance and its share grant
+  const { agentRef, slot } = contexts.machines[1].secrets[0] as { agentRef: string; slot: string };
+  /** m-9a07 also runs the organization's instance, its slot filled locally, listed before or after the personal one. */
+  const record = (orgFirst: boolean): Rec => {
+    const r = JSON.parse(JSON.stringify(contexts)) as Rec;
+    const machine = r.machines[1];
+    machine.packages.push({ ...placement });
+    const org = { agentRef, slot, from: machine.id, context: placement.context };
+    machine.secrets = orgFirst ? [org, ...machine.secrets] : [...machine.secrets, org];
+    return r;
+  };
+
+  it("decides the personal sealer whatever the order of the record's secret placements", () => {
+    for (const orgFirst of [true, false]) {
+      const ctx = estateEnvelopeContext([record(orgFirst)], "m-9a07");
+      expect(ctx.mayHold("m-4c1e#sig", agentRef, slot), `org first: ${orgFirst}`).toBe(true);
+      expect(ctx.currentPlacement(agentRef, slot), `org first: ${orgFirst}`).toBe(Number(contexts.revision));
+    }
+  });
+
+  it("never admits an envelope for the organization's slot, not even from the machine that holds it", () => {
+    for (const orgFirst of [true, false]) {
+      const ctx = estateEnvelopeContext([record(orgFirst)], "m-9a07");
+      expect(ctx.mayHold("m-9a07#sig", agentRef, slot), `org first: ${orgFirst}`).toBe(false);
+    }
+    // With only the organization's slot on the machine, nothing admits an envelope for it at all.
+    const orgOnly = record(true);
+    orgOnly.machines[1].secrets = orgOnly.machines[1].secrets.slice(0, 1);
+    const ctx = estateEnvelopeContext([orgOnly], "m-9a07");
+    expect(ctx.mayHold("m-9a07#sig", agentRef, slot)).toBe(false);
+    expect(ctx.mayHold("m-4c1e#sig", agentRef, slot)).toBe(false);
+    expect(ctx.currentPlacement(agentRef, slot)).toBeUndefined();
+  });
+
+  it("reads context personal spelled out as the personal placement", () => {
+    const r = record(true);
+    r.machines[1].secrets[1].context = "personal";
+    expect(estateEnvelopeContext([r], "m-9a07").mayHold("m-4c1e#sig", agentRef, slot)).toBe(true);
+  });
+});

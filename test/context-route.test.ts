@@ -95,6 +95,9 @@ describe("routeTarget (DEC-0082 item 5)", () => {
       expect(routeTarget("org:a", shape).route, String(shape)).toBe("none");
     }
     expect(routeTarget("org:constructor", [])).toEqual({ route: "none", reason: "not-enrolled" });
+    // An enrollment whose org is only inherited from its prototype is not the entry's own.
+    expect(routeTarget("org:a", [Object.create({ org: "a" })])).toEqual({ route: "none", reason: "not-enrolled" });
+    expect(routeTarget("org:a", [Object.create({ org: "a" }), { org: "a" }])).toEqual({ route: "enrollment", org: "a", index: 1 });
     expect(routeTarget("org:__proto__", [{}])).toEqual({ route: "none", reason: "not-enrolled" });
   });
 

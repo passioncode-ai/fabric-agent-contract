@@ -124,9 +124,9 @@ export function tenantRef(provider: string, tenant: string): string {
 
 const events = (value: JsonObject) => (Array.isArray(value.events) ? value.events.filter(isObject) : []);
 const collectorOf = (event: JsonObject) => (isObject(event.collector) ? event.collector : {});
-const deviceId = (value: JsonObject) => (isObject(value.device) ? String(value.device.id) : "");
+const deviceId = (value: JsonObject) => (isObject(value.device) ? show(value.device.id) : "");
 /** A stream is (device.id, collector.id, collector.epoch): collector ids are unique only within their device. */
-export const streamKey = (device: string, collector: JsonObject) => `${device}/${String(collector.id)}#${String(collector.epoch)}`;
+export const streamKey = (device: string, collector: JsonObject) => `${device}/${show(collector.id)}#${show(collector.epoch)}`;
 const num = (x: unknown) => (typeof x === "number" ? x : 0);
 const data = (event: JsonObject) => (isObject(event.data) ? event.data : {});
 const MAX_U64 = (1n << 64n) - 1n;
@@ -197,7 +197,7 @@ function batchCost(value: JsonObject): Finding[] {
     findings.push(...eventCost(event, `/events/${i}`));
     if (event.kind !== "usage.line") return;
     const line = data(event);
-    const key = String(line.dedupeKey ?? "");
+    const key = show(line.dedupeKey ?? "");
     const first = seen.get(key);
     if (!first) { seen.set(key, line); return; }
     if (first.model !== line.model || !jsonEqual(first.tokens, line.tokens) || !jsonEqual(first.cost, line.cost)) {
@@ -246,7 +246,7 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
     if (raw.some(([from, to]) => to < from)) flag("/data/dropped/ranges", "a dropped range runs forward");
     else if (merged.length !== raw.length) flag("/data/dropped/ranges", "dropped ranges do not overlap or touch; merge them");
     const size = merged.reduce((n, [from, to]) => n + (to - from + 1), 0);
-    if (num(d.dropped.events) !== size) flag("/data/dropped/events", `${String(d.dropped.events)} dropped events for ranges that hold ${size}`);
+    if (num(d.dropped.events) !== size) flag("/data/dropped/events", `${show(d.dropped.events)} dropped events for ranges that hold ${size}`);
     if (merged.some(([, to]) => to >= num(event.seq))) flag("/data/dropped/ranges", "an overflow names only seqs assigned before its own");
   }
   if (event.kind === "policy.violation" && typeof d.day === "string" && typeof event.occurred === "string" && !event.occurred.startsWith(`${d.day}T`)) {
@@ -305,7 +305,7 @@ function batchIntegrity(value: JsonObject): Finding[] {
  *  range is the device's word until its overflow event arrives, and counts for tamper evidence only (F-B-108, DEC-0052). */
 export interface StreamState { collector: { id: string; epoch: number }; held: SeqRange[]; accounted: SeqRange[]; pending?: SeqRange[]; bufferedFrom?: number }
 
-const stateKey = (collector: JsonObject) => `${String(collector.id)}#${String(collector.epoch)}`;
+const stateKey = (collector: JsonObject) => `${show(collector.id)}#${show(collector.epoch)}`;
 
 /** The streams of one device after `batch` and `checkIn`, merged into what the receiver already holds. Ranges stay merged. */
 export function mergeStreams(known: readonly StreamState[], batch: JsonObject | null, checkIn: JsonObject | null): StreamState[] {
@@ -314,7 +314,7 @@ export function mergeStreams(known: readonly StreamState[], batch: JsonObject | 
   const stream = (collector: JsonObject) => {
     const key = stateKey(collector);
     let s = streams.get(key);
-    if (!s) { s = { collector: { id: String(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [], pending: [] }; streams.set(key, s); }
+    if (!s) { s = { collector: { id: show(collector.id), epoch: num(collector.epoch) }, held: [], accounted: [], pending: [] }; streams.set(key, s); }
     return s;
   };
   for (const event of batch ? events(batch) : []) {
@@ -369,15 +369,15 @@ function ackIntegrity(value: JsonObject): Finding[] {
   if (deviceId(ack) !== deviceId(batch)) flag("/ack/device/id", "the ack names another device than the batch");
   const total = num(ack.accepted) + num(ack.duplicates) + rejected.length;
   if (total !== list.length) flag("/ack", `accepted + duplicates + rejected is ${total} for ${list.length} events`);
-  const ids = new Set(list.map((event) => String(event.eventId)));
-  rejected.forEach((entry, i) => { if (!ids.has(String(entry.eventId))) flag(`/ack/rejected/${i}/eventId`, "a rejection names an event the batch did not carry"); });
+  const ids = new Set(list.map((event) => show(event.eventId)));
+  rejected.forEach((entry, i) => { if (!ids.has(show(entry.eventId))) flag(`/ack/rejected/${i}/eventId`, "a rejection names an event the batch did not carry"); });
   const device = deviceId(batch);
   const expected = new Map(contiguousAcks(known, batch).map((p) => [streamKey(device, p.collector as unknown as JsonObject), p]));
   acks.forEach((entry, i) => {
     const key = streamKey(device, isObject(entry.collector) ? entry.collector : {});
     const want = expected.get(key);
     if (want === undefined) { flag(`/ack/acks/${i}`, `the ack names ${key}, a stream the receiver never saw`); return; }
-    if (num(entry.seq) !== want.seq) flag(`/ack/acks/${i}/seq`, `every seq of ${key} up to ${want.seq} is consumed, so the ack is ${want.seq}, not ${String(entry.seq)}`);
+    if (num(entry.seq) !== want.seq) flag(`/ack/acks/${i}/seq`, `every seq of ${key} up to ${want.seq} is consumed, so the ack is ${want.seq}, not ${show(entry.seq)}`);
     const claimed = rangesOf(entry.held);
     if (claimed.some(([from, to]) => from <= want.seq || uncovered(want.held, from, to).length > 0)) {
       flag(`/ack/acks/${i}/held`, `held names seqs of ${key} the receiver has not consumed, or seqs at or below the ack`);
@@ -398,7 +398,7 @@ function summaryShape(value: JsonObject): Finding[] {
     code: "FAC-SEM-040", instancePath: path, message: kind === "path" ? "a summary carries no path" : `${key}: a summary has no person dimension and no content`
   }));
   if (isObject(value.producer) && value.producer.kind !== undefined) findings.push({ code: "FAC-SEM-040", instancePath: "/producer/kind", message: "a summary is built by a receiver from many devices; a device never produces one" });
-  const from = String(value.from ?? ""), to = String(value.to ?? "");
+  const from = show(value.from ?? ""), to = show(value.to ?? "");
   if (from > to) findings.push({ code: "FAC-SEM-040", instancePath: "/to", message: `the range ends (${to}) before it starts (${from})` });
   const cells = Array.isArray(value.cells) ? value.cells.filter(isObject) : [];
   const tuples = new Set<string>();
@@ -410,7 +410,7 @@ function summaryShape(value: JsonObject): Finding[] {
     const tuple = cell.other === true ? JSON.stringify(["other", cell.day]) : JSON.stringify([cell.agent, cell.skill ?? null, cell.project, cell.day, cell.outcome]);
     if (tuples.has(tuple)) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}`, message: cell.other === true ? "a day has one other cell" : "two cells share agent, skill, project, day and outcome" });
     tuples.add(tuple);
-    const day = String(cell.day ?? "");
+    const day = show(cell.day ?? "");
     if (day < from || day > to) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/day`, message: `${day} is outside ${from}…${to}` });
   });
   return findings;
@@ -433,7 +433,7 @@ export function confirmedPurposes(consents: readonly JsonObject[], at: string): 
   const latest = new Map<string, { when: number; consent: JsonObject }>();
   const until = Date.parse(at);
   for (const consent of consents) {
-    const when = Date.parse(String(consent.at ?? ""));
+    const when = Date.parse(show(consent.at ?? ""));
     if (consent.kind !== "consent" || typeof consent.purposeId !== "string" || !(when <= until)) continue;
     const before = latest.get(consent.purposeId);
     if (!before || when >= before.when) latest.set(consent.purposeId, { when, consent });
@@ -456,7 +456,7 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
   (Array.isArray(log.entries) ? log.entries.filter(isObject) : []).forEach((entry, i) => {
     const reader = isObject(entry.reader) && isObject(entry.reader.user) ? entry.reader.user.id : undefined;
     if (reader === undefined || reader === subject) return;
-    const scope = String(entry.scope ?? "");
+    const scope = show(entry.scope ?? "");
     if (scope.startsWith("activity.") && !ACTIVITY_SCOPES.has(scope)) {
       flag(`/log/entries/${i}/scope`, `${scope} is not a scope this profile names; a person's activity reaches another person only through the named scopes`);
     }
@@ -466,7 +466,7 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
     if (scope === USAGE_SCOPE && entry.step !== "day" && entry.step !== "period") {
       flag(`/log/entries/${i}/step`, "a person's usage and cost reach another person only as sums per UTC day or billing period");
     }
-    if (PRESENCE_SCOPES.has(scope) && !(typeof entry.purposeId === "string" && confirmedPurposes(consents, String(entry.at ?? "")).has(entry.purposeId))) {
+    if (PRESENCE_SCOPES.has(scope) && !(typeof entry.purposeId === "string" && confirmedPurposes(consents, show(entry.at ?? "")).has(entry.purposeId))) {
       flag(`/log/entries/${i}/purposeId`, "a person's time and presence reach another person only under a purpose the subject confirmed");
     }
   });
