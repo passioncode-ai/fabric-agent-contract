@@ -6,7 +6,8 @@ import { isObject } from "./findings.js";
  * organization server's opaque id of the organization. The context travels on no telemetry or check-in document: an
  * organization server knows the organization from the device certificate (DEC-0031's attribution), and a field would
  * add nothing while it could leak `personal` or another organization's id (unlinkability). Instead a collector routes:
- * `routeTarget` answers where an event or a check-in of a session in a given context may be sent, and the shared vectors
+ * `routeTarget` answers where an event of a session in a given context may be sent, `routeGrantUsage` where a
+ * `grant.usage` goes, and the shared vectors
  * `fixtures/vectors/context-route.json` are what a port runs.
  */
 
@@ -39,7 +40,8 @@ export function parseContext(value: unknown): Context | undefined {
 export interface Enrollment { org: string }
 
 /**
- * Where a collector may send an event or a check-in of a session in a context:
+ * Where a collector may send an event of a session in a context (a check-in goes to its own enrollment's server, never by
+ * a session):
  * - `{route: "enrollment", org, index}`: to the organization server of the one enrollment whose `org` is exactly the
  *   context's id (`index` in the list given);
  * - `{route: "none", reason}`: nowhere. `personal`: the session is personal, which never leaves for an organization

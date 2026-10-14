@@ -258,7 +258,7 @@ const revokedRefs = (record: JsonObject, kind: string) =>
 /**
  * The `from` of a machine's personal placement of (agentRef, slot) in one revision, or undefined. Only a personal
  * secret placement (no `context`, or `personal`) is read (DEC-0082): an envelope names no context, and an organization's
- * instance fills its slot on its own machine, never by an envelope (`FAC-SEM-075`), so the answer never depends on the
+ * instance fills its slot on its own machine, never by an envelope (the estate record's slot rule), so the answer never depends on the
  * order of the record's secret placements.
  */
 function placedFrom(record: JsonObject, machineId: string, agentRef: string, slot: string): unknown {

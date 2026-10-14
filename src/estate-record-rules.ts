@@ -26,7 +26,7 @@ const isString = (value: unknown): value is string => typeof value === "string";
  * even when a non-object precedes it.
  */
 const indexed = (value: unknown): Array<[JsonObject, number]> => (Array.isArray(value) ? value.flatMap((item, index): Array<[JsonObject, number]> => (isObject(item) ? [[item, index]] : [])) : []);
-/** A number read without `toNumber()`, which throws on an object such as `{"toString": 1}`; a numeric string reads as before. */
+/** A number read without `Number()`, which throws on an object such as `{"toString": 1}`; a numeric string reads as before. */
 const toNumber = (value: unknown): number => (typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN);
 
 export const ESTATE_RECORD_SCHEMA = "estate-record/1";

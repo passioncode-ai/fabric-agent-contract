@@ -20,7 +20,7 @@ export const VECTOR_FILE = "fixtures/vectors/context-route.json";
 const none = (reason: string) => ({ route: "none", reason });
 const to = (org: string, index: number) => ({ route: "enrollment", org, index });
 
-/** The vectors as an object: the contexts, then where an event or a check-in of a session in each goes. */
+/** The vectors as an object: the contexts, then where a session's events go, then where a grant's usage goes. A check-in goes to its own enrollment and is not routed here. */
 export function contextRouteVectors(): Json {
   const A = "org_7kq2m4xw", B = "org_3fh9p1zc";
   const both = [{ org: A }, { org: B }];
@@ -113,7 +113,7 @@ export function contextRouteVectors(): Json {
   ];
 
   return {
-    about: "Vectors for routing by context (DEC-0082, docs/specification/contexts.md#routing). A context is personal or org:<orgId>, orgId 1-128 of [A-Za-z0-9_-], compared as written. contexts: each value and whether it is a context (common.schema.json#/$defs/contextId agrees). cases: routeTarget(session, enrollments) answers where a collector may send an event or a check-in of a session in that context: {route: enrollment, org, index} for the one enrollment whose org is exactly the context's id, else {route: none, reason} with reason personal (always, for a personal session), not-a-context, not-enrolled or ambiguous. Each enrollment is the org.id the device enrolled with (DEC-0031); an entry that is not an object with an own string org is skipped. Malformed input answers none and never throws. grantUsage: routeGrantUsage(grantContext, enrollments) answers where a grant.usage event goes: as routeTarget with the grant's own context, and {route: none, reason: no-context} when the grant states none (grantContext absent). The lax cases are what a careless port gets wrong.",
+    about: "Vectors for routing by context (DEC-0082, docs/specification/contexts.md#routing). A context is personal or org:<orgId>, orgId 1-128 of [A-Za-z0-9_-], compared as written. contexts: each value and whether it is a context (common.schema.json#/$defs/contextId agrees). cases: routeTarget(session, enrollments) answers where a collector may send an event of a session in that context (a check-in goes to its own enrollment's server and is not routed by a session): {route: enrollment, org, index} for the one enrollment whose org is exactly the context's id, else {route: none, reason} with reason personal (always, for a personal session), not-a-context, not-enrolled or ambiguous. Each enrollment is the org.id the device enrolled with (DEC-0031); an entry that is not an object with an own string org is skipped. Malformed input answers none and never throws. grantUsage: routeGrantUsage(grantContext, enrollments) answers where a grant.usage event goes: as routeTarget with the grant's own context, and {route: none, reason: no-context} when the grant states none (grantContext absent). The lax cases are what a careless port gets wrong.",
     contexts: contexts.map(([name, value, valid]) => ({ name, value, valid })),
     cases,
     grantUsage

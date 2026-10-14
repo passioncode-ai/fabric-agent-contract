@@ -18,7 +18,7 @@ export default defineConfig({
       thresholds: {
         // The whole set: a new rule file is measured from its first commit, before it has its own floor.
         branches: 86.85,
-        "src/activity-rules.ts": { branches: 92.45 },
+        "src/activity-rules.ts": { branches: 92.5 },
         "src/canonical.ts": { branches: 100 },
         "src/privacy-plan.ts": { branches: 100 },
         "src/comms-digest.ts": { branches: 100 },

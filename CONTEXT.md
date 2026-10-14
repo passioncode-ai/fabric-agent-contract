@@ -83,8 +83,9 @@ window at L3, not a grant limit (DEC-0041).
 **Context**: Where work happens and whose it is: `personal`, the person's own, or `org:<orgId>`, an organization by the
 organization server's opaque id (`common.schema.json#/$defs/contextId`), compared as written. A grant names the context
 its principal uses it in, never `personal` for an external one; an agent is placed on a machine once per context, an
-organization's instance under its own share grant; no event or check-in carries a context, and a collector routes each
-only to its context's organization; a grant's usage reaches its organization as a daily `grant.usage` event
+organization's instance under its own share grant; no event or check-in carries a context: a device sends each
+enrollment's check-ins to that enrollment's server, a collector sends a session's events only to its context's
+organization, and a grant's usage reaches the grant's organization as a daily `grant.usage` event
 ([contexts](docs/specification/contexts.md), DEC-0082).
 
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its

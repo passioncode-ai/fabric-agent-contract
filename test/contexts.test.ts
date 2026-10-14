@@ -211,7 +211,7 @@ describe("the specifications", () => {
   it("restate FAC-SEM-074 and FAC-SEM-075 per context and define FAC-SEM-111 in the estate record", () => {
     const row = (code: string) => estateSpec.split("\n").find((line) => line.startsWith(`| \`${code}\``)) ?? "";
     expect(row("FAC-SEM-074")).toMatch(/once per machine and context/);
-    expect(row("FAC-SEM-075")).toMatch(/once per agent and context/);
+    expect(row("FAC-SEM-075")).toMatch(/once per \(machine, agent, slot, context\)/);
     expect(row("FAC-SEM-111")).toMatch(/`estate-record`, `estate-placement`/);
     expect(estateSpec).not.toMatch(/placed once\s+per machine under/);
   });
@@ -279,7 +279,8 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
     expect(samples.filter(documented).length).toBeGreaterThanOrEqual(4);
     expect(samples.filter((id) => !documented(id)).length).toBeGreaterThanOrEqual(8);
     expect(extData({ ...usage.data, costUsd: null })).toBe(true);
-    for (const phrase of ["at most 64 characters", "no whitespace", "drive prefix", "`/Users/`", "FAC-SEM-037"]) expect(contextsSpec, phrase).toContain(phrase);
+    const flat = contextsSpec.replace(/\s+/g, " ");
+    for (const phrase of ["at most 64 characters", "no whitespace", "drive prefix", "`/Users/`", "FAC-SEM-037"]) expect(flat, phrase).toContain(phrase);
   });
 });
 
@@ -292,6 +293,14 @@ describe("the fix round's hardening (DEC-0082 review)", () => {
   it("FAC-SEM-075 fills an organization's slot only from its own machine", () => {
     expect(at("estate-record", changed((r) => { r.machines[0].secrets[1].from = "m-9a07"; }), "FAC-SEM-075")).toEqual(["/machines/0/secrets/1/from"]);
     expect(at("estate-record", changed((r) => { r.machines[0].secrets[0].from = "m-9a07"; }), "FAC-SEM-075")).toEqual([]);
+  });
+
+  it("reads a parent's revision as Number() did, without its throw: a numeric string as its number, an object as no number", () => {
+    const second = load("positive/estate-record-second.json");
+    const revisionAt = (revision: unknown) => at("estate-record-revision", { parent: { ...first, revision }, next: second }, "FAC-SEM-072");
+    expect(revisionAt("1")).not.toContain("/next/revision");
+    expect(revisionAt({ toString: 1 })).toContain("/next/revision");
+    expect(revisionAt(1)).not.toContain("/next/revision");
   });
 
   it("keeps the array index in every instancePath when a non-object comes first", () => {
