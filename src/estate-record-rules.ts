@@ -67,6 +67,13 @@ export function deviceKeyFingerprint(key: unknown): string | undefined {
 }
 
 /**
+ * The one form of a key reference (DEC-0084): a kid of the device-key schema, `@sha256:`, 64 lower-case hex digits. A
+ * `device-key` revocation whose `ref` holds `@` and is not this is malformed (`FAC-SEM-076`); a relay reports such a
+ * delta entry rather than ignoring it (`relayAdmissionSet`'s `unread`).
+ */
+export const KEY_REFERENCE = /^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#(sig|kem)@sha256:[a-f0-9]{64}$/;
+
+/**
  * The `device-key` revocation reference of one key (DEC-0084): `<kid>@<fingerprint>`. A `device-key` revocation names
  * either a kid, which revokes every key ever listed under it, or one key in this form, which revokes that key alone and
  * leaves the next key under the same kid usable: the form a key replacement revokes the old key by. `@` never occurs in
@@ -278,7 +285,9 @@ function keys(value: JsonObject, flag: Flag): void {
     const seen = new Set<unknown>();
     deviceKeysAt.forEach(([key, k]) => {
       if (key.kid !== `${show(machine.id)}#${show(key.use)}`) flag(`${at}/deviceKeys/${k}/kid`, "a device key is listed as <machine id>#sig or <machine id>#kem, by its role");
-      if (!validDeviceKey(key)) flag(`${at}/deviceKeys/${k}/publicKey`, "an Ed25519 key is never of small order (DEC-0045) and a P-256 key is a valid point (SEC 1 §3.2.2)");
+      // A key with no canonical fingerprint could be read as two keys by two readers, and no key reference names it (DEC-0084).
+      if (deviceKeyFingerprint(key) === undefined) flag(`${at}/deviceKeys/${k}/publicKey`, "a device key's octets are written in canonical padded base64, the one form a key reference can name (DEC-0084)");
+      else if (!validDeviceKey(key)) flag(`${at}/deviceKeys/${k}/publicKey`, "an Ed25519 key is never of small order (DEC-0045) and a P-256 key is a valid point (SEC 1 §3.2.2)");
       if (seen.has(key.publicKey)) flag(`${at}/deviceKeys/${k}/publicKey`, "one key is never used for the other role");
       seen.add(key.publicKey);
     });
@@ -414,6 +423,10 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
     const ref = revocation.kind === "grant" ? grantKey(revocation.ref) : revocation.ref;
     const key = `${show(revocation.kind)} ${show(ref)}`;
     if (seen.has(key)) flag(`/revocations/${index}`, `the ${show(revocation.kind)} ${show(revocation.ref)} is revoked twice`);
+    // A `device-key` ref is a kid or a key reference; one with `@` that is neither revokes nothing a reader can name.
+    if (revocation.kind === "device-key" && typeof revocation.ref === "string" && revocation.ref.includes("@") && !KEY_REFERENCE.test(revocation.ref)) {
+      flag(`/revocations/${index}/ref`, "a device-key revocation names a kid or a key reference <kid>@sha256:<64 lower-case hex digits> (DEC-0084)");
+    }
     seen.add(key);
     if (listed.get(show(revocation.kind))?.has(ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${show(revocation.kind)} it revokes: revocation outranks addition`);
   });

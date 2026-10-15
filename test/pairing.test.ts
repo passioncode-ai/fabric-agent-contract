@@ -10,6 +10,7 @@ import {
   FINGERPRINT_TYPE,
   RENDEZVOUS_SECONDS,
   checkReveal,
+  checkedComparisonCode,
   comparisonCode,
   estateFingerprint,
   joinListed,
@@ -53,6 +54,16 @@ describe("the vectors (fixtures/vectors/pairing.json)", () => {
   it.each(named(vectors.codes))("code: %s", (_name, entry) => {
     expect(comparisonCode(entry.new, entry.trusted)).toEqual(entry.answer);
     if (entry.laxCode) expect(entry.laxCode).not.toBe(entry.answer.code);
+  });
+
+  it.each(named(vectors.checkedCodes))("checked code: %s", (_name, entry) => {
+    expect(checkedComparisonCode(entry.newCommit, entry.new, entry.trustedCommit, entry.trusted)).toEqual(entry.answer);
+  });
+
+  it("computes no code from a reveal that did not open its commitment, though comparisonCode alone would", () => {
+    const late = (vectors.checkedCodes as Json[]).find((entry) => entry.name.includes("picked after")) as Json;
+    expect(comparisonCode(late.new, late.trusted).ok).toBe(true);
+    expect(checkedComparisonCode(late.newCommit, late.new, late.trustedCommit, late.trusted)).toEqual({ ok: false, problem: "commit-mismatch" });
   });
 
   it.each(named(vectors.fingerprints))("fingerprint: %s", (_name, entry) => {
@@ -181,7 +192,7 @@ describe("every function is total: malformed input answers a refusal, never a th
 
 describe("the specification (docs/specification/ceremonies.md)", () => {
   it("states the constants the code holds", () => {
-    for (const phrase of ['"fabric-enroll-commit/1"', '"fabric-enroll-code/1"', '"estate-fingerprint/1"', "`genesis`", "six decimal digits", "600 s", "five groups of five digits", "pairingCommit(", "checkReveal(", "comparisonCode(", "estateFingerprint(", "rendezvousVerdict(", "joinListed(", "ownKeysDecision("]) {
+    for (const phrase of ['"fabric-enroll-commit/1"', '"fabric-enroll-code/1"', '"estate-fingerprint/1"', "`genesis`", "six decimal digits", "600 s", "five groups of five digits", "pairingCommit(", "checkReveal(", "comparisonCode(", "estateFingerprint(", "rendezvousVerdict(", "joinListed(", "ownKeysDecision(", "checkedComparisonCode("]) {
       expect(spec, phrase).toContain(phrase);
     }
   });

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
+  "about": "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)); a port computes it only through checkedComparisonCode(newCommit, new, trustedCommit, trusted), which checks each reveal against its commitment first (checkedCodes). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure, and one abort accepted after both reveals. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
   "keys": {
     "new": [
       {
@@ -2002,6 +2002,248 @@
       }
     }
   ],
+  "checkedCodes": [
+    {
+      "name": "both reveals open their commitments: the code",
+      "newCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "new",
+        "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+      },
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trustedCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "answer": {
+        "ok": true,
+        "code": "724799"
+      }
+    },
+    {
+      "name": "lax: the trusted side revealed another nonce than it committed to (picked after seeing the new side's): no code",
+      "newCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "new",
+        "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+      },
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trustedCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "oHmlpPP6YrINSaY0JxC0FJAgu_Sa8AqzpEf82ivtPv0",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "commit-mismatch"
+      }
+    },
+    {
+      "name": "lax: the new side revealed another key than it committed to: no code",
+      "newCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "new",
+        "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+      },
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BKrKOD7cpB235NIazhl4kdi0eo06vrzdg4QLY6j865WXsdlDMFZmup2ZBNcmifhZMwImkDmhq5ttqwjo24T7YUg="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BA8tP7PC0IBBHb2SM3nVsIzKz9MwRYS9G4Nt1ONrsqjVBvthtzUbgGVuX5Ov1739ACvENPM0QFBx9bLlJYeEEq0="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trustedCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "commit-mismatch"
+      }
+    },
+    {
+      "name": "the two commitments swapped: the new side's reveal does not open the trusted commitment",
+      "newCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trustedCommit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "new",
+        "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "role-mismatch"
+      }
+    }
+  ],
   "fingerprints": [
     {
       "name": "the fingerprint of a revision 1",
@@ -2717,7 +2959,7 @@
       }
     },
     {
-      "name": "an abort after both reveals is refused too",
+      "name": "one abort after both reveals burns it: the person said the codes differ, and the relay forwards it to the other side",
       "openedAt": "2026-10-15T09:00:00Z",
       "at": "2026-10-15T09:00:30.000Z",
       "messages": [
@@ -2778,6 +3020,152 @@
           "schema": "pairing-message/1",
           "step": "abort",
           "role": "new"
+        }
+      ],
+      "answer": {
+        "state": "burned",
+        "reason": "aborted",
+        "index": 4
+      }
+    },
+    {
+      "name": "a second abort after both reveals is never read: the first one ended the rendezvous",
+      "openedAt": "2026-10-15T09:00:00Z",
+      "at": "2026-10-15T09:00:30.000Z",
+      "messages": [
+        {
+          "schema": "pairing-message/1",
+          "step": "commit",
+          "role": "new",
+          "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "commit",
+          "role": "trusted",
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "reveal",
+          "role": "new",
+          "keys": [
+            {
+              "kid": "m-7b2d#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+            },
+            {
+              "kid": "m-7b2d#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+            }
+          ],
+          "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "reveal",
+          "role": "trusted",
+          "keys": [
+            {
+              "kid": "m-4c1e#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+            },
+            {
+              "kid": "m-4c1e#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+            }
+          ],
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "abort",
+          "role": "new"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "abort",
+          "role": "trusted"
+        }
+      ],
+      "answer": {
+        "state": "burned",
+        "reason": "aborted",
+        "index": 4
+      }
+    },
+    {
+      "name": "lax: an abort with an extra member after both reveals is no abort, so the rendezvous is closed",
+      "openedAt": "2026-10-15T09:00:00Z",
+      "at": "2026-10-15T09:00:30.000Z",
+      "messages": [
+        {
+          "schema": "pairing-message/1",
+          "step": "commit",
+          "role": "new",
+          "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "commit",
+          "role": "trusted",
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "reveal",
+          "role": "new",
+          "keys": [
+            {
+              "kid": "m-7b2d#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+            },
+            {
+              "kid": "m-7b2d#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+            }
+          ],
+          "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "reveal",
+          "role": "trusted",
+          "keys": [
+            {
+              "kid": "m-4c1e#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+            },
+            {
+              "kid": "m-4c1e#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+            }
+          ],
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+        },
+        {
+          "schema": "pairing-message/1",
+          "step": "abort",
+          "role": "new",
+          "reason": "codes differ"
         }
       ],
       "answer": {

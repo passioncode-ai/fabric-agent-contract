@@ -179,6 +179,20 @@ export function estateFingerprint(digest: unknown): { ok: true; fingerprint: str
   return { ok: true, fingerprint: groups.join(" ") };
 }
 
+/**
+ * The comparison code as a port computes it (DEC-0084): only after each reveal opened its own commitment (`checkReveal`
+ * with the role expected of it), then `comparisonCode`. A code computed from reveals no one checked against their
+ * commitments loses the one-guess bound, since a side could pick its nonce after it saw the other's. Answers the first
+ * refusal of the new side's check, then the trusted side's, then the code's.
+ */
+export function checkedComparisonCode(newCommit: unknown, newReveal: unknown, trustedCommit: unknown, trustedReveal: unknown): { ok: true; code: string } | { ok: false; problem: PairingProblem } {
+  const a = checkReveal(newCommit, newReveal, "new");
+  if (!a.ok) return a;
+  const b = checkReveal(trustedCommit, trustedReveal, "trusted");
+  if (!b.ok) return b;
+  return comparisonCode(newReveal, trustedReveal);
+}
+
 /** Why a rendezvous ended without a pairing. */
 export type BurnReason = "malformed" | "expired" | "repeated" | "out-of-order" | "commit-mismatch" | "aborted" | "closed";
 
@@ -196,10 +210,11 @@ export type RendezvousVerdict =
  * - `repeated`: a second commit or a second reveal from one role;
  * - `out-of-order`: a reveal before both commitments arrived;
  * - `commit-mismatch`: a reveal that does not open its role's commitment (`checkReveal`);
- * - `aborted`: an `abort`, which either side sends when a check fails or the person says the codes differ;
- * - `closed`: any message after both reveals.
+ * - `aborted`: an `abort`, which either side sends when a check fails or the person says the codes differ — also once
+ *   after both reveals, so the relay forwards it and the other side learns the codes differed;
+ * - `closed`: any message after both reveals other than that one `abort`.
  * It is `complete` once both reveals opened their commitments — the pairing is done and the rendezvous carries nothing
- * more — and `open` before.
+ * more but one `abort` — and `open` before.
  */
 export function rendezvousVerdict(openedAt: unknown, messages: unknown, at: unknown): RendezvousVerdict {
   const opened = strictTime(openedAt);
@@ -210,8 +225,9 @@ export function rendezvousVerdict(openedAt: unknown, messages: unknown, at: unkn
   const revealed = new Set<PairingRole>();
   for (const [index, item] of messages.entries()) {
     const burn = (reason: BurnReason): RendezvousVerdict => ({ state: "burned", reason, index });
-    if (revealed.size === 2) return burn("closed");
+    // An abort burns at any point, after both reveals too (the person said the codes differ); nothing else follows them.
     if (isObject(item) && own(item, "schema") === PAIRING_SCHEMA && own(item, "step") === "abort" && Object.keys(item).sort().join() === "role,schema,step" && isRole(item.role)) return burn("aborted");
+    if (revealed.size === 2) return burn("closed");
     const commit = message(item, "commit");
     const reveal = message(item, "reveal");
     const role = (commit ?? reveal)?.role;

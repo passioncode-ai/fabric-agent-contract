@@ -1,6 +1,8 @@
+import { createHash, createPublicKey, verify as nodeVerify } from "node:crypto";
 import { deviceKeyFingerprint } from "./estate-record-rules.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { machineOfKeys } from "./pairing.js";
+import { verifyEs256 } from "./relay.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { ENROLL_TOKEN_FIELDS, signingStatement, verifySigningAssertion } from "./signing-challenges.js";
 import type { AssertionProblem, PasskeyCredential } from "./webauthn.js";
@@ -50,6 +52,8 @@ export interface EnrollTokenTrust {
 }
 
 const isString = (value: unknown): value is string => typeof value === "string";
+/** `estate-record.schema.json#/$defs/assertion`'s members, sorted. */
+const ASSERTION_MEMBERS = "alg,authenticatorData,clientDataJSON,credentialId,format,sig";
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 
 /**
@@ -58,6 +62,8 @@ const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.fil
  */
 function statementFields(token: unknown): JsonObject | undefined {
   if (!isObject(token) || token.schema !== ENROLL_TOKEN_SCHEMA || !isObject(token.statement) || token.statement.type !== ENROLL_TOKEN_TYPE) return undefined;
+  // The token holds exactly the schema's members: nothing unsigned rides beside the statement (DEC-0084).
+  if (Object.keys(token).sort().join() !== "schema,signature,statement") return undefined;
   const { type: _type, ...fields } = token.statement;
   return signingStatement(ENROLL_TOKEN_TYPE, fields) ? fields : undefined;
 }
@@ -66,8 +72,9 @@ function statementFields(token: unknown): JsonObject | undefined {
  * The reference verifier of an `enroll-token/1`, for the hub that admits a join and the node that pins the estate. In
  * this order, the first failure answering:
  * 1. `no-clock`: the clock is not a readable time (checked first, so no window comparison runs on NaN);
- * 2. `malformed`: not an `enroll-token/1` with a register statement and a `webauthn-assertion` signature whose
- *    `credentialId` is a string, or a record that is not an object with a string `estate`;
+ * 2. `malformed`: not an `enroll-token/1` of exactly `{schema, statement, signature}` with a register statement and a
+ *    `webauthn-assertion` signature of exactly the schema's members whose `credentialId` is a string, or a record that
+ *    is not an object with a string `estate`;
  * 3. `wrong-estate`: the statement's `scope` is not `estate:<the record's estate>`, or its `genesis` is not the digest
  *    of revision 1 the verifier holds;
  * 4. the passkey among the record's `authorities`: `no-trusted-authority` (none listed), `revoked-authority` (the record
@@ -84,7 +91,7 @@ export function verifyEnrollToken(token: unknown, trust: EnrollTokenTrust): Enro
   const record = trust.record;
   if (!fields || !isObject(record) || !isString(record.estate)) return { ok: false, problem: "malformed" };
   const signature = (token as JsonObject).signature;
-  if (!isObject(signature) || signature.format !== "webauthn-assertion" || !isString(signature.credentialId)) return { ok: false, problem: "malformed" };
+  if (!isObject(signature) || Object.keys(signature).sort().join() !== ASSERTION_MEMBERS || signature.format !== "webauthn-assertion" || !isString(signature.credentialId)) return { ok: false, problem: "malformed" };
   if (fields.scope !== `estate:${record.estate}` || fields.genesis !== trust.genesis) return { ok: false, problem: "wrong-estate" };
 
   const authorities = list(record.authorities);
@@ -119,23 +126,57 @@ export type EnrollLedgerEntry = { state: "redeemed"; fingerprint: string } | { s
 
 export type RedeemAnswer =
   | { ok: true; record: { nonce: string; state: "redeemed"; fingerprint: string } }
-  | { ok: false; problem: "malformed" | "bad-key" | "revoked" }
+  | { ok: false; problem: "malformed" | "bad-key" | "bad-proof" | "revoked" }
   | { ok: false; problem: "reused"; log: { nonce: string; presented: string; boundTo: string } };
 
+/** The register type of the joining machine's proof of its key (DEC-0084): `{digest, nonce}`, signed by the key. */
+export const ENROLL_JOIN_TYPE = "enroll-join/1";
+
 /**
- * The hub's single use of a verified token (DEC-0084), after `verifyEnrollToken` accepted it: `nonce` is the verdict's,
- * `machineKey` the joining machine's `#sig` device key, `ledger` the hub's map from nonce to entry, which it keeps for each
- * nonce at least until the token's `expiresAt` plus 60 s (the verifier refuses the token after that).
- * - `ok`: the first use. `record` is what the hub stores before it answers: the nonce bound to the key's fingerprint.
- * - `reused`: a second use, by any key, the same included. `log` is what the hub records: the nonce, the fingerprint
- *   presented and the one it is bound to. The joining machine learns only the refusal.
- * - `revoked`: Fabric revoked the token before its use.
- * - `bad-key`: `machineKey` is not one valid `<id>#sig` device key; `malformed`: no nonce or no ledger map.
+ * The bytes the joining machine signs with the `#sig` key it presents (DEC-0084): the register's `enroll-join/1`
+ * statement, `{type: "enroll-join/1", digest, nonce}`, where `digest` is `sha256:` and the hex SHA-256 of the token's
+ * statement bytes (`signingStatement("enroll-token/1", …)`) and `nonce` the token's. `undefined` for a token without a
+ * register statement.
  */
-export function redeemEnrollToken(nonce: unknown, machineKey: unknown, ledger: unknown): RedeemAnswer {
-  if (!isString(nonce) || !(ledger instanceof Map)) return { ok: false, problem: "malformed" };
+export function enrollJoinInput(token: unknown): string | undefined {
+  const fields = statementFields(token);
+  const statement = fields && signingStatement(ENROLL_TOKEN_TYPE, fields);
+  if (!fields || !statement) return undefined;
+  return signingStatement(ENROLL_JOIN_TYPE, { digest: `sha256:${createHash("sha256").update(statement).digest("hex")}`, nonce: fields.nonce })?.toString("utf8");
+}
+
+/** Whether `proof` is the presented key's signature over `input`: ES256 as 64 bytes r ‖ s, low-S (as relay-auth/1); Ed25519 as 64 bytes. */
+function proves(key: JsonObject, input: string, proof: unknown): boolean {
+  if (!isString(proof) || !/^[A-Za-z0-9_-]{86}$/.test(proof)) return false;
+  const octets = Buffer.from(key.publicKey as string, "base64");
+  if (key.alg === "es256") return verifyEs256(new Uint8Array(octets), input, proof) === true;
+  const publicKey = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: octets.toString("base64url") }, format: "jwk" });
+  return nodeVerify(null, Buffer.from(input, "utf8"), publicKey, Buffer.from(proof, "base64url"));
+}
+
+/**
+ * The hub's single use of a verified token (DEC-0084), after `verifyEnrollToken` accepted it: `token` is that token,
+ * `machineKey` the joining machine's `#sig` device key, `proof` that key's signature over `enrollJoinInput(token)`,
+ * `ledger` the hub's map from nonce to entry, which it keeps for each nonce at least until the token's `expiresAt` plus
+ * 60 s (the verifier refuses the token after that). In this order:
+ * - `malformed`: no register statement in the token, or no ledger map;
+ * - `bad-key`: `machineKey` is not one valid `<id>#sig` device key;
+ * - `bad-proof`: `proof` is not that key's signature over the join input, so the presenter does not hold the key it
+ *   asks to bind;
+ * - `revoked`: Fabric revoked the token before its use;
+ * - `reused`: a second use, by any key, the same included. `log` is what the hub records: the nonce, the fingerprint
+ *   presented and the one it is bound to. The joining machine learns only the refusal;
+ * - `ok`: the first use. `record` is what the hub stores before it answers: the nonce bound to the key's fingerprint.
+ * The token is a bearer token: whoever presents it first, with a key it holds, binds that key. The person compares the
+ * fingerprint the node prints with the one Fabric is about to list before signing (ceremonies.md, A headless machine).
+ */
+export function redeemEnrollToken(token: unknown, machineKey: unknown, proof: unknown, ledger: unknown): RedeemAnswer {
+  const input = enrollJoinInput(token);
+  if (input === undefined || !(ledger instanceof Map)) return { ok: false, problem: "malformed" };
+  const nonce = (statementFields(token) as JsonObject).nonce as string;
   // One key alone is a machine's key list only when it is a valid `<id>#sig` key, so a `#kem` key is refused here too.
   if (machineOfKeys([machineKey]) === undefined) return { ok: false, problem: "bad-key" };
+  if (!proves(machineKey as JsonObject, input, proof)) return { ok: false, problem: "bad-proof" };
   const fingerprint = deviceKeyFingerprint(machineKey) as string;
   const entry: unknown = ledger.get(nonce);
   if (isObject(entry) && entry.state === "revoked") return { ok: false, problem: "revoked" };

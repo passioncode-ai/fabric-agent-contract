@@ -50,7 +50,7 @@ describe("FAC-SEM-114 and the key reference in FAC-SEM-076 (fixtures)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => /^estate-(revision-(key|kem|machine-id|remove|hub)|device-key|key-replaced)/.test(name));
 
   it("covers removal, replacement, a dropped #kem, a changed id and a re-certified hub key, passing and failing", () => {
-    expect(files.length).toBe(13);
+    expect(files.length).toBe(15);
     const expected = files.map((name) => load(`semantic/${name}`).expect as string[]);
     expect(expected.filter((codes) => codes.length === 0).length).toBe(4);
     expect([...new Set(expected.flat())].sort()).toEqual(["FAC-SEM-073", "FAC-SEM-076", "FAC-SEM-114"]);
@@ -60,7 +60,8 @@ describe("FAC-SEM-114 and the key reference in FAC-SEM-076 (fixtures)", () => {
     const fixture = load(`semantic/${name}`);
     expect(codes(fixture.kind, fixture.input)).toEqual(fixture.expect);
     const records = fixture.kind === "estate-record" ? [fixture.input] : [fixture.input.parent, fixture.input.next];
-    for (const record of records) expect(schemaValid(record), name).toBe(true);
+    // The schema already refuses an unpadded P-256 key; the rule refuses it too, for a reader without the schema (DEC-0084).
+    for (const record of records) expect(schemaValid(record), name).toBe(name !== "estate-device-key-not-canonical.json");
   });
 
   it("names the parent's member that was dropped", () => {

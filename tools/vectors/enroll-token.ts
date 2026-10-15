@@ -16,6 +16,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { rfc8785 } from "../../src/canonical.js";
 import { projectRoot } from "../../src/contract.js";
+import { signDeterministic } from "./relay-crypto.js";
 
 type Json = Record<string, any>;
 export const VECTOR_FILE = "fixtures/vectors/enroll-token.json";
@@ -90,31 +91,48 @@ export function enrollTokenVectors(): Json {
     { name: "a nonce of 31 bytes", token: token({ nonce: sha("short").subarray(0, 31).toString("base64url") }), at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") },
     { name: "another schema", token: { ...good, schema: "enroll-token/2" }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") },
     { name: "a statement of another type", token: { ...good, statement: { ...statement, type: "limits/1" } }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") },
-    { name: "a signature that is not a WebAuthn assertion", token: { ...good, signature: { ...good.signature, format: "jws" } }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") }
+    { name: "a signature that is not a WebAuthn assertion", token: { ...good, signature: { ...good.signature, format: "jws" } }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") },
+    { name: "lax: an unsigned member beside the statement (a ceiling the passkey never signed)", token: { ...good, ceiling: `sha256:${"ab".repeat(32)}` }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") },
+    { name: "lax: an assertion with a member the schema does not list (a user handle)", token: { ...good, signature: { ...good.signature, userHandle: "dXNlcg" } }, at: at("2026-10-15T09:01:00Z"), answer: refused("malformed") }
   ];
 
-  // The hub's single use: a ledger from nonce to entry, as [nonce, entry] pairs.
+  // The hub's single use: a ledger from nonce to entry, as [nonce, entry] pairs, and the joining key's proof over the
+  // register's enroll-join/1 statement {digest of the token's statement, nonce}.
+  const machineD = BigInt(`0x${sha("fabric-agent-contract pairing vectors new sig").toString("hex")}`);
   const ecdh = createECDH("prime256v1");
   ecdh.setPrivateKey(sha("fabric-agent-contract pairing vectors new sig"));
   const machineKey = { kid: "m-7b2d#sig", use: "sig", alg: "es256", publicKey: ecdh.getPublicKey().toString("base64") };
   const fingerprint = `sha256:${sha(Buffer.from(machineKey.publicKey, "base64")).toString("hex")}`;
   const otherFingerprint = `sha256:${"ef".repeat(32)}`;
   const n = statement.nonce as string;
+  const joinInput = (tok: Json) => rfc8785({ type: "enroll-join/1", digest: `sha256:${sha(Buffer.from(rfc8785(tok.statement), "utf8")).toString("hex")}`, nonce: tok.statement.nonce });
+  const proof = signDeterministic(machineD, joinInput(good));
+  const otherToken = token({ nonce: sha("enroll-token vectors nonce 2").toString("base64url") });
+  // An Ed25519 #sig key proves the same way, with its 64-byte signature.
+  const edSeed = sha("fabric-agent-contract enroll-token vectors ed25519 machine");
+  const edKey = createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), edSeed]), format: "der", type: "pkcs8" });
+  const edMachineKey = { kid: "m-9b31#sig", use: "sig", alg: "ed25519", publicKey: Buffer.from((edKey.export({ format: "jwk" }) as { x: string }).x, "base64url").toString("base64") };
+  const edProof = sign(null, Buffer.from(joinInput(good), "utf8"), edKey).toString("base64url");
   const redeem: Json[] = [
-    { name: "the first use binds the nonce to the machine's #sig key", nonce: n, machineKey, ledger: [], answer: { ok: true, record: { nonce: n, state: "redeemed", fingerprint } } },
-    { name: "a second use by another key is refused and recorded", nonce: n, machineKey, ledger: [[n, { state: "redeemed", fingerprint: otherFingerprint }]], answer: { ok: false, problem: "reused", log: { nonce: n, presented: fingerprint, boundTo: otherFingerprint } } },
-    { name: "lax: a second use by the same key is refused too", nonce: n, machineKey, ledger: [[n, { state: "redeemed", fingerprint }]], answer: { ok: false, problem: "reused", log: { nonce: n, presented: fingerprint, boundTo: fingerprint } } },
-    { name: "a token Fabric revoked before its use", nonce: n, machineKey, ledger: [[n, { state: "revoked" }]], answer: refused("revoked") },
-    { name: "another token's use leaves this one unused", nonce: n, machineKey, ledger: [["another-nonce", { state: "redeemed", fingerprint: otherFingerprint }]], answer: { ok: true, record: { nonce: n, state: "redeemed", fingerprint } } },
-    { name: "a #kem key is not the key a join binds", nonce: n, machineKey: { ...machineKey, kid: "m-7b2d#kem", use: "kem", alg: "ecdh-p256" }, ledger: [], answer: refused("bad-key") },
-    { name: "a #sig key that is not on the curve", nonce: n, machineKey: { ...machineKey, publicKey: Buffer.concat([Buffer.from([4]), Buffer.alloc(64, 1)]).toString("base64") }, ledger: [], answer: refused("bad-key") }
+    { name: "the first use binds the nonce to the machine's #sig key, proven by its signature", token: good, machineKey, proof, ledger: [], answer: { ok: true, record: { nonce: n, state: "redeemed", fingerprint } } },
+    { name: "an Ed25519 #sig key proves and binds the same way", token: good, machineKey: edMachineKey, proof: edProof, ledger: [], answer: { ok: true, record: { nonce: n, state: "redeemed", fingerprint: `sha256:${sha(Buffer.from(edMachineKey.publicKey, "base64")).toString("hex")}` } } },
+    { name: "lax: a key presented without its proof binds nothing", token: good, machineKey, proof: null, ledger: [], answer: refused("bad-proof") },
+    { name: "lax: a proof made for another token is no proof for this one", token: good, machineKey, proof: signDeterministic(machineD, joinInput(otherToken)), ledger: [], answer: refused("bad-proof") },
+    { name: "lax: another machine's proof under the presented key's name", token: good, machineKey: { ...machineKey, publicKey: edMachineKey.publicKey, alg: "ed25519" }, proof, ledger: [], answer: refused("bad-proof") },
+    { name: "a second use by another key is refused and recorded", token: good, machineKey, proof, ledger: [[n, { state: "redeemed", fingerprint: otherFingerprint }]], answer: { ok: false, problem: "reused", log: { nonce: n, presented: fingerprint, boundTo: otherFingerprint } } },
+    { name: "lax: a second use by the same key is refused too", token: good, machineKey, proof, ledger: [[n, { state: "redeemed", fingerprint }]], answer: { ok: false, problem: "reused", log: { nonce: n, presented: fingerprint, boundTo: fingerprint } } },
+    { name: "a token Fabric revoked before its use", token: good, machineKey, proof, ledger: [[n, { state: "revoked" }]], answer: refused("revoked") },
+    { name: "another token's use leaves this one unused", token: good, machineKey, proof, ledger: [["another-nonce", { state: "redeemed", fingerprint: otherFingerprint }]], answer: { ok: true, record: { nonce: n, state: "redeemed", fingerprint } } },
+    { name: "a #kem key is not the key a join binds", token: good, machineKey: { ...machineKey, kid: "m-7b2d#kem", use: "kem", alg: "ecdh-p256" }, proof, ledger: [], answer: refused("bad-key") },
+    { name: "a #sig key that is not on the curve", token: good, machineKey: { ...machineKey, publicKey: Buffer.concat([Buffer.from([4]), Buffer.alloc(64, 1)]).toString("base64") }, proof, ledger: [], answer: refused("bad-key") },
+    { name: "a token without a register statement", token: { ...good, statement: { ...statement, uses: 2 } }, machineKey, proof, ledger: [], answer: refused("malformed") }
   ];
 
   return {
-    about: "Vectors for enroll-token/1 (DEC-0084, docs/specification/ceremonies.md#a-headless-machine). verify: verifyEnrollToken(token, {record, genesis, at}) with record the estate's current revision (record when given, else fixtures/positive/estate-record-first.json, as the hub and the node hold it), genesis that record's revision 1 digest, and at an RFC 3339 instant read as the clock. Each token is signed by the EdDSA test passkey of fixtures/vectors/estate-record.json over SHA-256 of the RFC 8785 form of its statement (the register's enroll-token/1, DEC-0063). redeem: redeemEnrollToken(nonce, machineKey, ledger) with ledger a map built from the [nonce, entry] pairs: a first use answers the record the hub stores, a second use (by any key) answers reused with the line the hub logs.",
+    about: "Vectors for enroll-token/1 (DEC-0084, docs/specification/ceremonies.md#a-headless-machine). verify: verifyEnrollToken(token, {record, genesis, at}) with record the estate's current revision (record when given, else fixtures/positive/estate-record-first.json, as the hub and the node hold it), genesis that record's revision 1 digest, and at an RFC 3339 instant read as the clock. Each token is signed by the EdDSA test passkey of fixtures/vectors/estate-record.json over SHA-256 of the RFC 8785 form of its statement (the register's enroll-token/1, DEC-0063). redeem: redeemEnrollToken(token, machineKey, proof, ledger) with ledger a map built from the [nonce, entry] pairs and proof the presented #sig key's signature over the register's enroll-join/1 statement {digest: sha256 of the token's statement bytes, nonce} (statement.join; ES256 as 64 bytes r||s low-S, Ed25519 as 64 bytes): a first use answers the record the hub stores, a second use (by any key) answers reused with the line the hub logs.",
     record: "fixtures/positive/estate-record-first.json",
     genesis,
-    statement: { fields: statement, bytes: rfc8785(statement), challenge: sha(Buffer.from(rfc8785(statement), "utf8")).toString("base64url") },
+    statement: { fields: statement, bytes: rfc8785(statement), challenge: sha(Buffer.from(rfc8785(statement), "utf8")).toString("base64url"), join: joinInput(good) },
     verify,
     redeem
   };

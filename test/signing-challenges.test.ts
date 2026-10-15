@@ -33,7 +33,7 @@ const statement = (type: string) => (vectors.statements as Json[]).find((entry) 
 describe("the register (DEC-0063)", () => {
   it("names v4 §7's four challenge types, the enroll token, the package statement and every typed statement a key signs", () => {
     expect([...SIGNING_STATEMENTS.keys()]).toEqual([
-      "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1", "fabric-package-signature/1", "window-lease/1", "relay-auth/1", "relay-blob/1"
+      "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1", "fabric-package-signature/1", "enroll-join/1", "window-lease/1", "relay-auth/1", "relay-blob/1"
     ]);
     const passkey = [...SIGNING_STATEMENTS].filter(([, spec]) => spec.signer === "passkey").map(([type]) => type);
     // DEC-0084 adds enroll-token/1 (DV-CON-01's amendment of DV-05): a passkey signs it too.

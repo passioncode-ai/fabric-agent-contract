@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for enroll-token/1 (DEC-0084, docs/specification/ceremonies.md#a-headless-machine). verify: verifyEnrollToken(token, {record, genesis, at}) with record the estate's current revision (record when given, else fixtures/positive/estate-record-first.json, as the hub and the node hold it), genesis that record's revision 1 digest, and at an RFC 3339 instant read as the clock. Each token is signed by the EdDSA test passkey of fixtures/vectors/estate-record.json over SHA-256 of the RFC 8785 form of its statement (the register's enroll-token/1, DEC-0063). redeem: redeemEnrollToken(nonce, machineKey, ledger) with ledger a map built from the [nonce, entry] pairs: a first use answers the record the hub stores, a second use (by any key) answers reused with the line the hub logs.",
+  "about": "Vectors for enroll-token/1 (DEC-0084, docs/specification/ceremonies.md#a-headless-machine). verify: verifyEnrollToken(token, {record, genesis, at}) with record the estate's current revision (record when given, else fixtures/positive/estate-record-first.json, as the hub and the node hold it), genesis that record's revision 1 digest, and at an RFC 3339 instant read as the clock. Each token is signed by the EdDSA test passkey of fixtures/vectors/estate-record.json over SHA-256 of the RFC 8785 form of its statement (the register's enroll-token/1, DEC-0063). redeem: redeemEnrollToken(token, machineKey, proof, ledger) with ledger a map built from the [nonce, entry] pairs and proof the presented #sig key's signature over the register's enroll-join/1 statement {digest: sha256 of the token's statement bytes, nonce} (statement.join; ES256 as 64 bytes r||s low-S, Ed25519 as 64 bytes): a first use answers the record the hub stores, a second use (by any key) answers reused with the line the hub logs.",
   "record": "fixtures/positive/estate-record-first.json",
   "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
   "statement": {
@@ -15,7 +15,8 @@
       "uses": 1
     },
     "bytes": "{\"ceiling\":null,\"expiresAt\":\"2026-10-15T09:15:00Z\",\"genesis\":\"sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6\",\"nonce\":\"rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8\",\"notBefore\":\"2026-10-15T09:00:00Z\",\"purpose\":\"agent-host\",\"scope\":\"estate:estate-5d0f1a\",\"type\":\"enroll-token/1\",\"uses\":1}",
-    "challenge": "BHP3U7ZzUfE-cvJ_WheVUlzF4MuOSHs5fVoC629M5vo"
+    "challenge": "BHP3U7ZzUfE-cvJ_WheVUlzF4MuOSHs5fVoC629M5vo",
+    "join": "{\"digest\":\"sha256:0473f753b67351f13e72f27f5a1795525cc5e0cb8e487b397d5a02eb6f4ce6fa\",\"nonce\":\"rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8\",\"type\":\"enroll-join/1\"}"
   },
   "verify": [
     {
@@ -1561,18 +1562,102 @@
         "ok": false,
         "problem": "malformed"
       }
+    },
+    {
+      "name": "lax: an unsigned member beside the statement (a ceiling the passkey never signed)",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        },
+        "ceiling": "sha256:abababababababababababababababababababababababababababababababab"
+      },
+      "at": "2026-10-15T09:01:00Z",
+      "answer": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "lax: an assertion with a member the schema does not list (a user handle)",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw",
+          "userHandle": "dXNlcg"
+        }
+      },
+      "at": "2026-10-15T09:01:00Z",
+      "answer": {
+        "ok": false,
+        "problem": "malformed"
+      }
     }
   ],
   "redeem": [
     {
-      "name": "the first use binds the nonce to the machine's #sig key",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "name": "the first use binds the nonce to the machine's #sig key, proven by its signature",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [],
       "answer": {
         "ok": true,
@@ -1584,14 +1669,188 @@
       }
     },
     {
-      "name": "a second use by another key is refused and recorded",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "name": "an Ed25519 #sig key proves and binds the same way",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
+      "machineKey": {
+        "kid": "m-9b31#sig",
+        "use": "sig",
+        "alg": "ed25519",
+        "publicKey": "OIh/qFPRxoNCoFFLogULYlHmTYVy9EMy8NoYW6+c0Vc="
+      },
+      "proof": "A0PsSKtVKJFwvCn_CxZUy10NVSF-nIv3EzB0gtvxTwYEtKI5oSBwtapWExxc-gSEWKKXZlYHIQcylP8oZtm9Cg",
+      "ledger": [],
+      "answer": {
+        "ok": true,
+        "record": {
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "state": "redeemed",
+          "fingerprint": "sha256:7396a099d060e3ffa32b922aa5ad2495272e0f34d8289931cb920c3e97c88260"
+        }
+      }
+    },
+    {
+      "name": "lax: a key presented without its proof binds nothing",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": null,
+      "ledger": [],
+      "answer": {
+        "ok": false,
+        "problem": "bad-proof"
+      }
+    },
+    {
+      "name": "lax: a proof made for another token is no proof for this one",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
+      "machineKey": {
+        "kid": "m-7b2d#sig",
+        "use": "sig",
+        "alg": "es256",
+        "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+      },
+      "proof": "3QhucQzDLVVWe7sYYt2wPc6OYklcIIa6qEWXR4KLyzU6cq0x7Km5PpvToEk6wumKoLXWjKpakk3Im8duOfZUUQ",
+      "ledger": [],
+      "answer": {
+        "ok": false,
+        "problem": "bad-proof"
+      }
+    },
+    {
+      "name": "lax: another machine's proof under the presented key's name",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
+      "machineKey": {
+        "kid": "m-7b2d#sig",
+        "use": "sig",
+        "alg": "ed25519",
+        "publicKey": "OIh/qFPRxoNCoFFLogULYlHmTYVy9EMy8NoYW6+c0Vc="
+      },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
+      "ledger": [],
+      "answer": {
+        "ok": false,
+        "problem": "bad-proof"
+      }
+    },
+    {
+      "name": "a second use by another key is refused and recorded",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
+      "machineKey": {
+        "kid": "m-7b2d#sig",
+        "use": "sig",
+        "alg": "es256",
+        "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+      },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [
         [
           "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
@@ -1613,13 +1872,35 @@
     },
     {
       "name": "lax: a second use by the same key is refused too",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [
         [
           "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
@@ -1641,13 +1922,35 @@
     },
     {
       "name": "a token Fabric revoked before its use",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [
         [
           "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
@@ -1663,13 +1966,35 @@
     },
     {
       "name": "another token's use leaves this one unused",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [
         [
           "another-nonce",
@@ -1690,13 +2015,35 @@
     },
     {
       "name": "a #kem key is not the key a join binds",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#kem",
         "use": "kem",
         "alg": "ecdh-p256",
         "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [],
       "answer": {
         "ok": false,
@@ -1705,17 +2052,76 @@
     },
     {
       "name": "a #sig key that is not on the curve",
-      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 1
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
       "machineKey": {
         "kid": "m-7b2d#sig",
         "use": "sig",
         "alg": "es256",
         "publicKey": "BAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
       },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
       "ledger": [],
       "answer": {
         "ok": false,
         "problem": "bad-key"
+      }
+    },
+    {
+      "name": "a token without a register statement",
+      "token": {
+        "schema": "enroll-token/1",
+        "statement": {
+          "type": "enroll-token/1",
+          "scope": "estate:estate-5d0f1a",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+          "purpose": "agent-host",
+          "ceiling": null,
+          "notBefore": "2026-10-15T09:00:00Z",
+          "expiresAt": "2026-10-15T09:15:00Z",
+          "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+          "uses": 2
+        },
+        "signature": {
+          "format": "webauthn-assertion",
+          "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+          "alg": "EdDSA",
+          "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+          "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+          "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+        }
+      },
+      "machineKey": {
+        "kid": "m-7b2d#sig",
+        "use": "sig",
+        "alg": "es256",
+        "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+      },
+      "proof": "Uxsa-SBGNDoUAdpqeOv3wieaJ12H3mke_nBNbW_QGspD-o6dMNtI9fXtFkgvZ70W31d56-x2dP3cs9vOcpbbVw",
+      "ledger": [],
+      "answer": {
+        "ok": false,
+        "problem": "malformed"
       }
     }
   ]

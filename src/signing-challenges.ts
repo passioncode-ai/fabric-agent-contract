@@ -88,6 +88,7 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
     "fabric-package-signature/1",
     { signer: "key", fields: ["role", "digest"], decision: "DEC-0051", check: (f) => (f.role === "publisher" || f.role === "organization") && matches(SHA256, f.digest) }
   ],
+  ["enroll-join/1", { signer: "key", fields: ["digest", "nonce"], decision: "DEC-0084", check: (f) => matches(SHA256, f.digest) && matches(NONCE32, f.nonce) }],
   ["window-lease/1", { signer: "key", fields: WINDOW_LEASE_FIELDS, decision: "DEC-0062" }],
   ["relay-auth/1", { signer: "key", fields: ["alg", "relay", "nonce", "estate", "kid", "iat"], decision: "DEC-0047" }],
   ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }]

@@ -99,7 +99,7 @@ describe("the schema (DEC-0055)", () => {
 
 describe("estate-record semantic fixtures (FAC-SEM-072…076, FAC-SEM-110, FAC-SEM-111)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("estate-"));
-  const schemaInvalid = ["estate-grant-not-external.json", "estate-hub-small-order.json", "estate-machine-small-order-key.json"];
+  const schemaInvalid = ["estate-grant-not-external.json", "estate-hub-small-order.json", "estate-machine-small-order-key.json", "estate-device-key-not-canonical.json"];
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));

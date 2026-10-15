@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { ENROLL_PURPOSE, MAX_ENROLL_TOKEN_SECONDS, redeemEnrollToken, verifyEnrollToken } from "../src/enroll-token.js";
+import { ENROLL_PURPOSE, MAX_ENROLL_TOKEN_SECONDS, enrollJoinInput, redeemEnrollToken, verifyEnrollToken } from "../src/enroll-token.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { SIGNING_STATEMENTS, signingChallenge, signingStatement } from "../src/signing-challenges.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -33,7 +33,12 @@ describe("the vectors (fixtures/vectors/enroll-token.json)", () => {
   });
 
   it.each((vectors.redeem as Json[]).map((entry) => [entry.name, entry] as const))("redeem: %s", (_name, entry) => {
-    expect(redeemEnrollToken(entry.nonce, entry.machineKey, new Map(entry.ledger))).toEqual(entry.answer);
+    expect(redeemEnrollToken(entry.token, entry.machineKey, entry.proof, new Map(entry.ledger))).toEqual(entry.answer);
+  });
+
+  it("give the join proof's bytes as the register computes them (enroll-join/1)", () => {
+    expect(enrollJoinInput(good)).toBe(vectors.statement.join);
+    expect(JSON.parse(vectors.statement.join)).toEqual({ digest: `sha256:${createHash("sha256").update(vectors.statement.bytes, "utf8").digest("hex")}`, nonce: good.statement.nonce, type: "enroll-join/1" });
   });
 
   it("give the statement's bytes and challenge as the register computes them", () => {
@@ -47,7 +52,7 @@ describe("the vectors (fixtures/vectors/enroll-token.json)", () => {
   it("carry every problem the verifier and the ledger answer", () => {
     const problems = new Set([...vectors.verify, ...vectors.redeem].map((entry: Json) => entry.answer.problem ?? "ok"));
     expect([...problems].sort()).toEqual([
-      "bad-key", "duplicate-authority", "expired", "malformed", "no-trusted-authority", "not-yet-valid", "ok", "reused", "revoked", "revoked-authority", "too-long-lived", "unknown-authority", "wrong-challenge", "wrong-estate", "wrong-origin"
+      "bad-key", "bad-proof", "duplicate-authority", "expired", "malformed", "no-trusted-authority", "not-yet-valid", "ok", "reused", "revoked", "revoked-authority", "too-long-lived", "unknown-authority", "wrong-challenge", "wrong-estate", "wrong-origin"
     ]);
   });
 });
@@ -99,18 +104,22 @@ describe("the verifier's order and its edges", () => {
   it("never throws on junk", () => {
     for (const junk of [undefined, null, 7, "x", [], {}, { schema: "enroll-token/1", statement: [] }, { toString: 1 }]) {
       expect(() => verify(junk, "2026-10-15T09:01:00Z")).not.toThrow();
-      expect(() => redeemEnrollToken(junk, junk, junk)).not.toThrow();
+      expect(() => redeemEnrollToken(junk, junk, junk, junk)).not.toThrow();
+      expect(enrollJoinInput(junk)).toBeUndefined();
       expect(() => evaluateSemanticRules("enroll-token", { statement: junk })).not.toThrow();
     }
   });
 
   it("refuses a nonce that is not a string and a ledger that is not a map", () => {
-    const key = vectors.redeem[0].machineKey;
-    expect(redeemEnrollToken(7, key, new Map())).toEqual({ ok: false, problem: "malformed" });
-    expect(redeemEnrollToken("n", key, {})).toEqual({ ok: false, problem: "malformed" });
-    expect(redeemEnrollToken("n", "key", new Map())).toEqual({ ok: false, problem: "bad-key" });
+    const { machineKey: key, proof } = vectors.redeem[0];
+    expect(redeemEnrollToken(7, key, proof, new Map())).toEqual({ ok: false, problem: "malformed" });
+    expect(redeemEnrollToken(good, key, proof, {})).toEqual({ ok: false, problem: "malformed" });
+    expect(redeemEnrollToken(good, "key", proof, new Map())).toEqual({ ok: false, problem: "bad-key" });
+    expect(redeemEnrollToken(good, key, `${proof.slice(0, -1)}A`, new Map()).ok).toBe(false);
+    expect(redeemEnrollToken(good, key, `${proof}AA`, new Map())).toEqual({ ok: false, problem: "bad-proof" });
     // A ledger entry the hub wrote in another shape still counts as a use.
-    expect(redeemEnrollToken("n", key, new Map([["n", "sha256:old"]]))).toMatchObject({ ok: false, problem: "reused", log: { boundTo: "sha256:old" } });
+    const n = good.statement.nonce as string;
+    expect(redeemEnrollToken(good, key, proof, new Map([[n, "sha256:old"]]))).toMatchObject({ ok: false, problem: "reused", log: { boundTo: "sha256:old" } });
   });
 });
 
@@ -147,6 +156,6 @@ describe("FAC-SEM-113 fixtures and the schema", () => {
 
 describe("the specification (docs/specification/ceremonies.md)", () => {
   it("states the token's rules", () => {
-    for (const phrase of ["`enroll-token/1`", "900 s", "stdin", "0600", "never", "`reused`", "`genesis`", "verifyEnrollToken(", "redeemEnrollToken(", "`FAC-SEM-113`"]) expect(spec, phrase).toContain(phrase);
+    for (const phrase of ["`enroll-token/1`", "900 s", "stdin", "0600", "never", "`reused`", "`genesis`", "`bad-proof`", "bearer", "`enroll-join/1`", "verifyEnrollToken(", "redeemEnrollToken(", "`FAC-SEM-113`"]) expect(spec, phrase).toContain(phrase);
   });
 });

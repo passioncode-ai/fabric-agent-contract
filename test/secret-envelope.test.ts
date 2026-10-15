@@ -1,4 +1,4 @@
-import { createECDH, generateKeyPairSync } from "node:crypto";
+import { createECDH, createHash, generateKeyPairSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -210,6 +210,26 @@ describe("the open context from the estate record (DEC-0055; review of #53, B)",
     expect(estateEnvelopeContext([r1, r2, moved, back], target).currentPlacement(agentRef, slot)).toBe(4);
     expect(open(seal({ placement: 2 }), [r1, r2, moved, back])).toEqual({ ok: false, refusal: "placement-stale" });
     expect(estateEnvelopeContext([r1], target).currentPlacement("urn:fabric:agent:example:none", slot)).toBeUndefined();
+  });
+
+  it("refuses a sender whose key or machine a delta entry revoked, by kid or by key reference, before the next revision (DEC-0084)", () => {
+    const r1 = withHolder(base, 1);
+    const sender = `${from}#sig`;
+    const keyRef = `${sender}@sha256:${createHash("sha256").update(Buffer.from(octets(holderKey.publicKey), "base64")).digest("hex")}`;
+    const withExtra = (extra: unknown[]) => openEnvelope(seal(), {
+      ownKemKid: kemKid, ownKemPrivateKey: otherKem.getPrivateKey(), now: new Date("2026-10-12T00:30:00Z"), lastOpened: () => undefined, ...estateEnvelopeContext([r1], target, extra)
+    });
+    expect(withExtra([])).toEqual({ ok: false, refusal: "cannot-open" });
+    for (const extra of [[{ kind: "device-key", ref: keyRef }], [{ kind: "device-key", ref: sender }], [{ kind: "machine", ref: from }]]) {
+      // No sender key is left for the kid, so the envelope is refused before its signature is read.
+      expect(withExtra(extra), JSON.stringify(extra)).toEqual({ ok: false, refusal: "bad-key" });
+      expect(estateEnvelopeContext([r1], target, extra).mayHold(sender, agentRef, slot)).toBe(false);
+      expect(estateEnvelopeContext([r1], target, extra).senderKey(sender)).toBeUndefined();
+    }
+    // An older key under the same kid, revoked by its reference, leaves the listed key the sender.
+    const older = `${sender}@sha256:${"0".repeat(64)}`;
+    expect(withExtra([{ kind: "device-key", ref: older }])).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(estateEnvelopeContext([r1], target, [{ kind: "device-key", ref: older }]).senderKey(sender)).toBeDefined();
   });
 
   it("refuses a holder the latest applied revision replaced, though an earlier one named it (review of #53, third reading 1)", () => {

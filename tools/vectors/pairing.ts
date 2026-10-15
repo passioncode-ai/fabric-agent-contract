@@ -125,6 +125,14 @@ export function pairingVectors(): Json {
   ];
 
   const changed = (name: string, a: Json, b: Json) => ({ name, new: a, trusted: b, answer: { ok: true, code: codeOf(transcriptOf(a, b)) } });
+  // The code as a port computes it: each reveal checked against its own commitment first (checkedComparisonCode).
+  const checkedCodes: Json[] = [
+    { name: "both reveals open their commitments: the code", newCommit: commitMsg("new", newCommit), new: newReveal, trustedCommit: commitMsg("trusted", trustedCommit), trusted: trustedReveal, answer: { ok: true, code: codeOf(transcriptOf(newReveal, trustedReveal)) } },
+    { name: "lax: the trusted side revealed another nonce than it committed to (picked after seeing the new side's): no code", newCommit: commitMsg("new", newCommit), new: newReveal, trustedCommit: commitMsg("trusted", trustedCommit), trusted: revealMsg("trusted", trustedKeys, nonce("trusted chosen late"), G), answer: refused("commit-mismatch") },
+    { name: "lax: the new side revealed another key than it committed to: no code", newCommit: commitMsg("new", newCommit), new: revealMsg("new", replacedKeys, nNew), trustedCommit: commitMsg("trusted", trustedCommit), trusted: trustedReveal, answer: refused("commit-mismatch") },
+    { name: "the two commitments swapped: the new side's reveal does not open the trusted commitment", newCommit: commitMsg("trusted", trustedCommit), new: newReveal, trustedCommit: commitMsg("new", newCommit), trusted: trustedReveal, answer: refused("role-mismatch") }
+  ];
+
   const codes: Json[] = [
     { name: "the code both screens show", new: newReveal, trusted: trustedReveal, answer: { ok: true, code: theCode }, transcript: theTranscript },
     changed("another nonce of the new machine changes the code", revealMsg("new", newKeys, nonce("new 2")), trustedReveal),
@@ -178,7 +186,9 @@ export function pairingVectors(): Json {
     { name: "an abort burns it: the person said the codes differ", openedAt: opened, at: at(30), messages: [...full.slice(0, 3), abort("trusted")], answer: burned("aborted", 3) },
     { name: "an abort as the first message burns it", openedAt: opened, at: at(30), messages: [abort("new")], answer: burned("aborted", 0) },
     { name: "anything after both reveals is refused: one rendezvous, one pairing", openedAt: opened, at: at(30), messages: [...full, commitMsg("new", newCommit)], answer: burned("closed", 4) },
-    { name: "an abort after both reveals is refused too", openedAt: opened, at: at(30), messages: [...full, abort("new")], answer: burned("closed", 4) },
+    { name: "one abort after both reveals burns it: the person said the codes differ, and the relay forwards it to the other side", openedAt: opened, at: at(30), messages: [...full, abort("new")], answer: burned("aborted", 4) },
+    { name: "a second abort after both reveals is never read: the first one ended the rendezvous", openedAt: opened, at: at(30), messages: [...full, abort("new"), abort("trusted")], answer: burned("aborted", 4) },
+    { name: "lax: an abort with an extra member after both reveals is no abort, so the rendezvous is closed", openedAt: opened, at: at(30), messages: [...full, { ...abort("new"), reason: "codes differ" }], answer: burned("closed", 4) },
     { name: "a message that is not a pairing message burns it", openedAt: opened, at: at(30), messages: [full[0], { type: "hello" }], answer: burned("malformed", 1) },
     { name: "a reveal with bad keys burns it as malformed", openedAt: opened, at: at(30), messages: [full[0], full[1], revealMsg("new", [newKeys[1]], nNew)], answer: burned("malformed", 2) },
     { name: "an abort with an extra member is no abort", openedAt: opened, at: at(30), messages: [{ ...abort("new"), reason: "codes differ" }], answer: burned("malformed", 0) },
@@ -218,11 +228,12 @@ export function pairingVectors(): Json {
   ];
 
   return {
-    about: "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
+    about: "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)); a port computes it only through checkedComparisonCode(newCommit, new, trustedCommit, trusted), which checks each reveal against its commitment first (checkedCodes). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure, and one abort accepted after both reveals. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
     keys: { new: newKeys, trusted: trustedKeys, replaced: replacedKeys, other: otherKeys },
     commits,
     reveals,
     codes,
+    checkedCodes,
     fingerprints,
     rendezvous,
     join,
