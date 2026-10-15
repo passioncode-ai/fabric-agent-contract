@@ -51,7 +51,7 @@
       "uniqueItems": true,
       "minItems": 1,
       "items": {
-        "$ref": "registry-models.schema.json#/$defs/modelClass"
+        "$ref": "registry-models.schema.json#/$defs/admissionClass"
       },
       "description": "DEC-0046: the classes the project allows, from the closed vocabulary. A model is within the policy when every class the catalogue gives it is listed here; absent: no restriction."
     },

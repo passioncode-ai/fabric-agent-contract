@@ -1,0 +1,22 @@
+{
+  "kind": "model-catalogue",
+  "asOf": "2026-10-11T18:00:00Z",
+  "models": [
+    {
+      "id": "qwen/qwen3.8-max-0902",
+      "family": "Qwen",
+      "classes": [
+        "open-vendor"
+      ],
+      "endpoints": [
+        "anthropic-messages",
+        "openai-chat"
+      ],
+      "toolUse": {
+        "status": "measured",
+        "at": "2026-10-11"
+      },
+      "priceRef": "openrouter:qwen/qwen3.8-max-0902"
+    }
+  ]
+}

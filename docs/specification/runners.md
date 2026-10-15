@@ -222,13 +222,69 @@ rules; the contents are Fabric's, as the runner catalogue's are:
 | Object | What it is | Schema | The estate's copy |
 |---|---|---|---|
 | Model catalogue | every model the estate may use: id (`<vendor>/<model>`), family, classes, the endpoints it serves (`anthropic-messages`, `openai-chat`, `responses`), tool use as last measured (`measured` or `blocked`, with the date and the reason), a reference into the live price feed, never a price | [`registry-models`](../../schemas/registry-models.schema.json) | Fabric's `registry/models.json`; prices and the weekly tool-use probe come from Project Observatory |
-| Model profile | a named, ordered list of catalogue ids with a fallback policy: `none`, or `between-turns` — the next model after a failed turn, never within one | [`model-profile`](../../schemas/model-profile.schema.json) | Fabric's `registry/model-profiles.json`, a `model-profiles` document; an agent may declare its own (`agent`) |
+| Model profile | a named, ordered list of catalogue ids with a fallback policy: `none`, or `between-turns` — the next model after a failed turn, never within one — and optionally what its lane reads (`reads`, DEC-0083) | [`model-profile`](../../schemas/model-profile.schema.json) | Fabric's `registry/model-profiles.json`, a `model-profiles` document; an agent may declare its own (`agent`) |
 | Runner profile | a runner kind of the catalogue, optionally its drive, a route and a model profile | [`runner-profile`](../../schemas/runner-profile.schema.json) | Fabric's settings, written into the bindings |
 | Resolution | which model profile applies, and which of its models the project admits | `resolveModelProfile` in [`src/profile-rules.ts`](../../src/profile-rules.ts) | the kit, implemented once |
 
-**Model classes.** The vocabulary is closed: `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`.
-The catalogue gives each model one or more of them. A spend policy's and a grant's model classes name only these, and
-a reader refuses any other by schema; a new class takes a decision. DEC-0037 had left the classes free strings.
+**Model classes.** The vocabulary is closed: `frontier`, `strong`, `cheap`, `code`, `vision`, `chinese-vendor`,
+`open-vendor`. The catalogue gives each model one or more of them. A spend policy's and a grant's model classes name
+only the admission classes, every class but the last, and a reader refuses any other by schema; a new class takes a
+decision. DEC-0037 had left the classes free strings; DEC-0083 added the last one.
+
+The open-vendor class (DEC-0083) marks a model whose vendor publishes its weights openly. Which models carry it is the
+catalogue writer's fact, as every class is; the contract names no vendor list. Informative only: the operator's rule of
+2026-10-15 names DeepSeek, Qwen, Xiaomi MiMo, Kimi, GLM and MiniMax as such vendors. It is independent of the
+chinese-vendor class, which says where the vendor is: a model may carry either, both or neither.
+
+It is **descriptive**, a deliberate exception to DEC-0046's every-class rule: [resolution](#resolution) ignores it, so a
+policy neither admits nor excludes a model by it, and a catalogue writer that adds it to a row changes no existing
+resolution. A policy cannot name it: `registry-models.schema.json#/$defs/admissionClass`, which a spend policy's and a
+grant's `modelClasses` take, refuses it. A catalogue row carries at least one admission class beside it (the schema's
+`contains`), since a row with none would give a policy nothing to admit it by; the resolver keeps such a row out
+under any policy that names classes. `admittedByClasses` in [`src/profile-rules.ts`](../../src/profile-rules.ts) is the
+admission test, and [`fixtures/vectors/model-admission.json`](../../fixtures/vectors/model-admission.json) its shared
+vectors: a port runs them on every copy of the every-class rule it keeps — its resolver and its doctor's usability
+check — so neither reports or drops a model for a class no policy can name.
+
+**Publication gate.** A resolver that does not validate the catalogue and has not ported the exception applies the
+every-class rule to `open-vendor` and drops every open model under a policy that names classes, and no policy can work
+around it. So a catalogue writer marks `open-vendor` only once every schema reader is pinned at or after DEC-0083 and
+every resolver the catalogue serves has ported the exception (DEC-0083, Compatibility).
+
+### What a profile reads
+
+A model profile MAY declare `reads` (DEC-0083): what the lane it serves reads, one or more of a closed vocabulary,
+each once ([`model-profile`](../../schemas/model-profile.schema.json)); absent means not declared, which stays valid.
+
+| Value | The lane reads |
+|---|---|
+| `user-content` | what a member, a client or the public sends: chat messages, questions, images, reviews, screenshots, voice |
+| `operator` | only what the estate's own operator or its agents write |
+| `web` | pages fetched from the open web |
+
+Only `user-content` carries a rule in this revision. A profile whose `reads` lists it — alone or beside another value
+— has an **open-vendor route** (`FAC-SEM-112`):
+
+- with `fallback: none`, its first model is `open-vendor` in the catalogue, because only the first model runs;
+- with `fallback: between-turns`, at least one of its models is.
+
+A model the catalogue does not hold counts as not open, so the rule fails closed; so does a fallback value this
+revision does not define, which is read as `none`. The rule also holds a resolution's outcome to the same test: when
+the resolved profile reads `user-content` and its own route is open, the models the project's policy leaves must still
+give an open-vendor route under the profile's `fallback`, or the finding names the policy as what leaves the lane on
+closed vendors alone. A profile whose own route is closed is reported once, for itself. `operator` and `web` carry no model rule; they let a lane say
+explicitly that it does not read user content, so a host or a kit can require every profile to declare `reads`. The
+contract does not require it, since that would refuse every existing profile.
+
+Why: the closed vendors refuse exactly the content such a lane exists to handle, and a refusal can come back as an
+empty answer. The operator's rule of 2026-10-15, measured in one product: one closed model returned 1,328 refusals and
+2,771 empty answers in seven days, and sending such content to one closed vendor got the provider account blocked for
+that vendor's chat models.
+
+**A refusal is a failed turn.** For a profile whose `reads` lists `user-content`, the runner treats a provider's
+content refusal, or an empty answer to a non-empty request, as a failed turn, so `between-turns` moves to the next
+model. This is normative for runners and no schema can check it; the runner
+row of [conformance](conformance.md#clients-and-readers) carries it (DEC-0083).
 
 ### Routes
 
@@ -276,7 +332,8 @@ One order chooses the model profile, most specific first (`FAC-SEM-060`):
 
 The project's spend policy (L1) then **restricts** the chosen profile and never chooses: a model stays when every
 class the catalogue gives it is one the policy's `modelClasses` allows, in the profile's order; a model the catalogue
-does not hold stays only when the policy names no classes. A policy without `modelClasses` restricts nothing; a policy that has it names at least one class (an empty list
+does not hold stays only when the policy names no classes. The descriptive `open-vendor` is not one of the classes
+checked (DEC-0083, the exception [above](#runner-and-model-profiles)), and a model with no other class does not stay. A policy without `modelClasses` restricts nothing; a policy that has it names at least one class (an empty list
 would refuse every launch). The profiles offered to one resolution — an agent's own and the estate's — never share
 an id (`FAC-SEM-060`). When no
 model stays, the host refuses the launch with `model-classes-empty`, naming the profile and the policy's id and
@@ -316,19 +373,23 @@ offered to others never names `subscription` ([service](service.md#offered-to-ot
 | `FAC-SEM-058` | `model-catalogue`, `model-profiles` | a model is catalogued once and a profile id declared once; a row's provider routing never orders a provider it ignores |
 | `FAC-SEM-059` | `runner-profile` | a subscription runs only in its vendor's runner; a key route's model allow-list is the profile's model profile, and its key is a reference, never a value |
 | `FAC-SEM-060` | `profile-resolution` | every model a profile names is catalogued; the outcome is the resolution order's, restricted by the policy's classes, an empty result refused naming the policy |
+| `FAC-SEM-112` | `profile-resolution` | a profile whose `reads` lists `user-content` has an open-vendor route: under `fallback: none` its first model, under `between-turns` at least one of its models, is `open-vendor` in the catalogue; a model the catalogue does not hold counts as closed; when the resolved profile has one, the models the policy leaves keep one by the same test |
 
 `FAC-SEM-021` states the locked "one entry per runner kind" as a rule; it is new in this
 revision because JSON Schema cannot express uniqueness by a property. The same limit shapes
 `FAC-SEM-028` and `FAC-SEM-029`. `FAC-SEM-030` keeps a route honest about admission without
 making the route a grant (DEC-0010); a `route-bundle` is `{route, admissions, binding?,
 catalogue?}`, and `FAC-SEM-032`/`FAC-SEM-033` run when the optional parts are present. A
-`route-event` is `{route, event}`. Where `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034` compare a revision reference's `id`,
+`route-event` is `{route, event}`. `FAC-SEM-112` runs on `profile-resolution`, the one kind that holds both a catalogue
+and profiles in this revision; a later kind that holds both runs it too. Where `FAC-SEM-030`, `FAC-SEM-032` and `FAC-SEM-034` compare a revision reference's `id`,
 a project or a capability, they compare normal forms, so another spelling of one URI is the same one
 ([identifiers](identifiers.md), DEC-0076); the revision number and the content hash still compare exactly.
 
 Fixtures: the `runners-*`, `runner-route*`, `binding-runner-route*`, `registry-models*`, `model-profile*` and
 `runner-profile*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json), and
-`fixtures/semantic/{model-catalogue,model-profiles,runner-profile,profile-resolution}-*.json`; rule tests:
+`fixtures/semantic/{model-catalogue,model-profiles,runner-profile,profile-resolution}-*.json` (the
+`profile-resolution-user-content-*` ones for `FAC-SEM-112`); rule tests:
 [`test/registry-rules.test.ts`](../../test/registry-rules.test.ts),
 [`test/route-rules.test.ts`](../../test/route-rules.test.ts) and
-[`test/runner-model-profiles.test.ts`](../../test/runner-model-profiles.test.ts).
+[`test/runner-model-profiles.test.ts`](../../test/runner-model-profiles.test.ts) and
+[`test/open-vendor-user-content.test.ts`](../../test/open-vendor-user-content.test.ts).

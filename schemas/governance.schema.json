@@ -51,7 +51,7 @@
             "autoApproveUsd": { "type": "number", "minimum": 0 },
             "payer": { "const": "owner" },
             "credentialSource": { "oneOf": [{ "type": "object", "required": ["kind", "ref"], "properties": { "kind": { "const": "project-key" }, "ref": { "type": "string", "minLength": 1 } }, "additionalProperties": false }, { "type": "object", "required": ["kind", "agent"], "properties": { "kind": { "const": "capability" }, "agent": { "$ref": "common.schema.json#/$defs/uri" }, "capability": { "$ref": "common.schema.json#/$defs/capabilityName" } }, "additionalProperties": false }] },
-            "modelClasses": { "type": "array", "uniqueItems": true, "items": { "$ref": "registry-models.schema.json#/$defs/modelClass" } }
+            "modelClasses": { "type": "array", "uniqueItems": true, "items": { "$ref": "registry-models.schema.json#/$defs/admissionClass" } }
           },
           "allOf": [
             { "if": { "properties": { "mode": { "const": "limited" } } }, "then": { "properties": { "limits": true }, "required": ["limits"] } },

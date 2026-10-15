@@ -458,9 +458,9 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the policy also allows `code` and `vision` -> Claude Sonnet 5.5 stays and the chat starts on it; the policy names no classes -> the profile is used whole.
 - **UI elements:** the refusal with the profile and the policy named, a link to the policy in Fabric.
 - **States covered:** error, success
-- **Errors & recovery:** the named profile does not exist -> the launch is refused as an unknown profile, never run on another one.
+- **Errors & recovery:** the named profile does not exist -> the launch is refused as an unknown profile, never run on another one; the profile's lane reads user content and its route has no open-vendor model -> the launch is refused naming the profile (`FAC-SEM-112`, DEC-0083), and the operator adds an open-vendor model to the profile.
 - **Status:** draft
-- **Coverage:** runners specification, Resolution; `src/profile-rules.ts` `resolveModelProfile`; `test/runner-model-profiles.test.ts`, `fixtures/semantic/profile-resolution-refused.json`
+- **Coverage:** runners specification, Resolution and What a profile reads; `src/profile-rules.ts` `resolveModelProfile`, `closedUserContentRoute`; `test/runner-model-profiles.test.ts`, `test/open-vendor-user-content.test.ts`, `fixtures/semantic/profile-resolution-refused.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
 - **Product:** unobserved
 
 ## Embedded dashboard

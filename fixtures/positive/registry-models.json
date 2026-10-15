@@ -8,7 +8,8 @@
       "classes": [
         "strong",
         "cheap",
-        "chinese-vendor"
+        "chinese-vendor",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",
@@ -29,7 +30,8 @@
       "family": "Qwen",
       "classes": [
         "strong",
-        "chinese-vendor"
+        "chinese-vendor",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",
@@ -46,7 +48,8 @@
       "family": "Qwen",
       "classes": [
         "cheap",
-        "chinese-vendor"
+        "chinese-vendor",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",
@@ -63,7 +66,8 @@
       "family": "GLM",
       "classes": [
         "strong",
-        "chinese-vendor"
+        "chinese-vendor",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",
@@ -80,7 +84,8 @@
       "family": "MiniMax",
       "classes": [
         "cheap",
-        "chinese-vendor"
+        "chinese-vendor",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",
@@ -97,7 +102,8 @@
       "family": "Mistral",
       "classes": [
         "cheap",
-        "code"
+        "code",
+        "open-vendor"
       ],
       "endpoints": [
         "anthropic-messages",

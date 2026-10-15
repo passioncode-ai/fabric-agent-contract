@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0083`
+**Next free ID:** `DEC-0084`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -1996,6 +1996,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   each agent's configuration.
 - **Annotated (2026-10-12):** a usage report's `route` admits `platform-metered` beside `subscription` and `key`, and a
   descriptor names its runner's credential kind, by DEC-0061.
+- **Annotated (2026-10-15):** amended by DEC-0083: the closed model classes gain `open-vendor` (seven classes), a model
+  profile gains the optional `reads`, and `FAC-SEM-112` joins `profile-resolution`'s rules. `open-vendor` is a
+  deliberate exception to item 5's every-class rule: resolution ignores it, a spend policy's and a grant's
+  `modelClasses` cannot name it (`$defs/admissionClass`), and a catalogue row carries at least one other class.
 - **Amends:** DEC-0037 (`modelClasses` closed), DEC-0016 (three drives, the shared kind `pi`), DEC-0042 (SH-11 gains
   `pi`), DEC-0021 (a usage row's `route`). Implements Fabric [ADR-0147](https://github.com/passioncode-ai/fabric/blob/29e3f984670f63650c39f2c4abc2ef8249e50f20/docs/adr/0147-runner-and-model-profiles-one-catalogue-named-profiles-one-resolution-order.md) with amendments 1 and 2 (written at
   `31a9d6ca`; its last change `29e3f984`, now on Fabric `main`), on the rulings the board brief records.
@@ -4921,3 +4925,122 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reserved by the owner session (receipts SEM-0110, SEM-0111); no further code was reserved, the duplicate clause being
   folded into `FAC-SEM-039`; the record plane is `fs`. The registers are edited under the owner session's leases on
   `docs/DECISIONS.md`, `docs/specification/conformance.md` and `docs/backlog.md`.
+
+### DEC-0083 — A lane that reads user content runs on an open-vendor model: the class `open-vendor`, a profile's `reads`, and a refusal as a failed turn (`FAC-SEM-112`)
+
+- **Date:** 2026-10-15
+- **Status:** Accepted source change (on merge of its pull request). The owner's design, with the owner's addition of
+  `operator` and `web` to item 2 and the owner's decision on PR #111's concern (items 5 and 3's outcome clause).
+  Consumer adoption: board row CT-52.
+- **Amends:** DEC-0046 (the closed model classes gain `open-vendor`, a deliberate exception to its every-class rule; a
+  model profile gains `reads`; `FAC-SEM-112` joins `profile-resolution`'s rules; a runner's failed turn).
+- **Decision:** in [runners](specification/runners.md#what-a-profile-reads) unless named otherwise —
+  1. **The model class `open-vendor`** joins the closed vocabulary (`registry-models.schema.json#/$defs/modelClass`,
+     seven classes): a model whose vendor publishes its weights openly. Which models carry it is the catalogue writer's
+     fact, not the contract's; the contract names no vendor list. Informative only, by vendor name: the operator's rule
+     of 2026-10-15 names DeepSeek, Qwen, Xiaomi MiMo, Kimi, GLM and MiniMax. It is independent of `chinese-vendor`,
+     which says where the vendor is, and `chinese-vendor` stays unchanged.
+  2. **A profile declares what it reads.** `model-profile.schema.json#/$defs/profile` gains an optional `reads`: an
+     array of at least one value, each once, of the closed vocabulary `$defs/reads`:
+     - `user-content`: what a member, a client or the public sends (chat messages, questions, images, reviews,
+       screenshots, voice);
+     - `operator`: only what the estate's own operator or its agents write;
+     - `web`: pages fetched from the open web.
+
+     Absent means not declared and stays valid; `reads` is not required, since that would refuse every existing
+     profile. Only `user-content` carries a model rule in this revision. `operator` and `web` let a lane declare that it
+     does not read user content, so a host or a kit can require every profile to declare `reads`.
+  3. **`FAC-SEM-112`** (kind `profile-resolution`, the one kind that holds both a catalogue and profiles in this
+     revision; a later kind that holds both runs it too; `src/profile-rules.ts`, `closedUserContentRoute`): a profile
+     whose `reads` lists `user-content`, alone or beside another value, has an open-vendor route.
+     - With `fallback: none`, its first model carries `open-vendor` in the catalogue, because only the first model runs.
+     - With `fallback: between-turns`, at least one of its models does.
+     - A model the catalogue does not hold counts as not open, and a fallback value this revision does not define is
+       read as `none`: the rule fails closed. The finding names the profile and says the lane would run on closed
+       vendors alone.
+     - **The outcome too.** When the resolved profile reads `user-content` and its own route is open, the models the
+       project's policy leaves (`resolveModelProfile` over the bundle) must still give an open-vendor route by the same
+       `fallback` test; otherwise the finding (`/resolved/models`) names the policy as what leaves the lane on closed
+       vendors alone. A profile whose own route is closed is reported once, for itself; a refused launch and a bundle
+       without a policy add nothing.
+  4. **A refusal is a failed turn.** For a profile whose `reads` lists `user-content`, the runner treats a provider's
+     content refusal, or an empty answer to a non-empty request, as a failed turn, so `between-turns` moves to the next
+     model. Normative for runners; no schema can check it, so the runner row of
+     [conformance](specification/conformance.md#clients-and-readers) carries it, and the host's launch row runs
+     `FAC-SEM-112`.
+  5. **`open-vendor` is descriptive: a deliberate exception to DEC-0046's every-class rule** (item 5 of DEC-0046).
+     Resolution ignores it (`resolveModelProfile`), so a policy neither admits nor excludes a model by it, and a
+     catalogue writer that adds it to a row changes no existing resolution. A policy cannot name it: the schema, not a
+     rule clause, since a spend policy's and a grant's `modelClasses` are schema-checked — both now take
+     `registry-models.schema.json#/$defs/admissionClass`, every class but `open-vendor`. A catalogue row carries at
+     least one admission class (`classes` `contains` one), and the resolver keeps a row with none out under any policy
+     that names classes, so the exception never admits a model by default.
+- **Why:** a lane that reads what members, clients or the public send exists to handle content the closed vendors
+  refuse, and a refusal can come back as an empty answer, which a runner that counts only errors reads as a success.
+  The operator's rule of 2026-10-15, measured in one product: one closed model returned 1,328 refusals and 2,771 empty
+  answers in seven days, and sending such content to one closed vendor got the whole provider account blocked for that
+  vendor's chat models. A route with an open-vendor model, first or as the fallback a refusal moves to, keeps the lane
+  answering. The class is the catalogue's fact, because vendors change their licences and the contract would otherwise
+  hold a list that ages; `chinese-vendor` answers another question (where the vendor is), so the two stay separate.
+  Under DEC-0046's every-class rule the class would have narrowed every policy that names classes the day a catalogue
+  writer added it, so a fact about licences would have changed what projects may run; it is descriptive instead. A
+  resolution's outcome is checked as well as the profile, because a policy can drop the open model by another class
+  it does not allow (DeepSeek V4 Pro is also `strong`).
+  The rule is fail-closed because a lane that reads user content on an uncatalogued model is exactly the case it
+  exists to catch. `operator` and `web` exist so that "declared, not user content" differs from "not declared".
+- **Compatibility:** `contractVersion` stays `0.1.0`, but this is not purely additive for readers.
+  1. Both schemas are closed: a reader pinned before DEC-0083 refuses a catalogue row with the class `open-vendor` and
+     a profile with `reads`. So a writer publishes `reads` on a profile only once every reader is pinned at or after
+     DEC-0083. A catalogue writer marks `open-vendor` only once every schema reader is pinned at or after DEC-0083
+     **and** every resolver the catalogue serves has ported item 5's exception (item 3), in its resolution and in any
+     other copy of the every-class rule it keeps, such as a doctor's usability check.
+  2. `FAC-SEM-112` refuses only profiles whose `reads` lists `user-content`. An existing profile, and a profile that
+     declares only `operator` or `web`, is unaffected.
+  3. Under item 5, adding `open-vendor` to a row changes no policy's outcome for a resolver that has ported the
+     exception (`test/open-vendor-user-content.test.ts` resolves the catalogue with and without it). A resolver that
+     does not validate the catalogue against the schema and has not ported the exception — a kit pinned before
+     DEC-0083 — applies the every-class rule to `open-vendor` and drops every open model under a policy that names
+     classes, and no policy can work around it, because a policy cannot name the class. Hence item 1's gate on the
+     catalogue writer. Every port checks its resolver and its doctor against the shared vectors
+     `fixtures/vectors/model-admission.json` (`admittedByClasses`). Refusing `open-vendor` in a policy's and a grant's
+     `modelClasses`, and a row with no other class, tightens nothing a reader accepted before: the value did not
+     exist.
+  4. No test hard-coded the six classes: the vocabulary test compares runners.md with the schema's list, and the new
+     test holds it at seven; DEC-0046's test now reads the policy's and the grant's `$defs/admissionClass`. The positive
+     catalogue fixture marks its DeepSeek, Qwen, GLM, MiniMax and Mistral rows `open-vendor`, an illustrative choice:
+     the catalogue writer decides.
+- **Consequences / affects:**
+  - spec: `docs/specification/runners.md` (the classes, What a profile reads, the rules table),
+    `docs/specification/conformance.md` (the host's launch row, the runner row, the register row);
+  - schemas: `schemas/registry-models.schema.json` (`open-vendor`, `$defs/admissionClass`, a row's `contains`),
+    `schemas/model-profile.schema.json` (`reads`, `$defs/reads`), `schemas/spend-policy.schema.json` and
+    `schemas/governance.schema.json` (`modelClasses` take `admissionClass`);
+  - spec, also: `docs/specification/spend-policy.md` (`modelClasses`);
+  - code: `src/profile-rules.ts` (`OPEN_VENDOR`, `USER_CONTENT`, `closedUserContentRoute`, `FAC-SEM-112` with its
+    outcome clause, `admittedByClasses` and `resolveModelProfile`'s exception; `FAC-SEM-058`, `FAC-SEM-060` and `FAC-SEM-112` name an item by
+    its index as written, past a leading non-object, an adjacent defect the adapter reported), `src/findings.ts`
+    (`indexed`, moved from `src/activity-rules.ts` and `src/estate-record-rules.ts`, which import it);
+  - fixtures: `fixtures/positive/registry-models.json` (the open-weight rows), `fixtures/positive/model-profile-user-content.json`,
+    `fixtures/positive/model-profiles-user-content.json`, `fixtures/positive/model-profile-reads-operator.json`,
+    `fixtures/negative/model-profile-reads-{unknown,empty,twice}.json`, `fixtures/negative/spend-policy-open-vendor-class.json`,
+    `fixtures/negative/registry-models-open-vendor-only.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
+    (ten), `fixtures/vectors/model-admission.json` (new, eight cases), `fixtures/catalogue.json`;
+  - tests: `test/open-vendor-user-content.test.ts` (new), `test/rule-tolerance.test.ts` (kind `profile-resolution`),
+    `test/runner-model-profiles.test.ts` (the admission-class reference), `test/findings.test.ts` (new); `vitest.config.ts`
+    (`src/findings.ts` measured at 100, `src/activity-rules.ts` 97.16 to 97.13 as the moved helper's covered branches
+    left it) and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - UX: `docs/ux/scenarios.md` (SCN-020's errors and coverage);
+  - docs: `CONTEXT.md` (Model class, Model profile), `docs/DOCMAP.md`, `docs/backlog.md` (CT-52),
+    `docs/handoffs/2026-10-15-open-vendor-user-content.md`, `docs/handoffs/README.md`.
+- **Not decided here:**
+  - that a checker's or a judge's fallback comes from a third vendor (the operator's guidance, not a rule a document
+    can check yet);
+  - per-model refusal or empty-answer thresholds, and how many failed turns end a conversation;
+  - which lanes count as user content: the profile's writer declares it;
+  - whether a host or a kit requires every profile to declare `reads` (allowed, not required here).
+- **Source:** the operator's rule of 2026-10-15, measured in one product ("user-generated content — open-vendor models
+  only"); the owner's design of DEC-0083, its addition of `operator` and `web`, and its decision on PR #111's concern
+  (2026-10-15). DEC-0083 and
+  `FAC-SEM-112` were reserved by the owner session (receipt SEM-0112); the record plane is `fs`. The registers are
+  edited under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and
+  `docs/backlog.md`.

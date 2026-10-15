@@ -1,0 +1,10 @@
+{
+  "kind": "model-profile",
+  "id": "member-chat",
+  "name": "Member chat",
+  "models": [
+    "qwen/qwen3.8-flash"
+  ],
+  "fallback": "none",
+  "reads": []
+}

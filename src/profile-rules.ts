@@ -1,5 +1,5 @@
 // #region profile-rules — docs: docs/specification/runners.md#runner-and-model-profiles
-import { type Finding, type JsonObject, isObject, jsonEqual, show, toNumber } from "./findings.js";
+import { type Finding, type JsonObject, indexed, isObject, jsonEqual, show, toNumber } from "./findings.js";
 import { secretValue } from "./secret-shape.js";
 
 /**
@@ -11,6 +11,12 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
 
 /** The vendor login each subscription is, and the one runner kind it runs in (DEC-0046, ADR-0147 decision 2). */
 export const SUBSCRIPTION_RUNNER: Readonly<Record<string, string>> = { claude: "claude-code", kimi: "kimi-code", chatgpt: "codex" };
+
+/** The model class of a model whose vendor publishes its weights openly (DEC-0083). Descriptive: a policy admits and excludes
+ * nothing by it. */
+export const OPEN_VENDOR = "open-vendor";
+/** What a lane reads when it reads what a member, a client or the public sends (DEC-0083). */
+export const USER_CONTENT = "user-content";
 
 /** The levels a profile is chosen at, most specific first. */
 export const RESOLUTION_ORDER = ["request", "agent", "binding", "estate"] as const;
@@ -34,10 +40,24 @@ export type Resolution =
   | { refused: "model-classes-empty"; profile: string; policy: { id: string; revision: number } };
 
 /**
+ * Whether a project's policy admits one catalogue row (DEC-0046, DEC-0083): every class the row has is in `allowed`,
+ * the descriptive `open-vendor` not counted, and at least one other class is there to check. A model the catalogue does
+ * not hold (`row` undefined) is not admitted. The resolver and a kit's doctor both answer by it; the shared vectors are
+ * `fixtures/vectors/model-admission.json`.
+ */
+export function admittedByClasses(row: unknown, allowed: readonly string[]): boolean {
+  if (!isObject(row)) return false;
+  const admission = strings(row.classes).filter((name) => name !== OPEN_VENDOR);
+  return admission.length > 0 && admission.every((name) => allowed.includes(name));
+}
+
+/**
  * The reference resolution (DEC-0046, FAC-SEM-060), which the kit ports: the request's profile, else the agent's,
  * else the binding's or project's, else the estate default. When the project's policy names `modelClasses`, a model
  * stays only if every class the catalogue gives it is allowed — a model the catalogue does not hold has no classes to
- * check and does not stay. An empty result refuses the launch, naming the policy.
+ * check and does not stay. The descriptive class `open-vendor` is not checked (DEC-0083, a deliberate exception to the
+ * every-class rule), and a model with no other class does not stay. An empty result refuses the launch, naming the
+ * policy.
  */
 export function resolveModelProfile(input: ResolutionInput): Resolution {
   const level = RESOLUTION_ORDER.find((name) => typeof input.choices[name] === "string");
@@ -48,12 +68,9 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
   const models = strings(profile.models);
   const policy = isObject(input.policy) ? input.policy : undefined;
   if (!policy || !Array.isArray(policy.modelClasses)) return { from: level, profile: id, models };
-  const allowed = new Set(strings(policy.modelClasses));
+  const allowed = strings(policy.modelClasses);
   const rows = new Map(list(isObject(input.catalogue) ? input.catalogue.models : undefined).map((row) => [row.id, row] as const));
-  const within = models.filter((model) => {
-    const row = rows.get(model);
-    return row !== undefined && strings(row.classes).every((name) => allowed.has(name));
-  });
+  const within = models.filter((model) => admittedByClasses(rows.get(model), allowed));
   if (within.length) return { from: level, profile: id, models: within };
   const meta = isObject(policy.meta) ? policy.meta : {};
   return { refused: "model-classes-empty", profile: id, policy: { id: show(meta.id), revision: toNumber(meta.revision) } };
@@ -63,7 +80,7 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
 function modelCatalogue(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
-  list(value.models).forEach((row, index) => {
+  indexed(value.models).forEach(([row, index]) => {
     if (seen.has(row.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/id`, message: `model ${show(row.id)} is catalogued more than once` });
     seen.add(row.id);
     const routing = isObject(row.provider) ? row.provider : {};
@@ -81,7 +98,7 @@ function modelCatalogue(value: JsonObject): Finding[] {
 function modelProfiles(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
-  list(value.profiles).forEach((profile, index) => {
+  indexed(value.profiles).forEach(([profile, index]) => {
     if (seen.has(profile.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/profiles/${index}/id`, message: `model profile ${show(profile.id)} is declared more than once` });
     seen.add(profile.id);
   });
@@ -117,12 +134,12 @@ function profileResolution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const catalogued = new Set(list(isObject(value.catalogue) ? value.catalogue.models : undefined).map((row) => row.id));
   const ids = new Set<unknown>();
-  list(value.profiles).forEach((profile, i) => {
+  indexed(value.profiles).forEach(([profile, i]) => {
     // An agent's profile and an estate profile never share an id: the resolver would take whichever came first.
     if (ids.has(profile.id)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/id`, message: `profile id ${show(profile.id)} is offered more than once to one resolution` });
     ids.add(profile.id);
-    strings(profile.models).forEach((model, j) => {
-      if (!catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${show(profile.id)} names ${model}, which the catalogue does not hold` });
+    (Array.isArray(profile.models) ? profile.models : []).forEach((model: unknown, j) => {
+      if (typeof model === "string" && !catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${show(profile.id)} names ${model}, which the catalogue does not hold` });
     });
   });
   const choices = isObject(value.choices) ? (value.choices as ResolutionInput["choices"]) : {};
@@ -131,11 +148,60 @@ function profileResolution(value: JsonObject): Finding[] {
   return findings;
 }
 
+/**
+ * FAC-SEM-112 (DEC-0083) for one profile: the models that run when the lane reads user content and none of them is an
+ * open-vendor model, or `undefined` when the profile does not read user content or its route has one. Under
+ * `between-turns` every model may run; under `none` — and under any other value, failing closed — only the first one.
+ * A model the catalogue does not hold, or whose row is not `open-vendor`, counts as closed. Never throws.
+ */
+export function closedUserContentRoute(profile: unknown, catalogue: unknown): string[] | undefined {
+  if (!isObject(profile) || !strings(profile.reads).includes(USER_CONTENT)) return undefined;
+  const models: unknown[] = Array.isArray(profile.models) ? profile.models : [];
+  const route = profile.fallback === "between-turns" ? models : models.slice(0, 1);
+  const open = new Set<string>();
+  for (const row of list(isObject(catalogue) ? catalogue.models : undefined)) {
+    if (typeof row.id === "string" && strings(row.classes).includes(OPEN_VENDOR)) open.add(row.id);
+  }
+  if (route.some((model) => typeof model === "string" && open.has(model))) return undefined;
+  return route.map((model) => show(model));
+}
+
+/** How a closed route is named in a finding: under `between-turns` all of it, otherwise its first model. */
+const closedRoute = (fallback: unknown, closed: string[]): string =>
+  fallback === "between-turns" ? "none of its models is" : `its first model, ${closed[0] ?? "none"}, is not`;
+
+/**
+ * FAC-SEM-112 (DEC-0083): a profile that reads user content has an open-vendor route — with `fallback: none` its first
+ * model is `open-vendor` in the catalogue, with `between-turns` at least one of its models is — so the lane never runs
+ * on closed vendors alone, which refuse the content it exists to handle. The resolution's outcome is held to the same
+ * test: when the resolved profile reads user content and its own route is open, the models the policy leaves must
+ * still give one, or the policy is named as what leaves the lane closed (one cause, one finding).
+ */
+function openVendorRoutes(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const profiles = list(value.profiles);
+  indexed(value.profiles).forEach(([profile, i]) => {
+    const closed = closedUserContentRoute(profile, value.catalogue);
+    if (closed === undefined) return;
+    findings.push({ code: "FAC-SEM-112", instancePath: `/profiles/${i}/models`, message: `profile ${show(profile.id)} reads user content, but ${closedRoute(profile.fallback, closed)} open-vendor in the catalogue: the lane would run on closed vendors alone` });
+  });
+  const choices = isObject(value.choices) ? (value.choices as ResolutionInput["choices"]) : {};
+  const outcome = resolveModelProfile({ catalogue: value.catalogue, profiles: value.profiles, choices, policy: value.policy });
+  if (!("models" in outcome)) return findings;
+  const profile = profiles.find((item) => item.id === outcome.profile);
+  if (!profile || closedUserContentRoute(profile, value.catalogue) !== undefined) return findings;
+  const closed = closedUserContentRoute({ ...profile, models: outcome.models }, value.catalogue);
+  if (closed === undefined) return findings;
+  const meta = isObject(value.policy) && isObject(value.policy.meta) ? value.policy.meta : {};
+  findings.push({ code: "FAC-SEM-112", instancePath: "/resolved/models", message: `the policy ${show(meta.id)} leaves profile ${show(profile.id)}'s lane on closed vendors alone: of the models it admits, ${closedRoute(profile.fallback, closed)} open-vendor in the catalogue` });
+  return findings;
+}
+
 export function profileRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "model-catalogue") return modelCatalogue(value);
   if (kind === "model-profiles") return modelProfiles(value);
   if (kind === "runner-profile") return runnerProfile(value);
-  if (kind === "profile-resolution") return profileResolution(value);
+  if (kind === "profile-resolution") return [...profileResolution(value), ...openVendorRoutes(value)];
   return undefined;
 }
 // #endregion profile-rules
