@@ -1,0 +1,28 @@
+{
+  "description": "A token whose statement leaves out ceiling: the register's field list is fixed, and null says none (FAC-SEM-113).",
+  "kind": "enroll-token",
+  "expect": [
+    "FAC-SEM-113"
+  ],
+  "input": {
+    "schema": "enroll-token/1",
+    "statement": {
+      "type": "enroll-token/1",
+      "scope": "estate:estate-5d0f1a",
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
+      "purpose": "agent-host",
+      "notBefore": "2026-10-15T09:00:00Z",
+      "expiresAt": "2026-10-15T09:15:00Z",
+      "nonce": "rzEvtarYvyOTXG9I9-vfI6AoqZbJRr8ITPEJSgCR0P8",
+      "uses": 1
+    },
+    "signature": {
+      "format": "webauthn-assertion",
+      "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+      "alg": "EdDSA",
+      "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+      "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+      "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+    }
+  }
+}

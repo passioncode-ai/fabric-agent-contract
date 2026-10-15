@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce} (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at) — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted) on the revision that adds the machine. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
+  "about": "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
   "keys": {
     "new": [
       {
@@ -97,11 +97,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
       }
     },
     {
@@ -122,11 +123,12 @@
             "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
           }
         ],
-        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "commit": "sha256:f343c444f8729dc3f2afd72582622d471098f962579183f9160dbe2152ec01c0"
+        "commit": "sha256:48cf566f032f04dff3d053b8a02ee888fc62a6f5f245ef74391b16aac40beecc"
       }
     },
     {
@@ -160,11 +162,89 @@
             "publicKey": "E5DhHVXK3sLz51FwFvVW6t3f/e6J7K32OScferYvVjc="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "commit": "sha256:6f86599032f96576f367ca24dde1f943550f73941d4adf426d543e8607385e66"
+        "commit": "sha256:87c7f92a0d177e8fbca00406b4f97584ac2157b855d60651fc35c9d8406c139c"
+      }
+    },
+    {
+      "name": "the trusted side without its estate's genesis",
+      "side": {
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "bad-genesis"
+      }
+    },
+    {
+      "name": "lax: the new side naming a genesis (it has no estate yet)",
+      "side": {
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "bad-genesis"
+      }
+    },
+    {
+      "name": "lax: a genesis in upper-case hex",
+      "side": {
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4D7C9D5653D99158DD358BB5242B5F8811CEDF2F813355DDF9FB0CFCBAE9B5C6"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "bad-genesis"
       }
     },
     {
@@ -582,7 +662,7 @@
         "schema": "pairing-message/1",
         "step": "commit",
         "role": "trusted",
-        "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
       },
       "reveal": {
         "schema": "pairing-message/1",
@@ -602,7 +682,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "expected": "trusted",
       "answer": {
@@ -800,12 +881,82 @@
             "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
           }
         ],
-        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "expected": "trusted",
       "answer": {
         "ok": false,
         "problem": "commit-mismatch"
+      }
+    },
+    {
+      "name": "a trusted reveal of another estate than it committed to",
+      "commit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "reveal": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "expected": "trusted",
+      "answer": {
+        "ok": false,
+        "problem": "commit-mismatch"
+      }
+    },
+    {
+      "name": "a trusted reveal without its genesis",
+      "commit": {
+        "schema": "pairing-message/1",
+        "step": "commit",
+        "role": "trusted",
+        "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
+      },
+      "reveal": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+      },
+      "expected": "trusted",
+      "answer": {
+        "ok": false,
+        "problem": "bad-genesis"
       }
     },
     {
@@ -834,7 +985,8 @@
             "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
           }
         ],
-        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
@@ -1111,13 +1263,14 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "550002"
+        "code": "724799"
       },
-      "transcript": "{\"new\":{\"keys\":[{\"alg\":\"es256\",\"kid\":\"m-7b2d#sig\",\"publicKey\":\"BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8=\",\"use\":\"sig\"},{\"alg\":\"ecdh-p256\",\"kid\":\"m-7b2d#kem\",\"publicKey\":\"BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s=\",\"use\":\"kem\"}],\"nonce\":\"uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc\"},\"trusted\":{\"keys\":[{\"alg\":\"es256\",\"kid\":\"m-4c1e#sig\",\"publicKey\":\"BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE=\",\"use\":\"sig\"},{\"alg\":\"ecdh-p256\",\"kid\":\"m-4c1e#kem\",\"publicKey\":\"BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8=\",\"use\":\"kem\"}],\"nonce\":\"Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI\"},\"type\":\"fabric-enroll-code/1\"}"
+      "transcript": "{\"new\":{\"keys\":[{\"alg\":\"es256\",\"kid\":\"m-7b2d#sig\",\"publicKey\":\"BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8=\",\"use\":\"sig\"},{\"alg\":\"ecdh-p256\",\"kid\":\"m-7b2d#kem\",\"publicKey\":\"BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s=\",\"use\":\"kem\"}],\"nonce\":\"uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc\"},\"trusted\":{\"genesis\":\"sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6\",\"keys\":[{\"alg\":\"es256\",\"kid\":\"m-4c1e#sig\",\"publicKey\":\"BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE=\",\"use\":\"sig\"},{\"alg\":\"ecdh-p256\",\"kid\":\"m-4c1e#kem\",\"publicKey\":\"BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8=\",\"use\":\"kem\"}],\"nonce\":\"Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI\"},\"type\":\"fabric-enroll-code/1\"}"
     },
     {
       "name": "another nonce of the new machine changes the code",
@@ -1159,11 +1312,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "300359"
+        "code": "416052"
       }
     },
     {
@@ -1206,11 +1360,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "r57K2buCe30ZYZoMnTbe9PTDbCG-C4abPFdclDudcsg"
+        "nonce": "r57K2buCe30ZYZoMnTbe9PTDbCG-C4abPFdclDudcsg",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "711167"
+        "code": "584885"
       }
     },
     {
@@ -1247,11 +1402,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "260636"
+        "code": "857231"
       }
     },
     {
@@ -1288,11 +1444,60 @@
             "publicKey": "BP2QDH2yFyEh5oBWIiOI7vOQqQibfaLPt/1yviGnTIkLO34S3f9UTtYS5Oybu2JDU61rpYgrlsV/4WItRl6gJWY="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "600077"
+        "code": "732095"
+      }
+    },
+    {
+      "name": "another estate of the trusted machine changes the code (a chain substituted for the person's)",
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "answer": {
+        "ok": true,
+        "code": "518405"
       }
     },
     {
@@ -1329,11 +1534,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "894645"
+        "code": "193399"
       }
     },
     {
@@ -1376,11 +1582,12 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "184729"
+        "code": "067583"
       }
     },
     {
@@ -1423,13 +1630,14 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": true,
-        "code": "550002"
+        "code": "724799"
       },
-      "laxCode": "100372"
+      "laxCode": "394173"
     },
     {
       "name": "lax: the two reveals passed in swapped order are refused, not coded",
@@ -1451,7 +1659,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "trusted": {
         "schema": "pairing-message/1",
@@ -1565,7 +1774,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
@@ -1612,7 +1822,8 @@
             "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
@@ -1659,7 +1870,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
@@ -1700,11 +1912,59 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
         "problem": "bad-keys"
+      }
+    },
+    {
+      "name": "a trusted reveal that names no estate",
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+      },
+      "answer": {
+        "ok": false,
+        "problem": "bad-genesis"
       }
     },
     {
@@ -1733,7 +1993,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "answer": {
         "ok": false,
@@ -1816,7 +2077,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -1856,7 +2117,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         }
       ],
       "answer": {
@@ -1872,7 +2134,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -1898,7 +2160,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         },
         {
           "schema": "pairing-message/1",
@@ -1940,7 +2203,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -1980,7 +2243,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         }
       ],
       "answer": {
@@ -2002,7 +2266,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2042,7 +2306,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         }
       ],
       "answer": {
@@ -2075,7 +2340,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         }
       ],
       "answer": {
@@ -2097,7 +2362,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2221,7 +2486,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2285,7 +2550,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2329,7 +2594,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2395,7 +2660,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2435,7 +2700,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         },
         {
           "schema": "pairing-message/1",
@@ -2465,7 +2731,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2505,7 +2771,8 @@
               "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
             }
           ],
-          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+          "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+          "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
         },
         {
           "schema": "pairing-message/1",
@@ -2555,7 +2822,7 @@
           "schema": "pairing-message/1",
           "step": "commit",
           "role": "trusted",
-          "commit": "sha256:619f564f5ea5f483721548e010b0dc02a3ca5cca3355ee49027a6eccd3e6d415"
+          "commit": "sha256:bd05c73f63f98e161d4e1e3196fdb224cf70a33761118715a6cd997d6a74a2c2"
         },
         {
           "schema": "pairing-message/1",
@@ -2720,8 +2987,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": true
       }
@@ -2808,10 +3077,103 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": true
+      }
+    },
+    {
+      "name": "a chain of another estate, however well signed: its revision 1 is not the genesis the code bound",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "estate-5d0f1a",
+        "revision": 2,
+        "machines": [
+          {
+            "id": "m-4c1e",
+            "deviceKeys": [
+              {
+                "kid": "m-4c1e#sig",
+                "use": "sig",
+                "alg": "es256",
+                "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+              },
+              {
+                "kid": "m-4c1e#kem",
+                "use": "kem",
+                "alg": "ecdh-p256",
+                "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+              }
+            ]
+          },
+          {
+            "id": "m-7b2d",
+            "deviceKeys": [
+              {
+                "kid": "m-7b2d#sig",
+                "use": "sig",
+                "alg": "es256",
+                "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+              },
+              {
+                "kid": "m-7b2d#kem",
+                "use": "kem",
+                "alg": "ecdh-p256",
+                "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+              }
+            ]
+          }
+        ],
+        "revocations": []
+      },
+      "new": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "new",
+        "keys": [
+          {
+            "kid": "m-7b2d#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+          },
+          {
+            "kid": "m-7b2d#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+          }
+        ],
+        "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+      },
+      "trusted": {
+        "schema": "pairing-message/1",
+        "step": "reveal",
+        "role": "trusted",
+        "keys": [
+          {
+            "kid": "m-4c1e#sig",
+            "use": "sig",
+            "alg": "es256",
+            "publicKey": "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="
+          },
+          {
+            "kid": "m-4c1e#kem",
+            "use": "kem",
+            "alg": "ecdh-p256",
+            "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
+          }
+        ],
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
+      },
+      "genesis": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+      "answer": {
+        "ok": false,
+        "problem": "other-estate"
       }
     },
     {
@@ -2879,8 +3241,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "not-listed"
@@ -2974,8 +3338,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "not-listed"
@@ -3063,8 +3429,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "other-keys"
@@ -3146,8 +3514,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "other-keys"
@@ -3229,8 +3599,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "trusted-not-listed"
@@ -3301,8 +3673,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "trusted-not-listed"
@@ -3370,7 +3744,8 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
       "trusted": {
         "schema": "pairing-message/1",
@@ -3392,6 +3767,7 @@
         ],
         "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "malformed"
@@ -3438,8 +3814,10 @@
             "publicKey": "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8="
           }
         ],
-        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI"
+        "nonce": "Dx1e4QZZ_HLDYrQO4103J_to72RdqI9k4OCqxZiSusI",
+        "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6"
       },
+      "genesis": "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6",
       "answer": {
         "ok": false,
         "problem": "malformed"

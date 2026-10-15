@@ -23,6 +23,7 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "approval.schema.json": "approval-claims",
   "delegation-token.schema.json": "delegation-claims",
   "estate-record.schema.json": "estate-record",
+  "enroll-token.schema.json": "enroll-token",
   "fabric-package.schema.json": "package",
   "governance.schema.json": "grant-spend",
   "activity-summary.schema.json": "activity-summary",
@@ -114,7 +115,10 @@ export const NOT_SWEPT: readonly string[] = [
   "work.schema.json",
   "local-channel.schema.json",
   "learning-note.schema.json",
-  "learning-note-answer.schema.json"
+  "learning-note-answer.schema.json",
+  // A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other
+  // side's reveal, never whole by a rule kind.
+  "pairing-message.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {
@@ -126,7 +130,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "revocation-delta-rules", "window-lease", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
+    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

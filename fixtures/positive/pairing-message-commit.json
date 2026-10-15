@@ -1,0 +1,6 @@
+{
+  "schema": "pairing-message/1",
+  "step": "commit",
+  "role": "new",
+  "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515"
+}

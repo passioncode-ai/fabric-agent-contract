@@ -7,8 +7,8 @@ import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 // #region pairing — docs: docs/specification/ceremonies.md#add-a-machine
 /**
  * The estate ceremonies' pure parts (DEC-0084): the pairing of a new machine with a trusted one — a commit, a reveal and
- * a comparison code over both sides' keys and nonces, the construction of ZRTP's short authentication string and
- * Bluetooth's numeric comparison — the one-time rendezvous that carries it, the estate's fingerprint a person compares,
+ * a comparison code over both sides' keys and nonces, the hash commitment of ZRTP's short authentication string
+ * (RFC 6189 §4.4.1.1, §7) — the one-time rendezvous that carries it, the estate's fingerprint a person compares,
  * and the checks a node runs on the revision that adds or re-keys it. Every function is total: malformed input answers a
  * refusal, never a throw. The shared vectors are `fixtures/vectors/pairing.json`, written by `tools/vectors/pairing.ts`.
  */
@@ -32,7 +32,7 @@ export const RENDEZVOUS_SECONDS = 600;
 export type PairingRole = "new" | "trusted";
 export const PAIRING_ROLES: readonly PairingRole[] = ["new", "trusted"];
 
-export type PairingProblem = "malformed" | "bad-role" | "bad-nonce" | "bad-keys" | "role-mismatch" | "commit-mismatch" | "same-machine";
+export type PairingProblem = "malformed" | "bad-role" | "bad-nonce" | "bad-keys" | "bad-genesis" | "role-mismatch" | "commit-mismatch" | "same-machine";
 
 /** 32 random bytes as unpadded base64url: 43 characters, the last one carrying 2 bits and 4 zero bits. */
 const NONCE = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
@@ -79,25 +79,36 @@ export function machineOfKeys(keys: unknown): string | undefined {
   return ids.size === 1 && uses.has("sig") ? id : undefined;
 }
 
-/** What one side commits to and reveals: its role, its device keys and its nonce. */
-export interface PairingSide { role: PairingRole; keys: unknown[]; nonce: string }
+/**
+ * What one side commits to and reveals: its role, its device keys and its nonce, and for the trusted side the estate's
+ * `genesis` — the digest of revision 1 — so the comparison code binds the network too.
+ */
+export interface PairingSide { role: PairingRole; keys: unknown[]; nonce: string; genesis?: string }
 
-/** A side's members checked in the order a port reports them: the role, the nonce, the keys. */
+/** A side's members checked in the order a port reports them: the role, the nonce, the keys, the genesis. */
 function sideProblem(side: unknown): PairingProblem | undefined {
   if (!isObject(side)) return "malformed";
-  if (!isRole(own(side, "role"))) return "bad-role";
+  const role = own(side, "role");
+  if (!isRole(role)) return "bad-role";
   if (!isString(own(side, "nonce")) || !NONCE.test(own(side, "nonce") as string)) return "bad-nonce";
   if (machineOfKeys(own(side, "keys")) === undefined) return "bad-keys";
+  // The trusted side names its estate; the new side has none to name yet.
+  const genesis = own(side, "genesis");
+  if (role === "trusted" ? !isString(genesis) || !SHA256.test(genesis) : Object.hasOwn(side, "genesis")) return "bad-genesis";
   return undefined;
 }
 
-/** The UTF-8 RFC 8785 text a commitment hashes: `{type: "fabric-enroll-commit/1", role, keys, nonce}`. */
-const commitInput = (side: JsonObject) => rfc8785({ type: COMMIT_TYPE, role: side.role, keys: side.keys, nonce: side.nonce });
+/** A side's members a commitment and the transcript cover: `{keys, nonce}`, and `genesis` for the trusted side. */
+const covered = (side: JsonObject): JsonObject => (side.role === "trusted" ? { keys: side.keys, nonce: side.nonce, genesis: side.genesis } : { keys: side.keys, nonce: side.nonce });
+
+/** The UTF-8 RFC 8785 text a commitment hashes: `{type: "fabric-enroll-commit/1", role, keys, nonce}`, and `genesis`. */
+const commitInput = (side: JsonObject) => rfc8785({ type: COMMIT_TYPE, role: side.role, ...covered(side) });
 
 /**
  * A side's commitment (DEC-0084 step 3): `sha256:` and the hex SHA-256 of the UTF-8 RFC 8785 form of `{type:
- * "fabric-enroll-commit/1", role, keys, nonce}`. The role is inside, so a commitment made as one side never opens as the
- * other; the keys are inside, so a side cannot swap its key after it saw the other's nonce.
+ * "fabric-enroll-commit/1", role, keys, nonce}`, with `genesis` beside them for the trusted side (`bad-genesis` when the
+ * trusted side names no digest or the new side names one). The role is inside, so a commitment made as one side never
+ * opens as the other; the keys are inside, so a side cannot swap its key after it saw the other's nonce.
  */
 export function pairingCommit(side: unknown): { ok: true; commit: string } | { ok: false; problem: PairingProblem } {
   const problem = sideProblem(side);
@@ -110,7 +121,7 @@ function message(value: unknown, step: "commit" | "reveal"): JsonObject | undefi
   if (!isObject(value) || own(value, "schema") !== PAIRING_SCHEMA || own(value, "step") !== step) return undefined;
   const members = Object.keys(value).sort().join();
   if (step === "commit") return members === "commit,role,schema,step" && isString(value.commit) && SHA256.test(value.commit) ? value : undefined;
-  return members === "keys,nonce,role,schema,step" ? value : undefined;
+  return members === "keys,nonce,role,schema,step" || members === "genesis,keys,nonce,role,schema,step" ? value : undefined;
 }
 
 /**
@@ -124,21 +135,23 @@ export function checkReveal(commit: unknown, reveal: unknown, expected?: Pairing
   const r = message(reveal, "reveal");
   if (!c || !r) return { ok: false, problem: "malformed" };
   if (r.role !== c.role || (expected !== undefined && r.role !== expected)) return { ok: false, problem: "role-mismatch" };
-  const made = pairingCommit({ role: r.role, keys: r.keys, nonce: r.nonce });
+  const { schema: _schema, step: _step, ...side } = r;
+  const made = pairingCommit(side);
   if (!made.ok) return made;
   if (made.commit !== c.commit) return { ok: false, problem: "commit-mismatch" };
   return { ok: true, machine: machineOfKeys(r.keys) as string };
 }
 
 /** The UTF-8 RFC 8785 text the comparison code hashes, from two reveals already checked. */
-const transcript = (a: JsonObject, b: JsonObject) => rfc8785({ type: CODE_TYPE, new: { keys: a.keys, nonce: a.nonce }, trusted: { keys: b.keys, nonce: b.nonce } });
+const transcript = (a: JsonObject, b: JsonObject) => rfc8785({ type: CODE_TYPE, new: covered(a), trusted: covered(b) });
 
 /**
  * The comparison code both screens show (step 4): the new machine's reveal and the trusted machine's, each a
  * `pairing-message/1` reveal (else `malformed`) in its own role (else `role-mismatch`, so a call with the two swapped is
- * refused), with valid nonces and keys, of two different machines (else `same-machine`). The transcript is the UTF-8 RFC
- * 8785 form of `{type: "fabric-enroll-code/1", new: {keys, nonce}, trusted: {keys, nonce}}`; the code is the first five
- * bytes of its SHA-256, read as a big-endian integer, modulo 10^6, written as six decimal digits with leading zeros.
+ * refused), with valid nonces, keys and genesis, of two different machines (else `same-machine`). The transcript is the
+ * UTF-8 RFC 8785 form of `{type: "fabric-enroll-code/1", new: {keys, nonce}, trusted: {keys, nonce, genesis}}`; the code
+ * is the first five bytes of its SHA-256, read as a big-endian integer, modulo 10^6, written as six decimal digits with
+ * leading zeros. The code binds both keys, both nonces and the estate the trusted machine is in.
  */
 export function comparisonCode(newReveal: unknown, trustedReveal: unknown): { ok: true; code: string } | { ok: false; problem: PairingProblem } {
   const a = message(newReveal, "reveal");
@@ -223,17 +236,20 @@ const machineOf = (record: JsonObject, id: unknown) => (Array.isArray(record.mac
 const sameKeys = (a: unknown[], b: unknown[]) => a.length === b.length && a.every((key) => b.some((other) => jsonEqual(key, other)));
 
 /**
- * What the new machine checks on the revision that adds it (step 6), after `verifyEstateRecord` accepted it: the record
- * lists the new machine with exactly the keys it revealed (else `not-listed` or `other-keys`) and the trusted machine
- * with the `#sig` key it revealed (else `trusted-not-listed`), and revokes neither. Two valid reveals are needed (else
- * `malformed`). The same check runs when a machine re-pairs under its id to replace its key (DEC-0084 item 5b).
+ * What the new machine checks before it pins and applies (step 6), after `verifyEstateRecord` accepted the chain from
+ * revision 1 to `record`: `genesis`, the digest of the revision 1 it verified, is the one the trusted machine revealed and
+ * the comparison code bound (else `other-estate`: a chain of another estate, however well signed); the record lists the
+ * new machine with exactly the keys it revealed (else `not-listed` or `other-keys`) and the trusted machine with the
+ * `#sig` key it revealed (else `trusted-not-listed`), and revokes neither. Two valid reveals in their roles are needed
+ * (else `malformed`). The same check runs when a machine re-pairs under its id to replace its key (DEC-0084 item 5b).
  */
-export function joinListed(record: unknown, newReveal: unknown, trustedReveal: unknown): { ok: true } | { ok: false; problem: "malformed" | "not-listed" | "other-keys" | "trusted-not-listed" } {
+export function joinListed(record: unknown, newReveal: unknown, trustedReveal: unknown, genesis: unknown): { ok: true } | { ok: false; problem: "malformed" | "other-estate" | "not-listed" | "other-keys" | "trusted-not-listed" } {
   const a = message(newReveal, "reveal");
   const b = message(trustedReveal, "reveal");
-  const newId = machineOfKeys(a?.keys);
-  const trustedId = machineOfKeys(b?.keys);
-  if (!isObject(record) || !a || !b || newId === undefined || trustedId === undefined || a.role !== "new" || b.role !== "trusted") return { ok: false, problem: "malformed" };
+  if (!isObject(record) || !a || !b || a.role !== "new" || b.role !== "trusted" || sideProblem(a) || sideProblem(b)) return { ok: false, problem: "malformed" };
+  if (b.genesis !== genesis) return { ok: false, problem: "other-estate" };
+  const newId = machineOfKeys(a.keys) as string;
+  const trustedId = machineOfKeys(b.keys) as string;
   const revoked = (id: string) => Array.isArray(record.revocations) && record.revocations.some((entry) => isObject(entry) && entry.kind === "machine" && entry.ref === id);
   const machine = machineOf(record, newId);
   if (!machine || revoked(newId)) return { ok: false, problem: "not-listed" };

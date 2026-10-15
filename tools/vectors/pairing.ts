@@ -28,13 +28,16 @@ const p256 = (label: string) => {
 };
 /** 32 bytes from a label, as unpadded base64url: a nonce that is the same on every run. */
 const nonce = (label: string) => sha(`nonce ${label}`).toString("base64url");
-const key = (id: string, use: "sig" | "kem", alg: string, publicKey: string) => ({ kid: `${id}#${use}`, use, alg, publicKey });
-const commitOf = (role: string, keys: unknown, n: string) => `sha256:${sha(rfc8785({ type: "fabric-enroll-commit/1", role, keys, nonce: n })).toString("hex")}`;
+type Key = { kid: string; use: string; alg: string; publicKey: string };
+const key = (id: string, use: "sig" | "kem", alg: string, publicKey: string): Key => ({ kid: `${id}#${use}`, use, alg, publicKey });
+/** The members a commitment and the transcript cover: keys and nonce, and the trusted side's genesis. */
+const covered = (role: string, keys: unknown, n: string, genesis?: string) => (role === "trusted" ? { keys, nonce: n, genesis } : { keys, nonce: n });
+const commitOf = (role: string, keys: unknown, n: string, genesis?: string) => `sha256:${sha(rfc8785({ type: "fabric-enroll-commit/1", role, ...covered(role, keys, n, genesis) })).toString("hex")}`;
 /** The comparison code as ceremonies.md defines it: the transcript's SHA-256, its first 5 bytes big-endian, mod 10^6. */
 const codeOf = (text: string) => String(sha(text).readUIntBE(0, 5) % 1_000_000).padStart(6, "0");
-const transcriptOf = (a: Json, b: Json) => rfc8785({ type: "fabric-enroll-code/1", new: { keys: a.keys, nonce: a.nonce }, trusted: { keys: b.keys, nonce: b.nonce } });
+const transcriptOf = (a: Json, b: Json) => rfc8785({ type: "fabric-enroll-code/1", new: { keys: a.keys, nonce: a.nonce }, trusted: { keys: b.keys, nonce: b.nonce, genesis: b.genesis } });
 const commitMsg = (role: string, commit: string) => ({ schema: "pairing-message/1", step: "commit", role, commit });
-const revealMsg = (role: string, keys: unknown, n: string) => ({ schema: "pairing-message/1", step: "reveal", role, keys, nonce: n });
+const revealMsg = (role: string, keys: unknown, n: string, genesis?: string): Json => ({ schema: "pairing-message/1", step: "reveal", role, keys, nonce: n, ...(genesis === undefined ? {} : { genesis }) });
 const fingerprintOf = (digest: string) => {
   const f = sha(rfc8785({ type: "estate-fingerprint/1", digest }));
   return [0, 1, 2, 3, 4].map((i) => String(f.readUIntBE(5 * i, 5) % 100_000).padStart(5, "0")).join(" ");
@@ -43,22 +46,25 @@ const fingerprintOf = (digest: string) => {
 /** The vectors as an object. */
 export function pairingVectors(): Json {
   // The trusted machine is the estate record fixtures' m-4c1e (fixtures/positive/estate-record-first.json).
-  const trustedKeys = [
+  const trustedKeys: [Key, Key] = [
     key("m-4c1e", "sig", "es256", "BAlY11RNjwoIwuAd0QrNCoeddZRpr5ueLSdxBla8GxLcqF9603uYlmbl9TlA4ulvzPYY3j7bw2jc5g9cpOER6ZE="),
     key("m-4c1e", "kem", "ecdh-p256", "BD59C6uiK3pDkKuvL3NZabarYa2kIth3/4BntlQ7yIaYxRSQ0rFfFRHAaM98zOVbXziRb7SILbvpEF91YC574J8=")
   ];
-  const newKeys = [key("m-7b2d", "sig", "es256", p256("new sig")), key("m-7b2d", "kem", "ecdh-p256", p256("new kem"))];
+  const newKeys: [Key, Key] = [key("m-7b2d", "sig", "es256", p256("new sig")), key("m-7b2d", "kem", "ecdh-p256", p256("new kem"))];
   // The same machine id after its key was replaced (DEC-0084 item 5b), and an attacker's machine in the middle.
-  const replacedKeys = [key("m-7b2d", "sig", "es256", p256("new sig 2")), key("m-7b2d", "kem", "ecdh-p256", p256("new kem 2"))];
+  const replacedKeys: [Key, Key] = [key("m-7b2d", "sig", "es256", p256("new sig 2")), key("m-7b2d", "kem", "ecdh-p256", p256("new kem 2"))];
   const otherKeys = [key("m-e5f0", "sig", "es256", p256("other sig"))];
   const nNew = nonce("new"), nTrusted = nonce("trusted"), nOther = nonce("other");
+  // The trusted machine's estate: the digest of its revision 1 (fixtures/positive/estate-record-first.json).
+  const G = "sha256:4d7c9d5653d99158dd358bb5242b5f8811cedf2f813355ddf9fb0cfcbae9b5c6";
+  const otherG = `sha256:${"9".repeat(64)}`;
 
   const newSide = { role: "new", keys: newKeys, nonce: nNew };
-  const trustedSide = { role: "trusted", keys: trustedKeys, nonce: nTrusted };
+  const trustedSide = { role: "trusted", keys: trustedKeys, nonce: nTrusted, genesis: G };
   const newCommit = commitOf("new", newKeys, nNew);
-  const trustedCommit = commitOf("trusted", trustedKeys, nTrusted);
+  const trustedCommit = commitOf("trusted", trustedKeys, nTrusted, G);
   const newReveal = revealMsg("new", newKeys, nNew);
-  const trustedReveal = revealMsg("trusted", trustedKeys, nTrusted);
+  const trustedReveal = revealMsg("trusted", trustedKeys, nTrusted, G);
   const theTranscript = transcriptOf(newReveal, trustedReveal);
   const theCode = codeOf(theTranscript);
 
@@ -72,9 +78,12 @@ export function pairingVectors(): Json {
   const commits: Json[] = [
     { name: "the new machine's commitment", side: newSide, answer: committed(newCommit), input: rfc8785({ type: "fabric-enroll-commit/1", role: "new", keys: newKeys, nonce: nNew }) },
     { name: "the trusted machine's commitment", side: trustedSide, answer: committed(trustedCommit) },
-    { name: "the same keys and nonce committed as the other role give another commitment", side: { ...newSide, role: "trusted" }, answer: committed(commitOf("trusted", newKeys, nNew)) },
+    { name: "the same keys and nonce committed as the other role give another commitment", side: { ...newSide, role: "trusted", genesis: G }, answer: committed(commitOf("trusted", newKeys, nNew, G)) },
     { name: "a machine with only a #sig key commits", side: { role: "new", keys: otherKeys, nonce: nOther }, answer: committed(commitOf("new", otherKeys, nOther)) },
-    { name: "an Ed25519 #sig key commits like an ES256 one", side: { role: "trusted", keys: [key("m-9a07", "sig", "ed25519", "E5DhHVXK3sLz51FwFvVW6t3f/e6J7K32OScferYvVjc=")], nonce: nTrusted }, answer: committed(commitOf("trusted", [key("m-9a07", "sig", "ed25519", "E5DhHVXK3sLz51FwFvVW6t3f/e6J7K32OScferYvVjc=")], nTrusted)) },
+    { name: "an Ed25519 #sig key commits like an ES256 one", side: { role: "trusted", keys: [key("m-9a07", "sig", "ed25519", "E5DhHVXK3sLz51FwFvVW6t3f/e6J7K32OScferYvVjc=")], nonce: nTrusted, genesis: G }, answer: committed(commitOf("trusted", [key("m-9a07", "sig", "ed25519", "E5DhHVXK3sLz51FwFvVW6t3f/e6J7K32OScferYvVjc=")], nTrusted, G)) },
+    { name: "the trusted side without its estate's genesis", side: { role: "trusted", keys: trustedKeys, nonce: nTrusted }, answer: refused("bad-genesis") },
+    { name: "lax: the new side naming a genesis (it has no estate yet)", side: { ...newSide, genesis: G }, answer: refused("bad-genesis") },
+    { name: "lax: a genesis in upper-case hex", side: { ...trustedSide, genesis: G.toUpperCase().replace("SHA256:", "sha256:") }, answer: refused("bad-genesis") },
     { name: "lax: the keys listed in another order are another commitment (RFC 8785 sorts members, never array items)", side: { ...newSide, keys: [newKeys[1], newKeys[0]] }, answer: committed(commitOf("new", [newKeys[1], newKeys[0]], nNew)) },
     { name: "a role that is neither new nor trusted", side: { ...newSide, role: "joiner" }, answer: refused("bad-role") },
     { name: "a nonce of 31 bytes", side: { ...newSide, nonce: nNew.slice(0, 42) }, answer: refused("bad-nonce") },
@@ -102,8 +111,10 @@ export function pairingVectors(): Json {
     { name: "a reveal with another key than committed (a key swapped after the other's nonce was seen)", commit: commitMsg("new", newCommit), reveal: revealMsg("new", replacedKeys, nNew), expected: "new", answer: refused("commit-mismatch") },
     { name: "a reveal of an attacker's keys and nonce against the new machine's commitment", commit: commitMsg("new", newCommit), reveal: revealMsg("new", otherKeys, nOther), expected: "new", answer: refused("commit-mismatch") },
     { name: "lax: a commitment over non-canonical JSON does not open", commit: commitMsg("new", `sha256:${sha(laxText).toString("hex")}`), reveal: newReveal, expected: "new", answer: refused("commit-mismatch"), laxInput: laxText },
-    { name: "lax: a swapped role — the new machine's commitment and reveal presented as the trusted side's", commit: commitMsg("trusted", newCommit), reveal: revealMsg("trusted", newKeys, nNew), expected: "trusted", answer: refused("commit-mismatch") },
-    { name: "lax: a reveal in another role than its commitment's", commit: commitMsg("new", newCommit), reveal: revealMsg("trusted", newKeys, nNew), answer: refused("role-mismatch") },
+    { name: "lax: a swapped role — the new machine's commitment and reveal presented as the trusted side's", commit: commitMsg("trusted", newCommit), reveal: revealMsg("trusted", newKeys, nNew, G), expected: "trusted", answer: refused("commit-mismatch") },
+    { name: "a trusted reveal of another estate than it committed to", commit: commitMsg("trusted", trustedCommit), reveal: revealMsg("trusted", trustedKeys, nTrusted, otherG), expected: "trusted", answer: refused("commit-mismatch") },
+    { name: "a trusted reveal without its genesis", commit: commitMsg("trusted", trustedCommit), reveal: revealMsg("trusted", trustedKeys, nTrusted), expected: "trusted", answer: refused("bad-genesis") },
+    { name: "lax: a reveal in another role than its commitment's", commit: commitMsg("new", newCommit), reveal: revealMsg("trusted", newKeys, nNew, G), answer: refused("role-mismatch") },
     { name: "lax: a reveal in its commitment's role, but not the role expected of the other side", commit: commitMsg("new", newCommit), reveal: newReveal, expected: "trusted", answer: refused("role-mismatch") },
     { name: "a reveal whose nonce is not 32 bytes", commit: commitMsg("new", newCommit), reveal: revealMsg("new", newKeys, "short"), expected: "new", answer: refused("bad-nonce") },
     { name: "a reveal whose keys are not one machine's", commit: commitMsg("new", newCommit), reveal: revealMsg("new", [newKeys[1]], nNew), expected: "new", answer: refused("bad-keys") },
@@ -117,18 +128,20 @@ export function pairingVectors(): Json {
   const codes: Json[] = [
     { name: "the code both screens show", new: newReveal, trusted: trustedReveal, answer: { ok: true, code: theCode }, transcript: theTranscript },
     changed("another nonce of the new machine changes the code", revealMsg("new", newKeys, nonce("new 2")), trustedReveal),
-    changed("another nonce of the trusted machine changes the code", newReveal, revealMsg("trusted", trustedKeys, nonce("trusted 2"))),
+    changed("another nonce of the trusted machine changes the code", newReveal, revealMsg("trusted", trustedKeys, nonce("trusted 2"), G)),
     changed("another key of the new machine changes the code (an attacker in the middle)", revealMsg("new", otherKeys, nNew), trustedReveal),
-    changed("another key of the trusted machine changes the code (an attacker in the middle)", newReveal, revealMsg("trusted", [key("m-e5f0", "sig", "es256", p256("other sig"))], nTrusted)),
+    changed("another key of the trusted machine changes the code (an attacker in the middle)", newReveal, revealMsg("trusted", [key("m-e5f0", "sig", "es256", p256("other sig"))], nTrusted, G)),
+    changed("another estate of the trusted machine changes the code (a chain substituted for the person's)", newReveal, revealMsg("trusted", trustedKeys, nTrusted, otherG)),
     changed("the new machine without its #kem key gives another code: the #kem key is bound too", revealMsg("new", [newKeys[0]], nNew), trustedReveal),
     changed("the replaced keys of the same machine id give another code", revealMsg("new", replacedKeys, nNew), trustedReveal),
-    { name: "lax: a port that writes the transcript with the two sides swapped gets another code", new: newReveal, trusted: trustedReveal, answer: { ok: true, code: theCode }, laxCode: codeOf(rfc8785({ type: "fabric-enroll-code/1", new: { keys: trustedKeys, nonce: nTrusted }, trusted: { keys: newKeys, nonce: nNew } })) },
+    { name: "lax: a port that writes the transcript with the two sides swapped gets another code", new: newReveal, trusted: trustedReveal, answer: { ok: true, code: theCode }, laxCode: codeOf(rfc8785({ type: "fabric-enroll-code/1", new: { keys: trustedKeys, nonce: nTrusted }, trusted: { keys: newKeys, nonce: nNew, genesis: G } })) },
     { name: "lax: the two reveals passed in swapped order are refused, not coded", new: trustedReveal, trusted: newReveal, answer: refused("role-mismatch") },
     { name: "two reveals in the same role", new: newReveal, trusted: revealMsg("new", trustedKeys, nTrusted), answer: refused("role-mismatch") },
     { name: "a reveal in no known role", new: { ...newReveal, role: "joiner" }, trusted: trustedReveal, answer: refused("bad-role") },
-    { name: "a machine paired with itself", new: newReveal, trusted: revealMsg("trusted", newKeys, nTrusted), answer: refused("same-machine") },
+    { name: "a machine paired with itself", new: newReveal, trusted: revealMsg("trusted", newKeys, nTrusted, G), answer: refused("same-machine") },
     { name: "a reveal with a bad nonce", new: revealMsg("new", newKeys, "AAAA"), trusted: trustedReveal, answer: refused("bad-nonce") },
-    { name: "a reveal with bad keys", new: newReveal, trusted: revealMsg("trusted", [trustedKeys[1]], nTrusted), answer: refused("bad-keys") },
+    { name: "a reveal with bad keys", new: newReveal, trusted: revealMsg("trusted", [trustedKeys[1]], nTrusted, G), answer: refused("bad-keys") },
+    { name: "a trusted reveal that names no estate", new: newReveal, trusted: revealMsg("trusted", trustedKeys, nTrusted), answer: refused("bad-genesis") },
     { name: "not a reveal", new: commitMsg("new", newCommit), trusted: trustedReveal, answer: refused("malformed") }
   ];
 
@@ -178,16 +191,17 @@ export function pairingVectors(): Json {
   const base = { schema: "estate-record/1", estate: "estate-5d0f1a", revision: 2 };
   const joined = { ...base, machines: [{ id: "m-4c1e", deviceKeys: trustedKeys }, { id: "m-7b2d", deviceKeys: newKeys }], revocations: [] };
   const join: Json[] = [
-    { name: "the revision lists the new machine with its revealed keys and the trusted machine with its #sig key", record: joined, new: newReveal, trusted: trustedReveal, answer: { ok: true } },
-    { name: "the keys may be listed in another order", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: [newKeys[1], newKeys[0]] }] }, new: newReveal, trusted: trustedReveal, answer: { ok: true } },
-    { name: "the revision does not list the new machine", record: { ...joined, machines: [joined.machines[0]] }, new: newReveal, trusted: trustedReveal, answer: refused("not-listed") },
-    { name: "the revision lists and revokes the new machine", record: { ...joined, revocations: [{ kind: "machine", ref: "m-7b2d", revokedAt: opened }] }, new: newReveal, trusted: trustedReveal, answer: refused("not-listed") },
-    { name: "the revision lists the new machine with another key than it revealed", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: replacedKeys }] }, new: newReveal, trusted: trustedReveal, answer: refused("other-keys") },
-    { name: "the revision lists the new machine without its #kem key", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: [newKeys[0]] }] }, new: newReveal, trusted: trustedReveal, answer: refused("other-keys") },
-    { name: "the revision does not list the trusted machine's revealed #sig key", record: { ...joined, machines: [{ id: "m-4c1e", deviceKeys: [key("m-4c1e", "sig", "es256", p256("other sig"))] }, joined.machines[1]] }, new: newReveal, trusted: trustedReveal, answer: refused("trusted-not-listed") },
-    { name: "the trusted machine is not in the revision", record: { ...joined, machines: [joined.machines[1]] }, new: newReveal, trusted: trustedReveal, answer: refused("trusted-not-listed") },
-    { name: "the reveals swapped", record: joined, new: trustedReveal, trusted: newReveal, answer: refused("malformed") },
-    { name: "no record", record: null, new: newReveal, trusted: trustedReveal, answer: refused("malformed") }
+    { name: "the revision lists the new machine with its revealed keys and the trusted machine with its #sig key", record: joined, new: newReveal, trusted: trustedReveal, genesis: G, answer: { ok: true } },
+    { name: "the keys may be listed in another order", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: [newKeys[1], newKeys[0]] }] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: { ok: true } },
+    { name: "a chain of another estate, however well signed: its revision 1 is not the genesis the code bound", record: joined, new: newReveal, trusted: trustedReveal, genesis: otherG, answer: refused("other-estate") },
+    { name: "the revision does not list the new machine", record: { ...joined, machines: [joined.machines[0]] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("not-listed") },
+    { name: "the revision lists and revokes the new machine", record: { ...joined, revocations: [{ kind: "machine", ref: "m-7b2d", revokedAt: opened }] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("not-listed") },
+    { name: "the revision lists the new machine with another key than it revealed", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: replacedKeys }] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("other-keys") },
+    { name: "the revision lists the new machine without its #kem key", record: { ...joined, machines: [joined.machines[0], { id: "m-7b2d", deviceKeys: [newKeys[0]] }] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("other-keys") },
+    { name: "the revision does not list the trusted machine's revealed #sig key", record: { ...joined, machines: [{ id: "m-4c1e", deviceKeys: [key("m-4c1e", "sig", "es256", p256("other sig"))] }, joined.machines[1]] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("trusted-not-listed") },
+    { name: "the trusted machine is not in the revision", record: { ...joined, machines: [joined.machines[1]] }, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("trusted-not-listed") },
+    { name: "the reveals swapped", record: joined, new: trustedReveal, trusted: newReveal, genesis: G, answer: refused("malformed") },
+    { name: "no record", record: null, new: newReveal, trusted: trustedReveal, genesis: G, answer: refused("malformed") }
   ];
   const replaced = { ...base, revision: 3, machines: [{ id: "m-4c1e", deviceKeys: trustedKeys }, { id: "m-7b2d", deviceKeys: replacedKeys }], revocations: [] };
   const sigRef = (k: Json) => `${k.kid}@sha256:${createHash("sha256").update(Buffer.from(k.publicKey, "base64")).digest("hex")}`;
@@ -204,7 +218,7 @@ export function pairingVectors(): Json {
   ];
 
   return {
-    about: "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce} (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at) — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted) on the revision that adds the machine. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
+    about: "Vectors for the estate ceremonies' pairing (DEC-0084, docs/specification/ceremonies.md). A side commits to sha256: + hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis (the digest of the estate's revision 1) for the trusted side (commits: pairingCommit), both commit before either reveals, and each checks the other's reveal against its commitment (reveals: checkReveal(commit, reveal, expected?)). The comparison code is the first 5 bytes, big-endian, of SHA-256 over the RFC 8785 transcript {type: fabric-enroll-code/1, new: {keys, nonce}, trusted: {keys, nonce, genesis}}, modulo 10^6, as six digits (codes: comparisonCode(new, trusted)). The estate fingerprint is five groups of five digits from SHA-256 over {type: estate-fingerprint/1, digest} of revision 1 (fingerprints: estateFingerprint). rendezvous: rendezvousVerdict(openedAt, messages, at), at an RFC 3339 instant read as the clock — one exchange within 600 s, burned by any failure. join: joinListed(record, new, trusted, genesis) on the revision that adds the machine, genesis the digest of the revision 1 the new machine verified its chain from. ownKeys: ownKeysDecision(record, machine, held). Every refusal answers {ok: false, problem} and nothing throws. The lax cases are what a careless port gets wrong: non-canonical JSON, a swapped role, folded hex.",
     keys: { new: newKeys, trusted: trustedKeys, replaced: replacedKeys, other: otherKeys },
     commits,
     reveals,

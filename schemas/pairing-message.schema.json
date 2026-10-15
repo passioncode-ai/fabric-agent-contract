@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/pairing-message.schema.json",
   "title": "Pairing message, pairing-message/1 (DEC-0084)",
-  "description": "One message of the pairing that adds a machine to an estate (DEC-0084, docs/specification/ceremonies.md): a side's commitment, its reveal, or an abort. Both sides commit before either reveals; the commitment is SHA-256 over the RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce} (pairingCommit); the comparison code both screens show is derived from both reveals (comparisonCode). A one-time relay rendezvous (relay.md) or a local connection carries these messages and nothing else.",
+  "description": "One message of the pairing that adds a machine to an estate (DEC-0084, docs/specification/ceremonies.md): a side's commitment, its reveal, or an abort. Both sides commit before either reveals; the commitment is SHA-256 over the RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}, with genesis for the trusted side (pairingCommit); the comparison code both screens show is derived from both reveals (comparisonCode). A one-time relay rendezvous (relay.md) or a local connection carries these messages and nothing else.",
   "oneOf": [
     {
       "type": "object",
@@ -46,7 +46,7 @@
           "const": "reveal"
         },
         "role": {
-          "$ref": "#/$defs/role"
+          "const": "new"
         },
         "keys": {
           "type": "array",
@@ -61,7 +61,48 @@
           "$ref": "#/$defs/nonce"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "The new machine's reveal: its keys and nonce. It names no estate: it has none yet."
+    },
+    {
+      "type": "object",
+      "required": [
+        "schema",
+        "step",
+        "role",
+        "keys",
+        "nonce",
+        "genesis"
+      ],
+      "properties": {
+        "schema": {
+          "const": "pairing-message/1"
+        },
+        "step": {
+          "const": "reveal"
+        },
+        "role": {
+          "const": "trusted"
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "$ref": "device-enrollment.schema.json#/$defs/deviceKey"
+          },
+          "description": "The side's device keys as an estate record lists them (DEC-0053, FAC-SEM-073): exactly one <id>#sig and at most one <id>#kem, for one machine id. The new machine's are the keys the revision that adds it lists; the trusted machine's #sig is the one the current revision lists for it."
+        },
+        "nonce": {
+          "$ref": "#/$defs/nonce"
+        },
+        "genesis": {
+          "$ref": "common.schema.json#/$defs/sha256",
+          "description": "The digest of revision 1 of the trusted machine's estate. The commitment and the comparison code cover it, so the code binds the network too, and the new machine pins revision 1 only when its digest is this one (joinListed)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "The trusted machine's reveal: its keys, its nonce and its estate's genesis."
     },
     {
       "type": "object",
