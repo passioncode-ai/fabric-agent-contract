@@ -5144,7 +5144,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `deviceKeyRef`, `validDeviceKey` exported, `FAC-SEM-076`, `FAC-SEM-114`, `verifyEstateRecord`),
     `src/signing-challenges.ts` (`enroll-token/1`, `ENROLL_TOKEN_FIELDS`), `src/relay.ts` (`relayAdmissionSet`),
     `src/semantic-rules.ts`, `src/protocol-revisions.ts`; `tools/vectors/pairing.ts` (new),
-    `tools/vectors/enroll-token.ts` (new); `vitest.config.ts` (two files at 100);
+    `tools/vectors/enroll-token.ts` (new); `vitest.config.ts` (two files at 100) and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - fixtures: `fixtures/vectors/pairing.json`, `fixtures/vectors/enroll-token.json` (new);
     `fixtures/positive/estate-record-key-replaced.json`, `fixtures/positive/enroll-token*.json`,
     `fixtures/positive/pairing-message-*.json`, `fixtures/negative/enroll-token-*.json`,

@@ -134,7 +134,8 @@ export type RedeemAnswer =
  */
 export function redeemEnrollToken(nonce: unknown, machineKey: unknown, ledger: unknown): RedeemAnswer {
   if (!isString(nonce) || !(ledger instanceof Map)) return { ok: false, problem: "malformed" };
-  if (!isObject(machineKey) || machineKey.use !== "sig" || machineOfKeys([machineKey]) === undefined) return { ok: false, problem: "bad-key" };
+  // One key alone is a machine's key list only when it is a valid `<id>#sig` key, so a `#kem` key is refused here too.
+  if (machineOfKeys([machineKey]) === undefined) return { ok: false, problem: "bad-key" };
   const fingerprint = deviceKeyFingerprint(machineKey) as string;
   const entry: unknown = ledger.get(nonce);
   if (isObject(entry) && entry.state === "revoked") return { ok: false, problem: "revoked" };

@@ -146,3 +146,11 @@ every floor met.
 `src/estate-record-rules.ts` to `src/findings.ts`, which joins the measured set with a floor of 100 (`test/findings.test.ts`).
 `activity-rules.ts`'s floor moves from 97.16 to 97.13: the helper's two covered branches left it, and the same nine
 branches stay uncovered, out of 314 in place of 316. `src/profile-rules.ts` keeps 100.
+
+**DEC-0084 (2026-10-15).** `src/pairing.ts` (199 / 199) and `src/enroll-token.ts` (106 / 106) are new, join the
+measured set and reach every branch, so each floor is 100. `src/estate-record-rules.ts` (274 / 274), `src/relay.ts`
+(208 / 208) and `src/signing-challenges.ts` (65 / 65) keep 100. 77 plants (each refusal clause removed or loosened
+once) each failed at least one test: 42 in `src/pairing.ts` (`test/pairing.test.ts`), 21 in `src/enroll-token.ts` and
+4 in `src/signing-challenges.ts` (`test/enroll-token.test.ts`), 9 in `src/estate-record-rules.ts` and 1 in
+`src/relay.ts` (`test/ceremonies.test.ts`). Measured with `vitest run --coverage` on the branch off main's `d8146cf`:
+73 files, 4945 tests, whole set 6652 / 6727 (98.88 %).
