@@ -1,5 +1,5 @@
 // #region profile-rules — docs: docs/specification/runners.md#runner-and-model-profiles
-import { type Finding, type JsonObject, isObject, jsonEqual, show, toNumber } from "./findings.js";
+import { type Finding, type JsonObject, indexed, isObject, jsonEqual, show, toNumber } from "./findings.js";
 import { secretValue } from "./secret-shape.js";
 
 /**
@@ -72,7 +72,7 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
 function modelCatalogue(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
-  list(value.models).forEach((row, index) => {
+  indexed(value.models).forEach(([row, index]) => {
     if (seen.has(row.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/models/${index}/id`, message: `model ${show(row.id)} is catalogued more than once` });
     seen.add(row.id);
     const routing = isObject(row.provider) ? row.provider : {};
@@ -90,7 +90,7 @@ function modelCatalogue(value: JsonObject): Finding[] {
 function modelProfiles(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<unknown>();
-  list(value.profiles).forEach((profile, index) => {
+  indexed(value.profiles).forEach(([profile, index]) => {
     if (seen.has(profile.id)) findings.push({ code: "FAC-SEM-058", instancePath: `/profiles/${index}/id`, message: `model profile ${show(profile.id)} is declared more than once` });
     seen.add(profile.id);
   });
@@ -126,12 +126,12 @@ function profileResolution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const catalogued = new Set(list(isObject(value.catalogue) ? value.catalogue.models : undefined).map((row) => row.id));
   const ids = new Set<unknown>();
-  list(value.profiles).forEach((profile, i) => {
+  indexed(value.profiles).forEach(([profile, i]) => {
     // An agent's profile and an estate profile never share an id: the resolver would take whichever came first.
     if (ids.has(profile.id)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/id`, message: `profile id ${show(profile.id)} is offered more than once to one resolution` });
     ids.add(profile.id);
-    strings(profile.models).forEach((model, j) => {
-      if (!catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${show(profile.id)} names ${model}, which the catalogue does not hold` });
+    (Array.isArray(profile.models) ? profile.models : []).forEach((model: unknown, j) => {
+      if (typeof model === "string" && !catalogued.has(model)) findings.push({ code: "FAC-SEM-060", instancePath: `/profiles/${i}/models/${j}`, message: `profile ${show(profile.id)} names ${model}, which the catalogue does not hold` });
     });
   });
   const choices = isObject(value.choices) ? (value.choices as ResolutionInput["choices"]) : {};
@@ -172,7 +172,7 @@ const closedRoute = (fallback: unknown, closed: string[]): string =>
 function openVendorRoutes(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const profiles = list(value.profiles);
-  profiles.forEach((profile, i) => {
+  indexed(value.profiles).forEach(([profile, i]) => {
     const closed = closedUserContentRoute(profile, value.catalogue);
     if (closed === undefined) return;
     findings.push({ code: "FAC-SEM-112", instancePath: `/profiles/${i}/models`, message: `profile ${show(profile.id)} reads user content, but ${closedRoute(profile.fallback, closed)} open-vendor in the catalogue: the lane would run on closed vendors alone` });

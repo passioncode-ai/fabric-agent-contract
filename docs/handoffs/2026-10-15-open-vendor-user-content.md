@@ -30,6 +30,13 @@ turn on a refusal or an empty answer.
   policy. The rule never throws; `profile-resolution` joined the tolerance kinds.
 - A refusal or an empty answer to a non-empty request is a failed turn for such a lane: runners.md, *What a profile
   reads*; a new runner row in conformance.md; the host's launch row now runs `FAC-SEM-112`.
+- Adjacent defect, reported by fabric-agent-adapter (its vector "crafted FAC-SEM-112: a non-object before the
+  profile"): `FAC-SEM-058`, `FAC-SEM-060` and `FAC-SEM-112` dropped non-objects before indexing, so a path named the
+  wrong item. All now use `indexed` (moved to `src/findings.ts`, shared with the activity and estate-record rules), and
+  `FAC-SEM-060`'s model index skips a non-string in place; one test per rule with a leading `null`, `7` and `"x"`.
+  `src/findings.ts` joins the measured set at 100 (`test/findings.test.ts`); `activity-rules.ts`'s floor moves from
+  97.16 to 97.13 because the helper's two covered branches left it (the same nine stay uncovered), recorded in the
+  coverage baseline.
 - Docs: runners.md (the classes, the new section, Resolution, the rules table), spend-policy.md, conformance.md (two
   rows, the register row), CONTEXT, DOCMAP, SCN-020's errors and coverage, CT-52.
 
@@ -47,13 +54,15 @@ turn on a refusal or an empty answer.
 
 - Gate at the branch head:
   - `tsc --noEmit` exit 0;
-  - `vitest run --coverage` exit 0: 69 files, 4637 tests passed, the coverage floors met;
+  - `vitest run --coverage` exit 0: 70 files, 4665 tests passed, the coverage floors met;
   - `docs/ux/lint.py` exit 0: 22 stories, 18 flows, 21 screens, 27 scenarios;
   - `src/docs-check.ts` exit 0;
   - `src/lint-md.ts` exit 0: 168 files, 0 errors;
   - `src/privacy-check.ts` exit 0: 0 findings.
-- Nineteen plants, each applied alone, confirmed failing named tests, then restored:
-  - twelve in `src/profile-rules.ts`: the fallback ignored, `none` counting every model, an undefined fallback read
+- Twenty-four plants, each applied alone, confirmed failing named tests, then restored:
+  - five raw-index plants in `src/profile-rules.ts`, each putting back the filtered index of one path
+    (`FAC-SEM-058` catalogue and profiles, `FAC-SEM-060` profiles and models, `FAC-SEM-112` profiles);
+  - twelve more in `src/profile-rules.ts`: the fallback ignored, `none` counting every model, an undefined fallback read
     as `between-turns`, an uncatalogued model counted as open, the `reads` clause removed, `user-content` beside
     another value not bound, the rule not registered, the resolver checking `open-vendor`, the resolver admitting a
     row whose only class is `open-vendor`, the outcome clause removed, the outcome reported beside a closed profile,

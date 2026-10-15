@@ -1,5 +1,5 @@
 import { createHash, createHmac } from "node:crypto";
-import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
+import { type Finding, type JsonObject, indexed, isObject, jsonEqual, show } from "./findings.js";
 import { normalIdentifier } from "./identifiers.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { type SeqRange, contiguousFrom, mergeRanges, rangesOf, uncovered } from "./seq-ranges.js";
@@ -123,11 +123,6 @@ export function tenantRef(provider: string, tenant: string): string {
 }
 
 const events = (value: JsonObject) => (Array.isArray(value.events) ? value.events.filter(isObject) : []);
-/**
- * The object items of an array with their index in the array as written, so an instancePath names the item it flags even
- * when a non-object precedes it.
- */
-const indexed = (value: unknown): Array<[JsonObject, number]> => (Array.isArray(value) ? value.flatMap((item, index): Array<[JsonObject, number]> => (isObject(item) ? [[item, index]] : [])) : []);
 const collectorOf = (event: JsonObject) => (isObject(event.collector) ? event.collector : {});
 const deviceId = (value: JsonObject) => (isObject(value.device) ? show(value.device.id) : "");
 /** A stream is (device.id, collector.id, collector.epoch): collector ids are unique only within their device. */

@@ -190,3 +190,38 @@ describe("the runner's failed turn and where it is carried (DEC-0083)", () => {
     expect(rows.some((line) => line.includes("`FAC-SEM-112`"))).toBe(true);
   });
 });
+
+describe("instancePaths name the item as written, past a leading non-object (DEC-0083 review)", () => {
+  const LEADS: unknown[] = [null, 7, "x"];
+  const open = load("semantic/profile-resolution-user-content-open-fallback.json").input;
+  const choose = (input: Json, id: string) => ({ ...input, choices: { estate: id }, resolved: resolveModelProfile({ catalogue: input.catalogue, profiles: input.profiles, choices: { estate: id } }) });
+  const paths = (kind: string, value: unknown, code: string) => evaluateSemanticRules(kind, value).filter((finding) => finding.code === code).map((finding) => finding.instancePath);
+
+  it.each(LEADS)("FAC-SEM-112: a non-object before the profile (%s)", (lead) => {
+    // The adapter's vector "crafted FAC-SEM-112: a non-object before the profile": the open-fallback profile under fallback none.
+    const profile = { ...open.profiles[0], fallback: "none" };
+    expect(paths("profile-resolution", choose({ ...open, profiles: [lead, profile] }, profile.id), "FAC-SEM-112")).toEqual(["/profiles/1/models"]);
+  });
+
+  it.each(LEADS)("FAC-SEM-060: a non-object before a profile offered twice (%s)", (lead) => {
+    const profile = open.profiles[0];
+    expect(paths("profile-resolution", choose({ ...open, profiles: [lead, profile, profile] }, profile.id), "FAC-SEM-060")).toEqual(["/profiles/2/id"]);
+  });
+
+  it.each([null, 7, {}])("FAC-SEM-060: a non-string model before an uncatalogued one (%s)", (lead) => {
+    const profile = { ...open.profiles[0], models: [lead, "moonshotai/kimi-k3"] };
+    expect(paths("profile-resolution", choose({ ...open, profiles: [7, profile] }, profile.id), "FAC-SEM-060")).toEqual(["/profiles/1/models/1"]);
+  });
+
+  it.each(LEADS)("FAC-SEM-058: a non-object before a model catalogued twice (%s)", (lead) => {
+    const row = catalogue.models[0];
+    expect(paths("model-catalogue", { ...catalogue, models: [lead, row, row] }, "FAC-SEM-058")).toEqual(["/models/2/id"]);
+    const routed = { ...row, provider: { order: ["deepinfra"], ignore: ["deepinfra"] } };
+    expect(paths("model-catalogue", { ...catalogue, models: [lead, routed] }, "FAC-SEM-058")).toEqual(["/models/1/provider"]);
+  });
+
+  it.each(LEADS)("FAC-SEM-058: a non-object before a profile declared twice (%s)", (lead) => {
+    const profile = open.profiles[0];
+    expect(paths("model-profiles", { kind: "model-profiles", profiles: [lead, profile, profile] }, "FAC-SEM-058")).toEqual(["/profiles/2/id"]);
+  });
+});

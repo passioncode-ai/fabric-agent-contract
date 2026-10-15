@@ -10,6 +10,13 @@ export type JsonObject = Record<string, unknown>;
 export const isObject = (value: unknown): value is JsonObject => typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
+ * The object items of an array with their index in the array as written, so an instancePath names the item it flags
+ * even when a non-object precedes it (DEC-0082; shared by every rule module since DEC-0083).
+ */
+export const indexed = (value: unknown): Array<[JsonObject, number]> =>
+  Array.isArray(value) ? value.flatMap((item, index): Array<[JsonObject, number]> => (isObject(item) ? [[item, index]] : [])) : [];
+
+/**
  * A value as text for a finding's message or a key, as `String()` writes it, without its throw on an object whose
  * `toString` is not a function (`{"toString": 1}`, valid JSON): such a value reads as its JSON.
  */

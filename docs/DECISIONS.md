@@ -5011,14 +5011,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `schemas/governance.schema.json` (`modelClasses` take `admissionClass`);
   - spec, also: `docs/specification/spend-policy.md` (`modelClasses`);
   - code: `src/profile-rules.ts` (`OPEN_VENDOR`, `USER_CONTENT`, `closedUserContentRoute`, `FAC-SEM-112` with its
-    outcome clause, `resolveModelProfile`'s exception);
+    outcome clause, `resolveModelProfile`'s exception; `FAC-SEM-058`, `FAC-SEM-060` and `FAC-SEM-112` name an item by
+    its index as written, past a leading non-object, an adjacent defect the adapter reported), `src/findings.ts`
+    (`indexed`, moved from `src/activity-rules.ts` and `src/estate-record-rules.ts`, which import it);
   - fixtures: `fixtures/positive/registry-models.json` (the open-weight rows), `fixtures/positive/model-profile-user-content.json`,
     `fixtures/positive/model-profiles-user-content.json`, `fixtures/positive/model-profile-reads-operator.json`,
     `fixtures/negative/model-profile-reads-{unknown,empty,twice}.json`, `fixtures/negative/spend-policy-open-vendor-class.json`,
     `fixtures/negative/registry-models-open-vendor-only.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
     (ten), `fixtures/catalogue.json`;
   - tests: `test/open-vendor-user-content.test.ts` (new), `test/rule-tolerance.test.ts` (kind `profile-resolution`),
-    `test/runner-model-profiles.test.ts` (the admission-class reference);
+    `test/runner-model-profiles.test.ts` (the admission-class reference), `test/findings.test.ts` (new); `vitest.config.ts`
+    (`src/findings.ts` measured at 100, `src/activity-rules.ts` 97.16 to 97.13 as the moved helper's covered branches
+    left it) and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - UX: `docs/ux/scenarios.md` (SCN-020's errors and coverage);
   - docs: `CONTEXT.md` (Model class, Model profile), `docs/DOCMAP.md`, `docs/backlog.md` (CT-52),
     `docs/handoffs/2026-10-15-open-vendor-user-content.md`, `docs/handoffs/README.md`.

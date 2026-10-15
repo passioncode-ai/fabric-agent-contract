@@ -141,3 +141,8 @@ unchanged). The whole-set floor stays at 86.85 %. Measured with `vitest run --co
 
 **Wave 4, P4-02 merged with main `5967bb1`** (P4-06, P4-07): 46 files, 2402 tests, whole set 4611 / 4769 (96.68 %),
 every floor met.
+
+**DEC-0083 (2026-10-15).** The raw-index helper `indexed` moves from `src/activity-rules.ts` and
+`src/estate-record-rules.ts` to `src/findings.ts`, which joins the measured set with a floor of 100 (`test/findings.test.ts`).
+`activity-rules.ts`'s floor moves from 97.16 to 97.13: the helper's two covered branches left it, and the same nine
+branches stay uncovered, out of 314 in place of 316. `src/profile-rules.ts` keeps 100.

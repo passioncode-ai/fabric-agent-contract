@@ -12,13 +12,15 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
         // The whole set: a new rule file is measured from its first commit, before it has its own floor.
         branches: 86.85,
-        "src/activity-rules.ts": { branches: 97.16 },
+        // 97.16 until DEC-0083 moved the shared `indexed` helper, with its two covered branches, to src/findings.ts:
+        // the same nine branches stay uncovered, out of 314 in place of 316.
+        "src/activity-rules.ts": { branches: 97.13 },
         "src/canonical.ts": { branches: 100 },
         "src/privacy-plan.ts": { branches: 100 },
         "src/comms-digest.ts": { branches: 100 },
@@ -34,6 +36,7 @@ export default defineConfig({
         "src/device-transport-rules.ts": { branches: 100 },
         "src/ed25519.ts": { branches: 100 },
         "src/estate-record-rules.ts": { branches: 100 },
+        "src/findings.ts": { branches: 100 },
         "src/p256.ts": { branches: 100 },
         "src/relay.ts": { branches: 100 },
         "src/relay-rules.ts": { branches: 100 },
