@@ -166,6 +166,17 @@ describe("every function is total: malformed input answers a refusal, never a th
     expect(machineOfKeys([{ ...keys[0], kid: 7 }])).toBeUndefined();
     expect(machineOfKeys(keys)).toBe("m-7b2d");
   });
+
+  it("refuses a reveal with a member the schema does not list, and reads a record's machines or keys that are not lists as none", () => {
+    const reveal = vectors.reveals[0] as Json;
+    expect(checkReveal(reveal.commit, { ...reveal.reveal, x: 1 })).toEqual({ ok: false, problem: "malformed" });
+    const join = vectors.join[0] as Json;
+    expect(joinListed({ ...join.record, machines: 7 }, join.new, join.trusted, join.genesis)).toEqual({ ok: false, problem: "not-listed" });
+    expect(ownKeysDecision({ ...join.record, machines: 7 }, "m-7b2d", vectors.keys.new)).toEqual({ action: "stop", reason: "removed" });
+    const noKeys = { ...join.record, machines: [join.record.machines[0], { id: "m-7b2d", deviceKeys: 7 }] };
+    expect(ownKeysDecision(noKeys, "m-7b2d", vectors.keys.new)).toEqual({ action: "stop", reason: "keys-replaced" });
+    expect(joinListed(noKeys, join.new, join.trusted, join.genesis)).toEqual({ ok: false, problem: "other-keys" });
+  });
 });
 
 describe("the specification (docs/specification/ceremonies.md)", () => {

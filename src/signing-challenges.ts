@@ -47,6 +47,9 @@ export const WINDOW_LEASE_FIELDS = [
   "leaseId", "sequence", "estate", "estateRevision", "machine", "scope", "window", "period", "amount", "unit", "issuedAt", "expiresAt", "alg", "kid"
 ] as const;
 
+/** The enroll token's members beside `type` (DEC-0084), one list for good. */
+export const ENROLL_TOKEN_FIELDS = ["scope", "genesis", "purpose", "ceiling", "notBefore", "expiresAt", "nonce", "uses"] as const;
+
 /** A Map, so a type named like an Object.prototype member reads nothing. */
 export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<string, StatementSpec>([
   ["estate-revision/1", { signer: "passkey", fields: ["digest"], decision: "DEC-0055", check: (f) => matches(SHA256, f.digest) }],
@@ -73,7 +76,7 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
     "enroll-token/1",
     {
       signer: "passkey",
-      fields: ["scope", "genesis", "purpose", "ceiling", "notBefore", "expiresAt", "nonce", "uses"],
+      fields: ENROLL_TOKEN_FIELDS,
       decision: "DEC-0084",
       // The values only; the window's length (at most 900 s) is FAC-SEM-113's and the verifier's (src/enroll-token.ts).
       check: (f) =>

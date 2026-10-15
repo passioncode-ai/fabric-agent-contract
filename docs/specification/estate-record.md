@@ -1,7 +1,8 @@
 # The estate record — `estate-record/1`
 
-DEC-0055, amended by DEC-0082 ([contexts](contexts.md)) · rule codes `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-111` (and
-`FAC-SEM-110`, [contexts](contexts.md#semantic-rules)) · schema
+DEC-0055, amended by DEC-0082 ([contexts](contexts.md)) and DEC-0084 ([ceremonies](ceremonies.md)) · rule codes
+`FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-111` (and `FAC-SEM-110`, [contexts](contexts.md#semantic-rules); `FAC-SEM-114`,
+[ceremonies](ceremonies.md#semantic-rules)) · schema
 [`estate-record`](../../schemas/estate-record.schema.json) · code
 [`src/estate-record-rules.ts`](../../src/estate-record-rules.ts), [`src/webauthn.ts`](../../src/webauthn.ts) · vectors
 [`fixtures/vectors/estate-record.json`](../../fixtures/vectors/estate-record.json)
@@ -46,7 +47,9 @@ and has the parent's number plus one, so a machine that holds revision *n* accep
 a skipped or replayed revision (`FAC-SEM-072`, kind `estate-record-revision`, `{parent, next}`). A revision continues its
 parent's `estate`, is never issued before it, and keeps every revocation the parent carries. Adding or removing a
 machine, placing or moving an agent, placing a secret, granting a share and revoking anything is each a new revision
-(v4 §6, §7); moving an agent keeps its `agentRef` (DEC-0050).
+(v4 §6, §7); moving an agent keeps its `agentRef` (DEC-0050). What a revision drops it revokes in the same revision: a
+removed machine, a replaced device key, a hub key no longer certified as it was (`FAC-SEM-114`, DEC-0084); the
+ceremonies that make these revisions are [ceremonies](ceremonies.md)'s.
 
 ### The digest
 
@@ -67,7 +70,8 @@ latest revision and online machines fetch it hourly (v4 §7); how a revision tra
 Each authority is a passkey: its WebAuthn `credentialId`, its `alg` (`ES256`, COSE −7, or `EdDSA`, COSE −8 with
 Ed25519), its public key as a public JWK, the `rpId` of the dedicated signing credential (v4 §7: `sign.<domain>`, never
 the sign-in credential) and the pinned `origins` a ceremony may run in. Revision 1 is verified under a passkey the
-machine pinned when it was enrolled (v4 Path 2 step 1: the person confirms the estate's fingerprint on the machine);
+machine pinned when it was enrolled (v4 Path 2 step 1; how a machine pins it, and the estate fingerprint a person
+compares, are [ceremonies](ceremonies.md)'s, DEC-0084);
 every later revision under a passkey its parent lists, so a new passkey is added by a revision an existing one signs.
 A P-256 key is valid by SEC 1 §3.2.2 (`isValidP256Key`), an Ed25519 key is not of small order (`isSmallOrderKey`,
 DEC-0045), and each passkey is listed once (`FAC-SEM-073`). Each is a signing credential: its `rpId` is `sign.<domain>`
@@ -85,7 +89,8 @@ kept outside the signed record, so the record carries no label a person chose:
   (`FAC-SEM-073`), the counts `FAC-SEM-044` also checks at enrollment (DEC-0056). The sending machine seals a secret to
   the `#kem` key and the relay carries it ([DEC-0047](relay.md#the-secret-envelope)).
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
-  public key to this machine. It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
+  public key to this machine. In a personal estate the hub runs on the always-on machine under an Ed25519 key of its
+  own, never the machine's `#sig` key (the operator's NET-3, DEC-0084, [ceremonies](ceremonies.md#who-holds-which-key)). It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
   its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
   delegation verifier that reads the estate record trusts a token's `kid` only while the revision it reads certifies
   it — a revision `verifyEstateRecord` accepted, not lower than the highest its machine applied (DL-14) — and refuses otherwise with the codes of
@@ -130,8 +135,12 @@ digest) or `grant` (a grant's `meta.id`) — its `ref` in that kind's own form a
 revocation before it (`FAC-SEM-072`), lists each once, and lists nothing it revokes: revocation outranks addition (v4 §7;
 `FAC-SEM-076`). A `grant` revocation matches the grant by the normal form of its id, in the record and in `isRevoked`
 (`src/revocation-delta.ts`), so another spelling of a revoked grant is revoked; every other kind's `ref` matches exactly
-(DEC-0076). Removing a machine also revokes its DEC-0031 certificate where an organization server issued one; who revokes for a
-solo estate, with no organization server, belongs to the enrollment ceremony (not decided here). The fast
+(DEC-0076). A `device-key` revocation's `ref` is a kid, which revokes every key ever listed under it, or one key's own
+reference `<kid>@sha256:<hex>` (`deviceKeyRef`, DEC-0084), which revokes that key alone: the form a key replacement
+revokes the old key by, since a kid outlives its keys ([ceremonies](ceremonies.md#replace-a-machines-key)). A solo
+estate has no DEC-0031 certificate to revoke, so the record's revocation and its delta entry are the whole removal of a
+machine; where an organization server issued one, that server revokes it when the organization removes the machine
+(DEC-0084, [ceremonies](ceremonies.md#remove-a-machine)). The fast
 revocation delta that reaches machines within seconds is DEC-0054's ([revocation delta](revocation-delta.md)), carried by the relay (v4 §7, [DEC-0047](relay.md#revocation-and-heartbeat)); the record is its
 durable state: a revision issued at or after a delta entry lists its revocation, or a machine holding the entry refuses
 it (`FAC-SEM-084`), and every check that reads the record's revocations reads the applied entries' too.
@@ -164,7 +173,8 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
   revocation of the parent kept (`FAC-SEM-072` holds here too, so a passkey cannot quietly un-revoke a machine);
 - the authority is one the verifier trusts: its parent's and not revoked by the parent, or for revision 1 the one it
   pinned. A revision may revoke its own signer when it removes it (a passkey rotated out signs its own removal);
-- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` and `FAC-SEM-111` (DEC-0082). The schema is not checked here: a machine applies a
+- the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` and `FAC-SEM-111` (DEC-0082), and with a
+  parent `FAC-SEM-114`: what it drops from the parent it revokes (DEC-0084). The schema is not checked here: a machine applies a
   revision only when it is valid against [`estate-record`](../../schemas/estate-record.schema.json) and
   `verifyEstateRecord` accepts it — a signed record of the wrong shape (say `authorities: null`) would otherwise lock
   the estate out at the next revision.
@@ -178,8 +188,9 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 - **The signature counter:** `verifyEstateRecord` returns `signCount` but checks no monotonicity, since a synced
   passkey's counter is often 0 and machines share no counter.
 - **Extension outputs** are ignored.
-- **The pinning itself:** the verifier trusts the authorities it is given; enrollment's confirmation of the estate's
-  fingerprint is v4 Path 2's ceremony, outside this record.
+- **The pinning itself:** the verifier trusts the authorities it is given; how a machine comes to pin revision 1's
+  passkey — its own ceremony, a comparison code that binds the estate's `genesis`, or an enroll token's — is
+  [ceremonies](ceremonies.md)'s (DEC-0084).
 - **Recovery:** a printed code whose revision takes effect after 72 hours (v4 §7) is not decided here.
 
 ### The verifier
@@ -196,7 +207,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the authority's RP ID is not a signing RP, `sign.<domain>` (DEC-0063: checked as soon as ER-4 has chosen the authority, before any check of the assertion); the `rpIdHash`; AT set or BS without BE; UP clear; UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
 | ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants are inside the window) |
-| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` or `FAC-SEM-111`; the verdict names the codes |
+| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110` or `FAC-SEM-111`, or, with a parent, `FAC-SEM-114` (DEC-0084); the verdict names the codes |
 
 The vectors hold one case or more per problem, the EdDSA test passkey's seed (Ed25519 is deterministic, so a port's
 signer reproduces its signatures), the ES256 test passkey (ECDSA signatures are randomized, so a port verifies rather
@@ -218,7 +229,7 @@ keys are DEC-0053's.
 | `FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once |
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine and context (absent: `personal`, DEC-0082) under a publisher key the record pins, each pinned once; an installed package is the one placed in its context — its own digest, the placement's `agentRef` and digest, on a machine of the record |
 | `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record — its own machine for an organization's instance — a slot once per (machine, agent, slot, context) (DEC-0082), and a slot the placed package declares |
-| `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076) |
+| `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076), a `device-key` revocation's ref as a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084) |
 | `FAC-SEM-111` | `estate-record`, `estate-placement` | a placement whose context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076), whose `context` equals the placement's as written and is an `org:<orgId>` (a malformed context fails closed), and which the record does not revoke; a personal placement (no context, or `personal`) names no grant (DEC-0082). It reads revisions only: a revocation delta stops the grant's calls at the hub and the meter at once, and this rule refuses the instance from the next revision |
 
 ## Who adopts it
@@ -245,13 +256,11 @@ records no use. A credential's id is an opaque handle.
 
 ## Not decided here
 
-- Fabric's decision D3 (keys: the passkey as the estate authority, platform-keystore device keys, certified hub keys)
-  is not recorded on Fabric's `main` (`5bf15e5c`). This record leaves open whether the hub key is the machine's `#sig`
-  key or a key of its own, but only partly: `hubKey` is Ed25519 until Fabric's D2 admits ES256, so until then v4's own
-  proposal — the hub signing with the machine's ES256 platform-keystore `#sig` key — cannot be certified, and a
-  machine with an ES256 `#sig` key certifies a separate Ed25519 hub key (as the positive fixture does). D2 and D3 are
-  coupled here. Also open: whether the hub holds a private key at all (Fabric's 0.5.0 decision, v4 §19), the estate's
-  fingerprint and the enrollment ceremony.
+- Fabric's decision D3 is settled for the personal estate by the operator's NET-3 (2026-10-15, DEC-0084): the passkey
+  signs every revision, the hub holds a private key of its own — an Ed25519 hub key certified as `hubKey`, not the
+  machine's `#sig` key — and every machine keeps its own device keys. The hub key stays Ed25519 until Fabric's D2. The
+  estate's fingerprint and the enrollment ceremonies are [ceremonies](ceremonies.md)'s. An organization's keys (Fabric
+  D8, CX-CON-06) stay open.
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
   whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
   (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is

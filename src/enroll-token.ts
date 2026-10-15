@@ -2,7 +2,7 @@ import { deviceKeyFingerprint } from "./estate-record-rules.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { machineOfKeys } from "./pairing.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { SIGNING_STATEMENTS, signingStatement, verifySigningAssertion } from "./signing-challenges.js";
+import { ENROLL_TOKEN_FIELDS, signingStatement, verifySigningAssertion } from "./signing-challenges.js";
 import type { AssertionProblem, PasskeyCredential } from "./webauthn.js";
 
 // #region enroll-token — docs: docs/specification/ceremonies.md#a-headless-machine
@@ -156,7 +156,7 @@ function tokenFindings(value: JsonObject): Finding[] {
     return findings;
   }
   if (statement.type !== ENROLL_TOKEN_TYPE) flag("/statement/type", "the statement's type is enroll-token/1, the register's (DEC-0063)");
-  const fields = (SIGNING_STATEMENTS.get(ENROLL_TOKEN_TYPE)?.fields ?? []) as readonly string[];
+  const fields: readonly string[] = ENROLL_TOKEN_FIELDS;
   const extra = Object.keys(statement).filter((name) => name !== "type" && !fields.includes(name));
   const missing = fields.filter((name) => !Object.hasOwn(statement, name));
   if (extra.length > 0 || missing.length > 0) flag("/statement", `the statement has exactly the register's fields: ${fields.join(", ")}`);
