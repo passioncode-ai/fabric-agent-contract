@@ -40,6 +40,18 @@ export type Resolution =
   | { refused: "model-classes-empty"; profile: string; policy: { id: string; revision: number } };
 
 /**
+ * Whether a project's policy admits one catalogue row (DEC-0046, DEC-0083): every class the row has is in `allowed`,
+ * the descriptive `open-vendor` not counted, and at least one other class is there to check. A model the catalogue does
+ * not hold (`row` undefined) is not admitted. The resolver and a kit's doctor both answer by it; the shared vectors are
+ * `fixtures/vectors/model-admission.json`.
+ */
+export function admittedByClasses(row: unknown, allowed: readonly string[]): boolean {
+  if (!isObject(row)) return false;
+  const admission = strings(row.classes).filter((name) => name !== OPEN_VENDOR);
+  return admission.length > 0 && admission.every((name) => allowed.includes(name));
+}
+
+/**
  * The reference resolution (DEC-0046, FAC-SEM-060), which the kit ports: the request's profile, else the agent's,
  * else the binding's or project's, else the estate default. When the project's policy names `modelClasses`, a model
  * stays only if every class the catalogue gives it is allowed — a model the catalogue does not hold has no classes to
@@ -56,13 +68,9 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
   const models = strings(profile.models);
   const policy = isObject(input.policy) ? input.policy : undefined;
   if (!policy || !Array.isArray(policy.modelClasses)) return { from: level, profile: id, models };
-  const allowed = new Set(strings(policy.modelClasses));
+  const allowed = strings(policy.modelClasses);
   const rows = new Map(list(isObject(input.catalogue) ? input.catalogue.models : undefined).map((row) => [row.id, row] as const));
-  const within = models.filter((model) => {
-    const row = rows.get(model);
-    const admission = row === undefined ? [] : strings(row.classes).filter((name) => name !== OPEN_VENDOR);
-    return admission.length > 0 && admission.every((name) => allowed.has(name));
-  });
+  const within = models.filter((model) => admittedByClasses(rows.get(model), allowed));
   if (within.length) return { from: level, profile: id, models: within };
   const meta = isObject(policy.meta) ? policy.meta : {};
   return { refused: "model-classes-empty", profile: id, policy: { id: show(meta.id), revision: toNumber(meta.revision) } };

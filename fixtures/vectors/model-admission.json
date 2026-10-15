@@ -1,0 +1,100 @@
+{
+  "about": "Model admission under a project's policy (runners.md Resolution, DEC-0046; the open-vendor exception, DEC-0083), for ports: admittedByClasses in src/profile-rules.ts runs the cases, and so must every copy of the every-class rule a port keeps — its resolver and its doctor's usability check. A policy that names model classes admits a catalogue row when every class the row has is allowed, the descriptive open-vendor not counted, and at least one other class is there; a model the catalogue does not hold (classes null) is not admitted. A case's policy lists only admission classes: the spend-policy and grant schemas refuse open-vendor.",
+  "cases": [
+    {
+      "name": "an open model whose other classes the policy allows: open-vendor admits and excludes nothing",
+      "classes": [
+        "cheap",
+        "chinese-vendor",
+        "open-vendor"
+      ],
+      "modelClasses": [
+        "cheap",
+        "chinese-vendor"
+      ],
+      "admitted": true
+    },
+    {
+      "name": "the same model without open-vendor: the same answer",
+      "classes": [
+        "cheap",
+        "chinese-vendor"
+      ],
+      "modelClasses": [
+        "cheap",
+        "chinese-vendor"
+      ],
+      "admitted": true
+    },
+    {
+      "name": "an open model with a class the policy does not allow: excluded by that class, not by open-vendor",
+      "classes": [
+        "strong",
+        "cheap",
+        "chinese-vendor",
+        "open-vendor"
+      ],
+      "modelClasses": [
+        "cheap"
+      ],
+      "admitted": false
+    },
+    {
+      "name": "an open model whose every other class is allowed, among more allowed classes",
+      "classes": [
+        "strong",
+        "open-vendor"
+      ],
+      "modelClasses": [
+        "strong",
+        "code",
+        "vision"
+      ],
+      "admitted": true
+    },
+    {
+      "name": "a closed model whose every class is allowed",
+      "classes": [
+        "strong",
+        "code",
+        "vision"
+      ],
+      "modelClasses": [
+        "strong",
+        "code",
+        "vision"
+      ],
+      "admitted": true
+    },
+    {
+      "name": "a closed model with a class the policy does not allow",
+      "classes": [
+        "strong",
+        "code",
+        "vision"
+      ],
+      "modelClasses": [
+        "strong"
+      ],
+      "admitted": false
+    },
+    {
+      "name": "a row whose only class is open-vendor (the schema refuses it): nothing to admit it by",
+      "classes": [
+        "open-vendor"
+      ],
+      "modelClasses": [
+        "cheap"
+      ],
+      "admitted": false
+    },
+    {
+      "name": "a model the catalogue does not hold: no classes to check",
+      "classes": null,
+      "modelClasses": [
+        "cheap"
+      ],
+      "admitted": false
+    }
+  ]
+}

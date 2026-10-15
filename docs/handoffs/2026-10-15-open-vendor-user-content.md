@@ -18,7 +18,10 @@ turn on a refusal or an empty answer.
   every-class rule. `resolveModelProfile` ignores it, so adding it to a row changes no resolution. A spend policy's and
   a grant's `modelClasses` cannot name it: the schema route (`$defs/admissionClass`), chosen over a rule clause because
   both are schema-checked. A catalogue row carries at least one other class (`contains`), and the resolver keeps a row
-  with none out under a policy that names classes. DEC-0046 annotated accordingly.
+  with none out under a policy that names classes. DEC-0046 annotated accordingly. `admittedByClasses` is the admission
+  test, and `fixtures/vectors/model-admission.json` (eight cases) its shared vectors for a port's resolver and doctor.
+  A resolver that has not ported the exception drops every open model under a policy that names classes, so a catalogue
+  writer marks `open-vendor` only once every resolver it serves has ported it (the publication gate).
 - A profile's optional `reads` (`schemas/model-profile.schema.json`): at least one of `user-content`, `operator`,
   `web`, each once; absent stays valid. `operator` and `web` (the owner's addition) carry no rule and let a lane say it
   does not read user content.
@@ -42,35 +45,43 @@ turn on a refusal or an empty answer.
 
 ## Open
 
-- Consumers adopt at their next pin (CT-52): Fabric's catalogue marks `open-vendor`, its resolution ignores the class
-  and its policy editors never offer it; its launch runs `FAC-SEM-112` on the profile and the outcome; its runners fail
-  a refused or empty turn. fabric-agent-adapter
-  (FAA-45): the kits run `FAC-SEM-112`, and its skills ask which lanes read user content. Fabric Switchboard runs it
-  too if it resolves model profiles.
+- Consumers adopt at their next pin (CT-52):
+  - Fabric: its catalogue marks `open-vendor` only once every schema reader is pinned at or after DEC-0083 and every
+    resolver it serves has ported the exception (a resolver without it drops every open model under a policy that
+    names classes); its resolution ignores the class and its policy editors never offer it; its launch runs
+    `FAC-SEM-112` on the profile and the outcome; its runners fail a refused or empty turn.
+  - fabric-agent-adapter (FAA-45): the kits run `FAC-SEM-112`; they port the `open-vendor` exception to both copies of
+    the every-class rule, the resolver (`resolveModelProfile`) and the doctor's `modelUsable` / `model_usable`, and run
+    `fixtures/vectors/model-admission.json` on both; its skills ask which lanes read user content.
+  - Fabric Switchboard runs `FAC-SEM-112`, and ports the exception, if it resolves model profiles.
 - Not decided: a third vendor for a checker's fallback; thresholds; which lanes count as user content; whether a host
   requires `reads`.
 
 ## Checks run
 
-- Gate at the branch head:
+- Gate at the branch head (the commit that carries this text; its code equals the run below):
   - `tsc --noEmit` exit 0;
-  - `vitest run --coverage` exit 0: 70 files, 4665 tests passed, the coverage floors met;
+  - `vitest run --coverage` exit 0: 70 files, 4677 tests passed; statements 99.47 % (6298/6331), branches 98.81 %
+    (6280/6355); every per-file floor met, `src/profile-rules.ts` and `src/findings.ts` at 100;
   - `docs/ux/lint.py` exit 0: 22 stories, 18 flows, 21 screens, 27 scenarios;
   - `src/docs-check.ts` exit 0;
   - `src/lint-md.ts` exit 0: 168 files, 0 errors;
   - `src/privacy-check.ts` exit 0: 0 findings.
-- Twenty-four plants, each applied alone, confirmed failing named tests, then restored:
-  - five raw-index plants in `src/profile-rules.ts`, each putting back the filtered index of one path
-    (`FAC-SEM-058` catalogue and profiles, `FAC-SEM-060` profiles and models, `FAC-SEM-112` profiles);
-  - twelve more in `src/profile-rules.ts`: the fallback ignored, `none` counting every model, an undefined fallback read
-    as `between-turns`, an uncatalogued model counted as open, the `reads` clause removed, `user-content` beside
-    another value not bound, the rule not registered, the resolver checking `open-vendor`, the resolver admitting a
-    row whose only class is `open-vendor`, the outcome clause removed, the outcome reported beside a closed profile,
-    the outcome tested on the profile's models;
-  - seven in the schemas: `open-vendor` removed from the classes, `minItems` and `uniqueItems` removed from `reads`,
-    `operator` dropped, the enum opened to any string, the admission class admitting `open-vendor`, a row's
-    `contains` removed.
-- The exact numbers are in the pull request.
+- Twenty-seven plants, each applied alone against `test/open-vendor-user-content.test.ts`,
+  `test/runner-model-profiles.test.ts`, `test/fixtures.test.ts` and `test/positive-sweep.test.ts`, each failing at
+  least one test (failures in brackets), then restored:
+  - the route: the fallback ignored (3), `none` counting every model (8), an undefined fallback read as
+    `between-turns` (1), an uncatalogued model counted as open (2), the `reads` clause removed (10), `user-content`
+    beside another value not bound (2), the rule not registered (15), only the first closed profile reported (1);
+  - the outcome: the clause removed (3), reported beside a closed profile (7), tested on the profile's models (3),
+    taken from the first profile instead of the resolved one (1);
+  - admission: the resolver checking `open-vendor` (5), a row whose only class is `open-vendor` admitted (3), any
+    admission class allowed instead of every one (8);
+  - raw indexes: `FAC-SEM-058` catalogue (3) and profiles (3), `FAC-SEM-060` profiles (6) and models (3),
+    `FAC-SEM-112` profiles (3);
+  - the schemas: `open-vendor` removed from the classes (15), `reads` `minItems` (3) and `uniqueItems` (3) removed,
+    `operator` dropped (4), the enum opened to any string (3), the admission class admitting `open-vendor` (3), a
+    row's `contains` removed (2).
 
 ## Next task
 

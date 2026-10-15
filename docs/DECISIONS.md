@@ -4990,19 +4990,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   exists to catch. `operator` and `web` exist so that "declared, not user content" differs from "not declared".
 - **Compatibility:** `contractVersion` stays `0.1.0`, but this is not purely additive for readers.
   1. Both schemas are closed: a reader pinned before DEC-0083 refuses a catalogue row with the class `open-vendor` and
-     a profile with `reads`. So a writer publishes `open-vendor` in the catalogue, and `reads` on a profile, only once
-     every reader is pinned at or after DEC-0083.
+     a profile with `reads`. So a writer publishes `reads` on a profile only once every reader is pinned at or after
+     DEC-0083. A catalogue writer marks `open-vendor` only once every schema reader is pinned at or after DEC-0083
+     **and** every resolver the catalogue serves has ported item 5's exception (item 3), in its resolution and in any
+     other copy of the every-class rule it keeps, such as a doctor's usability check.
   2. `FAC-SEM-112` refuses only profiles whose `reads` lists `user-content`. An existing profile, and a profile that
      declares only `operator` or `web`, is unaffected.
-  3. Item 5 leaves every existing resolution as it was: adding `open-vendor` to a row changes no policy's outcome
-     (`test/open-vendor-user-content.test.ts` resolves the catalogue with and without it). Refusing `open-vendor` in a
-     policy's and a grant's `modelClasses`, and a row with no other class, tightens nothing a reader accepted before:
-     the value did not exist. A kit that ports `resolveModelProfile` ports the exception with the rest of DEC-0083 at
-     its next pin; a reader pinned earlier refuses the row (item 1), so no reader ever applies the class under the
-     every-class rule.
+  3. Under item 5, adding `open-vendor` to a row changes no policy's outcome for a resolver that has ported the
+     exception (`test/open-vendor-user-content.test.ts` resolves the catalogue with and without it). A resolver that
+     does not validate the catalogue against the schema and has not ported the exception — a kit pinned before
+     DEC-0083 — applies the every-class rule to `open-vendor` and drops every open model under a policy that names
+     classes, and no policy can work around it, because a policy cannot name the class. Hence item 1's gate on the
+     catalogue writer. Every port checks its resolver and its doctor against the shared vectors
+     `fixtures/vectors/model-admission.json` (`admittedByClasses`). Refusing `open-vendor` in a policy's and a grant's
+     `modelClasses`, and a row with no other class, tightens nothing a reader accepted before: the value did not
+     exist.
   4. No test hard-coded the six classes: the vocabulary test compares runners.md with the schema's list, and the new
      test holds it at seven; DEC-0046's test now reads the policy's and the grant's `$defs/admissionClass`. The positive
-     catalogue fixture marks its DeepSeek, Qwen, GLM and MiniMax rows `open-vendor`.
+     catalogue fixture marks its DeepSeek, Qwen, GLM, MiniMax and Mistral rows `open-vendor`, an illustrative choice:
+     the catalogue writer decides.
 - **Consequences / affects:**
   - spec: `docs/specification/runners.md` (the classes, What a profile reads, the rules table),
     `docs/specification/conformance.md` (the host's launch row, the runner row, the register row);
@@ -5011,14 +5017,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `schemas/governance.schema.json` (`modelClasses` take `admissionClass`);
   - spec, also: `docs/specification/spend-policy.md` (`modelClasses`);
   - code: `src/profile-rules.ts` (`OPEN_VENDOR`, `USER_CONTENT`, `closedUserContentRoute`, `FAC-SEM-112` with its
-    outcome clause, `resolveModelProfile`'s exception; `FAC-SEM-058`, `FAC-SEM-060` and `FAC-SEM-112` name an item by
+    outcome clause, `admittedByClasses` and `resolveModelProfile`'s exception; `FAC-SEM-058`, `FAC-SEM-060` and `FAC-SEM-112` name an item by
     its index as written, past a leading non-object, an adjacent defect the adapter reported), `src/findings.ts`
     (`indexed`, moved from `src/activity-rules.ts` and `src/estate-record-rules.ts`, which import it);
   - fixtures: `fixtures/positive/registry-models.json` (the open-weight rows), `fixtures/positive/model-profile-user-content.json`,
     `fixtures/positive/model-profiles-user-content.json`, `fixtures/positive/model-profile-reads-operator.json`,
     `fixtures/negative/model-profile-reads-{unknown,empty,twice}.json`, `fixtures/negative/spend-policy-open-vendor-class.json`,
     `fixtures/negative/registry-models-open-vendor-only.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
-    (ten), `fixtures/catalogue.json`;
+    (ten), `fixtures/vectors/model-admission.json` (new, eight cases), `fixtures/catalogue.json`;
   - tests: `test/open-vendor-user-content.test.ts` (new), `test/rule-tolerance.test.ts` (kind `profile-resolution`),
     `test/runner-model-profiles.test.ts` (the admission-class reference), `test/findings.test.ts` (new); `vitest.config.ts`
     (`src/findings.ts` measured at 100, `src/activity-rules.ts` 97.16 to 97.13 as the moved helper's covered branches

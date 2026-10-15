@@ -241,7 +241,15 @@ policy neither admits nor excludes a model by it, and a catalogue writer that ad
 resolution. A policy cannot name it: `registry-models.schema.json#/$defs/admissionClass`, which a spend policy's and a
 grant's `modelClasses` take, refuses it. A catalogue row carries at least one admission class beside it (the schema's
 `contains`), since a row with none would give a policy nothing to admit it by; the resolver keeps such a row out
-under any policy that names classes.
+under any policy that names classes. `admittedByClasses` in [`src/profile-rules.ts`](../../src/profile-rules.ts) is the
+admission test, and [`fixtures/vectors/model-admission.json`](../../fixtures/vectors/model-admission.json) its shared
+vectors: a port runs them on every copy of the every-class rule it keeps — its resolver and its doctor's usability
+check — so neither reports or drops a model for a class no policy can name.
+
+**Publication gate.** A resolver that does not validate the catalogue and has not ported the exception applies the
+every-class rule to `open-vendor` and drops every open model under a policy that names classes, and no policy can work
+around it. So a catalogue writer marks `open-vendor` only once every schema reader is pinned at or after DEC-0083 and
+every resolver the catalogue serves has ported the exception (DEC-0083, Compatibility).
 
 ### What a profile reads
 

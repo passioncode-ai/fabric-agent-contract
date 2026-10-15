@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { OPEN_VENDOR, USER_CONTENT, closedUserContentRoute, resolveModelProfile } from "../src/profile-rules.js";
+import { OPEN_VENDOR, USER_CONTENT, admittedByClasses, closedUserContentRoute, resolveModelProfile } from "../src/profile-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 
@@ -21,6 +21,7 @@ const conformance = readFileSync(path.join(root, "docs/specification/conformance
 const fixture = load("semantic/profile-resolution-user-content-open-first.json");
 const catalogue = fixture.input.catalogue as Json;
 const profile = (fields: Json) => ({ kind: "model-profile", id: "member-chat", reads: [USER_CONTENT], ...fields });
+const paths112 = (input: unknown) => evaluateSemanticRules("profile-resolution", input).filter((finding) => finding.code === "FAC-SEM-112").map((finding) => finding.instancePath);
 const bundle = (profiles: Json[], over: Json = catalogue) => ({
   catalogue: over,
   profiles,
@@ -62,7 +63,8 @@ describe("the vocabulary (DEC-0083)", () => {
     const models = load("positive/registry-models.json").models as Json[];
     expect(valid("registry-models.schema.json", load("positive/registry-models.json"))).toBe(true);
     const open = models.filter((row) => (row.classes as string[]).includes(OPEN_VENDOR)).map((row) => row.family);
-    expect([...new Set(open)].sort()).toEqual(["DeepSeek", "GLM", "MiniMax", "Qwen"]);
+    // Illustrative: the catalogue writer decides which rows carry the class; these vendors publish open weights.
+    expect([...new Set(open)].sort()).toEqual(["DeepSeek", "GLM", "MiniMax", "Mistral", "Qwen"]);
     for (const row of models.filter((item) => ["Anthropic", "Gemini", "OpenAI", "Grok"].includes(item.family as string))) expect(row.classes).not.toContain(OPEN_VENDOR);
     const profiles = load("positive/model-profiles-user-content.json").profiles as Json[];
     expect(codes("profile-resolution", bundle(profiles, load("positive/registry-models.json")))).toEqual([]);
@@ -118,6 +120,10 @@ describe("FAC-SEM-112: a lane that reads user content has an open-vendor route",
     const closed = profile({ id: "triage", models: ["google/gemini-3.8-flash"], fallback: "none" });
     const findings = evaluateSemanticRules("profile-resolution", bundle([profile({ models: ["qwen/qwen3.8-flash"], fallback: "none" }), closed]));
     expect(findings.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual(["FAC-SEM-112 /profiles/1/models"]);
+    // Two closed profiles: each is reported, not only the first.
+    const other = profile({ id: "review", models: ["anthropic/claude-haiku-5.5"], fallback: "between-turns" });
+    const both = evaluateSemanticRules("profile-resolution", bundle([closed, other]));
+    expect(both.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual(["FAC-SEM-112 /profiles/0/models", "FAC-SEM-112 /profiles/1/models"]);
   });
 
   it("does not throw on a profile or a bundle of the wrong shape", () => {
@@ -169,6 +175,20 @@ describe("FAC-SEM-112: a lane that reads user content has an open-vendor route",
     expect(bare.map((finding) => finding.message)).toContain("the policy undefined leaves profile member-chat's lane on closed vendors alone: of the models it admits, none of its models is open-vendor in the catalogue");
     // A profile that does not read user content is not held to it.
     expect(codes("profile-resolution", { ...drops, profiles: [{ ...drops.profiles[0], reads: ["operator"] }] })).toEqual([]);
+  });
+
+  it("holds the resolved profile's outcome, not the first profile's", () => {
+    const drops = load("semantic/profile-resolution-user-content-policy-drops-open.json").input;
+    const triage = { kind: "model-profile", id: "triage", name: "Triage", models: ["anthropic/claude-haiku-5.5"], fallback: "none", reads: ["operator"] };
+    const input = { ...drops, profiles: [triage, drops.profiles[0]], choices: { estate: "member-chat" } };
+    expect(paths112(input)).toEqual(["/resolved/models"]);
+  });
+
+  it("pins the skip boundary: under fallback none a closed first model is reported once, for the profile, though the policy also drops the open one", () => {
+    const drops = load("semantic/profile-resolution-user-content-policy-drops-open.json").input;
+    const input = { ...drops, profiles: [{ ...drops.profiles[0], fallback: "none", models: ["anthropic/claude-haiku-5.5", "deepseek/deepseek-v4-pro"] }] };
+    input.resolved = resolveModelProfile({ catalogue: input.catalogue, profiles: input.profiles, choices: input.choices, policy: input.policy });
+    expect(evaluateSemanticRules("profile-resolution", input).map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual(["FAC-SEM-112 /profiles/0/models"]);
   });
 
   it("names one cause once: a profile whose own route is closed is not reported again for its outcome", () => {
@@ -223,5 +243,28 @@ describe("instancePaths name the item as written, past a leading non-object (DEC
   it.each(LEADS)("FAC-SEM-058: a non-object before a profile declared twice (%s)", (lead) => {
     const profile = open.profiles[0];
     expect(paths("model-profiles", { kind: "model-profiles", profiles: [lead, profile, profile] }, "FAC-SEM-058")).toEqual(["/profiles/2/id"]);
+  });
+});
+
+describe("model admission, the shared vectors a port's resolver and doctor both run (DEC-0083)", () => {
+  const vectors = load("vectors/model-admission.json") as { cases: Array<{ name: string; classes: string[] | null; modelClasses: string[]; admitted: boolean }> };
+
+  it("has every case the exception needs, among them an open model whose extra open-vendor the policy cannot name", () => {
+    expect(vectors.cases.length).toBe(8);
+    expect(vectors.cases.some((c) => c.admitted && c.classes?.includes(OPEN_VENDOR) && !c.modelClasses.includes(OPEN_VENDOR))).toBe(true);
+    for (const c of vectors.cases) expect(valid("spend-policy.schema.json", { ...load("positive/spend-policy-limited.json"), modelClasses: c.modelClasses }), c.name).toBe(true);
+  });
+
+  it.each(vectors.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => {
+    const row = c.classes === null ? undefined : { id: "vendor/model", classes: c.classes };
+    expect(admittedByClasses(row, c.modelClasses)).toBe(c.admitted);
+    // The resolver agrees with the row-level answer, so a port's resolver and doctor cannot drift apart.
+    const over = { models: row === undefined ? [] : [row] };
+    const resolved = resolveModelProfile({ catalogue: over, profiles: [{ id: "p", models: ["vendor/model"] }], choices: { estate: "p" }, policy: { modelClasses: c.modelClasses } });
+    expect("models" in resolved).toBe(c.admitted);
+  });
+
+  it("does not throw on a row of the wrong shape", () => {
+    for (const row of [null, 7, "x", [], { classes: "cheap" }, { classes: [7, null] }]) expect(admittedByClasses(row, ["cheap"])).toBe(false);
   });
 });
