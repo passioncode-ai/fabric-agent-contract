@@ -72,12 +72,13 @@ describe("the vocabulary (DEC-0083)", () => {
 describe("FAC-SEM-112: a lane that reads user content has an open-vendor route", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("profile-resolution-user-content-"));
 
-  it("has the eight semantic fixtures", () => expect(files).toHaveLength(8));
+  it("has the ten semantic fixtures", () => expect(files).toHaveLength(10));
 
   it.each(files)("%s", (name) => {
     const { input, expect: expected } = load(`semantic/${name}`);
     expect(valid("registry-models.schema.json", input.catalogue), name).toBe(true);
     for (const item of input.profiles as Json[]) expect(valid("model-profile.schema.json", item), `${name} ${String(item.id)}`).toBe(true);
+    if (input.policy !== undefined) expect(valid("spend-policy.schema.json", input.policy), `${name} policy`).toBe(true);
     expect(codes("profile-resolution", input)).toEqual([...(expected as string[])].sort());
   });
 
@@ -128,11 +129,49 @@ describe("FAC-SEM-112: a lane that reads user content has an open-vendor route",
     expect(codes("profile-resolution", { catalogue: 1, profiles: [{ id: { toString: 1 }, reads: [USER_CONTENT], models: [{ toString: 1 }] }], resolved: null })).toContain("FAC-SEM-112");
   });
 
-  it("an open-vendor model stays under a class-restricting policy only when the policy lists open-vendor too (DEC-0046's every-class rule)", () => {
+  it("admits an open model by its other classes: open-vendor is descriptive, and a policy that does not list it keeps the model", () => {
     const profiles = [profile({ models: ["qwen/qwen3.8-flash", "anthropic/claude-haiku-5.5"], fallback: "between-turns" })];
-    const resolve = (modelClasses: string[]) => resolveModelProfile({ catalogue, profiles, choices: { estate: "member-chat" }, policy: { modelClasses } });
-    expect(resolve(["cheap", "chinese-vendor"])).toMatchObject({ models: ["anthropic/claude-haiku-5.5"] });
-    expect(resolve(["cheap", "chinese-vendor", OPEN_VENDOR])).toMatchObject({ models: ["qwen/qwen3.8-flash", "anthropic/claude-haiku-5.5"] });
+    const resolve = (modelClasses: string[], over: Json = catalogue) => resolveModelProfile({ catalogue: over, profiles, choices: { estate: "member-chat" }, policy: { modelClasses } });
+    expect(resolve(["cheap", "chinese-vendor"])).toMatchObject({ models: ["qwen/qwen3.8-flash", "anthropic/claude-haiku-5.5"] });
+    // Adding the class to a row changes no resolution: the same row without it resolves the same.
+    const without = { ...catalogue, models: (catalogue.models as Json[]).map((row) => ({ ...row, classes: (row.classes as string[]).filter((name) => name !== OPEN_VENDOR) })) };
+    for (const classes of [["cheap"], ["cheap", "chinese-vendor"], ["strong"]]) expect(resolve(classes), String(classes)).toEqual(resolve(classes, without));
+    // A row whose only class is the descriptive one gives a policy nothing to admit it by, and never stays.
+    expect(resolve(["cheap"], { models: [{ id: "qwen/qwen3.8-flash", classes: [OPEN_VENDOR] }] })).toMatchObject({ refused: "model-classes-empty" });
+  });
+
+  it("refuses open-vendor in a spend policy's and a grant's model classes, and a catalogue row that has no other class, by schema", () => {
+    expect(valid("spend-policy.schema.json", load("negative/spend-policy-open-vendor-class.json"))).toBe(false);
+    expect(valid("spend-policy.schema.json", { ...load("negative/spend-policy-open-vendor-class.json"), modelClasses: ["cheap"] })).toBe(true);
+    const grant = load("positive/governance-grant-spend.json");
+    grant.spend.modelClasses = [OPEN_VENDOR];
+    expect(valid("governance.schema.json", grant)).toBe(false);
+    expect(valid("registry-models.schema.json", load("negative/registry-models-open-vendor-only.json"))).toBe(false);
+    for (const ref of [schema("spend-policy.schema.json").properties.modelClasses.items.$ref, schema("governance.schema.json").$defs.grant.properties.spend.properties.modelClasses.items.$ref]) {
+      expect(ref).toBe("registry-models.schema.json#/$defs/admissionClass");
+    }
+  });
+
+  it("holds the resolution's outcome to the route: a policy that drops the open model by another class is named", () => {
+    const drops = load("semantic/profile-resolution-user-content-policy-drops-open.json").input;
+    expect(evaluateSemanticRules("profile-resolution", drops)).toEqual([{ code: "FAC-SEM-112", instancePath: "/resolved/models", message: "the policy urn:spend-policy:project-a leaves profile member-chat's lane on closed vendors alone: of the models it admits, none of its models is open-vendor in the catalogue" }]);
+    // Under fallback none, a policy that drops the open first model leaves a closed first model.
+    const none = { ...drops, profiles: [{ ...drops.profiles[0], fallback: "none" }] };
+    expect(evaluateSemanticRules("profile-resolution", none).map((finding) => finding.message)).toEqual(["the policy urn:spend-policy:project-a leaves profile member-chat's lane on closed vendors alone: of the models it admits, its first model, anthropic/claude-haiku-5.5, is not open-vendor in the catalogue"]);
+    // A policy that keeps the open model, a refused launch, and no policy at all give no outcome finding.
+    expect(codes("profile-resolution", { ...drops, policy: { ...drops.policy, modelClasses: ["strong", "cheap", "chinese-vendor"] }, resolved: { from: "estate", profile: "member-chat", models: drops.profiles[0].models } })).toEqual([]);
+    expect(codes("profile-resolution", { ...drops, policy: { ...drops.policy, modelClasses: ["vision"] }, resolved: { refused: "model-classes-empty", profile: "member-chat", policy: { id: "urn:spend-policy:project-a", revision: 1 } } })).toEqual([]);
+    const free = { ...drops, resolved: { from: "estate", profile: "member-chat", models: drops.profiles[0].models } };
+    delete (free as Json).policy;
+    expect(codes("profile-resolution", free)).toEqual([]);
+    // A profile that does not read user content is not held to it.
+    expect(codes("profile-resolution", { ...drops, profiles: [{ ...drops.profiles[0], reads: ["operator"] }] })).toEqual([]);
+  });
+
+  it("names one cause once: a profile whose own route is closed is not reported again for its outcome", () => {
+    const drops = load("semantic/profile-resolution-user-content-policy-drops-open.json").input;
+    const closed = { ...drops, profiles: [{ ...drops.profiles[0], models: ["anthropic/claude-haiku-5.5"] }] };
+    expect(evaluateSemanticRules("profile-resolution", closed).map((finding) => finding.instancePath)).toEqual(["/profiles/0/models"]);
   });
 });
 

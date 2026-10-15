@@ -14,26 +14,34 @@ turn on a refusal or an empty answer.
 - The model class `open-vendor` (`schemas/registry-models.schema.json`, seven classes), independent of
   `chinese-vendor`. The catalogue writer decides which rows carry it; the contract cites the operator's vendor list as
   informative only, by name. The positive catalogue marks its DeepSeek, Qwen, GLM and MiniMax rows.
+- The owner's decision on PR #111's concern: `open-vendor` is descriptive, a deliberate exception to DEC-0046's
+  every-class rule. `resolveModelProfile` ignores it, so adding it to a row changes no resolution. A spend policy's and
+  a grant's `modelClasses` cannot name it: the schema route (`$defs/admissionClass`), chosen over a rule clause because
+  both are schema-checked. A catalogue row carries at least one other class (`contains`), and the resolver keeps a row
+  with none out under a policy that names classes. DEC-0046 annotated accordingly.
 - A profile's optional `reads` (`schemas/model-profile.schema.json`): at least one of `user-content`, `operator`,
   `web`, each once; absent stays valid. `operator` and `web` (the owner's addition) carry no rule and let a lane say it
   does not read user content.
 - `FAC-SEM-112` on kind `profile-resolution` (`src/profile-rules.ts`, `closedUserContentRoute`): a profile whose
   `reads` lists `user-content`, alone or beside another value, has an open-vendor route. Under `fallback: none` the
   first model counts; under `between-turns` any model counts. An uncatalogued model, and an undefined fallback (read
-  as `none`), fail closed. The rule never throws; `profile-resolution` joined the tolerance kinds.
+  as `none`), fail closed. The rule also holds the resolution's outcome: when the resolved profile reads user content
+  and its own route is open, the models the policy leaves must keep an open-vendor route, or the finding names the
+  policy. The rule never throws; `profile-resolution` joined the tolerance kinds.
 - A refusal or an empty answer to a non-empty request is a failed turn for such a lane: runners.md, *What a profile
   reads*; a new runner row in conformance.md; the host's launch row now runs `FAC-SEM-112`.
-- Docs: runners.md (the classes, the new section, the rules table), conformance.md (two rows, the register row),
-  CONTEXT, DOCMAP, SCN-020's errors and coverage, CT-52.
+- Docs: runners.md (the classes, the new section, Resolution, the rules table), spend-policy.md, conformance.md (two
+  rows, the register row), CONTEXT, DOCMAP, SCN-020's errors and coverage, CT-52.
 
 ## Open
 
-- Consumers adopt at their next pin (CT-52): Fabric's catalogue marks `open-vendor`, and its class-naming policies
-  list it first; its launch runs `FAC-SEM-112`; its runners fail a refused or empty turn. fabric-agent-adapter
+- Consumers adopt at their next pin (CT-52): Fabric's catalogue marks `open-vendor`, its resolution ignores the class
+  and its policy editors never offer it; its launch runs `FAC-SEM-112` on the profile and the outcome; its runners fail
+  a refused or empty turn. fabric-agent-adapter
   (FAA-45): the kits run `FAC-SEM-112`, and its skills ask which lanes read user content. Fabric Switchboard runs it
   too if it resolves model profiles.
-- Not decided: a third vendor for a checker's fallback; thresholds; which lanes count as user content; whether the rule
-  also holds the resolved set after a policy's class restriction drops the open model; whether a host requires `reads`.
+- Not decided: a third vendor for a checker's fallback; thresholds; which lanes count as user content; whether a host
+  requires `reads`.
 
 ## Checks run
 
@@ -44,12 +52,15 @@ turn on a refusal or an empty answer.
   - `src/docs-check.ts` exit 0;
   - `src/lint-md.ts` exit 0: 168 files, 0 errors;
   - `src/privacy-check.ts` exit 0: 0 findings.
-- Twelve plants, each applied alone, confirmed failing named tests, then restored:
-  - seven in `src/profile-rules.ts`: the fallback ignored, `none` counting every model, an undefined fallback read
+- Nineteen plants, each applied alone, confirmed failing named tests, then restored:
+  - twelve in `src/profile-rules.ts`: the fallback ignored, `none` counting every model, an undefined fallback read
     as `between-turns`, an uncatalogued model counted as open, the `reads` clause removed, `user-content` beside
-    another value not bound, the rule not registered;
-  - five in the schemas: `open-vendor` removed from the classes, `minItems` and `uniqueItems` removed from `reads`,
-    `operator` dropped, the enum opened to any string.
+    another value not bound, the rule not registered, the resolver checking `open-vendor`, the resolver admitting a
+    row whose only class is `open-vendor`, the outcome clause removed, the outcome reported beside a closed profile,
+    the outcome tested on the profile's models;
+  - seven in the schemas: `open-vendor` removed from the classes, `minItems` and `uniqueItems` removed from `reads`,
+    `operator` dropped, the enum opened to any string, the admission class admitting `open-vendor`, a row's
+    `contains` removed.
 - The exact numbers are in the pull request.
 
 ## Next task

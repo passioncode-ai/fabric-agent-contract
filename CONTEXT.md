@@ -370,7 +370,7 @@ endpoints, tool use as last measured and a reference into the live price feed (D
 **Model class**: One word of a closed vocabulary — `frontier`, `strong`, `cheap`, `code`, `vision`,
 `chinese-vendor`, `open-vendor` — that the catalogue gives a model and a spend policy allows. A policy restricts by
 class and never chooses. `open-vendor` (DEC-0083): the vendor publishes the model's weights openly, independent of
-where the vendor is.
+where the vendor is; descriptive, so a policy neither names it nor is checked against it.
 
 **Model profile**: A named, ordered list of catalogue ids with a fallback policy (`none` or `between-turns`), such
 as `default` or `cheap`. Resolved in the order request, agent, binding or project, estate default, then restricted by

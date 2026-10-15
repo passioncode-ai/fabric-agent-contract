@@ -41,7 +41,8 @@ together, so anyone can see why.
 [model catalogue](runners.md#runner-and-model-profiles) (DEC-0046); a grant's `spend.modelClasses` uses the same
 vocabulary. The policy restricts the model profile a launch resolves to and never chooses one: a model stays when
 every class it has is allowed, and when none stays the launch is refused with the policy named. Absent, it
-restricts nothing.
+restricts nothing. The descriptive class `open-vendor` is neither named nor checked: the schema refuses it here and in
+a grant, and resolution ignores it (DEC-0083).
 
 ## Grants
 

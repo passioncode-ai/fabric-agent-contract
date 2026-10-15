@@ -622,6 +622,8 @@
   {"name": "model-profile-reads-twice", "schema": "model-profile.schema.json", "path": "negative/model-profile-reads-twice.json", "valid": false, "keyword": "uniqueItems"},
   {"name": "runner-profile-subscription-with-key", "schema": "runner-profile.schema.json", "path": "negative/runner-profile-subscription-with-key.json", "valid": false, "keyword": "not"},
   {"name": "runner-profile-key-without-key", "schema": "runner-profile.schema.json", "path": "negative/runner-profile-key-without-key.json", "valid": false, "keyword": "required"},
+  {"name": "spend-policy-open-vendor-class", "schema": "spend-policy.schema.json", "path": "negative/spend-policy-open-vendor-class.json", "valid": false, "keyword": "not"},
+  {"name": "registry-models-open-vendor-only", "schema": "registry-models.schema.json", "path": "negative/registry-models-open-vendor-only.json", "valid": false, "keyword": "contains"},
   {"name": "spend-policy-unknown-class", "schema": "spend-policy.schema.json", "path": "negative/spend-policy-unknown-class.json", "valid": false, "keyword": "enum"},
   {"name": "service-usage-route", "schema": "service-usage.schema.json", "path": "positive/service-usage-route.json", "valid": true},
   {"name": "service-usage-unknown-route", "schema": "service-usage.schema.json", "path": "negative/service-usage-unknown-route.json", "valid": false, "keyword": "enum"},

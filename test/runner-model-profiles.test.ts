@@ -31,8 +31,10 @@ describe("the model catalogue and its vocabulary (DEC-0046, FAC-SEM-058)", () =>
     const listed = /\*\*Model classes\.\*\*([^\n]+(?:\n[^\n]+)*?)\n\n/.exec(runners)?.[1] ?? "";
     const named = [...listed.matchAll(/`([a-z-]+)`/g)].map((match) => match[1]).sort();
     expect(named).toEqual([...schema("registry-models.schema.json").$defs.modelClass.enum].sort());
-    expect(schema("spend-policy.schema.json").properties.modelClasses.items.$ref).toBe("registry-models.schema.json#/$defs/modelClass");
-    expect(schema("governance.schema.json").$defs.grant.properties.spend.properties.modelClasses.items.$ref).toBe("registry-models.schema.json#/$defs/modelClass");
+    // DEC-0083: a policy and a grant name the admission classes, every class but the descriptive open-vendor.
+    expect(schema("spend-policy.schema.json").properties.modelClasses.items.$ref).toBe("registry-models.schema.json#/$defs/admissionClass");
+    expect(schema("governance.schema.json").$defs.grant.properties.spend.properties.modelClasses.items.$ref).toBe("registry-models.schema.json#/$defs/admissionClass");
+    expect(schema("registry-models.schema.json").$defs.admissionClass.allOf[0].$ref).toBe("#/$defs/modelClass");
     expect(valid("spend-policy.schema.json", load("negative/spend-policy-unknown-class.json"))).toBe(false);
     const grant = load("positive/governance-grant-spend.json");
     grant.spend.modelClasses = ["general"];

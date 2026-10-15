@@ -1,0 +1,168 @@
+{
+  "description": "The profile's own route is open, but the policy allows only cheap, so DeepSeek V4 Pro (also strong and chinese-vendor) does not stay and the lane would run on Claude Haiku alone: the policy is named (FAC-SEM-112).",
+  "kind": "profile-resolution",
+  "expect": [
+    "FAC-SEM-112"
+  ],
+  "input": {
+    "catalogue": {
+      "kind": "model-catalogue",
+      "asOf": "2026-10-15T09:00:00Z",
+      "models": [
+        {
+          "id": "qwen/qwen3.8-flash",
+          "family": "Qwen",
+          "classes": [
+            "cheap",
+            "chinese-vendor",
+            "open-vendor"
+          ],
+          "endpoints": [
+            "openai-chat"
+          ],
+          "toolUse": {
+            "status": "measured",
+            "at": "2026-10-11"
+          },
+          "priceRef": "openrouter:qwen/qwen3.8-flash"
+        },
+        {
+          "id": "deepseek/deepseek-v4-pro",
+          "family": "DeepSeek",
+          "classes": [
+            "strong",
+            "cheap",
+            "chinese-vendor",
+            "open-vendor"
+          ],
+          "endpoints": [
+            "anthropic-messages",
+            "openai-chat"
+          ],
+          "toolUse": {
+            "status": "measured",
+            "at": "2026-10-11"
+          },
+          "priceRef": "openrouter:deepseek/deepseek-v4-pro"
+        },
+        {
+          "id": "google/gemini-3.8-flash",
+          "family": "Gemini",
+          "classes": [
+            "cheap",
+            "vision"
+          ],
+          "endpoints": [
+            "openai-chat"
+          ],
+          "toolUse": {
+            "status": "measured",
+            "at": "2026-10-11"
+          },
+          "priceRef": "openrouter:google/gemini-3.8-flash"
+        },
+        {
+          "id": "anthropic/claude-haiku-5.5",
+          "family": "Anthropic",
+          "classes": [
+            "cheap"
+          ],
+          "endpoints": [
+            "anthropic-messages"
+          ],
+          "toolUse": {
+            "status": "measured",
+            "at": "2026-10-11"
+          },
+          "priceRef": "openrouter:anthropic/claude-haiku-5.5"
+        }
+      ]
+    },
+    "profiles": [
+      {
+        "kind": "model-profile",
+        "id": "member-chat",
+        "name": "Member chat",
+        "models": [
+          "deepseek/deepseek-v4-pro",
+          "anthropic/claude-haiku-5.5"
+        ],
+        "fallback": "between-turns",
+        "reads": [
+          "user-content"
+        ]
+      }
+    ],
+    "choices": {
+      "estate": "member-chat"
+    },
+    "resolved": {
+      "from": "estate",
+      "profile": "member-chat",
+      "models": [
+        "anthropic/claude-haiku-5.5"
+      ]
+    },
+    "policy": {
+      "kind": "spend-policy",
+      "meta": {
+        "id": "urn:spend-policy:project-a",
+        "revision": 1,
+        "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "createdAt": "2026-10-11T09:00:00Z",
+        "createdBy": "urn:operator:one"
+      },
+      "project": "urn:project:a",
+      "mode": "limited",
+      "limitUsd": 40,
+      "period": "month",
+      "autoApproveUsd": 0.5,
+      "modelClasses": [
+        "cheap"
+      ],
+      "credentialSources": [
+        {
+          "kind": "capability",
+          "agent": "urn:agent:copy:one",
+          "capability": "copy.write"
+        },
+        {
+          "kind": "project-key",
+          "ref": "vault:project-a/prod/MODEL_KEY"
+        }
+      ],
+      "proposal": {
+        "inputs": {
+          "presets": [
+            "research.standard",
+            "copy.translate"
+          ],
+          "recentSpendUsd": 18.4,
+          "workKind": "site localization"
+        },
+        "options": [
+          {
+            "limitUsd": 20,
+            "label": "about the expected month"
+          },
+          {
+            "limitUsd": 40,
+            "label": "twice that",
+            "preselected": true
+          },
+          {
+            "limitUsd": 80,
+            "label": "four times that"
+          },
+          {
+            "limitUsd": null,
+            "label": "no project limit"
+          }
+        ]
+      },
+      "decidedBy": "urn:operator:one",
+      "decidedAt": "2026-10-11T09:05:00Z",
+      "decisionRef": "urn:decision:project-a:spend"
+    }
+  }
+}

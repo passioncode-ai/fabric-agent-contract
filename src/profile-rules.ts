@@ -12,6 +12,12 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
 /** The vendor login each subscription is, and the one runner kind it runs in (DEC-0046, ADR-0147 decision 2). */
 export const SUBSCRIPTION_RUNNER: Readonly<Record<string, string>> = { claude: "claude-code", kimi: "kimi-code", chatgpt: "codex" };
 
+/** The model class of a model whose vendor publishes its weights openly (DEC-0083). Descriptive: a policy admits and excludes
+ * nothing by it. */
+export const OPEN_VENDOR = "open-vendor";
+/** What a lane reads when it reads what a member, a client or the public sends (DEC-0083). */
+export const USER_CONTENT = "user-content";
+
 /** The levels a profile is chosen at, most specific first. */
 export const RESOLUTION_ORDER = ["request", "agent", "binding", "estate"] as const;
 export type ResolutionLevel = (typeof RESOLUTION_ORDER)[number];
@@ -37,7 +43,9 @@ export type Resolution =
  * The reference resolution (DEC-0046, FAC-SEM-060), which the kit ports: the request's profile, else the agent's,
  * else the binding's or project's, else the estate default. When the project's policy names `modelClasses`, a model
  * stays only if every class the catalogue gives it is allowed — a model the catalogue does not hold has no classes to
- * check and does not stay. An empty result refuses the launch, naming the policy.
+ * check and does not stay. The descriptive class `open-vendor` is not checked (DEC-0083, a deliberate exception to the
+ * every-class rule), and a model with no other class does not stay. An empty result refuses the launch, naming the
+ * policy.
  */
 export function resolveModelProfile(input: ResolutionInput): Resolution {
   const level = RESOLUTION_ORDER.find((name) => typeof input.choices[name] === "string");
@@ -52,7 +60,8 @@ export function resolveModelProfile(input: ResolutionInput): Resolution {
   const rows = new Map(list(isObject(input.catalogue) ? input.catalogue.models : undefined).map((row) => [row.id, row] as const));
   const within = models.filter((model) => {
     const row = rows.get(model);
-    return row !== undefined && strings(row.classes).every((name) => allowed.has(name));
+    const admission = row === undefined ? [] : strings(row.classes).filter((name) => name !== OPEN_VENDOR);
+    return admission.length > 0 && admission.every((name) => allowed.has(name));
   });
   if (within.length) return { from: level, profile: id, models: within };
   const meta = isObject(policy.meta) ? policy.meta : {};
@@ -131,11 +140,6 @@ function profileResolution(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** The model class of a model whose vendor publishes its weights openly (DEC-0083). */
-export const OPEN_VENDOR = "open-vendor";
-/** What a lane reads when it reads what a member, a client or the public sends (DEC-0083). */
-export const USER_CONTENT = "user-content";
-
 /**
  * FAC-SEM-112 (DEC-0083) for one profile: the models that run when the lane reads user content and none of them is an
  * open-vendor model, or `undefined` when the profile does not read user content or its route has one. Under
@@ -154,19 +158,34 @@ export function closedUserContentRoute(profile: unknown, catalogue: unknown): st
   return route.map((model) => show(model));
 }
 
+/** How a closed route is named in a finding: under `between-turns` all of it, otherwise its first model. */
+const closedRoute = (fallback: unknown, closed: string[]): string =>
+  fallback === "between-turns" ? "none of its models is" : `its first model, ${closed[0] ?? "none"}, is not`;
+
 /**
  * FAC-SEM-112 (DEC-0083): a profile that reads user content has an open-vendor route — with `fallback: none` its first
  * model is `open-vendor` in the catalogue, with `between-turns` at least one of its models is — so the lane never runs
- * on closed vendors alone, which refuse the content it exists to handle.
+ * on closed vendors alone, which refuse the content it exists to handle. The resolution's outcome is held to the same
+ * test: when the resolved profile reads user content and its own route is open, the models the policy leaves must
+ * still give one, or the policy is named as what leaves the lane closed (one cause, one finding).
  */
 function openVendorRoutes(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
-  list(value.profiles).forEach((profile, i) => {
+  const profiles = list(value.profiles);
+  profiles.forEach((profile, i) => {
     const closed = closedUserContentRoute(profile, value.catalogue);
     if (closed === undefined) return;
-    const which = profile.fallback === "between-turns" ? "none of its models is" : `its first model, ${closed[0] ?? "none"}, is not`;
-    findings.push({ code: "FAC-SEM-112", instancePath: `/profiles/${i}/models`, message: `profile ${show(profile.id)} reads user content, but ${which} open-vendor in the catalogue: the lane would run on closed vendors alone` });
+    findings.push({ code: "FAC-SEM-112", instancePath: `/profiles/${i}/models`, message: `profile ${show(profile.id)} reads user content, but ${closedRoute(profile.fallback, closed)} open-vendor in the catalogue: the lane would run on closed vendors alone` });
   });
+  const choices = isObject(value.choices) ? (value.choices as ResolutionInput["choices"]) : {};
+  const outcome = resolveModelProfile({ catalogue: value.catalogue, profiles: value.profiles, choices, policy: value.policy });
+  if (!("models" in outcome)) return findings;
+  const profile = profiles.find((item) => item.id === outcome.profile);
+  if (!profile || closedUserContentRoute(profile, value.catalogue) !== undefined) return findings;
+  const closed = closedUserContentRoute({ ...profile, models: outcome.models }, value.catalogue);
+  if (closed === undefined) return findings;
+  const meta = isObject(value.policy) && isObject(value.policy.meta) ? value.policy.meta : {};
+  findings.push({ code: "FAC-SEM-112", instancePath: "/resolved/models", message: `the policy ${show(meta.id)} leaves profile ${show(profile.id)}'s lane on closed vendors alone: of the models it admits, ${closedRoute(profile.fallback, closed)} open-vendor in the catalogue` });
   return findings;
 }
 
