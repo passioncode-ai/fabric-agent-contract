@@ -15,7 +15,7 @@ import { verify as nodeVerify } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { P256_CURVE, isEd25519Key, isLowS, p256KeyRefusal, type P256Key } from "./p256.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
+import { deviceKeyRef, verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
 
 export const RELAY_PROTOCOL = "fabric-relay/0.1";
@@ -351,7 +351,9 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   for (const machine of list(record.machines)) {
     if (machines.has(machine.id)) continue;
     for (const key of list(machine.deviceKeys)) {
-      if (key.use === "sig" && typeof key.kid === "string" && key.kid.endsWith("#sig") && typeof key.publicKey === "string" && !keys.has(key.kid)) {
+      // A `device-key` revocation names a kid or one key by its own reference (`deviceKeyRef`, DEC-0084): a delta entry
+      // that revokes a replaced key leaves the next key under the same kid admitted.
+      if (key.use === "sig" && typeof key.kid === "string" && key.kid.endsWith("#sig") && typeof key.publicKey === "string" && !keys.has(key.kid) && !keys.has(deviceKeyRef(key) ?? key.kid)) {
         const octets = new Uint8Array(Buffer.from(key.publicKey, "base64"));
         if (isEd25519Key(octets)) excluded.push({ kid: key.kid, reason: "unsupported-alg" });
         else if (p256KeyRefusal(octets) !== null) excluded.push({ kid: key.kid, reason: "bad-key" });

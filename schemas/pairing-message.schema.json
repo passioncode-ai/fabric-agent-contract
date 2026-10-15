@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/pairing-message.schema.json",
+  "title": "Pairing message, pairing-message/1 (DEC-0084)",
+  "description": "One message of the pairing that adds a machine to an estate (DEC-0084, docs/specification/ceremonies.md): a side's commitment, its reveal, or an abort. Both sides commit before either reveals; the commitment is SHA-256 over the RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce} (pairingCommit); the comparison code both screens show is derived from both reveals (comparisonCode). A one-time relay rendezvous (relay.md) or a local connection carries these messages and nothing else.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "schema",
+        "step",
+        "role",
+        "commit"
+      ],
+      "properties": {
+        "schema": {
+          "const": "pairing-message/1"
+        },
+        "step": {
+          "const": "commit"
+        },
+        "role": {
+          "$ref": "#/$defs/role"
+        },
+        "commit": {
+          "$ref": "common.schema.json#/$defs/sha256",
+          "description": "sha256: and the hex SHA-256 of the UTF-8 RFC 8785 form of {type: fabric-enroll-commit/1, role, keys, nonce}: the side's keys and nonce, hidden until its reveal."
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "schema",
+        "step",
+        "role",
+        "keys",
+        "nonce"
+      ],
+      "properties": {
+        "schema": {
+          "const": "pairing-message/1"
+        },
+        "step": {
+          "const": "reveal"
+        },
+        "role": {
+          "$ref": "#/$defs/role"
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "$ref": "device-enrollment.schema.json#/$defs/deviceKey"
+          },
+          "description": "The side's device keys as an estate record lists them (DEC-0053, FAC-SEM-073): exactly one <id>#sig and at most one <id>#kem, for one machine id. The new machine's are the keys the revision that adds it lists; the trusted machine's #sig is the one the current revision lists for it."
+        },
+        "nonce": {
+          "$ref": "#/$defs/nonce"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "schema",
+        "step",
+        "role"
+      ],
+      "properties": {
+        "schema": {
+          "const": "pairing-message/1"
+        },
+        "step": {
+          "const": "abort"
+        },
+        "role": {
+          "$ref": "#/$defs/role"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Either side ends the rendezvous: a reveal that does not open its commitment, or the person said the codes differ. It burns the rendezvous; a new attempt opens a new one with new nonces."
+    }
+  ],
+  "$defs": {
+    "role": {
+      "enum": [
+        "new",
+        "trusted"
+      ],
+      "description": "new: the machine that joins (or re-pairs under its id to replace its key); trusted: a machine of the estate on which the person signs the next revision."
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$",
+      "description": "32 fresh random bytes, unpadded base64url; never reused across rendezvous."
+    }
+  }
+}
