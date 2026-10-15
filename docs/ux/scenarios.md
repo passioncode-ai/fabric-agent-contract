@@ -33,6 +33,7 @@
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
+| SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
 
 ## Personas
 
@@ -612,4 +613,28 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the plist says launchd and the arguments say task-scheduler -> the copy exits 75 at once naming both markers, without trying the lock; the operator fixes the supervisor file.
 - **Status:** draft
 - **Coverage:** service specification, One copy; `src/service-supervisor.ts`; `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
+- **Product:** unobserved
+
+## Network
+
+### SCN-028: Add a second machine from afar: compare the code, sign with the passkey
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-023, FLW-19 (JTBD-10, JRN-09/#2)
+- **Entry point:** Fabric's "Add a machine" on the operator's daily machine, which is in the network
+- **Preconditions:** the network exists (revision 1 signed); the second machine runs the node and is in another place
+- **Steps:**
+  1. Operator opens "Add a machine" -> the trusted machine opens a one-time rendezvous and shows its link with 10 minutes to run.
+  2. The second machine joins with the link -> both commit, then both reveal.
+  3. Both screens show the same six digits and the network's fingerprint -> the operator confirms "The codes match".
+  4. The passkey prompt opens on the trusted machine -> the operator signs; the revision lists the second machine with its keys.
+  5. The second machine receives the chain -> it checks it starts at the network the code bound and lists its keys, applies it, and shows itself in the network.
+- **Expected result:** the second machine is in the network; nothing was typed but the passkey, and no key was copied.
+- **Alt paths:** nearby, the second machine shows a code instead of a link and the rest is the same. A server with no screen joins with an enroll token read from stdin; a second use of the token is refused and logged.
+- **UI elements:** the code and the fingerprint on both screens, "The codes match" / "They differ", the passkey prompt.
+- **States covered:** loading, error, success
+- **Errors & recovery:** the codes differ -> "They differ" burns the rendezvous; nothing is signed; a new attempt uses new nonces. The link is older than 10 minutes -> the rendezvous has expired; the operator starts again. The chain starts at another network -> the second machine refuses it (`other-estate`) and pins nothing.
+- **Status:** draft
+- **Coverage:** ceremonies specification, Add a machine; `src/pairing.ts`; `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
 - **Product:** unobserved

@@ -27,6 +27,7 @@
 | SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
 | SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
+| SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
 
 ## Design system
 
@@ -272,4 +273,15 @@
 - **Coverage:** `comms-directory.schema.json`, `test/comms-tools.test.ts` (the directory's boundary)
 - **Scenarios:** SCN-027
 - **Resources:** project-comms specification, Project directory
+- **Status:** proposed
+
+### SCR-22: Add a machine
+
+- **Used by:** FLW-19
+- **Purpose:** the person pairs a new machine with a trusted one and signs the revision that adds it.
+- **Elements:** the six-digit comparison code and the network's fingerprint, shown on both machines; "The codes match" (primary action, which opens the passkey prompt) and "They differ"; nearby, a QR code or short code on the new machine; from afar, the rendezvous link and its remaining time.
+- **States:** loading — waiting for the other side's commitment or reveal; error — the codes differ, a reveal did not open its commitment, or the rendezvous expired, each saying a new attempt starts over; success — the machine is listed in the signed revision.
+- **Coverage:** `src/pairing.ts`, `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
+- **Scenarios:** SCN-028
+- **Resources:** ceremonies specification, Add a machine
 - **Status:** proposed

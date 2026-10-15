@@ -410,6 +410,17 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   sessions closed 4403 (see [Admission](#admission)), within one push rather than at the next revision.
 - The window lease is DEC-0062's.
 
+## The pairing rendezvous
+
+When a machine joins an estate from afar, the trusted machine opens a **one-time rendezvous** on its relay session and
+shows its link; the new machine, not yet admitted, joins it with that link. The link's secret part travels after `#` (a
+fragment, never sent in an HTTP request) and the new machine presents it inside the WebSocket, so no credential is in a
+URL the relay sees. The rendezvous lives at most 600 s from its opening, carries `pairing-message/1` frames between its
+two sides and nothing else — never a mailbox message, a blob or presence — and is burned at the first failure, the first
+`abort`, or once both reveals were delivered, as `rendezvousVerdict` reads it ([ceremonies](ceremonies.md#the-rendezvous),
+DEC-0084). It admits the new machine to nothing: the machine is admitted only once a revision lists it. The rendezvous
+frame types are the relay's to add (not decided here).
+
 ## Shared vectors
 
 Every refusal of the relay family is data a port runs, not only a test in this repository (DEC-0066).
@@ -444,3 +455,5 @@ Every refusal of the relay family is data a port runs, not only a test in this r
   grants (one record holding several `{recipients, fetched, expiresAt}`) are the next revision's question.
 - How a relay serves several contexts (the pseudonymous per-context id of relay RLY-08, with Fabric D8).
 - Whether a self-hosted relay federates with the hosted one.
+- The frame types that open, join and close a pairing rendezvous (DEC-0084 fixes what it carries, how long it lives and
+  when it burns).

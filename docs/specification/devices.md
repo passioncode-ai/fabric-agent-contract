@@ -49,6 +49,12 @@ sequenceDiagram
 
 Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema.json).
 
+This is an organization server's enrollment. A machine joins its owner's personal estate by the estate ceremonies
+instead — a comparison code nearby or through a relay rendezvous, or an `enroll-token/1` without a screen — and a
+passkey-signed estate revision, with no certificate ([ceremonies](ceremonies.md), DEC-0084). Each organization
+enrollment of a machine gets keys of its own (the operator's NET-2); the contract's per-context `kid` and `iss`
+(CX-CON-06) are not decided yet.
+
 1. The device generates a key pair in hardware that does not export it, and a PKCS#10 certificate
    signing request (RFC 2986) signed by that key. The key's `storage` is `secure-enclave`, `tpm` or
    `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`. The first

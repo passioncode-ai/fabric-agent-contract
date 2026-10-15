@@ -105,6 +105,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: requests buried in chats and logs; pull: one board with each request's state; anxiety: a request reported done that never happened; habit: ask each agent in its own session.
 - **Success metric:** every request between Projects shows its request state and effect state separately, and a lost result shows as `outcome_unknown`, never as done.
 
+### JTBD-10: Bring my own machines into one network
+
+- **Statement:** When I get another machine, I want to add it to my network with a code and my passkey, so my agents can run and move between my machines without hand-made files or copied keys.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: keys copied by hand and machines that trust whoever reaches them first; pull: one confirmation on two screens and one passkey; anxiety: a stranger's machine joining in the middle, or a lost machine staying in; habit: SSH keys and shared secrets pasted between machines.
+- **Success metric:** a machine joins only after the person confirmed a code shown on both screens and signed with the passkey, and a removed machine is turned away within one revision.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -180,6 +188,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
 | 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried, or a request stuck forever because its responder is gone | `outcome_unknown`, left only by an observed reconciliation, which the operator gives as the estate owner when no responder holds the slot, shown as the owner's (priority 9) |
 | 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
+
+### JRN-09: Operator — my machines as one network (JTBD-10)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Create | creates the network on a first machine | Fabric, "Create my network" | 3 | no record says which machines are mine | revision 1 signed by the passkey, the network's fingerprint shown (priority 7) |
+| 2 | Add | adds a second machine, nearby or from afar | Fabric on the trusted machine, the new machine's node | 2 | a code from one key's fingerprint can be brute-forced; a stranger slips in | commit before reveal and a six-digit code over both sides' keys, nonces and the network (priority 9) |
+| 3 | Remove or re-key | removes a lost machine, or replaces a machine's key | Fabric | 2 | a removed machine keeps being admitted | one revision that revokes what it drops, carried within seconds by the delta (priority 8) |
 
 ## 4. User stories
 
@@ -445,6 +461,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a sender that already knows the Project's id, when it submits a request to it, then the board takes the request as for a listed Project; unlisting refuses no message.
   - Given a restore of the estate, then the Project is still unlisted.
 - **Priority:** could
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-023: Operator adds a machine to their network
+
+- **Story:** As P-02, I want to add a machine to my network by confirming a code on both screens and signing with my passkey, so that only the machine in front of me joins.
+- **Traces:** JTBD-10, JRN-09/#2
+- **Acceptance criteria:**
+  - Given a new machine and a trusted one, when both show the same six-digit code and I sign, then the next revision lists the new machine with exactly the keys it revealed.
+  - Given codes that differ, when I say so, then nothing is signed and the attempt cannot be resumed; a new attempt starts with new nonces.
+  - Given a server with no screen, when I give it Fabric's enroll token through stdin or a private file, then it joins once and a second use of the token is refused and logged.
+- **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
 

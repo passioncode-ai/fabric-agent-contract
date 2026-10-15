@@ -38,10 +38,11 @@ its id) nor by an entry applied before (`estateSigner`). Any hub of the estate m
   delegation tokens (DEC-0039). It cannot revoke a passkey — the delta carries no `authority` revocation — so the person
   can always sign the revision that revokes the hub key. It cannot un-revoke: the chain is append-only, the record keeps
   every revocation (`FAC-SEM-072`), and a revision issued after an entry lists it ([reconciliation](#reconciliation)).
-- **Not decided by this:** Fabric's D3 is not recorded. Whether the hub key is the machine's `#sig` key or its own,
-  and whether the hub holds a private key at all, stays open exactly as [estate record](estate-record.md#not-decided-here)
-  leaves it: whichever key the record certifies as `hubKey` is the one that signs here. Domain separation holds either
-  way: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
+- **The hub's own key** (DEC-0084, the operator's NET-3): in a personal estate the hub runs on the always-on machine
+  and holds a private key of its own, the Ed25519 key the record certifies as that machine's `hubKey`, never the
+  machine's `#sig` key ([ceremonies](ceremonies.md#who-holds-which-key)); when it is away, heartbeats stop and the
+  72-hour rule below applies. Whichever key the record certifies as `hubKey` is the one that signs here. Domain
+  separation holds: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
   input, which starts with `eyJ`; and every signed document here names its `type`.
 
 ## The delta
