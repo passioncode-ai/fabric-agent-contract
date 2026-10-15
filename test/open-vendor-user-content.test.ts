@@ -164,6 +164,9 @@ describe("FAC-SEM-112: a lane that reads user content has an open-vendor route",
     const free = { ...drops, resolved: { from: "estate", profile: "member-chat", models: drops.profiles[0].models } };
     delete (free as Json).policy;
     expect(codes("profile-resolution", free)).toEqual([]);
+    // A policy of the wrong shape, without its meta, is still read: the finding stands and names no id.
+    const bare = evaluateSemanticRules("profile-resolution", { ...drops, policy: { modelClasses: ["cheap"] } });
+    expect(bare.map((finding) => finding.message)).toContain("the policy undefined leaves profile member-chat's lane on closed vendors alone: of the models it admits, none of its models is open-vendor in the catalogue");
     // A profile that does not read user content is not held to it.
     expect(codes("profile-resolution", { ...drops, profiles: [{ ...drops.profiles[0], reads: ["operator"] }] })).toEqual([]);
   });
