@@ -1,0 +1,39 @@
+{
+  "kind": "model-profiles",
+  "profiles": [
+    {
+      "kind": "model-profile",
+      "id": "member-chat",
+      "name": "Member chat",
+      "models": [
+        "qwen/qwen3.8-flash"
+      ],
+      "fallback": "none",
+      "reads": [
+        "user-content"
+      ]
+    },
+    {
+      "kind": "model-profile",
+      "id": "review-triage",
+      "name": "Review triage",
+      "models": [
+        "google/gemini-3.8-flash",
+        "deepseek/deepseek-v4-pro"
+      ],
+      "fallback": "between-turns",
+      "reads": [
+        "user-content"
+      ]
+    },
+    {
+      "kind": "model-profile",
+      "id": "default",
+      "name": "Default",
+      "models": [
+        "anthropic/claude-haiku-5.5"
+      ],
+      "fallback": "none"
+    }
+  ]
+}

@@ -131,11 +131,50 @@ function profileResolution(value: JsonObject): Finding[] {
   return findings;
 }
 
+/** The model class of a model whose vendor publishes its weights openly (DEC-0083). */
+export const OPEN_VENDOR = "open-vendor";
+/** What a lane reads when it reads what a member, a client or the public sends (DEC-0083). */
+export const USER_CONTENT = "user-content";
+
+/**
+ * FAC-SEM-112 (DEC-0083) for one profile: the models that run when the lane reads user content and none of them is an
+ * open-vendor model, or `undefined` when the profile does not read user content or its route has one. Under
+ * `between-turns` every model may run; under `none` — and under any other value, failing closed — only the first one.
+ * A model the catalogue does not hold, or whose row is not `open-vendor`, counts as closed. Never throws.
+ */
+export function closedUserContentRoute(profile: unknown, catalogue: unknown): string[] | undefined {
+  if (!isObject(profile) || !strings(profile.reads).includes(USER_CONTENT)) return undefined;
+  const models: unknown[] = Array.isArray(profile.models) ? profile.models : [];
+  const route = profile.fallback === "between-turns" ? models : models.slice(0, 1);
+  const open = new Set<string>();
+  for (const row of list(isObject(catalogue) ? catalogue.models : undefined)) {
+    if (typeof row.id === "string" && strings(row.classes).includes(OPEN_VENDOR)) open.add(row.id);
+  }
+  if (route.some((model) => typeof model === "string" && open.has(model))) return undefined;
+  return route.map((model) => show(model));
+}
+
+/**
+ * FAC-SEM-112 (DEC-0083): a profile that reads user content has an open-vendor route — with `fallback: none` its first
+ * model is `open-vendor` in the catalogue, with `between-turns` at least one of its models is — so the lane never runs
+ * on closed vendors alone, which refuse the content it exists to handle.
+ */
+function openVendorRoutes(value: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  list(value.profiles).forEach((profile, i) => {
+    const closed = closedUserContentRoute(profile, value.catalogue);
+    if (closed === undefined) return;
+    const which = profile.fallback === "between-turns" ? "none of its models is" : `its first model, ${closed[0] ?? "none"}, is not`;
+    findings.push({ code: "FAC-SEM-112", instancePath: `/profiles/${i}/models`, message: `profile ${show(profile.id)} reads user content, but ${which} open-vendor in the catalogue: the lane would run on closed vendors alone` });
+  });
+  return findings;
+}
+
 export function profileRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "model-catalogue") return modelCatalogue(value);
   if (kind === "model-profiles") return modelProfiles(value);
   if (kind === "runner-profile") return runnerProfile(value);
-  if (kind === "profile-resolution") return profileResolution(value);
+  if (kind === "profile-resolution") return [...profileResolution(value), ...openVendorRoutes(value)];
   return undefined;
 }
 // #endregion profile-rules

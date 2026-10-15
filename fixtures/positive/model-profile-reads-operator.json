@@ -1,0 +1,12 @@
+{
+  "kind": "model-profile",
+  "id": "release-notes",
+  "name": "Release notes",
+  "models": [
+    "anthropic/claude-haiku-5.5"
+  ],
+  "fallback": "none",
+  "reads": [
+    "operator"
+  ]
+}

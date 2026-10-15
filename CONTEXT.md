@@ -368,12 +368,15 @@ endpoints, tool use as last measured and a reference into the live price feed (D
 `registry/models.json`. A row MAY carry OpenRouter's provider routing, which changes the upstream, never the model.
 
 **Model class**: One word of a closed vocabulary — `frontier`, `strong`, `cheap`, `code`, `vision`,
-`chinese-vendor` — that the catalogue gives a model and a spend policy allows. A policy restricts by class and never
-chooses.
+`chinese-vendor`, `open-vendor` — that the catalogue gives a model and a spend policy allows. A policy restricts by
+class and never chooses. `open-vendor` (DEC-0083): the vendor publishes the model's weights openly, independent of
+where the vendor is.
 
 **Model profile**: A named, ordered list of catalogue ids with a fallback policy (`none` or `between-turns`), such
 as `default` or `cheap`. Resolved in the order request, agent, binding or project, estate default, then restricted by
-the project's **Model classes**; an empty result refuses the launch, naming the policy.
+the project's **Model classes**; an empty result refuses the launch, naming the policy. It MAY declare what its lane
+reads (`reads`: `user-content`, `operator`, `web`); a lane that reads `user-content` has an open-vendor route, and its
+runner treats a content refusal or an empty answer as a failed turn (DEC-0083, `FAC-SEM-112`).
 
 **Runner profile**: A runner kind, a **Route** and a **Model profile**. **Route** `subscription` is the operator's own
 login, only in its vendor's runner and unmetered; `key` is an issued key whose model allow-list is the model profile.
