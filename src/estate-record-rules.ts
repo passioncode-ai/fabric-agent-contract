@@ -261,7 +261,8 @@ function revisionChain(value: JsonObject): Finding[] {
 
 /** Whether a raw device key is valid for its algorithm: Ed25519 of full order, or a P-256 point by SEC 1 §3.2.2. */
 export const validDeviceKey = (key: JsonObject): boolean => {
-  const raw = Buffer.from(show(key.publicKey ?? ""), "base64");
+  // Read only after deviceKeyFingerprint accepted the key (FAC-SEM-073, machineOfKeys), so publicKey is canonical base64.
+  const raw = Buffer.from(show(key.publicKey), "base64");
   return key.alg === "ed25519" ? raw.length === 32 && !isSmallOrderKey(raw) : isValidP256Key(raw);
 };
 

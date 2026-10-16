@@ -147,7 +147,9 @@ export function enrollJoinInput(token: unknown): string | undefined {
 
 /** Whether `proof` is the presented key's signature over `input`: ES256 as 64 bytes r ‖ s, low-S (as relay-auth/1); Ed25519 as 64 bytes. */
 function proves(key: JsonObject, input: string, proof: unknown): boolean {
-  if (!isString(proof) || !/^[A-Za-z0-9_-]{86}$/.test(proof)) return false;
+  // 64 bytes in their one canonical unpadded base64url form: 85 characters and a last one whose low 4 bits are zero, so
+  // no other spelling of the same bytes (an inserted character a lax decoder skips) counts as the proof.
+  if (!isString(proof) || !/^[A-Za-z0-9_-]{85}[AQgw]$/.test(proof)) return false;
   const octets = Buffer.from(key.publicKey as string, "base64");
   if (key.alg === "es256") return verifyEs256(new Uint8Array(octets), input, proof) === true;
   const publicKey = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x: octets.toString("base64url") }, format: "jwk" });

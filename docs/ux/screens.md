@@ -28,6 +28,7 @@
 | SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
+| SCR-23 | My network's machines | FLW-20 | disabled | proposed | `test/ceremonies.test.ts` |
 
 ## Design system
 
@@ -284,4 +285,15 @@
 - **Coverage:** `src/pairing.ts`, `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
 - **Scenarios:** SCN-028
 - **Resources:** ceremonies specification, Add a machine
+- **Status:** proposed
+
+### SCR-23: My network's machines
+
+- **Used by:** FLW-20
+- **Purpose:** the person creates the network, and removes a machine or replaces its key, each by one signed revision.
+- **Elements:** the network's fingerprint; one row per machine with its id and key fingerprint, "Replace key" (primary action) and "Remove" in an overflow menu; "Create my network" when there is none.
+- **States:** success — the revision is signed and the list shows the change; error — the passkey ceremony failed and nothing changed; empty — no network yet, with "Create my network".
+- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`), `test/ceremonies.test.ts`
+- **Scenarios:** SCN-029, SCN-030
+- **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
 - **Status:** proposed

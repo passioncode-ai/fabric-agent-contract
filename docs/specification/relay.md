@@ -141,7 +141,10 @@ since a client that signs high-S or an old protocol is refused the same way. It 
 and never asks the person to re-enter a secret for it.
 
 **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
-machines and keys, minus the revocations of verified delta entries it applied (`extraRevocations`, see [Revocation and
+machines and keys — a `device-key` revocation names a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084); the set
+subtracts a key either names, and reports in `unread` a delta revocation whose ref holds `@` but is no key reference —
+minus a `#sig` key listed under a kid other than its own machine's `<id>#sig`, and every key of a kid listed twice (F7,
+DEC-0084: `bad-key` in `excluded`, as `FAC-SEM-073` refuses such a record), minus the revocations of verified delta entries it applied (`extraRevocations`, see [Revocation and
 heartbeat](#revocation-and-heartbeat)), and minus every key that could never verify a relay signature: an Ed25519 key
 or one SEC 1 refuses, which `relayAdmissionSet` names in `excluded` for the log (`relayAdmissionSet`). Being admitted
 by a relay makes no machine T1 to another owner's machine (see [Trust tiers](#trust-tiers)). It keeps strangers out of
@@ -158,9 +161,11 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   inclusive, read by `strictTime` as `verifyEstateRecord` reads them. Before that it is `not-yet-valid`; after it, the
   relay fails closed (`expired`): it admits no new `auth` until a newer verified revision arrives, and it ends every
   open session (below). Queued mail stays until its `ttl`. Presence and `lastSeen` follow the same verified set.
-- **Open sessions are revalidated** (DEC-0066, replacing "at their next re-authentication"). An open session stands
-  only while its `kid` is in the relay's current admission set. When the relay applies a newer revision, or a delta
-  entry that revokes the machine or its `#sig`, it ends every session whose `kid` left the set with `error not-admitted`
+- **Open sessions are revalidated** (DEC-0066, replacing "at their next re-authentication"; by key since DEC-0084). An
+  open session stands only while its `kid` is in the relay's current admission set **and maps to the same key octets
+  the session was proven under** (`sessionStands`, vectors `session`): a key replacement keeps the kid `<id>#sig`, so a
+  session proven under the old key ends when the set maps that kid to the new key. When the relay applies a newer revision, or a delta
+  entry that revokes the machine or its `#sig`, it ends every session whose `kid` left the set or now names another key with `error not-admitted`
   and close 4403, and checks that before any frame it sends or accepts for the session, so a frame already in flight
   is not delivered. When the held revision's window ends it ends every session with `error expired` and close 4403. A
   machine so closed is refused on its next `auth` by the ordinary check. No new frame and no client re-authentication

@@ -55,6 +55,15 @@ const MEMBERS = [
   "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys"
 ];
 
+describe("a route event's selected index far past any route (the adapter's report on d8146cf, DEC-0084 fix round)", () => {
+  it.each([2 ** 32, Number.MAX_SAFE_INTEGER, 2 ** 53, 1e300])("index %s answers without throwing", (index) => {
+    const candidates = [{ runnerKind: "claude-code", session: {} }];
+    const value = { route: { candidates }, event: { kind: "runner-selected", probes: [], selected: { index, runnerKind: "claude-code" } } };
+    expect(() => evaluateSemanticRules("route-event", value)).not.toThrow();
+    expect(evaluateSemanticRules("route-event", value).some((finding) => finding.code === "FAC-SEM-034")).toBe(true);
+  });
+});
+
 describe("activity and device rules tolerate malformed input", () => {
   it.each(KINDS)("%s answers every malformed shape without throwing", (kind) => {
     for (const value of WRONG) {

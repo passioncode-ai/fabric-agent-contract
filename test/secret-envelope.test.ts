@@ -230,6 +230,10 @@ describe("the open context from the estate record (DEC-0055; review of #53, B)",
     const older = `${sender}@sha256:${"0".repeat(64)}`;
     expect(withExtra([{ kind: "device-key", ref: older }])).toEqual({ ok: false, refusal: "cannot-open" });
     expect(estateEnvelopeContext([r1], target, [{ kind: "device-key", ref: older }]).senderKey(sender)).toBeDefined();
+    // A key with no canonical fingerprint is matched by its kid alone (FAC-SEM-073 refuses such a record anyway).
+    const unpadded = withHolder(base, 1, (r) => { for (const k of r.machines[0].deviceKeys) if (k.kid === sender) k.publicKey = k.publicKey.replace(/=+$/, ""); });
+    expect(estateEnvelopeContext([unpadded], target, [{ kind: "device-key", ref: older }]).senderKey(sender)).toBeDefined();
+    expect(estateEnvelopeContext([unpadded], target, [{ kind: "device-key", ref: sender }]).senderKey(sender)).toBeUndefined();
   });
 
   it("refuses a holder the latest applied revision replaced, though an earlier one named it (review of #53, third reading 1)", () => {

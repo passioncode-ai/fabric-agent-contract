@@ -34,6 +34,8 @@
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
+| SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
+| SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
 
 ## Personas
 
@@ -637,4 +639,45 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the codes differ -> "They differ" burns the rendezvous; nothing is signed; a new attempt uses new nonces. The link is older than 10 minutes -> the rendezvous has expired; the operator starts again. The chain starts at another network -> the second machine refuses it (`other-estate`) and pins nothing.
 - **Status:** draft
 - **Coverage:** ceremonies specification, Add a machine; `src/pairing.ts`; `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
+- **Product:** unobserved
+
+### SCN-029: Create my network on the always-on machine
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-024, FLW-20 (JTBD-10, JRN-09/#1)
+- **Entry point:** Fabric's "Create my network" on the machine that stays on
+- **Preconditions:** the node runs on this machine; no network exists
+- **Steps:**
+  1. Operator chooses "Create my network" -> the machine makes its device keys and the hub's own key.
+  2. Fabric drafts revision 1 -> the passkey prompt opens; the operator signs.
+  3. The machine verifies revision 1 under that passkey and pins it -> Fabric and the machine show the network's fingerprint.
+- **Expected result:** the network exists with this machine and its hub key; later machines join it.
+- **Alt paths:** created on another machine -> revision 1 lists that machine only, and the hub key comes with the revision that adds the always-on machine.
+- **UI elements:** "Create my network", the passkey prompt, the fingerprint.
+- **States covered:** empty, error, success
+- **Errors & recovery:** the operator cancels the prompt -> nothing is signed and no machine pins anything; the operator starts again.
+- **Status:** draft
+- **Coverage:** ceremonies specification, Create my network; `src/estate-record-rules.ts`; `test/estate-record.test.ts`, `test/ceremonies.test.ts`
+- **Product:** unobserved
+
+### SCN-030: Remove a lost machine, then replace another machine's key
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-025, FLW-20 (JTBD-10, JRN-09/#3)
+- **Entry point:** the network's machine list in Fabric
+- **Preconditions:** the network has three machines; one was lost; another's keystore was reset
+- **Steps:**
+  1. Operator chooses "Remove" on the lost machine -> Fabric drafts a revision that revokes the machine and its hub key; the operator signs.
+  2. The hub sends the revocations as delta entries -> within seconds the relay turns the lost machine away and ends its sessions.
+  3. Operator chooses "Replace key" on the reset machine -> it pairs again under its id, the codes match, the operator signs a revision listing its new keys and revoking the old ones by reference.
+  4. The machine holds the new keys -> it applies the revision; a session or envelope under the old key is refused.
+- **Expected result:** the lost machine is out; the re-keyed machine keeps its id and its agents.
+- **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself.
+- **UI elements:** "Remove", "Replace key", the comparison code, the passkey prompt.
+- **States covered:** error, success
+- **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine (`FAC-SEM-114`); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
+- **Status:** draft
+- **Coverage:** ceremonies specification, Remove a machine, Replace a machine's key; `src/estate-record-rules.ts`, `src/relay.ts` `sessionStands`; `test/ceremonies.test.ts`, `fixtures/vectors/relay.json`
 - **Product:** unobserved

@@ -62,6 +62,14 @@ describe("the register entry (DEC-0063, DEC-0084)", () => {
     expect(SIGNING_STATEMENTS.get("enroll-token/1")).toMatchObject({ signer: "passkey", decision: "DEC-0084", fields: ["scope", "genesis", "purpose", "ceiling", "notBefore", "expiresAt", "nonce", "uses"] });
   });
 
+  it("registers enroll-join/1 as a key-signed {digest, nonce}, values checked", () => {
+    expect(SIGNING_STATEMENTS.get("enroll-join/1")).toMatchObject({ signer: "key", decision: "DEC-0084", fields: ["digest", "nonce"] });
+    const nonce = good.statement.nonce as string;
+    expect(signingStatement("enroll-join/1", { digest: `sha256:${"ab".repeat(32)}`, nonce })).toBeDefined();
+    expect(signingStatement("enroll-join/1", { digest: "sha256:x", nonce })).toBeUndefined();
+    expect(signingStatement("enroll-join/1", { digest: `sha256:${"ab".repeat(32)}`, nonce: "short" })).toBeUndefined();
+  });
+
   it("admits ceiling null or a digest, and nothing else", () => {
     const { type: _type, ...fields } = good.statement;
     expect(signingStatement("enroll-token/1", { ...fields, ceiling: `sha256:${"ab".repeat(32)}` })).toBeDefined();
@@ -117,6 +125,14 @@ describe("the verifier's order and its edges", () => {
     expect(redeemEnrollToken(good, "key", proof, new Map())).toEqual({ ok: false, problem: "bad-key" });
     expect(redeemEnrollToken(good, key, `${proof.slice(0, -1)}A`, new Map()).ok).toBe(false);
     expect(redeemEnrollToken(good, key, `${proof}AA`, new Map())).toEqual({ ok: false, problem: "bad-proof" });
+    // Another spelling of the same 64 bytes is no proof: an Ed25519 proof with a character a lax decoder skips, or a
+    // last character carrying bits the bytes do not have.
+    const ed = vectors.redeem[1];
+    expect(redeemEnrollToken(good, ed.machineKey, ed.proof, new Map()).ok).toBe(true);
+    expect(redeemEnrollToken(good, ed.machineKey, `${ed.proof.slice(0, 40)}*${ed.proof.slice(40)}`, new Map())).toEqual({ ok: false, problem: "bad-proof" });
+    const last = ed.proof.slice(-1) as string;
+    const sibling = "AQgw".includes(last) ? String.fromCharCode(last.charCodeAt(0) + 1) : last;
+    expect(redeemEnrollToken(good, ed.machineKey, `${ed.proof.slice(0, -1)}${sibling}`, new Map())).toEqual({ ok: false, problem: "bad-proof" });
     // A ledger entry the hub wrote in another shape still counts as a use.
     const n = good.statement.nonce as string;
     expect(redeemEnrollToken(good, key, proof, new Map([[n, "sha256:old"]]))).toMatchObject({ ok: false, problem: "reused", log: { boundTo: "sha256:old" } });

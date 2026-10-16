@@ -115,9 +115,15 @@ The person adds a machine nearby or remotely; the steps are the same, only the t
    device keys exactly as the estate record lists them (DEC-0053, `FAC-SEM-073`: one `#sig`, at most one `#kem`, one
    machine id, valid keys in canonical padded base64); `nonce` is 32 random bytes in unpadded base64url. A side reveals —
    `{step: "reveal", role, keys, nonce}`, and `genesis` for the trusted side — only after it holds the other side's
-   commitment. Each side checks the other's
-   reveal with `checkReveal(commit, reveal, expectedRole)`.
-4. **The comparison code.** `comparisonCode(newReveal, trustedReveal)`: the transcript is the UTF-8 RFC 8785 form of
+   commitment. Each side checks the other's reveal with `checkReveal(commit, reveal, expectedRole)`.
+   - **A departure from DV-04.** DV-04 has the new device commit, the trusted machine send its nonce in clear, and the
+     new device reveal (ZRTP's and the share code's asymmetric exchange). Here both sides commit, then both reveal: one
+     message order on both transports, each side's code fixed before it sees anything of the other's, and a `genesis`
+     on the trusted side that is covered like its keys. The one-guess bound is the same.
+4. **The comparison code.** A side computes it only through `checkedComparisonCode(newCommit, newReveal, trustedCommit,
+   trustedReveal)`, which runs `checkReveal` on each reveal against its own commitment first; a port that codes reveals
+   straight away lets a side pick its nonce after it saw the other's and loses the one-guess bound.
+   `comparisonCode(newReveal, trustedReveal)`: the transcript is the UTF-8 RFC 8785 form of
    `{"type": "fabric-enroll-code/1", "new": {keys, nonce}, "trusted": {keys, nonce, genesis}}`; the code is the first
    five bytes of its SHA-256 read as a big-endian integer, modulo 10^6, written as six decimal digits with leading
    zeros. Both screens show it, and the estate fingerprint of the trusted side's `genesis`. The code binds both sides'
@@ -144,7 +150,8 @@ The person adds a machine nearby or remotely; the steps are the same, only the t
 | 3 | a reveal whose role, keys or nonce do not open its commitment | `checkReveal` answers `commit-mismatch` (or `role-mismatch`); the side sends `abort` and the rendezvous burns |
 | 3 | keys that are not one machine's device keys, a nonce that is not 32 bytes | `bad-keys`, `bad-nonce`: the side aborts |
 | 4 | the two reveals in each other's role, or one machine paired with itself | `comparisonCode` answers `role-mismatch` or `same-machine`, and shows no code |
-| 5 | the person says the codes differ | the side that heard it sends `abort`; nothing is signed; a new attempt opens a new rendezvous with new nonces |
+| 4 | a reveal that did not open its commitment | `checkedComparisonCode` answers `commit-mismatch` and shows no code |
+| 5 | the person says the codes differ | the side that heard it sends one `abort`, which the rendezvous still carries after both reveals, so the other side learns it too; nothing is signed; a new attempt opens a new rendezvous with new nonces |
 | 5 | the passkey ceremony fails | nothing is signed (ER-7, ER-8) |
 | 3 | the trusted side names no `genesis`, or the new side names one | `bad-genesis`: the side aborts |
 | 6 | the chain starts at another revision 1 than the revealed `genesis` | `joinListed` answers `other-estate`; the new machine pins nothing |
@@ -164,11 +171,13 @@ both nonces, so a swapped `#kem` key changes it as surely as a swapped `#sig` ke
 ### The rendezvous
 
 `rendezvousVerdict(openedAt, messages, at)` is the relay's and both sides' one reading of a rendezvous. It is `open`
-until both reveals opened their commitments, then `complete`, and it carries nothing more. It **burns** on the first of:
+until both reveals opened their commitments, then `complete`, and after that it carries exactly one more message, an
+`abort`, so a side whose person said the codes differ tells the other side. It **burns** on the first of:
 an unreadable `openedAt` or clock or a message that is not a `pairing-message/1` (`malformed`); a clock more than 600 s
 after `openedAt` or more than 60 s before it (`expired`); a second commitment or reveal from one role (`repeated`); a
 reveal before both commitments (`out-of-order`); a reveal that does not open its role's commitment
-(`commit-mismatch`); an `abort` (`aborted`); any message after both reveals (`closed`). A burned or complete rendezvous
+(`commit-mismatch`); an `abort`, before or after both reveals (`aborted`); any other message after both reveals
+(`closed`). A burned or complete rendezvous
 is never reopened: a new attempt opens a new one, with new nonces.
 
 ## A headless machine
@@ -183,19 +192,30 @@ by the receiver's nonce store, as DEC-0056 does for request signatures.
   document its digest names), `notBefore` and `expiresAt` (at most 900 s apart), `nonce` (32 random bytes) and `uses`
   (`1`). The signature is a passkey assertion by a signing credential of the estate over `signingChallenge("enroll-token/1",
   fields)`. `ceiling` is always present, `null` for none, because a register type names one field list for good. Fabric
-  can revoke a token before its use; the hub records the revocation in its ledger.
+  can revoke a token before its use; the hub records the revocation in its ledger (how Fabric's revocation reaches the
+  hub is not decided here).
 - **The node consumes it** from stdin or from a file only its own user can read (mode 0600 or narrower), **never** from
-  argv, a URL, an environment variable or a log line, and presents it with its `#sig` key to the hub.
+  argv, a URL, an environment variable or a log line. It presents the token with its `#sig` key and a **proof of that
+  key**: its signature over the register's key-signed `enroll-join/1` statement, `{type: "enroll-join/1", digest,
+  nonce}` — `digest` the `sha256:` of the token's statement bytes, `nonce` the token's (`enrollJoinInput`); ES256 as 64
+  bytes r ‖ s in the low-S form `relay-auth/1` uses, Ed25519 as its 64 bytes. It **prints its own key's fingerprint**
+  (`deviceKeyFingerprint` of its `#sig` key) to its console.
 - **The hub verifies and binds it.** `verifyEnrollToken(token, {record, genesis, at})` checks, in order: a readable clock
   (`no-clock`); the token's shape and the register's values (`malformed`); the scope and `genesis` against the estate the
   hub holds (`wrong-estate`); the passkey among the current revision's authorities and not revoked
   (`no-trusted-authority`, `revoked-authority`, `duplicate-authority`, `unknown-authority`); the assertion
   (`verifySigningAssertion`, DEC-0063); then the window (`too-long-lived`, `not-yet-valid` with the 60 s skew, `expired`).
-  `redeemEnrollToken(nonce, machineKey, ledger)` then binds the token's nonce to the fingerprint of the machine's `#sig`
-  key (`deviceKeyFingerprint`) on its first use, and refuses every later use — by another key or the same one — as
-  `reused`, answering the line the hub logs (the nonce, the fingerprint presented, the one it is bound to); the joining
-  machine learns only the refusal. The hub keeps each nonce at least until the token's `expiresAt` plus 60 s, after which
-  the verifier refuses the token anyway.
+  `redeemEnrollToken(token, machineKey, proof, ledger)` then refuses a key that is not one valid `#sig` key (`bad-key`)
+  and a proof that is not that key's signature over `enroll-join/1` (`bad-proof`), binds the token's nonce to the
+  fingerprint of the machine's `#sig` key (`deviceKeyFingerprint`) on its first use, and refuses every later use — by
+  another key or the same one — as `reused`, answering the line the hub logs (the nonce, the fingerprint presented, the
+  one it is bound to); the joining machine learns only the refusal. The hub keeps each nonce at least until the token's
+  `expiresAt` plus 60 s, after which the verifier refuses the token anyway.
+- **The token is a bearer token.** The proof shows that the presenter holds the key it asks to bind, not that it is the
+  machine the person meant: whoever presents the token first, with a key of its own, binds that key, and the honest
+  node's later attempt is refused `reused` and logged. So before the person signs the revision that lists the machine,
+  **Fabric shows the fingerprint of the key it is about to list**, and the person compares it with the one the node
+  printed; a mismatch means someone else redeemed the token, and the person signs nothing and revokes it.
 - **The token gives no trust.** It authenticates the join and nothing else: the machine is in the network only when the
   person signs a revision that lists it with the bound key, as in step 5 above, and the node applies it as in step 6.
 - **The node pins the estate by the token's `genesis`.** It verifies the chain it receives from revision 1 and pins
@@ -210,6 +230,8 @@ by the receiver's nonce store, as DEC-0056 does for request signatures.
 | another estate, or a `genesis` that is not the revision 1 the verifier holds | `wrong-estate` |
 | a statement changed after signing | `wrong-challenge`: the challenge is rebuilt from the statement, never taken from the token |
 | the token was used | `reused`, recorded by the hub; the machine learns only the refusal |
+| a key without its proof, or a proof made for another token or by another key | `bad-proof`: nothing is bound |
+| someone redeemed it first with their own key | the honest node's join is `reused` and logged; the fingerprint Fabric shows differs from the node's, and the person signs nothing |
 | Fabric revoked it | `revoked` |
 
 ## Remove a machine
@@ -217,7 +239,9 @@ by the receiver's nonce store, as DEC-0056 does for request signatures.
 The person signs a revision without the machine that lists `machine <id>` in `revocations`, and the hub key it
 certified, if any, as `hub-key <kid>`, in the same revision (`FAC-SEM-114`); it may also list the machine's device keys.
 The hub issues a revocation-delta entry for each revocation, so it reaches every machine within seconds
-([revocation delta](revocation-delta.md#the-delta), DEC-0054). The relay drops the machine from its admission set and
+([revocation delta](revocation-delta.md#the-delta), DEC-0054). The revision lists each entry's revocation exactly as the
+entry names it — the same `kind` and `ref` — or a machine holding the entry refuses the revision (`FAC-SEM-084`), so
+Fabric's hub and its drafter write one form. The relay drops the machine from its admission set and
 ends its open sessions (DEC-0047, DEC-0066); a node that applied the revision answers `ownKeysDecision(record, id,
 held)` with `stop`, `removed`.
 
@@ -246,15 +270,25 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or
    another holder of its id carries it.
 
+The hub issues a delta entry for each old key, naming it by its key reference, and the revision lists each entry's
+revocation exactly as the entry names it (`FAC-SEM-084`); Fabric's hub and its drafter use that one form.
+
+**A one-machine estate** has no second machine to pair with. Its machine re-keys as in [create my
+network](#create-my-network): the person signs on the machine itself, with no pairing, a revision that lists the new
+keys and revokes the old ones by their key references; the machine applies it under the passkey it pinned.
+
 **What refuses the old key.** No rule compares a signature's time with the revision's `issuedAt`. From the moment a
 verifier applies the revision — or a revocation-delta entry that revokes the old key — the existing rules refuse
 anything the old key signs:
 
-- **the relay:** the old `#sig` key leaves the admission set, `auth` is `unauthenticated` and an open session is ended
-  with `not-admitted` and close 4403 (`relayAdmissionSet`, relay.md *Admission*, DEC-0066). A delta entry may revoke the
-  key by its key reference; `relayAdmissionSet` subtracts a key whose kid or key reference is revoked (DEC-0084);
-- **a secret envelope:** its sender's key is the `#sig` key the newest applied revision lists (`estateEnvelopeContext`,
-  DEC-0047 item 7), so an envelope signed by the old key does not verify;
+- **the relay:** the old `#sig` key leaves the admission set, so `auth` under it is `unauthenticated`. A session the old
+  key proved is ended with `not-admitted` and close 4403, because a session stands only while its kid maps to the same
+  key octets it was proven under (`sessionStands`, relay.md *Admission*, DEC-0084): the kid stays `<id>#sig`, so a check
+  by kid alone would keep it open. A delta entry may revoke the key by its key reference; `relayAdmissionSet` subtracts
+  a key whose kid or key reference is revoked;
+- **a secret envelope:** its sender's key is the `#sig` key the newest applied revision lists, less the keys and
+  machines the applied delta entries revoke by kid or key reference (`estateEnvelopeContext(applied, machine,
+  extraRevocations)`, DEC-0047 item 7, DEC-0084), so an envelope signed by the old key is refused (`bad-key`);
 - **delegation and window leases** are signed by the hub key, never a device key: a replaced hub key is untrusted once
   no applied revision certifies its kid (`hubKeyCertified`, DL-14, DEC-0060; `estateSigner`, DEC-0054).
 
@@ -278,8 +312,11 @@ stays linkable ([contexts](contexts.md#linkability)).
 | `FAC-SEM-113` | `enroll-token` | an `enroll-token/1`'s statement is the register's: `type` `enroll-token/1` and exactly its fields, `purpose` `agent-host`, `uses` 1, `scope` `estate:<id>`, `genesis` a digest, a 32-byte `nonce`, `ceiling` `null` or a digest; `notBefore` and `expiresAt` RFC 3339 read strictly, `expiresAt` after `notBefore` and at most 900 s after it |
 | `FAC-SEM-114` | `estate-record-revision` | what a revision drops, it revokes in the same revision: a machine of the parent it no longer lists as `machine <id>`, with its hub key as `hub-key <kid>`; a device key of a machine both list that it no longer lists, by its key reference `<kid>@sha256:<hex>` or by its kid; a hub key of a machine both list that it no longer certifies with the same kid and key, as `hub-key <old kid>`. `verifyEstateRecord` runs it whenever it has a parent (`rule-violation`) |
 
-`FAC-SEM-076` reads a `device-key` revocation as a kid or a key reference, and refuses a record that lists the key either
-names (DEC-0084).
+DEC-0084 also extends two rules of the [estate record](estate-record.md#semantic-rules): `FAC-SEM-076` reads a
+`device-key` revocation as a kid or a key reference, refuses a record that lists the key either names, and refuses a ref
+that holds `@` but does not match `^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#(sig|kem)@sha256:[a-f0-9]{64}$`;
+`FAC-SEM-073` refuses a device key whose `publicKey` has no canonical fingerprint, so the rule layer alone refuses a
+non-canonical key the schema would also refuse.
 
 | Kind | Input |
 |---|---|
@@ -298,15 +335,25 @@ Fixtures: `fixtures/semantic/enroll-token-*`, `fixtures/semantic/estate-revision
 - **Fabric** runs the ceremonies' signing in the person's own Fabric under the signing credential (DEC-0063): drafts
   revision 1 and every revision that adds, removes or re-keys a machine, runs the record's rules (`FAC-SEM-072`…`076`,
   `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-114`) before it asks for the passkey, shows the comparison code and the estate
-  fingerprint, issues and revokes `enroll-token/1`, and runs the hub on the always-on machine under its own certified hub
-  key.
-- **Project Observatory's node** generates the device keys, pairs (`pairingCommit`, `checkReveal`, `comparisonCode`),
-  joins a remote rendezvous, applies the chain and pins revision 1 as step 6 says, consumes an enroll token from stdin or
-  a 0600 file only, and decides on its own keys with `ownKeysDecision`.
-- **The relay** opens one-time rendezvous and carries pairing messages only, as `rendezvousVerdict` reads them, and
-  subtracts a key revoked by its key reference from the admission set.
-- **fabric-agent-adapter**'s kits run `fixtures/vectors/pairing.json` and `fixtures/vectors/enroll-token.json` if they
-  verify pairings or tokens.
+  fingerprint, and before it signs a headless machine in shows the fingerprint of the key it is about to list; issues and
+  revokes `enroll-token/1`; re-certifies a hub key under a new kid on a re-key; writes each delta entry's revocation
+  into the next revision in the entry's form; and runs the hub on the always-on machine under its own certified hub key,
+  binding each token once (`redeemEnrollToken`, with its proof).
+- **Project Observatory's node** generates the device keys; pairs (`pairingCommit`, `checkReveal`, and the code only
+  through `checkedComparisonCode`); joins a remote rendezvous; applies the chain and pins revision 1 only at the revealed
+  `genesis`, or at an enroll token's `genesis` after verifying the token; shows the estate fingerprint; repins so that
+  `verifyEstateRecord` runs `FAC-SEM-114` and the new `FAC-SEM-073` and `FAC-SEM-076` clauses; consumes a token from
+  stdin or a 0600 file only, presents it with its `enroll-join/1` proof and prints its own key's fingerprint; decides on
+  its own keys with `ownKeysDecision`; and opens envelopes with the applied delta entries (`estateEnvelopeContext`'s
+  `extraRevocations`).
+- **The relay** opens one-time rendezvous and carries pairing messages only, as `rendezvousVerdict` reads them,
+  forwarding one `abort` after both reveals; revalidates sessions by key, not by kid (`sessionStands`); subtracts a key
+  revoked by its key reference and reports a malformed reference (`unread`); and admits a `#sig` key only under its own
+  machine's kid, a kid listed twice for neither (F7) — its shared vectors are `fixtures/vectors/relay.json`'s
+  `admissionSet` and `session` groups.
+- **fabric-agent-adapter**'s kits run `FAC-SEM-113`, `FAC-SEM-114` and the new `FAC-SEM-073` and `FAC-SEM-076`
+  clauses, and `fixtures/vectors/pairing.json`, `fixtures/vectors/enroll-token.json` and the relay vectors' new cases,
+  at their next pin (as FAA-41 did for DEC-0082).
 
 The board row is CT-53.
 
@@ -314,9 +361,10 @@ The board row is CT-53.
 
 `contractVersion` stays `0.1.0`.
 
-1. **New schemas** (`pairing-message/1`, `enroll-token/1`), a new register type (`enroll-token/1`) and new functions are
-   additive: nobody reads them before adopting this decision.
-2. **`estate-record.schema.json` is unchanged.** A key reference is a `ref` string the schema already admits, so a
+1. **New schemas** (`pairing-message/1`, `enroll-token/1`), two new register types (`enroll-token/1`, `enroll-join/1`)
+   and new functions are additive: nobody reads them before adopting this decision.
+2. **`estate-record.schema.json` changes only in a description** (the revocation `ref` names the key-reference form);
+   validation is unchanged, which is compatible both ways. A key reference is a `ref` string the schema already admits, so a
    reader pinned before DEC-0084 accepts every record this decision produces. It does not recognise a key reference:
    its `FAC-SEM-076` compares a `device-key` ref with kids only, and its relay subtracts kids only. A key reference
    revokes a key that the same revision no longer lists, so an older reader of that revision distrusts the key anyway.
@@ -329,8 +377,17 @@ The board row is CT-53.
    revision in this repository's fixtures already revokes what it drops.
 4. **`FAC-SEM-076`'s new clause** refuses only a record that revokes, by key reference, a key it still lists: a form no
    record used before this decision.
-5. **`relayAdmissionSet` refuses more:** a key whose key reference is revoked. A relay pinned before DEC-0084 admits it
-   until the revision that drops it, as item 2 says.
+5. **`relayAdmissionSet` refuses more:** a key whose key reference is revoked (a relay pinned before DEC-0084 admits it
+   until the revision that drops it, as item 2 says), and a `#sig` key listed under another machine's kid or a kid listed
+   twice (F7), which `FAC-SEM-073` already refuses in any record `verifyEstateRecord` accepts, so only a held record that
+   was never checked loses a key. It also reports a malformed key reference in a delta entry.
+6. **`sessionStands`** ends a session whose kid now names other key octets; before DEC-0084 a relay that revalidated
+   by kid kept it. **`estateEnvelopeContext`'s `extraRevocations`** is optional, so an existing caller is unchanged.
+7. **`FAC-SEM-073` and `FAC-SEM-076` gain clauses** that refuse a non-canonical device key, which the schema already
+   refuses for P-256, and a `device-key` ref with `@` that is no key reference, a form that did not exist.
+8. **The rendezvous now carries one `abort` after both reveals**, where the first reading closed it: a relay or side
+   that adopted the first reading of this pull request has not shipped (CT-53 is open).
+9. **`redeemEnrollToken` takes the token and a proof** in place of the nonce: no hub has adopted it.
 
 ## Not decided here
 
@@ -341,6 +398,8 @@ The board row is CT-53.
 - The relay's frame types for a rendezvous (the relay's RLY rows); this page fixes what a rendezvous carries and when it
   burns.
 - A ceiling document's shape; until one is decided, Fabric issues tokens with `ceiling: null`.
+- How Fabric's revocation of an unused token reaches the hub's ledger when the hub runs on another machine: the
+  revocation delta carries no token kind and the relay's mail is not a channel this decision names.
 - A token for an organization's machine (`scope: organization:<id>`), and purposes beyond `agent-host`: each is a new
   value of the register type's fields, so a new type (`enroll-token/2`).
 - Recovery when every passkey is lost (a printed code, v4 §7), as DEC-0055 and DEC-0063 leave it.

@@ -476,6 +476,30 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-024: Operator creates their network
+
+- **Story:** As P-02, I want to create my network on a first machine with my passkey, so that later machines can join it and every screen names it the same way.
+- **Traces:** JTBD-10, JRN-09/#1
+- **Acceptance criteria:**
+  - Given a first machine, when I create my network and sign with my passkey, then revision 1 lists my passkey and this machine, and the machine shows the network's fingerprint.
+  - Given the always-on machine, when I create the network on it, then revision 1 also certifies its hub key; on another machine, the hub key comes with the revision that adds the always-on one.
+  - Given a cancelled passkey prompt, then nothing is signed and no machine pins anything.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-025: Operator removes a machine or replaces its key
+
+- **Story:** As P-02, I want to remove a machine I lost, or replace a machine's key, with one signed revision, so that the old machine or key is turned away everywhere within seconds.
+- **Traces:** JTBD-10, JRN-09/#3
+- **Acceptance criteria:**
+  - Given a machine I remove, when I sign, then the revision revokes the machine (and its hub key) and the relay turns it away.
+  - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
+  - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

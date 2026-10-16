@@ -123,7 +123,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Either side ends the rendezvous: a reveal that does not open its commitment, or the person said the codes differ. It burns the rendezvous; a new attempt opens a new one with new nonces."
+      "description": "Either side ends the rendezvous: a reveal that does not open its commitment, or the person said the codes differ. It burns the rendezvous, and one abort is still carried after both reveals, so the other side learns the codes differed; a new attempt opens a new rendezvous with new nonces."
     }
   ],
   "$defs": {
