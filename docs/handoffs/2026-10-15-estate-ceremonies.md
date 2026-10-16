@@ -42,6 +42,26 @@ and records NET-1…NET-3.
   fingerprint, Enroll token, Key reference), DOCMAP, README, the source ledger (RFC 6189), the UX layer (JTBD-10,
   JRN-09, ST-023, FLW-19, SCR-22, SCN-028).
 
+- **Fix round** (two blind verifiers on `c68de2f`, an adversarial port review's F7, the adapter's report), with the
+  owner's decisions:
+  - relay sessions are revalidated by key, not kid (`sessionStands`): a session proven under a replaced key ends;
+    shared vectors `fixtures/vectors/relay.json` `session` (new) and five `admissionSet` cases (key references in a
+    delta, a malformed one reported in `unread`, and F7: a `#sig` key only under its own machine's kid, a kid listed
+    twice for neither);
+  - `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), by kid or key reference;
+  - one `abort` is carried after both reveals; `checkedComparisonCode` is the only way a port computes the code;
+  - `verifyEnrollToken` refuses any member beyond the schema's; `redeemEnrollToken` requires the joining key's proof
+    over the key-signed register type `enroll-join/1` (`bad-proof`); the token is a bearer token, so the node prints
+    its key fingerprint and Fabric shows the one it is about to list;
+  - `FAC-SEM-076` refuses a malformed key reference, `FAC-SEM-073` a non-canonical device key; the revocation `ref`'s
+    schema description names the key-reference form (description only);
+  - ceremonies.md: delta entries and revisions in one form (`FAC-SEM-084`), a one-machine estate re-keys without
+    pairing, token revocation's channel added to *Not decided*; UX ST-024, ST-025, FLW-20, SCR-23, SCN-029, SCN-030;
+  - the symmetric commit (both commit, then both reveal) is recorded as a departure from DV-04's asymmetric exchange: one
+    message order on both transports and the trusted side's `genesis` committed like its keys; the bound is unchanged;
+  - adjacent: `FAC-SEM-034`'s probe check (`src/route-rules.ts`) compared after building `Array.from({length: count})`,
+    so a `selected.index` of 2**32 threw `RangeError`; it now compares first and lists at most 64 candidates.
+
 ## Open
 
 - Consumers adopt at their next pin (CT-53): Fabric (the ceremonies' interface and signing, issuing tokens, the hub on
@@ -53,27 +73,37 @@ and records NET-1…NET-3.
 
 ## Checks run
 
-- Gate at the branch head (off main `d8146cf`), each exit 0:
+- Gate at the final head of the fix round (off main `d8146cf`), each exit 0:
   - `node_modules/.bin/tsc --noEmit`: 0 errors;
-  - `node_modules/.bin/vitest run --coverage`: 73 files, 4945 tests passed, every floor met, whole set 6652 / 6727
-    branches (98.88 %); `src/pairing.ts` 199 / 199, `src/enroll-token.ts` 106 / 106, `src/estate-record-rules.ts`
-    274 / 274, `src/relay.ts` 208 / 208, `src/signing-challenges.ts` 65 / 65;
-  - `python3 docs/ux/lint.py`: passed (23 stories, 19 flows, 22 screens, 28 scenarios);
+  - `node_modules/.bin/vitest run --coverage`: 73 files, 4986 tests passed, every floor met, whole set 6724 / 6797
+    branches (98.92 %); `src/pairing.ts` 203 / 203, `src/enroll-token.ts` 123 / 123, `src/estate-record-rules.ts`
+    280 / 280, `src/relay.ts` 235 / 235, `src/relay-vectors.ts` 57 / 57, `src/secret-envelope.ts` 134 / 134,
+    `src/signing-challenges.ts` 67 / 67, `src/route-rules.ts` 127 / 129 (floor raised from 96.85 to 98.44);
+  - `python3 docs/ux/lint.py`: passed (25 stories, 20 flows, 23 screens, 30 scenarios);
   - `node_modules/.bin/tsx src/docs-check.ts`: passed;
   - `node_modules/.bin/tsx src/lint-md.ts`: 0 errors;
   - `ORG_INDEX=… node_modules/.bin/tsx src/privacy-check.ts`: 0 findings.
-- Plants, 77, each a refusal clause removed or loosened once, each confirmed failing at least one test and then restored:
-  - `src/pairing.ts`: 42, failing `test/pairing.test.ts`;
-  - `src/enroll-token.ts`: 21, and `src/signing-challenges.ts` (the register's `enroll-token/1` values): 4, failing
-    `test/enroll-token.test.ts`;
-  - `src/estate-record-rules.ts` (`FAC-SEM-114`, the key reference in `FAC-SEM-076`, the canonical fingerprint): 9, and
-    `src/relay.ts` (the key-reference subtraction): 1, failing `test/ceremonies.test.ts`.
-- One plant first survived: `machineKey.use !== "sig"` in `redeemEnrollToken` was redundant (a single `#kem` key is
-  never a machine's key list); the clause was removed and the whole check planted instead.
-- Exact boundaries tested: a token of 900 s accepted and 901 s refused; a clock 60 s before `notBefore` accepted, 60.001 s
-  refused; a rendezvous at 600 s complete, 600.001 s expired; codes of exactly six digits with a leading zero kept.
+- Plants, 99, each a refusal clause removed or loosened once, confirmed failing at least one test, then restored:
+  - the first reading's 77, rerun on the final code, all still killed: `src/pairing.ts` 42 (`test/pairing.test.ts`);
+    `src/enroll-token.ts` 21 and `src/signing-challenges.ts` 4 (`test/enroll-token.test.ts`);
+    `src/estate-record-rules.ts` 9 and `src/relay.ts` 1 (`test/ceremonies.test.ts`);
+  - the fix round's 22: `src/relay.ts` 6 (F7's two clauses, `unread` and its pattern, `sessionStands`' octet compare
+    and its `expired` answer; `test/relay-vectors.test.ts`); `src/secret-envelope.ts` 2 (`test/secret-envelope.test.ts`);
+    `src/estate-record-rules.ts` 2 (the malformed key reference, the canonical fingerprint; `test/ceremonies.test.ts`,
+    `test/estate-record.test.ts`); `src/pairing.ts` 3 (the abort after both reveals, each `checkReveal` in
+    `checkedComparisonCode`); `src/enroll-token.ts` 6 (the token's and the assertion's members, the proof, its ES256
+    branch, the join digest, the proof's canonical form) and `src/signing-challenges.ts` 1 (`enroll-join/1`'s values;
+    `test/enroll-token.test.ts`); `src/route-rules.ts` 2 (compare first, the 64-candidate cap; `test/route-rules.test.ts`,
+    `test/rule-tolerance.test.ts`).
+- Two plants first survived in the fix round and were closed by tests: the proof's format check (an inserted character
+  a lax base64url decoder skips; the pattern now admits only the canonical 64-byte form) and `enroll-join/1`'s register
+  values.
+- Exact boundaries: a token of 900 s accepted, 901 s refused; 60 s of skew accepted, 60.001 s refused; a rendezvous at
+  600 s complete, 600.001 s expired; six digits with a leading zero; a route event's selected index of 2**32 and
+  `Number.MAX_SAFE_INTEGER` answered `FAC-SEM-034` in under 500 ms.
 
 ## Next task
 
-The owner reviews and merges the pull request, then tells Fabric's and Project Observatory's builders the merge commit
-(CT-53) and moves this handoff's row in `docs/handoffs/README.md` to "merged".
+The owner reviews and merges the pull request, tells Fabric's, Project Observatory's, the relay's and the adapter's
+builders the merge commit (CT-53), moves this handoff's row in `docs/handoffs/README.md` to "merged", and updates
+fabric-workspace after the merge: the roadmap's contract row and RM-21 packet P3's state.

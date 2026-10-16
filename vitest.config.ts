@@ -68,7 +68,7 @@ export default defineConfig({
         "src/package-rules.ts": { branches: 100 },
         "src/profile-rules.ts": { branches: 100 },
         "src/registry-rules.ts": { branches: 98.64 },
-        "src/route-rules.ts": { branches: 96.85 },
+        "src/route-rules.ts": { branches: 98.44 },
         "src/secret-shape.ts": { branches: 100 },
         "src/semantic-rules.ts": { branches: 98.49 },
         "src/service-supervisor.ts": { branches: 100 },

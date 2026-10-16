@@ -154,3 +154,10 @@ once) each failed at least one test: 42 in `src/pairing.ts` (`test/pairing.test.
 4 in `src/signing-challenges.ts` (`test/enroll-token.test.ts`), 9 in `src/estate-record-rules.ts` and 1 in
 `src/relay.ts` (`test/ceremonies.test.ts`). Measured with `vitest run --coverage` on the branch off main's `d8146cf`:
 73 files, 4945 tests, whole set 6652 / 6727 (98.88 %).
+
+**DEC-0084 fix round (2026-10-16).** `src/pairing.ts` 203 / 203, `src/enroll-token.ts` 123 / 123,
+`src/estate-record-rules.ts` 280 / 280, `src/relay.ts` 235 / 235, `src/relay-vectors.ts` 57 / 57,
+`src/secret-envelope.ts` 134 / 134 and `src/signing-challenges.ts` 67 / 67 keep 100. `src/route-rules.ts`'s floor moves
+from 96.85 to 98.44 (127 / 129) with the `FAC-SEM-034` totality fix. 22 more plants, each killed. Measured on the
+branch: 73 files, 4986 tests, whole set 6724 / 6797 (98.92 %).
+
