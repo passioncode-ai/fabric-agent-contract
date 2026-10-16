@@ -141,7 +141,10 @@ since a client that signs high-S or an old protocol is refused the same way. It 
 and never asks the person to re-enter a secret for it.
 
 **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
-machines and keys, minus the revocations of verified delta entries it applied (`extraRevocations`, see [Revocation and
+machines and keys — a `device-key` revocation names a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084); the set
+subtracts a key either names, and reports in `unread` a delta revocation whose ref holds `@` but is no key reference —
+minus a `#sig` key listed under a kid other than its own machine's `<id>#sig`, and every key of a kid listed twice (F7,
+DEC-0084: `bad-key` in `excluded`, as `FAC-SEM-073` refuses such a record), minus the revocations of verified delta entries it applied (`extraRevocations`, see [Revocation and
 heartbeat](#revocation-and-heartbeat)), and minus every key that could never verify a relay signature: an Ed25519 key
 or one SEC 1 refuses, which `relayAdmissionSet` names in `excluded` for the log (`relayAdmissionSet`). Being admitted
 by a relay makes no machine T1 to another owner's machine (see [Trust tiers](#trust-tiers)). It keeps strangers out of
@@ -158,9 +161,11 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   inclusive, read by `strictTime` as `verifyEstateRecord` reads them. Before that it is `not-yet-valid`; after it, the
   relay fails closed (`expired`): it admits no new `auth` until a newer verified revision arrives, and it ends every
   open session (below). Queued mail stays until its `ttl`. Presence and `lastSeen` follow the same verified set.
-- **Open sessions are revalidated** (DEC-0066, replacing "at their next re-authentication"). An open session stands
-  only while its `kid` is in the relay's current admission set. When the relay applies a newer revision, or a delta
-  entry that revokes the machine or its `#sig`, it ends every session whose `kid` left the set with `error not-admitted`
+- **Open sessions are revalidated** (DEC-0066, replacing "at their next re-authentication"; by key since DEC-0084). An
+  open session stands only while its `kid` is in the relay's current admission set **and maps to the same key octets
+  the session was proven under** (`sessionStands`, vectors `session`): a key replacement keeps the kid `<id>#sig`, so a
+  session proven under the old key ends when the set maps that kid to the new key. When the relay applies a newer revision, or a delta
+  entry that revokes the machine or its `#sig`, it ends every session whose `kid` left the set or now names another key with `error not-admitted`
   and close 4403, and checks that before any frame it sends or accepts for the session, so a frame already in flight
   is not delivered. When the held revision's window ends it ends every session with `error expired` and close 4403. A
   machine so closed is refused on its next `auth` by the ordinary check. No new frame and no client re-authentication
@@ -410,6 +415,17 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   sessions closed 4403 (see [Admission](#admission)), within one push rather than at the next revision.
 - The window lease is DEC-0062's.
 
+## The pairing rendezvous
+
+When a machine joins an estate from afar, the trusted machine opens a **one-time rendezvous** on its relay session and
+shows its link; the new machine, not yet admitted, joins it with that link. The link's secret part travels after `#` (a
+fragment, never sent in an HTTP request) and the new machine presents it inside the WebSocket, so no credential is in a
+URL the relay sees. The rendezvous lives at most 600 s from its opening, carries `pairing-message/1` frames between its
+two sides and nothing else — never a mailbox message, a blob or presence — and is burned at the first failure, the first
+`abort`, or once both reveals were delivered, as `rendezvousVerdict` reads it ([ceremonies](ceremonies.md#the-rendezvous),
+DEC-0084). It admits the new machine to nothing: the machine is admitted only once a revision lists it. The rendezvous
+frame types are the relay's to add (not decided here).
+
 ## Shared vectors
 
 Every refusal of the relay family is data a port runs, not only a test in this repository (DEC-0066).
@@ -444,3 +460,5 @@ Every refusal of the relay family is data a port runs, not only a test in this r
   grants (one record holding several `{recipients, fetched, expiresAt}`) are the next revision's question.
 - How a relay serves several contexts (the pseudonymous per-context id of relay RLY-08, with Fabric D8).
 - Whether a self-hosted relay federates with the hosted one.
+- The frame types that open, join and close a pairing rendezvous (DEC-0084 fixes what it carries, how long it lives and
+  when it burns).

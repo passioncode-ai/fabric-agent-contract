@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0084`
+**Next free ID:** `DEC-0085`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -2423,6 +2423,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   runs the signing ceremony and certifies hub keys (backlog CT-19); Project Observatory's node verifies each revision
   before applying it, installs and fills only what the record places, and reports the applied revision in its check-in
   (CT-20); the relay serves the latest revision by digest (DEC-0047, reserved).
+- **Annotated (2026-10-15):** amended by DEC-0084: the operator's NET-3 settles D3 for a personal estate (the hub's own Ed25519 key certified as `hubKey`, the hub holds a private key); the enrollment ceremonies, the estate fingerprint and who revokes a solo estate's machine are `docs/specification/ceremonies.md`'s; a `device-key` revocation names a kid or a key reference `<kid>@sha256:<hex>` (`FAC-SEM-076` reads both); `FAC-SEM-114` (what a revision drops it revokes) joins the chain, and `verifyEstateRecord` runs it with a parent.
 - **Annotated (2026-10-13):** amended by DEC-0076: `FAC-SEM-076` keys share grants and `grant` revocations by the normal form of the grant's id (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-13):** amended by DEC-0082: a placement gains `context` (absent: `personal`) and, in an organization's context, `grant`; a secret placement gains `context`; `FAC-SEM-074` places an agent once per (machine, `agentRef`, context) and `FAC-SEM-075` a slot once per (`agentRef`, slot, context); `FAC-SEM-110` and `FAC-SEM-111` join the record's rules (`docs/specification/contexts.md`).
 - **Annotated (2026-10-12):** ER-10's window admits a revision from 60 s before `issuedAt` (the clock skew every
@@ -2522,6 +2523,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+- **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, DEC-0066's revalidation by key), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
 - **Annotated (2026-10-13):** amended by DEC-0082: an envelope names no context, so a target's open context (`estateEnvelopeContext`) reads only personal secret placements, and an organization's instance fills its slot on its own machine (`FAC-SEM-075`), never by an envelope (`docs/specification/contexts.md`).
 - **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
   - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
@@ -3482,6 +3484,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   computes challenges from the register (CT-19); Project Observatory's node verifies estate revisions under signing
   credentials only (CT-20); the first organization server pins administrators' signing credentials in `org-authority/1`
   and never serves a signing page (CT-04).
+- **Annotated (2026-10-15):** DEC-0084 registers `enroll-token/1` `{scope, genesis, purpose, ceiling, notBefore, expiresAt, nonce, uses}`, a passkey statement (the owners' DV-CON-01 amendment of DV-05); the passkey register now holds five types (`docs/specification/ceremonies.md#a-headless-machine`).
 - **Annotated (2026-10-12):** its affects list names `src/rfc3339.ts`, which the merge of #65 did not change (at that merge last changed by DEC-0060; since then by the relay audit's DEC-0066); the field limits of the register (a renamed field, a `jkt` end, a grant at revision 0) now have tests (packet P6-08).
 - **Amends:** DEC-0055 (tightening): an estate record's authority must be a signing credential, `rpId` `sign.<domain>`,
   origins on that RP ID (schema and `FAC-SEM-092`). Implements v4 §7 *Signing surface* and §12's row "signing challenge
@@ -3655,7 +3658,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `fixtures/positive/openrouter-attribution.json`, `fixtures/negative/openrouter-attribution-*`,
     `fixtures/vectors/openrouter-attribution.json`, `fixtures/catalogue.json`;
   - tests: `test/usage-rules.test.ts` (new), `test/openrouter-attribution.test.ts` (new), `test/positive-sweep.test.ts`,
-    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`; floors in `vitest.config.ts`;
+    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`, `test/secret-envelope.test.ts`,
+    `test/route-rules.test.ts`; floors in `vitest.config.ts`;
   - docs: `docs/evidence/sources.md` (OpenRouter *App Attribution*), `docs/evidence/adoption.md` (new),
     `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md`.
 - **Not decided here:** a per-project breakdown by day or by model; whether a hidden app (`X-OpenRouter-App-Visibility`)
@@ -4741,6 +4745,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   "fabric-agent-contract"), with the owner's later correction of that answer's §4 item (5) (a `grant.usage` event in
   place of "usage per grant already exists"), and the owner's decisions on the three independent readings of PR #107.
   Consumer adoption: board row CT-51.
+- **Annotated (2026-10-15):** DEC-0084 records the operator's NET-2 (K-1 answered: each organization enrollment of a machine gets keys of its own, 2026-10-15) and NET-1 (a network is a context); CX-CON-06 stays stage 2, so the pilot's single key stays linkable until it lands (contexts.md, *Linkability*).
 - **Amends:** DEC-0030 (one core kind), DEC-0031 (one enrollment per organization; `org.id` for contexts; no wire
   change), DEC-0037 and DEC-0039 (a grant's optional `context`), DEC-0047 (a secret envelope fills only a personal
   slot), DEC-0055 (a placement's `context` and `grant`, a secret placement's `context`; `FAC-SEM-074` and `FAC-SEM-075`
@@ -5044,3 +5049,159 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-112` were reserved by the owner session (receipt SEM-0112); the record plane is `fs`. The registers are
   edited under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and
   `docs/backlog.md`.
+
+### DEC-0084 — The estate ceremonies: create a network, add a machine by a comparison code or an enroll token, remove and re-key a machine (`FAC-SEM-113`, `FAC-SEM-114`)
+
+- **Date:** 2026-10-15
+- **Status:** Accepted source change (on merge of its pull request). The owner's design for RM-21 stage 1, packet P3,
+  with the changes this pull request names and argues (items 3, 4 and 5b). Consumer adoption: board row CT-53.
+- **Amends:** DEC-0055 (D3 settled for a personal estate; a `device-key` revocation by key reference, read by
+  `FAC-SEM-076`, which also refuses a malformed one; `FAC-SEM-073` refuses a non-canonical device key; `FAC-SEM-114` in
+  the chain and in `verifyEstateRecord`; the revocation `ref`'s schema description), DEC-0063 (the register gains
+  `enroll-token/1` and the key-signed `enroll-join/1`), DEC-0047 (the pairing rendezvous; key references, F7 and
+  session revalidation by key in the relay; delta revocations in `estateEnvelopeContext`), DEC-0082 (NET-1 and NET-2
+  recorded; CX-CON-06 stays stage 2). Also, an adjacent totality fix: `FAC-SEM-034`'s probe check (`src/route-rules.ts`)
+  compares before it builds a list (the adapter's report).
+- **Decision:** in [ceremonies](specification/ceremonies.md) —
+  1. **Who holds which key (NET-3 settles D3 for the personal estate).** The person's passkey signs every revision. The
+     hub runs on the always-on machine and holds a private key of its own, an Ed25519 hub key the passkey certifies as
+     that machine's `hubKey` (the schema already allowed it), never the machine's `#sig` key; it stays Ed25519 until
+     Fabric's D2. Every machine keeps its own device keys. When the hub is away the others work within the existing
+     windows: a revision's `validUntil` and the 72-hour heartbeat rule (DEC-0054). estate-record.md's open items on the
+     hub key, a hub's private key, the fingerprint and the ceremony are closed for a personal estate.
+  2. **The estate fingerprint** is a function, not a registered statement, since nothing signs it: `estateFingerprint`
+     over revision 1's digest, SHA-256 of the RFC 8785 form of `{type: "estate-fingerprint/1", digest}`, rendered as
+     five groups of five digits (each a 40-bit big-endian chunk modulo 10^5). 10^25 values: matching it by grinding a
+     revision 1 of another estate costs about 2^82 hashes (DV-REL-01's lesson about short key codes). It names the
+     network for people; it never pins a passkey alone.
+  3. **"Create my network"** runs in the person's Fabric under the signing credential: revision 1 lists the signing
+     passkey, the first machine with its `#sig`/`#kem` keys and, when that machine is the always-on one, its hub key
+     (otherwise the hub key is certified in the revision that adds the always-on machine, since a hub key is a member of
+     its machine); the machine pins the passkey it just used (DEC-0055).
+  4. **"Add a machine", nearby or remote.** The new machine generates its keys; nearby a QR code or a short code names a
+     local connection, remotely the trusted machine opens a one-time relay rendezvous of at most 600 s. Both sides commit
+     (`pairingCommit`: SHA-256 over the RFC 8785 form of `{type: "fabric-enroll-commit/1", role, keys, nonce}`, with the
+     trusted side's `genesis`, revision 1's digest), then reveal (`checkReveal`; a reveal that does not open its
+     commitment aborts). The comparison code (`comparisonCode`) is the first five bytes of SHA-256 over the RFC 8785
+     transcript `{type: "fabric-enroll-code/1", new: {keys, nonce}, trusted: {keys, nonce, genesis}}` modulo 10^6, six
+     digits: with both sides committed before either reveals, an attacker in the middle has one guess per rendezvous,
+     10^-6, detected when it fails (RFC 6189 §4.4.1.1, §7). A port computes the code only through
+     `checkedComparisonCode(newCommit, newReveal, trustedCommit, trustedReveal)`, which runs `checkReveal` on each first:
+     a code from unchecked reveals loses the bound. **A departure from DV-04:** DV-04's exchange is asymmetric (the new
+     device commits, the trusted machine sends its nonce in clear, the new device reveals); here both sides commit, then
+     both reveal, so one message order serves both transports and the trusted side's `genesis` is committed like its
+     keys; the one-guess bound is the same. The person confirms the code on both screens and signs the
+     next revision on the trusted machine, listing exactly the revealed keys; the new machine pins revision 1 only when
+     the chain it verified starts at the revealed `genesis` and applies the revision only when `joinListed` accepts it.
+     `rendezvousVerdict` is the one reading of a rendezvous: complete after both reveals, burned by any failure, an
+     `abort` (one is still carried after both reveals, so the peer learns the codes differed) or any other later
+     message. Schema `pairing-message.schema.json`; functions in `src/pairing.ts`; vectors
+     `fixtures/vectors/pairing.json`.
+  5. **A headless machine: `enroll-token/1`** (DV-05, as the owners amended it in DV-CON-01 on CT-38). A new register
+     statement `{scope, genesis, purpose, ceiling, notBefore, expiresAt, nonce, uses}` signed by a passkey assertion:
+     `estate:<id>`, revision 1's digest, `agent-host`, `null` or a digest, at most 900 s, 32 random bytes, `1`. The node
+     reads it from stdin or a 0600 file only, never argv, a URL, the environment or a log. `verifyEnrollToken` checks the
+     clock, the shape, the estate and `genesis`, the passkey among the current revision's authorities, the assertion and
+     the window, and refuses a token with any member beyond `{schema, statement, signature}` or an assertion member the
+     schema does not list; `redeemEnrollToken(token, machineKey, proof, ledger)` requires the presented `#sig` key's
+     signature over the key-signed register statement `enroll-join/1` `{digest of the token's statement, nonce}`
+     (`bad-proof`), binds the nonce to that key's fingerprint on first use and refuses every later use as `reused`,
+     answering the line the hub logs. The token is a bearer token: an interceptor who redeems it first binds its own key
+     and the honest node's attempt is refused `reused` and logged; so the node prints its own key's fingerprint and
+     Fabric shows the fingerprint it is about to list, for the person to compare before signing. The token gives no
+     trust: only a revision that lists the machine does; its `genesis` lets the node pin the person's estate.
+     `FAC-SEM-113` checks the document.
+  6. **"Remove a machine"**: a revision without it lists `machine <id>` and its hub key's `hub-key <kid>`
+     (`FAC-SEM-114`), and the delta carries each fast (DEC-0054). A solo estate has no DEC-0031 certificate, so the
+     record's revocation and the delta are the whole removal; where an organization server issued a certificate, that
+     server revokes it when the organization removes the machine.
+  7. **"Replace a machine's key"**: the machine pairs again in the role `new` under the same id; one revision lists the
+     new keys and revokes the old ones by their key reference `<kid>@sha256:<hex>` (`deviceKeyRef`), since a kid outlives
+     its keys and a kid revocation would revoke the new key too (`FAC-SEM-076` reads both forms); a hub key on that
+     machine is re-certified under a new kid with the old kid revoked, or revoked. A node applies such a revision only if
+     it holds every listed key (`ownKeysDecision`), otherwise it stops using its keys. In both removal and replacement
+     the revision lists each delta entry's revocation exactly as the entry names it (`FAC-SEM-084`), and Fabric's hub and
+     drafter use that form. From the moment a verifier applies the revision or a delta entry, the old key is refused: by
+     the relay's admission set (kid or key reference) and, for a session it proved, by `sessionStands`, which compares
+     key octets because the kid stays; by an envelope's sender key (`estateEnvelopeContext` with the applied entries'
+     `extraRevocations`, `bad-key`); and, for a hub key, by DL-14 and `estateSigner`. A one-machine estate re-keys like
+     "create my network": the passkey signs on the machine itself, no pairing, a revision that lists the new keys and
+     revokes the old ones by reference. A stolen machine is removed, not re-keyed.
+  8. **`FAC-SEM-114`** (kind `estate-record-revision`, and `verifyEstateRecord` with a parent, `rule-violation`): what a
+     revision drops it revokes in the same revision — a removed machine and its hub key, a device key of a kept machine
+     by its reference or kid, a hub key no longer certified with the same kid and key. `FAC-SEM-076` refuses a
+     `device-key` ref that holds `@` but does not match `^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#(sig|kem)@sha256:[a-f0-9]{64}$`;
+     `FAC-SEM-073` refuses a device key with no canonical fingerprint. The relay admits a `#sig` key only under its own
+     machine's kid and a kid listed twice for neither (F7, the adversarial review of a node port), so every port agrees.
+  9. **NET-2 answers K-1**: each organization enrollment gets its own keys. The contract's part, CX-CON-06 (a `kid` and
+     an `iss` per context, `FAC-SEM-044`, `FAC-SEM-073`, the check-in), is stage 2 and not in this decision; until it
+     lands the pilot's single key stays linkable (contexts.md rewritten).
+  10. **NET-1**: a network is a context (CONTEXT.md); no new schema.
+- **Why:** RM-21 stage 1 needs a person's two machines to form one network without hand-made files, and the contract
+  had the record but no ceremony that makes one. A comparison code over one key's fingerprint is brute-forced offline
+  (DV-REL-01); a commitment before any reveal leaves one online guess. The design bound keys and nonces; this decision
+  also binds the trusted side's `genesis`, because public keys can be copied: a chain of another estate whose newest
+  revision lists the trusted machine's key and a copy of the person's public passkey would otherwise pass every check
+  of the new machine. The enroll token carries `genesis` for the same reason. A device key's kid is fixed by its machine
+  id (DEC-0053), so a key replacement under the same id needs a revocation form that names one key.
+- **Compatibility:** `contractVersion` stays `0.1.0`.
+  1. The new schemas, the register type and the functions are additive.
+  2. `estate-record.schema.json` does not change: a key reference is a `ref` string it already admits, and an older
+     reader accepts every record this decision produces. An older reader does not recognise a key reference; since the
+     revision that revokes a key no longer lists it, that reader distrusts the key anyway, except that an older relay
+     keeps admitting a key a delta entry revoked by reference until it applies the revision.
+  3. `FAC-SEM-114` is a tightening: a reader at or after DEC-0084 refuses a revision that drops a machine, a key or a
+     hub key without revoking it; an older reader accepts it. No estate record is deployed (CT-19, CT-20), and every
+     revision in the fixtures already revoked what it dropped.
+  4. `FAC-SEM-076`'s new clauses refuse only a record that revokes by key reference a key it still lists, or names a
+     malformed key reference — forms that did not exist; `FAC-SEM-073`'s refuses a non-canonical key the schema already
+     refuses for P-256. `relayAdmissionSet` refuses keys revoked by key reference and, under F7, a key a record that
+     passed `FAC-SEM-073` never holds; `sessionStands` ends a session whose kid now names another key, which a relay that
+     revalidated by kid kept. `estateEnvelopeContext`'s `extraRevocations` is optional.
+  5. The revocation `ref`'s schema description names the key-reference form; validation is unchanged.
+  6. Within this pull request's own first reading (unshipped, CT-53 open): the rendezvous now carries one `abort` after
+     both reveals, `redeemEnrollToken` takes the token and a proof in place of the nonce, and the register gains
+     `enroll-join/1`.
+- **Consequences / affects:**
+  - spec: `docs/specification/ceremonies.md` (new), `docs/specification/estate-record.md` (header, revisions,
+    authorities, `hubKey`, revocations, the verifier, ER-11, the rules table, not decided),
+    `docs/specification/conformance.md` (five reader rows, the estate row, three canonical-form rows, the register row,
+    two register codes, the next free code), `docs/specification/signing.md`, `docs/specification/relay.md` (the pairing
+    rendezvous), `docs/specification/devices.md` (enrollment), `docs/specification/contexts.md` (linkability),
+    `docs/specification/revocation-delta.md` (who signs);
+  - schemas: `schemas/pairing-message.schema.json` (new), `schemas/enroll-token.schema.json` (new);
+  - code: `src/pairing.ts` (new), `src/enroll-token.ts` (new), `src/estate-record-rules.ts` (`deviceKeyFingerprint`,
+    `deviceKeyRef`, `KEY_REFERENCE`, `validDeviceKey` exported, `FAC-SEM-073`, `FAC-SEM-076`, `FAC-SEM-114`,
+    `verifyEstateRecord`), `src/signing-challenges.ts` (`enroll-token/1`, `ENROLL_TOKEN_FIELDS`, `enroll-join/1`),
+    `src/relay.ts` (`relayAdmissionSet`: key references, `unread`, F7; `sessionStands`), `src/relay-vectors.ts` (the
+    `session` group), `src/secret-envelope.ts` (`extraRevocations`), `src/route-rules.ts` (`FAC-SEM-034`'s probe check,
+    the adjacent totality fix), `src/semantic-rules.ts`, `src/protocol-revisions.ts`; `tools/vectors/pairing.ts` (new),
+    `tools/vectors/relay-crypto.ts` (`admissionSet`, `session`),
+    `tools/vectors/enroll-token.ts` (new); `vitest.config.ts` (two files at 100) and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - fixtures: `fixtures/vectors/pairing.json`, `fixtures/vectors/enroll-token.json` (new), `fixtures/vectors/relay.json`;
+    `fixtures/positive/estate-record-key-replaced.json`, `fixtures/positive/enroll-token*.json`,
+    `fixtures/positive/pairing-message-*.json`, `fixtures/negative/enroll-token-*.json`,
+    `fixtures/negative/pairing-message-*.json`, `fixtures/semantic/enroll-token-*.json`,
+    `fixtures/semantic/estate-revision-{key,kem,machine-id,remove,hub}-*.json`, `fixtures/semantic/estate-device-key-*.json`,
+    `fixtures/semantic/estate-key-replaced-kid-other-machine.json`; `fixtures/catalogue.json`;
+  - schemas, also: `schemas/estate-record.schema.json` (the revocation `ref`'s description);
+  - tests: `test/pairing.test.ts`, `test/enroll-token.test.ts`, `test/ceremonies.test.ts` (new);
+    `test/signing-challenges.test.ts`, `test/estate-record.test.ts`, `test/positive-sweep.test.ts`,
+    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`;
+  - UX: `docs/ux/scenarios.md` (SCN-028…SCN-030), `docs/ux/foundation.md` (ST-023…ST-025), `docs/ux/flows.md`
+    (FLW-19, FLW-20), `docs/ux/screens.md` (SCR-22, SCR-23);
+  - docs: `docs/evidence/sources.md` (RFC 6189), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/backlog.md` (CT-53,
+    CT-38, CT-51), `docs/handoffs/2026-10-15-estate-ceremonies.md`, `docs/handoffs/README.md`.
+- **Not decided here:** CX-CON-06 and how an organization enrollment's ceremony differs (stage 2, Fabric's D8);
+  `node-summary/1`, which no step needs; the interface and the QR code's encoding; the relay's frame types for a
+  rendezvous; how Fabric's revocation of an unused token reaches the hub's ledger (no existing channel carries it); a ceiling document's shape (tokens carry `ceiling: null` until then); a token for an organization or
+  another purpose (a new type, `enroll-token/2`); recovery when every passkey is lost.
+- **Source:** the operator's decisions NET-1…NET-4 of 2026-10-15 (fabric-workspace
+  `docs/reports/2026-10-15-agent-network-stage1/README.md` at `704daafe`, packet P3); the RM-28 devices design
+  (fabric-workspace `docs/reports/2026-10-12-org-contexts/devices.md` at `5ace0ff3`: §2, DV-04, DV-05, DV-REL-01 and the
+  owners' answer "amend" to DV-CON-01, board row CT-38); RFC 6189 in the [source ledger](evidence/sources.md); the
+  owner's design of DEC-0084 (2026-10-15). DEC-0084, `FAC-SEM-113` and `FAC-SEM-114` were reserved by git CAS
+  (`agent_sync.py reserve --key dec0084 DEC`, `--key dec0084-1 SEM`, `--key dec0084-2 SEM`); the record plane is `fs`.
+  The registers are edited under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md`
+  and `docs/backlog.md`.

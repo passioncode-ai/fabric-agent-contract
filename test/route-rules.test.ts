@@ -114,6 +114,25 @@ describe("route-event semantic rules (DEC-0029)", async () => {
     expect(check(exhausted)).toEqual([]);
   });
 
+  it("answers FAC-SEM-034 for a selected index of 2**32 or Number.MAX_SAFE_INTEGER without throwing or allocating (the adapter's report, DEC-0084 fix round)", () => {
+    const sel = selected as Record<string, any>;
+    const route = pinned as Record<string, any>;
+    for (const index of [2 ** 32, Number.MAX_SAFE_INTEGER, 2 ** 31 - 1]) {
+      const started = performance.now();
+      const event = { ...sel, selected: { ...sel.selected, index } };
+      expect(() => check(event), String(index)).not.toThrow();
+      expect(check(event), String(index)).toEqual(["FAC-SEM-034"]);
+      expect(performance.now() - started, String(index)).toBeLessThan(500);
+    }
+    // A route long enough for a large index, as a host could hold it in memory, is still judged in bounded work: the
+    // probes are compared first and the message names a range above 64 candidates.
+    const many = [...Array.from({ length: 69 }, () => route.candidates[0]), route.candidates[sel.selected.index]];
+    const message = (event: unknown, candidates: unknown[]) => evaluateSemanticRules("route-event", { route: { ...route, candidates }, event }).map((finding) => finding.message).join("\n");
+    expect(message({ ...sel, probes: [], selected: { ...sel.selected, index: 69 } }, many)).toContain("candidates 0 to 68 in order");
+    // A sticky relaunch walks nothing: probes there name "none" as what the walk must record.
+    expect(message({ ...sel, sticky: true, conversation: "c-1" }, route.candidates)).toContain("candidates none in order");
+  });
+
   it("FAC-SEM-034 flags an event that names another route revision, project or capability", () => {
     for (const [key, value] of [["route", { ...(selected.route as object), revision: 2 }], ["project", "urn:project:b"], ["capability", "urn:fabric:capability:other"]] as const) {
       expect(check({ ...clone(selected), [key]: value })).toContain("FAC-SEM-034");

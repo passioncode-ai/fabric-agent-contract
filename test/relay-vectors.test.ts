@@ -85,11 +85,13 @@ describe("the runner reads what a case leaves out as empty", () => {
       admit: { cases: [{ ...admitCase, context }] },
       replay: { cases: [{ name: "no steps" }] },
       admissionSet: { cases: [{ name: "no extra", held: (relay.admissionSet.cases as Json[])[0]!.held, at: "2026-10-13T00:00:00Z" }] },
+      session: { cases: [{ name: "no extra", session: (relay.session.cases as Json[])[0]!.session, held: (relay.session.cases as Json[])[0]!.held, at: "2026-10-13T00:00:00Z" }] },
       blobRequest: { relay: "https://relay.example", digest: `sha256:${"ab".repeat(32)}`, now: "2026-10-12T12:00:30Z", cases: [{ name: "no header", method: "GET", header: null }] }
     });
-    // The runner's group order: admissionSet, admit, replay, blobRequest.
+    // The runner's group order: admissionSet, session, admit, replay, blobRequest.
     expect(out.map((r) => r.actual)).toEqual([
       { ok: true, revision: 4, kids: ["m-a#sig", "m-b#sig", "m-c#sig"], excluded: [{ kid: "m-ed#sig", reason: "unsupported-alg" }, { kid: "m-bad#sig", reason: "bad-key" }] },
+      { ok: true },
       { ok: false, code: "unauthenticated" }, [],
       { ok: false, status: 400, code: "malformed" }
     ]);

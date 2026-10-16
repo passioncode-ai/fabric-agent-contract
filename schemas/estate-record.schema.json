@@ -412,7 +412,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1366,
-          "description": "What is revoked, in its kind's own form: a credential id, a machine id, a kid, a package digest or a grant's meta.id."
+          "description": "What is revoked, in its kind's own form: a credential id, a machine id, a kid, a package digest or a grant's meta.id. A device-key revocation names a kid (every key ever listed under it) or one key's reference <kid>@sha256:<hex of its octets> (DEC-0084, FAC-SEM-076)."
         },
         "revokedAt": {
           "$ref": "common.schema.json#/$defs/timestamp"

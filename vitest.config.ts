@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts", "src/pairing.ts", "src/enroll-token.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -35,9 +35,11 @@ export default defineConfig({
         "src/device-rules.ts": { branches: 98.87 },
         "src/device-transport-rules.ts": { branches: 100 },
         "src/ed25519.ts": { branches: 100 },
+        "src/enroll-token.ts": { branches: 100 },
         "src/estate-record-rules.ts": { branches: 100 },
         "src/findings.ts": { branches: 100 },
         "src/p256.ts": { branches: 100 },
+        "src/pairing.ts": { branches: 100 },
         "src/relay.ts": { branches: 100 },
         "src/relay-rules.ts": { branches: 100 },
         "src/relay-vectors.ts": { branches: 100 },
@@ -66,7 +68,7 @@ export default defineConfig({
         "src/package-rules.ts": { branches: 100 },
         "src/profile-rules.ts": { branches: 100 },
         "src/registry-rules.ts": { branches: 98.64 },
-        "src/route-rules.ts": { branches: 96.85 },
+        "src/route-rules.ts": { branches: 98.44 },
         "src/secret-shape.ts": { branches: 100 },
         "src/semantic-rules.ts": { branches: 98.49 },
         "src/service-supervisor.ts": { branches: 100 },

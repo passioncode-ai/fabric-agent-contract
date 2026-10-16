@@ -88,6 +88,31 @@ enrollment's check-ins to that enrollment's server, a collector sends a session'
 organization, and a grant's usage reaches the grant's organization as a daily `grant.usage` event
 ([contexts](docs/specification/contexts.md), DEC-0082).
 
+**Network**: A **Context**, seen as the machines that work in it (the operator's NET-1, 2026-10-15, recorded by
+DEC-0084): a person's own network is their personal estate, `personal`, all their own machines; any other network is an
+organization, `org:<orgId>`. Creating a network of one's own machines is the "create my network" ceremony; an
+organization's network and sharing into it are share grants (DEC-0082). No schema names a network
+([ceremonies](docs/specification/ceremonies.md)).
+
+**Estate ceremony**: How a signed estate revision is made (DEC-0084): "create my network" (revision 1), "add a
+machine" nearby or remotely (a **Comparison code**) or without a screen (an **Enroll token**), "remove a machine" and
+"replace a machine's key". Each ends in a revision the person's passkey signs and each machine applies offline; what a
+revision drops it revokes in the same revision (`FAC-SEM-114`) ([ceremonies](docs/specification/ceremonies.md)).
+
+**Comparison code**: The six digits both screens show when a machine pairs with a trusted one (DEC-0084): from the
+SHA-256 of the RFC 8785 transcript of both sides' keys, both nonces and the trusted side's estate `genesis`, after both
+sides committed before either revealed (`comparisonCode`). One rendezvous allows one guess; a wrong code burns it.
+
+**Estate fingerprint**: Five groups of five digits rendered from revision 1's digest (`estateFingerprint`, DEC-0084):
+what a person compares to know two screens show one network. It never pins a passkey alone.
+
+**Enroll token**: `enroll-token/1` (DEC-0084): Fabric's one-time, at most 15-minute token, signed by the person's
+signing passkey, with which a machine without a screen joins an estate; the hub binds it to the machine's `#sig` key on
+first use and refuses every later use (`FAC-SEM-113`). It gives no trust until a revision lists the machine.
+
+**Key reference**: One device key's identity in a `device-key` revocation, `<kid>@sha256:<hex>` over its octets
+(`deviceKeyRef`, DEC-0084). A kid outlives its keys, so a key replacement revokes the old key by its reference.
+
 **Estate key**: The signing key the estate's hub holds: it signs delegation tokens and approvals, and its
 public half is published for callees to verify offline ([delegation](docs/specification/delegation.md),
 DEC-0039). The **Estate record** certifies each machine's hub key (`hubKey`, DEC-0055); a verifier that reads it
@@ -95,7 +120,8 @@ trusts a `kid` only while the revision it reads certifies it — one `verifyEsta
 highest its machine applied — and refuses otherwise `kid-not-certified`, or `issuer-unavailable` when the revision is at
 fault (the meter: `principal-unproven`, with the detail in its reason) (delegation DL-14, DEC-0060). The module is
 `src/hub-key-rules.ts`. It also signs
-**Revocation delta** entries and **Heartbeats** (DEC-0054).
+**Revocation delta** entries and **Heartbeats** (DEC-0054). In a personal estate it is the hub's own Ed25519 key on the
+always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).

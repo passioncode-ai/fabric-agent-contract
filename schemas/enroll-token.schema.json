@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/enroll-token.schema.json",
+  "title": "Enroll token, enroll-token/1 (DEC-0084)",
+  "description": "The one-time token with which a machine that has no screen joins an estate (DEC-0084; DV-05 as amended by DV-CON-01). Fabric issues it: the statement is the signing register's enroll-token/1 (DEC-0063) and the signature a passkey assertion by a signing credential of the estate over its challenge. The node reads it from stdin or a file only its user can read, never from argv, a URL or a log. The hub binds its nonce to the joining machine's #sig key on first use and refuses every later use. It gives the machine no trust: a passkey-signed revision that lists the machine does. docs/specification/ceremonies.md.",
+  "type": "object",
+  "required": [
+    "schema",
+    "statement",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "enroll-token/1"
+    },
+    "statement": {
+      "type": "object",
+      "required": [
+        "type",
+        "scope",
+        "genesis",
+        "purpose",
+        "ceiling",
+        "notBefore",
+        "expiresAt",
+        "nonce",
+        "uses"
+      ],
+      "properties": {
+        "type": {
+          "const": "enroll-token/1"
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^estate:[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
+          "description": "estate:<the estate record's estate id>: whose machines it lets join."
+        },
+        "genesis": {
+          "$ref": "common.schema.json#/$defs/sha256",
+          "description": "The digest of the estate's revision 1. The node pins revision 1's passkeys only when the chain it receives starts at this digest, so a chain forged around a copied public key is refused."
+        },
+        "purpose": {
+          "const": "agent-host",
+          "description": "The only purpose this revision defines: a machine that hosts agents."
+        },
+        "ceiling": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/sha256"
+            }
+          ],
+          "description": "null for none, or the digest of a ceiling document whose shape is not decided here (as limits/1 binds whatever document its digest names). Always present: a register type names one field list for good."
+        },
+        "notBefore": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "expiresAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "After notBefore, and at most 900 s after it (FAC-SEM-113)."
+        },
+        "nonce": {
+          "$ref": "pairing-message.schema.json#/$defs/nonce",
+          "description": "32 random bytes: the token's identity in the hub's ledger, bound on first use to the joining machine's #sig key fingerprint."
+        },
+        "uses": {
+          "const": 1,
+          "description": "One use (the single-use marker); the hub's ledger enforces it."
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "$ref": "estate-record.schema.json#/$defs/assertion",
+      "description": "A WebAuthn Level 3 assertion by a signing credential (sign.<domain>) the estate's current revision lists, over SHA-256 of the RFC 8785 form of the statement (signingChallenge)."
+    }
+  },
+  "additionalProperties": false
+}
