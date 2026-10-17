@@ -38,10 +38,11 @@ its id) nor by an entry applied before (`estateSigner`). Any hub of the estate m
   delegation tokens (DEC-0039). It cannot revoke a passkey — the delta carries no `authority` revocation — so the person
   can always sign the revision that revokes the hub key. It cannot un-revoke: the chain is append-only, the record keeps
   every revocation (`FAC-SEM-072`), and a revision issued after an entry lists it ([reconciliation](#reconciliation)).
-- **Not decided by this:** Fabric's D3 is not recorded. Whether the hub key is the machine's `#sig` key or its own,
-  and whether the hub holds a private key at all, stays open exactly as [estate record](estate-record.md#not-decided-here)
-  leaves it: whichever key the record certifies as `hubKey` is the one that signs here. Domain separation holds either
-  way: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
+- **The hub's own key** (DEC-0084, the operator's NET-3): in a personal estate the hub runs on the always-on machine
+  and holds a private key of its own, the Ed25519 key the record certifies as that machine's `hubKey`, never the
+  machine's `#sig` key ([ceremonies](ceremonies.md#who-holds-which-key)); when it is away, heartbeats stop and the
+  72-hour rule below applies. Whichever key the record certifies as `hubKey` is the one that signs here. Domain
+  separation holds: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
   input, which starts with `eyJ`; and every signed document here names its `type`.
 
 ## The delta
@@ -104,7 +105,7 @@ before a refused one stay applied, since each is a valid revocation:
 | Row | Problem | When |
 |---|---|---|
 | RD-1 | `no-clock` | the verifier's clock is not a readable time (checked first: a comparison with NaN is always false) |
-| RD-2 | `malformed` | the held state, the page or an entry is not of its shape: a `sequence` that is not an integer from 1 to 2^53 − 1 (a string `"1"` among them), `prev` that is not 64 lower-case hex, a `sig` that is not 86 base64url characters, a time that is not RFC 3339 with `T`, an offset and a day that exists, a `revokedAt` after `at`, no RFC 8785 form |
+| RD-2 | `malformed` | the held state, the page or an entry is not of its shape: a `sequence` that is not an integer from 1 to 2^53 − 1 (a string `"1"` among them), `prev` that is not 64 lower-case hex, a `sig` that is not 86 base64url characters, a time that is not RFC 3339 with `T`, an offset and a day that exists, a `revokedAt` after `at`, a `device-key` `ref` that holds `@` but is no key reference `<kid>@sha256:<64 lower-case hex>` (DEC-0084: `FAC-SEM-076` refuses it in every revision, so the next revision could never list it), no RFC 8785 form |
 | RD-3 | `wrong-estate` | the entry, or the trusted revision, is another estate's |
 | RD-4 | `unsupported-alg` | `alg` is not `EdDSA` |
 | RD-5 | `not-revocable` | the kind is `authority` or unknown: a passkey is revoked only by a revision a passkey signs |
@@ -182,7 +183,7 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
+| `FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, name a `device-key` by a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084; `applyDelta` refuses any other `@` form as `malformed`), are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
 | `FAC-SEM-083` | `heartbeat`, `delta-freshness` | a heartbeat is `EdDSA`, has a readable `at`, and a head at sequence 0 is the estate's genesis; `{at, applied: {sequence, revision}, heartbeat, broken, answer}` — the machine's answer is the one the 72-hour rule gives |
 | `FAC-SEM-084` | `delta-reconciliation` | `{revision, entries}`: a revision issued at or after an entry lists its revocation |
 

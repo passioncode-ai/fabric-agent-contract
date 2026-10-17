@@ -21,6 +21,7 @@ import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
+import { enrollTokenRules } from "./enroll-token.js";
 import { contextRules } from "./context-rules.js";
 import { hubKeyRules } from "./hub-key-rules.js";
 import { signingRules } from "./signing-challenges.js";
@@ -67,6 +68,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (packaged) return packaged;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
+  const enroll = enrollTokenRules(kind, value);
+  if (enroll) return enroll;
   const context = contextRules(kind, value);
   if (context) return context;
   const hubKey = hubKeyRules(kind, value);

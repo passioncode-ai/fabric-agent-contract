@@ -185,17 +185,18 @@ when no call is metered under it.
 
 ## Linkability
 
-This slice does **not** meet CX-22 (unlinkable memberships), which is the operator's decision. Until CX-CON-06 lands (a
-`kid` and an `iss` per context; it waits on Fabric's D3), a machine shows both organizations:
+The operator decided K-1 on 2026-10-15 (NET-2, recorded by DEC-0084): each organization enrollment of a machine gets
+keys of its own, so organizations cannot link the machine (CX-22). The contract's part — a `kid` and an `iss` per context,
+with what `FAC-SEM-044`, `FAC-SEM-073` and the check-in carry for each (CX-CON-06) — is stage 2 and not yet decided. Until
+it lands, this slice still does **not** meet CX-22, and a machine shows both organizations:
 
 - the same device key and hub key;
 - in every check-in, the same `records`: the estate record's `revision` and `digest`, the `heartbeat`, the
   `revocationDelta` head and the `leases` (DEC-0053, DEC-0054, DEC-0056, DEC-0062).
 
-So the two organization servers can tell that one person's machine is enrolled in both. Running the pilot linkable waits
-on Fabric's recorded decision: the coordinator's K-1 in the pilot report and fabric-workspace #215, both still open.
-Project Observatory's plan for a device identity per organization is the open divergence from this slice. A membership
-in an organization another person controls does not run on this slice.
+So the two organization servers can tell that one person's machine is enrolled in both: the pilot's single key stays
+linkable until CX-CON-06. Project Observatory's plan for a device identity per organization is the direction NET-2
+confirms. A membership in an organization another person controls does not run on this slice.
 
 ## Compatibility
 
@@ -264,7 +265,8 @@ The board row is CT-51.
 ## Not decided here
 
 - The rest of N20 (CT-38): CX-CON-04 (`person` and `organization` in place of `external`), CX-CON-03, CX-CON-05 and
-  CX-CON-07…10; CX-CON-06 (a `kid` and an `iss` per context) waits on Fabric's D3.
+  CX-CON-07…10; CX-CON-06 (a `kid` and an `iss` per context), unblocked by the operator's NET-2 (DEC-0084) and stage 2
+  of RM-21.
 - A context on a project, a session or an event (the rest of CX-CON-01). Who fixes a session to a context is the host's
   (Fabric's CX-FAB-08).
 - Whether a share grant's `audience` names the placed agent: `audience` is an agent id and a placement names an

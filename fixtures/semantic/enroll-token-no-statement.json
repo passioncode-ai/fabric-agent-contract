@@ -1,0 +1,18 @@
+{
+  "description": "A token without its statement (FAC-SEM-113).",
+  "kind": "enroll-token",
+  "expect": [
+    "FAC-SEM-113"
+  ],
+  "input": {
+    "schema": "enroll-token/1",
+    "signature": {
+      "format": "webauthn-assertion",
+      "credentialId": "hSpa6a_vPaaKjLJRnom7Tg",
+      "alg": "EdDSA",
+      "authenticatorData": "L4UXLM_G7Q6Rz5W9pKS5sMNeEf5owxN4sl1xelH8lhoFAAAAAA",
+      "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQkhQM1U3WnpVZkUtY3ZKX1doZVZVbHpGNE11T1NIczVmVm9DNjI5TTV2byIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5leGFtcGxlLm9yZyJ9",
+      "sig": "qH0vg9FeRczg2Yl7jewfr4w4LUfM_9WUOoFh2dmMAe3u96c15DtFlKceRplkX_jaUdspkLKqjFhnqdd3wKY3Dw"
+    }
+  }
+}

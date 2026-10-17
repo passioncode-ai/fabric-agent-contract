@@ -2,6 +2,7 @@ import { createHash, createPublicKey, verify } from "node:crypto";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { rfc8785 } from "./canonical.js";
 import { isSmallOrderKey } from "./ed25519.js";
+import { KEY_REFERENCE } from "./estate-record-rules.js";
 import { type JsonObject, isObject, show } from "./findings.js";
 import { sameIdentifier } from "./identifiers.js";
 
@@ -169,6 +170,9 @@ function entryShape(entry: unknown): string | undefined {
   if (!isString(entry.sig) || !SIG.test(entry.sig)) return "sig is 64 bytes in base64url";
   const revocation = entry.revocation;
   if (!isObject(revocation) || !isString(revocation.kind) || !isString(revocation.ref)) return "revocation names its kind and ref";
+  // A `device-key` ref is a kid or a key reference (DEC-0084): one with `@` that is neither is refused in every revision
+  // that lists it (estate-record-rules), while reconciliation requires the next revision to list it, so the chain would stop.
+  if (revocation.kind === "device-key" && revocation.ref.includes("@") && !KEY_REFERENCE.test(revocation.ref)) return "a device-key ref is a kid or a key reference <kid>@sha256:<64 lower-case hex digits>";
   const at = deltaTime(entry.at);
   const revokedAt = deltaTime(revocation.revokedAt);
   if (Number.isNaN(at) || Number.isNaN(revokedAt)) return "at and revokedAt are RFC 3339 date-times with an offset, on days that exist";

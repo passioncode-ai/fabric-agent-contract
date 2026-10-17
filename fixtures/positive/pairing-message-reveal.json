@@ -1,0 +1,20 @@
+{
+  "schema": "pairing-message/1",
+  "step": "reveal",
+  "role": "new",
+  "keys": [
+    {
+      "kid": "m-7b2d#sig",
+      "use": "sig",
+      "alg": "es256",
+      "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+    },
+    {
+      "kid": "m-7b2d#kem",
+      "use": "kem",
+      "alg": "ecdh-p256",
+      "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+    }
+  ],
+  "nonce": "uLTm0WpJyNnMFIfuKbvcNuWNtPSQvRsghByRnwzaWUc"
+}
