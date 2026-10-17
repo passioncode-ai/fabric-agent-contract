@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
+import { KEY_REFERENCE } from "./estate-record-rules.js";
 import { DELTA_ALG, DELTA_KINDS, deltaEntryHash, deltaGenesis, deltaTime, freshnessAnswer, unreconciled } from "./revocation-delta.js";
 
 // #region revocation-delta-rules — docs: docs/specification/revocation-delta.md#semantic-rules
@@ -37,6 +38,9 @@ function page(value: JsonObject): Finding[] {
     const revocation = isObject(item.revocation) ? item.revocation : {};
     if (item.alg !== DELTA_ALG) add(`${at}/alg`, `an estate key signs with ${DELTA_ALG} until Fabric records D2 (unsupported-alg)`);
     if (!DELTA_KINDS.includes(revocation.kind as string)) add(`${at}/revocation/kind`, "the delta carries machine, device-key, hub-key, publisher-key, package and grant revocations; a passkey is revoked only by a revision (not-revocable)");
+    if (revocation.kind === "device-key" && typeof revocation.ref === "string" && revocation.ref.includes("@") && !KEY_REFERENCE.test(revocation.ref)) {
+      add(`${at}/revocation/ref`, "a device-key revocation names a kid or a key reference <kid>@sha256:<64 lower-case hex digits> (DEC-0084)");
+    }
     const issued = deltaTime(item.at);
     const revoked = deltaTime(revocation.revokedAt);
     if (Number.isNaN(issued) || Number.isNaN(revoked)) add(Number.isNaN(issued) ? `${at}/at` : `${at}/revocation/revokedAt`, "at and revokedAt are RFC 3339 date-times with an offset, on days that exist");

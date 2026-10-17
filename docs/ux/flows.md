@@ -453,6 +453,56 @@ flowchart TD
 
 - **Screens traversed:** SCR-21 success (unlisted); SCR-21 error (the host could not save the change and says so).
 
+### FLW-19: Operator adds a machine to their network
+
+- **Traces:** ST-023 (JTBD-10, JRN-09/#2)
+- **Goal:** the new machine is in the network, listed with the keys it generated, and has pinned the person's network
+- **Entry points:** Fabric's "Add a machine" on a trusted machine; the new machine's node (its own screen, or a terminal for a headless server)
+- **Success exit:** a passkey-signed revision lists the new machine; the new machine applied it offline
+- **Task analysis:** the new machine makes its keys → nearby, it shows a code; from afar, the trusted machine opens a one-time rendezvous (at most 10 minutes) → both commit, then reveal → both screens show the same six-digit code and the network's fingerprint → the person confirms and signs with the passkey on the trusted machine → the new machine checks the chain starts at the revealed network and lists its keys, and applies it.
+- **Rejected shape:** a code taken from one key's fingerprint — rejected because 20 bits are brute-forced offline (DV-REL-01); the commitment leaves one guess per rendezvous.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  K[New machine: keys and nonce] --> M{Nearby?}
+  M -->|yes| L[Local connection]
+  M -->|no| R[One-time rendezvous, 600 s]
+  L --> C[Both commit, then reveal]
+  R --> C
+  C -->|reveal does not open its commitment| X[Burned: start again]
+  C --> D{Codes match on both screens?}
+  D -->|no| X
+  D -->|yes| S[Passkey signs the next revision]
+  S --> A[New machine checks and applies offline]
+```
+
+- **Screens traversed:** SCR-22 loading (waiting for the other side), error (codes differ, rendezvous expired), success (joined).
+
+### FLW-20: Operator creates the network, removes or re-keys a machine
+
+- **Traces:** ST-024, ST-025 (JTBD-10, JRN-09/#1, JRN-09/#3)
+- **Goal:** a signed revision that creates the network, drops a machine, or replaces a machine's keys, revoking what it drops
+- **Entry points:** Fabric's "Create my network", and the network's machine list with "Remove" and "Replace key" per machine
+- **Success exit:** the person signed; machines apply the revision, and the delta carries each revocation within seconds
+- **Task analysis:** create: the first machine makes its keys → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it and its hub key → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
+- **Rejected shape:** dropping a machine or a key without revoking it — rejected because a revision that drops without revoking leaves caches and deltas without the revocation (`FAC-SEM-114`).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A{What changes?} -->|create| C[Revision 1: passkey, first machine]
+  A -->|remove| R[Revision without the machine, revoking it and its hub key]
+  A -->|re-key| K[Pair again under the id, or sign on the lone machine]
+  K --> N[Revision with the new keys, old ones revoked by reference]
+  C --> S[Passkey signs]
+  R --> S
+  N --> S
+  S --> P[Machines apply; the delta carries each revocation]
+```
+
+- **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

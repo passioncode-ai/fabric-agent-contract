@@ -1,0 +1,20 @@
+{
+  "schema": "pairing-message/1",
+  "step": "commit",
+  "role": "new",
+  "commit": "sha256:58b3acad225da8298dc83e3e5f8f760602c08ea7811daeee702cddad2a7fd515",
+  "keys": [
+    {
+      "kid": "m-7b2d#sig",
+      "use": "sig",
+      "alg": "es256",
+      "publicKey": "BHYJMaoWOLgoAKpohhiGWkOVtgcc2kkbvHn+caRxyt5jkpRXgLuzfCIM8GLpSdTfAef5BsXs+IU2tp0x32En0A8="
+    },
+    {
+      "kid": "m-7b2d#kem",
+      "use": "kem",
+      "alg": "ecdh-p256",
+      "publicKey": "BJgcFrvvLT5w5c+7PuGeTrY3w1B50PJn5y535OfuOuFpKTYLlr7zOu2MASKV8yNQh8f509brL1iRsZtOmUvIh0s="
+    }
+  ]
+}

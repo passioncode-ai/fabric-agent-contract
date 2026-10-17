@@ -34,6 +34,10 @@ const GRANT_REF = /^[^\s#]{1,200}#[1-9][0-9]{0,15}$/;
 const JKT = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 /** Whose limits a `limits/1` statement approves: an estate's or an organization's. */
 const LIMITS_SCOPE = /^(estate|organization):[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$/;
+/** Whose machines an `enroll-token/1` lets join: an estate's (DEC-0084). */
+const ESTATE_SCOPE = /^estate:[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$/;
+/** 32 random bytes as unpadded base64url, the same 43-character form as `jkt`. */
+const NONCE32 = JKT;
 const isString = (value: unknown): value is string => typeof value === "string";
 const positive = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 1;
 const matches = (pattern: RegExp, value: unknown) => isString(value) && pattern.test(value);
@@ -42,6 +46,9 @@ const matches = (pattern: RegExp, value: unknown) => isString(value) && pattern.
 export const WINDOW_LEASE_FIELDS = [
   "leaseId", "sequence", "estate", "estateRevision", "machine", "scope", "window", "period", "amount", "unit", "issuedAt", "expiresAt", "alg", "kid"
 ] as const;
+
+/** The enroll token's members beside `type` (DEC-0084), one list for good. */
+export const ENROLL_TOKEN_FIELDS = ["scope", "genesis", "purpose", "ceiling", "notBefore", "expiresAt", "nonce", "uses"] as const;
 
 /** A Map, so a type named like an Object.prototype member reads nothing. */
 export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<string, StatementSpec>([
@@ -66,9 +73,22 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ],
   ["limits/1", { signer: "passkey", fields: ["scope", "digest"], decision: "DEC-0063", check: (f) => matches(LIMITS_SCOPE, f.scope) && matches(SHA256, f.digest) }],
   [
+    "enroll-token/1",
+    {
+      signer: "passkey",
+      fields: ENROLL_TOKEN_FIELDS,
+      decision: "DEC-0084",
+      // The values only; the window's length (at most 900 s) is FAC-SEM-113's and the verifier's (src/enroll-token.ts).
+      check: (f) =>
+        matches(ESTATE_SCOPE, f.scope) && matches(SHA256, f.genesis) && f.purpose === "agent-host" && (f.ceiling === null || matches(SHA256, f.ceiling)) &&
+        Number.isFinite(strictTime(f.notBefore)) && Number.isFinite(strictTime(f.expiresAt)) && matches(NONCE32, f.nonce) && f.uses === 1
+    }
+  ],
+  [
     "fabric-package-signature/1",
     { signer: "key", fields: ["role", "digest"], decision: "DEC-0051", check: (f) => (f.role === "publisher" || f.role === "organization") && matches(SHA256, f.digest) }
   ],
+  ["enroll-join/1", { signer: "key", fields: ["digest", "nonce"], decision: "DEC-0084", check: (f) => matches(SHA256, f.digest) && matches(NONCE32, f.nonce) }],
   ["window-lease/1", { signer: "key", fields: WINDOW_LEASE_FIELDS, decision: "DEC-0062" }],
   ["relay-auth/1", { signer: "key", fields: ["alg", "relay", "nonce", "estate", "kid", "iat"], decision: "DEC-0047" }],
   ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }]

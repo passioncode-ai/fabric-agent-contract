@@ -1,0 +1,6 @@
+{
+  "schema": "pairing-message/1",
+  "step": "abort",
+  "role": "new",
+  "reason": "codes differ"
+}

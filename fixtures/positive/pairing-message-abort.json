@@ -1,0 +1,5 @@
+{
+  "schema": "pairing-message/1",
+  "step": "abort",
+  "role": "trusted"
+}

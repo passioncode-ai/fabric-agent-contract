@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107), comms-transition (FAC-SEM-027, FAC-SEM-109), board-finding (FAC-SEM-108), grant (FAC-SEM-110) and profile-resolution (FAC-SEM-060, FAC-SEM-112) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107), comms-transition (FAC-SEM-027, FAC-SEM-109), board-finding (FAC-SEM-108), grant (FAC-SEM-110), profile-resolution (FAC-SEM-060, FAC-SEM-112) and enroll-token (FAC-SEM-113) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -26,7 +26,9 @@ const KINDS = [
   // A standing grant, whose context is never personal for an external principal (FAC-SEM-110, DEC-0082).
   "grant",
   // A recorded profile resolution, whose profiles that read user content have an open-vendor route (FAC-SEM-060, FAC-SEM-112, DEC-0083).
-  "profile-resolution"
+  "profile-resolution",
+  // An enroll token, whose statement is the register's, for one use and at most 900 s (FAC-SEM-113, DEC-0084).
+  "enroll-token"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -49,8 +51,18 @@ const MEMBERS = [
   "context", "pool", "days", "byProject", "generatedAt", "route", "admissions", "event", "candidates", "project", "capability",
   "entry", "manifest", "projects", "op", "observed", "settledBy", "summary", "principal", "finding", "affects", "thread",
   "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day",
-  "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes"
+  "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes",
+  "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys"
 ];
+
+describe("a route event's selected index far past any route (the adapter's report on d8146cf, DEC-0084 fix round)", () => {
+  it.each([2 ** 32, Number.MAX_SAFE_INTEGER, 2 ** 53, 1e300])("index %s answers without throwing", (index) => {
+    const candidates = [{ runnerKind: "claude-code", session: {} }];
+    const value = { route: { candidates }, event: { kind: "runner-selected", probes: [], selected: { index, runnerKind: "claude-code" } } };
+    expect(() => evaluateSemanticRules("route-event", value)).not.toThrow();
+    expect(evaluateSemanticRules("route-event", value).some((finding) => finding.code === "FAC-SEM-034")).toBe(true);
+  });
+});
 
 describe("activity and device rules tolerate malformed input", () => {
   it.each(KINDS)("%s answers every malformed shape without throwing", (kind) => {

@@ -333,7 +333,9 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
     ["revocation kind", { revocation: { ...e1.entry.revocation, kind: 7 } }],
     ["revocation ref", { revocation: { ...e1.entry.revocation, ref: null } }],
     ["revokedAt", { revocation: { ...e1.entry.revocation, revokedAt: "2026-10-12T25:00:00Z" } }],
-    ["a lone surrogate (no RFC 8785 form)", { revocation: { ...e1.entry.revocation, ref: "\ud800" } }]
+    ["a lone surrogate (no RFC 8785 form)", { revocation: { ...e1.entry.revocation, ref: "\ud800" } }],
+    ["device-key ref, an @ form that is no key reference (DEC-0084)", { revocation: { ...e1.entry.revocation, kind: "device-key", ref: "m-c#sig@sha256:ABC" } }],
+    ["device-key ref, a key reference in upper-case hex", { revocation: { ...e1.entry.revocation, kind: "device-key", ref: `m-c#sig@sha256:${"AB".repeat(32)}` } }]
   ])("an entry with a bad %s is malformed", (_name, patch) => {
     expect(applyDelta(emptyDeltaState(ESTATE), { head: {}, entries: [{ ...e1.entry, ...patch }] }, trust)).toMatchObject({ ok: false, problem: "malformed", index: 0 });
   });
@@ -375,6 +377,15 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
     expect(codes("revocation-delta", page([7]))).toEqual(["FAC-SEM-082"]);
     expect(codes("revocation-delta", page([{ ...e1.entry, revocation: 3 }]))).toEqual(["FAC-SEM-082"]);
     expect(codes("revocation-delta", page([resign(e1.entry, { revocation: { ...e1.entry.revocation, revokedAt: "yesterday" } })]))).toEqual(["FAC-SEM-082"]);
+    // DEC-0084: a device-key ref is a kid or a key reference; an @ form that is neither is refused on the delta side too,
+    // since FAC-SEM-076 would refuse every revision that lists it while FAC-SEM-084 requires the next one to.
+    const refFindings = (ref: string) =>
+      evaluateSemanticRules("revocation-delta", page([resign(e1.entry, { revocation: { ...e1.entry.revocation, kind: "device-key", ref } })]))
+        .filter((finding) => finding.instancePath === "/entries/0/revocation/ref").map((finding) => finding.code);
+    expect(refFindings("m-c#sig@sha256:ABC")).toEqual(["FAC-SEM-082"]);
+    expect(refFindings(`m-c#sig@sha256:${"AB".repeat(32)}`)).toEqual(["FAC-SEM-082"]);
+    expect(refFindings(`m-c#sig@sha256:${"ab".repeat(32)}`)).toEqual([]);
+    expect(refFindings("m-c#sig")).toEqual([]);
     expect(codes("revocation-delta", { head: { sequence: 1, sha256: e1.hash }, entries: [{ ...e1.entry, revocation: { ...e1.entry.revocation, ref: "\ud800" } }] }).length).toBe(1);
     expect(evaluateSemanticRules("revocation-delta", { head: {}, entries: "x" })).toEqual([]);
     expect(codes("delta-freshness", { at: "2026-10-12T12:00:00Z", applied: { sequence: 2, revision: 3 }, heartbeat: { ...hb, at: "2026-10-12T11:00:00Z" }, broken: false, answer: "stale" })).toEqual(["FAC-SEM-083"]);

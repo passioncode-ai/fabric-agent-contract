@@ -105,6 +105,10 @@ const ED25519_JWK = { kty: "OKP", crv: "Ed25519", x: (ED25519.export({ format: "
 const MACHINE = testKey("machine example-laptop");
 const GPU = testKey("machine example-gpu-box");
 const STRANGER = testKey("stranger");
+/** The laptop's key after a key replacement under the same kid (DEC-0084). */
+const MACHINE_REPLACED = testKey("machine example-laptop replaced");
+/** A device key's reference, `<kid>@sha256:<hex of its octets>` (DEC-0084), computed here from the octets. */
+const keyRef = (kid: string, key: TestKey) => `${kid}@sha256:${sha256(Buffer.from(key.octets, "base64")).toString("hex")}`;
 const offCurve = (jwk: TestKey["jwk"]) => ({ ...jwk, y: jwk.x });
 
 // ---- relay.json ---------------------------------------------------------------------------------------------------
@@ -156,7 +160,38 @@ function admissionSetCases(): Json[] {
     c("at validUntil", "2026-11-11T09:00:00Z", ok(all)),
     c("one ms after validUntil", "2026-11-11T09:00:00.001Z", { ok: false, refusal: "expired" }),
     c("a held window that is not a real date", "2026-10-13T00:00:00Z", { ok: false, refusal: "expired" }, { held: heldRecord({ validUntil: "2026-11-31T09:00:00Z" }) }),
-    c("no record held", "2026-10-13T00:00:00Z", { ok: false, refusal: "no-record" }, { held: null })
+    c("no record held", "2026-10-13T00:00:00Z", { ok: false, refusal: "no-record" }, { held: null }),
+    // DEC-0084: a device-key revocation names a kid or one key by its reference <kid>@sha256:<hex of its octets>.
+    c("a delta revoking the listed key by its key reference: the kid leaves the set", "2026-10-13T00:00:00Z", ok(["m-a#sig", "m-b#sig"]), { extraRevocations: [{ kind: "device-key", ref: keyRef("m-c#sig", STRANGER) }] }),
+    c("a delta revoking an older key under the same kid: the listed key stays", "2026-10-13T00:00:00Z", ok(all), { extraRevocations: [{ kind: "device-key", ref: keyRef("m-c#sig", MACHINE_REPLACED) }] }),
+    c("a delta whose device-key ref holds @ but is no key reference is reported, and revokes nothing", "2026-10-13T00:00:00Z", { ...ok(all), unread: [{ index: 1, ref: "m-c#sig@sha256:ABC" }] }, { extraRevocations: [{ kind: "machine", ref: "m-zz" }, { kind: "device-key", ref: "m-c#sig@sha256:ABC" }] }),
+    // F7 (DEC-0084): a #sig key is admitted only under its own machine's kid, and a kid listed twice for neither.
+    c("a #sig key listed under another machine's id is not admitted (bad-key)", "2026-10-13T00:00:00Z", { ok: true, revision: 4, kids: ["m-b#sig", "m-c#sig"], excluded: [{ kid: "m-x#sig", reason: "bad-key" }, ...excluded] }, {
+      held: heldRecord({ machines: [{ id: "m-a", deviceKeys: [{ kid: "m-x#sig", use: "sig", publicKey: MACHINE.octets }] }, ...(heldRecord().machines as Json[]).slice(1)] })
+    }),
+    c("one kid listed twice is admitted for neither (bad-key)", "2026-10-13T00:00:00Z", { ok: true, revision: 4, kids: ["m-b#sig", "m-c#sig"], excluded: [{ kid: "m-a#sig", reason: "bad-key" }, { kid: "m-a#sig", reason: "bad-key" }, ...excluded] }, {
+      held: heldRecord({ machines: [...(heldRecord().machines as Json[]).slice(0, 1), { id: "m-a", deviceKeys: [{ kid: "m-a#sig", use: "sig", publicKey: MACHINE_REPLACED.octets }] }, ...(heldRecord().machines as Json[]).slice(1)] })
+    })
+  ];
+}
+
+/** sessionStands(session, relayAdmissionSet(...)): an open session stands only while its kid maps to the key it was proven under (DEC-0084). */
+function sessionCases(): Json[] {
+  const c = (name: string, session: Json, expect: Json, over: Json = {}) => ({ name, session, held: heldRecord(), at: "2026-10-13T00:00:00Z", extraRevocations: [], ...over, expect });
+  const underA = { kid: "m-a#sig", key: MACHINE.octets };
+  const replaced = heldRecord({
+    machines: [{ id: "m-a", deviceKeys: [{ kid: "m-a#sig", use: "sig", publicKey: MACHINE_REPLACED.octets }] }, ...(heldRecord().machines as Json[]).slice(1)],
+    revocations: [{ kind: "device-key", ref: keyRef("m-a#sig", MACHINE), revokedAt: "2026-10-12T10:00:00Z" }]
+  });
+  return [
+    c("a session under the key the record lists stands", underA, { ok: true }),
+    c("a session proven under key A, after a revision lists key B under the same kid and revokes A by reference: not-admitted", underA, { ok: false, code: "not-admitted" }, { held: replaced }),
+    c("a session proven under the new key B stands after that revision", { kid: "m-a#sig", key: MACHINE_REPLACED.octets }, { ok: true }, { held: replaced }),
+    c("a session whose key a delta revokes by reference: not-admitted", underA, { ok: false, code: "not-admitted" }, { extraRevocations: [{ kind: "device-key", ref: keyRef("m-a#sig", MACHINE) }] }),
+    c("a session whose machine a delta revokes: not-admitted", underA, { ok: false, code: "not-admitted" }, { extraRevocations: [{ kind: "machine", ref: "m-a" }] }),
+    c("lax: a session that names the kid with another key never stands", { kid: "m-a#sig", key: STRANGER.octets }, { ok: false, code: "not-admitted" }),
+    c("every session ends when the held record's window ended: expired", underA, { ok: false, code: "expired" }, { at: "2026-11-11T09:00:00.001Z" }),
+    c("no record held: not-admitted", underA, { ok: false, code: "not-admitted" }, { held: null })
   ];
 }
 
@@ -477,7 +512,8 @@ function relayVectors(): Json {
     },
     instant: { about: "instant(value): RFC 3339 UTC (Z only, at most nine fraction digits) on a day that exists, as an ISO string with milliseconds, or null (DEC-0066).", cases: instantCases() },
     relayOrigin: { about: "isRelayOrigin(value): what hello.relay may be (DEC-0066): https, or http on a loopback literal (127.0.0.0/8, [::1]) for a relay on this machine; never a name such as localhost.", cases: relayOriginCases() },
-    admissionSet: { about: "relayAdmissionSet({held, at, extraRevocations}) over a record the relay already verified and holds (no candidate, so no schema check runs): kids is the set's keys, sorted (DEC-0047 item 4, DEC-0066).", cases: admissionSetCases() },
+    admissionSet: { about: "relayAdmissionSet({held, at, extraRevocations}) over a record the relay already verified and holds (no candidate, so no schema check runs): kids is the set's keys, sorted; unread, when present, the delta revocations whose device-key ref holds @ but is no key reference (DEC-0047 item 4, DEC-0066, DEC-0084).", cases: admissionSetCases() },
+    session: { about: "sessionStands({kid, key}, relayAdmissionSet({held, at, extraRevocations})): an open session stands only while its kid maps to the same key octets it was proven under; a key replacement keeps the kid (DEC-0066, DEC-0084). key is base64 SEC 1 octets.", cases: sessionCases() },
     admit: { about: "admit(frame, context) (DEC-0047 item 4, DEC-0066): context.estate is the estate of the record the context admits from.", cases: admitCases() },
     messageBody: { about: "verifyMessageBody(body, {from: frame.from, msgId: frame.msgId, to: self}, senders, now) (DEC-0047 item 5, DEC-0066): `frame` is the deliver frame, `self` the recipient's own #sig.", cases: messageBodyCases() },
     replay: { about: "checkReplay(seen, payload, now) after verifyMessageBody (DEC-0066): steps run in order against one recipient's store of accepted (from, msgId), which an accepted step adds to.", cases: replayCases() }
@@ -619,15 +655,23 @@ function placementCases(): Json[] {
   });
   const personal = { agentRef: AGENT, slot: SLOT, from: laptop };
   const orgSlot = { agentRef: AGENT, slot: SLOT, from: target, context: org };
-  const query = (expectLaptop: boolean, expectTarget: boolean, currentPlacement: number | null) => ({
-    holds: [{ sender: `${laptop}#sig`, mayHold: expectLaptop }, { sender: `${target}#sig`, mayHold: expectTarget }], currentPlacement
+  const query = (expectLaptop: boolean, expectTarget: boolean, currentPlacement: number | null, laptopKnown = true) => ({
+    holds: [{ sender: `${laptop}#sig`, mayHold: expectLaptop, senderKnown: laptopKnown }, { sender: `${target}#sig`, mayHold: expectTarget, senderKnown: true }], currentPlacement
   });
+  // DEC-0084: the revocations of the verified delta entries the target applied (`extraRevocations`), read like the
+  // record's own. The key reference is written here from the key's octets, not by the code under test.
+  const laptopKeyRef = `${laptop}#sig@sha256:${createHash("sha256").update(Buffer.from(MACHINE.octets, "base64")).digest("hex")}`;
+  const revoked = (kind: string, ref: string) => [{ kind, ref, revokedAt: "2026-10-12T00:00:00Z" }];
   return [
     { name: "an organization's secret placement listed before the personal one: the personal one decides (a port that reads the first match fails)", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, personal])], expect: query(true, false, 4) },
     { name: "the personal secret placement listed first: the same answer", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal, orgSlot])], expect: query(true, false, 4) },
     { name: "context personal spelled out, after the organization's: it is the personal placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, { ...personal, context: "personal" }])], expect: query(true, false, 4) },
     { name: "only an organization's secret placement: no sender may hold the slot, and it has no current placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot])], expect: query(false, false, null) },
-    { name: "the run of the personal placement is unbroken when an organization's placement is added before it", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(3, [personal]), record(4, [orgSlot, personal])], expect: query(true, false, 3) }
+    { name: "the run of the personal placement is unbroken when an organization's placement is added before it", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(3, [personal]), record(4, [orgSlot, personal])], expect: query(true, false, 3) },
+    { name: "a delta entry revokes the sender's machine: it may not hold the slot and its key is unknown, before any revision says so (DEC-0084)", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("machine", laptop), expect: query(false, false, 4, false) },
+    { name: "a delta entry revokes the sender's #sig key by its kid", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", `${laptop}#sig`), expect: query(false, false, 4, false) },
+    { name: "a delta entry revokes the sender's #sig key by its key reference <kid>@sha256:<hex>", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", laptopKeyRef), expect: query(false, false, 4, false) },
+    { name: "a delta entry revoking another machine's key leaves the sender able to hold the slot", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", "m-other#sig"), expect: query(true, false, 4) }
   ];
 }
 
@@ -645,7 +689,7 @@ function envelopeVectors(): Json {
     senderKeyOctets: MACHINE.octets,
     cases: envelopeCases(envelope),
     placement: {
-      about: "DEC-0082: the open context a target derives from its applied estate-record revisions (estateEnvelopeContext, relay.md open steps 6 and 7) reads only personal secret placements (no context, or personal). Each case: the applied revisions, oldest first, the target machine, the agentRef and slot; expect.holds says whether each sender kid may hold the slot, expect.currentPlacement the revision the placement's run starts at, or null.",
+      about: "DEC-0082: the open context a target derives from its applied estate-record revisions (estateEnvelopeContext, relay.md open steps 6 and 7) reads only personal secret placements (no context, or personal). Each case: the applied revisions, oldest first, the target machine, the agentRef and slot; extraRevocations, when present, the revocations of the delta entries the target applied (DEC-0054, read like the record's own, DEC-0084); expect.holds says whether each sender kid may hold the slot and whether senderKey knows its key, expect.currentPlacement the revision the placement's run starts at, or null.",
       cases: placementCases()
     }
   };

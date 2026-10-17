@@ -20,7 +20,7 @@ Status: contract `0.1.0`. What ships: the JSON Schemas, the fixtures, the confor
 contract pin, and reference verifiers that consumers copy or port and test against this repository's
 vectors — `src/delegation.ts`, `src/grant-projection.ts`, `src/fabric-links.ts`, `src/operator-session.ts`,
 `src/session-handoff.ts`, `src/secret-shape.ts` (the one credential detector), `src/package-rules.ts` (the package digest, folder check and signature verifier), `src/estate-record-rules.ts` with
-`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/relay.ts` (relay
+`src/webauthn.ts` (the estate record's digest, chain and offline passkey-assertion verifier), `src/pairing.ts` and `src/enroll-token.ts` (the estate ceremonies' pairing, comparison code, fingerprint and enroll token, DEC-0084), `src/relay.ts` (relay
 admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE secret envelope), `src/relay-vectors.ts`
 (the framework-free runner of the relay's shared vectors, DEC-0066), `src/p256.ts` `signEs256`/`toLowS` (the low-S
 ES256 rule, DEC-0066) and
@@ -66,6 +66,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Packages — one version of an agent or a skill set: its digest, its publisher's signature, an organization's countersignature and `agentRef` (`fabric-package/1`, DEC-0050, DEC-0051)](docs/specification/package.md)
 - [Contexts — `personal` and `org:<orgId>`: a grant's context, one agent instance per context on a machine, routing by context and a grant's daily usage (DEC-0082)](docs/specification/contexts.md)
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
+- [The estate ceremonies — create my network, add a machine by a comparison code or an enroll token, remove and re-key a machine (DEC-0084)](docs/specification/ceremonies.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
 - [The runner catalogue of installed coding agents](docs/specification/runners.md)
 - [Pipelines and their compatibility rules (`pipeline/0.1`)](docs/specification/pipeline.md)

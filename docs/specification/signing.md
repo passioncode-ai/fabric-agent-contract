@@ -57,6 +57,10 @@ SHA-256 of the UTF-8 RFC 8785 form of `{type, ...fields}` (`signingChallenge`). 
   under a share grant until `expiresAt` (v4 §6 Path 7 step 3). `jkt` is the base64url RFC 7638 SHA-256 thumbprint of
   that person's key, the value RFC 9449 §6.1 binds a DPoP token to. `estate` is added to v4's three for the same reason
   as `organization`: personal estates share PassionCode's signing RP, and grant ids are an estate's own.
+- **`enroll-token/1`** `{scope, genesis, purpose, ceiling, notBefore, expiresAt, nonce, uses}`: Fabric's one-time token
+  with which a machine without a screen joins an estate, for at most 900 s, purpose `agent-host`, one use (DEC-0084,
+  [ceremonies](ceremonies.md#a-headless-machine)). `ceiling` is `null` for none, so the field list stays one list. The
+  joining machine proves its `#sig` key with the key-signed `enroll-join/1` `{digest, nonce}` over that token.
 - **`limits/1`** `{scope, digest}`: approval of a limits document, the estate's (`estate:<id>`) or an organization's
   (`organization:<id>`), by its `sha256:` digest over RFC 8785. The document's shape — an estate's windows, an
   organization's levels and allowances — is not decided here; the approval binds whatever document the digest names.
@@ -89,7 +93,8 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
 
 ## Who adopts it
 
-- **Fabric** (backlog CT-19) registers each person's signing credential under its signing RP ID, apart from the sign-in
+- **Fabric** (backlog CT-19, CT-53) runs the estate ceremonies under the signing credential and issues `enroll-token/1`
+  ([ceremonies](ceremonies.md), DEC-0084); it registers each person's signing credential under its signing RP ID, apart from the sign-in
   credential; runs every ceremony in the person's Fabric or the pinned static page; computes each challenge with the
   register's statement; and signs `share-grant/1` when an owner confirms an outside person, and `limits/1` when a person
   sets their estate's limits.
