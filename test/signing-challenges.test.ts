@@ -8,6 +8,8 @@ import { packageSigningInput } from "../src/package-rules.js";
 import { relayAuthSigningInput, relayBlobSigningInput } from "../src/relay.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import {
+  ENTITLEMENT_FIELDS,
+  ENTITLEMENT_KEY_SET_FIELDS,
   SIGNING_STATEMENTS,
   WINDOW_LEASE_FIELDS,
   isSigningRpId,
@@ -18,6 +20,7 @@ import {
   verifySigningAssertion
 } from "../src/signing-challenges.js";
 import { windowLeaseSigningInput } from "../src/window-lease.js";
+import { entitlementKeySetSigningInput, entitlementSigningInput } from "../src/entitlement.js";
 
 // DEC-0063: one register of signed statements, each the RFC 8785 form of {type, ...fields}; a passkey signs its
 // SHA-256 as the WebAuthn challenge, under a dedicated signing RP.
@@ -28,12 +31,14 @@ const vectors = load("vectors/signing-challenges.json");
 const estateVectors = load("vectors/estate-record.json");
 const conformance = readFileSync(path.join(root, "docs/specification/conformance.md"), "utf8");
 const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRules(kind, value).map((finding) => finding.code))];
+const DOCUMENT_TYPES = ["window-lease/1", "entitlement/1", "entitlement-key-set/1"];
 const statement = (type: string) => (vectors.statements as Json[]).find((entry) => entry.type === type) as Json;
 
 describe("the register (DEC-0063)", () => {
   it("names v4 §7's four challenge types, the package statement and every typed statement a key signs", () => {
     expect([...SIGNING_STATEMENTS.keys()]).toEqual([
-      "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "fabric-package-signature/1", "window-lease/1", "relay-auth/1", "relay-blob/1"
+      "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "fabric-package-signature/1", "window-lease/1", "relay-auth/1", "relay-blob/1",
+      "entitlement/1", "entitlement-key-set/1"
     ]);
     const passkey = [...SIGNING_STATEMENTS].filter(([, spec]) => spec.signer === "passkey").map(([type]) => type);
     expect(passkey).toEqual(["estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1"]);
@@ -46,7 +51,8 @@ describe("the register (DEC-0063)", () => {
     for (const row of rows) {
       const spec = SIGNING_STATEMENTS.get(row[1] as string);
       const fields = [...(row[2] ?? "").matchAll(/`([a-zA-Z]+)`/g)].map((match) => match[1]);
-      expect(fields, row[1]).toEqual(spec?.fields[0] === "leaseId" ? ["type", "sig"] : [...(spec?.fields ?? [])]);
+      // A signed document (a lease, an entitlement, a key set) is named as "every member but `type` and `sig`".
+      expect(fields, row[1]).toEqual(DOCUMENT_TYPES.includes(row[1] as string) ? ["type", "sig"] : [...(spec?.fields ?? [])]);
       expect(row[3]?.trim().startsWith(spec?.signer === "passkey" ? "a passkey" : "a key"), row[1]).toBe(true);
       expect(row[4], row[1]).toBe(spec?.decision);
     }
@@ -63,6 +69,12 @@ describe("the register (DEC-0063)", () => {
     const lease = load("positive/window-lease.json");
     expect(statement("window-lease/1").statement).toBe(windowLeaseSigningInput(lease)?.toString("utf8"));
     expect([...WINDOW_LEASE_FIELDS, "type", "sig"].sort()).toEqual(Object.keys(lease).sort());
+    const entitlement = load("positive/entitlement.json");
+    expect(statement("entitlement/1").statement).toBe(entitlementSigningInput(entitlement)?.toString("utf8"));
+    expect([...ENTITLEMENT_FIELDS, "type", "sig"].sort()).toEqual(Object.keys(entitlement).sort());
+    const keySet = load("positive/entitlement-key-set.json");
+    expect(statement("entitlement-key-set/1").statement).toBe(entitlementKeySetSigningInput(keySet)?.toString("utf8"));
+    expect([...ENTITLEMENT_KEY_SET_FIELDS, "type", "sig"].sort()).toEqual(Object.keys(keySet).sort());
     const auth = statement("relay-auth/1").fields;
     expect(statement("relay-auth/1").statement).toBe(relayAuthSigningInput(auth as never));
     const blob = statement("relay-blob/1").fields;

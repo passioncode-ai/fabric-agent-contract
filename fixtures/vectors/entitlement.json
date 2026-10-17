@@ -1,0 +1,4136 @@
+{
+  "about": "Vectors for entitlement/1 and entitlement-key-set/1 (DEC-0085), written by tools/vectors/entitlement.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them); Ed25519 is deterministic, so a port's signer reproduces every sig. root: the issuer's root key a verifier pins. keySets: documents the root signed; handedKeySets: key sets built by hand to reach the entitlement verifier's key checks, never root-signed. keySet cases: verifyEntitlementKeySet(keySet, trust), keySet a document or the name of one in keySets, trust.root the pinned {issuer, kid, x}. verify cases: verifyEntitlement(entitlement, trust), trust.now an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock), trust.keySet the name of a key set in keySets or handedKeySets, trust.held the record held for the subject. expected is exactly what the reference returns; digest is sha256: of the signed bytes.",
+  "keys": {
+    "root": {
+      "seed": "eff8d55d271b175a14522ef04be59b4d009dc1ef9d7e50c3bbc27df02cb8d672",
+      "kid": "root-2026-1",
+      "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+    },
+    "otherRoot": {
+      "seed": "72bdcb713727f479f9e67cd9afff105cfea397467aaf9a9a12c3e1e0d2f11d9d",
+      "kid": "root-other-1",
+      "x": "AMqPZ-k7IclPMW22cOVgbtrCUXQ8n9tvbsIP4Fr6lO0"
+    },
+    "k0": {
+      "seed": "290e6bf6b73f9a970a0373ea1ca7016126ce5923047c3fc68997e548532dc180",
+      "kid": "ent-2026-08",
+      "x": "0aFRv0iPBwVhxSsdaFldyg81xjo-RGRMHbf4aN3vJz4"
+    },
+    "k1": {
+      "seed": "b6ee382bd9d5b17be263f56ffd6eb83d995bb0ab3adbd0b6c890decf3539fdf8",
+      "kid": "ent-2026-09",
+      "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68"
+    },
+    "k2": {
+      "seed": "f4819edc352e8f8c30b46c1aaf6c94a3fe0f97adeab15b30e849791197a5eb8e",
+      "kid": "ent-2026-10",
+      "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg"
+    },
+    "rogue": {
+      "seed": "073658fb06241fb658243d5edcc89f85d8739b451382b3156cea8d1a31e59b78",
+      "kid": "ent-rogue",
+      "x": "sIKkXglBbEatUXz5WC9YPBhOtfFgfmul_I0io1eLNPc"
+    }
+  },
+  "root": {
+    "issuer": "https://platform.example",
+    "kid": "root-2026-1",
+    "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+  },
+  "signingInput": {
+    "entitlement": {
+      "document": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "input": "{\"agents\":[{\"agentRef\":\"urn:fabric:agent:example-publisher:notes\"},{\"agentRef\":\"urn:fabric:agent:example-publisher:triage\"}],\"alg\":\"EdDSA\",\"estate\":null,\"expiresAt\":\"2026-11-24T00:00:00Z\",\"hosting\":{\"product\":\"org-cloud\",\"size\":\"s-2\"},\"issuedAt\":\"2026-10-20T00:00:00Z\",\"issuer\":\"https://platform.example\",\"kid\":\"ent-2026-10\",\"licence\":{\"members\":25},\"notBefore\":\"2026-10-20T00:00:00Z\",\"order\":{\"id\":\"ord-org-a-0001\",\"revision\":3},\"subject\":\"org:org-a\",\"support\":{\"tier\":\"assist\"},\"type\":\"entitlement/1\"}"
+    },
+    "keySet": {
+      "document": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+      },
+      "input": "{\"alg\":\"EdDSA\",\"issuedAt\":\"2026-10-15T00:00:00Z\",\"issuer\":\"https://platform.example\",\"keys\":[{\"alg\":\"EdDSA\",\"kid\":\"ent-2026-09\",\"notAfter\":\"2026-11-01T00:00:00Z\",\"notBefore\":\"2026-09-01T00:00:00Z\",\"x\":\"nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68\"},{\"alg\":\"EdDSA\",\"kid\":\"ent-2026-10\",\"notAfter\":\"2027-01-01T00:00:00Z\",\"notBefore\":\"2026-10-15T00:00:00Z\",\"x\":\"hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg\"}],\"kid\":\"root-2026-1\",\"revision\":2,\"revoked\":[\"ent-2026-08\"],\"type\":\"entitlement-key-set/1\"}"
+    }
+  },
+  "keySets": {
+    "r1": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 1,
+      "issuedAt": "2026-09-01T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        }
+      ],
+      "revoked": [],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "xqW9a9bRApULrtQN5m2VcCT3YKtDYBOLbk-CBaXXWV_Npcwp4TVR46Qe8oHs2eKPMJBlv7otR2BnmJN5ycF3DQ"
+    },
+    "r2": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+    },
+    "r2Other": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:01Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "fpV9AMHxChNfJ9d8LnQX4MazMPC80TFOmqOX-UGAG4Zj55pxtlDgSTi1Jaf6jRfxPrW7AM-Ueoc_UQpyh28qDQ"
+    },
+    "r3": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 3,
+      "issuedAt": "2026-10-28T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08",
+        "ent-2026-09"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "o4sF-m4pmwjP84Vze0geKI9z_if9vV7U5F1q2R0Oym-SKZJYa3Ch6QC4Eqdft1eeSezpOLUfvc4kGbLy9I6xBg"
+    }
+  },
+  "handedKeySets": {
+    "algMismatch": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "ES256",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+    },
+    "smallOrder": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-zero",
+          "alg": "EdDSA",
+          "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+    },
+    "es256": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "ES256",
+      "kid": "root-2026-1",
+      "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+    },
+    "rootAmongKeys": {
+      "type": "entitlement-key-set/1",
+      "issuer": "https://platform.example",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ent-2026-09",
+          "alg": "EdDSA",
+          "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ent-2026-10",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        },
+        {
+          "kid": "root-2026-1",
+          "alg": "EdDSA",
+          "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ent-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-2026-1",
+      "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+    }
+  },
+  "keySetCases": [
+    {
+      "name": "first: revision 1 with nothing held",
+      "keySet": "r1",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:9319a69e2ca5a4487cca4518e134aafd3ffb52dccbe5cdbde4804ebcf87321fe",
+        "held": {
+          "revision": 1,
+          "digest": "sha256:9319a69e2ca5a4487cca4518e134aafd3ffb52dccbe5cdbde4804ebcf87321fe"
+        }
+      }
+    },
+    {
+      "name": "rotation: revision 2 over revision 1",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 1,
+          "digest": "sha256:9319a69e2ca5a4487cca4518e134aafd3ffb52dccbe5cdbde4804ebcf87321fe"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79",
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      }
+    },
+    {
+      "name": "revocation: revision 3 over revision 2",
+      "keySet": "r3",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:297a8158795b3f5020b9646fa943cf6212345ad3cd8e739c2e69a4731a234518",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:297a8158795b3f5020b9646fa943cf6212345ad3cd8e739c2e69a4731a234518"
+        }
+      }
+    },
+    {
+      "name": "redelivery: revision 2 again, the same bytes",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": true,
+        "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79",
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      }
+    },
+    {
+      "name": "stale: revision 1 after revision 2",
+      "keySet": "r1",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "conflict: revision 2 with other bytes",
+      "keySet": "r2Other",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "revision-conflict"
+      }
+    },
+    {
+      "name": "wrong issuer: a root pinned for another origin",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://other.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "wrong issuer: a set signed under another root's kid",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-other-1",
+        "sig": "kjxI8z-0BdWrxrvKsiDD_ByM8SPGCGTADyWxF28-GDyn7WpcuuDswqjAlaTN9eX8zMHygh_1Sw_mQA9f5HY2BA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "bad signature: the root's kid, signed by another key",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "yzulPaoWYXtnjhWO6iQoZukVhffxKpXu_qO55USnvzBxRV6x0QSrQoMiVM6aeISI0EiprO44QrpbhVZlBFxEAg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "bad signature: a key added after signing",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-rogue",
+            "alg": "EdDSA",
+            "x": "sIKkXglBbEatUXz5WC9YPBhOtfFgfmul_I0io1eLNPc",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "unknown algorithm: a listed key under ES256",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "ES256",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "AbBZuo9MEy0jN50KA6xW9cG69F3IDYe1746gcSFqfboTA8oXiH6UyTrqgZt2nHPUw957iLYuwdw6QqyzTaUICw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "unknown algorithm: the set under ES256",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "ES256",
+        "kid": "root-2026-1",
+        "sig": "PTvb7Ih1Tu2hdwi7E4oibv3fkQVjXDb-a_Uka6k1m5ozY5ZMNzbjhumZJFJNYF1REPGCr2CxsP6L-SUqIwTKBw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "unusable key: a pinned root that is not 32 canonical bytes",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0B"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "small-order key: a pinned root of order 4",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "small-order key: a listed signing key of order 4",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-zero",
+            "alg": "EdDSA",
+            "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "notBefore": "2026-10-01T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "LbDiry7QtV2bBMecSZ6aiWgnojutz6Iq-itq2m_wplixpw6M50bI8MtJuIvq7qJ8oy7BZMc2_aXH3bRA-D2GBQ"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "malformed: a kid listed twice",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "W-rJ3txH-xIvECGWUSSyAVBG1ENOOeuK8TA82K8vFe5BKKvremN6vIYUDyQ2M2h2dW_RJcuCS6kjUEUfBIVPAA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: the root's kid among the keys",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "root-2026-1",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "_S7rd-MSfQjkKqdL91DMF6JlbTdI-wvz3sczxbSrAYydcpGjfn2eH-3FTPMlJhiKifATlAbfnfeLCXe5D4Y6BA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a revoked kid among the keys",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-09"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "HZLzTx70KNxtH9xDwbkNSlURU1fWQoXyn0S2VinRCDm2FeQJHRDGZOtGxQIXRVnenYyj8KI7NcrEiSdfI7eWAA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a window that ends where it starts",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "ent-2026-09",
+            "alg": "EdDSA",
+            "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "ent-2026-10",
+            "alg": "EdDSA",
+            "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2026-10-15T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "tI4PUdRLujqYfDE2f1cG4xwMi98vpf94axj-wD_iigaF_sWYZnOlJ3Z0BvPCy2t7HSB083jbdp_LEM3HgHu9AA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: no keys",
+      "keySet": {
+        "type": "entitlement-key-set/1",
+        "issuer": "https://platform.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [],
+        "revoked": [
+          "ent-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-2026-1",
+        "sig": "zQ-aQcxiJ0_kqITumIx-Zz1tZagCuowAfqBi949KkQOCdDgAVJ-jQVCX55l0BAxJWD2Tlt61TDSNCABGdmnrDA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an entitlement is not a key set",
+      "keySet": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "context: no root",
+      "keySet": "r2",
+      "trust": {},
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a held record with revision 0",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://platform.example",
+          "kid": "root-2026-1",
+          "x": "ytsZiDHbvWzSNcejHa-OW7iNb4YcIU0PcxblPPgoA0c"
+        },
+        "held": {
+          "revision": 0,
+          "digest": "sha256:cb452a6c2135f5b29e62d39dc09187938c98c4165fd2432b9b04ae796aed8d79"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: no trust",
+      "keySet": "r2",
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    }
+  ],
+  "verify": [
+    {
+      "name": "valid: an organization's entitlement, active",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "valid: a personal entitlement at its own estate",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "zWUNfNb3u5f5G9L-cpLsVyUH8TfKmlODPteQpsGdLWA5d4Iw-B_aYtokLxejrlsfBVOap7-ZJ0TbJ3uEkbaFCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:d1bea19ccc64abae0926c279cf57542c752b3ee03265baa3813b865e819a8e97",
+        "held": {
+          "orderId": "ord-p-0001",
+          "revision": 1,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:d1bea19ccc64abae0926c279cf57542c752b3ee03265baa3813b865e819a8e97"
+        }
+      }
+    },
+    {
+      "name": "valid: no agents, no licence, no hosting, no support",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": null,
+        "support": null,
+        "agents": [],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "BR9-y0Yw9Akh0Yl3jeCO-H7Dar5RgvJulQ3fOa8RALgWGHrdZ59sDabnVWqmSwviAGcEhxC5ClnJbDs8lF8JCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:f9333aa27f434a8af9eaa2fd7238b19c6f8222eac995175dab6300bbf866794e",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:f9333aa27f434a8af9eaa2fd7238b19c6f8222eac995175dab6300bbf866794e"
+        }
+      }
+    },
+    {
+      "name": "wrong subject: organization A's entitlement at organization B",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-b",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "wrong subject: a personal entitlement at another person's estate",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "zWUNfNb3u5f5G9L-cpLsVyUH8TfKmlODPteQpsGdLWA5d4Iw-B_aYtokLxejrlsfBVOap7-ZJ0TbJ3uEkbaFCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "estate": "estate-7b21c0",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "wrong subject: a personal entitlement at an organization",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "zWUNfNb3u5f5G9L-cpLsVyUH8TfKmlODPteQpsGdLWA5d4Iw-B_aYtokLxejrlsfBVOap7-ZJ0TbJ3uEkbaFCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "wrong subject: an organization's entitlement at a personal cloud",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "wrong subject: subjects compare as written, org:ORG-A is not org:org-a",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:ORG-A",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "one person in two organizations: A's entitlement verifies at A",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "one person in two organizations: B's entitlement verifies at B",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-b",
+        "estate": null,
+        "order": {
+          "id": "ord-org-b-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 400
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "managed"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "8QUDbyodz3oaBsSewa0bH6gMkWWHX0KJ2FDJEkqVxTNz0OkLdu7sQ1terbUOMHi1QcbC-zWB-E8kkeA23pzJDA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-b",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:f03d06a69617e235165e8b824c731dd2725737682cd2cb8d3b17c826edc3ba46",
+        "held": {
+          "orderId": "ord-org-b-0001",
+          "revision": 1,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:f03d06a69617e235165e8b824c731dd2725737682cd2cb8d3b17c826edc3ba46"
+        }
+      }
+    },
+    {
+      "name": "one person in two organizations: B's entitlement is refused at A",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-b",
+        "estate": null,
+        "order": {
+          "id": "ord-org-b-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 400
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "managed"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "8QUDbyodz3oaBsSewa0bH6gMkWWHX0KJ2FDJEkqVxTNz0OkLdu7sQ1terbUOMHi1QcbC-zWB-E8kkeA23pzJDA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "wrong key: K2's kid, signed by a key nobody lists",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "ZpefEU1noAXZTdsBMX23BIvm6n4MgcWBxjFYrteajHILlN08dGL8vMCriDRcKwZ8FkM7BUH1b4XTA1aHmr2sDQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "bad signature: one byte of the signature changed",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRAf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "bad signature: a member changed after signing",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 2500
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "unknown kid: a kid the key set does not list",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-rogue",
+        "sig": "FWUuUW_VhjC9AH8LrcpuDG9_PDH8yQCXgP15QkCPxy7dzXekl56I7aBj4AB3x8G69n1GH_dnYrcSegeSXshIAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-key"
+      }
+    },
+    {
+      "name": "revoked key: signed by K0, which the key set revokes",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-08",
+        "sig": "oq_h22AQzDjffj8SPxjHRvoFHlC3XhNxcHTAQCyaPThR_LL5N9xUX8jdqkiyoVo7oe2NWfHDdY7uZEvb4wLtBw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-revoked"
+      }
+    },
+    {
+      "name": "revoked key: K1 revoked by revision 3, inside its window",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-09",
+        "sig": "pmuuCkKtx4RPpiYFOIsp8rn3IGs1uXt9IclKWIFgpofhyzo7Zy_11vqA3yId2k7yrsSJCZfWLlPnCdSKGGyrDA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r3"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-revoked"
+      }
+    },
+    {
+      "name": "rotated key: K1, rotated out, issuedAt inside its window",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-09",
+        "sig": "pmuuCkKtx4RPpiYFOIsp8rn3IGs1uXt9IclKWIFgpofhyzo7Zy_11vqA3yId2k7yrsSJCZfWLlPnCdSKGGyrDA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:2a7f197f4b5d9ca638f59975605d40aed2de59071ee06c3e36209f1ba4dcb470",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:2a7f197f4b5d9ca638f59975605d40aed2de59071ee06c3e36209f1ba4dcb470"
+        }
+      }
+    },
+    {
+      "name": "rotated key: K1 after its window, issuedAt at its notAfter",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-11-01T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-12-01T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-09",
+        "sig": "el_qCAe1yDOYEgLi2n-UU6dAcGjZM0k0WjcD5QTuWR7VscPAIh5CvF-QjR811Hf_8LifjXfw9uGmSKkYOtY7Aw"
+      },
+      "trust": {
+        "now": "2026-11-02T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "rotated key: K1 before its window",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-08-31T23:59:59Z",
+        "notBefore": "2026-08-31T23:59:59Z",
+        "expiresAt": "2026-10-01T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-09",
+        "sig": "vxbeOItZ3xYksTPz_Dm_p1TNaDDaoKRuEVpJ95uwPveG7VhSAfAY6uq2c1pp_T0hXTnKgeK_V5dFTa8VgH7CDw"
+      },
+      "trust": {
+        "now": "2026-09-02T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "rotated key: K2 at the first instant of its window",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "notBefore": "2026-10-15T00:00:00Z",
+        "expiresAt": "2026-11-19T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "a8mcG09S-BHGq90FBShlh7ci803POcRJYBuk0KklsKPjK_7o_Yhw1CcWoAKBoCZGq8-JAevlPdCY-echuluaBA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:3f16d0100d917b30a9cec4353bf0c6c88b2ec0d5403daea0cdff7130b0087caa",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-15T00:00:00Z",
+          "digest": "sha256:3f16d0100d917b30a9cec4353bf0c6c88b2ec0d5403daea0cdff7130b0087caa"
+        }
+      }
+    },
+    {
+      "name": "rotated key: K2 a millisecond before its window",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-14T23:59:59.999Z",
+        "notBefore": "2026-10-15T00:00:00Z",
+        "expiresAt": "2026-11-18T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "Kk5Q3TioMnw42pNeYTbDeBITbyeYSkFdqeoU3zvZ2gAJywOFrv0YxLSKWPPS-qeUL5lGKn2qGmlkI3COwQ-XCw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "small-order key: a listed key of order 4, refused before the signature is read",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-zero",
+        "sig": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "smallOrder"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "unusable key: the listed key names another algorithm",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "algMismatch"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "wrong issuer: another origin's entitlement",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://other.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "iJlvgl48O26sMMGnzSDkj58URoXjn5YgbJZIgTapm7aSFwQTcWgnMDxkOXB_vGj6jIynIxDq_A2OYqlR2ozTAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "wrong issuer: issuers compare as written, a longer host is another origin",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example.com",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "unknown algorithm: ES256",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "ES256",
+        "kid": "ent-2026-10",
+        "sig": "ODTMqGy_ks8urIICRarqGUn5vn3-Rtr_u1wZroSCBO3Zc6HeXXP9BQoGLnCpMlZPtlWtgJClqWuC77DW8HYjDw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "grace: at expiresAt",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-11-24T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "grace",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "grace: a day after expiresAt",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-11-25T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "grace",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "grace: a millisecond before it ends",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-12-07T23:59:59.999Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "grace",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "lapsed: 14 days after expiresAt",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-12-08T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "lapsed"
+      }
+    },
+    {
+      "name": "lapsed: long after",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2027-03-01T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "lapsed"
+      }
+    },
+    {
+      "name": "refresh due: 7 days before expiresAt",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-11-17T00:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "refresh not due: a millisecond earlier",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-11-16T23:59:59.999Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "not yet valid: before notBefore",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "NfKwdWxljJEh2HUDckp6rIiLSJw79pJVhp_Ry-0LUfwl03xK07zOxt4w-28yzp1mQaY5vbMLYaydL3-Vz3YQCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "not yet valid: 60 s before notBefore is within the clock skew",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "NfKwdWxljJEh2HUDckp6rIiLSJw79pJVhp_Ry-0LUfwl03xK07zOxt4w-28yzp1mQaY5vbMLYaydL3-Vz3YQCg"
+      },
+      "trust": {
+        "now": "2026-10-31T23:59:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:ee051100b9517276e0e3d1098688b453f8bd1ee742c2ac4a791ce227138bdfd8",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:ee051100b9517276e0e3d1098688b453f8bd1ee742c2ac4a791ce227138bdfd8"
+        }
+      }
+    },
+    {
+      "name": "not yet valid: 60 s and a millisecond before notBefore",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "NfKwdWxljJEh2HUDckp6rIiLSJw79pJVhp_Ry-0LUfwl03xK07zOxt4w-28yzp1mQaY5vbMLYaydL3-Vz3YQCg"
+      },
+      "trust": {
+        "now": "2026-10-31T23:58:59.999Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "too long: exactly 35 days",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "too long: 35 days and a second",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:01Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "onCcbgPUdzkrwEZ30eE8UFcfLf1MkdX3RMpmkOkpd3HYqx18L8qToDly1yl_4lzaexe1QRv6aALeWykuGnx_Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "too long: notBefore before issuedAt",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-19T23:59:59Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "fu1jDrBPaaZux_giXEjUWnvlU4ur1vXk_L3jGg0IUQdqlDXZnyeIGMQt49PKZNixmJ4F_DBKyvuFIggZxglkAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "too long: expiresAt at notBefore, an empty life",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-11-24T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "NYnNsdasZURcZcBL6p72etAySdMJu9pG4sw7pXMi6P2JdClcWfX3QKxZPYBbudMz4205GcLLYx1BM1ki2YvsAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "replay: a lower revision of the held order",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 2
+        },
+        "issuedAt": "2026-09-20T00:00:00Z",
+        "notBefore": "2026-09-20T00:00:00Z",
+        "expiresAt": "2026-10-25T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-09",
+        "sig": "j76_hPuIjbysQ40bkWQWH__S6ewcGgt_IejDxv9K-ghmzRumPP0Ps0c65gwF-JtFVmxLpfokIch5hu3V7BXHAA"
+      },
+      "trust": {
+        "now": "2026-10-24T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "replay: the held revision with other bytes",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 30
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "jVOq6Iz7eXsaAOIDYFQML-NgxpgJ8FeEqqNfoPTk2WgZDIAaTTcK8MTHFldG4iP1jlbCQTbm4JSqXNmwmCdlCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "revision-conflict"
+      }
+    },
+    {
+      "name": "redelivery: the held entitlement again",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": true,
+        "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      }
+    },
+    {
+      "name": "renewal: a higher revision of the held order",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 4
+        },
+        "issuedAt": "2026-10-24T00:00:00Z",
+        "notBefore": "2026-10-24T00:00:00Z",
+        "expiresAt": "2026-11-28T00:00:00Z",
+        "licence": {
+          "members": 30
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "Mk27n7APRWC7cMX0BR9xZe16XqIoLoOWAIArZSy9tPPvvzzFBVte2hzI4-CThJocDkYGk2sBbkir5Mk21QieAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:bc8929f48882d8cc945118db504d91ed9e88b8907383a28085ecc7dfc8fc0b9b",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 4,
+          "issuedAt": "2026-10-24T00:00:00Z",
+          "digest": "sha256:bc8929f48882d8cc945118db504d91ed9e88b8907383a28085ecc7dfc8fc0b9b"
+        }
+      }
+    },
+    {
+      "name": "replay: an older order issued before the held one",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0000",
+          "revision": 9
+        },
+        "issuedAt": "2026-10-19T00:00:00Z",
+        "notBefore": "2026-10-19T00:00:00Z",
+        "expiresAt": "2026-11-23T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "V1WcNacnwraQznAq7ZDkv3egYRHaYLaG3ay0JVEyK6JoIj_jhWA2JiE_caKEouLtEvg3Lq2dwHP7zbLAh0qTAw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "replay: another order issued at the same instant as the held one",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0000",
+          "revision": 9
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "Rsm9XtW2kqLYyRO7EAc5_PCZev53xTS_bsXitnGgmnVaB4NkDp2hGdVSg2aT2RdU8sZ7jcOPThS8Qd4gBfnsAA"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "supersede: a newer order issued after the held one",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0002",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-22T00:00:00Z",
+        "notBefore": "2026-10-22T00:00:00Z",
+        "expiresAt": "2026-11-26T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "o9WAUVLA_kRBTG0QIuRrvRc0lqpvNpBhpDw21lXb6K6NZtc7aS2WBPo_cFkY6sKO1oLouO-abGS_7MANb9hoDQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:a110ab6ade722c625e08c0f4c2883a6358550e0b6feb7c08ccf58340092e1ac1"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:7ab90274ee5afe362abf3417decb42d613ddd1e77ecff3db9cb5ba525182e249",
+        "held": {
+          "orderId": "ord-org-a-0002",
+          "revision": 1,
+          "issuedAt": "2026-10-22T00:00:00Z",
+          "digest": "sha256:7ab90274ee5afe362abf3417decb42d613ddd1e77ecff3db9cb5ba525182e249"
+        }
+      }
+    },
+    {
+      "name": "malformed: a personal entitlement with a licence",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 1
+        },
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "0awdqlxc4_9ZtpYxmwYCxYcsxm96o5XVz7-iciWIKXAkn2pL8MHXDgc-_-NMeFbSoQcREpsXBWeNgWyVe-s-Cg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an organization's entitlement with an estate",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "1vmlUqbcIPAdRX5ikZ_s3s9BfpkvzSFS0SGPHBd6BzURHZip54JHWPu2bvJmcBQTK3poH7g_QhUcZJUn2WcfDQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an organization with personal-cloud hosting",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "ulxHy7JE2Plxlop3MLLBGErn_PwpgY2mboDQTa6Di0W_FJuLdZW-sdxRUtSlotFk39Br6VHEUyN6LVDy5P9eDw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an amount",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ",
+        "amount": "120"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an agent listed twice",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "5rXS4f2tvh7lGwiDX-8xXEC-jO1XGaSyqIoDd5e5WO4vcrlKEAMdOqBBXhTd6uKZ58YCc_jjecTbYEBpz1mXBg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a time without an offset",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "RaQ1ky-xaXMnYWKICqvDxbXjNZplL1DcY4ZozZ9mVy6AtporcRXS2t9ibvSwHajqLESO3tQ0JfGKKhLzuAu9DQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: no signature",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: not an object",
+      "entitlement": "entitlement",
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "context: no trust",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a personal verifier without its estate",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": {
+          "product": "personal-cloud",
+          "size": "p-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "zWUNfNb3u5f5G9L-cpLsVyUH8TfKmlODPteQpsGdLWA5d4Iw-B_aYtokLxejrlsfBVOap7-ZJ0TbJ3uEkbaFCg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: an organization's verifier with an estate",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "estate": "estate-5d0f1a"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a subject that is not a context id",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "person:p-1",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set that is not one",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "rootAmongKeys"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set signed under an algorithm the verifier does not know",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "es256"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a held record without a digest",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "no clock: an unreadable now",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "org-cloud",
+          "size": "s-2"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25 12:00:00",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    }
+  ]
+}

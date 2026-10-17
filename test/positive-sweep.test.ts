@@ -48,7 +48,9 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "settings-backup.schema.json": "settings-backup",
   "spend-policy.schema.json": "spend-policy",
   "telemetry-event.schema.json": "telemetry-event",
-  "window-lease.schema.json": "window-lease"
+  "window-lease.schema.json": "window-lease",
+  "entitlement.schema.json": "entitlement",
+  "entitlement-key-set.schema.json": "entitlement-key-set"
 };
 
 /**
@@ -126,7 +128,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "revocation-delta-rules", "window-lease", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
+    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {
