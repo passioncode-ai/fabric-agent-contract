@@ -471,7 +471,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a new machine and a trusted one, when both show the same six-digit code and I sign, then the next revision lists the new machine with exactly the keys it revealed.
   - Given codes that differ, when I say so, then nothing is signed and the attempt cannot be resumed; a new attempt starts with new nonces.
-  - Given a server with no screen, when I give it Fabric's enroll token through stdin or a private file, then it joins once and a second use of the token is refused and logged.
+  - Given a server with no screen, when I give it Fabric's enroll token through stdin or a private file, then it binds its key once and a second use of the token is refused and logged; it joins only when I sign the revision, after Fabric shows the fingerprint of the key it is about to list and I compare it with the one the server printed (a mismatch: I sign nothing and revoke the token).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

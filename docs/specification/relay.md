@@ -94,7 +94,7 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   |---|---|---|
   | any refusal of `auth` (`unauthenticated`, `replay`, `not-yet-valid`, `unsupported-alg`, `protocol-unsupported`) | yes | 4401 |
   | no `auth` within 10 s | `unauthenticated` | 4401 |
-  | a proven session whose kid left the admission set (see [Admission](#admission)) | `not-admitted` | 4403 |
+  | a proven session whose kid left the admission set, or now names another key than the one it was proven under (`sessionStands`, DEC-0084; see [Admission](#admission)) | `not-admitted` | 4403 |
   | the held estate record expired | `expired` | 4403 |
   | a frame over 1 MiB | `too-large` | 1009 |
   | a binary frame | none | 1003 |
@@ -421,9 +421,10 @@ When a machine joins an estate from afar, the trusted machine opens a **one-time
 shows its link; the new machine, not yet admitted, joins it with that link. The link's secret part travels after `#` (a
 fragment, never sent in an HTTP request) and the new machine presents it inside the WebSocket, so no credential is in a
 URL the relay sees. The rendezvous lives at most 600 s from its opening, carries `pairing-message/1` frames between its
-two sides and nothing else — never a mailbox message, a blob or presence — and is burned at the first failure, the first
-`abort`, or once both reveals were delivered, as `rendezvousVerdict` reads it ([ceremonies](ceremonies.md#the-rendezvous),
-DEC-0084). It admits the new machine to nothing: the machine is admitted only once a revision lists it. The rendezvous
+two sides and nothing else — never a mailbox message, a blob or presence — and is burned at the first failure or the first
+`abort`. Once both reveals were delivered it is complete and carries exactly one more frame, an `abort`, so a side whose
+person said the codes differ tells the other side; any other frame then burns it (`closed`), as `rendezvousVerdict`
+reads it ([ceremonies](ceremonies.md#the-rendezvous), DEC-0084). It admits the new machine to nothing: the machine is admitted only once a revision lists it. The rendezvous
 frame types are the relay's to add (not decided here).
 
 ## Shared vectors
@@ -431,8 +432,10 @@ frame types are the relay's to add (not decided here).
 Every refusal of the relay family is data a port runs, not only a test in this repository (DEC-0066).
 
 - **Files.** `fixtures/vectors/relay.json` keeps its legacy members (`machineKey`, `machineKeyOctets`, `auth`,
-  `message`, `ed25519`) and carries the case groups `instant`, `relayOrigin`, `admissionSet`, `admit`, `messageBody`,
-  `replay` and `blobRequest`. `fixtures/vectors/secret-envelope.json` keeps its legacy members and carries `cases`.
+  `message`, `ed25519`) and carries the case groups `instant`, `relayOrigin`, `admissionSet`, `session`, `admit`,
+  `messageBody`, `replay` and `blobRequest`. `fixtures/vectors/secret-envelope.json` keeps its legacy members and carries `cases` and `placement` (the open context
+  `estateEnvelopeContext` derives, with a case's `extraRevocations` from applied delta entries, DEC-0082, DEC-0084). A port
+  that vendors `src/relay-vectors.ts` refreshes it with the vectors: the runner reads only the groups it knows.
   Each case is one complete context, the input, and `expect`, exactly what the reference returns; a key is a JWK or a
   string of base64 SEC 1 octets; a time is RFC 3339.
 - **The runner.** [`src/relay-vectors.ts`](../../src/relay-vectors.ts) (`relayVectorResults`, `envelopeVectorResults`)

@@ -280,7 +280,7 @@
 
 - **Used by:** FLW-19
 - **Purpose:** the person pairs a new machine with a trusted one and signs the revision that adds it.
-- **Elements:** the six-digit comparison code and the network's fingerprint, shown on both machines; "The codes match" (primary action, which opens the passkey prompt) and "They differ"; nearby, a QR code or short code on the new machine; from afar, the rendezvous link and its remaining time.
+- **Elements:** the six-digit comparison code and the network's fingerprint, shown on both machines; "The codes match" (primary action, which opens the passkey prompt) and "They differ"; nearby, a QR code or short code on the new machine; from afar, the rendezvous link and its remaining time; for a headless server joined by an enroll token, the fingerprint of the key about to be listed, beside the instruction to compare it with the one the server printed, and "Revoke the token" when they differ.
 - **States:** loading — waiting for the other side's commitment or reveal; error — the codes differ, a reveal did not open its commitment, or the rendezvous expired, each saying a new attempt starts over; success — the machine is listed in the signed revision.
 - **Coverage:** `src/pairing.ts`, `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
 - **Scenarios:** SCN-028

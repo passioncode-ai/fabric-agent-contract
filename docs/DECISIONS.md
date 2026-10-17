@@ -2523,7 +2523,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
-- **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, DEC-0066's revalidation by key), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
+- **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
 - **Annotated (2026-10-13):** amended by DEC-0082: an envelope names no context, so a target's open context (`estateEnvelopeContext`) reads only personal secret placements, and an organization's instance fills its slot on its own machine (`FAC-SEM-075`), never by an envelope (`docs/specification/contexts.md`).
 - **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
   - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
@@ -3484,7 +3484,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   computes challenges from the register (CT-19); Project Observatory's node verifies estate revisions under signing
   credentials only (CT-20); the first organization server pins administrators' signing credentials in `org-authority/1`
   and never serves a signing page (CT-04).
-- **Annotated (2026-10-15):** DEC-0084 registers `enroll-token/1` `{scope, genesis, purpose, ceiling, notBefore, expiresAt, nonce, uses}`, a passkey statement (the owners' DV-CON-01 amendment of DV-05); the passkey register now holds five types (`docs/specification/ceremonies.md#a-headless-machine`).
+- **Annotated (2026-10-15):** DEC-0084 registers `enroll-token/1` `{scope, genesis, purpose, ceiling, notBefore, expiresAt, nonce, uses}`, a passkey statement (the owners' DV-CON-01 amendment of DV-05); the passkey register now holds five types, and the key-signed register gains `enroll-join/1`, the joining key's proof at redemption (`docs/specification/ceremonies.md#a-headless-machine`).
 - **Annotated (2026-10-12):** its affects list names `src/rfc3339.ts`, which the merge of #65 did not change (at that merge last changed by DEC-0060; since then by the relay audit's DEC-0066); the field limits of the register (a renamed field, a `jkt` end, a grant at revision 0) now have tests (packet P6-08).
 - **Amends:** DEC-0055 (tightening): an estate record's authority must be a signing credential, `rpId` `sign.<domain>`,
   origins on that RP ID (schema and `FAC-SEM-092`). Implements v4 §7 *Signing surface* and §12's row "signing challenge
@@ -3807,6 +3807,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   git CAS (`agent_sync.py reserve --key relay-audit-n19-20261012 DEC`); no rule code was reserved. This file,
   `docs/backlog.md` and `conformance.md` were edited under git leases of run `N19-relay-audit`; the record plane is
   `fs`.
+- **Annotated (2026-10-17):** amended by DEC-0084: an open session stands only while its kid maps to the key octets it
+  was proven under (`sessionStands`), not only while its kid stays in the admission set, so a session proven under a
+  replaced key closes with 4403 `not-admitted` (relay.md's close-code table); `relayAdmissionSet` admits a `#sig` key
+  only under its own machine's kid (F7) and reports a malformed key reference in `unread`.
 
 ### DEC-0067 — Protocol revisions: a receiver accepts N and N−1, says so in `protocols`, and refuses another revision with `schema-unsupported`
 
@@ -5054,12 +5058,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-15
 - **Status:** Accepted source change (on merge of its pull request). The owner's design for RM-21 stage 1, packet P3,
-  with the changes this pull request names and argues (items 3, 4 and 5b). Consumer adoption: board row CT-53.
+  with the changes its pull request names and argues under *Changes from the design*. Consumer adoption: board row CT-53.
 - **Amends:** DEC-0055 (D3 settled for a personal estate; a `device-key` revocation by key reference, read by
   `FAC-SEM-076`, which also refuses a malformed one; `FAC-SEM-073` refuses a non-canonical device key; `FAC-SEM-114` in
   the chain and in `verifyEstateRecord`; the revocation `ref`'s schema description), DEC-0063 (the register gains
   `enroll-token/1` and the key-signed `enroll-join/1`), DEC-0047 (the pairing rendezvous; key references, F7 and
-  session revalidation by key in the relay; delta revocations in `estateEnvelopeContext`), DEC-0082 (NET-1 and NET-2
+  session revalidation by key in the relay; delta revocations in `estateEnvelopeContext`), DEC-0066 (an open session
+  stands only while its kid maps to the key octets it was proven under, `sessionStands`, where DEC-0066 revalidated by
+  kid; F7 and `unread` in `relayAdmissionSet`), DEC-0082 (NET-1 and NET-2
   recorded; CX-CON-06 stays stage 2). Also, an adjacent totality fix: `FAC-SEM-034`'s probe check (`src/route-rules.ts`)
   compares before it builds a list (the adapter's report).
 - **Decision:** in [ceremonies](specification/ceremonies.md) —
@@ -5165,7 +5171,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:**
   - spec: `docs/specification/ceremonies.md` (new), `docs/specification/estate-record.md` (header, revisions,
     authorities, `hubKey`, revocations, the verifier, ER-11, the rules table, not decided),
-    `docs/specification/conformance.md` (five reader rows, the estate row, three canonical-form rows, the register row,
+    `docs/specification/conformance.md` (five reader rows, the estate row, four canonical-form rows, two register rows,
     two register codes, the next free code), `docs/specification/signing.md`, `docs/specification/relay.md` (the pairing
     rendezvous), `docs/specification/devices.md` (enrollment), `docs/specification/contexts.md` (linkability),
     `docs/specification/revocation-delta.md` (who signs);

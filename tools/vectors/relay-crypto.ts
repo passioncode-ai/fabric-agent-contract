@@ -655,15 +655,23 @@ function placementCases(): Json[] {
   });
   const personal = { agentRef: AGENT, slot: SLOT, from: laptop };
   const orgSlot = { agentRef: AGENT, slot: SLOT, from: target, context: org };
-  const query = (expectLaptop: boolean, expectTarget: boolean, currentPlacement: number | null) => ({
-    holds: [{ sender: `${laptop}#sig`, mayHold: expectLaptop }, { sender: `${target}#sig`, mayHold: expectTarget }], currentPlacement
+  const query = (expectLaptop: boolean, expectTarget: boolean, currentPlacement: number | null, laptopKnown = true) => ({
+    holds: [{ sender: `${laptop}#sig`, mayHold: expectLaptop, senderKnown: laptopKnown }, { sender: `${target}#sig`, mayHold: expectTarget, senderKnown: true }], currentPlacement
   });
+  // DEC-0084: the revocations of the verified delta entries the target applied (`extraRevocations`), read like the
+  // record's own. The key reference is written here from the key's octets, not by the code under test.
+  const laptopKeyRef = `${laptop}#sig@sha256:${createHash("sha256").update(Buffer.from(MACHINE.octets, "base64")).digest("hex")}`;
+  const revoked = (kind: string, ref: string) => [{ kind, ref, revokedAt: "2026-10-12T00:00:00Z" }];
   return [
     { name: "an organization's secret placement listed before the personal one: the personal one decides (a port that reads the first match fails)", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, personal])], expect: query(true, false, 4) },
     { name: "the personal secret placement listed first: the same answer", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal, orgSlot])], expect: query(true, false, 4) },
     { name: "context personal spelled out, after the organization's: it is the personal placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot, { ...personal, context: "personal" }])], expect: query(true, false, 4) },
     { name: "only an organization's secret placement: no sender may hold the slot, and it has no current placement", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [orgSlot])], expect: query(false, false, null) },
-    { name: "the run of the personal placement is unbroken when an organization's placement is added before it", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(3, [personal]), record(4, [orgSlot, personal])], expect: query(true, false, 3) }
+    { name: "the run of the personal placement is unbroken when an organization's placement is added before it", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(3, [personal]), record(4, [orgSlot, personal])], expect: query(true, false, 3) },
+    { name: "a delta entry revokes the sender's machine: it may not hold the slot and its key is unknown, before any revision says so (DEC-0084)", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("machine", laptop), expect: query(false, false, 4, false) },
+    { name: "a delta entry revokes the sender's #sig key by its kid", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", `${laptop}#sig`), expect: query(false, false, 4, false) },
+    { name: "a delta entry revokes the sender's #sig key by its key reference <kid>@sha256:<hex>", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", laptopKeyRef), expect: query(false, false, 4, false) },
+    { name: "a delta entry revoking another machine's key leaves the sender able to hold the slot", machine: target, agentRef: AGENT, slot: SLOT, applied: [record(4, [personal])], extraRevocations: revoked("device-key", "m-other#sig"), expect: query(true, false, 4) }
   ];
 }
 
@@ -681,7 +689,7 @@ function envelopeVectors(): Json {
     senderKeyOctets: MACHINE.octets,
     cases: envelopeCases(envelope),
     placement: {
-      about: "DEC-0082: the open context a target derives from its applied estate-record revisions (estateEnvelopeContext, relay.md open steps 6 and 7) reads only personal secret placements (no context, or personal). Each case: the applied revisions, oldest first, the target machine, the agentRef and slot; expect.holds says whether each sender kid may hold the slot, expect.currentPlacement the revision the placement's run starts at, or null.",
+      about: "DEC-0082: the open context a target derives from its applied estate-record revisions (estateEnvelopeContext, relay.md open steps 6 and 7) reads only personal secret placements (no context, or personal). Each case: the applied revisions, oldest first, the target machine, the agentRef and slot; extraRevocations, when present, the revocations of the delta entries the target applied (DEC-0054, read like the record's own, DEC-0084); expect.holds says whether each sender kid may hold the slot and whether senderKey knows its key, expect.currentPlacement the revision the placement's run starts at, or null.",
       cases: placementCases()
     }
   };

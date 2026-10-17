@@ -183,7 +183,7 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
+| `FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, name a `device-key` by a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084; `applyDelta` refuses any other `@` form as `malformed`), are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
 | `FAC-SEM-083` | `heartbeat`, `delta-freshness` | a heartbeat is `EdDSA`, has a readable `at`, and a head at sequence 0 is the estate's genesis; `{at, applied: {sequence, revision}, heartbeat, broken, answer}` — the machine's answer is the one the 72-hour rule gives |
 | `FAC-SEM-084` | `delta-reconciliation` | `{revision, entries}`: a revision issued at or after an entry lists its revocation |
 

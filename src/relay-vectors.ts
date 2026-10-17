@@ -123,14 +123,15 @@ export function envelopeVectorResults(vectors: Json): VectorResult[] {
 }
 
 /**
- * Every case of `secret-envelope.json`'s `placement` group (DEC-0082), run through `estateEnvelopeContext`: whether each
- * sender kid may hold the slot, and the revision its placement run starts at (null for none).
+ * Every case of `secret-envelope.json`'s `placement` group (DEC-0082), run through `estateEnvelopeContext` with the case's
+ * `extraRevocations` (DEC-0084): whether each sender kid may hold the slot and whether `senderKey` knows its key, and the
+ * revision its placement run starts at (null for none).
  */
 export function placementVectorResults(vectors: Json): VectorResult[] {
   return cases(vectors.placement).map((c) => {
-    const ctx = estateEnvelopeContext(c.applied as JsonObject[], c.machine as string);
+    const ctx = estateEnvelopeContext(c.applied as JsonObject[], c.machine as string, (c.extraRevocations ?? []) as JsonObject[]);
     const agentRef = c.agentRef as string, slot = c.slot as string;
-    const holds = ((c.expect as Json).holds as Array<{ sender: string }>).map((h) => ({ sender: h.sender, mayHold: ctx.mayHold(h.sender, agentRef, slot) }));
+    const holds = ((c.expect as Json).holds as Array<{ sender: string }>).map((h) => ({ sender: h.sender, mayHold: ctx.mayHold(h.sender, agentRef, slot), senderKnown: ctx.senderKey(h.sender) !== undefined }));
     const actual = { holds, currentPlacement: ctx.currentPlacement(agentRef, slot) ?? null };
     return { group: "placement", name: c.name as string, actual, expected: c.expect };
   });

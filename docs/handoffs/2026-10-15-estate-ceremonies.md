@@ -35,7 +35,7 @@ and records NET-1…NET-3.
   - revision 1 certifies the hub key only when the network is created on the always-on machine; otherwise the revision
     that adds that machine does, since a hub key is a member of its machine.
 - Registers (under the owner session's leases): DEC-0084 appended; DEC-0055, DEC-0063, DEC-0047 and DEC-0082 annotated;
-  conformance.md (five reader rows, the estate row, three canonical-form rows, the register row, `FAC-SEM-113`,
+  conformance.md (five reader rows, the estate row, four canonical-form rows, two register rows, `FAC-SEM-113`,
   `FAC-SEM-114`, next free `FAC-SEM-115`); backlog CT-53 (new), CT-38 and CT-51.
 - Neighbours: estate-record.md, signing.md, relay.md (*The pairing rendezvous*), devices.md, contexts.md
   (*Linkability* rewritten), revocation-delta.md, CONTEXT.md (Network, Estate ceremony, Comparison code, Estate
@@ -62,6 +62,25 @@ and records NET-1…NET-3.
   - adjacent: `FAC-SEM-034`'s probe check (`src/route-rules.ts`) compared after building `Array.from({length: count})`,
     so a `selected.index` of 2**32 threw `RangeError`; it now compares first and lists at most 64 candidates.
 
+- **Second verification and fix round 2 (2026-10-17, the contract session that merges).** Three blind readings of the
+  fix round (`c68de2f..05f6b9f`) on the branch merged with main `7a14a48`: unit passed; seam found that the delta side
+  still accepted a `device-key` ref with `@` that is no key reference, which `FAC-SEM-076` refuses in every revision
+  while `FAC-SEM-084` requires the next revision to list it, so one such entry would stop an estate's chain; product
+  found relay.md still saying the rendezvous burns once both reveals arrive, DEC-0066 not naming its amendment, the
+  close-code row naming only a kid, the headless path in the UX layer missing the fingerprint comparison, and the vector
+  groups list missing `session`. Fixed: `applyDelta` refuses such an entry as `malformed` and `FAC-SEM-082` flags it
+  (two plants, each killed); relay.md's rendezvous paragraph, close-code row and vector groups; DEC-0084 amends DEC-0066
+  and DEC-0066 carries the annotation; ST-023, SCN-028, SCN-030 and SCR-22; counts in DEC-0084's affects. The shared
+  `placement` vectors now carry `extraRevocations` (machine, kid, key reference, another key) and report `senderKnown`,
+  so a port can check that a delta-revoked sender is refused (the Observatory node port's OBS-118 finding); ignoring
+  `extraRevocations` fails three of them.
+- **Left as risks, not blocking** (seen by the readings, recorded here and in CT-53): a held record that was never
+  verified can carry a `#sig` key with no canonical fingerprint, or a `kem` key under a `#sig` kid, which F7 does not
+  exclude (every verified record refuses both, `FAC-SEM-073`); `estateEnvelopeContext` relies on verified revisions for
+  F7; two hubs of one estate keep separate token ledgers, so a deployment redeems tokens on one hub; a `device-key`
+  revocation by kid is permanent for that kid, so a replacement revokes by key reference; relay.md's sentence on the
+  link's fragment is the relay's design, not traced to a decision.
+
 ## Open
 
 - Consumers adopt at their next pin (CT-53): Fabric (the ceremonies' interface and signing, issuing tokens, the hub on
@@ -69,7 +88,7 @@ and records NET-1…NET-3.
   consuming tokens), the relay (the rendezvous and its frame types), the adapter's kits (the two vector files).
 - Not decided: CX-CON-06 and an organization's ceremony (stage 2, D8); `node-summary/1`; the interface and the QR
   code's encoding; the rendezvous frame types; a ceiling document; a token for an organization (a new type); recovery
-  when every passkey is lost.
+  when every passkey is lost; how Fabric's revocation of an unused token reaches a hub on another machine.
 
 ## Checks run
 

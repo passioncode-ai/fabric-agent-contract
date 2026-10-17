@@ -633,10 +633,10 @@ independent agent author and P-02 project operator.
   4. The passkey prompt opens on the trusted machine -> the operator signs; the revision lists the second machine with its keys.
   5. The second machine receives the chain -> it checks it starts at the network the code bound and lists its keys, applies it, and shows itself in the network.
 - **Expected result:** the second machine is in the network; nothing was typed but the passkey, and no key was copied.
-- **Alt paths:** nearby, the second machine shows a code instead of a link and the rest is the same. A server with no screen joins with an enroll token read from stdin; a second use of the token is refused and logged.
+- **Alt paths:** nearby, the second machine shows a code instead of a link and the rest is the same. A server with no screen redeems Fabric's enroll token, read from stdin or a private file (mode 0600), binding its own key; it prints its key fingerprint, and before the operator signs, Fabric shows the fingerprint of the key it is about to list — they match, the operator signs; they differ, someone else redeemed the token first, so the operator signs nothing and revokes it. A second use of the token is refused and logged.
 - **UI elements:** the code and the fingerprint on both screens, "The codes match" / "They differ", the passkey prompt.
 - **States covered:** loading, error, success
-- **Errors & recovery:** the codes differ -> "They differ" burns the rendezvous; nothing is signed; a new attempt uses new nonces. The link is older than 10 minutes -> the rendezvous has expired; the operator starts again. The chain starts at another network -> the second machine refuses it (`other-estate`) and pins nothing.
+- **Errors & recovery:** the codes differ -> "They differ" burns the rendezvous; nothing is signed; a new attempt uses new nonces. The link is older than 10 minutes -> the rendezvous has expired; the operator starts again. The chain starts at another network -> the second machine refuses it (`other-estate`) and pins nothing. Headless: the fingerprints differ -> the operator signs nothing and revokes the token.
 - **Status:** draft
 - **Coverage:** ceremonies specification, Add a machine; `src/pairing.ts`; `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
 - **Product:** unobserved
@@ -677,7 +677,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself.
 - **UI elements:** "Remove", "Replace key", the comparison code, the passkey prompt.
 - **States covered:** error, success
-- **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine (`FAC-SEM-114`); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
+- **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine pinned at or after DEC-0084 (`FAC-SEM-114`; an older reader accepts it, ceremonies *Compatibility*); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
 - **Status:** draft
 - **Coverage:** ceremonies specification, Remove a machine, Replace a machine's key; `src/estate-record-rules.ts`, `src/relay.ts` `sessionStands`; `test/ceremonies.test.ts`, `fixtures/vectors/relay.json`
 - **Product:** unobserved
