@@ -170,8 +170,8 @@ function entryShape(entry: unknown): string | undefined {
   if (!isString(entry.sig) || !SIG.test(entry.sig)) return "sig is 64 bytes in base64url";
   const revocation = entry.revocation;
   if (!isObject(revocation) || !isString(revocation.kind) || !isString(revocation.ref)) return "revocation names its kind and ref";
-  // A `device-key` ref is a kid or a key reference (DEC-0084): one with `@` that is neither would be refused by
-  // `FAC-SEM-076` in every revision that lists it, while `FAC-SEM-084` requires the next revision to list it.
+  // A `device-key` ref is a kid or a key reference (DEC-0084): one with `@` that is neither is refused in every revision
+  // that lists it (estate-record-rules), while reconciliation requires the next revision to list it, so the chain would stop.
   if (revocation.kind === "device-key" && revocation.ref.includes("@") && !KEY_REFERENCE.test(revocation.ref)) return "a device-key ref is a kid or a key reference <kid>@sha256:<64 lower-case hex digits>";
   const at = deltaTime(entry.at);
   const revokedAt = deltaTime(revocation.revokedAt);
