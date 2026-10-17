@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -33,8 +33,12 @@ describe("sourceClosure", () => {
   it("follows re-exports and multi-line imports, not only one-line imports", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "closure-"));
     writeFileSync(path.join(dir, "a.ts"), 'export { x } from "./b.js";\nimport {\n  y,\n} from "./c.js";\nimport type { Z } from "./d.js";\n');
-    for (const name of ["b.ts", "c.ts", "d.ts"]) writeFileSync(path.join(dir, name), "export const x = 1;\n");
-    expect(sourceClosure(dir, "a.ts")).toEqual(["a.ts", "b.ts", "c.ts", "d.ts"]);
+    try {
+      for (const name of ["b.ts", "c.ts", "d.ts"]) writeFileSync(path.join(dir, name), "export const x = 1;\n");
+      expect(sourceClosure(dir, "a.ts")).toEqual(["a.ts", "b.ts", "c.ts", "d.ts"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
   it("resolves for every module to files that exist", () => {
     for (const file of readdirSync(src).filter((name) => name.endsWith(".ts"))) {
