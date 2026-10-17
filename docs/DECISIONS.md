@@ -5065,7 +5065,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `enroll-token/1` and the key-signed `enroll-join/1`), DEC-0047 (the pairing rendezvous; key references, F7 and
   session revalidation by key in the relay; delta revocations in `estateEnvelopeContext`), DEC-0066 (an open session
   stands only while its kid maps to the key octets it was proven under, `sessionStands`, where DEC-0066 revalidated by
-  kid; F7 and `unread` in `relayAdmissionSet`), DEC-0082 (NET-1 and NET-2
+  kid; F7 and `unread` in `relayAdmissionSet`), DEC-0054 (`applyDelta` refuses as `malformed`, and `FAC-SEM-082` flags, a `device-key`
+  revocation whose `ref` holds `@` but is no key reference: a revision could never list it, so the chain would stop),
+  DEC-0082 (NET-1 and NET-2
   recorded; CX-CON-06 stays stage 2). Also, an adjacent totality fix: `FAC-SEM-034`'s probe check (`src/route-rules.ts`)
   compares before it builds a list (the adapter's report).
 - **Decision:** in [ceremonies](specification/ceremonies.md) —
@@ -5165,7 +5167,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      passed `FAC-SEM-073` never holds; `sessionStands` ends a session whose kid now names another key, which a relay that
      revalidated by kid kept. `estateEnvelopeContext`'s `extraRevocations` is optional.
   5. The revocation `ref`'s schema description names the key-reference form; validation is unchanged.
-  6. Within this pull request's own first reading (unshipped, CT-53 open): the rendezvous now carries one `abort` after
+  6. The delta side tightens with the records: a machine at or after DEC-0084 refuses a page whose `device-key` entry
+     names a malformed key reference (`malformed`), while an older machine applies it; a hub runs `FAC-SEM-082` before it
+     signs an entry. The shared `placement` vectors' `expect.holds` gains `senderKnown`, so a port refreshes the runner
+     with the vectors (an old runner fails every placement case loudly).
+  7. Within this pull request's own first reading (unshipped, CT-53 open): the rendezvous now carries one `abort` after
      both reveals, `redeemEnrollToken` takes the token and a proof in place of the nonce, and the register gains
      `enroll-join/1`.
 - **Consequences / affects:**
@@ -5174,18 +5180,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `docs/specification/conformance.md` (five reader rows, the estate row, four canonical-form rows, two register rows,
     two register codes, the next free code), `docs/specification/signing.md`, `docs/specification/relay.md` (the pairing
     rendezvous), `docs/specification/devices.md` (enrollment), `docs/specification/contexts.md` (linkability),
-    `docs/specification/revocation-delta.md` (who signs);
+    `docs/specification/revocation-delta.md` (who signs, RD-2, the `FAC-SEM-082` row), the conformance delta reader row;
   - schemas: `schemas/pairing-message.schema.json` (new), `schemas/enroll-token.schema.json` (new);
   - code: `src/pairing.ts` (new), `src/enroll-token.ts` (new), `src/estate-record-rules.ts` (`deviceKeyFingerprint`,
     `deviceKeyRef`, `KEY_REFERENCE`, `validDeviceKey` exported, `FAC-SEM-073`, `FAC-SEM-076`, `FAC-SEM-114`,
     `verifyEstateRecord`), `src/signing-challenges.ts` (`enroll-token/1`, `ENROLL_TOKEN_FIELDS`, `enroll-join/1`),
     `src/relay.ts` (`relayAdmissionSet`: key references, `unread`, F7; `sessionStands`), `src/relay-vectors.ts` (the
-    `session` group), `src/secret-envelope.ts` (`extraRevocations`), `src/route-rules.ts` (`FAC-SEM-034`'s probe check,
+    `session` group, `extraRevocations` and `senderKnown` in `placementVectorResults`), `src/revocation-delta.ts`
+    (`applyDelta`'s entry shape), `src/revocation-delta-rules.ts` (`FAC-SEM-082`), `src/secret-envelope.ts` (`extraRevocations`), `src/route-rules.ts` (`FAC-SEM-034`'s probe check,
     the adjacent totality fix), `src/semantic-rules.ts`, `src/protocol-revisions.ts`; `tools/vectors/pairing.ts` (new),
-    `tools/vectors/relay-crypto.ts` (`admissionSet`, `session`),
+    `tools/vectors/relay-crypto.ts` (`admissionSet`, `session`, `placement`),
     `tools/vectors/enroll-token.ts` (new); `vitest.config.ts` (two files at 100) and
     `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
-  - fixtures: `fixtures/vectors/pairing.json`, `fixtures/vectors/enroll-token.json` (new), `fixtures/vectors/relay.json`;
+  - fixtures: `fixtures/vectors/pairing.json`, `fixtures/vectors/enroll-token.json` (new), `fixtures/vectors/relay.json`,
+    `fixtures/vectors/secret-envelope.json` (`placement` with `extraRevocations`), `fixtures/vectors/revocation-delta.json`
+    (one `apply` case);
     `fixtures/positive/estate-record-key-replaced.json`, `fixtures/positive/enroll-token*.json`,
     `fixtures/positive/pairing-message-*.json`, `fixtures/negative/enroll-token-*.json`,
     `fixtures/negative/pairing-message-*.json`, `fixtures/semantic/enroll-token-*.json`,
@@ -5194,7 +5203,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - schemas, also: `schemas/estate-record.schema.json` (the revocation `ref`'s description);
   - tests: `test/pairing.test.ts`, `test/enroll-token.test.ts`, `test/ceremonies.test.ts` (new);
     `test/signing-challenges.test.ts`, `test/estate-record.test.ts`, `test/positive-sweep.test.ts`,
-    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`;
+    `test/schema-compilation.test.ts`, `test/rule-tolerance.test.ts`, `test/revocation-delta.test.ts`;
   - UX: `docs/ux/scenarios.md` (SCN-028…SCN-030), `docs/ux/foundation.md` (ST-023…ST-025), `docs/ux/flows.md`
     (FLW-19, FLW-20), `docs/ux/screens.md` (SCR-22, SCR-23);
   - docs: `docs/evidence/sources.md` (RFC 6189), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`, `docs/backlog.md` (CT-53,

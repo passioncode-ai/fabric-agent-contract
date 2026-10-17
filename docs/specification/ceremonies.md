@@ -337,7 +337,7 @@ Fixtures: `fixtures/semantic/enroll-token-*`, `fixtures/semantic/estate-revision
   `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-114`) before it asks for the passkey, shows the comparison code and the estate
   fingerprint, and before it signs a headless machine in shows the fingerprint of the key it is about to list; issues and
   revokes `enroll-token/1`; re-certifies a hub key under a new kid on a re-key; writes each delta entry's revocation
-  into the next revision in the entry's form; and runs the hub on the always-on machine under its own certified hub key,
+  into the next revision in the entry's form, never signing an entry `FAC-SEM-082` flags; and runs the hub on the always-on machine under its own certified hub key,
   binding each token once (`redeemEnrollToken`, with its proof).
 - **Project Observatory's node** generates the device keys; pairs (`pairingCommit`, `checkReveal`, and the code only
   through `checkedComparisonCode`); joins a remote rendezvous; applies the chain and pins revision 1 only at the revealed
@@ -345,7 +345,7 @@ Fixtures: `fixtures/semantic/enroll-token-*`, `fixtures/semantic/estate-revision
   `verifyEstateRecord` runs `FAC-SEM-114` and the new `FAC-SEM-073` and `FAC-SEM-076` clauses; consumes a token from
   stdin or a 0600 file only, presents it with its `enroll-join/1` proof and prints its own key's fingerprint; decides on
   its own keys with `ownKeysDecision`; and opens envelopes with the applied delta entries (`estateEnvelopeContext`'s
-  `extraRevocations`).
+  `extraRevocations`, checked by the `placement` vectors), and refuses a delta entry naming a malformed key reference.
 - **The relay** opens one-time rendezvous and carries pairing messages only, as `rendezvousVerdict` reads them,
   forwarding one `abort` after both reveals; revalidates sessions by key, not by kid (`sessionStands`); subtracts a key
   revoked by its key reference and reports a malformed reference (`unread`); and admits a `#sig` key only under its own
@@ -388,6 +388,11 @@ The board row is CT-53.
 8. **The rendezvous now carries one `abort` after both reveals**, where the first reading closed it: a relay or side
    that adopted the first reading of this pull request has not shipped (CT-53 is open).
 9. **`redeemEnrollToken` takes the token and a proof** in place of the nonce: no hub has adopted it.
+10. **The delta side tightens with the records.** A machine at or after DEC-0084 refuses a delta page whose `device-key`
+   entry names a malformed key reference (`applyDelta` `malformed`, RD-2; `FAC-SEM-082`), where an older machine applies
+   it; since `FAC-SEM-076` refuses that ref in every revision, a hub runs `FAC-SEM-082` before it signs an entry.
+11. **The shared `placement` vectors carry `extraRevocations` and expect `senderKnown`.** A port that vendors
+   `src/relay-vectors.ts` refreshes it with the vectors; an old runner fails every placement case, never silently.
 
 ## Not decided here
 

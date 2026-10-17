@@ -638,7 +638,7 @@ independent agent author and P-02 project operator.
 - **States covered:** loading, error, success
 - **Errors & recovery:** the codes differ -> "They differ" burns the rendezvous; nothing is signed; a new attempt uses new nonces. The link is older than 10 minutes -> the rendezvous has expired; the operator starts again. The chain starts at another network -> the second machine refuses it (`other-estate`) and pins nothing. Headless: the fingerprints differ -> the operator signs nothing and revokes the token.
 - **Status:** draft
-- **Coverage:** ceremonies specification, Add a machine; `src/pairing.ts`; `test/pairing.test.ts`, `fixtures/vectors/pairing.json`
+- **Coverage:** ceremonies specification, Add a machine; `src/pairing.ts`; `test/pairing.test.ts`, `fixtures/vectors/pairing.json`; headless: `src/enroll-token.ts`, `test/enroll-token.test.ts`, `fixtures/vectors/enroll-token.json`
 - **Product:** unobserved
 
 ### SCN-029: Create my network on the always-on machine

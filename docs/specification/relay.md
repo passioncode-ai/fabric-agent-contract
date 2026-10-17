@@ -438,7 +438,8 @@ Every refusal of the relay family is data a port runs, not only a test in this r
   that vendors `src/relay-vectors.ts` refreshes it with the vectors: the runner reads only the groups it knows.
   Each case is one complete context, the input, and `expect`, exactly what the reference returns; a key is a JWK or a
   string of base64 SEC 1 octets; a time is RFC 3339.
-- **The runner.** [`src/relay-vectors.ts`](../../src/relay-vectors.ts) (`relayVectorResults`, `envelopeVectorResults`)
+- **The runner.** [`src/relay-vectors.ts`](../../src/relay-vectors.ts) (`relayVectorResults`, `envelopeVectorResults`,
+  `placementVectorResults`)
   turns the data into the reference's contexts and returns `{group, name, actual, expected}` per case, with no test
   framework, so a port vendors it and runs every case the contract runs. `test/relay-vectors.test.ts` runs it here and
   asserts that every refusal code of `admit`, `verifyMessageBody` with `checkReplay`, `verifyBlobRequest` with

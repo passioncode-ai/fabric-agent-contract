@@ -105,7 +105,7 @@ before a refused one stay applied, since each is a valid revocation:
 | Row | Problem | When |
 |---|---|---|
 | RD-1 | `no-clock` | the verifier's clock is not a readable time (checked first: a comparison with NaN is always false) |
-| RD-2 | `malformed` | the held state, the page or an entry is not of its shape: a `sequence` that is not an integer from 1 to 2^53 − 1 (a string `"1"` among them), `prev` that is not 64 lower-case hex, a `sig` that is not 86 base64url characters, a time that is not RFC 3339 with `T`, an offset and a day that exists, a `revokedAt` after `at`, no RFC 8785 form |
+| RD-2 | `malformed` | the held state, the page or an entry is not of its shape: a `sequence` that is not an integer from 1 to 2^53 − 1 (a string `"1"` among them), `prev` that is not 64 lower-case hex, a `sig` that is not 86 base64url characters, a time that is not RFC 3339 with `T`, an offset and a day that exists, a `revokedAt` after `at`, a `device-key` `ref` that holds `@` but is no key reference `<kid>@sha256:<64 lower-case hex>` (DEC-0084: `FAC-SEM-076` refuses it in every revision, so the next revision could never list it), no RFC 8785 form |
 | RD-3 | `wrong-estate` | the entry, or the trusted revision, is another estate's |
 | RD-4 | `unsupported-alg` | `alg` is not `EdDSA` |
 | RD-5 | `not-revocable` | the kind is `authority` or unknown: a passkey is revoked only by a revision a passkey signs |
