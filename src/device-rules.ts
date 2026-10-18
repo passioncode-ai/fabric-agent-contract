@@ -342,13 +342,15 @@ function enrollment(value: JsonObject): Finding[] {
  * `epochs` lists `{epoch, binding}` for every epoch issued to the device. The body's device is the certificate's
  * device. An event's user is the user bound when its epoch was issued — so events of an earlier epoch, still in the
  * buffer after the device was re-enrolled to another person, stay with the person they belong to, and events of an
- * unassigned epoch carry no user.
+ * unassigned epoch carry no user. A `grant.usage` carries its grant's own context, which is `org:` and the
+ * certificate's `org.id` as written (DEC-0086): another organization's usage is refused as `attribution`.
  */
 function attribution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-045", instancePath, message });
   const binding = isObject(value.binding) ? value.binding : {};
   const device = isObject(binding.device) ? binding.device.id : undefined;
+  const org = isObject(binding.org) ? binding.org.id : undefined;
   for (const doc of ["batch", "checkIn"] as const) {
     const body = isObject(value[doc]) ? value[doc] as JsonObject : null;
     if (!body) continue;
@@ -361,6 +363,11 @@ function attribution(value: JsonObject): Finding[] {
   }
   const batch = isObject(value.batch) ? value.batch : {};
   (Array.isArray(batch.events) ? batch.events.filter(isObject) : []).forEach((event, i) => {
+    if (event.kind === "grant.usage") {
+      const context = isObject(event.data) ? event.data.context : undefined;
+      // As written: never case-folded, never by prefix; a certificate without a string org.id matches no context.
+      if (typeof org !== "string" || context !== `org:${org}`) flag(`/batch/events/${i}/data/context`, "a grant's usage carries its grant's own context, org: and the client certificate's org.id; another organization's is refused as attribution");
+    }
     const epoch = isObject(event.collector) ? num(event.collector.epoch) : 0;
     const bound = epochs.get(epoch);
     if (!bound) { flag(`/batch/events/${i}/collector/epoch`, `no binding is recorded for epoch ${epoch} of this device`); return; }
