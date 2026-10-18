@@ -360,6 +360,9 @@ describe("share-registration semantic fixtures (FAC-SEM-117, FAC-SEM-118, FAC-SE
     elsewhere.machines[1].packages.push({ ...record.machines[0].packages[1], agentRef: "urn:fabric:agent:example:notes", context: "org:org_3fh9p1zc" });
     expect(paths("org-share-grants", { record: elsewhere })).toEqual([]);
     expect(paths("org-share-grants", { record: "x" })).toEqual([]);
+    const noMeta = structuredClone(record);
+    noMeta.shareGrants[1].meta = "x";
+    expect(paths("org-share-grants", { record: noMeta })).toEqual(["FAC-SEM-117 /record/shareGrants/1/meta/id"]);
   });
 
   it("flags a registration's document clauses where they are (FAC-SEM-118)", () => {
