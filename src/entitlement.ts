@@ -135,7 +135,8 @@ function validAtIssue(set: JsonObject): boolean {
 
 /**
  * Whether a key set's members have the schema's shapes and FAC-SEM-116's structure (each kid once, the root's kid
- * not among the keys, every window positive, no revoked kid among the keys); algorithms and small-order keys aside.
+ * not among the keys, every window positive, a key valid at its `issuedAt`, no revoked kid among the keys); algorithms
+ * and small-order keys aside.
  */
 export function keySetWellFormed(set: JsonObject): boolean {
   const keys = set.keys;
@@ -340,7 +341,7 @@ export function verifyEntitlement(value: unknown, trust: EntitlementTrust): Enti
 type Flag = (instancePath: string, message: string) => void;
 
 /**
- * FAC-SEM-115 on one entitlement: the subject's lines agree, the times are strict and in order, the life is at most 35
+ * FAC-SEM-115 on one entitlement: the subject's lines agree, the times are strict and in order, the life is at most 38
  * days, and each agent is listed once.
  */
 function entitlementDocument(value: JsonObject, flag: Flag): void {
@@ -375,8 +376,8 @@ function entitlementDocument(value: JsonObject, flag: Flag): void {
 }
 
 /**
- * FAC-SEM-116 on one key set: each kid once, never the root's kid, every window positive, no revoked kid among the
- * keys, and no key of small order.
+ * FAC-SEM-116 on one key set: each kid once, never the root's kid, every window positive, a key valid at the set's
+ * `issuedAt`, no revoked kid among the keys, and no key of small order.
  */
 function keySetDocument(value: JsonObject, flag: Flag): void {
   const revoked = list(value.revoked);
