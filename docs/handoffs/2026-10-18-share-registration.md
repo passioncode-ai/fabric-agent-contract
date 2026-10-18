@@ -45,8 +45,8 @@ tombstone joining nothing; the GJ-0 row; `FAC-SEM-117` counting placements in th
 
 ## Checks
 
-`pnpm run check` at the commit this handoff records as the gate's (typecheck, `vitest run --coverage`, `docs/ux/lint.py`,
-docs-check, lint-md, privacy-check), each exiting 0; the gate's commit is named in the handoff index row.
+`pnpm run check` at `45cd007` (typecheck, `vitest run --coverage`, `docs/ux/lint.py`,
+docs-check, lint-md, privacy-check), each exiting 0: 75 files, 5545 tests, coverage 7267 / 7340 branches, docs-check passed, lint-md 0 errors, privacy-check 0 findings. The final commit, which only records this, was checked again.
 
 ## Open
 
