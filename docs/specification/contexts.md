@@ -146,7 +146,7 @@ metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemet
 - **Its data**: `day`; `grantId`, the share grant's `meta.id`, `urn:fabric:share:` and 32 lower-case hex digits,
   compared as written (DEC-0086, `FAC-SEM-117`), so one grant revised during the day is one row and the organization
   server joins it to the agent its share registration names; `context`, the grant's own `org:<orgId>` (DEC-0086);
-  `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
+  `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and `costUsd`, a number of at least 0, or `null` when no call was priced, never `0` for an unknown cost, as DEC-0021 and
   `FAC-SEM-025` say (`FAC-SEM-038` checks the three together).
 - **A day and no finer time**, like `policy.violation`: `occurred` is that day's midnight UTC (`FAC-SEM-039`),
   `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`, `skill` or `launch` (schema).
@@ -161,7 +161,7 @@ metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemet
 - **Who derives the id**: the collector on the issuer's own device, from the receipts its meter settled, where the
   grant's id is known. A grant reference may end in `#<revision>` (`<id>#<revision>`, as the register's `share-grant/1`
   names a grant); the collector drops it by taking the receipt's grant `meta.id`, which carries no revision, so the
-  schema refuses a `#`. A grant whose `meta.id` is no share grant id reports no `grant.usage` (DEC-0086). DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
+  schema refuses a `#`. A grant whose `meta.id` is no share grant id reports no `grant.usage` (DEC-0086). DL-22's opacity binds callees (a service names a grant only by the token's `grant` claim), and
   this is the issuer's side, so it is not broken.
 - **Once**: a collector emits it after the day ends, one per (day, `grantId`) per stream; a batch that carries two for
   one (day, `grantId`) of one stream, the ids compared by normal form, is refused (`FAC-SEM-039`). A receiver counts the
