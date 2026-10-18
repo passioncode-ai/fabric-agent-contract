@@ -1,4 +1,4 @@
-# Brief — `entitlement/1` (CT-54, DEC-0085)
+# Brief: `entitlement/1` (CT-54, DEC-0085)
 
 Owner: fabric-agent-contract. Requester: passioncode-platform PLAT-020 (RM-14/CE-14), board thread
 `b68f4399-81c9-4cfe-a7a3-a62d9f30b92d` (message `7a2ddee7…`, 2026-10-17). Verifier: the first organization server
@@ -22,7 +22,7 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
 ## Decisions (made by the contract; recorded in DEC-0085 with these reasons)
 
 1. **Shape: one JSON document with its signature inside,** `{type: "entitlement/1", ...fields, alg, kid, sig}`;
-   the signed bytes are the register's `entitlement/1` statement — UTF-8 RFC 8785 of the document without `sig`
+   the signed bytes are the register's `entitlement/1` statement: UTF-8 RFC 8785 of the document without `sig`
    (`signingStatement`), registered `signer: "key"`. Reason: every signed record of the contract uses one canonical
    form (DEC-0043, DEC-0062); the verifier needs no JOSE parser, and the type inside the bytes means no other
    statement of the same key is an entitlement. Not a JWT.
@@ -35,14 +35,14 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
    - `subject`: a context id (`contextId`): `org:<orgId>` or `personal`. Never a person's id.
    - `estate`: for `personal`, the person's estate id (`opaqueId`), which binds a personal entitlement to one
      person's network without a cross-organization person id; `null` for `org:<orgId>`.
-   - `order`: `{id, revision}` — the signed order's opaque id and its revision (a positive safe integer).
+   - `order`: `{id, revision}`: the signed order's opaque id and its revision (a positive safe integer).
    - `issuedAt`, `notBefore`, `expiresAt`: strict RFC 3339 instants, `issuedAt ≤ notBefore < expiresAt`.
    - `licence`: `{members}` (an integer 1…1 000 000, the member allowance) or `null`; `null` for `personal`.
    - `hosting`: `{product: "org-cloud" | "personal-cloud", size}` (`size` an opaque id) or `null`;
      `org-cloud` only for `org:`, `personal-cloud` only for `personal`.
    - `support`: `{tier: "observe" | "assist" | "managed"}` or `null`; `null` for `personal`. Reason: ADR-0005 D-1's
      tier decides what admin agents may do, and they must read it from a verified record, not editable config.
-   - `agents`: an array (0…256) of `{agentRef}`, unique by `agentRef` — one entry per paid agent (ADR-0005 D-2).
+   - `agents`: an array (0…256) of `{agentRef}`, unique by `agentRef`, one entry per paid agent (ADR-0005 D-2).
    - No amount, price, currency or person anywhere: the schema refuses any member it does not list.
 4. **Issuer keys: a pinned root and a signed key set.** The verifier is installed with the issuer's **root key**
    `{issuer, kid, x}` (Ed25519), which signs only `entitlement-key-set/1` documents:
@@ -59,7 +59,7 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
      `stale-revision`, the same revision with other bytes `revision-conflict`, the same bytes are accepted unchanged.
    - Root replacement is a reinstall (out of band), as a device's root key is a re-enrollment.
 5. **Windows** (numbers, not defaults left to the caller):
-   - lifetime `expiresAt − issuedAt` at most **35 days** — one billing month (≤ 31 days) plus 4 days of overlap
+   - lifetime `expiresAt − issuedAt` at most **35 days**: one billing month (≤ 31 days) plus 4 days of overlap
      for the next revision to arrive before the month turns;
    - the issuer issues the next revision at least **7 days** before `expiresAt` (`REFRESH_SECONDS`); the verifier
      reports `refreshDue: true` from then on, so an administrator sees a stalled issuer a week ahead;

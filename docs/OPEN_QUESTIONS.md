@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0012`
+**Next free ID:** `OQ-0013`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -160,3 +160,28 @@ ruling; DEC-0017 states what holds now.
   - **Q4** — whether a schema refuses a non-normal spelling outright, so that a writer MUST emit the normal form and the
     readers' lookup by normal form becomes a check.
 - **Meanwhile:** readers compare by normal form; writers SHOULD emit it; nothing refuses a non-normal spelling.
+
+### OQ-0012 — Jobs and capabilities under limits and uncertain effects: a typed pause, `outcome-unknown` beyond comms, unknown as `null`
+
+- **Status:** Open (ruled in principle 2026-10-17); a DEC with schema, rule and vectors owes the wire shape
+- **Raised:** 2026-10-17, an agent retrospective of 18 agents (frame-agent private report, candidates C1–C4), read
+  against `7a14a48`; board row CT-55
+- **Owner of the answer:** this repository.
+- **Question:** four candidates for normative text, with their evidence as reported:
+  - **C1**: a job stopped by a provider or subscription limit ended as `failed` in about ten agents, and callers
+    resubmitted and paid twice; `interop.md` C3.2 has no limit state, no `resetsAt`;
+  - **C2**: `outcome_unknown` exists only for `com.*` (project comms); several agents booked duplicate charges by
+    resending an uncertain write under a new idempotency key;
+  - **C3**: unknown as `null` in every number and verdict, beyond `costUsd` (DEC-0021, `FAC-SEM-025`);
+  - **C4**: a 4xx at submit is a settled rejection; a 4xx while polling an accepted job is a lost job.
+- **Ruling in principle (2026-10-17):**
+  - C1 and C2 change the wire: one additive `fabric-interop` revision: a job error code `quota-exhausted` with
+    `retryable` and an optional `resetsAt` (RFC 3339 UTC), a `working` status message for a job a limit paused (the
+    provider resumes the same job), a job error code `outcome-unknown` for an effect that may have happened, and the
+    caller rules: no resubmit after either code, a resend reuses the idempotency key derived from the intent, never a
+    clock or a random value. Codes are lowercase-hyphenated as C3.2 requires; `degraded` stays health, never a job state.
+  - C3: already binding for cost; the DEC extends `null` for unknown to a job's `usage` totals, counts and coverage.
+    A check that did not run is already never a pass: a claim no checker verified stays in `notVerified`, and
+    `succeeded` is refused while any claim is there (`FAC-SEM-001`, DEC-0064; [results and evidence](specification/results-and-evidence.md)).
+  - C4: caller behaviour that moves no shape, so guidance in fabric-agent-adapter (its PR #122), not contract text.
+- **Meanwhile:** nothing changes on the wire; providers follow the adapter's guidance.
