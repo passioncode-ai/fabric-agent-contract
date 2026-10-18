@@ -116,7 +116,7 @@ describe("estate-record semantic fixtures (FAC-SEM-072…076, FAC-SEM-110, FAC-S
   it("never repeats the credential it refuses", () => {
     const text = JSON.stringify(evaluateSemanticRules("estate-record", load("semantic/estate-secret-value-as-slot.json").input));
     expect(text).toContain("FAC-SEM-075");
-    expect(text).not.toContain("AKIAIOSFODNN7EXAMPLE");
+    expect(text).not.toContain("GHP_EXAMPLE0SLOT0NAME0NOT0A0TOKEN000000");
   });
 
   it("names the digest it computed, and refuses a record that has no RFC 8785 form", () => {
