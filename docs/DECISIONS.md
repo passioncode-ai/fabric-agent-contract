@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0086`
+**Next free ID:** `DEC-0087`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5221,7 +5221,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   The registers are edited under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md`
   and `docs/backlog.md`.
 
-### DEC-0085: The entitlement, `entitlement/1`: one signed record of what an order entitles a subject to, under a key set an offline root signs, with a 35-day life, a 7-day refresh and a 14-day grace
+### DEC-0085 — The entitlement, `entitlement/1`: one signed record of what an order entitles a subject to, under a key set an offline root signs, with a 38-day life, a 7-day refresh and a 14-day grace
 
 - **Date:** 2026-10-17
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-54: the
@@ -5241,7 +5241,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      one field list for good: `issuer` (a lower-case `https://` origin, no port, path or trailing slash), `subject` (a
      context id, `org:<orgId>` or `personal`, DEC-0082; never a person), `estate` (for `personal`, the person's estate id;
      `null` for an organization), `order` (`{id, revision}`), `issuedAt` ≤ `notBefore` < `expiresAt`, `licence`
-     (`{members}` from 1 to 1 000 000, or `null`; `null` for `personal`), `hosting` (`{product, size}`, `org-cloud` only
+     (`{members}`, the member allowance the order grants, from 1 to 1 000 000, or `null`; `null` for `personal`; the
+     billable count is the organization server's own metering, never this field), `hosting` (`{product, size}`, `org-cloud` only
      for `org:` and `personal-cloud` only for `personal`, or `null`), `support` (`{tier}` of `observe`, `assist`,
      `managed`, or `null`; `null` for `personal`), `agents` (0 to 256 `{agentRef}`, unique, DEC-0050). No amount, price,
      currency or person: the schema refuses any member it does not list.
@@ -5250,16 +5251,27 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `{type, issuer, revision, issuedAt, keys: [{kid, alg, x, notBefore, notAfter}], revoked, alg, kid, sig}`; signing
      keys sign entitlements (devices.md's key-set pattern, DEC-0031). An entitlement verifies only under a listed key
      whose window holds its `issuedAt` (`notBefore` ≤ `issuedAt` < `notAfter`); a new key overlaps the old one, which stays
-     listed up to 49 days past its window; a revoked kid refuses everything it signed at once (`key-revoked`); the
+     listed up to 52 days past its window; a revoked kid refuses everything it signed at once (`key-revoked`); a key
+     set holds at least one key valid at its `issuedAt` (devices.md *Key sets*, `FAC-SEM-116`); the
      verifier keeps the highest key-set revision and its digest (lower `stale-revision`, same revision with other bytes
-     `revision-conflict`, same bytes unchanged); replacing the root is a reinstall.
-  5. **Windows:** a life of at most 35 days (`MAX_ENTITLEMENT_SECONDS`); the next revision issued at least 7 days before
+     `revision-conflict`, same bytes unchanged); replacing the root is a reinstall. The root
+     stays offline, owned by the platform.
+  5. **Windows:** a life of at most 38 days (`MAX_ENTITLEMENT_SECONDS`): one billing month of at most 31 days plus the
+     7-day refresh lead, so a monthly issuer re-issues by day 31 and `refreshDue` lights only when it missed that (the
+     owner's decision of the fix round, 2026-10-18; the brief had 35); the next revision issued at least 7 days before
      `expiresAt`, from when the verifier reports `refreshDue` (`REFRESH_SECONDS`); 14 days of `grace` after `expiresAt`,
      then `lapsed` (`GRACE_SECONDS`); 60 s of clock skew on `notBefore` (`CLOCK_SKEW_SECONDS`). What a lapse switches off is
      the verifying product's.
   6. **One entitlement per subject:** the verifier holds `{orderId, revision, issuedAt, digest}` per subject; the same
      order's higher revision is accepted, the same revision and digest is `unchanged`, the same revision with another
      digest `revision-conflict`, a lower revision `stale-revision`, and another order is accepted only when issued later.
+     **The issuer** raises `order.revision` with every entitlement it issues for an order (a refresh, a re-issue) and
+     never signs one revision with other bytes; after revoking a key it re-issues everything that key signed under a
+     listed key, delivered before or with the key set that revokes it; one entitlement per subject carries every current
+     line of that subject, and the platform keeps one order per subject (an amendment is a revision), so a second order
+     supersedes the first only as a deliberate replacement. **The verifier** keeps the accepted document, not only the
+     held record, and runs `verifyEntitlement` on it again after every key set it applies and at least once a day, so
+     `grace`, `lapsed` and `key-revoked` reach an entitlement it already accepted.
   7. **The verifiers,** answering and never throwing: `verifyEntitlement` in the order of the EN table (EN-1…EN-13:
      `context-invalid`, `no-clock`, `malformed`, `wrong-issuer`, `unknown-algorithm`, `unknown-key`, `key-revoked`,
      `unusable-key`, `small-order-key`, `key-not-valid`, `bad-signature`, `wrong-subject`, `too-long-lived`,
@@ -5280,11 +5292,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - kids are opaque ids (`activity-common#/$defs/opaqueId`), a key set holds 1 to 32 keys and up to 256 revoked kids, and
     the issuer is a host of two labels or more, compared as written;
   - the held record of a key set is `{revision, digest}`, `digest` being `sha256:` of the signed bytes, as an
-    entitlement's.
+    entitlement's;
+  - an unreadable clock answers `no-clock` even when the trust is also invalid: the clock is read before the rest of
+    the context, so no comparison ever runs on NaN (vector "no clock: an unreadable now beside an invalid subject");
+  - instants compare at millisecond precision: an entitlement or key-set time with more than three fraction digits is
+    malformed, in the schema (`entitlement#/$defs/instant`) and in the shape check, so every port compares the same
+    instants (the owner's decision of the fix round);
+  - a key set with no key valid at its `issuedAt` is a `FAC-SEM-116` finding, `malformed` to `verifyEntitlementKeySet`
+    (EK-2, a structural fault like a kid listed twice) and `context-invalid` to `verifyEntitlement` when handed as
+    applied (EN-1);
+  - a missing `licence`, `hosting` or `support` member is `malformed`, never a throw: only `null` or an object of exactly
+    its members is a line.
 - **Why:** the platform sells organization and personal plans whose paid functions run on servers it does not operate;
   those servers must decide offline, from a record they verify, what is paid, and an admin agent must read its support
   tier from that record rather than from editable configuration. An offline root with rotating online keys keeps the
-  root out of reach (the platform's PLAT-022) without reinstalling verifiers. The grace covers the issuer's outage; the
+  root out of reach without reinstalling verifiers. The grace covers the issuer's outage; the
   refresh warns a week ahead. J10: no person, no member list, no amount; a personal entitlement's estate id is not a
   cross-organization person id.
 - **Compatibility:** Additive: two new schemas, a specification, two register types, two rules, two protocol names.
@@ -5303,10 +5325,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `src/entitlement.ts` in `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md` (Entitlement), `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-54),
     `docs/evidence/specs/2026-10-17-entitlement/brief.md`, `docs/evidence/specs/2026-10-17-entitlement/plants.md`,
-    `docs/handoffs/2026-10-17-entitlement.md`, `docs/handoffs/README.md`.
+    `docs/handoffs/2026-10-17-entitlement.md`, `docs/handoffs/README.md`, `docs/OPEN_QUESTIONS.md` (OQ-0012).
 - **Not decided here:** member-period metering and the billable-member definition (the first organization server's
-  Stage 5); per-agent usage, which stays `grant.usage` (DEC-0082); how the platform stores orders; the hardware-module
-  ceremony for the root; which functions a lapse disables.
+  Stage 5); per-agent usage, which stays `grant.usage` (DEC-0082); how the platform stores orders and keeps its root
+  offline; the transport of entitlements and key sets and their delivery order (a key set before the entitlements
+  signed under a key it adds), the issuer's; which functions a lapse disables (the platform's packet keeps ingest,
+  security, fleet and setup through the grace).
 - **Source:** the platform's PLAT-020 message on the project board (2026-10-17); its organization offer ADR-0005 and its
   recovery program packet §1–2; DEC-0031, DEC-0043, DEC-0045, DEC-0050, DEC-0062, DEC-0063, DEC-0082; RFC 8032 and
   RFC 8785 in the [source ledger](evidence/sources.md); the brief `docs/evidence/specs/2026-10-17-entitlement/brief.md`.

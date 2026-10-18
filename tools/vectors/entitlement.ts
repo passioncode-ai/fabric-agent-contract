@@ -89,7 +89,9 @@ const HANDED: Record<string, Json> = {
   /** Not a set the root could have signed: its algorithm is not EdDSA. */
   es256: { ...KEY_SETS.r2, alg: "ES256" },
   /** Not a key set: the root's kid among the keys. */
-  rootAmongKeys: { ...KEY_SETS.r2, keys: [K1_ENTRY, K2_ENTRY, { ...K2_ENTRY, kid: ROOT.kid }] }
+  rootAmongKeys: { ...KEY_SETS.r2, keys: [K1_ENTRY, K2_ENTRY, { ...K2_ENTRY, kid: ROOT.kid }] },
+  /** Not a key set: no key's window holds its issuedAt (devices.md *Key sets*, FAC-SEM-116). */
+  noKeyAtIssue: { ...KEY_SETS.r2, issuedAt: "2027-06-01T00:00:00Z" }
 };
 
 // ---- Entitlements -------------------------------------------------------------------------------------------------
@@ -144,8 +146,9 @@ function verifyCases(): Json[] {
   const k2AtNotBefore = entitlement({ issuedAt: "2026-10-15T00:00:00Z", notBefore: "2026-10-15T00:00:00Z", expiresAt: "2026-11-19T00:00:00Z" });
   const k2JustBefore = entitlement({ issuedAt: "2026-10-14T23:59:59.999Z", notBefore: "2026-10-15T00:00:00Z", expiresAt: "2026-11-18T00:00:00Z" });
   const early = entitlement({ notBefore: "2026-11-01T00:00:00Z" });
-  const day35 = entitlement({ expiresAt: "2026-11-24T00:00:00Z" });
-  const day35Plus = entitlement({ expiresAt: "2026-11-24T00:00:01Z" });
+  const day38 = entitlement({ expiresAt: "2026-11-27T00:00:00Z" });
+  const day38Plus = entitlement({ expiresAt: "2026-11-27T00:00:00.001Z" });
+  const millis = entitlement({ notBefore: "2026-10-20T00:00:00.001Z" });
   const notBeforeEarly = entitlement({ notBefore: "2026-10-19T23:59:59Z" });
   const empty = entitlement({ notBefore: "2026-11-24T00:00:00Z" });
   const forged = { ...entitlement({ kid: "ent-zero" }), sig: `${"A".repeat(85)}A` };
@@ -187,8 +190,11 @@ function verifyCases(): Json[] {
     c("not yet valid: before notBefore", early, orgTrust(), refused("not-yet-valid")),
     c("not yet valid: 60 s before notBefore is within the clock skew", early, orgTrust({ now: "2026-10-31T23:59:00Z" }), accepted(early, "active", false)),
     c("not yet valid: 60 s and a millisecond before notBefore", early, orgTrust({ now: "2026-10-31T23:58:59.999Z" }), refused("not-yet-valid")),
-    c("too long: exactly 35 days", day35, orgTrust(), accepted(day35, "active", false)),
-    c("too long: 35 days and a second", day35Plus, orgTrust(), refused("too-long-lived")),
+    c("too long: exactly 38 days", day38, orgTrust(), accepted(day38, "active", false)),
+    c("too long: 38 days and a millisecond", day38Plus, orgTrust(), refused("too-long-lived")),
+    c("precision: a time with three fraction digits", millis, orgTrust(), accepted(millis, "active", false)),
+    c("precision: a time with four fraction digits is malformed", entitlement({ notBefore: "2026-10-20T00:00:00.0001Z" }), orgTrust(), refused("malformed")),
+    c("malformed: no licence member", (({ licence: _l, ...rest }) => rest)(BASE), orgTrust(), refused("malformed")),
     c("too long: notBefore before issuedAt", notBeforeEarly, orgTrust(), refused("too-long-lived")),
     c("too long: expiresAt at notBefore, an empty life", empty, orgTrust(), refused("too-long-lived")),
     c("replay: a lower revision of the held order", lower, orgTrust({ now: "2026-10-24T12:00:00Z", held: held(BASE) }), refused("stale-revision")),
@@ -211,9 +217,11 @@ function verifyCases(): Json[] {
     c("context: an organization's verifier with an estate", BASE, orgTrust({ estate: ESTATE }), refused("context-invalid")),
     c("context: a subject that is not a context id", BASE, orgTrust({ subject: "person:p-1" }), refused("context-invalid")),
     c("context: a key set that is not one", BASE, orgTrust({ keySet: "rootAmongKeys" }), refused("context-invalid")),
+    c("context: a key set with no key valid at its issuedAt", BASE, orgTrust({ keySet: "noKeyAtIssue" }), refused("context-invalid")),
     c("context: a key set signed under an algorithm the verifier does not know", BASE, orgTrust({ keySet: "es256" }), refused("context-invalid")),
     c("context: a held record without a digest", BASE, orgTrust({ held: { ...held(BASE), digest: "x" } }), refused("context-invalid")),
-    c("no clock: an unreadable now", BASE, orgTrust({ now: "2026-10-25 12:00:00" }), refused("no-clock"))
+    c("no clock: an unreadable now", BASE, orgTrust({ now: "2026-10-25 12:00:00" }), refused("no-clock")),
+    c("no clock: an unreadable now beside an invalid subject answers no-clock", BASE, orgTrust({ now: "2026-10-25 12:00:00", subject: "person:p-1" }), refused("no-clock"))
   ];
 }
 
@@ -249,6 +257,8 @@ function keySetCases(): Json[] {
     c("malformed: a revoked kid among the keys", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K1.kid]), pin(), refused("malformed")),
     c("malformed: a window that ends where it starts", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { ...K2_ENTRY, notAfter: K2_ENTRY.notBefore }], [K0.kid]), pin(), refused("malformed")),
     c("malformed: no keys", keySet(2, "2026-10-15T00:00:00Z", [], [K0.kid]), pin(), refused("malformed")),
+    c("malformed: no key valid at the set's issuedAt", keySet(4, "2027-02-01T00:00:00Z", [K2_ENTRY], [K0.kid, K1.kid]), pin(), refused("malformed")),
+    c("malformed: a key window time with four fraction digits", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { ...K2_ENTRY, notBefore: "2026-10-15T00:00:00.0000Z" }], [K0.kid]), pin(), refused("malformed")),
     c("malformed: an entitlement is not a key set", BASE, pin(), refused("malformed")),
     c("context: no root", "r2", {}, refused("context-invalid")),
     c("context: a held record with revision 0", "r2", pin({ held: { revision: 0, digest: digest(r2) } }), refused("context-invalid")),

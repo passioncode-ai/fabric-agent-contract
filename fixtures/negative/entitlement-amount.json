@@ -31,5 +31,5 @@
   "alg": "EdDSA",
   "kid": "ent-2026-10",
   "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ",
-  "amount": "120"
+  "amount": "an amount"
 }

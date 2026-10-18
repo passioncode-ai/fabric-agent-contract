@@ -47,7 +47,7 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
 4. **Issuer keys: a pinned root and a signed key set.** The verifier is installed with the issuer's **root key**
    `{issuer, kid, x}` (Ed25519), which signs only `entitlement-key-set/1` documents:
    `{type, issuer, revision, issuedAt, keys: [{kid, alg, x, notBefore, notAfter}], revoked: [kid], alg, kid, sig}`.
-   Signing keys sign entitlements. Reason: the root can live offline or in an HSM (PLAT-022) while online keys rotate
+   Signing keys sign entitlements. Reason: the root stays offline, owned by the platform, while online keys rotate
    and are revoked without reinstalling any verifier; this is the devices.md key-set pattern the organization server
    already implements for policies.
    - **Rotation**: a new key is added with a window that overlaps the old one; the old key stays listed after its
@@ -59,7 +59,8 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
      `stale-revision`, the same revision with other bytes `revision-conflict`, the same bytes are accepted unchanged.
    - Root replacement is a reinstall (out of band), as a device's root key is a re-enrollment.
 5. **Windows** (numbers, not defaults left to the caller):
-   - lifetime `expiresAt − issuedAt` at most **35 days**: one billing month (≤ 31 days) plus 4 days of overlap
+   - (amended by the owner's fix round, 2026-10-18: 38 days, one billing month plus the 7-day refresh lead; DEC-0085
+     item 5) lifetime `expiresAt − issuedAt` at most **35 days**: one billing month (≤ 31 days) plus 4 days of overlap
      for the next revision to arrive before the month turns;
    - the issuer issues the next revision at least **7 days** before `expiresAt` (`REFRESH_SECONDS`); the verifier
      reports `refreshDue: true` from then on, so an administrator sees a stalled issuer a week ahead;

@@ -7,7 +7,7 @@ import { ENTITLEMENT_KEY_SET_FIELDS, signingStatement } from "./signing-challeng
 // #region entitlement, docs: docs/specification/entitlement.md
 /**
  * `entitlement/1` (DEC-0085): what one signed order entitles one subject to (an organization, `org:<orgId>`, or one
- * person's estate, `personal`) for at most 35 days: a member allowance, a hosting product, a support tier and the paid
+ * person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a support tier and the paid
  * agents. The issuer (the PassionCode platform) signs it with a key its offline root lists in an
  * `entitlement-key-set/1`; a verifier (the first organization server, a personal cloud) holds the root, the key set it
  * applied and, per subject, the entitlement it accepted last. No amount, price, currency or person appears anywhere.
@@ -16,8 +16,11 @@ export const ENTITLEMENT_TYPE = "entitlement/1";
 export const ENTITLEMENT_KEY_SET_TYPE = "entitlement-key-set/1";
 /** Ed25519 only (DEC-0085 item 2); ES256 may join additively by a later decision, as for leases and hub keys. */
 export const ENTITLEMENT_ALGORITHMS: readonly string[] = ["EdDSA"];
-/** The longest life, `expiresAt − issuedAt`: one billing month (at most 31 days) and 4 days for the next revision. */
-export const MAX_ENTITLEMENT_SECONDS = 35 * 24 * 60 * 60;
+/**
+ * The longest life, `expiresAt − issuedAt`: one billing month (at most 31 days) and the 7-day refresh lead, so a monthly
+ * issuer re-issues by day 31 and `refreshDue` lights only when it missed that (DEC-0085, the owner's fix round).
+ */
+export const MAX_ENTITLEMENT_SECONDS = 38 * 24 * 60 * 60;
 /** The issuer issues the next revision at least this long before `expiresAt`; the verifier reports `refreshDue` from then on. */
 export const REFRESH_SECONDS = 7 * 24 * 60 * 60;
 /** After `expiresAt`, an entitlement verifies in `grace` this long, then is refused `lapsed`. */
@@ -53,7 +56,10 @@ const SHA256 = /^sha256:[a-f0-9]{64}$/;
 const matches = (pattern: RegExp, value: unknown) => isString(value) && pattern.test(value);
 const opaque = (value: unknown) => matches(OPAQUE, value);
 const issuerOk = (value: unknown) => isString(value) && value.length <= 261 && ISSUER.test(value);
-const time = (value: unknown) => strictTime(value);
+/** At most three fraction digits: every port compares the same instants, at millisecond precision (DEC-0085). */
+const MILLISECONDS = /:[0-9]{2}(?:\.[0-9]{1,3})?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})$/;
+/** A strict RFC 3339 instant with at most three fraction digits, in milliseconds, or NaN. */
+const time = (value: unknown) => (isString(value) && MILLISECONDS.test(value) ? strictTime(value) : Number.NaN);
 const readable = (value: unknown) => Number.isFinite(time(value));
 /** The members of `value` are exactly `names`. */
 const exactly = (value: JsonObject, names: readonly string[]) => Object.keys(value).length === names.length && names.every((name) => Object.hasOwn(value, name));
@@ -81,8 +87,8 @@ export function entitlementKeySetSigningInput(set: unknown): Buffer | undefined 
 
 /** Whether a nullable line is `null` or an object of exactly `names` whose members pass `check`. */
 const line = (value: unknown, names: readonly string[], check: (value: JsonObject) => boolean) =>
-  // `exactly` reads only own keys, so a number, a string or an array never has exactly `names` and needs no other test.
-  value === null || (exactly(value as JsonObject, names) && check(value as JsonObject));
+  // A missing member is `undefined`, never a line: only `null` or an object of exactly `names` is.
+  value === null || (isObject(value) && exactly(value, names) && check(value));
 
 /**
  * Whether the subject's lines agree (DEC-0085 item 3): `personal` carries an estate, no licence, no support and at most
@@ -99,7 +105,7 @@ function consistent(doc: JsonObject): boolean {
  * exact member list are the register's to check: `entitlementSigningInput` has no bytes for another type, a missing
  * member or an extra one, and the verifier refuses such a document `malformed` on that answer.
  */
-function wellFormed(doc: JsonObject): boolean {
+export function entitlementWellFormed(doc: JsonObject): boolean {
   const order = doc.order;
   const agents = doc.agents;
   const refs = Array.isArray(agents) ? agents.map((agent) => (isObject(agent) ? agent.agentRef : undefined)) : [];
@@ -121,11 +127,17 @@ function wellFormed(doc: JsonObject): boolean {
   );
 }
 
+/** Whether one of a key set's keys is valid at the set's own `issuedAt`: `notBefore` ≤ `issuedAt` < `notAfter`. */
+function validAtIssue(set: JsonObject): boolean {
+  const issuedAt = time(set.issuedAt);
+  return indexed(set.keys).some(([key]) => time(key.notBefore) <= issuedAt && issuedAt < time(key.notAfter));
+}
+
 /**
  * Whether a key set's members have the schema's shapes and FAC-SEM-116's structure (each kid once, the root's kid
  * not among the keys, every window positive, no revoked kid among the keys); algorithms and small-order keys aside.
  */
-function wellFormedKeySet(set: JsonObject): boolean {
+export function keySetWellFormed(set: JsonObject): boolean {
   const keys = set.keys;
   const revoked = set.revoked;
   if (
@@ -142,7 +154,8 @@ function wellFormedKeySet(set: JsonObject): boolean {
     kids.add(key.kid);
     if (!(time(key.notBefore) < time(key.notAfter))) return false;
   }
-  return true;
+  // devices.md *Key sets*: a set always holds a key valid at its issuedAt, so a verifier that applies it can verify.
+  return validAtIssue(set);
 }
 
 // ---- The key set -------------------------------------------------------------------------------------------------
@@ -190,7 +203,7 @@ export function verifyEntitlementKeySet(value: unknown, trust: KeySetTrust): Key
     return { ok: false, problem: "context-invalid" };
   }
   // A well-formed set always has its statement (its members are exact, its values finite); one test, one answer.
-  const input = isObject(value) && wellFormedKeySet(value) ? entitlementKeySetSigningInput(value) : undefined;
+  const input = isObject(value) && keySetWellFormed(value) ? entitlementKeySetSigningInput(value) : undefined;
   if (!input) return { ok: false, problem: "malformed" };
   const set = value as JsonObject;
   const root = trust.root;
@@ -258,7 +271,7 @@ const heldEntitlementOk = (held: unknown) =>
 function usableTrust(trust: EntitlementTrust): boolean {
   const estateOk = trust.subject === "personal" ? opaque(trust.estate) : trust.estate === undefined;
   // A key set the root did not sign under an algorithm this verifier knows is not one it could have applied.
-  const keySetOk = isObject(trust.keySet) && wellFormedKeySet(trust.keySet) && ENTITLEMENT_ALGORITHMS.includes(trust.keySet.alg as string);
+  const keySetOk = isObject(trust.keySet) && keySetWellFormed(trust.keySet) && ENTITLEMENT_ALGORITHMS.includes(trust.keySet.alg as string);
   return matches(CONTEXT, trust.subject) && estateOk && keySetOk && heldEntitlementOk(trust.held);
 }
 
@@ -274,7 +287,7 @@ export function verifyEntitlement(value: unknown, trust: EntitlementTrust): Enti
   const now = trust.now instanceof Date ? trust.now.getTime() : Number.NaN;
   if (!Number.isFinite(now)) return { ok: false, problem: "no-clock" };
   if (!usableTrust(trust)) return { ok: false, problem: "context-invalid" };
-  const input = isObject(value) && wellFormed(value) ? entitlementSigningInput(value) : undefined;
+  const input = isObject(value) && entitlementWellFormed(value) ? entitlementSigningInput(value) : undefined;
   if (!input) return { ok: false, problem: "malformed" };
   const entitlement = value as JsonObject;
 
@@ -347,7 +360,7 @@ function entitlementDocument(value: JsonObject, flag: Flag): void {
   const notBefore = time(value.notBefore);
   const expiresAt = time(value.expiresAt);
   const unreadable = (["issuedAt", "notBefore", "expiresAt"] as const).filter((name) => !readable(value[name]));
-  for (const name of unreadable) flag(`/${name}`, "a time is an RFC 3339 date-time with an offset, on a day that exists");
+  for (const name of unreadable) flag(`/${name}`, "a time is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits");
   if (!unreadable.length) {
     if (issuedAt > notBefore) flag("/notBefore", "notBefore is at or after issuedAt");
     if (notBefore >= expiresAt) flag("/expiresAt", "expiresAt is after notBefore");
@@ -379,6 +392,7 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
     else if (time(key.notBefore) >= time(key.notAfter)) flag(`${at}/notAfter`, "a key's window ends after it starts");
     if (matches(X, key.x) && isSmallOrderKey(rawKey(key.x as string))) flag(`${at}/x`, "a key of small order lets anyone forge a signature (DEC-0045)");
   }
+  if (readable(value.issuedAt) && !validAtIssue(value)) flag("/keys", "a key set holds at least one key valid at its issuedAt");
 }
 
 export function entitlementRules(kind: string, value: JsonObject): Finding[] | undefined {

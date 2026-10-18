@@ -29,7 +29,8 @@
       "description": "Rises with every set the root signs; a verifier refuses a lower revision than the one it applied, and the same revision with other bytes."
     },
     "issuedAt": {
-      "$ref": "common.schema.json#/$defs/timestamp"
+      "$ref": "entitlement.schema.json#/$defs/instant",
+      "description": "At least one key's window holds it (FAC-SEM-116)."
     },
     "keys": {
       "type": "array",
@@ -57,16 +58,16 @@
             "$ref": "#/$defs/ed25519X"
           },
           "notBefore": {
-            "$ref": "common.schema.json#/$defs/timestamp"
+            "$ref": "entitlement.schema.json#/$defs/instant"
           },
           "notAfter": {
-            "$ref": "common.schema.json#/$defs/timestamp",
+            "$ref": "entitlement.schema.json#/$defs/instant",
             "description": "After notBefore (FAC-SEM-116). An entitlement verifies under this key only when its issuedAt is at or after notBefore and before notAfter."
           }
         },
         "additionalProperties": false
       },
-      "description": "The signing keys, each kid once and never the root's kid (FAC-SEM-116)."
+      "description": "The signing keys: each kid once, never the root's kid, at least one valid at issuedAt (FAC-SEM-116)."
     },
     "revoked": {
       "type": "array",

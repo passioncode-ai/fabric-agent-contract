@@ -485,7 +485,7 @@ the meter spends within the smaller of its own remainder and the lease's, fails 
 in its check-in ([window lease](docs/specification/window-lease.md)).
 
 **Entitlement**: The issuer's signed record of what one order entitles one subject to (an organization,
-`org:<orgId>`, or one person's estate, `personal`) for at most 35 days: a member allowance, a hosting product, a
+`org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
 support tier and the paid agents, never an amount (`entitlement/1`, DEC-0085). Signed by a key the issuer's
 **Entitlement key set** lists, which a root key the verifier pins signs; it verifies in `grace` for 14 days after it
 expires ([entitlement](docs/specification/entitlement.md)).

@@ -1,5 +1,5 @@
 {
-  "description": "A life of 35 days and one second (FAC-SEM-115).",
+  "description": "A life of 38 days and one millisecond (FAC-SEM-115).",
   "kind": "entitlement",
   "expect": [
     "FAC-SEM-115"
@@ -15,7 +15,7 @@
     },
     "issuedAt": "2026-10-20T00:00:00Z",
     "notBefore": "2026-10-20T00:00:00Z",
-    "expiresAt": "2026-11-24T00:00:01Z",
+    "expiresAt": "2026-11-27T00:00:00.001Z",
     "licence": {
       "members": 25
     },

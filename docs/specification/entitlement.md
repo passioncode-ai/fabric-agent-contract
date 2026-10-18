@@ -8,10 +8,11 @@ DEC-0085 · rule codes `FAC-SEM-115`, `FAC-SEM-116` · schemas
 [`tools/vectors/entitlement.ts`](../../tools/vectors/entitlement.ts)
 
 An **entitlement** says what one signed order entitles one subject to: an organization (`org:<orgId>`) or one
-person's estate (`personal`), for at most 35 days. It carries the order's lines (a member allowance, a hosting
+person's estate (`personal`), for at most 38 days. It carries the order's lines (a member allowance, a hosting
 product, a support tier and the paid agents) and nothing about money. The issuer, the PassionCode platform, signs it;
-a verifier, the first organization server or a personal cloud, checks it offline against the issuer's keys and keeps
-the last one it accepted for its subject. What a verified entitlement switches on, and what a lapsed one switches off,
+a verifier, the first organization server or a personal cloud, checks it offline against the issuer's keys, keeps the
+last one it accepted for its subject, and checks that one again after every key set it applies and at least once a day
+([the verifier's duties](#the-verifiers-duties)). What a verified entitlement switches on, and what a lapsed one switches off,
 is the verifying product's; this document states the record, its signature, its windows and its states.
 
 Sources: the platform's request PLAT-020 on the project board (2026-10-17), which named the claims and left the
@@ -35,8 +36,8 @@ list for good (DEC-0063: a changed list is a new type). The schema refuses any m
 | `subject` | a context id (`common#/$defs/contextId`, DEC-0082): `org:<orgId>` or `personal`, never a person's id |
 | `estate` | for `personal`, the person's estate id, which binds the entitlement to one person's network without a cross-organization person id; `null` for `org:<orgId>` |
 | `order` | `{id, revision}`: the signed order's opaque id and its revision, a positive integer |
-| `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 35 days after `issuedAt` |
-| `licence` | `{members}`, the member allowance from 1 to 1 000 000, or `null`; always `null` for `personal` |
+| `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 38 days after `issuedAt`; at most three fraction digits, so every port compares the same instants at millisecond precision |
+| `licence` | `{members}`, the member allowance the order grants, from 1 to 1 000 000, or `null`; always `null` for `personal`. The billable count is the organization server's own metering, never this field |
 | `hosting` | `{product, size}`: `product` `org-cloud` (only for `org:`) or `personal-cloud` (only for `personal`), `size` an opaque id; or `null` |
 | `support` | `{tier}`: `observe`, `assist` or `managed`, what the organization's admin agents may do; or `null`; always `null` for `personal` |
 | `agents` | 0 to 256 `{agentRef}`, one per paid agent, each `agentRef` once (`fabric-package#/$defs/agentRef`) |
@@ -61,8 +62,8 @@ keys. A key of small order is refused before anything is verified under it (DEC-
 ## Issuer keys
 
 A verifier is installed with the issuer's **root key**, `{issuer, kid, x}` (Ed25519), pinned. The root signs only
-`entitlement-key-set/1` documents; signing keys sign entitlements. The root can then live offline or in a hardware
-module while the online keys rotate and are revoked without reinstalling any verifier: devices.md's key-set pattern
+`entitlement-key-set/1` documents; signing keys sign entitlements. The root stays offline, owned by the platform,
+while the online keys rotate and are revoked without reinstalling any verifier: devices.md's key-set pattern
 (DEC-0031), which the first organization server already runs for policies.
 
 | Field | Rule |
@@ -71,12 +72,12 @@ module while the online keys rotate and are revoked without reinstalling any ver
 | `issuer` | the root's issuer, as an entitlement names it |
 | `revision` | rises with every set the root signs |
 | `issuedAt` | a strict RFC 3339 instant |
-| `keys` | 1 to 32 `{kid, alg, x, notBefore, notAfter}`: each `kid` once, never the root's `kid`, `alg` `EdDSA`, `x` the canonical base64url of 32 bytes and never of small order, `notBefore` < `notAfter` |
+| `keys` | 1 to 32 `{kid, alg, x, notBefore, notAfter}`: at least one valid at the set's `issuedAt` (devices.md *Key sets*), each `kid` once, never the root's `kid`, `alg` `EdDSA`, `x` the canonical base64url of 32 bytes and never of small order, `notBefore` < `notAfter` |
 | `revoked` | 0 to 256 kids, each once, none of them among `keys` |
 | `alg`, `kid`, `sig` | the root's algorithm and `kid`, and its signature over the UTF-8 RFC 8785 form of the set without `sig` (`entitlementKeySetSigningInput`) |
 
 - **Rotation.** A new key is added with a window that overlaps the old one. The old key stays listed after its
-  `notAfter` until every entitlement it signed is past `expiresAt` and the grace (at most 35 + 14 = 49 days), and then
+  `notAfter` until every entitlement it signed is past `expiresAt` and the grace (at most 38 + 14 = 52 days), and then
   may be dropped. An entitlement verifies only under a listed key whose window holds its `issuedAt`
   (`notBefore` ≤ `issuedAt` < `notAfter`).
 - **Revocation.** A kid in `revoked`, and so absent from `keys`, refuses every entitlement it signed at once, whatever
@@ -90,7 +91,7 @@ module while the online keys rotate and are revoked without reinstalling any ver
 
 | Constant | Value | Why |
 |---|---|---|
-| `MAX_ENTITLEMENT_SECONDS` | 35 days | one billing month (at most 31 days) and 4 days for the next revision to arrive before the month turns |
+| `MAX_ENTITLEMENT_SECONDS` | 38 days | one billing month (at most 31 days) and the 7-day refresh lead: a monthly issuer re-issues by day 31, so `refreshDue` lights only when it missed that |
 | `REFRESH_SECONDS` | 7 days | the issuer issues the next revision at least this long before `expiresAt`; the verifier reports `refreshDue: true` from then on, so an administrator sees a stalled issuer a week ahead |
 | `GRACE_SECONDS` | 14 days | after `expiresAt` the entitlement still verifies, with `state: "grace"`; two weeks cover a platform outage or a late payment reconciliation without an organization losing its paid functions over the issuer's failure; after that it is `lapsed` |
 | `CLOCK_SKEW_SECONDS` | 60 s | how far before `notBefore` the verifier's clock may be (`src/rfc3339.ts`); since `issuedAt` ≤ `notBefore`, it also bounds an `issuedAt` in the future |
@@ -113,6 +114,24 @@ The verdict returns the new `held` record; the verifier stores it, one per subje
 organizations is two subjects: each organization holds its own entitlement, and an entitlement verifies only at its
 own subject.
 
+## The issuer's duties
+
+- It raises `order.revision` with every entitlement it issues for an order (a refresh, a re-issue, an amendment) and
+  never signs one revision with other bytes: the verifier refuses that as `revision-conflict`.
+- After revoking a key, it re-issues everything that key signed under a listed key, delivered before or with the key
+  set that revokes it, so no subject is left with only a revoked entitlement.
+- One entitlement per subject carries every current line of that subject. The platform keeps one order per subject,
+  and an amendment is a new revision of it; a second order supersedes the first only as a deliberate replacement,
+  issued later.
+- It delivers a key set before any entitlement signed under a key that set adds.
+
+## The verifier's duties
+
+- It keeps the accepted document, not only the `held` record, and runs `verifyEntitlement` on it again after every key
+  set it applies and at least once a day. `grace`, `lapsed` and `key-revoked` then reach an entitlement it already
+  accepted, and an entitlement it accepted becomes no stronger than its current key set.
+- It stores the `held` record the verdict returns, one per subject, and the applied key set's `{revision, digest}`.
+
 ## The verifier
 
 `verifyEntitlement(entitlement, {now, subject, estate, keySet, held})` checks, with no network, in this order, and
@@ -122,8 +141,8 @@ its pinned root; `estate` is required for the subject `personal` and absent for 
 
 | Row | Problem | When |
 |---|---|---|
-| EN-1 | `context-invalid`, `no-clock` | the context is not an object (first), then `now` is not a readable time (before any comparison), then `subject` is not a context id, `estate` is not an opaque id for `personal` or is present for an organization, `keySet` is not a well-formed key set under `EdDSA`, or `held` is not `{orderId, revision, issuedAt, digest}` |
-| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an `org-cloud`; an organization with an estate or a `personal-cloud`), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists), or `sig` not the canonical base64url of 64 bytes |
+| EN-1 | `context-invalid`, `no-clock` | the context is not an object (first), then `now` is not a readable time (before any comparison, and so `no-clock` even when the rest of the context is invalid too), then `subject` is not a context id, `estate` is not an opaque id for `personal` or is present for an organization, `keySet` is not a well-formed key set under `EdDSA` (one with no key valid at its `issuedAt` among them), or `held` is not `{orderId, revision, issuedAt, digest}` |
+| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an `org-cloud`; an organization with an estate or a `personal-cloud`), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists) or has more than three fraction digits, or `sig` not the canonical base64url of 64 bytes |
 | EN-3 | `wrong-issuer` | `issuer` is not the key set's |
 | EN-4 | `unknown-algorithm` | `alg` is not `EdDSA` |
 | EN-5 | `unknown-key`, `key-revoked` | `kid` is neither listed nor revoked; `kid` is revoked |
@@ -131,7 +150,7 @@ its pinned root; `estate` is required for the subject `personal` and absent for 
 | EN-7 | `key-not-valid` | `issuedAt` is before the key's `notBefore` or at or after its `notAfter` |
 | EN-8 | `bad-signature` | the signature does not verify over `entitlementSigningInput` |
 | EN-9 | `wrong-subject` | `subject` is not the verifier's, or, for `personal`, `estate` is not the verifier's |
-| EN-10 | `too-long-lived` | the times are not `issuedAt` ≤ `notBefore` < `expiresAt`, or the life is above 35 days |
+| EN-10 | `too-long-lived` | the times are not `issuedAt` ≤ `notBefore` < `expiresAt`, or the life is above 38 days |
 | EN-11 | `not-yet-valid` | the clock is more than 60 s before `notBefore` |
 | EN-12 | `lapsed` | the clock is 14 days or more after `expiresAt` |
 | EN-13 | `stale-revision`, `revision-conflict` | against the held record, as [one entitlement per subject](#one-entitlement-per-subject) states |
@@ -142,15 +161,16 @@ its pinned root; `estate` is required for the subject `personal` and absent for 
 | Row | Problem | When |
 |---|---|---|
 | EK-1 | `context-invalid` | the context is not an object, `root` is not `{issuer, kid, x}` with a lower-case https origin and an opaque kid, or `held` is not `{revision, digest}` |
-| EK-2 | `malformed` | not an object, another `type`, a member missing or unlisted, a value outside its field's rule, no key, a kid listed twice, the root's kid among the keys, a revoked kid among the keys, a key window that does not end after it starts |
+| EK-2 | `malformed` | not an object, another `type`, a member missing or unlisted, a value outside its field's rule (a time with more than three fraction digits among them), no key, no key valid at the set's `issuedAt`, a kid listed twice, the root's kid among the keys, a revoked kid among the keys, a key window that does not end after it starts |
 | EK-3 | `wrong-issuer` | the set's `issuer` or `kid` is not the pinned root's |
 | EK-4 | `unknown-algorithm` | the set's `alg` or a key's `alg` is not `EdDSA` |
 | EK-5 | `unusable-key`, `small-order-key` | the pinned root's `x` is not the canonical base64url of 32 bytes; the root or a listed key is of small order |
 | EK-6 | `bad-signature` | the root's signature does not verify over `entitlementKeySetSigningInput` |
 | EK-7 | `stale-revision`, `revision-conflict` | a revision below the held one; the held revision with another digest |
 
-The vectors hold one case or more per problem and the boundaries: a life of exactly 35 days and one of 35 days and a
-second, the clock 60 s before `notBefore` and a millisecond more, `refreshDue` at exactly 7 days before `expiresAt`
+The vectors hold one case or more per problem and the boundaries: a life of exactly 38 days and one of 38 days and a
+millisecond, a time with three fraction digits and one with four, a key set with no key valid at its `issuedAt`, an
+unreadable clock beside an invalid context, the clock 60 s before `notBefore` and a millisecond more, `refreshDue` at exactly 7 days before `expiresAt`
 and a millisecond earlier, the grace at `expiresAt`, a day after it and a millisecond before it ends, `lapsed` at
 exactly 14 days, a key's window at its first instant and a millisecond before it, `issuedAt` at the key's
 `notAfter`, a key rotated out that still verifies what it signed in time, a key revoked inside its window, a forged
@@ -162,19 +182,20 @@ output.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 35 days, and each agent is listed once by `agentRef` |
-| `FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, and no key of small order |
+| `FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
+| `FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
 
 ## Who adopts it
 
 - **The PassionCode platform** issues entitlements: the root key offline, signing key sets only; signing keys online,
-  each entitlement signed by a key the current set lists, with a life of at most 35 days, the next revision issued at
-  least 7 days before `expiresAt`; rotation with overlapping windows, an old key kept listed for 49 days after its
-  window; never an amount in a record.
+  each entitlement signed by a key the current set lists, with a life of at most 38 days, the next revision issued at
+  least 7 days before `expiresAt`; rotation with overlapping windows, an old key kept listed for 52 days after its
+  window; never an amount in a record; and every duty of [the issuer's duties](#the-issuers-duties).
 - **The first organization server** verifies: it pins the root, applies key sets with `verifyEntitlementKeySet` and
   keeps the applied revision and digest, verifies each entitlement with `verifyEntitlement` for its subject
-  `org:<orgId>`, stores the `held` record per subject, surfaces `refreshDue` and the `grace` state to its administrator,
-  and runs `fixtures/vectors/entitlement.json`.
+  `org:<orgId>`, stores the `held` record and the document per subject, re-verifies them as [the verifier's
+  duties](#the-verifiers-duties) state, surfaces `refreshDue` and the `grace` state to its administrator, and runs
+  `fixtures/vectors/entitlement.json`.
 - **A personal cloud** verifies the same way with the subject `personal` and its own estate.
 
 ## Privacy
@@ -188,6 +209,8 @@ cross-organization person id (the platform's program packet §2).
 
 - Member-period metering and what makes a member billable (the first organization server's Stage 5).
 - Per-agent usage: it stays `grant.usage` (DEC-0082), joined by the organization server through the share grant.
-- How the platform stores orders, and the hardware module ceremony for the root key.
-- Which functions a lapse disables: the verifying product's (the platform's packet keeps ingest and security through
-  the grace).
+- How the platform stores orders, and how the platform keeps its root offline.
+- The transport of entitlements and key sets, and their delivery order (a key set before the entitlements signed under
+  a key it adds): the issuer's.
+- Which functions a lapse disables: the verifying product's (the platform's packet keeps ingest, security, fleet and
+  setup through the grace).

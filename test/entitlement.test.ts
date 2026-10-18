@@ -20,9 +20,13 @@ import {
   SUPPORT_TIERS,
   entitlementKeySetSigningInput,
   entitlementSigningInput,
+  entitlementWellFormed,
+  keySetWellFormed,
   verifyEntitlement,
   verifyEntitlementKeySet
 } from "../src/entitlement.js";
+import { SMALL_ORDER_ENCODINGS } from "../src/ed25519.js";
+import { isObject } from "../src/findings.js";
 import { strictTime } from "../src/rfc3339.js";
 import { schemaClosure } from "../src/schema-closure.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -105,7 +109,7 @@ describe("the documents (DEC-0085)", () => {
     expect(schema.properties.agents.maxItems).toBe(MAX_AGENTS);
     expect(keySetSchema.properties.keys.maxItems).toBe(MAX_KEYS);
     expect(keySetSchema.properties.revoked.maxItems).toBe(MAX_REVOKED);
-    expect([MAX_ENTITLEMENT_SECONDS, REFRESH_SECONDS, GRACE_SECONDS, CLOCK_SKEW_SECONDS]).toEqual([3_024_000, 604_800, 1_209_600, 60]);
+    expect([MAX_ENTITLEMENT_SECONDS, REFRESH_SECONDS, GRACE_SECONDS, CLOCK_SKEW_SECONDS]).toEqual([3_283_200, 604_800, 1_209_600, 60]);
     expect([MAX_MEMBERS, MAX_AGENTS, MAX_KEYS, MAX_REVOKED]).toEqual([1_000_000, 256, 32, 256]);
   });
 
@@ -223,6 +227,11 @@ const ENTITLEMENT_MUTATIONS: Array<[string, (doc: Json) => unknown]> = [
   ["a currency", (d) => ({ ...d, currency: "USD" })],
   ["no estate member", ({ estate: _e, ...d }) => d],
   ["no agents member", ({ agents: _a, ...d }) => d],
+  ["no licence member", ({ licence: _l, ...d }) => d],
+  ["no hosting member", ({ hosting: _h, ...d }) => d],
+  ["no support member", ({ support: _s, ...d }) => d],
+  ["a time with four fraction digits", (d) => ({ ...d, issuedAt: "2026-10-20T00:00:00.0000Z" })],
+  ["an expiry with four fraction digits and an offset", (d) => ({ ...d, expiresAt: "2026-11-24T09:00:00.0001+09:00" })],
   ["an upper-case issuer", (d) => ({ ...d, issuer: "https://Platform.example" })],
   ["an issuer with a port", (d) => ({ ...d, issuer: "https://platform.example:443" })],
   ["an issuer with a path", (d) => ({ ...d, issuer: "https://platform.example/v1" })],
@@ -297,6 +306,8 @@ const KEY_SET_MUTATIONS: Array<[string, (set: Json) => unknown]> = [
   ["revision 0", (s) => ({ ...s, revision: 0 })],
   ["a string revision", (s) => ({ ...s, revision: "2" })],
   ["an issuedAt without an offset", (s) => ({ ...s, issuedAt: "2026-10-15T00:00:00" })],
+  ["an issuedAt with four fraction digits", (s) => ({ ...s, issuedAt: "2026-10-15T00:00:00.0000Z" })],
+  ["a key window end with four fraction digits", (s) => ({ ...s, keys: [s.keys[0], { ...s.keys[1], notAfter: "2027-01-01T00:00:00.0001Z" }] })],
   ["no keys", (s) => ({ ...s, keys: [] })],
   ["33 keys", (s) => ({ ...s, keys: Array.from({ length: 33 }, (_, i) => ({ ...s.keys[1], kid: `k-${i}` })) })],
   ["a key with a private member", (s) => ({ ...s, keys: [{ ...s.keys[0], d: s.keys[0].x }] })],
@@ -389,8 +400,55 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
   });
 });
 
+describe("the hand-copied patterns agree with the schemas (DEC-0085)", () => {
+  it("passes every schema-valid positive fixture and every accepted vector document through the shape checks", () => {
+    const entitlements = [BASE, PERSONAL, ...(vectors.verify as Json[]).filter((entry) => entry.expected.ok).map((entry) => entry.entitlement)];
+    for (const document of entitlements) {
+      expect(valid(document)).toBe(true);
+      expect(entitlementWellFormed(document)).toBe(true);
+    }
+    const sets = [KEY_SET, ...(Object.values(vectors.keySets) as Json[]), ...(vectors.keySetCases as Json[]).filter((entry) => entry.expected.ok).map((entry) => setOf(entry.keySet))];
+    for (const set of sets) {
+      expect(valid(set, "entitlement-key-set")).toBe(true);
+      expect(keySetWellFormed(set)).toBe(true);
+    }
+  });
+
+  it("agrees with the schema on every mutation, the algorithm's value and the subject's lines aside", () => {
+    // wellFormed checks shapes; the algorithm's value is the verifier's unknown-algorithm, and a key set's small-order
+    // keys its small-order-key: those two are refused by the schema and by a later step.
+    for (const [what, change] of [...ENTITLEMENT_MUTATIONS, ...SIG_MUTATIONS]) {
+      const document = change(structuredClone(BASE)) as Json;
+      if (what === "ES256" || what === "a numeric alg") continue;
+      // The type and the exact member list are the register's: the verifier's shape check is both together.
+      const shaped = isObject(document) && entitlementWellFormed(document) && entitlementSigningInput(document) !== undefined;
+      expect(shaped, what).toBe(valid(document));
+    }
+    for (const [what, change] of KEY_SET_MUTATIONS) {
+      if (/small order|ES256|alg as a number|numeric set alg/.test(what)) continue;
+      const set = change(structuredClone(KEY_SET)) as Json;
+      expect(keySetWellFormed(set), what).toBe(valid(set, "entitlement-key-set"));
+    }
+  });
+
+  it("refuses all fourteen small-order encodings, sign bit clear and set, in the key set's schema and its verifier", () => {
+    expect(SMALL_ORDER_ENCODINGS).toHaveLength(7);
+    for (const hex of SMALL_ORDER_ENCODINGS) {
+      for (const signBit of [0x00, 0x80]) {
+        const bytes = Buffer.from(hex, "hex");
+        bytes[31] = (bytes[31] as number) | signBit;
+        const x = bytes.toString("base64url");
+        const set = resign({ ...KEY_SET, keys: [KEY_SET.keys[0], { ...KEY_SET.keys[1], x }] }, ROOT);
+        expect(valid(set, "entitlement-key-set"), `${hex} ${signBit}`).toBe(false);
+        expect(verifyEntitlementKeySet(set, PIN), `${hex} ${signBit}`).toEqual({ ok: false, problem: "small-order-key" });
+        expect(codes("entitlement-key-set", set), `${hex} ${signBit}`).toEqual(["FAC-SEM-116"]);
+      }
+    }
+  });
+});
+
 describe("the verifiers' contexts and edges (DEC-0085)", () => {
-  const hostile: unknown[] = [null, 7, "x", true, [], {}, { toString: 1 }, JSON.parse('{"__proto__": {"ok": true}}'), JSON.parse('{"constructor": {"prototype": 1}}'), 2 ** 64, -0];
+  const hostile: unknown[] = [undefined, null, 7, "x", true, [], {}, { toString: 1 }, JSON.parse('{"__proto__": {"ok": true}}'), JSON.parse('{"constructor": {"prototype": 1}}'), 2 ** 64, -0];
 
   it("answers every hostile document and context, and never throws", () => {
     for (const value of hostile) {
@@ -482,12 +540,16 @@ describe("entitlement semantic fixtures (FAC-SEM-115, FAC-SEM-116)", () => {
     expect(at(BASE, { hosting: null })).toEqual([]);
     expect(at(BASE, { subject: 7 })).toEqual(["/subject the subject is personal or org:<orgId>, never a person"]);
     expect(at(BASE, { issuedAt: "x", expiresAt: 3 })).toEqual([
-      "/issuedAt a time is an RFC 3339 date-time with an offset, on a day that exists",
-      "/expiresAt a time is an RFC 3339 date-time with an offset, on a day that exists"
+      "/issuedAt a time is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits",
+      "/expiresAt a time is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits"
     ]);
-    expect(at(BASE, { notBefore: "2026-11-24T00:00:00Z", expiresAt: "2026-11-25T00:00:01Z" })).toEqual([
-      "/expiresAt an entitlement expires at most 35 days after it is issued"
+    expect(at(BASE, { notBefore: "2026-10-20T00:00:00.1234Z" })).toEqual([
+      "/notBefore a time is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits"
     ]);
+    expect(at(BASE, { notBefore: "2026-11-24T00:00:00Z", expiresAt: "2026-11-27T00:00:00.001Z" })).toEqual([
+      "/expiresAt an entitlement expires at most 38 days after it is issued"
+    ]);
+    expect(at(BASE, { notBefore: "2026-11-24T00:00:00Z", expiresAt: "2026-11-27T00:00:00Z" })).toEqual([]);
     expect(at(BASE, { notBefore: "2026-10-19T00:00:00Z" })).toEqual(["/notBefore notBefore is at or after issuedAt"]);
     expect(at(BASE, { notBefore: "2026-11-24T00:00:00Z" })).toEqual(["/expiresAt expiresAt is after notBefore"]);
     expect(at(BASE, { agents: [null, BASE.agents[0], 7, BASE.agents[0]] })).toEqual(["/agents/3/agentRef agent urn:fabric:agent:example-publisher:notes is listed twice"]);
@@ -500,10 +562,16 @@ describe("entitlement semantic fixtures (FAC-SEM-115, FAC-SEM-116)", () => {
     expect(at({ keys: [k1, { ...k2, kid: k1.kid }] })).toEqual(["/keys/1/kid kid ent-2026-09 is listed twice"]);
     expect(at({ keys: [null, { ...k2, kid: KEY_SET.kid }] })).toEqual(["/keys/1/kid the root's kid signs key sets only and is never a signing key"]);
     expect(at({ revoked: [k2.kid] })).toEqual(["/keys/1/kid kid ent-2026-10 is revoked, so it is not listed among the keys"]);
-    expect(at({ keys: [{ ...k1, notBefore: 7 }] })).toEqual(["/keys/0/notBefore a key's window is two RFC 3339 date-times with an offset"]);
-    expect(at({ keys: [{ ...k1, notAfter: "2026-11-01" }] })).toEqual(["/keys/0/notAfter a key's window is two RFC 3339 date-times with an offset"]);
-    expect(at({ keys: [{ ...k1, notAfter: "2026-08-01T00:00:00Z" }] })).toEqual(["/keys/0/notAfter a key's window ends after it starts"]);
+    expect(at({ keys: [{ ...k1, notBefore: 7 }, k2] })).toEqual(["/keys/0/notBefore a key's window is two RFC 3339 date-times with an offset"]);
+    expect(at({ keys: [{ ...k1, notAfter: "2026-11-01" }, k2] })).toEqual(["/keys/0/notAfter a key's window is two RFC 3339 date-times with an offset"]);
+    expect(at({ keys: [{ ...k1, notAfter: "2026-08-01T00:00:00Z" }, k2] })).toEqual(["/keys/0/notAfter a key's window ends after it starts"]);
     expect(at({ keys: [{ ...k1, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA" }] })).toEqual(["/keys/0/x a key of small order lets anyone forge a signature (DEC-0045)"]);
     expect(at({ keys: [{ ...k1, x: "not a key" }], revoked: "x" })).toEqual([]);
+    expect(at({ issuedAt: "2027-06-01T00:00:00Z" })).toEqual(["/keys a key set holds at least one key valid at its issuedAt"]);
+    expect(at({ issuedAt: "2026-12-31T23:59:59.999Z" })).toEqual([]);
+    expect(at({ issuedAt: "2027-01-01T00:00:00Z" })).toEqual(["/keys a key set holds at least one key valid at its issuedAt"]);
+    expect(at({ issuedAt: "2026-08-31T23:59:59.999Z" })).toEqual(["/keys a key set holds at least one key valid at its issuedAt"]);
+    expect(at({ issuedAt: "2026-09-01T00:00:00Z" })).toEqual([]);
+    expect(at({ issuedAt: "x" })).toEqual([]);
   });
 });

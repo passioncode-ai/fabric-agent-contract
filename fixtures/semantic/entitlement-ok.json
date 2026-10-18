@@ -1,5 +1,5 @@
 {
-  "description": "An organization's entitlement of 35 days: no finding (FAC-SEM-115, DEC-0085).",
+  "description": "An organization's entitlement of 35 days, within the 38-day limit: no finding (FAC-SEM-115, DEC-0085).",
   "kind": "entitlement",
   "expect": [],
   "input": {

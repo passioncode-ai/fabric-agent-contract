@@ -786,5 +786,7 @@
   {"name": "entitlement-key-set-no-keys", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-no-keys.json", "valid": false, "keyword": "minItems"},
   {"name": "entitlement-key-set-private-key", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-private-key.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "entitlement-key-set-revoked-twice", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-revoked-twice.json", "valid": false, "keyword": "uniqueItems"},
-  {"name": "entitlement-key-set-revision-zero", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-revision-zero.json", "valid": false, "keyword": "minimum"}
+  {"name": "entitlement-key-set-revision-zero", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-revision-zero.json", "valid": false, "keyword": "minimum"},
+  {"name": "entitlement-four-fraction-digits", "schema": "entitlement.schema.json", "path": "negative/entitlement-four-fraction-digits.json", "valid": false, "keyword": "pattern"},
+  {"name": "entitlement-key-set-four-fraction-digits", "schema": "entitlement-key-set.schema.json", "path": "negative/entitlement-key-set-four-fraction-digits.json", "valid": false, "keyword": "pattern"}
 ]

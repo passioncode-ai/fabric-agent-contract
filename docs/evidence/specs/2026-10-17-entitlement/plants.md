@@ -158,3 +158,22 @@ set. The refusal tests also name the expected problem (`malformed`, `unknown-alg
 | SEM-116: small order | 2 |
 | rules: not registered | 13 |
 | hosting: size | 1 |
+
+## Fix round (2026-10-18)
+
+Each new or changed refusal clause of the fix round, planted once alone against `test/entitlement.test.ts`, then
+restored. 9 plants, 9 killed. A first plant of the `line` guard (the object test replaced by `Object(value)`) did not
+throw and refused the same inputs, so it was replaced by the defect the unit reading found: the guard removed, which
+throws on a missing member.
+
+| Clause | Failing tests |
+|---|---|
+| line: the object test removed (a missing `licence`, `hosting` or `support` threw) | 4 |
+| time: at most three fraction digits | 9 |
+| the millisecond pattern: three digits, not four | 9 |
+| a key set holds a key valid at its issuedAt (shape check) | 3 |
+| that key's window: notBefore ≤ issuedAt | 1 |
+| that key's window: issuedAt < notAfter | 1 |
+| `FAC-SEM-116`: a key valid at issuedAt | 2 |
+| the 38-day life, one second longer | 5 |
+| `no-clock` before the rest of the context | 2 |

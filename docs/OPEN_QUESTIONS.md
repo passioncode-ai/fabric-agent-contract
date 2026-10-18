@@ -164,7 +164,7 @@ ruling; DEC-0017 states what holds now.
 ### OQ-0012 — Jobs and capabilities under limits and uncertain effects: a typed pause, `outcome-unknown` beyond comms, unknown as `null`
 
 - **Status:** Open (ruled in principle 2026-10-17); a DEC with schema, rule and vectors owes the wire shape
-- **Raised:** 2026-10-17, an agent retrospective of 18 agents (frame-agent private report, candidates C1–C4), read
+- **Raised:** 2026-10-17, an agent retrospective of 18 agents (a private report, candidates C1–C4), read
   against `7a14a48`; board row CT-55
 - **Owner of the answer:** this repository.
 - **Question:** four candidates for normative text, with their evidence as reported:
