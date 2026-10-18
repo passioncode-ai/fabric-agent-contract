@@ -83,10 +83,10 @@ window at L3, not a grant limit (DEC-0041).
 **Context**: Where work happens and whose it is: `personal`, the person's own, or `org:<orgId>`, an organization by the
 organization server's opaque id (`common.schema.json#/$defs/contextId`), compared as written. A grant names the context
 its principal uses it in, never `personal` for an external one; an agent is placed on a machine once per context, an
-organization's instance under its own share grant; no event or check-in carries a context: a device sends each
-enrollment's check-ins to that enrollment's server, a collector sends a session's events only to its context's
-organization, and a grant's usage reaches the grant's organization as a daily `grant.usage` event
-([contexts](docs/specification/contexts.md), DEC-0082).
+organization's instance under its own share grant; no event carries its session's context and no check-in carries a
+context: a device sends each enrollment's check-ins to that enrollment's server, a collector sends a session's events
+only to its context's organization, and a grant's usage reaches the grant's organization as a daily `grant.usage`
+event, which carries the grant's own `org:<orgId>` (DEC-0086) ([contexts](docs/specification/contexts.md), DEC-0082).
 
 **Network**: A **Context**, seen as the machines that work in it (the operator's NET-1, 2026-10-15, recorded by
 DEC-0084): a person's own network is their personal estate, `personal`, all their own machines; any other network is an
@@ -493,6 +493,15 @@ expires ([entitlement](docs/specification/entitlement.md)).
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
 installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
+
+**Share grant id**: The `meta.id` of a share grant into an organization, `urn:fabric:share:` and 32 lower-case hex
+digits from a CSPRNG, which holds no person's name, address or estate id and is compared as written (`FAC-SEM-117`,
+DEC-0086, [share registration](docs/specification/share-registration.md#the-share-grant-id)).
+
+**Share registration**: What the sharer's enrolled node tells an organization server about one share grant into it,
+over the device transport: the grant's id, revision, context, the one `agentRef` it runs and its window, or that it was
+withdrawn (`share-registration/1`, DEC-0086). The server keys it by the member the certificate binds and joins that
+member's `grant.usage` to the agent by it ([share registration](docs/specification/share-registration.md)).
 
 **Signing credential**: A passkey registered under the dedicated signing RP `sign.<domain>` and used for nothing else;
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
