@@ -1,0 +1,49 @@
+{
+  "description": "The receiver answers SR-6 as the reference: tombstone then active: the withdrawal that arrived first stays final (FAC-SEM-118).",
+  "kind": "share-registration-intake",
+  "expect": [],
+  "input": {
+    "held": [
+      {
+        "user": "m-4821",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "state": "withdrawn",
+        "withdrawnAt": "2026-10-20T12:00:00Z",
+        "digest": "sha256:c5adda821b8ef7252a1fbafaa99624f53da4fd6a89b37cf0ccdff60d5f139bfb"
+      }
+    ],
+    "registration": {
+      "type": "share-registration/1",
+      "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+      "context": "org:org_7kq2m4xw",
+      "state": "active",
+      "grantRevision": 3,
+      "agentRef": "urn:fabric:agent:example:inbox-digest",
+      "startsAt": "2026-10-12T08:00:00Z",
+      "expiresAt": "2026-10-26T08:00:00Z"
+    },
+    "binding": {
+      "transport": {
+        "ok": true
+      },
+      "org": {
+        "id": "org_7kq2m4xw"
+      },
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "user": {
+        "id": "m-4821"
+      }
+    },
+    "answer": {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "already-withdrawn",
+          "message": "this grant is already withdrawn for this user; a withdrawal is final"
+        }
+      }
+    }
+  }
+}

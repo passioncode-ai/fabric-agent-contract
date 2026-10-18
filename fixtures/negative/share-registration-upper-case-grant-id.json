@@ -1,0 +1,10 @@
+{
+  "type": "share-registration/1",
+  "grantId": "URN:FABRIC:SHARE:3F9C2A7E5B1D4C608E2F71A9D0B6C4E8",
+  "context": "org:org_7kq2m4xw",
+  "state": "active",
+  "grantRevision": 3,
+  "agentRef": "urn:fabric:agent:example:inbox-digest",
+  "startsAt": "2026-10-12T08:00:00Z",
+  "expiresAt": "2026-10-26T08:00:00Z"
+}

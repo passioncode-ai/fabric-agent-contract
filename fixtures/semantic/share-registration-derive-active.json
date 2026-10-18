@@ -1,0 +1,57 @@
+{
+  "description": "The derivation answers as the reference: active: one placement in the context runs the grant (FAC-SEM-118).",
+  "kind": "share-registration-derive",
+  "expect": [],
+  "input": {
+    "record": {
+      "schema": "estate-record/1",
+      "estate": "estate-5d0f1a",
+      "revision": 7,
+      "issuedAt": "2026-10-14T09:00:00Z",
+      "machines": [
+        {
+          "id": "m-1",
+          "packages": [
+            {
+              "agentRef": "urn:fabric:agent:example:inbox-digest",
+              "context": "org:org_7kq2m4xw",
+              "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+            }
+          ]
+        }
+      ],
+      "shareGrants": [
+        {
+          "kind": "standing-grant",
+          "meta": {
+            "id": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revision": 3
+          },
+          "startsAt": "2026-10-12T08:00:00Z",
+          "expiresAt": "2026-10-26T08:00:00Z",
+          "principalKind": "external",
+          "context": "org:org_7kq2m4xw"
+        }
+      ],
+      "revocations": []
+    },
+    "entries": [],
+    "orgId": "org_7kq2m4xw",
+    "previouslyRegistered": [],
+    "answer": {
+      "registrations": [
+        {
+          "type": "share-registration/1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "context": "org:org_7kq2m4xw",
+          "state": "active",
+          "grantRevision": 3,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-12T08:00:00Z",
+          "expiresAt": "2026-10-26T08:00:00Z"
+        }
+      ],
+      "degraded": []
+    }
+  }
+}

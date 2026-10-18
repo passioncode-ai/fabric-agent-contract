@@ -1,0 +1,14 @@
+{
+  "description": "A withdrawal on 31 November, a day that does not exist (FAC-SEM-118).",
+  "kind": "share-registration",
+  "expect": [
+    "FAC-SEM-118"
+  ],
+  "input": {
+    "type": "share-registration/1",
+    "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+    "context": "org:org_7kq2m4xw",
+    "state": "withdrawn",
+    "withdrawnAt": "2026-11-31T12:00:00Z"
+  }
+}
