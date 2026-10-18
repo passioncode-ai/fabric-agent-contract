@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/entitlement-key-set.schema.json",
+  "title": "Entitlement key set, entitlement-key-set/1 (DEC-0085)",
+  "description": "The issuer's signing keys for entitlement/1 documents, under a monotonic revision, signed by the issuer's root key (which a verifier pins at installation and which signs nothing else) over the RFC 8785 form of the set without sig (the register's entitlement-key-set/1, DEC-0063). A key is added with a window that overlaps the old one; a revoked kid refuses every entitlement it signed.",
+  "type": "object",
+  "required": [
+    "type",
+    "issuer",
+    "revision",
+    "issuedAt",
+    "keys",
+    "revoked",
+    "alg",
+    "kid",
+    "sig"
+  ],
+  "properties": {
+    "type": {
+      "const": "entitlement-key-set/1"
+    },
+    "issuer": {
+      "$ref": "entitlement.schema.json#/$defs/issuer"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Rises with every set the root signs; a verifier refuses a lower revision than the one it applied, and the same revision with other bytes."
+    },
+    "issuedAt": {
+      "$ref": "entitlement.schema.json#/$defs/instant",
+      "description": "At least one key's window holds it (FAC-SEM-116)."
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": [
+          "kid",
+          "alg",
+          "x",
+          "notBefore",
+          "notAfter"
+        ],
+        "properties": {
+          "kid": {
+            "$ref": "activity-common.schema.json#/$defs/opaqueId"
+          },
+          "alg": {
+            "enum": [
+              "EdDSA"
+            ]
+          },
+          "x": {
+            "$ref": "#/$defs/ed25519X"
+          },
+          "notBefore": {
+            "$ref": "entitlement.schema.json#/$defs/instant"
+          },
+          "notAfter": {
+            "$ref": "entitlement.schema.json#/$defs/instant",
+            "description": "After notBefore (FAC-SEM-116). An entitlement verifies under this key only when its issuedAt is at or after notBefore and before notAfter."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "The signing keys: each kid once, never the root's kid, at least one valid at issuedAt (FAC-SEM-116)."
+    },
+    "revoked": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "activity-common.schema.json#/$defs/opaqueId"
+      },
+      "description": "Kids revoked: absent from keys (FAC-SEM-116), and every entitlement one of them signed is refused (key-revoked)."
+    },
+    "alg": {
+      "enum": [
+        "EdDSA"
+      ],
+      "description": "The root key's algorithm."
+    },
+    "kid": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The root key's kid, as the verifier pinned it."
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "description": "The root key's Ed25519 signature (64 bytes, base64url without padding) over the UTF-8 RFC 8785 form of the set without sig."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ed25519X": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$",
+      "not": {
+        "enum": [
+          "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA",
+          "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA",
+          "JuiVj8KyJ7BFw_SJ8u-Y8NXfrAXTxjM5sTgCiG1T_AU",
+          "JuiVj8KyJ7BFw_SJ8u-Y8NXfrAXTxjM5sTgCiG1T_IU",
+          "xxdqcD1N2E-6PAt2DRBnDyogU_osOczGTsf9d5KsA3o",
+          "xxdqcD1N2E-6PAt2DRBnDyogU_osOczGTsf9d5KsA_o",
+          "7P_______________________________________38",
+          "7P________________________________________8",
+          "7f_______________________________________38",
+          "7f________________________________________8",
+          "7v_______________________________________38",
+          "7v________________________________________8"
+        ]
+      },
+      "description": "A 32-byte Ed25519 public key, base64url without padding, canonical (the last character's two spare bits zero). Never a key of small order (DEC-0045, CT-29): the enum lists libsodium's seven encodings with the sign bit clear and set."
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "description": "No key valid at the set's issuedAt: both windows closed before it (FAC-SEM-116, devices.md Key sets).",
+  "kind": "entitlement-key-set",
+  "expect": [
+    "FAC-SEM-116"
+  ],
+  "input": {
+    "type": "entitlement-key-set/1",
+    "issuer": "https://platform.example",
+    "revision": 2,
+    "issuedAt": "2027-06-01T00:00:00Z",
+    "keys": [
+      {
+        "kid": "ent-2026-09",
+        "alg": "EdDSA",
+        "x": "nbDLsqLcc2w0v2n8x6HIMEwjatLJGm3FDPE6n3-eJ68",
+        "notBefore": "2026-09-01T00:00:00Z",
+        "notAfter": "2026-11-01T00:00:00Z"
+      },
+      {
+        "kid": "ent-2026-10",
+        "alg": "EdDSA",
+        "x": "hEzyxaKiDEjIB7gnUKJAwskgq6xXAqMtugqNhOY3mZg",
+        "notBefore": "2026-10-15T00:00:00Z",
+        "notAfter": "2027-01-01T00:00:00Z"
+      }
+    ],
+    "revoked": [
+      "ent-2026-08"
+    ],
+    "alg": "EdDSA",
+    "kid": "root-2026-1",
+    "sig": "BWDsnZFjrbp1eONYPwpFLykzDcdkvwGwKenpcw2HcaJTO1PvCYWrseLjOx0nrWkhPdjJiumuBTSVbXqO2YELCA"
+  }
+}

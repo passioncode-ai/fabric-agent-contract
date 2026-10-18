@@ -484,6 +484,16 @@ lists it ([revocation delta](docs/specification/revocation-delta.md)).
 the meter spends within the smaller of its own remainder and the lease's, fails closed at expiry, and reports `spent`
 in its check-in ([window lease](docs/specification/window-lease.md)).
 
+**Entitlement**: The issuer's signed record of what one order entitles one subject to (an organization,
+`org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
+support tier and the paid agents, never an amount (`entitlement/1`, DEC-0085). Signed by a key the issuer's
+**Entitlement key set** lists, which a root key the verifier pins signs; it verifies in `grace` for 14 days after it
+expires ([entitlement](docs/specification/entitlement.md)).
+
+**Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
+kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
+installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
+
 **Signing credential**: A passkey registered under the dedicated signing RP `sign.<domain>` and used for nothing else;
 it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
 top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).

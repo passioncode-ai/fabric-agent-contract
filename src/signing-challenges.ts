@@ -50,6 +50,14 @@ export const WINDOW_LEASE_FIELDS = [
 /** The enroll token's members beside `type` (DEC-0084), one list for good. */
 export const ENROLL_TOKEN_FIELDS = ["scope", "genesis", "purpose", "ceiling", "notBefore", "expiresAt", "nonce", "uses"] as const;
 
+/** The entitlement's members beside `type`: the document without `sig` (DEC-0085). */
+export const ENTITLEMENT_FIELDS = [
+  "issuer", "subject", "estate", "order", "issuedAt", "notBefore", "expiresAt", "licence", "hosting", "support", "agents", "alg", "kid"
+] as const;
+
+/** The entitlement key set's members beside `type`: the set without `sig` (DEC-0085). */
+export const ENTITLEMENT_KEY_SET_FIELDS = ["issuer", "revision", "issuedAt", "keys", "revoked", "alg", "kid"] as const;
+
 /** A Map, so a type named like an Object.prototype member reads nothing. */
 export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<string, StatementSpec>([
   ["estate-revision/1", { signer: "passkey", fields: ["digest"], decision: "DEC-0055", check: (f) => matches(SHA256, f.digest) }],
@@ -91,7 +99,9 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ["enroll-join/1", { signer: "key", fields: ["digest", "nonce"], decision: "DEC-0084", check: (f) => matches(SHA256, f.digest) && matches(NONCE32, f.nonce) }],
   ["window-lease/1", { signer: "key", fields: WINDOW_LEASE_FIELDS, decision: "DEC-0062" }],
   ["relay-auth/1", { signer: "key", fields: ["alg", "relay", "nonce", "estate", "kid", "iat"], decision: "DEC-0047" }],
-  ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }]
+  ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }],
+  ["entitlement/1", { signer: "key", fields: ENTITLEMENT_FIELDS, decision: "DEC-0085" }],
+  ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }]
 ]);
 
 /**

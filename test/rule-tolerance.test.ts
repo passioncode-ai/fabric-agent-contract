@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
-// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107), comms-transition (FAC-SEM-027, FAC-SEM-109), board-finding (FAC-SEM-108), grant (FAC-SEM-110), profile-resolution (FAC-SEM-060, FAC-SEM-112) and enroll-token (FAC-SEM-113) rule kind reads a malformed input — missing members, members of the wrong type — and
+// Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107), comms-transition (FAC-SEM-027, FAC-SEM-109), board-finding (FAC-SEM-108), grant (FAC-SEM-110), profile-resolution (FAC-SEM-060, FAC-SEM-112), enroll-token (FAC-SEM-113) and entitlement (FAC-SEM-115, FAC-SEM-116) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
@@ -13,7 +13,7 @@ const KINDS = [
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
-  "window-lease", "window-lease-division", "lease-reservation", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "local-channel-session", "session-join", "service-events-page", "proposal", "proposal-transition", "proposal-submit", "learning-rollout",
+  "window-lease", "window-lease-division", "lease-reservation", "entitlement", "entitlement-key-set", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "local-channel-session", "session-join", "service-events-page", "proposal", "proposal-transition", "proposal-submit", "learning-rollout",
   "result", "learning", "promotion", "versioned-setting", "grant-window", "roles",
   // The kinds whose rules compare identifiers by normal form (DEC-0076).
   "execution-bundle", "service-usage", "runner-route", "route-bundle", "route-event", "provider-observation",
@@ -52,7 +52,8 @@ const MEMBERS = [
   "entry", "manifest", "projects", "op", "observed", "settledBy", "summary", "principal", "finding", "affects", "thread",
   "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day",
   "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes",
-  "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys"
+  "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys",
+  "subject", "order", "licence", "hosting", "support", "agents", "agentRef", "keys", "revoked", "notAfter", "issuer"
 ];
 
 describe("a route event's selected index far past any route (the adapter's report on d8146cf, DEC-0084 fix round)", () => {
@@ -96,6 +97,12 @@ describe("activity and device rules tolerate malformed input", () => {
     expect(() => evaluateSemanticRules("lease-reservation", { lease, request: { at: 1, amountUsd: [], spentUsd: {} }, decision: 2 })).not.toThrow();
     expect(() => evaluateSemanticRules("signing-credential", { rpId: ["sign.example.org"], origins: [1, null, { a: 1 }] })).not.toThrow();
     expect(() => evaluateSemanticRules("window-lease", { window: "__proto__", period: "constructor" })).not.toThrow();
+    // An entitlement and a key set whose members hold every wrong shape, prototype names among them (DEC-0085).
+    for (const value of WRONG) {
+      expect(() => evaluateSemanticRules("entitlement", { subject: "personal", estate: value, licence: value, hosting: { product: value, constructor: 1 }, agents: [value, { agentRef: value }, { agentRef: { toString: 1 } }], issuedAt: value })).not.toThrow();
+      expect(() => evaluateSemanticRules("entitlement-key-set", { kid: value, revoked: value, keys: [value, { kid: "__proto__", x: value, notBefore: value, notAfter: value }, { kid: "constructor", x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }] })).not.toThrow();
+    }
+    expect(() => evaluateSemanticRules("entitlement", { subject: "__proto__", agents: [{ agentRef: "__proto__" }, { agentRef: "__proto__" }], issuedAt: 9007199254740993, expiresAt: 1e308 })).not.toThrow();
     const dashboard = "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1";
     for (const value of WRONG) expect(() => evaluateSemanticRules("service-well-known", { extensions: { [dashboard]: value, constructor: value } })).not.toThrow();
   });
@@ -195,7 +202,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
     "openrouter-attribution.schema.json": "openrouter-attribution", "device-check-in.schema.json": "device-check-in", "manifest.schema.json": "manifest",
     "provider.schema.json": "provider-entry", "service-descriptor.schema.json": "service-descriptor", "service-well-known.schema.json": "service-well-known",
     "telemetry-event.schema.json": "telemetry-event", "activity-batch.schema.json": "activity-batch", "estate-record.schema.json": "estate-record",
-    "window-lease.schema.json": "window-lease", "revocation-delta.schema.json": "revocation-delta", "heartbeat.schema.json": "heartbeat",
+    "window-lease.schema.json": "window-lease", "entitlement.schema.json": "entitlement", "entitlement-key-set.schema.json": "entitlement-key-set", "revocation-delta.schema.json": "revocation-delta", "heartbeat.schema.json": "heartbeat",
     "relay-frame.schema.json": "relay-frame", "secret-envelope.schema.json": "secret-envelope", "spend-policy.schema.json": "spend-policy",
     "model-profile.schema.json": "model-profiles", "registry-models.schema.json": "model-catalogue", "runner-profile.schema.json": "runner-profile",
     "activity-summary.schema.json": "activity-summary"

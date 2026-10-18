@@ -11,6 +11,7 @@ import { ENVELOPE_TYPE } from "../src/secret-envelope.js";
 import { HANDOFF_FORMAT } from "../src/session-handoff.js";
 import { SETTINGS_BACKUP_FORMAT } from "../src/settings-backup.js";
 import { WINDOW_LEASE_TYPE } from "../src/window-lease.js";
+import { ENTITLEMENT_KEY_SET_TYPE, ENTITLEMENT_TYPE } from "../src/entitlement.js";
 import { SCHEMA_PREFIX } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -40,7 +41,7 @@ describe("the register", () => {
     for (const named of NAMED_ONLY) expect(pinned.has(named), named).toBe(false);
   });
   it("keeps every module's own revision constant at its protocol's newest revision, so a new revision widens them", () => {
-    for (const constant of [COMMS_PROTOCOL, ESTATE_RECORD_SCHEMA, RELAY_PROTOCOL, DELTA_TYPE, HEARTBEAT_TYPE, ENVELOPE_TYPE, HANDOFF_FORMAT, SETTINGS_BACKUP_FORMAT, WINDOW_LEASE_TYPE]) {
+    for (const constant of [COMMS_PROTOCOL, ESTATE_RECORD_SCHEMA, RELAY_PROTOCOL, DELTA_TYPE, HEARTBEAT_TYPE, ENVELOPE_TYPE, HANDOFF_FORMAT, SETTINGS_BACKUP_FORMAT, WINDOW_LEASE_TYPE, ENTITLEMENT_TYPE, ENTITLEMENT_KEY_SET_TYPE]) {
       const parsed = parseRevision(constant)!;
       expect(PROTOCOL_REVISIONS.get(parsed.name)?.at(-1), constant).toBe(parsed.revision);
     }

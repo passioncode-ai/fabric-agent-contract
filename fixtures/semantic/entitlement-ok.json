@@ -1,0 +1,39 @@
+{
+  "description": "An organization's entitlement of 35 days, within the 38-day limit: no finding (FAC-SEM-115, DEC-0085).",
+  "kind": "entitlement",
+  "expect": [],
+  "input": {
+    "type": "entitlement/1",
+    "issuer": "https://platform.example",
+    "subject": "org:org-a",
+    "estate": null,
+    "order": {
+      "id": "ord-org-a-0001",
+      "revision": 3
+    },
+    "issuedAt": "2026-10-20T00:00:00Z",
+    "notBefore": "2026-10-20T00:00:00Z",
+    "expiresAt": "2026-11-24T00:00:00Z",
+    "licence": {
+      "members": 25
+    },
+    "hosting": {
+      "product": "org-cloud",
+      "size": "s-2"
+    },
+    "support": {
+      "tier": "assist"
+    },
+    "agents": [
+      {
+        "agentRef": "urn:fabric:agent:example-publisher:notes"
+      },
+      {
+        "agentRef": "urn:fabric:agent:example-publisher:triage"
+      }
+    ],
+    "alg": "EdDSA",
+    "kid": "ent-2026-10",
+    "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+  }
+}
