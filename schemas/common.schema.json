@@ -155,6 +155,17 @@
       "pattern": "^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$",
       "description": "DEC-0082: the context a grant is used in or an agent instance runs in: personal, or org:<orgId>, where orgId is the organization server's opaque id of the organization: a letter or digit, then up to 127 of [A-Za-z0-9_-] (1-128 characters, an enrollment's org.id can be any such id). Compared as written: never case-folded, never by prefix (docs/specification/contexts.md)."
     },
+    "orgContextId": {
+      "type": "string",
+      "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+      "description": "DEC-0086: an organization's context, org:<orgId>: contextId without personal. What a share registration and a grant.usage carry, the grant's own context. Compared as written (docs/specification/contexts.md)."
+    },
+    "shareGrantId": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^urn:fabric:share:(?!0{32}$)[0-9a-f]{32}$",
+      "description": "DEC-0086, FAC-SEM-117: the meta.id of a share grant into an organization: urn:fabric:share: and 32 lower-case hex digits, 128 bits from a CSPRNG, never derived from a name, an address, an estate id, an agentRef or the organization, and never all zeros. The pattern admits only its own normal form (DEC-0076), so it is compared as written; it holds no person's name, address or estate id (docs/specification/share-registration.md)."
+    },
     "traceId": {
       "type": "string",
       "pattern": "^(?!0{32}$)[0-9a-f]{32}$"

@@ -44,6 +44,8 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["pipeline", ["0.1"]],
   ["revocation-delta", ["1"]],
   ["session-handoff", ["1"]],
+  ["share-registration", ["1"]],
+  ["share-registration-receipt", ["1"]],
   ["window-lease", ["1"]],
 ]);
 
