@@ -13,7 +13,8 @@
   "monotonicNs": "0",
   "data": {
     "day": "2026-10-12",
-    "grantId": "urn:grant:estate:share-inbox-digest-org-a#1",
+    "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8#1",
+    "context": "org:org_7kq2m4xw",
     "calls": 12,
     "unpricedCalls": 2,
     "costUsd": 0.84

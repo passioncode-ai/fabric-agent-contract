@@ -5,7 +5,7 @@
   "input": {
     "kind": "standing-grant",
     "meta": {
-      "id": "urn:grant:estate:share-inbox-digest",
+      "id": "urn:fabric:share:5d2a9e1f7c4b80a3e6d19f2c7b0a4e36",
       "revision": 1,
       "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
       "createdAt": "2026-10-12T08:00:00Z",
