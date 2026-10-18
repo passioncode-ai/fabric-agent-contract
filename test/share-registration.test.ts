@@ -124,7 +124,7 @@ describe("the share grant id and the organization's context (FAC-SEM-117)", () =
   });
 
   it("reads an organization's context exactly as the schema does", () => {
-    for (const [value, expected] of [["org:org_7kq2m4xw", true], ["org:a", true], ["personal", false], ["org:", false], ["ORG:a", false], ["org:a\n", false], ["org:a.b", false], [7, false]] as const) {
+    for (const [value, expected] of [["org:org_7kq2m4xw", true], ["org:a", true], [`org:${"o".repeat(128)}`, true], [`org:${"o".repeat(129)}`, false], ["personal", false], ["org:", false], ["ORG:a", false], ["org:a\n", false], ["org:a.b", false], [7, false]] as const) {
       expect(isOrgContext(value), String(value)).toBe(expected);
       expect(valid({ ...ACTIVE, context: value }), String(value)).toBe(expected);
     }
@@ -223,6 +223,8 @@ describe("every output validates, and every input the schema refuses is refused 
   /** Changes to a valid registration. */
   const MUTATIONS: Array<[string, (doc: Json) => unknown]> = [
     ["no type", ({ type: _t, ...d }) => d],
+    ["a numeric type", (d) => ({ ...d, type: 1 })],
+    ["a null type", (d) => ({ ...d, type: null })],
     ["no grantId", ({ grantId: _g, ...d }) => d],
     ["no context", ({ context: _c, ...d }) => d],
     ["no state", ({ state: _s, ...d }) => d],
@@ -253,6 +255,11 @@ describe("every output validates, and every input the schema refuses is refused 
     ["an array", () => [ACTIVE]],
     ["a string", () => "share-registration/1"]
   ];
+
+  it("reads a registration of another revision as no registration, though the receiver answers it at SR-2", () => {
+    expect(registrationWellFormed({ ...ACTIVE, type: "share-registration/2" })).toBe(false);
+    expect(registrationWellFormed({ ...WITHDRAWN, type: SHARE_REGISTRATION_RECEIPT_TYPE })).toBe(false);
+  });
 
   it.each(MUTATIONS)("%s: the schema's verdict is the receiver's", (_name, mutate) => {
     const value = mutate(structuredClone(ACTIVE));
