@@ -95,10 +95,13 @@ take the context, `personal` when it is not given, so a caller written before DE
 
 ## Routing
 
-**No document on the telemetry or check-in wire carries a context.** An organization server already knows the
+**No event carries its session's context, and no check-in carries a context.** An organization server already knows the
 organization from the device certificate: the certificate binds `org.id`, and a receiver attributes by it, never by the
 body (DEC-0031, `FAC-SEM-045`). A context field would add nothing it does not know, and it could leak `personal` or
-another organization's id to a receiver, which unlinkable memberships forbid (the RM-28 report's CX-22). What a device
+another organization's id to a receiver, which unlinkable memberships forbid (the RM-28 report's CX-22). A `grant.usage`
+and a share registration carry their grant's own `org:<orgId>` (DEC-0086, amending DEC-0082 item 5): the receiver
+compares it with its certificate's `org.id` and refuses it when they differ, so the field adds a check and tells the
+receiver nothing it does not know ([share registration](share-registration.md#the-join)). What a device
 sends, and to which organization server, is decided three ways:
 
 - **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per
@@ -140,9 +143,10 @@ no activity event kind carried a grant reference: a usage report's `byGrant` and
 DEC-0045) stay on the device, with its meter. So the activity protocol gains the kind **`grant.usage`**: one grant's
 metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemetry-event.schema.json#/$defs/grantUsage`).
 
-- **Its data**: `day`; `grantId`, the grant's `meta.id`, a URI of 1–256 characters with no `#`, compared by normal form
-  (DEC-0076), so one grant revised during the day is one row and the organization server joins it to the share grant it
-  holds; `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
+- **Its data**: `day`; `grantId`, the share grant's `meta.id`, `urn:fabric:share:` and 32 lower-case hex digits,
+  compared as written (DEC-0086, `FAC-SEM-117`), so one grant revised during the day is one row and the organization
+  server joins it to the agent its share registration names; `context`, the grant's own `org:<orgId>` (DEC-0086);
+  `calls` (at least 1: a day with no call emits nothing); `unpricedCalls`, never more than `calls`; and `costUsd`, a number of at least 0, or `null` when no call was priced — never `0` for an unknown cost, as DEC-0021 and
   `FAC-SEM-025` say (`FAC-SEM-038` checks the three together).
 - **A day and no finer time**, like `policy.violation`: `occurred` is that day's midnight UTC (`FAC-SEM-039`),
   `monotonicNs` is `"0"`, and it carries no `session`, `user`, `run`, `task`, `git`, `skill` or `launch` (schema).
@@ -157,8 +161,7 @@ metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemet
 - **Who derives the id**: the collector on the issuer's own device, from the receipts its meter settled, where the
   grant's id is known. A grant reference may end in `#<revision>` (`<id>#<revision>`, as the register's `share-grant/1`
   names a grant); the collector drops it by taking the receipt's grant `meta.id`, which carries no revision, so the
-  schema refuses a `#`. Hosts keep grant ids within 256 characters; a grant whose `meta.id` is longer reports no
-  `grant.usage`. DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
+  schema refuses a `#`. A grant whose `meta.id` is no share grant id reports no `grant.usage` (DEC-0086). DL-22's opacity binds callees — a service names a grant only by the token's `grant` claim — and
   this is the issuer's side, so it is not broken.
 - **Once**: a collector emits it after the day ends, one per (day, `grantId`) per stream; a batch that carries two for
   one (day, `grantId`) of one stream, the ids compared by normal form, is refused (`FAC-SEM-039`). A receiver counts the
@@ -167,7 +170,8 @@ metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemet
 - **Routing**: a `grant.usage` event goes only to the organization server of the grant's own `context`, `org:<orgId>`
   (`routeGrantUsage(grantContext, enrollments)` in `src/context-route.ts`, the vectors' `grantUsage`). A grant that
   states no context answers `none` with reason `no-context`, and a personal one `personal`: neither produces a
-  `grant.usage` toward any organization.
+  `grant.usage` toward any organization. The event carries that context, and a collector sends it only after the
+  enrollment answered the grant's share registration (the sender gate, [share registration](share-registration.md#the-join)).
 
 A grant's id is not put on `usage.line`: a reference on each call would let the organization join every model call
 to the grant, finer than CX-VES-08's sums, and a shared agent's spend is metered by grant check and often has no session
@@ -222,7 +226,9 @@ confirms. A membership in an organization another person controls does not run o
    anywhere. Any other it rejects as that event's `schema` rejection, which consumes the event and leaves the batch
    standing ([batch and acknowledgement](activity.md#batch-and-acknowledgement)), and the usage is lost to it; so a writer
    sends such an id only to a receiver pinned at or after DEC-0082. `FAC-SEM-037`'s home-path check applies to every
-   event on every receiver, so a `grantId` that names a home directory is refused at any pin.
+   event on every receiver, so a `grantId` that names a home directory is refused at any pin. DEC-0086 makes `context`
+   required and `grantId` a share grant id, which a receiver pinned at DEC-0082 refuses: its compatibility and the sender
+   gate are in [share registration](share-registration.md#compatibility).
 
 ## Semantic rules
 
@@ -254,13 +260,14 @@ Fixtures: `fixtures/semantic/grant-context-*`, `fixtures/semantic/estate-share-g
     Observatory row, requested through the pilot's §4 table or the board (`com.submit`).
 - **The first organization server** issues `org.id` within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`, reads a share grant's `context`, and
   ingests `grant.usage` to show a shared agent's usage per grant as sums and states, counting the first per (stream,
-  day, `grantId`), every read in the access log (CX-VES-08).
+  day, `grantId`), every read in the access log (CX-VES-08); per agent, through share registrations (DEC-0086,
+  [who adopts it](share-registration.md#who-adopts-it)).
 - **fabric-agent-adapter** (its FAA-41): the kits run `FAC-SEM-110` and `FAC-SEM-111` and accept per-context
   placements at their next pin.
 - **Fabric Dashboards** (its FD-52) groups instances by the placement's context; a service descriptor carries none.
 - **Fabric Switchboard** uses the context-id form for its pool's context attribute.
 
-The board row is CT-51.
+The board rows are CT-51 and, for share registrations, CT-56.
 
 ## Not decided here
 
