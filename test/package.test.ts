@@ -114,7 +114,7 @@ describe("FAC-SEM-065: a package carries no secret (DEC-0013)", () => {
     for (const name of ["secret-shaped-name", "secret-in-purpose", "secret-in-entry"]) {
       const fixture = load(`semantic/package-${name}.json`);
       const text = JSON.stringify(evaluateSemanticRules("package", fixture));
-      for (const value of ["AKIAIOSFODNN7EXAMPLE", "sk-proj-0123456789abcdefABCDEF", "ghp_0123456789abcdefABCDEF0123456789abcd"]) expect(text).not.toContain(value);
+      for (const value of ["GHP_EXAMPLE0SLOT0NAME0NOT0A0TOKEN000000", "sk-proj-0123456789abcdefABCDEF", "ghp_0123456789abcdefABCDEF0123456789abcd"]) expect(text).not.toContain(value);
     }
   });
 
