@@ -33,8 +33,14 @@ const SHARE_GRANT_ID = /^urn:fabric:share:(?!0{32}$)[0-9a-f]{32}$/;
 const ORG_CONTEXT = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 /** `fabric-package#/$defs/agentRef`. */
 const AGENT_REF = /^urn:fabric:agent:[a-z][a-z0-9]*(?:-[a-z0-9]+)*:[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
-/** `share-registration#/$defs/instant`: an offset, and at most three fraction digits (DEC-0085's millisecond rule). */
-const INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,3})?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})$/;
+/**
+ * `share-registration#/$defs/instant`: an offset, seconds 00 to 59 (no leap second, which JSON Schema's `date-time` admits),
+ * and at most three fraction digits (DEC-0085's millisecond rule).
+ */
+const INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-5][0-9](?:\.[0-9]{1,3})?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})$/;
+/** A time whose fraction has more than three digits, which a registration cannot carry as written. */
+const SUB_MILLISECOND = /:[0-9]{2}\.[0-9]{4,}/;
+const DAY_MS = 24 * 60 * 60 * 1000;
 /** `activity-common#/$defs/day`. */
 const DAY = /^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$/;
 const SHA256 = /^sha256:[a-f0-9]{64}$/;
@@ -46,8 +52,28 @@ const agentRefOk = (value: unknown): value is string => isString(value) && value
 /** An instant as milliseconds, or NaN: the schema's pattern and a day that exists (`strictTime`). */
 const time = (value: unknown): number => (isString(value) && INSTANT.test(value) ? strictTime(value) : Number.NaN);
 const readable = (value: unknown): value is string => Number.isFinite(time(value));
-/** The UTC day of an instant read by `time`, `YYYY-MM-DD`. */
-const utcDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+/** The midnight UTC, in milliseconds, of the day an instant falls on: days compare as numbers, so a year past 9999 compares too. */
+const dayStart = (ms: number) => Math.floor(ms / DAY_MS) * DAY_MS;
+
+/**
+ * A grant's or a revocation's time as a registration carries it (DEC-0086, the fix round): a time with at most three
+ * fraction digits as written, already a millisecond instant; one with more, rounded to milliseconds (`up` for a window's
+ * start, down otherwise, so a registered window is never wider than the grant's and a withdrawal ends early, never late)
+ * and written as `Date#toISOString` does. Undefined for a time `strictTime` cannot read.
+ */
+function carried(value: unknown, up = false): string | undefined {
+  if (!isString(value) || !Number.isFinite(strictTime(value))) return undefined;
+  if (!SUB_MILLISECOND.test(value)) return value;
+  // Cutting the fraction to three digits floors the instant; a non-zero digit cut away moves a start up by 1 ms.
+  const cut = value.replace(/(\.[0-9]{3})([0-9]+)/, "$1");
+  const extra = up && /[1-9]/.test(/\.[0-9]{3}([0-9]+)/.exec(value)?.[1] ?? "") ? 1 : 0;
+  return new Date(strictTime(cut) + extra).toISOString();
+}
+/** A grant's or a revocation's time as milliseconds, any number of fraction digits floored, or NaN. */
+const instant = (value: unknown): number => {
+  const text = carried(value);
+  return text === undefined ? Number.NaN : strictTime(text);
+};
 /** An object's own member, never one read through its prototype (`constructor`, `__proto__`). */
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
 const exactly = (value: JsonObject, names: readonly string[]) => Object.keys(value).length === names.length && names.every((name) => Object.hasOwn(value, name));
@@ -95,13 +121,16 @@ export interface ShareRegistrationDerivation {
   degraded: Array<{ grantId: string; code: DerivationDegraded }>;
 }
 
-/** Whether `grant` revocations name `id` by normal form, and the earliest readable `revokedAt` among them (undefined when none is readable). */
+/**
+ * Whether `grant` revocations name `id` by normal form, and the earliest `revokedAt` among them as a registration carries
+ * it (`carried`, floored): compared by instant, any number of fraction digits; undefined when none is readable.
+ */
 function revokedAt(revocations: readonly JsonObject[], id: string): { revoked: boolean; at: string | undefined } {
   const matching = revocations.filter((revocation) => sameIdentifier(revocation.ref, id));
-  const times = matching.map((revocation) => revocation.revokedAt).filter(readable);
+  const times = matching.map((revocation) => revocation.revokedAt).filter((value) => Number.isFinite(instant(value)));
   // The first earliest in order: two revocations at one instant give one answer.
-  const at = times.reduce<string | undefined>((best, candidate) => (best === undefined || time(candidate) < time(best) ? candidate : best), undefined);
-  return { revoked: matching.length > 0, at };
+  const at = times.reduce<unknown>((best, candidate) => (best === undefined || instant(candidate) < instant(best) ? candidate : best), undefined);
+  return { revoked: matching.length > 0, at: carried(at) };
 }
 
 /**
@@ -118,8 +147,10 @@ function revokedAt(revocations: readonly JsonObject[], id: string): { revoked: b
  *   grant's `meta.revision`, `startsAt` and `expiresAt` as written.
  *
  * Then each grant id registered before that the revision no longer lists in that context is withdrawn: at the earliest
- * `revokedAt` when it is revoked, else at the revision's `issuedAt`. A time, a revision or a window the registration
- * cannot carry (`registrationWellFormed`) registers nothing (`share-grant-unreadable`). Personal, context-less and
+ * `revokedAt` when it is revoked, else at the revision's `issuedAt`. Times are carried at millisecond precision
+ * (`carried`): a withdrawal time floored, a window rounded inward, so a revoked share is withdrawn whatever the number of
+ * fraction digits. A time `strictTime` cannot read, a revision below 1, or a window that is empty once rounded registers
+ * nothing (`share-grant-unreadable`). Personal, context-less and
  * other organizations' grants never register. Total: malformed input answers no registration.
  */
 export function deriveShareRegistrations(record: unknown, appliedEntries: unknown, orgId: unknown, previouslyRegistered: unknown): ShareRegistrationDerivation {
@@ -159,14 +190,15 @@ export function deriveShareRegistrations(record: unknown, appliedEntries: unknow
       answer.degraded.push({ grantId: id, code: "share-grant-agents" });
       continue;
     }
-    emit({ type: SHARE_REGISTRATION_TYPE, grantId: id, context, state: "active", grantRevision: meta.revision, agentRef, startsAt: grant.startsAt, expiresAt: grant.expiresAt }, id);
+    // The window is carried rounded inward to milliseconds, never wider than the grant's.
+    emit({ type: SHARE_REGISTRATION_TYPE, grantId: id, context, state: "active", grantRevision: meta.revision, agentRef, startsAt: carried(grant.startsAt, true), expiresAt: carried(grant.expiresAt) }, id);
   }
 
   const earlier = Array.isArray(previouslyRegistered) ? previouslyRegistered.filter(isShareGrantId) : [];
   for (const id of new Set(earlier)) {
     if (listed.has(id)) continue;
     const revocation = revokedAt(revocations, id);
-    withdrawal(id, revocation.revoked ? revocation.at : record.issuedAt);
+    withdrawal(id, revocation.revoked ? revocation.at : carried(record.issuedAt));
   }
   return answer;
 }
@@ -174,7 +206,11 @@ export function deriveShareRegistrations(record: unknown, appliedEntries: unknow
 // ---- Intake (the receiver) ---------------------------------------------------------------------------------------
 
 /**
- * What a receiver holds per (user, grantId) (DEC-0086 item 5): the state, the active registration's members (kept on a
+ * What a receiver holds per (user, grantId) (DEC-0086 item 5). A receiver keeps one held list per organization: an entry
+ * carries no organization, because the user and the grant id are keys inside the organization whose certificate bound the
+ * user, and a user id of one organization says nothing in another. So `decideShareRegistration` and `joinGrantUsage` are
+ * given the list of the organization the request's certificate binds, never a list shared across organizations.
+ * The entry holds: the state, the active registration's members (kept on a
  * withdrawal so usage before it still joins; absent on a tombstone, a withdrawal that arrived with nothing held), the
  * withdrawal time, and the digest of the registration it keeps.
  */
@@ -257,7 +293,8 @@ const receipt = (held: HeldShareRegistration, state: ShareRegistrationReceipt["s
 });
 
 /**
- * The receiver's decision on one registration (DEC-0086 item 4), in the order of share-registration.md's SR table:
+ * The receiver's decision on one registration (DEC-0086 item 4), in the order of share-registration.md's SR table.
+ * `held` is the list the receiver keeps for the organization of the certificate's `org.id` (see `HeldShareRegistration`):
  *
  * - SR-0: its own context unusable (`held` not a list of well-formed entries one per (user, grantId), a binding that is
  *   not `{transport, org: {id}, user?: {id}}`): `{fault: "context-invalid"}`; a transport verdict naming DEC-0056 step
@@ -325,7 +362,9 @@ export type GrantUsageJoin =
 
 /**
  * The receiver's join of one `grant.usage` (DEC-0086 item 6), in the order of share-registration.md's GJ table, given
- * the binding recorded for the event's epoch (`{org: {id}, user?: {id}}`, FAC-SEM-045) and the registrations it holds:
+ * the binding recorded for the event's epoch (`{org: {id}, user?: {id}}`, FAC-SEM-045) and the registrations it holds for
+ * that binding's organization (one list per organization, `HeldShareRegistration`). Days compare as midnight UTC in
+ * milliseconds, so a window ending past year 9999 still compares:
  *
  * - GJ-0: its own context unusable, `{fault: "context-invalid"}`; an event that is not a `grant.usage` whose `data`
  *   carries a day that exists, a share grant id and an organization's context: rejected `schema`;
@@ -352,37 +391,91 @@ export function joinGrantUsage(event: unknown, binding: unknown, registrations: 
   if (user === undefined) return { outcome: "stored", joined: false, reason: "unassigned-device" };
   const entry = registrations.find((candidate) => candidate.user === user && candidate.grantId === grantId && candidate.agentRef !== undefined);
   if (!entry) return { outcome: "stored", joined: false, reason: "unregistered" };
-  if (day < utcDay(time(entry.startsAt))) return { outcome: "stored", joined: false, reason: "before-start" };
+  const dayMs = strictTime(`${day}T00:00:00Z`);
+  if (dayMs < dayStart(time(entry.startsAt))) return { outcome: "stored", joined: false, reason: "before-start" };
   const end = Math.min(time(entry.expiresAt), entry.withdrawnAt === undefined ? Number.POSITIVE_INFINITY : time(entry.withdrawnAt));
-  if (day > utcDay(end)) return { outcome: "stored", joined: false, reason: "after-end" };
+  if (dayMs > dayStart(end)) return { outcome: "stored", joined: false, reason: "after-end" };
   return { outcome: "stored", joined: true, agentRef: entry.agentRef as string };
+}
+
+// ---- The sender gate (the collector) ----------------------------------------------------------------------------
+
+export type GateAnswer = "send" | "hold" | "hold-degraded";
+
+/** Refusals after which the grant's usage may be sent: the receiver holds a registration (or a final withdrawal) for it. */
+const SEND_AFTER: readonly string[] = ["stale-revision", "already-withdrawn"];
+/** Refusals that do not clear by sending again: the node holds the usage back and reports itself degraded. */
+const DEGRADED_AFTER: readonly string[] = ["revision-conflict", "agent-mismatch", "wrong-organization", "unassigned-device"];
+
+/**
+ * The sender gate (DEC-0086 item 6): whether a collector may emit `grant.usage` for a grant toward one enrollment, given
+ * that enrollment's latest answer to the grant's registration, in the shape `decideShareRegistration` answers
+ * (`{status: 200, receipt}`, `{status, body: {error: {code}}}`, `{status: 401, code}`, `{fault}`), or `undefined`
+ * before any answer:
+ *
+ * - `send`: a receipt, whatever its state, or `stale-revision` or `already-withdrawn`;
+ * - `hold-degraded`: `revision-conflict`, `agent-mismatch`, `wrong-organization` or `unassigned-device`, which sending
+ *   the same registration again does not clear: the node keeps the sums and reports itself degraded;
+ * - `hold`: no answer yet, a transport refusal (401), `malformed`, `schema-unsupported`, a receiver's fault, or anything
+ *   else: the node keeps the sums and registers again.
+ *
+ * It never throws.
+ */
+export function gateGrantUsage(answer: unknown): GateAnswer {
+  if (own(answer, "status") === 200 && own(own(answer, "receipt"), "type") === SHARE_REGISTRATION_RECEIPT_TYPE) return "send";
+  const code = own(own(own(answer, "body"), "error"), "code");
+  if (!isString(code)) return "hold";
+  if (SEND_AFTER.includes(code)) return "send";
+  return DEGRADED_AFTER.includes(code) ? "hold-degraded" : "hold";
 }
 
 // ---- Rules -------------------------------------------------------------------------------------------------------
 
 /**
- * FAC-SEM-117 on one grant: a grant whose `context` is an organization's has a share grant id as its `meta.id`. Called
+ * FAC-SEM-117 on one grant: a grant whose `context` is an organization's has a share grant id as its `meta.id`, and its
+ * `startsAt` and `expiresAt` carry at most three fraction digits. Called
  * by kind `grant` (`src/context-rules.ts`) and by kind `org-share-grants` for each share grant of a record.
  */
 export function shareGrantIdFindings(grant: unknown, at: string): Finding[] {
   if (!isObject(grant) || !isString(grant.context) || !grant.context.startsWith("org:")) return [];
+  const findings: Finding[] = [];
   const id = isObject(grant.meta) ? grant.meta.id : undefined;
-  if (isShareGrantId(id)) return [];
-  return [{ code: "FAC-SEM-117", instancePath: `${at}/meta/id`, message: "a share grant into an organization is named urn:fabric:share: and 32 lower-case hex digits from a CSPRNG, never a name, an address or an estate id" }];
+  if (!isShareGrantId(id)) findings.push({ code: "FAC-SEM-117", instancePath: `${at}/meta/id`, message: "a share grant into an organization is named urn:fabric:share: and 32 lower-case hex digits from a CSPRNG, never a name, an address or an estate id" });
+  // The writer's millisecond rule (the fix round): the window a registration carries is the grant's, as written.
+  for (const name of ["startsAt", "expiresAt"]) {
+    if (isString(grant[name]) && SUB_MILLISECOND.test(grant[name] as string)) findings.push({ code: "FAC-SEM-117", instancePath: `${at}/${name}`, message: "a share grant into an organization carries its window with at most three fraction digits" });
+  }
+  return findings;
 }
 
-/** FAC-SEM-117 on a record: each organization share grant's id form, and one agentRef among the placements naming it. */
+/** The agentRefs the placements of `record` in `context` run under the grant `id` (by normal form). */
+function agentsUnder(record: JsonObject, context: unknown, id: unknown): Set<string> {
+  const placements = list(record.machines).flatMap((machine) => list(machine.packages));
+  return new Set(placements.filter((placement) => placement.context === context && isString(id) && sameIdentifier(placement.grant, id)).map((placement) => show(placement.agentRef)));
+}
+
+/**
+ * FAC-SEM-117 on a record (`{record, parent?}`): each organization share grant's id and window form, one agentRef among
+ * the placements naming it, and, against the parent revision, the same agentRef as the parent's placements ran under
+ * the same grant (DEC-0086, the fix round: moving a share to another agent revokes the grant and mints a new id).
+ */
 function orgShareGrants(value: JsonObject): Finding[] {
   const record = isObject(value.record) ? value.record : {};
-  const placements = list(record.machines).flatMap((machine) => list(machine.packages));
+  const parent = isObject(value.parent) ? value.parent : undefined;
   const findings: Finding[] = [];
   for (const [grant, index] of indexed(record.shareGrants)) {
     const at = `/record/shareGrants/${index}`;
     findings.push(...shareGrantIdFindings(grant, at));
     if (!isString(grant.context) || !grant.context.startsWith("org:")) continue;
     const id = isObject(grant.meta) ? grant.meta.id : undefined;
-    const refs = new Set(placements.filter((placement) => placement.context === grant.context && isString(id) && sameIdentifier(placement.grant, id)).map((placement) => show(placement.agentRef)));
+    const refs = agentsUnder(record, grant.context, id);
     if (refs.size > 1) findings.push({ code: "FAC-SEM-117", instancePath: at, message: `the placements naming this grant run ${refs.size} agents: a share grant into an organization runs one agentRef` });
+    if (!parent || refs.size === 0) continue;
+    const before = list(parent.shareGrants).find((old) => old.context === grant.context && isObject(old.meta) && isString(id) && sameIdentifier(old.meta.id, id));
+    const earlier = before ? agentsUnder(parent, before.context, id) : new Set<string>();
+    if (earlier.size > 0 && [...refs].some((ref) => !earlier.has(ref))) {
+      findings.push({ code: "FAC-SEM-117", instancePath: at, message: "this grant ran another agent in the parent revision: a share grant into an organization keeps its agentRef; move the share by revoking it and minting a new id" });
+    }
   }
   return findings;
 }
