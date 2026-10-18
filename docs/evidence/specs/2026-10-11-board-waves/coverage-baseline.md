@@ -168,3 +168,6 @@ so its floor is 100. `src/signing-challenges.ts` (67 / 67) and `src/protocol-rev
 `src/entitlement.ts` and of `FAC-SEM-115` and `FAC-SEM-116` removed or loosened once) each failed at least one test
 (`docs/evidence/specs/2026-10-17-entitlement/plants.md`). Measured with `vitest run --coverage` on the branch merged
 with main's `1531f21`: 74 files, 5179 tests, whole set 7014 / 7087 (98.96 %).
+
+**DEC-0085 fix round (2026-10-18).** `src/entitlement.ts` 286 / 286 keeps 100. 9 more plants, each killed. Measured
+on `b2a9131`: 74 files, 5195 tests, whole set 7025 / 7098 (98.97 %).
