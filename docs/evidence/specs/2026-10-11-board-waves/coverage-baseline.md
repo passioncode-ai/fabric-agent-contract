@@ -161,3 +161,10 @@ once) each failed at least one test: 42 in `src/pairing.ts` (`test/pairing.test.
 from 96.85 to 98.44 (127 / 129) with the `FAC-SEM-034` totality fix. 22 more plants, each killed. Measured on the
 branch: 73 files, 4986 tests, whole set 6724 / 6797 (98.92 %).
 
+
+**DEC-0085 (2026-10-17).** `src/entitlement.ts` (275 / 275) is new, joins the measured set and reaches every branch,
+so its floor is 100. `src/signing-challenges.ts` (67 / 67) and `src/protocol-revisions.ts` (65 / 65) keep 100;
+`src/semantic-rules.ts` reads 98.51 (463 / 470) against its floor of 98.49. 140 plants (each refusal clause of
+`src/entitlement.ts` and of `FAC-SEM-115` and `FAC-SEM-116` removed or loosened once) each failed at least one test
+(`docs/evidence/specs/2026-10-17-entitlement/plants.md`). Measured with `vitest run --coverage` on the branch merged
+with main's `1531f21`: 74 files, 5179 tests, whole set 7014 / 7087 (98.96 %).

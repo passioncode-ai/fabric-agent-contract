@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/entitlement.schema.json",
   "title": "Entitlement, entitlement/1 (DEC-0085)",
-  "description": "What one signed order entitles one subject to — an organization (org:<orgId>) or one person's estate (personal) — for at most 35 days: a member allowance, a hosting product, a support tier and the paid agents. The issuer signs it with a key its root lists in an entitlement-key-set/1, over the RFC 8785 form of the document without sig (DEC-0043, the register's entitlement/1, DEC-0063). It names no amount, price, currency or person.",
+  "description": "What one signed order entitles one subject to (an organization, org:<orgId>, or one person's estate, personal) for at most 35 days: a member allowance, a hosting product, a support tier and the paid agents. The issuer signs it with a key its root lists in an entitlement-key-set/1, over the RFC 8785 form of the document without sig (DEC-0043, the register's entitlement/1, DEC-0063). It names no amount, price, currency or person.",
   "type": "object",
   "required": [
     "type",

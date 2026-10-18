@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/entitlement-key-set.schema.json",
   "title": "Entitlement key set, entitlement-key-set/1 (DEC-0085)",
-  "description": "The issuer's signing keys for entitlement/1 documents, under a monotonic revision, signed by the issuer's root key — which a verifier pins at installation and which signs nothing else — over the RFC 8785 form of the set without sig (the register's entitlement-key-set/1, DEC-0063). A key is added with a window that overlaps the old one; a revoked kid refuses every entitlement it signed.",
+  "description": "The issuer's signing keys for entitlement/1 documents, under a monotonic revision, signed by the issuer's root key (which a verifier pins at installation and which signs nothing else) over the RFC 8785 form of the set without sig (the register's entitlement-key-set/1, DEC-0063). A key is added with a window that overlaps the old one; a revoked kid refuses every entitlement it signed.",
   "type": "object",
   "required": [
     "type",

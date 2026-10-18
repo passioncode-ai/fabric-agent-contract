@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0085`
+**Next free ID:** `DEC-0086`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5220,3 +5220,97 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`agent_sync.py reserve --key dec0084 DEC`, `--key dec0084-1 SEM`, `--key dec0084-2 SEM`); the record plane is `fs`.
   The registers are edited under the owner session's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md`
   and `docs/backlog.md`.
+
+### DEC-0085: The entitlement, `entitlement/1`: one signed record of what an order entitles a subject to, under a key set an offline root signs, with a 35-day life, a 7-day refresh and a 14-day grace
+
+- **Date:** 2026-10-17
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-54: the
+  PassionCode platform issues (its PLAT-020), the first organization server and a personal cloud verify.
+- **Amends:** nothing. It answers the platform's request PLAT-020 on the project board (2026-10-17), which left the
+  signature, the grace and the refresh to the contract, and serves the platform's organization offer (its ADR-0005,
+  accepted 2026-10-16, D-2 and D-4).
+- **Decision:** in [entitlement](specification/entitlement.md) unless named otherwise:
+  1. **Shape:** one JSON document with its signature inside, `{type: "entitlement/1", ...fields, alg, kid, sig}`
+     ([`entitlement.schema.json`](../schemas/entitlement.schema.json)), signed over the register's `entitlement/1`
+     statement, the UTF-8 RFC 8785 form of the document without `sig` (`entitlementSigningInput`), `signer: "key"`.
+     Not a JWT: every signed record of the contract uses one canonical form (DEC-0043, DEC-0062), the verifier needs no
+     JOSE parser, and the type inside the bytes means no other statement of the same key is an entitlement.
+  2. **Algorithm:** `EdDSA` (Ed25519) only, a small-order key refused before any verification (DEC-0045); `ES256` may
+     join additively by a later decision. One algorithm leaves no downgrade path.
+  3. **Fields,** every member always present and `null` where the order has no such line, so the register type keeps
+     one field list for good: `issuer` (a lower-case `https://` origin, no port, path or trailing slash), `subject` (a
+     context id, `org:<orgId>` or `personal`, DEC-0082; never a person), `estate` (for `personal`, the person's estate id;
+     `null` for an organization), `order` (`{id, revision}`), `issuedAt` ≤ `notBefore` < `expiresAt`, `licence`
+     (`{members}` from 1 to 1 000 000, or `null`; `null` for `personal`), `hosting` (`{product, size}`, `org-cloud` only
+     for `org:` and `personal-cloud` only for `personal`, or `null`), `support` (`{tier}` of `observe`, `assist`,
+     `managed`, or `null`; `null` for `personal`), `agents` (0 to 256 `{agentRef}`, unique, DEC-0050). No amount, price,
+     currency or person: the schema refuses any member it does not list.
+  4. **Issuer keys:** the verifier pins the issuer's root key `{issuer, kid, x}`, which signs only
+     `entitlement-key-set/1` documents ([`entitlement-key-set.schema.json`](../schemas/entitlement-key-set.schema.json)):
+     `{type, issuer, revision, issuedAt, keys: [{kid, alg, x, notBefore, notAfter}], revoked, alg, kid, sig}`; signing
+     keys sign entitlements (devices.md's key-set pattern, DEC-0031). An entitlement verifies only under a listed key
+     whose window holds its `issuedAt` (`notBefore` ≤ `issuedAt` < `notAfter`); a new key overlaps the old one, which stays
+     listed up to 49 days past its window; a revoked kid refuses everything it signed at once (`key-revoked`); the
+     verifier keeps the highest key-set revision and its digest (lower `stale-revision`, same revision with other bytes
+     `revision-conflict`, same bytes unchanged); replacing the root is a reinstall.
+  5. **Windows:** a life of at most 35 days (`MAX_ENTITLEMENT_SECONDS`); the next revision issued at least 7 days before
+     `expiresAt`, from when the verifier reports `refreshDue` (`REFRESH_SECONDS`); 14 days of `grace` after `expiresAt`,
+     then `lapsed` (`GRACE_SECONDS`); 60 s of clock skew on `notBefore` (`CLOCK_SKEW_SECONDS`). What a lapse switches off is
+     the verifying product's.
+  6. **One entitlement per subject:** the verifier holds `{orderId, revision, issuedAt, digest}` per subject; the same
+     order's higher revision is accepted, the same revision and digest is `unchanged`, the same revision with another
+     digest `revision-conflict`, a lower revision `stale-revision`, and another order is accepted only when issued later.
+  7. **The verifiers,** answering and never throwing: `verifyEntitlement` in the order of the EN table (EN-1…EN-13:
+     `context-invalid`, `no-clock`, `malformed`, `wrong-issuer`, `unknown-algorithm`, `unknown-key`, `key-revoked`,
+     `unusable-key`, `small-order-key`, `key-not-valid`, `bad-signature`, `wrong-subject`, `too-long-lived`,
+     `not-yet-valid`, `lapsed`, `stale-revision`, `revision-conflict`), and `verifyEntitlementKeySet` in the order of the
+     EK table (EK-1…EK-7).
+  8. **Rules:** `FAC-SEM-115` (`entitlement`) and `FAC-SEM-116` (`entitlement-key-set`).
+  9. **Protocol revisions:** `entitlement` `["1"]` and `entitlement-key-set` `["1"]`.
+- **Choices made in implementation** (the brief left them open; recorded so a port reads them as decisions):
+  - an inverted time order (`notBefore` before `issuedAt`, or `expiresAt` at or before `notBefore`) is `too-long-lived`,
+    as WL-3 answers a lease whose life is not positive; the subject's lines in disagreement are `malformed`;
+  - a key set whose `kid` is not the pinned root's is `wrong-issuer` (the root is one issuer's one key; the EK codes name
+    no `unknown-key`);
+  - `issuedAt`'s skew is implied: `issuedAt` ≤ `notBefore`, so the 60 s on `notBefore` bounds an `issuedAt` in the
+    future, and the verifier checks `notBefore` alone;
+  - a verifier for an organization takes no `estate` and one for `personal` requires it (`context-invalid` otherwise);
+    a key set handed as applied must be well formed and signed under `EdDSA` (`context-invalid` otherwise), so a listed
+    key under another algorithm is `unusable-key`;
+  - kids are opaque ids (`activity-common#/$defs/opaqueId`), a key set holds 1 to 32 keys and up to 256 revoked kids, and
+    the issuer is a host of two labels or more, compared as written;
+  - the held record of a key set is `{revision, digest}`, `digest` being `sha256:` of the signed bytes, as an
+    entitlement's.
+- **Why:** the platform sells organization and personal plans whose paid functions run on servers it does not operate;
+  those servers must decide offline, from a record they verify, what is paid, and an admin agent must read its support
+  tier from that record rather than from editable configuration. An offline root with rotating online keys keeps the
+  root out of reach (the platform's PLAT-022) without reinstalling verifiers. The grace covers the issuer's outage; the
+  refresh warns a week ahead. J10: no person, no member list, no amount; a personal entitlement's estate id is not a
+  cross-organization person id.
+- **Compatibility:** Additive: two new schemas, a specification, two register types, two rules, two protocol names.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/entitlement.md` (new), `docs/specification/conformance.md` (the register, canonical
+    forms, the verifier's and the issuer's rows, `FAC-SEM-115` and `FAC-SEM-116`);
+  - schemas: `schemas/entitlement.schema.json`, `schemas/entitlement-key-set.schema.json` (new);
+  - code: `src/entitlement.ts` (new), `src/signing-challenges.ts` (`ENTITLEMENT_FIELDS`, `ENTITLEMENT_KEY_SET_FIELDS`,
+    the two types), `src/semantic-rules.ts`, `src/protocol-revisions.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/entitlement*.json`, `fixtures/negative/entitlement-*`,
+    `fixtures/semantic/entitlement-*`, `fixtures/vectors/entitlement.json` (new, written by
+    `tools/vectors/entitlement.ts`), `fixtures/vectors/signing-challenges.json` (the two statements);
+  - tests: `test/entitlement.test.ts` (new), `test/signing-challenges.test.ts`, `test/protocol-revisions.test.ts`,
+    `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `test/schema-compilation.test.ts`; the floor for
+    `src/entitlement.ts` in `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md` (Entitlement), `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-54),
+    `docs/evidence/specs/2026-10-17-entitlement/brief.md`, `docs/evidence/specs/2026-10-17-entitlement/plants.md`,
+    `docs/handoffs/2026-10-17-entitlement.md`, `docs/handoffs/README.md`.
+- **Not decided here:** member-period metering and the billable-member definition (the first organization server's
+  Stage 5); per-agent usage, which stays `grant.usage` (DEC-0082); how the platform stores orders; the hardware-module
+  ceremony for the root; which functions a lapse disables.
+- **Source:** the platform's PLAT-020 message on the project board (2026-10-17); its organization offer ADR-0005 and its
+  recovery program packet §1–2; DEC-0031, DEC-0043, DEC-0045, DEC-0050, DEC-0062, DEC-0063, DEC-0082; RFC 8032 and
+  RFC 8785 in the [source ledger](evidence/sources.md); the brief `docs/evidence/specs/2026-10-17-entitlement/brief.md`.
+  DEC-0085, `FAC-SEM-115` and `FAC-SEM-116` were reserved by git CAS (`agent_sync.py reserve --key ct54-entitlement
+  DEC`, `--key ct54-entitlement-doc SEM`, `--key ct54-entitlement-keyset SEM`); the record plane is `fs`. The registers
+  are edited under the owner run's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and
+  `docs/backlog.md`.

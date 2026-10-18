@@ -2,12 +2,12 @@ import { createHash, createPublicKey, verify as verifySignature } from "node:cry
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { ENTITLEMENT_FIELDS, ENTITLEMENT_KEY_SET_FIELDS, signingStatement } from "./signing-challenges.js";
+import { ENTITLEMENT_KEY_SET_FIELDS, signingStatement } from "./signing-challenges.js";
 
-// #region entitlement — docs: docs/specification/entitlement.md
+// #region entitlement, docs: docs/specification/entitlement.md
 /**
- * `entitlement/1` (DEC-0085): what one signed order entitles one subject to — an organization (`org:<orgId>`) or one
- * person's estate (`personal`) — for at most 35 days: a member allowance, a hosting product, a support tier and the paid
+ * `entitlement/1` (DEC-0085): what one signed order entitles one subject to (an organization, `org:<orgId>`, or one
+ * person's estate, `personal`) for at most 35 days: a member allowance, a hosting product, a support tier and the paid
  * agents. The issuer (the PassionCode platform) signs it with a key its offline root lists in an
  * `entitlement-key-set/1`; a verifier (the first organization server, a personal cloud) holds the root, the key set it
  * applied and, per subject, the entitlement it accepted last. No amount, price, currency or person appears anywhere.
@@ -63,7 +63,7 @@ const rawKey = (x: string) => Buffer.from(x, "base64url");
 // ---- The documents -----------------------------------------------------------------------------------------------
 
 /**
- * The bytes the issuer signs: the register's `entitlement/1` statement (DEC-0063) — the UTF-8 RFC 8785 form of the
+ * The bytes the issuer signs: the register's `entitlement/1` statement (DEC-0063): the UTF-8 RFC 8785 form of the
  * document without `sig`. `undefined` when it does not carry exactly the registered members or has no RFC 8785 form.
  */
 export function entitlementSigningInput(entitlement: unknown): Buffer | undefined {
@@ -80,7 +80,9 @@ export function entitlementKeySetSigningInput(set: unknown): Buffer | undefined 
 }
 
 /** Whether a nullable line is `null` or an object of exactly `names` whose members pass `check`. */
-const line = (value: unknown, names: readonly string[], check: (value: JsonObject) => boolean) => value === null || (isObject(value) && exactly(value, names) && check(value));
+const line = (value: unknown, names: readonly string[], check: (value: JsonObject) => boolean) =>
+  // `exactly` reads only own keys, so a number, a string or an array never has exactly `names` and needs no other test.
+  value === null || (exactly(value as JsonObject, names) && check(value as JsonObject));
 
 /**
  * Whether the subject's lines agree (DEC-0085 item 3): `personal` carries an estate, no licence, no support and at most
@@ -92,21 +94,24 @@ function consistent(doc: JsonObject): boolean {
   return doc.estate === null && (doc.hosting === null || product === "org-cloud");
 }
 
-/** Whether an entitlement's members have the shapes the schema gives them, the algorithm's value aside. */
+/**
+ * Whether an entitlement's members have the shapes the schema gives them, the algorithm's value aside. The type and the
+ * exact member list are the register's to check: `entitlementSigningInput` has no bytes for another type, a missing
+ * member or an extra one, and the verifier refuses such a document `malformed` on that answer.
+ */
 function wellFormed(doc: JsonObject): boolean {
   const order = doc.order;
   const agents = doc.agents;
   const refs = Array.isArray(agents) ? agents.map((agent) => (isObject(agent) ? agent.agentRef : undefined)) : [];
   return (
-    doc.type === ENTITLEMENT_TYPE &&
-    exactly(doc, [...ENTITLEMENT_FIELDS, "type", "sig"]) &&
     issuerOk(doc.issuer) &&
     matches(CONTEXT, doc.subject) &&
     (doc.estate === null || opaque(doc.estate)) &&
     isObject(order) && exactly(order, ["id", "revision"]) && opaque(order.id) && positive(order.revision) &&
     readable(doc.issuedAt) && readable(doc.notBefore) && readable(doc.expiresAt) &&
     line(doc.licence, ["members"], (l) => Number.isSafeInteger(l.members) && (l.members as number) >= 1 && (l.members as number) <= MAX_MEMBERS) &&
-    line(doc.hosting, ["product", "size"], (h) => HOSTING_PRODUCTS.includes(h.product as string) && opaque(h.size)) &&
+    // The product's two values are `consistent`'s to check, each against its subject.
+    line(doc.hosting, ["product", "size"], (h) => opaque(h.size)) &&
     line(doc.support, ["tier"], (s) => SUPPORT_TIERS.includes(s.tier as string)) &&
     Array.isArray(agents) && agents.length <= MAX_AGENTS &&
     agents.every((agent) => isObject(agent) && exactly(agent, ["agentRef"]) && isString(agent.agentRef) && agent.agentRef.length <= 146 && AGENT_REF.test(agent.agentRef)) &&
@@ -259,8 +264,8 @@ function usableTrust(trust: EntitlementTrust): boolean {
 
 /**
  * The reference verifier (DEC-0085 item 7), in the order of entitlement.md's EN table: the context and the clock, the
- * shape, the issuer, the algorithm, the key — listed, not revoked, usable, of full order, its window holding `issuedAt`
- * — the signature, the subject, the life, the clock against `notBefore` and the grace, then the entitlement held for
+ * shape, the issuer, the algorithm, the key (listed, not revoked, usable, of full order, its window holding `issuedAt`),
+ * the signature, the subject, the life, the clock against `notBefore` and the grace, then the entitlement held for
  * the subject. It answers and never throws.
  */
 export function verifyEntitlement(value: unknown, trust: EntitlementTrust): EntitlementVerdict {
@@ -276,11 +281,9 @@ export function verifyEntitlement(value: unknown, trust: EntitlementTrust): Enti
   const keySet = trust.keySet;
   if (entitlement.issuer !== keySet.issuer) return { ok: false, problem: "wrong-issuer" };
   if (!ENTITLEMENT_ALGORITHMS.includes(entitlement.alg as string)) return { ok: false, problem: "unknown-algorithm" };
-  const revoked = list(keySet.revoked).includes(entitlement.kid);
   const key = (keySet.keys as JsonObject[]).find((entry) => entry.kid === entitlement.kid);
-  if (!key && !revoked) return { ok: false, problem: "unknown-key" };
-  // A revoked kid refuses every entitlement it signed, at once, whatever its window.
-  if (revoked || !key) return { ok: false, problem: "key-revoked" };
+  // A revoked kid refuses every entitlement it signed, at once, whatever its window; a usable key set never also lists it.
+  if (!key) return { ok: false, problem: list(keySet.revoked).includes(entitlement.kid) ? "key-revoked" : "unknown-key" };
   // The key set's shape makes `x` the canonical base64url of 32 bytes; what is left is its algorithm.
   if (key.alg !== entitlement.alg) return { ok: false, problem: "unusable-key" };
   if (isSmallOrderKey(rawKey(key.x as string))) return { ok: false, problem: "small-order-key" };

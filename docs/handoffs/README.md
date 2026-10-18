@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-17 entitlements for the organization offer](2026-10-17-entitlement.md) | DEC-0085 (CT-54; `FAC-SEM-115`, `FAC-SEM-116`) | open, branch `agent/ct54-entitlement-20261017` |
 | [2026-10-15 the estate ceremonies](2026-10-15-estate-ceremonies.md) | DEC-0084 (CT-53; `FAC-SEM-113`, `FAC-SEM-114`) | open, this pull request |
 | [2026-10-15 a lane that reads user content runs on an open-vendor model](2026-10-15-open-vendor-user-content.md) | DEC-0083 (CT-52; `FAC-SEM-112`) | merged, #111 `a3e330f` |
 | [2026-10-13 contexts for the RM-28 pilot](2026-10-13-rm28-pilot-contexts.md) | DEC-0082 (CT-51; `FAC-SEM-110`, `FAC-SEM-111`) | merged, #107 `92cd1d7` |

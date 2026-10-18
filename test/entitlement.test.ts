@@ -30,7 +30,7 @@ import { ENTITLEMENT_FIELDS, ENTITLEMENT_KEY_SET_FIELDS } from "../src/signing-c
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildEntitlementVectors } from "../tools/vectors/entitlement.js";
 
-// DEC-0085: entitlement/1 and entitlement-key-set/1 — what one signed order entitles one subject to, the issuer's root
+// DEC-0085: entitlement/1 and entitlement-key-set/1: what one signed order entitles one subject to, the issuer's root
 // and key set, the windows, one entitlement held per subject, and the two verifiers.
 const root = projectRoot();
 type Json = Record<string, any>;
@@ -307,6 +307,10 @@ const KEY_SET_MUTATIONS: Array<[string, (set: Json) => unknown]> = [
   ["a key in base64 with a slash", (s) => ({ ...s, keys: [{ ...s.keys[0], x: `/${s.keys[0].x.slice(1)}` }] })],
   ["a key under ES256", (s) => ({ ...s, keys: [{ ...s.keys[0], alg: "ES256" }] })],
   ["a key that is a string", (s) => ({ ...s, keys: ["ent-2026-09"] })],
+  ["257 revoked kids", (s) => ({ ...s, revoked: Array.from({ length: 257 }, (_, i) => `ent-old-${i}`) })],
+  ["a key kid with a space", (s) => ({ ...s, keys: [{ ...s.keys[0], kid: "ent 2026" }] })],
+  ["a key alg as a number", (s) => ({ ...s, keys: [{ ...s.keys[0], alg: 7 }] })],
+  ["a numeric set alg", (s) => ({ ...s, alg: 7 })],
   ["a kid listed twice in revoked", (s) => ({ ...s, revoked: ["ent-2026-08", "ent-2026-08"] })],
   ["a revoked kid with a space", (s) => ({ ...s, revoked: ["ent 2026"] })],
   ["revoked as a string", (s) => ({ ...s, revoked: "ent-2026-08" })],
@@ -322,7 +326,8 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
       const document = resign(changed);
       if (valid(document)) continue;
       refusedBySchema += 1;
-      expect(verifyEntitlement(document, ORG_TRUST).ok, what).toBe(false);
+      // Refused for its shape, not by a later check that a careless shape check would leave to luck.
+      expect(verifyEntitlement(document, ORG_TRUST), what).toEqual({ ok: false, problem: what === "ES256" ? "unknown-algorithm" : "malformed" });
     }
     expect(refusedBySchema).toBe(ENTITLEMENT_MUTATIONS.length);
     for (const [what, change] of SIG_MUTATIONS) {
@@ -340,7 +345,9 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
       ["a licence", { licence: { members: 1 } }],
       ["a support tier", { support: { tier: "observe" } }],
       ["no estate", { estate: null }],
-      ["org-cloud", { hosting: { product: "org-cloud", size: "p-1" } }]
+      ["org-cloud", { hosting: { product: "org-cloud", size: "p-1" } }],
+      ["an estate with a space", { estate: "estate 5d0f1a" }],
+      ["an estate of 129 characters", { estate: "e".repeat(129) }]
     ] as const) {
       const document = resign({ ...PERSONAL, ...change });
       expect(valid(document), what).toBe(false);
@@ -354,12 +361,12 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
       const fixture = load(`negative/${name}`);
       const document = name.includes("short-sig") ? fixture : resign(fixture);
       expect(valid(document), name).toBe(false);
-      expect(verifyEntitlement(document, fixture.subject === "personal" ? PERSONAL_TRUST : ORG_TRUST).ok, name).toBe(false);
+      expect(verifyEntitlement(document, fixture.subject === "personal" ? PERSONAL_TRUST : ORG_TRUST), name).toEqual({ ok: false, problem: name.endsWith("es256.json") ? "unknown-algorithm" : "malformed" });
     }
     for (const name of readdirSync(path.join(root, "fixtures/negative")).filter((file) => file.startsWith("entitlement-key-set-"))) {
       const document = resign(load(`negative/${name}`), ROOT);
       expect(valid(document, "entitlement-key-set"), name).toBe(false);
-      expect(verifyEntitlementKeySet(document, PIN).ok, name).toBe(false);
+      expect(verifyEntitlementKeySet(document, PIN), name).toEqual({ ok: false, problem: name.endsWith("small-order.json") ? "small-order-key" : "malformed" });
     }
   });
 
@@ -367,9 +374,15 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
     for (const [what, change] of KEY_SET_MUTATIONS) {
       const document = resign(change(structuredClone(KEY_SET)) as Json, ROOT);
       expect(valid(document, "entitlement-key-set"), what).toBe(false);
-      expect(verifyEntitlementKeySet(document, PIN).ok, what).toBe(false);
+      const expected = what.includes("small order") ? "small-order-key" : what.includes("ES256") ? "unknown-algorithm" : "malformed";
+      expect(verifyEntitlementKeySet(document, PIN), what).toEqual({ ok: false, problem: expected });
       // Handed to the entitlement verifier as applied, it is not a key set it can use.
       expect(verifyEntitlement(BASE, { ...ORG_TRUST, keySet: document }).ok, what).toBe(false);
+    }
+    for (const [what, change] of SIG_MUTATIONS) {
+      const document = change(structuredClone(KEY_SET));
+      expect(valid(document, "entitlement-key-set"), what).toBe(false);
+      expect(verifyEntitlementKeySet(document, PIN), what).toEqual({ ok: false, problem: "malformed" });
     }
     expect(resign(KEY_SET, ROOT).sig).toBe(KEY_SET.sig);
     expect(verifyEntitlementKeySet(resign(KEY_SET, ROOT), PIN).ok).toBe(true);

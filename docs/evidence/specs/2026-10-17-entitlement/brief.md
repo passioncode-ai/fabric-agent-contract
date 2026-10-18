@@ -2,7 +2,7 @@
 
 Owner: fabric-agent-contract. Requester: passioncode-platform PLAT-020 (RM-14/CE-14), board thread
 `b68f4399-81c9-4cfe-a7a3-a62d9f30b92d` (message `7a2ddee7…`, 2026-10-17). Verifier: the first organization server
-(Vesta Stage 5) and a personal cloud. The offer it serves: passioncode-platform ADR-0005 (accepted 2026-10-16), D-2, D-4.
+(its Stage 5) and a personal cloud. The offer it serves: passioncode-platform ADR-0005 (accepted 2026-10-16), D-2, D-4.
 Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys `ct54-entitlement*`).
 
 ## Source ledger
@@ -104,6 +104,6 @@ Ids reserved through agent-sync: `DEC-0085`, `FAC-SEM-115`, `FAC-SEM-116` (keys 
 
 ## Not decided here
 
-Member-period metering and the billable-member definition (Vesta Stage 5); per-agent usage stays `grant.usage`
+Member-period metering and the billable-member definition (the first organization server's Stage 5); per-agent usage stays `grant.usage`
 (DEC-0082), joined by the organization server through the share grant; how the platform stores orders; the HSM
 ceremony; which functions a lapse disables.

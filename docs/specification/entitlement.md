@@ -1,4 +1,4 @@
-# Entitlements — `entitlement/1` and `entitlement-key-set/1`
+# Entitlements: `entitlement/1` and `entitlement-key-set/1`
 
 DEC-0085 · rule codes `FAC-SEM-115`, `FAC-SEM-116` · schemas
 [`entitlement`](../../schemas/entitlement.schema.json) and
@@ -8,8 +8,8 @@ DEC-0085 · rule codes `FAC-SEM-115`, `FAC-SEM-116` · schemas
 [`tools/vectors/entitlement.ts`](../../tools/vectors/entitlement.ts)
 
 An **entitlement** says what one signed order entitles one subject to: an organization (`org:<orgId>`) or one
-person's estate (`personal`), for at most 35 days. It carries the order's lines — a member allowance, a hosting
-product, a support tier and the paid agents — and nothing about money. The issuer, the PassionCode platform, signs it;
+person's estate (`personal`), for at most 35 days. It carries the order's lines (a member allowance, a hosting
+product, a support tier and the paid agents) and nothing about money. The issuer, the PassionCode platform, signs it;
 a verifier, the first organization server or a personal cloud, checks it offline against the issuer's keys and keeps
 the last one it accepted for its subject. What a verified entitlement switches on, and what a lapsed one switches off,
 is the verifying product's; this document states the record, its signature, its windows and its states.
@@ -62,7 +62,7 @@ keys. A key of small order is refused before anything is verified under it (DEC-
 
 A verifier is installed with the issuer's **root key**, `{issuer, kid, x}` (Ed25519), pinned. The root signs only
 `entitlement-key-set/1` documents; signing keys sign entitlements. The root can then live offline or in a hardware
-module while the online keys rotate and are revoked without reinstalling any verifier — devices.md's key-set pattern
+module while the online keys rotate and are revoked without reinstalling any verifier: devices.md's key-set pattern
 (DEC-0031), which the first organization server already runs for policies.
 
 | Field | Rule |
@@ -76,7 +76,7 @@ module while the online keys rotate and are revoked without reinstalling any ver
 | `alg`, `kid`, `sig` | the root's algorithm and `kid`, and its signature over the UTF-8 RFC 8785 form of the set without `sig` (`entitlementKeySetSigningInput`) |
 
 - **Rotation.** A new key is added with a window that overlaps the old one. The old key stays listed after its
-  `notAfter` until every entitlement it signed is past `expiresAt` and the grace — at most 35 + 14 = 49 days — and then
+  `notAfter` until every entitlement it signed is past `expiresAt` and the grace (at most 35 + 14 = 49 days), and then
   may be dropped. An entitlement verifies only under a listed key whose window holds its `issuedAt`
   (`notBefore` ≤ `issuedAt` < `notAfter`).
 - **Revocation.** A kid in `revoked`, and so absent from `keys`, refuses every entitlement it signed at once, whatever
@@ -179,7 +179,7 @@ output.
 
 ## Privacy
 
-An entitlement names a subject — an organization's opaque id or `personal` with an estate id — an order's opaque id,
+An entitlement names a subject (an organization's opaque id, or `personal` with an estate id), an order's opaque id,
 counts and products. It carries no person, no member list and no amount; a member allowance is a number. One person in
 two organizations appears in neither organization's entitlement, and the estate id of a personal entitlement is not a
 cross-organization person id (the platform's program packet §2).
