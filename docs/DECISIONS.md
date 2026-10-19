@@ -5522,14 +5522,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      code. A spend window of a grant or the meter stays `limit-reached` (DL-19) with its approval request.
   2. **A paused job:** a provider that resumes the same job keeps it `working` with `statusMessage` `quota-exhausted` or
      `quota-exhausted until <UTC instant>`, optionally followed by a colon, a space and a text that is not only white
-     space, at most 500 code points; `pollIntervalMs` SHOULD reach the reset. `readJobPause`. No member and no status
+     space (ASCII: space, tab, line feed, carriage return), at most 500 code points; `pollIntervalMs` SHOULD reach the
+     reset. `readJobPause`. No member and no status
      are added.
   3. **`outcome-unknown`:** a job whose effect may have happened and is not observed ends `failed` with
      `error: {code: "outcome-unknown", message, data?}`; only an observed result settles it.
   4. **The caller's act** `jobCallerAction(answer, now)`, total: `poll`, `wait` (`notBefore`), `answer`, `done`,
      `cancelled`, `resend` under the same key (`quota-exhausted` retryable, `notBefore` its reset when later than
      `now`), `person` (`quota-exhausted` not retryable, `limit-reached`), `reconcile` (`outcome-unknown`), `failed`
-     (another code), `invalid` (on which a caller sends nothing new and keeps polling a job it can still read). Never
+     (another code), `invalid` (on which a caller sends nothing new, keeps polling a `working` job and reports any other
+     answer as malformed). Never
      "submit anew": after `outcome-unknown` nothing goes under a new key until the caller observed that the effect did
      not happen.
   5. **The intent's key** `intentIdempotencyKey({agentId, capability, input, request?})`: a UUID of version 8 (RFC 9562
@@ -5537,7 +5539,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      request when one principal asks twice on purpose; never a clock or a random value.
   6. **A repeated key:** a provider keeps keys per authenticated caller; a key whose job ended `quota-exhausted` admits
      the intent again, once, when the limit no longer holds; a key whose job ended `outcome-unknown` is answered with
-     that job and never runs again; any other ended key is answered with its job.
+     that job and never runs again; a key whose job ended `limit-reached` admits the intent again, once, when its approval
+     is granted; any other ended key is answered with its job.
   7. **Unknown is `null`:** `common#/$defs/usage`'s counts, `costUsd` and `wallMs` admit `null` for unknown, never 0;
      `partial: true` says a number is a lower bound or unknown, SHOULD stand beside a `null` and is never `false` there.
   8. **The revision `fabric-interop/0.2`:** its readers accept `null` and `partial`; a caller names the revisions it

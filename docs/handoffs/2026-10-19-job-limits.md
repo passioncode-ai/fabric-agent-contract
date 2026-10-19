@@ -18,7 +18,7 @@ table; this run implements it on branch `agent/ct55-job-limits-20261019`.
 - **Rules (REQ-04, REQ-05):** `FAC-SEM-119` (kinds `interop-job`, `usage`) and `FAC-SEM-120` (kind `job-caller`),
   dispatched from `src/semantic-rules.ts`.
 - **Vectors (REQ-06):** `fixtures/vectors/job-limits.json`, written by `tools/vectors/job-limits.ts --write`, expected
-  values by hand, nothing imported from the module: 25 pause, 37 caller, 13 key, 8 usage and 5 reader cases; the test compares the
+  values by hand, nothing imported from the module: 28 pause, 37 caller, 13 key, 8 usage and 5 reader cases; the test compares the
   file with the generator and runs the caller and pause cases in UTC, America/St_Johns and Pacific/Kiritimati.
 - **Schema against the reference (REQ-07):** 13 mutations of `quota-exhausted`'s data get the schema's verdict from
   `quotaDataOk` and `jobCallerAction`.
@@ -38,7 +38,7 @@ DEC-0087 ([register](../DECISIONS.md)), with its *Choices made in implementation
 
 ## Checks
 
-`pnpm run check` at the fix round's code, each step exiting 0: typecheck; `vitest run --coverage` 76 files, 5759
+`pnpm run check` at the second fix round's code, each step exiting 0: typecheck; `vitest run --coverage` 76 files, 5762
 tests, branches 7445 / 7518 with `src/job-limits.ts` at 133 / 133; UX lint passed (31 scenarios); documentation checks
 passed, lint-md 0 errors; privacy-check 0 findings.
 
@@ -64,6 +64,18 @@ Three blind readings of `3be94d4`: unit fail, seam fail, product fail. Every fin
   guidance disagreed; no UX scenario. Now: `fabric-interop/0.2` named in `_meta.protocols` is the gate; item 6 (a
   repeated key, keys per authenticated caller); `limit-reached` stays DL-19's with the act `person`; the MCP Task route
   is in *Not decided here*; one wording of `partial`; the adapter's guidance correction in CT-55; SCN-031.
+
+## The second reading (2026-10-19)
+
+One blind reading of `10554d6..98be038` closed 18 of 19 claims and found two contradictions: after a `limit-reached`
+approval the caller resent under the same key while the provider's rule answered that key with its ended job (now: such
+a key admits the intent again once its approval is granted), and `common.schema.json`'s `usage` description still named
+the pin gate (now: the revision a caller names). Its follow-ups are closed with them: the `limit-reached` vector carries
+DL-19's data, the pause text's white space is ASCII (space, tab, line feed, carriage return) with no-break space and
+byte-order mark vectors, "never 0" names the `fabric-interop/0.1` exception, `invalid` keeps polling only a `working`
+job, the brief marks its first-cut decisions superseded, and the title, DOCMAP, README and OQ-0012 name
+`fabric-interop/0.2`. Merge by squash, so the first cut's commit with a private agent's name stays out of `main`'s
+history.
 
 ## Open
 

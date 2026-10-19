@@ -295,6 +295,49 @@
       }
     },
     {
+      "name": "malformed: a text of a tab and a carriage return only",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted: \t\r"
+        }
+      },
+      "expected": {
+        "paused": false,
+        "malformed": true
+      }
+    },
+    {
+      "name": "white space is ASCII only: a no-break space is text, paused",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted:  "
+        }
+      },
+      "expected": {
+        "paused": true
+      }
+    },
+    {
+      "name": "white space is ASCII only: a byte-order mark is text, paused",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted: ﻿"
+        }
+      },
+      "expected": {
+        "paused": true
+      }
+    },
+    {
       "name": "malformed: four fraction digits",
       "answer": {
         "job": {
@@ -748,7 +791,10 @@
             "code": "limit-reached",
             "message": "stopped",
             "data": {
-              "approvalUrl": "https://fabric.example/approve/1"
+              "detail": "window-exhausted",
+              "window": "day",
+              "level": "L1",
+              "approvalRequest": "urn:fabric:approval-request:7f3c"
             }
           }
         }

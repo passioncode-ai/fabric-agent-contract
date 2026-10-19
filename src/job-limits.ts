@@ -26,9 +26,10 @@ export const JOB_STATUSES: readonly string[] = ["working", "input_required", "co
 const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](?:\.[0-9]{1,3})?Z$/;
 /**
  * The pause grammar of a `working` job's `statusMessage`: `quota-exhausted`, an optional ` until <UTC instant>`, an
- * optional colon, a space and a text that holds at least one character other than white space.
+ * optional colon, a space and a text that holds at least one character other than ASCII white space (space, tab, line
+ * feed, carriage return), so every regular-expression engine reads it alike.
  */
-const PAUSE = /^quota-exhausted(?: until (\S+?))?(?:: (\s*\S[\s\S]*))?$/;
+const PAUSE = /^quota-exhausted(?: until ([^ \t\n\r]+?))?(?:: ([ \t\n\r]*[^ \t\n\r][\s\S]*))?$/;
 const ERROR_CODE = /^[a-z][a-z0-9-]{1,63}$/;
 /** `interop-job#/$defs/job/properties/statusMessage`: JSON Schema's `maxLength` counts code points, not UTF-16 units. */
 const MAX_STATUS_MESSAGE = 500;
@@ -95,11 +96,13 @@ export interface CallerAction {
  * - `failed` with `quota-exhausted`: `resend` under the same key when `retryable`, with `notBefore` its `resetsAt` when
  *   that is after `now`; `person` when not retryable;
  * - `failed` with `outcome-unknown`: `reconcile`, observe whether the effect happened, never a new key;
- * - `failed` with `limit-reached` (DL-19, an exhausted spend window): `person`, its approval request reaches the operator;
+ * - `failed` with `limit-reached` (DL-19, an exhausted spend window): `person`, its approval request reaches the operator,
+ *   and after the approval a resend under the same key;
  * - `failed` with any other code: `failed`;
  * - `invalid`: `now` unreadable, an answer that is not `{job}` with an id and a status, a `failed` job whose `error` is
  *   not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, or a
- *   malformed pause. On `invalid` a caller sends nothing new: it keeps polling a job it can still read.
+ *   malformed pause. On `invalid` a caller sends nothing new: it keeps polling a `working` job and reports any other
+ *   answer as malformed.
  *
  * It never throws.
  */

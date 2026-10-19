@@ -88,3 +88,9 @@ survived, two were closed with a vector or a test and one is equivalent:
 | J-54 | reader: an inherited `protocols` read | killed |
 | J-55 | rule: a result's usage not read | killed |
 | J-56 | pause: an inherited message read | killed |
+
+## After the second reading
+
+| Plant | What was removed or loosened | Result |
+|---|---|---|
+| J-57 | the pause text's white space read as Unicode `\s` instead of ASCII | killed (the no-break space vector) |

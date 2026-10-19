@@ -230,7 +230,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A job's or a result's usage. A number nobody measured is null (DEC-0087), never 0; `partial` says the numbers are a lower bound. A reader pinned before DEC-0087 refuses null and `partial`, so a writer sends them only to readers pinned at or after it."
+      "description": "A job's or a result's usage. A number nobody measured is null, never 0; `partial` is true when a number is a lower bound or unknown (DEC-0087). A provider writes null and `partial` only toward a caller whose request `_meta.protocols` names fabric-interop/0.2; toward any other it writes the lower bound it measured."
     },
     "protocolRevision": {
       "type": "string",

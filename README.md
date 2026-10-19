@@ -60,7 +60,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [The revocation delta and the heartbeat — revocations within seconds, a signed commitment to them, and the 72-hour rule (`revocation-delta/1`, `heartbeat/1`, DEC-0054)](docs/specification/revocation-delta.md)
 - [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
 - [Entitlements: what a signed order entitles an organization or a person's estate to, under a key set an offline root signs (`entitlement/1`, `entitlement-key-set/1`, DEC-0085)](docs/specification/entitlement.md)
-- [Jobs under limits and uncertain effects: `quota-exhausted`, the pause grammar, `outcome-unknown`, the caller's act and the intent's key (DEC-0087)](docs/specification/interop.md#limits-and-uncertain-effects)
+- [Jobs under limits and uncertain effects: `quota-exhausted`, the pause grammar, `outcome-unknown`, the caller's act, the intent's key and `null` usage under `fabric-interop/0.2` (DEC-0087)](docs/specification/interop.md#limits-and-uncertain-effects)
 - [Share registrations: which agent a share grant into an organization runs, registered by the sharer's enrolled node, and `grant.usage` joined to it (`share-registration/1`, DEC-0086)](docs/specification/share-registration.md)
 - [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
 - [The local channel to the node — `fabric-local-channel/0.1` (DEC-0075)](docs/specification/local-channel.md)

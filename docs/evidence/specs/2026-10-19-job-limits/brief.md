@@ -40,6 +40,10 @@ C4 (a 4xx at submit against a 4xx while polling) stays adapter guidance (fabric-
 
 ## Decisions
 
+*Decisions 2, 5 and 7 below are the first cut; the section "After the first readings" and DEC-0087 supersede them
+(the gate is the revision a caller names, the interim writes nothing in `notVerified`, instants carry at most three
+fraction digits).*
+
 1. **`quota-exhausted`.** A job a provider, subscription or spending limit stopped and that the provider will not resume
    ends `failed` with `error: {code: "quota-exhausted", message, data: {retryable, resetsAt?}}`. `retryable` is
    required: `true` when the same intent may run again once the limit resets, `false` when a person must act (a budget

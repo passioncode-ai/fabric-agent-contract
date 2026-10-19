@@ -187,5 +187,6 @@ ruling; DEC-0017 states what holds now.
 - **Meanwhile:** nothing changes on the wire; providers follow the adapter's guidance.
 - **Resolution:** DEC-0087, [interop → limits and uncertain effects](specification/interop.md#limits-and-uncertain-effects):
   `quota-exhausted` with `data: {retryable, resetsAt?}`, the pause grammar of a `working` job's `statusMessage`,
-  `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), `null` and
-  `partial` in `usage`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
+  `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), the provider's
+  answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
+  `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.

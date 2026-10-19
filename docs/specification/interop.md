@@ -1,4 +1,4 @@
-# Interop extension `fabric-interop/0.1`
+# Interop extension `fabric-interop/0.1` and `/0.2`
 
 `covers:` Fabric agent-registry REQ-04, REQ-05, REQ-11 — DEC-0016, rulings DEC-0017, DEC-0018 · locked in Fabric's
 [agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/03311c856b7771e5e4cfff967b138e89e292c67f/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
@@ -171,7 +171,7 @@ upper-case and at most three fraction digits (`#/$defs/utcInstant`), and only wi
 
 **A paused job.** A provider that resumes the same job after the limit keeps it `working` and writes its
 `statusMessage` as `quota-exhausted` or `quota-exhausted until <UTC instant>`, either optionally followed by a colon, a
-space and a text that is not only white space, at most 500 characters (code points, as JSON Schema counts) in all;
+space and a text that is not only ASCII white space (space, tab, line feed, carriage return), at most 500 characters (code points, as JSON Schema counts) in all;
 `pollIntervalMs` SHOULD reach the reset, within its cap of 3 600 000. `readJobPause(answer)` reads it. A `working` job
 whose message starts `quota-exhausted` and breaks the grammar is `FAC-SEM-119`'s. The job gains no member and no
 status: its schema is closed and its states are MCP Task states. `degraded` stays a service's health, never a job's
@@ -197,7 +197,7 @@ now)` does, `now` a UTC instant:
 | `failed`, `limit-reached` | `person`: its approval request reaches the operator (SCN-017); after the approval a resend under the same key |
 | `failed`, `outcome-unknown` | `reconcile`: observe whether the effect happened |
 | `failed`, any other code | `failed` |
-| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a malformed pause | `invalid`: the caller sends nothing new and keeps polling a job it can still read |
+| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
 
 It never answers "submit anew". After `outcome-unknown` a caller sends nothing under a new key until it has observed that
 the effect did not happen; a new attempt is then a new intent (a new `request`, below). `FAC-SEM-120` (kind
@@ -214,13 +214,14 @@ with no RFC 8785 form.
 
 **The provider's answer to a repeated key.** A provider keeps a key per authenticated caller, so two callers that send
 the same input never share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
-longer holds (the reset passed, or the person acted): the provider runs it, once. A key whose job ended
-`outcome-unknown` is answered with that job again and never runs a second time. Any other key whose job ended is
-answered with that job.
+longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
+approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
+again and never runs a second time. Any other key whose job ended is answered with that job.
 
 **Unknown is `null`.** In a job's or a result's `usage` ([`common.schema.json#/$defs/usage`](../../schemas/common.schema.json)),
 `inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `costUsd` and `wallMs` are `null` when nobody
-measured them, never 0; 0 is a measured zero (DEC-0021's rule for cost, extended). `partial` is `true` when a number is
+measured them, never 0, toward a reader of `fabric-interop/0.2`; 0 is a measured zero (DEC-0021's rule for cost,
+extended). Toward a reader of `fabric-interop/0.1` the gate below applies. `partial` is `true` when a number is
 a lower bound or unknown; a writer SHOULD set it beside a `null` and never sets it `false` there (`FAC-SEM-119`, kinds
 `usage`, `interop-job` and `result`).
 
