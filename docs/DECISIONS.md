@@ -5717,11 +5717,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `git: null`;
   - `ambiguous` lists the Projects in the order of `projects`;
   - the results of D2's order against the operator's literal words (a worktree or a branch goes to the existing
-    Project, a new folder makes a new one) are listed by row, so the list is whole, and recorded for the operator to
-    correct on the board (folder-attribution.md, *What follows from D2*): a worktree or clone of a known repository
-    joins its Project exactly when AT-6, AT-7 or AT-8 decides, and a new folder makes a Project exactly when AT-15
-    does; every row that can decide first (AT-1 to AT-5, AT-9, AT-11, AT-13, AT-14), and a clone the identity cannot
-    match (an SSH alias, a local or absent origin), departs from them;
+    Project, a new folder makes a new one) are recorded for the operator to correct on the board, stated by the rows
+    that keep the words (folder-attribution.md, *What follows from D2*): a worktree or clone of a known repository
+    joins its Project when AT-6, AT-7 or AT-8 decides, or AT-3 by its place in that repository, a new folder makes a
+    Project exactly when AT-15 does, and whenever another row decides first the answer departs (AT-0 is a fault, not
+    an attribution);
   - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
     Project, a tie or a refusal is shown.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across

@@ -133,21 +133,21 @@ both, in the order of `projects`, and the product reports it rather than choosin
   repository (D2: "scoped to the folder, not to every clone"). A folder a Project lists below the tombstone is the
   Project's, so an explicit attach below a removed parent lasts.
 - **What follows from D2 against the operator's literal words** (in the run index: a worktree or a branch goes to the
-  existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. The list is
-  by row, so it is whole: the operator's words hold exactly where the row they name decides, and every row that can
-  decide first departs from them.
-  - *A worktree or clone of a known repository* joins its Project exactly when AT-6, AT-7 or AT-8 decides. It does not
-    when an earlier row decides: an explicit attach elsewhere (AT-1); a tombstone on the folder (AT-2); another
-    Project's folder that holds it, unless a declared container lies between (AT-3); a temporary root that holds the
-    folder or its main checkout (AT-4), so a worktree in an ordinary folder whose main checkout is kept under a
-    temporary root is refused while a clone of it joins; a broad folder, or a checkout right under home, from any
-    folder of it (AT-5). Nor when no row can see it: a repository whose Projects all sit in its subfolders (AT-9), and a
-    clone the identity cannot match, which is a new Project (AT-15): one through an SSH alias (`github.com-work`), with
-    a local path or no origin, or of a repository whose Project folders were stored without one.
-  - *A new folder* makes a new Project exactly when AT-15 decides. It does not inside another Project's folder (AT-3,
-    a repository cloned into a plain-folder Project included), under a temporary root (AT-4), when broad or right under
-    home (AT-5), in a tool's own folder (AT-11), at a tombstoned root (AT-13), or at a root that holds another
-    Project's folder (AT-14).
+  existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. The rule
+  is stated by the rows that keep the words, so it needs no list to be whole:
+  - *A worktree or clone of a known repository* joins its repository's Project when AT-6, AT-7 or AT-8 decides, or
+    AT-3 by its place in that repository (a checkout already recorded). Whenever another row decides first, or AT-3
+    gives another Project, the answer departs from the words.
+  - *A new folder* makes a new Project exactly when AT-15 decides. Whenever another row decides first, the answer
+    departs from the words.
+  - AT-0 is a fault in the snapshot, not an attribution, and departs from nothing.
+
+  Among the departures, for example: another Project's folder that holds the folder (AT-3, a repository cloned into a
+  plain-folder Project included); a temporary root that holds the folder or its main checkout (AT-4), so a worktree
+  whose main checkout is kept under a temporary root is refused while a clone of it joins; a checkout right under home
+  (AT-5); a repository whose Projects all sit in its subfolders (AT-9); a new repository whose owner a Project lists,
+  or that a Project's agent worked in, joins that Project (AT-10, AT-12); a clone the identity cannot match (an SSH
+  alias such as `github.com-work`, a local or absent origin) goes on to the later rows like a new repository.
 - **A tool's folder after the owner row (AT-11).** As Switchboard's SB-131: a tool's folder joins a known repository by
   worktree, repository or owner, but never by work and never as a new Project.
 
@@ -248,6 +248,9 @@ The board row is CT-57.
 
 - How Fabric records an alias and its evidence (D3 as corrected), the wire of Fabric's session-start capability and
   its refusals (D4 as corrected), and storage (D5).
+- What a collector sends for a session that has no Project (refused or tied): activity's `session.interval` and
+  `usage.line` require a `project` (`telemetry-event.schema.json`), so until a decision such a session's usage is
+  not reported, and the per-day totals undercount it. Board row CT-64.
 - How a product learns the work records: Switchboard reads them from coding agents' transcripts (SB-131, SB-132).
 - Folders on network shares and case-insensitive file systems beyond the product resolving the real path.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
