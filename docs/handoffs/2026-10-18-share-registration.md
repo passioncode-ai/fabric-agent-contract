@@ -46,7 +46,31 @@ tombstone joining nothing; the GJ-0 row; `FAC-SEM-117` counting placements in th
 ## Checks
 
 `pnpm run check` at `45cd007` (typecheck, `vitest run --coverage`, `docs/ux/lint.py`,
-docs-check, lint-md, privacy-check), each exiting 0: 75 files, 5545 tests, coverage 7267 / 7340 branches, docs-check passed, lint-md 0 errors, privacy-check 0 findings. The final commit, which only records this, was checked again.
+docs-check, lint-md, privacy-check), each exiting 0: 75 files, 5545 tests, coverage 7267 / 7340 branches, docs-check passed, lint-md 0 errors, privacy-check 0 findings.
+
+After the fix round, `pnpm run check` at `f628f0d`, each step exiting 0: typecheck; 75 files, 5585 tests, coverage
+7308 / 7381 branches with `src/share-registration.ts` at 271 / 271; UX lint passed; documentation checks passed,
+lint-md 0 errors; privacy-check 0 findings. The commits after it record this only.
+
+## The fix round (2026-10-18 to 2026-10-19)
+
+Three blind readings of `cbcd03c`: unit fail, seam pass, product fail. Every finding was fixed on this branch:
+
+- a `revokedAt` or a dropping revision's `issuedAt` with more than three fraction digits gave no withdrawal, so a
+  revoked share stayed active at the receiver (unit and seam): times are now carried at millisecond precision, a
+  withdrawal floored, a window rounded inward, and `FAC-SEM-117` refuses a share grant window with more than three
+  fraction digits at the writer;
+- `identifiers.md` and `estate-record.md` were claimed but untouched; conformance, CONTEXT and two code comments listed
+  signed requests without share registrations (product): written;
+- a re-pointed grant held its usage forever (product): a grant keeps its `agentRef`, `FAC-SEM-117` with `parent`
+  refuses a re-pointed one, and SR-7's recovery is to revoke and mint a new id;
+- the sender gate was prose only (seam): `gateGrantUsage`, with vectors;
+- days past year 9999, the held list's organization, the leap second, the privacy sentence's scope, the compatibility
+  of a long `context` at a pre-DEC-0082 receiver, the protocol-revision test, and a negative fixture that tested nothing
+  (unit, product, seam): fixed, each recorded in DEC-0086's *Choices made in implementation*.
+
+The builder of the first fix round stopped on a provider error (502) after the code commit; the next session finished
+the vectors, docs, plants and gate from its worktree.
 
 ## Open
 
@@ -57,5 +81,15 @@ docs-check, lint-md, privacy-check), each exiting 0: 75 files, 5545 tests, cover
 
 ## Next task
 
-Open the pull request for `agent/ct56-share-registration-20261018`, run the independent readings (unit, seam, product),
-merge, then post the merge commit on the board threads `cc944654` and `b68f4399`.
+Open the pull request for `agent/ct56-share-registration-20261018`, run one more blind reading of the fix round's diff
+(`cbcd03c..HEAD`), merge, then on the project board:
+
+- post the merge commit on threads `cc944654` and `b68f4399` (the first organization server);
+- `com.submit` to Project Observatory: OBS-101 implements `grant.usage` at DEC-0086 directly, with
+  `deriveShareRegistrations`, the registration client and `gateGrantUsage`;
+- `com.submit` to Fabric: CX-FAB-04 mints `urn:fabric:share:` ids from a CSPRNG, runs `FAC-SEM-117` with the parent
+  revision, writes windows and `revokedAt` with at most three fraction digits, and never re-points a grant;
+- a note to fabric-agent-adapter: vendor the schema and the two common defs, run `FAC-SEM-117` (with `parent`),
+  `FAC-SEM-118` and the amended `FAC-SEM-045`;
+- the knowledge base: the contract's rows in fabric-workspace `products.md` and `plans.md`, then
+  `node scripts/workspace.mjs sync`.
