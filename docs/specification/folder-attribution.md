@@ -137,11 +137,11 @@ both, in the order of `projects`, and the product reports it rather than choosin
   existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. The rule
   is stated by the rows that keep the words, so it needs no list to be whole:
   - *A worktree or clone of a known repository* joins its repository's Project when AT-6, AT-7 or AT-8 attaches it
-    to one Project, or AT-3 does by its place in that repository (a checkout already recorded). Whenever another row
-    decides first, AT-3 gives another Project, or a row ties (D2 adds that a tie attributes nothing), the answer
+    to one Project, or AT-3 does by its place in that repository (a checkout already recorded). Whenever a row other
+    than AT-0 or AT-1 decides first, AT-3 gives another Project, or a row ties (D2 adds that a tie attributes nothing), the answer
     departs from the words.
-  - *A new folder* makes a new Project exactly when AT-15 decides. Whenever another row decides first, the answer
-    departs from the words.
+  - *A new folder* makes a new Project exactly when AT-15 decides. Whenever a row other than AT-0 or AT-1 decides
+    first, the answer departs from the words.
   - AT-0 is a fault in the snapshot, not an attribution, and AT-1 is a person's or agent's explicit choice: neither
     departs from the words.
 
@@ -207,8 +207,8 @@ refused after it adopts, among them a worktree or clone under a temporary root o
 whose Projects sit deeper, and in Fabric (which has no temporary, tool or subfolder tombstone refusal today) folders
 under a temporary root, in a tool's folder or below a tombstoned folder; each product's owed rows below are the full
 measure. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
-([activity](activity.md)) and a service's usage `byProject` (FAC-SEM-025). A refused or tied session carries no
-`project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
+([activity](activity.md)), a service's usage `byProject` (FAC-SEM-025), and the policy violations activity reports
+(`policy.violation` requires a `project`). A refused or tied session carries no `project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
 
 ## Who adopts it
 
@@ -224,8 +224,10 @@ naming the rule and the Projects; the reasons are the schema's.
   re-read the remote, or keep the raw URL beside the key); not attributing when its Git probe times out; a worktree or
   clone at home, an ancestor of home, a declared container or right under home refused (AT-5), where today its worktree
   match comes first; a home kept under Git passed as `git: null`; recording by `explainFolder`'s `record`; its container
-  message naming the ancestors of home; its scenarios that show attribution (SCN-033's detach and undo) updated in the
-  adoption change. Its plain folder as its own Project (`8bdad97c`) and its subfolder start at the
+  message naming the ancestors of home; its snapshot's `containers` including Observatory's declared ones (its `_*`
+  folders and `folder_exclusions.json`, expanded to paths) where it can read them; its scenarios that show
+  attribution (SCN-033's detach and undo, SCN-137's order and its rule that a non-Git folder is never registered
+  automatically) updated in the adoption change. Its plain folder as its own Project (`8bdad97c`) and its subfolder start at the
   Git top level (`f7c71cba`, CO-331, ADR-0166) already match. Projects it stored at a subfolder before `f7c71cba` make
   their repository a container (AT-9, AT-14) until they are moved to the top level.
 - **Fabric Switchboard** (SB-141) runs the vectors in `./scripts/check.sh`; at a session's start it asks Fabric's
@@ -235,8 +237,9 @@ naming the rule and the Projects; the reasons are the schema's.
   (AT-6 to AT-9); its `dismissed` rows read as tombstones (a `gone` row, a folder that vanished, is no tombstone: a
   re-clone at the path is new); its work path (`record_worked`) feeding the snapshot's `work` records through
   `attributeFolder` rather than recording a repository itself, and its `shared` and contested states replaced by the
-  tie it reports; a worktree right under home refused at attach as at creation; recording by `record`; its CLI text on
-  containers and its scenarios (SCN-055, SCN-063) updated with them.
+  tie it reports; a worktree right under home refused at attach as at creation; recording by `record`; its snapshot's
+  `containers` including Observatory's declared ones where it can read them; its CLI text on containers and its
+  scenarios (SCN-055, SCN-063) updated with them.
 - **Project Observatory** (the engine) runs the vectors in its scan and in its local answer while Fabric is not
   running; at a session's start it asks Fabric's capability (D4 as corrected) rather than serving one. Measured against
   the table: it has no work row (AT-12) and reads owners only indirectly (AT-10); it scans only the children of its data
@@ -253,9 +256,9 @@ The board row is CT-57.
 
 - How Fabric records an alias and its evidence (D3 as corrected), the wire of Fabric's session-start capability and
   its refusals (D4 as corrected), and storage (D5).
-- What a collector sends for a session that has no Project (refused or tied): activity's `session.interval` and
-  `usage.line` require a `project` (`telemetry-event.schema.json`), so until a decision such a session's usage is
-  not reported, and the per-day totals undercount it. Board row CT-64.
+- What a collector sends for a session that has no Project (refused or tied): activity's `session.interval`,
+  `usage.line` and `policy.violation` require a `project` (`telemetry-event.schema.json`), so until a decision such a
+  session's usage and policy violations are not reported, and the per-day totals undercount it. Board row CT-64.
 - How a product learns the work records: Switchboard reads them from coding agents' transcripts (SB-131, SB-132).
 - Folders on network shares and case-insensitive file systems beyond the product resolving the real path.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and

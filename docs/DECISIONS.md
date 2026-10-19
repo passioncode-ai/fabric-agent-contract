@@ -5720,8 +5720,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     Project, a new folder makes a new one) are recorded for the operator to correct on the board, stated by the rows
     that keep the words (folder-attribution.md, *What follows from D2*): a worktree or clone of a known repository
     joins its Project when AT-6, AT-7 or AT-8 attaches it to one Project, or AT-3 does by its place in that
-    repository, a new folder makes a Project exactly when AT-15 does, and whenever another row decides first or a row
-    ties the answer departs (AT-0 is a fault and AT-1 an explicit choice, neither a departure);
+    repository, a new folder makes a Project exactly when AT-15 does, and whenever a row other than AT-0 or AT-1 decides
+    first or a row ties the answer departs (AT-0 is a fault and AT-1 an explicit choice, neither a departure);
   - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
     Project, a tie or a refusal is shown.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across

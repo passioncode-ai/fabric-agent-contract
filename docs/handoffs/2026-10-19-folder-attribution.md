@@ -42,7 +42,9 @@ amendment "Fabric is the core"; the canonical Project id is Fabric's too, D3), a
 names (it replaces the planned `project.attribute` in project-observatory-contract): the answer's refusal
 reasons `transient`, `tombstoned`, `container` and `tool` (the run index planned `refused-container`), a tie as
 `ambiguous` with its Projects, a bad snapshot as `input-invalid`, all from `folder-attribution.schema.json#/$defs/answer`;
-and one state the function never answers, "not attributable yet" while the product's Git probe fails.
+and one state the function never answers, "not attributable yet" while the product's Git probe fails. The
+reply also carries `explainFolder`'s `record` (`$defs/record`), so a product that asks records what Fabric's
+snapshot gave, and the `row`, so it can show the situation behind `container` (AT-5, AT-9 or AT-14).
 
 ## Readings
 
@@ -147,6 +149,15 @@ its identity when rebuilt (recordOrigin now keeps an origin only when it names t
 invariant holds by construction rather than by listing forms). Also: CT-64 is a backlog row, the conformance row runs
 the origin cases, the record vectors cover AT-12 and a tie, and the local-path forms and the host rule are written as
 the code reads them.
+
+The eleventh readings of `abc5131`: the unit reading passed (no rule read two ways, no invariant claimed and not
+enforced; two risks recorded below); the product reading failed it on one omission, now fixed in the documents only:
+reading Observatory's declared containers was a duty no product owed (now in Fabric's and Switchboard's owed rows
+and CT-57). Also: `policy.violation` beside the activity counts and in CT-64, Fabric's SCN-137 among its owed
+scenarios, the departure rule's exemption written into its own clauses, and the capability's reply carrying `record`
+and `row`. Risks left for the next change, not blocking: a plain subfolder of a container declared inside a Git
+Project's place is attached by AT-6 and may record a listed folder again; no vector holds the documented tie after an
+explicit attach of another Project's place.
 
 ## Plants
 
