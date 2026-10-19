@@ -6,20 +6,20 @@
   ],
   "input": {
     "snapshot": {
-      "folder": "/home/ana/work/fabric-night",
-      "home": "/home/ana",
+      "folder": "/u/ana/work/fabric-night",
+      "home": "/u/ana",
       "tempRoots": [
         "/tmp",
         "/private/tmp",
         "/private/var/folders",
         "/var/tmp",
-        "/home/ana/.cache",
-        "/home/ana/Library/Caches"
+        "/u/ana/.cache",
+        "/u/ana/Library/Caches"
       ],
       "git": {
-        "toplevel": "/home/ana/work/fabric-night",
-        "commonDir": "/home/ana/work/fabric/.git",
-        "mainCheckout": "/home/ana/work/fabric",
+        "toplevel": "/u/ana/work/fabric-night",
+        "commonDir": "/u/ana/work/fabric/.git",
+        "mainCheckout": "/u/ana/work/fabric",
         "origin": "git@github.com:example-org/fabric.git"
       },
       "projects": [
@@ -27,8 +27,8 @@
           "id": "project:fabric",
           "folders": [
             {
-              "path": "/home/ana/work/fabric",
-              "commonDir": "/home/ana/work/fabric/.git",
+              "path": "/u/ana/work/fabric",
+              "commonDir": "/u/ana/work/fabric/.git",
               "origin": "git@github.com:example-org/fabric.git"
             }
           ],
@@ -40,7 +40,7 @@
           "id": "project:notes",
           "folders": [
             {
-              "path": "/home/ana/work/notes",
+              "path": "/u/ana/work/notes",
               "commonDir": null,
               "origin": null
             }
@@ -51,7 +51,7 @@
     },
     "answer": {
       "outcome": "new",
-      "root": "/home/ana/work/fabric-night"
+      "root": "/u/ana/work/fabric-night"
     }
   }
 }

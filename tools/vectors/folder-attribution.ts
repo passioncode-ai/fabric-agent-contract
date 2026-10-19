@@ -17,7 +17,7 @@ import { projectRoot } from "../../src/contract.js";
 type Json = Record<string, any>;
 export const VECTOR_FILE = "fixtures/vectors/folder-attribution.json";
 
-const HOME = "/home/ana";
+const HOME = "/u/ana";
 const DATA = `${HOME}/work`;
 const TEMP = ["/tmp", "/private/tmp", "/private/var/folders", "/var/tmp", `${HOME}/.cache`, `${HOME}/Library/Caches`];
 
@@ -29,16 +29,17 @@ function originCases(): Json[] {
   return [
     ok("git@github.com:Example-Org/Fabric.git", "github.com/example-org/fabric"),
     ok("https://github.com/example-org/fabric", "github.com/example-org/fabric"),
-    ok("https://user:token@github.com/example-org/fabric.git/", "github.com/example-org/fabric"),
+    ok("https://git@github.com/example-org/fabric.git/", "github.com/example-org/fabric"),
     ok("ssh://git@github.com:22/example-org/fabric.git", "github.com/example-org/fabric"),
-    ok("git+ssh://git@bitbucket.org/team/app.git", "bitbucket.org/team/app"),
+    ok("git+ssh://git@github.com:2222/team/app.git", "github.com/team/app"),
+    ok("https://bitbucket.org/team/app.git", "bitbucket.org/team/app"),
     ok("https://gitlab.example.com/group/sub/app.git?ref=main#readme", "gitlab.example.com/group/sub/app"),
     ok("  git@github.com:example-org/fabric.git  ", "github.com/example-org/fabric"),
     no("/local/path/repo"),
     no("../repo"),
     no("C:\\work\\repo"),
     no("C:/work/repo"),
-    no("file:///home/ana/repo"),
+    no("file:///u/ana/repo"),
     no("ftp://github.com/example-org/fabric"),
     no("https://github.com/only-owner"),
     no("git@localhost:owner/name"),
@@ -112,12 +113,12 @@ function attributionCases(): Json[] {
     ["AT-9: work on another repository decides nothing", snap({ folder: `${DATA}/lib`, git: repoGit(`${DATA}/lib`, null), work: [{ project: "project:notes", commonDir: `${DATA}/other/.git` }] }), { outcome: "new", root: `${DATA}/lib` }],
     // AT-10
     ["AT-10: the filesystem root", snap({ folder: "/" }), { outcome: "refused", reason: "container" }],
-    ["AT-10: a Windows drive root", snap({ folder: "C:/", home: "C:/Users/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
+    ["AT-10: a Windows drive root", snap({ folder: "C:/", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
     ["AT-10: home", snap({ folder: HOME }), { outcome: "refused", reason: "container" }],
     ["AT-11: a folder directly in the filesystem root is no container unless it is home", snap({ folder: "/srv" }), { outcome: "new", root: "/srv" }],
-    ["AT-11: a folder directly in a Windows drive root", snap({ folder: "C:/work", home: "C:/Users/ana", tempRoots: ["C:/Users/ana/AppData/Local/Temp"] }), { outcome: "new", root: "C:/work" }],
-    ["AT-7: a hidden folder in a Windows home", snap({ folder: "C:/Users/ana/.config/tool", home: "C:/Users/ana", tempRoots: [] }), { outcome: "refused", reason: "tool" }],
-    ["AT-10: a folder right under a Windows home", snap({ folder: "C:/Users/ana/projects", home: "C:/Users/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
+    ["AT-11: a folder directly in a Windows drive root", snap({ folder: "C:/work", home: "C:/Profiles/ana", tempRoots: ["C:/Profiles/ana/AppData/Local/Temp"] }), { outcome: "new", root: "C:/work" }],
+    ["AT-7: a hidden folder in a Windows home", snap({ folder: "C:/Profiles/ana/.config/tool", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "tool" }],
+    ["AT-10: a folder right under a Windows home", snap({ folder: "C:/Profiles/ana/projects", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
     ["AT-10: a folder right under home", snap({ folder: DATA }), { outcome: "refused", reason: "container" }],
     ["AT-10: a repository right under home", snap({ folder: `${HOME}/scratch`, git: repoGit(`${HOME}/scratch`, null) }), { outcome: "refused", reason: "container" }],
     ["AT-10: a folder holding another Project's folder", snap({ folder: `${DATA}/group`, projects: [project("project:inner", [folder(`${DATA}/group/inner`)])] }), { outcome: "refused", reason: "container" }],

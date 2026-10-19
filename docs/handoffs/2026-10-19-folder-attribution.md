@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for project-observatory-contract to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 19 origin and 53 attribution cases covering every AT row, a repository, a
+  nothing imported from the module): 20 origin and 53 attribution cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, POSIX and Windows paths.
 - Fixtures: positive `folder-attribution-snapshot`, negative `folder-attribution-relative-folder`, semantic
@@ -41,6 +41,12 @@ then killed.
 `pnpm run check`, each step exiting 0: typecheck; 76 files, 5861 tests, branches 7616 / 7689 with
 `src/folder-attribution.ts` at 169 / 169; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
+
+The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
+the vectors' fictional home, and P2, the e-mail shape of two remote examples with userinfo. No real name or address was
+in them, but the rule binds shapes. The gate before the commit had not read the new files (`check_private.py` reads
+tracked files only), and the push command tested `grep`'s exit, not the check's. The vectors now use `/u/ana` and
+`C:/Profiles/ana` and userinfo `git@`; the check exits 0; the pushes since are gated on the check's own exit code.
 
 ## Next task
 
