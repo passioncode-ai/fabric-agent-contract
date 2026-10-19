@@ -25,6 +25,14 @@ const idOk = (value: unknown): value is string => isString(value) && value.lengt
 const originOk = (value: unknown) => value === undefined || value === null || (isString(value) && codePoints(value) <= MAX_PATH);
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
 const list = (value: unknown): unknown[] | undefined => (Array.isArray(value) && value.length <= MAX_LIST ? value : undefined);
+/** `value` without its leading and trailing `/`, in linear time (a regular expression for the trailing run is quadratic). */
+function trimSlashes(value: string, leading: boolean): string {
+  let start = 0;
+  let end = value.length;
+  while (leading && start < end && value[start] === "/") start += 1;
+  while (end > start && value[end - 1] === "/") end -= 1;
+  return value.slice(start, end);
+}
 
 /** Whether `value` is a path in the form above. */
 export function isPath(value: unknown): value is string {
@@ -70,7 +78,7 @@ export function normalizeOrigin(raw: unknown): string | undefined {
     path = String(String(scp[2]).split(/[?#]/)[0]);
   }
   host = host.slice(host.lastIndexOf("@") + 1).replace(/:[0-9]*$/, "").toLowerCase();
-  path = path.replace(/^\/+|\/+$/g, "").toLowerCase();
+  path = trimSlashes(path, true).toLowerCase();
   if (path.endsWith(".git")) path = path.slice(0, -4);
   const segments = path.split("/");
   if (!/^[a-z0-9.-]+$/.test(host) || !host.includes(".") || segments.length < 2 || segments.some((segment) => segment === "" || /\s/.test(segment))) return undefined;
@@ -78,6 +86,11 @@ export function normalizeOrigin(raw: unknown): string | undefined {
 }
 /** The owner of a normalized repository identity: every segment but the last (`host/owner`, `host/group/sub`). */
 export const ownerOf = (repository: string): string => repository.slice(0, repository.lastIndexOf("/"));
+
+/** `path` relative to `top`, which holds it: `""` for the top itself, else its segments below it. */
+const relativeTo = (path: string, top: string): string => (path === top ? "" : path.slice(isRoot(top) ? top.length : top.length + 1));
+/** Whether the relative path `rel` is `base` or lies under it (`""` holds every path). */
+const relUnder = (rel: string, base: string): boolean => base === "" || rel === base || rel.startsWith(`${base}/`);
 
 /** Whether `path` lies in a tool's own folder: a hidden folder directly in home, `Library` or `AppData` (Switchboard SB-131). */
 function inToolFolder(path: string, home: string): boolean {
@@ -98,6 +111,8 @@ interface ProjectFolder {
   path: string;
   commonDir: string | undefined;
   repository: string | undefined;
+  /** Its place in its repository: the path below the folder's Git top level, `""` at the top or when not given. */
+  rel: string;
 }
 interface Project {
   id: string;
@@ -120,16 +135,35 @@ function projectsOf(value: unknown): Project[] | undefined {
       const path = own(folder, "path");
       const commonDir = own(folder, "commonDir");
       const origin = own(folder, "origin");
+      const toplevel = own(folder, "toplevel");
       if (!isPath(path) || (commonDir !== undefined && commonDir !== null && !isPath(commonDir)) || !originOk(origin)) return undefined;
-      parsed.push({ path, commonDir: isString(commonDir) ? commonDir : undefined, repository: normalizeOrigin(origin) });
+      if (toplevel !== undefined && toplevel !== null && !(isPath(toplevel) && under(path, toplevel))) return undefined;
+      parsed.push({ path, commonDir: isString(commonDir) ? commonDir : undefined, repository: normalizeOrigin(origin), rel: isString(toplevel) ? relativeTo(path, toplevel) : "" });
     }
-    projects.push({ id, folders: parsed, sources: sources.map((source) => (source as string).toLowerCase().replace(/\/+$/, "")) });
+    projects.push({ id, folders: parsed, sources: sources.map((source) => trimSlashes((source as string).toLowerCase(), false)) });
   }
   return new Set(projects.map((project) => project.id)).size === projects.length ? projects : undefined;
 }
 
 /** The distinct ids of `projects`, in the snapshot's order. */
 const ids = (projects: Project[]) => [...new Set(projects.map((project) => project.id))];
+/**
+ * The Projects whose folder in this repository holds the folder's place in it, nearest first: of the folders `matches`
+ * picks, those whose `rel` holds `rel`, and of them the longest (so a worktree or clone of the outer of two nested
+ * Projects joins the outer one, and a folder inside the inner one the inner one).
+ */
+function nearestIn(projects: Project[], matches: (entry: ProjectFolder) => boolean, rel: string): Project[] {
+  let nearest = -1;
+  let owners: Project[] = [];
+  for (const project of projects) {
+    for (const entry of project.folders) {
+      if (!matches(entry) || !relUnder(rel, entry.rel)) continue;
+      if (entry.rel.length > nearest) [nearest, owners] = [entry.rel.length, [project]];
+      else if (entry.rel.length === nearest) owners.push(project);
+    }
+  }
+  return owners;
+}
 /** One project attached by `rule`, or ambiguous when more than one matches; undefined when none does. */
 function decide(matches: Project[], rule: AttributionRule): Attribution | undefined {
   const [first, ...others] = ids(matches);
@@ -144,18 +178,19 @@ function decide(matches: Project[], rule: AttributionRule): Attribution | undefi
  * - AT-0: a snapshot that is not of the schema's shape, or `explicit` naming no Project: `{fault: "input-invalid"}`;
  * - AT-1: `explicit` names a Project: attached to it (`explicit`), whatever else holds;
  * - AT-2: the folder is at or under a tombstone: refused `tombstoned`;
- * - AT-3: the folder, or its nearest ancestor a Project lists, belongs to that Project (`folder`); a root, home, an
- *   ancestor of home or a folder right under home is never such an ancestor;
+ * - AT-3: the folder, or its nearest ancestor-or-self a Project lists, belongs to that Project (`folder`); a root,
+ *   home or an ancestor of home is never listed so;
  * - AT-4: the folder or its root is under a temporary root: refused `transient`;
- * - AT-5: the root (the main checkout, or the folder without Git) is a container: a root, home, an ancestor of home,
- *   a folder right under home, or a folder that holds another Project's folder: refused `container`;
- * - AT-6: a Project's folder has the same Git common dir, or is the main checkout (`worktree`);
- * - AT-7: the same repository identity (`repository`);
+ * - AT-5: the root (the main checkout, or the folder without Git) is a root, home, an ancestor of home, or a folder
+ *   right under home no Project lists: refused `container`;
+ * - AT-6: a Project's folder has the same Git common dir, or is the main checkout (`worktree`), nearest by place;
+ * - AT-7: the same repository identity (`repository`), nearest by place;
  * - AT-8: the repository's owner is a source of a Project (`owner`);
  * - AT-9: the folder or its root is in a tool's folder: refused `tool`;
  * - AT-10: a work record names the repository (its common dir or its identity) for a Project (`work`);
  * - AT-11: the root is at or under a tombstone: refused `tombstoned`;
- * - AT-12: otherwise a new Project at the root.
+ * - AT-12: the root holds another Project's folder: refused `container` (no Project is made around another);
+ * - AT-13: otherwise a new Project at the root.
  *
  * Two Projects matching at one row answer `ambiguous` with both, and nothing is attached. It never throws.
  */
@@ -190,8 +225,9 @@ export function attributeFolder(snapshot: unknown): Attribution {
 
   if (tombstones.some((stone) => under(folder, stone as string))) return { outcome: "refused", reason: "tombstoned" };
   const root = git === null ? folder : (mainCheckout as string);
-  /** Never an ancestor a folder joins: a root, home, an ancestor of home, a folder right under home. */
-  const broad = (path: string) => isRoot(path) || under(home, path) || parentOf(path) === home;
+  /** Never a Project: a root, home, an ancestor of home. */
+  const broad = (path: string) => isRoot(path) || under(home, path);
+  const listed = (path: string) => projects.some((project) => project.folders.some((entry) => entry.path === path));
   // AT-3: the nearest Project folder at or above the folder.
   let nearest = -1;
   let owners: Project[] = [];
@@ -205,13 +241,14 @@ export function attributeFolder(snapshot: unknown): Attribution {
   const byFolder = decide(owners, "folder");
   if (byFolder) return byFolder;
   if (tempRoots.some((temp) => under(folder, temp as string) || under(root, temp as string))) return { outcome: "refused", reason: "transient" };
-  if (broad(root) || projects.some((project) => project.folders.some((entry) => entry.path !== root && under(entry.path, root)))) return { outcome: "refused", reason: "container" };
+  if (broad(root) || (parentOf(root) === home && !listed(root))) return { outcome: "refused", reason: "container" };
   if (git !== null) {
-    const byCommon = decide(projects.filter((project) => project.folders.some((entry) => entry.commonDir === commonDir || entry.path === mainCheckout)), "worktree");
+    const place = relativeTo(folder, toplevel as string);
+    const byCommon = decide(nearestIn(projects, (entry) => entry.commonDir === commonDir || entry.path === mainCheckout, place), "worktree");
     if (byCommon) return byCommon;
     const repository = normalizeOrigin(origin);
     if (repository !== undefined) {
-      const byRepository = decide(projects.filter((project) => project.folders.some((entry) => entry.repository === repository)), "repository");
+      const byRepository = decide(nearestIn(projects, (entry) => entry.repository === repository, place), "repository");
       if (byRepository) return byRepository;
       const byOwner = decide(projects.filter((project) => project.sources.includes(ownerOf(repository))), "owner");
       if (byOwner) return byOwner;
@@ -224,6 +261,7 @@ export function attributeFolder(snapshot: unknown): Attribution {
     return { outcome: "refused", reason: "tool" };
   }
   if (tombstones.some((stone) => under(root, stone as string))) return { outcome: "refused", reason: "tombstoned" };
+  if (projects.some((project) => project.folders.some((entry) => entry.path !== root && under(entry.path, root)))) return { outcome: "refused", reason: "container" };
   return { outcome: "new", root };
 }
 

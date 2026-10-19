@@ -31,7 +31,7 @@ describe("the vectors (DEC-0089)", () => {
   });
   it("covers every AT row", () => {
     const rows = new Set((vectors.attribution as Json[]).map((entry) => /^AT-[0-9]+/.exec(entry.name)?.[0]));
-    for (let row = 0; row <= 12; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
+    for (let row = 0; row <= 13; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
   });
   it("hold the same answers in every time zone", () => {
     for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
@@ -89,6 +89,35 @@ describe("totality: every function answers and never throws", () => {
   it("answers a snapshot with very many matching folders without overflowing the stack", () => {
     const projects = Array.from({ length: 14 }, (_, n) => ({ id: `p:${n}`, folders: Array(10000).fill({ path: "/u/ana/work/s", commonDir: null }), sources: [] }));
     expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
+  });
+  it("trims slashes in linear time: 10000 sources and 2000 origins of 4096 characters answer within a second", () => {
+    const slashes = `a${"/".repeat(4094)}b`;
+    const started = Date.now();
+    attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(10000).fill(slashes) }] });
+    attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(2000).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] });
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+  it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
+    const hostile: unknown[] = [null, undefined, 7, "", [], {}, "/"];
+    const paths = (value: unknown, at: Array<string | number> = []): Array<Array<string | number>> => {
+      if (value === null || typeof value !== "object") return [at];
+      const keys = Array.isArray(value) ? value.map((_, index) => index) : Object.keys(value as object);
+      return [at, ...keys.flatMap((key) => paths((value as Record<string | number, unknown>)[key], [...at, key]))];
+    };
+    let runs = 0;
+    for (const entry of vectors.attribution as Json[]) {
+      for (const at of paths(entry.snapshot).filter((p) => p.length > 0)) {
+        for (const bad of hostile) {
+          const copy = structuredClone(entry.snapshot) as Record<string | number, unknown>;
+          let node = copy;
+          for (const key of at.slice(0, -1)) node = node[key] as Record<string | number, unknown>;
+          node[at[at.length - 1] as string | number] = bad;
+          expect(() => attributeFolder(copy)).not.toThrow();
+          runs += 1;
+        }
+      }
+    }
+    expect(runs).toBeGreaterThan(10000);
   });
   it("reads no inherited member", () => {
     const inherited = Object.create({ folder: "/a/b", home: "/h", tempRoots: [], git: null, projects: [] }) as Json;

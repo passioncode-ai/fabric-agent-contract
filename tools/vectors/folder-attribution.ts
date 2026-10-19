@@ -36,6 +36,9 @@ function originCases(): Json[] {
     ok("https://gitlab.example.com/group/sub/app.git?ref=main#readme", "gitlab.example.com/group/sub/app"),
     ok("  git@github.com:example-org/fabric.git  ", "github.com/example-org/fabric"),
     ok("git@github.com:example-org/fabric.git?x=1#y", "github.com/example-org/fabric"),
+    ok("git@github.com-work:example-org/fabric.git", "github.com-work/example-org/fabric"),
+    ok("git@github.com:/example-org/fabric.git", "github.com/example-org/fabric"),
+    no("https://git_host.example.com/example-org/fabric"),
     no("/local/path/repo"),
     no("../repo"),
     no("C:\\work\\repo"),
@@ -55,9 +58,11 @@ function originCases(): Json[] {
 
 const repoGit = (top: string, origin: string | null, main = top, common = `${main}/.git`) => ({ toplevel: top, commonDir: common, mainCheckout: main, origin });
 const project = (id: string, folders: Json[], sources: string[] = []) => ({ id, folders, sources });
-const folder = (p: string, commonDir: string | null = `${p}/.git`, origin: string | null = null) => ({ path: p, commonDir, origin });
+const folder = (p: string, commonDir: string | null = `${p}/.git`, origin: string | null = null, toplevel?: string) => ({ path: p, commonDir, origin, ...(toplevel === undefined ? {} : { toplevel }) });
 const FABRIC = project("project:fabric", [folder(`${DATA}/fabric`, `${DATA}/fabric/.git`, "git@github.com:example-org/fabric.git")], ["github.com/example-org"]);
 const NOTES = project("project:notes", [folder(`${DATA}/notes`, null, null)]);
+const MONO = project("project:mono", [folder(`${DATA}/mono`, `${DATA}/mono/.git`, "git@github.com:example-org/mono.git", `${DATA}/mono`)]);
+const PKG = project("project:pkg", [folder(`${DATA}/mono/pkg`, `${DATA}/mono/.git`, "git@github.com:example-org/mono.git", `${DATA}/mono`)]);
 const snap = (over: Json): Json => ({ folder: `${DATA}/x`, home: HOME, tempRoots: TEMP, git: null, projects: [FABRIC, NOTES], ...over });
 
 function attributionCases(): Json[] {
@@ -78,7 +83,7 @@ function attributionCases(): Json[] {
     ["AT-2: a subfolder of a tombstoned folder", snap({ folder: `${DATA}/old/src`, tombstones: [`${DATA}/old`] }), { outcome: "refused", reason: "tombstoned" }],
     ["AT-11: a worktree whose main checkout is tombstoned", snap({ folder: `${DATA}/old-wt`, git: repoGit(`${DATA}/old-wt`, null, `${DATA}/old`, `${DATA}/old/.git`), tombstones: [`${DATA}/old`] }), { outcome: "refused", reason: "tombstoned" }],
     ["AT-2: a removed worktree stays out though its main checkout is a Project's", snap({ folder: `${DATA}/fabric-old`, git: repoGit(`${DATA}/fabric-old`, "git@github.com:example-org/fabric.git", `${DATA}/fabric`, `${DATA}/fabric/.git`), tombstones: [`${DATA}/fabric-old`] }), { outcome: "refused", reason: "tombstoned" }],
-    ["AT-12: a tombstone keeps only its own folder out: another clone of the same remote is new", snap({ folder: `${DATA}/app-2`, git: repoGit(`${DATA}/app-2`, "git@github.com:other/app.git"), tombstones: [`${DATA}/app`] }), { outcome: "new", root: `${DATA}/app-2` }],
+    ["AT-13: a tombstone keeps only its own folder out: another clone of the same remote is new", snap({ folder: `${DATA}/app-2`, git: repoGit(`${DATA}/app-2`, "git@github.com:other/app.git"), tombstones: [`${DATA}/app`] }), { outcome: "new", root: `${DATA}/app-2` }],
     ["AT-3: the Project's own folder", snap({ folder: `${DATA}/fabric`, git: repoGit(`${DATA}/fabric`, "git@github.com:example-org/fabric.git") }), attached("project:fabric", "folder")],
     ["AT-3: a subfolder of a Project's folder, an agent started there", snap({ folder: `${DATA}/fabric/apps/desktop`, git: repoGit(`${DATA}/fabric`, "git@github.com:example-org/fabric.git") }), attached("project:fabric", "folder")],
     ["AT-3: a plain folder a Project lists", snap({ folder: `${DATA}/notes/2026` }), attached("project:notes", "folder")],
@@ -105,36 +110,54 @@ function attributionCases(): Json[] {
     ["AT-5: the filesystem root", snap({ folder: "/" }), { outcome: "refused", reason: "container" }],
     ["AT-5: a Windows drive root", snap({ folder: "C:/", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
     ["AT-5: home", snap({ folder: HOME }), { outcome: "refused", reason: "container" }],
-    ["AT-12: a folder directly in the filesystem root is no container unless it is home", snap({ folder: "/srv" }), { outcome: "new", root: "/srv" }],
-    ["AT-12: a folder directly in a Windows drive root", snap({ folder: "C:/work", home: "C:/Profiles/ana", tempRoots: ["C:/Profiles/ana/AppData/Local/Temp"] }), { outcome: "new", root: "C:/work" }],
+    ["AT-13: a folder directly in the filesystem root is no container unless it is home", snap({ folder: "/srv" }), { outcome: "new", root: "/srv" }],
+    ["AT-13: a folder directly in a Windows drive root", snap({ folder: "C:/work", home: "C:/Profiles/ana", tempRoots: ["C:/Profiles/ana/AppData/Local/Temp"] }), { outcome: "new", root: "C:/work" }],
     ["AT-9: a hidden folder in a Windows home", snap({ folder: "C:/Profiles/ana/.config/tool", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "tool" }],
     ["AT-5: a folder right under a Windows home", snap({ folder: "C:/Profiles/ana/projects", home: "C:/Profiles/ana", tempRoots: [] }), { outcome: "refused", reason: "container" }],
     ["AT-5: a folder right under home", snap({ folder: DATA }), { outcome: "refused", reason: "container" }],
     ["AT-5: a repository right under home", snap({ folder: `${HOME}/scratch`, git: repoGit(`${HOME}/scratch`, null) }), { outcome: "refused", reason: "container" }],
-    ["AT-5: a folder holding another Project's folder", snap({ folder: `${DATA}/group`, projects: [project("project:inner", [folder(`${DATA}/group/inner`)])] }), { outcome: "refused", reason: "container" }],
-    ["AT-12: a new repository: a Project at its top level", snap({ folder: `${DATA}/app/src`, git: repoGit(`${DATA}/app`, "git@github.com:someone/app.git") }), { outcome: "new", root: `${DATA}/app` }],
-    ["AT-12: a worktree of an unknown repository: a Project at its main checkout", snap({ folder: `${DATA}/app-wt`, git: repoGit(`${DATA}/app-wt`, null, `${DATA}/app`, `${DATA}/app/.git`) }), { outcome: "new", root: `${DATA}/app` }],
-    ["AT-12: a plain folder: a Project at itself", snap({ folder: `${DATA}/drafts` }), { outcome: "new", root: `${DATA}/drafts` }],
-    ["AT-12: a branch decides nothing: the same answer on any branch", snap({ folder: `${DATA}/app`, git: { ...repoGit(`${DATA}/app`, null), branch: "feature/x" } }), { outcome: "new", root: `${DATA}/app` }],
+    ["AT-12: a folder holding another Project's folder", snap({ folder: `${DATA}/group`, projects: [project("project:inner", [folder(`${DATA}/group/inner`)])] }), { outcome: "refused", reason: "container" }],
+    ["AT-13: a new repository: a Project at its top level", snap({ folder: `${DATA}/app/src`, git: repoGit(`${DATA}/app`, "git@github.com:someone/app.git") }), { outcome: "new", root: `${DATA}/app` }],
+    ["AT-13: a worktree of an unknown repository: a Project at its main checkout", snap({ folder: `${DATA}/app-wt`, git: repoGit(`${DATA}/app-wt`, null, `${DATA}/app`, `${DATA}/app/.git`) }), { outcome: "new", root: `${DATA}/app` }],
+    ["AT-13: a plain folder: a Project at itself", snap({ folder: `${DATA}/drafts` }), { outcome: "new", root: `${DATA}/drafts` }],
+    ["AT-13: a branch decides nothing: the same answer on any branch", snap({ folder: `${DATA}/app`, git: { ...repoGit(`${DATA}/app`, null), branch: "feature/x" } }), { outcome: "new", root: `${DATA}/app` }],
     ["AT-0: an empty source", snap({ projects: [project("project:s", [], [""])] }), { fault: "input-invalid" }],
     ["AT-0: a Project id of 257 characters", snap({ projects: [project("p".repeat(257), [])] }), { fault: "input-invalid" }],
     ["AT-0: an explicit id of 257 characters", snap({ explicit: "p".repeat(257) }), { fault: "input-invalid" }],
     ["AT-0: a work record with an empty project", snap({ work: [{ project: "", commonDir: `${DATA}/lib/.git` }] }), { fault: "input-invalid" }],
     ["AT-0: an origin of 4097 characters", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, `https://github.com/o/${"r".repeat(4076)}`) }), { fault: "input-invalid" }],
     ["AT-0: a work record's origin of 4097 characters", snap({ work: [{ project: "project:notes", commonDir: `${DATA}/lib/.git`, origin: `https://github.com/o/${"r".repeat(4076)}` }] }), { fault: "input-invalid" }],
+    ["AT-6: a worktree of the outer of two nested Projects joins the outer one", snap({ folder: `${DATA}/mono-wt/docs`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [MONO, PKG] }), attached("project:mono", "worktree")],
+    ["AT-6: in that worktree, a folder inside the inner Project joins the inner one", snap({ folder: `${DATA}/mono-wt/pkg/src`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [MONO, PKG] }), attached("project:pkg", "worktree")],
+    ["AT-6: the inner Project listed first changes nothing", snap({ folder: `${DATA}/mono-wt`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [PKG, MONO] }), attached("project:mono", "worktree")],
+    ["AT-6: the inner Project listed first, a folder inside it joins it", snap({ folder: `${DATA}/mono-wt/pkg/src`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [PKG, MONO] }), attached("project:pkg", "worktree")],
+    ["AT-7: a Project folder in a repository whose top level is the filesystem root", snap({ folder: `${DATA}/sys/srv/x`, git: repoGit(`${DATA}/sys`, "https://github.com/example-org/sys"), projects: [project("project:sys", [folder("/srv/x", "/.git", "https://github.com/example-org/sys", "/")])] }), attached("project:sys", "repository")],
+    ["AT-7: a clone of the outer of two nested Projects joins the outer one", snap({ folder: `${DATA}/mono-2`, git: repoGit(`${DATA}/mono-2`, "https://github.com/example-org/mono"), projects: [MONO, PKG] }), attached("project:mono", "repository")],
+    ["AT-7: in that clone, a folder inside the inner Project joins the inner one", snap({ folder: `${DATA}/mono-2/pkg/a`, git: repoGit(`${DATA}/mono-2`, "https://github.com/example-org/mono"), projects: [MONO, PKG] }), attached("project:pkg", "repository")],
+    ["AT-6: a nested Project's folder without its top level counts at the top: a tie", snap({ folder: `${DATA}/mono-wt`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [MONO, project("project:pkg", [folder(`${DATA}/mono/pkg`, `${DATA}/mono/.git`)])] }), { outcome: "ambiguous", rule: "worktree", projects: ["project:mono", "project:pkg"] }],
+    ["AT-12: a worktree of a repository whose only Project is a subfolder of it", snap({ folder: `${DATA}/mono-wt/docs`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [PKG] }), { outcome: "refused", reason: "container" }],
+    ["AT-6: in that worktree, the subfolder's place joins its Project", snap({ folder: `${DATA}/mono-wt/pkg`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), projects: [PKG] }), attached("project:pkg", "worktree")],
+    ["AT-0: a Project folder whose top level does not hold it", snap({ projects: [project("project:t", [folder(`${DATA}/t`, `${DATA}/t/.git`, null, `${DATA}/other`)])] }), { fault: "input-invalid" }],
+    ["AT-3: a folder right under home a Project lists is its folder", snap({ folder: `${HOME}/scratch`, projects: [project("project:scratch", [folder(`${HOME}/scratch`, null)])] }), attached("project:scratch", "folder")],
+    ["AT-3: and so is a subfolder of it", snap({ folder: `${HOME}/scratch/a/b`, projects: [project("project:scratch", [folder(`${HOME}/scratch`, null)])] }), attached("project:scratch", "folder")],
+    ["AT-6: a worktree of a Project whose main checkout is right under home", snap({ folder: `${DATA}/scratch-wt`, git: repoGit(`${DATA}/scratch-wt`, null, `${HOME}/scratch`), projects: [project("project:scratch", [folder(`${HOME}/scratch`)])] }), attached("project:scratch", "worktree")],
+    ["AT-5: home a Project lists is still no Project", snap({ folder: HOME, projects: [project("project:home", [folder(HOME, null)])] }), { outcome: "refused", reason: "container" }],
+    ["AT-13: an unknown worktree of a bare repository: a Project at the bare folder", snap({ folder: `${DATA}/r/main`, git: repoGit(`${DATA}/r/main`, null, `${DATA}/r/.bare`, `${DATA}/r/.bare`) }), { outcome: "new", root: `${DATA}/r/.bare` }],
+    ["AT-6: a second worktree of a bare repository a Project keeps", snap({ folder: `${DATA}/r/feature`, git: repoGit(`${DATA}/r/feature`, null, `${DATA}/r/.bare`, `${DATA}/r/.bare`), projects: [project("project:r", [folder(`${DATA}/r/main`, `${DATA}/r/.bare`, null, `${DATA}/r/main`)])] }), attached("project:r", "worktree")],
+    ["AT-5: a bare repository right under home", snap({ folder: `${DATA}/wt`, git: repoGit(`${DATA}/wt`, null, `${HOME}/r.git`, `${HOME}/r.git`) }), { outcome: "refused", reason: "container" }],
     ["AT-1: a Project id of 200 astral characters is within the bound (code points, not UTF-16 units)", snap({ projects: [project("\u{1F600}".repeat(200), [])], explicit: "\u{1F600}".repeat(200) }), attached("\u{1F600}".repeat(200), "explicit")],
     ["AT-3: the nearest of two nested Project folders, the inner one listed first", snap({ folder: `${DATA}/mono/pkg/a`, projects: [project("project:pkg", [folder(`${DATA}/mono/pkg`)]), project("project:mono", [folder(`${DATA}/mono`)])] }), attached("project:pkg", "folder")],
     ["AT-3: the outer of two nested Projects keeps its folders outside the inner one", snap({ folder: `${DATA}/mono/docs`, projects: [project("project:mono", [folder(`${DATA}/mono`)]), project("project:pkg", [folder(`${DATA}/mono/pkg`)])] }), attached("project:mono", "folder")],
     ["AT-3: a Project's own folder under a temporary root still attaches", snap({ folder: "/private/tmp/notes/a", projects: [project("project:tmpnotes", [folder("/private/tmp/notes", null)])] }), attached("project:tmpnotes", "folder")],
     ["AT-4: a worktree whose main checkout is in a temporary root", snap({ folder: `${DATA}/wt`, git: repoGit(`${DATA}/wt`, null, "/tmp/clone", "/tmp/clone/.git") }), { outcome: "refused", reason: "transient" }],
     ["AT-5: a home that is a clone of a Project's repository", snap({ folder: HOME, git: repoGit(HOME, "git@github.com:example-org/fabric.git") }), { outcome: "refused", reason: "container" }],
-    ["AT-5: a repository root that holds a Project's subfolder", snap({ folder: `${DATA}/big`, git: repoGit(`${DATA}/big`, null), projects: [project("project:sub", [folder(`${DATA}/big/apps/sub`, null)])] }), { outcome: "refused", reason: "container" }],
+    ["AT-12: a repository root that holds a Project's subfolder", snap({ folder: `${DATA}/big`, git: repoGit(`${DATA}/big`, null), projects: [project("project:sub", [folder(`${DATA}/big/apps/sub`, null)])] }), { outcome: "refused", reason: "container" }],
     ["AT-5: the folder that holds home", snap({ folder: "/u" }), { outcome: "refused", reason: "container" }],
     ["AT-6: a remoteless worktree whose main checkout a Project lists without a common dir", snap({ folder: `${DATA}/r-wt`, git: repoGit(`${DATA}/r-wt`, null, `${DATA}/r`, `${DATA}/r/.git`), projects: [project("project:r", [folder(`${DATA}/r`, null)])] }), attached("project:r", "worktree")],
     ["AT-6: a tombstoned main checkout does not keep out a worktree of a Project that keeps the repository", snap({ folder: `${DATA}/wt-b`, git: repoGit(`${DATA}/wt-b`, null, `${DATA}/r`, `${DATA}/r/.git`), projects: [project("project:r", [folder(`${DATA}/wt-a`, `${DATA}/r/.git`)])], tombstones: [`${DATA}/r`] }), attached("project:r", "worktree")],
     ["AT-8: a clone in a tool folder whose owner a Project lists joins by owner", snap({ folder: `${HOME}/.codex/plug`, git: repoGit(`${HOME}/.codex/plug`, "git@github.com:example-org/plug.git") }), attached("project:fabric", "owner")],
     ["AT-10: a second clone of a worked repository, by its identity", snap({ folder: `${DATA}/lib-2`, git: repoGit(`${DATA}/lib-2`, "git@github.com:someone/lib.git"), work: [{ project: "project:notes", commonDir: `${DATA}/lib/.git`, origin: "https://github.com/someone/lib" }] }), attached("project:notes", "work")],
-    ["AT-12: a tombstone inside the root keeps out only its own folder", snap({ folder: `${DATA}/gone/src`, git: repoGit(`${DATA}/gone`, null), tombstones: [`${DATA}/gone/x`] }), { outcome: "new", root: `${DATA}/gone` }],
+    ["AT-13: a tombstone inside the root keeps out only its own folder", snap({ folder: `${DATA}/gone/src`, git: repoGit(`${DATA}/gone`, null), tombstones: [`${DATA}/gone/x`] }), { outcome: "new", root: `${DATA}/gone` }],
   ];
   return cases.map(([name, snapshot, expected]) => ({ name, snapshot, expected }));
 }

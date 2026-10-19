@@ -49,7 +49,7 @@
           }
         }
       ],
-      "description": "null for a folder without Git; else git rev-parse --show-toplevel, --git-common-dir (absolute), the main checkout (the common dir's working tree) and remote.origin.url. Other members (a branch) are read by no rule."
+      "description": "null for a folder without Git; else git rev-parse --show-toplevel, --git-common-dir (absolute), the main checkout (the common dir's working tree; for a bare repository the common dir itself) and remote.origin.url. Other members (a branch) are read by no rule."
     },
     "project": {
       "type": "object",
@@ -89,6 +89,17 @@
                   "null"
                 ],
                 "maxLength": 4096
+              },
+              "toplevel": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/path"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "the folder's Git top level (git rev-parse --show-toplevel), which holds it; null or absent outside Git. It gives the folder's place in its repository, so a worktree or a clone joins the nearest of nested Projects (AT-6, AT-7); a folder in Git without it counts as at the top."
               }
             }
           }

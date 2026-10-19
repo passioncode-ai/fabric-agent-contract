@@ -1,0 +1,51 @@
+{
+  "description": "An explicit attach names a Project and wins over a tombstone on the folder, as attributeFolder does (FAC-SEM-121, DEC-0089).",
+  "kind": "folder-attribution",
+  "expect": [],
+  "input": {
+    "snapshot": {
+      "folder": "/u/ana/work/lib-2/src",
+      "home": "/u/ana",
+      "tempRoots": [
+        "/tmp",
+        "/u/ana/.cache"
+      ],
+      "git": {
+        "toplevel": "/u/ana/work/lib-2",
+        "commonDir": "/u/ana/work/lib-2/.git",
+        "mainCheckout": "/u/ana/work/lib-2",
+        "origin": "https://github.com/someone/lib"
+      },
+      "projects": [
+        {
+          "id": "project:notes",
+          "folders": [
+            {
+              "path": "/u/ana/work/notes",
+              "commonDir": "/u/ana/work/notes/.git",
+              "origin": null,
+              "toplevel": "/u/ana/work/notes"
+            }
+          ],
+          "sources": []
+        }
+      ],
+      "work": [
+        {
+          "project": "project:notes",
+          "commonDir": "/u/ana/work/lib/.git",
+          "origin": "git@github.com:someone/lib.git"
+        }
+      ],
+      "tombstones": [
+        "/u/ana/work/lib-2"
+      ],
+      "explicit": "project:notes"
+    },
+    "answer": {
+      "outcome": "attached",
+      "project": "project:notes",
+      "rule": "explicit"
+    }
+  }
+}
