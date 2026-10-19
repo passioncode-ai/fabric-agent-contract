@@ -109,9 +109,10 @@
             "product": {
               "enum": [
                 "org-cloud",
+                "enterprise-cloud",
                 "personal-cloud"
               ],
-              "description": "org-cloud only for org:<orgId>, personal-cloud only for personal."
+              "description": "org-cloud and enterprise-cloud (a dedicated cloud, DEC-0088) only for org:<orgId>, personal-cloud only for personal."
             },
             "size": {
               "$ref": "activity-common.schema.json#/$defs/opaqueId",
@@ -243,7 +244,10 @@
                 "type": "object",
                 "properties": {
                   "product": {
-                    "const": "org-cloud"
+                    "enum": [
+                      "org-cloud",
+                      "enterprise-cloud"
+                    ]
                   }
                 }
               }

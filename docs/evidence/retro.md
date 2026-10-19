@@ -39,8 +39,28 @@
 - `2026-10-12-board-waves-close` — waves 2–6 in PRs #39…#81; the last wave closed at `d54b69a` (DEC-0043…DEC-0075, without
   DEC-0073); 193 inventory items, 151 closed, 42 open: 37 in the program and 5 wave-1 board items without a row, given rows or
   receipts by the w7 close (`2026-10-12-w7-final`).
+- `2026-10-18-share-registration`: PR #117 `b89cb94` (DEC-0086) after seven readings in four rounds and three fix rounds; #118, #119.
+- `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings in three rounds; #121.
+- `2026-10-19-enterprise-cloud`: DEC-0088 (this run's pull request).
 
 ## Recent log
+
+### 2026-10-19: Jobs under limits and uncertain effects (DEC-0087), and the share registrations' close (DEC-0086)
+
+- **Goal:** land DEC-0086 after its interrupted fix round, then give OQ-0012's ruling its wire shape.
+- **Failed attempts:** (1) DEC-0086's fix round stopped on a provider error (502) after its code commit, and the
+  worktree held the rest uncommitted for five hours; (2) DEC-0087's first cut failed all three readings: it replaced
+  the ruling's revision with a pin gate no provider can see, its interim (an unknown count in `notVerified`) collided
+  with `FAC-SEM-001`, and it left the provider's answer to a repeated key unstated; (3) the first cut's vectors named a
+  private agent and were pushed: the privacy check had run before `git add`, and `check_private.py` lists tracked files
+  only, so the new file was never read.
+- **Verified corrections:** the next session found the builder's transcript, finished the round from the worktree and
+  merged after four readings; DEC-0087 follows the ruling (`fabric-interop/0.2` named in `_meta.protocols`), the interim
+  writes the measured lower bound with nothing in `notVerified`, and item 6 answers a repeated key by its job's code; the
+  vectors use a neutral name, the PR merged by squash so `main` never carried it (`git log origin/main` has no
+  `3be94d4`), and org-index has the finding (thread `acca9379`).
+- **Learning:** a decision that departs from a recorded ruling says so as a departure, or follows it; and the privacy
+  check runs on the tree being pushed, after the commit, because it reads tracked files only.
 
 ### 2026-10-12 — The board run, waves 2–6
 

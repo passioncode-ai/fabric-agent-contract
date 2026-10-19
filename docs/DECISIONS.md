@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0088`
+**Next free ID:** `DEC-0089`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5227,6 +5227,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-17
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-54: the
   PassionCode platform issues (its PLAT-020), the first organization server and a personal cloud verify.
+- **Annotated (2026-10-19):** item 3 amended by DEC-0088 (`enterprise-cloud`, a third hosting product for an
+  organization).
 - **Amends:** nothing. It answers the platform's request PLAT-020 on the project board (2026-10-17), which left the
   signature, the grace and the refresh to the contract, and serves the platform's organization offer (its ADR-0005,
   accepted 2026-10-16, D-2 and D-4).
@@ -5604,3 +5606,42 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unit, seam, product) led to items 6 and 8 and the choices on instants, lengths, the gate and the interim. DEC-0087,
   `FAC-SEM-119` and `FAC-SEM-120` were reserved by git CAS (`agent_sync.py reserve`, keys `ct55-job-limits`,
   `ct55-job-documents`, `ct55-job-caller`); the record plane is `fs`.
+
+### DEC-0088: `enterprise-cloud`, a third hosting product in `entitlement/1`, for an organization only (amends DEC-0085)
+
+- **Date:** 2026-10-19
+- **Status:** Accepted source change (on merge of its pull request). Amends DEC-0085 item 3. Consumer
+  adoption: board row CT-59.
+- **Decision:** in [entitlement → enterprise cloud](specification/entitlement.md#enterprise-cloud-dec-0088):
+  1. `hosting.product` admits `enterprise-cloud` beside `org-cloud` and `personal-cloud`
+     (`entitlement.schema.json`, `HOSTING_PRODUCTS`); an `org:<orgId>` subject carries `org-cloud` or `enterprise-cloud`
+     (`ORG_HOSTING_PRODUCTS`), `personal` only `personal-cloud`; anything else is `malformed` (EN-2) and
+     `FAC-SEM-115`'s.
+  2. `size` stays opaque; no other field is added: the dedication is the product; a service level (SLA) and a region
+     are the order's until a verifier must check them, and `support.tier` keeps its DEC-0085 meaning (what the
+     organization's admin agents may do), so no service level is written there.
+  3. The issuer sends `enterprise-cloud` only to a verifier whose owner confirmed on the board that it re-vendored at
+     or after DEC-0088.
+- **Why:** the operator's SD-2 (2026-10-19) makes Enterprise a tier paid as its own dedicated cloud, and the platform
+  (ADR-0008 D-3, PLAT-063) cannot issue it while the reference verifier refuses a third product.
+- **Alternatives refused:** `org-cloud` with an Enterprise `size` (the verifier could not tell a dedicated cloud from a
+  shared one); a region, an SLA or a `dedicated` flag now (no verifier checks them); the SLA in `support.tier` (that
+  line sets what admin agents may do, found by this decision's reading).
+- **Compatibility:** a verifier pinned at DEC-0085 refuses `enterprise-cloud` as `malformed`, so the issuer sends it
+  only to verifiers at or after DEC-0088 and issues Enterprise on `org-cloud` until then. Every DEC-0085 document keeps
+  its verdict. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/entitlement.md` (the field table, EN-2, `FAC-SEM-115`, the section, the issuer's duties,
+    *Not decided here*), `docs/specification/conformance.md` (the issuer row);
+  - schemas: `schemas/entitlement.schema.json` (the `enum` and the organization's condition);
+  - code: `src/entitlement.ts` (`HOSTING_PRODUCTS`, `ORG_HOSTING_PRODUCTS`); `tools/vectors/entitlement.ts`;
+  - fixtures: `fixtures/vectors/entitlement.json`, `fixtures/positive/entitlement-enterprise-cloud.json`,
+    `fixtures/negative/entitlement-unknown-hosting-product.json`,
+    `fixtures/semantic/entitlement-personal-enterprise-cloud.json`, `fixtures/catalogue.json`;
+  - tests: `test/entitlement.test.ts`;
+  - docs: `docs/backlog.md` (CT-59), `docs/evidence/retro.md`, `docs/handoffs/2026-10-19-enterprise-cloud.md`,
+    `docs/handoffs/README.md`.
+- **Not decided here:** a region or data-residency line, and a service level.
+- **Source:** passioncode-platform's request on the project board (thread `c7d8f53d`, 2026-10-19) under the operator's
+  SD-2 and its ADR-0008 D-3; DEC-0085. DEC-0088 was reserved by git CAS (`agent_sync.py reserve`, key
+  `ct59-enterprise-cloud`).
