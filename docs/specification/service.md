@@ -221,8 +221,10 @@ show every agent's spend beside its health without knowing any provider.
   the rows, and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
   ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
   result and here is counted with the same measured numbers. A count a job result reported as `null` (DEC-0087)
-  adds the lower bound the service measured, so the day's token totals are a lower bound; a host shows them so, as it
-  does a cost beside `unpricedCalls`.
+  adds the lower bound the service measured, so the day's token totals are a lower bound. `unmeasuredCalls` (optional
+  on the day and on each model row, absent meaning 0, DEC-0091) counts those calls: a host MUST show the tokens as a
+  lower bound while it is above 0, as it shows a cost beside `unpricedCalls`. It is at most `calls`, and a day's is the
+  sum of its rows' (`FAC-SEM-025`).
 - **An unknown cost is `null`, never `0`.** `unpricedCalls` counts calls whose cost the service
   could not establish. A row whose calls are all unpriced has `costUsd: null`; a row with some
   priced calls carries the known part, and a host MUST show it as a lower bound while
