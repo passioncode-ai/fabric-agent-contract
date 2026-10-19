@@ -4861,6 +4861,54 @@
       }
     },
     {
+      "name": "AT-3: a folder listed below a tombstone gets through it though another Project lists the tombstone's parent",
+      "snapshot": {
+        "folder": "/u/ana/work/w/old/src/a",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:w",
+            "folders": [
+              {
+                "path": "/u/ana/work/w",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:p",
+            "folders": [
+              {
+                "path": "/u/ana/work/w/old/src",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/u/ana/work/w/old"
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:p",
+        "rule": "folder"
+      }
+    },
+    {
       "name": "AT-2: and its sibling stays tombstoned",
       "snapshot": {
         "folder": "/u/ana/work/old/other",
