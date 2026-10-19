@@ -39,9 +39,8 @@
 - `2026-10-12-board-waves-close` — waves 2–6 in PRs #39…#81; the last wave closed at `d54b69a` (DEC-0043…DEC-0075, without
   DEC-0073); 193 inventory items, 151 closed, 42 open: 37 in the program and 5 wave-1 board items without a row, given rows or
   receipts by the w7 close (`2026-10-12-w7-final`).
-
-- `2026-10-18-share-registration`: PR #117 `b89cb94` (DEC-0086) after four readings and three fix rounds; #118, #119.
-- `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings; #121.
+- `2026-10-18-share-registration`: PR #117 `b89cb94` (DEC-0086) after seven readings in four rounds and three fix rounds; #118, #119.
+- `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings in three rounds; #121.
 - `2026-10-19-enterprise-cloud`: DEC-0088 (this run's pull request).
 
 ## Recent log

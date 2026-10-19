@@ -124,6 +124,8 @@ own subject.
   and an amendment is a new revision of it; a second order supersedes the first only as a deliberate replacement,
   issued later.
 - It delivers a key set before any entitlement signed under a key that set adds.
+- It issues `enterprise-cloud` (DEC-0088) only to a verifier re-vendored at or after DEC-0088, as that verifier's owner
+  confirms on the project board (thread `c7d8f53d`), and an Enterprise order on `org-cloud` until then.
 
 ## The verifier's duties
 
@@ -192,8 +194,9 @@ platform's SD-2 and ADR-0008 D-3, 2026-10-19). Only an `org:<orgId>` subject car
 is `malformed` (EN-2, `FAC-SEM-115`). Its `size` stays the opaque id the issuer and the host agree on, as for the other
 products. Nothing else is added:
 
-- the service level is the `support` line's tier, already in every entitlement;
 - the dedication is the product itself;
+- a service level (an SLA) is the order's, not the entitlement's: no verifier checks it, and `support.tier` keeps its
+  DEC-0085 meaning, what the organization's admin agents may do, so an issuer never writes a service level there;
 - a region is not in the entitlement until a verifier needs to check where it runs (*Not decided here*).
 
 A verifier pinned before DEC-0088 refuses `enterprise-cloud` as `malformed` (the schema's `enum`), so the issuer sends
@@ -221,8 +224,7 @@ cross-organization person id (the platform's program packet §2).
 
 ## Not decided here
 
-- A region or a data-residency line for `enterprise-cloud`: added when a verifier must check where the cloud runs.
-
+- A region or a data-residency line, and a service level, for `enterprise-cloud`: added when a verifier must check them.
 - Member-period metering and what makes a member billable (the first organization server's Stage 5).
 - Per-agent usage: it stays `grant.usage` (DEC-0082), joined by the organization server through the share grant.
 - How the platform stores orders, and how the platform keeps its root offline.

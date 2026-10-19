@@ -351,12 +351,17 @@ describe("every input the schema refuses, the verifiers refuse (the standing ins
     expect(verifyEntitlement(resign(BASE), ORG_TRUST).ok).toBe(true);
   });
 
+  it("signs the enterprise-cloud fixture as the vectors do (DEC-0088)", () => {
+    expect(verifyEntitlement(read("fixtures/positive/entitlement-enterprise-cloud.json"), ORG_TRUST).ok).toBe(true);
+  });
+
   it("refuses a personal entitlement whose lines disagree, as the schema does", () => {
     for (const [what, change] of [
       ["a licence", { licence: { members: 1 } }],
       ["a support tier", { support: { tier: "observe" } }],
       ["no estate", { estate: null }],
       ["org-cloud", { hosting: { product: "org-cloud", size: "p-1" } }],
+      ["enterprise-cloud (DEC-0088)", { hosting: { product: "enterprise-cloud", size: "e-1" } }],
       ["an estate with a space", { estate: "estate 5d0f1a" }],
       ["an estate of 129 characters", { estate: "e".repeat(129) }]
     ] as const) {

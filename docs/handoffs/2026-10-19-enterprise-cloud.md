@@ -30,7 +30,17 @@ product; a region waits until a verifier must check it).
 Each clause was removed once and the focused tests (`test/entitlement.test.ts`, `test/fixtures.test.ts`) were run; 6
 plants, each killed: an organization's `enterprise-cloud` refused by the verifier (E-01); a personal one admitted by the
 verifier (E-02) or the rule (E-06); the rule not checking an organization's product (E-03); the schema's `enum` without
-it (E-04); the schema's organization condition admitting any product (E-05).
+it (E-04); the schema's organization condition admitting any product (E-05); after the reading, the schema's personal
+condition admitting it (E-07, killed by a new case in the personal-lines test).
+
+## The reading (2026-10-19)
+
+One blind reading found one blocker: the first text said the service level is `support.tier`, which DEC-0085 defines as
+what the organization's admin agents may do. Now the SLA is the order's, `support.tier` keeps its meaning, and both
+are in *Not decided here* beside the region. Also closed: the positive fixture is signed as the vectors are (a test
+verifies it), DEC-0085 carries the amendment note and DEC-0088 names item 3, the issuer's duty is in *The issuer's
+duties* and the conformance issuer row (the verifier's owner confirms its re-vendor on thread `c7d8f53d`), and the
+retro counts readings in one unit.
 
 ## Checks
 
