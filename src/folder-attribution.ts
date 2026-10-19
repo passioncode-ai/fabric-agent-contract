@@ -19,11 +19,21 @@ const SCHEMES = ["http", "https", "ssh", "git", "git+ssh", "git+https"];
 
 const isString = (value: unknown): value is string => typeof value === "string";
 /** A length in code points, as JSON Schema's `maxLength` counts. */
-const codePoints = (value: string) => [...value].length;
+/**
+ * Whether `value` has at most `max` code points, the schema's `maxLength`. A code point is one or two UTF-16 units, so
+ * a string of at most `max` units always is and one of more than `2 * max` never is; only between them are they counted.
+ */
+const within = (value: string, max: number): boolean => {
+  if (value.length <= max) return true;
+  if (value.length > 2 * max) return false;
+  let count = 0;
+  for (const _ of value) if (++count > max) return false;
+  return true;
+};
 /** `#/$defs/projectId`: 1 to 256 characters. */
-const idOk = (value: unknown): value is string => isString(value) && value.length > 0 && codePoints(value) <= 256;
+const idOk = (value: unknown): value is string => isString(value) && value.length > 0 && within(value, 256);
 /** An origin member: absent, `null`, or a string of at most 4096 characters. */
-const originOk = (value: unknown) => value === undefined || value === null || (isString(value) && codePoints(value) <= MAX_PATH);
+const originOk = (value: unknown) => value === undefined || value === null || (isString(value) && within(value, MAX_PATH));
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
 const list = (value: unknown): unknown[] | undefined => (Array.isArray(value) && value.length <= MAX_LIST ? value : undefined);
 /** `value` with A to Z lower-cased and nothing else (a non-ASCII letter keeps its case). */
@@ -39,7 +49,7 @@ function trimSlashes(value: string, leading: boolean): string {
 
 /** Whether `value` is a path in the form above. */
 export function isPath(value: unknown): value is string {
-  return isString(value) && codePoints(value) <= MAX_PATH && PATH.test(value) && !value.split("/").some((segment) => segment === "." || segment === "..");
+  return isString(value) && within(value, MAX_PATH) && PATH.test(value) && !value.split("/").some((segment) => segment === "." || segment === "..");
 }
 const isRoot = (path: string) => path === "/" || /^[A-Z]:\/$/.test(path);
 /** Whether `path` is `base` or lies under it, segment by segment (`/a/bc` is not under `/a/b`). */
@@ -61,7 +71,7 @@ const parentOf = (path: string): string => {
  * Undefined for a local path, `file:`, another scheme or anything else.
  */
 export function normalizeOrigin(raw: unknown): string | undefined {
-  if (!isString(raw) || codePoints(raw) > MAX_PATH) return undefined;
+  if (!isString(raw) || !within(raw, MAX_PATH)) return undefined;
   const value = raw.trim();
   let host: string;
   let path: string;
@@ -172,7 +182,7 @@ function projectsOf(value: unknown): Project[] | undefined {
     const id = own(entry, "id");
     const folders = list(own(entry, "folders"));
     const sources = own(entry, "sources") === undefined ? [] : list(own(entry, "sources"));
-    if (!idOk(id) || !folders || !sources || !sources.every((source) => isString(source) && source.length > 0 && codePoints(source) <= MAX_PATH)) return undefined;
+    if (!idOk(id) || !folders || !sources || !sources.every((source) => isString(source) && source.length > 0 && within(source, MAX_PATH))) return undefined;
     const parsed: ProjectFolder[] = [];
     for (const folder of folders) {
       const path = own(folder, "path");
