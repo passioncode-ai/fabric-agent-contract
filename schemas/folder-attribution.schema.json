@@ -310,6 +310,38 @@
         }
       ]
     },
+    "pending": {
+      "description": "The session-start capability's answer when the folder's Git facts cannot be read yet (DEC-0092): attributeFolder is not called, no Project is named, and the caller asks again later.",
+      "type": "object",
+      "required": [
+        "outcome",
+        "reason",
+        "retryable"
+      ],
+      "properties": {
+        "outcome": {
+          "const": "pending"
+        },
+        "reason": {
+          "const": "git-unreadable"
+        },
+        "retryable": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "resolveAnswer": {
+      "description": "What fabric.project.resolve answers for {path} (DEC-0092): attributeFolder's answer, or pending.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/answer"
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
     "record": {
       "type": "object",
       "additionalProperties": false,
@@ -360,6 +392,9 @@
     },
     {
       "$ref": "#/$defs/answer"
+    },
+    {
+      "$ref": "#/$defs/pending"
     }
   ]
 }
