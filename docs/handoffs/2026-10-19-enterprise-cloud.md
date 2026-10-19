@@ -51,5 +51,5 @@ lint-md 0 errors; privacy-check 0 findings, run after the commit as well (the re
 
 ## Next task
 
-Open the pull request, run one blind reading, merge, then post the merge commit on thread `c7d8f53d`. Then CT-57
-(folder attribution), due 2026-10-22.
+Done on 2026-10-19: PR #122 merged at `0752e03`; the merge was posted on thread `c7d8f53d` (message `7079cf78`), asking
+the first organization server to post its re-vendor commit there. Next: CT-57 (folder attribution), due 2026-10-22.
