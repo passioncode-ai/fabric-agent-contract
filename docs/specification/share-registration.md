@@ -118,14 +118,16 @@ millisecond early, never late), a window is **rounded inward** (`startsAt` up, `
 window is never wider than the grant's. Flooring cuts the fraction to three digits and keeps the offset, so every
 readable time can be carried, a year 9999 one at an offset included; a start rounded up by a millisecond is written as
 `Date#toISOString` writes it, in UTC. The earliest of several revocations is chosen at millisecond precision after the
-floor, the first listed among equals. So a revoked share is withdrawn whatever the number of fraction digits its
+floor, the first listed among equals: the record's revocations in their order, then the applied delta entries in theirs. So a revoked share is withdrawn whatever the number of fraction digits its
 revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9995Z` is carried as the next day's
 `00:00:00.000Z`), so that day's usage is `before-start`; a grant that passed `FAC-SEM-117` never has such a start. `FAC-SEM-117` makes the writer's side the simple one: a share grant into an organization
-carries its window with at most three fraction digits, and Fabric and the hub write its revocations' `revokedAt` so.
+carries its window with at most three fraction digits, and Fabric and the hub SHOULD write its revocations' `revokedAt`
+so (revocation-delta.md); the derivation floors whatever they write.
 
 A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
-redelivery answers `unchanged`. It keeps each receipt. It sends nothing again that the receiver answered with a typed
+redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
+for the record to change as below. It keeps each receipt. It sends nothing again that the receiver answered with a typed
 refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded meanwhile; after no
 answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the
 same split.
@@ -258,10 +260,11 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
 - **Fabric** (CX-FAB-04) mints `urn:fabric:share:<32 hex>` from a CSPRNG for each share grant into an organization, runs
   `FAC-SEM-117` with `parent` the latest earlier revision that placed each grant before the passkey signs, writes the window and every `revokedAt` with at most
   three fraction digits, drafts one `agentRef` per organization grant and never re-points it (a move revokes and mints a
-  new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub writes the
+  new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub SHOULD write the
   revocation delta's `revokedAt` with at most three fraction digits.
 - **Project Observatory's node and collector** derive registrations per enrollment and send them signed (DEC-0056), keep
-  the receipts, withdraw on revocation or drop, send again after an enrollment and weekly, emit `grant.usage` with
+  the receipts, withdraw on revocation or drop, send again after an enrollment and weekly (never what a typed refusal
+  answered until the record changes; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
   `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
   DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for share-registration/1 (DEC-0086), written by tools/vectors/share-registration.ts, never by hand. grantId: common.schema.json#/$defs/shareGrantId, ok exactly when a share grant id, compared as written. derive: deriveShareRegistrations(record, entries, orgId, previouslyRegistered); a record carries only the members the derivation reads, so a port's derivation must not validate the whole estate record first. intake: decideShareRegistration(held, registration, binding); held is the receiver's list of what it holds per (user, grantId); binding.transport is the verdict of devices.md's transport steps 0 to 8. join: joinGrantUsage(event, binding, registrations); binding is the one recorded for the event's epoch; a receiver keeps one held list per organization. gate: gateGrantUsage(answer), the collector's sender gate over the enrollment's latest answer to the grant's registration; a case without answer is no answer yet. A time with more than three fraction digits is carried at millisecond precision: a withdrawal floored, a window rounded inward, written as Date#toISOString does. expected is exactly what the reference returns; a digest is sha256: of the UTF-8 RFC 8785 form of the registration kept. Every case holds in every time zone.",
+  "about": "Vectors for share-registration/1 (DEC-0086), written by tools/vectors/share-registration.ts, never by hand. grantId: common.schema.json#/$defs/shareGrantId, ok exactly when a share grant id, compared as written. derive: deriveShareRegistrations(record, entries, orgId, previouslyRegistered); a record carries only the members the derivation reads, so a port's derivation must not validate the whole estate record first. intake: decideShareRegistration(held, registration, binding); held is the receiver's list of what it holds per (user, grantId); binding.transport is the verdict of devices.md's transport steps 0 to 8. join: joinGrantUsage(event, binding, registrations); binding is the one recorded for the event's epoch; a receiver keeps one held list per organization. gate: gateGrantUsage(answer), the collector's sender gate over the enrollment's latest answer to the grant's registration; a case without answer is no answer yet. A time with more than three fraction digits is carried at millisecond precision: a withdrawal floored and a window's end rounded down by cutting the fraction, the offset kept; a window's start rounded up, written as Date#toISOString does when it moves. Of several revocations the earliest after the floor wins, the first listed among equals: the record's revocations in order, then the applied entries in order. expected is exactly what the reference returns; a digest is sha256: of the UTF-8 RFC 8785 form of the registration kept. Every case holds in every time zone.",
   "grantId": [
     {
       "name": "32 lower-case hex digits",
@@ -1597,6 +1597,71 @@
             "context": "org:org_7kq2m4xw",
             "state": "withdrawn",
             "withdrawnAt": "2026-10-15T07:30:00.999+02:00"
+          }
+        ],
+        "degraded": []
+      }
+    },
+    {
+      "name": "withdrawn: a record revocation and a delta entry equal at the millisecond keep the record's",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "estate-5d0f1a",
+        "revision": 7,
+        "issuedAt": "2026-10-14T09:00:00Z",
+        "machines": [
+          {
+            "id": "m-1",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "context": "org:org_7kq2m4xw",
+                "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+              }
+            ]
+          }
+        ],
+        "shareGrants": [
+          {
+            "kind": "standing-grant",
+            "meta": {
+              "id": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+              "revision": 3
+            },
+            "startsAt": "2026-10-12T08:00:00Z",
+            "expiresAt": "2026-10-26T08:00:00Z",
+            "principalKind": "external",
+            "context": "org:org_7kq2m4xw"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "grant",
+            "ref": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revokedAt": "2026-10-13T12:00:00.001+02:00"
+          }
+        ]
+      },
+      "entries": [
+        {
+          "sequence": 1,
+          "revocation": {
+            "kind": "grant",
+            "ref": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revokedAt": "2026-10-13T10:00:00.0019Z"
+          }
+        }
+      ],
+      "orgId": "org_7kq2m4xw",
+      "previouslyRegistered": [],
+      "expected": {
+        "registrations": [
+          {
+            "type": "share-registration/1",
+            "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "context": "org:org_7kq2m4xw",
+            "state": "withdrawn",
+            "withdrawnAt": "2026-10-13T12:00:00.001+02:00"
           }
         ],
         "degraded": []

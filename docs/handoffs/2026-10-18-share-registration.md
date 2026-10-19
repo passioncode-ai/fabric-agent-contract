@@ -56,7 +56,10 @@ lint-md 0 errors; privacy-check 0 findings.
 
 After the second reading, `pnpm run check` exits 0 again: typecheck; 75 files, 5591 tests, coverage 7308 / 7381
 branches with `src/share-registration.ts` at 271 / 271; UX lint passed; documentation checks passed, lint-md 0 errors;
-privacy-check 0 findings. The commit that records it changes only this file and plants.md.
+privacy-check 0 findings, on the code of `282f31c`. A third reading of `b0a3307..282f31c` found the vectors' description
+still saying a floored time is written in UTC, and five wording gaps; the commit after it fixes them with one more tie
+vector (a record revocation and a delta entry equal at the millisecond, plant P-126). `pnpm run check` then exits 0:
+75 files, 5592 tests, the other steps as above.
 
 ## The fix round (2026-10-18 to 2026-10-19)
 

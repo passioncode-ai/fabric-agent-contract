@@ -176,3 +176,4 @@ the two codes moved to `hold-degraded` were planted once each, the same way. 5 p
 | P-123 | a floored time written in UTC, its offset lost | killed |
 | P-124 | `malformed` held, not degraded | killed |
 | P-125 | `schema-unsupported` held, not degraded | killed |
+| P-126 | the applied entries' revocations listed before the record's | killed (the third reading's tie vector) |

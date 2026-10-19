@@ -5370,7 +5370,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      earliest `revokedAt`; otherwise the revision's placements in that context naming it by normal form decide (none,
      nothing yet; two `agentRef`s, nothing, `share-grant-agents`; one, active). A grant registered earlier that the
      revision no longer lists and does not revoke is withdrawn at the revision's `issuedAt`. A node sends on change and
-     SHOULD send each active registration again at least every 7 days.
+     SHOULD send each active registration again at least every 7 days, except one a typed refusal answered.
   4. **Authenticity and the receiver's order** `decideShareRegistration(held, registration, binding)`, total: the
      organization from the certificate's `org.id`, the registrant from the `user.id` bound to its epoch, never from the
      body; held per (registrant, `grantId`); the body bytes and signature fields kept as evidence. SR-0 (own context),
@@ -5416,13 +5416,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     millisecond precision: a withdrawal time floored by cutting the fraction, its offset kept (so a year 9999 time at an
     offset is carried too), a window rounded inward (`startsAt` up, written in UTC as `Date#toISOString` writes it when
     it moves; `expiresAt` down; never wider than the grant's); the earliest revocation is chosen at millisecond
-    precision after the floor, the first listed among equals (the second reading's unit tier). A start rounded up can
+    precision after the floor, the first listed among equals, the record's revocations before the applied entries (the
+    second and third readings). A start rounded up can
     move to the next UTC day, which only a grant that skipped `FAC-SEM-117` can carry. So a revoked share is withdrawn whatever the precision of its
     `revokedAt` (found by the fix round's unit and seam readings). A time `strictTime` cannot read, a revision below 1, a
     window empty once carried, or a revocation with no readable `revokedAt` registers nothing and reports a third
     degraded code, `share-grant-unreadable`; an `agentRef` that is no agentRef is `share-grant-agents`;
   - the writer's side is the simple one: `FAC-SEM-117` refuses an organization share grant whose window carries more
-    than three fraction digits, and Fabric and the hub write its revocations' `revokedAt` with at most three;
+    than three fraction digits, and Fabric and the hub SHOULD write its revocations' `revokedAt` with at most three;
   - a receiver keeps one held list per organization: a held entry carries no organization, because the user id and the
     grant id are keys inside the organization whose certificate bound the user; `decideShareRegistration` and
     `joinGrantUsage` are given that organization's list;
