@@ -26,7 +26,7 @@ const FAULT = { fault: "input-invalid" };
 
 function cases(): Json[] {
   const usage = [row(SETUP, "2026-10-12", 4, 0, 0.25), row(SETUP, "2026-10-13", 2, 1, 0.5), row(BOOKS, "2026-10-12", 1, 1, null), row(OTHER, "2026-10-12", 9, 0, 3), row(SETUP, "2026-10-12", 1, 0, 0.125)];
-  const list: Array<[string, Json, Json]> = [
+  const list: Array<[string, Json | null, Json]> = [
     ["per day: the partner's agents only, two rows of one agent and day summed", { usage, publishers: ["acme"], step: "day" }, { cells: [cell(BOOKS, "2026-10-12", 1, 1, null), cell(SETUP, "2026-10-12", 5, 0, 0.375), cell(SETUP, "2026-10-13", 2, 1, 0.5)] }],
     ["per period: one cell per agent", { usage, publishers: ["acme"], step: "period" }, { cells: [cell(BOOKS, null, 1, 1, null), cell(SETUP, null, 7, 1, 0.875)] }],
     ["a cell is unpriced only when every call in it is", { usage: [row(BOOKS, "2026-10-12", 1, 1, null), row(BOOKS, "2026-10-13", 2, 0, 1)], publishers: ["acme"], step: "period" }, { cells: [cell(BOOKS, null, 3, 1, 1)] }],

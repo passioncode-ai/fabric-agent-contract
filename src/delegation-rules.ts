@@ -1,4 +1,4 @@
-import { chainDepth, effectClosure, MAX_APPROVAL_LIFETIME_SECONDS, MAX_CHAIN_DEPTH, MAX_DELEGATION_LIFETIME_SECONDS } from "./delegation.js";
+import { chainDepth, effectClosure, isPartnerActor, MAX_APPROVAL_LIFETIME_SECONDS, MAX_CHAIN_DEPTH, MAX_DELEGATION_LIFETIME_SECONDS } from "./delegation.js";
 import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
 
 // #region delegation-rules — docs: docs/specification/delegation.md#semantic-rules
@@ -58,6 +58,32 @@ export function principalActor(grant: JsonObject): { sub: string; session?: stri
   return undefined;
 }
 
+/** The innermost node of an actor chain (the earliest actor), or undefined for no chain. */
+function innermost(act: unknown): unknown {
+  let node: unknown = act;
+  for (let hops = 0; isObject(node) && node.act !== undefined && hops < 64; hops += 1) node = node.act;
+  return node;
+}
+
+/**
+ * FAC-SEM-124 (DEC-0090 item 3): under a partner grant the company's owner gives a partner organization, the grant's
+ * principal is that partner (`org:<partnerOrgId>`) and its context the company's own organization; the token is for the
+ * owner who issued the grant, and its chain ends in the partner: a token minted at the grant holds the partner's agent
+ * and, inside it, the partner; an onward token keeps the parent's chain (FAC-SEM-050), so the partner stays innermost.
+ */
+function partnerGrantRules(grant: JsonObject, token: JsonObject, parent: JsonObject | undefined): Finding[] {
+  const findings: Finding[] = [];
+  const push = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-124", instancePath, message });
+  const partner = isObject(grant.principal) ? grant.principal.id : undefined;
+  if (!(typeof partner === "string" && isPartnerActor({ partner }))) push("/grant/principal/id", "a partner grant's principal is the partner organization, org:<partnerOrgId>");
+  if (typeof grant.context !== "string" || !grant.context.startsWith("org:") || grant.context === partner) push("/grant/context", "a partner grant is in the company's own organization context, never personal and never the partner's");
+  if (token.sub !== grant.issuer) push("/token/sub", "under a partner grant the token is for the owner who issued it");
+  const last = innermost(token.act);
+  if (!isPartnerActor(last) || last.partner !== partner) push("/token/act", `the chain under a partner grant ends in the partner ${show(partner)}`);
+  else if (!parent && chainDepth(token.act) !== 2) push("/token/act", "a token minted at a partner grant holds the partner's agent and, inside it, the partner");
+  return findings;
+}
+
 /**
  * FAC-SEM-050 (DEC-0039): the issuer minted the token within its grant (DL-4) and, for an onward call, narrower
  * than the token it was exchanged for (DL-5). Input: `{ grant, token, parent?, meter? }` — the standing grant
@@ -76,6 +102,10 @@ function delegationMintRules(value: JsonObject): Finding[] {
   const meter = isObject(value.meter) ? value.meter : undefined;
   const forMeter = meter !== undefined && token.aud === meter.audience;
   const actor = isObject(token.act) ? token.act : {};
+  // DEC-0090: a partner actor stands only in a chain under a partner grant (the meter's token keeps the parent's).
+  if (grant.principalKind !== "partner" && innermost(token.act) !== undefined && isPartnerActor(innermost(token.act))) {
+    findings.push({ code: "FAC-SEM-124", instancePath: "/token/act", message: "a partner organization is an actor only under a grant whose principal is that partner" });
+  }
   const iat = time(token.iat);
   const exp = time(token.exp);
 
@@ -131,6 +161,8 @@ function delegationMintRules(value: JsonObject): Finding[] {
     const named = principalActor(grant);
     if (grant.principalKind === "external") {
       if (!isObject(grant.principal) || token.sub !== grant.principal.id) push("/token/sub", "under a share grant the token is for the grant's external principal");
+    } else if (grant.principalKind === "partner") {
+      findings.push(...partnerGrantRules(grant, token, parent));
     } else {
       if (!named) push("/grant/principal", "an agent or session grant's principal is urn:agent:<agent id> or urn:session:<agent id>:<session>");
       else {
