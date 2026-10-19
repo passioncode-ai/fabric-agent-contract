@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 28 origin, 133 attribution and 24 record cases covering every AT row, a repository, a
+  nothing imported from the module): 28 origin, 135 attribution and 25 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -131,6 +131,15 @@ identity, and a broad record path records nothing; record vectors for every form
 input, at most eight times the cost plus 150 ms, the best of five) instead of the clock; `fabric.project.resolve`
 named, and the local fallback cited to its board message.
 
+The ninth readings of `abb7ad1` (unit and product): both failed it. The list against the operator's words was found
+incomplete a fourth time, so it is now stated by the rows that keep the words, with examples marked as examples (a
+known repository's worktree or clone joins its Project at AT-6, AT-7, AT-8 or AT-3 by its own place; a new folder is a
+Project only at AT-15; any other row departs), and a probe over 30,000 random worlds agrees. A tombstone was lifted
+through a container inside a listed folder (AT-2 now reads reach, as AT-3 does); an scp-like remote the form cannot
+read kept its password (any remote that is neither a local path nor has an identity now records `null`); a worktree
+whose top level is a declared container is refused; the growth tests build their input outside the timer; a session
+with no Project and activity's required `project` is named as not decided (CT-64).
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -182,10 +191,13 @@ The eighth fix round planted 6 (a worktree's top level under home ignored, the r
 ended at the first `@`, a URL without identity kept, a broad record kept, the quadratic AT-2 against the growth test):
 all 6 killed on the first pass. 113 plants in all, two equivalent.
 
+The ninth fix round planted 3 (AT-2 reading holds instead of reach, an unreadable scp remote kept, a container top
+not refused): all killed. 116 plants in all, two equivalent.
+
 ## Checks
 
-`pnpm run check` at the eighth fix round, each step exiting 0: typecheck; 77 files, 5993 tests, branches 7788 / 7861
-with `src/folder-attribution.ts` at 341 / 341 (vectors: 28 origin, 133 attribution, 24 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the ninth fix round, each step exiting 0: typecheck; 77 files, 5996 tests, branches 7791 / 7864
+with `src/folder-attribution.ts` at 344 / 344 (vectors: 28 origin, 135 attribution, 25 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
