@@ -14,12 +14,12 @@ const load = (relative: string) => JSON.parse(readFileSync(path.join(fixtures, r
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
 const paths = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => `${finding.code} ${finding.instancePath}`);
 
-describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069, FAC-SEM-077)", () => {
+describe("device semantic fixtures (FAC-SEM-041…046, FAC-SEM-068, FAC-SEM-069, FAC-SEM-077, FAC-SEM-125)", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("device-"));
 
   it("has a passing and a failing input for each rule", () => {
     const expected = new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]));
-    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069", "FAC-SEM-077"]);
+    expect([...expected].sort()).toEqual(["FAC-SEM-041", "FAC-SEM-042", "FAC-SEM-043", "FAC-SEM-044", "FAC-SEM-045", "FAC-SEM-046", "FAC-SEM-068", "FAC-SEM-069", "FAC-SEM-077", "FAC-SEM-125"]);
   });
 
   it.each(files)("%s yields exactly its expected codes", (name) => {

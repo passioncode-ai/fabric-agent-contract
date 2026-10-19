@@ -1,0 +1,21 @@
+{
+  "description": "The same rotation request again after a lost response: the same certificate; no finding.",
+  "kind": "device-rotation",
+  "expect": [],
+  "input": {
+    "answered": [
+      {
+        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "serial": "01AB",
+        "certificate": "MIIB-new-certificate"
+      }
+    ],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "serial": "01AB"
+    },
+    "response": {
+      "certificate": "MIIB-new-certificate"
+    }
+  }
+}

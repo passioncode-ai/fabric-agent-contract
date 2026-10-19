@@ -60,7 +60,10 @@ enrollment of a machine gets keys of its own (the operator's NET-2); the contrac
    `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`. The first
    organization server's target architecture v4 makes a non-extractable `ecdsa-p256` key in the
    `platform-keystore`, held by a signed key helper, the device key; DEC-0031 already admits it, and
-   DEC-0053 records it as the target without changing the schema.
+   DEC-0053 records it as the target without changing the schema. A node without such a store MAY hold the key in a
+   file (DEC-0094): `storage: "file"`, an owner-only PKCS#8 file, with `exportable: true`, so a verifier always knows
+   the key can be copied; the schema ties `file` to `exportable: true` and every other store to `false`. A server MAY
+   refuse a file-held key by policy, with the enrollment's refusal; how the file is protected is the node's.
    `publicKeySha256` is the SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it
    against the CSR and records it as the device's key on record.
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
@@ -114,7 +117,10 @@ its record, and the next enrollment of that id is a first enrollment.
 **Rotation and re-enrollment.** Before expiry, and SHOULD at two thirds of the lifetime, a check-in
 response asks for `certificate.action: "rotate"`. The device then sends a new CSR from the same
 hardware key and receives a new certificate under the same epoch; the rotation request is signed like every other,
-under the current certificate's serial ([transport](#transport)). The device enrolls again from
+under the current certificate's serial ([transport](#transport)). **Rotation is idempotent** (DEC-0094): a rotation
+request whose CSR key (`publicKeySha256`) and current serial equal one the server already answered gets the same new
+certificate again, and the old certificate stays valid until the new serial is first presented, at most until its own
+expiry. A response lost after the server committed the rotation then costs a repeat, never a new enrollment. The device enrolls again from
 step 2 when any of these happens:
 
 - its certificate expired;
@@ -480,7 +486,8 @@ Until a key per context exists (CX-CON-06), the device shows both organizations 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
-or `re-enroll`) when one is due.
+or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server writes and accepts (DEC-0067's list), so a
+node learns them at check-in.
 
 **Free text stays bounded.** Every `detail` and `error` string is one line of at most 200
 characters with no path in it (schema `device-common#/$defs/detail`, F-B-104): no slash, backslash or
