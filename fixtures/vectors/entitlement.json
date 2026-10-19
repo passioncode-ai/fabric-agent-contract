@@ -3819,6 +3819,150 @@
       }
     },
     {
+      "name": "valid: an organization's enterprise-cloud, a dedicated cloud (DEC-0088)",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "enterprise-cloud",
+          "size": "e-1"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "iX7Fzx2t1ZJZgpjDGePHwQepC_IO58-6RzhlgBDshHjfiMUH4Z8i-7_nBKjCw6qd6v68lXhATDWI_VHPMvYBBw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "state": "active",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:acf81d5b94d4f91f31ef48455dfbe35f6b363c13b4a81520b495ffb7dfcce98b",
+        "held": {
+          "orderId": "ord-org-a-0001",
+          "revision": 3,
+          "issuedAt": "2026-10-20T00:00:00Z",
+          "digest": "sha256:acf81d5b94d4f91f31ef48455dfbe35f6b363c13b4a81520b495ffb7dfcce98b"
+        }
+      }
+    },
+    {
+      "name": "malformed: a personal entitlement with enterprise-cloud hosting",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "order": {
+          "id": "ord-p-0001",
+          "revision": 1
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": null,
+        "hosting": {
+          "product": "enterprise-cloud",
+          "size": "e-1"
+        },
+        "support": null,
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "4FnYjNHvaHN-CSfQ0i_PpkWxAY71Ov7q3jaSlvHdPNhzRm_Ip7zgYAVp-QHZUgFWSgCg3UhTM_9ZrUTshsg9Bg"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "personal",
+        "estate": "estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an unknown hosting product",
+      "entitlement": {
+        "type": "entitlement/1",
+        "issuer": "https://platform.example",
+        "subject": "org:org-a",
+        "estate": null,
+        "order": {
+          "id": "ord-org-a-0001",
+          "revision": 3
+        },
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-11-24T00:00:00Z",
+        "licence": {
+          "members": 25
+        },
+        "hosting": {
+          "product": "dedicated-cloud",
+          "size": "e-1"
+        },
+        "support": {
+          "tier": "assist"
+        },
+        "agents": [
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:notes"
+          },
+          {
+            "agentRef": "urn:fabric:agent:example-publisher:triage"
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "ent-2026-10",
+        "sig": "2wpf-g1bfthwmK5KiKc0Grt9j3BevHT0ft_5ppF7C2E2UNgO54OgqoMe5v0mNbPM85nxjzjQOJ7mhTR479w5AQ"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "subject": "org:org-a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
       "name": "malformed: an amount",
       "entitlement": {
         "type": "entitlement/1",

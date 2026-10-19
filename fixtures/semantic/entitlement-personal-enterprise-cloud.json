@@ -1,0 +1,37 @@
+{
+  "description": "A personal entitlement carries an enterprise-cloud, which only an organization may hold (FAC-SEM-115, DEC-0088).",
+  "kind": "entitlement",
+  "expect": [
+    "FAC-SEM-115"
+  ],
+  "input": {
+    "type": "entitlement/1",
+    "issuer": "https://platform.example",
+    "subject": "personal",
+    "estate": "estate-5d0f1a",
+    "order": {
+      "id": "ord-org-a-0001",
+      "revision": 3
+    },
+    "issuedAt": "2026-10-20T00:00:00Z",
+    "notBefore": "2026-10-20T00:00:00Z",
+    "expiresAt": "2026-11-24T00:00:00Z",
+    "licence": null,
+    "hosting": {
+      "product": "enterprise-cloud",
+      "size": "e-1"
+    },
+    "support": null,
+    "agents": [
+      {
+        "agentRef": "urn:fabric:agent:example-publisher:notes"
+      },
+      {
+        "agentRef": "urn:fabric:agent:example-publisher:triage"
+      }
+    ],
+    "alg": "EdDSA",
+    "kid": "ent-2026-10",
+    "sig": "oq1N1zSFuRHf0o6t-CWAvkM4L_5DYdzQeWrLZKUr6tSjhfovC1sUSJB4J-Dn7h6B3tbfoHB6pD_A1nwarzA5AQ"
+  }
+}

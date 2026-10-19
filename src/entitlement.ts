@@ -32,7 +32,9 @@ export const MAX_AGENTS = 256;
 /** The most signing keys, and revoked kids, one key set lists. */
 export const MAX_KEYS = 32;
 export const MAX_REVOKED = 256;
-export const HOSTING_PRODUCTS: readonly string[] = ["org-cloud", "personal-cloud"];
+export const HOSTING_PRODUCTS: readonly string[] = ["org-cloud", "enterprise-cloud", "personal-cloud"];
+/** The hosting products an organization's entitlement may carry (DEC-0088: `enterprise-cloud`, a dedicated cloud). */
+export const ORG_HOSTING_PRODUCTS: readonly string[] = ["org-cloud", "enterprise-cloud"];
 export const SUPPORT_TIERS: readonly string[] = ["observe", "assist", "managed"];
 export { CLOCK_SKEW_SECONDS };
 
@@ -92,12 +94,12 @@ const line = (value: unknown, names: readonly string[], check: (value: JsonObjec
 
 /**
  * Whether the subject's lines agree (DEC-0085 item 3): `personal` carries an estate, no licence, no support and at most
- * a `personal-cloud`; `org:<orgId>` carries no estate and at most an `org-cloud`.
+ * a `personal-cloud`; `org:<orgId>` carries no estate and at most an `org-cloud` or an `enterprise-cloud` (DEC-0088).
  */
 function consistent(doc: JsonObject): boolean {
   const product = isObject(doc.hosting) ? doc.hosting.product : undefined;
   if (doc.subject === "personal") return isString(doc.estate) && doc.licence === null && doc.support === null && (doc.hosting === null || product === "personal-cloud");
-  return doc.estate === null && (doc.hosting === null || product === "org-cloud");
+  return doc.estate === null && (doc.hosting === null || ORG_HOSTING_PRODUCTS.includes(product as string));
 }
 
 /**
@@ -353,7 +355,7 @@ function entitlementDocument(value: JsonObject, flag: Flag): void {
     if (hosting && hosting.product !== "personal-cloud") flag("/hosting/product", "a personal entitlement's hosting is personal-cloud");
   } else if (matches(CONTEXT, value.subject)) {
     if (value.estate !== null) flag("/estate", "an organization's entitlement names no estate");
-    if (hosting && hosting.product !== "org-cloud") flag("/hosting/product", "an organization's hosting is org-cloud");
+    if (hosting && !ORG_HOSTING_PRODUCTS.includes(hosting.product as string)) flag("/hosting/product", "an organization's hosting is org-cloud or enterprise-cloud");
   } else {
     flag("/subject", "the subject is personal or org:<orgId>, never a person");
   }

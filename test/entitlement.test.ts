@@ -535,7 +535,7 @@ describe("entitlement semantic fixtures (FAC-SEM-115, FAC-SEM-116)", () => {
     expect(at(PERSONAL, { hosting: "x" })).toEqual([]);
     expect(at(BASE, { estate: "estate-5d0f1a", hosting: { product: "personal-cloud", size: "p" } })).toEqual([
       "/estate an organization's entitlement names no estate",
-      "/hosting/product an organization's hosting is org-cloud"
+      "/hosting/product an organization's hosting is org-cloud or enterprise-cloud"
     ]);
     expect(at(BASE, { hosting: null })).toEqual([]);
     expect(at(BASE, { subject: 7 })).toEqual(["/subject the subject is personal or org:<orgId>, never a person"]);

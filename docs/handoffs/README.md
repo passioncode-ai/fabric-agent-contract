@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-19 `enterprise-cloud` in entitlement/1](2026-10-19-enterprise-cloud.md) | DEC-0088 (CT-59; `FAC-SEM-115`) | open, branch `agent/ct59-enterprise-cloud-20261019` |
 | [2026-10-19 jobs under limits and uncertain effects](2026-10-19-job-limits.md) | DEC-0087 (CT-55, OQ-0012; `FAC-SEM-119`, `FAC-SEM-120`) | merged, #120 `027a01c` (squash) |
 | [2026-10-18 share registrations and the grant's context on grant.usage](2026-10-18-share-registration.md) | DEC-0086 (CT-56; `FAC-SEM-117`, `FAC-SEM-118`) | merged, #117 `b89cb94` |
 | [2026-10-17 entitlements for the organization offer](2026-10-17-entitlement.md) | DEC-0085 (CT-54; `FAC-SEM-115`, `FAC-SEM-116`) | merged, #116 `292194d` |

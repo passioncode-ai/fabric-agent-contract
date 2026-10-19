@@ -38,7 +38,7 @@ list for good (DEC-0063: a changed list is a new type). The schema refuses any m
 | `order` | `{id, revision}`: the signed order's opaque id and its revision, a positive integer |
 | `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 38 days after `issuedAt`; at most three fraction digits, so every port compares the same instants at millisecond precision |
 | `licence` | `{members}`, the member allowance the order grants, from 1 to 1 000 000, or `null`; always `null` for `personal`. The billable count is the organization server's own metering, never this field |
-| `hosting` | `{product, size}`: `product` `org-cloud` (only for `org:`) or `personal-cloud` (only for `personal`), `size` an opaque id; or `null` |
+| `hosting` | `{product, size}`: `product` `org-cloud` or `enterprise-cloud` (only for `org:`; DEC-0088) or `personal-cloud` (only for `personal`), `size` an opaque id; or `null` |
 | `support` | `{tier}`: `observe`, `assist` or `managed`, what the organization's admin agents may do; or `null`; always `null` for `personal` |
 | `agents` | 0 to 256 `{agentRef}`, one per paid agent, each `agentRef` once (`fabric-package#/$defs/agentRef`) |
 | `alg`, `kid`, `sig` | `EdDSA`, the signing key's `kid`, and the signature ([the signature](#the-signature)) |
@@ -142,7 +142,7 @@ its pinned root; `estate` is required for the subject `personal` and absent for 
 | Row | Problem | When |
 |---|---|---|
 | EN-1 | `context-invalid`, `no-clock` | the context is not an object (first), then `now` is not a readable time (before any comparison, and so `no-clock` even when the rest of the context is invalid too), then `subject` is not a context id, `estate` is not an opaque id for `personal` or is present for an organization, `keySet` is not a well-formed key set under `EdDSA` (one with no key valid at its `issuedAt` among them), or `held` is not `{orderId, revision, issuedAt, digest}` |
-| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an `org-cloud`; an organization with an estate or a `personal-cloud`), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists) or has more than three fraction digits, or `sig` not the canonical base64url of 64 bytes |
+| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an organization's product; an organization with an estate or a `personal-cloud`), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists) or has more than three fraction digits, or `sig` not the canonical base64url of 64 bytes |
 | EN-3 | `wrong-issuer` | `issuer` is not the key set's |
 | EN-4 | `unknown-algorithm` | `alg` is not `EdDSA` |
 | EN-5 | `unknown-key`, `key-revoked` | `kid` is neither listed nor revoked; `kid` is revoked |
@@ -182,8 +182,22 @@ output.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
+| `FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
 | `FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
+
+## Enterprise cloud (DEC-0088)
+
+`enterprise-cloud` is the third hosting product: a dedicated cloud for one organization, sold as its own tier (the
+platform's SD-2 and ADR-0008 D-3, 2026-10-19). Only an `org:<orgId>` subject carries it; a personal entitlement with it
+is `malformed` (EN-2, `FAC-SEM-115`). Its `size` stays the opaque id the issuer and the host agree on, as for the other
+products. Nothing else is added:
+
+- the service level is the `support` line's tier, already in every entitlement;
+- the dedication is the product itself;
+- a region is not in the entitlement until a verifier needs to check where it runs (*Not decided here*).
+
+A verifier pinned before DEC-0088 refuses `enterprise-cloud` as `malformed` (the schema's `enum`), so the issuer sends
+it only to verifiers re-vendored at or after DEC-0088; until then an Enterprise order is issued on `org-cloud`.
 
 ## Who adopts it
 
@@ -206,6 +220,8 @@ two organizations appears in neither organization's entitlement, and the estate 
 cross-organization person id (the platform's program packet §2).
 
 ## Not decided here
+
+- A region or a data-residency line for `enterprise-cloud`: added when a verifier must check where the cloud runs.
 
 - Member-period metering and what makes a member billable (the first organization server's Stage 5).
 - Per-agent usage: it stays `grant.usage` (DEC-0082), joined by the organization server through the share grant.
