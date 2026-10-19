@@ -11,7 +11,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
 
 - `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-15), `explainFolder` (the answer, its row and the folder to record), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
-- `schemas/folder-attribution.schema.json`: the snapshot and the answer, for project-observatory-contract to refer to.
+- `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
   nothing imported from the module): 25 origin, 119 attribution and 15 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
@@ -37,7 +37,9 @@ records match by common dir or identity; each product records `explainFolder`'s 
 checkout, the root for `new`), so later answers stay; a folder a Project lists below a tombstone gets through it; a failed Git probe is not
 `git: null`, and a home kept under Git is.
 
-For `project.attribute` (D4), a proposal to project-observatory-contract, which owns the names: the answer's refusal
+For the session-start capability (D4), which the operator moved to Fabric's hub later on 2026-10-19 (Fabric ADR-0166,
+amendment "Fabric is the core"; the canonical Project id is Fabric's too, D3), a proposal to Fabric, which owns its
+names (it replaces the planned `project.attribute` in project-observatory-contract): the answer's refusal
 reasons `transient`, `tombstoned`, `container` and `tool` (the run index planned `refused-container`), a tie as
 `ambiguous` with its Projects, a bad snapshot as `input-invalid`, all from `folder-attribution.schema.json#/$defs/answer`;
 and one state the function never answers, "not attributable yet" while the product's Git probe fails.
@@ -175,6 +177,7 @@ receipt. Recorded for agent-sync's owner; nothing in this repository depends on 
 ## Next task
 
 PR #124: run the blind readings until two consecutive rounds find nothing that blocks it, merge, then post the merge
-commit on thread `617c8cbe` for Fabric, Switchboard (SB-141: within a working day of the merge) and Observatory, and a request to project-observatory-contract
-for `project.attribute` (D4) referring to `folder-attribution.schema.json`, and add DEC-0089 to the contract's row
+commit on thread `617c8cbe` for Fabric, Switchboard (SB-141: within a working day of the merge) and Observatory, with
+the proposal above for Fabric's session-start capability (D4 as corrected) referring to `folder-attribution.schema.json`
+(no request to project-observatory-contract: the capability moved to Fabric), and add DEC-0089 to the contract's row
 of the knowledge base roadmap (`fabric-workspace/knowledge/roadmap.md`).

@@ -5740,8 +5740,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-57),
     `docs/handoffs/2026-10-19-folder-attribution.md`, `docs/handoffs/README.md`.
-- **Not decided here:** the canonical id and aliases (D3), the session-start capability (D4), storage (D5); how a
-  product learns its work records.
+- **Not decided here:** how Fabric records an alias, the wire of the session-start capability, storage (D5); how a
+  product learns its work records. The operator corrected D3 and D4 later the same day (Fabric ADR-0166, amendment
+  "Fabric is the core"; board thread `617c8cbe`): the canonical Project id is Fabric's, Observatory's `project:<slug>`
+  and Switchboard's pool are its aliases (`observatory:<slug>`, `switchboard:<pool>`), and the session-start
+  capability is Fabric's, served by its hub; Observatory and Switchboard ask it and apply these rules locally only
+  while Fabric is not running.
 - **Source:** Fabric's ask D1 on the project board (thread `617c8cbe`, 2026-10-19) and the run index org-index
   `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe` (D1 to D5, the measured table); Fabric
   `folderResolver.ts` `normalizeRemoteKey` and Switchboard `suggest.rs` `normalize`, `transient`, `tool_folder`;

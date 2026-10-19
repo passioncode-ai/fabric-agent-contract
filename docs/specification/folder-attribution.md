@@ -12,9 +12,13 @@ folder, an agent started in a subfolder, an origin owner and work done from insi
 set (the run's D1 and D2, org-index `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe`). Every product
 runs the vectors in its own gate and keeps no rule of its own beside them.
 
-Not here: the canonical Project id (Project Observatory's `project:<slug>`, with the other products' ids as its aliases,
-the run's D3), the capability a session calls at its start (`project.attribute` in project-observatory-contract, D4),
-and storage (each product writes only its own store, D5). This page decides which Project, not how it is named.
+Not here: how Projects are named across the products, the capability a session calls at its start, and storage. The
+operator corrected D3 and D4 later on 2026-10-19 (Fabric ADR-0166, amendment "Fabric is the core", on the board thread
+`617c8cbe`): the canonical Project id is **Fabric's**, and Observatory's `project:<slug>` and Switchboard's pool are
+recorded against it as aliases (`observatory:<slug>`, `switchboard:<pool>`); the session-start capability is Fabric's,
+served by its hub, and Observatory and Switchboard ask it, applying these rules locally only while Fabric is not running
+and reconciling later. Each product writes only its own store (D5). This page decides which Project, not how it is
+named or served.
 
 ## The snapshot
 
@@ -48,7 +52,8 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
   folders belong to: a product passes `git: null` for a folder whose top level is broad, so a plain folder below home is
   still its own Project.
 - **Project ids compare as written.** `id`, `explicit` and `work[].project` are each product's own opaque keys, matched
-  byte for byte; the canonical id and its aliases are D3's ([identifiers](identifiers.md#where-identifiers-are-compared)).
+  byte for byte; the canonical id is Fabric's and the others are its aliases (D3 as the operator corrected it,
+  [identifiers](identifiers.md#where-identifiers-are-compared)).
 - **A Project folder's `toplevel`** places it in its repository: a folder at `mono/pkg` under the top level `mono` is
   at `pkg`. AT-6 and AT-7 read it, so a worktree or a clone of the outer of two nested Projects joins the outer one and
   a folder inside the inner one the inner one. A folder in Git without it counts as at the top: a nested Project without
@@ -202,7 +207,8 @@ naming the rule and the Projects; the reasons are the schema's.
   `attributeFolder` rather than recording a repository itself, and its `shared` and contested states replaced by the
   tie it reports; a worktree right under home refused at attach as at creation; recording by `record`; its CLI text on
   containers and its scenarios (SCN-055, SCN-063) updated with them.
-- **Project Observatory** (the engine) runs the vectors in its scan and in `project.attribute` (D4). Measured against
+- **Project Observatory** (the engine) runs the vectors in its scan and in its local answer while Fabric is not
+  running; at a session's start it asks Fabric's capability (D4 as corrected) rather than serving one. Measured against
   the table: it has no work row (AT-12) and reads owners only indirectly (AT-10); it scans only the children of its data
   root, so a subfolder start is not rooted at the repository (AT-15) and a remoteless worktree joins only on its tip
   (AT-6); its `folder_exclusions.json` and `_*` folders become the snapshot's `containers` (the folder that holds agent
@@ -215,19 +221,20 @@ The board row is CT-57.
 
 ## Not decided here
 
-- The canonical id and the aliases (D3), the session-start capability and its refusals (D4), and storage (D5).
+- How Fabric records an alias and its evidence (D3 as corrected), the wire of Fabric's session-start capability and
+  its refusals (D4 as corrected), and storage (D5).
 - How a product learns the work records: Switchboard reads them from coding agents' transcripts (SB-131, SB-132).
 - Folders on network shares and case-insensitive file systems beyond the product resolving the real path.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
-- One store of tombstones and containers. Until D4 makes one authoritative, each product reads its own (Fabric's
+- One store of tombstones and containers. Until every product asks Fabric's capability (D4), each reads its own (Fabric's
   detach, Switchboard's dismissed rows, Observatory's `denied_links.json` and `folder_exclusions.json`), so one folder can
   still answer differently in two products; Fabric and Switchboard read Observatory's declared containers where they
   can reach them.
 - Decided limits, not open questions: an origin that is a local path has no identity, so such a clone joins by work or
   as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
-- A state for "not attributable yet" (the Git probe failed): the function is never called then, and
-  `project.attribute` (D4) names it in project-observatory-contract.
+- A state for "not attributable yet" (the Git probe failed): the function is never called then, and Fabric's
+  session-start capability (D4) names it.
 - A user-facing scenario: the contract has no interface here; each product's scenarios own how a session's Project,
   a tie or a refusal is shown.
