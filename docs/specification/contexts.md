@@ -164,7 +164,8 @@ metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemet
   schema refuses a `#`. A grant whose `meta.id` is no share grant id reports no `grant.usage` (DEC-0086). DL-22's opacity binds callees (a service names a grant only by the token's `grant` claim), and
   this is the issuer's side, so it is not broken.
 - **Once**: a collector emits it after the day ends, one per (day, `grantId`) per stream; a batch that carries two for
-  one (day, `grantId`) of one stream, the ids compared by normal form, is refused (`FAC-SEM-039`). A receiver counts the
+  one (day, `grantId`) of one stream, the ids compared by normal form (a share grant id is its own normal form, so the
+  two comparisons agree), is refused (`FAC-SEM-039`). A receiver counts the
   first `grant.usage` per (stream, day, `grantId`) it holds and ignores later ones
   ([conformance](conformance.md#clients-and-readers)).
 - **Routing**: a `grant.usage` event goes only to the organization server of the grant's own `context`, `org:<orgId>`
@@ -227,8 +228,10 @@ confirms. A membership in an organization another person controls does not run o
    standing ([batch and acknowledgement](activity.md#batch-and-acknowledgement)), and the usage is lost to it; so a writer
    sends such an id only to a receiver pinned at or after DEC-0082. `FAC-SEM-037`'s home-path check applies to every
    event on every receiver, so a `grantId` that names a home directory is refused at any pin. DEC-0086 makes `context`
-   required and `grantId` a share grant id, which a receiver pinned at DEC-0082 refuses: its compatibility and the sender
-   gate are in [share registration](share-registration.md#compatibility).
+   required and `grantId` a share grant id, which a receiver pinned at DEC-0082 refuses. A receiver pinned before
+   DEC-0082 refuses such an event too when its `context` is longer than 64 characters (`org:` and an `orgId` of more than
+   60), by the same `extScalar` rule. Its compatibility and the sender gate are in
+   [share registration](share-registration.md#compatibility).
 
 ## Semantic rules
 

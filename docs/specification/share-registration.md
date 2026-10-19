@@ -29,8 +29,10 @@ DEC-0085. The brief is [`docs/evidence/specs/2026-10-18-share-registration/brief
 A share grant into an organization (a grant whose `context` is `org:<orgId>`) has the `meta.id`
 **`urn:fabric:share:<32 lower-case hex>`** (`common.schema.json#/$defs/shareGrantId`): 128 bits from a CSPRNG, never
 derived from a name, an address, an estate id, an `agentRef` or the organization, and never all zeros. So the id an
-organization server receives holds nothing about the person, as a workflow id cannot (`memory-capability.schema.json`
-pins `workflowId` to `^wf_[0-9a-f]{16}$`).
+organization server receives in a registration or a `grant.usage` holds nothing about the person, as a workflow id
+cannot (`memory-capability.schema.json` pins `workflowId` to `^wf_[0-9a-f]{16}$`). A delegation token's grant claim
+carries the same id only when `FAC-SEM-117` ran before the revision was signed; a grant written without it can carry
+another `meta.id` there.
 
 The pattern admits only its own normal form (DEC-0076: `urn` and the NID lower-cased, the NSS kept), so the id is
 **compared as written** ([identifiers](identifiers.md#where-identifiers-are-compared)): `URN:fabric:share:...`, upper-case
@@ -38,7 +40,11 @@ hex, 31 or 33 digits, a `#1`, a surrounding space and a trailing newline are not
 flag; a port whose `$` matches before a final newline (Python's `re`, PCRE) anchors with `\Z` or compares the whole
 string, which the vectors' "a trailing newline" case checks.
 
-`FAC-SEM-117` checks the form where a grant is written: Fabric and the adapter's kits run it before a passkey signs a
+`FAC-SEM-117` checks the form where a grant is written, and two more writer's duties on a share grant into an
+organization: its `startsAt` and `expiresAt` carry at most three fraction digits, and it **keeps its `agentRef` across
+revisions**. Moving a share to another agent revokes the grant and mints a new id; a revision whose placements run the
+grant under another `agentRef` than its parent revision's is refused (kind `org-share-grants` with `parent`). The rule
+runs where a grant is written: Fabric and the adapter's kits run it before a passkey signs a
 revision. It is not part of `governance.schema.json` nor of `verifyEstateRecord`, on purpose: a naming fault must not
 lock an estate out of its own record. It fails closed for billing only: a grant of another form registers nothing
 (the derivation's `share-grant-id`), the schema refuses its `grant.usage`, and the organization sees no usage for it.
@@ -55,8 +61,8 @@ lock an estate out of its own record. It fails closed for billing only: a grant 
 | `state` | `active` | `withdrawn` | |
 | `grantRevision` | yes | no | the grant's `meta.revision` in the revision the node applied, 1 to 2^53 − 1 |
 | `agentRef` | yes | no | the one `agentRef` the revision's placements in this context run under the grant (`fabric-package#/$defs/agentRef`) |
-| `startsAt`, `expiresAt` | yes | no | the grant's window as written; strict RFC 3339 instants with at most three fraction digits, `startsAt` < `expiresAt` (`FAC-SEM-118`) |
-| `withdrawnAt` | no | yes | when the share ended, a strict instant with at most three fraction digits |
+| `startsAt`, `expiresAt` | yes | no | the grant's window at millisecond precision (see *Times* below); strict RFC 3339 instants, seconds 00 to 59, at most three fraction digits, `startsAt` < `expiresAt` (`FAC-SEM-118`) |
+| `withdrawnAt` | no | yes | when the share ended, at millisecond precision; a strict instant, seconds 00 to 59, at most three fraction digits |
 
 Nothing else: no estate id or revision, machine id, principal, issuer, `createdBy`, project, audience, capabilities,
 effect ceiling, data classes, spend, content hash or free text. `shareRegistrationDigest(registration)` is `sha256:` and
@@ -93,14 +99,22 @@ of the applied revision whose `context` is `org:<orgId>` as written, in the reco
    DEC-0076) is withdrawn at the earliest `revokedAt` among them;
 3. otherwise the placements of the revision (`machines[].packages[]`) in that context that name the grant by normal form
    decide: none, nothing yet; two `agentRef`s, or one that is no agentRef, nothing (degraded `share-grant-agents`); one,
-   an active registration with the grant's `meta.revision`, `startsAt` and `expiresAt` as written.
+   an active registration with the grant's `meta.revision`, `startsAt` and `expiresAt` (see *Times*).
 
 Then each grant id in `previouslyRegistered` (the ids the node registered active toward this enrollment) that the
 revision no longer lists in that context is withdrawn: at the earliest `revokedAt` when a revocation names it, else at
-the revision's `issuedAt`. A revision, window or time that the registration cannot carry (a revision below 1, a window
-that does not end after it starts, an instant with more than three fraction digits or none readable) registers nothing:
-degraded `share-grant-unreadable`. Personal grants, grants that state no context and other organizations' grants never
-register.
+the revision's `issuedAt`. A revision, window or time that the registration cannot carry (a revision below 1, a time
+`strictTime` cannot read, a window that is empty once carried) registers nothing: degraded `share-grant-unreadable`.
+Personal grants, grants that state no context and other organizations' grants never register.
+
+**Times.** A registration carries every time at millisecond precision, so every port compares the same instants
+(DEC-0085's rule). A grant's or revocation's time with at most three fraction digits is carried as written, its offset
+kept. One with more is rounded to milliseconds and written as `Date#toISOString` writes it, in UTC: a withdrawal time is
+**floored** (a withdrawal may end a share up to a millisecond early, never late), a window is **rounded inward**
+(`startsAt` up, `expiresAt` down), so a registered window is never wider than the grant's. The earliest of several
+revocations is chosen by instant, at full precision. So a revoked share is withdrawn whatever the number of fraction
+digits its revocation carries. `FAC-SEM-117` makes the writer's side the simple one: a share grant into an organization
+carries its window with at most three fraction digits, and Fabric and the hub write its revocations' `revokedAt` so.
 
 A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
@@ -110,7 +124,10 @@ until the record changes.
 ## The receiver
 
 The receiver takes the organization from the certificate's `org.id` and the registrant from the `user.id` bound to the
-certificate's epoch ([attribution](devices.md#attribution)), never from the body. It keys what it holds by (registrant
+certificate's epoch ([attribution](devices.md#attribution)), never from the body. It keeps **one held list per
+organization**: a held entry carries no organization, because the user id and the grant id are keys inside the
+organization whose certificate bound the user, and a user id of one organization says nothing in another. The functions
+below are given the list of the organization the certificate binds. It keys what it holds by (registrant
 `user.id`, `grantId`), so one member cannot overwrite, squat on or attach usage to another member's grant: two members
 who register one grant id hold two registrations. It keeps the request's body bytes and its `Signature-Input` and
 `Signature` fields as evidence.
@@ -128,7 +145,7 @@ for its epoch with `transport` the verdict of devices.md's transport steps (`{ok
 | SR-4 | 403 `wrong-organization` | `context` is not `org:` followed by the certificate's `org.id` as written (never case-folded, never by prefix) |
 | SR-5 | 403 `unassigned-device` | no user is bound to the certificate's epoch |
 | SR-6 | 409 `already-withdrawn` | an active registration while a withdrawal is held for (user, `grantId`), a tombstone included |
-| SR-7 | 409 `agent-mismatch` | an active registration naming another `agentRef` than the active one held, whatever its revision |
+| SR-7 | 409 `agent-mismatch` | an active registration naming another `agentRef` than the active one held, whatever its revision. A grant keeps its `agentRef` (`FAC-SEM-117`); the recovery is to revoke the grant, mint a new id and register that |
 | SR-8 | 409 `stale-revision` | an active registration with a lower `grantRevision` than held |
 | SR-9 | 409 `revision-conflict` | an active registration with the held `grantRevision` and another digest |
 | SR-10 | 200 `unchanged` | the digest held, or a second withdrawal: of two withdrawals the earliest `withdrawnAt` is kept, with its digest |
@@ -175,12 +192,22 @@ for the event's epoch (`{org: {id}, user?: {id}}`, as `FAC-SEM-045` reads it); `
 
 A rejected event is consumed, as every rejection (DEC-0030). A stored event that is not joined keeps its sums and is
 shown under its grant without an agent. Days compare as UTC days: a `startsAt` of `2026-10-12T22:00:00-05:00` starts on
-13 October, which the vectors check in three time zones.
+13 October, which the vectors check in three time zones. A port compares days as numbers (midnight UTC), not as
+`YYYY-MM-DD` text of the end: an `expiresAt` of `9999-12-31T23:00:00-05:00` falls in year 10000 in UTC, and day
+`2026-10-15` still joins.
 
-**The sender gate.** A collector emits `grant.usage` for grant G toward enrollment E only after E answered G's
-registration with a receipt, `stale-revision` or `already-withdrawn`. Until then it keeps the day's sums; on
-`revision-conflict` or `agent-mismatch` it holds them back and reports itself degraded. So no `grant.usage` reaches a
-receiver that has no way to read it.
+**The sender gate.** A collector emits `grant.usage` for grant G toward enrollment E only as
+`gateGrantUsage(answer)` allows, `answer` being E's latest answer to G's registration in the shape
+`decideShareRegistration` answers, or none yet. It never throws:
+
+| Gate | Answer |
+|---|---|
+| `send` | a receipt, whatever its state (usage before a withdrawal still joins); `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
+| `hold-degraded` | `revision-conflict`, `agent-mismatch`, `wrong-organization`, `unassigned-device`: sending the same registration again does not clear them, so the node keeps the sums and reports itself degraded |
+| `hold` | no answer yet, a transport refusal (401), `malformed`, `schema-unsupported`, a receiver's fault, or anything else: the node keeps the sums and registers again |
+
+So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant
+stays held; the share continues under the new grant id (SR-7's recovery).
 
 Joined usage is per person. Another person sees it only as sums per UTC day or billing period, each read logged
 (OD-1, `FAC-SEM-067`).
@@ -189,12 +216,12 @@ Joined usage is per person. Another person sees it only as sums per UTC day or b
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-117` | `grant`, `org-share-grants` | a grant whose `context` is an organization's has a share grant id as its `meta.id` (`urn:fabric:share:` and 32 lower-case hex digits, not all zeros, as written); on a record (`{record}`), each such share grant does, and the placements in its context that name it by normal form run one `agentRef` |
+| `FAC-SEM-117` | `grant`, `org-share-grants` | a grant whose `context` is an organization's has a share grant id as its `meta.id` (`urn:fabric:share:` and 32 lower-case hex digits, not all zeros, as written) and a `startsAt` and `expiresAt` with at most three fraction digits; on a record (`{record, parent?}`), each such share grant does, the placements in its context that name it by normal form run one `agentRef`, and, given the parent revision, the same `agentRef` as the parent's placements ran under the same grant |
 | `FAC-SEM-118` | `share-registration`, `share-registration-derive`, `share-registration-intake`, `grant-usage-join` | a registration's instants are on days that exist and an active one's window ends after it starts; an implementation's derivation, decision and join answer as `deriveShareRegistrations`, `decideShareRegistration` and `joinGrantUsage` do, row for row of the SR and GJ tables |
 
 | Kind | Input |
 |---|---|
-| `org-share-grants` | `{record}`, an estate record |
+| `org-share-grants` | `{record, parent?}`, an estate record and, optionally, the revision it follows |
 | `share-registration` | a document of `share-registration.schema.json`; a receipt or a refusal has no clause |
 | `share-registration-derive` | `{record, entries, orgId, previouslyRegistered, answer}`; `answer` is `{registrations, degraded}` |
 | `share-registration-intake` | `{held, registration, binding, answer}` |
@@ -220,13 +247,16 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
 ## Who adopts it
 
 - **Fabric** (CX-FAB-04) mints `urn:fabric:share:<32 hex>` from a CSPRNG for each share grant into an organization, runs
-  `FAC-SEM-117` before the passkey signs, drafts one `agentRef` per organization grant, shows the `agentRef` and the
-  window on the share card, and never sends a registration.
+  `FAC-SEM-117` with the parent revision before the passkey signs, writes the window and every `revokedAt` with at most
+  three fraction digits, drafts one `agentRef` per organization grant and never re-points it (a move revokes and mints a
+  new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub writes the
+  revocation delta's `revokedAt` with at most three fraction digits.
 - **Project Observatory's node and collector** derive registrations per enrollment and send them signed (DEC-0056), keep
   the receipts, withdraw on revocation or drop, send again after an enrollment and weekly, emit `grant.usage` with
-  `context` only behind the sender gate, and run `fixtures/vectors/share-registration.json`.
+  `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
-  DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`), keeps held entries,
+  DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per
+  organization, keeps held entries,
   body bytes, signature fields and tombstones, refuses a mismatched `grant.usage` context as `attribution`, shows
   per-agent usage to others only as sums with each read logged, lists `share-registration/1` in its enrollment
   response's `protocols`, and runs the vectors.

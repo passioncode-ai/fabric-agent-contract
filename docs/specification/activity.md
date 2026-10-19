@@ -193,7 +193,7 @@ settled grant-check receipts (DEC-0037), each counted once and assigned to the U
 when it lists `receipts`, the meter holds none of them and the report's `days` hold one date; otherwise it is not used,
 and the collector reports what the meter holds ([contexts](contexts.md#usage-per-grant)). It holds sums and states only, never a per-call
 line, because usage under a share grant is data about a person (CX-VES-08). A collector emits it after the day ends, one
-per (day, `grantId`) per stream (`FAC-SEM-039` refuses a second in one batch, the ids compared by normal form), and
+per (day, `grantId`) per stream (`FAC-SEM-039` refuses a second in one batch, the ids compared by normal form; a share grant id is its own normal form, so the two comparisons agree), and
 sends it only to the organization server of the grant's own context ([routing](contexts.md#routing),
 `routeGrantUsage`). A receiver counts the first per (stream, day, `grantId`) and ignores later ones. It rejects one whose
 `context` is not `org:` and its certificate's `org.id` as `attribution` (`FAC-SEM-045`), and joins it to an agent by the

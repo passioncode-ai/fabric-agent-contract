@@ -216,7 +216,7 @@ one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by
 DEC-0053).
 
 **Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
-every batch, check-in and rotation request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
+every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
 terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 

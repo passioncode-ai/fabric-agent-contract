@@ -5387,12 +5387,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      context, rejected `attribution`; GJ-2 no bound user, stored not joined `unassigned-device`; GJ-3 no registration for
      (bound user, `grantId`), `unregistered`, joined again when one arrives; GJ-4 a day before the UTC day of `startsAt`,
      `before-start`; GJ-5 a day after the UTC day of the end, `after-end`; GJ-6 joined to the registration's `agentRef`.
-     The sender gate: a collector emits `grant.usage` for a grant toward an enrollment only after it answered the
-     grant's registration with a receipt, `stale-revision` or `already-withdrawn`; on `revision-conflict` or
-     `agent-mismatch` it holds back and reports degraded.
+     The sender gate `gateGrantUsage(answer)`, total, over the enrollment's latest answer to the grant's registration:
+     `send` after a receipt (any state), `stale-revision` or `already-withdrawn`; `hold-degraded` after
+     `revision-conflict`, `agent-mismatch`, `wrong-organization` or `unassigned-device`, which sending again does not
+     clear (the node keeps the sums and reports degraded); `hold` before any answer and after anything else (a 401,
+     `malformed`, `schema-unsupported`, a receiver's fault).
   7. **Share grant ids (`FAC-SEM-117`):** a grant whose `context` is `org:<orgId>` has the `meta.id`
      `urn:fabric:share:<32 lower-case hex>`, 128 bits from a CSPRNG, never derived from a name, an address, an estate
-     id, an `agentRef` or the organization. Checked by the schemas at the boundary and by `FAC-SEM-117` (kinds `grant`
+     id, an `agentRef` or the organization; its `startsAt` and `expiresAt` carry at most three fraction digits; it keeps
+     its `agentRef` across revisions, so moving a share to another agent revokes the grant and mints a new id (kind
+     `org-share-grants` given `parent` refuses a re-pointed grant; SR-7's recovery). Checked by the schemas at the boundary and by `FAC-SEM-117` (kinds `grant`
      and `org-share-grants`), which Fabric and the kits run before signing; not by `governance.schema.json` nor
      `verifyEstateRecord`, so a naming fault never locks an estate out; it fails closed for billing only. Compared as
      written ([identifiers](specification/identifiers.md#where-identifiers-are-compared)).
@@ -5403,11 +5407,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      DEC-0082 item 5 (annotated) say that no event carries its session's context and no check-in carries a context,
      while a `grant.usage` and a share registration carry their grant's own `org:<orgId>`.
 - **Choices made in implementation** (the brief left them open; recorded so a port reads them as decisions):
-  - instants in a registration are DEC-0085's: strict RFC 3339 with an offset and at most three fraction digits, on a
-    day that exists (`share-registration#/$defs/instant` and the reference's reader), so every port compares the same
-    instants; the derivation copies a grant's times as written and, when one cannot be carried (or a revision below 1,
-    or a window that does not end after it starts, or a revocation with no readable `revokedAt`), registers nothing and
-    reports a third degraded code, `share-grant-unreadable`; an `agentRef` that is no agentRef is `share-grant-agents`;
+  - instants in a registration are DEC-0085's: strict RFC 3339 with an offset, seconds 00 to 59 (no leap second, which
+    `date-time` admits and `strictTime` refuses) and at most three fraction digits, on a day that exists
+    (`share-registration#/$defs/instant` and the reference's reader), so every port compares the same instants;
+  - the derivation carries a time with at most three fraction digits as written, its offset kept, and one with more at
+    millisecond precision in UTC as `Date#toISOString` writes it: a withdrawal time floored (a withdrawal may end early,
+    never late), a window rounded inward (`startsAt` up, `expiresAt` down, never wider than the grant's); the earliest
+    revocation is chosen by instant at full precision. So a revoked share is withdrawn whatever the precision of its
+    `revokedAt` (found by the fix round's unit and seam readings). A time `strictTime` cannot read, a revision below 1, a
+    window empty once carried, or a revocation with no readable `revokedAt` registers nothing and reports a third
+    degraded code, `share-grant-unreadable`; an `agentRef` that is no agentRef is `share-grant-agents`;
+  - the writer's side is the simple one: `FAC-SEM-117` refuses an organization share grant whose window carries more
+    than three fraction digits, and Fabric and the hub write its revocations' `revokedAt` with at most three;
+  - a receiver keeps one held list per organization: a held entry carries no organization, because the user id and the
+    grant id are keys inside the organization whose certificate bound the user; `decideShareRegistration` and
+    `joinGrantUsage` are given that organization's list;
+  - the join compares days as numbers (midnight UTC in milliseconds), so an end past year 9999 in UTC still compares;
+  - the gate's `wrong-organization` and `unassigned-device` are `hold-degraded`: sending to the same enrollment again
+    does not clear them, the device must be enrolled or assigned anew;
+  - the id an organization server receives holds nothing about the person in a registration and a `grant.usage`; a
+    delegation token's grant claim carries the same id only when `FAC-SEM-117` ran before the revision was signed;
   - `previouslyRegistered` is the list of grant ids the node registered active toward the enrollment; a value that is no
     share grant id is ignored; a grant now listed only in another organization counts as no longer listed; a grant
     listed twice is read once, at its first entry; a revoked grant the node never registered still gives a withdrawal,
@@ -5461,9 +5480,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - fixtures: `fixtures/vectors/share-registration.json` (new); `fixtures/positive/share-registration-*`,
     `fixtures/negative/share-registration-*`, `fixtures/negative/telemetry-event-grant-usage-no-context.json` and
     `-personal-context.json`, `fixtures/semantic/share-*`, `fixtures/semantic/grant-usage-join-*`,
-    `fixtures/semantic/device-attribution-grant-usage-*` (new); 45 existing fixtures migrated; `fixtures/catalogue.json`;
+    `fixtures/semantic/device-attribution-grant-usage-*` (new); 45 existing fixtures migrated;
+    the negative fixture `telemetry-event-grant-usage-long-id` removed (the share grant id's pattern admits no long id,
+    so it tested nothing of its own); `fixtures/catalogue.json`;
   - tests: `test/share-registration.test.ts` (new), `test/contexts.test.ts`, `test/positive-sweep.test.ts`,
-    `test/rule-tolerance.test.ts`, `test/schema-compilation.test.ts`; the floor for `src/share-registration.ts` in
+    `test/rule-tolerance.test.ts`, `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`; the floor for `src/share-registration.ts` in
     `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-56),
     `docs/evidence/specs/2026-10-18-share-registration/brief.md` and `plants.md`,
