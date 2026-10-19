@@ -107,6 +107,61 @@ describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => 
   });
 });
 
+describe("recording keeps the Project in random worlds (DEC-0089 item 4)", () => {
+  it("in 6,000 seeded worlds of worktrees, clones, nested Projects, containers and tombstones, an answer's record applied names the same Project", () => {
+    let state = 20261019;
+    // mulberry32: a seeded generator, so a failure is reproducible.
+    const rnd = () => {
+      state = (state + 0x6d2b79f5) | 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const pick = <T,>(items: T[]): T => items[Math.floor(rnd() * items.length)] as T;
+    const H = "/u/ana";
+    const W = `${H}/work`;
+    const subs = ["", "pkg", "pkg/a", "docs", "_wt"];
+    let checked = 0;
+    for (let n = 0; n < 6000; n++) {
+      const repos = ["r1", "r2"].map((r) => ({ origin: pick([`git@github.com:o/${r}.git`, null]), checkouts: [`${W}/${r}`, `${W}/${r}-wt`, `${W}/${r}-2`, `${W}/c/${r}-wt`] }));
+      const checkout = (repo: (typeof repos)[number], i: number) => ({ top: repo.checkouts[i] as string, common: `${repo.checkouts[i === 2 ? 2 : 0]}/.git`, main: repo.checkouts[i === 2 ? 2 : 0] as string });
+      const projects: Json[] = [];
+      for (let p = 0; p < 1 + Math.floor(rnd() * 3); p++) {
+        const folders: Json[] = [];
+        for (let f = 0; f < 1 + Math.floor(rnd() * 2); f++) {
+          if (rnd() < 0.2) {
+            folders.push({ path: pick([`${W}/c`, `${W}/notes`, `${W}/r1/pkg`]), commonDir: null, origin: null });
+            continue;
+          }
+          const repo = pick(repos);
+          const at = checkout(repo, Math.floor(rnd() * 4));
+          const sub = pick(subs);
+          folders.push({ path: sub ? `${at.top}/${sub}` : at.top, commonDir: at.common, origin: repo.origin, toplevel: at.top });
+        }
+        projects.push({ id: `p${p}`, folders, sources: rnd() < 0.2 ? ["github.com/o"] : [] });
+      }
+      const repo = pick(repos);
+      const at = checkout(repo, Math.floor(rnd() * 4));
+      const sub = pick(subs);
+      const snapshot: Json = {
+        folder: sub ? `${at.top}/${sub}` : at.top,
+        home: H,
+        tempRoots: [],
+        git: { toplevel: at.top, commonDir: at.common, mainCheckout: at.main, origin: repo.origin },
+        projects,
+        containers: rnd() < 0.3 ? [pick([`${W}/c`, `${at.top}/_wt`, `${W}/r1/pkg`])] : [],
+        tombstones: rnd() < 0.15 ? [pick([`${W}/r1`, `${W}/r2-wt`, `${at.top}/docs`])] : []
+      };
+      const { answer, record } = explainFolder(snapshot);
+      if (!record || !("outcome" in answer) || (answer.outcome !== "attached" && answer.outcome !== "new")) continue;
+      const project = answer.outcome === "new" ? "project:new" : answer.project;
+      expect(attributeFolder(recorded(snapshot, snapshot.folder, snapshot.git)), JSON.stringify(snapshot)).toMatchObject({ outcome: "attached", project });
+      checked += 1;
+    }
+    expect(checked).toBeGreaterThan(2000);
+  }, 30_000);
+});
+
 describe("length bounds in code points (DEC-0089)", () => {
   const withId = (id: string) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id, folders: [], sources: [] }] });
   it("admits 256 code points written as 512 UTF-16 units, and refuses 257 code points however they are written", () => {

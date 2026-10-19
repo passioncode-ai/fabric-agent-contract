@@ -3290,6 +3290,58 @@
       }
     },
     {
+      "name": "AT-7: a worktree's folder at a nested Project's place, the nested Project in another clone, joins it by identity",
+      "snapshot": {
+        "folder": "/u/ana/work/mono-wt/pkg/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/mono-wt",
+          "commonDir": "/u/ana/work/mono/.git",
+          "mainCheckout": "/u/ana/work/mono",
+          "origin": "git@github.com:example-org/mono.git"
+        },
+        "projects": [
+          {
+            "id": "project:mono",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono",
+                "commonDir": "/u/ana/work/mono/.git",
+                "origin": "git@github.com:example-org/mono.git",
+                "toplevel": "/u/ana/work/mono"
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:pkg",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono-2/pkg",
+                "commonDir": "/u/ana/work/mono-2/.git",
+                "origin": "git@github.com:example-org/mono.git",
+                "toplevel": "/u/ana/work/mono-2"
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:pkg",
+        "rule": "repository"
+      }
+    },
+    {
       "name": "AT-3: once the outer Project's clone is recorded, a folder inside the inner Project there still joins the inner one",
       "snapshot": {
         "folder": "/u/ana/work/mono-2/pkg/a",

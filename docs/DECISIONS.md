@@ -5659,7 +5659,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      folder, not broad, below it that holds the folder; the folder's Project by the nearest place (by common dir or by
      identity, the same common dir at equal depth) when a folder of its own repository holds it, else its nearest
      listed folder by path, a declared container between them ending a listed folder's reach; a temporary folder or root refused; a broad folder or root refused; the same Git common
-     dir or the main checkout, then the same repository identity, each at the nearest place in the repository; the
+     dir or the main checkout, or the same repository identity, at the nearest place in the repository (the same common
+     dir at equal depth, as AT-3 weighs them); the
      Project the main checkout lies in; a repository whose Projects all sit deeper refused; the origin's owner a
      Project lists; a tool's folder refused; a work record (by common dir or by identity); a tombstoned root refused; a
      root holding another Project's folder refused; else a new Project at the main checkout, or at the folder without
