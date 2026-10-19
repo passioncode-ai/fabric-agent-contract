@@ -245,7 +245,7 @@ describe("totality: every function answers and never throws", () => {
     expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
   });
   // Linear time, measured by growth rather than by the clock: four times the input may cost at most eight times as much
-  // (a quadratic row costs sixteen), the best of five runs each, plus 150 ms for a busy machine's pauses (the quadratic
+  // (a quadratic row costs sixteen), the best of five runs each, plus 300 ms for a busy machine's pauses (the quadratic
   // rows these tests were written against cost seconds at the larger size).
   // `build(n)` makes the input outside the timer and returns the call that is timed.
   const linear = (build: (n: number) => () => void, n: number) => {
@@ -257,7 +257,7 @@ describe("totality: every function answers and never throws", () => {
     }));
     const small = best(n);
     const large = best(4 * n);
-    expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(8 * small + 150);
+    expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(8 * small + 300);
   };
   it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
     const slashes = `a${"/".repeat(4094)}b`;

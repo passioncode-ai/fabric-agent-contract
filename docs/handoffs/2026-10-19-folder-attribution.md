@@ -162,8 +162,17 @@ explicit attach of another Project's place.
 The twelfth readings of `e5fdc38`: the unit reading passed (risks: the totality comment is for JSON values; the
 nearer-place predicate is computed in two places with the same inputs). The product reading found that Switchboard
 had shipped SB-146 the same evening (a project is a group, one folder in several groups, no group created by
-itself). Resolved in the documents by D3 as corrected: the snapshot's Projects are Fabric's, a Switchboard group binds
-accounts above the answer, AT-15 makes a Fabric Project; posted on thread `617c8cbe`. Also: an explicit move removes
+itself). Resolved in the documents by D3 as corrected: the snapshot's Projects are Fabric's, a Switchboard group is not one
+of them, AT-15 makes a Fabric Project. The thirteenth product reading then found the first wording claimed too much
+(a pool as the alias of one Project, while a group may hold several); the page now leaves that mapping to D3 and
+marks Switchboard's owed rows as measured before SB-146, and names SCN-055's change (a repository recorded by work
+stays with the first Project).
+
+The thirteenth seam reading found the page mapped Observatory's `denied_links.json` to tombstones; it denies a
+(Project, repository) link made by Observatory's vault rules, so it is no tombstone and goes with those rules. Also
+from the thirteenth round: Observatory's origin read raw, not through `git remote get-url` (`insteadOf`); Fabric's
+alias clones that lose their identity named in Compatibility; owner sources, the offline answer's Projects and
+archived Projects under Not decided here; the growth tests' margin 300 ms under contention. Also: an explicit move removes
 the other Project's folder at the place (every product's duty, in the conformance row), and the forms of remote that
 merge at AT-7 are named exactly.
 
@@ -171,7 +180,8 @@ merge at AT-7 are named exactly.
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
 `test/fixtures.test.ts`) were run: 30 plants, 28 killed on the first pass; the two survivors were closed with vectors ("AT-6: a worktree whose
-main checkout a Project lists" and "AT-9: a worktree of an unknown repository whose main checkout is in a tool folder"),
+main checkout a Project lists" and "AT-9: a worktree of an unknown repository whose main checkout is in a tool folder",
+both renamed since by the row that decides them),
 then killed.
 
 The fix round planted 18 more, one per new clause (the listed ancestor skipping containers, the ancestors of home, a

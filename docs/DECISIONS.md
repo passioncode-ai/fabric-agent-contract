@@ -5748,7 +5748,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Not decided here:** how Fabric records an alias, the wire of the session-start capability, storage (D5); how a
   product learns its work records. The operator corrected D3 and D4 later the same day (Fabric ADR-0166, amendment
   "Fabric is the core"; board thread `617c8cbe`): the canonical Project id is Fabric's, Observatory's `project:<slug>`
-  and Switchboard's pool are its aliases (`observatory:<slug>`, `switchboard:<pool>`), and the session-start
+  and Switchboard's pool are its aliases (`observatory:<slug>`, `switchboard:<pool>`; since Switchboard's SB-146 a pool
+  is a group that may hold several Projects, so how it is recorded is D3's), and the session-start
   capability is Fabric's, served by its hub (`fabric.project.resolve`, Fabric's message on the board); Observatory and
   Switchboard ask it, and apply these rules locally only while Fabric is not running (the board message `c95b4a22`;
   the ADR's amendment states only the asking).
