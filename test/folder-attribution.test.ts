@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { attributeFolder, explainFolder, isPath, normalizeOrigin, ownerOf, under } from "../src/folder-attribution.js";
+import { attributeFolder, explainFolder, isPath, normalizeOrigin, ownerOf, recordOrigin, under } from "../src/folder-attribution.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildFolderAttributionVectors } from "../tools/vectors/folder-attribution.js";
@@ -107,6 +107,24 @@ describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => 
   });
 });
 
+describe("recordOrigin (DEC-0089 item 4)", () => {
+  it("records nothing when what is left of the remote still has a secret's shape, and keeps a local path", () => {
+    // Built at run time, so no token-shaped literal sits in the repository.
+    const token = ["ghp", "_", "a".repeat(36)].join("");
+    expect(recordOrigin(`ssh://${token}@github.com/o/r.git`)).toBeNull();
+    expect(recordOrigin(`${token}@github.com:o/r.git`)).toBeNull();
+    expect(recordOrigin(null)).toBeNull();
+    expect(recordOrigin("/u/ana/repo")).toBe("/u/ana/repo");
+  });
+  it("names the same repository as the remote it came from, for every origin vector", () => {
+    for (const entry of vectors.origin as Json[]) {
+      if (typeof entry.origin !== "string") continue;
+      const kept = recordOrigin(entry.origin);
+      expect(kept === null ? undefined : normalizeOrigin(kept), entry.origin).toBe(normalizeOrigin(entry.origin));
+    }
+  });
+});
+
 describe("the schema (DEC-0089)", () => {
   it("admits every vector's snapshot that is well formed, and every answer", () => {
     for (const entry of vectors.attribution as Json[]) {
@@ -203,7 +221,8 @@ describe("totality: every function answers and never throws", () => {
       }
     }
     expect(runs).toBeGreaterThan(10000);
-  });
+    // An exhaustive sweep of every node of every vector: about 25,000 calls, each a few hundred microseconds.
+  }, 30_000);
   it("reads no inherited member", () => {
     const inherited = Object.create({ folder: "/a/b", home: "/h", tempRoots: [], git: null, projects: [] }) as Json;
     expect(attributeFolder(inherited)).toEqual({ fault: "input-invalid" });
