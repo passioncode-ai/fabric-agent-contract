@@ -5652,49 +5652,56 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
 - **Decision:** in [folder attribution](specification/attribution.md):
   1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
-     `tempRoots`, `git` or `null`, `projects`, `work?`, `tombstones?`, `explicit?`;
-     `folder-attribution.schema.json`), answering `attached` (with its rule), `new` (with its root), `refused` (with
-     its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`, in the order AT-0 to AT-13: a fault; an
-     explicit attach; a tombstone on the folder refused; the folder or its nearest listed ancestor; a temporary folder
-     or root refused; a broad container root refused; the same Git common dir or the main checkout, then the same
-     repository identity, each at the nearest place in the repository; the origin's owner a Project lists; a tool's
-     folder refused; a work record (by common dir or by identity); a tombstoned root refused; a root holding another
-     Project's folder refused; else a new Project at the main checkout, or at the folder without Git. A tie at one row
-     is `ambiguous` and attributes nothing. A branch decides nothing.
+     `tempRoots`, `git` or `null`, `projects` with each folder's `commonDir`, `origin` and `toplevel`, `work?`,
+     `tombstones?`, `containers?`, `explicit?`; `folder-attribution.schema.json`), answering `attached` (with its rule),
+     `new` (with its root), `refused` (with its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`,
+     in the order AT-0 to AT-15: a fault; an explicit attach; a tombstone on the folder refused; the folder or its
+     nearest listed ancestor; a temporary folder or root refused; a broad folder or root refused; the same Git common
+     dir or the main checkout, then the same repository identity, each at the nearest place in the repository; the
+     Project the main checkout lies in; a repository whose Projects all sit deeper refused; the origin's owner a
+     Project lists; a tool's folder refused; a work record (by common dir or by identity); a tombstoned root refused; a
+     root holding another Project's folder refused; else a new Project at the main checkout, or at the folder without
+     Git. A tie at one row is `ambiguous` and attributes nothing. A branch decides nothing.
   2. **The repository identity** `normalizeOrigin`: `host/path` in lower case, from `http`, `https`, `ssh`, `git`,
      `git+ssh`, `git+https` URLs or the scp form, trimmed; credentials, port, query, fragment and one `.git` dropped;
      a host of letters, digits, `.` and `-` with a dot, and at least two path segments. The owner is every segment but the last.
-  3. **Containers:** the filesystem or a drive root, home and an ancestor of home are never a Project, never listed
-     and never attached; a folder right under home is a container unless a Project lists it; a root that holds another
-     Project's folder is never made a Project (AT-12) but does not stop a folder joining by an earlier row. Under a
-     temporary or cache root only the folder or its nearest listed ancestor (AT-3) joins; a tool's folder (a hidden
-     folder directly in home, `Library`, `AppData`) joins by AT-3, or a known repository by worktree, repository or
-     owner, never by work and never as a new Project.
-  4. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
+  3. **Containers.** A *broad* folder (a filesystem or drive root, home, an ancestor of home, or a container a person
+     declared) is never a Project, never listed (AT-3 to AT-9 skip it) and never attached by any row but an explicit
+     attach; a folder or root right under home is a container unless a Project lists it, for a worktree as for a clone;
+     a repository whose Project folders all sit deeper than the folder's place is a container of them (AT-9); a root
+     that holds another Project's folder is never made a Project (AT-14). Under a temporary or cache root only the
+     folder or its nearest listed ancestor (AT-3) joins; a tool's folder (a hidden folder directly in home, `Library`,
+     `AppData`) joins by AT-3, or a known repository by AT-6 to AT-10, never by work and never as a new Project.
+  4. **Recording.** After an attach by a Git row the product records the folder's Git top level as a folder of the
+     Project; after `new`, the root; after `folder`, nothing; after an explicit attach, the folder, removing a tombstone
+     the attach overrode (attribution.md, *Recording the answer*).
+  5. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
      `attributeFolder`'s.
 - **Choices made in implementation** (the run's D2 left them open):
-  - paths compare segment by segment and as written; the product resolves the real path (links, case) first;
+  - paths compare segment by segment and as written; the product resolves the real path (links, case) first; Project
+    ids compare as written (each product's own keys; identifiers.md);
   - a tombstone covers its folder and its subfolders and is scoped to them: it refuses the folder (AT-2) and a new
-    Project at a tombstoned root (AT-11), but not a worktree or clone of a repository another Project keeps; an
-    explicit attach clears it;
+    Project at a tombstoned root (AT-13), but not a worktree or clone of a repository another Project keeps;
   - a folder a Project lists is attached before the temporary refusal, so a Project kept under a temporary root keeps
     working (D2's "already belongs" first, as Switchboard does); nothing else joins there;
-  - broad containers are refused before every Git row, so a home that is a clone is not attached (Fabric and
+  - broad folders are refused before every Git row, so home as a clone or as a worktree is not attached (Fabric and
     Switchboard refused them when attaching); a folder right under home a Project lists is that Project's (Switchboard
-    offers its worktrees); a root holding another Project's folder is refused only before creation, so a worktree of
-    the outer of two nested Projects joins it;
-  - a worktree or clone is the same tree: AT-6 and AT-7 match a Project folder by its place below its Git top level
-    (the snapshot's `toplevel`), the nearest place first, as AT-3 matches by path; a nested folder given without its
-    top level counts at the top and ties;
+    offers its worktrees);
+  - a worktree or clone is the same tree: AT-6 and AT-7 match a Project folder by its place below its Git top level,
+    the nearest place first, as AT-3 matches by path; else a worktree goes where its main checkout goes (AT-8); else a
+    repository whose Projects all sit deeper is refused, so no second Project is made for one repository (AT-9); a
+    nested folder given without its top level counts at the top and ties;
   - the repository identity folds case for the whole path (GitHub, GitLab and Bitbucket route a path regardless of it;
     only Switchboard folded, owner and name) and keeps group paths (Fabric did); it is not DEC-0076's normal form,
     which compares URIs; on a case-sensitive server two repositories differing only in case read as one, accepted;
   - a tool's folder is refused after the owner row, so it joins a known repository but never by work and never as a new
     Project, as Switchboard's SB-131;
-  - a work record carries the common dir and, when it has one, the raw origin, so a second clone joins by work;
-  - a Git probe that fails is not `git: null`: the product does not attribute until it can read the facts;
+  - a work record carries the common dir and, when it has one, the raw origin, so a second clone joins by work; one
+    naming a Project the snapshot does not hold matches nothing;
+  - the main checkout is the first entry of `git worktree list --porcelain` (the common dir for a bare repository); a
+    Git probe that fails is not `git: null`, and a folder whose top level is broad (home kept under Git) is passed as
+    `git: null`;
   - `ambiguous` lists the Projects in the order of `projects`;
-  - an explicit attach wins over a tombstone, and the product removes the tombstone it overrode;
   - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
     Project, a tie or a refusal is shown.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across

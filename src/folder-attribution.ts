@@ -178,19 +178,20 @@ function decide(matches: Project[], rule: AttributionRule): Attribution | undefi
  * - AT-0: a snapshot that is not of the schema's shape, or `explicit` naming no Project: `{fault: "input-invalid"}`;
  * - AT-1: `explicit` names a Project: attached to it (`explicit`), whatever else holds;
  * - AT-2: the folder is at or under a tombstone: refused `tombstoned`;
- * - AT-3: the folder, or its nearest ancestor-or-self a Project lists, belongs to that Project (`folder`); a root,
- *   home or an ancestor of home is never listed so;
- * - AT-4: the folder or its root is under a temporary root: refused `transient`;
- * - AT-5: the root (the main checkout, or the folder without Git) is a root, home, an ancestor of home, or a folder
- *   right under home no Project lists: refused `container`;
+ * - AT-3: the folder, or its nearest ancestor, a Project lists (`folder`); a broad folder (a root, home, an ancestor of
+ *   home, a declared container) is never so listed;
+ * - AT-4: the folder or its root is at or under a temporary root: refused `transient`;
+ * - AT-5: the folder or its root is broad, or right under home and listed by no Project: refused `container`;
  * - AT-6: a Project's folder has the same Git common dir, or is the main checkout (`worktree`), nearest by place;
  * - AT-7: the same repository identity (`repository`), nearest by place;
- * - AT-8: the repository's owner is a source of a Project (`owner`);
- * - AT-9: the folder or its root is in a tool's folder: refused `tool`;
- * - AT-10: a work record names the repository (its common dir or its identity) for a Project (`work`);
- * - AT-11: the root is at or under a tombstone: refused `tombstoned`;
- * - AT-12: the root holds another Project's folder: refused `container` (no Project is made around another);
- * - AT-13: otherwise a new Project at the root.
+ * - AT-8: the root (the main checkout) lies in a folder a Project lists, AT-3's search (`worktree`);
+ * - AT-9: the repository has Project folders, but none at a place that holds the folder's: refused `container`;
+ * - AT-10: the repository's owner is a source of a Project (`owner`);
+ * - AT-11: the folder or its root is in a tool's folder: refused `tool`;
+ * - AT-12: a work record names the repository (its common dir or its identity) for a Project (`work`);
+ * - AT-13: the root is at or under a tombstone: refused `tombstoned`;
+ * - AT-14: the root holds another Project's folder: refused `container` (no Project is made around another);
+ * - AT-15: otherwise a new Project at the root.
  *
  * Two Projects matching at one row answer `ambiguous` with both, and nothing is attached. It never throws.
  */
@@ -203,7 +204,8 @@ export function attributeFolder(snapshot: unknown): Attribution {
   const work = own(snapshot, "work") === undefined ? [] : list(own(snapshot, "work"));
   const tombstones = own(snapshot, "tombstones") === undefined ? [] : list(own(snapshot, "tombstones"));
   const explicit = own(snapshot, "explicit");
-  if (!isPath(folder) || !isPath(home) || !tempRoots || !tempRoots.every(isPath) || !projects || !work || !tombstones || !tombstones.every(isPath)) return { fault: "input-invalid" };
+  const containers = own(snapshot, "containers") === undefined ? [] : list(own(snapshot, "containers"));
+  if (!isPath(folder) || !isPath(home) || !tempRoots || !tempRoots.every(isPath) || !projects || !work || !tombstones || !tombstones.every(isPath) || !containers || !containers.every(isPath)) return { fault: "input-invalid" };
   if (git !== null && !isObject(git)) return { fault: "input-invalid" };
   const toplevel = own(git, "toplevel");
   const commonDir = own(git, "commonDir");
@@ -225,37 +227,50 @@ export function attributeFolder(snapshot: unknown): Attribution {
 
   if (tombstones.some((stone) => under(folder, stone as string))) return { outcome: "refused", reason: "tombstoned" };
   const root = git === null ? folder : (mainCheckout as string);
-  /** Never a Project: a root, home, an ancestor of home. */
-  const broad = (path: string) => isRoot(path) || under(home, path);
+  const declared = new Set(containers as string[]);
+  /** Never a Project and never listed: a root, home, an ancestor of home, a container a person declared. */
+  const broad = (path: string) => isRoot(path) || under(home, path) || declared.has(path);
   const listed = (path: string) => projects.some((project) => project.folders.some((entry) => entry.path === path));
-  // AT-3: the nearest Project folder at or above the folder.
-  let nearest = -1;
-  let owners: Project[] = [];
-  for (const project of projects) {
-    for (const entry of project.folders) {
-      if (!under(folder, entry.path) || broad(entry.path)) continue;
-      if (entry.path.length > nearest) [nearest, owners] = [entry.path.length, [project]];
-      else if (entry.path.length === nearest) owners.push(project);
+  /** A folder right under home that no Project lists (a root is broad, so it is never asked). */
+  const looseUnderHome = (path: string) => parentOf(path) === home && !listed(path);
+  /** The Projects whose listed folder is `path` or its nearest ancestor (AT-3's search), broad folders skipped. */
+  const byPath = (path: string): Project[] => {
+    let nearest = -1;
+    let owners: Project[] = [];
+    for (const project of projects) {
+      for (const entry of project.folders) {
+        if (!under(path, entry.path) || broad(entry.path)) continue;
+        if (entry.path.length > nearest) [nearest, owners] = [entry.path.length, [project]];
+        else if (entry.path.length === nearest) owners.push(project);
+      }
     }
-  }
-  const byFolder = decide(owners, "folder");
+    return owners;
+  };
+  const byFolder = decide(byPath(folder), "folder");
   if (byFolder) return byFolder;
   if (tempRoots.some((temp) => under(folder, temp as string) || under(root, temp as string))) return { outcome: "refused", reason: "transient" };
-  if (broad(root) || (parentOf(root) === home && !listed(root))) return { outcome: "refused", reason: "container" };
+  if (broad(folder) || broad(root) || looseUnderHome(folder) || looseUnderHome(root)) return { outcome: "refused", reason: "container" };
   if (git !== null) {
     const place = relativeTo(folder, toplevel as string);
-    const byCommon = decide(nearestIn(projects, (entry) => entry.commonDir === commonDir || entry.path === mainCheckout, place), "worktree");
-    if (byCommon) return byCommon;
     const repository = normalizeOrigin(origin);
+    const sameCommon = (entry: ProjectFolder) => !broad(entry.path) && (entry.commonDir === commonDir || entry.path === mainCheckout);
+    const sameIdentity = (entry: ProjectFolder) => !broad(entry.path) && repository !== undefined && entry.repository === repository;
+    const byCommon = decide(nearestIn(projects, sameCommon, place), "worktree");
+    if (byCommon) return byCommon;
+    const byRepository = decide(nearestIn(projects, sameIdentity, place), "repository");
+    if (byRepository) return byRepository;
+    // AT-8: a worktree goes where its main checkout goes by AT-3.
+    const byCheckout = decide(byPath(root), "worktree");
+    if (byCheckout) return byCheckout;
+    // AT-9: the repository has Projects, but only at places deeper than the folder's: it holds them.
+    if (projects.some((project) => project.folders.some((entry) => sameCommon(entry) || sameIdentity(entry)))) return { outcome: "refused", reason: "container" };
     if (repository !== undefined) {
-      const byRepository = decide(nearestIn(projects, (entry) => entry.repository === repository, place), "repository");
-      if (byRepository) return byRepository;
       const byOwner = decide(projects.filter((project) => project.sources.includes(ownerOf(repository))), "owner");
       if (byOwner) return byOwner;
     }
     if (inToolFolder(folder, home) || inToolFolder(root, home)) return { outcome: "refused", reason: "tool" };
-    const worked = (record: (typeof records)[number]) => record.commonDir === commonDir || (repository !== undefined && record.repository === repository);
-    const byWork = decide(projects.filter((project) => records.some((record) => record.project === project.id && worked(record))), "work");
+    const workers = new Set(records.filter((record) => record.commonDir === commonDir || (repository !== undefined && record.repository === repository)).map((record) => record.project));
+    const byWork = decide(projects.filter((project) => workers.has(project.id)), "work");
     if (byWork) return byWork;
   } else if (inToolFolder(folder, home)) {
     return { outcome: "refused", reason: "tool" };

@@ -9,29 +9,32 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
 
 ## Done
 
-- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-13), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
+- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-15), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for project-observatory-contract to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 24 origin and 90 attribution cases covering every AT row, a repository, a
+  nothing imported from the module): 24 origin and 107 attribution cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
-  an owner, work, a tie at each rank, tombstones and an explicit attach, POSIX and Windows paths.
+  an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
+  containers, POSIX and Windows paths.
 - Fixtures: positive `folder-attribution-snapshot`, negative `folder-attribution-relative-folder`, semantic
-  `folder-attribution-ok` and `-new-for-worktree`.
+  `folder-attribution-ok`, `-new-for-worktree`, `-work-by-origin` and `-explicit-over-tombstone`.
 - Docs: `docs/specification/attribution.md` (new); identifiers.md (the repository identity is not DEC-0076's form);
   conformance (the attributing product's row, `FAC-SEM-121`, next free `FAC-SEM-122`); CONTEXT, DOCMAP, README; DEC-0089;
   CT-57 with each product's duty.
 
 ## Decisions
 
-DEC-0089 and its *Choices made in implementation*: segment-by-segment paths on the real path; a tombstone covers its
-folder and subfolders, refuses the folder (AT-2) and a new Project at a tombstoned root (AT-11), and does not refuse a
-worktree of a repository another Project keeps; a listed folder is attached before the temporary refusal; a root,
-home and its ancestors are never a Project and never listed; a folder right under home is a container unless listed;
-broad containers are refused before every Git row and the holder of another Project's folder only before creation; a
-worktree or clone joins the nearest place in its repository (each folder's `toplevel`); the repository identity folds
-case and keeps group paths; a tool's folder is refused after the owner row (as Switchboard's SB-131); work
-records match by common dir or by identity; a failed Git probe is not `git: null`.
+DEC-0089 and its *Choices made in implementation*: segment-by-segment paths on the real path, Project ids as written; a
+tombstone covers its folder and subfolders, refuses the folder (AT-2) and a new Project at a tombstoned root (AT-13),
+and does not refuse a worktree of a repository another Project keeps; a listed folder is attached before the temporary
+refusal; a broad folder (a root, home, an ancestor of home, a declared container) is never a Project, never listed and
+refused for the folder and its root alike; a folder right under home is a container unless listed; a worktree or clone
+is the same tree (the nearest place by each folder's `toplevel`, else the main checkout's Project, else a container of
+the repository's deeper Projects); a root holding a Project's folder is never made a Project; the repository identity
+folds case and keeps group paths; a tool's folder is refused after the owner row (as Switchboard's SB-131); work
+records match by common dir or identity; each product records the same after each answer; a failed Git probe is not
+`git: null`, and a home kept under Git is.
 
 For `project.attribute` (D4), a proposal to project-observatory-contract, which owns the names: the answer's refusal
 reasons `transient`, `tombstoned`, `container` and `tool` (the run index planned `refused-container`), a tie as
@@ -53,11 +56,22 @@ folder right under home that a Project lists was refused, though the table exclu
 and with two nested Projects (`mono` listing the repository, `pkg` its subfolder) a worktree of `mono` was refused as a
 container and a clone of it tied. The second fix round: a Project folder carries its Git `toplevel`, and AT-6 and AT-7
 pick the nearest place in the repository, so a worktree or clone is read as the same tree; the holder of another
-Project's folder is refused only before creation (AT-12, `new` is AT-13); a folder right under home a Project lists is
+Project's folder is refused only before creation (then AT-12, `new` AT-13); a folder right under home a Project lists is
 its folder. Also: slashes trimmed in linear time (10,000 sources of 4,096 slashes took 72 s), vectors for bare
 repositories, the scp leading `/`, a trimmed origin, an SSH alias and an underscore host, a sweep that replaces every
 node of every vector's snapshot with a hostile value, two semantic fixtures carrying `work`, `tombstones`, `explicit`
 and `toplevel`, and each product's measured change written out.
+
+The third readings of `af9eff9`: the seam reading passed; the unit and product readings failed it. A worktree whose
+main checkout lies in a plain Project folder made a second Project and took that folder away; a second clone of a
+repository whose only Project is a subfolder became a second Project; home as a worktree, and a worktree right under
+home, were attached while a clone there was refused; the work row was quadratic (10,000 by 10,000 in 1.3 s); the
+Observatory duty could not be met, nothing said what a product records after an answer, and Project ids were compared
+without saying so. The third fix round rebuilt the order as AT-0 to AT-15 on one model (a worktree or clone is the same
+tree): broad folders (with declared `containers`) refused for the folder and the root alike, the main checkout's
+Project (AT-8), a repository whose Projects all sit deeper refused (AT-9), the work row in one pass, *Recording the
+answer*, Project ids compared as written (identifiers.md), the main checkout from `git worktree list --porcelain`, and
+CO-330 corrected to `8bdad97c` and `f7c71cba` (CO-331).
 
 ## Plants
 
@@ -77,13 +91,20 @@ The second fix round planted 12 more (an empty place holding every place, the ne
 ignored, a `toplevel` that does not hold its folder, the place read from `toplevel`, a listed folder right under home,
 the holder refused only before creation, a repository at the filesystem root, the repository row by place, sources
 trimmed, an origin path's leading `/`, a listed folder right under home in AT-3): 11 killed on the first pass; the
-survivor (the leading `/` of an scp path) was closed with an origin vector, then killed. 60 plants in all, every one
+survivor (the leading `/` of an scp path) was closed with an origin vector, then killed.
+
+The third fix round planted 13 (a declared container as broad, a broad folder and a loose folder or root right under
+home at AT-5, AT-6 and AT-7 skipping broad folders, AT-8 and AT-9 removed, AT-9 reading common dirs only, work by
+identity, containers validated, AT-9 before AT-8, a root guard in the loose test): 10 killed on the first pass; two
+were closed with vectors (a worktree of a repository only a home-listing Project keeps; a worktree whose main checkout
+lies in a plain Project folder while the repository keeps a deeper Project), then killed; one was equivalent (a root
+is broad, so the loose test never sees one) and its guard was removed. 72 plants in all, every non-equivalent one
 killed.
 
 ## Checks
 
-`pnpm run check` at the second fix round, each step exiting 0: typecheck; 77 files, 5911 tests, branches 7666 / 7739
-with `src/folder-attribution.ts` at 219 / 219; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the third fix round, each step exiting 0: typecheck; 77 files, 5929 tests, branches 7682 / 7755
+with `src/folder-attribution.ts` at 235 / 235; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in

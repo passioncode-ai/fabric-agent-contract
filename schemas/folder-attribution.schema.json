@@ -185,6 +185,14 @@
           },
           "description": "Folders a person or agent removed; each keeps itself and its subfolders out until an explicit attach."
         },
+        "containers": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/path"
+          },
+          "description": "Folders a person declared containers (for example a folder that holds agent worktrees): never a Project, never listed and never an ancestor a folder joins (AT-3, AT-5). Absent: none."
+        },
         "explicit": {
           "$ref": "#/$defs/projectId",
           "description": "A person or agent attaches the folder to this Project."

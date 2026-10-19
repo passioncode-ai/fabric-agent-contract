@@ -125,6 +125,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 - a repository identity (`normalizeOrigin`, [folder attribution](attribution.md#the-repository-identity), DEC-0089):
   `host/path` in lower case from a remote URL, compared as written once built; it folds the path's case, so it is not
   the normal form above, which compares URIs;
+- a folder-attribution snapshot's Project ids (`id`, `explicit`, `work[].project`; [folder
+  attribution](attribution.md#the-snapshot), DEC-0089): each product's own opaque storage keys, matched byte for byte,
+  even when one is shaped like a URI such as `project:<slug>`; the canonical id and its aliases are the run's D3;
 
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;

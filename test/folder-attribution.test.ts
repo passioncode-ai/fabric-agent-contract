@@ -31,7 +31,7 @@ describe("the vectors (DEC-0089)", () => {
   });
   it("covers every AT row", () => {
     const rows = new Set((vectors.attribution as Json[]).map((entry) => /^AT-[0-9]+/.exec(entry.name)?.[0]));
-    for (let row = 0; row <= 13; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
+    for (let row = 0; row <= 15; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
   });
   it("hold the same answers in every time zone", () => {
     for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
@@ -95,6 +95,15 @@ describe("totality: every function answers and never throws", () => {
     const started = Date.now();
     attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(10000).fill(slashes) }] });
     attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(2000).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] });
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+  it("reads work records in linear time: 10000 Projects and 10000 records with ids of 256 astral characters answer within a second", () => {
+    const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
+    const projects = Array.from({ length: 10000 }, (_, n) => ({ id: id(n), folders: [], sources: [] }));
+    const work = Array.from({ length: 10000 }, (_, n) => ({ project: id(n), commonDir: `/u/ana/work/r${n}/.git` }));
+    const git = { toplevel: "/u/ana/work/lib", commonDir: "/u/ana/work/lib/.git", mainCheckout: "/u/ana/work/lib", origin: null };
+    const started = Date.now();
+    expect(attributeFolder({ folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work })).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
     expect(Date.now() - started).toBeLessThan(1000);
   });
   it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
