@@ -131,6 +131,20 @@ in them, but the rule binds shapes. The gate before the commit had not read the 
 tracked files only), and the push command tested `grep`'s exit, not the check's. The vectors now use `/u/ana` and
 `C:/Profiles/ana` and userinfo `git@`; the check exits 0; the pushes since are gated on the check's own exit code.
 
+## Status report (2026-10-19, the operator's instruction on board thread `bd1c9611`)
+
+The same report was posted on that thread (message `95a49696`).
+
+- **Status:** DEC-0086 to DEC-0088 merged today; DEC-0089 (this row) in PR #124, gate green, its blind readings owed.
+- **Worked on:** CT-56 (DEC-0086), CT-55 (DEC-0087), CT-59 (DEC-0088), CT-57 (DEC-0089), CT-58 (brief drafted).
+- **Done:** #117 `b89cb94`; #120 `027a01c` and #121 `ceb5985`; #122 `0752e03` and #123 `0704218`. The contract
+  publishes no package: consumers pin a commit, so a merge is the release.
+- **Left:** this PR, then its board messages (thread `617c8cbe`, project-observatory-contract for D4); CT-58 by
+  2026-10-27 (thread `6e66a023`).
+- **Blocked by:** no other project; the fifth reading stopped on the model session limit (resets 14:10 Europe/Warsaw).
+- **When it can ship:** this PR when two consecutive readings find nothing that blocks it, targeted 2026-10-22.
+- **Next action:** CT-58's design until the readings run again.
+
 ## Next task
 
 Open the pull request, run the blind readings, merge, then post the merge commit on thread `617c8cbe` for Fabric,
