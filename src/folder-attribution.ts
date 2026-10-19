@@ -7,7 +7,8 @@ import { secretUrl } from "./secret-shape.js";
  * Fabric, Fabric Switchboard and Project Observatory. `attributeFolder` reads a snapshot of what a product knows (the
  * folder, its Git facts, the Projects with their folders and sources, the work records, the tombstones) and answers in
  * the order of folder-attribution.md's AT table; it reads no file system, so every product gets the same answer from the same
- * facts. Every function here answers and never throws: malformed input is an answer.
+ * facts. attributeFolder, explainFolder, normalizeOrigin and isPath answer any value and never throw: malformed input is
+ * an answer; the other exports take the strings their types name.
  */
 
 /** A path: absolute, `/`-separated (a Windows path written `C:/...`, its drive letter upper case), no empty, `.` or `..` segment, no trailing `/`. */
@@ -127,7 +128,9 @@ export function recordOrigin(origin: string | null): string | null {
     if (!scp || normalizeOrigin(value) === undefined) return null;
     value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${host.slice(host.lastIndexOf("@") + 1)}:${String(String(scp[3]).split(/[?#]/)[0])}`;
   }
-  return secretUrl(value) ? null : value;
+  // The kept origin names the same repository as the raw one, by construction: a rebuilt form whose identity differs
+  // (an scp remote read as a URL, say) is not kept.
+  return secretUrl(value) || normalizeOrigin(value) !== normalizeOrigin(origin) ? null : value;
 }
 
 /** The owner of a normalized repository identity: every segment but the last (`host/owner`, `host/group/sub`). */

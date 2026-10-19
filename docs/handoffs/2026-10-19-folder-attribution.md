@@ -134,7 +134,8 @@ named, and the local fallback cited to its board message.
 The ninth readings of `abb7ad1` (unit and product): both failed it. The list against the operator's words was found
 incomplete a fourth time, so it is now stated by the rows that keep the words, with examples marked as examples (a
 known repository's worktree or clone joins its Project at AT-6, AT-7, AT-8 or AT-3 by its own place; a new folder is a
-Project only at AT-15; any other row departs), and a probe over 30,000 random worlds agrees. A tombstone was lifted
+Project only at AT-15; any other row departs), probed in the session over random worlds (the probe is not in the
+tree; the tenth product reading probed 180,000 worlds and found only ties and AT-1, both now in the rule). A tombstone was lifted
 through a container inside a listed folder (AT-2 now reads reach, as AT-3 does); an scp-like remote the form cannot
 read kept its password (any remote that is neither a local path nor has an identity now records `null`); a worktree
 whose top level is a declared container is refused; the growth tests build their input outside the timer; a session

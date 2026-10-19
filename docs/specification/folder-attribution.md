@@ -69,7 +69,8 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
 `ssh`, `git`, `git+ssh` or `git+https`, or from the scp form `[user@]host:path`. The user, a password or token, the port,
 a query, a fragment, the leading and trailing `/` and then one trailing `.git` are dropped (so a path ending in `/.git`
 keeps an empty segment and has no identity), and surrounding whitespace is
-trimmed. The host is a DNS name of ASCII letters, digits, `.` and `-` with a dot, after the same `A` to `Z` folding (so
+trimmed. The host is ASCII letters, digits, `.` and `-` with at least one dot (not checked further as a DNS name; a trailing
+`.` makes another identity), after the same `A` to `Z` folding (so
 `git_host.example.com` has no identity, nor has a host with a non-ASCII letter such as the Kelvin sign U+212A, and
 an SSH alias such as `github.com-work` is an identity of its own), and the path has at least two segments: `owner/name`, or a group path such as `group/sub/name`. A local path, `file:`, any other scheme
 or anything else has no identity. The owner (`ownerOf`) is every segment but the last.
@@ -135,12 +136,14 @@ both, in the order of `projects`, and the product reports it rather than choosin
 - **What follows from D2 against the operator's literal words** (in the run index: a worktree or a branch goes to the
   existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. The rule
   is stated by the rows that keep the words, so it needs no list to be whole:
-  - *A worktree or clone of a known repository* joins its repository's Project when AT-6, AT-7 or AT-8 decides, or
-    AT-3 by its place in that repository (a checkout already recorded). Whenever another row decides first, or AT-3
-    gives another Project, the answer departs from the words.
+  - *A worktree or clone of a known repository* joins its repository's Project when AT-6, AT-7 or AT-8 attaches it
+    to one Project, or AT-3 does by its place in that repository (a checkout already recorded). Whenever another row
+    decides first, AT-3 gives another Project, or a row ties (D2 adds that a tie attributes nothing), the answer
+    departs from the words.
   - *A new folder* makes a new Project exactly when AT-15 decides. Whenever another row decides first, the answer
     departs from the words.
-  - AT-0 is a fault in the snapshot, not an attribution, and departs from nothing.
+  - AT-0 is a fault in the snapshot, not an attribution, and AT-1 is a person's or agent's explicit choice: neither
+    departs from the words.
 
   Among the departures, for example: another Project's folder that holds the folder (AT-3, a repository cloned into a
   plain-folder Project included); a temporary root that holds the folder or its main checkout (AT-4), so a worktree
@@ -176,12 +179,12 @@ session (Observatory's `_*` folders are, below).
 
 The record's `origin` is the remote without what can carry a credential (`recordOrigin`): an `http` or `https` URL
 loses its user information, any URL its password, query and fragment, the scp form `user:secret@host:path` its
-`:secret` up to the host's last `@`; a local path is kept; `null` for any other remote with no repository identity (its authority
+`:secret` up to the host's last `@`; a local path (absolute, a drive path, or starting with `.`) is kept; `null` for any other remote with no repository identity (its authority
 cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). A record whose path is
 broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
 attach of a folder another Project already holds at the same place ties at AT-3 when asked again, until the product
 removes the other Project's folder (D5). It names the
-same repository (`normalizeOrigin` of both is one identity), and the vectors' `record` cases hold one of each form.
+same repository (`normalizeOrigin` of both is one identity; a rebuilt form whose identity would differ is `null`), and the vectors' `record` cases hold one of each form.
 
 ## Semantic rules
 
@@ -200,8 +203,10 @@ the products' code). `contractVersion` stays `0.1.0`. Project counts move on ado
 Switchboard and Observatory, subfolder starts merge into their repository's Project, and stored Projects that differ
 only in the case or depth of their remote's path now tie at AT-7. The product that holds two such Projects merges them
 in its own store (D5) and reports the tie until then (DEC-0076 item 5). Sessions that a product attributed before can be
-refused after it adopts: a worktree or clone under a temporary root or right under home, and a repository root whose
-Projects sit deeper. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
+refused after it adopts, among them a worktree or clone under a temporary root or right under home, a repository root
+whose Projects sit deeper, and in Fabric (which has no temporary, tool or subfolder tombstone refusal today) folders
+under a temporary root, in a tool's folder or below a tombstoned folder; each product's owed rows below are the full
+measure. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
 ([activity](activity.md)) and a service's usage `byProject` (FAC-SEM-025). A refused or tied session carries no
 `project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
 
