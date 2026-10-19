@@ -822,5 +822,7 @@
   {"name": "share-registration-refusal-unknown-code", "schema": "share-registration.schema.json", "path": "negative/share-registration-refusal-unknown-code.json", "valid": false, "keyword": "enum"},
   {"name": "share-registration-refusal-long-message", "schema": "share-registration.schema.json", "path": "negative/share-registration-refusal-long-message.json", "valid": false, "keyword": "maxLength"},
   {"name": "telemetry-event-grant-usage-no-context", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-no-context.json", "valid": false, "keyword": "required"},
-  {"name": "telemetry-event-grant-usage-personal-context", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-personal-context.json", "valid": false, "keyword": "pattern"}
+  {"name": "telemetry-event-grant-usage-personal-context", "schema": "telemetry-event.schema.json", "path": "negative/telemetry-event-grant-usage-personal-context.json", "valid": false, "keyword": "pattern"},
+  {"name": "folder-attribution-snapshot", "schema": "folder-attribution.schema.json", "path": "positive/folder-attribution-snapshot.json", "valid": true},
+  {"name": "folder-attribution-relative-folder", "schema": "folder-attribution.schema.json", "path": "negative/folder-attribution-relative-folder.json", "valid": false, "keyword": "pattern"}
 ]

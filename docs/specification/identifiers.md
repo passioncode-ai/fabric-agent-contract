@@ -122,6 +122,10 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 
 **Compared as written** — fields that are not URIs, or whose comparison another specification fixes:
 
+- a repository identity (`normalizeOrigin`, [folder attribution](attribution.md#the-repository-identity), DEC-0089):
+  `host/path` in lower case from a remote URL, compared as written once built; it folds the path's case, so it is not
+  the normal form above, which compares URIs;
+
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;
 - context ids (`common.schema.json#/$defs/contextId`: `personal`, `org:<orgId>`; [contexts](contexts.md), DEC-0082) — a

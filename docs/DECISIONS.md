@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0089`
+**Next free ID:** `DEC-0090`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5645,3 +5645,62 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** passioncode-platform's request on the project board (thread `c7d8f53d`, 2026-10-19) under the operator's
   SD-2 and its ADR-0008 D-3; DEC-0085. DEC-0088 was reserved by git CAS (`agent_sync.py reserve`, key
   `ct59-enterprise-cloud`).
+
+### DEC-0089: Folder attribution: one rule set, with vectors, for which Project a coding agent's folder belongs to (`FAC-SEM-121`)
+
+- **Date:** 2026-10-19
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
+- **Decision:** in [folder attribution](specification/attribution.md):
+  1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
+     `tempRoots`, `git` or `null`, `projects`, `work?`, `tombstones?`, `explicit?`;
+     `folder-attribution.schema.json`), answering `attached` (with its rule), `new` (with its root), `refused` (with
+     its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`, in the order AT-0 to AT-11: an explicit
+     attach; a temporary folder refused; a tombstone refused; the folder or its nearest listed ancestor; the same Git
+     common dir; the same repository identity; a tool's folder refused; the origin's owner a Project lists; a work
+     record; a container refused; else a new Project at the main checkout, or at the folder without Git. A tie at one
+     row is `ambiguous` and attributes nothing. A branch decides nothing.
+  2. **The repository identity** `normalizeOrigin`: `host/path` in lower case, from `http`, `https`, `ssh`, `git`,
+     `git+ssh`, `git+https` URLs or the scp form; credentials, port, query, fragment and one `.git` dropped; a host
+     with a dot and at least two path segments. The owner is every segment but the last.
+  3. **Containers:** the filesystem or a drive root, home, a folder right under home, and a folder that holds another
+     Project's folder; never a Project and never an ancestor a folder joins. A temporary or cache root joins nothing; a
+     tool's folder (a hidden folder in home, `Library`, `AppData`) joins a known repository only.
+  4. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
+     `attributeFolder`'s.
+- **Choices made in implementation** (the run's D2 left them open):
+  - paths compare segment by segment and as written; the product resolves the real path (links, case) first;
+  - a tombstone covers its folder and its subfolders, and refuses when either the folder or the root it would be
+    attached at is under it; an explicit attach clears it;
+  - the repository identity folds case for the whole path (Switchboard folded owner and name) and keeps group paths
+    (Fabric did); it is not DEC-0076's normal form, which compares URIs;
+  - a tool's folder is refused after the worktree and repository rows, so a worktree a coding agent keeps there joins,
+    as Switchboard's SB-131 does; a temporary folder is refused before every row;
+  - `ambiguous` lists the Projects in the snapshot's order.
+- **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across
+  Fabric, Switchboard and Observatory; measured that day, the three disagreed on four cases (org-index run index).
+- **Alternatives refused:** each product keeping its rules with a shared description (they drifted once already); the
+  branch as a signal (a branch is the same repository); the file system read by the reference (vectors could not then be
+  shared).
+- **Compatibility:** new; it refuses no document. Each product's own answers change where its rules differed.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/attribution.md` (new), `docs/specification/identifiers.md` (the repository identity is
+    not DEC-0076's form), `docs/specification/conformance.md` (the attributing product's row; `FAC-SEM-121`; next free
+    `FAC-SEM-122`);
+  - schemas: `schemas/folder-attribution.schema.json` (new);
+  - code: `src/folder-attribution.ts` (new), `src/semantic-rules.ts`; `tools/vectors/folder-attribution.ts` (new);
+  - fixtures: `fixtures/vectors/folder-attribution.json` (new), `fixtures/positive/folder-attribution-snapshot.json`,
+    `fixtures/negative/folder-attribution-relative-folder.json`, `fixtures/semantic/folder-attribution-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/folder-attribution.test.ts` (new), `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
+    the floor for `src/folder-attribution.ts` in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-57),
+    `docs/handoffs/2026-10-19-folder-attribution.md`, `docs/handoffs/README.md`.
+- **Not decided here:** the canonical id and aliases (D3), the session-start capability (D4), storage (D5); how a
+  product learns its work records.
+- **Source:** Fabric's ask D1 on the project board (thread `617c8cbe`, 2026-10-19) and the run index org-index
+  `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe` (D1 to D5, the measured table); Fabric
+  `folderResolver.ts` `normalizeRemoteKey` and Switchboard `suggest.rs` `normalize`, `transient`, `tool_folder`;
+  DEC-0076. DEC-0089 and `FAC-SEM-121` were reserved by git CAS (`agent_sync.py reserve`, key
+  `ct57-folder-attribution`).

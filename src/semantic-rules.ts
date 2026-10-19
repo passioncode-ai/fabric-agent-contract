@@ -35,6 +35,7 @@ import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
+import { folderAttributionRules } from "./folder-attribution.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
@@ -80,6 +81,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (lease) return lease;
   const entitlement = entitlementRules(kind, value);
   if (entitlement) return entitlement;
+  const folderAttribution = folderAttributionRules(kind, value);
+  if (folderAttribution) return folderAttribution;
   const jobLimits = jobLimitRules(kind, value);
   if (jobLimits) return jobLimits;
   const share = shareRegistrationRules(kind, value);

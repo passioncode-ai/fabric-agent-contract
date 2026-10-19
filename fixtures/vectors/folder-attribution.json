@@ -1,0 +1,2635 @@
+{
+  "about": "Vectors for folder attribution (DEC-0089), written by tools/vectors/folder-attribution.ts, never by hand. origin: normalizeOrigin(origin), a repository identity host/path or null. attribution: attributeFolder(snapshot); snapshot is {folder, home, tempRoots, git, projects, work?, tombstones?, explicit?}, git null for a folder without Git or {toplevel, commonDir, mainCheckout, origin}; a project is {id, folders: [{path, commonDir, origin}], sources}; paths are absolute and /-separated. Members a rule does not read (a branch) change nothing.",
+  "origin": [
+    {
+      "origin": "git@github.com:Example-Org/Fabric.git",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
+      "origin": "https://github.com/example-org/fabric",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
+      "origin": "https://user:token@github.com/example-org/fabric.git/",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
+      "origin": "ssh://git@github.com:22/example-org/fabric.git",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
+      "origin": "git+ssh://git@bitbucket.org/team/app.git",
+      "expected": "bitbucket.org/team/app"
+    },
+    {
+      "origin": "https://gitlab.example.com/group/sub/app.git?ref=main#readme",
+      "expected": "gitlab.example.com/group/sub/app"
+    },
+    {
+      "origin": "  git@github.com:example-org/fabric.git  ",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
+      "origin": "/local/path/repo",
+      "expected": null
+    },
+    {
+      "origin": "../repo",
+      "expected": null
+    },
+    {
+      "origin": "C:\\work\\repo",
+      "expected": null
+    },
+    {
+      "origin": "C:/work/repo",
+      "expected": null
+    },
+    {
+      "origin": "file:///home/ana/repo",
+      "expected": null
+    },
+    {
+      "origin": "ftp://github.com/example-org/fabric",
+      "expected": null
+    },
+    {
+      "origin": "https://github.com/only-owner",
+      "expected": null
+    },
+    {
+      "origin": "git@localhost:owner/name",
+      "expected": null
+    },
+    {
+      "origin": "https://github.com",
+      "expected": null
+    },
+    {
+      "origin": "",
+      "expected": null
+    },
+    {
+      "origin": null,
+      "expected": null
+    },
+    {
+      "origin": 7,
+      "expected": null
+    }
+  ],
+  "attribution": [
+    {
+      "name": "AT-0: no folder",
+      "snapshot": {
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a relative folder",
+      "snapshot": {
+        "folder": "work/x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a folder with a trailing slash",
+      "snapshot": {
+        "folder": "/home/ana/work/x/",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a folder with ..",
+      "snapshot": {
+        "folder": "/home/ana/work/../x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: Git facts whose top level does not hold the folder",
+      "snapshot": {
+        "folder": "/home/ana/work/x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/other",
+          "commonDir": "/home/ana/work/other/.git",
+          "mainCheckout": "/home/ana/work/other",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: two Projects with one id",
+      "snapshot": {
+        "folder": "/home/ana/work/x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: an explicit Project that does not exist",
+      "snapshot": {
+        "folder": "/home/ana/work/x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "explicit": "project:none"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a work record without a common dir",
+      "snapshot": {
+        "folder": "/home/ana/work/x",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:fabric"
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-1: an explicit attach wins over a tombstone",
+      "snapshot": {
+        "folder": "/home/ana/work/scratch",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/scratch"
+        ],
+        "explicit": "project:notes"
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:notes",
+        "rule": "explicit"
+      }
+    },
+    {
+      "name": "AT-2: a folder in the temporary folder",
+      "snapshot": {
+        "folder": "/tmp/agent-1/fabric",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/tmp/agent-1/fabric",
+          "commonDir": "/tmp/agent-1/fabric/.git",
+          "mainCheckout": "/tmp/agent-1/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "transient"
+      }
+    },
+    {
+      "name": "AT-2: a cache clone, even of a known repository",
+      "snapshot": {
+        "folder": "/home/ana/.cache/tool/fabric",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/.cache/tool/fabric",
+          "commonDir": "/home/ana/.cache/tool/fabric/.git",
+          "mainCheckout": "/home/ana/.cache/tool/fabric",
+          "origin": "https://github.com/example-org/fabric"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "transient"
+      }
+    },
+    {
+      "name": "AT-3: a tombstoned folder",
+      "snapshot": {
+        "folder": "/home/ana/work/old",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/old"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tombstoned"
+      }
+    },
+    {
+      "name": "AT-3: a subfolder of a tombstoned folder",
+      "snapshot": {
+        "folder": "/home/ana/work/old/src",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/old"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tombstoned"
+      }
+    },
+    {
+      "name": "AT-3: a worktree whose main checkout is tombstoned",
+      "snapshot": {
+        "folder": "/home/ana/work/old-wt",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/old-wt",
+          "commonDir": "/home/ana/work/old/.git",
+          "mainCheckout": "/home/ana/work/old",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/old"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tombstoned"
+      }
+    },
+    {
+      "name": "AT-3: a removed worktree stays out though its main checkout is a Project's",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric-old",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric-old",
+          "commonDir": "/home/ana/work/fabric/.git",
+          "mainCheckout": "/home/ana/work/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/fabric-old"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tombstoned"
+      }
+    },
+    {
+      "name": "AT-3: a tombstone keeps only its own folder out: another clone of the same remote is new",
+      "snapshot": {
+        "folder": "/home/ana/work/app-2",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/app-2",
+          "commonDir": "/home/ana/work/app-2/.git",
+          "mainCheckout": "/home/ana/work/app-2",
+          "origin": "git@github.com:other/app.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/home/ana/work/app"
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/app-2"
+      }
+    },
+    {
+      "name": "AT-4: the Project's own folder",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric",
+          "commonDir": "/home/ana/work/fabric/.git",
+          "mainCheckout": "/home/ana/work/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-4: a subfolder of a Project's folder, an agent started there",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric/apps/desktop",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric",
+          "commonDir": "/home/ana/work/fabric/.git",
+          "mainCheckout": "/home/ana/work/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-4: a plain folder a Project lists",
+      "snapshot": {
+        "folder": "/home/ana/work/notes/2026",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:notes",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-4: a sibling whose name extends the folder's is not under it",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric-site",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric-site",
+          "commonDir": "/home/ana/work/fabric-site/.git",
+          "mainCheckout": "/home/ana/work/fabric-site",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/fabric-site"
+      }
+    },
+    {
+      "name": "AT-4: the nearest of two nested Project folders",
+      "snapshot": {
+        "folder": "/home/ana/work/mono/pkg/a",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:mono",
+            "folders": [
+              {
+                "path": "/home/ana/work/mono",
+                "commonDir": "/home/ana/work/mono/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:pkg",
+            "folders": [
+              {
+                "path": "/home/ana/work/mono/pkg",
+                "commonDir": "/home/ana/work/mono/pkg/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:pkg",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-4: a home folder a Project lists is no ancestor: a new Project",
+      "snapshot": {
+        "folder": "/home/ana/work/y",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:home",
+            "folders": [
+              {
+                "path": "/home/ana",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/y"
+      }
+    },
+    {
+      "name": "AT-4: two Projects listing one folder: ambiguous",
+      "snapshot": {
+        "folder": "/home/ana/work/shared",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:a",
+            "folders": [
+              {
+                "path": "/home/ana/work/shared",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:b",
+            "folders": [
+              {
+                "path": "/home/ana/work/shared",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "ambiguous",
+        "rule": "folder",
+        "projects": [
+          "project:a",
+          "project:b"
+        ]
+      }
+    },
+    {
+      "name": "AT-5: a worktree of a Project's repository",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric-night",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric-night",
+          "commonDir": "/home/ana/work/fabric/.git",
+          "mainCheckout": "/home/ana/work/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "worktree"
+      }
+    },
+    {
+      "name": "AT-5: a worktree a tool keeps in its own folder still joins",
+      "snapshot": {
+        "folder": "/home/ana/.codex/worktrees/a1/fabric",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/.codex/worktrees/a1/fabric",
+          "commonDir": "/home/ana/work/fabric/.git",
+          "mainCheckout": "/home/ana/work/fabric",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "worktree"
+      }
+    },
+    {
+      "name": "AT-5: a remoteless worktree joins by its common dir",
+      "snapshot": {
+        "folder": "/home/ana/work/notes-wt",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/notes-wt",
+          "commonDir": "/home/ana/work/local/.git",
+          "mainCheckout": "/home/ana/work/local",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:local",
+            "folders": [
+              {
+                "path": "/home/ana/work/local",
+                "commonDir": "/home/ana/work/local/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:local",
+        "rule": "worktree"
+      }
+    },
+    {
+      "name": "AT-5: two Projects with one common dir: ambiguous",
+      "snapshot": {
+        "folder": "/home/ana/work/wt",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/wt",
+          "commonDir": "/home/ana/work/r/.git",
+          "mainCheckout": "/home/ana/work/r",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:a",
+            "folders": [
+              {
+                "path": "/home/ana/work/r",
+                "commonDir": "/home/ana/work/r/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:b",
+            "folders": [
+              {
+                "path": "/home/ana/work/r2",
+                "commonDir": "/home/ana/work/r/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "ambiguous",
+        "rule": "worktree",
+        "projects": [
+          "project:a",
+          "project:b"
+        ]
+      }
+    },
+    {
+      "name": "AT-6: another clone on another branch, by its origin",
+      "snapshot": {
+        "folder": "/home/ana/work/fabric-2",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/fabric-2",
+          "commonDir": "/home/ana/work/fabric-2/.git",
+          "mainCheckout": "/home/ana/work/fabric-2",
+          "origin": "https://github.com/Example-Org/Fabric"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "repository"
+      }
+    },
+    {
+      "name": "AT-6: a clone in a tool folder joins by its origin",
+      "snapshot": {
+        "folder": "/home/ana/.claude/plugins/fabric",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/.claude/plugins/fabric",
+          "commonDir": "/home/ana/.claude/plugins/fabric/.git",
+          "mainCheckout": "/home/ana/.claude/plugins/fabric",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "repository"
+      }
+    },
+    {
+      "name": "AT-6: two Projects with one origin: ambiguous",
+      "snapshot": {
+        "folder": "/home/ana/work/c",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/c",
+          "commonDir": "/home/ana/work/c/.git",
+          "mainCheckout": "/home/ana/work/c",
+          "origin": "git@github.com:o/r.git"
+        },
+        "projects": [
+          {
+            "id": "project:a",
+            "folders": [
+              {
+                "path": "/home/ana/work/a",
+                "commonDir": "/home/ana/work/a/.git",
+                "origin": "https://github.com/o/r"
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:b",
+            "folders": [
+              {
+                "path": "/home/ana/work/b",
+                "commonDir": "/home/ana/work/b/.git",
+                "origin": "git@github.com:o/r"
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "ambiguous",
+        "rule": "repository",
+        "projects": [
+          "project:a",
+          "project:b"
+        ]
+      }
+    },
+    {
+      "name": "AT-7: an unknown repository in a tool folder",
+      "snapshot": {
+        "folder": "/home/ana/.claude/plugins/marketplace",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/.claude/plugins/marketplace",
+          "commonDir": "/home/ana/.claude/plugins/marketplace/.git",
+          "mainCheckout": "/home/ana/.claude/plugins/marketplace",
+          "origin": "git@github.com:example-org/site.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tool"
+      }
+    },
+    {
+      "name": "AT-7: a worktree of an unknown repository whose main checkout is in a tool folder",
+      "snapshot": {
+        "folder": "/home/ana/work/wt",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/wt",
+          "commonDir": "/home/ana/.codex/repos/x/.git",
+          "mainCheckout": "/home/ana/.codex/repos/x",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tool"
+      }
+    },
+    {
+      "name": "AT-7: a plain folder in Library",
+      "snapshot": {
+        "folder": "/home/ana/Library/Application Support/tool",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tool"
+      }
+    },
+    {
+      "name": "AT-8: a new repository of an owner a Project lists",
+      "snapshot": {
+        "folder": "/home/ana/work/site",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/site",
+          "commonDir": "/home/ana/work/site/.git",
+          "mainCheckout": "/home/ana/work/site",
+          "origin": "git@github.com:Example-Org/site.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "owner"
+      }
+    },
+    {
+      "name": "AT-8: an owner two Projects list: ambiguous",
+      "snapshot": {
+        "folder": "/home/ana/work/site",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/site",
+          "commonDir": "/home/ana/work/site/.git",
+          "mainCheckout": "/home/ana/work/site",
+          "origin": "git@github.com:o/site.git"
+        },
+        "projects": [
+          {
+            "id": "project:a",
+            "folders": [],
+            "sources": [
+              "github.com/o"
+            ]
+          },
+          {
+            "id": "project:b",
+            "folders": [],
+            "sources": [
+              "github.com/o/"
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "ambiguous",
+        "rule": "owner",
+        "projects": [
+          "project:a",
+          "project:b"
+        ]
+      }
+    },
+    {
+      "name": "AT-8: an owner of a group path",
+      "snapshot": {
+        "folder": "/home/ana/work/app",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/app",
+          "commonDir": "/home/ana/work/app/.git",
+          "mainCheckout": "/home/ana/work/app",
+          "origin": "https://gitlab.example.com/group/sub/app.git"
+        },
+        "projects": [
+          {
+            "id": "project:g",
+            "folders": [],
+            "sources": [
+              "gitlab.example.com/group/sub"
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:g",
+        "rule": "owner"
+      }
+    },
+    {
+      "name": "AT-9: a repository a Project's agent changed from inside the Project",
+      "snapshot": {
+        "folder": "/home/ana/work/lib",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/lib",
+          "commonDir": "/home/ana/work/lib/.git",
+          "mainCheckout": "/home/ana/work/lib",
+          "origin": "git@github.com:someone/lib.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:notes",
+            "commonDir": "/home/ana/work/lib/.git"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:notes",
+        "rule": "work"
+      }
+    },
+    {
+      "name": "AT-9: work by two Projects: ambiguous",
+      "snapshot": {
+        "folder": "/home/ana/work/lib",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/lib",
+          "commonDir": "/home/ana/work/lib/.git",
+          "mainCheckout": "/home/ana/work/lib",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:notes",
+            "commonDir": "/home/ana/work/lib/.git"
+          },
+          {
+            "project": "project:fabric",
+            "commonDir": "/home/ana/work/lib/.git"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "ambiguous",
+        "rule": "work",
+        "projects": [
+          "project:fabric",
+          "project:notes"
+        ]
+      }
+    },
+    {
+      "name": "AT-9: work on another repository decides nothing",
+      "snapshot": {
+        "folder": "/home/ana/work/lib",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/lib",
+          "commonDir": "/home/ana/work/lib/.git",
+          "mainCheckout": "/home/ana/work/lib",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:notes",
+            "commonDir": "/home/ana/work/other/.git"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/lib"
+      }
+    },
+    {
+      "name": "AT-10: the filesystem root",
+      "snapshot": {
+        "folder": "/",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-10: a Windows drive root",
+      "snapshot": {
+        "folder": "C:/",
+        "home": "C:/Users/ana",
+        "tempRoots": [],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-10: home",
+      "snapshot": {
+        "folder": "/home/ana",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-11: a folder directly in the filesystem root is no container unless it is home",
+      "snapshot": {
+        "folder": "/srv",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/srv"
+      }
+    },
+    {
+      "name": "AT-11: a folder directly in a Windows drive root",
+      "snapshot": {
+        "folder": "C:/work",
+        "home": "C:/Users/ana",
+        "tempRoots": [
+          "C:/Users/ana/AppData/Local/Temp"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "C:/work"
+      }
+    },
+    {
+      "name": "AT-7: a hidden folder in a Windows home",
+      "snapshot": {
+        "folder": "C:/Users/ana/.config/tool",
+        "home": "C:/Users/ana",
+        "tempRoots": [],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "tool"
+      }
+    },
+    {
+      "name": "AT-10: a folder right under a Windows home",
+      "snapshot": {
+        "folder": "C:/Users/ana/projects",
+        "home": "C:/Users/ana",
+        "tempRoots": [],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-10: a folder right under home",
+      "snapshot": {
+        "folder": "/home/ana/work",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-10: a repository right under home",
+      "snapshot": {
+        "folder": "/home/ana/scratch",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/scratch",
+          "commonDir": "/home/ana/scratch/.git",
+          "mainCheckout": "/home/ana/scratch",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-10: a folder holding another Project's folder",
+      "snapshot": {
+        "folder": "/home/ana/work/group",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:inner",
+            "folders": [
+              {
+                "path": "/home/ana/work/group/inner",
+                "commonDir": "/home/ana/work/group/inner/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-11: a new repository: a Project at its top level",
+      "snapshot": {
+        "folder": "/home/ana/work/app/src",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/app",
+          "commonDir": "/home/ana/work/app/.git",
+          "mainCheckout": "/home/ana/work/app",
+          "origin": "git@github.com:someone/app.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/app"
+      }
+    },
+    {
+      "name": "AT-11: a worktree of an unknown repository: a Project at its main checkout",
+      "snapshot": {
+        "folder": "/home/ana/work/app-wt",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/app-wt",
+          "commonDir": "/home/ana/work/app/.git",
+          "mainCheckout": "/home/ana/work/app",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/app"
+      }
+    },
+    {
+      "name": "AT-11: a plain folder: a Project at itself",
+      "snapshot": {
+        "folder": "/home/ana/work/drafts",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/drafts"
+      }
+    },
+    {
+      "name": "AT-11: a branch decides nothing: the same answer on any branch",
+      "snapshot": {
+        "folder": "/home/ana/work/app",
+        "home": "/home/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/home/ana/.cache",
+          "/home/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/home/ana/work/app",
+          "commonDir": "/home/ana/work/app/.git",
+          "mainCheckout": "/home/ana/work/app",
+          "origin": null,
+          "branch": "feature/x"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/home/ana/work/fabric",
+                "commonDir": "/home/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/home/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/home/ana/work/app"
+      }
+    }
+  ]
+}
