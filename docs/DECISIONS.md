@@ -5656,19 +5656,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `tombstones?`, `containers?`, `explicit?`; `folder-attribution.schema.json`), answering `attached` (with its rule),
      `new` (with its root), `refused` (with its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`,
      in the order AT-0 to AT-15: a fault; an explicit attach; a tombstone on the folder refused unless a Project lists a
-     folder below it that holds the folder; the folder's Project by place when a folder of its own repository holds it,
-     else its nearest listed folder by path; a temporary folder or root refused; a broad folder or root refused; the same Git common
+     folder, not broad, below it that holds the folder; the folder's Project by the nearest place (by common dir or by
+     identity, the same common dir at equal depth) when a folder of its own repository holds it, else its nearest
+     listed folder by path, a declared container between them ending a listed folder's reach; a temporary folder or root refused; a broad folder or root refused; the same Git common
      dir or the main checkout, then the same repository identity, each at the nearest place in the repository; the
      Project the main checkout lies in; a repository whose Projects all sit deeper refused; the origin's owner a
      Project lists; a tool's folder refused; a work record (by common dir or by identity); a tombstoned root refused; a
      root holding another Project's folder refused; else a new Project at the main checkout, or at the folder without
      Git. A tie at one row is `ambiguous` and attributes nothing. A branch decides nothing.
   2. **The repository identity** `normalizeOrigin`: `host/path` with `A` to `Z` lower-cased, from `http`, `https`, `ssh`, `git`,
-     `git+ssh`, `git+https` URLs or the scp form, trimmed; credentials, port, query, fragment and one `.git` dropped;
-     a host of letters, digits, `.` and `-` with a dot, and at least two path segments. The owner is every segment but the last.
+     `git+ssh`, `git+https` URLs or the scp form, trimmed; credentials, port, query, fragment, the outer `/` and then
+     one `.git` dropped; a host of ASCII letters, digits, `.` and `-` with a dot, and at least two non-empty path
+     segments. The owner is every segment but the last.
   3. **Containers.** A *broad* folder (a filesystem or drive root, home, an ancestor of home, or a container a person
-     declared) is never a Project, never listed (AT-3 to AT-9 skip it) and never attached by any row but an explicit
-     attach; a folder right under home is a container unless a Project lists it, for a worktree as for a clone, and so
+     declared) is never a Project, never listed (AT-2 to AT-9 skip it) and never attached by any row but an explicit
+     attach; a declared container inside a Project's folder ends that folder's reach (AT-3), so it is refused and what
+     it holds goes by its own rows; a folder right under home is a container unless a Project lists it, for a worktree as for a clone, and so
      is a root there unless a Project folder is in its repository;
      a repository whose Project folders all sit deeper than the folder's place is a container of them (AT-9); a root
      that holds another Project's folder is never made a Project (AT-14). Under a temporary or cache root only the
@@ -5678,7 +5681,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and nothing else: after AT-6 or AT-7 the matched Project folder's place in this checkout, after AT-8, owner or work
      the checkout's top level, after `new` the root (its own top level, none for a bare repository), after `folder`
      nothing, after an explicit attach the folder (nothing for a broad one), removing a tombstone at the folder only
-     (folder-attribution.md, *Recording the answer*; the vectors' `record` cases).
+     (folder-attribution.md, *Recording the answer*; the vectors' `record` cases). The record's `origin` is the remote
+     without what can carry a credential (`recordOrigin`): no product's store holds a token from a remote URL.
   5. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
      `attributeFolder`'s.
 - **Choices made in implementation** (the run's D2 left them open):
@@ -5694,7 +5698,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     home a Project lists is that Project's (Switchboard offers its worktrees);
   - a worktree or clone is the same tree: AT-6 and AT-7 match a Project folder by its place below its Git top level,
     the nearest place first, and AT-3 decides by the same place when a folder of the folder's own repository holds it,
-    so a recorded worktree never takes a nested Project's place; else a worktree goes where its main checkout goes
+    by common dir or by identity, the same common dir at equal depth, so a recorded worktree or clone never takes a
+    nested Project's place; else a worktree goes where its main checkout goes
     (AT-8); else a
     repository whose Projects all sit deeper is refused, so no second Project is made for one repository (AT-9); a
     nested folder given without its top level counts at the top and ties;
@@ -5712,8 +5717,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - `ambiguous` lists the Projects in the order of `projects`;
   - six results of D2's order go against the operator's literal words (a worktree or a branch goes to the existing
     Project, a new folder makes a new one) and are recorded for the operator to correct on the board: a repository
-    cloned inside a plain-folder Project is that Project's (AT-3); a worktree of a known repository under a temporary
-    root is refused (AT-4); a worktree or clone of a known repository right under home is refused (AT-5), as a new
+    placed inside another Project's folder is that Project's (AT-3), even a worktree or clone of a known repository,
+    unless a declared container lies between them; a worktree or clone of a known repository under a temporary root is
+    refused (AT-4); a worktree or clone of a known repository right under home is refused (AT-5), as a new
     repository there is; a worktree or clone at the root of a repository whose Projects all sit in its subfolders is
     refused (AT-9); a new repository in a tool's folder (AT-11), and one whose root holds a plain-folder Project's
     folder (AT-14), are refused, not made Projects;

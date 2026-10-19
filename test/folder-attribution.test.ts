@@ -89,14 +89,21 @@ describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => 
     after = recorded(empty, `${W}/r/main`, wt(`${W}/r/main`, `${W}/r/.bare`, `${W}/r/.bare`));
     expect(ask(after, `${W}/r/feature`, wt(`${W}/r/feature`, `${W}/r/.bare`, `${W}/r/.bare`))).toEqual({ outcome: "attached", project: "project:new", rule: "worktree" });
   });
-  it("every vector's record, applied, gives the same answer again", () => {
-    for (const entry of vectors.attribution as Json[]) {
+  it("every vector's record, applied, gives the same Project again: attached, new, and explicit asked again without it", () => {
+    let applied = 0;
+    for (const entry of [...(vectors.attribution as Json[]), ...(vectors.record as Json[])]) {
       const snapshot = entry.snapshot as Json;
       const { answer, record } = explainFolder(snapshot);
-      if (!record || !("outcome" in answer) || answer.outcome !== "attached" || snapshot.explicit !== undefined) continue;
+      if (!record || !("outcome" in answer) || (answer.outcome !== "attached" && answer.outcome !== "new")) continue;
       const after = recorded(snapshot, snapshot.folder, snapshot.git);
-      expect(attributeFolder(after), entry.name).toMatchObject({ outcome: "attached", project: answer.project });
+      // An explicit attach is asked again without it, the tombstone at the folder itself removed (Recording the answer).
+      const { explicit, ...rest } = after;
+      const again = explicit === undefined ? after : { ...rest, tombstones: ((after.tombstones as string[] | undefined) ?? []).filter((stone) => stone !== snapshot.folder) };
+      const project = answer.outcome === "new" ? "project:new" : answer.project;
+      expect(attributeFolder(again), entry.name).toMatchObject({ outcome: "attached", project });
+      applied += 1;
     }
+    expect(applied).toBeGreaterThan(60);
   });
 });
 

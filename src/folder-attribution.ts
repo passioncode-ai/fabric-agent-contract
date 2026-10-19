@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
+import { secretUrl } from "./secret-shape.js";
 
 // #region folder-attribution, docs: docs/specification/folder-attribution.md
 /**
@@ -86,6 +87,31 @@ export function normalizeOrigin(raw: unknown): string | undefined {
   if (!/^[a-z0-9.-]+$/.test(host) || !host.includes(".") || segments.length < 2 || segments.some((segment) => segment === "" || /\s/.test(segment))) return undefined;
   return `${host}/${segments.join("/")}`;
 }
+/**
+ * The origin a record keeps (*Recording the answer*): the raw remote without what can carry a credential, so no
+ * product's store holds a token from a remote URL. An `http`/`https` URL loses its user information, any URL its
+ * password, query and fragment, the scp form `user:secret@host:path` its `:secret` and its query; a local path is kept.
+ * Its identity is the raw remote's. `null` when what is left still has the shape of a secret.
+ */
+export function recordOrigin(origin: string | null): string | null {
+  if (origin === null) return null;
+  let value = origin.trim();
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):\/\//.exec(value);
+  const userOf = (info: string) => String(info.split(":")[0]);
+  if (scheme) {
+    const rest = String(value.slice(scheme[0].length).split(/[?#]/)[0]);
+    const slash = rest.indexOf("/");
+    const authority = slash < 0 ? rest : rest.slice(0, slash);
+    const at = authority.lastIndexOf("@");
+    const user = at < 0 || /http/i.test(String(scheme[1])) ? "" : userOf(authority.slice(0, at));
+    value = `${scheme[0]}${user === "" ? "" : `${user}@`}${authority.slice(at + 1)}${slash < 0 ? "" : rest.slice(slash)}`;
+  } else if (!(value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || value.startsWith("."))) {
+    const scp = /^(?:([^@/\s]+)@)?([^:/\s]+):([^\s]+)$/.exec(value);
+    if (scp) value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${scp[2]}:${String(String(scp[3]).split(/[?#]/)[0])}`;
+  }
+  return secretUrl(value) ? null : value;
+}
+
 /** The owner of a normalized repository identity: every segment but the last (`host/owner`, `host/group/sub`). */
 export const ownerOf = (repository: string): string => repository.slice(0, repository.lastIndexOf("/"));
 
@@ -256,9 +282,21 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   const declared = new Set(containers as string[]);
   /** Never a Project and never listed: a root, home, an ancestor of home, a container a person declared. */
   const broad = (path: string) => isRoot(path) || under(home, path) || declared.has(path);
-  const rawOrigin = isString(origin) ? origin : null;
+  /** The deepest declared container at or above `path`, where a listed folder's reach ends. */
+  const cutOf = (path: string): string | undefined => {
+    let cut: string | undefined;
+    for (const container of declared) if (under(path, container) && (cut === undefined || container.length > cut.length)) cut = container;
+    return cut;
+  };
+  /**
+   * Whether a listed folder at `entry` reaches `path` (DEC-0089 item 3): it holds it, and no declared container lies
+   * strictly below it on the way, so a container inside a Project's folder keeps what it holds to their own rows. The
+   * containers holding `path` are a chain of its ancestors, so the deepest one, `cut`, decides.
+   */
+  const reaches = (path: string, cut: string | undefined, entry: string) => under(path, entry) && !(cut !== undefined && cut !== entry && under(cut, entry));
+  const keptOrigin = recordOrigin(isString(origin) ? origin : null);
   /** The record of a folder of this repository at `path`, its top level `top` (null: none). */
-  const gitRecord = (path: string, top: string | null): AttributionRecord => ({ path, commonDir: commonDir as string, origin: rawOrigin, toplevel: top });
+  const gitRecord = (path: string, top: string | null): AttributionRecord => ({ path, commonDir: commonDir as string, origin: keptOrigin, toplevel: top });
   if (explicit !== undefined) {
     const target = idOk(explicit) ? projects.find((project) => project.id === explicit) : undefined;
     if (!target) return fault;
@@ -270,13 +308,14 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   const listed = (path: string) => projects.some((project) => project.folders.some((entry) => entry.path === path));
   /** A folder right under home that no Project lists (a root is broad, so it is never asked). */
   const looseUnderHome = (path: string) => parentOf(path) === home && !listed(path);
-  /** The Projects whose listed folder is `path` or its nearest ancestor (AT-3's search), broad folders skipped. */
+  /** The Projects whose listed folder is `path` or its nearest ancestor that reaches it (AT-3's search), broad folders skipped. */
   const byPath = (path: string): Project[] => {
+    const cut = cutOf(path);
     let nearest = -1;
     let owners: Project[] = [];
     for (const project of projects) {
       for (const entry of project.folders) {
-        if (!under(path, entry.path) || broad(entry.path)) continue;
+        if (!reaches(path, cut, entry.path) || broad(entry.path)) continue;
         if (entry.path.length > nearest) [nearest, owners] = [entry.path.length, [project]];
         else if (entry.path.length === nearest) owners.push(project);
       }
@@ -293,13 +332,18 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   // listed folders that hold the folder are a chain of its ancestors, so one is below a tombstone exactly when the deepest
   // is: one pass over the folders, then one over the tombstones.
   let deepest: string | undefined;
-  for (const project of projects) for (const entry of project.folders) if (under(folder, entry.path) && (deepest === undefined || entry.path.length > deepest.length)) deepest = entry.path;
+  for (const project of projects) for (const entry of project.folders) if (!broad(entry.path) && under(folder, entry.path) && (deepest === undefined || entry.path.length > deepest.length)) deepest = entry.path;
   const stoned = tombstones.some((stone) => under(folder, stone as string) && !(deepest !== undefined && deepest !== stone && under(deepest, stone as string)));
   if (stoned) return at(2, { outcome: "refused", reason: "tombstoned" });
-  // AT-3: a Project folder holds the folder; one of the folder's own repository decides by place.
-  for (const same of [sameCommon, sameIdentity]) {
-    if (!anyFolder((entry) => same(entry) && under(folder, entry.path))) continue;
-    const byPlace = decide(nearestIn(projects, same, place).owners, "folder");
+  // AT-3: a Project folder holds the folder; when one of the folder's own repository does, the nearest place among that
+  // repository's folders decides, by common dir or by identity, the same common dir at equal depth (so recording the
+  // outer Project's clone never takes a nested Project's place).
+  const folderCut = cutOf(folder);
+  if (anyFolder((entry) => sameRepository(entry) && reaches(folder, folderCut, entry.path))) {
+    const common = nearestIn(projects, sameCommon, place);
+    const identity = nearestIn(projects, sameIdentity, place);
+    const nearer = identity.owners.length > 0 && (common.owners.length === 0 || identity.place.length > common.place.length) ? identity : common;
+    const byPlace = decide(nearer.owners, "folder");
     if (byPlace) return at(3, byPlace);
   }
   const byFolder = decide(byPath(folder), "folder");
