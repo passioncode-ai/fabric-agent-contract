@@ -89,7 +89,11 @@ first-cut section it superseded, and a test checks the `limit-reached` vector ag
 
 ## Next task
 
-Run one more blind reading of the fix round (`3be94d4..HEAD`), merge PR #120, then on the project board: a request to
-Fabric (the hub as caller on `agent.call` and keeper of its `outcome-unknown` keys, its host as reader of `usage`), to
-fabric-agent-adapter (its kits as providers, callers and readers; its guidance correction; C4 stays its guidance) and to
-Fabric Dashboards (reader of `usage`), and a note to the job-capable providers on this machine.
+Done on 2026-10-19: PR #120 merged by squash at `027a01c`; the branch was deleted on `origin`. The first cut's commit
+`3be94d4`, which named a private agent in the vectors, is not in `main`'s history; GitHub still keeps it under the pull
+request's own ref, which only the repository's owner can purge.
+
+Next, on the project board: a request to Fabric (the hub as caller on `agent.call`, keeper of its `outcome-unknown`
+keys, forwarding `_meta.protocols`; its host as reader of `usage`), to fabric-agent-adapter (its kits as providers,
+callers and readers; its guidance correction; C4 stays its guidance) and to Fabric Dashboards (reader of `usage`). Then
+the contract's next task is CT-57 (folder attribution), due 2026-10-22.
