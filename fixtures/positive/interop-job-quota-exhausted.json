@@ -1,0 +1,15 @@
+{
+  "job": {
+    "id": "job_7f3a2c",
+    "status": "failed",
+    "updatedAt": "2026-10-19T10:00:00Z",
+    "error": {
+      "code": "quota-exhausted",
+      "message": "the subscription's 5-hour window is spent",
+      "data": {
+        "retryable": true,
+        "resetsAt": "2026-10-19T12:00:00Z"
+      }
+    }
+  }
+}

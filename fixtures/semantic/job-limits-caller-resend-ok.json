@@ -1,0 +1,27 @@
+{
+  "description": "After quota-exhausted, retryable, the caller resends under the same key once the limit resets (FAC-SEM-120, DEC-0087).",
+  "kind": "job-caller",
+  "expect": [],
+  "input": {
+    "answer": {
+      "job": {
+        "id": "job_7f3a",
+        "status": "failed",
+        "updatedAt": "2026-10-19T10:00:00Z",
+        "error": {
+          "code": "quota-exhausted",
+          "message": "m",
+          "data": {
+            "retryable": true,
+            "resetsAt": "2026-10-19T12:00:00Z"
+          }
+        }
+      }
+    },
+    "now": "2026-10-19T10:00:00Z",
+    "action": {
+      "action": "resend",
+      "notBefore": "2026-10-19T12:00:00Z"
+    }
+  }
+}

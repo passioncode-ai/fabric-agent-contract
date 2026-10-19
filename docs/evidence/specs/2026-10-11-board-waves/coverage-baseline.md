@@ -184,3 +184,8 @@ clauses removed or loosened once) each failed at least one test after two surviv
 and `FAC-SEM-117`'s window and parent clauses. 26 more plants: 21 killed, one closed with a test, one a redundant
 guard removed, three equivalent (`docs/evidence/specs/2026-10-18-share-registration/plants.md`, *The fix round*).
 Measured with `vitest run --coverage` on `f628f0d`: 75 files, 5585 tests, whole set 7308 / 7381 (99.01 %).
+
+**DEC-0087 (2026-10-19).** `src/job-limits.ts` (121 / 121) is new, joins the measured set and reaches every branch, so
+its floor is 100. 40 plants, each killed after two survivors were closed
+(`docs/evidence/specs/2026-10-19-job-limits/plants.md`). Measured with `vitest run --coverage`: 76 files, 5719 tests,
+whole set 7431 / 7504 (99.02 %).

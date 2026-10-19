@@ -183,31 +183,54 @@
       ],
       "properties": {
         "inputTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "outputTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "cacheReadTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "cacheWriteTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "costUsd": {
-          "type": "number",
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0
         },
         "wallMs": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
+        },
+        "partial": {
+          "type": "boolean",
+          "description": "DEC-0087: true when a number is a lower bound or unknown (null). An unknown number is null, never 0; 0 is a measured zero."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "A job's or a result's usage. A number nobody measured is null (DEC-0087), never 0; `partial` says the numbers are a lower bound. A reader pinned before DEC-0087 refuses null and `partial`, so a writer sends them only to readers pinned at or after it."
     },
     "protocolRevision": {
       "type": "string",

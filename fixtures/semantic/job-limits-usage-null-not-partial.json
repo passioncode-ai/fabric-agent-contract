@@ -1,0 +1,14 @@
+{
+  "description": "A usage that says partial: false beside an unknown cost (FAC-SEM-119, DEC-0087).",
+  "kind": "usage",
+  "expect": [
+    "FAC-SEM-119"
+  ],
+  "input": {
+    "inputTokens": 1200,
+    "outputTokens": 300,
+    "costUsd": null,
+    "wallMs": 5100,
+    "partial": false
+  }
+}

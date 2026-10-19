@@ -1,0 +1,21 @@
+{
+  "description": "The caller polls a paused job before its reset (FAC-SEM-120, DEC-0087).",
+  "kind": "job-caller",
+  "expect": [
+    "FAC-SEM-120"
+  ],
+  "input": {
+    "answer": {
+      "job": {
+        "id": "job_7f3a",
+        "status": "working",
+        "updatedAt": "2026-10-19T10:00:00Z",
+        "statusMessage": "quota-exhausted until 2026-10-19T12:00:00Z"
+      }
+    },
+    "now": "2026-10-19T10:00:00Z",
+    "action": {
+      "action": "poll"
+    }
+  }
+}

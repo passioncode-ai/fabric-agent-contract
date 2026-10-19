@@ -1,0 +1,21 @@
+{
+  "description": "A completed job whose usage holds an unknown cost and says it is partial (FAC-SEM-119, DEC-0087).",
+  "kind": "interop-job",
+  "expect": [],
+  "input": {
+    "job": {
+      "id": "job_7f3a",
+      "status": "completed",
+      "updatedAt": "2026-10-19T10:00:00Z",
+      "result": {
+        "usage": {
+          "inputTokens": 1200,
+          "outputTokens": 300,
+          "costUsd": null,
+          "wallMs": 5100,
+          "partial": true
+        }
+      }
+    }
+  }
+}
