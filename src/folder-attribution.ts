@@ -352,7 +352,7 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   if (anyFolder((entry) => sameRepository(entry) && reaches(folder, folderCut, entry.path))) {
     const common = nearestIn(projects, sameCommon, place);
     const identity = nearestIn(projects, sameIdentity, place);
-    const nearer = identity.owners.length > 0 && (common.owners.length === 0 || identity.place.length > common.place.length) ? identity : common;
+    const nearer = common.owners.length === 0 || identity.place.length > common.place.length ? identity : common;
     const byPlace = decide(nearer.owners, "folder");
     if (byPlace) return at(3, byPlace);
   }
@@ -370,7 +370,7 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
     // at equal depth, so an answer and the answer after its record is applied name one Project.
     const common = nearestIn(projects, sameCommon, place);
     const identity = nearestIn(projects, sameIdentity, place);
-    const identityNearer = identity.owners.length > 0 && (common.owners.length === 0 || identity.place.length > common.place.length);
+    const identityNearer = common.owners.length === 0 || identity.place.length > common.place.length;
     const byPlace = identityNearer ? atPlace(identity, 7, "repository") : atPlace(common, 6, "worktree");
     if (byPlace) return byPlace;
     const whole = (row: number, answer: ReturnType<typeof decide>) => answer && at(row, answer, answer.outcome === "attached" ? gitRecord(top, top) : null);
