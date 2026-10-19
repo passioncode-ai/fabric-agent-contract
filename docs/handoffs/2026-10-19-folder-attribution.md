@@ -159,6 +159,14 @@ and `row`. Risks left for the next change, not blocking: a plain subfolder of a 
 Project's place is attached by AT-6 and may record a listed folder again; no vector holds the documented tie after an
 explicit attach of another Project's place.
 
+The twelfth readings of `e5fdc38`: the unit reading passed (risks: the totality comment is for JSON values; the
+nearer-place predicate is computed in two places with the same inputs). The product reading found that Switchboard
+had shipped SB-146 the same evening (a project is a group, one folder in several groups, no group created by
+itself). Resolved in the documents by D3 as corrected: the snapshot's Projects are Fabric's, a Switchboard group binds
+accounts above the answer, AT-15 makes a Fabric Project; posted on thread `617c8cbe`. Also: an explicit move removes
+the other Project's folder at the place (every product's duty, in the conformance row), and the forms of remote that
+merge at AT-7 are named exactly.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,

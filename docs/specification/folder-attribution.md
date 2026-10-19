@@ -182,8 +182,9 @@ loses its user information, any URL its password, query and fragment, the scp fo
 `:secret` up to the host's last `@`; a local path (absolute, a drive path, or starting with `.`) is kept; `null` for any other remote with no repository identity (its authority
 cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). A record whose path is
 broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
-attach of a folder another Project already holds at the same place ties at AT-3 when asked again, until the product
-removes the other Project's folder (D5). It names the
+attach that moves a folder (or its place in the repository, in this checkout or another of the same common dir) from
+another Project lasts only when the product also removes that Project's folder at the place from its own store (D5);
+until then it ties at AT-3 when asked again. Every product does that removal with the record. It names the
 same repository (`normalizeOrigin` of both is one identity; a rebuilt form whose identity would differ is `null`), and the vectors' `record` cases hold one of each form.
 
 ## Semantic rules
@@ -200,8 +201,9 @@ Fixtures: `fixtures/positive/folder-attribution-snapshot.json`, `fixtures/negati
 New: no document changes and no product is refused. Each product's answers change where its rules differed from the
 table, and each adopts by running the vectors; the rows below are the changes measured on 2026-10-19 (the run index and
 the products' code). `contractVersion` stays `0.1.0`. Project counts move on adoption: plain folders become Projects in
-Switchboard and Observatory, subfolder starts merge into their repository's Project, and stored Projects that differ
-only in the case or depth of their remote's path now tie at AT-7. The product that holds two such Projects merges them
+Observatory (Switchboard's are Fabric's, below), subfolder starts merge into their repository's Project, and stored
+Projects whose remotes differ only in the path's case, a leading or trailing `/` or a trailing `.git` now tie at
+AT-7. The product that holds two such Projects merges them
 in its own store (D5) and reports the tie until then (DEC-0076 item 5). Sessions that a product attributed before can be
 refused after it adopts, among them a worktree or clone under a temporary root or right under home, a repository root
 whose Projects sit deeper, and in Fabric (which has no temporary, tool or subfolder tombstone refusal today) folders
@@ -231,7 +233,12 @@ naming the rule and the Projects; the reasons are the schema's.
   Git top level (`f7c71cba`, CO-331, ADR-0166) already match. Projects it stored at a subfolder before `f7c71cba` make
   their repository a container (AT-9, AT-14) until they are moved to the top level.
 - **Fabric Switchboard** (SB-141) runs the vectors in `./scripts/check.sh`; at a session's start it asks Fabric's
-  capability (D4 as corrected), applying the vectors itself only while Fabric is not running. Owed: a plain folder as its own Project;
+  capability (D4 as corrected), applying the vectors itself only while Fabric is not running. Since SB-146
+  (2026-10-19) a Switchboard project is a group that binds accounts, and a folder may sit in several groups: under D3
+  as corrected the snapshot's Projects are Fabric's, a group is an account-binding layer above the answer (the
+  group a session's accounts come from is Switchboard's choice, never an attribution tie), and AT-15 makes a Project
+  in Fabric, not a group, so SCN-068 and "nothing creates a group by itself" stand; `switchboard:<pool>` is an alias
+  of the Fabric Project a group binds. Owed, for the local answer while Fabric is down: a plain folder as its own Project;
   group paths of three or more segments; the ancestors of home refused, and a folder right under home refused unless a
   Project lists it; the nearest of nested Project folders and their ties (AT-3), and by place for worktrees and clones
   (AT-6 to AT-9); its `dismissed` rows read as tombstones (a `gone` row, a folder that vanished, is no tombstone: a
@@ -239,7 +246,7 @@ naming the rule and the Projects; the reasons are the schema's.
   `attributeFolder` rather than recording a repository itself, and its `shared` and contested states replaced by the
   tie it reports; a worktree right under home refused at attach as at creation; recording by `record`; its snapshot's
   `containers` including Observatory's declared ones where it can read them; its CLI text on containers and its
-  scenarios (SCN-055, SCN-063) updated with them.
+  scenarios (SCN-055, SCN-063, SCN-068) updated with them.
 - **Project Observatory** (the engine) runs the vectors in its scan and in its local answer while Fabric is not
   running; at a session's start it asks Fabric's capability (D4 as corrected) rather than serving one. Measured against
   the table: it has no work row (AT-12) and reads owners only indirectly (AT-10); it scans only the children of its data
