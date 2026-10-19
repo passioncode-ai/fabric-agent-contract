@@ -57,7 +57,7 @@ An **entry** (`$defs/entry` of [`revocation-delta`](../../schemas/revocation-del
 | `sequence` | 1 for the estate's first entry, then the previous entry's plus one: never skipped, never repeated |
 | `prev` | the head hash before this entry: the previous entry's hash, or for entry 1 the estate's **genesis** |
 | `at` | when the hub issued it, RFC 3339 with an offset |
-| `revocation` | `{kind, ref, revokedAt}` in the estate record's own shape; `kind` is `machine`, `device-key`, `hub-key`, `publisher-key`, `package` or `grant` — never `authority`; `revokedAt` never after `at` |
+| `revocation` | `{kind, ref, revokedAt}` in the estate record's own shape; `kind` is `machine`, `device-key`, `hub-key`, `publisher-key`, `package` or `grant` (never `authority`); `revokedAt` never after `at`, and for a `grant` revocation of a share grant into an organization it SHOULD carry at most three fraction digits, since a share registration carries it floored to milliseconds (DEC-0086) |
 | `kid` | the estate key's kid |
 | `sig` | the Ed25519 signature (RFC 8032), 64 bytes in base64url, over the entry's signing input |
 

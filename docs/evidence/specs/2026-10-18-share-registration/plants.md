@@ -163,3 +163,16 @@ redundant guard removed from the code, and three are equivalent (no input tells 
 | P-118 | a record with no placement under the grant compared | guard removed |
 | P-119 | the code's instant admits a leap second | equivalent |
 | P-120 | the schema's instant admits a leap second | killed |
+
+## The second reading
+
+After the second reading (unit and product of `b0a3307`), the gate's status check, the floor that keeps its offset and
+the two codes moved to `hold-degraded` were planted once each, the same way. 5 plants, each killed.
+
+| Plant | What was removed or loosened | Result |
+|---|---|---|
+| P-121 | the gate sends on a send code under any status | killed |
+| P-122 | the gate degrades on a typed code under any status | killed |
+| P-123 | a floored time written in UTC, its offset lost | killed |
+| P-124 | `malformed` held, not degraded | killed |
+| P-125 | `schema-unsupported` held, not degraded | killed |

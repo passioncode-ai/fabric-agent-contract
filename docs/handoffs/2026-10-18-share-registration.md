@@ -15,13 +15,14 @@ fixed decisions 1 to 9 and the REQ table; this run implements it on branch `agen
   `share-registration-receipt/1` (REQ-08).
 - **Code (REQ-02):** `src/share-registration.ts`: `isShareGrantId`, `isOrgContext`, `shareRegistrationDigest`,
   `registrationWellFormed`, `deriveShareRegistrations`, `decideShareRegistration` (SR-0 to SR-11),
-  `joinGrantUsage` (GJ-0 to GJ-6); every function answers and never throws.
+  `joinGrantUsage` (GJ-0 to GJ-6), `gateGrantUsage` (the sender gate, from the fix round); every function answers and
+  never throws.
 - **Rules (REQ-03 to REQ-05):** `FAC-SEM-117` (kinds `grant`, through `src/context-rules.ts`, and `org-share-grants`),
   `FAC-SEM-118` (kinds `share-registration`, `share-registration-derive`, `share-registration-intake`,
   `grant-usage-join`), and `FAC-SEM-045` amended in `src/device-rules.ts` for a `grant.usage`'s context.
 - **Vectors (REQ-06):** `fixtures/vectors/share-registration.json`, written by
   `tools/vectors/share-registration.ts --write`, expected values by hand, nothing imported from the module: 21 grant id,
-  36 derive, 50 intake and 24 join cases; the test compares the file with the generator and runs every case in UTC,
+  49 derive, 50 intake, 25 join and 23 gate cases (after both fix rounds); the test compares the file with the generator and runs every case in UTC,
   America/St_Johns and Pacific/Kiritimati.
 - **Outputs and refusals (REQ-07):** every derived registration validates and passes `FAC-SEM-118`; every receipt and
   refusal validates; 32 registration mutations, active and withdrawn, get the schema's verdict from the receiver.
@@ -32,7 +33,8 @@ fixed decisions 1 to 9 and the REQ table; this run implements it on branch `agen
   record, conformance (rows, canonical form, `FAC-SEM-117`, `FAC-SEM-118`, next free `FAC-SEM-119`); CONTEXT, README,
   DOCMAP, the coverage baseline; DEC-0086 after DEC-0085 with the DEC-0082 annotation (next free stays `DEC-0087`);
   CT-56 after CT-55 with each consumer's duty.
-- **Plants (REQ-11):** 94, each killed after two survivors were closed with tests:
+- **Plants (REQ-11):** 94 on the build, each killed after two survivors were closed with tests, and 26 on the fix round
+  and 5 after the second reading (125 in all; three equivalent, each argued):
   [`plants.md`](../evidence/specs/2026-10-18-share-registration/plants.md).
 - **Gate (REQ-12):** `pnpm run check` exits 0 (see *Checks*), with a 100 % branch floor for `src/share-registration.ts`.
 
@@ -50,7 +52,11 @@ docs-check, lint-md, privacy-check), each exiting 0: 75 files, 5545 tests, cover
 
 After the fix round, `pnpm run check` at `f628f0d`, each step exiting 0: typecheck; 75 files, 5585 tests, coverage
 7308 / 7381 branches with `src/share-registration.ts` at 271 / 271; UX lint passed; documentation checks passed,
-lint-md 0 errors; privacy-check 0 findings. The commits after it record this only.
+lint-md 0 errors; privacy-check 0 findings.
+
+After the second reading, `pnpm run check` exits 0 again: typecheck; 75 files, 5591 tests, coverage 7308 / 7381
+branches with `src/share-registration.ts` at 271 / 271; UX lint passed; documentation checks passed, lint-md 0 errors;
+privacy-check 0 findings. The commit that records it changes only this file and plants.md.
 
 ## The fix round (2026-10-18 to 2026-10-19)
 
@@ -71,6 +77,19 @@ Three blind readings of `cbcd03c`: unit fail, seam pass, product fail. Every fin
 
 The builder of the first fix round stopped on a provider error (502) after the code commit; the next session finished
 the vectors, docs, plants and gate from its worktree.
+
+**The second reading (2026-10-19),** of `b0a3307`, unit and product: both failed, and both rounds' findings are fixed:
+
+- unit: the text said the earliest revocation is chosen at full precision while the code chooses at millisecond
+  precision after the floor, first listed among equals: the text now says what the code does, with a vector for the tie.
+  A floored time is now cut and keeps its offset, so a year 9999 time at an offset is carried; the gate checks that a
+  code comes under its own status; a start rounded up to the next UTC day is stated;
+- product: a move in two steps (no placement, then another agent) passed the immediate-parent check: `parent` is now the
+  latest earlier revision that placed the grant, and the writer passes it; the retry rule was stated two ways: a typed
+  refusal is not sent again until the record changes (the gate answers `hold-degraded`, `malformed` and
+  `schema-unsupported` included), no answer, a 401 or a receiver's fault are sent again with backoff; backlog row CT-56,
+  devices.md's list of signed requests, this file's counts, the hub's `revokedAt` (a SHOULD in revocation-delta.md) and
+  the DEC-0086 heading (no em dash) brought in line.
 
 ## Open
 

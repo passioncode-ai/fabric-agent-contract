@@ -172,7 +172,7 @@ describe("the vectors (DEC-0086)", () => {
   it("gate every answer the intake vectors give as the decision says (DEC-0086 item 6)", () => {
     const expected: Record<string, string> = {
       "stale-revision": "send", "already-withdrawn": "send", "revision-conflict": "hold-degraded", "agent-mismatch": "hold-degraded",
-      "wrong-organization": "hold-degraded", "unassigned-device": "hold-degraded", malformed: "hold", "schema-unsupported": "hold"
+      "wrong-organization": "hold-degraded", "unassigned-device": "hold-degraded", malformed: "hold-degraded", "schema-unsupported": "hold-degraded"
     };
     for (const entry of vectors.intake as Json[]) {
       const answer = entry.expected as Json;

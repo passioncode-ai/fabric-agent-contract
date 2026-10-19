@@ -5340,7 +5340,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   are edited under the owner run's leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and
   `docs/backlog.md`.
 
-### DEC-0086 — Share registrations, `share-registration/1`: the sharer's enrolled node tells the organization server which agent each share grant into it runs; `grant.usage` carries the grant's own context; a share grant id holds nothing about the person (`FAC-SEM-117`, `FAC-SEM-118`)
+### DEC-0086: Share registrations, `share-registration/1`: the sharer's enrolled node tells the organization server which agent each share grant into it runs; `grant.usage` carries the grant's own context; a share grant id holds nothing about the person (`FAC-SEM-117`, `FAC-SEM-118`)
 
 - **Date:** 2026-10-18
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-56.
@@ -5389,14 +5389,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `before-start`; GJ-5 a day after the UTC day of the end, `after-end`; GJ-6 joined to the registration's `agentRef`.
      The sender gate `gateGrantUsage(answer)`, total, over the enrollment's latest answer to the grant's registration:
      `send` after a receipt (any state), `stale-revision` or `already-withdrawn`; `hold-degraded` after
-     `revision-conflict`, `agent-mismatch`, `wrong-organization` or `unassigned-device`, which sending again does not
-     clear (the node keeps the sums and reports degraded); `hold` before any answer and after anything else (a 401,
-     `malformed`, `schema-unsupported`, a receiver's fault).
+     `revision-conflict`, `agent-mismatch`, `wrong-organization`, `unassigned-device`, `malformed` or
+     `schema-unsupported` under their own status, which sending the same registration again does not clear (the node
+     keeps the sums, reports degraded and sends again only when the record changes); `hold` before any answer and after
+     anything else (a 401, a receiver's fault, a code under a status not its own), sent again with backoff.
   7. **Share grant ids (`FAC-SEM-117`):** a grant whose `context` is `org:<orgId>` has the `meta.id`
      `urn:fabric:share:<32 lower-case hex>`, 128 bits from a CSPRNG, never derived from a name, an address, an estate
      id, an `agentRef` or the organization; its `startsAt` and `expiresAt` carry at most three fraction digits; it keeps
      its `agentRef` across revisions, so moving a share to another agent revokes the grant and mints a new id (kind
-     `org-share-grants` given `parent` refuses a re-pointed grant; SR-7's recovery). Checked by the schemas at the boundary and by `FAC-SEM-117` (kinds `grant`
+     `org-share-grants` given `parent`, the latest earlier revision that placed the grant in its context (the immediate parent when it did), refuses a re-pointed grant, a move in two steps
+     included; SR-7's recovery). Checked by the schemas at the boundary and by `FAC-SEM-117` (kinds `grant`
      and `org-share-grants`), which Fabric and the kits run before signing; not by `governance.schema.json` nor
      `verifyEstateRecord`, so a naming fault never locks an estate out; it fails closed for billing only. Compared as
      written ([identifiers](specification/identifiers.md#where-identifiers-are-compared)).
@@ -5411,9 +5413,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `date-time` admits and `strictTime` refuses) and at most three fraction digits, on a day that exists
     (`share-registration#/$defs/instant` and the reference's reader), so every port compares the same instants;
   - the derivation carries a time with at most three fraction digits as written, its offset kept, and one with more at
-    millisecond precision in UTC as `Date#toISOString` writes it: a withdrawal time floored (a withdrawal may end early,
-    never late), a window rounded inward (`startsAt` up, `expiresAt` down, never wider than the grant's); the earliest
-    revocation is chosen by instant at full precision. So a revoked share is withdrawn whatever the precision of its
+    millisecond precision: a withdrawal time floored by cutting the fraction, its offset kept (so a year 9999 time at an
+    offset is carried too), a window rounded inward (`startsAt` up, written in UTC as `Date#toISOString` writes it when
+    it moves; `expiresAt` down; never wider than the grant's); the earliest revocation is chosen at millisecond
+    precision after the floor, the first listed among equals (the second reading's unit tier). A start rounded up can
+    move to the next UTC day, which only a grant that skipped `FAC-SEM-117` can carry. So a revoked share is withdrawn whatever the precision of its
     `revokedAt` (found by the fix round's unit and seam readings). A time `strictTime` cannot read, a revision below 1, a
     window empty once carried, or a revocation with no readable `revokedAt` registers nothing and reports a third
     degraded code, `share-grant-unreadable`; an `agentRef` that is no agentRef is `share-grant-agents`;
@@ -5449,7 +5453,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - the fixture `activity-batch-grant-usage-twice-spelled.json` became a test in `test/contexts.test.ts`: a share grant
     id admits only its normal form, so its second spelling is no longer schema-valid, and `FAC-SEM-039` keeps its verdict
     on it;
-  - a node sends nothing again that the receiver refused until the record changes (share-registration.md, derivation).
+  - a node sends nothing again that the receiver refused with a typed SR-2 to SR-9 refusal until the record changes,
+    and reports the grant degraded meanwhile; after no answer, a 401 or a receiver's fault it sends again with backoff
+    (share-registration.md, derivation; the gate reads the same split, the second reading's product tier).
 - **Why:** the organization server needs the agent behind each share grant to bill and show usage per agent, and may not
   read the person's estate record, where a grant meets its placement. Only the enrolled node holds a certificate the
   server attributes and registers only what a passkey signed, so the registration is authentic, scoped to the member who

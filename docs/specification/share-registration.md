@@ -42,8 +42,12 @@ string, which the vectors' "a trailing newline" case checks.
 
 `FAC-SEM-117` checks the form where a grant is written, and two more writer's duties on a share grant into an
 organization: its `startsAt` and `expiresAt` carry at most three fraction digits, and it **keeps its `agentRef` across
-revisions**. Moving a share to another agent revokes the grant and mints a new id; a revision whose placements run the
-grant under another `agentRef` than its parent revision's is refused (kind `org-share-grants` with `parent`). The rule
+revisions**. Moving a share to another agent revokes the grant and mints a new id. Kind `org-share-grants` takes
+`parent`, the latest earlier revision that placed the grant in its context (the immediate parent when it did), and refuses a revision whose placements run the grant under another `agentRef` than that
+revision's did. The writer passes that revision, not only the immediate parent: a move in two steps (a revision with no
+placement under the grant, then one placing it under another agent) is caught only so. A grant the given revision does
+not place is not compared, so when the record's grants were last placed in different revisions the writer runs the kind
+once with each of them. The rule
 runs where a grant is written: Fabric and the adapter's kits run it before a passkey signs a
 revision. It is not part of `governance.schema.json` nor of `verifyEstateRecord`, on purpose: a naming fault must not
 lock an estate out of its own record. It fails closed for billing only: a grant of another form registers nothing
@@ -109,17 +113,22 @@ Personal grants, grants that state no context and other organizations' grants ne
 
 **Times.** A registration carries every time at millisecond precision, so every port compares the same instants
 (DEC-0085's rule). A grant's or revocation's time with at most three fraction digits is carried as written, its offset
-kept. One with more is rounded to milliseconds and written as `Date#toISOString` writes it, in UTC: a withdrawal time is
-**floored** (a withdrawal may end a share up to a millisecond early, never late), a window is **rounded inward**
-(`startsAt` up, `expiresAt` down), so a registered window is never wider than the grant's. The earliest of several
-revocations is chosen by instant, at full precision. So a revoked share is withdrawn whatever the number of fraction
-digits its revocation carries. `FAC-SEM-117` makes the writer's side the simple one: a share grant into an organization
+kept. One with more is rounded to milliseconds: a withdrawal time is **floored** (a withdrawal may end a share up to a
+millisecond early, never late), a window is **rounded inward** (`startsAt` up, `expiresAt` down), so a registered
+window is never wider than the grant's. Flooring cuts the fraction to three digits and keeps the offset, so every
+readable time can be carried, a year 9999 one at an offset included; a start rounded up by a millisecond is written as
+`Date#toISOString` writes it, in UTC. The earliest of several revocations is chosen at millisecond precision after the
+floor, the first listed among equals. So a revoked share is withdrawn whatever the number of fraction digits its
+revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9995Z` is carried as the next day's
+`00:00:00.000Z`), so that day's usage is `before-start`; a grant that passed `FAC-SEM-117` never has such a start. `FAC-SEM-117` makes the writer's side the simple one: a share grant into an organization
 carries its window with at most three fraction digits, and Fabric and the hub write its revocations' `revokedAt` so.
 
 A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
-redelivery answers `unchanged`. It keeps each receipt, and it re-sends nothing the receiver answered with a refusal
-until the record changes.
+redelivery answers `unchanged`. It keeps each receipt. It sends nothing again that the receiver answered with a typed
+refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded meanwhile; after no
+answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the
+same split.
 
 ## The receiver
 
@@ -202,9 +211,9 @@ shown under its grant without an agent. Days compare as UTC days: a `startsAt` o
 
 | Gate | Answer |
 |---|---|
-| `send` | a receipt, whatever its state (usage before a withdrawal still joins); `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
-| `hold-degraded` | `revision-conflict`, `agent-mismatch`, `wrong-organization`, `unassigned-device`: sending the same registration again does not clear them, so the node keeps the sums and reports itself degraded |
-| `hold` | no answer yet, a transport refusal (401), `malformed`, `schema-unsupported`, a receiver's fault, or anything else: the node keeps the sums and registers again |
+| `send` | a status 200 receipt, whatever its state (usage before a withdrawal still joins); a 409 `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
+| `hold-degraded` | a typed refusal of the SR table that sending the same registration again does not clear: 409 `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or `schema-unsupported`. The node keeps the sums, reports itself degraded and sends again only when the record changes |
+| `hold` | no answer yet, a transport refusal (401), a receiver's fault, a code under a status that is not its own, or anything else: the node keeps the sums and sends the registration again with backoff |
 
 So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant
 stays held; the share continues under the new grant id (SR-7's recovery).
@@ -216,12 +225,12 @@ Joined usage is per person. Another person sees it only as sums per UTC day or b
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-117` | `grant`, `org-share-grants` | a grant whose `context` is an organization's has a share grant id as its `meta.id` (`urn:fabric:share:` and 32 lower-case hex digits, not all zeros, as written) and a `startsAt` and `expiresAt` with at most three fraction digits; on a record (`{record, parent?}`), each such share grant does, the placements in its context that name it by normal form run one `agentRef`, and, given the parent revision, the same `agentRef` as the parent's placements ran under the same grant |
+| `FAC-SEM-117` | `grant`, `org-share-grants` | a grant whose `context` is an organization's has a share grant id as its `meta.id` (`urn:fabric:share:` and 32 lower-case hex digits, not all zeros, as written) and a `startsAt` and `expiresAt` with at most three fraction digits; on a record (`{record, parent?}`), each such share grant does, the placements in its context that name it by normal form run one `agentRef`, and, given `parent` (the latest earlier revision that placed the grant in its context (the immediate parent when it did)), the same `agentRef` as that revision's placements ran under the same grant |
 | `FAC-SEM-118` | `share-registration`, `share-registration-derive`, `share-registration-intake`, `grant-usage-join` | a registration's instants are on days that exist and an active one's window ends after it starts; an implementation's derivation, decision and join answer as `deriveShareRegistrations`, `decideShareRegistration` and `joinGrantUsage` do, row for row of the SR and GJ tables |
 
 | Kind | Input |
 |---|---|
-| `org-share-grants` | `{record, parent?}`, an estate record and, optionally, the revision it follows |
+| `org-share-grants` | `{record, parent?}`, an estate record and, optionally, the latest earlier revision that placed the grant in its context (the immediate parent when it did) |
 | `share-registration` | a document of `share-registration.schema.json`; a receipt or a refusal has no clause |
 | `share-registration-derive` | `{record, entries, orgId, previouslyRegistered, answer}`; `answer` is `{registrations, degraded}` |
 | `share-registration-intake` | `{held, registration, binding, answer}` |
@@ -247,7 +256,7 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
 ## Who adopts it
 
 - **Fabric** (CX-FAB-04) mints `urn:fabric:share:<32 hex>` from a CSPRNG for each share grant into an organization, runs
-  `FAC-SEM-117` with the parent revision before the passkey signs, writes the window and every `revokedAt` with at most
+  `FAC-SEM-117` with `parent` the latest earlier revision that placed each grant before the passkey signs, writes the window and every `revokedAt` with at most
   three fraction digits, drafts one `agentRef` per organization grant and never re-points it (a move revokes and mints a
   new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub writes the
   revocation delta's `revokedAt` with at most three fraction digits.

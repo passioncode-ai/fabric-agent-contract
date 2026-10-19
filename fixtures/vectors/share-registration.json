@@ -1544,7 +1544,7 @@
       }
     },
     {
-      "name": "withdrawn: a microsecond revokedAt in a delta entry is floored and written in UTC",
+      "name": "withdrawn: a microsecond revokedAt in a delta entry is floored, its offset kept",
       "record": {
         "schema": "estate-record/1",
         "estate": "estate-5d0f1a",
@@ -1596,7 +1596,177 @@
             "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
             "context": "org:org_7kq2m4xw",
             "state": "withdrawn",
-            "withdrawnAt": "2026-10-15T05:30:00.999Z"
+            "withdrawnAt": "2026-10-15T07:30:00.999+02:00"
+          }
+        ],
+        "degraded": []
+      }
+    },
+    {
+      "name": "withdrawn: two revocations equal at the millisecond once floored keep the first listed",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "estate-5d0f1a",
+        "revision": 7,
+        "issuedAt": "2026-10-14T09:00:00Z",
+        "machines": [
+          {
+            "id": "m-1",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "context": "org:org_7kq2m4xw",
+                "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+              }
+            ]
+          }
+        ],
+        "shareGrants": [
+          {
+            "kind": "standing-grant",
+            "meta": {
+              "id": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+              "revision": 3
+            },
+            "startsAt": "2026-10-12T08:00:00Z",
+            "expiresAt": "2026-10-26T08:00:00Z",
+            "principalKind": "external",
+            "context": "org:org_7kq2m4xw"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "grant",
+            "ref": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revokedAt": "2026-10-13T10:00:00.0019Z"
+          },
+          {
+            "kind": "grant",
+            "ref": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revokedAt": "2026-10-13T12:00:00.001+02:00"
+          }
+        ]
+      },
+      "entries": [],
+      "orgId": "org_7kq2m4xw",
+      "previouslyRegistered": [],
+      "expected": {
+        "registrations": [
+          {
+            "type": "share-registration/1",
+            "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "context": "org:org_7kq2m4xw",
+            "state": "withdrawn",
+            "withdrawnAt": "2026-10-13T10:00:00.001Z"
+          }
+        ],
+        "degraded": []
+      }
+    },
+    {
+      "name": "withdrawn: a microsecond revokedAt whose UTC instant is past year 9999 is floored, its offset kept",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "estate-5d0f1a",
+        "revision": 7,
+        "issuedAt": "2026-10-14T09:00:00Z",
+        "machines": [
+          {
+            "id": "m-1",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "context": "org:org_7kq2m4xw",
+                "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+              }
+            ]
+          }
+        ],
+        "shareGrants": [
+          {
+            "kind": "standing-grant",
+            "meta": {
+              "id": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+              "revision": 3
+            },
+            "startsAt": "2026-10-12T08:00:00Z",
+            "expiresAt": "2026-10-26T08:00:00Z",
+            "principalKind": "external",
+            "context": "org:org_7kq2m4xw"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "grant",
+            "ref": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "revokedAt": "9999-12-31T23:30:00.0001-05:00"
+          }
+        ]
+      },
+      "entries": [],
+      "orgId": "org_7kq2m4xw",
+      "previouslyRegistered": [],
+      "expected": {
+        "registrations": [
+          {
+            "type": "share-registration/1",
+            "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "context": "org:org_7kq2m4xw",
+            "state": "withdrawn",
+            "withdrawnAt": "9999-12-31T23:30:00.000-05:00"
+          }
+        ],
+        "degraded": []
+      }
+    },
+    {
+      "name": "active: a microsecond expiry whose UTC instant is past year 9999 is floored, its offset kept",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "estate-5d0f1a",
+        "revision": 7,
+        "issuedAt": "2026-10-14T09:00:00Z",
+        "machines": [
+          {
+            "id": "m-1",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "context": "org:org_7kq2m4xw",
+                "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+              }
+            ]
+          }
+        ],
+        "shareGrants": [
+          {
+            "kind": "standing-grant",
+            "meta": {
+              "id": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+              "revision": 3
+            },
+            "startsAt": "2026-10-12T08:00:00Z",
+            "expiresAt": "9999-12-31T23:00:00.0001-05:00",
+            "principalKind": "external",
+            "context": "org:org_7kq2m4xw"
+          }
+        ],
+        "revocations": []
+      },
+      "entries": [],
+      "orgId": "org_7kq2m4xw",
+      "previouslyRegistered": [],
+      "expected": {
+        "registrations": [
+          {
+            "type": "share-registration/1",
+            "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+            "context": "org:org_7kq2m4xw",
+            "state": "active",
+            "grantRevision": 3,
+            "agentRef": "urn:fabric:agent:example:inbox-digest",
+            "startsAt": "2026-10-12T08:00:00Z",
+            "expiresAt": "9999-12-31T23:00:00.000-05:00"
           }
         ],
         "degraded": []
@@ -5843,7 +6013,7 @@
       "expected": "hold-degraded"
     },
     {
-      "name": "malformed",
+      "name": "malformed: the same bytes again do not clear it",
       "answer": {
         "status": 400,
         "body": {
@@ -5853,10 +6023,10 @@
           }
         }
       },
-      "expected": "hold"
+      "expected": "hold-degraded"
     },
     {
-      "name": "schema-unsupported",
+      "name": "schema-unsupported: the receiver does not read this revision",
       "answer": {
         "status": 400,
         "body": {
@@ -5869,6 +6039,44 @@
                 "share-registration/1"
               ]
             }
+          }
+        }
+      },
+      "expected": "hold-degraded"
+    },
+    {
+      "name": "stale-revision under a status that is not its own",
+      "answer": {
+        "status": 401,
+        "body": {
+          "error": {
+            "code": "stale-revision",
+            "message": "a higher revision of this grant is held"
+          }
+        }
+      },
+      "expected": "hold"
+    },
+    {
+      "name": "agent-mismatch under status 200",
+      "answer": {
+        "status": 200,
+        "body": {
+          "error": {
+            "code": "agent-mismatch"
+          }
+        }
+      },
+      "expected": "hold"
+    },
+    {
+      "name": "wrong-organization under status 409",
+      "answer": {
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "wrong-organization",
+            "message": "the registration's context is not this certificate's organization"
           }
         }
       },

@@ -127,7 +127,8 @@ once (`FAC-SEM-076`); a grant's id is a URI, so two spellings with one normal fo
 organization's instance of the agent names it (`FAC-SEM-111`). Its `meta.id` is a **share grant id**,
 `urn:fabric:share:` and 32 lower-case hex digits from a CSPRNG, never derived from a name, an address, an estate id, an
 `agentRef` or the organization; its window carries at most three fraction digits; and it keeps its `agentRef` across
-revisions, so moving the share revokes the grant and mints a new id (`FAC-SEM-117`, DEC-0086,
+revisions, even after a revision that placed it nowhere, so moving the share revokes the grant and mints a new id
+(`FAC-SEM-117` given the latest earlier revision that placed it, DEC-0086,
 [share registration](share-registration.md#the-share-grant-id)). Fabric runs `FAC-SEM-117` before the passkey signs; it is
 not part of `verifyEstateRecord`, so a naming fault never locks an estate out of its record. Its access level is its own `capabilities`,
 `effectCeiling`, `dataClasses`, `spend` and `expiresAt`: two share grants of one agent into two organizations with

@@ -58,19 +58,20 @@ const dayStart = (ms: number) => Math.floor(ms / DAY_MS) * DAY_MS;
 /**
  * A grant's or a revocation's time as a registration carries it (DEC-0086, the fix round): a time with at most three
  * fraction digits as written, already a millisecond instant; one with more, rounded to milliseconds (`up` for a window's
- * start, down otherwise, so a registered window is never wider than the grant's and a withdrawal ends early, never late)
- * and written as `Date#toISOString` does. Undefined for a time `strictTime` cannot read.
+ * start, down otherwise, so a registered window is never wider than the grant's and a withdrawal ends early, never late).
+ * Rounding down cuts the fraction to three digits and keeps the offset, so every readable time can be carried; rounding a
+ * start up by one millisecond writes it as `Date#toISOString` does, in UTC. Undefined for a time `strictTime` cannot read.
  */
 function carried(value: unknown, up = false): string | undefined {
   if (!isString(value) || !Number.isFinite(strictTime(value))) return undefined;
   if (!SUB_MILLISECOND.test(value)) return value;
   // Cutting the fraction to three digits floors the instant; a non-zero digit cut away moves a start up by 1 ms.
-  let extra = 0;
+  let extra = false;
   const cut = value.replace(/(\.[0-9]{3})([0-9]+)/, (_, kept: string, rest: string) => {
-    if (up && /[1-9]/.test(rest)) extra = 1;
+    extra = up && /[1-9]/.test(rest);
     return kept;
   });
-  return new Date(strictTime(cut) + extra).toISOString();
+  return extra ? new Date(strictTime(cut) + 1).toISOString() : cut;
 }
 /** A grant's or a revocation's time as milliseconds, any number of fraction digits floored, or NaN. */
 const instant = (value: unknown): number => {
@@ -126,7 +127,8 @@ export interface ShareRegistrationDerivation {
 
 /**
  * Whether `grant` revocations name `id` by normal form, and the earliest `revokedAt` among them as a registration carries
- * it (`carried`, floored): compared by instant, any number of fraction digits; undefined when none is readable.
+ * it (`carried`, floored): compared at millisecond precision after the floor, the first listed among equals; undefined
+ * when none is readable.
  */
 function revokedAt(revocations: readonly JsonObject[], id: string): { revoked: boolean; at: string | undefined } {
   const matching = revocations.filter((revocation) => sameIdentifier(revocation.ref, id));
@@ -147,7 +149,7 @@ function revokedAt(revocations: readonly JsonObject[], id: string): { revoked: b
  *   withdrawn at the earliest `revokedAt`;
  * - otherwise the placements of the revision in that context naming the grant by normal form decide: none, nothing yet;
  *   two `agentRef`s (or one that is no agentRef), nothing (`share-grant-agents`); one, an active registration with the
- *   grant's `meta.revision`, `startsAt` and `expiresAt` as written.
+ *   grant's `meta.revision` and its window as `carried` writes it.
  *
  * Then each grant id registered before that the revision no longer lists in that context is withdrawn: at the earliest
  * `revokedAt` when it is revoked, else at the revision's `issuedAt`. Times are carried at millisecond precision
@@ -405,10 +407,12 @@ export function joinGrantUsage(event: unknown, binding: unknown, registrations: 
 
 export type GateAnswer = "send" | "hold" | "hold-degraded";
 
-/** Refusals after which the grant's usage may be sent: the receiver holds a registration (or a final withdrawal) for it. */
-const SEND_AFTER: readonly string[] = ["stale-revision", "already-withdrawn"];
-/** Refusals that do not clear by sending again: the node holds the usage back and reports itself degraded. */
-const DEGRADED_AFTER: readonly string[] = ["revision-conflict", "agent-mismatch", "wrong-organization", "unassigned-device"];
+/** Refusals after which the grant's usage may be sent, with their status: the receiver holds a registration (or a final withdrawal). */
+const SEND_AFTER: ReadonlyMap<string, number> = new Map([["stale-revision", 409], ["already-withdrawn", 409]]);
+/** Typed refusals that sending the same registration again does not clear, with their status: the node holds back and reports degraded. */
+const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
+  ["revision-conflict", 409], ["agent-mismatch", 409], ["wrong-organization", 403], ["unassigned-device", 403], ["malformed", 400], ["schema-unsupported", 400]
+]);
 
 /**
  * The sender gate (DEC-0086 item 6): whether a collector may emit `grant.usage` for a grant toward one enrollment, given
@@ -416,20 +420,22 @@ const DEGRADED_AFTER: readonly string[] = ["revision-conflict", "agent-mismatch"
  * (`{status: 200, receipt}`, `{status, body: {error: {code}}}`, `{status: 401, code}`, `{fault}`), or `undefined`
  * before any answer:
  *
- * - `send`: a receipt, whatever its state, or `stale-revision` or `already-withdrawn`;
- * - `hold-degraded`: `revision-conflict`, `agent-mismatch`, `wrong-organization` or `unassigned-device`, which sending
- *   the same registration again does not clear: the node keeps the sums and reports itself degraded;
- * - `hold`: no answer yet, a transport refusal (401), `malformed`, `schema-unsupported`, a receiver's fault, or anything
- *   else: the node keeps the sums and registers again.
+ * - `send`: a status 200 receipt, whatever its state, or a 409 `stale-revision` or `already-withdrawn`;
+ * - `hold-degraded`: a typed refusal of the SR table that sending the same registration again does not clear (409
+ *   `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or
+ *   `schema-unsupported`): the node keeps the sums, reports itself degraded and sends again only when the record changes;
+ * - `hold`: no answer yet, a transport refusal (401), a receiver's fault, a code whose status is not its own, or anything
+ *   else: the node keeps the sums and sends the registration again with backoff.
  *
  * It never throws.
  */
 export function gateGrantUsage(answer: unknown): GateAnswer {
   if (own(answer, "status") === 200 && own(own(answer, "receipt"), "type") === SHARE_REGISTRATION_RECEIPT_TYPE) return "send";
   const code = own(own(own(answer, "body"), "error"), "code");
+  const status = own(answer, "status");
   if (!isString(code)) return "hold";
-  if (SEND_AFTER.includes(code)) return "send";
-  return DEGRADED_AFTER.includes(code) ? "hold-degraded" : "hold";
+  if (SEND_AFTER.get(code) === status) return "send";
+  return DEGRADED_AFTER.get(code) === status ? "hold-degraded" : "hold";
 }
 
 // ---- Rules -------------------------------------------------------------------------------------------------------
@@ -459,7 +465,8 @@ function agentsUnder(record: JsonObject, context: unknown, id: unknown): Set<str
 
 /**
  * FAC-SEM-117 on a record (`{record, parent?}`): each organization share grant's id and window form, one agentRef among
- * the placements naming it, and, against the parent revision, the same agentRef as the parent's placements ran under
+ * the placements naming it, and, against `parent` (the latest earlier revision that placed the grant in its context,
+ * so that a move in two steps is caught), the same agentRef as that revision's placements ran under
  * the same grant (DEC-0086, the fix round: moving a share to another agent revokes the grant and mints a new id).
  */
 function orgShareGrants(value: JsonObject): Finding[] {
@@ -477,7 +484,7 @@ function orgShareGrants(value: JsonObject): Finding[] {
     const before = list(parent.shareGrants).find((old) => old.context === grant.context && isObject(old.meta) && isString(id) && sameIdentifier(old.meta.id, id));
     const earlier = before ? agentsUnder(parent, before.context, id) : new Set<string>();
     if (earlier.size > 0 && [...refs].some((ref) => !earlier.has(ref))) {
-      findings.push({ code: "FAC-SEM-117", instancePath: at, message: "this grant ran another agent in the parent revision: a share grant into an organization keeps its agentRef; move the share by revoking it and minting a new id" });
+      findings.push({ code: "FAC-SEM-117", instancePath: at, message: "this grant ran another agent in the earlier revision given as parent: a share grant into an organization keeps its agentRef; move the share by revoking it and minting a new id" });
     }
   }
   return findings;

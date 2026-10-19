@@ -94,7 +94,7 @@ context names it, so nothing of a context is routed to it.
 
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment
-(`FAC-SEM-044`). Every later request — batches, check-ins and rotation — is made over mutual TLS with it and carries an
+(`FAC-SEM-044`). Every later request (batches, check-ins, rotation and share registrations) is made over mutual TLS with it and carries an
 HTTP message signature made with the device's key, which a receiver behind a host that terminates TLS verifies instead
 ([transport](#transport), DEC-0056).
 
