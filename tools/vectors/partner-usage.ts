@@ -39,6 +39,8 @@ function cases(): Json[] {
     ["a day that does not exist", { usage: [row(SETUP, "2026-02-30", 1, 0, 1)], publishers: ["acme"], step: "day" }, FAULT],
     ["no calls", { usage: [row(SETUP, "2026-10-12", 0, 0, null)], publishers: ["acme"], step: "day" }, FAULT],
     ["more unpriced calls than calls", { usage: [row(SETUP, "2026-10-12", 1, 2, null)], publishers: ["acme"], step: "day" }, FAULT],
+    ["more unpriced calls than calls, with a cost", { usage: [row(SETUP, "2026-10-12", 1, 2, 0.5)], publishers: ["acme"], step: "day" }, FAULT],
+    ["rows in any order: the cells ordered by day", { usage: [row(SETUP, "2026-10-13", 1, 0, 1), row(SETUP, "2026-10-12", 1, 0, 2)], publishers: ["acme"], step: "day" }, { cells: [cell(SETUP, "2026-10-12", 1, 0, 2), cell(SETUP, "2026-10-13", 1, 0, 1)] }],
     ["a zero cost for an unpriced row", { usage: [row(SETUP, "2026-10-12", 1, 1, 0)], publishers: ["acme"], step: "day" }, FAULT],
     ["a null cost for a priced row", { usage: [row(SETUP, "2026-10-12", 1, 0, null)], publishers: ["acme"], step: "day" }, FAULT],
     ["a negative cost", { usage: [row(SETUP, "2026-10-12", 1, 0, -1)], publishers: ["acme"], step: "day" }, FAULT],

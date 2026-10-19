@@ -463,6 +463,70 @@
       }
     },
     {
+      "name": "more unpriced calls than calls, with a cost",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 2,
+            "costUsd": 0.5
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "rows in any order: the cells ordered by day",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-13",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 1
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 2
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "cells": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 2
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-13",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 1
+          }
+        ]
+      }
+    },
+    {
       "name": "a zero cost for an unpriced row",
       "input": {
         "usage": [

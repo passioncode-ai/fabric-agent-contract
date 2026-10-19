@@ -27,6 +27,16 @@ describe("owner to partner to agents (DEC-0090 item 3, FAC-SEM-124)", () => {
     expect(at(load("delegation-mint-partner-personal.json"))).toEqual(["/grant/context"]);
     expect(at(load("delegation-mint-agent-grant-partner-actor.json"))).toEqual(["/token/act"]);
   });
+  it("refuses a principal that is no organization, a grant in the partner's own context and a deeper chain at mint", () => {
+    const ok = load("delegation-mint-partner-ok.json");
+    const principal = { ...ok, grant: { ...ok.grant, principal: { ...ok.grant.principal, id: "urn:person:partner" } } };
+    expect(at(principal)).toEqual(["/grant/principal/id", "/token/act"]);
+    expect(at({ ...ok, grant: { ...ok.grant, context: ok.grant.principal.id } })).toEqual(["/grant/context"]);
+    const deeper = { ...ok, token: { ...ok.token, act: { sub: ok.token.act.sub, act: { sub: "acme-helper.default", act: ok.token.act.act } } } };
+    expect(chainDepth(deeper.token.act)).toBe(3);
+    expect(at(deeper)).toEqual(["/token/act"]);
+    expect(at({ ...ok, token: { ...ok.token, sub: "urn:person:someone-else" } })).toEqual(["/token/sub"]);
+  });
   it("keeps the partner innermost onward: the chain grows by one agent outside", () => {
     const ok = load("delegation-mint-partner-ok.json");
     const onward = { ...ok, parent: ok.token, token: { ...ok.token, aud: "example-writer", act: { sub: ok.token.aud, act: ok.token.act } } };
