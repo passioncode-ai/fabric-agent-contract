@@ -5509,71 +5509,94 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `ct56-share-grant-id`, `ct56-share-registration`); the record plane is `fs`. The registers are edited under this run's
   leases on `docs/DECISIONS.md`, `docs/specification/conformance.md` and `docs/backlog.md`.
 
-### DEC-0087: Jobs under limits and uncertain effects: `quota-exhausted`, a pause grammar, `outcome-unknown`, the caller's act, the intent's key, and unknown as `null` in `usage` (`FAC-SEM-119`, `FAC-SEM-120`)
+### DEC-0087: Jobs under limits and uncertain effects: `quota-exhausted`, a pause grammar, `outcome-unknown`, the caller's act, the intent's key, the answer to a repeated key, and unknown as `null` in `usage` under `fabric-interop/0.2` (`FAC-SEM-119`, `FAC-SEM-120`)
 
 - **Date:** 2026-10-19
 - **Status:** Accepted source change (on merge of its pull request). Resolves OQ-0012. Consumer adoption: board row CT-55.
 - **Decision:** in [interop → limits and uncertain effects](specification/interop.md#limits-and-uncertain-effects):
-  1. **`quota-exhausted`:** a job a limit stopped and its provider will not resume ends `failed` with
-     `error: {code: "quota-exhausted", message, data: {retryable, resetsAt?}}`; `data` closed, `retryable` required
-     (`true`: the same intent may run once the limit resets; `false`: a person must act), `resetsAt` an RFC 3339 UTC
-     instant only with `retryable: true` (`interop-common#/$defs/quotaExhaustedData`, `#/$defs/utcInstant`). The schema
-     constrains `data` only for this code.
+  1. **`quota-exhausted`:** a job a limit (a provider's quota, a subscription's window) stopped and its provider will
+     not resume ends `failed` with `error: {code: "quota-exhausted", message, data: {retryable, resetsAt?}}`; `data`
+     closed, `retryable` required (`true`: the same intent may run once the limit resets; `false`: a person must act),
+     `resetsAt` an RFC 3339 UTC instant with at most three fraction digits, only with `retryable: true`
+     (`interop-common#/$defs/quotaExhaustedData`, `#/$defs/utcInstant`). The schema constrains `data` only for this
+     code. A spend window of a grant or the meter stays `limit-reached` (DL-19) with its approval request.
   2. **A paused job:** a provider that resumes the same job keeps it `working` with `statusMessage` `quota-exhausted` or
-     `quota-exhausted until <UTC instant>`, optionally followed by a colon, a space and text, at most 500 characters;
-     `pollIntervalMs` SHOULD reach the reset. `readJobPause`. No member and no status are added.
+     `quota-exhausted until <UTC instant>`, optionally followed by a colon, a space and a text that is not only white
+     space, at most 500 code points; `pollIntervalMs` SHOULD reach the reset. `readJobPause`. No member and no status
+     are added.
   3. **`outcome-unknown`:** a job whose effect may have happened and is not observed ends `failed` with
      `error: {code: "outcome-unknown", message, data?}`; only an observed result settles it.
   4. **The caller's act** `jobCallerAction(answer, now)`, total: `poll`, `wait` (`notBefore`), `answer`, `done`,
      `cancelled`, `resend` under the same key (`quota-exhausted` retryable, `notBefore` its reset when later than
-     `now`), `person` (not retryable), `reconcile` (`outcome-unknown`), `failed` (another code), `invalid`. Never "submit
-     anew": after either code nothing is sent under a new key.
+     `now`), `person` (`quota-exhausted` not retryable, `limit-reached`), `reconcile` (`outcome-unknown`), `failed`
+     (another code), `invalid` (on which a caller sends nothing new and keeps polling a job it can still read). Never
+     "submit anew": after `outcome-unknown` nothing goes under a new key until the caller observed that the effect did
+     not happen.
   5. **The intent's key** `intentIdempotencyKey({agentId, capability, input, request?})`: a UUID of version 8 (RFC 9562
      §5.5, §5.8) from the first 16 bytes of the SHA-256 of the intent's RFC 8785 form; `request` names the principal's
      request when one principal asks twice on purpose; never a clock or a random value.
-  6. **Unknown is `null`:** `common#/$defs/usage`'s counts, `costUsd` and `wallMs` admit `null` for unknown, never 0;
-     an optional `partial: true` says the numbers are a lower bound.
-  7. **Rules:** `FAC-SEM-119` (kinds `interop-job`, `usage`): the pause grammar with a UTC instant on a day that exists,
-     `quota-exhausted`'s `resetsAt` on a day that exists, no `partial: false` beside a `null`; `FAC-SEM-120` (kind
-     `job-caller`): a caller's act equals `jobCallerAction`'s.
+  6. **A repeated key:** a provider keeps keys per authenticated caller; a key whose job ended `quota-exhausted` admits
+     the intent again, once, when the limit no longer holds; a key whose job ended `outcome-unknown` is answered with
+     that job and never runs again; any other ended key is answered with its job.
+  7. **Unknown is `null`:** `common#/$defs/usage`'s counts, `costUsd` and `wallMs` admit `null` for unknown, never 0;
+     `partial: true` says a number is a lower bound or unknown, SHOULD stand beside a `null` and is never `false` there.
+  8. **The revision `fabric-interop/0.2`:** its readers accept `null` and `partial`; a caller names the revisions it
+     reads in `_meta.protocols` (DEC-0067's list); a provider writes `null` or `partial` only toward a caller that names
+     `fabric-interop/0.2` (`readsNullUsage`), and toward any other the lower bound it measured, as before, with nothing
+     in `notVerified`.
+  9. **Rules:** `FAC-SEM-119` (kinds `interop-job`, `usage`, `result`): the pause grammar with a UTC instant on a day
+     that exists, `quota-exhausted`'s `resetsAt` on a day that exists, no `partial: false` beside a `null`;
+     `FAC-SEM-120` (kind `job-caller`): a caller's act equals `jobCallerAction`'s.
 - **Choices made in implementation** (OQ-0012 left them open):
   - the pause is carried by the `statusMessage` grammar, because `interop-job` is closed and its states are MCP Task
     states; `degraded` stays health;
-  - `data` of `outcome-unknown` stays open: what a provider can say about an unobserved effect varies;
-  - `jobCallerAction` answers `invalid`, never a guess, for `quota-exhausted` data the schema refuses, and `now` must be a
-    UTC instant, so a caller cannot misread an offset;
-  - a reset equal to `now` is reached (`poll`, `resend` without `notBefore`);
+  - `data` of `outcome-unknown` stays open: what a provider can say about an unobserved effect varies, and Fabric's
+    hub already sends `{mayHaveRun}`;
+  - instants carry at most three fraction digits (DEC-0085's rule), so every port compares the same instants; lengths
+    count code points, as JSON Schema's `maxLength` does; a reset equal to `now` is reached (`poll`, `resend` without
+    `notBefore`);
+  - `jobCallerAction` answers `invalid`, never a guess, for an `error` the schema refuses and for `quota-exhausted`
+    data the schema refuses, and reads own members only;
   - the key is a UUID so it fits `agent.call`'s `idempotencyKey` (1 to 256 characters) and capabilities that require a
-    UUID key;
-  - no new `fabric-interop` revision: the protocol has no negotiation, so a revision string nobody negotiates would add
-    nothing; the pin gate below does the work;
+    UUID key; the principal is not in the intent, because a provider scopes keys by the authenticated caller;
+  - the gate is a revision a caller names, not a pin a provider cannot see; the interim writes the measured lower
+    bound, unmarked, rather than a `notVerified` entry, which would turn every such job from `succeeded` into `partial`
+    (`FAC-SEM-001`): usage was non-authoritative before and stays so;
   - "coverage" in OQ-0012's C3 is `partial` beside `null`, and `notVerified` for a claim (DEC-0064's `FAC-SEM-001`).
 - **Why:** the 2026-10-17 retrospective found callers that read a limit as a plain failure and resubmitted, paying
   twice, and callers that resent an uncertain write under a new key, booking it twice; and unknown numbers written as 0
   read as measured zeros.
 - **Alternatives refused:** a job status `paused` (breaks every reader of the MCP Task states); a new job member (the
   job is closed); `degraded` as a job state; a random or clock-derived key (a resend after a restart pays twice); 0 for
-  unknown (DEC-0021).
-- **Compatibility:** additive for `error.data` (only the two new codes, which no provider sent before). `usage` is
-  closed and its counts were integers, so a reader pinned before DEC-0087 refuses `null` and `partial`: readers adopt
-  first, and a provider writes `null` or `partial` only toward readers pinned at or after DEC-0087; until then it writes
-  the lower bound it measured and names the count in `notVerified`, and omits an optional number it does not know.
-  `contractVersion` stays `0.1.0`.
+  unknown (DEC-0021); a gate by pin (a provider answering `fabric.job.get` cannot see its caller's pin); `quota-exhausted`
+  for a spend window (it would lose DL-19's approval request).
+- **Compatibility:** additive for `error.data` (only `quota-exhausted`, which no provider sent before; Fabric's hub
+  already sends `outcome-unknown` with open `data`, which stays valid). `_meta.protocols` is a new optional member of an
+  open object. `usage` is closed and its numbers were integers: a reader of `fabric-interop/0.1` refuses `null` and
+  `partial`, which is why they go only to a caller that names `fabric-interop/0.2`. `fabric-interop` gains `0.2` in the
+  register (`src/protocol-revisions.ts`, named only, as `0.1` is). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/interop.md` (the section, the rule table), `docs/specification/results-and-evidence.md`
-    (`usage`), `docs/specification/conformance.md` (the serving, calling and reading rows; `FAC-SEM-119`,
+    (`usage`), `docs/specification/service.md` (a usage report's tokens), `docs/specification/versioning.md` (the
+    named revisions), `docs/specification/conformance.md` (the serving, calling and reading rows; `FAC-SEM-119`,
     `FAC-SEM-120`; next free `FAC-SEM-121`);
   - schemas: `schemas/interop-common.schema.json` (`error`, `quotaExhaustedData`, `utcInstant`),
-    `schemas/common.schema.json` (`usage`);
-  - code: `src/job-limits.ts` (new), `src/semantic-rules.ts`; `tools/vectors/job-limits.ts` (new);
+    `schemas/common.schema.json` (`usage`), `schemas/interop-request-meta.schema.json` (`protocols`);
+  - code: `src/job-limits.ts` (new), `src/semantic-rules.ts`, `src/protocol-revisions.ts`; `tools/vectors/job-limits.ts`
+    (new);
   - fixtures: `fixtures/vectors/job-limits.json` (new), `fixtures/semantic/job-limits-*` (new), `fixtures/catalogue.json`;
-  - tests: `test/job-limits.test.ts` (new); the floor for `src/job-limits.ts` in `vitest.config.ts` and
-    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - tests: `test/job-limits.test.ts` (new), `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`; the floor for
+    `src/job-limits.ts` in `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
   - docs: `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`, `docs/OPEN_QUESTIONS.md` (OQ-0012), `docs/backlog.md` (CT-55),
-    `docs/evidence/sources.md` (RFC 9562), `docs/evidence/specs/2026-10-19-job-limits/brief.md` and `plants.md`,
-    `docs/handoffs/2026-10-19-job-limits.md`, `docs/handoffs/README.md`.
-- **Not decided here:** whether `cancelled` asserts that no effect happened; a machine-readable scope of a limit; C4 (a
-  4xx at submit against a 4xx while polling), adapter guidance (fabric-agent-adapter PR #122).
+    `docs/evidence/sources.md` (RFC 9562), `docs/ux/scenarios.md` and `docs/ux/screens.md` (SCN-031),
+    `docs/evidence/specs/2026-10-19-job-limits/brief.md` and `plants.md`, `docs/handoffs/2026-10-19-job-limits.md`,
+    `docs/handoffs/README.md`.
+- **Not decided here:** whether `cancelled` asserts that no effect happened; a machine-readable scope of a limit; the
+  two codes and the pause on the MCP Task route; C4 (a 4xx at submit against a 4xx while polling), adapter guidance
+  (fabric-agent-adapter PR #122).
 - **Source:** OQ-0012 and its ruling in principle of 2026-10-17 (an agent retrospective of 18 agents, a private report);
-  DEC-0017, DEC-0021, DEC-0022, DEC-0064; RFC 9562. DEC-0087, `FAC-SEM-119` and `FAC-SEM-120` were reserved by git CAS
-  (`agent_sync.py reserve`, keys `ct55-job-limits`, `ct55-job-documents`, `ct55-job-caller`); the record plane is `fs`.
+  DEC-0017, DEC-0021, DEC-0022, DEC-0064, DEC-0067, DEC-0085; DL-19; RFC 9562; Fabric's hub `outcome-unknown` on
+  `agent.call` (fabric `apps/desktop/src/main/hubCall.ts` at `df9edcc6`). Three blind readings of the first cut
+  (unit, seam, product) led to items 6 and 8 and the choices on instants, lengths, the gate and the interim. DEC-0087,
+  `FAC-SEM-119` and `FAC-SEM-120` were reserved by git CAS (`agent_sync.py reserve`, keys `ct55-job-limits`,
+  `ct55-job-documents`, `ct55-job-caller`); the record plane is `fs`.

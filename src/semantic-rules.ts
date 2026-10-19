@@ -34,7 +34,7 @@ import { feedDataRules } from "./feed-data.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
-import { jobLimitRules } from "./job-limits.js";
+import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
@@ -107,6 +107,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "result" && value.outcome === "succeeded" && Array.isArray(value.notVerified) && value.notVerified.length > 0) {
     findings.push({ code: "FAC-SEM-001", instancePath: "/notVerified", message: "a succeeded result lists no claim in notVerified" });
   }
+  // DEC-0087: a result's own usage, as kind usage reads it.
+  if (kind === "result") findings.push(...usageFindings(value.usage, "/usage"));
   if (kind === "execution-bundle") {
     const pool = isObject(value.pool) && Array.isArray(value.pool.accounts) ? value.pool.accounts : [];
     const selected = isObject(value.context) ? value.context.selectedAccount : undefined;

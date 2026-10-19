@@ -57,3 +57,34 @@ plant.
 | J-38 | schema: `costUsd` without `null` | killed |
 | J-39 | schema: `partial` of any type | killed |
 | J-40 | schema: a negative count | killed |
+
+## After the first readings
+
+The fix round's new clauses were planted once each, the same way. 16 plants: 13 killed on the first pass; of the 3 that
+survived, two were closed with a vector or a test and one is equivalent:
+
+- **J-47, a message over 2000 code points acted on:** caller vectors "a message of 2000 characters: failed" and "of
+  2001 characters: invalid" now tell them apart. Re-planted: killed.
+- **J-52, the request's length in UTF-16 units:** a key vector with a request of 256 code points beyond the BMP (512
+  UTF-16 units) now gets a key. Re-planted: killed.
+- **J-50, an inherited status read in the job reader:** equivalent. `readJobPause` and `jobCallerAction` read the
+  status again as an own member, so an inherited one answers `{paused: false}` and `invalid` either way.
+
+| Plant | What was removed or loosened | Result |
+|---|---|---|
+| J-41 | the pause length in UTF-16 units | killed |
+| J-42 | a blank pause text admitted | killed |
+| J-43 | more than three fraction digits admitted (code) | killed |
+| J-44 | more than three fraction digits admitted (schema) | killed |
+| J-45 | an error with another member acted on | killed |
+| J-46 | an empty message acted on | killed |
+| J-47 | a message over 2000 code points acted on | killed (after a vector) |
+| J-48 | `limit-reached` read as failed | killed |
+| J-49 | quota data: an inherited `retryable` read | killed |
+| J-50 | job: an inherited status read | equivalent |
+| J-51 | key: inherited members read | killed |
+| J-52 | key: the request's length in UTF-16 units | killed (after a vector) |
+| J-53 | reader: `protocols` not read | killed |
+| J-54 | reader: an inherited `protocols` read | killed |
+| J-55 | rule: a result's usage not read | killed |
+| J-56 | pause: an inherited message read | killed |

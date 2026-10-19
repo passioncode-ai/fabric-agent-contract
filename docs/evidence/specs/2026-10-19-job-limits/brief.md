@@ -6,8 +6,8 @@ Run `2026-10-19-job-limits`, branch `agent/ct55-job-limits-20261019`, based on `
 
 ## The request
 
-OQ-0012 (ruled in principle on 2026-10-17, board row CT-55) asks for one additive `fabric-interop` decision with schema,
-rule and vectors for three candidates of an agent retrospective of 18 agents:
+OQ-0012 (ruled in principle on 2026-10-17, board row CT-55) asks for one additive `fabric-interop` revision, a decision
+with schema, rule and vectors, for three candidates of an agent retrospective of 18 agents:
 
 - **C1:** a job a provider or subscription limit stopped ended `failed` and callers resubmitted and paid twice: a job
   error code `quota-exhausted` with `retryable` and an optional `resetsAt`, and a `working` status message for a job a
@@ -75,6 +75,14 @@ C4 (a 4xx at submit against a 4xx while polling) stays adapter guidance (fabric-
    The `error.data` constraint binds only the two new codes, which no provider sends yet. No new protocol revision:
    `fabric-interop` has no negotiation, so a revision string nobody negotiates would add nothing; the pin gate does the
    work, as DEC-0082 and DEC-0086 did. `contractVersion` stays `0.1.0`.
+
+## After the first readings
+
+The unit, seam and product readings of `3be94d4` changed decisions 2, 5 and 7 (DEC-0087 records the final text):
+instants carry at most three fraction digits and lengths count code points; a provider keeps keys per authenticated
+caller and answers a repeated key by the job's code; the gate is the revision `fabric-interop/0.2` a caller names in
+`_meta.protocols`, as the ruling asked, not a pin a provider cannot see; the interim writes the measured lower bound
+and nothing in `notVerified`; a spend window stays `limit-reached` (DL-19), whose caller act is `person`.
 
 ## Alternatives refused
 

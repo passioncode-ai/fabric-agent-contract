@@ -16,7 +16,8 @@ Every completed or stopped invocation produces one result envelope:
 - `usage`: optional provider-reported metering (`common.schema.json#/$defs/usage`: input,
   output and cache tokens, cost, wall time), explicitly non-authoritative until reconciled.
   A [job result](interop.md#c32-jobs) requires it. A number nobody measured is `null`, never 0, and `partial: true`
-  says the numbers are a lower bound (DEC-0087, [limits and uncertain effects](interop.md#limits-and-uncertain-effects)).
+  says a number is a lower bound or unknown, written only toward a reader of `fabric-interop/0.2` (DEC-0087,
+  [limits and uncertain effects](interop.md#limits-and-uncertain-effects)).
 - `output`: the value the capability's `outputSchema` describes, when the result answers a
   capability call; a [job result](interop.md#c32-jobs) requires it (DEC-0017).
 - `trace`: `{traceparent, tracestate?}` of the span that produced the result; for a

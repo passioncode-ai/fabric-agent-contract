@@ -13,15 +13,28 @@ import { strictTime } from "./rfc3339.js";
  */
 export const QUOTA_EXHAUSTED = "quota-exhausted";
 export const OUTCOME_UNKNOWN = "outcome-unknown";
+/** DL-19's refusal of an exhausted spend window (delegation.md), relayed unchanged with its approval request. */
+export const LIMIT_REACHED = "limit-reached";
+/** The `fabric-interop` revision whose readers accept `null` and `partial` in `usage` (DEC-0087). */
+export const INTEROP_NULL_USAGE = "fabric-interop/0.2";
 /** The MCP Task states a job takes (interop.md C3.2). */
 export const JOB_STATUSES: readonly string[] = ["working", "input_required", "completed", "failed", "cancelled"];
-/** `interop-common#/$defs/utcInstant`: RFC 3339 in UTC, `T` and `Z` upper-case, seconds 00 to 59. */
-const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](?:\.[0-9]{1,9})?Z$/;
-/** The pause grammar of a `working` job's `statusMessage`: `quota-exhausted`, an optional ` until <UTC instant>`, an optional `: <text>`. */
-const PAUSE = /^quota-exhausted(?: until (\S+?))?(?:: ([\s\S]+))?$/;
+/**
+ * `interop-common#/$defs/utcInstant`: RFC 3339 in UTC, `T` and `Z` upper-case, seconds 00 to 59, at most three fraction
+ * digits, so every port compares the same instants at millisecond precision (DEC-0085's rule).
+ */
+const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](?:\.[0-9]{1,3})?Z$/;
+/**
+ * The pause grammar of a `working` job's `statusMessage`: `quota-exhausted`, an optional ` until <UTC instant>`, an
+ * optional colon, a space and a text that holds at least one character other than white space.
+ */
+const PAUSE = /^quota-exhausted(?: until (\S+?))?(?:: (\s*\S[\s\S]*))?$/;
 const ERROR_CODE = /^[a-z][a-z0-9-]{1,63}$/;
-/** `interop-job#/$defs/job/properties/statusMessage`. */
+/** `interop-job#/$defs/job/properties/statusMessage`: JSON Schema's `maxLength` counts code points, not UTF-16 units. */
 const MAX_STATUS_MESSAGE = 500;
+/** `interop-common#/$defs/error/properties/message`. */
+const MAX_ERROR_MESSAGE = 2000;
+const codePoints = (value: string) => [...value].length;
 /** The counts and the cost of `common#/$defs/usage`, each a non-negative number or `null` for unknown. */
 export const USAGE_NUMBERS: readonly string[] = ["inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens", "costUsd", "wallMs"];
 
@@ -32,16 +45,18 @@ const utcTime = (value: unknown): number => (isString(value) && UTC_INSTANT.test
 
 /** Whether `data` is `quota-exhausted`'s: closed, `retryable` a boolean, `resetsAt` a UTC instant and only with `retryable: true`. */
 export function quotaDataOk(data: unknown): data is { retryable: boolean; resetsAt?: string } {
-  if (!isObject(data) || typeof data.retryable !== "boolean") return false;
+  const retryable = own(data, "retryable");
+  if (!isObject(data) || typeof retryable !== "boolean") return false;
   if (Object.keys(data).some((name) => name !== "retryable" && name !== "resetsAt")) return false;
   if (!Object.hasOwn(data, "resetsAt")) return true;
-  return data.retryable && Number.isFinite(utcTime(data.resetsAt));
+  return retryable && Number.isFinite(utcTime(own(data, "resetsAt")));
 }
 
 /** The job inside a `fabric.job.get` or `fabric.job.cancel` answer (`{job}`), when it has an id and a known status. */
 function jobOf(answer: unknown): JsonObject | undefined {
   const job = own(answer, "job");
-  if (!isObject(job) || !isString(job.id) || job.id.length === 0 || !JOB_STATUSES.includes(job.status as string)) return undefined;
+  const id = own(job, "id");
+  if (!isObject(job) || !isString(id) || id.length === 0 || !JOB_STATUSES.includes(own(job, "status") as string)) return undefined;
   return job;
 }
 
@@ -51,14 +66,15 @@ export type JobPause = { paused: false } | { paused: true; resetsAt?: string } |
  * Whether a `fabric.job.get` answer (`{job}`) is a job a limit paused (DEC-0087 item 2): status `working`, its
  * `statusMessage` `quota-exhausted`, `quota-exhausted until <UTC instant>`, either followed by `: <text>`.
  * A `working` job whose message starts `quota-exhausted` and breaks the grammar (an instant that is not UTC or names no
- * day, an empty text, more than 500 characters) is `malformed`. Any other answer is not paused.
+ * day or carries more than three fraction digits, a blank text, more than 500 code points) is `malformed`. Any other
+ * answer is not paused.
  */
 export function readJobPause(answer: unknown): JobPause {
   const job = jobOf(answer);
-  if (!job || job.status !== "working" || !isString(job.statusMessage) || !job.statusMessage.startsWith(QUOTA_EXHAUSTED)) return { paused: false };
-  const message = job.statusMessage;
+  const message = own(job, "statusMessage");
+  if (!job || own(job, "status") !== "working" || !isString(message) || !message.startsWith(QUOTA_EXHAUSTED)) return { paused: false };
   const match = PAUSE.exec(message);
-  if (!match || message.length > MAX_STATUS_MESSAGE) return { paused: false, malformed: true };
+  if (!match || codePoints(message) > MAX_STATUS_MESSAGE) return { paused: false, malformed: true };
   const [, until] = match;
   if (until === undefined) return { paused: true };
   return Number.isFinite(utcTime(until)) ? { paused: true, resetsAt: until } : { paused: false, malformed: true };
@@ -79,9 +95,11 @@ export interface CallerAction {
  * - `failed` with `quota-exhausted`: `resend` under the same key when `retryable`, with `notBefore` its `resetsAt` when
  *   that is after `now`; `person` when not retryable;
  * - `failed` with `outcome-unknown`: `reconcile`, observe whether the effect happened, never a new key;
+ * - `failed` with `limit-reached` (DL-19, an exhausted spend window): `person`, its approval request reaches the operator;
  * - `failed` with any other code: `failed`;
- * - `invalid`: `now` unreadable, an answer that is not `{job}` with an id and a status, a `failed` job without
- *   `{code, message}`, `quota-exhausted` data that is not its schema's, or a malformed pause.
+ * - `invalid`: `now` unreadable, an answer that is not `{job}` with an id and a status, a `failed` job whose `error` is
+ *   not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, or a
+ *   malformed pause. On `invalid` a caller sends nothing new: it keeps polling a job it can still read.
  *
  * It never throws.
  */
@@ -89,21 +107,25 @@ export function jobCallerAction(answer: unknown, now: unknown): CallerAction {
   const at = utcTime(now);
   const job = jobOf(answer);
   if (!Number.isFinite(at) || !job) return { action: "invalid" };
-  if (job.status === "working") {
+  const status = own(job, "status");
+  if (status === "working") {
     const pause = readJobPause(answer);
     if ("malformed" in pause) return { action: "invalid" };
     if (!pause.paused) return { action: "poll" };
     if (pause.resetsAt === undefined) return { action: "wait" };
     return utcTime(pause.resetsAt) > at ? { action: "wait", notBefore: pause.resetsAt } : { action: "poll" };
   }
-  if (job.status === "input_required") return { action: "answer" };
-  if (job.status === "completed") return { action: "done" };
-  if (job.status === "cancelled") return { action: "cancelled" };
-  const error = job.error;
+  if (status === "input_required") return { action: "answer" };
+  if (status === "completed") return { action: "done" };
+  if (status === "cancelled") return { action: "cancelled" };
+  const error = own(job, "error");
   const code = own(error, "code");
+  const message = own(error, "message");
   const codeOk = (isString(code) && ERROR_CODE.test(code)) || Number.isInteger(code);
-  if (!codeOk || !isString(own(error, "message"))) return { action: "invalid" };
+  const shapeOk = isObject(error) && Object.keys(error).every((name) => name === "code" || name === "message" || name === "data");
+  if (!shapeOk || !codeOk || !isString(message) || message.length === 0 || codePoints(message) > MAX_ERROR_MESSAGE) return { action: "invalid" };
   if (code === OUTCOME_UNKNOWN) return { action: "reconcile" };
+  if (code === LIMIT_REACHED) return { action: "person" };
   if (code !== QUOTA_EXHAUSTED) return { action: "failed" };
   const data = own(error, "data");
   if (!quotaDataOk(data)) return { action: "invalid" };
@@ -122,9 +144,9 @@ export function jobCallerAction(answer: unknown, now: unknown): CallerAction {
  */
 export function intentIdempotencyKey(intent: unknown): string | undefined {
   if (!isObject(intent) || Object.keys(intent).some((name) => !["agentId", "capability", "input", "request"].includes(name))) return undefined;
-  const { agentId, capability, input, request } = intent;
+  const [agentId, capability, input, request] = ["agentId", "capability", "input", "request"].map((name) => own(intent, name));
   if (!isString(agentId) || agentId.length === 0 || !isString(capability) || capability.length === 0 || !isObject(input)) return undefined;
-  if (Object.hasOwn(intent, "request") && (!isString(request) || request.length === 0 || request.length > 256)) return undefined;
+  if (Object.hasOwn(intent, "request") && (!isString(request) || request.length === 0 || codePoints(request) > 256)) return undefined;
   let form: string;
   try {
     form = rfc8785(Object.hasOwn(intent, "request") ? { agentId, capability, input, request } : { agentId, capability, input });
@@ -136,6 +158,17 @@ export function intentIdempotencyKey(intent: unknown): string | undefined {
   bytes.writeUInt8((bytes.readUInt8(8) & 0x3f) | 0x80, 8);
   const hex = bytes.toString("hex");
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+/**
+ * Whether a provider may write `null` and `partial` in a job's `usage` toward this caller (DEC-0087, the gate): only when
+ * the request's `_meta.protocols` (DEC-0067) names `fabric-interop/0.2`. A caller that names no revision reads
+ * `fabric-interop/0.1`, whose `usage` holds numbers only; toward it a provider writes the lower bound it measured, as
+ * before. It never throws.
+ */
+export function readsNullUsage(requestMeta: unknown): boolean {
+  const protocols = own(requestMeta, "protocols");
+  return Array.isArray(protocols) && protocols.includes(INTEROP_NULL_USAGE);
 }
 
 // ---- Rules -------------------------------------------------------------------------------------------------------

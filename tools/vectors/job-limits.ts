@@ -58,6 +58,11 @@ function pauseCases(): Json[] {
     ["malformed: another word after the code", working("quota-exhausted, retrying"), { paused: false, malformed: true }],
     ["malformed: more than 500 characters", working(`quota-exhausted: ${"x".repeat(484)}`), { paused: false, malformed: true }],
     ["at 500 characters, paused", working(`quota-exhausted: ${"x".repeat(483)}`), { paused: true }],
+    ["characters are code points: 277 of them, astral, paused", working(`quota-exhausted: ${"\u{1F600}".repeat(260)}`), { paused: true }],
+    ["characters are code points: 501 of them, astral, malformed", working(`quota-exhausted: ${"\u{1F600}".repeat(484)}`), { paused: false, malformed: true }],
+    ["malformed: a text of white space only", working("quota-exhausted:    "), { paused: false, malformed: true }],
+    ["malformed: a text of a newline only", working("quota-exhausted: \n"), { paused: false, malformed: true }],
+    ["malformed: four fraction digits", working("quota-exhausted until 2026-10-19T12:00:00.0004Z"), { paused: false, malformed: true }],
     ["the grammar binds a working job only: failed", job("failed", { statusMessage: "quota-exhausted, gave up", error: { code: "other", message: "x" } }), { paused: false }],
     ["not a job answer", { status: "working" }, { paused: false }],
     ["a job without an id", { job: { status: "working", statusMessage: "quota-exhausted" } }, { paused: false }],
@@ -91,6 +96,12 @@ function callerCases(): Json[] {
     ["quota-exhausted, another member: invalid", failed("quota-exhausted", { retryable: true, scope: "model" }), NOW, { action: "invalid" }],
     ["outcome-unknown: reconcile, never a new key", failed("outcome-unknown"), NOW, { action: "reconcile" }],
     ["outcome-unknown with data: reconcile", failed("outcome-unknown", { reference: "ch_3Kq" }), NOW, { action: "reconcile" }],
+    ["limit-reached (DL-19, a spend window): a person, through its approval request", failed("limit-reached", { approvalUrl: "https://fabric.example/approve/1" }), NOW, { action: "person" }],
+    ["quota-exhausted, a reset with four fraction digits: invalid", failed("quota-exhausted", { retryable: true, resetsAt: "2026-10-19T10:00:00.0004Z" }), NOW, { action: "invalid" }],
+    ["failed, an empty message: invalid", job("failed", { error: { code: "quota-exhausted", message: "", data: { retryable: true } } }), NOW, { action: "invalid" }],
+    ["failed, a message of 2000 characters: failed", job("failed", { error: { code: "x-y", message: "m".repeat(2000) } }), NOW, { action: "failed" }],
+    ["failed, a message of 2001 characters: invalid", job("failed", { error: { code: "x-y", message: "m".repeat(2001) } }), NOW, { action: "invalid" }],
+    ["failed, an error with another member: invalid", job("failed", { error: { code: "x-y", message: "m", hint: "h" } }), NOW, { action: "invalid" }],
     ["another code: failed", failed("upstream-error"), NOW, { action: "failed" }],
     ["an integer code: failed", failed(-32603), NOW, { action: "failed" }],
     ["a code of another form: invalid", failed("Quota_Exhausted"), NOW, { action: "invalid" }],
@@ -113,7 +124,7 @@ function callerCases(): Json[] {
 // ---- The intent's key ---------------------------------------------------------------------------------------------
 
 function keyCases(): Json[] {
-  const base = { agentId: "asset-foundry.default", capability: "foundry.asset.order", input: { brief: "a 9:16 ad", candidates: 2 } };
+  const base = { agentId: "example-media.default", capability: "media.order", input: { brief: "a 9:16 ad", candidates: 2 } };
   const ok = (name: string, intent: Json) => ({ name, intent, expected: uuid8(intent) });
   const no = (name: string, intent: unknown) => ({ name, intent, expected: null });
   return [
@@ -122,13 +133,14 @@ function keyCases(): Json[] {
     ok("another input: another key", { ...base, input: { brief: "a 9:16 ad", candidates: 3 } }),
     ok("the same input asked twice on purpose: the request names it", { ...base, request: "task_51c2" }),
     ok("an input with a nested array and a non-ASCII string", { ...base, input: { brief: "реклама", sizes: [1080, 1920], nested: { a: null } } }),
+    ok("a request of 256 characters that are code points beyond the BMP", { ...base, request: "\u{1F600}".repeat(256) }),
     no("a request that is empty", { ...base, request: "" }),
     no("a request of 257 characters", { ...base, request: "r".repeat(257) }),
     no("an input that is an array", { ...base, input: [1] }),
     no("no agentId", { capability: base.capability, input: base.input }),
     no("an empty capability", { ...base, capability: "" }),
     no("another member (a clock)", { ...base, at: NOW }),
-    no("not an object", "foundry.asset.order")
+    no("not an object", "media.order")
   ];
 }
 
@@ -148,15 +160,29 @@ function usageCases(): Json[] {
   return cases.map(([name, usage, findings]) => ({ name, usage, findings }));
 }
 
+// ---- The reader's revision ----------------------------------------------------------------------------------------
+
+function readerCases(): Json[] {
+  const cases: Array<[string, unknown, boolean]> = [
+    ["a caller that names fabric-interop/0.2 reads null", { traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", protocols: ["fabric-interop/0.2", "fabric-interop/0.1"] }, true],
+    ["a caller that names only fabric-interop/0.1 does not", { traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", protocols: ["fabric-interop/0.1"] }, false],
+    ["a caller that names no revision reads fabric-interop/0.1", { traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01" }, false],
+    ["protocols that is no list", { protocols: "fabric-interop/0.2" }, false],
+    ["no _meta", null, false]
+  ];
+  return cases.map(([name, meta, expected]) => ({ name, meta, expected }));
+}
+
 /** The vectors as an object. */
 export function jobLimitVectors(): Json {
   return {
     about:
-      "Vectors for jobs under limits and uncertain effects (DEC-0087), written by tools/vectors/job-limits.ts, never by hand. pause: readJobPause(answer), answer a fabric.job.get answer {job}; the grammar binds a working job whose statusMessage starts quota-exhausted. caller: jobCallerAction(answer, now), now a UTC instant; resend reuses the intent's key, never a new one; a case without now passes none. key: intentIdempotencyKey(intent); expected is a UUID of version 8 from the first 16 bytes of the SHA-256 of the intent's RFC 8785 form, or null when the intent has another shape. usage: the FAC-SEM-119 findings on one usage object, as 'code instancePath'. Every case holds in every time zone.",
+      "Vectors for jobs under limits and uncertain effects (DEC-0087), written by tools/vectors/job-limits.ts, never by hand. pause: readJobPause(answer), answer a fabric.job.get answer {job}; the grammar binds a working job whose statusMessage starts quota-exhausted. caller: jobCallerAction(answer, now), now a UTC instant; resend reuses the intent's key, never a new one; a case without now passes none. key: intentIdempotencyKey(intent); expected is a UUID of version 8 from the first 16 bytes of the SHA-256 of the intent's RFC 8785 form, or null when the intent has another shape. usage: the FAC-SEM-119 findings on one usage object, as 'code instancePath'. reader: readsNullUsage(meta), meta a request's _meta; a provider writes null and partial in usage only toward a reader that names fabric-interop/0.2. Instants carry at most three fraction digits; lengths count code points. Every case holds in every time zone.",
     pause: pauseCases(),
     caller: callerCases(),
     key: keyCases(),
-    usage: usageCases()
+    usage: usageCases(),
+    reader: readerCases()
   };
 }
 

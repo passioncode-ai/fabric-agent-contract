@@ -162,7 +162,7 @@
 - **Elements:** notification text with a link, stop message with action buttons, confirmation with amount and expiry, reply prompt for free text (primary action: the stop's recommended button).
 - **States:** empty — not linked yet, the chat waits for the link code; success — a stop answered, keyboard removed; error — already decided, expired confirmation, or no effect for a sender outside the allowlist. silent — in a group shared with other bots, a message not addressed to this bot gets no answer (OC-14, OC-15); degraded — nobody receives, shown as `receiver-missing` (OC-17).
 - **Coverage:** `operator-channel-status.schema.json`, `test/operator-channel.test.ts`
-- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017
+- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017, SCN-031
 - **Resources:** operator-channel specification, Rules
 - **Status:** proposed
 

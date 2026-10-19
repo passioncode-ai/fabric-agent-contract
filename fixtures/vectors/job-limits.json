@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for jobs under limits and uncertain effects (DEC-0087), written by tools/vectors/job-limits.ts, never by hand. pause: readJobPause(answer), answer a fabric.job.get answer {job}; the grammar binds a working job whose statusMessage starts quota-exhausted. caller: jobCallerAction(answer, now), now a UTC instant; resend reuses the intent's key, never a new one; a case without now passes none. key: intentIdempotencyKey(intent); expected is a UUID of version 8 from the first 16 bytes of the SHA-256 of the intent's RFC 8785 form, or null when the intent has another shape. usage: the FAC-SEM-119 findings on one usage object, as 'code instancePath'. Every case holds in every time zone.",
+  "about": "Vectors for jobs under limits and uncertain effects (DEC-0087), written by tools/vectors/job-limits.ts, never by hand. pause: readJobPause(answer), answer a fabric.job.get answer {job}; the grammar binds a working job whose statusMessage starts quota-exhausted. caller: jobCallerAction(answer, now), now a UTC instant; resend reuses the intent's key, never a new one; a case without now passes none. key: intentIdempotencyKey(intent); expected is a UUID of version 8 from the first 16 bytes of the SHA-256 of the intent's RFC 8785 form, or null when the intent has another shape. usage: the FAC-SEM-119 findings on one usage object, as 'code instancePath'. reader: readsNullUsage(meta), meta a request's _meta; a provider writes null and partial in usage only toward a reader that names fabric-interop/0.2. Instants carry at most three fraction digits; lengths count code points. Every case holds in every time zone.",
   "pause": [
     {
       "name": "working without a message",
@@ -233,6 +233,80 @@
       },
       "expected": {
         "paused": true
+      }
+    },
+    {
+      "name": "characters are code points: 277 of them, astral, paused",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted: 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+        }
+      },
+      "expected": {
+        "paused": true
+      }
+    },
+    {
+      "name": "characters are code points: 501 of them, astral, malformed",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted: 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+        }
+      },
+      "expected": {
+        "paused": false,
+        "malformed": true
+      }
+    },
+    {
+      "name": "malformed: a text of white space only",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted:    "
+        }
+      },
+      "expected": {
+        "paused": false,
+        "malformed": true
+      }
+    },
+    {
+      "name": "malformed: a text of a newline only",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted: \n"
+        }
+      },
+      "expected": {
+        "paused": false,
+        "malformed": true
+      }
+    },
+    {
+      "name": "malformed: four fraction digits",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "working",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "statusMessage": "quota-exhausted until 2026-10-19T12:00:00.0004Z"
+        }
+      },
+      "expected": {
+        "paused": false,
+        "malformed": true
       }
     },
     {
@@ -664,6 +738,125 @@
       }
     },
     {
+      "name": "limit-reached (DL-19, a spend window): a person, through its approval request",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "limit-reached",
+            "message": "stopped",
+            "data": {
+              "approvalUrl": "https://fabric.example/approve/1"
+            }
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "person"
+      }
+    },
+    {
+      "name": "quota-exhausted, a reset with four fraction digits: invalid",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "quota-exhausted",
+            "message": "stopped",
+            "data": {
+              "retryable": true,
+              "resetsAt": "2026-10-19T10:00:00.0004Z"
+            }
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "invalid"
+      }
+    },
+    {
+      "name": "failed, an empty message: invalid",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "quota-exhausted",
+            "message": "",
+            "data": {
+              "retryable": true
+            }
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "invalid"
+      }
+    },
+    {
+      "name": "failed, a message of 2000 characters: failed",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "x-y",
+            "message": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "failed"
+      }
+    },
+    {
+      "name": "failed, a message of 2001 characters: invalid",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "x-y",
+            "message": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "invalid"
+      }
+    },
+    {
+      "name": "failed, an error with another member: invalid",
+      "answer": {
+        "job": {
+          "id": "job_7f3a",
+          "status": "failed",
+          "updatedAt": "2026-10-19T10:00:00Z",
+          "error": {
+            "code": "x-y",
+            "message": "m",
+            "hint": "h"
+          }
+        }
+      },
+      "now": "2026-10-19T10:00:00Z",
+      "expected": {
+        "action": "invalid"
+      }
+    },
+    {
       "name": "another code: failed",
       "answer": {
         "job": {
@@ -820,57 +1013,57 @@
     {
       "name": "an intent",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
         }
       },
-      "expected": "e887f141-7ccb-830f-bf39-a4e82bbea029"
+      "expected": "b92286cd-cff9-831b-a365-82a71c9c092e"
     },
     {
       "name": "the same intent with its input's members in another order: the same key",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "candidates": 2,
           "brief": "a 9:16 ad"
         }
       },
-      "expected": "e887f141-7ccb-830f-bf39-a4e82bbea029"
+      "expected": "b92286cd-cff9-831b-a365-82a71c9c092e"
     },
     {
       "name": "another input: another key",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 3
         }
       },
-      "expected": "995cb3fa-6c53-8a68-8048-4e91e9801260"
+      "expected": "4513d395-750d-8880-b104-645448191316"
     },
     {
       "name": "the same input asked twice on purpose: the request names it",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
         },
         "request": "task_51c2"
       },
-      "expected": "3ccfdbaf-c650-872c-b287-945f44a30587"
+      "expected": "e95c7eb7-99d6-88a1-83e7-8d2f12121b62"
     },
     {
       "name": "an input with a nested array and a non-ASCII string",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "реклама",
           "sizes": [
@@ -882,13 +1075,26 @@
           }
         }
       },
-      "expected": "afab58ef-4a7b-80df-8b6d-a516f7772028"
+      "expected": "07267e80-6bdc-81eb-bdb2-48c0933e19c6"
+    },
+    {
+      "name": "a request of 256 characters that are code points beyond the BMP",
+      "intent": {
+        "agentId": "example-media.default",
+        "capability": "media.order",
+        "input": {
+          "brief": "a 9:16 ad",
+          "candidates": 2
+        },
+        "request": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "expected": "926f4273-3113-8d13-8313-73370884d1b5"
     },
     {
       "name": "a request that is empty",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
@@ -900,8 +1106,8 @@
     {
       "name": "a request of 257 characters",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
@@ -913,8 +1119,8 @@
     {
       "name": "an input that is an array",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": [
           1
         ]
@@ -924,7 +1130,7 @@
     {
       "name": "no agentId",
       "intent": {
-        "capability": "foundry.asset.order",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
@@ -935,7 +1141,7 @@
     {
       "name": "an empty capability",
       "intent": {
-        "agentId": "asset-foundry.default",
+        "agentId": "example-media.default",
         "capability": "",
         "input": {
           "brief": "a 9:16 ad",
@@ -947,8 +1153,8 @@
     {
       "name": "another member (a clock)",
       "intent": {
-        "agentId": "asset-foundry.default",
-        "capability": "foundry.asset.order",
+        "agentId": "example-media.default",
+        "capability": "media.order",
         "input": {
           "brief": "a 9:16 ad",
           "candidates": 2
@@ -959,7 +1165,7 @@
     },
     {
       "name": "not an object",
-      "intent": "foundry.asset.order",
+      "intent": "media.order",
       "expected": null
     }
   ],
@@ -1051,6 +1257,48 @@
         "partial": false
       },
       "findings": []
+    }
+  ],
+  "reader": [
+    {
+      "name": "a caller that names fabric-interop/0.2 reads null",
+      "meta": {
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        "protocols": [
+          "fabric-interop/0.2",
+          "fabric-interop/0.1"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "a caller that names only fabric-interop/0.1 does not",
+      "meta": {
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        "protocols": [
+          "fabric-interop/0.1"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "name": "a caller that names no revision reads fabric-interop/0.1",
+      "meta": {
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+      },
+      "expected": false
+    },
+    {
+      "name": "protocols that is no list",
+      "meta": {
+        "protocols": "fabric-interop/0.2"
+      },
+      "expected": false
+    },
+    {
+      "name": "no _meta",
+      "meta": null,
+      "expected": false
     }
   ]
 }

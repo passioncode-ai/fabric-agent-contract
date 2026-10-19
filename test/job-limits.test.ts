@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { USAGE_NUMBERS, intentIdempotencyKey, jobCallerAction, quotaDataOk, readJobPause, usageFindings } from "../src/job-limits.js";
+import { USAGE_NUMBERS, intentIdempotencyKey, jobCallerAction, quotaDataOk, readJobPause, readsNullUsage, usageFindings } from "../src/job-limits.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildJobLimitVectors } from "../tools/vectors/job-limits.js";
 
@@ -57,6 +57,13 @@ describe("the vectors (DEC-0087)", () => {
   it.each(vectors.usage as Json[])("usage: $name", (entry) => {
     expect(paths("usage", entry.usage)).toEqual(entry.findings);
   });
+  it.each(vectors.reader as Json[])("reader: $name", (entry) => {
+    expect(readsNullUsage(entry.meta)).toBe(entry.expected);
+  });
+  it("names a reader's revision as the request _meta's schema admits it", () => {
+    for (const entry of vectors.reader as Json[]) if (entry.expected) expect(valid("interop-request-meta.schema.json", entry.meta)).toBe(true);
+    expect(valid("interop-request-meta.schema.json", { traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", protocols: ["fabric interop"] })).toBe(false);
+  });
   it("hold the same answers in UTC, in America/St_Johns and in Pacific/Kiritimati", () => {
     for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
       process.env.TZ = name;
@@ -84,6 +91,7 @@ describe("the reference reads what the schema reads (the retro's standing instru
     ["a reset in lower case", { retryable: true, resetsAt: "2026-10-19t12:00:00z" }],
     ["a reset without seconds", { retryable: true, resetsAt: "2026-10-19T12:00Z" }],
     ["a leap second", { retryable: true, resetsAt: "2026-12-31T23:59:60Z" }],
+    ["four fraction digits", { retryable: true, resetsAt: "2026-10-19T12:00:00.0001Z" }],
     ["a numeric reset", { retryable: true, resetsAt: 1 }],
     ["another member", { retryable: true, scope: "model" }],
     ["an array", [true]],
@@ -128,6 +136,15 @@ describe("totality: every function answers and never throws", () => {
     const inherited = Object.create({ job: { id: "j", status: "working" } }) as Json;
     expect(jobCallerAction(inherited, "2026-10-19T10:00:00Z")).toEqual({ action: "invalid" });
     expect(readJobPause(inherited)).toEqual({ paused: false });
+    expect(jobCallerAction({ job: Object.create({ id: "j", status: "completed" }) }, "2026-10-19T10:00:00Z")).toEqual({ action: "invalid" });
+    expect(jobCallerAction({ job: Object.assign(Object.create({ status: "completed" }), { id: "j" }) }, "2026-10-19T10:00:00Z")).toEqual({ action: "invalid" });
+    expect(readJobPause({ job: Object.assign(Object.create({ statusMessage: "quota-exhausted" }), { id: "j", status: "working" }) })).toEqual({ paused: false });
+    const error = Object.assign(Object.create({ code: "outcome-unknown", message: "m" }), {});
+    expect(jobCallerAction({ job: { id: "j", status: "failed", error } }, "2026-10-19T10:00:00Z")).toEqual({ action: "invalid" });
+    expect(quotaDataOk(Object.create({ retryable: true }))).toBe(false);
+    expect(intentIdempotencyKey(Object.assign(Object.create({ agentId: "a" }), { capability: "c", input: {} }))).toBeUndefined();
+    expect(intentIdempotencyKey({ agentId: "a", capability: "c", input: Object.create(null) })).toMatch(/^[0-9a-f]{8}-/);
+    expect(readsNullUsage(Object.create({ protocols: ["fabric-interop/0.2"] }))).toBe(false);
   });
 });
 
@@ -145,6 +162,11 @@ describe("the rules (FAC-SEM-119, FAC-SEM-120)", () => {
     const done = { job: { id: "j", status: "completed", updatedAt: "2026-10-19T10:00:00Z", result: { usage: { inputTokens: null, outputTokens: 1, wallMs: 1, partial: false } } } };
     expect(paths("interop-job", done)).toEqual(["FAC-SEM-119 /job/result/usage/partial"]);
     expect(paths("interop-job", {})).toEqual([]);
+  });
+  it("FAC-SEM-119 on a result's own usage, beside FAC-SEM-001", () => {
+    const result = read("fixtures/positive/interop-job-completed.json").job.result;
+    expect(paths("result", { ...result, usage: { inputTokens: 1, outputTokens: 1, wallMs: 1, costUsd: null, partial: false } })).toContain("FAC-SEM-119 /usage/partial");
+    expect(paths("result", { ...result, usage: { inputTokens: null, outputTokens: 1, wallMs: 1, partial: true } }).filter((p) => p.startsWith("FAC-SEM-119"))).toEqual([]);
   });
   it("FAC-SEM-120: a caller's act against jobCallerAction's", () => {
     const answer = working("quota-exhausted until 2026-10-19T12:00:00Z");
