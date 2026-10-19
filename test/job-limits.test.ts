@@ -71,6 +71,11 @@ describe("the vectors (DEC-0087)", () => {
       for (const entry of vectors.pause as Json[]) expect(readJobPause(entry.answer), `${name} ${entry.name}`).toEqual(entry.expected);
     }
   });
+  it("give limit-reached DL-19's own refusal, as delegation-refusal.schema.json reads it", () => {
+    const cases = (vectors.caller as Json[]).filter((entry) => entry.answer?.job?.error?.code === "limit-reached");
+    expect(cases.length).toBeGreaterThan(0);
+    for (const entry of cases) expect(valid("delegation-refusal.schema.json", { error: entry.answer.job.error })).toBe(true);
+  });
   it("write a key of version 8 and variant 10, the same for the same intent", () => {
     const keys = (vectors.key as Json[]).map((entry) => entry.expected).filter((key): key is string => key !== null);
     for (const key of keys) expect(key).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-8[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);

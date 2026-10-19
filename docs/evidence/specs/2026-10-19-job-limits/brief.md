@@ -40,9 +40,10 @@ C4 (a 4xx at submit against a 4xx while polling) stays adapter guidance (fabric-
 
 ## Decisions
 
-*Decisions 2, 5 and 7 below are the first cut; the section "After the first readings" and DEC-0087 supersede them
-(the gate is the revision a caller names, the interim writes nothing in `notVerified`, instants carry at most three
-fraction digits).*
+*Decisions 2, 4, 5 and 7 and the section "Who adopts what" below are the first cut; the section "After the first
+readings" and DEC-0087 supersede them (the gate is the revision a caller names, the interim writes nothing in
+`notVerified`, instants carry at most three fraction digits, `limit-reached` is a `person` act and its key runs again
+once approved).*
 
 1. **`quota-exhausted`.** A job a provider, subscription or spending limit stopped and that the provider will not resume
    ends `failed` with `error: {code: "quota-exhausted", message, data: {retryable, resetsAt?}}`. `retryable` is

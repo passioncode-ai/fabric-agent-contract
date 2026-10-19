@@ -94,3 +94,4 @@ survived, two were closed with a vector or a test and one is equivalent:
 | Plant | What was removed or loosened | Result |
 |---|---|---|
 | J-57 | the pause text's white space read as Unicode `\s` instead of ASCII | killed (the no-break space vector) |
+| J-58 | the `limit-reached` vector's data without DL-19's `window` | killed (the DL-19 schema test) |

@@ -440,7 +440,7 @@ stream epoch, signed policy layers and periodic check-ins.
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
 
-**Interop**: The `fabric-interop/0.1` extension: how agents are called over MCP —
+**Interop**: The `fabric-interop/0.1` extension (and `/0.2`, whose readers accept `null` usage, DEC-0087): how agents are called over MCP:
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.
 
 **Job**: Work a capability call started that may outlive the request, reached by a

@@ -45,7 +45,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Embedded dashboard — width, navigation, scrolling and themes inside a host (`fabric-dashboard/0.1`)](docs/specification/embedded-dashboard.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
-- [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
+- [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`, `/0.2`)](docs/specification/interop.md)
 - [Spend policy and grants with amounts — agents check a record instead of asking (DEC-0037, DEC-0038)](docs/specification/spend-policy.md)
 - [Conformance — profiles, the semantic-rule register and who checks what](docs/specification/conformance.md)
 - [Identifiers — when two identifiers are the same: the normal form writers emit and readers compare (DEC-0076)](docs/specification/identifiers.md)

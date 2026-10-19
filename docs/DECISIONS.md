@@ -5541,7 +5541,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the intent again, once, when the limit no longer holds; a key whose job ended `outcome-unknown` is answered with
      that job and never runs again; a key whose job ended `limit-reached` admits the intent again, once, when its approval
      is granted; any other ended key is answered with its job.
-  7. **Unknown is `null`:** `common#/$defs/usage`'s counts, `costUsd` and `wallMs` admit `null` for unknown, never 0;
+  7. **Unknown is `null`:** `common#/$defs/usage`'s counts, `costUsd` and `wallMs` admit `null` for unknown, never 0
+     toward a caller of `fabric-interop/0.2` (item 8);
      `partial: true` says a number is a lower bound or unknown, SHOULD stand beside a `null` and is never `false` there.
   8. **The revision `fabric-interop/0.2`:** its readers accept `null` and `partial`; a caller names the revisions it
      reads in `_meta.protocols` (DEC-0067's list); a provider writes `null` or `partial` only toward a caller that names

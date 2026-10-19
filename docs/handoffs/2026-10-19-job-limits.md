@@ -77,6 +77,12 @@ job, the brief marks its first-cut decisions superseded, and the title, DOCMAP, 
 `fabric-interop/0.2`. Merge by squash, so the first cut's commit with a private agent's name stays out of `main`'s
 history.
 
+**The third reading (2026-10-19),** of `98be038..d496ab2`: nothing blocks. Its leftovers are closed with it: the index
+rows and the glossary name `fabric-interop/0.2`, SCN-031 and DEC-0087 item 7 state the `fabric-interop/0.1` exception
+and the resend after an approval, CT-55 names the three codes' answers to a repeated key, the brief marks every
+first-cut section it superseded, and a test checks the `limit-reached` vector against `delegation-refusal.schema.json`
+(plant J-58).
+
 ## Open
 
 - Each consumer adopts at its next pin (CT-55), readers of `usage` first.
