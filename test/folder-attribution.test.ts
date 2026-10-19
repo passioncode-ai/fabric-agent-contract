@@ -244,28 +244,40 @@ describe("totality: every function answers and never throws", () => {
     const projects = Array.from({ length: 14 }, (_, n) => ({ id: `p:${n}`, folders: Array(10000).fill({ path: "/u/ana/work/s", commonDir: null }), sources: [] }));
     expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
   });
-  it("trims slashes in linear time: 10000 sources and 2000 origins of 4096 characters answer within a second", () => {
+  // Linear time, measured by growth rather than by the clock: four times the input may cost at most ten times as much
+  // (a quadratic row costs sixteen), the best of three runs each, plus 25 ms for a busy machine's noise.
+  const linear = (run: (n: number) => void, n: number) => {
+    const best = (size: number) => Math.min(...[0, 1, 2].map(() => {
+      const started = performance.now();
+      run(size);
+      return performance.now() - started;
+    }));
+    const small = best(n);
+    const large = best(4 * n);
+    expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(10 * small + 25);
+  };
+  it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
     const slashes = `a${"/".repeat(4094)}b`;
-    const started = Date.now();
-    attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(10000).fill(slashes) }] });
-    attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(2000).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] });
-    expect(Date.now() - started).toBeLessThan(1000);
-  });
-  it("reads tombstones in linear time: 10000 tombstones and 10000 Project folders answer within a second", () => {
-    const folders = [...Array(9999).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
-    const started = Date.now();
-    expect(attributeFolder({ folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(10000).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] })).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
-    expect(Date.now() - started).toBeLessThan(1000);
-  });
-  it("reads work records in linear time: 10000 Projects and 10000 records with ids of 256 astral characters answer within a second", () => {
+    linear((n) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(n).fill(slashes) }] }), 2500);
+    linear((n) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] }), 500);
+  }, 30_000);
+  it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
+    const at = (n: number) => {
+      const folders = [...Array(n - 1).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
+      expect(attributeFolder({ folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(n).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] })).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
+    };
+    linear(at, 2500);
+  }, 30_000);
+  it("reads work records in linear time: up to 10000 Projects and 10000 records with ids of 256 astral characters", () => {
     const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
-    const projects = Array.from({ length: 10000 }, (_, n) => ({ id: id(n), folders: [], sources: [] }));
-    const work = Array.from({ length: 10000 }, (_, n) => ({ project: id(n), commonDir: `/u/ana/work/r${n}/.git` }));
     const git = { toplevel: "/u/ana/work/lib", commonDir: "/u/ana/work/lib/.git", mainCheckout: "/u/ana/work/lib", origin: null };
-    const started = Date.now();
-    expect(attributeFolder({ folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work })).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
-    expect(Date.now() - started).toBeLessThan(1000);
-  });
+    const at = (size: number) => {
+      const projects = Array.from({ length: size }, (_, n) => ({ id: id(n), folders: [], sources: [] }));
+      const work = Array.from({ length: size }, (_, n) => ({ project: id(n), commonDir: `/u/ana/work/r${n}/.git` }));
+      expect(attributeFolder({ folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work })).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
+    };
+    linear(at, 2500);
+  }, 30_000);
   it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
     const hostile: unknown[] = [null, undefined, 7, "", [], {}, "/"];
     const paths = (value: unknown, at: Array<string | number> = []): Array<Array<string | number>> => {

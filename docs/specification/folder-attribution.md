@@ -95,7 +95,7 @@ top), and the folder's place is its path below `git.toplevel`.
 | AT-2 | refused, `tombstoned` | the folder is at or under a tombstone, and no Project lists a folder, not broad, strictly below that tombstone which holds the folder (so a folder attached explicitly below a removed parent stays attached, and its siblings stay out) |
 | AT-3 | attached, `folder` | a folder a Project lists, not broad, holds the folder with no declared container between them (a container inside a Project's folder ends that folder's reach): when one in the folder's own repository holds it, the nearest place among that repository's Project folders decides, by common dir or by identity, the same common dir at equal depth, as AT-6 and AT-7 do; else the nearest listed folder by path (the outer of two nested Projects keeps its folders outside the inner one; a folder right under home a Project lists is its folder) |
 | AT-4 | refused, `transient` | the folder or its root is at or under a temporary or cache root |
-| AT-5 | refused, `container` | the folder or its root is broad; or the folder is right under home and listed by no Project, a worktree there as a clone there; or the root is, and no Project folder is in its repository |
+| AT-5 | refused, `container` | the folder or its root is broad; or the folder is right under home and listed by no Project; or a worktree's own top level is; or the root is, and no Project folder of its repository lies in it (for a worktree, none anywhere), so a start in any folder of a checkout right under home is refused as the checkout is |
 | AT-6 | attached, `worktree` | a Project's folder, not broad, has the same Git common dir or is the main checkout, at a place that holds the folder's (the nearest such place wins), and no folder of the same repository identity holds a nearer place |
 | AT-7 | attached, `repository` | a Project's folder, not broad, has the same repository identity, at a place that holds the folder's and is nearer than any AT-6 would take (the nearest wins). AT-6 and AT-7 weigh the places as AT-3 does, so an answer and the answer after its record is applied name one Project |
 | AT-8 | attached, `worktree` | the root lies in a folder a Project lists (AT-3's search on the root): a worktree goes where its main checkout goes |
@@ -133,16 +133,21 @@ both, in the order of `projects`, and the product reports it rather than choosin
   repository (D2: "scoped to the folder, not to every clone"). A folder a Project lists below the tombstone is the
   Project's, so an explicit attach below a removed parent lasts.
 - **What follows from D2 against the operator's literal words** (in the run index: a worktree or a branch goes to the
-  existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. Six results:
-  - a repository placed inside another Project's folder is that Project's (AT-3), not a new one, even a worktree or a
-    clone of a known repository, unless a declared container lies between them;
-  - a worktree or clone of a known repository under a temporary root is refused (AT-4), while its main checkout's own
-    Project kept there works;
-  - a worktree or clone of a known repository placed right under home is refused (AT-5), as a new repository there is;
-  - a worktree or clone at the root of a repository whose Projects all sit in its subfolders is refused (AT-9), not
-    joined to one of them;
-  - a new repository in a tool's own folder is refused (AT-11), not made a Project;
-  - a new repository whose root holds a plain-folder Project's folder is refused (AT-14), not made a Project.
+  existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. The list is
+  by row, so it is whole: the operator's words hold exactly where the row they name decides, and every row that can
+  decide first departs from them.
+  - *A worktree or clone of a known repository* joins its Project exactly when AT-6, AT-7 or AT-8 decides. It does not
+    when an earlier row decides: an explicit attach elsewhere (AT-1); a tombstone on the folder (AT-2); another
+    Project's folder that holds it, unless a declared container lies between (AT-3); a temporary root that holds the
+    folder or its main checkout (AT-4), so a worktree in an ordinary folder whose main checkout is kept under a
+    temporary root is refused while a clone of it joins; a broad folder, or a checkout right under home, from any
+    folder of it (AT-5). Nor when no row can see it: a repository whose Projects all sit in its subfolders (AT-9), and a
+    clone the identity cannot match, which is a new Project (AT-15): one through an SSH alias (`github.com-work`), with
+    a local path or no origin, or of a repository whose Project folders were stored without one.
+  - *A new folder* makes a new Project exactly when AT-15 decides. It does not inside another Project's folder (AT-3,
+    a repository cloned into a plain-folder Project included), under a temporary root (AT-4), when broad or right under
+    home (AT-5), in a tool's own folder (AT-11), at a tombstoned root (AT-13), or at a root that holds another
+    Project's folder (AT-14).
 - **A tool's folder after the owner row (AT-11).** As Switchboard's SB-131: a tool's folder joins a known repository by
   worktree, repository or owner, but never by work and never as a new Project.
 
@@ -171,7 +176,11 @@ session (Observatory's `_*` folders are, below).
 
 The record's `origin` is the remote without what can carry a credential (`recordOrigin`): an `http` or `https` URL
 loses its user information, any URL its password, query and fragment, the scp form `user:secret@host:path` its
-`:secret`; a local path is kept; `null` when what is left still has the shape of a secret (`secretUrl`). It names the
+`:secret` up to the host's last `@`; a local path is kept; `null` for a URL with no repository identity (its authority
+cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). A record whose path is
+broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
+attach of a folder another Project already holds at the same place ties at AT-3 when asked again, until the product
+removes the other Project's folder (D5). It names the
 same repository (`normalizeOrigin` of both is one identity), and the vectors' `record` cases hold one of each form.
 
 ## Semantic rules

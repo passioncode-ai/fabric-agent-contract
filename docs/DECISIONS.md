@@ -5716,14 +5716,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     Git probe that fails is not `git: null`, and a folder whose top level is broad (home kept under Git) is passed as
     `git: null`;
   - `ambiguous` lists the Projects in the order of `projects`;
-  - six results of D2's order go against the operator's literal words (a worktree or a branch goes to the existing
-    Project, a new folder makes a new one) and are recorded for the operator to correct on the board: a repository
-    placed inside another Project's folder is that Project's (AT-3), even a worktree or clone of a known repository,
-    unless a declared container lies between them; a worktree or clone of a known repository under a temporary root is
-    refused (AT-4); a worktree or clone of a known repository right under home is refused (AT-5), as a new
-    repository there is; a worktree or clone at the root of a repository whose Projects all sit in its subfolders is
-    refused (AT-9); a new repository in a tool's folder (AT-11), and one whose root holds a plain-folder Project's
-    folder (AT-14), are refused, not made Projects;
+  - the results of D2's order against the operator's literal words (a worktree or a branch goes to the existing
+    Project, a new folder makes a new one) are listed by row, so the list is whole, and recorded for the operator to
+    correct on the board (folder-attribution.md, *What follows from D2*): a worktree or clone of a known repository
+    joins its Project exactly when AT-6, AT-7 or AT-8 decides, and a new folder makes a Project exactly when AT-15
+    does; every row that can decide first (AT-1 to AT-5, AT-9, AT-11, AT-13, AT-14), and a clone the identity cannot
+    match (an SSH alias, a local or absent origin), departs from them;
   - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
     Project, a tie or a refusal is shown.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across
@@ -5751,8 +5749,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product learns its work records. The operator corrected D3 and D4 later the same day (Fabric ADR-0166, amendment
   "Fabric is the core"; board thread `617c8cbe`): the canonical Project id is Fabric's, Observatory's `project:<slug>`
   and Switchboard's pool are its aliases (`observatory:<slug>`, `switchboard:<pool>`), and the session-start
-  capability is Fabric's, served by its hub; Observatory and Switchboard ask it and apply these rules locally only
-  while Fabric is not running.
+  capability is Fabric's, served by its hub (`fabric.project.resolve`, Fabric's message on the board); Observatory and
+  Switchboard ask it, and apply these rules locally only while Fabric is not running (the board message `c95b4a22`;
+  the ADR's amendment states only the asking).
 - **Source:** Fabric's ask D1 on the project board (thread `617c8cbe`, 2026-10-19) and the run index org-index
   `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe` (D1 to D5, the measured table); Fabric
   `folderResolver.ts` `normalizeRemoteKey` and Switchboard `suggest.rs` `normalize`, `transient`, `tool_folder`;

@@ -109,6 +109,9 @@ export function recordOrigin(origin: string | null): string | null {
   const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):\/\//.exec(value);
   const userOf = (info: string) => String(info.split(":")[0]);
   if (scheme) {
+    // A URL with no repository identity names no repository a rule could match, and its authority cannot be read
+    // reliably (a password holding `/`, `?` or `#`): nothing of it is kept.
+    if (normalizeOrigin(value) === undefined) return null;
     const rest = String(value.slice(scheme[0].length).split(/[?#]/)[0]);
     const slash = rest.indexOf("/");
     const authority = slash < 0 ? rest : rest.slice(0, slash);
@@ -117,7 +120,9 @@ export function recordOrigin(origin: string | null): string | null {
     value = `${scheme[0]}${user === "" ? "" : `${user}@`}${authority.slice(at + 1)}${slash < 0 ? "" : rest.slice(slash)}`;
   } else if (!(value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || value.startsWith("."))) {
     const scp = /^(?:([^@/\s]+)@)?([^:/\s]+):([^\s]+)$/.exec(value);
-    if (scp) value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${scp[2]}:${String(String(scp[3]).split(/[?#]/)[0])}`;
+    // The host ends the user information at its last `@`, as normalizeOrigin reads it, so no part of a password is kept.
+    const host = String(scp?.[2]);
+    if (scp) value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${host.slice(host.lastIndexOf("@") + 1)}:${String(String(scp[3]).split(/[?#]/)[0])}`;
   }
   return secretUrl(value) ? null : value;
 }
@@ -306,7 +311,7 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   const reaches = (path: string, cut: string | undefined, entry: string) => under(path, entry) && !(cut !== undefined && cut !== entry && under(cut, entry));
   const keptOrigin = recordOrigin(isString(origin) ? origin : null);
   /** The record of a folder of this repository at `path`, its top level `top` (null: none). */
-  const gitRecord = (path: string, top: string | null): AttributionRecord => ({ path, commonDir: commonDir as string, origin: keptOrigin, toplevel: top });
+  const gitRecord = (path: string, top: string | null): AttributionRecord | null => (broad(path) ? null : { path, commonDir: commonDir as string, origin: keptOrigin, toplevel: top });
   if (explicit !== undefined) {
     const target = idOk(explicit) ? projects.find((project) => project.id === explicit) : undefined;
     if (!target) return fault;
@@ -359,7 +364,12 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   const byFolder = decide(byPath(folder), "folder");
   if (byFolder) return at(3, byFolder);
   if (tempRoots.some((temp) => under(folder, temp as string) || under(root, temp as string))) return at(4, { outcome: "refused", reason: "transient" });
-  if (broad(folder) || broad(root) || looseUnderHome(folder) || (looseUnderHome(root) && !anyFolder(sameRepository))) return at(5, { outcome: "refused", reason: "container" });
+  // AT-5: a checkout right under home is a container whatever folder of it the agent starts in: its own top level when
+  // it is a worktree, its main checkout unless a Project folder of the repository lies in it (or, for a worktree, a
+  // Project folder of the repository anywhere).
+  const checkoutTop = git === null ? undefined : (toplevel as string);
+  const looseRoot = looseUnderHome(root) && !anyFolder((entry) => sameRepository(entry) && (checkoutTop !== root || under(entry.path, root)));
+  if (broad(folder) || broad(root) || looseUnderHome(folder) || (checkoutTop !== undefined && checkoutTop !== root && looseUnderHome(checkoutTop)) || looseRoot) return at(5, { outcome: "refused", reason: "container" });
   if (git !== null) {
     const top = toplevel as string;
     const atPlace = (found: { owners: Project[]; place: string }, row: number, rule: AttributionRule) => {
