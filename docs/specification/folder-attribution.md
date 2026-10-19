@@ -183,6 +183,21 @@ attach of a folder another Project already holds at the same place ties at AT-3 
 removes the other Project's folder (D5). It names the
 same repository (`normalizeOrigin` of both is one identity), and the vectors' `record` cases hold one of each form.
 
+## The session-start capability
+
+DEC-0092. Fabric's hub serves it (D4 as corrected): `fabric.project.resolve`, read-only, input `{path}` (an absolute
+folder, the form of the snapshot's `folder`), answer `folder-attribution.schema.json#/$defs/resolveAnswer`. That is
+`attributeFolder`'s answer for the snapshot the hub gathers for `path`, or, when the folder's Git facts cannot be read
+yet (a probe that failed or timed out, which is not "no Git"):
+
+```json
+{ "outcome": "pending", "reason": "git-unreadable", "retryable": true }
+```
+
+`pending` names no Project and is never recorded; the caller asks again later and attributes nothing until then.
+Observatory and Switchboard ask this capability at a session's start; while the hub does not answer they run the
+vectors themselves (the board message `c95b4a22`) and reconcile later.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -259,7 +274,5 @@ The board row is CT-57.
   can reach them.
 - Decided limits, not open questions: an origin that is a local path has no identity, so such a clone joins by work or
   as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
-- A state for "not attributable yet" (the Git probe failed): the function is never called then, and Fabric's
-  session-start capability (D4) names it.
 - A user-facing scenario: the contract has no interface here; each product's scenarios own how a session's Project,
   a tie or a refusal is shown.
