@@ -1,7 +1,7 @@
 # The estate record — `estate-record/1`
 
-DEC-0055, amended by DEC-0082 ([contexts](contexts.md)) and DEC-0084 ([ceremonies](ceremonies.md)) · rule codes
-`FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-111` (and `FAC-SEM-110`, [contexts](contexts.md#semantic-rules); `FAC-SEM-114`,
+DEC-0055, amended by DEC-0082 ([contexts](contexts.md)), DEC-0084 ([ceremonies](ceremonies.md)) and DEC-0090
+([the partner channel](partner-channel.md)) · rule codes `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-111`, `FAC-SEM-122` (and `FAC-SEM-110`, [contexts](contexts.md#semantic-rules); `FAC-SEM-114`,
 [ceremonies](ceremonies.md#semantic-rules)) · schema
 [`estate-record`](../../schemas/estate-record.schema.json) · code
 [`src/estate-record-rules.ts`](../../src/estate-record-rules.ts), [`src/webauthn.ts`](../../src/webauthn.ts) · vectors
@@ -34,6 +34,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `authorities[]` | the passkeys that may sign the next revision ([authorities](#authorities)) |
 | `machines[]` | each machine: `id`, `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
 | `publisherKeys[]` | the publisher keys the estate's machines pin, as public Ed25519 JWKs naming their `alg` |
+| `publisherScopes[]` | optional: a partner's publisher key scoped to the organization contexts it is trusted in, `{kid, partner, contexts}` ([the partner channel](partner-channel.md#a-partners-publisher-key-trusted-per-context-fac-sem-122), DEC-0090) |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
 | `revocations[]` | every revocation of the estate so far ([revocations](#revocations)) |
 | `digest` | the [digest](#the-digest) |
@@ -103,7 +104,8 @@ kept outside the signed record, so the record carries no label a person chose:
   instance in `org:<orgId>` names in `grant` the id of a share grant of this record, matched by normal form (DEC-0076),
   whose `context` is the placement's as written, and which the record does not revoke; a personal instance names no
   grant (`FAC-SEM-111`). `placementTrust(record, machine, agentRef, context)` is the `trust` the node hands
-  `verifyPackage` (DEC-0051), `context` defaulting to `personal`; kind `estate-placement`
+  `verifyPackage` (DEC-0051), `context` defaulting to `personal`; a partner's key scoped away from `context` gives no
+  publisher key (DEC-0090); kind `estate-placement`
   (`{record, machine, package, context?}`, `context` defaulting to `personal`) checks that the package is the one placed
   in that context — its own digest, the placement's `agentRef` and digest (`FAC-SEM-074`) — and that an organization's
   instance names its grant (`FAC-SEM-111`).
@@ -236,6 +238,7 @@ keys are DEC-0053's.
 | `FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine and context (absent: `personal`, DEC-0082) under a publisher key the record pins, each pinned once; an installed package is the one placed in its context — its own digest, the placement's `agentRef` and digest, on a machine of the record |
 | `FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record — its own machine for an organization's instance — a slot once per (machine, agent, slot, context) (DEC-0082), and a slot the placed package declares |
 | `FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes — a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076), a `device-key` revocation's ref as a kid or a key reference `<kid>@sha256:<hex>`, and a ref that holds `@` refused unless it is a key reference (DEC-0084) |
+| `FAC-SEM-122` | `estate-record`, `estate-placement` | a partner's publisher key is scoped once, to a key the record pins, and a placement under it is in one of the organization contexts its scope names, never `personal` or another; a placement out of scope trusts no publisher key ([the partner channel](partner-channel.md), DEC-0090) |
 | `FAC-SEM-111` | `estate-record`, `estate-placement` | a placement whose context is not `personal` names in `grant` a share grant of the same record, matched by normal form (DEC-0076), whose `context` equals the placement's as written and is an `org:<orgId>` (a malformed context fails closed), and which the record does not revoke; a personal placement (no context, or `personal`) names no grant (DEC-0082). It reads revisions only: a revocation delta stops the grant's calls at the hub and the meter at once, and this rule refuses the instance from the next revision |
 
 ## Who adopts it

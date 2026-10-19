@@ -1,6 +1,6 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041, DEC-0045, DEC-0060 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0039, DEC-0041, DEC-0045, DEC-0060, DEC-0090 ([the partner channel](partner-channel.md)) · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -104,7 +104,10 @@ callee, enforces attenuation:
   grant whose `principalKind` is `agent` names its principal `urn:agent:<agent id>`, and the token's outermost
   actor is that agent id; `session` names it `urn:session:<agent id>:<session id>`, and the outermost actor is
   that agent with that `session`; for both, `sub` is the person who issued the grant (`issuer`). Under a share
-  grant (`external`) `sub` is the grant's principal, the outside person.
+  grant (`external`) `sub` is the grant's principal, the outside person. Under a partner grant (`partner`, DEC-0090)
+  `sub` is the issuer, and the chain's innermost actor is the partner organization `{partner: org:<partnerOrgId>}`:
+  minted at the grant, the partner's agent holds it inside; onward, it stays innermost (`FAC-SEM-124`,
+  [the partner channel](partner-channel.md)).
 - **DL-5 — Narrower than its parent.** A token minted for an onward call keeps the parent's `iss`, `sub` and
   `project`; its outermost actor is the parent's `aud` (the agent calling onward is the one the parent was
   for), and the rest of its chain is exactly the parent's `act`, so the chain grows by one actor per hop. Its
@@ -472,6 +475,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | `FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | `FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 | `FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
+| `FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of
 [`fixtures/catalogue.json`](../../fixtures/catalogue.json) and `fixtures/semantic/delegation-*`, `approval-*`;
