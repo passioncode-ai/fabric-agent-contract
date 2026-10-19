@@ -347,7 +347,7 @@ describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("access-log-"));
 
   it("has a passing and a failing input", () => {
-    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))]).toEqual(["FAC-SEM-067"]);
+    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))].sort()).toEqual(["FAC-SEM-067", "FAC-SEM-123"]);
     expect(files.some((name) => (load(`semantic/${name}`).expect as string[]).length === 0)).toBe(true);
   });
 
