@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 28 origin, 135 attribution and 25 record cases covering every AT row, a repository, a
+  nothing imported from the module): 28 origin, 135 attribution and 28 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -141,6 +141,13 @@ read kept its password (any remote that is neither a local path nor has an ident
 whose top level is a declared container is refused; the growth tests build their input outside the timer; a session
 with no Project and activity's required `project` is named as not decided (CT-64).
 
+The tenth readings of `6fe817f` (unit and product) each found one narrow case: the departure rule had not counted ties
+or explicit attaches (now: a tie departs, AT-1 is a choice, AT-0 a fault), and an scp remote with an empty user lost
+its identity when rebuilt (recordOrigin now keeps an origin only when it names the raw remote's identity, so the
+invariant holds by construction rather than by listing forms). Also: CT-64 is a backlog row, the conformance row runs
+the origin cases, the record vectors cover AT-12 and a tie, and the local-path forms and the host rule are written as
+the code reads them.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -195,10 +202,12 @@ all 6 killed on the first pass. 113 plants in all, two equivalent.
 The ninth fix round planted 3 (AT-2 reading holds instead of reach, an unreadable scp remote kept, a container top
 not refused): all killed. 116 plants in all, two equivalent.
 
+The tenth fix round planted 1 (the identity invariant dropped): killed. 117 plants in all, two equivalent.
+
 ## Checks
 
-`pnpm run check` at the ninth fix round, each step exiting 0: typecheck; 77 files, 5996 tests, branches 7791 / 7864
-with `src/folder-attribution.ts` at 344 / 344 (vectors: 28 origin, 135 attribution, 25 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the tenth fix round, each step exiting 0: typecheck; 77 files, 5999 tests, branches 7793 / 7866
+with `src/folder-attribution.ts` at 346 / 346 (vectors: 28 origin, 135 attribution, 28 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
