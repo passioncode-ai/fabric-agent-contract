@@ -44,6 +44,15 @@ const token = (overrides: Json = {}, options: Parameters<typeof sign>[1] = {}) =
 const code = (result: { ok: boolean; code?: RefusalCode }) => (result.ok ? "ok" : result.code);
 
 describe("delegation token: the callee's offline check (DEC-0039, verifyDelegation)", () => {
+  it("accepts a partner as the innermost actor and returns it in the chain, never outermost (DEC-0090)", () => {
+    const partnerChain = { sub: "example-media", act: { sub: "acme-setup.default", act: { partner: "org:acme_partners" } } };
+    expect(valid("delegation-token.schema.json", { ...claims, act: partnerChain })).toBe(true);
+    expect(verifyDelegation(token({ act: partnerChain }), call)).toMatchObject({ ok: true, caller: "example-media", chain: ["example-media", "acme-setup.default", "org:acme_partners"] });
+    expect(code(verifyDelegation(token({ act: { partner: "org:acme_partners" } }), call))).toBe("unauthenticated");
+    expect(code(verifyDelegation(token({ act: { sub: "example-media", act: { partner: "org:acme_partners", sub: "x" } } }), call))).toBe("unauthenticated");
+    const deep = { sub: "a1", act: { sub: "a2", act: { sub: "a3", act: { sub: "a4", act: { partner: "org:acme_partners" } } } } };
+    expect(code(verifyDelegation(token({ act: deep }), call))).toBe("chain-too-deep");
+  });
   it("accepts a token from the estate, naming the person, the caller and the whole chain", () => {
     expect(valid("delegation-token.schema.json", claims)).toBe(true);
     const result = verifyDelegation(token(), { ...call, issuer: "urn:fabric:estate:example" });
