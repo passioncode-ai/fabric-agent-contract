@@ -9,11 +9,11 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
 
 ## Done
 
-- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-15), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
+- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-15), `explainFolder` (the answer, its row and the folder to record), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for project-observatory-contract to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 24 origin and 107 attribution cases covering every AT row, a repository, a
+  nothing imported from the module): 25 origin, 119 attribution and 15 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -33,7 +33,8 @@ refused for the folder and its root alike; a folder right under home is a contai
 is the same tree (the nearest place by each folder's `toplevel`, else the main checkout's Project, else a container of
 the repository's deeper Projects); a root holding a Project's folder is never made a Project; the repository identity
 folds case and keeps group paths; a tool's folder is refused after the owner row (as Switchboard's SB-131); work
-records match by common dir or identity; each product records the same after each answer; a failed Git probe is not
+records match by common dir or identity; each product records `explainFolder`'s `record` (the matched place in this
+checkout, the root for `new`), so later answers stay; a folder a Project lists below a tombstone gets through it; a failed Git probe is not
 `git: null`, and a home kept under Git is.
 
 For `project.attribute` (D4), a proposal to project-observatory-contract, which owns the names: the answer's refusal
@@ -73,6 +74,18 @@ Project (AT-8), a repository whose Projects all sit deeper refused (AT-9), the w
 answer*, Project ids compared as written (identifiers.md), the main checkout from `git worktree list --porcelain`, and
 CO-330 corrected to `8bdad97c` and `f7c71cba` (CO-331).
 
+The fourth readings of `75dc421`: both failed it on recording. Recording a Git attach at the bare top level let a
+recorded worktree take a nested Project's place by path; a `new` root recorded with the snapshot's top level faulted
+every later snapshot; an explicit attach below a tombstoned parent could not last; a worktree whose main checkout is
+right under home was refused while its clone joined; and two clauses (a broad root, AT-6's main checkout) had no
+vector. The fourth fix round: `explainFolder` answers the row and the record, recorded at the matched place (the
+record vectors and a sequence test apply each record and ask again); AT-3 decides by place when a folder of the
+folder's own repository holds it; AT-2 lets a folder a Project lists below the tombstone through; AT-5 reads a root
+right under home only when no Project folder is in its repository; drive letters upper case, ASCII lower-casing,
+origins normalized on first read, the dead AT-14 clause removed; each vector's name checked against the row that
+decides it; the products' owed changes (Fabric's worktree before its breadth check, Switchboard's `record_worked`,
+scenarios) and the cases that go against the operator's literal words written out.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -98,13 +111,18 @@ home at AT-5, AT-6 and AT-7 skipping broad folders, AT-8 and AT-9 removed, AT-9 
 identity, containers validated, AT-9 before AT-8, a root guard in the loose test): 10 killed on the first pass; two
 were closed with vectors (a worktree of a repository only a home-listing Project keeps; a worktree whose main checkout
 lies in a plain Project folder while the repository keeps a deeper Project), then killed; one was equivalent (a root
-is broad, so the loose test never sees one) and its guard was removed. 72 plants in all, every non-equivalent one
-killed.
+is broad, so the loose test never sees one) and its guard was removed.
+
+The fourth fix round planted 15 (the tombstone exemption, and it covering the tombstoned folder itself, AT-3 by
+place removed, in one pass and without its physical holder, a root right under home whose repository has Projects, the
+recorded place, its join below a root top level, a bare root's top level, an explicit broad folder recorded, ASCII
+lower-casing, the upper-case drive letter, the owner and AT-8 records, a new root's origin): all 15 killed on the first
+pass. 88 plants in all (30, 18, 12, 13, 15), one equivalent, every other one killed.
 
 ## Checks
 
-`pnpm run check` at the third fix round, each step exiting 0: typecheck; 77 files, 5929 tests, branches 7682 / 7755
-with `src/folder-attribution.ts` at 235 / 235; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the fourth fix round, each step exiting 0: typecheck; 77 files, 5962 tests, branches 7726 / 7799
+with `src/folder-attribution.ts` at 279 / 279; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in

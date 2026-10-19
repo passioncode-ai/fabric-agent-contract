@@ -23,7 +23,7 @@ and storage (each product writes only its own store, D5). This page decides whic
 
 | Member | What |
 |---|---|
-| `folder` | the folder the agent works in, absolute and real (symlinks resolved), `/`-separated; a Windows path as `C:/...` |
+| `folder` | the folder the agent works in, absolute and real (symlinks resolved), `/`-separated; a Windows path as `C:/...`, its drive letter upper case |
 | `home` | the user's home folder, the same form |
 | `tempRoots` | the platform's temporary and cache roots that exist: the OS temp dir, `/tmp`, `/private/tmp`, `/private/var/folders`, `/var/tmp`, `~/.cache`, `~/Library/Caches`, `~/AppData/Local/Temp` |
 | `git` | `null` for a folder outside Git; else `{toplevel, commonDir, mainCheckout, origin}`: `git rev-parse --show-toplevel`, the absolute `--git-common-dir`, the main checkout (the first entry of `git worktree list --porcelain`; for a bare repository, the common dir), and `remote.origin.url` or `null` |
@@ -58,7 +58,7 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
 
 ## The repository identity
 
-`normalizeOrigin(url)` is `host/path` in lower case (DEC-0089 item 2), from a URL whose scheme is `http`, `https`,
+`normalizeOrigin(url)` is `host/path` with `A` to `Z` lower-cased (DEC-0089 item 2; a non-ASCII letter keeps its case), from a URL whose scheme is `http`, `https`,
 `ssh`, `git`, `git+ssh` or `git+https`, or from the scp form `[user@]host:path`. The user, a password or token, the port,
 a query, a fragment, the leading and trailing `/` and one trailing `.git` are dropped, and surrounding whitespace is
 trimmed. The host is a DNS name of letters, digits, `.` and `-` with a dot (so `git_host.example.com` has no identity, and
@@ -83,10 +83,10 @@ top), and the folder's place is its path below `git.toplevel`.
 |---|---|---|
 | AT-0 | `{fault: "input-invalid"}` | the snapshot is not of the schema's shape (a path not in the form above, a Project id or `explicit` of more than 256 characters, an empty source, an origin of more than 4096, all counted in code points; Git facts, or a Project folder's `toplevel`, that do not hold the folder; two Projects with one id; a work record with no `project` or no common dir), or `explicit` names no Project. A work record naming a Project the snapshot does not hold is no fault: it matches nothing |
 | AT-1 | attached, `explicit` | `explicit` names a Project, whatever else holds: an explicit attach wins over a tombstone, and over a broad folder |
-| AT-2 | refused, `tombstoned` | the folder is at or under a tombstone |
-| AT-3 | attached, `folder` | the folder itself, or its nearest ancestor, is a folder a Project lists, broad folders skipped (the outer of two nested Projects keeps its folders outside the inner one; a folder right under home a Project lists is its folder) |
+| AT-2 | refused, `tombstoned` | the folder is at or under a tombstone, and no Project lists a folder strictly below that tombstone which holds the folder (so a folder attached explicitly below a removed parent stays attached, and its siblings stay out) |
+| AT-3 | attached, `folder` | a folder a Project lists, not broad, holds the folder: when one in the folder's own repository holds it (same common dir, else same identity), the nearest place among that repository's Project folders decides, as AT-6 and AT-7 do; else the nearest listed folder by path (the outer of two nested Projects keeps its folders outside the inner one; a folder right under home a Project lists is its folder) |
 | AT-4 | refused, `transient` | the folder or its root is at or under a temporary or cache root |
-| AT-5 | refused, `container` | the folder or its root is broad, or is right under home and listed by no Project: a worktree there is refused as a clone there is |
+| AT-5 | refused, `container` | the folder or its root is broad; or the folder is right under home and listed by no Project, a worktree there as a clone there; or the root is, and no Project folder is in its repository |
 | AT-6 | attached, `worktree` | a Project's folder, not broad, has the same Git common dir or is the main checkout, at a place that holds the folder's (the nearest such place wins) |
 | AT-7 | attached, `repository` | a Project's folder, not broad, has the same repository identity, at a place that holds the folder's (the nearest wins) |
 | AT-8 | attached, `worktree` | the root lies in a folder a Project lists (AT-3's search on the root): a worktree goes where its main checkout goes |
@@ -107,33 +107,45 @@ both, in the order of `projects`, and the product reports it rather than choosin
   first, as Switchboard does: a Project that lives under a temporary root keeps working. A folder nobody lists there
   joins nothing, a worktree whose main checkout is there neither.
 - **Broad containers before every attach row (AT-5), the holders only after them (AT-9, AT-14).** D2 refuses containers
-  and never creates them, and Fabric and Switchboard both refuse them when attaching today: home, a root or a folder
-  right under home is not attached by any Git row, as a worktree or as a clone alike. A folder right under home that a
-  Project lists is that Project's (Switchboard offers its worktrees). A repository root holding a Project's subfolder is
-  refused only when nothing attached the folder (AT-9 for the repository, AT-14 for a plain root).
+  and never creates them. Fabric and Switchboard both refuse a broad folder they would create, but neither refuses one
+  by worktree today (Fabric matches a worktree before its breadth check; Switchboard's attach has no home check): the
+  contract chooses to refuse home, a root or a folder right under home for every Git row, as a worktree or as a clone
+  alike, and both products owe it. A folder right under home that a Project lists is that Project's (Switchboard offers
+  its worktrees), and so is a worktree of a repository whose Project lives there. A repository root holding a Project's
+  subfolder is refused only when nothing attached the folder (AT-9 for the repository, AT-14 for a plain root).
 - **A worktree or clone is the same tree (AT-6 to AT-9).** Its folder joins the Project whose folder holds the same
   place in the repository, the nearest first, as AT-3 does by path; else the Project its main checkout lies in; and when
   the repository's Projects all sit deeper, it is a container of them, never a second Project for the same repository.
 - **A tombstone is scoped to its folder (AT-2, AT-13).** It keeps the folder and its subfolders out of every row, and
   keeps a new Project from starting at a tombstoned root; it does not keep out a worktree of a Project that keeps the
-  repository (D2: "scoped to the folder, not to every clone").
+  repository (D2: "scoped to the folder, not to every clone"). A folder a Project lists below the tombstone is the
+  Project's, so an explicit attach below a removed parent lasts.
+- **What follows from D2 against the operator's literal words**, recorded so the operator can correct them on the
+  board: a repository cloned inside a plain-folder Project is that Project's (AT-3), not a new one; a worktree of a known
+  repository under a temporary root is refused (AT-4), while its main checkout's own Project kept there works; a
+  repository right under home is refused (AT-5).
 - **A tool's folder after the owner row (AT-11).** As Switchboard's SB-131: a tool's folder joins a known repository by
   worktree, repository or owner, but never by work and never as a new Project.
 
 ## Recording the answer
 
-The next folder's answer reads what the products recorded, so each records the same:
+The next folder's answer reads what the products recorded, so each records the same: `explainFolder(snapshot)` answers
+`{answer, row, record}`, and `record` is the Project folder to add, `{path, commonDir, origin, toplevel}`, or `null`
+(the vectors' `record` cases hold one of each):
 
-| Answer | The product records |
+| Answer | `record` |
 |---|---|
-| attached, `folder` | nothing: the folder is already the Project's |
-| attached, `worktree`, `repository`, `owner` or `work` | the folder's Git top level as a folder of that Project, with its `commonDir`, `origin` and `toplevel` |
-| attached, `explicit` | the folder as a folder of that Project (its top level when it is the top of a repository), and removes a tombstone the attach overrode |
-| `new` | a new Project with the root as its folder, with its Git facts |
-| refused, `ambiguous`, fault | nothing |
+| attached, `folder` | `null`: the folder is already the Project's |
+| attached, `worktree` or `repository` at AT-6 or AT-7 | the matched Project folder's place in this checkout: `git.toplevel` joined with that place (the top level itself at place `""`), with `toplevel` the checkout's top level and the snapshot's `commonDir` and raw `origin` |
+| attached, `worktree` at AT-8, `owner` or `work` | `git.toplevel`, its own top level |
+| attached, `explicit` | the folder (with its Git facts when in Git), or `null` for a broad folder: an explicit attach of home holds for that call only. The product removes a tombstone at the folder itself, never one above it (AT-2 lets the recorded folder through) |
+| `new` | the root, with `toplevel` the root itself (`null` for a bare repository's folder, which has no working tree) and the snapshot's `commonDir` and raw `origin`; `null` members without Git |
+| refused, `ambiguous`, fault | `null` |
 
-So after one worktree of a Project is recorded under `~/work/_worktrees`, that folder holds a Project's folder and is
-never made a Project itself (AT-14); declaring it a container says so before the first.
+A product adds `record` to the attached Project (or the new one) and nothing else; the tests apply each vector's
+record and ask again, and the answer stays. So after one worktree of a Project is recorded under `~/work/_worktrees`,
+that folder holds a Project's folder and is never made a Project itself (AT-14); declaring it a container says so
+before the first.
 
 ## Semantic rules
 
@@ -164,21 +176,28 @@ naming the rule and the Projects; the reasons are the schema's.
   nearest place and the main checkout's Project (AT-6 to AT-9); the main checkout from `git worktree list --porcelain`,
   so a bare repository, a submodule and a separate Git dir are read alike (today it takes the common dir's parent); the
   repository identity folding the whole path's case, read from the raw remote (a stored `remote_key` is not a URL:
-  re-read the remote, or keep the raw URL beside the key); not attributing when its Git probe times out; its container
-  message naming the ancestors of home. Its plain folder as its own Project (`8bdad97c`) and its subfolder start at the
+  re-read the remote, or keep the raw URL beside the key); not attributing when its Git probe times out; a worktree or
+  clone at home, an ancestor of home, a declared container or right under home refused (AT-5), where today its worktree
+  match comes first; a home kept under Git passed as `git: null`; recording by `explainFolder`'s `record`; its container
+  message naming the ancestors of home; its scenarios that show attribution (SCN-033's detach and undo) updated in the
+  adoption change. Its plain folder as its own Project (`8bdad97c`) and its subfolder start at the
   Git top level (`f7c71cba`, CO-331, ADR-0166) already match. Projects it stored at a subfolder before `f7c71cba` make
   their repository a container (AT-9, AT-14) until they are moved to the top level.
 - **Fabric Switchboard** (SB-141) runs the vectors in `./scripts/check.sh`. Owed: a plain folder as its own Project;
   group paths of three or more segments; the ancestors of home refused, and a folder right under home refused unless a
   Project lists it; the nearest of nested Project folders and their ties (AT-3), and by place for worktrees and clones
   (AT-6 to AT-9); its `dismissed` rows read as tombstones (a `gone` row, a folder that vanished, is no tombstone: a
-  re-clone at the path is new); its CLI text on containers updated with them.
+  re-clone at the path is new); its work path (`record_worked`) feeding the snapshot's `work` records through
+  `attributeFolder` rather than recording a repository itself, and its `shared` and contested states replaced by the
+  tie it reports; a worktree right under home refused at attach as at creation; recording by `record`; its CLI text on
+  containers and its scenarios (SCN-055, SCN-063) updated with them.
 - **Project Observatory** (the engine) runs the vectors in its scan and in `project.attribute` (D4). Measured against
   the table: it has no work row (AT-12) and reads owners only indirectly (AT-10); it scans only the children of its data
   root, so a subfolder start is not rooted at the repository (AT-15) and a remoteless worktree joins only on its tip
   (AT-6); its `folder_exclusions.json` and `_*` folders become the snapshot's `containers` (the folder that holds agent
-  worktrees among them), its `denied_links.json` becomes tombstones (AT-2, AT-13), and no rule of its own stays beside
-  the vectors; plain folders, group paths, any host, the identity's case, temporary roots (AT-4) and ties.
+  worktrees among them; its names and prefixes expanded to the matching paths under its data root), its
+  `denied_links.json` becomes tombstones (AT-2, AT-13), and no rule of its own stays beside the vectors; recording by
+  `record`; plain folders, group paths, any host, the identity's case, temporary roots (AT-4) and ties.
 - **fabric-workspace** names this page from the knowledge page that owns the cross-product fact.
 
 The board row is CT-57.
@@ -191,6 +210,10 @@ The board row is CT-57.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
+- One store of tombstones and containers. Until D4 makes one authoritative, each product reads its own (Fabric's
+  detach, Switchboard's dismissed rows, Observatory's `denied_links.json` and `folder_exclusions.json`), so one folder can
+  still answer differently in two products; Fabric and Switchboard read Observatory's declared containers where they
+  can reach them.
 - Decided limits, not open questions: an origin that is a local path has no identity, so such a clone joins by work or
   as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
 - A state for "not attributable yet" (the Git probe failed): the function is never called then, and

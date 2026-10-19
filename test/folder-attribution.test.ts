@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { attributeFolder, isPath, normalizeOrigin, ownerOf, under } from "../src/folder-attribution.js";
+import { attributeFolder, explainFolder, isPath, normalizeOrigin, ownerOf, under } from "../src/folder-attribution.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildFolderAttributionVectors } from "../tools/vectors/folder-attribution.js";
@@ -29,9 +29,17 @@ describe("the vectors (DEC-0089)", () => {
   it.each(vectors.attribution as Json[])("attribution: $name", (entry) => {
     expect(attributeFolder(entry.snapshot)).toEqual(entry.expected);
   });
-  it("covers every AT row", () => {
-    const rows = new Set((vectors.attribution as Json[]).map((entry) => /^AT-[0-9]+/.exec(entry.name)?.[0]));
-    for (let row = 0; row <= 15; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
+  it("name the row that decides each one, and cover every AT row", () => {
+    const rows = new Set<number>();
+    for (const entry of [...(vectors.attribution as Json[]), ...(vectors.record as Json[])]) {
+      const row = explainFolder(entry.snapshot).row;
+      expect(entry.name.startsWith(`AT-${row}:`), entry.name).toBe(true);
+      rows.add(row);
+    }
+    for (let row = 0; row <= 15; row += 1) expect(rows.has(row), `AT-${row}`).toBe(true);
+  });
+  it.each(vectors.record as Json[])("record: $name", (entry) => {
+    expect(explainFolder(entry.snapshot).record).toEqual(entry.record);
   });
   it("hold the same answers in every time zone", () => {
     for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
@@ -41,11 +49,66 @@ describe("the vectors (DEC-0089)", () => {
   });
 });
 
+/** The snapshot with `record` added as a folder of the Project `answer` names, or of a new Project `project:new`. */
+function recorded(snapshot: Json, folder: string, git: Json | null): Json {
+  const explained = explainFolder({ ...snapshot, folder, git });
+  const { record } = explained;
+  const answer = explained.answer as Json;
+  if (!record) return snapshot;
+  const id = answer.outcome === "new" ? "project:new" : answer.project;
+  const projects = (snapshot.projects as Json[]).some((project) => project.id === id) ? snapshot.projects : [...snapshot.projects, { id, folders: [], sources: [] }];
+  return { ...snapshot, projects: (projects as Json[]).map((project) => (project.id === id ? { ...project, folders: [...project.folders, record] } : project)) };
+}
+
+describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => {
+  const W = "/u/ana/work";
+  const wt = (top: string, main: string, common = `${main}/.git`) => ({ toplevel: top, commonDir: common, mainCheckout: main, origin: null });
+  const f = (p: string, top: string) => ({ path: p, commonDir: `${W}/mono/.git`, origin: null, toplevel: top });
+  const base = { home: "/u/ana", tempRoots: [], projects: [{ id: "project:mono", folders: [f(`${W}/mono`, `${W}/mono`)], sources: [] }, { id: "project:pkg", folders: [f(`${W}/mono/pkg`, `${W}/mono`)], sources: [] }] };
+  const ask = (snapshot: Json, folder: string, git: Json | null) => attributeFolder({ ...snapshot, folder, git });
+  it("the outer Project's worktree, recorded, leaves the inner place to the inner Project", () => {
+    const after = recorded(base, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/pkg/src`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:pkg" });
+    expect(ask(after, `${W}/mono-wt/docs/a`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+  });
+  it("the inner Project's worktree, recorded, leaves the rest of the worktree and a second worktree to the outer one", () => {
+    const after = recorded(base, `${W}/mono-wt/pkg/src`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+    expect(ask(after, `${W}/mono-wt2/other`, wt(`${W}/mono-wt2`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+  });
+  it("with only the inner Project, its recorded worktree keeps the rest a container", () => {
+    const only = { ...base, projects: [base.projects[1]] };
+    const after = recorded(only, `${W}/mono-wt/pkg/x`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`))).toEqual({ outcome: "refused", reason: "container" });
+    expect(ask(after, `${W}/mono/docs`, wt(`${W}/mono`, `${W}/mono`))).toEqual({ outcome: "refused", reason: "container" });
+  });
+  it("a new Project from a worktree of an unknown repository, recorded, takes the next worktree, normal or bare", () => {
+    const empty = { home: "/u/ana", tempRoots: [], projects: [] };
+    let after = recorded(empty, `${W}/app-wt`, wt(`${W}/app-wt`, `${W}/app`));
+    expect(ask(after, `${W}/app-wt2`, wt(`${W}/app-wt2`, `${W}/app`))).toEqual({ outcome: "attached", project: "project:new", rule: "worktree" });
+    after = recorded(empty, `${W}/r/main`, wt(`${W}/r/main`, `${W}/r/.bare`, `${W}/r/.bare`));
+    expect(ask(after, `${W}/r/feature`, wt(`${W}/r/feature`, `${W}/r/.bare`, `${W}/r/.bare`))).toEqual({ outcome: "attached", project: "project:new", rule: "worktree" });
+  });
+  it("every vector's record, applied, gives the same answer again", () => {
+    for (const entry of vectors.attribution as Json[]) {
+      const snapshot = entry.snapshot as Json;
+      const { answer, record } = explainFolder(snapshot);
+      if (!record || !("outcome" in answer) || answer.outcome !== "attached" || snapshot.explicit !== undefined) continue;
+      const after = recorded(snapshot, snapshot.folder, snapshot.git);
+      expect(attributeFolder(after), entry.name).toMatchObject({ outcome: "attached", project: answer.project });
+    }
+  });
+});
+
 describe("the schema (DEC-0089)", () => {
   it("admits every vector's snapshot that is well formed, and every answer", () => {
     for (const entry of vectors.attribution as Json[]) {
       if (!("fault" in entry.expected)) expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(true);
       expect(valid("#/$defs/answer", entry.expected), entry.name).toBe(true);
+    }
+    for (const entry of vectors.record as Json[]) {
+      expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(true);
+      if (entry.record) expect(valid("#/$defs/record", entry.record), entry.name).toBe(true);
     }
   });
   it("refuses every bound the reference refuses (the retro's standing instruction)", () => {

@@ -9,8 +9,8 @@ import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.j
  * facts. Every function here answers and never throws: malformed input is an answer.
  */
 
-/** A path: absolute, `/`-separated (a Windows path written `C:/...`), no empty, `.` or `..` segment, no trailing `/`. */
-const PATH = /^(?:\/|[A-Za-z]:\/)(?:[^/]+(?:\/[^/]+)*)?$/;
+/** A path: absolute, `/`-separated (a Windows path written `C:/...`, its drive letter upper case), no empty, `.` or `..` segment, no trailing `/`. */
+const PATH = /^(?:\/|[A-Z]:\/)(?:[^/]+(?:\/[^/]+)*)?$/;
 const MAX_PATH = 4096;
 const MAX_LIST = 10_000;
 /** The schemes a remote names a repository by (DEC-0089 item 2). */
@@ -25,6 +25,8 @@ const idOk = (value: unknown): value is string => isString(value) && value.lengt
 const originOk = (value: unknown) => value === undefined || value === null || (isString(value) && codePoints(value) <= MAX_PATH);
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
 const list = (value: unknown): unknown[] | undefined => (Array.isArray(value) && value.length <= MAX_LIST ? value : undefined);
+/** `value` with A to Z lower-cased and nothing else (a non-ASCII letter keeps its case). */
+const asciiLower = (value: string) => value.replace(/[A-Z]/g, (letter) => letter.toLowerCase());
 /** `value` without its leading and trailing `/`, in linear time (a regular expression for the trailing run is quadratic). */
 function trimSlashes(value: string, leading: boolean): string {
   let start = 0;
@@ -38,7 +40,7 @@ function trimSlashes(value: string, leading: boolean): string {
 export function isPath(value: unknown): value is string {
   return isString(value) && codePoints(value) <= MAX_PATH && PATH.test(value) && !value.split("/").some((segment) => segment === "." || segment === "..");
 }
-const isRoot = (path: string) => path === "/" || /^[A-Za-z]:\/$/.test(path);
+const isRoot = (path: string) => path === "/" || /^[A-Z]:\/$/.test(path);
 /** Whether `path` is `base` or lies under it, segment by segment (`/a/bc` is not under `/a/b`). */
 export function under(path: string, base: string): boolean {
   if (path === base) return true;
@@ -48,7 +50,7 @@ export function under(path: string, base: string): boolean {
 const parentOf = (path: string): string => {
   const cut = path.lastIndexOf("/");
   const parent = path.slice(0, cut);
-  return parent === "" ? "/" : /^[A-Za-z]:$/.test(parent) ? `${parent}/` : parent;
+  return parent === "" ? "/" : /^[A-Z]:$/.test(parent) ? `${parent}/` : parent;
 };
 
 /**
@@ -78,7 +80,7 @@ export function normalizeOrigin(raw: unknown): string | undefined {
     path = String(String(scp[2]).split(/[?#]/)[0]);
   }
   host = host.slice(host.lastIndexOf("@") + 1).replace(/:[0-9]*$/, "").toLowerCase();
-  path = trimSlashes(path, true).toLowerCase();
+  path = asciiLower(trimSlashes(path, true));
   if (path.endsWith(".git")) path = path.slice(0, -4);
   const segments = path.split("/");
   if (!/^[a-z0-9.-]+$/.test(host) || !host.includes(".") || segments.length < 2 || segments.some((segment) => segment === "" || /\s/.test(segment))) return undefined;
@@ -99,6 +101,19 @@ function inToolFolder(path: string, home: string): boolean {
   return first.startsWith(".") || first === "Library" || first === "AppData";
 }
 
+/** What a product records after an answer (attribution.md, *Recording the answer*): a folder of the attached Project. */
+export interface AttributionRecord {
+  path: string;
+  commonDir: string | null;
+  origin: string | null;
+  toplevel: string | null;
+}
+/** The answer, the AT row that decided it, and what to record (`null`: nothing). */
+export interface AttributionExplained {
+  answer: Attribution;
+  row: number;
+  record: AttributionRecord | null;
+}
 export type AttributionRule = "explicit" | "folder" | "worktree" | "repository" | "owner" | "work";
 export type Attribution =
   | { outcome: "attached"; project: string; rule: AttributionRule }
@@ -110,7 +125,9 @@ export type Attribution =
 interface ProjectFolder {
   path: string;
   commonDir: string | undefined;
-  repository: string | undefined;
+  /** Its raw origin; `repositoryOf` normalizes it once, when a row first reads it. */
+  origin: unknown;
+  repository?: string | null;
   /** Its place in its repository: the path below the folder's Git top level, `""` at the top or when not given. */
   rel: string;
 }
@@ -138,13 +155,18 @@ function projectsOf(value: unknown): Project[] | undefined {
       const toplevel = own(folder, "toplevel");
       if (!isPath(path) || (commonDir !== undefined && commonDir !== null && !isPath(commonDir)) || !originOk(origin)) return undefined;
       if (toplevel !== undefined && toplevel !== null && !(isPath(toplevel) && under(path, toplevel))) return undefined;
-      parsed.push({ path, commonDir: isString(commonDir) ? commonDir : undefined, repository: normalizeOrigin(origin), rel: isString(toplevel) ? relativeTo(path, toplevel) : "" });
+      parsed.push({ path, commonDir: isString(commonDir) ? commonDir : undefined, origin, rel: isString(toplevel) ? relativeTo(path, toplevel) : "" });
     }
     projects.push({ id, folders: parsed, sources: sources.map((source) => trimSlashes((source as string).toLowerCase(), false)) });
   }
   return new Set(projects.map((project) => project.id)).size === projects.length ? projects : undefined;
 }
 
+/** A Project folder's repository identity, normalized on first read. */
+function repositoryOf(entry: ProjectFolder): string | undefined {
+  if (entry.repository === undefined) entry.repository = normalizeOrigin(entry.origin) ?? null;
+  return entry.repository ?? undefined;
+}
 /** The distinct ids of `projects`, in the snapshot's order. */
 const ids = (projects: Project[]) => [...new Set(projects.map((project) => project.id))];
 /**
@@ -152,20 +174,21 @@ const ids = (projects: Project[]) => [...new Set(projects.map((project) => proje
  * picks, those whose `rel` holds `rel`, and of them the longest (so a worktree or clone of the outer of two nested
  * Projects joins the outer one, and a folder inside the inner one the inner one).
  */
-function nearestIn(projects: Project[], matches: (entry: ProjectFolder) => boolean, rel: string): Project[] {
+function nearestIn(projects: Project[], matches: (entry: ProjectFolder) => boolean, rel: string): { owners: Project[]; place: string } {
   let nearest = -1;
+  let place = "";
   let owners: Project[] = [];
   for (const project of projects) {
     for (const entry of project.folders) {
       if (!matches(entry) || !relUnder(rel, entry.rel)) continue;
-      if (entry.rel.length > nearest) [nearest, owners] = [entry.rel.length, [project]];
+      if (entry.rel.length > nearest) [nearest, place, owners] = [entry.rel.length, entry.rel, [project]];
       else if (entry.rel.length === nearest) owners.push(project);
     }
   }
-  return owners;
+  return { owners, place };
 }
 /** One project attached by `rule`, or ambiguous when more than one matches; undefined when none does. */
-function decide(matches: Project[], rule: AttributionRule): Attribution | undefined {
+function decide(matches: Project[], rule: AttributionRule): Extract<Attribution, { outcome: string }> | undefined {
   const [first, ...others] = ids(matches);
   if (first === undefined) return undefined;
   return others.length === 0 ? { outcome: "attached", project: first, rule } : { outcome: "ambiguous", rule, projects: [first, ...others] };
@@ -173,15 +196,18 @@ function decide(matches: Project[], rule: AttributionRule): Attribution | undefi
 
 /**
  * The Project of one folder (DEC-0089 item 1), in the order of attribution.md's AT table. `snapshot` is
- * `{folder, home, tempRoots, git, projects, work?, tombstones?, explicit?}`:
+ * `{folder, home, tempRoots, git, projects, work?, tombstones?, containers?, explicit?}`:
  *
  * - AT-0: a snapshot that is not of the schema's shape, or `explicit` naming no Project: `{fault: "input-invalid"}`;
  * - AT-1: `explicit` names a Project: attached to it (`explicit`), whatever else holds;
- * - AT-2: the folder is at or under a tombstone: refused `tombstoned`;
- * - AT-3: the folder, or its nearest ancestor, a Project lists (`folder`); a broad folder (a root, home, an ancestor of
+ * - AT-2: the folder is at or under a tombstone, and no Project lists a folder below it that holds the folder: refused
+ *   `tombstoned`;
+ * - AT-3: a Project folder holds the folder (`folder`): one of the folder's own repository decides by place (by common
+ *   dir, then by identity), else the nearest listed folder by path; a broad folder (a root, home, an ancestor of
  *   home, a declared container) is never so listed;
  * - AT-4: the folder or its root is at or under a temporary root: refused `transient`;
- * - AT-5: the folder or its root is broad, or right under home and listed by no Project: refused `container`;
+ * - AT-5: the folder or its root is broad, or right under home and listed by no Project (a root only when no Project
+ *   folder is in its repository): refused `container`;
  * - AT-6: a Project's folder has the same Git common dir, or is the main checkout (`worktree`), nearest by place;
  * - AT-7: the same repository identity (`repository`), nearest by place;
  * - AT-8: the root (the main checkout) lies in a folder a Project lists, AT-3's search (`worktree`);
@@ -196,6 +222,13 @@ function decide(matches: Project[], rule: AttributionRule): Attribution | undefi
  * Two Projects matching at one row answer `ambiguous` with both, and nothing is attached. It never throws.
  */
 export function attributeFolder(snapshot: unknown): Attribution {
+  return explainFolder(snapshot).answer;
+}
+
+/** `attributeFolder`'s answer with the AT row that decided it and the folder a product records after it. */
+export function explainFolder(snapshot: unknown): AttributionExplained {
+  const at = (row: number, answer: Attribution, record: AttributionRecord | null = null): AttributionExplained => ({ answer, row, record });
+  const fault = at(0, { fault: "input-invalid" });
   const folder = own(snapshot, "folder");
   const home = own(snapshot, "home");
   const tempRoots = list(own(snapshot, "tempRoots"));
@@ -205,31 +238,35 @@ export function attributeFolder(snapshot: unknown): Attribution {
   const tombstones = own(snapshot, "tombstones") === undefined ? [] : list(own(snapshot, "tombstones"));
   const explicit = own(snapshot, "explicit");
   const containers = own(snapshot, "containers") === undefined ? [] : list(own(snapshot, "containers"));
-  if (!isPath(folder) || !isPath(home) || !tempRoots || !tempRoots.every(isPath) || !projects || !work || !tombstones || !tombstones.every(isPath) || !containers || !containers.every(isPath)) return { fault: "input-invalid" };
-  if (git !== null && !isObject(git)) return { fault: "input-invalid" };
+  if (!isPath(folder) || !isPath(home) || !tempRoots || !tempRoots.every(isPath) || !projects || !work || !tombstones || !tombstones.every(isPath) || !containers || !containers.every(isPath)) return fault;
+  if (git !== null && !isObject(git)) return fault;
   const toplevel = own(git, "toplevel");
   const commonDir = own(git, "commonDir");
   const mainCheckout = own(git, "mainCheckout");
   const origin = own(git, "origin");
-  if (git !== null && (!isPath(toplevel) || !isPath(commonDir) || !isPath(mainCheckout) || !under(folder, toplevel) || !originOk(origin))) return { fault: "input-invalid" };
-  const records: Array<{ project: string; commonDir: string; repository: string | undefined }> = [];
+  if (git !== null && (!isPath(toplevel) || !isPath(commonDir) || !isPath(mainCheckout) || !under(folder, toplevel) || !originOk(origin))) return fault;
+  const records: Array<{ project: string; commonDir: string; origin: unknown }> = [];
   for (const record of work) {
     const project = own(record, "project");
     const repo = own(record, "commonDir");
     const recordOrigin = own(record, "origin");
-    if (!idOk(project) || !isPath(repo) || !originOk(recordOrigin)) return { fault: "input-invalid" };
-    records.push({ project, commonDir: repo, repository: normalizeOrigin(recordOrigin) });
+    if (!idOk(project) || !isPath(repo) || !originOk(recordOrigin)) return fault;
+    records.push({ project, commonDir: repo, origin: recordOrigin });
   }
-  if (explicit !== undefined) {
-    const target = idOk(explicit) ? projects.find((project) => project.id === explicit) : undefined;
-    return target ? { outcome: "attached", project: target.id, rule: "explicit" } : { fault: "input-invalid" };
-  }
-
-  if (tombstones.some((stone) => under(folder, stone as string))) return { outcome: "refused", reason: "tombstoned" };
-  const root = git === null ? folder : (mainCheckout as string);
   const declared = new Set(containers as string[]);
   /** Never a Project and never listed: a root, home, an ancestor of home, a container a person declared. */
   const broad = (path: string) => isRoot(path) || under(home, path) || declared.has(path);
+  const rawOrigin = isString(origin) ? origin : null;
+  /** The record of a folder of this repository at `path`, its top level `top` (null: none). */
+  const gitRecord = (path: string, top: string | null): AttributionRecord => ({ path, commonDir: commonDir as string, origin: rawOrigin, toplevel: top });
+  if (explicit !== undefined) {
+    const target = idOk(explicit) ? projects.find((project) => project.id === explicit) : undefined;
+    if (!target) return fault;
+    const record = broad(folder) ? null : git === null ? { path: folder, commonDir: null, origin: null, toplevel: null } : gitRecord(folder, toplevel as string);
+    return at(1, { outcome: "attached", project: target.id, rule: "explicit" }, record);
+  }
+
+  const root = git === null ? folder : (mainCheckout as string);
   const listed = (path: string) => projects.some((project) => project.folders.some((entry) => entry.path === path));
   /** A folder right under home that no Project lists (a root is broad, so it is never asked). */
   const looseUnderHome = (path: string) => parentOf(path) === home && !listed(path);
@@ -246,38 +283,56 @@ export function attributeFolder(snapshot: unknown): Attribution {
     }
     return owners;
   };
+  const repository = git === null ? undefined : normalizeOrigin(origin);
+  const place = git === null ? "" : relativeTo(folder, toplevel as string);
+  const sameCommon = (entry: ProjectFolder) => git !== null && !broad(entry.path) && (entry.commonDir === commonDir || entry.path === mainCheckout);
+  const sameIdentity = (entry: ProjectFolder) => repository !== undefined && !broad(entry.path) && repositoryOf(entry) === repository;
+  const sameRepository = (entry: ProjectFolder) => sameCommon(entry) || sameIdentity(entry);
+  const anyFolder = (test: (entry: ProjectFolder) => boolean) => projects.some((project) => project.folders.some(test));
+  // AT-2: a tombstone keeps out its folder, unless a Project lists a folder below the tombstone that holds this one.
+  const stoned = tombstones.some((stone) => under(folder, stone as string) && !anyFolder((entry) => entry.path !== stone && under(entry.path, stone as string) && under(folder, entry.path)));
+  if (stoned) return at(2, { outcome: "refused", reason: "tombstoned" });
+  // AT-3: a Project folder holds the folder; one of the folder's own repository decides by place.
+  for (const same of [sameCommon, sameIdentity]) {
+    if (!anyFolder((entry) => same(entry) && under(folder, entry.path))) continue;
+    const byPlace = decide(nearestIn(projects, same, place).owners, "folder");
+    if (byPlace) return at(3, byPlace);
+  }
   const byFolder = decide(byPath(folder), "folder");
-  if (byFolder) return byFolder;
-  if (tempRoots.some((temp) => under(folder, temp as string) || under(root, temp as string))) return { outcome: "refused", reason: "transient" };
-  if (broad(folder) || broad(root) || looseUnderHome(folder) || looseUnderHome(root)) return { outcome: "refused", reason: "container" };
+  if (byFolder) return at(3, byFolder);
+  if (tempRoots.some((temp) => under(folder, temp as string) || under(root, temp as string))) return at(4, { outcome: "refused", reason: "transient" });
+  if (broad(folder) || broad(root) || looseUnderHome(folder) || (looseUnderHome(root) && !anyFolder(sameRepository))) return at(5, { outcome: "refused", reason: "container" });
   if (git !== null) {
-    const place = relativeTo(folder, toplevel as string);
-    const repository = normalizeOrigin(origin);
-    const sameCommon = (entry: ProjectFolder) => !broad(entry.path) && (entry.commonDir === commonDir || entry.path === mainCheckout);
-    const sameIdentity = (entry: ProjectFolder) => !broad(entry.path) && repository !== undefined && entry.repository === repository;
-    const byCommon = decide(nearestIn(projects, sameCommon, place), "worktree");
+    const top = toplevel as string;
+    const atPlace = (found: { owners: Project[]; place: string }, row: number, rule: AttributionRule) => {
+      const answer = decide(found.owners, rule);
+      return answer && at(row, answer, answer.outcome === "attached" ? gitRecord(found.place === "" ? top : `${isRoot(top) ? top : `${top}/`}${found.place}`, top) : null);
+    };
+    const byCommon = atPlace(nearestIn(projects, sameCommon, place), 6, "worktree");
     if (byCommon) return byCommon;
-    const byRepository = decide(nearestIn(projects, sameIdentity, place), "repository");
+    const byRepository = atPlace(nearestIn(projects, sameIdentity, place), 7, "repository");
     if (byRepository) return byRepository;
+    const whole = (row: number, answer: ReturnType<typeof decide>) => answer && at(row, answer, answer.outcome === "attached" ? gitRecord(top, top) : null);
     // AT-8: a worktree goes where its main checkout goes by AT-3.
-    const byCheckout = decide(byPath(root), "worktree");
+    const byCheckout = whole(8, decide(byPath(root), "worktree"));
     if (byCheckout) return byCheckout;
     // AT-9: the repository has Projects, but only at places deeper than the folder's: it holds them.
-    if (projects.some((project) => project.folders.some((entry) => sameCommon(entry) || sameIdentity(entry)))) return { outcome: "refused", reason: "container" };
+    if (anyFolder(sameRepository)) return at(9, { outcome: "refused", reason: "container" });
     if (repository !== undefined) {
-      const byOwner = decide(projects.filter((project) => project.sources.includes(ownerOf(repository))), "owner");
+      const byOwner = whole(10, decide(projects.filter((project) => project.sources.includes(ownerOf(repository))), "owner"));
       if (byOwner) return byOwner;
     }
-    if (inToolFolder(folder, home) || inToolFolder(root, home)) return { outcome: "refused", reason: "tool" };
-    const workers = new Set(records.filter((record) => record.commonDir === commonDir || (repository !== undefined && record.repository === repository)).map((record) => record.project));
-    const byWork = decide(projects.filter((project) => workers.has(project.id)), "work");
+    if (inToolFolder(folder, home) || inToolFolder(root, home)) return at(11, { outcome: "refused", reason: "tool" });
+    const workers = new Set(records.filter((record) => record.commonDir === commonDir || (repository !== undefined && normalizeOrigin(record.origin) === repository)).map((record) => record.project));
+    const byWork = whole(12, decide(projects.filter((project) => workers.has(project.id)), "work"));
     if (byWork) return byWork;
   } else if (inToolFolder(folder, home)) {
-    return { outcome: "refused", reason: "tool" };
+    return at(11, { outcome: "refused", reason: "tool" });
   }
-  if (tombstones.some((stone) => under(root, stone as string))) return { outcome: "refused", reason: "tombstoned" };
-  if (projects.some((project) => project.folders.some((entry) => entry.path !== root && under(entry.path, root)))) return { outcome: "refused", reason: "container" };
-  return { outcome: "new", root };
+  if (tombstones.some((stone) => under(root, stone as string))) return at(13, { outcome: "refused", reason: "tombstoned" });
+  if (anyFolder((entry) => under(entry.path, root))) return at(14, { outcome: "refused", reason: "container" });
+  const record = git === null ? { path: root, commonDir: null, origin: null, toplevel: null } : gitRecord(root, root === commonDir ? null : root);
+  return at(15, { outcome: "new", root }, record);
 }
 
 // ---- Rules -------------------------------------------------------------------------------------------------------

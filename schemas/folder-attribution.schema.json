@@ -6,7 +6,7 @@
     "path": {
       "type": "string",
       "maxLength": 4096,
-      "pattern": "^(?:/|[A-Za-z]:/)(?:[^/]+(?:/[^/]+)*)?$",
+      "pattern": "^(?:/|[A-Z]:/)(?:[^/]+(?:/[^/]+)*)?$",
       "not": {
         "pattern": "(?:^|/)\\.{1,2}(?:/|$)"
       },
@@ -49,7 +49,7 @@
           }
         }
       ],
-      "description": "null for a folder without Git; else git rev-parse --show-toplevel, --git-common-dir (absolute), the main checkout (the common dir's working tree; for a bare repository the common dir itself) and remote.origin.url. Other members (a branch) are read by no rule."
+      "description": "null for a folder without Git; else git rev-parse --show-toplevel, --git-common-dir (absolute), the main checkout (the first entry of git worktree list --porcelain; for a bare repository the common dir) and remote.origin.url. Other members (a branch) are read by no rule."
     },
     "project": {
       "type": "object",
@@ -309,6 +309,49 @@
           "additionalProperties": false
         }
       ]
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "commonDir",
+        "origin",
+        "toplevel"
+      ],
+      "description": "What a product records after an answer (attribution.md, Recording the answer): a folder of the attached or new Project; explainFolder's record.",
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "commonDir": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/path"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4096
+        },
+        "toplevel": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/path"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
     }
   },
   "oneOf": [
