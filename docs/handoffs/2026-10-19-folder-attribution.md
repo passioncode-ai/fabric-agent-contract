@@ -172,9 +172,18 @@ The thirteenth seam reading found the page mapped Observatory's `denied_links.js
 (Project, repository) link made by Observatory's vault rules, so it is no tombstone and goes with those rules. Also
 from the thirteenth round: Observatory's origin read raw, not through `git remote get-url` (`insteadOf`); Fabric's
 alias clones that lose their identity named in Compatibility; owner sources, the offline answer's Projects and
-archived Projects under Not decided here; the growth tests' margin 300 ms under contention. Also: an explicit move removes
+archived Projects under Not decided here; the growth tests' margin 300 ms under contention.
+
+The fourteenth readings of `c3dd0e7`: the seam reading passed (seven adoption risks, below); the product reading found
+one more list stated as whole (the remote forms that move), now examples with the `origin` vectors as the measure.
+Adoption risks from both readings, for board row CT-66 after the merge: Switchboard's removed (`added`) folders as
+tombstones and its origins kept raw; Fabric storing each folder's common dir, and its SCN-128 worktree tick and
+SCN-033 attach that make a second Project for one repository; Observatory's second resolver `tools/session_start.py`,
+its exclusions split into containers and tombstones, and a scenario for its refusal and tie text; an ambiguous vector
+whose snapshot order is not sorted; SB-141 restated under D3 and D4 as corrected. Also: an explicit move removes
 the other Project's folder at the place (every product's duty, in the conformance row), and the forms of remote that
-merge at AT-7 are named exactly.
+merge at AT-7 named (then, after the fourteenth reading, made examples, with the `origin` vectors run against each
+product's normalizer as the full measure).
 
 ## Plants
 

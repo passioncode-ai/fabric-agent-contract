@@ -200,11 +200,13 @@ Fixtures: `fixtures/positive/folder-attribution-snapshot.json`, `fixtures/negati
 
 New: no document changes and no product is refused. Each product's answers change where its rules differed from the
 table, and each adopts by running the vectors; the rows below are the changes measured on 2026-10-19 (the run index and
-the products' code). `contractVersion` stays `0.1.0`. Project counts move on adoption: plain folders become Projects in
-Observatory (Switchboard's are Fabric's, below), subfolder starts merge into their repository's Project, and stored
-Projects whose remotes differ only in the path's case, a leading or trailing `/` or a trailing `.git` now tie at
-AT-7. A remote whose host has no dot (an SSH alias such as `gh-work`) or whose path has one segment loses the identity
-Fabric gives it today, so Fabric's clones over such aliases stop joining by remote. The product that holds two such Projects merges them
+the products' code). `contractVersion` stays `0.1.0`. Project counts move on adoption: plain folders a session starts in become Projects in
+Observatory (its scan already makes its data root's plain children Projects; Switchboard's are Fabric's, below), and
+subfolder starts merge into their repository's Project. Which stored Projects now tie at AT-7, and which clones lose
+an identity a product gives them today, is measured by running the `origin` vectors against that product's current
+normalizer: every case where the two differ moves. Examples: Fabric keeps a port, an scp query and a host without a
+dot (an SSH alias such as `gh-work`) in its key today, so clones over another port merge and clones over such an
+alias stop joining by remote; Switchboard keeps no group path, so its three-segment remotes gain an identity. The product that holds two such Projects merges them
 in its own store (D5) and reports the tie until then (DEC-0076 item 5). Sessions that a product attributed before can be
 refused after it adopts, among them a worktree or clone under a temporary root or right under home, a repository root
 whose Projects sit deeper, and in Fabric (which has no temporary, tool or subfolder tombstone refusal today) folders
