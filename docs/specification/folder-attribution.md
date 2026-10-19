@@ -27,7 +27,7 @@ and storage (each product writes only its own store, D5). This page decides whic
 | `home` | the user's home folder, the same form |
 | `tempRoots` | the platform's temporary and cache roots that exist: the OS temp dir, `/tmp`, `/private/tmp`, `/private/var/folders`, `/var/tmp`, `~/.cache`, `~/Library/Caches`, `~/AppData/Local/Temp` |
 | `git` | `null` for a folder outside Git; else `{toplevel, commonDir, mainCheckout, origin}`: `git rev-parse --show-toplevel`, the absolute `--git-common-dir`, the main checkout (the first entry of `git worktree list --porcelain`; for a bare repository, the common dir), and `remote.origin.url` or `null` |
-| `projects` | each Project as `{id, folders: [{path, commonDir, origin, toplevel}], sources}`: each folder's Git common dir, raw origin and Git top level (`null` outside Git), and `sources` the repository owners it lists, `host/owner` |
+| `projects` | each Project as `{id, folders: [{path, commonDir, origin, toplevel}], sources}`: each folder's Git common dir, raw origin and Git top level (`null` outside Git), and `sources` the repository owners it lists, `host/owner`, compared with `A` to `Z` folded as the identity is (a non-ASCII letter as written) and a trailing `/` ignored |
 | `work` | optional: `{project, commonDir, origin?}`, a coding agent of `project` changed the repository with this common dir (and this raw `origin`, when it has one) from inside that Project's folder |
 | `tombstones` | optional: folders a person or agent removed |
 | `containers` | optional: folders a person declared containers, such as the folder that holds agent worktrees: never a Project, never listed, never an ancestor a folder joins |
@@ -61,7 +61,8 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
 `normalizeOrigin(url)` is `host/path` with `A` to `Z` lower-cased (DEC-0089 item 2; a non-ASCII letter keeps its case), from a URL whose scheme is `http`, `https`,
 `ssh`, `git`, `git+ssh` or `git+https`, or from the scp form `[user@]host:path`. The user, a password or token, the port,
 a query, a fragment, the leading and trailing `/` and one trailing `.git` are dropped, and surrounding whitespace is
-trimmed. The host is a DNS name of letters, digits, `.` and `-` with a dot (so `git_host.example.com` has no identity, and
+trimmed. The host is a DNS name of ASCII letters, digits, `.` and `-` with a dot, after the same `A` to `Z` folding (so
+`git_host.example.com` has no identity, nor has a host with a non-ASCII letter such as the Kelvin sign U+212A, and
 an SSH alias such as `github.com-work` is an identity of its own), and the path has at least two segments: `owner/name`, or a group path such as `group/sub/name`. A local path, `file:`, any other scheme
 or anything else has no identity. The owner (`ownerOf`) is every segment but the last.
 
@@ -81,7 +82,7 @@ top), and the folder's place is its path below `git.toplevel`.
 
 | Row | Answer | When |
 |---|---|---|
-| AT-0 | `{fault: "input-invalid"}` | the snapshot is not of the schema's shape (a path not in the form above, a Project id or `explicit` of more than 256 characters, an empty source, an origin of more than 4096, all counted in code points; Git facts, or a Project folder's `toplevel`, that do not hold the folder; two Projects with one id; a work record with no `project` or no common dir), or `explicit` names no Project. A work record naming a Project the snapshot does not hold is no fault: it matches nothing |
+| AT-0 | `{fault: "input-invalid"}` | the snapshot is not of the schema's shape (a path not in the form above, a Project id or `explicit` of more than 256 characters, an empty source, an origin of more than 4096, all counted in code points; a work record with no `project` or no common dir), or it breaks a condition across members that the schema cannot state (Git facts, or a Project folder's `toplevel`, that do not hold the folder; two Projects with one id; `explicit` naming no Project). A work record naming a Project the snapshot does not hold is no fault: it matches nothing |
 | AT-1 | attached, `explicit` | `explicit` names a Project, whatever else holds: an explicit attach wins over a tombstone, and over a broad folder |
 | AT-2 | refused, `tombstoned` | the folder is at or under a tombstone, and no Project lists a folder strictly below that tombstone which holds the folder (so a folder attached explicitly below a removed parent stays attached, and its siblings stay out) |
 | AT-3 | attached, `folder` | a folder a Project lists, not broad, holds the folder: when one in the folder's own repository holds it (same common dir, else same identity), the nearest place among that repository's Project folders decides, as AT-6 and AT-7 do; else the nearest listed folder by path (the outer of two nested Projects keeps its folders outside the inner one; a folder right under home a Project lists is its folder) |
@@ -120,10 +121,16 @@ both, in the order of `projects`, and the product reports it rather than choosin
   keeps a new Project from starting at a tombstoned root; it does not keep out a worktree of a Project that keeps the
   repository (D2: "scoped to the folder, not to every clone"). A folder a Project lists below the tombstone is the
   Project's, so an explicit attach below a removed parent lasts.
-- **What follows from D2 against the operator's literal words**, recorded so the operator can correct them on the
-  board: a repository cloned inside a plain-folder Project is that Project's (AT-3), not a new one; a worktree of a known
-  repository under a temporary root is refused (AT-4), while its main checkout's own Project kept there works; a
-  repository right under home is refused (AT-5).
+- **What follows from D2 against the operator's literal words** (in the run index: a worktree or a branch goes to the
+  existing Project, a new folder makes a new one), recorded so the operator can correct them on the board. Six results:
+  - a repository cloned inside a plain-folder Project is that Project's (AT-3), not a new one;
+  - a worktree of a known repository under a temporary root is refused (AT-4), while its main checkout's own Project
+    kept there works;
+  - a worktree or clone of a known repository placed right under home is refused (AT-5), as a new repository there is;
+  - a worktree or clone at the root of a repository whose Projects all sit in its subfolders is refused (AT-9), not
+    joined to one of them;
+  - a new repository in a tool's own folder is refused (AT-11), not made a Project;
+  - a new repository whose root holds a plain-folder Project's folder is refused (AT-14), not made a Project.
 - **A tool's folder after the owner row (AT-11).** As Switchboard's SB-131: a tool's folder joins a known repository by
   worktree, repository or owner, but never by work and never as a new Project.
 
@@ -163,7 +170,11 @@ table, and each adopts by running the vectors; the rows below are the changes me
 the products' code). `contractVersion` stays `0.1.0`. Project counts move on adoption: plain folders become Projects in
 Switchboard and Observatory, subfolder starts merge into their repository's Project, and stored Projects that differ
 only in the case or depth of their remote's path now tie at AT-7. The product that holds two such Projects merges them
-in its own store (D5) and reports the tie until then (DEC-0076 item 5).
+in its own store (D5) and reports the tie until then (DEC-0076 item 5). Sessions that a product attributed before can be
+refused after it adopts: a worktree or clone under a temporary root or right under home, and a repository root whose
+Projects sit deeper. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
+([activity](activity.md)) and a service's usage `byProject` (FAC-SEM-025). A refused or tied session carries no
+`project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
 
 ## Who adopts it
 

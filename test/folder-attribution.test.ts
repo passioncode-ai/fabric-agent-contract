@@ -160,6 +160,12 @@ describe("totality: every function answers and never throws", () => {
     attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(2000).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] });
     expect(Date.now() - started).toBeLessThan(1000);
   });
+  it("reads tombstones in linear time: 10000 tombstones and 10000 Project folders answer within a second", () => {
+    const folders = [...Array(9999).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
+    const started = Date.now();
+    expect(attributeFolder({ folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(10000).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] })).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
   it("reads work records in linear time: 10000 Projects and 10000 records with ids of 256 astral characters answer within a second", () => {
     const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
     const projects = Array.from({ length: 10000 }, (_, n) => ({ id: id(n), folders: [], sources: [] }));

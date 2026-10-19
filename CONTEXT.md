@@ -458,9 +458,9 @@ under a new key (DEC-0087). The board's `outcome_unknown` is the same idea for a
 
 **Folder attribution**: Which Project a folder a coding agent works in belongs to, decided by one function over a
 snapshot of the facts (`attributeFolder`, the AT table, DEC-0089) that Fabric, Switchboard and Observatory all run; a
-tie attributes nothing ([folder attribution](docs/specification/attribution.md)).
+tie attributes nothing ([folder attribution](docs/specification/folder-attribution.md)).
 
-**Repository identity**: A remote's `host/path` in lower case, credentials and `.git` dropped (`normalizeOrigin`,
+**Repository identity**: A remote's `host/path` with `A` to `Z` lower-cased (a non-ASCII letter keeps its case), credentials and `.git` dropped (`normalizeOrigin`,
 DEC-0089): two clones with one identity are one repository, whatever their branch.
 
 **Intent key**: The idempotency key a caller derives from its intent `{agentId, capability, input, request?}`, a UUID of

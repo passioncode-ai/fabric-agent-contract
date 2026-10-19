@@ -5650,7 +5650,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-19
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
-- **Decision:** in [folder attribution](specification/attribution.md):
+- **Decision:** in [folder attribution](specification/folder-attribution.md):
   1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
      `tempRoots`, `git` or `null`, `projects` with each folder's `commonDir`, `origin` and `toplevel`, `work?`,
      `tombstones?`, `containers?`, `explicit?`; `folder-attribution.schema.json`), answering `attached` (with its rule),
@@ -5678,7 +5678,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and nothing else: after AT-6 or AT-7 the matched Project folder's place in this checkout, after AT-8, owner or work
      the checkout's top level, after `new` the root (its own top level, none for a bare repository), after `folder`
      nothing, after an explicit attach the folder (nothing for a broad one), removing a tombstone at the folder only
-     (attribution.md, *Recording the answer*; the vectors' `record` cases).
+     (folder-attribution.md, *Recording the answer*; the vectors' `record` cases).
   5. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
      `attributeFolder`'s.
 - **Choices made in implementation** (the run's D2 left them open):
@@ -5710,9 +5710,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     Git probe that fails is not `git: null`, and a folder whose top level is broad (home kept under Git) is passed as
     `git: null`;
   - `ambiguous` lists the Projects in the order of `projects`;
-  - three results of D2's order go against the operator's literal words and are recorded for the operator to correct
-    on the board: a repository cloned inside a plain-folder Project is that Project's, a worktree of a known repository
-    under a temporary root is refused, a repository right under home is refused;
+  - six results of D2's order go against the operator's literal words (a worktree or a branch goes to the existing
+    Project, a new folder makes a new one) and are recorded for the operator to correct on the board: a repository
+    cloned inside a plain-folder Project is that Project's (AT-3); a worktree of a known repository under a temporary
+    root is refused (AT-4); a worktree or clone of a known repository right under home is refused (AT-5), as a new
+    repository there is; a worktree or clone at the root of a repository whose Projects all sit in its subfolders is
+    refused (AT-9); a new repository in a tool's folder (AT-11), and one whose root holds a plain-folder Project's
+    folder (AT-14), are refused, not made Projects;
   - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
     Project, a tie or a refusal is shown.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across
@@ -5723,7 +5727,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** new; it refuses no document. Each product's own answers change where its rules differed.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
-  - spec: `docs/specification/attribution.md` (new), `docs/specification/identifiers.md` (the repository identity is
+  - spec: `docs/specification/folder-attribution.md` (new), `docs/specification/identifiers.md` (the repository identity is
     not DEC-0076's form), `docs/specification/conformance.md` (the attributing product's row; `FAC-SEM-121`; next free
     `FAC-SEM-122`);
   - schemas: `schemas/folder-attribution.schema.json` (new);

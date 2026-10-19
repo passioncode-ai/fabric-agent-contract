@@ -54,6 +54,14 @@
       "expected": null
     },
     {
+      "origin": "https://Kithub.com/example-org/fabric",
+      "expected": null
+    },
+    {
+      "origin": "git@GITHUB.KOM:example-org/fabric.git",
+      "expected": null
+    },
+    {
       "origin": "/local/path/repo",
       "expected": null
     },
@@ -1812,6 +1820,75 @@
           "project:a",
           "project:b"
         ]
+      }
+    },
+    {
+      "name": "AT-10: an owner with a non-ASCII letter, listed as written",
+      "snapshot": {
+        "folder": "/u/ana/work/app",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/app",
+          "commonDir": "/u/ana/work/app/.git",
+          "mainCheckout": "/u/ana/work/app",
+          "origin": "https://github.com/Über/app"
+        },
+        "projects": [
+          {
+            "id": "project:u",
+            "folders": [],
+            "sources": [
+              "GitHub.com/Über"
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:u",
+        "rule": "owner"
+      }
+    },
+    {
+      "name": "AT-15: an owner whose non-ASCII letter differs in case is another owner",
+      "snapshot": {
+        "folder": "/u/ana/work/app",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/app",
+          "commonDir": "/u/ana/work/app/.git",
+          "mainCheckout": "/u/ana/work/app",
+          "origin": "https://github.com/Über/app"
+        },
+        "projects": [
+          {
+            "id": "project:u",
+            "folders": [],
+            "sources": [
+              "github.com/über"
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/u/ana/work/app"
       }
     },
     {

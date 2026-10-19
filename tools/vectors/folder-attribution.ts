@@ -6,7 +6,7 @@
  *   tsx tools/vectors/folder-attribution.ts --write   write it
  *
  * Every vector change is made here and written by `--write`, never by hand; `test/folder-attribution.test.ts` runs the
- * check. Each expected answer is written below by hand from DEC-0089's items and attribution.md's AT table. Nothing here
+ * check. Each expected answer is written below by hand from DEC-0089's items and folder-attribution.md's AT table. Nothing here
  * imports `src/folder-attribution.ts`, so the gate checks that the reference returns what this file expects.
  */
 import { readFileSync, writeFileSync } from "node:fs";
@@ -40,6 +40,8 @@ function originCases(): Json[] {
     ok("git@github.com:/example-org/fabric.git", "github.com/example-org/fabric"),
     ok("https://github.com/Example-Org/\u00dcber-\u00c9cole", "github.com/example-org/\u00dcber-\u00c9cole"),
     no("https://git_host.example.com/example-org/fabric"),
+    no("https://\u212aithub.com/example-org/fabric"),
+    no("git@GITHUB.\u212aOM:example-org/fabric.git"),
     no("/local/path/repo"),
     no("../repo"),
     no("C:\\work\\repo"),
@@ -104,6 +106,8 @@ function attributionCases(): Json[] {
     ["AT-11: a plain folder in Library", snap({ folder: `${HOME}/Library/Application Support/tool` }), { outcome: "refused", reason: "tool" }],
     ["AT-10: a new repository of an owner a Project lists", snap({ folder: `${DATA}/site`, git: repoGit(`${DATA}/site`, "git@github.com:Example-Org/site.git") }), attached("project:fabric", "owner")],
     ["AT-10: an owner two Projects list: ambiguous", snap({ folder: `${DATA}/site`, git: repoGit(`${DATA}/site`, "git@github.com:o/site.git"), projects: [project("project:a", [], ["github.com/o"]), project("project:b", [], ["github.com/o/"])] }), { outcome: "ambiguous", rule: "owner", projects: ["project:a", "project:b"] }],
+    ["AT-10: an owner with a non-ASCII letter, listed as written", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://github.com/\u00dcber/app"), projects: [project("project:u", [], ["GitHub.com/\u00dcber"])] }), attached("project:u", "owner")],
+    ["AT-15: an owner whose non-ASCII letter differs in case is another owner", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://github.com/\u00dcber/app"), projects: [project("project:u", [], ["github.com/\u00fcber"])] }), { outcome: "new", root: `${DATA}/app` }],
     ["AT-10: an owner of a group path", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://gitlab.example.com/group/sub/app.git"), projects: [project("project:g", [], ["gitlab.example.com/group/sub"])] }), attached("project:g", "owner")],
     ["AT-12: a repository a Project's agent changed from inside the Project", snap({ folder: `${DATA}/lib`, git: repoGit(`${DATA}/lib`, "git@github.com:someone/lib.git"), work: [{ project: "project:notes", commonDir: `${DATA}/lib/.git` }] }), attached("project:notes", "work")],
     ["AT-12: work by two Projects: ambiguous", snap({ folder: `${DATA}/lib`, git: repoGit(`${DATA}/lib`, null), work: [{ project: "project:notes", commonDir: `${DATA}/lib/.git` }, { project: "project:fabric", commonDir: `${DATA}/lib/.git` }] }), { outcome: "ambiguous", rule: "work", projects: ["project:fabric", "project:notes"] }],
@@ -192,7 +196,7 @@ function attributionCases(): Json[] {
   return cases.map(([name, snapshot, expected]) => ({ name, snapshot, expected }));
 }
 
-/** What a product records after each answer (attribution.md, *Recording the answer*); `null` records nothing. */
+/** What a product records after each answer (folder-attribution.md, *Recording the answer*); `null` records nothing. */
 function recordCases(): Json[] {
   const rec = (p: string, commonDir: string | null, origin: string | null, toplevel: string | null) => ({ path: p, commonDir, origin, toplevel });
   const cases: Array<[string, Json, Json | null]> = [

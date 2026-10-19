@@ -1,11 +1,11 @@
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
 
-// #region folder-attribution, docs: docs/specification/attribution.md
+// #region folder-attribution, docs: docs/specification/folder-attribution.md
 /**
  * Folder attribution (DEC-0089, CT-57): which Project a folder a coding agent works in belongs to, decided once for
  * Fabric, Fabric Switchboard and Project Observatory. `attributeFolder` reads a snapshot of what a product knows (the
  * folder, its Git facts, the Projects with their folders and sources, the work records, the tombstones) and answers in
- * the order of attribution.md's AT table; it reads no file system, so every product gets the same answer from the same
+ * the order of folder-attribution.md's AT table; it reads no file system, so every product gets the same answer from the same
  * facts. Every function here answers and never throws: malformed input is an answer.
  */
 
@@ -79,7 +79,7 @@ export function normalizeOrigin(raw: unknown): string | undefined {
     host = String(scp[1]);
     path = String(String(scp[2]).split(/[?#]/)[0]);
   }
-  host = host.slice(host.lastIndexOf("@") + 1).replace(/:[0-9]*$/, "").toLowerCase();
+  host = asciiLower(host.slice(host.lastIndexOf("@") + 1).replace(/:[0-9]*$/, ""));
   path = asciiLower(trimSlashes(path, true));
   if (path.endsWith(".git")) path = path.slice(0, -4);
   const segments = path.split("/");
@@ -101,7 +101,7 @@ function inToolFolder(path: string, home: string): boolean {
   return first.startsWith(".") || first === "Library" || first === "AppData";
 }
 
-/** What a product records after an answer (attribution.md, *Recording the answer*): a folder of the attached Project. */
+/** What a product records after an answer (folder-attribution.md, *Recording the answer*): a folder of the attached Project. */
 export interface AttributionRecord {
   path: string;
   commonDir: string | null;
@@ -157,7 +157,7 @@ function projectsOf(value: unknown): Project[] | undefined {
       if (toplevel !== undefined && toplevel !== null && !(isPath(toplevel) && under(path, toplevel))) return undefined;
       parsed.push({ path, commonDir: isString(commonDir) ? commonDir : undefined, origin, rel: isString(toplevel) ? relativeTo(path, toplevel) : "" });
     }
-    projects.push({ id, folders: parsed, sources: sources.map((source) => trimSlashes((source as string).toLowerCase(), false)) });
+    projects.push({ id, folders: parsed, sources: sources.map((source) => trimSlashes(asciiLower(source as string), false)) });
   }
   return new Set(projects.map((project) => project.id)).size === projects.length ? projects : undefined;
 }
@@ -195,7 +195,7 @@ function decide(matches: Project[], rule: AttributionRule): Extract<Attribution,
 }
 
 /**
- * The Project of one folder (DEC-0089 item 1), in the order of attribution.md's AT table. `snapshot` is
+ * The Project of one folder (DEC-0089 item 1), in the order of folder-attribution.md's AT table. `snapshot` is
  * `{folder, home, tempRoots, git, projects, work?, tombstones?, containers?, explicit?}`:
  *
  * - AT-0: a snapshot that is not of the schema's shape, or `explicit` naming no Project: `{fault: "input-invalid"}`;
@@ -289,8 +289,12 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   const sameIdentity = (entry: ProjectFolder) => repository !== undefined && !broad(entry.path) && repositoryOf(entry) === repository;
   const sameRepository = (entry: ProjectFolder) => sameCommon(entry) || sameIdentity(entry);
   const anyFolder = (test: (entry: ProjectFolder) => boolean) => projects.some((project) => project.folders.some(test));
-  // AT-2: a tombstone keeps out its folder, unless a Project lists a folder below the tombstone that holds this one.
-  const stoned = tombstones.some((stone) => under(folder, stone as string) && !anyFolder((entry) => entry.path !== stone && under(entry.path, stone as string) && under(folder, entry.path)));
+  // AT-2: a tombstone keeps out its folder, unless a Project lists a folder below the tombstone that holds this one. The
+  // listed folders that hold the folder are a chain of its ancestors, so one is below a tombstone exactly when the deepest
+  // is: one pass over the folders, then one over the tombstones.
+  let deepest: string | undefined;
+  for (const project of projects) for (const entry of project.folders) if (under(folder, entry.path) && (deepest === undefined || entry.path.length > deepest.length)) deepest = entry.path;
+  const stoned = tombstones.some((stone) => under(folder, stone as string) && !(deepest !== undefined && deepest !== stone && under(deepest, stone as string)));
   if (stoned) return at(2, { outcome: "refused", reason: "tombstoned" });
   // AT-3: a Project folder holds the folder; one of the folder's own repository decides by place.
   for (const same of [sameCommon, sameIdentity]) {

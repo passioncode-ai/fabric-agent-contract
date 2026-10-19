@@ -19,7 +19,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   containers, POSIX and Windows paths.
 - Fixtures: positive `folder-attribution-snapshot`, negative `folder-attribution-relative-folder`, semantic
   `folder-attribution-ok`, `-new-for-worktree`, `-work-by-origin` and `-explicit-over-tombstone`.
-- Docs: `docs/specification/attribution.md` (new); identifiers.md (the repository identity is not DEC-0076's form);
+- Docs: `docs/specification/folder-attribution.md` (new); identifiers.md (the repository identity is not DEC-0076's form);
   conformance (the attributing product's row, `FAC-SEM-121`, next free `FAC-SEM-122`); CONTEXT, DOCMAP, README; DEC-0089;
   CT-57 with each product's duty.
 

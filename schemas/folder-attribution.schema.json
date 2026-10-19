@@ -112,7 +112,7 @@
             "minLength": 1,
             "maxLength": 4096
           },
-          "description": "Repository owners the Project lists as its sources, host/owner (case and a trailing / ignored)."
+          "description": "Repository owners the Project lists as its sources, host/owner (A to Z compared in either case, a non-ASCII letter as written; a trailing / ignored)."
         }
       }
     },
@@ -319,7 +319,7 @@
         "origin",
         "toplevel"
       ],
-      "description": "What a product records after an answer (attribution.md, Recording the answer): a folder of the attached or new Project; explainFolder's record.",
+      "description": "What a product records after an answer (folder-attribution.md, Recording the answer): a folder of the attached or new Project; explainFolder's record.",
       "properties": {
         "path": {
           "$ref": "#/$defs/path"
