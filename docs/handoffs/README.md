@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-18 share registrations and the grant's context on grant.usage](2026-10-18-share-registration.md) | DEC-0086 (CT-56; `FAC-SEM-117`, `FAC-SEM-118`) | open, branch `agent/ct56-share-registration-20261018`; gate on `45cd007` |
+| [2026-10-18 share registrations and the grant's context on grant.usage](2026-10-18-share-registration.md) | DEC-0086 (CT-56; `FAC-SEM-117`, `FAC-SEM-118`) | merged, #117 `b89cb94` |
 | [2026-10-17 entitlements for the organization offer](2026-10-17-entitlement.md) | DEC-0085 (CT-54; `FAC-SEM-115`, `FAC-SEM-116`) | merged, #116 `292194d` |
 | [2026-10-15 the estate ceremonies](2026-10-15-estate-ceremonies.md) | DEC-0084 (CT-53; `FAC-SEM-113`, `FAC-SEM-114`) | merged, #113 `1531f21` |
 | [2026-10-15 a lane that reads user content runs on an open-vendor model](2026-10-15-open-vendor-user-content.md) | DEC-0083 (CT-52; `FAC-SEM-112`) | merged, #111 `a3e330f` |
