@@ -1,0 +1,72 @@
+{
+  "claude-code": {
+    "skip": {
+      "argv": [
+        "--dangerously-skip-permissions"
+      ]
+    },
+    "source": "https://code.claude.com/docs/en/cli-reference"
+  },
+  "codex": {
+    "skip": {
+      "argv": [
+        "--dangerously-bypass-approvals-and-sandbox"
+      ]
+    },
+    "measured": {
+      "argv": [
+        "codex",
+        "--help"
+      ],
+      "version": "codex-cli 0.163.0",
+      "date": "2026-10-19"
+    }
+  },
+  "gemini-cli": {
+    "skip": {
+      "argv": [
+        "--approval-mode",
+        "yolo"
+      ]
+    },
+    "measured": {
+      "argv": [
+        "gemini",
+        "--help"
+      ],
+      "version": "0.63.0",
+      "date": "2026-10-19"
+    }
+  },
+  "cline": {
+    "skip": {
+      "argv": [
+        "--auto-approve",
+        "true"
+      ]
+    },
+    "measured": {
+      "argv": [
+        "cline",
+        "--help"
+      ],
+      "version": "3.0.73",
+      "date": "2026-10-19"
+    }
+  },
+  "cursor-cli": {
+    "skip": {
+      "argv": [
+        "--force"
+      ]
+    },
+    "measured": {
+      "argv": [
+        "agent",
+        "--help"
+      ],
+      "version": "2026.09.02-c22c1a3",
+      "date": "2026-10-19"
+    }
+  }
+}
