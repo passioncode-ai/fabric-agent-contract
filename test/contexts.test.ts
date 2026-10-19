@@ -183,6 +183,29 @@ describe("FAC-SEM-111: an organization's instance runs under its context's share
   });
 });
 
+describe("a partner's publisher key, trusted per context (DEC-0090, FAC-SEM-122)", () => {
+  const partner = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/semantic/estate-partner-key-ok.json"), "utf8")).input;
+  const SETUP = "urn:fabric:agent:acme:setup-desk";
+  const key = partner.publisherKeys.find((entry: { kid: string }) => entry.kid === "partner-acme-2026");
+  it("hands the key for a placement in its scope's context", () => {
+    expect(placementTrust(partner, "m-4c1e", SETUP, ORG_A)?.publisher).toEqual([key]);
+  });
+  it("hands no key for the same placement read in another record's context, nor for an unscoped key's placement", () => {
+    const moved = structuredClone(partner);
+    moved.machines[0].packages[3].context = ORG_B;
+    expect(placementTrust(moved, "m-4c1e", SETUP, ORG_B)?.publisher).toEqual([]);
+    expect(placementTrust(partner, "m-4c1e", AGENT, ORG_A)?.publisher).toEqual([partner.publisherKeys[0]]);
+  });
+  it("refuses an installation under the key outside its scope", () => {
+    const moved = structuredClone(partner);
+    moved.machines[0].packages[3].context = ORG_B;
+    moved.machines[0].packages[3].grant = moved.shareGrants.find((g: { context?: string }) => g.context === ORG_B).meta.id;
+    const pkg = { agentRef: SETUP };
+    expect(codes("estate-placement", { record: moved, machine: "m-4c1e", package: pkg, context: ORG_B })).toContain("FAC-SEM-122");
+    expect(codes("estate-placement", { record: partner, machine: "m-4c1e", package: pkg, context: ORG_A })).not.toContain("FAC-SEM-122");
+  });
+});
+
 describe("estate-placement and placementTrust take the context (DEC-0082)", () => {
   it("default to personal, so an existing caller is unchanged", () => {
     expect(placementTrust(contexts, "m-4c1e", AGENT)).toEqual(placementTrust(first, "m-4c1e", AGENT));
