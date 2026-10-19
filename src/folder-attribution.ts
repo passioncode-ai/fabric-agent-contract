@@ -113,11 +113,12 @@ export function recordOrigin(origin: string | null): string | null {
     // reliably (a password holding `/`, `?` or `#`): nothing of it is kept.
     if (normalizeOrigin(value) === undefined) return null;
     const rest = String(value.slice(scheme[0].length).split(/[?#]/)[0]);
+    // A URL with an identity has a path, so its authority ends at the first `/`.
     const slash = rest.indexOf("/");
-    const authority = slash < 0 ? rest : rest.slice(0, slash);
+    const authority = rest.slice(0, slash);
     const at = authority.lastIndexOf("@");
     const user = at < 0 || /http/i.test(String(scheme[1])) ? "" : userOf(authority.slice(0, at));
-    value = `${scheme[0]}${user === "" ? "" : `${user}@`}${authority.slice(at + 1)}${slash < 0 ? "" : rest.slice(slash)}`;
+    value = `${scheme[0]}${user === "" ? "" : `${user}@`}${authority.slice(at + 1)}${rest.slice(slash)}`;
   } else if (!(value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || value.startsWith("."))) {
     const scp = /^(?:([^@/\s]+)@)?([^:/\s]+):([^\s]+)$/.exec(value);
     // The host ends the user information at its last `@`, as normalizeOrigin reads it, so no part of a password is kept.
