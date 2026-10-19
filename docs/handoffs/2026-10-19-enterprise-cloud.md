@@ -17,13 +17,15 @@ reference verifier refused any product but `org-cloud` and `personal-cloud`. Row
   personal `enterprise-cloud` and for an unknown product. Fixtures: positive `entitlement-enterprise-cloud`, negative
   `entitlement-unknown-hosting-product`, semantic `entitlement-personal-enterprise-cloud`; the existing
   `entitlement-org-personal-cloud` now fails on `enum`.
-- Spec: `docs/specification/entitlement.md` (the field table, EN-2, `FAC-SEM-115`, *Enterprise cloud*, *Not decided
-  here*); DEC-0088; CT-59.
+- Spec: `docs/specification/entitlement.md` (the field table, EN-2, `FAC-SEM-115`, *Enterprise cloud*, the issuer's
+  duties, *Not decided here*), `docs/specification/conformance.md` (the issuer row); DEC-0088; CT-59.
 
 ## Decisions
 
-DEC-0088: `size` stays opaque and nothing else is added (the service level is `support.tier`, the dedication is the
-product; a region waits until a verifier must check it).
+DEC-0088: `size` stays opaque and nothing else is added. The dedication is the product; a service level (SLA) and a
+region are the order's until a verifier must check them; `support.tier` keeps its DEC-0085 meaning (what the
+organization's admin agents may do), so no service level is written there. The issuer sends `enterprise-cloud` only to a
+verifier whose owner confirmed its re-vendor on thread `c7d8f53d`.
 
 ## Plants
 
@@ -44,7 +46,7 @@ retro counts readings in one unit.
 
 ## Checks
 
-`pnpm run check`, each step exiting 0: typecheck; 76 files, 5772 tests; UX lint passed; documentation checks passed,
+`pnpm run check`, each step exiting 0: typecheck; 76 files, 5773 tests; UX lint passed; documentation checks passed,
 lint-md 0 errors; privacy-check 0 findings, run after the commit as well (the retro's learning of 2026-10-19).
 
 ## Next task
