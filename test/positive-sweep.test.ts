@@ -45,6 +45,7 @@ export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "secret-envelope.schema.json": "secret-envelope",
   "service-descriptor.schema.json": "service-descriptor",
   "service-usage.schema.json": "service-usage",
+  "support-quality-daily.schema.json": "support-quality-daily",
   "service-well-known.schema.json": "service-well-known",
   "session-handoff.schema.json": "session-handoff",
   "settings-backup.schema.json": "settings-backup",

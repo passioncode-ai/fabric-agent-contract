@@ -53,6 +53,7 @@ export default defineConfig({
         "src/share-registration.ts": { branches: 100 },
         "src/job-limits.ts": { branches: 100 },
         "src/folder-attribution.ts": { branches: 100 },
+        "src/support-quality-rules.ts": { branches: 100 },
         "src/schema-closure.ts": { branches: 100 },
         "src/signing-challenges.ts": { branches: 100 },
         "src/protocol-revisions.ts": { branches: 100 },
