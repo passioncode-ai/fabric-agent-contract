@@ -65,8 +65,11 @@ function carried(value: unknown, up = false): string | undefined {
   if (!isString(value) || !Number.isFinite(strictTime(value))) return undefined;
   if (!SUB_MILLISECOND.test(value)) return value;
   // Cutting the fraction to three digits floors the instant; a non-zero digit cut away moves a start up by 1 ms.
-  const cut = value.replace(/(\.[0-9]{3})([0-9]+)/, "$1");
-  const extra = up && /[1-9]/.test(/\.[0-9]{3}([0-9]+)/.exec(value)?.[1] ?? "") ? 1 : 0;
+  let extra = 0;
+  const cut = value.replace(/(\.[0-9]{3})([0-9]+)/, (_, kept: string, rest: string) => {
+    if (up && /[1-9]/.test(rest)) extra = 1;
+    return kept;
+  });
   return new Date(strictTime(cut) + extra).toISOString();
 }
 /** A grant's or a revocation's time as milliseconds, any number of fraction digits floored, or NaN. */
