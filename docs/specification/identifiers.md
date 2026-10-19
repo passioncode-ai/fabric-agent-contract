@@ -128,6 +128,11 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   grant's `context` against a placement's (`FAC-SEM-111`), a session's or a grant's against an enrollment's `org.id`
   (`routeTarget`, `routeGrantUsage`): never case-folded or by prefix; the pattern admits no upper-case prefix and no `%`,
   so every valid value is already its normal form and the two comparisons agree;
+- share grant ids (`common.schema.json#/$defs/shareGrantId`: `urn:fabric:share:` and 32 lower-case hex digits;
+  [share registration](share-registration.md#the-share-grant-id), DEC-0086), a registration's `grantId` against what a
+  receiver holds and a `grant.usage`'s against a registration's: the pattern admits only its own normal form (`urn` and
+  the NID lower-case, the NSS lower-case hex), so a share grant id is its own normal form and comparing it as written
+  agrees with `FAC-SEM-039`'s and `FAC-SEM-111`'s comparison by normal form;
 - a board finding's `affects` items (`FAC-SEM-108`, DEC-0080): a backlog row's `repository`, `path` and `id`, whose
   patterns admit no `:`, so none is a URI; a task's id, an opaque id of the host's task (DEC-0041's grammar); and its
   `dedupeKey`, a key like the idempotency key, not an identifier;

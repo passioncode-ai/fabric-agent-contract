@@ -182,8 +182,8 @@ vocabulary: `personal_account_in_work_folder`, `unknown_account`, `personal_key_
 day's violations after the day ends, so the stream position tells no more than the day.
 
 **`grant.usage`** — one grant's metered usage for one **UTC day** (DEC-0082, [contexts](contexts.md#usage-per-grant)).
-`data`: `day`, `grantId` (the grant's `meta.id`, a URI of 1–256 characters with no `#`, compared by normal form,
-DEC-0076), `calls` (at least 1),
+`data`: `day`, `grantId` (the share grant's `meta.id`, `urn:fabric:share:` and 32 lower-case hex digits, compared as
+written, DEC-0086), `context` (the grant's own `org:<orgId>`, DEC-0086), `calls` (at least 1),
 `unpricedCalls` (never more than `calls`) and `costUsd`, a number of at least 0 or `null` when no call was priced — an
 unknown cost is `null`, never `0` (`FAC-SEM-038`). Like `policy.violation` it carries a day and no finer time:
 `occurred` is that day's midnight UTC (`FAC-SEM-039`), `monotonicNs` is `"0"`, and it carries no `session`, `user`,
@@ -193,9 +193,12 @@ settled grant-check receipts (DEC-0037), each counted once and assigned to the U
 when it lists `receipts`, the meter holds none of them and the report's `days` hold one date; otherwise it is not used,
 and the collector reports what the meter holds ([contexts](contexts.md#usage-per-grant)). It holds sums and states only, never a per-call
 line, because usage under a share grant is data about a person (CX-VES-08). A collector emits it after the day ends, one
-per (day, `grantId`) per stream (`FAC-SEM-039` refuses a second in one batch, the ids compared by normal form), and
+per (day, `grantId`) per stream (`FAC-SEM-039` refuses a second in one batch, the ids compared by normal form; a share grant id is its own normal form, so the two comparisons agree), and
 sends it only to the organization server of the grant's own context ([routing](contexts.md#routing),
-`routeGrantUsage`). A receiver counts the first per (stream, day, `grantId`) and ignores later ones.
+`routeGrantUsage`). A receiver counts the first per (stream, day, `grantId`) and ignores later ones. It rejects one whose
+`context` is not `org:` and its certificate's `org.id` as `attribution` (`FAC-SEM-045`), and joins it to an agent by the
+share registration it holds for the device's bound user ([share registration](share-registration.md#the-join),
+DEC-0086). A collector sends one only behind the sender gate there.
 
 **`result`** — a run met, or did not meet, the result signal its agent declares (DEC-0052, the first
 organization server's target architecture v4 §12). It requires `run.root`, and carries **no `user` and no
@@ -242,7 +245,8 @@ It MUST NOT interpret the event's `data`. A new core kind is therefore an additi
 from the device certificate ([attribution](devices.md#attribution)), and a context field could leak `personal` or
 another organization's id. A collector sends a session's events only to the organization server of the one enrollment
 whose organization is the session's `org:<orgId>`, compared as written, and never an event of a `personal` session
-(`routeTarget`); it sends `grant.usage` by the grant's own context (`routeGrantUsage`); and the device sends each
+(`routeTarget`); it sends `grant.usage` by the grant's own context (`routeGrantUsage`), which the event carries
+(DEC-0086); and the device sends each
 enrollment's check-ins to that enrollment's server ([devices → check-in](devices.md#check-in)). The shared vectors are
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json) ([contexts → routing](contexts.md#routing)).
 

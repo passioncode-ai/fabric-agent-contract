@@ -233,17 +233,29 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
     const branch = (telemetry.allOf as Json[]).find((entry) => entry.if?.properties?.kind?.const === "grant.usage") as Json;
     for (const member of ["user", "session", "run", "task", "git", "skill", "launch"]) expect(branch.then.properties[member], member).toBe(false);
     expect(branch.then.properties.monotonicNs).toEqual({ const: "0" });
-    expect(Object.keys(telemetry.$defs.grantUsage.properties).sort()).toEqual(["calls", "costUsd", "day", "grantId", "unpricedCalls"]);
-    expect(telemetry.$defs.grantUsage.properties.grantId).toMatchObject({ format: "uri", minLength: 1, maxLength: 256 });
+    expect(Object.keys(telemetry.$defs.grantUsage.properties).sort()).toEqual(["calls", "context", "costUsd", "day", "grantId", "unpricedCalls"]);
+    // DEC-0086: the grant's own context is required, and the id is a share grant's.
+    expect(telemetry.$defs.grantUsage.required).toEqual(["day", "grantId", "context", "calls", "unpricedCalls", "costUsd"]);
+    expect(telemetry.$defs.grantUsage.properties.grantId.$ref).toBe("common.schema.json#/$defs/shareGrantId");
+    expect(telemetry.$defs.grantUsage.properties.context.$ref).toBe("common.schema.json#/$defs/orgContextId");
     expect(valid(usage, "telemetry-event.schema.json")).toBe(true);
     expect(codes("telemetry-event", usage)).toEqual([]);
   });
 
-  it("holds the grant id's bounds: a URI of 1 to 256 characters, never 0 or 257", () => {
+  it("names a share grant by its id, urn:fabric:share: and 32 lower-case hex digits, as written (DEC-0086)", () => {
     const withId = (grantId: string) => valid({ ...usage, data: { ...usage.data, grantId } }, "telemetry-event.schema.json");
-    expect([withId("u:g"), withId(`urn:g:${"g".repeat(250)}`), withId(""), withId(`urn:g:${"g".repeat(251)}`), withId("not a uri")]).toEqual([true, true, false, false, false]);
+    const id = "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8";
+    expect(usage.data.grantId).toBe(id);
+    expect([withId(id), withId(id.toUpperCase()), withId(`URN:fabric:share:${id.slice(17)}`), withId("urn:grant:estate:share-inbox-digest-org-a"), withId(""), withId("not a uri")]).toEqual([true, false, false, false, false, false]);
     // grantId is the grant's meta.id, which carries no revision: a reference's #<revision> is never part of it.
-    expect([withId("urn:grant:x#1"), withId("urn:grant:x#"), withId("https://h/grants/x")]).toEqual([false, false, true]);
+    expect([withId(`${id}#1`), withId(`${id}#`), withId(`urn:fabric:share:${"0".repeat(32)}`)]).toEqual([false, false, false]);
+  });
+
+  it("carries the grant's own context, an organization's, never personal and never absent (DEC-0086)", () => {
+    const withContext = (context: unknown) => valid({ ...usage, data: { ...usage.data, context } }, "telemetry-event.schema.json");
+    const { context: _context, ...withoutContext } = usage.data;
+    expect([withContext("org:org_7kq2m4xw"), withContext("personal"), withContext("org:"), withContext("ORG:org_7kq2m4xw")]).toEqual([true, false, false, false]);
+    expect(valid({ ...usage, data: withoutContext }, "telemetry-event.schema.json")).toBe(false);
   });
 
   it("carries a cost that is null exactly when no call was priced, never more unpriced calls than calls (FAC-SEM-038)", () => {
@@ -265,6 +277,15 @@ describe("grant.usage: one grant's usage for one UTC day (DEC-0082)", () => {
     const otherStream = { ...batch, events: [batch.events[0], { ...batch.events[1], collector: { id: "other-collector", epoch: 1 }, seq: 1 }] };
     expect(at("activity-batch", otherStream, "FAC-SEM-039")).toEqual([]);
     expect(at("telemetry-event", { ...usage, occurred: "2026-10-11T00:00:00Z" }, "FAC-SEM-039")).toEqual(["/occurred"]);
+  });
+
+  it("still counts two spellings of one grant id as one grant, though the schema now admits only the normal form (DEC-0076, DEC-0086)", () => {
+    // Before DEC-0086 this was the fixture activity-batch-grant-usage-twice-spelled.json; a share grant id admits only
+    // its own normal form, so the second spelling is no longer schema-valid, and the rule keeps its verdict on it.
+    const batch = load("semantic/activity-batch-grant-usage-twice.json").input;
+    const respelled = { ...batch, events: [batch.events[0], { ...batch.events[1], data: { ...batch.events[1].data, grantId: "URN:FABRIC:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8" } }] };
+    expect(at("activity-batch", respelled, "FAC-SEM-039")).toEqual(["/events/1/data/grantId"]);
+    expect(valid(respelled.events[1], "telemetry-event.schema.json")).toBe(false);
   });
 
   it("reads to a receiver pinned before DEC-0082 as an unknown kind's data exactly when its grantId satisfies extScalar's string branch", () => {

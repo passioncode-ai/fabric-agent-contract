@@ -6,7 +6,7 @@ import { isValidP256Key, p256Jwk } from "./p256.js";
 /**
  * The device transport binding (DEC-0056): HTTP message signatures, a subset of RFC 9421, beside mutual TLS for
  * `fabric-device/0.1` and `fabric-activity/0.1`. A host that terminates TLS never sees a client certificate, so a
- * device proves its key by signing every batch, check-in and rotation request: label `fabric-device`, covered
+ * device proves its key by signing every batch, check-in, rotation and share-registration request (DEC-0086): label `fabric-device`, covered
  * components `@method`, `@target-uri` and `content-digest` (RFC 9530, SHA-256 of the body), parameters
  * `created;nonce;keyid;alg` in that order, `keyid` the certificate serial, `alg` the device's `#sig` key's.
  *

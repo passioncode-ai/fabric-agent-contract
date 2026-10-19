@@ -1,0 +1,41 @@
+{
+  "description": "The receiver answers SR-4 as the reference: a certificate org.id that differs only in case (FAC-SEM-118).",
+  "kind": "share-registration-intake",
+  "expect": [],
+  "input": {
+    "held": [],
+    "registration": {
+      "type": "share-registration/1",
+      "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+      "context": "org:org_7kq2m4xw",
+      "state": "active",
+      "grantRevision": 3,
+      "agentRef": "urn:fabric:agent:example:inbox-digest",
+      "startsAt": "2026-10-12T08:00:00Z",
+      "expiresAt": "2026-10-26T08:00:00Z"
+    },
+    "binding": {
+      "transport": {
+        "ok": true
+      },
+      "org": {
+        "id": "Org_7kq2m4xw"
+      },
+      "device": {
+        "id": "dev-01j9a"
+      },
+      "user": {
+        "id": "m-4821"
+      }
+    },
+    "answer": {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "wrong-organization",
+          "message": "the registration's context is not this certificate's organization"
+        }
+      }
+    }
+  }
+}

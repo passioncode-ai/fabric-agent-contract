@@ -1,0 +1,6 @@
+{
+  "type": "share-registration-receipt/1",
+  "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+  "state": "registered",
+  "digest": "sha256:d431ae1fff886e40b43f7a5e15a00cb2e931fa8fd1544a0f7b38324076c1ff0b"
+}

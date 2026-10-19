@@ -617,6 +617,7 @@
       "required": [
         "day",
         "grantId",
+        "context",
         "calls",
         "unpricedCalls",
         "costUsd"
@@ -627,12 +628,12 @@
           "description": "The UTC day the usage was metered on, never a time (DEC-0082): the event's occurred is that day's midnight and its monotonicNs is 0."
         },
         "grantId": {
-          "type": "string",
-          "format": "uri",
-          "pattern": "^[^#]+$",
-          "minLength": 1,
-          "maxLength": 256,
-          "description": "The grant the usage was metered under: its meta.id, which carries no revision, so no # (the collector drops a grant reference's #<revision> by taking the receipt's grant meta.id), compared by normal form (DEC-0076), so one grant revised mid-day is one row. The collector on the issuer's own device derives it from the grant-check receipts its meter settled; the organization server joins it to the share grant it holds. Hosts keep grant ids within 256 characters; a longer one reports no grant.usage."
+          "$ref": "common.schema.json#/$defs/shareGrantId",
+          "description": "The share grant the usage was metered under: its meta.id, urn:fabric:share: and 32 lower-case hex digits (DEC-0086, FAC-SEM-117), which carries no revision, so one grant revised mid-day is one row. Compared as written: the pattern admits only its own normal form (DEC-0076). The collector on the issuer's own device derives it from the grant-check receipts its meter settled; the organization server joins it to the share registration it holds for the device's bound user (joinGrantUsage). A grant whose meta.id is of another form reports no grant.usage."
+        },
+        "context": {
+          "$ref": "common.schema.json#/$defs/orgContextId",
+          "description": "DEC-0086: the grant's own context, org:<orgId>, the value the collector passed to routeGrantUsage. The receiver refuses an event whose context is not org: and its certificate's org.id as written, as an attribution rejection (FAC-SEM-045)."
         },
         "calls": {
           "type": "integer",

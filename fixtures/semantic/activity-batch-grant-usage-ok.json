@@ -25,7 +25,8 @@
         "monotonicNs": "0",
         "data": {
           "day": "2026-10-12",
-          "grantId": "urn:grant:estate:share-inbox-digest-org-a",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "context": "org:org_7kq2m4xw",
           "calls": 12,
           "unpricedCalls": 2,
           "costUsd": 0.84
@@ -46,7 +47,8 @@
         "monotonicNs": "0",
         "data": {
           "day": "2026-10-12",
-          "grantId": "urn:grant:estate:share-inbox-digest-org-b",
+          "grantId": "urn:fabric:share:8b1e4d7a2c9f05e3b6a17d40c2e9f851",
+          "context": "org:org_3fh9p1zc",
           "calls": 1,
           "unpricedCalls": 0,
           "costUsd": 0.05

@@ -94,7 +94,7 @@ context names it, so nothing of a context is routed to it.
 
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment
-(`FAC-SEM-044`). Every later request — batches, check-ins and rotation — is made over mutual TLS with it and carries an
+(`FAC-SEM-044`). Every later request (batches, check-ins, rotation and share registrations) is made over mutual TLS with it and carries an
 HTTP message signature made with the device's key, which a receiver behind a host that terminates TLS verifies instead
 ([transport](#transport), DEC-0056).
 
@@ -152,7 +152,7 @@ passes the small-order check (DEC-0045).
 
 DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A host
 that terminates TLS — a platform's load balancer — never sees a client certificate, so mutual TLS alone cannot prove
-the device's key there. **A device signs every batch, check-in and rotation request with an HTTP message signature**
+the device's key there. **A device signs every batch, check-in, rotation and share-registration request with an HTTP message signature**
 ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. Enrollment is
 unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
 
@@ -264,7 +264,9 @@ that enrollment (`org`, `device`, `user` when one was bound). For a batch or a c
 - `device.id` in the body MUST equal the certificate's device;
 - every event's `user.id` MUST equal the user bound to **the event's epoch**, or be absent when that
   epoch was issued with no user;
-- an event of an epoch with no recorded binding for this device is refused.
+- an event of an epoch with no recorded binding for this device is refused;
+- a `grant.usage`'s `data.context` MUST be `org:` followed by the certificate's `org.id` as written: it is the grant's
+  own context (DEC-0086), and another organization's usage, or one whose context differs only in case, is refused.
 
 So when a device is re-enrolled to another person:
 
@@ -470,6 +472,8 @@ the one its certificate binds ([attribution](#attribution)). A check-in has no s
 it. A session's events go where `routeTarget` answers, and a grant's daily usage where `routeGrantUsage` answers
 (`src/context-route.ts`, the shared vectors
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json), [contexts](contexts.md#routing)).
+Share registrations go to each enrollment's own server, signed as its other requests are
+([share registration](share-registration.md#transport), DEC-0086).
 Until a key per context exists (CX-CON-06), the device shows both organizations the same device key and reports the same
 `records` to each, so the two can link it ([contexts → linkability](contexts.md#linkability)).
 
@@ -546,7 +550,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers — lock first, then the user's value, then the highest default, then the contract's default for an unset key — with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
 | `FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | `FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
-| `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused |
+| `FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused; a `grant.usage`'s `data.context` is `org:` and the certificate's `org.id`, as written (DEC-0086) |
 | `FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |

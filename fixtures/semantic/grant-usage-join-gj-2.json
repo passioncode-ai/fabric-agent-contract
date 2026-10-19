@@ -1,0 +1,54 @@
+{
+  "description": "The receiver joins as the reference: no user bound to the epoch (FAC-SEM-118).",
+  "kind": "grant-usage-join",
+  "expect": [],
+  "input": {
+    "event": {
+      "protocol": "fabric-activity/0.1",
+      "eventId": "01K7GV0A1B2C3D4E5F6G7H8J9K",
+      "kind": "grant.usage",
+      "source": "meter",
+      "collector": {
+        "id": "observatory-node",
+        "epoch": 3
+      },
+      "seq": 41,
+      "occurred": "2026-10-15T00:00:00Z",
+      "bootId": "boot-7c41e2",
+      "monotonicNs": "0",
+      "data": {
+        "day": "2026-10-15",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "context": "org:org_7kq2m4xw",
+        "calls": 12,
+        "unpricedCalls": 2,
+        "costUsd": 0.84
+      }
+    },
+    "binding": {
+      "org": {
+        "id": "org_7kq2m4xw"
+      },
+      "device": {
+        "id": "dev-01j9a"
+      }
+    },
+    "registrations": [
+      {
+        "user": "m-4821",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "state": "active",
+        "grantRevision": 3,
+        "agentRef": "urn:fabric:agent:example:inbox-digest",
+        "startsAt": "2026-10-12T08:00:00Z",
+        "expiresAt": "2026-10-26T08:00:00Z",
+        "digest": "sha256:d431ae1fff886e40b43f7a5e15a00cb2e931fa8fd1544a0f7b38324076c1ff0b"
+      }
+    ],
+    "answer": {
+      "outcome": "stored",
+      "joined": false,
+      "reason": "unassigned-device"
+    }
+  }
+}

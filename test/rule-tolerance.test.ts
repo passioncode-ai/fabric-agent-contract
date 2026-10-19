@@ -13,7 +13,7 @@ const KINDS = [
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
   "revocation-delta", "heartbeat", "delta-freshness", "delta-reconciliation",
   "service-well-known", "service-lock-outcome", "windows-token-file", "delegation-hub-key", "service-descriptor", "service-runner", "service-peer-request",
-  "window-lease", "window-lease-division", "lease-reservation", "entitlement", "entitlement-key-set", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "local-channel-session", "session-join", "service-events-page", "proposal", "proposal-transition", "proposal-submit", "learning-rollout",
+  "window-lease", "window-lease-division", "lease-reservation", "entitlement", "entitlement-key-set", "org-share-grants", "share-registration", "share-registration-derive", "share-registration-intake", "grant-usage-join", "signing-credential", "openrouter-attribution", "protocols", "device-check-in", "local-channel-session", "session-join", "service-events-page", "proposal", "proposal-transition", "proposal-submit", "learning-rollout",
   "result", "learning", "promotion", "versioned-setting", "grant-window", "roles",
   // The kinds whose rules compare identifiers by normal form (DEC-0076).
   "execution-bundle", "service-usage", "runner-route", "route-bundle", "route-event", "provider-observation",
@@ -53,7 +53,8 @@ const MEMBERS = [
   "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day",
   "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes",
   "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys",
-  "subject", "order", "licence", "hosting", "support", "agents", "agentRef", "keys", "revoked", "notAfter", "issuer"
+  "subject", "order", "licence", "hosting", "support", "agents", "agentRef", "keys", "revoked", "notAfter", "issuer",
+  "grantRevision", "withdrawnAt", "registration", "registrations", "held", "transport", "orgId", "previouslyRegistered"
 ];
 
 describe("a route event's selected index far past any route (the adapter's report on d8146cf, DEC-0084 fix round)", () => {
@@ -202,7 +203,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
     "openrouter-attribution.schema.json": "openrouter-attribution", "device-check-in.schema.json": "device-check-in", "manifest.schema.json": "manifest",
     "provider.schema.json": "provider-entry", "service-descriptor.schema.json": "service-descriptor", "service-well-known.schema.json": "service-well-known",
     "telemetry-event.schema.json": "telemetry-event", "activity-batch.schema.json": "activity-batch", "estate-record.schema.json": "estate-record",
-    "window-lease.schema.json": "window-lease", "entitlement.schema.json": "entitlement", "entitlement-key-set.schema.json": "entitlement-key-set", "revocation-delta.schema.json": "revocation-delta", "heartbeat.schema.json": "heartbeat",
+    "window-lease.schema.json": "window-lease", "entitlement.schema.json": "entitlement", "entitlement-key-set.schema.json": "entitlement-key-set", "share-registration.schema.json": "share-registration", "revocation-delta.schema.json": "revocation-delta", "heartbeat.schema.json": "heartbeat",
     "relay-frame.schema.json": "relay-frame", "secret-envelope.schema.json": "secret-envelope", "spend-policy.schema.json": "spend-policy",
     "model-profile.schema.json": "model-profiles", "registry-models.schema.json": "model-catalogue", "runner-profile.schema.json": "runner-profile",
     "activity-summary.schema.json": "activity-summary"
