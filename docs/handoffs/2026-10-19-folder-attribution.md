@@ -86,6 +86,18 @@ origins normalized on first read, the dead AT-14 clause removed; each vector's n
 decides it; the products' owed changes (Fabric's worktree before its breadth check, Switchboard's `record_worked`,
 scenarios) and the cases that go against the operator's literal words written out.
 
+The fifth readings of `2c1a426` (the unit and product readings; the seam reading had passed twice): both failed it,
+narrowly. AT-2 was quadratic in the tombstones (10,000 identical tombstones against 10,000 folders took 33.6 s);
+sources were folded with full Unicode lower-casing while the identity folds `A` to `Z` only, so an owner with an
+upper-case non-ASCII letter never matched; the list of results against the operator's literal words named three and
+missed AT-5 (a worktree or clone right under home) and AT-9 (one at the root of a repository whose Projects sit deeper);
+`CONTEXT.md` and identifiers.md said "in lower case". The fifth fix round: AT-2 in one pass (the deepest listed holder
+decides), sources and the host folded `A` to `Z` only (a host with the Kelvin sign has no identity), the six results
+listed (AT-3, AT-4, AT-5, AT-9, AT-11, AT-14) in the page and DEC-0089, AT-0's cross-member conditions named apart from
+the schema's shape, Compatibility naming the sessions refused after adoption and the per-Project totals that move, the
+page renamed `folder-attribution.md` (the word "attribution" also names devices.md's and OpenRouter's), and
+`explainFolder` in the conformance row's evidence.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -117,12 +129,18 @@ The fourth fix round planted 15 (the tombstone exemption, and it covering the to
 place removed, in one pass and without its physical holder, a root right under home whose repository has Projects, the
 recorded place, its join below a root top level, a bare root's top level, an explicit broad folder recorded, ASCII
 lower-casing, the upper-case drive letter, the owner and AT-8 records, a new root's origin): all 15 killed on the first
-pass. 88 plants in all (30, 18, 12, 13, 15), one equivalent, every other one killed.
+pass.
+
+The fifth fix round planted 5 (the host and the sources folded by full Unicode, the quadratic AT-2 restored, the
+deepest holder equal to the tombstone, the shallowest holder instead of the deepest): 4 killed on the first pass; the
+survivor was closed with a vector ("AT-3: a folder listed below a tombstone gets through it though another Project
+lists the tombstone's parent"), then killed. 93 plants in all (30, 18, 12, 13, 15, 5), one equivalent, every other one
+killed.
 
 ## Checks
 
-`pnpm run check` at the fourth fix round, each step exiting 0: typecheck; 77 files, 5962 tests, branches 7726 / 7799
-with `src/folder-attribution.ts` at 279 / 279; UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the fifth fix round, each step exiting 0: typecheck; 77 files, 5968 tests, branches 7731 / 7804
+with `src/folder-attribution.ts` at 284 / 284 (vectors: 27 origin, 122 attribution, 15 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
@@ -145,8 +163,18 @@ The same report was posted on that thread (message `95a49696`).
 - **When it can ship:** this PR when two consecutive readings find nothing that blocks it, targeted 2026-10-22.
 - **Next action:** CT-58's design until the readings run again.
 
+## Registers and ids
+
+DEC-0089 and FAC-SEM-121 were reserved by git CAS under the key `ct57-folder-attribution`. The register markers in
+this tree (next free DEC-0090, FAC-SEM-122) are floors read from the tree; CT-58 already holds DEC-0090 and
+FAC-SEM-122 to FAC-SEM-124 on `origin`. The fifth product reading found the SEM reservation's CAS commit (`78c96d9`,
+recorded in `.agent-sync/40-reservations-r-158228f530c9.md`) no longer reachable from `refs/agent-sync/ids/SEM`, whose
+chain runs from CT-55's commit to CT-58's: the id was taken and is not reused, but the remote chain does not show the
+receipt. Recorded for agent-sync's owner; nothing in this repository depends on it.
+
 ## Next task
 
-Open the pull request, run the blind readings, merge, then post the merge commit on thread `617c8cbe` for Fabric,
-Switchboard (SB-141: within a working day of the merge) and Observatory, and a request to project-observatory-contract
-for `project.attribute` (D4) referring to `folder-attribution.schema.json`.
+PR #124: run the blind readings until two consecutive rounds find nothing that blocks it, merge, then post the merge
+commit on thread `617c8cbe` for Fabric, Switchboard (SB-141: within a working day of the merge) and Observatory, and a request to project-observatory-contract
+for `project.attribute` (D4) referring to `folder-attribution.schema.json`, and add DEC-0089 to the contract's row
+of the knowledge base roadmap (`fabric-workspace/knowledge/roadmap.md`).
