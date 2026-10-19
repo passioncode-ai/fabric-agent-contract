@@ -113,3 +113,53 @@ file was restored after each plant; the worktree was clean at the end of the pas
 | P-92 | schema orgContextId admits personal | killed |
 | P-93 | grant.usage context optional | killed |
 | P-94 | grant.usage grantId any URI | killed |
+
+## The fix round
+
+The three blind readings of `cbcd03c` (unit fail, seam pass, product fail) led to a fix round: millisecond carrying of
+withdrawal and window times, `gateGrantUsage`, `FAC-SEM-117`'s window digits and parent `agentRef`, days compared as
+numbers, no leap second. Each new clause and each branch of the gate was planted once, the same way and with the same
+focused tests. 26 plants: 21 killed on the first pass; of the 5 that survived, one was closed with a test, one was a
+redundant guard removed from the code, and three are equivalent (no input tells them apart from the reference):
+
+- **P-117, the parent's grant looked up in any context:** no case had the parent revision hold the grant under another
+  context with placements of its own there. The test "share-registration semantic fixtures" now gives the parent the
+  grant in another organization, run there by another agent, and expects no finding. Re-planted: killed.
+- **P-118, a record with no placement under the grant compared:** `refs.size === 0` guarded nothing, since an empty set
+  has no member to differ from the parent's. The guard was removed from `orgShareGrants`; the plant no longer applies.
+- **P-99, the earliest revocation by its carried time:** flooring is monotonic, so the floor of the earliest instant is
+  the earliest floor: equivalent.
+- **P-102, GJ-5 compares the day with the end's instant:** the usage day is a midnight, so it is after the end's instant
+  exactly when it is after the end's day: equivalent. P-103, the same change on GJ-4, is killed, since a start is not a
+  midnight.
+- **P-119, the code's instant admits a leap second:** `strictTime` refuses second 60 by itself, so `time` answers NaN
+  either way: equivalent. The pattern keeps `[0-5][0-9]` to read as the schema's, whose own plant (P-120) is killed.
+
+| Plant | What was removed or loosened | Result |
+|---|---|---|
+| P-95 | a sub-millisecond time carried as written | killed |
+| P-96 | a window's start rounded down, not up | killed |
+| P-97 | a start whose cut digits are zero still moved up | killed |
+| P-98 | the earliest revocation read only at three fraction digits | killed |
+| P-99 | the earliest revocation by its carried time, not at full precision | equivalent |
+| P-100 | a drop's withdrawal at `issuedAt` as written | killed |
+| P-101 | the window copied as written | killed |
+| P-102 | GJ-5 compares the day with the end's instant, not its day | equivalent |
+| P-103 | GJ-4 compares the day with the start's instant, not its day | killed |
+| P-104 | the gate sends on any status 200 | killed |
+| P-105 | the gate sends on a receipt of any status | killed |
+| P-106 | the gate holds after `stale-revision` | killed |
+| P-107 | the gate holds after `already-withdrawn` | killed |
+| P-108 | `agent-mismatch` only held | killed |
+| P-109 | `wrong-organization` only held | killed |
+| P-110 | `unassigned-device` only held | killed |
+| P-111 | `revision-conflict` only held | killed |
+| P-112 | an unknown code held as degraded | killed |
+| P-113 | `FAC-SEM-117` window digits not checked | killed |
+| P-114 | `FAC-SEM-117` checks only `startsAt` | killed |
+| P-115 | `FAC-SEM-117` parent not compared | killed |
+| P-116 | a parent with no placement under the grant flags | killed |
+| P-117 | the parent's grant looked up in any context | killed (after a test) |
+| P-118 | a record with no placement under the grant compared | guard removed |
+| P-119 | the code's instant admits a leap second | equivalent |
+| P-120 | the schema's instant admits a leap second | killed |

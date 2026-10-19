@@ -470,7 +470,7 @@ function orgShareGrants(value: JsonObject): Finding[] {
     const id = isObject(grant.meta) ? grant.meta.id : undefined;
     const refs = agentsUnder(record, grant.context, id);
     if (refs.size > 1) findings.push({ code: "FAC-SEM-117", instancePath: at, message: `the placements naming this grant run ${refs.size} agents: a share grant into an organization runs one agentRef` });
-    if (!parent || refs.size === 0) continue;
+    if (!parent) continue;
     const before = list(parent.shareGrants).find((old) => old.context === grant.context && isObject(old.meta) && isString(id) && sameIdentifier(old.meta.id, id));
     const earlier = before ? agentsUnder(parent, before.context, id) : new Set<string>();
     if (earlier.size > 0 && [...refs].some((ref) => !earlier.has(ref))) {

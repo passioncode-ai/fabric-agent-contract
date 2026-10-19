@@ -409,6 +409,10 @@ describe("share-registration semantic fixtures (FAC-SEM-117, FAC-SEM-118, FAC-SE
     const moved = structuredClone(record);
     moved.shareGrants[1].context = "org:org_3fh9p1zc";
     expect(paths("org-share-grants", { record: repointed, parent: moved })).toEqual([]);
+    // The parent's grant is the one in the grant's own context: another organization's placements under it say nothing.
+    const movedRun = structuredClone(moved);
+    movedRun.machines[0].packages.push({ ...record.machines[0].packages[1], agentRef: "urn:fabric:agent:example:other", context: "org:org_3fh9p1zc" });
+    expect(paths("org-share-grants", { record, parent: movedRun })).toEqual([]);
     const dropped = structuredClone(repointed);
     dropped.machines[0].packages.splice(1, 1);
     expect(paths("org-share-grants", { record: dropped, parent: record })).toEqual([]);
