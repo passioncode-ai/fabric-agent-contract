@@ -1,0 +1,15 @@
+{
+  "job": {
+    "id": "job_7f3a2c",
+    "status": "failed",
+    "updatedAt": "2026-10-19T10:00:00Z",
+    "error": {
+      "code": "quota-exhausted",
+      "message": "spent",
+      "data": {
+        "retryable": true,
+        "resetsAt": "2026-10-19T14:00:00+02:00"
+      }
+    }
+  }
+}

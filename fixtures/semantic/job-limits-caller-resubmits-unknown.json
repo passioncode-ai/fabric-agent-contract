@@ -1,0 +1,24 @@
+{
+  "description": "After outcome-unknown the caller resends at once instead of reconciling (FAC-SEM-120, DEC-0087).",
+  "kind": "job-caller",
+  "expect": [
+    "FAC-SEM-120"
+  ],
+  "input": {
+    "answer": {
+      "job": {
+        "id": "job_7f3a",
+        "status": "failed",
+        "updatedAt": "2026-10-19T10:00:00Z",
+        "error": {
+          "code": "outcome-unknown",
+          "message": "the provider timed out after sending"
+        }
+      }
+    },
+    "now": "2026-10-19T10:00:00Z",
+    "action": {
+      "action": "resend"
+    }
+  }
+}

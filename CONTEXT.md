@@ -440,11 +440,28 @@ stream epoch, signed policy layers and periodic check-ins.
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
 
-**Interop**: The `fabric-interop/0.1` extension: how agents are called over MCP —
+**Interop**: The `fabric-interop/0.1` extension (and `/0.2`, whose readers accept `null` usage, DEC-0087): how agents are called over MCP:
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.
 
 **Job**: Work a capability call started that may outlive the request, reached by a
 stable job id through an MCP Task or `fabric.job.get` / `fabric.job.cancel`.
+
+**Quota exhausted**: A job a limit (a provider's quota, a subscription's window; a spend window stays `limit-reached`,
+DL-19) stopped: it ends
+`failed` with the error code `quota-exhausted` and `data: {retryable, resetsAt?}`; a job a limit only paused stays
+`working` with a `statusMessage` in the pause grammar, `quota-exhausted until <UTC instant>` (DEC-0087,
+[interop](docs/specification/interop.md#limits-and-uncertain-effects)).
+
+**Outcome unknown (job)**: A job whose effect may have happened and that its provider could not observe: it ends
+`failed` with `outcome-unknown`, and its caller reconciles, observing whether the effect happened, and never resends
+under a new key (DEC-0087). The board's `outcome_unknown` is the same idea for a project comms request (DEC-0022).
+
+**Intent key**: The idempotency key a caller derives from its intent `{agentId, capability, input, request?}`, a UUID of
+version 8 over the SHA-256 of its RFC 8785 form (`intentIdempotencyKey`, DEC-0087), so a resend after a restart or on
+another machine is the same request; never a clock or a random value. A provider keeps keys per authenticated caller.
+
+**`fabric-interop/0.2`**: The revision whose readers accept `null` and `partial` in a job's `usage`; a caller names it
+in its request's `_meta.protocols`, and only toward such a caller does a provider write them (DEC-0087).
 
 **Trace context**: The W3C `traceparent` (and optional `tracestate`) every call
 carries in `_meta`, so that all the calls made for one run form one trace.

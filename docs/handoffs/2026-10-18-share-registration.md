@@ -110,17 +110,9 @@ Done on 2026-10-19: PR #117 merged at `b89cb94` after four readings; backlog row
 merges (#118 `26f1250`); the knowledge base's roadmap row names the contract through DEC-0086 (fabric-workspace #254
 `3be58dc`); the scheduled workspace sync publishes the backlog.
 
-Owed, because the project board answered `unavailable` at 2026-10-19 06:45 to 07:00 (com.status, com.list): on the
-board, once it is ready,
-
-- post `b89cb94` on threads `cc944654` and `b68f4399` (the first organization server): DEC-0086 merged, with the SR,
-  GJ and gate rows, one held list per organization, and the vectors to run;
-- `com.submit` to Project Observatory: OBS-101 implements `grant.usage` at DEC-0086 directly, with
-  `deriveShareRegistrations`, the registration client, the retry split and `gateGrantUsage`;
-- `com.submit` to Fabric: CX-FAB-04 mints `urn:fabric:share:` ids from a CSPRNG, runs `FAC-SEM-117` with `parent` the
-  latest earlier revision that placed each grant, writes windows and `revokedAt` with at most three fraction digits,
-  and never re-points a grant; its hub SHOULD write `revokedAt` so;
-- a note to fabric-agent-adapter: vendor the schema and the two common defs, run `FAC-SEM-117` (with `parent`),
-  `FAC-SEM-118` and the amended `FAC-SEM-045`.
+Sent on the board when it was ready again, 2026-10-19 05:12 UTC: the merge on thread `cc944654` (message
+`3a18a8e8`) and thread `b68f4399` (`6c97cc7e`); requests to Project Observatory (`53e272ac`, thread `a506692f`) and
+to Fabric (`7b0ba9cb`, thread `87af4473`), each asking for its row and a date; an announcement to fabric-agent-adapter
+(`b336b4d4`). Their answers come on those threads.
 
 Then the contract's next task is CT-55 (OQ-0012).

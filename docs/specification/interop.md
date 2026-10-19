@@ -1,4 +1,4 @@
-# Interop extension `fabric-interop/0.1`
+# Interop extension `fabric-interop/0.1` and `/0.2`
 
 `covers:` Fabric agent-registry REQ-04, REQ-05, REQ-11 — DEC-0016, rulings DEC-0017, DEC-0018 · locked in Fabric's
 [agent-registry contracts](https://github.com/passioncode-ai/fabric/blob/03311c856b7771e5e4cfff967b138e89e292c67f/docs/evidence/specs/2026-09-29-agent-registry-contracts.md)
@@ -147,6 +147,97 @@ Derived constraints, from the MCP Tasks lifecycle rather than from new policy:
   [result](results-and-evidence.md) with `output` and `usage` required. One shape, no
   subset.
 
+## Limits and uncertain effects
+
+DEC-0087 (OQ-0012, board row CT-55) · rule codes `FAC-SEM-119`, `FAC-SEM-120` · revision `fabric-interop/0.2` · code
+[`src/job-limits.ts`](../../src/job-limits.ts) · vectors
+[`fixtures/vectors/job-limits.json`](../../fixtures/vectors/job-limits.json), written by
+[`tools/vectors/job-limits.ts`](../../tools/vectors/job-limits.ts) · tests
+[`test/job-limits.test.ts`](../../test/job-limits.test.ts)
+
+A limit (a provider's quota, a subscription's window) stops or pauses a job, and an effect (a payment, a message, an
+order) may happen without its provider seeing the answer. A caller that reads either as an ordinary failure submits
+again and pays twice: an agent retrospective of 2026-10-17 counted it in about ten agents. Two error codes, a pause
+grammar, one act per answer, a key per intent and the provider's answer to a repeated key close it. A spend window of a
+grant or the meter is not such a limit: it stays `limit-reached` with its approval request (DL-19,
+[delegation](delegation.md)), relayed unchanged.
+
+**`quota-exhausted`.** A job a limit stopped and that its provider will not resume ends `failed` with
+`error: {code: "quota-exhausted", message, data: {retryable, resetsAt?}}`
+([`interop-common.schema.json#/$defs/quotaExhaustedData`](../../schemas/interop-common.schema.json), closed).
+`retryable` is `true` when the same intent may run again once the limit resets, `false` when a person must act (a plan
+changed, a provider budget raised). `resetsAt` is when the limit resets, an RFC 3339 instant in UTC with `T` and `Z`
+upper-case and at most three fraction digits (`#/$defs/utcInstant`), and only with `retryable: true`.
+
+**A paused job.** A provider that resumes the same job after the limit keeps it `working` and writes its
+`statusMessage` as `quota-exhausted` or `quota-exhausted until <UTC instant>`, either optionally followed by a colon, a
+space and a text that is not only ASCII white space (space, tab, line feed, carriage return), at most 500 characters (code points, as JSON Schema counts) in all;
+`pollIntervalMs` SHOULD reach the reset, within its cap of 3 600 000. `readJobPause(answer)` reads it. A `working` job
+whose message starts `quota-exhausted` and breaks the grammar is `FAC-SEM-119`'s. The job gains no member and no
+status: its schema is closed and its states are MCP Task states. `degraded` stays a service's health, never a job's
+state.
+
+**`outcome-unknown`.** A job whose effect may have happened and that its provider cannot observe ends `failed` with
+`error: {code: "outcome-unknown", message, data?}`. As in project comms, only an observed result settles it. Fabric's
+hub already answers `agent.call` so when a call reached the product and its answer was lost (`data.mayHaveRun`), and
+keeps refusing that key; DEC-0087 gives the code its meaning for every job.
+
+**The caller's act.** A caller answers each `fabric.job.get` or `fabric.job.cancel` answer as `jobCallerAction(answer,
+now)` does, `now` a UTC instant:
+
+| Answer | Act |
+|---|---|
+| `working`, a limit paused it, its reset after `now` or not given | `wait` (`notBefore` the reset, when given) |
+| `working` otherwise (a reset reached) | `poll` |
+| `input_required` | `answer` |
+| `completed` | `done` |
+| `cancelled` | `cancelled` |
+| `failed`, `quota-exhausted`, `retryable: true` | `resend` under the same key (`notBefore` its `resetsAt`, when after `now`) |
+| `failed`, `quota-exhausted`, `retryable: false` | `person`: nothing is sent until a person acts; then a resend under the same key |
+| `failed`, `limit-reached` | `person`: its approval request reaches the operator (SCN-017); after the approval a resend under the same key |
+| `failed`, `outcome-unknown` | `reconcile`: observe whether the effect happened |
+| `failed`, any other code | `failed` |
+| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
+
+It never answers "submit anew". After `outcome-unknown` a caller sends nothing under a new key until it has observed that
+the effect did not happen; a new attempt is then a new intent (a new `request`, below). `FAC-SEM-120` (kind
+`job-caller`, `{answer, now, action}`) compares an implementation's act with it. A checker of a job answer runs kind
+`interop-job` beside `interop-job-trace`.
+
+**The intent's key.** A resend reuses the idempotency key its intent derives, never a clock or a random value, so a
+resend after a restart or on another machine is the same request. `intentIdempotencyKey({agentId, capability, input,
+request?})` is a UUID of version 8 (RFC 9562 §5.5, §5.8): the first 16 bytes of the SHA-256 of the RFC 8785 form of
+that object, `ver` set to `0b1000` and `var` to `0b10`, in lower-case hex 8-4-4-4-12. `request` names the principal's
+request (a task id, a message id) when one principal asks twice for the same input on purpose. A UUID fits `agent.call`'s
+`idempotencyKey` ([C3.5](#c35-the-hub)) and capabilities whose input requires a UUID key. It answers no key for an input
+with no RFC 8785 form.
+
+**The provider's answer to a repeated key.** A provider keeps a key per authenticated caller, so two callers that send
+the same input never share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
+longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
+approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
+again and never runs a second time. Any other key whose job ended is answered with that job.
+
+**Unknown is `null`.** In a job's or a result's `usage` ([`common.schema.json#/$defs/usage`](../../schemas/common.schema.json)),
+`inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `costUsd` and `wallMs` are `null` when nobody
+measured them, never 0, toward a reader of `fabric-interop/0.2`; 0 is a measured zero (DEC-0021's rule for cost,
+extended). Toward a reader of `fabric-interop/0.1` the gate below applies. `partial` is `true` when a number is
+a lower bound or unknown; a writer SHOULD set it beside a `null` and never sets it `false` there (`FAC-SEM-119`, kinds
+`usage`, `interop-job` and `result`).
+
+**The gate.** `usage` is closed and its numbers were integers, so a reader of `fabric-interop/0.1` refuses `null` and
+`partial`. DEC-0087 publishes `fabric-interop/0.2`, whose readers accept them. A caller names the revisions it reads in
+its request's `_meta.protocols` (DEC-0067's list, [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)),
+and a provider writes `null` or `partial` only toward a caller that names `fabric-interop/0.2` (`readsNullUsage`).
+Toward any other caller it writes the lower bound it measured, as before; nothing goes to `notVerified`, so the result's
+`outcome` is the work's (`FAC-SEM-001`). Usage stays non-authoritative until reconciled, as it always was
+([results and evidence](results-and-evidence.md)). The `data` constraint binds only `quota-exhausted`, which no provider
+sent before. `contractVersion` stays `0.1.0`.
+
+Not decided here: whether `cancelled` asserts that no effect happened; a machine-readable scope for a limit; how the
+two codes and the pause travel on the MCP Task route (C3.2), so a provider that limits a job serves it through the job
+handle and `fabric.job.get`; C4 (a 4xx at submit against a 4xx while polling), which stays adapter guidance.
+
 ## C3.3 Awaiting a choice
 
 A job or call that needs a person returns `input_required` with MCP
@@ -228,6 +319,9 @@ The field is in [`service-well-known.schema.json`](../../schemas/service-well-kn
 | `FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
 | `FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |
 | `FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
+| `FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
+| `FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
 
-Fixtures: every `interop-*` entry of [`fixtures/catalogue.json`](../../fixtures/catalogue.json);
+Fixtures: every `interop-*` entry of [`fixtures/catalogue.json`](../../fixtures/catalogue.json),
+`fixtures/semantic/job-limits-*` and the vectors [`fixtures/vectors/job-limits.json`](../../fixtures/vectors/job-limits.json);
 rule tests: [`test/interop-rules.test.ts`](../../test/interop-rules.test.ts).

@@ -1,0 +1,13 @@
+{
+  "description": "A working job a limit paused until a UTC instant follows the pause grammar (FAC-SEM-119, DEC-0087).",
+  "kind": "interop-job",
+  "expect": [],
+  "input": {
+    "job": {
+      "id": "job_7f3a",
+      "status": "working",
+      "updatedAt": "2026-10-19T10:00:00Z",
+      "statusMessage": "quota-exhausted until 2026-10-19T12:00:00Z: the subscription window"
+    }
+  }
+}

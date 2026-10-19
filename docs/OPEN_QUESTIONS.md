@@ -163,7 +163,7 @@ ruling; DEC-0017 states what holds now.
 
 ### OQ-0012 — Jobs and capabilities under limits and uncertain effects: a typed pause, `outcome-unknown` beyond comms, unknown as `null`
 
-- **Status:** Open (ruled in principle 2026-10-17); a DEC with schema, rule and vectors owes the wire shape
+- **Status:** Resolved→DEC-0087 (2026-10-19; ruled in principle 2026-10-17)
 - **Raised:** 2026-10-17, an agent retrospective of 18 agents (a private report, candidates C1–C4), read
   against `7a14a48`; board row CT-55
 - **Owner of the answer:** this repository.
@@ -185,3 +185,8 @@ ruling; DEC-0017 states what holds now.
     `succeeded` is refused while any claim is there (`FAC-SEM-001`, DEC-0064; [results and evidence](specification/results-and-evidence.md)).
   - C4: caller behaviour that moves no shape, so guidance in fabric-agent-adapter (its PR #122), not contract text.
 - **Meanwhile:** nothing changes on the wire; providers follow the adapter's guidance.
+- **Resolution:** DEC-0087, [interop → limits and uncertain effects](specification/interop.md#limits-and-uncertain-effects):
+  `quota-exhausted` with `data: {retryable, resetsAt?}`, the pause grammar of a `working` job's `statusMessage`,
+  `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), the provider's
+  answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
+  `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.

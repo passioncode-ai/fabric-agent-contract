@@ -1,0 +1,22 @@
+{
+  "description": "quota-exhausted names a reset on a day that does not exist (FAC-SEM-119, DEC-0087).",
+  "kind": "interop-job",
+  "expect": [
+    "FAC-SEM-119"
+  ],
+  "input": {
+    "job": {
+      "id": "job_7f3a",
+      "status": "failed",
+      "updatedAt": "2026-10-19T10:00:00Z",
+      "error": {
+        "code": "quota-exhausted",
+        "message": "the 5-hour window is spent",
+        "data": {
+          "retryable": true,
+          "resetsAt": "2026-02-30T12:00:00Z"
+        }
+      }
+    }
+  }
+}

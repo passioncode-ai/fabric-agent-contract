@@ -1,0 +1,15 @@
+{
+  "description": "A working job's message starts quota-exhausted and breaks the pause grammar (FAC-SEM-119, DEC-0087).",
+  "kind": "interop-job",
+  "expect": [
+    "FAC-SEM-119"
+  ],
+  "input": {
+    "job": {
+      "id": "job_7f3a",
+      "status": "working",
+      "updatedAt": "2026-10-19T10:00:00Z",
+      "statusMessage": "quota-exhausted until 2026-10-19T14:00:00+02:00"
+    }
+  }
+}

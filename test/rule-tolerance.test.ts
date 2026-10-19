@@ -195,7 +195,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
 
   const SCHEMA_KIND: Readonly<Record<string, string>> = {
     "approval.schema.json": "approval-claims", "delegation-token.schema.json": "delegation-claims", "governance.schema.json": "grant",
-    "fabric-package.schema.json": "package", "versioned-setting.schema.json": "versioned-setting", "result.schema.json": "result",
+    "fabric-package.schema.json": "package", "versioned-setting.schema.json": "versioned-setting", "result.schema.json": "result", "interop-job.schema.json": "interop-job",
     "roles.schema.json": "roles", "coordination.schema.json": "coordination", "comms-directory.schema.json": "comms-directory",
     "comms-message.schema.json": "comms-message", "comms-submit.schema.json": "comms-submit", "fabric-proposal.schema.json": "proposal",
     "service-events-page.schema.json": "service-events-page", "service-usage.schema.json": "service-usage", "settings-backup.schema.json": "settings-backup",

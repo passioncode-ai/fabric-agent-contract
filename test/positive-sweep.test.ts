@@ -13,6 +13,7 @@ const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.js
 /** The rule kind that reads one document of a schema whole. */
 export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
   "comms-directory.schema.json": "comms-directory",
+  "interop-job.schema.json": "interop-job",
   "comms-message.schema.json": "comms-message",
   "activity-batch.schema.json": "activity-batch",
   "fabric-proposal.schema.json": "proposal",
@@ -104,7 +105,6 @@ export const NOT_SWEPT: readonly string[] = [
   "interop-job-handle.schema.json",
   "interop-job-request.schema.json",
   "interop-job-tool-output.schema.json",
-  "interop-job.schema.json",
   "interop-request-meta.schema.json",
   "interop-result.schema.json",
   "memory-capability.schema.json",
@@ -133,7 +133,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

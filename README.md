@@ -26,7 +26,7 @@ admission, blob requests and message bodies), `src/secret-envelope.ts` (the HPKE
 ES256 rule, DEC-0066) and
 `src/http-signature.ts` (the device request signature's signer and receiver, DEC-0056), `src/hub-key-rules.ts` (whether the
 estate record certifies a delegation key, DEC-0060) `src/revocation-delta.ts` (the revocation delta, the heartbeat
-and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062), `src/entitlement.ts` (entitlements and their key sets, DEC-0085), `src/share-registration.ts` (share registrations and the join of `grant.usage` to an agent, DEC-0086), `src/signing-challenges.ts` (the
+and the 72-hour rule, DEC-0054), `src/window-lease.ts` (window leases, DEC-0062), `src/entitlement.ts` (entitlements and their key sets, DEC-0085), `src/share-registration.ts` (share registrations and the join of `grant.usage` to an agent, DEC-0086), `src/job-limits.ts` (jobs under limits and uncertain effects, DEC-0087), `src/signing-challenges.ts` (the
 signing register and its verifier, DEC-0063) `src/openrouter-attribution.ts` (OpenRouter attribution headers, DEC-0065) `src/protocol-revisions.ts` (protocol revisions, N and N−1, DEC-0067) `src/session-join.ts` (one writer per session, DEC-0068) `src/app-descriptor.ts` (an app's own descriptor, DEC-0069) and `src/feed-data.ts` (no secret in a feed event's data, DEC-0070). What does not ship: a runtime, a provider implementation, a model router,
 a published package, or an SDK with a stability promise beyond the pinned commit (DEC-0016).
 
@@ -45,7 +45,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Embedded dashboard — width, navigation, scrolling and themes inside a host (`fabric-dashboard/0.1`)](docs/specification/embedded-dashboard.md)
 - [Project communication — agents exchange information and requests (`fabric-project-comms/0.1`)](docs/specification/project-comms.md)
 - [Operator channel — an agent's notifications and decisions in a messenger (`fabric-operator-channel/0.1`)](docs/specification/operator-channel.md)
-- [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`)](docs/specification/interop.md)
+- [Calling agents: capabilities, jobs, trace, the hub (`fabric-interop/0.1`, `/0.2`)](docs/specification/interop.md)
 - [Spend policy and grants with amounts — agents check a record instead of asking (DEC-0037, DEC-0038)](docs/specification/spend-policy.md)
 - [Conformance — profiles, the semantic-rule register and who checks what](docs/specification/conformance.md)
 - [Identifiers — when two identifiers are the same: the normal form writers emit and readers compare (DEC-0076)](docs/specification/identifiers.md)
@@ -60,6 +60,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [The revocation delta and the heartbeat — revocations within seconds, a signed commitment to them, and the 72-hour rule (`revocation-delta/1`, `heartbeat/1`, DEC-0054)](docs/specification/revocation-delta.md)
 - [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
 - [Entitlements: what a signed order entitles an organization or a person's estate to, under a key set an offline root signs (`entitlement/1`, `entitlement-key-set/1`, DEC-0085)](docs/specification/entitlement.md)
+- [Jobs under limits and uncertain effects: `quota-exhausted`, the pause grammar, `outcome-unknown`, the caller's act, the intent's key and `null` usage under `fabric-interop/0.2` (DEC-0087)](docs/specification/interop.md#limits-and-uncertain-effects)
 - [Share registrations: which agent a share grant into an organization runs, registered by the sharer's enrolled node, and `grant.usage` joined to it (`share-registration/1`, DEC-0086)](docs/specification/share-registration.md)
 - [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
 - [The local channel to the node — `fabric-local-channel/0.1` (DEC-0075)](docs/specification/local-channel.md)

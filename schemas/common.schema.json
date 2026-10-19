@@ -183,31 +183,54 @@
       ],
       "properties": {
         "inputTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "outputTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "cacheReadTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "cacheWriteTokens": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "costUsd": {
-          "type": "number",
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0
         },
         "wallMs": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
+        },
+        "partial": {
+          "type": "boolean",
+          "description": "DEC-0087: true when a number is a lower bound or unknown (null). An unknown number is null, never 0; 0 is a measured zero."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "A job's or a result's usage. A number nobody measured is null, never 0; `partial` is true when a number is a lower bound or unknown (DEC-0087). A provider writes null and `partial` only toward a caller whose request `_meta.protocols` names fabric-interop/0.2; toward any other it writes the lower bound it measured."
     },
     "protocolRevision": {
       "type": "string",

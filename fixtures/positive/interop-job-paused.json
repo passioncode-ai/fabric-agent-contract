@@ -1,0 +1,9 @@
+{
+  "job": {
+    "id": "job_7f3a2c",
+    "status": "working",
+    "updatedAt": "2026-10-19T10:00:00Z",
+    "statusMessage": "quota-exhausted until 2026-10-19T12:00:00Z: the subscription window",
+    "pollIntervalMs": 3600000
+  }
+}

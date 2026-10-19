@@ -36,6 +36,7 @@
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
 | SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
+| SCN-031 | A job stops at a limit: the caller waits for the reset, resends under the same key, or hands it to a person | spend | P-02 | ST-013, FLW-10 | draft | not audited |
 
 ## Personas
 
@@ -402,6 +403,25 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the confirm button expired -> nothing is spent; the request stays filed and the operator answers it again.
 - **Status:** draft
 - **Coverage:** spend-policy specification, rule 3; `grant-check.schema.json`; `refusalFromDenial`, `test/delegation-sealed.test.ts` (F-B-301)
+- **Product:** unobserved
+
+### SCN-031: A job stops at a limit: the caller waits for the reset, resends under the same key, or hands it to a person
+
+- **Persona:** P-02
+- **Feature:** spend
+- **Traces:** ST-013, FLW-10 (JTBD-07, JRN-06/#2)
+- **Entry point:** an agent calls a job-capable capability (`agent.call` or a provider's tool) and polls `fabric.job.get`
+- **Preconditions:** the provider serves DEC-0087; the caller derives its key with `intentIdempotencyKey`
+- **Steps:**
+  1. The subscription's window runs out mid-job and the provider will resume it -> the job stays `working`, its message `quota-exhausted until <UTC instant>`; the caller waits until then instead of polling every second.
+  2. The window resets -> the provider resumes the same job -> `completed`; the operator sees one job and one charge.
+- **Expected result:** a limit never turns into a second paid run: the caller waits, or resends under the key its intent derives, which the provider recognises.
+- **Alt paths:** the provider will not resume -> the job ends `failed` with `quota-exhausted`, `retryable: true` and its `resetsAt`; the caller resends under the same key after the reset and the provider runs the intent again once. `retryable: false` (a plan or a provider budget must change) -> the caller stops (`person`) until the operator acts, then resends under the same key. A spend window of a grant is exhausted -> `limit-reached` (DL-19) with its approval request, which reaches the operator as SCN-017 says; once approved, the caller resends under the same key and the provider runs the intent once.
+- **UI elements:** the job's status message; the operator's approval request.
+- **States covered:** success, unknown, error
+- **Errors & recovery:** the provider cannot tell whether an effect happened -> `outcome-unknown`; the caller reconciles (observes whether the order, message or payment exists) and never resends under a new key until it observed that the effect did not happen. Usage the provider did not measure reads unknown (`null`, `partial`) for a caller of `fabric-interop/0.2`, never 0; a caller of `fabric-interop/0.1` gets the measured lower bound, as before.
+- **Status:** draft
+- **Coverage:** interop Limits and uncertain effects (DEC-0087); `interop-common.schema.json` (`quotaExhaustedData`), `common.schema.json` (`usage`); `src/job-limits.ts`, `test/job-limits.test.ts` (FAC-SEM-119, FAC-SEM-120)
 - **Product:** unobserved
 
 ### SCN-018: Approve one action for an outside caller
