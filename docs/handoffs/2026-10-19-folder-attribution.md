@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 28 origin, 130 attribution and 18 record cases covering every AT row, a repository, a
+  nothing imported from the module): 28 origin, 131 attribution and 18 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -112,6 +112,13 @@ identity; the widened results list and the undeclared worktrees folder written o
 attached, new and explicit vector; Switchboard's duty to ask Fabric's capability; the code-point bounds counted only
 between `max` and `2 * max` units (10,000 sources of 4,096 characters had cost a third of a second).
 
+The seventh readings of `67a2aaa` stopped on the account's model limit; the unit reader's last line named an order
+dependence, reproduced in the main session: a worktree's folder at a nested Project's place, the nested Project kept in
+another clone, answered the outer Project at AT-6 and the nested one at AT-3 once its record was applied. The seventh
+fix round: AT-6 and AT-7 weigh the nearest place across common dir and identity as AT-3 does; a seeded property test
+over 6,000 random worlds (worktrees, clones, nested Projects, containers, tombstones) that fails on the previous module;
+a vector for the case; every result the page lists against the operator's words probed and confirmed.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -156,10 +163,13 @@ secret-shaped leftover kept, identity winning at equal depth, common dir always 
 shallowest cut, AT-2 counting broad holders, AT-3's repository holder ignoring the cut): 7 killed on the first pass;
 the 4 survivors were closed with two vectors and two tests, then killed. 104 plants in all.
 
+The seventh fix round planted 3 (common dir first again, identity winning at equal depth, the owners clause): 2
+killed; the third was equivalent and its redundant clause was removed. 107 plants in all, two equivalent.
+
 ## Checks
 
-`pnpm run check` at the sixth fix round, each step exiting 0: typecheck; 77 files, 5983 tests, branches 7778 / 7851
-with `src/folder-attribution.ts` at 331 / 331 (vectors: 28 origin, 130 attribution, 18 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the seventh fix round, each step exiting 0: typecheck; 77 files, 5985 tests, branches 7779 / 7852
+with `src/folder-attribution.ts` at 332 / 332 (vectors: 28 origin, 131 attribution, 18 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
