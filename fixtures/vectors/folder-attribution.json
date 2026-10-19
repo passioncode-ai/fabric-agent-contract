@@ -34,6 +34,10 @@
       "expected": "github.com/example-org/fabric"
     },
     {
+      "origin": "git@github.com:example-org/fabric.git?x=1#y",
+      "expected": "github.com/example-org/fabric"
+    },
+    {
       "origin": "/local/path/repo",
       "expected": null
     },
@@ -507,7 +511,7 @@
       }
     },
     {
-      "name": "AT-2: a folder in the temporary folder",
+      "name": "AT-4: a folder in the temporary folder",
       "snapshot": {
         "folder": "/tmp/agent-1/fabric",
         "home": "/u/ana",
@@ -558,7 +562,7 @@
       }
     },
     {
-      "name": "AT-2: a cache clone, even of a known repository",
+      "name": "AT-4: a cache clone, even of a known repository",
       "snapshot": {
         "folder": "/u/ana/.cache/tool/fabric",
         "home": "/u/ana",
@@ -609,7 +613,7 @@
       }
     },
     {
-      "name": "AT-3: a tombstoned folder",
+      "name": "AT-2: a tombstoned folder",
       "snapshot": {
         "folder": "/u/ana/work/old",
         "home": "/u/ana",
@@ -658,7 +662,7 @@
       }
     },
     {
-      "name": "AT-3: a subfolder of a tombstoned folder",
+      "name": "AT-2: a subfolder of a tombstoned folder",
       "snapshot": {
         "folder": "/u/ana/work/old/src",
         "home": "/u/ana",
@@ -707,7 +711,7 @@
       }
     },
     {
-      "name": "AT-3: a worktree whose main checkout is tombstoned",
+      "name": "AT-11: a worktree whose main checkout is tombstoned",
       "snapshot": {
         "folder": "/u/ana/work/old-wt",
         "home": "/u/ana",
@@ -761,7 +765,7 @@
       }
     },
     {
-      "name": "AT-3: a removed worktree stays out though its main checkout is a Project's",
+      "name": "AT-2: a removed worktree stays out though its main checkout is a Project's",
       "snapshot": {
         "folder": "/u/ana/work/fabric-old",
         "home": "/u/ana",
@@ -815,7 +819,7 @@
       }
     },
     {
-      "name": "AT-3: a tombstone keeps only its own folder out: another clone of the same remote is new",
+      "name": "AT-12: a tombstone keeps only its own folder out: another clone of the same remote is new",
       "snapshot": {
         "folder": "/u/ana/work/app-2",
         "home": "/u/ana",
@@ -869,7 +873,7 @@
       }
     },
     {
-      "name": "AT-4: the Project's own folder",
+      "name": "AT-3: the Project's own folder",
       "snapshot": {
         "folder": "/u/ana/work/fabric",
         "home": "/u/ana",
@@ -921,7 +925,7 @@
       }
     },
     {
-      "name": "AT-4: a subfolder of a Project's folder, an agent started there",
+      "name": "AT-3: a subfolder of a Project's folder, an agent started there",
       "snapshot": {
         "folder": "/u/ana/work/fabric/apps/desktop",
         "home": "/u/ana",
@@ -973,7 +977,7 @@
       }
     },
     {
-      "name": "AT-4: a plain folder a Project lists",
+      "name": "AT-3: a plain folder a Project lists",
       "snapshot": {
         "folder": "/u/ana/work/notes/2026",
         "home": "/u/ana",
@@ -1020,7 +1024,7 @@
       }
     },
     {
-      "name": "AT-4: a sibling whose name extends the folder's is not under it",
+      "name": "AT-3: a sibling whose name extends the folder's is not under it",
       "snapshot": {
         "folder": "/u/ana/work/fabric-site",
         "home": "/u/ana",
@@ -1071,7 +1075,7 @@
       }
     },
     {
-      "name": "AT-4: the nearest of two nested Project folders",
+      "name": "AT-3: the nearest of two nested Project folders",
       "snapshot": {
         "folder": "/u/ana/work/mono/pkg/a",
         "home": "/u/ana",
@@ -1116,7 +1120,7 @@
       }
     },
     {
-      "name": "AT-4: a home folder a Project lists is no ancestor: a new Project",
+      "name": "AT-3: a home folder a Project lists is no ancestor: a new Project",
       "snapshot": {
         "folder": "/u/ana/work/y",
         "home": "/u/ana",
@@ -1149,7 +1153,7 @@
       }
     },
     {
-      "name": "AT-4: two Projects listing one folder: ambiguous",
+      "name": "AT-3: two Projects listing one folder: ambiguous",
       "snapshot": {
         "folder": "/u/ana/work/shared",
         "home": "/u/ana",
@@ -1197,7 +1201,7 @@
       }
     },
     {
-      "name": "AT-5: a worktree of a Project's repository",
+      "name": "AT-6: a worktree of a Project's repository",
       "snapshot": {
         "folder": "/u/ana/work/fabric-night",
         "home": "/u/ana",
@@ -1249,7 +1253,7 @@
       }
     },
     {
-      "name": "AT-5: a worktree a tool keeps in its own folder still joins",
+      "name": "AT-6: a worktree a tool keeps in its own folder still joins",
       "snapshot": {
         "folder": "/u/ana/.codex/worktrees/a1/fabric",
         "home": "/u/ana",
@@ -1301,7 +1305,7 @@
       }
     },
     {
-      "name": "AT-5: a remoteless worktree joins by its common dir",
+      "name": "AT-6: a remoteless worktree joins by its common dir",
       "snapshot": {
         "folder": "/u/ana/work/notes-wt",
         "home": "/u/ana",
@@ -1340,7 +1344,7 @@
       }
     },
     {
-      "name": "AT-5: two Projects with one common dir: ambiguous",
+      "name": "AT-6: two Projects with one common dir: ambiguous",
       "snapshot": {
         "folder": "/u/ana/work/wt",
         "home": "/u/ana",
@@ -1393,7 +1397,7 @@
       }
     },
     {
-      "name": "AT-6: another clone on another branch, by its origin",
+      "name": "AT-7: another clone on another branch, by its origin",
       "snapshot": {
         "folder": "/u/ana/work/fabric-2",
         "home": "/u/ana",
@@ -1445,7 +1449,7 @@
       }
     },
     {
-      "name": "AT-6: a clone in a tool folder joins by its origin",
+      "name": "AT-7: a clone in a tool folder joins by its origin",
       "snapshot": {
         "folder": "/u/ana/.claude/plugins/fabric",
         "home": "/u/ana",
@@ -1497,7 +1501,7 @@
       }
     },
     {
-      "name": "AT-6: two Projects with one origin: ambiguous",
+      "name": "AT-7: two Projects with one origin: ambiguous",
       "snapshot": {
         "folder": "/u/ana/work/c",
         "home": "/u/ana",
@@ -1550,7 +1554,7 @@
       }
     },
     {
-      "name": "AT-7: an unknown repository in a tool folder",
+      "name": "AT-9: an unknown repository in a tool folder",
       "snapshot": {
         "folder": "/u/ana/.claude/plugins/marketplace",
         "home": "/u/ana",
@@ -1566,7 +1570,7 @@
           "toplevel": "/u/ana/.claude/plugins/marketplace",
           "commonDir": "/u/ana/.claude/plugins/marketplace/.git",
           "mainCheckout": "/u/ana/.claude/plugins/marketplace",
-          "origin": "git@github.com:example-org/site.git"
+          "origin": "git@github.com:someone/marketplace.git"
         },
         "projects": [
           {
@@ -1601,7 +1605,7 @@
       }
     },
     {
-      "name": "AT-7: a worktree of an unknown repository whose main checkout is in a tool folder",
+      "name": "AT-9: a worktree of an unknown repository whose main checkout is in a tool folder",
       "snapshot": {
         "folder": "/u/ana/work/wt",
         "home": "/u/ana",
@@ -1652,7 +1656,7 @@
       }
     },
     {
-      "name": "AT-7: a plain folder in Library",
+      "name": "AT-9: a plain folder in Library",
       "snapshot": {
         "folder": "/u/ana/Library/Application Support/tool",
         "home": "/u/ana",
@@ -1830,7 +1834,7 @@
       }
     },
     {
-      "name": "AT-9: a repository a Project's agent changed from inside the Project",
+      "name": "AT-10: a repository a Project's agent changed from inside the Project",
       "snapshot": {
         "folder": "/u/ana/work/lib",
         "home": "/u/ana",
@@ -1888,7 +1892,7 @@
       }
     },
     {
-      "name": "AT-9: work by two Projects: ambiguous",
+      "name": "AT-10: work by two Projects: ambiguous",
       "snapshot": {
         "folder": "/u/ana/work/lib",
         "home": "/u/ana",
@@ -1953,7 +1957,7 @@
       }
     },
     {
-      "name": "AT-9: work on another repository decides nothing",
+      "name": "AT-10: work on another repository decides nothing",
       "snapshot": {
         "folder": "/u/ana/work/lib",
         "home": "/u/ana",
@@ -2010,7 +2014,7 @@
       }
     },
     {
-      "name": "AT-10: the filesystem root",
+      "name": "AT-5: the filesystem root",
       "snapshot": {
         "folder": "/",
         "home": "/u/ana",
@@ -2056,7 +2060,7 @@
       }
     },
     {
-      "name": "AT-10: a Windows drive root",
+      "name": "AT-5: a Windows drive root",
       "snapshot": {
         "folder": "C:/",
         "home": "C:/Profiles/ana",
@@ -2095,7 +2099,7 @@
       }
     },
     {
-      "name": "AT-10: home",
+      "name": "AT-5: home",
       "snapshot": {
         "folder": "/u/ana",
         "home": "/u/ana",
@@ -2141,7 +2145,7 @@
       }
     },
     {
-      "name": "AT-11: a folder directly in the filesystem root is no container unless it is home",
+      "name": "AT-12: a folder directly in the filesystem root is no container unless it is home",
       "snapshot": {
         "folder": "/srv",
         "home": "/u/ana",
@@ -2187,7 +2191,7 @@
       }
     },
     {
-      "name": "AT-11: a folder directly in a Windows drive root",
+      "name": "AT-12: a folder directly in a Windows drive root",
       "snapshot": {
         "folder": "C:/work",
         "home": "C:/Profiles/ana",
@@ -2228,7 +2232,7 @@
       }
     },
     {
-      "name": "AT-7: a hidden folder in a Windows home",
+      "name": "AT-9: a hidden folder in a Windows home",
       "snapshot": {
         "folder": "C:/Profiles/ana/.config/tool",
         "home": "C:/Profiles/ana",
@@ -2267,7 +2271,7 @@
       }
     },
     {
-      "name": "AT-10: a folder right under a Windows home",
+      "name": "AT-5: a folder right under a Windows home",
       "snapshot": {
         "folder": "C:/Profiles/ana/projects",
         "home": "C:/Profiles/ana",
@@ -2306,7 +2310,7 @@
       }
     },
     {
-      "name": "AT-10: a folder right under home",
+      "name": "AT-5: a folder right under home",
       "snapshot": {
         "folder": "/u/ana/work",
         "home": "/u/ana",
@@ -2352,7 +2356,7 @@
       }
     },
     {
-      "name": "AT-10: a repository right under home",
+      "name": "AT-5: a repository right under home",
       "snapshot": {
         "folder": "/u/ana/scratch",
         "home": "/u/ana",
@@ -2403,7 +2407,7 @@
       }
     },
     {
-      "name": "AT-10: a folder holding another Project's folder",
+      "name": "AT-5: a folder holding another Project's folder",
       "snapshot": {
         "folder": "/u/ana/work/group",
         "home": "/u/ana",
@@ -2436,7 +2440,7 @@
       }
     },
     {
-      "name": "AT-11: a new repository: a Project at its top level",
+      "name": "AT-12: a new repository: a Project at its top level",
       "snapshot": {
         "folder": "/u/ana/work/app/src",
         "home": "/u/ana",
@@ -2487,7 +2491,7 @@
       }
     },
     {
-      "name": "AT-11: a worktree of an unknown repository: a Project at its main checkout",
+      "name": "AT-12: a worktree of an unknown repository: a Project at its main checkout",
       "snapshot": {
         "folder": "/u/ana/work/app-wt",
         "home": "/u/ana",
@@ -2538,7 +2542,7 @@
       }
     },
     {
-      "name": "AT-11: a plain folder: a Project at itself",
+      "name": "AT-12: a plain folder: a Project at itself",
       "snapshot": {
         "folder": "/u/ana/work/drafts",
         "home": "/u/ana",
@@ -2584,7 +2588,7 @@
       }
     },
     {
-      "name": "AT-11: a branch decides nothing: the same answer on any branch",
+      "name": "AT-12: a branch decides nothing: the same answer on any branch",
       "snapshot": {
         "folder": "/u/ana/work/app",
         "home": "/u/ana",
@@ -2633,6 +2637,844 @@
       "expected": {
         "outcome": "new",
         "root": "/u/ana/work/app"
+      }
+    },
+    {
+      "name": "AT-0: an empty source",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:s",
+            "folders": [],
+            "sources": [
+              ""
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a Project id of 257 characters",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+            "folders": [],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: an explicit id of 257 characters",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "explicit": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a work record with an empty project",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "",
+            "commonDir": "/u/ana/work/lib/.git"
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: an origin of 4097 characters",
+      "snapshot": {
+        "folder": "/u/ana/work/app",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/app",
+          "commonDir": "/u/ana/work/app/.git",
+          "mainCheckout": "/u/ana/work/app",
+          "origin": "https://github.com/o/rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-0: a work record's origin of 4097 characters",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:notes",
+            "commonDir": "/u/ana/work/lib/.git",
+            "origin": "https://github.com/o/rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+          }
+        ]
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "AT-1: a Project id of 200 astral characters is within the bound (code points, not UTF-16 units)",
+      "snapshot": {
+        "folder": "/u/ana/work/x",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "folders": [],
+            "sources": []
+          }
+        ],
+        "explicit": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "rule": "explicit"
+      }
+    },
+    {
+      "name": "AT-3: the nearest of two nested Project folders, the inner one listed first",
+      "snapshot": {
+        "folder": "/u/ana/work/mono/pkg/a",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:pkg",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono/pkg",
+                "commonDir": "/u/ana/work/mono/pkg/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:mono",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono",
+                "commonDir": "/u/ana/work/mono/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:pkg",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-3: the outer of two nested Projects keeps its folders outside the inner one",
+      "snapshot": {
+        "folder": "/u/ana/work/mono/docs",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:mono",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono",
+                "commonDir": "/u/ana/work/mono/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          },
+          {
+            "id": "project:pkg",
+            "folders": [
+              {
+                "path": "/u/ana/work/mono/pkg",
+                "commonDir": "/u/ana/work/mono/pkg/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:mono",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-3: a Project's own folder under a temporary root still attaches",
+      "snapshot": {
+        "folder": "/private/tmp/notes/a",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:tmpnotes",
+            "folders": [
+              {
+                "path": "/private/tmp/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:tmpnotes",
+        "rule": "folder"
+      }
+    },
+    {
+      "name": "AT-4: a worktree whose main checkout is in a temporary root",
+      "snapshot": {
+        "folder": "/u/ana/work/wt",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/wt",
+          "commonDir": "/tmp/clone/.git",
+          "mainCheckout": "/tmp/clone",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "transient"
+      }
+    },
+    {
+      "name": "AT-5: a home that is a clone of a Project's repository",
+      "snapshot": {
+        "folder": "/u/ana",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana",
+          "commonDir": "/u/ana/.git",
+          "mainCheckout": "/u/ana",
+          "origin": "git@github.com:example-org/fabric.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-5: a repository root that holds a Project's subfolder",
+      "snapshot": {
+        "folder": "/u/ana/work/big",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/big",
+          "commonDir": "/u/ana/work/big/.git",
+          "mainCheckout": "/u/ana/work/big",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:sub",
+            "folders": [
+              {
+                "path": "/u/ana/work/big/apps/sub",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-5: the folder that holds home",
+      "snapshot": {
+        "folder": "/u",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": null,
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason": "container"
+      }
+    },
+    {
+      "name": "AT-6: a remoteless worktree whose main checkout a Project lists without a common dir",
+      "snapshot": {
+        "folder": "/u/ana/work/r-wt",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/r-wt",
+          "commonDir": "/u/ana/work/r/.git",
+          "mainCheckout": "/u/ana/work/r",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:r",
+            "folders": [
+              {
+                "path": "/u/ana/work/r",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:r",
+        "rule": "worktree"
+      }
+    },
+    {
+      "name": "AT-6: a tombstoned main checkout does not keep out a worktree of a Project that keeps the repository",
+      "snapshot": {
+        "folder": "/u/ana/work/wt-b",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/wt-b",
+          "commonDir": "/u/ana/work/r/.git",
+          "mainCheckout": "/u/ana/work/r",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:r",
+            "folders": [
+              {
+                "path": "/u/ana/work/wt-a",
+                "commonDir": "/u/ana/work/r/.git",
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/u/ana/work/r"
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:r",
+        "rule": "worktree"
+      }
+    },
+    {
+      "name": "AT-8: a clone in a tool folder whose owner a Project lists joins by owner",
+      "snapshot": {
+        "folder": "/u/ana/.codex/plug",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/.codex/plug",
+          "commonDir": "/u/ana/.codex/plug/.git",
+          "mainCheckout": "/u/ana/.codex/plug",
+          "origin": "git@github.com:example-org/plug.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:fabric",
+        "rule": "owner"
+      }
+    },
+    {
+      "name": "AT-10: a second clone of a worked repository, by its identity",
+      "snapshot": {
+        "folder": "/u/ana/work/lib-2",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/lib-2",
+          "commonDir": "/u/ana/work/lib-2/.git",
+          "mainCheckout": "/u/ana/work/lib-2",
+          "origin": "git@github.com:someone/lib.git"
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "work": [
+          {
+            "project": "project:notes",
+            "commonDir": "/u/ana/work/lib/.git",
+            "origin": "https://github.com/someone/lib"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "attached",
+        "project": "project:notes",
+        "rule": "work"
+      }
+    },
+    {
+      "name": "AT-12: a tombstone inside the root keeps out only its own folder",
+      "snapshot": {
+        "folder": "/u/ana/work/gone/src",
+        "home": "/u/ana",
+        "tempRoots": [
+          "/tmp",
+          "/private/tmp",
+          "/private/var/folders",
+          "/var/tmp",
+          "/u/ana/.cache",
+          "/u/ana/Library/Caches"
+        ],
+        "git": {
+          "toplevel": "/u/ana/work/gone",
+          "commonDir": "/u/ana/work/gone/.git",
+          "mainCheckout": "/u/ana/work/gone",
+          "origin": null
+        },
+        "projects": [
+          {
+            "id": "project:fabric",
+            "folders": [
+              {
+                "path": "/u/ana/work/fabric",
+                "commonDir": "/u/ana/work/fabric/.git",
+                "origin": "git@github.com:example-org/fabric.git"
+              }
+            ],
+            "sources": [
+              "github.com/example-org"
+            ]
+          },
+          {
+            "id": "project:notes",
+            "folders": [
+              {
+                "path": "/u/ana/work/notes",
+                "commonDir": null,
+                "origin": null
+              }
+            ],
+            "sources": []
+          }
+        ],
+        "tombstones": [
+          "/u/ana/work/gone/x"
+        ]
+      },
+      "expected": {
+        "outcome": "new",
+        "root": "/u/ana/work/gone"
       }
     }
   ]

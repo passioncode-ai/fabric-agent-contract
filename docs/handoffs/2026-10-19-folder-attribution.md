@@ -9,11 +9,11 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
 
 ## Done
 
-- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-11), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
+- `src/folder-attribution.ts`: `attributeFolder` (AT-0 to AT-12), `normalizeOrigin`, `ownerOf`, `isPath`, `under`, and
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for project-observatory-contract to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 20 origin and 53 attribution cases covering every AT row, a repository, a
+  nothing imported from the module): 21 origin and 72 attribution cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, POSIX and Windows paths.
 - Fixtures: positive `folder-attribution-snapshot`, negative `folder-attribution-relative-folder`, semantic
@@ -25,9 +25,26 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
 ## Decisions
 
 DEC-0089 and its *Choices made in implementation*: segment-by-segment paths on the real path; a tombstone covers its
-folder and subfolders and is read at the folder and at the root; the repository identity folds case and keeps group
-paths; a tool's folder is refused after the worktree and repository rows (as Switchboard's SB-131); a temporary folder
-is refused before every row.
+folder and subfolders, refuses the folder (AT-2) and a new Project at a tombstoned root (AT-11), and does not refuse a
+worktree of a repository another Project keeps; a listed folder is attached before the temporary refusal; containers
+(with the ancestors of home) are refused before every Git row and skipped as listed ancestors; the repository identity
+folds case and keeps group paths; a tool's folder is refused after the owner row (as Switchboard's SB-131); work
+records match by common dir or by identity; a failed Git probe is not `git: null`.
+
+For `project.attribute` (D4) the refusal reasons map one to one: `transient`, `tombstoned`, `container`, `tool`; a tie
+is `ambiguous` with its Projects; a bad snapshot is `input-invalid`. project-observatory-contract names them from
+`folder-attribution.schema.json#/$defs/answer`.
+
+## Readings
+
+The first unit and product readings of `bfca2a6` failed it. The order was AT-0 to AT-11 with the temporary refusal
+first, containers last and a tombstone read at the root before every attach row: a Project kept under a temporary root
+was refused, a home that is a clone of a Project's repository was attached to it, a worktree of a Project whose main
+checkout another Project tombstoned was refused, the outer of two nested Projects lost its folders to the root rule,
+an identity without work records' origin could not join a second clone, bounds were unchecked against the schema and a
+deep path could overflow the stack. The fix round reordered to AT-0 to AT-12 (above), added bounds in code points, the
+work record's origin, the ancestors of home as containers, a loop instead of a spread, the scp form's query and
+fragment cut, and 19 vectors for those cases; the docs now give each product's measured change.
 
 ## Plants
 
@@ -35,6 +52,13 @@ Each clause and row was removed or loosened once and the focused tests (`test/fo
 `test/fixtures.test.ts`) were run: 30 plants, 28 killed on the first pass; the two survivors were closed with vectors (a
 removed worktree whose main checkout is a Project's, A-06; a worktree whose main checkout is in a tool folder, A-13),
 then killed.
+
+The fix round planted 18 more, one per new clause (the listed ancestor skipping containers, the ancestors of home, a
+folder right under home, the nearest strictly, the temporary root, a container's own root, the main checkout row, work
+by identity, the tool root, the tombstoned root, a tombstone read early at the root, the order of the folder and
+temporary rows, containers before the Git rows, the tool row after the owner row, the scp query, the work record's
+origin): 16 killed on the first pass; the two survivors (an id counted in UTF-16 units, an unbounded work origin) were
+closed with vectors, then killed.
 
 ## Checks
 

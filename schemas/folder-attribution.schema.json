@@ -154,10 +154,17 @@
               },
               "commonDir": {
                 "$ref": "#/$defs/path"
+              },
+              "origin": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 4096
               }
             }
           },
-          "description": "A coding agent of project changed the repository with this common dir from inside that project's folder."
+          "description": "A coding agent of project changed this repository (its common dir, and its remote.origin.url when it has one) from inside that project's folder."
         },
         "tombstones": {
           "type": "array",

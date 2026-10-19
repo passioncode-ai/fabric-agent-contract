@@ -5654,27 +5654,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
      `tempRoots`, `git` or `null`, `projects`, `work?`, `tombstones?`, `explicit?`;
      `folder-attribution.schema.json`), answering `attached` (with its rule), `new` (with its root), `refused` (with
-     its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`, in the order AT-0 to AT-11: an explicit
-     attach; a temporary folder refused; a tombstone refused; the folder or its nearest listed ancestor; the same Git
-     common dir; the same repository identity; a tool's folder refused; the origin's owner a Project lists; a work
-     record; a container refused; else a new Project at the main checkout, or at the folder without Git. A tie at one
-     row is `ambiguous` and attributes nothing. A branch decides nothing.
+     its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`, in the order AT-0 to AT-12: a fault; an
+     explicit attach; a tombstone on the folder refused; the folder or its nearest listed ancestor; a temporary folder
+     or root refused; a container root refused; the same Git common dir or the main checkout; the same repository
+     identity; the origin's owner a Project lists; a tool's folder refused; a work record (by common dir or by
+     identity); a tombstoned root refused; else a new Project at the main checkout, or at the folder without Git. A tie
+     at one row is `ambiguous` and attributes nothing. A branch decides nothing.
   2. **The repository identity** `normalizeOrigin`: `host/path` in lower case, from `http`, `https`, `ssh`, `git`,
      `git+ssh`, `git+https` URLs or the scp form; credentials, port, query, fragment and one `.git` dropped; a host
      with a dot and at least two path segments. The owner is every segment but the last.
-  3. **Containers:** the filesystem or a drive root, home, a folder right under home, and a folder that holds another
-     Project's folder; never a Project and never an ancestor a folder joins. A temporary or cache root joins nothing; a
-     tool's folder (a hidden folder in home, `Library`, `AppData`) joins a known repository only.
+  3. **Containers:** the filesystem or a drive root, home, an ancestor of home, a folder right under home, and a folder
+     that holds another Project's folder; never a Project, never attached by a Git row and never an ancestor a folder
+     joins. A temporary or cache root joins only a Project that lists the folder; a tool's folder (a hidden folder
+     directly in home, `Library`, `AppData`) joins a known repository only by worktree, repository or owner.
   4. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
      `attributeFolder`'s.
 - **Choices made in implementation** (the run's D2 left them open):
   - paths compare segment by segment and as written; the product resolves the real path (links, case) first;
-  - a tombstone covers its folder and its subfolders, and refuses when either the folder or the root it would be
-    attached at is under it; an explicit attach clears it;
-  - the repository identity folds case for the whole path (Switchboard folded owner and name) and keeps group paths
-    (Fabric did); it is not DEC-0076's normal form, which compares URIs;
-  - a tool's folder is refused after the worktree and repository rows, so a worktree a coding agent keeps there joins,
-    as Switchboard's SB-131 does; a temporary folder is refused before every row;
+  - a tombstone covers its folder and its subfolders and is scoped to them: it refuses the folder (AT-2) and a new
+    Project at a tombstoned root (AT-11), but not a worktree or clone of a repository another Project keeps; an
+    explicit attach clears it;
+  - a folder a Project lists is attached before the temporary refusal, so a Project kept under a temporary root keeps
+    working (D2's "already belongs" first, as Switchboard does); nothing else joins there;
+  - containers are refused before every Git row, so a home that is a clone, or a repository root that holds a Project's
+    subfolder, is not attached (Fabric and Switchboard refused them when attaching); the nearest listed ancestor skips
+    containers, so the outer of two nested Projects keeps its own folders;
+  - the repository identity folds case for the whole path (GitHub, GitLab and Bitbucket route a path regardless of it;
+    only Switchboard folded, owner and name) and keeps group paths (Fabric did); it is not DEC-0076's normal form,
+    which compares URIs; on a case-sensitive server two repositories differing only in case read as one, accepted;
+  - a tool's folder is refused after the owner row, so it joins a known repository but never by work and never as a new
+    Project, as Switchboard's SB-131;
+  - a work record carries the common dir and, when it has one, the raw origin, so a second clone joins by work;
+  - a Git probe that fails is not `git: null`: the product does not attribute until it can read the facts;
   - `ambiguous` lists the Projects in the snapshot's order.
 - **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across
   Fabric, Switchboard and Observatory; measured that day, the three disagreed on four cases (org-index run index).

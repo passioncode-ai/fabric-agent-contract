@@ -31,7 +31,7 @@ describe("the vectors (DEC-0089)", () => {
   });
   it("covers every AT row", () => {
     const rows = new Set((vectors.attribution as Json[]).map((entry) => /^AT-[0-9]+/.exec(entry.name)?.[0]));
-    for (let row = 0; row <= 11; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
+    for (let row = 0; row <= 12; row += 1) expect(rows.has(`AT-${row}`), `AT-${row}`).toBe(true);
   });
   it("hold the same answers in every time zone", () => {
     for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
@@ -47,6 +47,15 @@ describe("the schema (DEC-0089)", () => {
       if (!("fault" in entry.expected)) expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(true);
       expect(valid("#/$defs/answer", entry.expected), entry.name).toBe(true);
     }
+  });
+  it("refuses every bound the reference refuses (the retro's standing instruction)", () => {
+    for (const entry of (vectors.attribution as Json[]).filter((e) => /empty source|257 characters|empty project|4097 characters/.test(e.name))) {
+      expect(entry.expected, entry.name).toEqual({ fault: "input-invalid" });
+      expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(false);
+    }
+    const astral = { folder: `/${"\u{1F600}".repeat(2100)}`, home: "/u/ana", tempRoots: [], git: null, projects: [] };
+    expect(valid("#/$defs/snapshot", astral)).toBe(true);
+    expect("fault" in attributeFolder(astral)).toBe(false);
   });
   it("refuses a snapshot the reference refuses for its shape", () => {
     for (const entry of (vectors.attribution as Json[]).filter((e) => e.name.startsWith("AT-0: a") && /relative|trailing|\.\./.test(e.name))) {
@@ -76,6 +85,10 @@ describe("totality: every function answers and never throws", () => {
       expect(() => normalizeOrigin(a)).not.toThrow();
       expect(() => attributeFolder({ folder: "/a/b", home: "/h", tempRoots: [], git: a, projects: [] })).not.toThrow();
     }
+  });
+  it("answers a snapshot with very many matching folders without overflowing the stack", () => {
+    const projects = Array.from({ length: 14 }, (_, n) => ({ id: `p:${n}`, folders: Array(10000).fill({ path: "/u/ana/work/s", commonDir: null }), sources: [] }));
+    expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
   });
   it("reads no inherited member", () => {
     const inherited = Object.create({ folder: "/a/b", home: "/h", tempRoots: [], git: null, projects: [] }) as Json;

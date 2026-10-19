@@ -33,7 +33,16 @@ and storage (each product writes only its own store, D5). This page decides whic
 | `explicit` | optional: a Project a person or agent attaches the folder to |
 
 Paths compare segment by segment and as written: `/a/bc` is not under `/a/b`, and the product resolves case and links
-before it builds the snapshot. A branch is read by no rule: a branch is the same repository.
+before it builds the snapshot. A branch is read by no rule: a branch is the same repository. Gathering it:
+
+- **A Git probe that fails or times out is not "no Git".** A product that cannot read the Git facts does not attribute
+  the folder (it tries again later); passing `git: null` would make a subfolder of a repository a plain-folder Project.
+- **`origin` is the raw `remote.origin.url`.** A stored identity (`host/owner/name`) is not a URL and has no identity
+  here, so a product that kept only its own key re-reads the remote or keeps the raw URL beside it.
+- **A worktree of a bare repository** has no working tree of its own: its `mainCheckout` is the bare repository's folder
+  (the common dir), and the container and tombstone rows read that folder.
+- **Work records** carry the repository's common dir and, when it has one, its raw `origin`, so a second clone of a
+  repository a Project's agent worked in joins by work too.
 
 ## The repository identity
 
@@ -44,33 +53,49 @@ has at least two segments: `owner/name`, or a group path such as `group/sub/name
 or anything else has no identity. The owner (`ownerOf`) is every segment but the last.
 
 This is not DEC-0076's normal form: that one compares URIs for equality and keeps the path's case. A repository identity
-folds case because the hosts that serve these remotes route a path regardless of it, and the three products already
-did (Switchboard lower-cased owner and name, Fabric kept group paths).
+folds case because GitHub, GitLab and Bitbucket route a path regardless of it, so `Example-Org/Fabric` and
+`example-org/fabric` are one repository there. Of the three products only Switchboard folded case (owner and name);
+Fabric folds the host only and keeps group paths, and Observatory keeps case. The cost is accepted: on a server whose
+paths are case-sensitive, two repositories that differ only in case read as one. A product that stored a key in another
+form normalizes it again when it adopts this decision.
 
 ## The order
 
-`attributeFolder` answers in this order and never throws:
+`attributeFolder` answers in this order and never throws. The *root* is the folder a new Project would start at: the
+main checkout, or the folder itself without Git.
 
 | Row | Answer | When |
 |---|---|---|
-| AT-0 | `{fault: "input-invalid"}` | the snapshot is not of the schema's shape (a path not in the form above, Git facts whose top level does not hold the folder, two Projects with one id, a work record without a common dir), or `explicit` names no Project |
+| AT-0 | `{fault: "input-invalid"}` | the snapshot is not of the schema's shape (a path not in the form above, a Project id or `explicit` of more than 256 characters, an empty source, an origin of more than 4096, all counted in code points; Git facts whose top level does not hold the folder; two Projects with one id; a work record without a Project or a common dir), or `explicit` names no Project |
 | AT-1 | attached, `explicit` | `explicit` names a Project, whatever else holds: an explicit attach also clears a tombstone |
-| AT-2 | refused, `transient` | the folder is under a temporary or cache root: an agent's scratch worktree or a tool's cache clone comes and goes |
-| AT-3 | refused, `tombstoned` | the folder, or the root it would be attached at, is at or under a tombstone; a tombstone keeps its own folder out, not every clone of its remote |
-| AT-4 | attached, `folder` | the folder, or its nearest ancestor a Project lists, belongs to that Project; a container is never such an ancestor |
-| AT-5 | attached, `worktree` | a Project's folder has the same Git common dir |
-| AT-6 | attached, `repository` | a Project's folder has the same repository identity |
-| AT-7 | refused, `tool` | the folder or its root is in a tool's own folder: a hidden folder directly in home, `Library` or `AppData` |
+| AT-2 | refused, `tombstoned` | the folder is at or under a tombstone |
+| AT-3 | attached, `folder` | the folder, or its nearest ancestor a Project lists, belongs to that Project; a root, home, an ancestor of home or a folder right under home is never such an ancestor (the outer of two nested Projects keeps its folders outside the inner one) |
+| AT-4 | refused, `transient` | the folder or its root is under a temporary or cache root |
+| AT-5 | refused, `container` | the root is a filesystem or drive root, home, an ancestor of home, a folder right under home, or a folder that holds another Project's folder |
+| AT-6 | attached, `worktree` | a Project's folder has the same Git common dir, or is the main checkout |
+| AT-7 | attached, `repository` | a Project's folder has the same repository identity |
 | AT-8 | attached, `owner` | the repository's owner is a source a Project lists |
-| AT-9 | attached, `work` | a work record names the repository's common dir for a Project |
-| AT-10 | refused, `container` | the root is a container: the filesystem or a drive root, home, a folder right under home, or a folder that holds another Project's folder |
-| AT-11 | `new`, at the root | otherwise: the root is the main checkout (so a subfolder start and a worktree of an unknown repository are rooted at the repository), or the folder itself without Git |
+| AT-9 | refused, `tool` | the folder or its root is in a tool's own folder: a hidden folder directly in home, `Library` or `AppData` |
+| AT-10 | attached, `work` | a work record names this repository (its common dir, or its identity) for a Project |
+| AT-11 | refused, `tombstoned` | the root is at or under a tombstone: no new Project is made there |
+| AT-12 | `new`, at the root | otherwise: so a subfolder start and a worktree of an unknown repository are rooted at the repository, and a folder without Git at itself |
 
 **A tie attributes nothing.** Two Projects matching at one row answer `{outcome: "ambiguous", rule, projects}` with
 both, in the snapshot's order, and the product reports it rather than choosing.
 
-So a tool's folder still joins a known repository (a worktree a coding agent keeps in `~/.codex/worktrees`, a clone in a
-plugin folder), but never makes a Project and never joins by owner or work. And a temporary folder joins nothing.
+**Where the order departs from D2's list, and why** (each a choice of DEC-0089):
+
+- **The folder's own Project first, then the temporary refusal (AT-3, AT-4).** D2 ranks "already belongs to a Project"
+  first, as Switchboard does: a Project that lives under a temporary root keeps working. A folder nobody lists there
+  joins nothing, a worktree whose main checkout is there neither.
+- **Containers before every attach row (AT-5).** D2 refuses them and never creates them, and Fabric and Switchboard both
+  refuse them when attaching today: a home that is a clone of a Project's repository, or a repository root that holds a
+  Project's subfolder, is not attached by worktree or repository.
+- **A tombstone is scoped to its folder (AT-2, AT-11).** It keeps the folder and its subfolders out of every row, and
+  keeps a new Project from starting at a tombstoned root; it does not keep out a worktree of a Project that keeps the
+  repository (D2: "scoped to the folder, not to every clone").
+- **A tool's folder after the owner row (AT-9).** As Switchboard's SB-131: a tool's folder joins a known repository by
+  worktree, repository or owner, but never by work and never as a new Project.
 
 ## Semantic rules
 
@@ -83,16 +108,22 @@ Fixtures: `fixtures/positive/folder-attribution-snapshot.json`, `fixtures/negati
 
 ## Compatibility
 
-New: no document changes and no product is refused. Each product's attribution changes where its own rules differed
-(the run's table): Fabric's owner and work rules and its subfolder start, Switchboard's plain folder, Observatory's
-scan by any host. `contractVersion` stays `0.1.0`.
+New: no document changes and no product is refused. Each product's answers change where its rules differed from the
+table, and each adopts by running the vectors; the rows below are the changes measured on 2026-10-19 (the run index and
+the products' code). `contractVersion` stays `0.1.0`.
 
 ## Who adopts it
 
-- **Fabric** runs the vectors in its gate (CO-331): the subfolder start at the Git top level and the scoped tombstone
-  (landed at Fabric `838d4986`), the owner and work rules (CO-329), and a plain folder as its own Project.
-- **Fabric Switchboard** runs the vectors in `./scripts/check.sh` (SB-141): a plain folder as its own Project.
-- **Project Observatory** runs the vectors in its engine's scan and in `project.attribute` (D4), for any host.
+- **Fabric** (CO-331, CO-329) runs the vectors in its gate. Owed: a tombstone that covers subfolders (today an exact
+  path, so it fails "AT-2: a subfolder of a tombstoned folder") and that does not refuse an attach by worktree; the
+  temporary (AT-4) and tool (AT-9) refusals; the owner and work rows (AT-8, AT-10); the repository identity folding the
+  whole path's case, with its stored `remote_key` rows normalized again; not attributing when its Git probe times out.
+  Its plain folder as its own Project and its subfolder start at the Git top level already match (CO-330, `f7c71cba`).
+- **Fabric Switchboard** (SB-141) runs the vectors in `./scripts/check.sh`. Owed: a plain folder as its own Project;
+  group paths of three or more segments; a folder right under home and the ancestors of home refused; the nearest of
+  nested Project folders and their ties (AT-3); its CLI text on containers updated with them.
+- **Project Observatory** (the engine) runs the vectors in its scan and in `project.attribute` (D4): plain folders,
+  group paths, any host, and the repository identity's case.
 - **fabric-workspace** names this page from the knowledge page that owns the cross-product fact.
 
 The board row is CT-57.
