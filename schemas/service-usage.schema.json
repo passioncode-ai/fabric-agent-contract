@@ -192,6 +192,10 @@
         "unpricedCalls": {
           "$ref": "#/$defs/count"
         },
+        "unmeasuredCalls": {
+          "$ref": "#/$defs/count",
+          "description": "Calls whose token count the service could not establish (a job result's null count, DEC-0087): while above 0 the token totals are a lower bound. Absent is 0 (DEC-0091)."
+        },
         "inputTokens": {
           "$ref": "#/$defs/count"
         },

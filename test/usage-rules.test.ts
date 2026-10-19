@@ -119,3 +119,20 @@ describe("FAC-SEM-025: calls by project and task run", () => {
     expect(found.map((finding) => finding.instancePath)).toEqual(["/days/0/date", "/days/1/calls", "/days/0/date"]);
   });
 });
+
+describe("FAC-SEM-025: calls whose tokens are unknown (DEC-0091)", () => {
+  const unmeasured = read("service-usage-unmeasured.json");
+  const day = (over: Json, row: Json) => ({ ...unmeasured, days: [unmeasured.days[0], { ...unmeasured.days[1], ...over, byModel: [unmeasured.days[1].byModel[0], { ...unmeasured.days[1].byModel[1], ...row }] }] });
+  it("passes a day whose unmeasuredCalls is the sum of its models', and a report that names none", () => {
+    expect(paths(unmeasured)).toEqual([]);
+    expect(paths(read("service-usage.json"))).toEqual([]);
+  });
+  it("refuses more calls with unknown tokens than calls, on a row and on the day", () => {
+    expect(paths(day({ unmeasuredCalls: 3 }, { unmeasuredCalls: 3 }))).toEqual(["FAC-SEM-025 /days/1/byModel/1/unmeasuredCalls"]);
+    expect(paths(day({ unmeasuredCalls: 6 }, { unmeasuredCalls: 2 }))).toContain("FAC-SEM-025 /days/1/unmeasuredCalls");
+  });
+  it("refuses a day's unmeasuredCalls that is not the sum of its models', an absent one counting 0", () => {
+    expect(paths(day({ unmeasuredCalls: 2 }, {}))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
+    expect(paths(day({ unmeasuredCalls: undefined }, {}))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
+  });
+});

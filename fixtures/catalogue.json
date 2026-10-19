@@ -170,6 +170,7 @@
   {"name": "openrouter-attribution-unknown-category", "schema": "openrouter-attribution.schema.json", "path": "negative/openrouter-attribution-unknown-category.json", "valid": false, "keyword": "enum"},
   {"name": "openrouter-attribution-three-categories", "schema": "openrouter-attribution.schema.json", "path": "negative/openrouter-attribution-three-categories.json", "valid": false, "keyword": "maxItems"},
   {"name": "service-usage", "schema": "service-usage.schema.json", "path": "positive/service-usage.json", "valid": true},
+  {"name": "service-usage-unmeasured", "schema": "service-usage.schema.json", "path": "positive/service-usage-unmeasured.json", "valid": true},
   {"name": "service-usage-negative-cost", "schema": "service-usage.schema.json", "path": "negative/service-usage-negative-cost.json", "valid": false, "keyword": "minimum"},
   {"name": "service-usage-not-usd", "schema": "service-usage.schema.json", "path": "negative/service-usage-not-usd.json", "valid": false, "keyword": "const"},
   {"name": "service-usage-model-without-basis", "schema": "service-usage.schema.json", "path": "negative/service-usage-model-without-basis.json", "valid": false, "keyword": "required"},
