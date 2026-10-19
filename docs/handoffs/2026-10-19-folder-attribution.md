@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 25 origin, 119 attribution and 15 record cases covering every AT row, a repository, a
+  nothing imported from the module): 28 origin, 130 attribution and 18 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -100,6 +100,18 @@ the schema's shape, Compatibility naming the sessions refused after adoption and
 page renamed `folder-attribution.md` (the word "attribution" also names devices.md's and OpenRouter's), and
 `explainFolder` in the conformance row's evidence.
 
+The sixth readings of `c4bdbfd` and `27ab6f2` (the operator's D3/D4 correction landed between them): the seam reading
+passed with risks; the unit and product readings failed it. A recorded outer clone took a nested Project's place by
+identity (AT-3 decided by common dir first); a declared container inside a Project's folder was attached by AT-3 while
+DEC-0089 item 3 said a broad folder is attached only explicitly; the list of results against the operator's words
+missed a worktree or clone inside another Project's folder; a record kept the remote URL with any token in it; the Done
+counts were stale. The sixth fix round: `recordOrigin` (a record keeps the remote without credentials, `null` when a
+secret's shape is left); AT-3 by the nearest place across common dir and identity, the same common dir at equal depth;
+a declared container ends a listed folder's reach (AT-3), and AT-2 skips broad holders; a path ending in `/.git` has no
+identity; the widened results list and the undeclared worktrees folder written out; the record round trip over every
+attached, new and explicit vector; Switchboard's duty to ask Fabric's capability; the code-point bounds counted only
+between `max` and `2 * max` units (10,000 sources of 4,096 characters had cost a third of a second).
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -139,10 +151,15 @@ survivor was closed with a vector ("AT-3: a folder listed below a tombstone gets
 lists the tombstone's parent"), then killed. 93 plants in all (30, 18, 12, 13, 15, 5), one equivalent, every other one
 killed.
 
+The sixth fix round planted 11 (the record's raw origin, an http user kept, a query kept, an scp password kept, a
+secret-shaped leftover kept, identity winning at equal depth, common dir always first, no container cut, the
+shallowest cut, AT-2 counting broad holders, AT-3's repository holder ignoring the cut): 7 killed on the first pass;
+the 4 survivors were closed with two vectors and two tests, then killed. 104 plants in all.
+
 ## Checks
 
-`pnpm run check` at the fifth fix round, each step exiting 0: typecheck; 77 files, 5968 tests, branches 7731 / 7804
-with `src/folder-attribution.ts` at 284 / 284 (vectors: 27 origin, 122 attribution, 15 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the sixth fix round, each step exiting 0: typecheck; 77 files, 5983 tests, branches 7778 / 7851
+with `src/folder-attribution.ts` at 331 / 331 (vectors: 28 origin, 130 attribution, 18 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in
@@ -159,7 +176,8 @@ The same report was posted on that thread (message `95a49696`).
 - **Worked on:** CT-56 (DEC-0086), CT-55 (DEC-0087), CT-59 (DEC-0088), CT-57 (DEC-0089), CT-58 (brief drafted).
 - **Done:** #117 `b89cb94`; #120 `027a01c` and #121 `ceb5985`; #122 `0752e03` and #123 `0704218`. The contract
   publishes no package: consumers pin a commit, so a merge is the release.
-- **Left:** this PR, then its board messages (thread `617c8cbe`, project-observatory-contract for D4); CT-58 by
+- **Left:** this PR, then its board messages (thread `617c8cbe`; D4 then sat with project-observatory-contract, and the
+  operator moved it to Fabric later that day); CT-58 by
   2026-10-27 (thread `6e66a023`).
 - **Blocked by:** no other project; the fifth reading stopped on the model session limit (resets 14:10 Europe/Warsaw).
 - **When it can ship:** this PR when two consecutive readings find nothing that blocks it, targeted 2026-10-22.
