@@ -13,7 +13,7 @@ CT-57, branch `agent/ct57-folder-attribution-20261019`.
   `FAC-SEM-121` (kind `folder-attribution`), dispatched from `src/semantic-rules.ts`; total, never throws.
 - `schemas/folder-attribution.schema.json`: the snapshot and the answer, for Fabric's session-start capability to refer to.
 - `fixtures/vectors/folder-attribution.json` (`tools/vectors/folder-attribution.ts --write`, expected values by hand,
-  nothing imported from the module): 28 origin, 131 attribution and 18 record cases covering every AT row, a repository, a
+  nothing imported from the module): 28 origin, 133 attribution and 24 record cases covering every AT row, a repository, a
   worktree, a clone on another branch, a subfolder start, a plain folder, containers, a tool's folder, a temporary folder,
   an owner, work, a tie at each rank, tombstones and an explicit attach, nested Projects, bare repositories, declared
   containers, POSIX and Windows paths.
@@ -119,6 +119,18 @@ fix round: AT-6 and AT-7 weigh the nearest place across common dir and identity 
 over 6,000 random worlds (worktrees, clones, nested Projects, containers, tombstones) that fails on the previous module;
 a vector for the case; every result the page lists against the operator's words probed and confirmed.
 
+The eighth readings of `c22677d` (unit and product; the account's limit had reset): both failed it. A start in a
+subfolder of a worktree or clone right under home attached by AT-6 or AT-7, then made the checkout a Project's folder;
+recordOrigin ended an scp password at its first `@` and kept the rest; the list against the operator's words missed a
+worktree whose main checkout is kept under a temporary root (the third time that list was found incomplete); the record
+vectors lacked forms the page said they held; the baseline said one equivalent plant; a wall-clock timing test failed
+under load. The eighth fix round, the list rebuilt rather than patched (the loop guard): the results are listed by row,
+so the list is whole by construction; AT-5 reads a worktree's own top level and a root's exemption needs a Project
+folder of the repository inside it; recordOrigin reads the scp host from its last `@`, records `null` for a URL with no
+identity, and a broad record path records nothing; record vectors for every form; the growth tests (four times the
+input, at most eight times the cost plus 150 ms, the best of five) instead of the clock; `fabric.project.resolve`
+named, and the local fallback cited to its board message.
+
 ## Plants
 
 Each clause and row was removed or loosened once and the focused tests (`test/folder-attribution.test.ts`,
@@ -166,10 +178,14 @@ the 4 survivors were closed with two vectors and two tests, then killed. 104 pla
 The seventh fix round planted 3 (common dir first again, identity winning at equal depth, the owners clause): 2
 killed; the third was equivalent and its redundant clause was removed. 107 plants in all, two equivalent.
 
+The eighth fix round planted 6 (a worktree's top level under home ignored, the root exempted by identity, the scp user
+ended at the first `@`, a URL without identity kept, a broad record kept, the quadratic AT-2 against the growth test):
+all 6 killed on the first pass. 113 plants in all, two equivalent.
+
 ## Checks
 
-`pnpm run check` at the seventh fix round, each step exiting 0: typecheck; 77 files, 5985 tests, branches 7779 / 7852
-with `src/folder-attribution.ts` at 332 / 332 (vectors: 28 origin, 131 attribution, 18 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
+`pnpm run check` at the eighth fix round, each step exiting 0: typecheck; 77 files, 5993 tests, branches 7788 / 7861
+with `src/folder-attribution.ts` at 341 / 341 (vectors: 28 origin, 133 attribution, 24 record); UX lint passed; documentation checks passed, lint-md 0 errors; privacy-check 0
 findings, run again after the commit.
 
 The first push (`7146c7c`) carried 439 privacy findings: P3, the shape of a home path (`/home/<name>`, `/Users/<name>`) in

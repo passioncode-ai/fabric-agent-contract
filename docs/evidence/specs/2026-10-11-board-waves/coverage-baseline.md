@@ -190,7 +190,7 @@ set and reaches every branch, so its floor is 100. 56 plants, one equivalent
 (`docs/evidence/specs/2026-10-19-job-limits/plants.md`). Measured with `vitest run --coverage`: 76 files, 5759 tests,
 whole set 7445 / 7518 (99.02 %).
 
-**DEC-0089 (2026-10-19).** `src/folder-attribution.ts` (332 / 332 after the readings' seventh fix round) is new, joins
-the measured set and reaches every branch, so its floor is 100. 107 plants, two equivalent, each other killed after its
+**DEC-0089 (2026-10-19).** `src/folder-attribution.ts` (341 / 341 after the readings' eighth fix round) is new, joins
+the measured set and reaches every branch, so its floor is 100. 113 plants, two equivalent, each other killed after its
 survivors were closed (`docs/handoffs/2026-10-19-folder-attribution.md`). Measured with `vitest run --coverage`: 77
-files, 5985 tests, whole set 7779 / 7852 (99.07 %).
+files, 5993 tests, whole set 7788 / 7861 (99.07 %).
