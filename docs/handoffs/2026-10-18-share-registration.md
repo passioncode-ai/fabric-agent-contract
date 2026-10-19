@@ -59,7 +59,10 @@ branches with `src/share-registration.ts` at 271 / 271; UX lint passed; document
 privacy-check 0 findings, on the code of `282f31c`. A third reading of `b0a3307..282f31c` found the vectors' description
 still saying a floored time is written in UTC, and five wording gaps; the commit after it fixes them with one more tie
 vector (a record revocation and a delta entry equal at the millisecond, plant P-126). `pnpm run check` then exits 0:
-75 files, 5592 tests, the other steps as above.
+75 files, 5592 tests, the other steps as above. A fourth reading of `282f31c..c4f45d0` found nothing that blocks; its
+two gaps were closed (a vector for an unmoved start at an offset, plant P-127; the weekly resend's exception in
+conformance and the code comment; Fabric's `revokedAt` a duty, the hub's a SHOULD), and `pnpm run check` exits 0 with
+5593 tests.
 
 ## The fix round (2026-10-18 to 2026-10-19)
 

@@ -121,8 +121,8 @@ readable time can be carried, a year 9999 one at an offset included; a start rou
 floor, the first listed among equals: the record's revocations in their order, then the applied delta entries in theirs. So a revoked share is withdrawn whatever the number of fraction digits its
 revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9995Z` is carried as the next day's
 `00:00:00.000Z`), so that day's usage is `before-start`; a grant that passed `FAC-SEM-117` never has such a start. `FAC-SEM-117` makes the writer's side the simple one: a share grant into an organization
-carries its window with at most three fraction digits, and Fabric and the hub SHOULD write its revocations' `revokedAt`
-so (revocation-delta.md); the derivation floors whatever they write.
+carries its window with at most three fraction digits, Fabric writes its revocations' `revokedAt` so, and the hub
+SHOULD (revocation-delta.md); the derivation floors whatever they write.
 
 A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a

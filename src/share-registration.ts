@@ -16,7 +16,10 @@ import { strictTime } from "./rfc3339.js";
  */
 export const SHARE_REGISTRATION_TYPE = "share-registration/1";
 export const SHARE_REGISTRATION_RECEIPT_TYPE = "share-registration-receipt/1";
-/** A node re-sends each active registration at least this often (SHOULD), so a receiver that lost it learns it again. */
+/**
+ * A node re-sends each active registration at least this often (SHOULD), so a receiver that lost it learns it again;
+ * never one a typed refusal answered, which waits for the record to change.
+ */
 export const RESEND_SECONDS = 7 * 24 * 60 * 60;
 /** The longest refusal message. */
 export const MAX_MESSAGE = 200;

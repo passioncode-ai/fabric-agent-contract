@@ -5423,7 +5423,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     window empty once carried, or a revocation with no readable `revokedAt` registers nothing and reports a third
     degraded code, `share-grant-unreadable`; an `agentRef` that is no agentRef is `share-grant-agents`;
   - the writer's side is the simple one: `FAC-SEM-117` refuses an organization share grant whose window carries more
-    than three fraction digits, and Fabric and the hub SHOULD write its revocations' `revokedAt` with at most three;
+    than three fraction digits, Fabric writes its revocations' `revokedAt` with at most three, and the hub SHOULD;
   - a receiver keeps one held list per organization: a held entry carries no organization, because the user id and the
     grant id are keys inside the organization whose certificate bound the user; `decideShareRegistration` and
     `joinGrantUsage` are given that organization's list;
