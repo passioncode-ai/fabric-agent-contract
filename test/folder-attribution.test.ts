@@ -247,10 +247,12 @@ describe("totality: every function answers and never throws", () => {
   // Linear time, measured by growth rather than by the clock: four times the input may cost at most eight times as much
   // (a quadratic row costs sixteen), the best of five runs each, plus 150 ms for a busy machine's pauses (the quadratic
   // rows these tests were written against cost seconds at the larger size).
-  const linear = (run: (n: number) => void, n: number) => {
+  // `build(n)` makes the input outside the timer and returns the call that is timed.
+  const linear = (build: (n: number) => () => void, n: number) => {
     const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => {
+      const run = build(size);
       const started = performance.now();
-      run(size);
+      run();
       return performance.now() - started;
     }));
     const small = best(n);
@@ -259,13 +261,20 @@ describe("totality: every function answers and never throws", () => {
   };
   it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
     const slashes = `a${"/".repeat(4094)}b`;
-    linear((n) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(n).fill(slashes) }] }), 2500);
-    linear((n) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] }), 500);
+    linear((n) => {
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(n).fill(slashes) }] };
+      return () => attributeFolder(snapshot);
+    }, 2500);
+    linear((n) => {
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] };
+      return () => attributeFolder(snapshot);
+    }, 500);
   }, 30_000);
   it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
     const at = (n: number) => {
       const folders = [...Array(n - 1).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
-      expect(attributeFolder({ folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(n).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] })).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
+      const snapshot = { folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(n).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
     };
     linear(at, 2500);
   }, 30_000);
@@ -275,7 +284,8 @@ describe("totality: every function answers and never throws", () => {
     const at = (size: number) => {
       const projects = Array.from({ length: size }, (_, n) => ({ id: id(n), folders: [], sources: [] }));
       const work = Array.from({ length: size }, (_, n) => ({ project: id(n), commonDir: `/u/ana/work/r${n}/.git` }));
-      expect(attributeFolder({ folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work })).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
+      const snapshot = { folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
     };
     linear(at, 2500);
   }, 30_000);

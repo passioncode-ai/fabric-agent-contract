@@ -123,7 +123,9 @@ export function recordOrigin(origin: string | null): string | null {
     const scp = /^(?:([^@/\s]+)@)?([^:/\s]+):([^\s]+)$/.exec(value);
     // The host ends the user information at its last `@`, as normalizeOrigin reads it, so no part of a password is kept.
     const host = String(scp?.[2]);
-    if (scp) value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${host.slice(host.lastIndexOf("@") + 1)}:${String(String(scp[3]).split(/[?#]/)[0])}`;
+    // A remote that is not a local path and has no identity cannot be read reliably: nothing of it is kept.
+    if (!scp || normalizeOrigin(value) === undefined) return null;
+    value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${host.slice(host.lastIndexOf("@") + 1)}:${String(String(scp[3]).split(/[?#]/)[0])}`;
   }
   return secretUrl(value) ? null : value;
 }
@@ -348,13 +350,13 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   // listed folders that hold the folder are a chain of its ancestors, so one is below a tombstone exactly when the deepest
   // is: one pass over the folders, then one over the tombstones.
   let deepest: string | undefined;
-  for (const project of projects) for (const entry of project.folders) if (!broad(entry.path) && under(folder, entry.path) && (deepest === undefined || entry.path.length > deepest.length)) deepest = entry.path;
+  const folderCut = cutOf(folder);
+  for (const project of projects) for (const entry of project.folders) if (!broad(entry.path) && reaches(folder, folderCut, entry.path) && (deepest === undefined || entry.path.length > deepest.length)) deepest = entry.path;
   const stoned = tombstones.some((stone) => under(folder, stone as string) && !(deepest !== undefined && deepest !== stone && under(deepest, stone as string)));
   if (stoned) return at(2, { outcome: "refused", reason: "tombstoned" });
   // AT-3: a Project folder holds the folder; when one of the folder's own repository does, the nearest place among that
   // repository's folders decides, by common dir or by identity, the same common dir at equal depth (so recording the
   // outer Project's clone never takes a nested Project's place).
-  const folderCut = cutOf(folder);
   if (anyFolder((entry) => sameRepository(entry) && reaches(folder, folderCut, entry.path))) {
     const common = nearestIn(projects, sameCommon, place);
     const identity = nearestIn(projects, sameIdentity, place);
@@ -370,7 +372,7 @@ export function explainFolder(snapshot: unknown): AttributionExplained {
   // Project folder of the repository anywhere).
   const checkoutTop = git === null ? undefined : (toplevel as string);
   const looseRoot = looseUnderHome(root) && !anyFolder((entry) => sameRepository(entry) && (checkoutTop !== root || under(entry.path, root)));
-  if (broad(folder) || broad(root) || looseUnderHome(folder) || (checkoutTop !== undefined && checkoutTop !== root && looseUnderHome(checkoutTop)) || looseRoot) return at(5, { outcome: "refused", reason: "container" });
+  if (broad(folder) || broad(root) || looseUnderHome(folder) || (checkoutTop !== undefined && checkoutTop !== root && (looseUnderHome(checkoutTop) || declared.has(checkoutTop))) || looseRoot) return at(5, { outcome: "refused", reason: "container" });
   if (git !== null) {
     const top = toplevel as string;
     const atPlace = (found: { owners: Project[]; place: string }, row: number, rule: AttributionRule) => {
