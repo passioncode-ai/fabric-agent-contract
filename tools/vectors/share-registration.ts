@@ -121,13 +121,23 @@ function deriveCases(): Json[] {
     ["degraded: an upper-case hex meta.id registers nothing", record([grant({ id: `urn:fabric:share:${HEX_A.toUpperCase()}` })], one), [], ORG, [], derived([], [{ grantId: `urn:fabric:share:${HEX_A.toUpperCase()}`, code: "share-grant-id" }])],
     ["degraded: two agentRefs under one grant register nothing", record([grant({})], [[placement(A)], [placement(A, CTX, NOTES)]]), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-agents" }])],
     ["degraded: an agentRef that is no agentRef registers nothing", record([grant({})], [[placement(A, CTX, "urn:fabric:agent:Example:inbox")]]), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-agents" }])],
-    ["degraded: a startsAt with four fraction digits cannot be carried", record([grant({ startsAt: "2026-10-12T08:00:00.0001Z" })], one), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-unreadable" }])],
+    ["active: a microsecond window is rounded inward, the start up and the expiry down", record([grant({ startsAt: "2026-10-12T08:00:00.0001Z", expiresAt: "2026-10-26T08:00:00.9999Z" })], one), [], ORG, [], derived([active(A, { startsAt: "2026-10-12T08:00:00.001Z", expiresAt: "2026-10-26T08:00:00.999Z" })])],
+    ["active: a start whose cut digits are all zero is not moved up", record([grant({ startsAt: "2026-10-12T08:00:00.1230000Z" })], one), [], ORG, [], derived([active(A, { startsAt: "2026-10-12T08:00:00.123Z" })])],
+    ["active: a microsecond start at an offset is written in UTC, rounded up", record([grant({ startsAt: "2026-10-12T10:00:00.0005+02:00" })], one), [], ORG, [], derived([active(A, { startsAt: "2026-10-12T08:00:00.001Z" })])],
+    ["active: a window of three fraction digits or fewer is carried as written, its offset kept", record([grant({ startsAt: "2026-10-12T10:00:00.5+02:00" })], one), [], ORG, [], derived([active(A, { startsAt: "2026-10-12T10:00:00.5+02:00" })])],
+    ["active: an expiry whose UTC instant is past year 9999 is carried as written", record([grant({ expiresAt: "9999-12-31T23:00:00-05:00" })], one), [], ORG, [], derived([active(A, { expiresAt: "9999-12-31T23:00:00-05:00" })])],
+    ["degraded: a microsecond window empty once rounded inward cannot be carried", record([grant({ startsAt: "2026-10-12T08:00:00.0001Z", expiresAt: "2026-10-12T08:00:00.0009Z" })], one), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-unreadable" }])],
+    ["degraded: a start on 31 November cannot be read", record([grant({ startsAt: "2026-11-31T08:00:00Z" })], one), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-unreadable" }])],
     ["degraded: a window that ends where it starts cannot be carried", record([grant({ expiresAt: START })], one), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-unreadable" }])],
     ["degraded: revision 0 cannot be carried", record([grant({ revision: 0 })], one), [], ORG, [], derived([], [{ grantId: A, code: "share-grant-unreadable" }])],
     ["withdrawn: the record revokes the grant", record([grant({})], one, [revocation(A, "2026-10-13T10:00:00Z")]), [], ORG, [], derived([withdrawn(A, "2026-10-13T10:00:00Z")])],
     ["withdrawn: a delta entry ahead of the revision revokes the grant", record([grant({})], one), [entry(A, "2026-10-15T07:30:00Z")], ORG, [], derived([withdrawn(A, "2026-10-15T07:30:00Z")])],
     ["withdrawn: of the record's and a delta entry's revocations, the earliest revokedAt", record([grant({})], one, [revocation(A, "2026-10-15T00:00:00Z")]), [entry(A, "2026-10-14T23:59:59.999Z")], ORG, [], derived([withdrawn(A, "2026-10-14T23:59:59.999Z")])],
     ["withdrawn: two revocations at other offsets, the earlier listed first, keep the first", record([grant({})], one, [revocation(A, "2026-10-13T10:00:00+02:00"), revocation(A, "2026-10-13T09:00:00Z")]), [entry(A, "2026-10-13T08:00:00.001Z")], ORG, [], derived([withdrawn(A, "2026-10-13T10:00:00+02:00")])],
+    ["withdrawn: a microsecond revokedAt in the record is floored to milliseconds", record([grant({})], one, [revocation(A, "2026-10-13T10:00:00.123456Z")]), [], ORG, [], derived([withdrawn(A, "2026-10-13T10:00:00.123Z")])],
+    ["withdrawn: a microsecond revokedAt in a delta entry is floored and written in UTC", record([grant({})], one), [entry(A, "2026-10-15T07:30:00.9999995+02:00")], ORG, [], derived([withdrawn(A, "2026-10-15T05:30:00.999Z")])],
+    ["withdrawn: the earliest by instant, a microsecond earlier in a delta entry than in the record", record([grant({})], one, [revocation(A, "2026-10-13T10:00:00.0019Z")]), [entry(A, "2026-10-13T10:00:00.0005Z")], ORG, [], derived([withdrawn(A, "2026-10-13T10:00:00.000Z")])],
+    ["withdrawn: dropped at a microsecond issuedAt, floored", record([], [[]], [], "2026-10-14T09:00:00.0000001Z"), [], ORG, [A], derived([withdrawn(A, "2026-10-14T09:00:00.000Z")])],
     ["withdrawn: a revocation ref spelled otherwise names the grant by normal form", record([grant({})], one, [revocation(`URN:fabric:share:${HEX_A}`, "2026-10-13T10:00:00Z")]), [], ORG, [], derived([withdrawn(A, "2026-10-13T10:00:00Z")])],
     ["withdrawn: a revoked grant registered never before still withdraws (a tombstone at the receiver)", record([grant({ id: B })], [[placement(B)]], [revocation(B, "2026-10-13T10:00:00Z")]), [], ORG, [], derived([withdrawn(B, "2026-10-13T10:00:00Z")])],
     ["active: a revocation of another kind naming the grant's id does not withdraw it", record([grant({})], one, [revocation(A, "2026-10-13T10:00:00Z", "package")]), [], ORG, [], derived([active()])],
@@ -302,21 +312,52 @@ function joinCases(): Json[] {
     ["GJ-5: a day after the withdrawal's UTC day", usage("2026-10-21"), epochBinding(), [withdrawnHeld], stored("after-end")],
     ["GJ-6: the withdrawal's UTC day itself", usage("2026-10-20"), epochBinding(), [withdrawnHeld], joined()],
     // GJ-6
+    ["GJ-6: expiresAt 9999-12-31T23:00:00-05:00, past year 9999 in UTC, joins day 2026-10-15", usage("2026-10-15"), epochBinding(), [heldActive(active(A, { expiresAt: "9999-12-31T23:00:00-05:00" }))], joined()],
     ["GJ-6: the start's UTC day", usage("2026-10-12"), epochBinding(), [held], joined()],
     ["GJ-6: a day inside the window, among two members' registrations", usage("2026-10-15"), epochBinding({ user: { id: OTHER_USER } }), [held, heldActive(active(A, { agentRef: NOTES }), OTHER_USER)], joined(NOTES)]
   ];
   return cases.map(([name, event, bound, registrations, expected]) => ({ name, event, binding: bound, registrations, expected }));
 }
 
+// ---- The sender gate ---------------------------------------------------------------------------------------------
+
+function gateCases(): Json[] {
+  const receipt = (state: string) => ({ status: 200, receipt: { type: RECEIPT, grantId: A, state, digest: `sha256:${"a".repeat(64)}` }, held: {} });
+  const cases: Array<[string, unknown, string]> = [
+    ["no answer yet", undefined, "hold"],
+    ["a receipt, registered", receipt("registered"), "send"],
+    ["a receipt, unchanged", receipt("unchanged"), "send"],
+    ["a receipt, withdrawn: usage before the withdrawal still joins", receipt("withdrawn"), "send"],
+    ["stale-revision: a higher revision is held", refused(409, "stale-revision"), "send"],
+    ["already-withdrawn: the withdrawal is held", refused(409, "already-withdrawn"), "send"],
+    ["revision-conflict", refused(409, "revision-conflict"), "hold-degraded"],
+    ["agent-mismatch: the grant was re-pointed; revoke it and mint a new id", refused(409, "agent-mismatch"), "hold-degraded"],
+    ["wrong-organization: the node sent to another organization", refused(403, "wrong-organization"), "hold-degraded"],
+    ["unassigned-device: no user bound until the device is assigned and enrolled again", refused(403, "unassigned-device"), "hold-degraded"],
+    ["malformed", refused(400, "malformed"), "hold"],
+    ["schema-unsupported", unsupported("share-registration/2"), "hold"],
+    ["a transport refusal", { status: 401, code: "signature-replayed" }, "hold"],
+    ["the receiver's own fault", { fault: "context-invalid" }, "hold"],
+    ["a status 200 without a receipt", { status: 200 }, "hold"],
+    ["a status 200 whose receipt is a registration", { status: 200, receipt: { type: TYPE } }, "hold"],
+    ["a receipt with another status", { status: 201, receipt: receipt("registered").receipt }, "hold"],
+    ["an unknown refusal code", { status: 409, body: { error: { code: "teapot" } } }, "hold"],
+    ["null", null, "hold"],
+    ["a string", "send", "hold"]
+  ];
+  return cases.map(([name, answer, expected]) => (answer === undefined ? { name, expected } : { name, answer, expected }));
+}
+
 /** The vectors as an object. */
 export function shareRegistrationVectors(): Json {
   return {
     about:
-      "Vectors for share-registration/1 (DEC-0086), written by tools/vectors/share-registration.ts, never by hand. grantId: common.schema.json#/$defs/shareGrantId, ok exactly when a share grant id, compared as written. derive: deriveShareRegistrations(record, entries, orgId, previouslyRegistered); a record carries only the members the derivation reads, so a port's derivation must not validate the whole estate record first. intake: decideShareRegistration(held, registration, binding); held is the receiver's list of what it holds per (user, grantId); binding.transport is the verdict of devices.md's transport steps 0 to 8. join: joinGrantUsage(event, binding, registrations); binding is the one recorded for the event's epoch. expected is exactly what the reference returns; a digest is sha256: of the UTF-8 RFC 8785 form of the registration kept. Every case holds in every time zone.",
+      "Vectors for share-registration/1 (DEC-0086), written by tools/vectors/share-registration.ts, never by hand. grantId: common.schema.json#/$defs/shareGrantId, ok exactly when a share grant id, compared as written. derive: deriveShareRegistrations(record, entries, orgId, previouslyRegistered); a record carries only the members the derivation reads, so a port's derivation must not validate the whole estate record first. intake: decideShareRegistration(held, registration, binding); held is the receiver's list of what it holds per (user, grantId); binding.transport is the verdict of devices.md's transport steps 0 to 8. join: joinGrantUsage(event, binding, registrations); binding is the one recorded for the event's epoch; a receiver keeps one held list per organization. gate: gateGrantUsage(answer), the collector's sender gate over the enrollment's latest answer to the grant's registration; a case without answer is no answer yet. A time with more than three fraction digits is carried at millisecond precision: a withdrawal floored, a window rounded inward, written as Date#toISOString does. expected is exactly what the reference returns; a digest is sha256: of the UTF-8 RFC 8785 form of the registration kept. Every case holds in every time zone.",
     grantId: grantIdCases(),
     derive: deriveCases(),
     intake: intakeCases(),
-    join: joinCases()
+    join: joinCases(),
+    gate: gateCases()
   };
 }
 

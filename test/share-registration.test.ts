@@ -17,6 +17,7 @@ import {
   TRANSPORT_REFUSALS,
   decideShareRegistration,
   deriveShareRegistrations,
+  gateGrantUsage,
   isOrgContext,
   isShareGrantId,
   joinGrantUsage,
@@ -82,7 +83,8 @@ describe("the schema (DEC-0086)", () => {
     expect(schema.$defs.registration.properties.context.$ref).toBe("common.schema.json#/$defs/orgContextId");
     expect(schema.$defs.registration.properties.agentRef.$ref).toBe("fabric-package.schema.json#/$defs/agentRef");
     expect(schema.$defs.receipt.properties.digest.$ref).toBe("common.schema.json#/$defs/sha256");
-    expect(schema.$defs.instant.pattern).toBe(read("schemas/entitlement.schema.json").$defs.instant.pattern);
+    // DEC-0085's instant with seconds 00 to 59: no leap second, which date-time admits and strictTime refuses.
+    expect(schema.$defs.instant.pattern).toBe(read("schemas/entitlement.schema.json").$defs.instant.pattern.replace(":[0-9]{2}(", ":[0-5][0-9]("));
   });
 
   it("names nothing a registration must not carry (DEC-0086 item 2)", () => {
@@ -161,6 +163,22 @@ describe("the vectors (DEC-0086)", () => {
 
   it.each(vectors.join as Json[])("join: $name", (entry) => {
     expect(joinGrantUsage(entry.event, entry.binding, entry.registrations)).toEqual(entry.expected);
+  });
+
+  it.each(vectors.gate as Json[])("gate: $name", (entry) => {
+    expect(gateGrantUsage(entry.answer)).toBe(entry.expected);
+  });
+
+  it("gate every answer the intake vectors give as the decision says (DEC-0086 item 6)", () => {
+    const expected: Record<string, string> = {
+      "stale-revision": "send", "already-withdrawn": "send", "revision-conflict": "hold-degraded", "agent-mismatch": "hold-degraded",
+      "wrong-organization": "hold-degraded", "unassigned-device": "hold-degraded", malformed: "hold", "schema-unsupported": "hold"
+    };
+    for (const entry of vectors.intake as Json[]) {
+      const answer = entry.expected as Json;
+      const want = answer.status === 200 ? "send" : answer.body ? expected[answer.body.error.code] : "hold";
+      expect(gateGrantUsage(answer), entry.name).toBe(want);
+    }
   });
 
   it("holds the same answers in UTC, in America/St_Johns and in Pacific/Kiritimati", () => {
@@ -251,6 +269,7 @@ describe("every output validates, and every input the schema refuses is refused 
     ["a time without an offset", (d) => ({ ...d, startsAt: "2026-10-12T08:00:00" })],
     ["a time with four fraction digits", (d) => ({ ...d, expiresAt: "2026-10-26T08:00:00.0001Z" })],
     ["a time with a space", (d) => ({ ...d, startsAt: "2026-10-12 08:00:00Z" })],
+    ["a leap second", (d) => ({ ...d, expiresAt: "2026-12-31T23:59:60Z" })],
     ["a numeric time", (d) => ({ ...d, startsAt: 1 })],
     ["an array", () => [ACTIVE]],
     ["a string", () => "share-registration/1"]
@@ -321,6 +340,12 @@ describe("totality: every function answers and never throws", () => {
       expect(() => joinGrantUsage({ kind: "grant.usage", data: { day: a, grantId: b, context: a } }, { org: { id: b }, user: a }, [])).not.toThrow();
     }
   });
+  it("gates anything", () => {
+    for (const a of HOSTILE) {
+      expect(() => gateGrantUsage(a)).not.toThrow();
+      expect(() => gateGrantUsage({ status: 200, receipt: a, body: { error: { code: a } } })).not.toThrow();
+    }
+  });
   it("reads no inherited member", () => {
     const inherited = Object.create({ transport: { ok: true }, org: { id: "org_7kq2m4xw" }, user: { id: "m-4821" } }) as Json;
     expect(decideShareRegistration([], ACTIVE, inherited)).toEqual({ fault: "context-invalid" });
@@ -367,6 +392,26 @@ describe("share-registration semantic fixtures (FAC-SEM-117, FAC-SEM-118, FAC-SE
     elsewhere.machines[1].packages.push({ ...record.machines[0].packages[1], agentRef: "urn:fabric:agent:example:notes", context: "org:org_3fh9p1zc" });
     expect(paths("org-share-grants", { record: elsewhere })).toEqual([]);
     expect(paths("org-share-grants", { record: "x" })).toEqual([]);
+    // The writer's millisecond rule on the window (the fix round).
+    expect(paths("grant", { ...grant, startsAt: "2026-10-12T08:00:00.0001Z", expiresAt: "2026-10-26T08:00:00.123Z" })).toEqual(["FAC-SEM-117 /startsAt"]);
+    expect(paths("grant", { ...grant, expiresAt: "2026-10-26T08:00:00.1234+02:00" })).toEqual(["FAC-SEM-117 /expiresAt"]);
+    expect(paths("grant", { ...grant, context: "personal", principalKind: "internal", startsAt: "2026-10-12T08:00:00.0001Z" })).toEqual([]);
+    // A re-pointed grant against its parent revision, and the cases that are not one.
+    const repointed = structuredClone(record);
+    repointed.machines[0].packages[1].agentRef = "urn:fabric:agent:example:notes";
+    expect(paths("org-share-grants", { record: repointed, parent: record })).toEqual(["FAC-SEM-117 /record/shareGrants/1"]);
+    expect(paths("org-share-grants", { record: repointed })).toEqual([]);
+    expect(paths("org-share-grants", { record, parent: record })).toEqual([]);
+    expect(paths("org-share-grants", { record: repointed, parent: "x" })).toEqual([]);
+    const unplaced = structuredClone(record);
+    unplaced.machines[0].packages.splice(1, 1);
+    expect(paths("org-share-grants", { record: repointed, parent: unplaced })).toEqual([]);
+    const moved = structuredClone(record);
+    moved.shareGrants[1].context = "org:org_3fh9p1zc";
+    expect(paths("org-share-grants", { record: repointed, parent: moved })).toEqual([]);
+    const dropped = structuredClone(repointed);
+    dropped.machines[0].packages.splice(1, 1);
+    expect(paths("org-share-grants", { record: dropped, parent: record })).toEqual([]);
     const noMeta = structuredClone(record);
     noMeta.shareGrants[1].meta = "x";
     expect(paths("org-share-grants", { record: noMeta })).toEqual(["FAC-SEM-117 /record/shareGrants/1/meta/id"]);
