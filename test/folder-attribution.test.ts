@@ -107,6 +107,16 @@ describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => 
   });
 });
 
+describe("length bounds in code points (DEC-0089)", () => {
+  const withId = (id: string) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id, folders: [], sources: [] }] });
+  it("admits 256 code points written as 512 UTF-16 units, and refuses 257 code points however they are written", () => {
+    expect(withId("\u{1F600}".repeat(256))).toEqual({ outcome: "new", root: "/u/ana/work/x" });
+    expect(withId("a".repeat(257))).toEqual({ fault: "input-invalid" });
+    expect(withId(`${"\u{1F600}".repeat(200)}${"a".repeat(57)}`)).toEqual({ fault: "input-invalid" });
+    expect(withId("a".repeat(513))).toEqual({ fault: "input-invalid" });
+  });
+});
+
 describe("recordOrigin (DEC-0089 item 4)", () => {
   it("records nothing when what is left of the remote still has a secret's shape, and keeps a local path", () => {
     // Built at run time, so no token-shaped literal sits in the repository.
@@ -115,6 +125,7 @@ describe("recordOrigin (DEC-0089 item 4)", () => {
     expect(recordOrigin(`${token}@github.com:o/r.git`)).toBeNull();
     expect(recordOrigin(null)).toBeNull();
     expect(recordOrigin("/u/ana/repo")).toBe("/u/ana/repo");
+    expect(recordOrigin("github.com:example-org/fabric.git?x=1")).toBe("github.com:example-org/fabric.git");
   });
   it("names the same repository as the remote it came from, for every origin vector", () => {
     for (const entry of vectors.origin as Json[]) {
