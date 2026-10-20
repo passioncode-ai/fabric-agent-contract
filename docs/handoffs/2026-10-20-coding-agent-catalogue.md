@@ -41,4 +41,6 @@ writes `catalogue/coding-agents.json` byte for byte.
 
 ## Next task
 
-Readings, merge, then post the merge commit on thread `617c8cbe` to Fabric and Fabric Switchboard.
+Done 2026-10-20: merged as #131 `bab2578`. The post on thread `617c8cbe` to Fabric and Fabric Switchboard waits for
+Fabric to come back from its 0.3.7 release (the board was down at the merge). Left: the products' adoption (CT-60),
+the remaining evidence (CT-68), and org-index's row naming `catalogue/coding-agents.json`.

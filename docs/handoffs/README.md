@@ -4,12 +4,13 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-20 final pass](2026-10-20-final-pass.md) | DEC-0090 to DEC-0095 (CT-58, CT-60 to CT-63, CT-65) | done, this session's close |
 | [2026-10-20 unmeasured calls](2026-10-20-unmeasured-calls.md) | DEC-0091 (CT-62) | merged, #127 `c90e31b` |
 | [2026-10-20 resolve pending](2026-10-20-resolve-pending.md) | DEC-0092 (CT-63) | merged, #128 `0de7640` |
 | [2026-10-20 coding-agent catalogue](2026-10-20-coding-agent-catalogue.md) | DEC-0093 (CT-60) | merged, #131 `bab2578` |
 | [2026-10-20 device file key](2026-10-20-device-file-key.md) | DEC-0094 (CT-65) | merged, #129 `de9eae4` |
 | [2026-10-20 support quality](2026-10-20-support-quality.md) | DEC-0095 (CT-61) | merged, #132 `43f82c6` |
-| [2026-10-20 partner channel](2026-10-20-partner-channel.md) | DEC-0090 (CT-58) | open, branch `agent/ct58-partner-channel-20261019` |
+| [2026-10-20 partner channel](2026-10-20-partner-channel.md) | DEC-0090 (CT-58) | merged, #130 `3d8cb17` |
 | [2026-10-19 folder attribution](2026-10-19-folder-attribution.md) | DEC-0089 (CT-57; `FAC-SEM-121`) | merged, #124 `ebfddce` |
 | [2026-10-19 `enterprise-cloud` in entitlement/1](2026-10-19-enterprise-cloud.md) | DEC-0088 (CT-59; `FAC-SEM-115`) | merged, #122 `0752e03` |
 | [2026-10-19 jobs under limits and uncertain effects](2026-10-19-job-limits.md) | DEC-0087 (CT-55, OQ-0012; `FAC-SEM-119`, `FAC-SEM-120`) | merged, #120 `027a01c` (squash) |

@@ -23,4 +23,5 @@ Issue #125: one payload for a support agent's daily quality, so any voice-of-the
 
 ## Next task
 
-Readings, merge, then comment on issue #125 with the merge commit.
+Done 2026-10-20: merged as #132 `43f82c6`; commented on issue #125 (comment 6282656987). Left: the asker's producers
+move to `/1` (CT-61).

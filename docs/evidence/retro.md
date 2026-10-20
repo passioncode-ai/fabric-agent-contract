@@ -42,8 +42,24 @@
 - `2026-10-18-share-registration`: PR #117 `b89cb94` (DEC-0086) after seven readings in four rounds and three fix rounds; #118, #119.
 - `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings in three rounds; #121.
 - `2026-10-19-enterprise-cloud`: DEC-0088 (this run's pull request).
+- `2026-10-20-final-pass`: DEC-0089 to DEC-0095 merged as #124, #127, #128, #129, #130, #131, #132 (main `3d8cb17`).
 
 ## Recent log
+
+### 2026-10-20: The final pass (DEC-0089 to DEC-0095)
+
+- **Goal:** land every decision the products asked for before the ecosystem is used in its final form.
+- **Failed attempts:** (1) the "Next free" markers listed which IDs open branches held, so every merge made the line false
+  again; three fix rounds patched the list; (2) rebases resolved by a script that kept one side of a conflicting table
+  row lost later edits of the same row and kept stale copies of conformance rows (two reached `main` with the CT-61
+  merge); (3) a reading found a reader duty that would have made Fabric and Switchboard withdraw shipped features
+  (CT-60), because the duty was written from the catalogue's side only.
+- **Verified corrections:** the markers state only the CAS counter's next value, a claim no merge order makes false;
+  after each rebase the rows a branch changed were restored from its tip and the tables checked for a repeated first
+  cell (the stale copies were removed in #130); the reader keeps what it ships on its own evidence until the catalogue
+  records it.
+- **Learning:** a register line that describes other branches is false at the first merge; describe only what one
+  commit can know. After a scripted conflict resolution, compare each changed row with the branch tip before the gate.
 
 ### 2026-10-19: Jobs under limits and uncertain effects (DEC-0087), and the share registrations' close (DEC-0086)
 

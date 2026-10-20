@@ -26,5 +26,6 @@ PA-01 was decided by the first organization server (board thread `6e66a023`): a 
 
 ## Next task
 
-Readings, merge, then answer on board thread `6e66a023` with the merge commit, and update RM-31 in fabric-workspace
-`knowledge/roadmap.md`.
+Done 2026-10-20: merged as #130 `3d8cb17`. The answer on thread `6e66a023` waits for Fabric to come back from its
+0.3.7 release; fabric-workspace's RM-31 row is updated by the knowledge-base change of the same day. Left: the
+products' adoption (CT-58) and the page's Not decided items.
