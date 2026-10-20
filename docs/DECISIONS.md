@@ -5949,7 +5949,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the partner's publishers, with no person, device or grant; `costUsd` is `null` exactly when every call of the cell
      is unpriced, the priced costs summed smallest first so the order of the rows does not change a cell. A cell may be
      one person's usage when one member uses the agent; a minimum population is not decided here. Each read is logged in every contributing member's access log as `reader: {service: "org:<partnerOrgId>", role:
-     "partner"}`, scope `activity.usage`, step `day` or `period`; the rule refuses a partner entry read as a person, of
+     "partner"}`, scope `activity.usage`, step `day` or `period`, and the organization server's notice names each partner
+     reader before its first read; the rule refuses a partner entry read as a person, of
      another scope or step, or keyed by a device.
   3. **Owner to partner to agents (`FAC-SEM-124`).** A grant whose `principalKind` is `partner` has the partner as its
      principal and the company's own `org:<orgId>` as its `context`; being in an organization's context, it is named by
@@ -5977,6 +5978,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-58), `docs/handoffs/2026-10-20-partner-channel.md`;
   brief `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
 - **Source:** board thread `6e66a023` (SD-1, passioncode-platform's ADR-0007 reply, the contract's acceptance; the first
-  organization server's PA-01); DEC-0090 and `SEM-0122` to `SEM-0124` reserved under the key `ct58-partner-channel`.
-  The DEC reservation's counter commit is not in the chain on origin (it moves from `a24dc0f`, next 90, to `7b857d5`,
-  next 92), the receipt-chain defect the CT-57 handoff records; no other branch uses DEC-0090.
+  organization server's PA-01); DEC-0090 and `SEM-0122` reserved under the key `ct58-partner-channel`,
+  `SEM-0123` under `ct58-partner-channel-2`, `SEM-0124` under `ct58-partner-channel-3`. Two counter commits are not in
+  the chains on origin, the receipt-chain defect the CT-57 handoff records: DEC's (it moves from `a24dc0f`, next 90, to
+  `7b857d5`, next 92) and `SEM-0124`'s `0bfa93f` (SEM moves from `5f2665c`, next 124, to `4c4598f`, next 127). No other
+  branch uses DEC-0090 or `FAC-SEM-122` to `FAC-SEM-124`.

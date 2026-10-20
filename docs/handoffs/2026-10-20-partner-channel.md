@@ -18,7 +18,7 @@ Brief: `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
 
 ## Decisions
 
-PA-01 is taken as decided: a partner organization's id is an ordinary organization id, named by `org:<partnerOrgId>`.
+PA-01 was decided by the first organization server (board thread `6e66a023`): a partner organization's id is an ordinary organization id, named by `org:<partnerOrgId>`.
 
 ## Checks
 

@@ -490,7 +490,7 @@
         },
         "partner": {
           "$ref": "common.schema.json#/$defs/orgContextId",
-          "description": "The partner organization that holds the key, org:<partnerOrgId> (until the first organization server's PA-01 names its form)."
+          "description": "The partner organization that holds the key, org:<partnerOrgId>, an ordinary organization id (the first organization server's PA-01)."
         },
         "contexts": {
           "type": "array",

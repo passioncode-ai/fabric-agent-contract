@@ -14,7 +14,7 @@ The operator's standing decision SD-1 (2026-10-19): partners (integrators, agenc
 on the platform and sell them to companies as a setup; a company that comes through a partner pays PassionCode only for
 the cloud its agents run on. The contract's part is PA-06 (board thread `6e66a023`, fabric-workspace `knowledge/roadmap.md`
 RM-31): what a partner's signed package may be trusted for, what a partner may read of its agents' usage, and how a
-company's owner lets a partner act on the company's agents. The first organization server's PA-01 (board, 2026-10-19) decided the
+company's owner lets a partner act on the company's agents. The first organization server's PA-01 (board thread `6e66a023`, 2026-10-19) decided the
 partner organization's id: an ordinary organization id, so a partner is named by its organization context,
 `org:<partnerOrgId>`, as passioncode-platform's ADR-0007 does.
 
@@ -33,8 +33,8 @@ A key named there is a partner's: `placementTrust(record, machine, agentRef, con
 for a placement in one of its contexts, and answers no key (`{publisher: []}`) for one elsewhere, so the package is
 refused `unknown-key` (PK-6). `FAC-SEM-122` refuses, on `estate-record`, a placement under a scoped key outside its
 contexts, a key scoped twice and a scope naming a key the record does not pin; on `estate-placement`, an installation
-under a scoped key outside its contexts. A key taken from a listing rather than the estate record is not narrowed by a scope, so a partner's key is trusted only
-from the record. A key no scope names keeps DEC-0051's meaning, so a record without
+under a scoped key outside its contexts. A key a scope names is taken only from the estate record, never from a listing (a listing's key is not narrowed by a
+scope). A revision that breaks `FAC-SEM-122` is refused whole: `verifyEstateRecord` answers `rule-violation` (ER-11). A key no scope names keeps DEC-0051's meaning, so a record without
 `publisherScopes` reads as before.
 
 ## A partner reads its agents' usage (FAC-SEM-123)
@@ -56,7 +56,8 @@ PA-03). `partnerUsage({usage, publishers, step})` is what it shows the partner:
 A cell carries no person, device or grant: a partner sees what its agents did, never who used them. A cell may still be
 one person's usage, when only one member uses an agent; a minimum population per cell is not decided here. Each read is
 logged in every contributing member's access log (OD-1) as `reader: {service: "org:<partnerOrgId>", role: "partner"}`,
-scope `activity.usage`, `step` `day` or `period`. `FAC-SEM-123` (kind `access-log-disclosure`) refuses a partner entry
+scope `activity.usage`, `step` `day` or `period`; the organization server's notice names each partner that reads
+members' usage before that partner's first read. `FAC-SEM-123` (kind `access-log-disclosure`) refuses a partner entry
 read as a person (`reader.user`) or with no `service`, of any other scope, at any other step, or keyed by a device.
 
 ## Owner to partner to agents (FAC-SEM-124)
@@ -86,9 +87,12 @@ actor (closed schemas), so a partner channel needs the reader at this pin. `cont
 
 ## Who adopts it
 
-- **The first organization server** shows a partner `partnerUsage`'s cells, logs each read as above, and holds each
+- **The first organization server** shows a partner `partnerUsage`'s cells, logs each read as above, names each partner
+  reader in its notice, and holds each
   partner's publisher names (its PA-03).
-- **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor.
+- **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor; it signs a revision that
+  carries `publisherScopes` only once every machine of the estate reports an applied revision at or after DEC-0090
+  (a machine pinned before refuses the closed record and stops applying revisions).
 - **Every verifier of delegation tokens** (Project Observatory's node, fabric-agent-adapter's kits) re-vendors
   `verifyDelegation` at this pin, or refuses every partner-grant token at DL-13 step 5.
 - **Project Observatory's node** verifies a partner's package under the record's scope before it installs it in a
@@ -100,6 +104,9 @@ The board row is CT-58.
 ## Not decided here
 
 - The partner console.
+- Which agent may hold a partner grant: `FAC-SEM-124` checks the chain's depth, the issuer and the partner innermost,
+  not that the outermost agent is the partner's.
+- A collector sends no `grant.usage` for a partner grant, which no share registration names, until that is decided.
 - A minimum population per cell, so a cell is never one person's usage (activity's summaries keep `minPopulation`).
 - Where the owner and the company see the spend made under a partner grant: a collector sends `grant.usage` only for
   a share grant a share registration names, and share registrations derive from the record's `shareGrants`.

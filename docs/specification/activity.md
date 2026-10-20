@@ -75,7 +75,7 @@ by `method`; every read in the person's access log; and no scoring of persons.
   `FAC-SEM-067` refuses a log entry that breaks either ([`confirmedPurposes`](../../src/activity-rules.ts)).
   The person reading their own data, and a service that serves nobody (a summary build), are not narrowed. A partner
   organization (DEC-0090) reads only usage sums per agent and UTC day or period, logged in each contributing member's
-  access log; the notice names that reader.
+  access log; the organization server's notice names that reader before its first read (DEC-0090).
 - This narrows what DEC-0030's presence ruling lets a receiver serve, not the schema: the per-person
   estimates still exist, and reach an owner or administrator only through a purpose the person
   confirmed.
