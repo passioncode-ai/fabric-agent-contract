@@ -99,7 +99,7 @@
             "required": ["storage"]
           },
           "then": {
-            "properties": { "exportable": { "const": true } }
+            "properties": { "exportable": { "const": true }, "attestation": false }
           },
           "else": {
             "properties": { "exportable": { "const": false } }

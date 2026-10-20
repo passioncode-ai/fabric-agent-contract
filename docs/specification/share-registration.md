@@ -85,7 +85,8 @@ enrollments, under mutual TLS and the DEC-0056 `fabric-device` signature by that
 certificate's serial ([devices → transport](devices.md#transport): "every batch, check-in, rotation and
 share-registration request"). The path is the receiver's; the contract names none. `share-registration/1` and
 `share-registration-receipt/1` are protocol revisions of their own (DEC-0067): the receiver lists `share-registration/1`
-in its enrollment response's `protocols`, and a node sends registrations only to a receiver that lists it.
+in its `protocols`, and a node sends registrations only to a receiver whose latest enrollment or check-in response
+(DEC-0094) lists it.
 
 Only the enrolled node holds the device's certificate and key, so only it can make the request the receiver attributes.
 It registers only what a passkey signed: it builds registrations from the estate revision and the revocation-delta

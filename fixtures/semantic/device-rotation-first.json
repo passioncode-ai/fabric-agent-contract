@@ -6,7 +6,7 @@
     "answered": [],
     "request": {
       "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "serial": "01AB"
+      "serial": "01ab"
     },
     "response": {
       "certificate": "MIIB-new-certificate"

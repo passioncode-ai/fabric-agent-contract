@@ -84,11 +84,11 @@ on different releases still talk:
   register (N−1), and no other (`acceptedRevisions`). A protocol with one published revision has no N−1.
 - **`protocols`.** A party says which revisions it reads in a list of at most N and N−1 per protocol
   (`common.schema.json#/$defs/protocols`): a service in its well-known document (what it accepts), a node in its
-  check-in (what records and policy it can be sent), a receiver in its enrollment response (what it accepts from the
-  device). A sender writes each document in the newest revision both lists name. Absent, the party reads only the
+  check-in (what records and policy it can be sent), a receiver in its enrollment response and, from DEC-0094, its check-in response (what it accepts
+  from the device; the latest list the node received counts). A sender writes each document in the newest revision both lists name. Absent, the party reads only the
   revision its own documents name. `FAC-SEM-099` checks the list wherever it appears (kinds `service-well-known`,
   `device-check-in`, `device-enrollment`, and `protocols` alone). A party sends `protocols` only to a reader pinned at
-  or after DEC-0067, or one that ignores unknown members: the three carrying objects are closed, so an older pinned
+  or after DEC-0067, or one that ignores unknown members: the four carrying objects are closed, so an older pinned
   copy refuses the new member.
 - **`schema-unsupported`.** A document in a revision the receiver does not accept is refused after the request is
   authenticated (a device's signature, [devices](devices.md#transport) steps 0–8; a delegated call's DL-13 order) and

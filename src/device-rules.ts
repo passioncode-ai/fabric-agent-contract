@@ -578,8 +578,9 @@ function rotation(value: JsonObject): Finding[] {
   const request = isObject(value.request) ? value.request : {};
   const response = isObject(value.response) ? value.response : {};
   const answered = Array.isArray(value.answered) ? value.answered.filter(isObject) : [];
+  if (typeof request.publicKeySha256 !== "string" || typeof request.serial !== "string") return [];
   const earlier = answered.find((entry) => entry.publicKeySha256 === request.publicKeySha256 && entry.serial === request.serial);
-  if (earlier === undefined || earlier.certificate === response.certificate) return [];
+  if (earlier === undefined || jsonEqual(earlier.certificate, response.certificate)) return [];
   return [{ code: "FAC-SEM-125", instancePath: "/response/certificate", message: "a repeated rotation request gets the certificate it was answered with, not a new one" }];
 }
 
