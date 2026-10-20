@@ -5788,3 +5788,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-20-unmeasured-calls.md`.
 - **Source:** the board message `3ba380ab` (Fabric Dashboards, thread `16e6c000`); DEC-0091 reserved by git CAS (key
   `ct62-unmeasured-calls`).
+
+### DEC-0092: `fabric.project.resolve` answers `pending` while a folder's Git facts cannot be read
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-63.
+- **Decision:** in [folder attribution](specification/folder-attribution.md#the-session-start-capability):
+  1. Fabric's hub serves the session-start capability `fabric.project.resolve` (D4 as the operator corrected it):
+     read-only, input `{path}`, answer `folder-attribution.schema.json#/$defs/resolveAnswer`.
+  2. `resolveAnswer` is `attributeFolder`'s answer, or `{outcome: "pending", reason: "git-unreadable", retryable:
+     true}` when the folder's Git facts cannot be read yet (a probe that failed or timed out, which is not "no Git").
+  3. `pending` names no Project and is never recorded; the caller asks again later and attributes nothing until then.
+- **Why:** DEC-0089 left "not attributable yet" to the capability, and Fabric asked for a name to build against
+  (board thread `617c8cbe`, 2026-10-19); the spelling is the one Fabric accepted.
+- **Alternatives refused:** a refusal reason (`refused` means the folder is never attributed, `pending` that it is
+  not yet); `ambiguous` (it names Projects).
+- **Compatibility:** additive: a new `$defs` pair and a third alternative at the schema's root.
+- **Consequences / affects:** schema `schemas/folder-attribution.schema.json` (`$defs/pending`, `$defs/resolveAnswer`);
+  tests `test/folder-attribution.test.ts`; docs `docs/specification/folder-attribution.md` (the session-start
+  capability), `docs/backlog.md` (CT-63), `docs/handoffs/2026-10-20-resolve-pending.md`.
+- **Source:** the board thread `617c8cbe` (Fabric's acceptance of the shape, 2026-10-19); DEC-0092 reserved by git CAS
+  (key `ct63-resolve-pending`).

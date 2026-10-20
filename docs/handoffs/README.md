@@ -5,6 +5,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | Handoff | Decisions | Merge |
 |---|---|---|
 | [2026-10-20 unmeasured calls](2026-10-20-unmeasured-calls.md) | DEC-0091 (CT-62) | open, branch `agent/ct62-unmeasured-calls-20261019` |
+| [2026-10-20 resolve pending](2026-10-20-resolve-pending.md) | DEC-0092 (CT-63) | open, branch `agent/ct63-resolve-pending-20261020` |
 | [2026-10-19 folder attribution](2026-10-19-folder-attribution.md) | DEC-0089 (CT-57; `FAC-SEM-121`) | merged, #124 `ebfddce` |
 | [2026-10-19 `enterprise-cloud` in entitlement/1](2026-10-19-enterprise-cloud.md) | DEC-0088 (CT-59; `FAC-SEM-115`) | merged, #122 `0752e03` |
 | [2026-10-19 jobs under limits and uncertain effects](2026-10-19-job-limits.md) | DEC-0087 (CT-55, OQ-0012; `FAC-SEM-119`, `FAC-SEM-120`) | merged, #120 `027a01c` (squash) |
