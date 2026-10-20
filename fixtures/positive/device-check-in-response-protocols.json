@@ -74,6 +74,7 @@
   },
   "protocols": [
     "fabric-device/0.1",
-    "estate-record/1"
+    "fabric-activity/0.1",
+    "share-registration/1"
   ]
 }

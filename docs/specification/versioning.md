@@ -85,7 +85,8 @@ on different releases still talk:
 - **`protocols`.** A party says which revisions it reads in a list of at most N and N−1 per protocol
   (`common.schema.json#/$defs/protocols`): a service in its well-known document (what it accepts), a node in its
   check-in (what records and policy it can be sent), a receiver in its enrollment response and, from DEC-0094, its check-in response (what it accepts
-  from the device; the latest list the node received counts). A sender writes each document in the newest revision both lists name. Absent, the party reads only the
+  from the device; the latest list the node received counts). A sender writes each document in the newest revision both lists name. A check-in response without `protocols` leaves the latest list the node received
+  unchanged. Absent everywhere, the party reads only the
   revision its own documents name. `FAC-SEM-099` checks the list wherever it appears (kinds `service-well-known`,
   `device-check-in`, `device-enrollment`, and `protocols` alone). A party sends `protocols` only to a reader pinned at
   or after DEC-0067 (for the check-in response, at or after DEC-0094), or one that ignores unknown members: the four

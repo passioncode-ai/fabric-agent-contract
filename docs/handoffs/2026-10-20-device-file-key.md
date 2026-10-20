@@ -39,5 +39,5 @@ response cost a repeat rather than a new enrollment (board request of 2026-10-19
 
 ## Next task
 
-Readings, merge, then tell Project Observatory (its node) and the first organization server (rotation) on the board,
+Readings, merge, then tell Project Observatory (its node) and the first organization server (the file key and rotation) on the board,
 with the merge commit.

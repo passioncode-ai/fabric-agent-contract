@@ -5361,6 +5361,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   id); DEC-0031 and DEC-0056 (a share-registration request is a device request; `FAC-SEM-045` checks a `grant.usage`'s
   context). It answers the first organization server's request VES-GRANT-CONTEXT on the project board (thread
   `cc944654`, 2026-10-17): direction "(a) plus the context from (b)", with (c) as the share grant id.
+- **Annotated (2026-10-20):** DEC-0094: a node reads the latest `protocols` list it received (its enrollment response, or
+  a check-in response that carries one), and also sends after a check-in response's `protocols` first lists
+  `share-registration/1`.
 - **Decision:** in [share registration](specification/share-registration.md) unless named otherwise:
   1. **Carrier:** `share-registration/1`, sent by the sharer's enrolled node to the organization server of one of its
      own enrollments as a device request, under mutual TLS and the DEC-0056 `fabric-device` signature by that

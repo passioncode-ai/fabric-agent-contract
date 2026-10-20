@@ -1,6 +1,6 @@
 # Share registrations: `share-registration/1` and its receipt
 
-DEC-0086 · rule codes `FAC-SEM-117`, `FAC-SEM-118` (here) and `FAC-SEM-045` amended ([devices](devices.md#semantic-rules)) ·
+DEC-0086, amended by DEC-0094 (the latest `protocols` list, the check-in trigger) · rule codes `FAC-SEM-117`, `FAC-SEM-118` (here) and `FAC-SEM-045` amended ([devices](devices.md#semantic-rules)) ·
 schema [`share-registration.schema.json`](../../schemas/share-registration.schema.json), with
 [`common.schema.json#/$defs/shareGrantId`](../../schemas/common.schema.json) and `#/$defs/orgContextId` · code
 [`src/share-registration.ts`](../../src/share-registration.ts) · vectors
