@@ -39,5 +39,6 @@ response cost a repeat rather than a new enrollment (board request of 2026-10-19
 
 ## Next task
 
-Readings, merge, then tell Project Observatory (its node) and the first organization server (the file key and rotation) on the board,
-with the merge commit.
+Done 2026-10-20: merged as #129 `de9eae4`, before the 2026-10-23 date Project Observatory asked for. The post to
+Project Observatory and the first organization server waits for Fabric to come back from its 0.3.7 release. Left: their
+adoption (CT-65), CT-67 and CT-69.

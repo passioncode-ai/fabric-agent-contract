@@ -22,7 +22,6 @@ a contract name (board thread `617c8cbe`; Fabric accepted `{outcome: pending, re
 
 ## Next task
 
-Post the merge commit on thread `617c8cbe` for Fabric's F9 (its plan row "answering DEC-0089's answer" becomes
-`resolveAnswer`) and to Project Observatory for OBS-160, whose resolver reads another shape and falls back locally on an
-unknown answer; update fabric-workspace `knowledge/agents-first.md` to cite DEC-0092 at the merge commit and publish.
-The reply carrying `record` and `row` is CT-66's.
+Done 2026-10-20: merged as #128 `0de7640`; posted on thread `617c8cbe` to Fabric and Project Observatory (messages
+`13fd3df5`, `a184a4b3`); fabric-workspace `knowledge/agents-first.md` cites DEC-0092 in the knowledge-base change of
+the same day. Left: Fabric's F9, Observatory's OBS-160 reread, CT-64, CT-66.
