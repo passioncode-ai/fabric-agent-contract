@@ -1,0 +1,15 @@
+{
+  "description": "A first rotation request, not answered before: the server issues a new certificate; no finding.",
+  "kind": "device-rotation",
+  "expect": [],
+  "input": {
+    "answered": [],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "serial": "01ab"
+    },
+    "response": {
+      "certificate": "MIIB-new-certificate"
+    }
+  }
+}

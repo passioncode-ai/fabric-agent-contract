@@ -5,6 +5,10 @@ annotate only the old status; decision bodies are never rewritten.
 
 **Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
 
+**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
+heading here is held by an open branch, and its reservation is in the counter's log)
+
+
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
 commits `2d385e0`, `25c07ce`). The `SEM-0035` and `SEM-0036` receipts DEC-0025 cites were taken before the
@@ -910,6 +914,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** items 1 and 2 extended by DEC-0056 — every request after enrollment carries an HTTP message signature beside mutual TLS, and a receiver behind a TLS-terminating host attributes by the certificate the verified signature names.
 - **Annotated (2026-10-13):** DEC-0082: a device enrolled in several organizations holds one enrollment per organization and sends each enrollment's check-ins to that enrollment's own server, on its interval, reporting only its streams, with no context; a session's events go where `routeTarget` answers and `grant.usage` where `routeGrantUsage` answers (`fixtures/vectors/context-route.json`); an organization server that takes part in contexts issues `org.id` within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`.
 - **Amends:** nothing — a new protocol, added under the DEC-0016 extension policy
+- **Annotated (2026-10-20):** DEC-0094: a device without a hardware or platform store MAY hold its key in a file
+  (`storage: file`, `exportable: true`, no `attestation`), its `deviceKeys` in the same store; rotation is idempotent
+  (`FAC-SEM-125`).
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
   1. **Enrollment** (`device-enrollment.schema.json`):
@@ -3822,6 +3829,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Amends:** DEC-0009 (how a revision is negotiated and refused, not only named). Implements the first organization
   server's target architecture v4 §12 row "`protocols[]` with N and N−1, `schema-unsupported`" (commit `9c6a780`) and
   the organization edition's CON-OE-07. Closes the board run's inventory item CON-OE-07 (node N12, packet P6-01).
+- **Annotated (2026-10-20):** DEC-0094 adds a fourth carrying object, the check-in response, sent only to a node pinned
+  at or after DEC-0094 or one that ignores unknown members; the latest list a node
+  received, from its enrollment or a check-in response, is the server's current one.
 - **Decision:** in [versioning → Protocol revisions](specification/versioning.md#protocol-revisions) —
   1. **The register.** `PROTOCOL_REVISIONS` in `src/protocol-revisions.ts` lists every contract protocol's published
      revisions, oldest first; a test keeps it equal to the revisions the schemas pin with `const` plus `NAMED_ONLY` (five
@@ -5351,6 +5361,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   id); DEC-0031 and DEC-0056 (a share-registration request is a device request; `FAC-SEM-045` checks a `grant.usage`'s
   context). It answers the first organization server's request VES-GRANT-CONTEXT on the project board (thread
   `cc944654`, 2026-10-17): direction "(a) plus the context from (b)", with (c) as the share grant id.
+- **Annotated (2026-10-20):** DEC-0094: a node reads the latest `protocols` list it received (its enrollment response, or
+  a check-in response that carries one), and also sends after a check-in response's `protocols` first lists
+  `share-registration/1`.
 - **Decision:** in [share registration](specification/share-registration.md) unless named otherwise:
   1. **Carrier:** `share-registration/1`, sent by the sharer's enrolled node to the organization server of one of its
      own enrollments as a device request, under mutual TLS and the DEC-0056 `fabric-device` signature by that
@@ -5846,3 +5859,44 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-20-coding-agent-catalogue.md`; brief `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
 - **Source:** board thread `617c8cbe` (messages `f63e1f06`, `6ffee284`, `41e010ab`, `ea29f0a8`); DEC-0093 reserved by
   git CAS (key `ct60-runner-catalogue`, counter commit `fb6a608`).
+
+### DEC-0094: A device key MAY live in a file, rotation is idempotent, and a check-in response MAY list `protocols` (`FAC-SEM-125`)
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-65.
+- **Decision:** in [devices](specification/devices.md#enrollment):
+  1. `key.storage` admits `file`: an owner-only PKCS#8 file. A file-held key is `exportable: true`, and every other
+     store `exportable: false`; the schema ties the two, so a verifier always knows whether the key can be copied, and a
+     file key carries no `attestation`. The `deviceKeys` (`#sig`, `#kem`) live in the store `key.storage` names. A
+     server MAY refuse a file-held key by policy with its own error (the contract defines no code); a node so refused
+     never retries claiming a store it lacks. How the file is protected is the node's.
+  2. Rotation is idempotent: a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal
+     one the server already answered gets that answer's certificate again, byte for byte, and the old certificate stays
+     valid until the new serial is first presented, at most until its own expiry. Rule `FAC-SEM-125`
+     (`device-rotation`).
+  3. A `check-in-response` MAY carry `protocols` (DEC-0067's list), so a node learns the server's revisions at check-in;
+     the latest list the node received, from its enrollment or a check-in response, is the server's current one. The
+     response is closed, so a server sends it only to a node pinned at or after DEC-0094 or one that ignores unknown
+     members; `fabric-device/0.1` carries no in-band sign of the pin (a revision that does is board row CT-67).
+- **Why:** Project Observatory's node runs on machines with no hardware or platform key store and asked for a file key
+  and a rotation whose lost response costs a repeat rather than a new enrollment (board, 2026-10-19, due 2026-10-23).
+  `exportable: const false` made such a node unable to enroll at all, or forced it to claim a store it does not have.
+- **Alternatives refused:** a file key with `exportable: false` (a false statement a verifier would trust); a new
+  enrollment after a lost rotation response (it moves the stream epoch and drops the user binding's history); a
+  rotation answered with a fresh certificate each time (two valid certificates for one key and serial).
+- **Compatibility:** additive in the enrollment: the enum grows, and a hardware-held key still reads `exportable:
+  false`; a server pinned before DEC-0094 refuses `file` at its schema. Not additive for a node pinned before DEC-0094
+  that validates the closed check-in response: it refuses one carrying `protocols`, hence item 3's send condition.
+- **Consequences / affects:** schemas `schemas/device-enrollment.schema.json`, `schemas/device-check-in.schema.json`;
+  rule `src/device-rules.ts` (`rotation`); tests `test/device-rules.test.ts`; fixtures
+  `fixtures/semantic/device-rotation-*`, `fixtures/positive/device-enrollment-request-file-key.json`,
+  `fixtures/negative/device-enrollment-{file-key-not-exportable,hardware-key-exportable,file-key-attested}.json`,
+  `fixtures/positive/device-check-in-response-protocols.json`; docs
+  `docs/specification/devices.md`, `relay.md`, `versioning.md`, `share-registration.md`, `CONTEXT.md`, `docs/DOCMAP.md`,
+  `docs/specification/conformance.md` (the server's row, the node's file-key row, the node's and the receiver's
+  share-registration rows, the `FAC-SEM-125` register row), `docs/backlog.md` (CT-04, CT-65, CT-67), `docs/OPEN_QUESTIONS.md` (OQ-0010),
+  `docs/handoffs/2026-10-20-device-file-key.md`.
+- **Source:** Project Observatory's request on the project board (2026-10-19); DEC-0094 reserved by git CAS (key
+  `ct65-device-file-key`, counter commit `ba52e30`). `SEM-0125` was taken while the SEM counter's receipt chain was
+  broken (the shared fetched-id ref, recorded in the CT-57 handoff): the counter on origin reads next 127 (`4c4598f`),
+  and no other branch uses 125.

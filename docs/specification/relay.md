@@ -25,7 +25,8 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 ## Keys
 
 - **A relay participant's keys are P-256, held in the platform keystore** ([devices](devices.md#device-keys),
-  DEC-0053). Each machine has two non-exportable keys, never one key in both roles:
+  DEC-0053), or, on a machine without a store, where it can ([ceremonies](ceremonies.md); for a machine enrolled with an
+  organization, `key.storage: file`, DEC-0094). Each machine has two keys, never one key in both roles:
   - a **signing key** (ES256), under the key id `<machine>#sig`;
   - a **key-agreement key** (ECDH P-256), under the key id `<machine>#kem`.
 

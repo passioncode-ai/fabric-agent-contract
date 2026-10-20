@@ -347,6 +347,10 @@
         "flags"
       ],
       "properties": {
+        "protocols": {
+          "$ref": "common.schema.json#/$defs/protocols",
+          "description": "DEC-0094: the protocol revisions this server accepts from the device, so a node learns them at check-in (DEC-0067's list)."
+        },
         "protocol": {
           "$ref": "device-common.schema.json#/$defs/protocol"
         },

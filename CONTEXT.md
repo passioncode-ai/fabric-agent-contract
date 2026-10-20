@@ -210,7 +210,7 @@ itself is checked under the root key (`FAC-SEM-046`) ([devices](docs/specificati
 else (DEC-0031); Ed25519 or ES256, naming its algorithm, and certified by the offline root an installer pinned when
 it pinned one (**Root certification**, `FAC-SEM-069`, DEC-0053).
 
-**Device key**: A device's non-exportable key. Beside DEC-0031's enrollment key, `deviceKeys` lists exactly one signing
+**Device key**: A device's key, non-exportable unless its `key.storage` is `file` (DEC-0094). Beside DEC-0031's enrollment key, `deviceKeys` lists exactly one signing
 key `<device.id>#sig` (ES256 or Ed25519) and at most one key-agreement key `<device.id>#kem` (ECDH over P-256), never
 one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by SEC 1 §3.2.2 (`isValidP256Key`,
 DEC-0053).
@@ -438,7 +438,7 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 their user id or by a device bound to them — when and why, readable by that subject.
 
 **Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
-a hardware-bound short-lived certificate that also attributes everything it sends, a server-issued
+a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that

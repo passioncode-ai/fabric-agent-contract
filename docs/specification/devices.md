@@ -1,7 +1,7 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056 and DEC-0082 (one enrollment per organization, `org.id` for contexts) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
-`FAC-SEM-069`, `FAC-SEM-077` · schemas
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) and DEC-0094 (a key in a file, idempotent rotation) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+`FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
@@ -55,12 +55,20 @@ passkey-signed estate revision, with no certificate ([ceremonies](ceremonies.md)
 enrollment of a machine gets keys of its own (the operator's NET-2); the contract's per-context `kid` and `iss`
 (CX-CON-06) are not decided yet.
 
-1. The device generates a key pair in hardware that does not export it, and a PKCS#10 certificate
-   signing request (RFC 2986) signed by that key. The key's `storage` is `secure-enclave`, `tpm` or
-   `platform-keystore`, it is `exportable: false`, and it MAY carry a platform `attestation`. The first
+1. The device generates a key pair in a hardware or platform store that does not export it, or, without one, in a file
+   (DEC-0094, below), and a PKCS#10 certificate signing request (RFC 2986) signed by that key. In a store, the key's
+   `storage` is `secure-enclave`, `tpm` or `platform-keystore`, it is `exportable: false`, and it MAY carry a platform
+   `attestation`. The first
    organization server's target architecture v4 makes a non-extractable `ecdsa-p256` key in the
    `platform-keystore`, held by a signed key helper, the device key; DEC-0031 already admits it, and
-   DEC-0053 records it as the target without changing the schema.
+   DEC-0053 records it as the target without changing the schema. A node without such a store MAY hold the key in a
+   file (DEC-0094): `storage: "file"`, an owner-only PKCS#8 file, with `exportable: true`, so a verifier always knows
+   the key can be copied; the schema ties `file` to `exportable: true` and every other store to `false`, and a file key
+   carries no `attestation`. The listed `deviceKeys` (`#sig`, `#kem`) live in the same store `key.storage` names, so a
+   file-key node holds them in owner-only files too and a verifier reads `key.storage` for all of them. A server MAY
+   refuse a file-held key by policy; the contract defines no refusal code for it, so the server answers its own error.
+   A node so refused shows that the server refused the enrollment and never retries claiming a store it lacks; a
+   server pinned before DEC-0094 refuses `file` at its schema. How the file is protected is the node's.
    `publicKeySha256` is the SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it
    against the CSR and records it as the device's key on record.
 2. It sends an `enrollment-request` with `org.id`, `device.id` and `platform`, the key
@@ -108,13 +116,19 @@ has on record is a re-enrollment. The server accepts it only with one of two pro
   its key (a wipe, a replaced board).
 
 An SSO sign-in alone is not proof. Without this rule any member of the organization could enroll as
-another person's device and make it look `tampered`. An administrator who retires a device removes
+another person's device and make it look `tampered`. A file-held key (DEC-0094) can be copied, and a copy passes the
+key-on-record proof; that is why the enrollment states `exportable`. An administrator who retires a device removes
 its record, and the next enrollment of that id is a first enrollment.
 
 **Rotation and re-enrollment.** Before expiry, and SHOULD at two thirds of the lifetime, a check-in
 response asks for `certificate.action: "rotate"`. The device then sends a new CSR from the same
-hardware key and receives a new certificate under the same epoch; the rotation request is signed like every other,
-under the current certificate's serial ([transport](#transport)). The device enrolls again from
+key, the key on record, and receives a new certificate under the same epoch; the rotation request is signed like every other,
+under the current certificate's serial ([transport](#transport)). **Rotation is idempotent** (DEC-0094): a rotation
+request whose CSR key (`publicKeySha256`) and current serial equal one the server already answered gets the same new
+certificate again, and the old certificate stays valid until the new serial is first presented, at most until its own
+expiry. A response lost after the server committed the rotation then costs a repeat, not a new enrollment while the old
+certificate is valid. Once it holds the new certificate the device switches every sender to the new serial at once and
+re-signs any request still in flight under the old one. The device enrolls again from
 step 2 when any of these happens:
 
 - its certificate expired;
@@ -130,7 +144,7 @@ evidence of tampering. Nothing is renewed silently past `notAfter`.
 ### Device keys by role
 
 DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 device keys held in the
-platform keystore, listed by role in the enrollment request's `deviceKeys`:
+platform keystore (or, from DEC-0094, wherever `key.storage` names, a file included), listed by role in the enrollment request's `deviceKeys`:
 
 - **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
 - **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol ([relay](relay.md), DEC-0047) seals
@@ -276,7 +290,7 @@ So when a device is re-enrolled to another person:
 
 A mismatch is refused (`attribution` in the batch ack). A receiver that stores `user.id` writes the
 epoch's bound value (`FAC-SEM-045`). So one device can never make another look `tampered`, or
-attribute events to another person.
+attribute events to another person, unless it holds a copy of that device's file-held key (DEC-0094).
 
 <a id="policy"></a>
 
@@ -429,8 +443,8 @@ that vendors it copies its `$ref` closure ([adoption → Vendoring schemas](adop
 Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 
 - `protocols` MAY list the revisions the node reads; the receiver sends each record and the policy in the newest
-  revision that list and its own writer share, and the enrollment response's `protocols` lists what the receiver
-  accepts from the device. A document in a revision the other side does not accept is refused with
+  revision that list and its own writer share, and the server's `protocols` lists what it accepts from the device:
+  the latest list the node received, from its enrollment response or a later check-in response (DEC-0094). A document in a revision the other side does not accept is refused with
   `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067) — after the request signature's steps
   0–8 hold, before the body is read. An enrollment request, which authenticates by its `Authorization` proof instead,
   is refused with `schema-unsupported` after that proof is checked and before the CSR is read.
@@ -480,7 +494,11 @@ Until a key per context exists (CX-CON-06), the device shows both organizations 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
-or `re-enroll`) when one is due.
+or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server accepts from the device (DEC-0067's list), so a
+node learns them at check-in; the latest list the node received is the server's current one. The response is a closed
+object, so a server sends it only to a node pinned at or after DEC-0094 or one that ignores unknown members;
+`fabric-device/0.1` carries no in-band sign of a node's pin, so the server knows it from the node's product and version
+(a revision that carries it is board row CT-67).
 
 **Free text stays bounded.** Every `detail` and `error` string is one line of at most 200
 characters with no path in it (schema `device-common#/$defs/detail`, F-B-104): no slash, backslash or
@@ -555,6 +573,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 | `FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold — naming the client certificate's serial when there is one — accepts an unsigned request only on a valid client certificate, and otherwise answers the 401 code of the first step that fails |
+| `FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
 
 Each kind checks one input:
 
@@ -569,6 +588,7 @@ Each kind checks one input:
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 | `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
+| `device-rotation` | `{answered: [{publicKeySha256, serial, certificate}], request: {publicKeySha256, serial}, response: {certificate}}`; `answered` the rotations the server already answered, at most one per (`publicKeySha256`, `serial`), `request` the CSR's key and the current certificate's serial; an entry or a request whose key or serial is not a string matches nothing |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are
 `fixtures/semantic/device-*`; the transport's vectors `fixtures/vectors/http-signature.json`. Tests:
@@ -576,6 +596,9 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
 
 ## Not decided here
 
+- Whether a server records and shows a device's `key.storage` (an administrator's posture view), and a policy key that
+  requires a hardware key (DEC-0094). A file-key device carries no `attestation`, so if `attested` is proved
+  by the enrollment's attestation (OQ-0010), it cannot meet it.
 - (OQ-0010) Which attestation formats a server accepts for `build_channel.allowed: attested`.
   Deferred by the operator on 2026-10-08: `attestation` stays an opaque field until the first real
   organization server adopts DEC-0031.

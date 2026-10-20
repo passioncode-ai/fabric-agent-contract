@@ -145,7 +145,7 @@ ruling; DEC-0017 states what holds now.
 - **Question:** Which platform attestation formats prove `build_channel.allowed: attested`, and a
   non-exportable key at enrollment?
 - **Meanwhile:** `attestation` is an optional opaque field in the enrollment request. No consumer is
-  required to produce or verify one.
+  required to produce or verify one. A file-held key (DEC-0094) carries none, so if `attested` is proved by it, such a device cannot meet it.
 
 ### OQ-0011 — Identifier equality: what DEC-0076 left open
 

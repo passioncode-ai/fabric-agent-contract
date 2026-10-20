@@ -1,0 +1,16 @@
+{
+  "description": "A request that names no key or serial matches no answered rotation, even one that names none either; no finding.",
+  "kind": "device-rotation",
+  "expect": [],
+  "input": {
+    "answered": [
+      {
+        "certificate": "MIIB-new-certificate"
+      }
+    ],
+    "request": {},
+    "response": {
+      "certificate": "MIIB-other-certificate"
+    }
+  }
+}

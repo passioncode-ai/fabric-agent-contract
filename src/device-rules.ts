@@ -568,6 +568,22 @@ function rootCertification(value: JsonObject): Finding[] {
   return findings;
 }
 
+/**
+ * FAC-SEM-125 (DEC-0094): rotation is idempotent. `{answered, request, response}`: `answered` the rotations the server
+ * already answered, each `{publicKeySha256, serial, certificate}`; `request` a rotation request's `{publicKeySha256,
+ * serial}` (the CSR's key and the current certificate's serial); `response` the server's `{certificate}`. A request
+ * that repeats an answered one gets that answer's certificate again, byte for byte.
+ */
+function rotation(value: JsonObject): Finding[] {
+  const request = isObject(value.request) ? value.request : {};
+  const response = isObject(value.response) ? value.response : {};
+  const answered = Array.isArray(value.answered) ? value.answered.filter(isObject) : [];
+  if (typeof request.publicKeySha256 !== "string" || typeof request.serial !== "string") return [];
+  const earlier = answered.find((entry) => entry.publicKeySha256 === request.publicKeySha256 && entry.serial === request.serial);
+  if (earlier === undefined || jsonEqual(earlier.certificate, response.certificate)) return [];
+  return [{ code: "FAC-SEM-125", instancePath: "/response/certificate", message: "a repeated rotation request gets the certificate it was answered with, not a new one" }];
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -578,6 +594,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-key-set") return keySet(value);
   if (kind === "device-action") return deviceAction(value);
   if (kind === "device-root-certification") return rootCertification(value);
+  if (kind === "device-rotation") return rotation(value);
   return undefined;
 }
 // #endregion device-rules

@@ -1,6 +1,6 @@
 # Share registrations: `share-registration/1` and its receipt
 
-DEC-0086 · rule codes `FAC-SEM-117`, `FAC-SEM-118` (here) and `FAC-SEM-045` amended ([devices](devices.md#semantic-rules)) ·
+DEC-0086, amended by DEC-0094 (the latest `protocols` list, the check-in trigger) · rule codes `FAC-SEM-117`, `FAC-SEM-118` (here) and `FAC-SEM-045` amended ([devices](devices.md#semantic-rules)) ·
 schema [`share-registration.schema.json`](../../schemas/share-registration.schema.json), with
 [`common.schema.json#/$defs/shareGrantId`](../../schemas/common.schema.json) and `#/$defs/orgContextId` · code
 [`src/share-registration.ts`](../../src/share-registration.ts) · vectors
@@ -85,7 +85,7 @@ enrollments, under mutual TLS and the DEC-0056 `fabric-device` signature by that
 certificate's serial ([devices → transport](devices.md#transport): "every batch, check-in, rotation and
 share-registration request"). The path is the receiver's; the contract names none. `share-registration/1` and
 `share-registration-receipt/1` are protocol revisions of their own (DEC-0067): the receiver lists `share-registration/1`
-in its enrollment response's `protocols`, and a node sends registrations only to a receiver that lists it.
+in its `protocols`, and a node sends registrations only to a receiver whose latest `protocols` list (from its enrollment response, or a check-in response that carries one, DEC-0094) names it.
 
 Only the enrolled node holds the device's certificate and key, so only it can make the request the receiver attributes.
 It registers only what a passkey signed: it builds registrations from the estate revision and the revocation-delta
@@ -124,7 +124,8 @@ revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9
 carries its window with at most three fraction digits, Fabric writes its revocations' `revokedAt` so, and the hub
 SHOULD (revocation-delta.md); the derivation floors whatever they write.
 
-A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
+A node sends on change: after it applies a revision or a delta entry, after an enrollment, and after a check-in
+response's `protocols` first lists `share-registration/1` (DEC-0094). It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
 redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
 for the record to change as below. It keeps each receipt. It sends nothing again that the receiver answered with a typed
@@ -263,15 +264,16 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
   new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub SHOULD write the
   revocation delta's `revokedAt` with at most three fraction digits.
 - **Project Observatory's node and collector** derive registrations per enrollment and send them signed (DEC-0056), keep
-  the receipts, withdraw on revocation or drop, send again after an enrollment and weekly (never what a typed refusal
+  the receipts, withdraw on revocation or drop, send again after an enrollment, after a check-in response's `protocols` first lists `share-registration/1`
+  (DEC-0094) and weekly (never what a typed refusal
   answered until the record changes; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
   `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
   DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per
   organization, keeps held entries,
   body bytes, signature fields and tombstones, refuses a mismatched `grant.usage` context as `attribution`, shows
-  per-agent usage to others only as sums with each read logged, lists `share-registration/1` in its enrollment
-  response's `protocols`, and runs the vectors.
+  per-agent usage to others only as sums with each read logged, lists `share-registration/1` in every `protocols`
+  list it sends (its enrollment response, and its check-in response when it carries one, DEC-0094), and runs the vectors.
 - **fabric-agent-adapter** vendors the schema and the two common defs; its kits run `FAC-SEM-117`, `FAC-SEM-118` and the
   amended `FAC-SEM-045`.
 

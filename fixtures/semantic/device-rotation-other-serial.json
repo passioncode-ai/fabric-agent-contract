@@ -1,0 +1,21 @@
+{
+  "description": "A rotation with the same key under another serial is a new rotation, not a repeat: a new certificate; no finding.",
+  "kind": "device-rotation",
+  "expect": [],
+  "input": {
+    "answered": [
+      {
+        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "serial": "01ab",
+        "certificate": "MIIB-new-certificate"
+      }
+    ],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "serial": "02cd"
+    },
+    "response": {
+      "certificate": "MIIB-other-certificate"
+    }
+  }
+}

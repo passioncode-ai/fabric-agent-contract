@@ -1,0 +1,23 @@
+{
+  "description": "The same rotation request again answered with another certificate: FAC-SEM-125.",
+  "kind": "device-rotation",
+  "expect": [
+    "FAC-SEM-125"
+  ],
+  "input": {
+    "answered": [
+      {
+        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "serial": "01ab",
+        "certificate": "MIIB-new-certificate"
+      }
+    ],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "serial": "01ab"
+    },
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}

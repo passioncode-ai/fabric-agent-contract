@@ -1,0 +1,21 @@
+{
+  "description": "A request under the same serial with another CSR key is not a repeat, so FAC-SEM-125 does not apply (a rotation CSR from a key other than the key on record is not a rotation at all: devices.md, Rotation and re-enrollment); no finding.",
+  "kind": "device-rotation",
+  "expect": [],
+  "input": {
+    "answered": [
+      {
+        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "serial": "01ab",
+        "certificate": "MIIB-new-certificate"
+      }
+    ],
+    "request": {
+      "publicKeySha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "serial": "01ab"
+    },
+    "response": {
+      "certificate": "MIIB-other-certificate"
+    }
+  }
+}
