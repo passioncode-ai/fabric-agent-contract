@@ -8,7 +8,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | [2026-10-20 resolve pending](2026-10-20-resolve-pending.md) | DEC-0092 (CT-63) | merged, #128 `0de7640` |
 | [2026-10-20 coding-agent catalogue](2026-10-20-coding-agent-catalogue.md) | DEC-0093 (CT-60) | merged, #131 `bab2578` |
 | [2026-10-20 device file key](2026-10-20-device-file-key.md) | DEC-0094 (CT-65) | merged, #129 `de9eae4` |
-| [2026-10-20 support quality](2026-10-20-support-quality.md) | DEC-0095 (CT-61) | open, branch `agent/ct61-support-quality-20261019` |
+| [2026-10-20 support quality](2026-10-20-support-quality.md) | DEC-0095 (CT-61) | merged, #132 `43f82c6` |
 | [2026-10-20 partner channel](2026-10-20-partner-channel.md) | DEC-0090 (CT-58) | open, branch `agent/ct58-partner-channel-20261019` |
 | [2026-10-19 folder attribution](2026-10-19-folder-attribution.md) | DEC-0089 (CT-57; `FAC-SEM-121`) | merged, #124 `ebfddce` |
 | [2026-10-19 `enterprise-cloud` in entitlement/1](2026-10-19-enterprise-cloud.md) | DEC-0088 (CT-59; `FAC-SEM-115`) | merged, #122 `0752e03` |
