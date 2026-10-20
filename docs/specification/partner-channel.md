@@ -14,9 +14,9 @@ The operator's standing decision SD-1 (2026-10-19): partners (integrators, agenc
 on the platform and sell them to companies as a setup; a company that comes through a partner pays PassionCode only for
 the cloud its agents run on. The contract's part is PA-06 (board thread `6e66a023`, fabric-workspace `knowledge/roadmap.md`
 RM-31): what a partner's signed package may be trusted for, what a partner may read of its agents' usage, and how a
-company's owner lets a partner act on the company's agents. Until the first organization server's PA-01 names the
-partner organization's id form, a partner is named by an organization context, `org:<partnerOrgId>`, as
-passioncode-platform's ADR-0007 does.
+company's owner lets a partner act on the company's agents. The first organization server's PA-01 (board, 2026-10-19) decided the
+partner organization's id: an ordinary organization id, so a partner is named by its organization context,
+`org:<partnerOrgId>`, as passioncode-platform's ADR-0007 does.
 
 ## A partner's publisher key, trusted per context (FAC-SEM-122)
 
@@ -82,7 +82,7 @@ actor (closed schemas), so a partner channel needs the reader at this pin. `cont
 ## Who adopts it
 
 - **The first organization server** shows a partner `partnerUsage`'s cells, logs each read as above, and holds each
-  partner's publisher names (its PA-03); it names the partner organization's id form (its PA-01).
+  partner's publisher names (its PA-03).
 - **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor.
 - **Project Observatory's node** verifies a partner's package under the record's scope before it installs it in a
   company's context (its PA-10).
@@ -92,6 +92,6 @@ The board row is CT-58.
 
 ## Not decided here
 
-- The partner organization's id form (the first organization server's PA-01) and the partner console.
+- The partner console.
 - How an owner revokes or hands over a partner (RM-10, the first organization server's PA-02 with Fabric).
 - Billing: a partner-channel order holds only `hosting` (passioncode-platform ADR-0007).

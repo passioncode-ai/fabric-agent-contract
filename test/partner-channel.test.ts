@@ -31,6 +31,8 @@ describe("owner to partner to agents (DEC-0090 item 3, FAC-SEM-124)", () => {
     const ok = load("delegation-mint-partner-ok.json");
     const principal = { ...ok, grant: { ...ok.grant, principal: { ...ok.grant.principal, id: "urn:person:partner" } } };
     expect(at(principal)).toEqual(["/grant/principal/id", "/token/act"]);
+    const { principal: _, ...noPrincipal } = ok.grant;
+    expect(at({ ...ok, grant: noPrincipal })).toEqual(["/grant/principal/id", "/token/act"]);
     expect(at({ ...ok, grant: { ...ok.grant, context: ok.grant.principal.id } })).toEqual(["/grant/context"]);
     const deeper = { ...ok, token: { ...ok.token, act: { sub: ok.token.act.sub, act: { sub: "acme-helper.default", act: ok.token.act.act } } } };
     expect(chainDepth(deeper.token.act)).toBe(3);

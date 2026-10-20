@@ -468,6 +468,11 @@ snapshot of the facts (`attributeFolder`, the AT table, DEC-0089) that Fabric, S
 tie attributes nothing ([folder attribution](docs/specification/folder-attribution.md)). Fabric's hub is to serve it as
 `fabric.project.resolve` (F9, owed), which answers `pending` while the folder's Git facts cannot be read (DEC-0092).
 
+**Partner**: An organization (an integrator, an agency, an agent studio) that builds agents on the platform and sells them
+to companies; named by its organization context `org:<partnerOrgId>`. Its publisher key is trusted only in the contexts
+the estate record scopes it to, it reads its agents' usage only as sums per agent and day or period, and it acts on a
+company's agents only under the owner's partner grant ([the partner channel](docs/specification/partner-channel.md), DEC-0090).
+
 **Repository identity**: A remote's `host/path` with `A` to `Z` lower-cased (a non-ASCII letter keeps its case), credentials and `.git` dropped (`normalizeOrigin`,
 DEC-0089): two clones with one identity are one repository, whatever their branch.
 
