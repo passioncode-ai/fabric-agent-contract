@@ -187,7 +187,22 @@ a resolver that its engine (`project-observatory-open-source`, 209d1184 of 2026-
 now states what Observatory owes, with the vectors run against its resolver as the measure, instead of describing
 its code. More risks for the after-merge row (take the next free CT id, which may not be CT-66): Switchboard's two
 attach paths (`unassigned` and `assess`), a refusal and tie text in the conformance row, Fabric's F9 answer wrapping
-`$defs/answer` rather than extending it, Fabric's SCN-137 already untrue of 8bdad97c. Also: an explicit move removes
+`$defs/answer` rather than extending it, Fabric's SCN-137 already untrue of 8bdad97c.
+
+The sixteenth readings of `2a694ca`: the seam and product readings both passed, with risks only.
+
+**The finish line, judged on 2026-10-20.** The code has not changed since `abc5131`, where the unit reading passed
+twice in a row (rounds eleven and twelve). The product reading passed twice in a row (fifteen and sixteen). The seam
+reading passed in rounds fourteen and sixteen; its one finding in fifteen was a sentence describing Observatory's
+resolver, rewritten at `2a694ca` and confirmed by sixteen. The gate is green at that head. So two consecutive rounds
+found nothing that blocks the decision, and the remaining findings are risks for the after-merge row: the next free
+CT id (CT-66, checked against the open branches CT-58 to CT-65). Risks of round sixteen added to that list:
+Observatory's third path (`tools/record_turn.py`); the `_` prefix as the operator's configuration, not the engine's
+default; Switchboard's worktree path (`classify_inner`, which refuses a folder that holds a Project folder) beside
+`repo_root`; SB-145 counting by group; the vectors not yet run by any product (adoption); a whitespace path segment's
+missing identity named and vectored; DEC-0089 item 3's "in its repository" read as "inside this checkout" (an
+annotation after the merge); a duty to declare the folder that holds agent worktrees; activity.md naming CT-64; the
+fabric-workspace knowledge page in the next task. Also: an explicit move removes
 the other Project's folder at the place (every product's duty, in the conformance row), and the forms of remote that
 merge at AT-7 named (then, after the fourteenth reading, made examples, with the `origin` vectors run against each
 product's normalizer as the full measure).
@@ -288,7 +303,8 @@ receipt. Recorded for agent-sync's owner; nothing in this repository depends on 
 ## Next task
 
 PR #124: run the blind readings until two consecutive rounds find nothing that blocks it, merge, then post the merge
-commit on thread `617c8cbe` for Fabric, Switchboard (SB-141: within a working day of the merge) and Observatory, with
+commit on thread `617c8cbe` (and fabric-workspace's knowledge page that owns the cross-product fact) for Fabric,
+Switchboard (SB-141: within a working day of the merge) and Observatory, with
 the proposal above for Fabric's session-start capability (D4 as corrected) referring to `folder-attribution.schema.json`
 (no request to project-observatory-contract: the capability moved to Fabric), and add DEC-0089 to the contract's row
 of the knowledge base roadmap (`fabric-workspace/knowledge/roadmap.md`).
