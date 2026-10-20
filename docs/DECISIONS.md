@@ -5811,6 +5811,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** schema `schemas/folder-attribution.schema.json` (`$defs/pending`, `$defs/resolveAnswer`);
   tests `test/folder-attribution.test.ts`; docs `docs/specification/folder-attribution.md` (the session-start
   capability), `docs/specification/conformance.md` (the hub's row and the attributing product's row), `docs/DOCMAP.md`, `CONTEXT.md`, `docs/backlog.md`
-  (CT-63, CT-64, CT-66), `docs/handoffs/2026-10-20-resolve-pending.md` and its row in `docs/handoffs/README.md`.
+  (CT-63, CT-64, CT-66), `docs/handoffs/2026-10-20-resolve-pending.md` and its row in `docs/handoffs/README.md`, the
+  annotation on `docs/handoffs/2026-10-19-folder-attribution.md`; DEC-0089's annotation.
 - **Source:** the board thread `617c8cbe` (Fabric's acceptance of the shape, 2026-10-19); DEC-0092 reserved by git CAS
   (key `ct63-resolve-pending`).

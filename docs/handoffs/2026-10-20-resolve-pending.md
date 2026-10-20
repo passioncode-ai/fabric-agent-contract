@@ -13,7 +13,8 @@ a contract name (board thread `617c8cbe`; Fabric accepted `{outcome: pending, re
   required key, no extra member (the mutants that drop the root alternative or a required key fail them).
 - DEC-0092; DEC-0089 annotated; the hub's conformance row and pending in the attributing product's row; DOCMAP and
   CONTEXT; backlog CT-63, and pending in CT-64 and CT-66.
-- Readings: unit (pass), product (four rounds; each round's findings are fixed in this branch).
+- Readings: unit (pass); product, six rounds: the first four's findings fixed in this branch, the fifth a pass whose
+  risks were addressed, the sixth with no false claim in the contract text (its handoff count and risks fixed here).
 
 ## Checks
 
@@ -21,5 +22,7 @@ a contract name (board thread `617c8cbe`; Fabric accepted `{outcome: pending, re
 
 ## Next task
 
-Readings, merge, then post the merge commit on thread `617c8cbe` for Fabric's F9. The reply carrying `record` and
-`row` is CT-66's.
+Post the merge commit on thread `617c8cbe` for Fabric's F9 (its plan row "answering DEC-0089's answer" becomes
+`resolveAnswer`) and to Project Observatory for OBS-160, whose resolver reads another shape and falls back locally on an
+unknown answer; update fabric-workspace `knowledge/agents-first.md` to cite DEC-0092 at the merge commit and publish.
+The reply carrying `record` and `row` is CT-66's.
