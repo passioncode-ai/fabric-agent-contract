@@ -180,7 +180,14 @@ Adoption risks from both readings, for board row CT-66 after the merge: Switchbo
 tombstones and its origins kept raw; Fabric storing each folder's common dir, and its SCN-128 worktree tick and
 SCN-033 attach that make a second Project for one repository; Observatory's second resolver `tools/session_start.py`,
 its exclusions split into containers and tombstones, and a scenario for its refusal and tie text; an ambiguous vector
-whose snapshot order is not sorted; SB-141 restated under D3 and D4 as corrected. Also: an explicit move removes
+whose snapshot order is not sorted; SB-141 restated under D3 and D4 as corrected.
+
+The fifteenth readings of `e535c93`: the product reading passed; the seam reading found Observatory's row described
+a resolver that its engine (`project-observatory-open-source`, 209d1184 of 2026-10-18) had already changed. The row
+now states what Observatory owes, with the vectors run against its resolver as the measure, instead of describing
+its code. More risks for the after-merge row (take the next free CT id, which may not be CT-66): Switchboard's two
+attach paths (`unassigned` and `assess`), a refusal and tie text in the conformance row, Fabric's F9 answer wrapping
+`$defs/answer` rather than extending it, Fabric's SCN-137 already untrue of 8bdad97c. Also: an explicit move removes
 the other Project's folder at the place (every product's duty, in the conformance row), and the forms of remote that
 merge at AT-7 named (then, after the fourteenth reading, made examples, with the `origin` vectors run against each
 product's normalizer as the full measure).

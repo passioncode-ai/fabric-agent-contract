@@ -253,16 +253,18 @@ naming the rule and the Projects; the reasons are the schema's.
   "it leaves the first one" ends; a worktree right under home refused at attach as at creation; recording by `record`; its snapshot's
   `containers` including Observatory's declared ones where it can read them; its CLI text on containers and its
   scenarios (SCN-055, SCN-063, SCN-068) updated with them.
-- **Project Observatory** (the engine) runs the vectors in its scan and in its local answer while Fabric is not
-  running; at a session's start it asks Fabric's capability (D4 as corrected) rather than serving one. Measured against
-  the table: it has no work row (AT-12) and reads owners only indirectly (AT-10); it scans only the children of its data
-  root, so a subfolder start is not rooted at the repository (AT-15) and a remoteless worktree joins only on its tip
-  (AT-6); its `folder_exclusions.json` and `_*` folders become the snapshot's `containers` (the folder that holds agent
-  worktrees among them; its names and prefixes expanded to the matching paths under its data root), and no rule of
-  its own stays beside the vectors (its `denied_links.json` denies a link its vault-note rules made between a Project
-  and a repository; it is no tombstone, and it goes with those rules on adoption); its origin read as the raw
-  `remote.origin.url` (`git config --get`), not through `git remote get-url`, which applies `insteadOf` rewrites and
-  gives the same clone another identity; recording by `record`; plain folders, group paths, any host, the identity's case, temporary roots (AT-4) and ties.
+- **Project Observatory** (its engine, `project-observatory-open-source`) runs the vectors in its scan and in its local
+  answer while Fabric is not running; at a session's start it asks Fabric's capability (D4 as corrected) rather than
+  serving one. Owed, whatever its resolver does today (the vectors run against it are the measure): its session-start
+  resolver (`tools/session_start.py`, which today takes the first path segment below the data root, so a repository
+  nested in a root child goes to that child) replaced by the capability or `attributeFolder`; the work row (AT-12)
+  and owners (AT-10) read directly; its `folder_exclusions.json` and `_*` folders as the snapshot's `containers` (the
+  folder that holds agent worktrees among them; its names and prefixes expanded to the matching paths under its data
+  root), with no rule of its own beside the vectors (its `denied_links.json` denies a link its vault-note rules made
+  between a Project and a repository; it is no tombstone, and it goes with those rules on adoption); its origin read
+  as the raw `remote.origin.url` (`git config --get`), not through `git remote get-url`, which applies `insteadOf`
+  rewrites and gives the same clone another identity; recording by `record`; plain folders, group paths, any host,
+  the identity's case, temporary roots (AT-4) and ties.
 - **fabric-workspace** names this page from the knowledge page that owns the cross-product fact.
 
 The board row is CT-57.
