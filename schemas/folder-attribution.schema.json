@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/folder-attribution.schema.json",
-  "title": "Folder attribution (DEC-0089): the snapshot attributeFolder reads and its answer",
+  "title": "Folder attribution (DEC-0089): the snapshot attributeFolder reads, its answer, and the session-start capability's pending (DEC-0092)",
   "$defs": {
     "path": {
       "type": "string",
