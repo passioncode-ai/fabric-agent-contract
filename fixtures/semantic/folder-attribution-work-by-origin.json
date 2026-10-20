@@ -1,0 +1,50 @@
+{
+  "description": "An implementation attributes a second clone by a work record's origin, with a tombstone elsewhere and the nested Projects' top levels given, as attributeFolder does (FAC-SEM-121, DEC-0089); it carries work, tombstones and toplevel so the gate's hostile sweep reaches their readers.",
+  "kind": "folder-attribution",
+  "expect": [],
+  "input": {
+    "snapshot": {
+      "folder": "/u/ana/work/lib-2/src",
+      "home": "/u/ana",
+      "tempRoots": [
+        "/tmp",
+        "/u/ana/.cache"
+      ],
+      "git": {
+        "toplevel": "/u/ana/work/lib-2",
+        "commonDir": "/u/ana/work/lib-2/.git",
+        "mainCheckout": "/u/ana/work/lib-2",
+        "origin": "https://github.com/someone/lib"
+      },
+      "projects": [
+        {
+          "id": "project:notes",
+          "folders": [
+            {
+              "path": "/u/ana/work/notes",
+              "commonDir": "/u/ana/work/notes/.git",
+              "origin": null,
+              "toplevel": "/u/ana/work/notes"
+            }
+          ],
+          "sources": []
+        }
+      ],
+      "work": [
+        {
+          "project": "project:notes",
+          "commonDir": "/u/ana/work/lib/.git",
+          "origin": "git@github.com:someone/lib.git"
+        }
+      ],
+      "tombstones": [
+        "/u/ana/work/old"
+      ]
+    },
+    "answer": {
+      "outcome": "attached",
+      "project": "project:notes",
+      "rule": "work"
+    }
+  }
+}

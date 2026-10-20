@@ -98,6 +98,7 @@ export const NOT_SWEPT: readonly string[] = [
   "device-policy.schema.json",
   "execution-context.schema.json",
   "fabric-link.schema.json",
+  "folder-attribution.schema.json",
   "grant-check-request.schema.json",
   "grant-check.schema.json",
   "interop-agent-call.schema.json",

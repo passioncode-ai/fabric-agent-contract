@@ -1,0 +1,331 @@
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { afterAll, describe, expect, it } from "vitest";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { attributeFolder, explainFolder, isPath, normalizeOrigin, ownerOf, recordOrigin, under } from "../src/folder-attribution.js";
+import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { createValidator, validateDocument } from "../src/validator.js";
+import { VECTOR_FILE, buildFolderAttributionVectors } from "../tools/vectors/folder-attribution.js";
+
+type Json = Record<string, any>;
+const root = projectRoot();
+const read = (relative: string) => JSON.parse(readFileSync(path.join(root, relative), "utf8")) as Json;
+const vectors = read(VECTOR_FILE);
+const ajv = await createValidator();
+const valid = (pointer: string, doc: unknown) => validateDocument(ajv, `${SCHEMA_PREFIX}schemas/folder-attribution.schema.json${pointer}`, doc).valid;
+const TZ = process.env.TZ;
+afterAll(() => {
+  if (TZ === undefined) delete process.env.TZ;
+  else process.env.TZ = TZ;
+});
+
+describe("the vectors (DEC-0089)", () => {
+  it("are the generator's output", () => {
+    expect(buildFolderAttributionVectors()).toBe(readFileSync(path.join(root, VECTOR_FILE), "utf8"));
+  });
+  it.each(vectors.origin as Json[])("origin: $origin", (entry) => {
+    expect(normalizeOrigin(entry.origin) ?? null).toBe(entry.expected);
+  });
+  it.each(vectors.attribution as Json[])("attribution: $name", (entry) => {
+    expect(attributeFolder(entry.snapshot)).toEqual(entry.expected);
+  });
+  it("name the row that decides each one, and cover every AT row", () => {
+    const rows = new Set<number>();
+    for (const entry of [...(vectors.attribution as Json[]), ...(vectors.record as Json[])]) {
+      const row = explainFolder(entry.snapshot).row;
+      expect(entry.name.startsWith(`AT-${row}:`), entry.name).toBe(true);
+      rows.add(row);
+    }
+    for (let row = 0; row <= 15; row += 1) expect(rows.has(row), `AT-${row}`).toBe(true);
+  });
+  it.each(vectors.record as Json[])("record: $name", (entry) => {
+    expect(explainFolder(entry.snapshot).record).toEqual(entry.record);
+  });
+  it("hold the same answers in every time zone", () => {
+    for (const name of ["UTC", "America/St_Johns", "Pacific/Kiritimati"]) {
+      process.env.TZ = name;
+      for (const entry of vectors.attribution as Json[]) expect(attributeFolder(entry.snapshot), `${name} ${entry.name}`).toEqual(entry.expected);
+    }
+  });
+});
+
+/** The snapshot with `record` added as a folder of the Project `answer` names, or of a new Project `project:new`. */
+function recorded(snapshot: Json, folder: string, git: Json | null): Json {
+  const explained = explainFolder({ ...snapshot, folder, git });
+  const { record } = explained;
+  const answer = explained.answer as Json;
+  if (!record) return snapshot;
+  const id = answer.outcome === "new" ? "project:new" : answer.project;
+  const projects = (snapshot.projects as Json[]).some((project) => project.id === id) ? snapshot.projects : [...snapshot.projects, { id, folders: [], sources: [] }];
+  return { ...snapshot, projects: (projects as Json[]).map((project) => (project.id === id ? { ...project, folders: [...project.folders, record] } : project)) };
+}
+
+describe("recording the answer keeps the next answers (DEC-0089 item 4)", () => {
+  const W = "/u/ana/work";
+  const wt = (top: string, main: string, common = `${main}/.git`) => ({ toplevel: top, commonDir: common, mainCheckout: main, origin: null });
+  const f = (p: string, top: string) => ({ path: p, commonDir: `${W}/mono/.git`, origin: null, toplevel: top });
+  const base = { home: "/u/ana", tempRoots: [], projects: [{ id: "project:mono", folders: [f(`${W}/mono`, `${W}/mono`)], sources: [] }, { id: "project:pkg", folders: [f(`${W}/mono/pkg`, `${W}/mono`)], sources: [] }] };
+  const ask = (snapshot: Json, folder: string, git: Json | null) => attributeFolder({ ...snapshot, folder, git });
+  it("the outer Project's worktree, recorded, leaves the inner place to the inner Project", () => {
+    const after = recorded(base, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/pkg/src`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:pkg" });
+    expect(ask(after, `${W}/mono-wt/docs/a`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+  });
+  it("the inner Project's worktree, recorded, leaves the rest of the worktree and a second worktree to the outer one", () => {
+    const after = recorded(base, `${W}/mono-wt/pkg/src`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+    expect(ask(after, `${W}/mono-wt2/other`, wt(`${W}/mono-wt2`, `${W}/mono`))).toMatchObject({ project: "project:mono" });
+  });
+  it("with only the inner Project, its recorded worktree keeps the rest a container", () => {
+    const only = { ...base, projects: [base.projects[1]] };
+    const after = recorded(only, `${W}/mono-wt/pkg/x`, wt(`${W}/mono-wt`, `${W}/mono`));
+    expect(ask(after, `${W}/mono-wt/docs`, wt(`${W}/mono-wt`, `${W}/mono`))).toEqual({ outcome: "refused", reason: "container" });
+    expect(ask(after, `${W}/mono/docs`, wt(`${W}/mono`, `${W}/mono`))).toEqual({ outcome: "refused", reason: "container" });
+  });
+  it("a new Project from a worktree of an unknown repository, recorded, takes the next worktree, normal or bare", () => {
+    const empty = { home: "/u/ana", tempRoots: [], projects: [] };
+    let after = recorded(empty, `${W}/app-wt`, wt(`${W}/app-wt`, `${W}/app`));
+    expect(ask(after, `${W}/app-wt2`, wt(`${W}/app-wt2`, `${W}/app`))).toEqual({ outcome: "attached", project: "project:new", rule: "worktree" });
+    after = recorded(empty, `${W}/r/main`, wt(`${W}/r/main`, `${W}/r/.bare`, `${W}/r/.bare`));
+    expect(ask(after, `${W}/r/feature`, wt(`${W}/r/feature`, `${W}/r/.bare`, `${W}/r/.bare`))).toEqual({ outcome: "attached", project: "project:new", rule: "worktree" });
+  });
+  it("every vector's record, applied, gives the same Project again: attached, new, and explicit asked again without it", () => {
+    let applied = 0;
+    for (const entry of [...(vectors.attribution as Json[]), ...(vectors.record as Json[])]) {
+      const snapshot = entry.snapshot as Json;
+      const { answer, record } = explainFolder(snapshot);
+      if (!record || !("outcome" in answer) || (answer.outcome !== "attached" && answer.outcome !== "new")) continue;
+      const after = recorded(snapshot, snapshot.folder, snapshot.git);
+      // An explicit attach is asked again without it, the tombstone at the folder itself removed (Recording the answer).
+      const { explicit, ...rest } = after;
+      const again = explicit === undefined ? after : { ...rest, tombstones: ((after.tombstones as string[] | undefined) ?? []).filter((stone) => stone !== snapshot.folder) };
+      const project = answer.outcome === "new" ? "project:new" : answer.project;
+      expect(attributeFolder(again), entry.name).toMatchObject({ outcome: "attached", project });
+      applied += 1;
+    }
+    expect(applied).toBeGreaterThan(60);
+  });
+});
+
+describe("recording keeps the Project in random worlds (DEC-0089 item 4)", () => {
+  it("in 6,000 seeded worlds of worktrees, clones, nested Projects, containers and tombstones, an answer's record applied names the same Project", () => {
+    let state = 20261019;
+    // mulberry32: a seeded generator, so a failure is reproducible.
+    const rnd = () => {
+      state = (state + 0x6d2b79f5) | 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const pick = <T,>(items: T[]): T => items[Math.floor(rnd() * items.length)] as T;
+    const H = "/u/ana";
+    const W = `${H}/work`;
+    const subs = ["", "pkg", "pkg/a", "docs", "_wt"];
+    let checked = 0;
+    for (let n = 0; n < 6000; n++) {
+      const repos = ["r1", "r2"].map((r) => ({ origin: pick([`git@github.com:o/${r}.git`, null]), checkouts: [`${W}/${r}`, `${W}/${r}-wt`, `${W}/${r}-2`, `${W}/c/${r}-wt`] }));
+      const checkout = (repo: (typeof repos)[number], i: number) => ({ top: repo.checkouts[i] as string, common: `${repo.checkouts[i === 2 ? 2 : 0]}/.git`, main: repo.checkouts[i === 2 ? 2 : 0] as string });
+      const projects: Json[] = [];
+      for (let p = 0; p < 1 + Math.floor(rnd() * 3); p++) {
+        const folders: Json[] = [];
+        for (let f = 0; f < 1 + Math.floor(rnd() * 2); f++) {
+          if (rnd() < 0.2) {
+            folders.push({ path: pick([`${W}/c`, `${W}/notes`, `${W}/r1/pkg`]), commonDir: null, origin: null });
+            continue;
+          }
+          const repo = pick(repos);
+          const at = checkout(repo, Math.floor(rnd() * 4));
+          const sub = pick(subs);
+          folders.push({ path: sub ? `${at.top}/${sub}` : at.top, commonDir: at.common, origin: repo.origin, toplevel: at.top });
+        }
+        projects.push({ id: `p${p}`, folders, sources: rnd() < 0.2 ? ["github.com/o"] : [] });
+      }
+      const repo = pick(repos);
+      const at = checkout(repo, Math.floor(rnd() * 4));
+      const sub = pick(subs);
+      const snapshot: Json = {
+        folder: sub ? `${at.top}/${sub}` : at.top,
+        home: H,
+        tempRoots: [],
+        git: { toplevel: at.top, commonDir: at.common, mainCheckout: at.main, origin: repo.origin },
+        projects,
+        containers: rnd() < 0.3 ? [pick([`${W}/c`, `${at.top}/_wt`, `${W}/r1/pkg`])] : [],
+        tombstones: rnd() < 0.15 ? [pick([`${W}/r1`, `${W}/r2-wt`, `${at.top}/docs`])] : []
+      };
+      const { answer, record } = explainFolder(snapshot);
+      if (!record || !("outcome" in answer) || (answer.outcome !== "attached" && answer.outcome !== "new")) continue;
+      const project = answer.outcome === "new" ? "project:new" : answer.project;
+      expect(attributeFolder(recorded(snapshot, snapshot.folder, snapshot.git)), JSON.stringify(snapshot)).toMatchObject({ outcome: "attached", project });
+      checked += 1;
+    }
+    expect(checked).toBeGreaterThan(2000);
+  }, 30_000);
+});
+
+describe("length bounds in code points (DEC-0089)", () => {
+  const withId = (id: string) => attributeFolder({ folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id, folders: [], sources: [] }] });
+  it("admits 256 code points written as 512 UTF-16 units, and refuses 257 code points however they are written", () => {
+    expect(withId("\u{1F600}".repeat(256))).toEqual({ outcome: "new", root: "/u/ana/work/x" });
+    expect(withId("a".repeat(257))).toEqual({ fault: "input-invalid" });
+    expect(withId(`${"\u{1F600}".repeat(200)}${"a".repeat(57)}`)).toEqual({ fault: "input-invalid" });
+    expect(withId("a".repeat(513))).toEqual({ fault: "input-invalid" });
+  });
+});
+
+describe("recordOrigin (DEC-0089 item 4)", () => {
+  it("records nothing when what is left of the remote still has a secret's shape, and keeps a local path", () => {
+    // Built at run time, so no token-shaped literal sits in the repository.
+    const token = ["ghp", "_", "a".repeat(36)].join("");
+    expect(recordOrigin(`ssh://${token}@github.com/o/r.git`)).toBeNull();
+    expect(recordOrigin(`${token}@github.com:o/r.git`)).toBeNull();
+    expect(recordOrigin(null)).toBeNull();
+    expect(recordOrigin("/u/ana/repo")).toBe("/u/ana/repo");
+    expect(recordOrigin("github.com:example-org/fabric.git?x=1")).toBe("github.com:example-org/fabric.git");
+  });
+  it("names the same repository as the remote it came from, for every origin vector", () => {
+    for (const entry of vectors.origin as Json[]) {
+      if (typeof entry.origin !== "string") continue;
+      const kept = recordOrigin(entry.origin);
+      expect(kept === null ? undefined : normalizeOrigin(kept), entry.origin).toBe(normalizeOrigin(entry.origin));
+    }
+  });
+});
+
+describe("the schema (DEC-0089)", () => {
+  it("admits every vector's snapshot that is well formed, and every answer", () => {
+    for (const entry of vectors.attribution as Json[]) {
+      if (!("fault" in entry.expected)) expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(true);
+      expect(valid("#/$defs/answer", entry.expected), entry.name).toBe(true);
+    }
+    for (const entry of vectors.record as Json[]) {
+      expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(true);
+      if (entry.record) expect(valid("#/$defs/record", entry.record), entry.name).toBe(true);
+    }
+  });
+  it("refuses every bound the reference refuses (the retro's standing instruction)", () => {
+    for (const entry of (vectors.attribution as Json[]).filter((e) => /empty source|257 characters|empty project|4097 characters/.test(e.name))) {
+      expect(entry.expected, entry.name).toEqual({ fault: "input-invalid" });
+      expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(false);
+    }
+    const astral = { folder: `/${"\u{1F600}".repeat(2100)}`, home: "/u/ana", tempRoots: [], git: null, projects: [] };
+    expect(valid("#/$defs/snapshot", astral)).toBe(true);
+    expect("fault" in attributeFolder(astral)).toBe(false);
+  });
+  it("refuses a snapshot the reference refuses for its shape", () => {
+    for (const entry of (vectors.attribution as Json[]).filter((e) => e.name.startsWith("AT-0: a") && /relative|trailing|\.\./.test(e.name))) {
+      expect(valid("#/$defs/snapshot", entry.snapshot), entry.name).toBe(false);
+    }
+  });
+});
+
+describe("helpers", () => {
+  it("compares paths segment by segment", () => {
+    expect(under("/a/b", "/a")).toBe(true);
+    expect(under("/a/bc", "/a/b")).toBe(false);
+    expect(under("/a", "/")).toBe(true);
+    expect(under("C:/x", "C:/")).toBe(true);
+    expect(isPath("/a//b")).toBe(false);
+    expect(isPath("/a/./b")).toBe(false);
+    expect(isPath("C:/")).toBe(true);
+    expect(ownerOf("gitlab.example.com/group/sub/app")).toBe("gitlab.example.com/group/sub");
+  });
+});
+
+describe("totality: every function answers and never throws", () => {
+  const HOSTILE: unknown[] = [undefined, null, 0, Number.NaN, "", "x", [], {}, Object.create(null), { toString: 1 }, { folder: "/a", home: "/h", tempRoots: [], git: null, projects: [{ id: "p", folders: [{ path: 1 }] }] }];
+  it("attributes anything", () => {
+    for (const a of HOSTILE) {
+      expect(() => attributeFolder(a)).not.toThrow();
+      expect(() => normalizeOrigin(a)).not.toThrow();
+      expect(() => attributeFolder({ folder: "/a/b", home: "/h", tempRoots: [], git: a, projects: [] })).not.toThrow();
+    }
+  });
+  it("answers a snapshot with very many matching folders without overflowing the stack", () => {
+    const projects = Array.from({ length: 14 }, (_, n) => ({ id: `p:${n}`, folders: Array(10000).fill({ path: "/u/ana/work/s", commonDir: null }), sources: [] }));
+    expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
+  });
+  // Linear time, measured by growth rather than by the clock: four times the input may cost at most eight times as much
+  // (a quadratic row costs sixteen), the best of five runs each, plus 300 ms for a busy machine's pauses (the quadratic
+  // rows these tests were written against cost seconds at the larger size).
+  // `build(n)` makes the input outside the timer and returns the call that is timed.
+  const linear = (build: (n: number) => () => void, n: number) => {
+    const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => {
+      const run = build(size);
+      const started = performance.now();
+      run();
+      return performance.now() - started;
+    }));
+    const small = best(n);
+    const large = best(4 * n);
+    expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(8 * small + 300);
+  };
+  it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
+    const slashes = `a${"/".repeat(4094)}b`;
+    linear((n) => {
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(n).fill(slashes) }] };
+      return () => attributeFolder(snapshot);
+    }, 2500);
+    linear((n) => {
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] };
+      return () => attributeFolder(snapshot);
+    }, 500);
+  }, 30_000);
+  it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
+    const at = (n: number) => {
+      const folders = [...Array(n - 1).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
+      const snapshot = { folder: "/u/ana/work/old/keep/x", home: "/u/ana", tempRoots: [], tombstones: Array(n).fill("/u/ana/work/old"), git: null, projects: [{ id: "p:k", folders, sources: [] }] };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
+    };
+    linear(at, 2500);
+  }, 30_000);
+  it("reads work records in linear time: up to 10000 Projects and 10000 records with ids of 256 astral characters", () => {
+    const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
+    const git = { toplevel: "/u/ana/work/lib", commonDir: "/u/ana/work/lib/.git", mainCheckout: "/u/ana/work/lib", origin: null };
+    const at = (size: number) => {
+      const projects = Array.from({ length: size }, (_, n) => ({ id: id(n), folders: [], sources: [] }));
+      const work = Array.from({ length: size }, (_, n) => ({ project: id(n), commonDir: `/u/ana/work/r${n}/.git` }));
+      const snapshot = { folder: "/u/ana/work/lib", home: "/u/ana", tempRoots: [], git, projects, work };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
+    };
+    linear(at, 2500);
+  }, 30_000);
+  it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
+    const hostile: unknown[] = [null, undefined, 7, "", [], {}, "/"];
+    const paths = (value: unknown, at: Array<string | number> = []): Array<Array<string | number>> => {
+      if (value === null || typeof value !== "object") return [at];
+      const keys = Array.isArray(value) ? value.map((_, index) => index) : Object.keys(value as object);
+      return [at, ...keys.flatMap((key) => paths((value as Record<string | number, unknown>)[key], [...at, key]))];
+    };
+    let runs = 0;
+    for (const entry of vectors.attribution as Json[]) {
+      for (const at of paths(entry.snapshot).filter((p) => p.length > 0)) {
+        for (const bad of hostile) {
+          const copy = structuredClone(entry.snapshot) as Record<string | number, unknown>;
+          let node = copy;
+          for (const key of at.slice(0, -1)) node = node[key] as Record<string | number, unknown>;
+          node[at[at.length - 1] as string | number] = bad;
+          expect(() => attributeFolder(copy)).not.toThrow();
+          runs += 1;
+        }
+      }
+    }
+    expect(runs).toBeGreaterThan(10000);
+    // An exhaustive sweep of every node of every vector: about 25,000 calls, each a few hundred microseconds.
+  }, 30_000);
+  it("reads no inherited member", () => {
+    const inherited = Object.create({ folder: "/a/b", home: "/h", tempRoots: [], git: null, projects: [] }) as Json;
+    expect(attributeFolder(inherited)).toEqual({ fault: "input-invalid" });
+  });
+});
+
+describe("folder-attribution semantic fixtures (FAC-SEM-121)", () => {
+  const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("folder-attribution-"));
+  it("has fixtures", () => {
+    expect(files.length).toBeGreaterThanOrEqual(2);
+  });
+  it.each(files)("%s", (file) => {
+    const fixture = read(`fixtures/semantic/${file}`);
+    const codes = [...new Set(evaluateSemanticRules(fixture.kind, fixture.input).map((finding) => finding.code))];
+    expect(codes).toEqual(fixture.expect);
+  });
+});

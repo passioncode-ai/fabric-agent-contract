@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0089`
+**Next free ID:** `DEC-0090`
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5645,3 +5645,116 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** passioncode-platform's request on the project board (thread `c7d8f53d`, 2026-10-19) under the operator's
   SD-2 and its ADR-0008 D-3; DEC-0085. DEC-0088 was reserved by git CAS (`agent_sync.py reserve`, key
   `ct59-enterprise-cloud`).
+
+### DEC-0089: Folder attribution: one rule set, with vectors, for which Project a coding agent's folder belongs to (`FAC-SEM-121`)
+
+- **Date:** 2026-10-19
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
+- **Decision:** in [folder attribution](specification/folder-attribution.md):
+  1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
+     `tempRoots`, `git` or `null`, `projects` with each folder's `commonDir`, `origin` and `toplevel`, `work?`,
+     `tombstones?`, `containers?`, `explicit?`; `folder-attribution.schema.json`), answering `attached` (with its rule),
+     `new` (with its root), `refused` (with its reason), `ambiguous` (with the Projects) or `{fault: "input-invalid"}`,
+     in the order AT-0 to AT-15: a fault; an explicit attach; a tombstone on the folder refused unless a Project lists a
+     folder, not broad, below it that holds the folder; the folder's Project by the nearest place (by common dir or by
+     identity, the same common dir at equal depth) when a folder of its own repository holds it, else its nearest
+     listed folder by path, a declared container between them ending a listed folder's reach; a temporary folder or root refused; a broad folder or root refused; the same Git common
+     dir or the main checkout, or the same repository identity, at the nearest place in the repository (the same common
+     dir at equal depth, as AT-3 weighs them); the
+     Project the main checkout lies in; a repository whose Projects all sit deeper refused; the origin's owner a
+     Project lists; a tool's folder refused; a work record (by common dir or by identity); a tombstoned root refused; a
+     root holding another Project's folder refused; else a new Project at the main checkout, or at the folder without
+     Git. A tie at one row is `ambiguous` and attributes nothing. A branch decides nothing.
+  2. **The repository identity** `normalizeOrigin`: `host/path` with `A` to `Z` lower-cased, from `http`, `https`, `ssh`, `git`,
+     `git+ssh`, `git+https` URLs or the scp form, trimmed; credentials, port, query, fragment, the outer `/` and then
+     one `.git` dropped; a host of ASCII letters, digits, `.` and `-` with a dot, and at least two non-empty path
+     segments. The owner is every segment but the last.
+  3. **Containers.** A *broad* folder (a filesystem or drive root, home, an ancestor of home, or a container a person
+     declared) is never a Project, never listed (AT-2 to AT-9 skip it) and never attached by any row but an explicit
+     attach; a declared container inside a Project's folder ends that folder's reach (AT-3), so it is refused and what
+     it holds goes by its own rows; a folder right under home is a container unless a Project lists it, for a worktree as for a clone, and so
+     is a root there unless a Project folder is in its repository;
+     a repository whose Project folders all sit deeper than the folder's place is a container of them (AT-9); a root
+     that holds another Project's folder is never made a Project (AT-14). Under a temporary or cache root only the
+     folder or its nearest listed ancestor (AT-3) joins; a tool's folder (a hidden folder directly in home, `Library`,
+     `AppData`) joins by AT-3, or a known repository by AT-6 to AT-10, never by work and never as a new Project.
+  4. **Recording.** `explainFolder(snapshot)` answers `{answer, row, record}`; the product adds `record` to the Project
+     and nothing else: after AT-6 or AT-7 the matched Project folder's place in this checkout, after AT-8, owner or work
+     the checkout's top level, after `new` the root (its own top level, none for a bare repository), after `folder`
+     nothing, after an explicit attach the folder (nothing for a broad one), removing a tombstone at the folder only
+     (folder-attribution.md, *Recording the answer*; the vectors' `record` cases). The record's `origin` is the remote
+     without what can carry a credential (`recordOrigin`): no product's store holds a token from a remote URL.
+  5. **The rule** `FAC-SEM-121` (kind `folder-attribution`, `{snapshot, answer}`): an implementation's answer equals
+     `attributeFolder`'s.
+- **Choices made in implementation** (the run's D2 left them open):
+  - paths compare segment by segment and as written, a drive letter upper case; the product resolves the real path
+    (links, case) first; Project ids compare as written (each product's own keys; identifiers.md);
+  - a tombstone covers its folder and its subfolders and is scoped to them: it refuses the folder (AT-2) and a new
+    Project at a tombstoned root (AT-13), but not a worktree or clone of a repository another Project keeps, nor a
+    folder a Project lists below it (so an explicit attach below a removed parent lasts and its siblings stay out);
+  - a folder a Project lists is attached before the temporary refusal, so a Project kept under a temporary root keeps
+    working (D2's "already belongs" first, as Switchboard does); nothing else joins there;
+  - broad folders are refused before every Git row, so home as a clone or as a worktree is not attached; Fabric and
+    Switchboard refuse a broad folder they would create but not by worktree today, so both owe it; a folder right under
+    home a Project lists is that Project's (Switchboard offers its worktrees);
+  - a worktree or clone is the same tree: AT-6 and AT-7 match a Project folder by its place below its Git top level,
+    the nearest place first, and AT-3 decides by the same place when a folder of the folder's own repository holds it,
+    by common dir or by identity, the same common dir at equal depth, so a recorded worktree or clone never takes a
+    nested Project's place; else a worktree goes where its main checkout goes
+    (AT-8); else a
+    repository whose Projects all sit deeper is refused, so no second Project is made for one repository (AT-9); a
+    nested folder given without its top level counts at the top and ties;
+  - the repository identity folds case for the whole path (GitHub, GitLab and Bitbucket route a path regardless of it;
+    only Switchboard folded, owner and name) and keeps group paths (Fabric did); it is not DEC-0076's normal form,
+    which compares URIs; on a case-sensitive server two repositories differing only in case read as one, accepted; only
+    `A` to `Z` fold, so every port agrees on a non-ASCII path;
+  - a tool's folder is refused after the owner row, so it joins a known repository but never by work and never as a new
+    Project, as Switchboard's SB-131;
+  - a work record carries the common dir and, when it has one, the raw origin, so a second clone joins by work; one
+    naming a Project the snapshot does not hold matches nothing;
+  - the main checkout is the first entry of `git worktree list --porcelain` (the common dir for a bare repository); a
+    Git probe that fails is not `git: null`, and a folder whose top level is broad (home kept under Git) is passed as
+    `git: null`;
+  - `ambiguous` lists the Projects in the order of `projects`;
+  - the results of D2's order against the operator's literal words (a worktree or a branch goes to the existing
+    Project, a new folder makes a new one) are recorded for the operator to correct on the board, stated by the rows
+    that keep the words (folder-attribution.md, *What follows from D2*): a worktree or clone of a known repository
+    joins its Project when AT-6, AT-7 or AT-8 attaches it to one Project, or AT-3 does by its place in that
+    repository, a new folder makes a Project exactly when AT-15 does, and whenever a row other than AT-0 or AT-1 decides
+    first or a row ties the answer departs (AT-0 is a fault and AT-1 an explicit choice, neither a departure);
+  - no user-facing scenario: the contract defines no interface here, and each product's scenarios own how a session's
+    Project, a tie or a refusal is shown.
+- **Why:** the operator (2026-10-19) asked that every folder a coding agent works in be attributed alike across
+  Fabric, Switchboard and Observatory; measured that day, the three disagreed on four cases (org-index run index).
+- **Alternatives refused:** each product keeping its rules with a shared description (they drifted once already); the
+  branch as a signal (a branch is the same repository); the file system read by the reference (vectors could not then be
+  shared).
+- **Compatibility:** new; it refuses no document. Each product's own answers change where its rules differed.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/folder-attribution.md` (new), `docs/specification/identifiers.md` (the repository identity is
+    not DEC-0076's form), `docs/specification/conformance.md` (the attributing product's row; `FAC-SEM-121`; next free
+    `FAC-SEM-122`);
+  - schemas: `schemas/folder-attribution.schema.json` (new);
+  - code: `src/folder-attribution.ts` (new), `src/semantic-rules.ts`; `tools/vectors/folder-attribution.ts` (new);
+  - fixtures: `fixtures/vectors/folder-attribution.json` (new), `fixtures/positive/folder-attribution-snapshot.json`,
+    `fixtures/negative/folder-attribution-relative-folder.json`, `fixtures/semantic/folder-attribution-*`,
+    `fixtures/catalogue.json`;
+  - tests: `test/folder-attribution.test.ts` (new), `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
+    the floor for `src/folder-attribution.ts` in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `CONTEXT.md`, `README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-57),
+    `docs/handoffs/2026-10-19-folder-attribution.md`, `docs/handoffs/README.md`.
+- **Not decided here:** how Fabric records an alias, the wire of the session-start capability, storage (D5); how a
+  product learns its work records. The operator corrected D3 and D4 later the same day (Fabric ADR-0166, amendment
+  "Fabric is the core"; board thread `617c8cbe`): the canonical Project id is Fabric's, Observatory's `project:<slug>`
+  and Switchboard's pool are its aliases (`observatory:<slug>`, `switchboard:<pool>`; since Switchboard's SB-146 a pool
+  is a group that may hold several Projects, so how it is recorded is D3's), and the session-start
+  capability is Fabric's, served by its hub (`fabric.project.resolve`, Fabric's message on the board); Observatory and
+  Switchboard ask it, and apply these rules locally only while Fabric is not running (the board message `c95b4a22`;
+  the ADR's amendment states only the asking).
+- **Source:** Fabric's ask D1 on the project board (thread `617c8cbe`, 2026-10-19) and the run index org-index
+  `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe` (D1 to D5, the measured table); Fabric
+  `folderResolver.ts` `normalizeRemoteKey` and Switchboard `suggest.rs` `normalize`, `transient`, `tool_folder`;
+  DEC-0076. DEC-0089 and `FAC-SEM-121` were reserved by git CAS (`agent_sync.py reserve`, key
+  `ct57-folder-attribution`).

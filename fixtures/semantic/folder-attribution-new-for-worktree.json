@@ -1,0 +1,57 @@
+{
+  "description": "An implementation makes a worktree of a known repository a new Project instead of attaching it (FAC-SEM-121, DEC-0089).",
+  "kind": "folder-attribution",
+  "expect": [
+    "FAC-SEM-121"
+  ],
+  "input": {
+    "snapshot": {
+      "folder": "/u/ana/work/fabric-night",
+      "home": "/u/ana",
+      "tempRoots": [
+        "/tmp",
+        "/private/tmp",
+        "/private/var/folders",
+        "/var/tmp",
+        "/u/ana/.cache",
+        "/u/ana/Library/Caches"
+      ],
+      "git": {
+        "toplevel": "/u/ana/work/fabric-night",
+        "commonDir": "/u/ana/work/fabric/.git",
+        "mainCheckout": "/u/ana/work/fabric",
+        "origin": "git@github.com:example-org/fabric.git"
+      },
+      "projects": [
+        {
+          "id": "project:fabric",
+          "folders": [
+            {
+              "path": "/u/ana/work/fabric",
+              "commonDir": "/u/ana/work/fabric/.git",
+              "origin": "git@github.com:example-org/fabric.git"
+            }
+          ],
+          "sources": [
+            "github.com/example-org"
+          ]
+        },
+        {
+          "id": "project:notes",
+          "folders": [
+            {
+              "path": "/u/ana/work/notes",
+              "commonDir": null,
+              "origin": null
+            }
+          ],
+          "sources": []
+        }
+      ]
+    },
+    "answer": {
+      "outcome": "new",
+      "root": "/u/ana/work/fabric-night"
+    }
+  }
+}

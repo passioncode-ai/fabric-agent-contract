@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/folder-attribution.schema.json",
+  "title": "Folder attribution (DEC-0089): the snapshot attributeFolder reads and its answer",
+  "$defs": {
+    "path": {
+      "type": "string",
+      "maxLength": 4096,
+      "pattern": "^(?:/|[A-Z]:/)(?:[^/]+(?:/[^/]+)*)?$",
+      "not": {
+        "pattern": "(?:^|/)\\.{1,2}(?:/|$)"
+      },
+      "description": "An absolute, /-separated path (a Windows path as C:/...), with no empty, . or .. segment and no trailing /."
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "git": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "toplevel",
+            "commonDir",
+            "mainCheckout"
+          ],
+          "properties": {
+            "toplevel": {
+              "$ref": "#/$defs/path"
+            },
+            "commonDir": {
+              "$ref": "#/$defs/path"
+            },
+            "mainCheckout": {
+              "$ref": "#/$defs/path"
+            },
+            "origin": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 4096
+            }
+          }
+        }
+      ],
+      "description": "null for a folder without Git; else git rev-parse --show-toplevel, --git-common-dir (absolute), the main checkout (the first entry of git worktree list --porcelain; for a bare repository the common dir) and remote.origin.url. Other members (a branch) are read by no rule."
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "folders"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/projectId"
+        },
+        "folders": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "$ref": "#/$defs/path"
+              },
+              "commonDir": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/path"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "origin": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 4096
+              },
+              "toplevel": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/path"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "the folder's Git top level (git rev-parse --show-toplevel), which holds it; null or absent outside Git. It gives the folder's place in its repository, so a worktree or a clone joins the nearest of nested Projects (AT-6, AT-7); a folder in Git without it counts as at the top."
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "description": "Repository owners the Project lists as its sources, host/owner (A to Z compared in either case, a non-ASCII letter as written; a trailing / ignored)."
+        }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "folder",
+        "home",
+        "tempRoots",
+        "git",
+        "projects"
+      ],
+      "properties": {
+        "folder": {
+          "$ref": "#/$defs/path"
+        },
+        "home": {
+          "$ref": "#/$defs/path"
+        },
+        "tempRoots": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/path"
+          },
+          "description": "The platform's temporary and cache roots: the OS temp dir, /tmp, /private/tmp, /private/var/folders, /var/tmp, ~/.cache, ~/Library/Caches, ~/AppData/Local/Temp, as each exists."
+        },
+        "git": {
+          "$ref": "#/$defs/git"
+        },
+        "projects": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/project"
+          }
+        },
+        "work": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "required": [
+              "project",
+              "commonDir"
+            ],
+            "properties": {
+              "project": {
+                "$ref": "#/$defs/projectId"
+              },
+              "commonDir": {
+                "$ref": "#/$defs/path"
+              },
+              "origin": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 4096
+              }
+            }
+          },
+          "description": "A coding agent of project changed this repository (its common dir, and its remote.origin.url when it has one) from inside that project's folder."
+        },
+        "tombstones": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/path"
+          },
+          "description": "Folders a person or agent removed; each keeps itself and its subfolders out until an explicit attach."
+        },
+        "containers": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/path"
+          },
+          "description": "Folders a person declared containers (for example a folder that holds agent worktrees): never a Project, never listed and never an ancestor a folder joins (AT-3, AT-5). Absent: none."
+        },
+        "explicit": {
+          "$ref": "#/$defs/projectId",
+          "description": "A person or agent attaches the folder to this Project."
+        }
+      }
+    },
+    "answer": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "outcome",
+            "project",
+            "rule"
+          ],
+          "properties": {
+            "outcome": {
+              "const": "attached"
+            },
+            "project": {
+              "$ref": "#/$defs/projectId"
+            },
+            "rule": {
+              "enum": [
+                "explicit",
+                "folder",
+                "worktree",
+                "repository",
+                "owner",
+                "work"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "outcome",
+            "root"
+          ],
+          "properties": {
+            "outcome": {
+              "const": "new"
+            },
+            "root": {
+              "$ref": "#/$defs/path"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "outcome",
+            "reason"
+          ],
+          "properties": {
+            "outcome": {
+              "const": "refused"
+            },
+            "reason": {
+              "enum": [
+                "transient",
+                "tombstoned",
+                "container",
+                "tool"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "outcome",
+            "rule",
+            "projects"
+          ],
+          "properties": {
+            "outcome": {
+              "const": "ambiguous"
+            },
+            "rule": {
+              "enum": [
+                "folder",
+                "worktree",
+                "repository",
+                "owner",
+                "work"
+              ]
+            },
+            "projects": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/projectId"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "fault"
+          ],
+          "properties": {
+            "fault": {
+              "const": "input-invalid"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "commonDir",
+        "origin",
+        "toplevel"
+      ],
+      "description": "What a product records after an answer (folder-attribution.md, Recording the answer): a folder of the attached or new Project; explainFolder's record.",
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "commonDir": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/path"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4096
+        },
+        "toplevel": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/path"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/snapshot"
+    },
+    {
+      "$ref": "#/$defs/answer"
+    }
+  ]
+}

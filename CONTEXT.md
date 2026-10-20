@@ -456,6 +456,13 @@ DL-19) stopped: it ends
 `failed` with `outcome-unknown`, and its caller reconciles, observing whether the effect happened, and never resends
 under a new key (DEC-0087). The board's `outcome_unknown` is the same idea for a project comms request (DEC-0022).
 
+**Folder attribution**: Which Project a folder a coding agent works in belongs to, decided by one function over a
+snapshot of the facts (`attributeFolder`, the AT table, DEC-0089) that Fabric, Switchboard and Observatory all run; a
+tie attributes nothing ([folder attribution](docs/specification/folder-attribution.md)).
+
+**Repository identity**: A remote's `host/path` with `A` to `Z` lower-cased (a non-ASCII letter keeps its case), credentials and `.git` dropped (`normalizeOrigin`,
+DEC-0089): two clones with one identity are one repository, whatever their branch.
+
 **Intent key**: The idempotency key a caller derives from its intent `{agentId, capability, input, request?}`, a UUID of
 version 8 over the SHA-256 of its RFC 8785 form (`intentIdempotencyKey`, DEC-0087), so a resend after a restart or on
 another machine is the same request; never a clock or a random value. A provider keeps keys per authenticated caller.
