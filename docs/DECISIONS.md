@@ -5768,8 +5768,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-20
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-62.
 - **Decision:** in [service](specification/service.md) and `service-usage.schema.json`:
-  1. A day's totals and each of its model rows MAY carry `unmeasuredCalls`: the calls whose token count the service
-     could not establish (a job result's `null` count, DEC-0087). Absent is 0.
+  1. A day's totals and each of its model rows MAY carry `unmeasuredCalls`: every call whose token count the service
+     did not measure in full, whatever it wrote to its caller: a `null` to a fabric-interop/0.2 reader (DEC-0087), the
+     measured lower bound to a 0.1 reader, a number beside `partial: true`, or a call made outside a job. Absent is 0.
   2. A host MUST show the day's tokens as a lower bound while `unmeasuredCalls` is above 0, as it shows a cost beside
      `unpricedCalls`.
   3. `FAC-SEM-025` keeps it within the calls (a row's and the day's) and holds the day's to the sum of its rows'.
@@ -5778,6 +5779,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives refused:** a boolean "partial" flag (it says nothing of how much is unknown); reusing
   `unpricedCalls` (a call can be priced and still have no token count).
 - **Compatibility:** additive; a report without `unmeasuredCalls` reads as before. `contractVersion` stays `0.1.0`.
+  The day and model objects are closed, so a host that validates reports against a copy of the schema pinned before
+  DEC-0091 rejects a report that carries the field until it adopts this decision; a host that ignores unknown members,
+  as Fabric Dashboards and the adapter's checker do, reads it as before.
 - **Consequences / affects:** schema `schemas/service-usage.schema.json` (`$defs/totals`); code `src/usage-rules.ts`;
   fixture `fixtures/positive/service-usage-unmeasured.json` and `fixtures/catalogue.json`; tests
   `test/usage-rules.test.ts`; docs `docs/specification/service.md`, `docs/backlog.md` (CT-62),

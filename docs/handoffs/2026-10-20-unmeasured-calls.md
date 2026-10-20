@@ -22,4 +22,6 @@ Two: the bound removed, and the field left out of the day's sums; both killed.
 
 ## Next task
 
-Readings, merge, then post the merge commit to Fabric Dashboards on thread `16e6c000`.
+Readings, merge, then post the merge commit to Fabric Dashboards on thread `16e6c000` (its Spend scenario's
+"some calls carry no price" line needs its own wording for the token mark) and to the adapter's owner (its two copies
+of `FAC-SEM-025` need the bound and the day sum).

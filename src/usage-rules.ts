@@ -13,6 +13,8 @@ import { strictTime } from "./rfc3339.js";
  *   is null exactly as in a day's rows (CON-OE-13); the known costs add up the same way: a project costs at least its task
  *   runs (and holds at least their priced calls) and all projects no more than the days (CT-40), a null cost counting
  *   as none.
+ * - the unknown counts: a row has no more `unpricedCalls` or `unmeasuredCalls` than calls, and a day's
+ *   `unmeasuredCalls` is the sum of its rows' (DEC-0091).
  * Malformed input answers findings or none, never an exception.
  */
 

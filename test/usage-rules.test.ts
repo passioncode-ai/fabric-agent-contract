@@ -130,6 +130,8 @@ describe("FAC-SEM-025: calls whose tokens are unknown (DEC-0091)", () => {
   it("refuses more calls with unknown tokens than calls, on a row and on the day", () => {
     expect(paths(day({ unmeasuredCalls: 3 }, { unmeasuredCalls: 3 }))).toEqual(["FAC-SEM-025 /days/1/byModel/1/unmeasuredCalls"]);
     expect(paths(day({ unmeasuredCalls: 6 }, { unmeasuredCalls: 2 }))).toContain("FAC-SEM-025 /days/1/unmeasuredCalls");
+    const empty = { ...unmeasured, days: [unmeasured.days[0], { ...unmeasured.days[1], calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0, unpricedCalls: 0, unmeasuredCalls: 1, byModel: [] }] };
+    expect(paths(empty).filter((p) => p.endsWith("/days/1/unmeasuredCalls"))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
   });
   it("refuses a day's unmeasuredCalls that is not the sum of its models', an absent one counting 0", () => {
     expect(paths(day({ unmeasuredCalls: 2 }, {}))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
