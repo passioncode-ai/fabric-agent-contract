@@ -93,7 +93,7 @@ own their run scope, [DECISIONS.md](docs/DECISIONS.md) owns accepted choices, an
 ### Install
 
 The repository is public; clone it, or get it with every other repository through org-index
-`scripts/clone_all.sh`. Node.js 20+ and pnpm
+`scripts/clone_all.sh`. Node.js 22.13+ (the declared pnpm 11 needs it) and pnpm
 (the version in `package.json` → `packageManager`):
 
 ```bash
