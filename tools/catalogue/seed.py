@@ -1,7 +1,8 @@
 """The seed of catalogue/coding-agents.json: Switchboard's agent list of 2026-10-19 (switchboard_agents, schema 1,
 revision c23b83f814c04379), catalogue fields only. Machine state (installed, enabled, default, paths) and the operator's
 model choices are dropped: a launch argv names no model, and openrouter.modelArgv carries {model}. Permissions are
-added in permissions.json, each with the maker's documentation as its source."""
+added in permissions.json, each with its evidence: the maker's documentation (source) or the installed agent's output
+(measured)."""
 import json, sys
 
 # id, name, maker, url, install (via, package-or-script), launch argv, mcp, openrouter model argv (None: no OpenRouter route)
@@ -38,7 +39,7 @@ SEED = [
   ("devin", "Devin Desktop / Devin CLI (formerly Windsurf/Cascade)", "Devin (formerly Windsurf)", "https://docs.devin.ai/desktop/getting-started.md", ("script", "https://cli.devin.ai/install.sh"), ["devin"], True, None),
 ]
 
-# The runner kind DEC-0046 catalogues is the id; Switchboard's earlier name for it is an alias.
+# The runner kind the runners page's C2 lists (DEC-0016, DEC-0029, DEC-0046) is the id; Switchboard's earlier name for it is an alias.
 ALIASES = {"cursor-agent": ["cursor-cli"], "kiro": ["kiro-cli"]}
 
 def entry(row, permissions):

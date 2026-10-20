@@ -82,20 +82,20 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
 C2 above makes the runner entry's shape the contract's and leaves its contents to each host. The list of coding agents
 itself is the contract's too: [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json), valid against
 [`coding-agents.schema.json`](../../schemas/coding-agents.schema.json) (`coding-agents/1`), versioned with the contract
-and read by every product (Fabric presents and launches from it, Fabric Switchboard keys its accounts and continuation by
-it). Machine state stays with each product: whether an agent is installed, enabled or the default, its accounts and the
+and read by every product at its pin (Fabric to present and launch from it, Fabric Switchboard to key its accounts and
+continuation by it; adoption: CT-60). Machine state stays with each product: whether an agent is installed, enabled or the default, its accounts and the
 keys per project.
 
 | Member | What |
 |---|---|
-| `id` | the stable id every product keys its machine state by: the runner kind where C2 catalogues one (`cursor-agent`, `kiro`), else a new name; a removed agent's id goes to `retired` and is never reused |
+| `id` | the stable id every product keys its machine state by: the runner kind where C2 catalogues one (`cursor-agent`, `kiro`), else a new name, which is the kind a host uses if it later catalogues the agent as a runner (detection still runs only a C2 runner entry); a removed agent's id goes to `retired` and is never reused |
 | `aliases` | other names a product used for it (Switchboard's `cursor-cli`, `kiro-cli`); a product that keyed state by one reads it as the id |
 | `name`, `maker`, `url` | as its maker writes them; `url` is `https` |
-| `install` | how to install it: `via` `brew`, `brew-cask`, `npm`, `uv`, `pipx` with a `package`, or `script` with the maker's install script's URL; optional `platforms` |
+| `install` | how to install it: `via` `brew`, `brew-cask`, `npm`, `uv`, `pipx` with a `package` and no script, or `script` with the maker's install script's URL and no package; optional `platforms` |
 | `launch.argv` | the interactive launch, as argv, never a shell line; it names no model |
-| `permissions` | `skip` (an `argv` or `env`) that skips the agent's permission prompts, with its evidence: `source`, the maker's documentation that names it, or `measured`, the command whose output names it (such as `--help`), the version and the date. An agent with no recorded evidence has no `permissions`, and a product offers it manual approval only |
+| `permissions` | `skip` (exactly one of an `argv` or an `env` of single-word values) that skips the agent's permission prompts, with its evidence: `source`, the maker's documentation that names it, or `measured`, the command whose output names it (such as `--help`), the version and the date. An agent with no recorded evidence has no `permissions`, and a product offers it manual approval only |
 | `mcp` | whether it loads MCP servers |
-| `openrouter` | how to run it on an OpenRouter key: variable names (`keyEnv`, `baseUrlEnv`, `modelEnv`, `homeEnv`) and `modelArgv` with `{model}`; never a value |
+| `openrouter` | how to run it on an OpenRouter key: variable names (`keyEnv`, `baseUrlEnv`, `modelEnv`, `homeEnv`) and `modelArgv` with `{model}`; never a value. An entry without `keyEnv` is a partial recipe (the model argument only), which a product does not offer as a route |
 | `proxy` | a local proxy's base-URL variable and the command that prints its key; never a value |
 | `runner` | the C2 runner entry, where measured |
 | `sources` | every URL the entry came from, its `url` and its permission `source` among them |

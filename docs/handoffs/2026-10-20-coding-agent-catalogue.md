@@ -11,7 +11,8 @@ Brief: `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
   30 agents, Fabric Switchboard's list of 2026-10-19 without machine state, written by `tools/catalogue/seed.py`.
 - Permission arguments for five agents, each with its evidence (`tools/catalogue/permissions.json`): Claude Code from
   its documentation; Codex, Gemini CLI, Cline and Cursor measured from the installed agent's `--help`.
-- Ids are DEC-0046's runner kinds (`cursor-agent`, `kiro`), Switchboard's names kept as `aliases`.
+- Ids are the runner kinds C2 lists (DEC-0016, DEC-0029, DEC-0046: `cursor-agent`, `kiro`), else new names;
+  Switchboard's names kept as `aliases`.
 - `test/coding-agents.test.ts`; the runners page section; DEC-0093; DOCMAP, README, CONTEXT; backlog CT-60.
 
 ## Decisions

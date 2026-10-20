@@ -15,8 +15,8 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Map([
   ["access-log", ["1"]],
   ["approval", ["1"]],
-  ["coding-agents", ["1"]],
   ["activity-summary", ["1"]],
+  ["coding-agents", ["1"]],
   ["enroll-token", ["1"]],
   ["entitlement", ["1"]],
   ["entitlement-key-set", ["1"]],

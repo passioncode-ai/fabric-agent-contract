@@ -5823,14 +5823,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** in [runners](specification/runners.md#the-coding-agent-catalogue-dec-0093):
   1. `catalogue/coding-agents.json`, valid against `coding-agents.schema.json` (`coding-agents/1`), lists the coding
      agents every product reads; machine state (installed, enabled, default, accounts, keys) stays with each product.
-  2. An entry's `id` is the runner kind where DEC-0046 catalogues one, else a new name; `aliases` keep the names a
+  2. An entry's `id` is the runner kind where the runners page's C2 lists one (DEC-0016, extended by DEC-0029 and
+     DEC-0046), else a new name, which is the kind a host uses if it later catalogues the agent as a runner; `aliases` keep the names a
      product used before (Switchboard's `cursor-cli`, `kiro-cli`); a removed id is `retired`, never reused.
   3. A permission-skipping argument or variable is recorded only with its evidence: the maker's documentation
      (`source`) or the agent's own output (`measured`: the command, the version, the date). Without it there is no
      `permissions`.
-  4. Environment members are variable names, never values; no member holds a credential.
+  4. Environment members are variable names, never values, except `permissions.skip.env`'s values, which are single
+     words (such as `yes`); `skip` is exactly one of `argv` or `env`; no member holds a credential.
 - **Why:** the operator wants one list of coding agents for every product (Fabric's walk, OF-11, thread `617c8cbe`,
-  message `f63e1f06`); DEC-0046 made only the entry's shape the contract's. Fabric Switchboard agreed to read the
+  message `f63e1f06`); DEC-0016 (C2) made only the runner entry's shape the contract's. Fabric Switchboard agreed to read the
   contract's list and asked for the optional OpenRouter and proxy recipes (`41e010ab`, `ea29f0a8`).
 - **Alternatives refused:** each host keeping its own list (two lists drift: Switchboard's and Fabric's already named
   two agents differently); a permission argument from memory or a third party's list (an argument that skips approval

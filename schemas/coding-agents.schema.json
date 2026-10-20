@@ -23,7 +23,8 @@
       "maxItems": 256,
       "items": {
         "$ref": "#/$defs/agent"
-      }
+      },
+      "description": ""
     },
     "retired": {
       "type": "array",
@@ -101,7 +102,45 @@
           }
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "via": {
+              "const": "script"
+            },
+            "script": {
+              "$ref": "#/$defs/url"
+            },
+            "package": false
+          },
+          "required": [
+            "script"
+          ]
+        },
+        {
+          "properties": {
+            "via": {
+              "enum": [
+                "brew",
+                "brew-cask",
+                "npm",
+                "uv",
+                "pipx"
+              ]
+            },
+            "package": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 214
+            },
+            "script": false
+          },
+          "required": [
+            "package"
+          ]
+        }
+      ]
     },
     "agent": {
       "type": "object",
@@ -117,7 +156,7 @@
       "properties": {
         "id": {
           "$ref": "#/$defs/id",
-          "description": "The stable id every product keys its machine state by; equal to the runner kind where DEC-0046 catalogues one (runners.md, C2)."
+          "description": "The stable id every product keys its machine state by: the runner kind where the runners page's C2 lists one (DEC-0016, extended by DEC-0029 and DEC-0046), else a new name a host uses if it catalogues the agent as a runner."
         },
         "aliases": {
           "type": "array",
@@ -184,12 +223,14 @@
                   },
                   "additionalProperties": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 64
+                    "pattern": "^[A-Za-z0-9._-]{1,32}$",
+                    "description": "The value the agent reads to skip its prompts, such as yes or 1; a word, never a command or a credential."
                   }
                 }
               },
-              "additionalProperties": false
+              "additionalProperties": false,
+              "maxProperties": 1,
+              "description": "Exactly one of argv or env."
             }
           },
           "oneOf": [
@@ -284,7 +325,7 @@
         },
         "runner": {
           "$ref": "runners.schema.json#/$defs/runner",
-          "description": "The detection and drive entry of DEC-0046, where measured."
+          "description": "The runner entry of C2 (DEC-0016), where a host measured one."
         },
         "sources": {
           "type": "array",
