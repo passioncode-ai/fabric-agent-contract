@@ -5906,7 +5906,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-20
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-61.
 - **Decision:** in [support quality](specification/support-quality.md):
-  1. An agent that answers people publishes, on its events feed, one event per closed UTC day and channel (`chat`,
+  1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
      `support-quality-daily/1` payload: the four families of the standard (nobody dropped, quality, stability, autonomy),
      the rubric `checks` as a member of their own (two levels), `rubricVersion`, `judgeModel` and `notMeasured`. A
@@ -5918,13 +5918,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and judge. Model-call failures per lane are not split in this revision.
 - **Why:** issue #125 asked for one payload so any voice-of-the-customer reader reads any agent's support feed the same
   way; the standard behind it (what is measured, the rubric, the judge) is the asker's, the shape the contract's.
-- **Alternatives refused:** a `0` for a metric not measured (a reader cannot tell it from a measured zero); per-turn
+- **Alternatives refused:** a free channel slug, as the first implementation had (an enum lets a reader apply the
+  standard's per-channel targets; an agent merges its surfaces of one channel); a `0` for a metric not measured (a reader cannot tell it from a measured zero); per-turn
   records (they carry a person's words, which never leave the agent).
 - **Compatibility:** additive: a new schema and revision. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schema `schemas/support-quality-daily.schema.json`, revision `support-quality-daily/1` in
   `src/protocol-revisions.ts`; rule `src/support-quality-rules.ts` (wired in `src/semantic-rules.ts`); tests
   `test/support-quality.test.ts`, `test/schema-compilation.test.ts`; fixtures `fixtures/positive/support-quality-daily.json`,
-  `fixtures/semantic/support-quality-daily-*`, nine `fixtures/negative/support-quality-daily-*`; docs `docs/specification/support-quality.md`, `conformance.md` (two rows
+  `fixtures/semantic/support-quality-daily-*`, nine `fixtures/negative/support-quality-daily-*`, `fixtures/catalogue.json`,
+  `test/positive-sweep.test.ts`, `vitest.config.ts`; docs `docs/specification/support-quality.md`, `conformance.md` (two rows
   and the register row), `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-61),
   `docs/handoffs/2026-10-20-support-quality.md`.
 - **Source:** issue #125 (passioncode-ai/fabric-agent-contract); DEC-0095 and `SEM-0126` reserved by git CAS (key
