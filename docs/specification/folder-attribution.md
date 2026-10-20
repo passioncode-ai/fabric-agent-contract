@@ -118,7 +118,7 @@ both, in the order of `projects`, and the product reports it rather than choosin
   joins nothing, a worktree whose main checkout is there neither.
 - **Broad containers before every Git row (AT-5), the holders only after them (AT-9, AT-14).** D2 refuses containers
   and never creates them. Fabric and Switchboard both refuse a broad folder they would create, but neither refuses one
-  by worktree today (Fabric matches a worktree before its breadth check; Switchboard's attach has no home check): the
+  by worktree today (Fabric matches a worktree before its breadth check; Switchboard's `repo_root` refuses only home itself and a filesystem root, not a folder right under home): the
   contract chooses to refuse home, a root or a folder right under home for every Git row, as a worktree or as a clone
   alike, and both products owe it. A folder right under home that a Project lists is that Project's (Switchboard offers
   its worktrees), and so is a worktree of a repository whose Project lives there. A repository root holding a Project's
