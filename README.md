@@ -62,7 +62,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [Entitlements: what a signed order entitles an organization or a person's estate to, under a key set an offline root signs (`entitlement/1`, `entitlement-key-set/1`, DEC-0085)](docs/specification/entitlement.md)
 - [Support quality: one support channel's quality per closed UTC day (DEC-0095)](docs/specification/support-quality.md)
 - [The partner channel: a partner's keys, its agents' usage and its delegation (DEC-0090)](docs/specification/partner-channel.md)
-- [Folder attribution: which Project a coding agent's folder belongs to, one rule set for Fabric, Switchboard and Observatory (DEC-0089)](docs/specification/folder-attribution.md)
+- [Folder attribution: which Project a coding agent's folder belongs to, one rule set for Fabric, Fabric Switchboard and Project Observatory (DEC-0089)](docs/specification/folder-attribution.md)
 - [Jobs under limits and uncertain effects: `quota-exhausted`, the pause grammar, `outcome-unknown`, the caller's act, the intent's key and `null` usage under `fabric-interop/0.2` (DEC-0087)](docs/specification/interop.md#limits-and-uncertain-effects)
 - [Share registrations: which agent a share grant into an organization runs, registered by the sharer's enrolled node, and `grant.usage` joined to it (`share-registration/1`, DEC-0086)](docs/specification/share-registration.md)
 - [Signing — the dedicated signing RP, the ceremony and the register of passkey-signed statements (DEC-0063)](docs/specification/signing.md)
