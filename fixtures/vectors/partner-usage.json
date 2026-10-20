@@ -590,6 +590,141 @@
       }
     },
     {
+      "name": "costs summed smallest first: the rows in one order",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.1
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.2
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.3
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "cells": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 3,
+            "unpricedCalls": 0,
+            "costUsd": 0.6000000000000001
+          }
+        ]
+      }
+    },
+    {
+      "name": "costs summed smallest first: the same rows in another order give the same cell",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.3
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.2
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 0.1
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "cells": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 3,
+            "unpricedCalls": 0,
+            "costUsd": 0.6000000000000001
+          }
+        ]
+      }
+    },
+    {
+      "name": "a count above the safe integers",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 9007199254740992,
+            "unpricedCalls": 0,
+            "costUsd": 1
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a cell whose calls leave the safe integers",
+      "input": {
+        "usage": [
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 9007199254740991,
+            "unpricedCalls": 0,
+            "costUsd": 1
+          },
+          {
+            "agentRef": "urn:fabric:agent:acme:setup-desk",
+            "day": "2026-10-12",
+            "calls": 1,
+            "unpricedCalls": 0,
+            "costUsd": 1
+          }
+        ],
+        "publishers": [
+          "acme"
+        ],
+        "step": "day"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
       "name": "not an object",
       "input": null,
       "expected": {

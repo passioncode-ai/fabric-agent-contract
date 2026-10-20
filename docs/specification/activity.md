@@ -73,7 +73,9 @@ by `method`; every read in the person's access log; and no scoring of persons.
   `consent` for it at the time of the read says `given`. It serves a person's **usage and cost** only as
   sums per UTC day or billing period. The access log records the read's `purposeId` and `step`, and
   `FAC-SEM-067` refuses a log entry that breaks either ([`confirmedPurposes`](../../src/activity-rules.ts)).
-  The person reading their own data, and a service that serves nobody (a summary build), are not narrowed.
+  The person reading their own data, and a service that serves nobody (a summary build), are not narrowed. A partner
+  organization (DEC-0090) reads only usage sums per agent and UTC day or period, logged in each contributing member's
+  access log; the notice names that reader.
 - This narrows what DEC-0030's presence ruling lets a receiver serve, not the schema: the per-person
   estimates still exist, and reach an owner or administrator only through a purpose the person
   confirmed.
@@ -475,7 +477,8 @@ service's read (no `user`), of `activity.usage`, per UTC day or billing period, 
 [the partner channel](partner-channel.md)).
 
 A receiver that stores activity telemetry MUST record these reads and MUST let the subject read
-their own log. Reads of summaries, which carry no person, are not logged per subject.
+their own log. Reads of summaries, which carry no person, are not logged per subject; a partner's read is the exception, logged in
+every contributing member's log (DEC-0090).
 
 ## Mapping to OpenTelemetry
 

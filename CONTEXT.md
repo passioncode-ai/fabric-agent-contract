@@ -274,7 +274,8 @@ the token's outermost `act.sub`, and `urn:session:<agent id>:<session id>` names
 (its `act.session`).
 
 **Actor chain**: The agents acting for the **Principal**, the one calling now outermost and each
-earlier one nested inside (a token's `act`, RFC 8693), at most four deep.
+earlier one nested inside (a token's `act`, RFC 8693), at most four deep; under a partner grant the innermost actor is
+the partner organization (DEC-0090).
 
 **Approval document**: `approval/1`, a JWS by the estate key that one person approved one action — bound
 by the SHA-256 of its RFC 8785 canonical form — for one callee, used once, within 24 hours (DEC-0039).

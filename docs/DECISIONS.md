@@ -5944,14 +5944,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `verifyPackage` only for a placement in one of its contexts. The rule refuses a placement or an installation under a
      scoped key elsewhere, a key scoped twice and a scope naming a key the record does not pin. An unscoped key keeps
      DEC-0051's meaning.
-  2. **A partner reads its agents' usage (`FAC-SEM-123`).** `partnerUsage({usage, publishers, step})` answers, over the
-     organization server's joined `grant.usage` rows (DEC-0086), cells per `agentRef` and UTC day or billing period of
+  2. **A partner reads its agents' usage (`FAC-SEM-123`).** `partnerUsage({usage, publishers, step})` answers, over one
+     organization's joined `grant.usage` rows (DEC-0086), cells per `agentRef` and UTC day or billing period of
      the partner's publishers, with no person, device or grant; `costUsd` is `null` exactly when every call of the cell
-     is unpriced. Each read is logged in every contributing member's access log as `reader: {service, role:
+     is unpriced, the priced costs summed smallest first so the order of the rows does not change a cell. A cell may be
+     one person's usage when one member uses the agent; a minimum population is not decided here. Each read is logged in every contributing member's access log as `reader: {service: "org:<partnerOrgId>", role:
      "partner"}`, scope `activity.usage`, step `day` or `period`; the rule refuses a partner entry read as a person, of
      another scope or step, or keyed by a device.
   3. **Owner to partner to agents (`FAC-SEM-124`).** A grant whose `principalKind` is `partner` has the partner as its
-     principal and the company's own `org:<orgId>` as its `context`. A token under it is for the grant's issuer, and its
+     principal and the company's own `org:<orgId>` as its `context`; being in an organization's context, it is named by
+     a share grant id (`urn:fabric:share:<32 hex>`, `FAC-SEM-117`). A token under it is for the grant's issuer, and its
      chain holds the partner actor `{partner: "org:<partnerOrgId>"}` innermost, counted toward DL-6's depth; an onward
      token keeps it innermost. A partner actor stands in no chain under another kind of grant, and a verifier admits it
      only innermost.
@@ -5975,4 +5977,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-58), `docs/handoffs/2026-10-20-partner-channel.md`;
   brief `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
 - **Source:** board thread `6e66a023` (SD-1, passioncode-platform's ADR-0007 reply, the contract's acceptance; the first
-  organization server's PA-01); DEC-0090 and `SEM-0122` to `SEM-0124` reserved by git CAS (key `ct58-partner-channel`).
+  organization server's PA-01); DEC-0090 and `SEM-0122` to `SEM-0124` reserved under the key `ct58-partner-channel`.
+  The DEC reservation's counter commit is not in the chain on origin (it moves from `a24dc0f`, next 90, to `7b857d5`,
+  next 92), the receipt-chain defect the CT-57 handoff records; no other branch uses DEC-0090.

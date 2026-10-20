@@ -17,7 +17,7 @@
         {
           "at": "2026-10-07T16:02:00Z",
           "reader": {
-            "service": "org_acme_partners",
+            "service": "org:acme_partners",
             "role": "partner"
           },
           "scope": "activity.usage",

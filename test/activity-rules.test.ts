@@ -358,6 +358,15 @@ describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
     expect(result.valid, JSON.stringify(result.errors, null, 2)).toBe(true);
   });
 
+  it("refuses a partner entry that names no service (DEC-0090)", () => {
+    const fixture = load("semantic/access-log-partner-usage-ok.json");
+    const entry = fixture.input.log.entries[0];
+    for (const reader of [{ role: "partner" }, { role: "partner", service: 7 }]) {
+      const input = { ...fixture.input, log: { ...fixture.input.log, entries: [{ ...entry, reader }] } };
+      expect(evaluateSemanticRules(fixture.kind, input).filter((f) => f.code === "FAC-SEM-123").map((f) => f.instancePath)).toEqual(["/log/entries/0/reader"]);
+    }
+  });
+
   it("refuses a person's usage served to another person without a step, and narrows nothing the subject reads", () => {
     const fixture = load("semantic/access-log-disclosure-ok.json").input;
     delete fixture.log.entries[0].step;

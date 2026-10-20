@@ -48,3 +48,7 @@ new `act` shape or an agent id the hub registers for the partner.
 | REQ-3 | the partner grant and the partner actor in delegation | delegation vectors, schema fixtures |
 | REQ-4 | spec pages, DEC, conformance rows, registers, backlog CT-58, handoff | docs checks, readings |
 | REQ-5 | the board answer on `6e66a023` and the KB roadmap row | the posted message, the merged KB change |
+
+Outcome: [the partner channel](../../../specification/partner-channel.md) and DEC-0090 supersede the design-stage forms
+above (the partner actor is `{partner}`, `partnerUsage({usage, publishers, step})`, the rule codes 122 to 124, PA-01
+decided).

@@ -20,7 +20,7 @@
             "user": {
               "id": "u_partner_1"
             },
-            "service": "org_acme_partners",
+            "service": "org:acme_partners",
             "role": "partner"
           },
           "scope": "activity.usage",

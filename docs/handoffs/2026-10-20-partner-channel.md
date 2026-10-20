@@ -13,7 +13,8 @@ Brief: `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
 - The `partner` principal kind, the partner actor in `act` and `FAC-SEM-124` at mint and at verification.
 - The page `docs/specification/partner-channel.md`, the neighbour pages, the register rows, three duty rows,
   DEC-0090, DOCMAP, README, CONTEXT, backlog CT-58.
-- Plants: 32 planted across the three parts, all killed (`b2fbb93`).
+- Plants: 32 planted across the three parts, all killed (`4ce8c8b`). The unit reading planted 23 more; its one survivor (a partner entry
+  with no service) has a test now.
 
 ## Decisions
 

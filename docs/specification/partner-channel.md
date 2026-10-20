@@ -33,7 +33,8 @@ A key named there is a partner's: `placementTrust(record, machine, agentRef, con
 for a placement in one of its contexts, and answers no key (`{publisher: []}`) for one elsewhere, so the package is
 refused `unknown-key` (PK-6). `FAC-SEM-122` refuses, on `estate-record`, a placement under a scoped key outside its
 contexts, a key scoped twice and a scope naming a key the record does not pin; on `estate-placement`, an installation
-under a scoped key outside its contexts. A key no scope names keeps DEC-0051's meaning, so a record without
+under a scoped key outside its contexts. A key taken from a listing rather than the estate record is not narrowed by a scope, so a partner's key is trusted only
+from the record. A key no scope names keeps DEC-0051's meaning, so a record without
 `publisherScopes` reads as before.
 
 ## A partner reads its agents' usage (FAC-SEM-123)
@@ -42,16 +43,19 @@ The organization server already joins each `grant.usage` to the agent a share re
 GJ-6). It holds, from its catalog, the publisher names each partner publishes under (the first organization server's
 PA-03). `partnerUsage({usage, publishers, step})` is what it shows the partner:
 
-- `usage`: its joined rows `{agentRef, day, calls, unpricedCalls, costUsd}`; a row not joined to an agent is never
+- `usage`: one organization's joined rows `{agentRef, day, calls, unpricedCalls, costUsd}` (a partner that serves
+  several companies is answered per company); a row not joined to an agent is never
   shown to a partner;
 - `publishers`: the partner's publisher names; `step`: `day` or `period`;
 - the answer: `{cells}`, one per `agentRef` and UTC day (or one per `agentRef` for the period), ordered by `agentRef`
   then day, each `{agentRef, day, calls, unpricedCalls, costUsd}`; `costUsd` is `null` exactly when every call in the
-  cell is unpriced (`FAC-SEM-038`'s rule), else the sum of the priced costs; a row of another publisher adds nothing; a
+  cell is unpriced (`FAC-SEM-038`'s rule), else the sum of the priced costs, smallest first, so the order of the rows
+  does not change a cell; a row of another publisher adds nothing; a
   malformed input is `{fault: "input-invalid"}`.
 
-A cell carries no person, device or grant: a partner sees what its agents did, never who used them. Each read is
-logged in every contributing member's access log (OD-1) as `reader: {service: <the partner's id>, role: "partner"}`,
+A cell carries no person, device or grant: a partner sees what its agents did, never who used them. A cell may still be
+one person's usage, when only one member uses an agent; a minimum population per cell is not decided here. Each read is
+logged in every contributing member's access log (OD-1) as `reader: {service: "org:<partnerOrgId>", role: "partner"}`,
 scope `activity.usage`, `step` `day` or `period`. `FAC-SEM-123` (kind `access-log-disclosure`) refuses a partner entry
 read as a person (`reader.user`) or with no `service`, of any other scope, at any other step, or keyed by a device.
 
@@ -60,7 +64,8 @@ read as a person (`reader.user`) or with no `service`, of any other scope, at an
 A company's owner lets a partner act on the company's agents with a standing grant whose `principalKind` is `partner`:
 
 - its `principal.id` is the partner, `org:<partnerOrgId>`; its `context` is the company's own `org:<orgId>`, never
-  `personal` and never the partner's;
+  `personal` and never the partner's; being in an organization's context, its `meta.id` is a share grant id
+  (`urn:fabric:share:<32 hex>`, `FAC-SEM-117`, [share registration](share-registration.md));
 - a token minted under it is for the owner who issued the grant (`sub` is the grant's `issuer`), and its chain ends in
   the partner: the partner's agent outermost, and inside it the partner actor `{partner: "org:<partnerOrgId>"}`
   (`delegation-token.schema.json#/$defs/partnerActor`), which carries no `act` and counts toward DL-6's depth;
@@ -68,8 +73,8 @@ A company's owner lets a partner act on the company's agents with a standing gra
   one agent outside;
 - a partner actor stands in no chain under another kind of grant.
 
-`FAC-SEM-124` (kind `delegation-mint`) refuses each break. A verifier (`verifyDelegation`) admits a partner actor only
-innermost and never outermost; it returns it in `chain`, so a callee sees on whose behalf, through which partner, the
+`FAC-SEM-124` (kind `delegation-mint`) refuses each break at the hub, which alone sees the grant. A verifier
+(`verifyDelegation`, DL-13 step 5) admits a partner actor only innermost and never outermost; it returns it in `chain`, so a callee sees on whose behalf, through which partner, the
 call runs.
 
 ## Compatibility
@@ -84,6 +89,8 @@ actor (closed schemas), so a partner channel needs the reader at this pin. `cont
 - **The first organization server** shows a partner `partnerUsage`'s cells, logs each read as above, and holds each
   partner's publisher names (its PA-03).
 - **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor.
+- **Every verifier of delegation tokens** (Project Observatory's node, fabric-agent-adapter's kits) re-vendors
+  `verifyDelegation` at this pin, or refuses every partner-grant token at DL-13 step 5.
 - **Project Observatory's node** verifies a partner's package under the record's scope before it installs it in a
   company's context (its PA-10).
 - **fabric-agent-adapter** signs a partner's packages with the partner's key (its PA-07).
@@ -93,5 +100,8 @@ The board row is CT-58.
 ## Not decided here
 
 - The partner console.
+- A minimum population per cell, so a cell is never one person's usage (activity's summaries keep `minPopulation`).
+- Where the owner and the company see the spend made under a partner grant: a collector sends `grant.usage` only for
+  a share grant a share registration names, and share registrations derive from the record's `shareGrants`.
 - How an owner revokes or hands over a partner (RM-10, the first organization server's PA-02 with Fabric).
 - Billing: a partner-channel order holds only `hosting` (passioncode-platform ADR-0007).

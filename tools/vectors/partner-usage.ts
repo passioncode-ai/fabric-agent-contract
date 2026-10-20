@@ -44,6 +44,10 @@ function cases(): Json[] {
     ["a zero cost for an unpriced row", { usage: [row(SETUP, "2026-10-12", 1, 1, 0)], publishers: ["acme"], step: "day" }, FAULT],
     ["a null cost for a priced row", { usage: [row(SETUP, "2026-10-12", 1, 0, null)], publishers: ["acme"], step: "day" }, FAULT],
     ["a negative cost", { usage: [row(SETUP, "2026-10-12", 1, 0, -1)], publishers: ["acme"], step: "day" }, FAULT],
+    ["costs summed smallest first: the rows in one order", { usage: [row(SETUP, "2026-10-12", 1, 0, 0.1), row(SETUP, "2026-10-12", 1, 0, 0.2), row(SETUP, "2026-10-12", 1, 0, 0.3)], publishers: ["acme"], step: "day" }, { cells: [cell(SETUP, "2026-10-12", 3, 0, 0.6000000000000001)] }],
+    ["costs summed smallest first: the same rows in another order give the same cell", { usage: [row(SETUP, "2026-10-12", 1, 0, 0.3), row(SETUP, "2026-10-12", 1, 0, 0.2), row(SETUP, "2026-10-12", 1, 0, 0.1)], publishers: ["acme"], step: "day" }, { cells: [cell(SETUP, "2026-10-12", 3, 0, 0.6000000000000001)] }],
+    ["a count above the safe integers", { usage: [row(SETUP, "2026-10-12", 9007199254740992, 0, 1)], publishers: ["acme"], step: "day" }, FAULT],
+    ["a cell whose calls leave the safe integers", { usage: [row(SETUP, "2026-10-12", 9007199254740991, 0, 1), row(SETUP, "2026-10-12", 1, 0, 1)], publishers: ["acme"], step: "day" }, FAULT],
     ["not an object", null, FAULT]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

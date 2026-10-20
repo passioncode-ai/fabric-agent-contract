@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
+import { contextRules } from "../src/context-rules.js";
 import { chainDepth, isPartnerActor } from "../src/delegation.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -20,6 +21,7 @@ describe("owner to partner to agents (DEC-0090 item 3, FAC-SEM-124)", () => {
     expect(valid("delegation-token.schema.json", ok.token)).toBe(true);
     expect(evaluateSemanticRules("delegation-mint", ok)).toEqual([]);
     expect(chainDepth(ok.token.act)).toBe(2);
+    expect(contextRules("grant", ok.grant), "a partner grant is in an organization's context, so it has a share grant id (FAC-SEM-117)").toEqual([]);
   });
   it("refuses another partner, no partner, a personal grant and a partner actor under an agent's grant", () => {
     expect(at(load("delegation-mint-partner-other-partner.json"))).toEqual(["/token/act"]);

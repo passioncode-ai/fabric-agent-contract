@@ -29,7 +29,7 @@ export interface PartnerUsageCell {
 }
 export type PartnerUsageAnswer = { cells: PartnerUsageCell[] } | { fault: "input-invalid" };
 
-const count = (value: unknown): value is number => typeof value === "number" && Number.isInteger(value) && value >= 0;
+const count = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 const isDay = (value: unknown): value is string => typeof value === "string" && DAY.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value);
 
 /**
@@ -37,7 +37,8 @@ const isDay = (value: unknown): value is string => typeof value === "string" && 
  * costUsd}` (one per joined `grant.usage`; a row not joined to an agent is never shown to a partner), `publishers` the
  * publisher names the partner publishes under, `step` `day` or `period`. Answers the partner's cells, ordered by
  * `agentRef` then `day`: a cell's `costUsd` is `null` exactly when every call in it is unpriced (FAC-SEM-038's rule), else
- * the sum of the priced costs. A row whose publisher is not the partner's adds nothing.
+ * the sum of the priced costs, smallest first, so the order of the rows does not change it. A row whose publisher is not
+ * the partner's adds nothing; a count that is not a safe integer, or a cell whose calls leave the safe range, is a fault.
  */
 export function partnerUsage(input: unknown): PartnerUsageAnswer {
   const fault = { fault: "input-invalid" } as const;
@@ -47,6 +48,7 @@ export function partnerUsage(input: unknown): PartnerUsageAnswer {
   if (!publishers.every((name) => typeof name === "string" && publisherOf(`urn:fabric:agent:${name}:x`) === name)) return fault;
   const theirs = new Set(publishers as string[]);
   const cells = new Map<string, PartnerUsageCell>();
+  const costs = new Map<string, number[]>();
   for (const row of usage) {
     if (!isObject(row)) return fault;
     const { agentRef, day, calls, unpricedCalls, costUsd } = row;
@@ -60,10 +62,13 @@ export function partnerUsage(input: unknown): PartnerUsageAnswer {
     const cell = cells.get(key) ?? { agentRef: agentRef as string, day: cellDay, calls: 0, unpricedCalls: 0, costUsd: null };
     cell.calls += calls;
     cell.unpricedCalls += unpricedCalls;
-    if (costUsd !== null) cell.costUsd = (cell.costUsd ?? 0) + costUsd;
+    if (!Number.isSafeInteger(cell.calls)) return fault;
+    if (costUsd !== null) costs.set(key, [...(costs.get(key) ?? []), costUsd]);
     cells.set(key, cell);
   }
-  const ordered = [...cells.values()].sort((a, b) => (a.agentRef === b.agentRef ? String(a.day).localeCompare(String(b.day)) : a.agentRef < b.agentRef ? -1 : 1));
+  // The priced costs are summed smallest first, so the same rows in any order give the same cell.
+  for (const [key, list] of costs) (cells.get(key) as PartnerUsageCell).costUsd = list.sort((a, b) => a - b).reduce((sum, cost) => sum + cost, 0);
+  const ordered = [...cells.values()].sort((a, b) => (a.agentRef === b.agentRef ? (String(a.day) < String(b.day) ? -1 : 1) : a.agentRef < b.agentRef ? -1 : 1));
   return { cells: ordered };
 }
 // #endregion
