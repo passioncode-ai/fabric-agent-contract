@@ -5650,6 +5650,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-19
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
+- **Annotated (2026-10-20):** merged as #124 `ebfddce`. Item 3's "unless a Project folder is in its repository" means
+  a Project folder of the repository that lies inside that checkout (the AT-5 row's "lies in it"; for a worktree,
+  one anywhere). The adoption gaps the readings found are board row CT-66.
 - **Decision:** in [folder attribution](specification/folder-attribution.md):
   1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
      `tempRoots`, `git` or `null`, `projects` with each folder's `commonDir`, `origin` and `toplevel`, `work?`,
