@@ -23,7 +23,9 @@ Brief: `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
 
 ## Open
 
-- More measured permission arguments and OpenRouter recipes, one agent at a time with evidence.
+- More measured permission arguments, OpenRouter recipes (`keyEnv`) and proxy recipes, one agent at a time with
+  evidence.
+- After the merge: org-index `repositories.json`, the contract's row, owns `catalogue/coding-agents.json`.
 - `runner` entries (C2) inside the catalogue, where a host measured one.
 
 ## Checks

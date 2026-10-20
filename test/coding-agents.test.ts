@@ -22,7 +22,7 @@ describe("the coding-agent catalogue (DEC-0093)", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of (catalogue.retired ?? []) as string[]) expect(ids).not.toContain(id);
   });
-  it("names each runner kind DEC-0046 catalogues by that kind, and no alias twice or as another entry's id", () => {
+  it("names each runner kind C2 lists (DEC-0016, DEC-0029, DEC-0046) by that kind, and no alias twice or as another entry's id", () => {
     const ids = (catalogue.agents as Json[]).map((agent) => agent.id);
     for (const kind of ["claude-code", "codex", "cursor-agent", "gemini-cli", "goose", "hermes", "kilo", "kimi-code", "kiro", "opencode", "cline", "pi"]) expect(ids, kind).toContain(kind);
     const aliases = (catalogue.agents as Json[]).flatMap((agent) => (agent.aliases ?? []) as string[]);
@@ -44,6 +44,16 @@ describe("the coding-agent catalogue (DEC-0093)", () => {
     const root = projectRoot();
     const out = execFileSync("python3", ["-I", path.join(root, "tools/catalogue/seed.py"), path.join(root, "tools/catalogue/permissions.json")], { encoding: "utf8" });
     expect(out).toBe(readFileSync(path.join(root, "catalogue/coding-agents.json"), "utf8"));
+  });
+  it("raises revision whenever the file changes from the committed main's", () => {
+    let committed: string;
+    try {
+      committed = execFileSync("git", ["-C", projectRoot(), "show", "origin/main:catalogue/coding-agents.json"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    } catch {
+      return; // main has no catalogue yet, or no origin: nothing to compare
+    }
+    const current = readFileSync(path.join(projectRoot(), "catalogue/coding-agents.json"), "utf8");
+    if (committed !== current) expect(catalogue.revision).toBeGreaterThan((JSON.parse(committed) as Json).revision);
   });
   it("refuses an install whose via and package or script do not pair, and an unknown via", () => {
     const agent = (catalogue.agents as Json[]).find((entry) => entry.id === "claude-code") as Json;

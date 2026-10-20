@@ -6,7 +6,7 @@ two optional recipes (`ea29f0a8`).
 
 ## What changes
 
-DEC-0046 made the runner catalogue's *shape* the contract's (`runners.schema.json`) and its *contents* each host's
+DEC-0016 (C2) made the runner catalogue's *shape* the contract's (`runners.schema.json`) and its *contents* each host's
 (Fabric's `registry/runners.json`). The operator wants one list for every product, so the contents move here:
 
 - `catalogue/runners.json`: one entry per coding agent, validated by `runners.schema.json`, versioned with the contract,
@@ -41,3 +41,6 @@ agent's own documentation, Orca's list as a cross-check only. Order: after CT-57
 
 Outcome: the data became its own file and schema, `catalogue/coding-agents.json` and `coding-agents/1`, rather than
 new members of a runner entry ([runners](../../../specification/runners.md#the-coding-agent-catalogue-dec-0093), DEC-0093).
+Also changed from the plan: the stable key is `id` (not `kind`); a permission's evidence is the maker's documentation
+or the agent's measured output (four of five are measured); `install` is `via` with a package or a script, not
+`[{platform, argv}]`.

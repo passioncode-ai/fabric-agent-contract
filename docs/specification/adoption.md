@@ -29,8 +29,8 @@ through a variable at run time, as `session-handoff.ts` loads its validator, nam
 server's session on 2026-10-12, after its prefix copy refused every check-in.)
 
 A data file is vendored the same way: a consumer copies `catalogue/coding-agents.json` at its pin with
-`coding-agents.schema.json`'s closure (which reaches `runners.schema.json`), and compares its `revision` to tell a
-stale copy (DEC-0093).
+`coding-agents.schema.json`'s closure, as `schemaClosure` lists it (today `coding-agents`, `runners` and
+`service-common`), and compares its `revision` to tell a stale copy (DEC-0093).
 
 ## Fabric consumer
 

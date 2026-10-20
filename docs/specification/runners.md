@@ -97,12 +97,13 @@ keys per project.
 | `mcp` | whether it loads MCP servers |
 | `openrouter` | how to run it on an OpenRouter key: variable names (`keyEnv`, `baseUrlEnv`, `modelEnv`, `homeEnv`) and `modelArgv` with `{model}`; never a value. An entry without `keyEnv` is a partial recipe (the model argument only), which a product does not offer as a route |
 | `proxy` | a local proxy's base-URL variable and the command that prints its key; never a value |
-| `runner` | the C2 runner entry, where measured |
+| `runner` | the C2 runner entry, where a host measured one; a host's own catalogue entry for the same kind is the one it runs (C2), and a difference is reported to the contract |
 | `sources` | every URL the entry came from, its `url` and its permission `source` among them |
 
 No member holds a credential (`secretArgument`, `test/coding-agents.test.ts`). The seed is Fabric Switchboard's list of
 2026-10-19 without machine state ([`tools/catalogue/seed.py`](../../tools/catalogue/seed.py)), each permission argument
-from [`tools/catalogue/permissions.json`](../../tools/catalogue/permissions.json); a change raises `revision` by one.
+from [`tools/catalogue/permissions.json`](../../tools/catalogue/permissions.json); a change raises `revision` by one
+(`REVISION` in the seed; `test/coding-agents.test.ts` refuses a change of the file at an unchanged revision).
 
 ## Runner routes
 

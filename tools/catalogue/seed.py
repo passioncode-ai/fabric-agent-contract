@@ -5,6 +5,9 @@ added in permissions.json, each with its evidence: the maker's documentation (so
 (measured)."""
 import json, sys
 
+# Raised by one on every change of catalogue/coding-agents.json (DEC-0093).
+REVISION = 1
+
 # id, name, maker, url, install (via, package-or-script), launch argv, mcp, openrouter model argv (None: no OpenRouter route)
 SEED = [
   ("hermes", "Hermes Agent", "Nous Research", "https://github.com/NousResearch/hermes-agent", ("script", "https://hermes-agent.nousresearch.com/install.sh"), ["hermes"], True, ["--provider", "openrouter", "-m", "{model}"]),
@@ -60,5 +63,5 @@ def entry(row, permissions):
 
 if __name__ == "__main__":
     permissions = json.load(open(sys.argv[1])) if len(sys.argv) > 1 else {}
-    doc = {"schema": "coding-agents/1", "revision": 1, "agents": [entry(r, permissions) for r in SEED]}
+    doc = {"schema": "coding-agents/1", "revision": REVISION, "agents": [entry(r, permissions) for r in SEED]}
     print(json.dumps(doc, indent=2, ensure_ascii=False))

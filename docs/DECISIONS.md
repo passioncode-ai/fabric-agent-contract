@@ -5841,7 +5841,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** schema `schemas/coding-agents.schema.json`, revision `coding-agents/1` in
   `src/protocol-revisions.ts`; data `catalogue/coding-agents.json`, written by `tools/catalogue/seed.py` from
   `tools/catalogue/permissions.json`; tests `test/coding-agents.test.ts`, `test/schema-compilation.test.ts`; docs
-  `docs/specification/runners.md`, `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-60),
+  `docs/specification/runners.md`, `conformance.md` (the reader's row), `adoption.md` (vendoring the data file),
+  `docs/evidence/sources.md`, `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-60),
   `docs/handoffs/2026-10-20-coding-agent-catalogue.md`; brief `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
 - **Source:** board thread `617c8cbe` (messages `f63e1f06`, `6ffee284`, `41e010ab`, `ea29f0a8`); DEC-0093 reserved by
   git CAS (key `ct60-runner-catalogue`, counter commit `fb6a608`).
