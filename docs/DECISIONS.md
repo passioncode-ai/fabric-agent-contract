@@ -3,8 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
-heading here is held by an open branch, and its reservation is in the counter's log)
+**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5797,7 +5796,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-63.
 - **Decision:** in [folder attribution](specification/folder-attribution.md#the-session-start-capability):
   1. Fabric's hub serves the session-start capability `fabric.project.resolve` (D4 as the operator corrected it):
-     read-only, input `{path}`, answer `folder-attribution.schema.json#/$defs/resolveAnswer`.
+     read-only (a call records nothing, at the hub or the caller), input `{path}`, answer `folder-attribution.schema.json#/$defs/resolveAnswer`.
   2. `resolveAnswer` is `attributeFolder`'s answer, or `{outcome: "pending", reason: "git-unreadable", retryable:
      true}` when the folder's Git facts cannot be read yet (a probe that failed or timed out, which is not "no Git").
   3. `pending` names no Project and is never recorded; the caller asks again later, with backoff, attributes nothing

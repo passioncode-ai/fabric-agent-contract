@@ -190,7 +190,8 @@ same repository (`normalizeOrigin` of both is one identity; a rebuilt form whose
 
 ## The session-start capability
 
-DEC-0092. Fabric's hub serves it (D4 as corrected): `fabric.project.resolve`, read-only, input `{path}` (an absolute
+DEC-0092. Fabric's hub serves it (D4 as corrected): `fabric.project.resolve`, read-only (a call records
+nothing, at the hub or the caller; an attribution is recorded by each product's own path, D5), input `{path}` (an absolute
 folder, the form of the snapshot's `folder`), answer `folder-attribution.schema.json#/$defs/resolveAnswer`. That is
 `attributeFolder`'s answer for the snapshot the hub gathers for `path`, or, when the folder's Git facts cannot be read
 yet (a probe that failed or timed out, which is not "no Git"):
@@ -203,7 +204,8 @@ yet (a probe that failed or timed out, which is not "no Git"):
 until then. A pending that lasts is shown as a degraded state (the session has no Project yet, and why), never turned
 into a refusal or a Project by the caller.
 
-The answer carries no `record` and no `row`: the hub records its own attribution in its own store (D5), and a caller
+The answer carries no `record` and no `row`: the hub records its own attributions through its own path (D5), not as an
+effect of a call, and a caller
 that keeps a row of its own records `explainFolder`'s `record` only when it answers locally over its own snapshot.
 When the hub's answer also carries `record` and `row` (board row CT-66), that is a new decision with a wrapper object
 around `resolveAnswer`, never new members of it, so a caller that validates against `resolveAnswer` keeps working.
@@ -246,7 +248,8 @@ naming the rule and the Projects; the reasons are the schema's. For `pending` (D
 Project yet because the folder's Git facts cannot be read.
 
 - **Fabric** (CO-331, CO-329) runs the vectors in its gate, and its hub serves `fabric.project.resolve` (F9), answering
-  exactly `resolveAnswer` and `pending` only while the Git facts cannot be read (DEC-0092). Owed: a tombstone that covers subfolders (today an exact
+  exactly `resolveAnswer` and `pending` only while the Git facts cannot be read (DEC-0092). Owed: F9 itself (the hub
+  serving `fabric.project.resolve`); a tombstone that covers subfolders (today an exact
   path, so it fails "AT-2: a subfolder of a tombstoned folder") and that does not refuse an attach by worktree; the
   temporary (AT-4) and tool (AT-11) refusals; the owner and work rows (AT-10, AT-12); each folder's `toplevel`, the
   nearest place and the main checkout's Project (AT-6 to AT-9); the main checkout from `git worktree list --porcelain`,
