@@ -25,7 +25,7 @@ statements fixed in the branch. Each decision's own handoff names its readings.
 - Board posts for CT-58 (thread `6e66a023`), CT-60 (thread `617c8cbe`) and CT-65 (Project Observatory and the first
   organization server): Fabric was down for its 0.3.7 release at the merges. Their texts are in this session's
   transcript; the next session sends them with the keys `ct58-merged-6e66a023-20261020`,
-  `ct60-merged-617c8cbe-20261020`, `ct65-merged-observatory-vesta-20261020`.
+  `ct60-merged-617c8cbe-20261020`, `ct65-merged-observatory-orgserver-20261020`.
 - The products' adoption: backlog rows CT-58, CT-60 to CT-65.
 - New rows from the readings: CT-64, CT-66, CT-67, CT-68, CT-69.
 - Not done in this pass: CT-30 and CT-44 (nobody named them blocking).
