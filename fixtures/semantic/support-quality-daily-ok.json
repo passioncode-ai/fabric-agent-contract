@@ -24,15 +24,15 @@
       "sampled": 40,
       "helpedYes": 16,
       "helpedPartly": 14,
-      "helpedNo": 6,
-      "checks": {
-        "language": 0.97,
-        "addressed": 0.92,
-        "policy_safe": 1,
-        "routing": 0.95,
-        "actionable": 0.9,
-        "continuity": 0.97
-      }
+      "helpedNo": 6
+    },
+    "checks": {
+      "language": 0.97,
+      "addressed": 0.92,
+      "policy_safe": 1,
+      "routing": 0.95,
+      "actionable": 0.9,
+      "continuity": 0.97
     },
     "stability": {
       "turnErrors": 0,

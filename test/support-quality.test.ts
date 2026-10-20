@@ -1,7 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { createValidator, validateDocument } from "../src/validator.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0095: support-quality-daily/1, FAC-SEM-126.
@@ -35,9 +36,42 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     const value = ok();
     value.judgeModel = null;
     expect(paths(value)).toEqual(["FAC-SEM-126 /judgeModel"]);
-    value.quality = { sampled: 0, helpedYes: 0, helpedPartly: 0, helpedNo: 0, checks: null };
-    value.notMeasured = [...value.notMeasured, "quality.checks"];
+    value.quality = { sampled: 0, helpedYes: 0, helpedPartly: 0, helpedNo: 0 };
+    value.checks = null;
+    value.notMeasured = [...value.notMeasured, "checks"];
     expect(paths(value)).toEqual([]);
+  });
+  it("names the judge when a verdict shows, even with no sample count, and the rubric too", () => {
+    const value = ok();
+    value.rubricVersion = null;
+    expect(paths(value)).toEqual(["FAC-SEM-126 /judgeModel"]);
+    const unsampled = ok();
+    unsampled.quality.sampled = null;
+    unsampled.notMeasured = [...unsampled.notMeasured, "quality.sampled"];
+    unsampled.judgeModel = null;
+    expect(paths(unsampled)).toEqual(["FAC-SEM-126 /judgeModel"]);
+  });
+  it("names checks when nothing was judged, and only then", () => {
+    const unnamed = ok();
+    unnamed.checks = null;
+    expect(paths(unnamed)).toContain("FAC-SEM-126 /checks");
+    const named = ok();
+    named.notMeasured = [...named.notMeasured, "checks"];
+    expect(paths(named)).toEqual(["FAC-SEM-126 /checks"]);
+  });
+  it("lets the median equal the 90th percentile", () => {
+    const value = ok();
+    value.nobodyDropped.firstReplyP50Ms = value.nobodyDropped.firstReplyP90Ms;
+    expect(paths(value)).toEqual([]);
+  });
+  it("travels as an event's data.value: the events page accepts it (DEC-0070's two levels)", async () => {
+    const ajv = await createValidator();
+    const page = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-events-page-data.json"), "utf8")) as Json;
+    const payload = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/support-quality-daily.json"), "utf8")) as Json;
+    const event = (page.events as Json[]).find((entry) => entry.data) as Json;
+    event.data = { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: payload };
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
   });
   it("reads a malformed payload without throwing and skips sums it cannot make", () => {
     expect(paths({ notMeasured: 7, nobodyDropped: "x", quality: [1], stability: null, autonomy: 3 })).toEqual([]);

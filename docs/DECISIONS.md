@@ -5907,12 +5907,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-61.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people publishes, on its events feed, one event per closed UTC day and channel (`chat`,
-     `mail`, `reviews`, `community`) whose `data` (DEC-0070) is a `support-quality-daily/1` payload: the four families
-     of the standard (nobody dropped, quality, stability, autonomy), `rubricVersion`, `judgeModel` and `notMeasured`.
+     `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
+     `support-quality-daily/1` payload: the four families of the standard (nobody dropped, quality, stability, autonomy),
+     the rubric `checks` as a member of their own (two levels), `rubricVersion`, `judgeModel` and `notMeasured`. A
+     reader recognises it by `data.value.kind`; `data.schema` is the service's published copy, as DEC-0070 says.
   2. Counts and rates only: no person's words, no ids and no judge notes.
   3. `FAC-SEM-126`: a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0`;
      parts stay within their whole (helped verdicts within the sample, recoveries within the failures, outcomes within
-     the turns); p50 at most p90; a judged sample names its rubric version and judge.
+     the turns); p50 at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version
+     and judge. Model-call failures per lane are not split in this revision.
 - **Why:** issue #125 asked for one payload so any voice-of-the-customer reader reads any agent's support feed the same
   way; the standard behind it (what is measured, the rubric, the judge) is the asker's, the shape the contract's.
 - **Alternatives refused:** a `0` for a metric not measured (a reader cannot tell it from a measured zero); per-turn
@@ -5921,7 +5924,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** schema `schemas/support-quality-daily.schema.json`, revision `support-quality-daily/1` in
   `src/protocol-revisions.ts`; rule `src/support-quality-rules.ts` (wired in `src/semantic-rules.ts`); tests
   `test/support-quality.test.ts`, `test/schema-compilation.test.ts`; fixtures `fixtures/positive/support-quality-daily.json`,
-  `fixtures/semantic/support-quality-daily-*`; docs `docs/specification/support-quality.md`, `conformance.md` (two rows
+  `fixtures/semantic/support-quality-daily-*`, nine `fixtures/negative/support-quality-daily-*`; docs `docs/specification/support-quality.md`, `conformance.md` (two rows
   and the register row), `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-61),
   `docs/handoffs/2026-10-20-support-quality.md`.
 - **Source:** issue #125 (passioncode-ai/fabric-agent-contract); DEC-0095 and `SEM-0126` reserved by git CAS (key

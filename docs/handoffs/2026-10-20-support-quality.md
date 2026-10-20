@@ -8,7 +8,8 @@ Issue #125: one payload for a support agent's daily quality, so any voice-of-the
 
 - `schemas/support-quality-daily.schema.json` (`support-quality-daily/1`, in the revision register).
 - `src/support-quality-rules.ts` (`FAC-SEM-126`), wired in `src/semantic-rules.ts`, at 100 % branches; one positive and
-  three semantic fixtures; `test/support-quality.test.ts`.
+  three semantic and nine negative fixtures; `test/support-quality.test.ts`, which also carries the payload inside an
+  events page.
 - `docs/specification/support-quality.md`, two conformance rows and the register row, DEC-0095, DOCMAP, README,
   CONTEXT, backlog CT-61.
 
