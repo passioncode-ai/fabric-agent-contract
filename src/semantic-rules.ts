@@ -2,6 +2,7 @@ import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { coreRules } from "./core-rules.js";
 import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 import { usageRules } from "./usage-rules.js";
+import { supportQualityRules } from "./support-quality-rules.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
 import { relayRules } from "./relay-rules.js";
@@ -159,6 +160,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value));
+  if (kind === "support-quality-daily") findings.push(...supportQualityRules(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));
   if (kind === "spend-policy") findings.push(...spendPolicyRules(value));

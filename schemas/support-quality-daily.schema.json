@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/support-quality-daily.schema.json",
+  "title": "support-quality-daily/1 (DEC-0095): one support channel's quality for one closed UTC day, as an event's data.value",
+  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind.",
+  "type": "object",
+  "required": [
+    "kind",
+    "day",
+    "channel",
+    "rubricVersion",
+    "judgeModel",
+    "notMeasured",
+    "nobodyDropped",
+    "quality",
+    "stability",
+    "autonomy",
+    "checks"
+  ],
+  "properties": {
+    "kind": {
+      "const": "support-quality-daily/1"
+    },
+    "day": {
+      "type": "string",
+      "format": "date",
+      "description": "The closed UTC day measured."
+    },
+    "channel": {
+      "enum": [
+        "chat",
+        "mail",
+        "reviews",
+        "community"
+      ]
+    },
+    "rubricVersion": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 32,
+      "pattern": "^[A-Za-z0-9._-]{1,32}$"
+    },
+    "judgeModel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160,
+      "pattern": "^[a-z0-9][a-z0-9._-]*/[A-Za-z0-9._:-]+$",
+      "description": "The judge's <vendor>/<model>, another vendor than the drafter."
+    },
+    "notMeasured": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][A-Za-z]{0,63}(\\.[a-z][A-Za-z_]{0,63})?$"
+      },
+      "description": "Each metric not computed, as family.metric, or checks when no check was judged."
+    },
+    "nobodyDropped": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turns",
+        "replyCoverage",
+        "firstReplyP50Ms",
+        "firstReplyP90Ms",
+        "repeatAskRate",
+        "agentRepeats",
+        "answeredLater"
+      ],
+      "properties": {
+        "turns": {
+          "$ref": "#/$defs/count"
+        },
+        "replyCoverage": {
+          "$ref": "#/$defs/rate"
+        },
+        "firstReplyP50Ms": {
+          "$ref": "#/$defs/count"
+        },
+        "firstReplyP90Ms": {
+          "$ref": "#/$defs/count"
+        },
+        "repeatAskRate": {
+          "$ref": "#/$defs/rate"
+        },
+        "agentRepeats": {
+          "$ref": "#/$defs/count"
+        },
+        "answeredLater": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sampled",
+        "helpedYes",
+        "helpedPartly",
+        "helpedNo"
+      ],
+      "properties": {
+        "sampled": {
+          "$ref": "#/$defs/count"
+        },
+        "helpedYes": {
+          "$ref": "#/$defs/count"
+        },
+        "helpedPartly": {
+          "$ref": "#/$defs/count"
+        },
+        "helpedNo": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "checks": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "maxProperties": 16,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z_]{0,31}$"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "description": "Each rubric check's pass rate among its non-NA verdicts (language, addressed, policy_safe, routing, actionable, continuity in rubric v1); a check with no verdict that day is left out; null when nothing was judged. At the top level so data.value stays two levels deep (DEC-0070)."
+    },
+    "stability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turnErrors",
+        "modelCallFailures",
+        "recoveredByFallback",
+        "processErrors",
+        "restarts",
+        "knowledgeAgeHours"
+      ],
+      "properties": {
+        "turnErrors": {
+          "$ref": "#/$defs/count"
+        },
+        "modelCallFailures": {
+          "$ref": "#/$defs/count"
+        },
+        "recoveredByFallback": {
+          "$ref": "#/$defs/count"
+        },
+        "processErrors": {
+          "$ref": "#/$defs/count"
+        },
+        "restarts": {
+          "$ref": "#/$defs/count"
+        },
+        "knowledgeAgeHours": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolvedWithoutPerson",
+        "toPersonPolicy",
+        "toPersonInability",
+        "queueOldestMinutes",
+        "queueSlaMinutes"
+      ],
+      "properties": {
+        "resolvedWithoutPerson": {
+          "$ref": "#/$defs/count"
+        },
+        "toPersonPolicy": {
+          "$ref": "#/$defs/count"
+        },
+        "toPersonInability": {
+          "$ref": "#/$defs/count"
+        },
+        "queueOldestMinutes": {
+          "$ref": "#/$defs/count"
+        },
+        "queueSlaMinutes": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

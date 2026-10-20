@@ -47,6 +47,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["session-handoff", ["1"]],
   ["share-registration", ["1"]],
   ["share-registration-receipt", ["1"]],
+  ["support-quality-daily", ["1"]],
   ["window-lease", ["1"]],
 ]);
 
