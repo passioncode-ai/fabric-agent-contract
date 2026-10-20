@@ -13,6 +13,8 @@ import { strictTime } from "./rfc3339.js";
  *   is null exactly as in a day's rows (CON-OE-13); the known costs add up the same way: a project costs at least its task
  *   runs (and holds at least their priced calls) and all projects no more than the days (CT-40), a null cost counting
  *   as none.
+ * - the unknown counts: a row has no more `unpricedCalls` or `unmeasuredCalls` than calls, and a day's
+ *   `unmeasuredCalls` is the sum of its rows' (DEC-0091).
  * Malformed input answers findings or none, never an exception.
  */
 
@@ -59,6 +61,8 @@ function pricedRow(row: JsonObject, at: string): Finding[] {
   const calls = count(row.calls);
   const unpriced = count(row.unpricedCalls);
   if (unpriced > calls) return [flag(`${at}/unpricedCalls`, "more unpriced calls than calls")];
+  // DEC-0091: calls whose token count is unknown are some of the calls, never more.
+  if (count(row.unmeasuredCalls) > calls) return [flag(`${at}/unmeasuredCalls`, "more calls with unknown tokens than calls")];
   if (calls > 0 && unpriced === calls && row.costUsd !== null) return [flag(`${at}/costUsd`, "every call is unpriced, so the cost is unknown (null), not a number")];
   if (unpriced < calls && row.costUsd === null) return [flag(`${at}/costUsd`, "priced calls carry a cost; null is only for a row with no priced call")];
   return [];
@@ -134,7 +138,7 @@ function usageArithmetic(value: JsonObject): Finding[] {
       if (spent) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/byModel`, message: "a day with calls, tokens or cost names the models they belong to" });
       return;
     }
-    for (const field of ["calls", "unpricedCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
+    for (const field of ["calls", "unpricedCalls", "unmeasuredCalls", "inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"]) {
       const sum = models.reduce((n, m) => n + toNumber(m[field] ?? 0), 0);
       if (toNumber(day[field] ?? 0) !== sum) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/${field}`, message: `the day's ${field} is not the sum of its models (${show(day[field] ?? 0)} ≠ ${sum})` });
     }

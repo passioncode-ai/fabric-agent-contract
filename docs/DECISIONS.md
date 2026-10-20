@@ -3,7 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0090`
+**Next free ID:** `DEC-0096` (read from the CAS counter `refs/agent-sync/ids/DEC`; DEC-0090 and DEC-0092 to DEC-0095 are
+reserved by open branches)
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5761,3 +5762,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `folderResolver.ts` `normalizeRemoteKey` and Switchboard `suggest.rs` `normalize`, `transient`, `tool_folder`;
   DEC-0076. DEC-0089 and `FAC-SEM-121` were reserved by git CAS (`agent_sync.py reserve`, key
   `ct57-folder-attribution`).
+
+### DEC-0091: A usage report counts the calls whose tokens are unknown (`unmeasuredCalls`)
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-62.
+- **Decision:** in [service](specification/service.md) and `service-usage.schema.json`:
+  1. A day's totals and each of its model rows MAY carry `unmeasuredCalls`: every call whose token count the service
+     did not measure in full, whatever it wrote to its caller: a `null` to a fabric-interop/0.2 reader (DEC-0087), the
+     measured lower bound to a 0.1 reader, a number beside `partial: true`, or a call made outside a job. Absent is 0.
+  2. A host MUST show the day's tokens as a lower bound while `unmeasuredCalls` is above 0, as it shows a cost beside
+     `unpricedCalls`.
+  3. `FAC-SEM-025` keeps it within the calls (a row's and the day's) and holds the day's to the sum of its rows'.
+- **Why:** service.md already promised that a host shows such a day's tokens as a lower bound, but the report gave
+  it no signal; Fabric Dashboards found it on DEC-0087 (board thread `16e6c000`, 2026-10-19).
+- **Alternatives refused:** a boolean "partial" flag (it says nothing of how much is unknown); reusing
+  `unpricedCalls` (a call can be priced and still have no token count).
+- **Compatibility:** additive; a report without `unmeasuredCalls` reads as before. `contractVersion` stays `0.1.0`.
+  The day and model objects are closed, so a host that validates reports against a copy of the schema pinned before
+  DEC-0091 rejects a report that carries the field until it adopts this decision; a host that ignores unknown members,
+  as Fabric Dashboards and the adapter's checker do, reads it as before.
+- **Consequences / affects:** schema `schemas/service-usage.schema.json` (`$defs/totals`); code `src/usage-rules.ts`;
+  fixture `fixtures/positive/service-usage-unmeasured.json` and `fixtures/catalogue.json`; tests
+  `test/usage-rules.test.ts`; docs `docs/specification/service.md`, `docs/backlog.md` (CT-62),
+  `docs/handoffs/2026-10-20-unmeasured-calls.md`.
+- **Source:** the board message `3ba380ab` (Fabric Dashboards, thread `16e6c000`); DEC-0091 reserved by git CAS (key
+  `ct62-unmeasured-calls`).
