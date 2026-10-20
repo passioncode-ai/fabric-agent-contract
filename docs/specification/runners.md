@@ -77,6 +77,33 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
   (DEC-0042, SH-11).
 - `mcpConfig.file` and `skillsDir` are absolute or `~/` paths; `docs` is an HTTPS URL.
 
+## The coding-agent catalogue (DEC-0093)
+
+C2 above makes the runner entry's shape the contract's and leaves its contents to each host. The list of coding agents
+itself is the contract's too: [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json), valid against
+[`coding-agents.schema.json`](../../schemas/coding-agents.schema.json) (`coding-agents/1`), versioned with the contract
+and read by every product (Fabric presents and launches from it, Fabric Switchboard keys its accounts and continuation by
+it). Machine state stays with each product: whether an agent is installed, enabled or the default, its accounts and the
+keys per project.
+
+| Member | What |
+|---|---|
+| `id` | the stable id every product keys its machine state by: the runner kind where C2 catalogues one (`cursor-agent`, `kiro`), else a new name; a removed agent's id goes to `retired` and is never reused |
+| `aliases` | other names a product used for it (Switchboard's `cursor-cli`, `kiro-cli`); a product that keyed state by one reads it as the id |
+| `name`, `maker`, `url` | as its maker writes them; `url` is `https` |
+| `install` | how to install it: `via` `brew`, `brew-cask`, `npm`, `uv`, `pipx` with a `package`, or `script` with the maker's install script's URL; optional `platforms` |
+| `launch.argv` | the interactive launch, as argv, never a shell line; it names no model |
+| `permissions` | `skip` (an `argv` or `env`) that skips the agent's permission prompts, with its evidence: `source`, the maker's documentation that names it, or `measured`, the command whose output names it (such as `--help`), the version and the date. An agent with no recorded evidence has no `permissions`, and a product offers it manual approval only |
+| `mcp` | whether it loads MCP servers |
+| `openrouter` | how to run it on an OpenRouter key: variable names (`keyEnv`, `baseUrlEnv`, `modelEnv`, `homeEnv`) and `modelArgv` with `{model}`; never a value |
+| `proxy` | a local proxy's base-URL variable and the command that prints its key; never a value |
+| `runner` | the C2 runner entry, where measured |
+| `sources` | every URL the entry came from, its `url` and its permission `source` among them |
+
+No member holds a credential (`secretArgument`, `test/coding-agents.test.ts`). The seed is Fabric Switchboard's list of
+2026-10-19 without machine state ([`tools/catalogue/seed.py`](../../tools/catalogue/seed.py)), each permission argument
+from [`tools/catalogue/permissions.json`](../../tools/catalogue/permissions.json); a change raises `revision` by one.
+
 ## Runner routes
 
 `covers:` operator preference for terminal agents — DEC-0026, refined by DEC-0029 · operator

@@ -591,10 +591,13 @@
       ]
     },
     {
-      "id": "cursor-cli",
+      "id": "cursor-agent",
       "name": "Cursor CLI",
       "maker": "Cursor",
       "url": "https://cursor.com/docs/cli/installation.md",
+      "aliases": [
+        "cursor-cli"
+      ],
       "install": [
         {
           "via": "script",
@@ -690,10 +693,13 @@
       ]
     },
     {
-      "id": "kiro-cli",
+      "id": "kiro",
       "name": "Kiro CLI",
       "maker": "AWS (Kiro)",
       "url": "https://kiro.dev/docs/getting-started/installation.md",
+      "aliases": [
+        "kiro-cli"
+      ],
       "install": [
         {
           "via": "script",

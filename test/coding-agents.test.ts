@@ -21,6 +21,13 @@ describe("the coding-agent catalogue (DEC-0093)", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of (catalogue.retired ?? []) as string[]) expect(ids).not.toContain(id);
   });
+  it("names each runner kind DEC-0046 catalogues by that kind, and no alias twice or as another entry's id", () => {
+    const ids = (catalogue.agents as Json[]).map((agent) => agent.id);
+    for (const kind of ["claude-code", "codex", "cursor-agent", "gemini-cli", "goose", "hermes", "kilo", "kimi-code", "kiro", "opencode", "cline", "pi"]) expect(ids, kind).toContain(kind);
+    const aliases = (catalogue.agents as Json[]).flatMap((agent) => (agent.aliases ?? []) as string[]);
+    expect(new Set(aliases).size).toBe(aliases.length);
+    for (const alias of aliases) expect(ids, alias).not.toContain(alias);
+  });
   it("records a permission-skipping argument only with its evidence, the one tools/catalogue/permissions.json holds", () => {
     for (const agent of catalogue.agents as Json[]) {
       expect(agent.permissions, agent.id).toEqual(permissions[agent.id]);

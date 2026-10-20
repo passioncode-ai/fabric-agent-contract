@@ -54,7 +54,7 @@
       "date": "2026-10-19"
     }
   },
-  "cursor-cli": {
+  "cursor-agent": {
     "skip": {
       "argv": [
         "--force"

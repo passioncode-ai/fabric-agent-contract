@@ -38,3 +38,6 @@ DEC-0046 made the runner catalogue's *shape* the contract's (`runners.schema.jso
 
 Switchboard's 30 entries (`switchboard_agents`, 2026-10-19) are the seed; each permission argv is checked against the
 agent's own documentation, Orca's list as a cross-check only. Order: after CT-57 (DEC-0089) and CT-62 (DEC-0091).
+
+Outcome: the data became its own file and schema, `catalogue/coding-agents.json` and `coding-agents/1`, rather than
+new members of a runner entry ([runners](../../../specification/runners.md#the-coding-agent-catalogue-dec-0093), DEC-0093).

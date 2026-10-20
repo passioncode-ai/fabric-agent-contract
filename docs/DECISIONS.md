@@ -5815,3 +5815,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   annotation on `docs/handoffs/2026-10-19-folder-attribution.md`; DEC-0089's annotation.
 - **Source:** the board thread `617c8cbe` (Fabric's acceptance of the shape, 2026-10-19); DEC-0092 reserved by git CAS
   (key `ct63-resolve-pending`).
+
+### DEC-0093: The coding-agent catalogue is the contract's data: one list of coding agents for every product
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-60.
+- **Decision:** in [runners](specification/runners.md#the-coding-agent-catalogue-dec-0093):
+  1. `catalogue/coding-agents.json`, valid against `coding-agents.schema.json` (`coding-agents/1`), lists the coding
+     agents every product reads; machine state (installed, enabled, default, accounts, keys) stays with each product.
+  2. An entry's `id` is the runner kind where DEC-0046 catalogues one, else a new name; `aliases` keep the names a
+     product used before (Switchboard's `cursor-cli`, `kiro-cli`); a removed id is `retired`, never reused.
+  3. A permission-skipping argument or variable is recorded only with its evidence: the maker's documentation
+     (`source`) or the agent's own output (`measured`: the command, the version, the date). Without it there is no
+     `permissions`.
+  4. Environment members are variable names, never values; no member holds a credential.
+- **Why:** the operator wants one list of coding agents for every product (Fabric's walk, OF-11, thread `617c8cbe`,
+  message `f63e1f06`); DEC-0046 made only the entry's shape the contract's. Fabric Switchboard agreed to read the
+  contract's list and asked for the optional OpenRouter and proxy recipes (`41e010ab`, `ea29f0a8`).
+- **Alternatives refused:** each host keeping its own list (two lists drift: Switchboard's and Fabric's already named
+  two agents differently); a permission argument from memory or a third party's list (an argument that skips approval
+  is recorded only from the maker or the agent itself).
+- **Compatibility:** additive: a new schema and a new data file. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schema `schemas/coding-agents.schema.json`, revision `coding-agents/1` in
+  `src/protocol-revisions.ts`; data `catalogue/coding-agents.json`, written by `tools/catalogue/seed.py` from
+  `tools/catalogue/permissions.json`; tests `test/coding-agents.test.ts`, `test/schema-compilation.test.ts`; docs
+  `docs/specification/runners.md`, `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-60),
+  `docs/handoffs/2026-10-20-coding-agent-catalogue.md`; brief `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
+- **Source:** board thread `617c8cbe` (messages `f63e1f06`, `6ffee284`, `41e010ab`, `ea29f0a8`); DEC-0093 reserved by
+  git CAS (key `ct60-runner-catalogue`, counter commit `fb6a608`).

@@ -30,17 +30,21 @@ SEED = [
   ("crush", "Crush", "Charm", "https://github.com/charmbracelet/crush", ("brew", "charmbracelet/tap/crush"), ["crush"], True, None),
   ("zed", "Zed agent", "Zed Industries", "https://github.com/zed-industries/zed", ("brew-cask", "zed"), ["zed"], True, None),
   ("amp", "Amp", "Sourcegraph", "https://ampcode.com", ("script", "https://ampcode.com/install.sh"), ["amp"], True, None),
-  ("cursor-cli", "Cursor CLI", "Cursor", "https://cursor.com/docs/cli/installation.md", ("script", "https://cursor.com/install"), ["agent"], True, None),
+  ("cursor-agent", "Cursor CLI", "Cursor", "https://cursor.com/docs/cli/installation.md", ("script", "https://cursor.com/install"), ["agent"], True, None),
   ("copilot-cli", "GitHub Copilot CLI", "GitHub", "https://github.com/github/copilot-cli", ("brew", "copilot-cli"), ["copilot"], True, None),
   ("factory-droid", "Factory Droid", "Factory", "https://docs.factory.com/droid-cli/quickstart.md", ("script", "https://app.factory.ai/cli"), ["droid"], True, None),
   ("warp", "Warp", "Warp", "https://github.com/warpdotdev/Warp", ("brew-cask", "warp"), ["warp"], True, None),
-  ("kiro-cli", "Kiro CLI", "AWS (Kiro)", "https://kiro.dev/docs/getting-started/installation.md", ("script", "https://cli.kiro.dev/install"), ["kiro-cli"], True, None),
+  ("kiro", "Kiro CLI", "AWS (Kiro)", "https://kiro.dev/docs/getting-started/installation.md", ("script", "https://cli.kiro.dev/install"), ["kiro-cli"], True, None),
   ("devin", "Devin Desktop / Devin CLI (formerly Windsurf/Cascade)", "Devin (formerly Windsurf)", "https://docs.devin.ai/desktop/getting-started.md", ("script", "https://cli.devin.ai/install.sh"), ["devin"], True, None),
 ]
+
+# The runner kind DEC-0046 catalogues is the id; Switchboard's earlier name for it is an alias.
+ALIASES = {"cursor-agent": ["cursor-cli"], "kiro": ["kiro-cli"]}
 
 def entry(row, permissions):
     id_, name, maker, url, install, argv, mcp, model_argv = row
     out = {"id": id_, "name": name, "maker": maker, "url": url}
+    if id_ in ALIASES: out["aliases"] = ALIASES[id_]
     if install:
         via, what = install
         out["install"] = [{"via": via, "script": what} if via == "script" else {"via": via, "package": what}]
