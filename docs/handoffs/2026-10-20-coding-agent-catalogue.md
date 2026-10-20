@@ -8,7 +8,8 @@ Brief: `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
 ## Done
 
 - `schemas/coding-agents.schema.json` (`coding-agents/1`, in the revision register) and `catalogue/coding-agents.json`:
-  30 agents, Fabric Switchboard's list of 2026-10-19 without machine state, written by `tools/catalogue/seed.py`.
+  30 agents from Fabric Switchboard's list of 2026-10-19 (names, makers, urls, installs, launches, MCP flags,
+  OpenRouter model arguments; not its machine state, key variables, headless or MCP commands), written by `tools/catalogue/seed.py`.
 - Permission arguments for five agents, each with its evidence (`tools/catalogue/permissions.json`): Claude Code from
   its documentation; Codex, Gemini CLI, Cline and Cursor measured from the installed agent's `--help`.
 - Ids are the runner kinds C2 lists (DEC-0016, DEC-0029, DEC-0046: `cursor-agent`, `kiro`), else new names;
@@ -27,6 +28,11 @@ Brief: `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
   evidence.
 - After the merge: org-index `repositories.json`, the contract's row, owns `catalogue/coding-agents.json`.
 - `runner` entries (C2) inside the catalogue, where a host measured one.
+
+## Readings
+
+Unit and product, three rounds; each round's false statements fixed in this branch. The third round's risks (an `ask`
+member, Codex's sandbox, the products' own Bypass and OpenRouter evidence, three launch binaries) are board row CT-68.
 
 ## Checks
 

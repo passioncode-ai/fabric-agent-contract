@@ -1,6 +1,7 @@
 """The seed of catalogue/coding-agents.json: Switchboard's agent list of 2026-10-19 (switchboard_agents, schema 1,
-revision c23b83f814c04379), catalogue fields only. Machine state (installed, enabled, default, paths) and the operator's
-model choices are dropped: a launch argv names no model, and openrouter.modelArgv carries {model}. Permissions are
+revision c23b83f814c04379): names, makers, urls, installs, launches, MCP flags and OpenRouter model arguments. Machine
+state (installed, enabled, default, paths), the operator's model choices, key variables, headless and MCP commands are
+not carried: a launch argv names no model, and openrouter.modelArgv carries {model}. Permissions are
 added in permissions.json, each with its evidence: the maker's documentation (source) or the installed agent's output
 (measured)."""
 import json, sys
