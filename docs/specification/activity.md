@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052, DEC-0068 and DEC-0082; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082 and DEC-0090; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -73,7 +73,9 @@ by `method`; every read in the person's access log; and no scoring of persons.
   `consent` for it at the time of the read says `given`. It serves a person's **usage and cost** only as
   sums per UTC day or billing period. The access log records the read's `purposeId` and `step`, and
   `FAC-SEM-067` refuses a log entry that breaks either ([`confirmedPurposes`](../../src/activity-rules.ts)).
-  The person reading their own data, and a service that serves nobody (a summary build), are not narrowed.
+  The person reading their own data, and a service that serves nobody (a summary build), are not narrowed. A partner
+  organization (DEC-0090) reads only usage sums per agent and UTC day or period, logged in each contributing member's
+  access log; the organization server's notice names that reader before its first read (DEC-0090).
 - This narrows what DEC-0030's presence ruling lets a receiver serve, not the schema: the per-person
   estimates still exist, and reach an owner or administrator only through a purpose the person
   confirmed.
@@ -470,8 +472,13 @@ that the device is `logging_disabled`. Each entry records:
 A read served to another person carries the `purposeId` and `step` the [notice rules](#notice) require
 (`FAC-SEM-067`).
 
+A reader whose `role` is `partner` is a partner organization reading its agents' usage (DEC-0090): its entry is a
+service's read (no `user`), of `activity.usage`, per UTC day or billing period, keyed by no device (`FAC-SEM-123`,
+[the partner channel](partner-channel.md)).
+
 A receiver that stores activity telemetry MUST record these reads and MUST let the subject read
-their own log. Reads of summaries, which carry no person, are not logged per subject.
+their own log. Reads of summaries, which carry no person, are not logged per subject; a partner's read is the exception, logged in
+every contributing member's log (DEC-0090).
 
 ## Mapping to OpenTelemetry
 
@@ -527,6 +534,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 | `FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 | `FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
+| `FAC-SEM-123` | `access-log-disclosure` | an entry whose reader's `role` is `partner` is a service's read (no `user`) of `activity.usage`, per UTC day or billing period, keyed by no device ([the partner channel](partner-channel.md), DEC-0090) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves

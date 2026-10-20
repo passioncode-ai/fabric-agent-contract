@@ -64,6 +64,14 @@
       },
       "description": "The publisher keys the estate's machines pin, by kid: a placement names one, and verifyPackage verifies the placed package's publisher signature under it (DEC-0051)."
     },
+    "publisherScopes": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/publisherScope"
+      },
+      "description": "DEC-0090: the publisher keys that are a partner's, each trusted only for placements in the organization contexts it names (FAC-SEM-122). A key not named here keeps DEC-0051's meaning."
+    },
     "shareGrants": {
       "type": "array",
       "maxItems": 256,
@@ -465,6 +473,37 @@
       },
       "additionalProperties": false,
       "description": "A WebAuthn Level 3 assertion response, without the user handle: the passkey signed authenticatorData ‖ SHA-256(clientDataJSON), and clientDataJSON's challenge is derived from the record's digest (estateChallenge)."
+    },
+    "publisherScope": {
+      "type": "object",
+      "required": [
+        "kid",
+        "partner",
+        "contexts"
+      ],
+      "properties": {
+        "kid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "A kid of publisherKeys."
+        },
+        "partner": {
+          "$ref": "common.schema.json#/$defs/orgContextId",
+          "description": "The partner organization that holds the key, org:<partnerOrgId>, an ordinary organization id (the first organization server's PA-01)."
+        },
+        "contexts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "common.schema.json#/$defs/orgContextId"
+          },
+          "description": "The organization contexts a placement under this key may be in; never personal."
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

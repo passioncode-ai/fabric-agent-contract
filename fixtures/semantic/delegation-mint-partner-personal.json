@@ -1,0 +1,107 @@
+{
+  "grant": {
+    "kind": "standing-grant",
+    "meta": {
+      "id": "urn:fabric:share:5a7c3e1f9b2d4a6c8e0f1a3b5c7d9e2f",
+      "revision": 3,
+      "contentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "createdAt": "2026-10-11T09:00:00Z",
+      "createdBy": "urn:person:operator"
+    },
+    "project": "urn:project:a",
+    "principal": {
+      "id": "org:acme_partners",
+      "revision": 1,
+      "contentHash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    },
+    "effects": [
+      "send"
+    ],
+    "resourcePatterns": [
+      "urn:project:a:drafts/*"
+    ],
+    "dataClasses": [
+      "project-internal"
+    ],
+    "startsAt": "2026-10-11T09:00:00Z",
+    "expiresAt": "2026-11-11T09:00:00Z",
+    "idempotency": "required",
+    "issuer": "urn:person:operator",
+    "state": "active",
+    "principalKind": "partner",
+    "audience": "example-writer",
+    "capabilities": [
+      "writer.write",
+      "writer.check",
+      "writer.send"
+    ],
+    "effectCeiling": [
+      "draft",
+      "send"
+    ],
+    "spend": {
+      "mode": "limited",
+      "limits": [
+        {
+          "window": "task",
+          "limitUsd": 2
+        },
+        {
+          "window": "day",
+          "limitUsd": 5
+        },
+        {
+          "window": "month",
+          "limitUsd": 50
+        }
+      ],
+      "perCallMaxUsd": 0.5,
+      "payer": "owner",
+      "credentialSource": {
+        "kind": "capability",
+        "agent": "urn:agent:example-writer",
+        "capability": "writer.write"
+      }
+    },
+    "context": "personal"
+  },
+  "token": {
+    "iss": "urn:fabric:estate:example",
+    "sub": "urn:person:operator",
+    "act": {
+      "sub": "acme-setup.default",
+      "act": {
+        "partner": "org:acme_partners"
+      }
+    },
+    "aud": "example-writer",
+    "scope": "writer.write writer.check",
+    "effect": [
+      "draft"
+    ],
+    "grant": [
+      "urn:fabric:share:5a7c3e1f9b2d4a6c8e0f1a3b5c7d9e2f#3"
+    ],
+    "spend": {
+      "mode": "limited",
+      "remaining": [
+        {
+          "window": "task",
+          "remainingUsd": 1.5
+        },
+        {
+          "window": "day",
+          "remainingUsd": 4.2
+        },
+        {
+          "window": "month",
+          "remainingUsd": 38
+        }
+      ]
+    },
+    "project": "urn:project:a",
+    "iat": 1791720000,
+    "exp": 1791720540,
+    "jti": "01JA7Y5Q3C2K9M8N4P6R0S1T2V"
+  }
+}

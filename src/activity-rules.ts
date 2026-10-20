@@ -439,6 +439,24 @@ export function confirmedPurposes(consents: readonly JsonObject[], at: string): 
   return new Set([...latest].filter(([, { consent }]) => consent.state === "given").map(([purpose]) => purpose));
 }
 
+/** The reader role of a partner organization's read (DEC-0090): its agents' usage, never a person's own data. */
+export const PARTNER_ROLE = "partner";
+
+/**
+ * FAC-SEM-123 (DEC-0090 item 2): a partner organization reads a member's data only as its agents' usage sums: an access
+ * log entry whose reader's role is `partner` is a service's read (no `user`), of `activity.usage`, per UTC day or billing
+ * period, keyed by no device.
+ */
+function partnerRead(entry: JsonObject, i: number): Finding[] {
+  const findings: Finding[] = [];
+  const flag = (suffix: string, message: string) => findings.push({ code: "FAC-SEM-123", instancePath: `/log/entries/${i}${suffix}`, message });
+  if (!isObject(entry.reader) || entry.reader.user !== undefined || typeof entry.reader.service !== "string") flag("/reader", "a partner reads as its organization's service, never as a person of the organization");
+  if (entry.scope !== USAGE_SCOPE) flag("/scope", "a partner reads only its agents' usage sums (activity.usage)");
+  if (entry.step !== "day" && entry.step !== "period") flag("/step", "a partner reads usage only as sums per UTC day or billing period");
+  if (entry.device !== undefined) flag("/device", "a partner's read is keyed by no device");
+  return findings;
+}
+
 /**
  * FAC-SEM-067 (OD-1 in neutral form, DEC-0052): `{log, consents?}` — of the reads an access log records, those served to
  * a person other than the subject show the subject's time or presence only under a purpose the subject confirmed, and
@@ -452,6 +470,10 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
   const subject = isObject(log.subject) && isObject(log.subject.user) ? log.subject.user.id : undefined;
   const consents = Array.isArray(value.consents) ? value.consents.filter(isObject) : [];
   indexed(log.entries).forEach(([entry, i]) => {
+    if (isObject(entry.reader) && entry.reader.role === PARTNER_ROLE) {
+      findings.push(...partnerRead(entry, i));
+      return;
+    }
     const reader = isObject(entry.reader) && isObject(entry.reader.user) ? entry.reader.user.id : undefined;
     if (reader === undefined || reader === subject) return;
     const scope = show(entry.scope ?? "");

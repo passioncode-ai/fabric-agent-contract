@@ -59,7 +59,15 @@ export const LEEWAY_SECONDS = 60;
 export interface Jwk { kty: string; crv?: string; x?: string; kid?: string; use?: string; alg?: string; [member: string]: unknown }
 export interface Jwks { keys: Jwk[] }
 
-export interface Actor { sub: string; session?: string; act?: Actor }
+export interface Actor { sub: string; session?: string; act?: Actor | PartnerActor }
+/** DEC-0090: the partner organization a company's owner granted, the innermost actor under a partner grant. */
+export interface PartnerActor { partner: string }
+/** `common.schema.json#/$defs/orgContextId`: an organization's context, `org:<orgId>`. */
+const ORG_CONTEXT = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+/** Whether `node` is a partner actor (DEC-0090): exactly `{partner: org:<id>}`, never with a `sub`, session or `act`. */
+export function isPartnerActor(node: unknown): node is PartnerActor {
+  return isObject(node) && typeof node.partner === "string" && ORG_CONTEXT.test(node.partner) && Object.keys(node).length === 1;
+}
 export interface SpendRemaining { mode: "unlimited" | "limited"; remaining?: Array<{ window: string; remainingUsd: number }>; perCallMaxUsd?: number }
 export interface DelegationClaims {
   iss: string;
@@ -296,6 +304,8 @@ export function chainDepth(act: unknown): number {
   let depth = 0;
   let node: unknown = act;
   while (node !== undefined) {
+    // DEC-0090: a partner actor ends the chain, never begins it.
+    if (depth > 0 && isPartnerActor(node)) return depth + 1;
     if (!isObject(node) || !isString(node.sub)) return Number.POSITIVE_INFINITY;
     depth += 1;
     if (depth > 64) return depth;
@@ -306,7 +316,7 @@ export function chainDepth(act: unknown): number {
 
 function chainOf(act: Actor): string[] {
   const chain: string[] = [];
-  for (let node: Actor | undefined = act; node; node = node.act) chain.push(node.sub);
+  for (let node: Actor | PartnerActor | undefined = act; node; node = "act" in node ? node.act : undefined) chain.push("partner" in node ? node.partner : node.sub);
   return chain;
 }
 
@@ -338,6 +348,8 @@ function actorChainDepth(act: unknown): number | undefined {
   if (act === undefined) return undefined;
   let depth = 0;
   for (let node: unknown = act; node !== undefined; node = (node as JsonObject).act) {
+    // DEC-0090: a partner organization may be the innermost actor, never the outermost; it ends the chain.
+    if (depth > 0 && isPartnerActor(node)) return depth + 1;
     if (!isObject(node) || typeof node.sub !== "string" || !AGENT_ID.test(node.sub)) return undefined;
     if (node.session !== undefined && !(typeof node.session === "string" && OPAQUE_ID.test(node.session))) return undefined;
     depth += 1;
@@ -534,7 +546,8 @@ export function refusalFromDenial(denial: GrantCheckDenial): DelegationRefusalDo
 export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act" | "grant">, grantRef: string): string {
   if (!meterClaims.grant.includes(grantRef)) throw new RangeError("the meter checks only a grant its verified token names");
   if (meterClaims.task !== undefined) return `task:${meterClaims.task}`;
-  for (let actor: Actor | undefined = meterClaims.act; actor !== undefined; actor = actor.act) {
+  // A partner actor (DEC-0090) holds no session: the walk stops there.
+  for (let actor: Actor | PartnerActor | undefined = meterClaims.act; actor !== undefined && !("partner" in actor); actor = actor.act) {
     if (actor.session !== undefined) return `session:${actor.sub}:${actor.session}`;
   }
   return `grant:${grantRef}`;

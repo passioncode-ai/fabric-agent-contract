@@ -274,7 +274,8 @@ the token's outermost `act.sub`, and `urn:session:<agent id>:<session id>` names
 (its `act.session`).
 
 **Actor chain**: The agents acting for the **Principal**, the one calling now outermost and each
-earlier one nested inside (a token's `act`, RFC 8693), at most four deep.
+earlier one nested inside (a token's `act`, RFC 8693), at most four deep; under a partner grant the innermost actor is
+the partner organization (DEC-0090).
 
 **Approval document**: `approval/1`, a JWS by the estate key that one person approved one action — bound
 by the SHA-256 of its RFC 8785 canonical form — for one callee, used once, within 24 hours (DEC-0039).
@@ -467,6 +468,11 @@ under a new key (DEC-0087). The board's `outcome_unknown` is the same idea for a
 snapshot of the facts (`attributeFolder`, the AT table, DEC-0089) that Fabric, Switchboard and Observatory all run; a
 tie attributes nothing ([folder attribution](docs/specification/folder-attribution.md)). Fabric's hub is to serve it as
 `fabric.project.resolve` (F9, owed), which answers `pending` while the folder's Git facts cannot be read (DEC-0092).
+
+**Partner**: An organization (an integrator, an agency, an agent studio) that builds agents on the platform and sells them
+to companies; named by its organization context `org:<partnerOrgId>`. Its publisher key is trusted only in the contexts
+the estate record scopes it to, it reads its agents' usage only as sums per agent and day or period, and it acts on a
+company's agents only under the owner's partner grant ([the partner channel](docs/specification/partner-channel.md), DEC-0090).
 
 **Repository identity**: A remote's `host/path` with `A` to `Z` lower-cased (a non-ASCII letter keeps its case), credentials and `.git` dropped (`normalizeOrigin`,
 DEC-0089): two clones with one identity are one repository, whatever their branch.

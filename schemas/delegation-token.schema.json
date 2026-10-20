@@ -8,7 +8,7 @@
   "properties": {
     "iss": { "$ref": "common.schema.json#/$defs/uri", "description": "The estate hub that signed the token; stable across key rotation and port changes (urn:fabric:estate:<estate id>)." },
     "sub": { "$ref": "common.schema.json#/$defs/uri", "description": "The principal: the person of the estate on whose behalf the work runs (the operator, or an external person under a share grant)." },
-    "act": { "$ref": "#/$defs/actor", "description": "RFC 8693 §4.1 actor chain: the agent now calling outermost, each earlier agent nested inside, at most four deep; a token for the meter (effect none) at most five (DL-6, DEC-0045)." },
+    "act": { "$ref": "#/$defs/actor", "description": "RFC 8693 §4.1 actor chain: the agent now calling outermost, each earlier agent nested inside (innermost only, under a partner grant, the partner actor, DEC-0090), at most four deep; a token for the meter (effect none) at most five (DL-6, DEC-0045)." },
     "aud": { "$ref": "common.schema.json#/$defs/agentId", "description": "Exactly one callee agent id, as a string, never an array." },
     "scope": {
       "type": "string",
@@ -89,25 +89,25 @@
     "actor": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor2" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "anyOf": [{ "$ref": "#/$defs/actor2" }, { "$ref": "#/$defs/partnerActor" }] } },
       "additionalProperties": false
     },
     "actor2": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor3" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "anyOf": [{ "$ref": "#/$defs/actor3" }, { "$ref": "#/$defs/partnerActor" }] } },
       "additionalProperties": false
     },
     "actor3": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor4" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "anyOf": [{ "$ref": "#/$defs/actor4" }, { "$ref": "#/$defs/partnerActor" }] } },
       "additionalProperties": false
     },
     "actor4": {
       "type": "object",
       "required": ["sub"],
-      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "$ref": "#/$defs/actor5" } },
+      "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" }, "act": { "anyOf": [{ "$ref": "#/$defs/actor5" }, { "$ref": "#/$defs/partnerActor" }] } },
       "additionalProperties": false,
       "description": "The fourth actor is the last of a callee's token; only a token for the meter nests a fifth (DL-6)."
     },
@@ -117,6 +117,13 @@
       "properties": { "sub": { "$ref": "common.schema.json#/$defs/agentId" }, "session": { "$ref": "#/$defs/session" } },
       "additionalProperties": false,
       "description": "The fifth actor, in a token for the meter only (effect none, DEC-0045): it carries no act."
+    },
+    "partnerActor": {
+      "type": "object",
+      "required": ["partner"],
+      "properties": { "partner": { "$ref": "common.schema.json#/$defs/orgContextId" } },
+      "additionalProperties": false,
+      "description": "DEC-0090: the partner organization a company's owner granted, the innermost actor of a token minted under a partner grant (principalKind partner, FAC-SEM-124); never the outermost, it carries no act and counts toward DL-6's depth."
     }
   }
 }

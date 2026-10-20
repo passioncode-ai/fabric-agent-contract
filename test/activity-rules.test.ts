@@ -347,7 +347,7 @@ describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
   const files = readdirSync(path.join(fixtures, "semantic")).filter((name) => name.startsWith("access-log-"));
 
   it("has a passing and a failing input", () => {
-    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))]).toEqual(["FAC-SEM-067"]);
+    expect([...new Set(files.flatMap((name) => load(`semantic/${name}`).expect as string[]))].sort()).toEqual(["FAC-SEM-067", "FAC-SEM-123"]);
     expect(files.some((name) => (load(`semantic/${name}`).expect as string[]).length === 0)).toBe(true);
   });
 
@@ -356,6 +356,15 @@ describe("FAC-SEM-067: OD-1 in neutral form over the access log", () => {
     expect([...new Set(codes(fixture.kind, fixture.input))]).toEqual(fixture.expect);
     const result = validateDocument(validator, `${SCHEMA_PREFIX}schemas/access-log.schema.json`, fixture.input.log);
     expect(result.valid, JSON.stringify(result.errors, null, 2)).toBe(true);
+  });
+
+  it("refuses a partner entry that names no service (DEC-0090)", () => {
+    const fixture = load("semantic/access-log-partner-usage-ok.json");
+    const entry = fixture.input.log.entries[0];
+    for (const reader of [{ role: "partner" }, { role: "partner", service: 7 }]) {
+      const input = { ...fixture.input, log: { ...fixture.input.log, entries: [{ ...entry, reader }] } };
+      expect(evaluateSemanticRules(fixture.kind, input).filter((f) => f.code === "FAC-SEM-123").map((f) => f.instancePath)).toEqual(["/log/entries/0/reader"]);
+    }
   });
 
   it("refuses a person's usage served to another person without a step, and narrows nothing the subject reads", () => {

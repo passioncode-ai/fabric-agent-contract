@@ -1,6 +1,6 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041, DEC-0045, DEC-0060 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0039, DEC-0041, DEC-0045, DEC-0060, DEC-0090 ([the partner channel](partner-channel.md)) · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -39,7 +39,7 @@ flowchart LR
 |---|---|---|
 | **Issuer** | the estate's Fabric hub | holds the estate signing key, decides grants with the operator, mints tokens and approvals, publishes the keys |
 | **Principal** | a person: the operator, or an external person under a share grant | the token's `sub`; the work runs on their behalf |
-| **Actor** | an agent, or an agent's session | the token's `act` chain; the outermost actor is the agent calling now |
+| **Actor** | an agent, or an agent's session; innermost only, under a partner grant, the partner organization (DEC-0090) | the token's `act` chain; the outermost actor is the agent calling now |
 | **Callee** | the agent whose capability is called | the token's `aud`; it verifies the token and acts |
 | **Meter** | the registry that answers `grant-check` ([spend policy](spend-policy.md#checking)) | reserves spend against the grant's windows and the estate total; it issues no identity |
 
@@ -59,7 +59,7 @@ in the shape of OAuth 2.0 Token Exchange (RFC 8693):
 |---|---|---|
 | `iss` | yes | the estate hub, a URI stable across key rotation and port changes (`urn:fabric:estate:<estate id>`) |
 | `sub` | yes | the principal, a URI naming a person |
-| `act` | yes | the actor chain (RFC 8693 §4.1): `{sub: <agent id>, session?: <id>, act?: {…}}`, the agent calling now outermost, each earlier actor nested inside; at most **four** deep, five in a token for the meter (DL-6) |
+| `act` | yes | the actor chain (RFC 8693 §4.1): `{sub: <agent id>, session?: <id>, act?: {…}}`, the agent calling now outermost, each earlier actor nested inside, and innermost only the partner actor `{partner: "org:<partnerOrgId>"}` under a partner grant (DEC-0090, [the partner channel](partner-channel.md#owner-to-partner-to-agents-fac-sem-124)); at most **four** deep, five in a token for the meter (DL-6) |
 | `aud` | yes | exactly **one** callee agent id, a string, never an array |
 | `scope` | yes | the callee's capability names, space-delimited (RFC 8693 §4.2) |
 | `effect` | yes | the effect ceiling: an array of [governance](governance-and-roles.md#external-effects) effect classes (DL-3) |
@@ -104,7 +104,10 @@ callee, enforces attenuation:
   grant whose `principalKind` is `agent` names its principal `urn:agent:<agent id>`, and the token's outermost
   actor is that agent id; `session` names it `urn:session:<agent id>:<session id>`, and the outermost actor is
   that agent with that `session`; for both, `sub` is the person who issued the grant (`issuer`). Under a share
-  grant (`external`) `sub` is the grant's principal, the outside person.
+  grant (`external`) `sub` is the grant's principal, the outside person. Under a partner grant (`partner`, DEC-0090)
+  `sub` is the issuer, and the chain's innermost actor is the partner organization `{partner: org:<partnerOrgId>}`:
+  minted at the grant, the partner's agent holds it inside; onward, it stays innermost (`FAC-SEM-124`,
+  [the partner channel](partner-channel.md)).
 - **DL-5 — Narrower than its parent.** A token minted for an onward call keeps the parent's `iss`, `sub` and
   `project`; its outermost actor is the parent's `aud` (the agent calling onward is the one the parent was
   for), and the rest of its chain is exactly the parent's `act`, so the chain grows by one actor per hop. Its
@@ -168,7 +171,7 @@ against the clock, and a comparison with NaN is always false, so an unreadable c
 | 3 | `kid` names a published key; an unknown `kid` is the token's fault, while a published key that cannot be used — a `use` other than `sig`, an `alg` other than `EdDSA` (both outside [`delegation-jwks`](../../schemas/delegation-jwks.schema.json)), not an Ed25519 public key of 32 bytes, **of small order** (`small-order-key`: its bytes, sign bit cleared, are one of libsodium's seven `has_small_order` encodings; `isSmallOrderKey` in [`src/ed25519.ts`](../../src/ed25519.ts)), or carrying a private member — or a `kid` published twice is the issuer's (DEC-0045) | `unauthenticated` (unknown `kid`); `issuer-unavailable` |
 | 4 | the Ed25519 signature over the first two segments | `unauthenticated` |
 | 4a | when the callee reads the estate record: the revision it reads certifies `kid` with the published key ([DL-14](#keys-publication-and-rotation)) | `unauthenticated` (`kid-not-certified`); `issuer-unavailable` (the revision's fault) |
-| 5 | the claims have the DL-2 types — each actor's `sub` an agent id and `session` a session id, `iss`, `sub` and `project` URIs, `aud` an agent id, `scope` and `jti` in the schema's grammar, `effect` known classes each once, exactly one `grant`, `spend`, `task`, `iat`, `exp` and `nbf` typed as the schema types them; then `iss` is the issuer the callee trusts | `unauthenticated` |
+| 5 | the claims have the DL-2 types — each actor's `sub` an agent id and `session` a session id, except an innermost partner actor, which is `{partner}` only (DEC-0090), `iss`, `sub` and `project` URIs, `aud` an agent id, `scope` and `jti` in the schema's grammar, `effect` known classes each once, exactly one `grant`, `spend`, `task`, `iat`, `exp` and `nbf` typed as the schema types them; then `iss` is the issuer the callee trusts | `unauthenticated` |
 | 6 | `exp` after `iat` and at most 600 seconds after; `iat`, and `nbf` when present, not later than now + 60 s | `unauthenticated` |
 | 7 | now not later than `exp` + 60 s | `token-expired` |
 | 8 | `aud` equals the callee's own agent id | `wrong-audience` |
@@ -472,6 +475,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | `FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | `FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 | `FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
+| `FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of
 [`fixtures/catalogue.json`](../../fixtures/catalogue.json) and `fixtures/semantic/delegation-*`, `approval-*`;

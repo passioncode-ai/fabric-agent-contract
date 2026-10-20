@@ -5931,3 +5931,57 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-20-support-quality.md`.
 - **Source:** issue #125 (passioncode-ai/fabric-agent-contract); DEC-0095 and `SEM-0126` reserved by git CAS (key
   `ct61-support-quality`, counter commits `8a62c04` and `4c4598f`).
+
+### DEC-0090: The partner channel: a partner's publisher key trusted per context, its agents' usage, and owner to partner to agents (`FAC-SEM-122`…`FAC-SEM-124`)
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-58.
+- **Decision:** in [the partner channel](specification/partner-channel.md), a partner is named by its organization
+  context `org:<partnerOrgId>` (the first organization server's PA-01):
+  1. **A partner's publisher key, trusted per context (`FAC-SEM-122`).** `estate-record/1` gains an optional
+     `publisherScopes[]`, each `{kid, partner, contexts}`: `kid` a key of `publisherKeys`, `partner` the partner,
+     `contexts` 1 to 64 distinct organization contexts, never `personal`. `placementTrust` hands a scoped key to
+     `verifyPackage` only for a placement in one of its contexts. The rule refuses a placement or an installation under a
+     scoped key elsewhere, a key scoped twice and a scope naming a key the record does not pin. An unscoped key keeps
+     DEC-0051's meaning.
+  2. **A partner reads its agents' usage (`FAC-SEM-123`).** `partnerUsage({usage, publishers, step})` answers, over one
+     organization's joined `grant.usage` rows (DEC-0086), cells per `agentRef` and UTC day or billing period of
+     the partner's publishers, with no person, device or grant; `costUsd` is `null` exactly when every call of the cell
+     is unpriced, the priced costs summed smallest first so the order of the rows does not change a cell. A cell may be
+     one person's usage when one member uses the agent; a minimum population is not decided here. Each read is logged in every contributing member's access log as `reader: {service: "org:<partnerOrgId>", role:
+     "partner"}`, scope `activity.usage`, step `day` or `period`, and the organization server's notice names each partner
+     reader before its first read; the rule refuses a partner entry read as a person, of
+     another scope or step, or keyed by a device.
+  3. **Owner to partner to agents (`FAC-SEM-124`).** A grant whose `principalKind` is `partner` has the partner as its
+     principal and the company's own `org:<orgId>` as its `context`; being in an organization's context, it is named by
+     a share grant id (`urn:fabric:share:<32 hex>`, `FAC-SEM-117`). A token under it is for the grant's issuer, and its
+     chain holds the partner actor `{partner: "org:<partnerOrgId>"}` innermost, counted toward DL-6's depth; an onward
+     token keeps it innermost. A partner actor stands in no chain under another kind of grant, and a verifier admits it
+     only innermost.
+- **Why:** the operator's standing decision SD-1 (2026-10-19): partners build paid agents and sell them to companies as
+  a setup, and the company pays the platform only for the cloud. PA-06 asked the contract for these three parts (board
+  thread `6e66a023`, accepted in principle there on 2026-10-19, pull request targeted by 2026-10-27).
+- **Alternatives refused:** a scope inside the publisher JWK (the JWK is closed, and a key's trust is the record's to
+  state); a partner reading per-person or per-grant usage (OD-1 shows another party sums only); the partner as an agent
+  id the hub registers (it would hide which partner a chain runs through); a partner actor anywhere in the chain (only
+  innermost says on whose behalf).
+- **Compatibility:** additive: `publisherScopes`, the `partner` principal kind and the partner actor are new, and a
+  record, grant or token without them reads as before. A reader pinned before DEC-0090 refuses a record with
+  `publisherScopes`, a partner grant and a token whose chain holds a partner actor (closed schemas), so a partner channel
+  needs the reader at this pin, and a writer gates on every reader's pin as DEC-0082 does (every machine for
+  `publisherScopes`, the meter for a partner grant). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `schemas/estate-record.schema.json`, `schemas/delegation-token.schema.json`,
+  `schemas/governance.schema.json`; code `src/estate-record-rules.ts`, `src/partner-usage.ts`, `src/activity-rules.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`; tests `test/estate-record.test.ts`, `test/activity-rules.test.ts`;
+  fixture `fixtures/semantic/delegation-mint-agent-grant-partner-actor.json`; docs `docs/specification/package.md`; vectors `fixtures/vectors/partner-usage.json` (written by
+  `tools/vectors/partner-usage.ts`); fixtures `fixtures/semantic/{estate-partner,access-log-partner,delegation-mint-partner}-*`;
+  tests `test/partner-usage.test.ts`, `test/partner-channel.test.ts`, `test/contexts.test.ts`, `test/delegation.test.ts`;
+  docs `docs/specification/partner-channel.md`, `estate-record.md`, `activity.md`, `delegation.md`, `conformance.md`,
+  `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-58), `docs/handoffs/2026-10-20-partner-channel.md`;
+  brief `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
+- **Source:** board thread `6e66a023` (SD-1, passioncode-platform's ADR-0007 reply, the contract's acceptance; the first
+  organization server's PA-01); DEC-0090 and `SEM-0122` reserved under the key `ct58-partner-channel`,
+  `SEM-0123` under `ct58-partner-channel-2`, `SEM-0124` under `ct58-partner-channel-3`. Two counter commits are not in
+  the chains on origin, the receipt-chain defect the CT-57 handoff records: DEC's (it moves from `a24dc0f`, next 90, to
+  `7b857d5`, next 92) and `SEM-0124`'s `0bfa93f` (SEM moves from `5f2665c`, next 124, to `4c4598f`, next 127). No other
+  branch uses DEC-0090 or `FAC-SEM-122` to `FAC-SEM-124`.

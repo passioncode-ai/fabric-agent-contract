@@ -1,0 +1,46 @@
+{
+  "description": "A partner reads as its organization's service, never as a person (DEC-0090, FAC-SEM-123).",
+  "kind": "access-log-disclosure",
+  "expect": [
+    "FAC-SEM-123"
+  ],
+  "input": {
+    "log": {
+      "format": "access-log/1",
+      "generatedAt": "2026-10-08T00:00:00Z",
+      "subject": {
+        "user": {
+          "id": "m-4821"
+        }
+      },
+      "entries": [
+        {
+          "at": "2026-10-07T16:02:00Z",
+          "reader": {
+            "user": {
+              "id": "u_partner_1"
+            },
+            "service": "org:acme_partners",
+            "role": "partner"
+          },
+          "scope": "activity.usage",
+          "step": "day",
+          "purpose": "the partner's support and billing of its agents",
+          "range": {
+            "from": "2026-10-01T00:00:00Z",
+            "to": "2026-10-07T23:59:59Z"
+          }
+        }
+      ]
+    },
+    "consents": [
+      {
+        "protocol": "fabric-activity/0.1",
+        "kind": "consent",
+        "purposeId": "debugging",
+        "state": "given",
+        "at": "2026-10-07T18:50:00Z"
+      }
+    ]
+  }
+}

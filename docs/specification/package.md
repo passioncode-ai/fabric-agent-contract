@@ -201,7 +201,8 @@ verifier of this version refuses it as `unknown-algorithm`. Every Ed25519 key pa
 ### The verifier
 
 `verifyPackage(package, trust, {countersigned})` is the reference. `trust` holds the keys the installing machine pinned,
-per role, as JWKs (`kty`, `crv`, `x`, `kid`, `alg`): the publisher's key from the estate record or the listing, the
+per role, as JWKs (`kty`, `crv`, `x`, `kid`, `alg`): the publisher's key from the estate record or the listing (a partner's key that `publisherScopes` names, from the
+record only, [the partner channel](partner-channel.md)), the
 organization's keys from its record. It answers `{ok: true, digest, signers, unverified?}` or the first problem, in this order — PK-1's package checks,
 PK-2…PK-4, then each signature in array order: its shape (PK-1's entry part) and PK-5…PK-9:
 
