@@ -5846,3 +5846,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-20-coding-agent-catalogue.md`; brief `docs/evidence/specs/2026-10-19-runner-catalogue/brief.md`.
 - **Source:** board thread `617c8cbe` (messages `f63e1f06`, `6ffee284`, `41e010ab`, `ea29f0a8`); DEC-0093 reserved by
   git CAS (key `ct60-runner-catalogue`, counter commit `fb6a608`).
+
+### DEC-0094: A device key MAY live in a file, rotation is idempotent, and a check-in response MAY list `protocols` (`FAC-SEM-125`)
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-65.
+- **Decision:** in [devices](specification/devices.md#enrollment):
+  1. `key.storage` admits `file`: an owner-only PKCS#8 file. A file-held key is `exportable: true`, and every other
+     store `exportable: false`; the schema ties the two, so a verifier always knows whether the key can be copied. A
+     server MAY refuse a file-held key by policy, with the enrollment's refusal. How the file is protected is the node's.
+  2. Rotation is idempotent: a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal
+     one the server already answered gets that answer's certificate again, byte for byte, and the old certificate stays
+     valid until the new serial is first presented, at most until its own expiry. Rule `FAC-SEM-125`
+     (`device-rotation`).
+  3. A `check-in-response` MAY carry `protocols` (DEC-0067's list), so a node learns the server's revisions at check-in.
+- **Why:** Project Observatory's node runs on machines with no hardware or platform key store and asked for a file key
+  and a rotation whose lost response costs a repeat rather than a new enrollment (board, 2026-10-19, due 2026-10-23).
+  `exportable: const false` made such a node unable to enroll at all, or forced it to claim a store it does not have.
+- **Alternatives refused:** a file key with `exportable: false` (a false statement a verifier would trust); a new
+  enrollment after a lost rotation response (it moves the stream epoch and drops the user binding's history); a
+  rotation answered with a fresh certificate each time (two valid certificates for one key and serial).
+- **Compatibility:** additive for a node: the enum grows and `protocols` is optional. A receiver that relied on
+  `exportable` being `false` now reads it; a hardware-held key still reads `false`.
+- **Consequences / affects:** schemas `schemas/device-enrollment.schema.json`, `schemas/device-check-in.schema.json`;
+  rule `src/device-rules.ts` (`rotation`); tests `test/device-rules.test.ts`; fixtures
+  `fixtures/semantic/device-rotation-*`, `fixtures/positive/device-enrollment-request-file-key.json`,
+  `fixtures/negative/device-enrollment-{file-key-not-exportable,hardware-key-exportable}.json`; docs
+  `docs/specification/devices.md`, `docs/specification/conformance.md` (the server's row, the `FAC-SEM-125` register
+  row), `docs/backlog.md` (CT-65), `docs/handoffs/2026-10-20-device-file-key.md`.
+- **Source:** Project Observatory's request on the project board (2026-10-19); DEC-0094 and `SEM-0125` reserved by git
+  CAS (key `ct65-device-file-key`).

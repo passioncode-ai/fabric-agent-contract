@@ -1,7 +1,7 @@
 # Devices `fabric-device/0.1`
 
 DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056 and DEC-0082 (one enrollment per organization, `org.id` for contexts) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
-`FAC-SEM-069`, `FAC-SEM-077` · schemas
+`FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
@@ -562,6 +562,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | `FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | `FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 | `FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold — naming the client certificate's serial when there is one — accepts an unsigned request only on a valid client certificate, and otherwise answers the 401 code of the first step that fails |
+| `FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
 
 Each kind checks one input:
 
@@ -576,6 +577,7 @@ Each kind checks one input:
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 | `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
+| `device-rotation` | `{answered: [{publicKeySha256, serial, certificate}], request: {publicKeySha256, serial}, response: {certificate}}`; `answered` the rotations the server already answered, `request` the CSR's key and the current certificate's serial |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are
 `fixtures/semantic/device-*`; the transport's vectors `fixtures/vectors/http-signature.json`. Tests:
