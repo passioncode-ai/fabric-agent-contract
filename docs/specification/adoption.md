@@ -28,6 +28,10 @@ closure covers static imports and re-exports of sibling modules (`from "./x.js"`
 through a variable at run time, as `session-handoff.ts` loads its validator, names it in its own comment. (Reported by the first organization
 server's session on 2026-10-12, after its prefix copy refused every check-in.)
 
+A data file is vendored the same way: a consumer copies `catalogue/coding-agents.json` at its pin with
+`coding-agents.schema.json`'s closure, as `schemaClosure` lists it (today `coding-agents`, `runners` and
+`service-common`), and compares its `revision` to tell a stale copy (DEC-0093).
+
 ## Fabric consumer
 
 Fabric consumes this repository by canonical private Git URL and release/commit,

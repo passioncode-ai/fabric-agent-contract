@@ -374,6 +374,10 @@ digest and a revision's `contentHash`. They give different bytes for the same va
 a service (`fabric-provider/0.1`): its id, its manifest and how to reach it over
 MCP. Like a service descriptor, it describes an installation and grants nothing.
 
+**Coding-agent catalogue**: The contract's one list of coding agents every product reads
+(`catalogue/coding-agents.json`, DEC-0093): install, launch, permission evidence and recipes per agent, keyed by the
+stable id (the runner kind where the runners page lists one, else a new name); machine state stays with each product.
+
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
 modes (drives) it can be run in. A binary no entry names is never executed.

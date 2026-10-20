@@ -72,7 +72,8 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [The estate record — one person's machines, keys, placed agents, secret placements and share grants, revision by revision, signed by their passkey (`estate-record/1`, DEC-0055)](docs/specification/estate-record.md)
 - [The estate ceremonies — create my network, add a machine by a comparison code or an enroll token, remove and re-key a machine (DEC-0084)](docs/specification/ceremonies.md)
 - [Agents that are not services (`fabric-provider/0.1`)](docs/specification/provider.md)
-- [The runner catalogue of installed coding agents](docs/specification/runners.md)
+- [The runner catalogue of installed coding agents](docs/specification/runners.md), and the list of coding agents
+  itself, [`catalogue/coding-agents.json`](catalogue/coding-agents.json) (DEC-0093)
 - [Pipelines and their compatibility rules (`pipeline/0.1`)](docs/specification/pipeline.md)
 - [Full estate reference scenario](docs/reference-architecture/estate-loop.md)
 - [JSON Schemas](schemas/)

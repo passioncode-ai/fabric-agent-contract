@@ -77,6 +77,36 @@ argv, without a shell, with the timeout; a binary not in the catalogue is never 
   (DEC-0042, SH-11).
 - `mcpConfig.file` and `skillsDir` are absolute or `~/` paths; `docs` is an HTTPS URL.
 
+## The coding-agent catalogue (DEC-0093)
+
+C2 above makes the runner entry's shape the contract's and leaves its contents to each host. The list of coding agents
+itself is the contract's too: [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json), valid against
+[`coding-agents.schema.json`](../../schemas/coding-agents.schema.json) (`coding-agents/1`), versioned with the contract
+and read by every product at its pin (Fabric to present and launch from it, Fabric Switchboard to key its accounts and
+continuation by it; adoption: CT-60). Machine state stays with each product: whether an agent is installed, enabled or the default, its accounts and the
+keys per project.
+
+| Member | What |
+|---|---|
+| `id` | the stable id every product keys its machine state by: the runner kind where C2 catalogues one (`cursor-agent`, `kiro`), else a new name, which is the kind a host uses if it later catalogues the agent as a runner (detection still runs only a C2 runner entry); a removed agent's id goes to `retired` and is never reused |
+| `aliases` | other names a product used for it (`cursor-cli`, `kiro-cli`, used by Switchboard and Fabric); a product that keyed state by one reads it as the id |
+| `name`, `maker`, `url` | as its maker writes them; `url` is `https` |
+| `install` | how to install it: `via` `brew`, `brew-cask`, `npm`, `uv`, `pipx` with a `package` and no script, or `script` with the maker's install script's URL and no package; optional `platforms` |
+| `launch.argv` | the interactive launch, as argv, never a shell line; it names no model |
+| `permissions` | `skip` (exactly one of an `argv` or an `env` of single-word values) that skips the agent's permission prompts, with its evidence: `source`, the maker's documentation that names it, or `measured`, the command whose output names it (such as `--help`), the version and the date. A skip argument may do more than skip prompts (Codex's also drops its sandbox); a product says what it does. A missing `permissions` says nothing about whether the agent asks before a tool (Cline's plain launch approves every tool by default): a product offers no permission-skipping mode from the catalogue for it, and keeps a mode it already ships on its own evidence |
+| `mcp` | whether it loads MCP servers |
+| `openrouter` | how to run it on an OpenRouter key: variable names (`keyEnv`, `baseUrlEnv`, `modelEnv`, `homeEnv`) and `modelArgv` with `{model}`; never a value. An entry without `keyEnv` is a partial recipe (the model argument only): a product offers no route from it, and keeps a route it already ships on its own evidence |
+| `proxy` | a local proxy's base-URL variable and the command that prints its key; never a value |
+| `runner` | the C2 runner entry, where a host measured one; a host's own catalogue entry for the same kind is the one it runs (C2), and a difference is reported to the contract |
+| `sources` | the URLs the entry's facts came from, its `url` and its permission `source` among them; install scripts are in `install` |
+
+No member holds a credential (`secretArgument`, `test/coding-agents.test.ts`). The seed is Fabric Switchboard's list of
+2026-10-19 ([`tools/catalogue/seed.py`](../../tools/catalogue/seed.py)): its names, makers, urls, installs, launches, MCP
+flags and OpenRouter model arguments; its machine state, key variables, headless and MCP commands are not carried until
+each is read from its maker. Each permission argument is from
+[`tools/catalogue/permissions.json`](../../tools/catalogue/permissions.json). A change raises `revision` (`REVISION` in
+the seed; `test/coding-agents.test.ts` refuses a change of the file at an unchanged revision).
+
 ## Runner routes
 
 `covers:` operator preference for terminal agents — DEC-0026, refined by DEC-0029 · operator
