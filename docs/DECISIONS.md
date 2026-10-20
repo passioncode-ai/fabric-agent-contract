@@ -5968,10 +5968,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive: `publisherScopes`, the `partner` principal kind and the partner actor are new, and a
   record, grant or token without them reads as before. A reader pinned before DEC-0090 refuses a record with
   `publisherScopes`, a partner grant and a token whose chain holds a partner actor (closed schemas), so a partner channel
-  needs the reader at this pin. `contractVersion` stays `0.1.0`.
+  needs the reader at this pin, and a writer gates on every reader's pin as DEC-0082 does (every machine for
+  `publisherScopes`, the meter for a partner grant). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schemas `schemas/estate-record.schema.json`, `schemas/delegation-token.schema.json`,
   `schemas/governance.schema.json`; code `src/estate-record-rules.ts`, `src/partner-usage.ts`, `src/activity-rules.ts`,
-  `src/delegation.ts`, `src/delegation-rules.ts`; vectors `fixtures/vectors/partner-usage.json` (written by
+  `src/delegation.ts`, `src/delegation-rules.ts`; tests `test/estate-record.test.ts`, `test/activity-rules.test.ts`;
+  fixture `fixtures/semantic/delegation-mint-agent-grant-partner-actor.json`; docs `docs/specification/package.md`; vectors `fixtures/vectors/partner-usage.json` (written by
   `tools/vectors/partner-usage.ts`); fixtures `fixtures/semantic/{estate-partner,access-log-partner,delegation-mint-partner}-*`;
   tests `test/partner-usage.test.ts`, `test/partner-channel.test.ts`, `test/contexts.test.ts`, `test/delegation.test.ts`;
   docs `docs/specification/partner-channel.md`, `estate-record.md`, `activity.md`, `delegation.md`, `conformance.md`,

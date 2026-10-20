@@ -48,7 +48,7 @@ PA-03). `partnerUsage({usage, publishers, step})` is what it shows the partner:
   shown to a partner;
 - `publishers`: the partner's publisher names; `step`: `day` or `period`;
 - the answer: `{cells}`, one per `agentRef` and UTC day (or one per `agentRef` for the period), ordered by `agentRef`
-  then day, each `{agentRef, day, calls, unpricedCalls, costUsd}`; `costUsd` is `null` exactly when every call in the
+  then day (`day` is `null` for a period cell), each `{agentRef, day, calls, unpricedCalls, costUsd}`; `costUsd` is `null` exactly when every call in the
   cell is unpriced (`FAC-SEM-038`'s rule), else the sum of the priced costs, smallest first, so the order of the rows
   does not change a cell; a row of another publisher adds nothing; a
   malformed input is `{fault: "input-invalid"}`.
@@ -90,9 +90,13 @@ actor (closed schemas), so a partner channel needs the reader at this pin. `cont
 - **The first organization server** shows a partner `partnerUsage`'s cells, logs each read as above, names each partner
   reader in its notice, and holds each
   partner's publisher names (its PA-03).
-- **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor; it signs a revision that
-  carries `publisherScopes` only once every machine of the estate reports an applied revision at or after DEC-0090
-  (a machine pinned before refuses the closed record and stops applying revisions).
+- **Fabric** (the hub) mints partner-grant tokens as above and verifies the partner actor; as [contexts](contexts.md) item 3 gates DEC-0082,
+  it signs a revision that carries `publisherScopes` only once every machine of the estate is pinned at or after
+  DEC-0090 (a machine pinned before refuses the closed record and stops applying revisions), and projects or mints
+  under a partner grant only once the meter that reads its projection is (an older meter answers `unknown-state` for a
+  grant whose `principalKind` it does not know). A check-in names no contract pin, so the hub knows each pin from the
+  machine's node version and the meter's own.
+- **The meter** (Project Observatory's) re-vendors `governance.schema.json` and `src/grant-projection.ts` at this pin.
 - **Every verifier of delegation tokens** (Project Observatory's node, fabric-agent-adapter's kits) re-vendors
   `verifyDelegation` at this pin, or refuses every partner-grant token at DL-13 step 5.
 - **Project Observatory's node** verifies a partner's package under the record's scope before it installs it in a
@@ -106,7 +110,10 @@ The board row is CT-58.
 - The partner console.
 - Which agent may hold a partner grant: `FAC-SEM-124` checks the chain's depth, the issuer and the partner innermost,
   not that the outermost agent is the partner's.
-- A collector sends no `grant.usage` for a partner grant, which no share registration names, until that is decided.
+- A collector sends no `grant.usage` for a partner grant, which no share registration names, until that is decided: a
+  partner grant takes a share grant id but is not one of the record's `shareGrants` and registers nothing.
+- Whether naming a new partner reader issues a new `noticeVersion`, and whether the member's acknowledgement gates the
+  partner's first read.
 - A minimum population per cell, so a cell is never one person's usage (activity's summaries keep `minPopulation`).
 - Where the owner and the company see the spend made under a partner grant: a collector sends `grant.usage` only for
   a share grant a share registration names, and share registrations derive from the record's `shareGrants`.

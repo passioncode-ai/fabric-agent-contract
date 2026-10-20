@@ -51,4 +51,5 @@ new `act` shape or an agent id the hub registers for the partner.
 
 Outcome: [the partner channel](../../../specification/partner-channel.md) and DEC-0090 supersede the design-stage forms
 above (the partner actor is `{partner}`, `partnerUsage({usage, publishers, step})`, the rule codes 122 to 124, PA-01
-decided).
+decided). Item 3's "a verifier admits a partner actor only under such
+a grant" is superseded too: the hub alone sees the grant (FAC-SEM-124 at mint); a verifier admits it only innermost.
