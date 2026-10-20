@@ -8,6 +8,7 @@ annotate only the old status; decision bodies are never rewritten.
 **Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
 heading here is held by an open branch, and its reservation is in the counter's log)
 
+
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
 commits `2d385e0`, `25c07ce`). The `SEM-0035` and `SEM-0036` receipts DEC-0025 cites were taken before the
@@ -3828,7 +3829,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Amends:** DEC-0009 (how a revision is negotiated and refused, not only named). Implements the first organization
   server's target architecture v4 §12 row "`protocols[]` with N and N−1, `schema-unsupported`" (commit `9c6a780`) and
   the organization edition's CON-OE-07. Closes the board run's inventory item CON-OE-07 (node N12, packet P6-01).
-- **Annotated (2026-10-20):** DEC-0094 adds a fourth carrying object, the check-in response; the latest list a node
+- **Annotated (2026-10-20):** DEC-0094 adds a fourth carrying object, the check-in response, sent only to a node pinned
+  at or after DEC-0094; the latest list a node
   received, from its enrollment or a check-in response, is the server's current one.
 - **Decision:** in [versioning → Protocol revisions](specification/versioning.md#protocol-revisions) —
   1. **The register.** `PROTOCOL_REVISIONS` in `src/protocol-revisions.ts` lists every contract protocol's published
@@ -5885,10 +5887,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** schemas `schemas/device-enrollment.schema.json`, `schemas/device-check-in.schema.json`;
   rule `src/device-rules.ts` (`rotation`); tests `test/device-rules.test.ts`; fixtures
   `fixtures/semantic/device-rotation-*`, `fixtures/positive/device-enrollment-request-file-key.json`,
-  `fixtures/negative/device-enrollment-{file-key-not-exportable,hardware-key-exportable}.json`; docs
+  `fixtures/negative/device-enrollment-{file-key-not-exportable,hardware-key-exportable,file-key-attested}.json`,
+  `fixtures/positive/device-check-in-response-protocols.json`; docs
   `docs/specification/devices.md`, `relay.md`, `versioning.md`, `share-registration.md`, `CONTEXT.md`, `docs/DOCMAP.md`,
   `docs/specification/conformance.md` (the server's row, the node's share-registration row, the `FAC-SEM-125` register
-  row), `docs/backlog.md` (CT-65), `docs/handoffs/2026-10-20-device-file-key.md`.
+  row), `docs/backlog.md` (CT-04, CT-65, CT-67), `docs/OPEN_QUESTIONS.md` (OQ-0010),
+  `docs/handoffs/2026-10-20-device-file-key.md`.
 - **Source:** Project Observatory's request on the project board (2026-10-19); DEC-0094 reserved by git CAS (key
   `ct65-device-file-key`, counter commit `ba52e30`). `SEM-0125` was taken while the SEM counter's receipt chain was
   broken (the shared fetched-id ref, recorded in the CT-57 handoff): the counter on origin reads next 127 (`4c4598f`),

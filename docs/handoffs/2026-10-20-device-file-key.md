@@ -9,8 +9,10 @@ response cost a repeat rather than a new enrollment (board request of 2026-10-19
 
 - `schemas/device-enrollment.schema.json`: `storage: "file"`; `exportable` true exactly for `file`.
 - `schemas/device-check-in.schema.json`: an optional `protocols` on the response.
-- `src/device-rules.ts` `rotation` (`FAC-SEM-125`, kind `device-rotation`) with three semantic fixtures; two negative
-  and one positive enrollment fixtures.
+- `src/device-rules.ts` `rotation` (`FAC-SEM-125`, kind `device-rotation`) with six semantic fixtures
+  (`device-rotation-{first,replay,replay-new-certificate,other-key,other-serial,no-key}`); three negative enrollment
+  fixtures (`file-key-not-exportable`, `hardware-key-exportable`, `file-key-attested`); two positive fixtures
+  (`device-enrollment-request-file-key`, `device-check-in-response-protocols`).
 - `docs/specification/devices.md`, the server's row and the register row in `conformance.md`, DEC-0094, backlog CT-65.
 
 ## Decisions

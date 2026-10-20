@@ -125,7 +125,8 @@ revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9
 carries its window with at most three fraction digits, Fabric writes its revocations' `revokedAt` so, and the hub
 SHOULD (revocation-delta.md); the derivation floors whatever they write.
 
-A node sends on change: after it applies a revision or a delta entry, and after an enrollment. It SHOULD send each
+A node sends on change: after it applies a revision or a delta entry, after an enrollment, and after a check-in
+response's `protocols` first lists `share-registration/1` (DEC-0094). It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
 redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
 for the record to change as below. It keeps each receipt. It sends nothing again that the receiver answered with a typed
@@ -271,8 +272,8 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
   DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per
   organization, keeps held entries,
   body bytes, signature fields and tombstones, refuses a mismatched `grant.usage` context as `attribution`, shows
-  per-agent usage to others only as sums with each read logged, lists `share-registration/1` in its enrollment
-  response's `protocols`, and runs the vectors.
+  per-agent usage to others only as sums with each read logged, lists `share-registration/1` in every `protocols`
+  list it sends (its enrollment response, and its check-in response when it carries one, DEC-0094), and runs the vectors.
 - **fabric-agent-adapter** vendors the schema and the two common defs; its kits run `FAC-SEM-117`, `FAC-SEM-118` and the
   amended `FAC-SEM-045`.
 

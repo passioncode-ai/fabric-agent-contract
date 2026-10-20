@@ -88,7 +88,8 @@ on different releases still talk:
   from the device; the latest list the node received counts). A sender writes each document in the newest revision both lists name. Absent, the party reads only the
   revision its own documents name. `FAC-SEM-099` checks the list wherever it appears (kinds `service-well-known`,
   `device-check-in`, `device-enrollment`, and `protocols` alone). A party sends `protocols` only to a reader pinned at
-  or after DEC-0067, or one that ignores unknown members: the four carrying objects are closed, so an older pinned
+  or after DEC-0067 (for the check-in response, at or after DEC-0094), or one that ignores unknown members: the four
+  carrying objects are closed, so an older pinned
   copy refuses the new member.
 - **`schema-unsupported`.** A document in a revision the receiver does not accept is refused after the request is
   authenticated (a device's signature, [devices](devices.md#transport) steps 0–8; a delegated call's DL-13 order) and

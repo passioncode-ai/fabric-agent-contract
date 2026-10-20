@@ -144,7 +144,7 @@ evidence of tampering. Nothing is renewed silently past `notAfter`.
 ### Device keys by role
 
 DEC-0053 admits, beside the Ed25519 device key DEC-0031 already allowed, P-256 device keys held in the
-platform keystore, listed by role in the enrollment request's `deviceKeys`:
+platform keystore (or, from DEC-0094, wherever `key.storage` names, a file included), listed by role in the enrollment request's `deviceKeys`:
 
 - **`<device.id>#sig`** signs: ES256 (P-256) or Ed25519;
 - **`<device.id>#kem`** agrees keys: ECDH over P-256 only. The relay protocol ([relay](relay.md), DEC-0047) seals
@@ -290,7 +290,7 @@ So when a device is re-enrolled to another person:
 
 A mismatch is refused (`attribution` in the batch ack). A receiver that stores `user.id` writes the
 epoch's bound value (`FAC-SEM-045`). So one device can never make another look `tampered`, or
-attribute events to another person.
+attribute events to another person, unless it holds a copy of that device's file-held key (DEC-0094).
 
 <a id="policy"></a>
 
@@ -597,7 +597,8 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
 ## Not decided here
 
 - Whether a server records and shows a device's `key.storage` (an administrator's posture view), and a policy key that
-  requires a hardware key (DEC-0094).
+  requires a hardware key (DEC-0094). A file-key device carries no `attestation`, so it can never meet
+  `build_channel.allowed: attested` (OQ-0010).
 - (OQ-0010) Which attestation formats a server accepts for `build_channel.allowed: attested`.
   Deferred by the operator on 2026-10-08: `attestation` stays an opaque field until the first real
   organization server adopts DEC-0031.
