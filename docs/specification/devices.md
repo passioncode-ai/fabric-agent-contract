@@ -494,7 +494,7 @@ Until a key per context exists (CX-CON-06), the device shows both organizations 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
-or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server writes and accepts (DEC-0067's list), so a
+or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server accepts from the device (DEC-0067's list), so a
 node learns them at check-in; the latest list the node received is the server's current one. The response is a closed
 object, so a server sends it only to a node pinned at or after DEC-0094 or one that ignores unknown members;
 `fabric-device/0.1` carries no in-band sign of a node's pin, so the server knows it from the node's product and version
@@ -597,8 +597,8 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
 ## Not decided here
 
 - Whether a server records and shows a device's `key.storage` (an administrator's posture view), and a policy key that
-  requires a hardware key (DEC-0094). A file-key device carries no `attestation`, so it can never meet
-  `build_channel.allowed: attested` (OQ-0010).
+  requires a hardware key (DEC-0094). A file-key device carries no `attestation`, so if `attested` is proved
+  by the enrollment's attestation (OQ-0010), it cannot meet it.
 - (OQ-0010) Which attestation formats a server accepts for `build_channel.allowed: attested`.
   Deferred by the operator on 2026-10-08: `attestation` stays an opaque field until the first real
   organization server adopts DEC-0031.

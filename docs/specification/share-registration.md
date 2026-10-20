@@ -85,8 +85,7 @@ enrollments, under mutual TLS and the DEC-0056 `fabric-device` signature by that
 certificate's serial ([devices → transport](devices.md#transport): "every batch, check-in, rotation and
 share-registration request"). The path is the receiver's; the contract names none. `share-registration/1` and
 `share-registration-receipt/1` are protocol revisions of their own (DEC-0067): the receiver lists `share-registration/1`
-in its `protocols`, and a node sends registrations only to a receiver whose latest enrollment or check-in response
-(DEC-0094) lists it.
+in its `protocols`, and a node sends registrations only to a receiver whose latest `protocols` list (from its enrollment response, or a check-in response that carries one, DEC-0094) names it.
 
 Only the enrolled node holds the device's certificate and key, so only it can make the request the receiver attributes.
 It registers only what a passkey signed: it builds registrations from the estate revision and the revocation-delta
@@ -265,7 +264,8 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
   new id), shows the `agentRef` and the window on the share card, and never sends a registration. The hub SHOULD write the
   revocation delta's `revokedAt` with at most three fraction digits.
 - **Project Observatory's node and collector** derive registrations per enrollment and send them signed (DEC-0056), keep
-  the receipts, withdraw on revocation or drop, send again after an enrollment and weekly (never what a typed refusal
+  the receipts, withdraw on revocation or drop, send again after an enrollment, after a check-in response's `protocols` first lists `share-registration/1`
+  (DEC-0094) and weekly (never what a typed refusal
   answered until the record changes; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
   `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
