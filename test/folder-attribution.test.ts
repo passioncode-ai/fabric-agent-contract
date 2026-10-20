@@ -202,6 +202,20 @@ describe("the schema (DEC-0089)", () => {
       if (entry.record) expect(valid("#/$defs/record", entry.record), entry.name).toBe(true);
     }
   });
+  it("types fabric.project.resolve's answer: every answer, or pending with nothing else (DEC-0092)", () => {
+    const pending = { outcome: "pending", reason: "git-unreadable", retryable: true };
+    expect(valid("#/$defs/resolveAnswer", pending)).toBe(true);
+    for (const entry of vectors.attribution as Json[]) expect(valid("#/$defs/resolveAnswer", entry.expected), entry.name).toBe(true);
+    expect(valid("#/$defs/resolveAnswer", { ...pending, project: "project:p" })).toBe(false);
+    expect(valid("#/$defs/resolveAnswer", { ...pending, retryable: false })).toBe(false);
+    expect(valid("#/$defs/resolveAnswer", { ...pending, reason: "transient" })).toBe(false);
+    expect(valid("#/$defs/answer", pending)).toBe(false);
+    expect(valid("", pending)).toBe(true);
+    for (const key of Object.keys(pending)) {
+      const { [key]: _, ...without } = pending as Record<string, unknown>;
+      expect(valid("#/$defs/resolveAnswer", without), key).toBe(false);
+    }
+  });
   it("refuses every bound the reference refuses (the retro's standing instruction)", () => {
     for (const entry of (vectors.attribution as Json[]).filter((e) => /empty source|257 characters|empty project|4097 characters/.test(e.name))) {
       expect(entry.expected, entry.name).toEqual({ fault: "input-invalid" });

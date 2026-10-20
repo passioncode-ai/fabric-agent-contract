@@ -1,5 +1,8 @@
 # Handoff: DEC-0089, folder attribution (2026-10-19)
 
+> Annotated 2026-10-20: the shape of the session-start answer proposed below is superseded by DEC-0092
+> ([2026-10-20 resolve pending](2026-10-20-resolve-pending.md)): `resolveAnswer`, no `record` and no `row`.
+
 ## Objective
 
 Fabric asked (board thread `617c8cbe`, ask D1) for one rule set, with vectors, by which Fabric, Fabric Switchboard and

@@ -3,8 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0096` (read from the CAS counter `refs/agent-sync/ids/DEC`; DEC-0090 and DEC-0092 to DEC-0095 are
-reserved by open branches)
+**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5653,7 +5652,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-57.
 - **Annotated (2026-10-20):** merged as #124 `ebfddce`. Item 3's "unless a Project folder is in its repository" means
   a Project folder of the repository that lies inside that checkout (the AT-5 row's "lies in it"; for a worktree,
-  one anywhere). The adoption gaps the readings found are board row CT-66.
+  one anywhere). The adoption gaps the readings found are board row CT-66. Its *Not decided here* on the
+  session-start capability's input and answer is decided by DEC-0092: `fabric.project.resolve`, input `{path}`,
+  answer `resolveAnswer`, `pending` while the Git facts cannot be read.
 - **Decision:** in [folder attribution](specification/folder-attribution.md):
   1. **The function** `attributeFolder(snapshot)`, total, over a snapshot a product gathers (`folder`, `home`,
      `tempRoots`, `git` or `null`, `projects` with each folder's `commonDir`, `origin` and `toplevel`, `work?`,
@@ -5788,3 +5789,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-20-unmeasured-calls.md`.
 - **Source:** the board message `3ba380ab` (Fabric Dashboards, thread `16e6c000`); DEC-0091 reserved by git CAS (key
   `ct62-unmeasured-calls`).
+
+### DEC-0092: `fabric.project.resolve` answers `pending` while a folder's Git facts cannot be read
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-63.
+- **Decision:** in [folder attribution](specification/folder-attribution.md#the-session-start-capability):
+  1. Fabric's hub serves the session-start capability `fabric.project.resolve` (D4 as the operator corrected it):
+     read-only (a call records nothing, at the hub or the caller), input `{path}`, answer `folder-attribution.schema.json#/$defs/resolveAnswer`.
+  2. `resolveAnswer` is `attributeFolder`'s answer, or `{outcome: "pending", reason: "git-unreadable", retryable:
+     true}` when the folder's Git facts cannot be read yet (a probe that failed or timed out, which is not "no Git").
+  3. `pending` names no Project and is never recorded; the caller asks again later, with backoff, attributes nothing
+     until then and shows a lasting pending as degraded. The answer carries no `record` or `row`; carrying them later
+     is a new decision with a wrapper around `resolveAnswer`, never new members of it.
+- **Why:** the page as merged in `ebfddce` left "not attributable yet" to the capability (its *Not decided here*),
+  and Fabric asked for a name to build against
+  (board thread `617c8cbe`, 2026-10-19); the spelling is the one Fabric accepted.
+- **Alternatives refused:** a refusal reason (`refused` means the folder is never attributed, `pending` that it is
+  not yet); `ambiguous` (it names Projects).
+- **Compatibility:** additive: a new `$defs` pair and a third alternative at the schema's root.
+- **Consequences / affects:** schema `schemas/folder-attribution.schema.json` (`$defs/pending`, `$defs/resolveAnswer`);
+  tests `test/folder-attribution.test.ts`; docs `docs/specification/folder-attribution.md` (the session-start
+  capability), `docs/specification/conformance.md` (the hub's row and the attributing product's row), `docs/DOCMAP.md`, `CONTEXT.md`, `docs/backlog.md`
+  (CT-63, CT-64, CT-66), `docs/handoffs/2026-10-20-resolve-pending.md` and its row in `docs/handoffs/README.md`, the
+  annotation on `docs/handoffs/2026-10-19-folder-attribution.md`; DEC-0089's annotation.
+- **Source:** the board thread `617c8cbe` (Fabric's acceptance of the shape, 2026-10-19); DEC-0092 reserved by git CAS
+  (key `ct63-resolve-pending`).

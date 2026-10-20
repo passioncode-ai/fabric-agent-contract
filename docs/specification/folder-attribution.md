@@ -12,13 +12,14 @@ folder, an agent started in a subfolder, an origin owner and work done from insi
 set (the run's D1 and D2, org-index `docs/runs/2026-10-19-unified-attribution/README.md` at `5fb77fe`). Every product
 runs the vectors in its own gate and keeps no rule of its own beside them.
 
-Not here: how Projects are named across the products, the capability a session calls at its start, and storage. The
+Not here: how Projects are named across the products, the session-start capability's transport, and storage. The
 operator corrected D3 and D4 later on 2026-10-19 (Fabric ADR-0166, amendment "Fabric is the core", on the board thread
 `617c8cbe`): the canonical Project id is **Fabric's**, and Observatory's `project:<slug>` and Switchboard's pool are
 recorded against it as aliases (`observatory:<slug>`, `switchboard:<pool>`); the session-start capability is Fabric's,
 served by its hub, and Observatory and Switchboard ask it (the board message adds that they apply these rules locally
 while Fabric is not running and reconcile later; the ADR's amendment states only the asking). Each product writes only its own store (D5). This page decides which Project, not how it is
-named or served.
+named; of the session-start capability it names the input and types the answer ([below](#the-session-start-capability),
+DEC-0092).
 
 ## The snapshot
 
@@ -187,6 +188,31 @@ another Project lasts only when the product also removes that Project's folder a
 until then it ties at AT-3 when asked again. Every product does that removal with the record. It names the
 same repository (`normalizeOrigin` of both is one identity; a rebuilt form whose identity would differ is `null`), and the vectors' `record` cases hold one of each form.
 
+## The session-start capability
+
+DEC-0092. Fabric's hub serves it (D4 as corrected): `fabric.project.resolve`, read-only (a call records
+nothing, at the hub or the caller; an attribution is recorded by each product's own path, D5), input `{path}` (an absolute
+folder, the form of the snapshot's `folder`), answer `folder-attribution.schema.json#/$defs/resolveAnswer`. That is
+`attributeFolder`'s answer for the snapshot the hub gathers for `path`, or, when the folder's Git facts cannot be read
+yet (a probe that failed or timed out, which is not "no Git"):
+
+```json
+{ "outcome": "pending", "reason": "git-unreadable", "retryable": true }
+```
+
+`pending` names no Project and is never recorded; the caller asks again later, with backoff, and attributes nothing
+until then. A pending that lasts is shown as a degraded state (the session has no Project yet, and why), never turned
+into a refusal or a Project by the caller.
+
+The answer carries no `record` and no `row`: the hub records its own attributions through its own path (D5), not as an
+effect of a call, and a caller
+that keeps a store of its own records `explainFolder`'s `record` only when it answers locally over its own snapshot.
+When the hub's answer also carries `record` and `row` (board row CT-66), that is a new decision with a wrapper object
+around `resolveAnswer`, never new members of it, so a caller that validates against `resolveAnswer` keeps working. A caller validates F9's
+answer against `resolveAnswer` from its first call, never against `$defs/answer`, which refuses `pending`.
+Observatory and Switchboard ask this capability at a session's start; while Fabric is not running they run the
+vectors themselves (the board message `c95b4a22`) and reconcile later.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -214,14 +240,18 @@ under a temporary root, in a tool's folder or below a tombstoned folder; each pr
 measure. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
 ([activity](activity.md)), a service's usage `byProject` (FAC-SEM-025), and the policy violations activity reports
 (`policy.violation` requires a `project`), and Switchboard's Statistics by project (SB-145) where it counts sessions
-by their Project. A refused or tied session carries no `project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
+by their Project. A refused, tied or pending (DEC-0092, until attributed) session carries no `project.id`, nor does one whose `new`
+Project is not made yet; events recorded before adoption keep their old ids until the product merges its Projects (D5).
 
 ## Who adopts it
 
 Every product shows its own text for each refusal reason (`transient`, `tombstoned`, `container`, `tool`) and for a tie,
-naming the rule and the Projects; the reasons are the schema's.
+naming the rule and the Projects; the reasons are the schema's. For `pending` (DEC-0092) it says that the session has no
+Project yet because the folder's Git facts cannot be read.
 
-- **Fabric** (CO-331, CO-329) runs the vectors in its gate. Owed: a tombstone that covers subfolders (today an exact
+- **Fabric** (CO-331, CO-329) runs the vectors in its gate, and its hub serves `fabric.project.resolve` (F9), answering
+  exactly `resolveAnswer` and `pending` only while the Git facts cannot be read (DEC-0092). Owed: F9 itself (the hub
+  serving `fabric.project.resolve`); a tombstone that covers subfolders (today an exact
   path, so it fails "AT-2: a subfolder of a tombstoned folder") and that does not refuse an attach by worktree; the
   temporary (AT-4) and tool (AT-11) refusals; the owner and work rows (AT-10, AT-12); each folder's `toplevel`, the
   nearest place and the main checkout's Project (AT-6 to AT-9); the main checkout from `git worktree list --porcelain`,
@@ -271,9 +301,10 @@ The board row is CT-57.
 
 ## Not decided here
 
-- How Fabric records an alias and its evidence (D3 as corrected), the wire of Fabric's session-start capability and
-  its refusals (D4 as corrected), and storage (D5).
-- What a collector sends for a session that has no Project (refused or tied): activity's `session.interval`,
+- How Fabric records an alias and its evidence (D3 as corrected), the session-start capability's transport and the
+  hub's own errors (unreachable, a path outside its machine) (D4 as corrected; DEC-0092 settled its input and answer),
+  and storage (D5).
+- What a collector sends for a session that has no Project (refused, tied or pending): activity's `session.interval`,
   `usage.line` and `policy.violation` require a `project` (`telemetry-event.schema.json`), so until a decision such a
   session's usage and policy violations are not reported, and the per-day totals undercount it. Board row CT-64.
 - How a product learns the work records: Switchboard reads them from coding agents' transcripts (SB-131, SB-132).
@@ -281,6 +312,9 @@ The board row is CT-57.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
+- While Fabric's hub runs: who records an answer of `fabric.project.resolve` whose record is not null (an attach, AT-14's
+  protection included) and how a caller has Fabric make the Project a `new` answer names (the call records nothing,
+  DEC-0092; D4's wire). Until it is made the session carries no `project.id` (CT-64).
 - While Fabric's hub is down: where a product that answers locally reads Fabric's Projects (their folders with Git
   facts, sources and work records), and what it does with a `new` answer it cannot create in Fabric (D4's wire).
 - How owner sources (AT-10) reach Fabric's Projects, which carry none today, when the snapshot's Projects are Fabric's.
@@ -292,7 +326,5 @@ The board row is CT-57.
   can reach them.
 - Decided limits, not open questions: an origin that is a local path has no identity, so such a clone joins by work or
   as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
-- A state for "not attributable yet" (the Git probe failed): the function is never called then, and Fabric's
-  session-start capability (D4) names it.
 - A user-facing scenario: the contract has no interface here; each product's scenarios own how a session's Project,
-  a tie or a refusal is shown.
+  a tie, a refusal or a pending answer is shown.

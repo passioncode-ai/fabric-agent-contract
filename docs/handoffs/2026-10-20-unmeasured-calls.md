@@ -22,6 +22,5 @@ Two: the bound removed, and the field left out of the day's sums; both killed.
 
 ## Next task
 
-Readings, merge, then post the merge commit to Fabric Dashboards on thread `16e6c000` (its Spend scenario's
-"some calls carry no price" line needs its own wording for the token mark) and to the adapter's owner (its two copies
-of `FAC-SEM-025` need the bound and the day sum).
+Done 2026-10-20: merged as #127 `c90e31b`; posted to Fabric Dashboards on thread `16e6c000` (message `a9f96fa7`) and to
+fabric-agent-adapter (thread `476ccf78`, message `e663221d`). What is left is the consumers' adoption, backlog row CT-62.
