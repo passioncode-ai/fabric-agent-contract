@@ -9,7 +9,7 @@ a contract name (board thread `617c8cbe`; Fabric accepted `{outcome: pending, re
 
 - `schemas/folder-attribution.schema.json`: `$defs/pending` and `$defs/resolveAnswer` (the answer, or pending).
 - `docs/specification/folder-attribution.md`: the section on the session-start capability.
-- Tests in `test/folder-attribution.test.ts`: every answer and pending, at `resolveAnswer` and at the root, each
+- Tests in `test/folder-attribution.test.ts`: every answer and pending at `resolveAnswer`, pending at the root, each
   required key, no extra member (the mutants that drop the root alternative or a required key fail them).
 - DEC-0092; DEC-0089 annotated; the hub's conformance row and pending in the attributing product's row; DOCMAP and
   CONTEXT; backlog CT-63, and pending in CT-64 and CT-66.

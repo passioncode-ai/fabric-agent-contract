@@ -206,9 +206,10 @@ into a refusal or a Project by the caller.
 
 The answer carries no `record` and no `row`: the hub records its own attributions through its own path (D5), not as an
 effect of a call, and a caller
-that keeps a row of its own records `explainFolder`'s `record` only when it answers locally over its own snapshot.
+that keeps a store of its own records `explainFolder`'s `record` only when it answers locally over its own snapshot.
 When the hub's answer also carries `record` and `row` (board row CT-66), that is a new decision with a wrapper object
-around `resolveAnswer`, never new members of it, so a caller that validates against `resolveAnswer` keeps working.
+around `resolveAnswer`, never new members of it, so a caller that validates against `resolveAnswer` keeps working. A caller validates F9's
+answer against `resolveAnswer` from its first call, never against `$defs/answer`, which refuses `pending`.
 Observatory and Switchboard ask this capability at a session's start; while Fabric is not running they run the
 vectors themselves (the board message `c95b4a22`) and reconcile later.
 
@@ -311,8 +312,9 @@ The board row is CT-57.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
-- While Fabric's hub runs: how a caller has Fabric make the Project a `new` answer of `fabric.project.resolve` names
-  (the call records nothing, DEC-0092; D4's wire). Until it is made the session carries no `project.id` (CT-64).
+- While Fabric's hub runs: who records an answer of `fabric.project.resolve` whose record is not null (an attach, AT-14's
+  protection included) and how a caller has Fabric make the Project a `new` answer names (the call records nothing,
+  DEC-0092; D4's wire). Until it is made the session carries no `project.id` (CT-64).
 - While Fabric's hub is down: where a product that answers locally reads Fabric's Projects (their folders with Git
   facts, sources and work records), and what it does with a `new` answer it cannot create in Fabric (D4's wire).
 - How owner sources (AT-10) reach Fabric's Projects, which carry none today, when the snapshot's Projects are Fabric's.
