@@ -239,7 +239,8 @@ under a temporary root, in a tool's folder or below a tombstoned folder; each pr
 measure. Per-Project numbers move with the Projects: the activity summary cells keyed by `project.id`
 ([activity](activity.md)), a service's usage `byProject` (FAC-SEM-025), and the policy violations activity reports
 (`policy.violation` requires a `project`), and Switchboard's Statistics by project (SB-145) where it counts sessions
-by their Project. A refused, tied or pending (DEC-0092, until attributed) session carries no `project.id`; events recorded before adoption keep their old ids until the product merges its Projects (D5).
+by their Project. A refused, tied or pending (DEC-0092, until attributed) session carries no `project.id`, nor does one whose `new`
+Project is not made yet; events recorded before adoption keep their old ids until the product merges its Projects (D5).
 
 ## Who adopts it
 
@@ -310,6 +311,8 @@ The board row is CT-57.
 - Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
+- While Fabric's hub runs: how a caller has Fabric make the Project a `new` answer of `fabric.project.resolve` names
+  (the call records nothing, DEC-0092; D4's wire). Until it is made the session carries no `project.id` (CT-64).
 - While Fabric's hub is down: where a product that answers locally reads Fabric's Projects (their folders with Git
   facts, sources and work records), and what it does with a `new` answer it cannot create in Fabric (D4's wire).
 - How owner sources (AT-10) reach Fabric's Projects, which carry none today, when the snapshot's Projects are Fabric's.

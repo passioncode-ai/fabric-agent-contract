@@ -13,7 +13,7 @@ a contract name (board thread `617c8cbe`; Fabric accepted `{outcome: pending, re
   required key, no extra member (the mutants that drop the root alternative or a required key fail them).
 - DEC-0092; DEC-0089 annotated; the hub's conformance row and pending in the attributing product's row; DOCMAP and
   CONTEXT; backlog CT-63, and pending in CT-64 and CT-66.
-- Readings: unit (pass), product (two rounds; the first's findings and the second's are fixed in this branch).
+- Readings: unit (pass), product (four rounds; each round's findings are fixed in this branch).
 
 ## Checks
 
