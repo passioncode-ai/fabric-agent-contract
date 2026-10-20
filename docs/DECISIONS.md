@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0096` (read from the CAS counter `refs/agent-sync/ids/DEC`; DEC-0090 and DEC-0092 to DEC-0095 are
-reserved by open branches)
+**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
+heading here is held by an open branch, and its reservation is in the counter's log)
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
 the second's DEC-0028 was returned with `release-id` and never written (DEC-0027 *Source*; origin counter
@@ -5811,7 +5811,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive: a new `$defs` pair and a third alternative at the schema's root.
 - **Consequences / affects:** schema `schemas/folder-attribution.schema.json` (`$defs/pending`, `$defs/resolveAnswer`);
   tests `test/folder-attribution.test.ts`; docs `docs/specification/folder-attribution.md` (the session-start
-  capability), `docs/specification/conformance.md` (the hub's row), `docs/DOCMAP.md`, `CONTEXT.md`, `docs/backlog.md`
+  capability), `docs/specification/conformance.md` (the hub's row and the attributing product's row), `docs/DOCMAP.md`, `CONTEXT.md`, `docs/backlog.md`
   (CT-63, CT-64, CT-66), `docs/handoffs/2026-10-20-resolve-pending.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the board thread `617c8cbe` (Fabric's acceptance of the shape, 2026-10-19); DEC-0092 reserved by git CAS
   (key `ct63-resolve-pending`).

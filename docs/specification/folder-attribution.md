@@ -18,7 +18,7 @@ operator corrected D3 and D4 later on 2026-10-19 (Fabric ADR-0166, amendment "Fa
 recorded against it as aliases (`observatory:<slug>`, `switchboard:<pool>`); the session-start capability is Fabric's,
 served by its hub, and Observatory and Switchboard ask it (the board message adds that they apply these rules locally
 while Fabric is not running and reconcile later; the ADR's amendment states only the asking). Each product writes only its own store (D5). This page decides which Project, not how it is
-named; of the session-start capability it types only the input and the answer ([below](#the-session-start-capability),
+named; of the session-start capability it names the input and types the answer ([below](#the-session-start-capability),
 DEC-0092).
 
 ## The snapshot
@@ -207,7 +207,7 @@ The answer carries no `record` and no `row`: the hub records its own attribution
 that keeps a row of its own records `explainFolder`'s `record` only when it answers locally over its own snapshot.
 When the hub's answer also carries `record` and `row` (board row CT-66), that is a new decision with a wrapper object
 around `resolveAnswer`, never new members of it, so a caller that validates against `resolveAnswer` keeps working.
-Observatory and Switchboard ask this capability at a session's start; while the hub does not answer they run the
+Observatory and Switchboard ask this capability at a session's start; while Fabric is not running they run the
 vectors themselves (the board message `c95b4a22`) and reconcile later.
 
 ## Semantic rules
@@ -241,8 +241,9 @@ by their Project. A refused, tied or pending (DEC-0092, until attributed) sessio
 
 ## Who adopts it
 
-Every product shows its own text for each refusal reason (`transient`, `tombstoned`, `container`, `tool`), for a tie
-and for `pending` (DEC-0092), naming the rule and the Projects; the reasons are the schema's.
+Every product shows its own text for each refusal reason (`transient`, `tombstoned`, `container`, `tool`) and for a tie,
+naming the rule and the Projects; the reasons are the schema's. For `pending` (DEC-0092) it says that the session has no
+Project yet because the folder's Git facts cannot be read.
 
 - **Fabric** (CO-331, CO-329) runs the vectors in its gate, and its hub serves `fabric.project.resolve` (F9), answering
   exactly `resolveAnswer` and `pending` only while the Git facts cannot be read (DEC-0092). Owed: a tombstone that covers subfolders (today an exact
