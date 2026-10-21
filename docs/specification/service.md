@@ -47,6 +47,53 @@ flowchart LR
 
 Schema: [`service-descriptor.schema.json`](../../schemas/service-descriptor.schema.json).
 
+### Minimal local descriptor
+
+The smallest descriptor a local service installs, here for a service supervised by launchd on macOS:
+
+<!-- example: service-descriptor.schema.json kind=service-descriptor -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "id": "example-agent",
+  "instance": "default",
+  "name": "Example Agent",
+  "origin": "http://127.0.0.1:47195",
+  "auth": { "tokenFile": "~/.config/example-agent/service.token" },
+  "lifecycle": {
+    "manager": "launchd",
+    "label": "com.example.example-agent",
+    "plist": "~/Library/LaunchAgents/com.example.example-agent.plist"
+  },
+  "paths": {
+    "data": "~/Library/Application Support/example-agent",
+    "logs": ["~/Library/Logs/example-agent/service.log"]
+  },
+  "installedAt": "2026-10-21T09:00:00Z",
+  "installedBy": "example-agent service install 0.1.0"
+}
+```
+
+<!-- required-members: service-descriptor.schema.json -->
+
+| Member | Required | What it holds |
+|---|---|---|
+| `protocol` | yes | `"fabric-service/0.1"` |
+| `id` | yes | the service's slug, `^[a-z][a-z0-9-]{1,62}$`, the same on every machine |
+| `instance` | yes | which copy on this machine, `default` for the first |
+| `name` | yes | what a host shows, at most 80 characters |
+| `auth` | yes | `tokenFile`, where the token is; optionally the `header` it travels in and its `scheme` (below) |
+| `lifecycle` | yes | the one supervisor (`manager`) and its own names: launchd's `label` and `plist`, systemd's `unit`, the Task Scheduler's `task`, an app's `app` |
+| `installedAt` | yes | when it was installed, RFC 3339 |
+| `installedBy` | yes | the installer and its version, or `{by, role?, tool}` |
+| `origin` | local placement | `http://127.0.0.1:<port>`; an app's descriptor may leave it out |
+| `paths` | local placement | `data` and `logs` |
+
+**The token's header.** `auth.header` names the header the token travels in. Absent, it is `Authorization` with
+`auth.scheme: "Bearer"`. A custom header, any other name, MUST carry `auth.scheme: "none"`: the token is then the
+header's whole value, with no `Bearer` before it (schema).
+
 An installer MUST write one descriptor per installed service instance, and its
 uninstaller MUST remove it. The running service MUST NOT write its own descriptor: the
 descriptor describes an installation, not a run. The one exception is an app, below.
@@ -116,6 +163,40 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 ## Well-known document
 
 Schema: [`service-well-known.schema.json`](../../schemas/service-well-known.schema.json).
+
+### Minimal well-known document
+
+The smallest answer to `GET /.well-known/fabric-service`, for the descriptor above:
+
+<!-- example: service-well-known.schema.json kind=service-well-known -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-agent",
+    "instance": "default",
+    "name": "Example Agent",
+    "version": "0.1.0",
+    "build": { "commit": "8b80be9" }
+  },
+  "process": { "pid": 51234, "startedAt": "2026-10-21T09:00:05Z" },
+  "status": "ready",
+  "degraded": [],
+  "surfaces": { "events": { "path": "/fabric/v1/events" } }
+}
+```
+
+<!-- required-members: service-well-known.schema.json -->
+
+| Member | Required | What it holds |
+|---|---|---|
+| `protocol` | yes | `"fabric-service/0.1"` |
+| `service` | yes | `id`, `instance` and `name`, equal to the descriptor's; `version`; `build` with a `commit` or a `digest` |
+| `process` | yes | the live process: `pid` and `startedAt` |
+| `status` | yes | `starting`, `ready`, `degraded` or `stopping` |
+| `degraded` | yes | the sources that do not work now; an empty list asserts full health |
+| `surfaces` | yes | at least `events`; `dashboard`, `mcp` and `usage` when the service has them |
 
 `GET /.well-known/fabric-service` MUST answer without authentication, from memory, in
 under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote

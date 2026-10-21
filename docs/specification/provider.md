@@ -14,24 +14,32 @@ Schema: [`provider.schema.json`](../../schemas/provider.schema.json).
 
 ## C1. `fabric-provider/0.1` — an agent that is not a service
 
-File: `<fabric home>/providers/<id>.json` (same root as `services/`; `FABRIC_PROVIDERS_DIR`
-overrides), mode 0600, written only by the agent's installer, removed by its uninstaller.
+**Fabric home** is the folder that holds both `services/` and `providers/` on a machine: on macOS
+`~/Library/Application Support/ai.passioncode.fabric/`, on Linux `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/`,
+on Windows `%LOCALAPPDATA%\passioncode-fabric\` ([where the directory is](#where-the-directory-is)).
 
-| Field | Type | Rule |
-|---|---|---|
-| `protocol` | const `"fabric-provider/0.1"` | required |
-| `id` | `^[a-z][a-z0-9-]{1,62}$` | required; unique across `providers/` and `services/` |
-| `name`, `summary` | string ≤ 80 / ≤ 200 | required / optional |
-| `manifest` | absolute or `~/` path to `fabric-agent.json` | required; the manifest's `provider.id` names this entry |
-| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | required; argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013); `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044) |
-| `source.repository` | URL | optional |
-| `installedAt`, `installedBy` | RFC 3339, string | required |
-| `extensions` | object of absolute-URI keys | optional; unknown keys preserved |
+File: `<fabric home>/providers/<id>.json` (`FABRIC_PROVIDERS_DIR` overrides the folder), mode 0600, written only by
+the agent's installer, removed by its uninstaller.
+
+<!-- required-members: provider.schema.json -->
+
+| Field | Type | Required | Rule |
+|---|---|---|---|
+| `protocol` | const `"fabric-provider/0.1"` | yes | |
+| `id` | `^[a-z][a-z0-9-]{1,62}$` | yes | unique across `providers/` and `services/`; equals the stem of the file name (`FAC-SEM-014`) |
+| `providerId` | absolute URI | yes | equals the manifest's `provider.id`, compared by their normal forms ([identifiers](identifiers.md), DEC-0076; `FAC-SEM-014`, DEC-0017) |
+| `name` | string of at most 80 characters | yes | |
+| `summary` | string of at most 200 characters | no | |
+| `manifest` | absolute or `~/` path to `fabric-agent.json` | yes | the manifest must resolve |
+| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | yes | argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013). `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044). **Do not emit `run.mcp.stdio.scope` yet:** Fabric's registry and the Fabric Agent Adapter's admit only `command` and `env` today ([below](#what-the-schema-adds-to-the-table)); leave it out and the reader takes `on-demand` |
+| `source` | `{repository: URL}` | no | |
+| `installedAt` | RFC 3339 | yes | |
+| `installedBy` | string | yes | |
+| `extensions` | object of absolute-URI keys | no | unknown keys preserved |
 
 Rules: **FAC-SEM-013** an id appears in at most one of `services/` and `providers/`;
 **FAC-SEM-014** and **FAC-SEM-015** are as ruled below (DEC-0017): the entry's `providerId` equals the resolved
-manifest's `provider.id`, and an `env` value is checked by its form. The text locked on 2026-09-29 (`provider.id`
-equal to the slug `id`; an `env` value refused by name patterns) is superseded.
+manifest's `provider.id`, and an `env` value is checked by its form.
 
 ## Rulings (DEC-0017)
 
@@ -53,6 +61,7 @@ equal to the slug `id`; an `env` value refused by name patterns) is superseded.
 |---|---|
 | macOS | `~/Library/Application Support/ai.passioncode.fabric/providers/` |
 | Linux | `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/providers/` |
+| Windows | `%LOCALAPPDATA%\passioncode-fabric\providers\` (the services folder's root, DEC-0032) |
 | any | the value of `FABRIC_PROVIDERS_DIR` when set |
 
 The file is written atomically (temporary file, `fsync`, rename), as a descriptor is.

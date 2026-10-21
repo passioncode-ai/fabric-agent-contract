@@ -25,28 +25,78 @@ expected class and supported versions are safe diagnostics.
 
 ## Required repository gates
 
-`pnpm run check` runs:
+This is the one description of the merge gate; README, DOCMAP and AGENTS.md link here. `pnpm run check` runs five
+commands in order and stops at the first that fails:
 
-1. TypeScript typecheck;
-2. compilation of every Draft 2020-12 schema;
-3. positive fixtures expected to pass;
-4. negative fixtures expected to fail for their named rule;
-5. cross-object policy tests;
-6. Markdown lint;
-7. relative-link resolution;
-8. Mermaid syntax parse;
-9. version and canonical-ID consistency;
-10. UX trace lint;
-11. one spelling of every extension key (G-08) and glossary profile names equal to the
-    manifest schema's (G-12), in the documentation check;
-12. the pipeline reference checker's rules PL-1…PL-4;
-13. one allocation and one definition of every semantic rule code (G-13).
+1. `pnpm typecheck`: the TypeScript typecheck.
+2. `pnpm test`: the test suite under the coverage ratchet (`vitest.config.ts`: each rule file's branch floor is its
+   measured percentage). It compiles every Draft 2020-12 schema; runs each positive fixture, expected to pass, and
+   each negative fixture, expected to fail on its named keyword ([`fixtures/catalogue.json`](../../fixtures/catalogue.json));
+   runs the semantic rule fixtures, the cross-object policy tests, the pipeline reference checker's rules PL-1 to
+   PL-4 and every [reference module's](#reference-modules-and-vectors) shared vectors.
+3. `pnpm ux:lint`: the UX trace lint of `docs/ux/`.
+4. `pnpm docs:check`: relative links resolve (a link inside a fenced code block is text and is not resolved; a fence
+   never closed and a malformed percent escape are findings), Mermaid source parses, the contract version and the
+   canonical schema ids agree, every extension key has one spelling (G-08), the glossary's profile names equal the
+   manifest schema's (G-12), every semantic rule code has one allocation and one definition (G-13), every path a
+   decision's *Consequences / affects* names resolves, and Markdown lint passes.
+5. `pnpm privacy:check`: the organization's private-data check, org-index's `scripts/check_private.py`, where the
+   operator's denylist exists. Without the denylist (a contributor's machine, CI) the step says so and passes; with
+   the denylist present and no script found it fails rather than skips ([`src/privacy-plan.ts`](../../src/privacy-plan.ts),
+   CT-40).
 
 The merging session runs the same frozen command on the candidate and records its output in the pull request;
 hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`). A green check never
 substitutes for semantic review of prose. Before release, at least one planted
 negative fixture is temporarily inverted and observed failing; the restored green
 run is recorded in the retrospective.
+
+## Reference modules and vectors
+
+Reference modules are code a consumer copies or ports. A port is conformant when it gives the same answers on the
+module's shared vectors, which the module's own test also runs. `src/secret-shape.ts` is the shared credential
+detector; connections use a variant of it in `src/connections.ts`, and whether the two become one is open as CT-73.
+
+| Module | What it verifies | Vectors | Decision |
+|---|---|---|---|
+| [`src/canonical.ts`](../../src/canonical.ts) | the settings form and RFC 8785, the [canonical forms](#canonical-forms) | [`canonical.json`](../../fixtures/vectors/canonical.json) | DEC-0043 |
+| [`src/identifiers.ts`](../../src/identifiers.ts) | when two identifiers are the same | [`identifiers.json`](../../fixtures/vectors/identifiers.json) | DEC-0076 |
+| [`src/ed25519.ts`](../../src/ed25519.ts) | Ed25519 keys refused before verifying (small-order keys) | [`delegation-small-order.json`](../../fixtures/vectors/delegation-small-order.json) | DEC-0045 |
+| [`src/p256.ts`](../../src/p256.ts) | P-256 key validation, `signEs256` and `toLowS` (the low-S ES256 rule) | [`p256.json`](../../fixtures/vectors/p256.json) | DEC-0053, DEC-0066 |
+| [`src/secret-shape.ts`](../../src/secret-shape.ts) | the shared credential detector: no credential in an argument, a value or a URL | none; `test/service-hygiene.test.ts` | DEC-0044 |
+| [`src/delegation.ts`](../../src/delegation.ts) | the delegation token's minting and the callee's offline check | none; `test/delegation.test.ts` | DEC-0039 |
+| [`src/grant-projection.ts`](../../src/grant-projection.ts) | the hub's grant projection and the meter's read of it | none; `test/meter-grant.test.ts` | DEC-0041 |
+| [`src/hub-key-rules.ts`](../../src/hub-key-rules.ts) | whether the estate record certifies a delegation key | [`hub-key.json`](../../fixtures/vectors/hub-key.json) | DEC-0060 |
+| [`src/fabric-links.ts`](../../src/fabric-links.ts) | `fabric://` links | none; `test/fabric-button.test.ts` | DEC-0040 |
+| [`src/operator-session.ts`](../../src/operator-session.ts) | the operator's dashboard session lifetime | none; `test/delegation.test.ts` | DEC-0039 |
+| [`src/session-handoff.ts`](../../src/session-handoff.ts) | the session handoff folder | none; `test/session-handoff.test.ts` | DEC-0042 |
+| [`src/package-rules.ts`](../../src/package-rules.ts) | the package digest, the folder check and the signature verifier | [`package.json`](../../fixtures/vectors/package.json) | DEC-0050, DEC-0051 |
+| [`src/estate-record-rules.ts`](../../src/estate-record-rules.ts), [`src/webauthn.ts`](../../src/webauthn.ts) | the estate record's digest and chain, and the offline passkey-assertion verifier | [`estate-record.json`](../../fixtures/vectors/estate-record.json) | DEC-0055 |
+| [`src/pairing.ts`](../../src/pairing.ts) | pairing, the comparison code and the estate fingerprint | [`pairing.json`](../../fixtures/vectors/pairing.json) | DEC-0084 |
+| [`src/enroll-token.ts`](../../src/enroll-token.ts) | the enroll token | [`enroll-token.json`](../../fixtures/vectors/enroll-token.json) | DEC-0084 |
+| [`src/relay.ts`](../../src/relay.ts) | relay admission, blob requests and message bodies | [`relay.json`](../../fixtures/vectors/relay.json) | DEC-0047 |
+| [`src/secret-envelope.ts`](../../src/secret-envelope.ts) | the HPKE secret envelope | [`secret-envelope.json`](../../fixtures/vectors/secret-envelope.json) | DEC-0047 |
+| [`src/relay-vectors.ts`](../../src/relay-vectors.ts) | the framework-free runner of the relay's shared vectors | [`relay.json`](../../fixtures/vectors/relay.json), [`secret-envelope.json`](../../fixtures/vectors/secret-envelope.json) | DEC-0066 |
+| [`src/http-signature.ts`](../../src/http-signature.ts) | the device request signature's signer and receiver | [`http-signature.json`](../../fixtures/vectors/http-signature.json) | DEC-0056 |
+| [`src/revocation-delta.ts`](../../src/revocation-delta.ts) | the revocation delta, the heartbeat and the 72-hour rule | [`revocation-delta.json`](../../fixtures/vectors/revocation-delta.json) | DEC-0054 |
+| [`src/window-lease.ts`](../../src/window-lease.ts) | window leases | [`window-lease.json`](../../fixtures/vectors/window-lease.json) | DEC-0062 |
+| [`src/entitlement.ts`](../../src/entitlement.ts) | entitlements and their key sets | [`entitlement.json`](../../fixtures/vectors/entitlement.json) | DEC-0085 |
+| [`src/share-registration.ts`](../../src/share-registration.ts) | share registrations and the join of `grant.usage` to an agent | [`share-registration.json`](../../fixtures/vectors/share-registration.json) | DEC-0086 |
+| [`src/context-route.ts`](../../src/context-route.ts) | routing by context | [`context-route.json`](../../fixtures/vectors/context-route.json) | DEC-0082 |
+| [`src/job-limits.ts`](../../src/job-limits.ts) | jobs under limits and uncertain effects | [`job-limits.json`](../../fixtures/vectors/job-limits.json) | DEC-0087 |
+| [`src/folder-attribution.ts`](../../src/folder-attribution.ts) | folder attribution | [`folder-attribution.json`](../../fixtures/vectors/folder-attribution.json) | DEC-0089 |
+| [`src/partner-usage.ts`](../../src/partner-usage.ts) | a partner's read of its agents' usage | [`partner-usage.json`](../../fixtures/vectors/partner-usage.json) | DEC-0090 |
+| [`src/signing-challenges.ts`](../../src/signing-challenges.ts) | the signing register and its verifier | [`signing-challenges.json`](../../fixtures/vectors/signing-challenges.json) | DEC-0063 |
+| [`src/openrouter-attribution.ts`](../../src/openrouter-attribution.ts) | OpenRouter attribution headers | [`openrouter-attribution.json`](../../fixtures/vectors/openrouter-attribution.json) | DEC-0065 |
+| [`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) | protocol revisions, N and N-1 | [`protocol-revisions.json`](../../fixtures/vectors/protocol-revisions.json) | DEC-0067 |
+| [`src/session-join.ts`](../../src/session-join.ts) | one writer per session | none; `fixtures/semantic/session-join-*.json` | DEC-0068 |
+| [`src/app-descriptor.ts`](../../src/app-descriptor.ts) | an app's own descriptor | [`app-descriptor.json`](../../fixtures/vectors/app-descriptor.json) | DEC-0069 |
+| [`src/feed-data.ts`](../../src/feed-data.ts) | no secret in a feed event's data | none; `test/feed-data.test.ts` | DEC-0070 |
+| [`src/service-supervisor.ts`](../../src/service-supervisor.ts) | one copy under every supervisor | [`service-supervisor.json`](../../fixtures/vectors/service-supervisor.json) | DEC-0057 |
+| [`src/windows-token.ts`](../../src/windows-token.ts) | the Windows token-file reader | [`windows-token.json`](../../fixtures/vectors/windows-token.json) | DEC-0057 |
+| [`src/dashboard-declaration.ts`](../../src/dashboard-declaration.ts) | the embedded dashboard's declaration | [`dashboard-declaration.json`](../../fixtures/vectors/dashboard-declaration.json) | DEC-0059 |
+| [`src/comms-hold.ts`](../../src/comms-hold.ts) | the operator's hold on the Project board | [`comms-hold.json`](../../fixtures/vectors/comms-hold.json) | DEC-0079 |
+| [`src/connections.ts`](../../src/connections.ts) | what an agent uses, read as `connectionsView` answers | [`connections.json`](../../fixtures/vectors/connections.json) | DEC-0096 |
 
 ## Clients and readers
 

@@ -11,7 +11,7 @@ and recorded as DEC-0001.
 |---|---|---|---|---|
 | Decisions | `docs/DECISIONS.md` | `DEC-####` | yes | lease before write when coordination is healthy |
 | Open questions | `docs/OPEN_QUESTIONS.md` | `OQ-####` | yes | same |
-| Requirements | `docs/evidence/specs/*-brief.md` | `REQ-###` | frozen per run | same |
+| Requirements | `docs/evidence/specs/*-brief.md`, `docs/evidence/specs/*/brief.md` | `REQ-###` | frozen per run | same |
 
 ## Single sources
 
@@ -21,7 +21,11 @@ and recorded as DEC-0001.
 | Contract vocabulary | `CONTEXT.md` |
 | Pinned external protocol facts | `docs/evidence/sources.md` |
 | Normative profile behavior | `docs/specification/` |
-| Provider author and operator onboarding | `docs/guides/connecting-compatible-agents.md` |
+| Specification index by topic, and each surface's maturity (who carries it, from the consumer review of 2026-10-21) | `docs/specification/README.md` |
+| Provider author and operator onboarding, by agent kind, with examples the suite validates | `docs/guides/connecting-compatible-agents.md`, `test/guide-examples.test.ts` |
+| The minimal descriptor and well-known document, the provider entry's members, and the tables that equal their schemas' `required` | `docs/specification/service.md#minimal-local-descriptor`, `#minimal-well-known-document`, `docs/specification/provider.md`, `test/spec-required-members.test.ts` |
+| Reference modules, what each verifies and its vectors | `docs/specification/conformance.md#reference-modules-and-vectors` |
+| The merge gate, `pnpm run check`, the privacy check included | `docs/specification/conformance.md#required-repository-gates` |
 | Memory control-plane semantics | `docs/specification/memory-and-learning.md` |
 | Memory wire (`memory/0.1`, DEC-0023) and the superseded backend mapping | `docs/specification/memory-and-learning.md#wire-memory01`; history: `docs/reference-architecture/mcp-memory-service-adapter.md` |
 | Service extension (`fabric-service/0.1`), local and remote placement | `docs/specification/service.md` |
@@ -83,7 +87,7 @@ and recorded as DEC-0001.
 | Device enrollment, signed policy, check-in and health (`fabric-device/0.1`) | `docs/specification/devices.md`, `schemas/device-*.schema.json`, `src/device-rules.ts`, `src/p256.ts`, `FAC-SEM-045` attribution; a key in a file and idempotent rotation, `FAC-SEM-125` (DEC-0031, DEC-0053, DEC-0094, OQ-0010; handoff `docs/handoffs/2026-10-20-device-file-key.md`) |
 | The device transport binding: HTTP message signatures (RFC 9421 subset, label `fabric-device`) and `Content-Digest` (RFC 9530) beside mutual TLS, the receiver's steps and codes, the nonce store; key roles counted at enrollment; the check-in's estate digest; `FAC-SEM-077` | `docs/specification/devices.md#transport`, `src/http-signature.ts`, `src/device-transport-rules.ts`, `fixtures/vectors/http-signature.json`, `test/http-signature.test.ts` (DEC-0056); handoff `docs/handoffs/2026-10-12-w4-p4-04-device-transport.md` |
 | Activity telemetry and devices handoff | `docs/handoffs/2026-10-08-activity-telemetry.md`; the amendment `docs/handoffs/2026-10-12-activity-devices.md` (DEC-0052, DEC-0053) |
-| A stdio MCP server's `scope` (LC-19), no secret in a command line (LC-21), the one credential detector; `FAC-SEM-056`, `FAC-SEM-057` | `docs/specification/profiles.md#where-a-stdio-server-is-declared`, `#no-secret-in-a-command-line`, `src/secret-shape.ts`, `src/semantic-rules.ts` (DEC-0044); handoff `docs/handoffs/2026-10-12-service-hygiene.md` |
+| A stdio MCP server's `scope` (LC-19), no secret in a command line (LC-21), the shared credential detector (connections use a variant, CT-73); `FAC-SEM-056`, `FAC-SEM-057` | `docs/specification/profiles.md#where-a-stdio-server-is-declared`, `#no-secret-in-a-command-line`, `src/secret-shape.ts`, `src/semantic-rules.ts` (DEC-0044); handoff `docs/handoffs/2026-10-12-service-hygiene.md` |
 | A setup state in the service well-known (`degraded[].setup`) | `docs/specification/service.md#well-known-document`, `schemas/service-well-known.schema.json` (DEC-0044) |
 | Semantic rule codes: allocation and the next free code | `docs/specification/conformance.md#semantic-rule-codes`, `src/rule-codes.ts` (DEC-0029) |
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |
@@ -126,12 +130,18 @@ back to their exact revisions; they do not become a second editable source.
 
 ## Gates
 
+The merge gate is `pnpm run check`; what it runs, the privacy check included, is described once, in
+[conformance](specification/conformance.md#required-repository-gates). The commands below are its parts, and the
+two that are not in it.
+
 | Gate | Command | Scope |
 |---|---|---|
-| Full | `pnpm run check` | types, schemas, fixtures, Markdown, links, Mermaid syntax |
+| Full | `pnpm run check` | the merge gate, [as conformance describes it](specification/conformance.md#required-repository-gates) |
 | Documentation | `pnpm docs:check` | Markdown shape, links, versions, Mermaid parseability, extension-key spelling, glossary profile names; not semantic correctness |
-| Consumer pin | `pnpm pin:check <repository>` | every contract revision a consumer names equals its `fabric-contract.lock.json` |
-| Contract | `pnpm test` | schema compilation and positive/negative fixtures; not provider quality |
+| Contract | `pnpm test` | schema compilation, fixtures, semantic rules, vectors and the examples of the guide; not provider quality |
+| Privacy | `pnpm privacy:check` | the organization's private-data check where the operator's denylist exists |
+| An author's document | `pnpm validate <file or folder>` | one document or a folder against its schema and the semantic rules; not in the gate |
+| Consumer pin | `pnpm pin:check <repository>` | every contract revision a consumer names equals its `fabric-contract.lock.json`; not in the gate |
 
 ## Navigation
 

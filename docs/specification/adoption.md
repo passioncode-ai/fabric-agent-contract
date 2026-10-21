@@ -4,10 +4,12 @@
 
 ## Repository coordination
 
-This repository uses the same contract it recommends for shared work. Its durable
-record plane is Git; its coordination plane is Notion with Git-ref leases. The
-generated `docs/AGENT_SYNC.md` snapshot is descriptive, while the live tool is
-authoritative. Credentials live only in an ignored `.env.agent-sync` file.
+This repository uses the same contract it recommends for shared work. Its durable record is Git. Leases and id
+reservations are refs on `origin` (`refs/agent-sync/leases/`, `refs/agent-sync/ids/`), so they exclude across
+machines. The configured record plane is Notion, but its token is empty, so runs are recorded locally and the
+generated `docs/AGENT_SYNC.md` snapshot says `record plane: fs` ([AGENTS.md](../../AGENTS.md), *Local rules*). The
+snapshot is descriptive, while the live tool is authoritative. Credentials live only in an ignored
+`.env.agent-sync` file.
 
 ## Measured pins
 
