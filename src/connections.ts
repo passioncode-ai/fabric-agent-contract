@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { JWT_SHAPE, secretUrl } from "./secret-shape.js";
+import { BEARER_INSIDE, JWT_SHAPE, secretUrl } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // extensions/connections/0.1 (DEC-0096): what an agent uses, and the contract-side check of it.
@@ -39,13 +39,19 @@ function shape(): ValidateFunction {
   return connectionsShape;
 }
 
-const NONE: ConnectionsView = { declared: false, reported: false, connections: [], errors: [] };
+// A fresh answer each time: a caller that changes one answer never changes the next.
+const none = (): ConnectionsView => ({ declared: false, reported: false, connections: [], errors: [] });
 const TEXT_MEMBERS = ["target", "label", "purpose", "reason"] as const;
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
-// a word and is not a key (the shared SECRET_VALUE has no such boundary).
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})|\bbearer\s+\S{12,}/i;
-/** A credential in a connection's text: a token's shape, or a URL that carries one (`secretUrl`, for a URL only). */
-const credential = (value: string): boolean => JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || (/^[a-z][a-z0-9+.-]*:\/\//i.test(value) && secretUrl(value));
+// a word and is not a key (the shared SECRET_VALUE has no such boundary). A bearer token needs a digit (BEARER_INSIDE),
+// so "bearer authentication" in a purpose is prose.
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
+// Every URL in a member, at its start or inside prose ("refused at https://…?api_key=…"); `secretUrl` reads each URL
+// alone, never the prose around it.
+const URL_TOKEN = /[a-z][a-z0-9+.-]*:\/\/[^\s"'<>()]+/gi;
+/** A credential in a connection's text: a token's shape, or a URL that carries one. */
+const credential = (value: string): boolean =>
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || (value.match(URL_TOKEN) ?? []).some(secretUrl);
 
 /** The problems the schema cannot state: an id named twice, a credential in a text member. */
 function beyondShape(list: Connection[]): string[] {
@@ -69,16 +75,16 @@ function beyondShape(list: Connection[]): string[] {
  */
 export function connectionsView(wellKnown: unknown): ConnectionsView {
   const extensions = isObject(wellKnown) && isObject(wellKnown.extensions) ? wellKnown.extensions : undefined;
-  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.connections)) return NONE;
+  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.connections)) return none();
   const value = extensions[EXTENSION_KEYS.connections];
   const validate = shape();
   if (validate(value) !== true) {
     const errors = (validate.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}: ${show(error.message)}`);
-    return { ...NONE, reported: true, errors };
+    return { ...none(), reported: true, errors };
   }
   const list = (value as { connections: Connection[] }).connections;
   const errors = beyondShape(list);
-  if (errors.length > 0) return { ...NONE, reported: true, errors };
+  if (errors.length > 0) return { ...none(), reported: true, errors };
   const degraded = Array.isArray((wellKnown as JsonObject).degraded) ? ((wellKnown as JsonObject).degraded as unknown[]) : [];
   const failing = new Set(degraded.filter(isObject).map((entry) => entry.source).filter((source): source is string => typeof source === "string"));
   return { declared: true, reported: false, connections: list.map((connection) => ({ ...connection, failing: failing.has(connection.id) })), errors: [] };

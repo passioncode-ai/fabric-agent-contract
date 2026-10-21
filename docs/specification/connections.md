@@ -29,9 +29,10 @@ entries:
 | `lastAt` | optional, when the service last used it or saw it work, an RFC 3339 date-time (a date alone is refused) |
 
 No other member: a call count belongs to the [usage report](service.md#usage-report), and the reverse view (which agents
-use this one) is the host's, built from every agent's declaration. No member carries a credential or a URL with one
-(a token's shape where it starts a word, or a URL that carries one, `secretUrl`; a name such as `flask-server` is
-not taken for a key).
+use this one) is the host's, built from every agent's declaration. No member carries a credential or a URL with one:
+a token's shape where it starts a word (a name such as `flask-server` is not taken for a key), a JWT, `Bearer` and a
+token that holds a digit ("bearer authentication" is prose), or any URL in the member, at its start or inside prose,
+that carries one (`secretUrl`: a password, or a parameter such as `api_key` with a value).
 
 ## Reading it
 

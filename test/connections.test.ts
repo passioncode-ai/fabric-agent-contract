@@ -27,6 +27,14 @@ describe("extensions/connections/0.1 (DEC-0096)", () => {
     for (const input of [undefined, 1, "x", [], { extensions: null }, { extensions: { [KEY]: undefined } }, { extensions: { [KEY]: { connections: [null] } } }, { extensions: { constructor: 1 } }]) expect(() => connectionsView(input)).not.toThrow();
     expect(connectionsView({ extensions: { constructor: 1 } }).reported).toBe(false);
   });
+  it("answers a fresh object each time, so a caller that changes one answer never changes the next", () => {
+    const first = connectionsView({});
+    first.connections.push({ id: "x", kind: "model", target: "x", state: "ok", failing: false });
+    first.errors.push("x");
+    expect(connectionsView({})).toEqual({ declared: false, reported: false, connections: [], errors: [] });
+    const reported = connectionsView({ extensions: { [KEY]: [] } });
+    expect(reported.connections).toEqual([]);
+  });
   it("is reported as FAC-SEM-127 on a well-known document, at the extension key", () => {
     const dup = JSON.parse(read("fixtures/semantic/service-well-known-connections-duplicate.json")) as Json;
     const findings = connectionsRules(dup.input);

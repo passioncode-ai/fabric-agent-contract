@@ -113,6 +113,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: keys copied by hand and machines that trust whoever reaches them first; pull: one confirmation on two screens and one passkey; anxiety: a stranger's machine joining in the middle, or a lost machine staying in; habit: SSH keys and shared secrets pasted between machines.
 - **Success metric:** a machine joins only after the person confirmed a code shown on both screens and signed with the passkey, and a removed machine is turned away within one revision.
 
+### JTBD-11: See what each of my agents uses, and where a chain breaks
+
+- **Statement:** When one of my agents fails because something it calls is down, I want to see what it uses (other agents' capabilities, models, connectors, stores, channels) and which of those is failing, so I can find the broken link without reading every agent's logs.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: an agent reports "degraded" with no word on what it depends on; pull: one map built from every agent's own declaration; anxiety: a map that shows a key or a password, or one built from a declaration that is wrong; habit: reading each agent's README and logs.
+- **Success metric:** every agent that declares its connections shows each one with its state, a connection its agent reports degraded is marked failing, and an invalid declaration shows nothing of itself and says why.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -196,6 +204,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Create | creates the network on a first machine | Fabric, "Create my network" | 3 | no record says which machines are mine | revision 1 signed by the passkey, the network's fingerprint shown (priority 7) |
 | 2 | Add | adds a second machine, nearby or from afar | Fabric on the trusted machine, the new machine's node | 2 | a code from one key's fingerprint can be brute-forced; a stranger slips in | commit before reveal and a six-digit code over both sides' keys, nonces and the network (priority 9) |
 | 3 | Remove or re-key | removes a lost machine, or replaces a machine's key | Fabric | 2 | a removed machine keeps being admitted | one revision that revokes what it drops, carried within seconds by the delta (priority 8) |
+
+### JRN-10: Operator — what my agents use (JTBD-11)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Look | opens an agent's connections in the host | Fabric Dashboards, the Connections tab | 3 | nothing says what an agent calls | one declaration per agent, read from its well-known document (priority 8) |
+| 2 | Trace | follows a failing connection to the agent or connector behind it | the Connections tab | 2 | a failure reported without its source | a `degraded[].source` equal to a connection's id marks it failing (priority 9) |
+| 3 | Distrust | opens an agent whose declaration is wrong | the Connections tab | 3 | half a map, or a key shown on screen | an invalid declaration shows none of itself, with its reasons; no member carries a credential (priority 8) |
 
 ## 4. User stories
 
@@ -496,6 +512,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a machine I remove, when I sign, then the revision revokes the machine (and its hub key) and the relay turns it away.
   - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
   - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-026: Operator sees what an agent uses and which connection fails
+
+- **Story:** As P-02, I want each agent's declared connections, with the failing ones marked, so that I can find where a chain of agents breaks.
+- **Traces:** JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3
+- **Acceptance criteria:**
+  - Given an agent whose well-known document declares its connections, when the host reads it, then each connection is shown with its kind, target and state.
+  - Given a `degraded[]` entry whose `source` equals a connection's id, when the host reads the document, then that connection is marked failing; a source equal only to a target marks nothing.
+  - Given a declaration that is invalid against its schema, names an id twice or carries a credential in a text member, when the host reads it, then none of it is shown and the reasons are.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

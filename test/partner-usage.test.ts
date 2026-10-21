@@ -36,7 +36,10 @@ describe("partner usage (DEC-0090 item 2)", () => {
   it("answers rows in one cell in linear time", () => {
     const rows = (length: number) => Array.from({ length }, () => ({ agentRef: "urn:fabric:agent:acme:a0", day: "2026-10-12", calls: 1, unpricedCalls: 0, costUsd: 1 }));
     expect(partnerUsage({ usage: rows(100_000), publishers: ["acme"], step: "period" })).toMatchObject({ cells: [{ calls: 100_000, costUsd: 100_000 }] });
-    const time = (input: unknown[]) => Math.min(...[0, 1, 2].map(() => { const started = performance.now(); partnerUsage({ usage: input, publishers: ["acme"], step: "period" }); return performance.now() - started; }));
+    // CPU time, not wall time: on an oversubscribed machine the longer run is preempted more often, and wall time then
+    // grew 23x for 4x the rows (load 70, 2026-10-21); the process's own CPU time does not count the waits.
+    const cpuMs = () => { const { user, system } = process.cpuUsage(); return (user + system) / 1000; };
+    const time = (input: unknown[]) => Math.min(...[0, 1, 2].map(() => { const started = cpuMs(); partnerUsage({ usage: input, publishers: ["acme"], step: "period" }); return cpuMs() - started; }));
     const small = rows(12_500);
     const large = rows(50_000);
     let a = 0;

@@ -68,7 +68,7 @@ export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || 
  * `Bearer <token>` inside a longer value (`--header=Authorization: Bearer …`): a token of 12 or more token characters
  * holding a digit, so prose ("the Bearer token refresh bug", "the Bearer authentication scheme") passes.
  */
-const BEARER_INSIDE = /\bbearer\s+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}=*/i;
+export const BEARER_INSIDE = /\bbearer\s+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}=*/i;
 /** A path or a URL by its start: `/…`, `~/…`, `./…`, `C:\…`, `scheme://…`. */
 const PATH_LIKE = /^(?:[/~.]|[A-Za-z]:[\\/]|[a-z][a-z0-9+.-]*:\/\/)/i;
 /**

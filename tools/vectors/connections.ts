@@ -27,6 +27,8 @@ const NONE = { declared: false, reported: false, connections: [] };
 
 function cases(): Json[] {
   const fake = ["sk", "-", "A".repeat(24)].join("");
+  const bearer = ["abc123", "def456", "ghi789"].join("");
+  const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
     ["no key: nothing declared", { extensions: {} }, NONE],
     ["not a document: nothing declared", null, NONE],
@@ -53,6 +55,18 @@ function cases(): Json[] {
     ["a connector target with a space", doc({ connections: [{ ...telegram, target: "Google Ads" }] }), REPORTED],
     ["a lastAt that is a date only", doc({ connections: [{ ...notify, lastAt: "2026-10-20" }] }), REPORTED],
     ["65 connections", doc({ connections: Array.from({ length: 65 }, (_, n) => ({ ...model, id: `m${n}` })) }), REPORTED],
+    ["a URL with a password inside a reason", doc({ connections: [{ ...telegram, reason: "see postgres://user:pw@db.example.com/app" }] }), REPORTED],
+    ["a URL with an api_key inside a purpose", doc({ connections: [{ ...telegram, purpose: "refused at https://api.example.com/v1?api_key=abcdefabcdef" }] }), REPORTED],
+    ["a URL without a credential inside a purpose is declared", doc({ connections: [{ ...telegram, purpose: "reads https://api.telegram.org/bot/getUpdates" }] }), view([{ ...telegram, purpose: "reads https://api.telegram.org/bot/getUpdates", failing: false }])],
+    ["bearer as a word is no credential", doc({ connections: [{ ...telegram, purpose: "calls the API with bearer authentication" }] }), view([{ ...telegram, purpose: "calls the API with bearer authentication", failing: false }])],
+    ["Bearer and a token in a reason", doc({ connections: [{ ...telegram, reason: `sent Bearer ${bearer} and was refused` }] }), REPORTED],
+    ["a key as a whole target", doc({ connections: [{ ...telegram, target: fake }] }), REPORTED],
+    ["a key in a label", doc({ connections: [{ ...telegram, label: `uses ${fake}` }] }), REPORTED],
+    ["a JWT in a purpose", doc({ connections: [{ ...telegram, purpose: `signs ${jwt}` }] }), REPORTED],
+    ["a label of 300 characters is declared", doc({ connections: [{ ...model, label: "a".repeat(300) }] }), view([{ ...model, label: "a".repeat(300), failing: false }])],
+    ["a label of 301 characters", doc({ connections: [{ ...model, label: "a".repeat(301) }] }), REPORTED],
+    ["degraded entries that are not objects are ignored", doc({ connections: [telegram] }, [null, 5, "telegram", { source: 5 }]), view([{ ...telegram, failing: false }])],
+    ["failing follows the id, not the target", doc({ connections: [{ ...telegram, id: "tg-reader" }, { ...model, id: "chat", target: "telegram" }] }, [{ source: "tg-reader" }, { source: "openrouter/xiaomi/mimo-v2.6-pro" }]), view([{ ...telegram, id: "tg-reader", failing: true }, { ...model, id: "chat", target: "telegram", failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

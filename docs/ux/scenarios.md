@@ -37,6 +37,7 @@
 | SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
 | SCN-031 | A job stops at a limit: the caller waits for the reset, resends under the same key, or hands it to a person | spend | P-02 | ST-013, FLW-10 | draft | not audited |
+| SCN-032 | See what an agent uses, follow the failing connection, or learn why its declaration is not shown | connections | P-02 | ST-026, FLW-21 | draft | not audited |
 
 ## Personas
 
@@ -485,6 +486,28 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the named profile does not exist -> the launch is refused as an unknown profile, never run on another one; the profile's lane reads user content and its route has no open-vendor model -> the launch is refused naming the profile (`FAC-SEM-112`, DEC-0083), and the operator adds an open-vendor model to the profile.
 - **Status:** draft
 - **Coverage:** runners specification, Resolution and What a profile reads; `src/profile-rules.ts` `resolveModelProfile`, `closedUserContentRoute`; `test/runner-model-profiles.test.ts`, `test/open-vendor-user-content.test.ts`, `fixtures/semantic/profile-resolution-refused.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
+- **Product:** unobserved
+
+## Connections
+
+### SCN-032: See what an agent uses, follow the failing connection, or learn why its declaration is not shown
+
+- **Persona:** P-02
+- **Feature:** connections
+- **Traces:** ST-026, FLW-21 (JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3)
+- **Entry point:** `example-agent`'s Connections tab in the host
+- **Preconditions:** `example-agent` declares a service connection to `personal-communicator.default` for `communicator.notify`, a connector `telegram` and a model; its well-known document has `degraded: [{source: "telegram"}]`
+- **Steps:**
+  1. Operator opens the tab -> three connections, each with its kind, target and state.
+  2. The `telegram` connector -> marked failing, with its reason.
+  3. Operator opens a second agent whose declaration names `notify` twice -> the tab shows none of it and says the id is named twice.
+- **Expected result:** a valid declaration is shown whole with the failing connections marked; an invalid one shows nothing of itself and its reasons.
+- **Alt paths:** an agent that declares nothing -> the tab says so. A `degraded[].source` equal to a connection's target but not its id -> nothing is marked.
+- **UI elements:** the connections list, the failing mark, the reasons.
+- **States covered:** success, failing, invalid, empty
+- **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text.
+- **Status:** draft
+- **Coverage:** DEC-0096, `FAC-SEM-127`, `connectionsView` in `src/connections.ts`, `fixtures/vectors/connections.json`, `test/connections.test.ts`; Fabric Dashboards' SCN-073 is the host's own scenario
 - **Product:** unobserved
 
 ## Embedded dashboard

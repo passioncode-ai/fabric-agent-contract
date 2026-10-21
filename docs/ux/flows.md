@@ -504,6 +504,30 @@ flowchart TD
 
 - **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed).
 
+### FLW-21: Operator reads what an agent uses
+
+- **Traces:** ST-026 (JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3)
+- **Goal:** the operator sees an agent's connections with the failing ones marked, or learns that its declaration is invalid and why
+- **Entry points:** an agent's Connections tab in the host
+- **Success exit:** the operator names the failing connection and the agent or connector behind it
+- **Task analysis:** the host reads the agent's well-known document → it validates the value under the connections extension key → it checks each id is named once and no text member carries a credential → it marks each connection whose id a `degraded[].source` names → the operator follows a failing connection to its target.
+- **Rejected shape:** showing the valid part of an invalid declaration — rejected because a partial map reads as complete, and a declaration that carried a credential would put it on screen (DEC-0096).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  O[Host reads the well-known document] --> K{Connections key present?}
+  K -->|no| N[Nothing declared]
+  K -->|yes| V{Valid, each id once, no credential?}
+  V -->|no| R[Reported: none of it shown, the reasons are]
+  V -->|yes| D[Each connection shown with kind, target and state]
+  D --> F{A degraded source equals its id?}
+  F -->|yes| X[Connection marked failing]
+  F -->|no| Y[Connection shown as declared]
+```
+
+- **Screens traversed:** SCR-24 success; SCR-24 failing; SCR-24 invalid.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

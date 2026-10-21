@@ -265,9 +265,11 @@ describe("totality: every function answers and never throws", () => {
   const linear = (build: (n: number) => () => void, n: number) => {
     const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => {
       const run = build(size);
-      const started = performance.now();
+      // CPU time, not wall time: preemption on a loaded machine inflates the longer run's wall time, not its CPU time.
+      const cpuMs = () => { const { user, system } = process.cpuUsage(); return (user + system) / 1000; };
+      const started = cpuMs();
       run();
-      return performance.now() - started;
+      return cpuMs() - started;
     }));
     // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth (x16 for
     // x4 input) fails every try.

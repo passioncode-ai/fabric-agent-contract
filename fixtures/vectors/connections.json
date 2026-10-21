@@ -1042,6 +1042,374 @@
       }
     },
     {
+      "name": "a URL with a password inside a reason",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "see postgres://user:pw@db.example.com/app"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a URL with an api_key inside a purpose",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "refused at https://api.example.com/v1?api_key=abcdefabcdef",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a URL without a credential inside a purpose is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads https://api.telegram.org/bot/getUpdates",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads https://api.telegram.org/bot/getUpdates",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "bearer as a word is no credential",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "calls the API with bearer authentication",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "calls the API with bearer authentication",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bearer and a token in a reason",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "sent Bearer abc123def456ghi789 and was refused"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a key as a whole target",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "sk-AAAAAAAAAAAAAAAAAAAAAAAA",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a key in a label",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s",
+                "label": "uses sk-AAAAAAAAAAAAAAAAAAAAAAAA"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a JWT in a purpose",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "signs eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.c2lnbmF0dXJl",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a label of 300 characters is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "writer",
+            "kind": "model",
+            "target": "openrouter/xiaomi/mimo-v2.6-pro",
+            "state": "unknown",
+            "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "a label of 301 characters",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "degraded entries that are not objects are ignored",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": [
+          null,
+          5,
+          "telegram",
+          {
+            "source": 5
+          }
+        ]
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads the operator chat",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "failing follows the id, not the target",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "tg-reader",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              },
+              {
+                "id": "chat",
+                "kind": "model",
+                "target": "telegram",
+                "state": "unknown"
+              }
+            ]
+          }
+        },
+        "degraded": [
+          {
+            "source": "tg-reader"
+          },
+          {
+            "source": "openrouter/xiaomi/mimo-v2.6-pro"
+          }
+        ]
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "tg-reader",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads the operator chat",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": true
+          },
+          {
+            "id": "chat",
+            "kind": "model",
+            "target": "telegram",
+            "state": "unknown",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
       "name": "not an object",
       "input": {
         "extensions": {

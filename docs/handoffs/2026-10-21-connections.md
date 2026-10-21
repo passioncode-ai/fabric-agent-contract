@@ -26,6 +26,10 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   window read a partner actor only as `isPartnerActor` does. `support-quality-daily/1`'s `checks` is never `{}`, and a
   check's pass rate counts as judged under a test. The catalogue's revision test compares with the merge base.
 - New rows CT-71; CT-68 widened.
+- From the second readings: a credential URL inside prose is found (every URL in a member is read by `secretUrl`), a
+  bearer word without a token is prose, every answer is a fresh object, vectors for each detector branch and for
+  `failing` by id rather than target; the growth tests time CPU, not the wall clock; the connections user path is
+  JTBD-11, JRN-10, ST-026, FLW-21, SCR-24 and SCN-032.
 
 ## Decisions
 
@@ -38,4 +42,5 @@ No call count, no `usedBy`, no `direction` (see the page's Alternatives and Not 
 ## Next task
 
 Readings, merge, then post the merge commit on thread `131648c0` for Fabric Dashboards (FD-78) and
-fabric-agent-adapter (FAA-62).
+fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs; update the Contract
+row of fabric-workspace `knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync.
