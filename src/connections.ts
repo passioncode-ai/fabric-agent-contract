@@ -76,11 +76,16 @@ function urlsIn(value: string): string[] {
 }
 /**
  * A long run mixing upper case, lower case and digits (the shared `longSecret`: an AWS secret access key, say), in a
- * piece of the member split at spaces and `=`, read whole (a secret may hold `/`); a piece with a scheme is a URL and
- * is read by `secretUrl` instead, between its path's separators. Not looked for in a model's `target`, which is a
- * `provider/model` id, nor in `id` and `capability`, which the schema keeps lower case.
+ * piece of the member split at spaces and `=`, read whole (a secret may hold `/`). In a piece that holds a URL, the
+ * text before its `://` is read so (whatever is glued to the scheme), and the URL itself by `secretUrl`, between its
+ * path's separators. Not looked for in a model's `target`, which is a `provider/model` id, nor in `id` and
+ * `capability`, which the schema keeps lower case.
  */
-const longRun = (value: string): boolean => value.split(/[\s=]/).some((piece) => piece.search(SCHEME) < 0 && longSecret(piece));
+const longRun = (value: string): boolean =>
+  value.split(/[\s=]/).some((piece) => {
+    const scheme = piece.indexOf("://");
+    return longSecret(scheme < 0 ? piece : piece.slice(0, scheme));
+  });
 /** A credential in one member of a connection: a token's shape, a long run where one is looked for, or a URL that carries one. */
 const credential = (value: string, runs: boolean): boolean =>
   JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || (runs && longRun(value)) || urlsIn(value).some(secretUrl);

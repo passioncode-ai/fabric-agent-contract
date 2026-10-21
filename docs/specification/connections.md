@@ -48,23 +48,24 @@ No string member carries a credential or a URL with one. What counts is defined 
   whole (the shared `longSecret`). An AWS secret access key that holds all three (all but about one in a thousand)
   is one, with or without `/`, and so are a slug such as `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket
   title holding a digit and a long mixed model id written in a purpose; a hex digest is lower case and is not. A
-  model's `target` is not checked for a long run, whatever it holds, and `id` and `capability` are lower case; a
-  piece with a scheme is a URL, read as below, and text glued before the scheme in that piece is read only as part
-  of the URL;
+  model's `target` is not checked for a long run outside a URL, and `id` and `capability` are lower case. In a piece
+  that holds a URL, the text before its `://` is read for a long run (whatever is glued to the scheme), and the URL
+  as below;
 - any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, a parameter such as
   `api_key` with a value, or any shape above, which the shared detector reads in a URL without a word start or a
   case rule). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
   punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host. A query or
   fragment value is read whole, `=` included; a path is read between its separators, as the shared detector reads
   it, so a secret that a `/` splits into pieces under 40 characters is not found in a path, while a 40-character
-  mixed segment is (CT-73).
+  mixed segment is, and so is a secret after an `=` in the path, which starts a piece of its own (CT-73).
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
 a store `sk-Prod-eu-west-1-db`, a URL path holding `sk-learn-classifier-v2` or a URL path segment of 40 or more mixed
-characters (a Google Docs or Notion page id), hides the whole declaration; its author moves a model id to `target` or
-drops the link. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the
-word start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a model's
-`target`; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
+characters (a Google Docs or Notion page id), hides the whole declaration; its author removes a model id from the text
+or declares it as a model connection of its own whose `target` is the id, or drops the link. These shapes are a
+variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word start, the `sk-` rules,
+case-sensitive prefixes, a Bearer token's length and digit, and no long run in a model's `target`; wider by the
+Telegram bot token. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 

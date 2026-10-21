@@ -143,6 +143,11 @@ function cases(): Json[] {
     ["an empty purpose", doc({ connections: [{ ...model, purpose: "" }] }), REPORTED],
     ["an empty reason", doc({ connections: [{ ...model, reason: "" }] }), REPORTED],
     ["a URL query value holding = is read whole", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/?q=${"Ab1".repeat(7)}=${"Cd2".repeat(7)}` }] }), REPORTED],
+    ["a long run glued before a scheme across an underscore", doc({ connections: [{ ...telegram, purpose: `${"Ab1".repeat(7)}_${"Cd2".repeat(7)}https://h.example/` }] }), REPORTED],
+    ["an AWS secret glued before a scheme", doc({ connections: [{ ...telegram, purpose: `${awsSecret}https://h.example/` }] }), REPORTED],
+    ["a slashed secret after an = in a URL path is a piece of its own", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}` }] }), REPORTED],
+    ["a slashed secret in a URL path is not found", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/${awsSecret}` }] }), view([{ ...telegram, purpose: `reads https://h.example/${awsSecret}`, failing: false }])],
+    ["a model target that is a URL is read as one", doc({ connections: [{ ...model, target: `https://h.example/${"Ab1".repeat(13)}c` }] }), REPORTED],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));
