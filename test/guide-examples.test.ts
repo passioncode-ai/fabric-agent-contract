@@ -122,11 +122,14 @@ describe("examples read together (pair=…)", () => {
 
 describe("the guide's profile table names each profile's version member (REQ-10)", () => {
   const guide = readFileSync(path.join(root, "docs/guides/connecting-compatible-agents.md"), "utf8");
+  // The profile selects its branch on `kind` (allOf of if/then), each branch a `$defs` profile (REQ-03).
+  type Branch = { properties: Record<string, { const?: string }> };
   const manifest = JSON.parse(readFileSync(path.join(root, "schemas/manifest.schema.json"), "utf8")) as {
-    $defs: { profile: { oneOf: Array<{ properties: Record<string, { const?: string }> }> } };
+    $defs: Record<string, Branch> & { profile: { allOf: Array<{ if: Branch; then: { $ref: string } }> } };
   };
-  const branches = manifest.$defs.profile.oneOf.map((branch) => {
-    const kind = branch.properties.kind?.const as string;
+  const branches = manifest.$defs.profile.allOf.map((arm) => {
+    const kind = arm.if.properties.kind?.const as string;
+    const branch = manifest.$defs[arm.then.$ref.replace("#/$defs/", "")] as Branch;
     const [member, schema] = Object.entries(branch.properties).find(([name, value]) => /(Revision|Version)$/.test(name) && value.const !== undefined) as [string, { const: string }];
     return { kind, member, value: schema.const };
   });
