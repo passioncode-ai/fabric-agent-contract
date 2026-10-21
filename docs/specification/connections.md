@@ -30,7 +30,8 @@ entries:
 
 No other member: a call count belongs to the [usage report](service.md#usage-report), and the reverse view (which agents
 use this one) is the host's, built from every agent's declaration. No member carries a credential or a URL with one:
-a token's shape where it starts a word (a name such as `flask-server` is not taken for a key), a JWT, `Bearer` and a
+in any string member, a token's shape where it starts a word (a name such as `flask-server`, or `sk-learn-classifier`
+with no digit, is not taken for a key), a JWT, `Bearer` and a
 token that holds a digit ("bearer authentication" is prose), or any URL in the member, at its start or inside prose,
 that carries one (`secretUrl`: a password, or a parameter such as `api_key` with a value).
 
@@ -46,7 +47,7 @@ host resolves a `service` target to an installed agent to draw the chain.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-127` | `service-well-known` | a value under the connections extension key is valid against `service-connections-extension.schema.json`, names each `id` once and carries no credential in `target`, `label`, `purpose` or `reason` (DEC-0096) |
+| `FAC-SEM-127` | `service-well-known` | a value under the connections extension key is valid against `service-connections-extension.schema.json`, names each `id` once and carries no credential in any string member (`id`, `target`, `capability`, `label`, `purpose`, `reason`) (DEC-0096) |
 
 ## Compatibility
 
@@ -55,10 +56,11 @@ and ignore unknown `extensions`). `contractVersion` stays `0.1.0`.
 
 ## Who adopts it
 
-- **Fabric Dashboards** reads it for its Connections tab (FD-78) and re-pins its reader (`connectionsOf`) to these
-  vectors.
-- **fabric-agent-adapter** lets both service kits emit it from a list the service declares, `state` from the kit's own
-  health checks and a `degraded[].source` equal to the connection's `id` (FAA-62).
+- **Fabric Dashboards** reads it for its Connections tab (FD-78) and owes the re-pin of its reader (`connectionsOf`)
+  to these vectors (CT-70), before any kit emits the key.
+- **fabric-agent-adapter** owes the emission in both service kits (FAA-62), after Dashboards' re-pin: from a list
+  the service declares, `state` from the kit's own health checks and a `degraded[].source` equal to the connection's
+  `id`.
 - **Fabric** MAY read it for its own map of the estate.
 
 The board row is CT-70.

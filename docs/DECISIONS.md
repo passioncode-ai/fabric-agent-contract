@@ -6001,7 +6001,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `connector`, `store` or `channel`; `capability` only on a `service` and a DEC-0020 capability name; a `service`'s
      `target` an `id.instance` key or a product id; `state` `ok`, `degraded`, `down` or `unknown`.
   2. A `degraded[].source` equal to a connection's `id` is that connection failing.
-  3. `connectionsView` is the reading: an invalid value, a repeated `id` or a credential in a text member is not
+  3. `connectionsView` is the reading: an invalid value, a repeated `id` or a credential in any string member is not
      declared and is reported (`FAC-SEM-127`); a connection is data, never authority.
 - **Why:** Fabric Dashboards' Connections tab (FD-78) needs the agent's own word for what it uses, and the operator
   asked for the whole chain in the contract (board thread `131648c0`, 2026-10-20).

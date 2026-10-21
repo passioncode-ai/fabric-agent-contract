@@ -46,8 +46,8 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
-                "capability": "communicator.notify",
+                "target": "example-notifier.default",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               },
@@ -82,8 +82,8 @@
           {
             "id": "notify",
             "kind": "service",
-            "target": "personal-communicator.default",
-            "capability": "communicator.notify",
+            "target": "example-notifier.default",
+            "capability": "notifier.send",
             "state": "ok",
             "lastAt": "2026-10-20T09:00:00Z",
             "failing": false
@@ -116,8 +116,8 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
-                "capability": "communicator.notify",
+                "target": "example-notifier.default",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               },
@@ -221,8 +221,8 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
-                "capability": "communicator.notify",
+                "target": "example-notifier.default",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z",
                 "calls": 12
@@ -270,7 +270,7 @@
               {
                 "id": "telegram",
                 "kind": "connector",
-                "target": "https://api.example.com/?token=sk-AAAAAAAAAAAAAAAAAAAAAAAA",
+                "target": "https://api.example.com/?token=sk-A1A1A1A1A1A1A1A1A1A1A1A1",
                 "purpose": "reads the operator chat",
                 "state": "degraded",
                 "reason": "flood wait 30 s"
@@ -297,7 +297,7 @@
                 "target": "telegram",
                 "purpose": "reads the operator chat",
                 "state": "degraded",
-                "reason": "key sk-AAAAAAAAAAAAAAAAAAAAAAAA refused"
+                "reason": "key sk-A1A1A1A1A1A1A1A1A1A1A1A1 refused"
               }
             ]
           }
@@ -394,7 +394,7 @@
                 "id": "flask",
                 "kind": "service",
                 "target": "flask-server-production.default",
-                "capability": "communicator.notify",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z",
                 "purpose": "risk-assessment-builder"
@@ -412,7 +412,7 @@
             "id": "flask",
             "kind": "service",
             "target": "flask-server-production.default",
-            "capability": "communicator.notify",
+            "capability": "notifier.send",
             "state": "ok",
             "lastAt": "2026-10-20T09:00:00Z",
             "purpose": "risk-assessment-builder",
@@ -454,7 +454,7 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
+                "target": "example-notifier.default",
                 "capability": "fabric.job-get",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
@@ -471,7 +471,7 @@
           {
             "id": "notify",
             "kind": "service",
-            "target": "personal-communicator.default",
+            "target": "example-notifier.default",
             "capability": "fabric.job-get",
             "state": "ok",
             "lastAt": "2026-10-20T09:00:00Z",
@@ -489,7 +489,7 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
+                "target": "example-notifier.default",
                 "capability": "x",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
@@ -514,7 +514,7 @@
                 "id": "notify",
                 "kind": "service",
                 "target": "Personal-Communicator.default",
-                "capability": "communicator.notify",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               }
@@ -538,7 +538,7 @@
                 "id": "notify",
                 "kind": "service",
                 "target": "https://example.com/a",
-                "capability": "communicator.notify",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               }
@@ -561,8 +561,8 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator",
-                "capability": "communicator.notify",
+                "target": "example-notifier",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               }
@@ -578,8 +578,8 @@
           {
             "id": "notify",
             "kind": "service",
-            "target": "personal-communicator",
-            "capability": "communicator.notify",
+            "target": "example-notifier",
+            "capability": "notifier.send",
             "state": "ok",
             "lastAt": "2026-10-20T09:00:00Z",
             "failing": false
@@ -620,8 +620,8 @@
               {
                 "id": "notify",
                 "kind": "service",
-                "target": "personal-communicator.default",
-                "capability": "communicator.notify",
+                "target": "example-notifier.default",
+                "capability": "notifier.send",
                 "state": "ok",
                 "lastAt": "2026-10-20"
               }
@@ -1192,7 +1192,7 @@
               {
                 "id": "telegram",
                 "kind": "connector",
-                "target": "sk-AAAAAAAAAAAAAAAAAAAAAAAA",
+                "target": "sk-A1A1A1A1A1A1A1A1A1A1A1A1",
                 "purpose": "reads the operator chat",
                 "state": "degraded",
                 "reason": "flood wait 30 s"
@@ -1220,7 +1220,7 @@
                 "purpose": "reads the operator chat",
                 "state": "degraded",
                 "reason": "flood wait 30 s",
-                "label": "uses sk-AAAAAAAAAAAAAAAAAAAAAAAA"
+                "label": "uses sk-A1A1A1A1A1A1A1A1A1A1A1A1"
               }
             ]
           }
@@ -1410,6 +1410,85 @@
       }
     },
     {
+      "name": "a key-shaped id",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "sk-a1a1a1a1a1a1a1a1a1a1a1a1",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a key-shaped capability",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "notify",
+                "kind": "service",
+                "target": "example-notifier.default",
+                "capability": "sk-a1a1a1a1a1a1a1a1a1a1a1a1",
+                "state": "ok",
+                "lastAt": "2026-10-20T09:00:00Z"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an sk- name without a digit is no credential",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "sk-learn-classifier",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "sk-learn-classifier-model"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "sk-learn-classifier",
+            "kind": "model",
+            "target": "openrouter/xiaomi/mimo-v2.6-pro",
+            "state": "unknown",
+            "label": "sk-learn-classifier-model",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
       "name": "not an object",
       "input": {
         "extensions": {
@@ -1417,8 +1496,8 @@
             {
               "id": "notify",
               "kind": "service",
-              "target": "personal-communicator.default",
-              "capability": "communicator.notify",
+              "target": "example-notifier.default",
+              "capability": "notifier.send",
               "state": "ok",
               "lastAt": "2026-10-20T09:00:00Z"
             }

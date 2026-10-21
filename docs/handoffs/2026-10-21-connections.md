@@ -33,14 +33,17 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
 
 ## Decisions
 
-No call count, no `usedBy`, no `direction` (see the page's Alternatives and Not decided here).
+No call count, no `usedBy`, no `direction` (see DEC-0096's Alternatives refused and the page's Not decided here).
 
 ## Checks
 
-`pnpm run check` before the push.
+`pnpm run check` on each pushed head: exit 0 at `c8d37b4` (82 test files, 6173 tests, privacy check 0 findings);
+the final head's run is in the PR's gate comment.
 
 ## Next task
 
 Readings, merge, then post the merge commit on thread `131648c0` for Fabric Dashboards (FD-78) and
-fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs; update the Contract
-row of fabric-workspace `knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync.
+fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs; set CT-70 and this handoff's
+row in `README.md` to merged with #135 and the merge commit; update the Contract row of fabric-workspace
+`knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync. Dashboards' re-pin (FD-78) lands before any
+kit emits the key (FAA-62).

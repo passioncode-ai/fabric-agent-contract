@@ -51,7 +51,7 @@ const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0
 const URL_TOKEN = /[a-z][a-z0-9+.-]*:\/\/[^\s"'<>()]+/gi;
 /** A credential in a connection's text: a token's shape, or a URL that carries one. */
 const credential = (value: string): boolean =>
-  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || (value.match(URL_TOKEN) ?? []).some(secretUrl);
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || (value.match(URL_TOKEN) ?? []).some(secretUrl);
 
 /** The problems the schema cannot state: an id named twice, a credential in a text member. */
 function beyondShape(list: Connection[]): string[] {

@@ -305,7 +305,7 @@
 
 - **Used by:** FLW-21
 - **Purpose:** the person sees what an agent uses and which connection fails.
-- **Elements:** one row per connection with its kind, target, state, purpose and last time; a failing mark on a connection its agent reports degraded; the reasons when the declaration is invalid.
+- **Elements:** one row per connection with its kind, target, state, purpose and last time; a failing mark on a connection whose id a `degraded[].source` names; the reasons when the declaration is invalid.
 - **States:** success, the connections listed; failing, one or more marked; invalid, none shown and the reasons are; empty, the agent declares nothing.
 - **Coverage:** `src/connections.ts` (`connectionsView`, `FAC-SEM-127`), `fixtures/vectors/connections.json`, `test/connections.test.ts`
 - **Scenarios:** SCN-032

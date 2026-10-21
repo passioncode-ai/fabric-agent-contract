@@ -17,7 +17,7 @@ type Json = Record<string, any>;
 export const VECTOR_FILE = "fixtures/vectors/connections.json";
 const KEY = "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1";
 
-const notify = { id: "notify", kind: "service", target: "personal-communicator.default", capability: "communicator.notify", state: "ok", lastAt: "2026-10-20T09:00:00Z" };
+const notify = { id: "notify", kind: "service", target: "example-notifier.default", capability: "notifier.send", state: "ok", lastAt: "2026-10-20T09:00:00Z" };
 const telegram = { id: "telegram", kind: "connector", target: "telegram", purpose: "reads the operator chat", state: "degraded", reason: "flood wait 30 s" };
 const model = { id: "writer", kind: "model", target: "openrouter/xiaomi/mimo-v2.6-pro", state: "unknown" };
 const doc = (value: unknown, degraded: unknown[] = []) => ({ extensions: { [KEY]: value }, degraded });
@@ -26,7 +26,7 @@ const REPORTED = { declared: false, reported: true };
 const NONE = { declared: false, reported: false, connections: [] };
 
 function cases(): Json[] {
-  const fake = ["sk", "-", "A".repeat(24)].join("");
+  const fake = ["sk", "-", "A1".repeat(12)].join("");
   const bearer = ["abc123", "def456", "ghi789"].join("");
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
@@ -51,7 +51,7 @@ function cases(): Json[] {
     ["a one-character capability", doc({ connections: [{ ...notify, capability: "x" }] }), REPORTED],
     ["a service target that is no key or product id", doc({ connections: [{ ...notify, target: "Personal-Communicator.default" }] }), REPORTED],
     ["a service target that is a URL", doc({ connections: [{ ...notify, target: "https://example.com/a" }] }), REPORTED],
-    ["a product id as a service target", doc({ connections: [{ ...notify, target: "personal-communicator" }] }), view([{ ...notify, target: "personal-communicator", failing: false }])],
+    ["a product id as a service target", doc({ connections: [{ ...notify, target: "example-notifier" }] }), view([{ ...notify, target: "example-notifier", failing: false }])],
     ["a connector target with a space", doc({ connections: [{ ...telegram, target: "Google Ads" }] }), REPORTED],
     ["a lastAt that is a date only", doc({ connections: [{ ...notify, lastAt: "2026-10-20" }] }), REPORTED],
     ["65 connections", doc({ connections: Array.from({ length: 65 }, (_, n) => ({ ...model, id: `m${n}` })) }), REPORTED],
@@ -67,6 +67,9 @@ function cases(): Json[] {
     ["a label of 301 characters", doc({ connections: [{ ...model, label: "a".repeat(301) }] }), REPORTED],
     ["degraded entries that are not objects are ignored", doc({ connections: [telegram] }, [null, 5, "telegram", { source: 5 }]), view([{ ...telegram, failing: false }])],
     ["failing follows the id, not the target", doc({ connections: [{ ...telegram, id: "tg-reader" }, { ...model, id: "chat", target: "telegram" }] }, [{ source: "tg-reader" }, { source: "openrouter/xiaomi/mimo-v2.6-pro" }]), view([{ ...telegram, id: "tg-reader", failing: true }, { ...model, id: "chat", target: "telegram", failing: false }])],
+    ["a key-shaped id", doc({ connections: [{ ...model, id: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
+    ["a key-shaped capability", doc({ connections: [{ ...notify, capability: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
+    ["an sk- name without a digit is no credential", doc({ connections: [{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model" }] }), view([{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model", failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

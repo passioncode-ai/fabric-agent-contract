@@ -119,7 +119,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: an agent reports "degraded" with no word on what it depends on; pull: one map built from every agent's own declaration; anxiety: a map that shows a key or a password, or one built from a declaration that is wrong; habit: reading each agent's README and logs.
-- **Success metric:** every agent that declares its connections shows each one with its state, a connection its agent reports degraded is marked failing, and an invalid declaration shows nothing of itself and says why.
+- **Success metric:** every agent that declares its connections shows each one with its state, a connection whose id a `degraded[].source` names is marked failing, and an invalid declaration shows nothing of itself and says why.
 
 ## 3. Customer journeys
 
@@ -205,7 +205,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Add | adds a second machine, nearby or from afar | Fabric on the trusted machine, the new machine's node | 2 | a code from one key's fingerprint can be brute-forced; a stranger slips in | commit before reveal and a six-digit code over both sides' keys, nonces and the network (priority 9) |
 | 3 | Remove or re-key | removes a lost machine, or replaces a machine's key | Fabric | 2 | a removed machine keeps being admitted | one revision that revokes what it drops, carried within seconds by the delta (priority 8) |
 
-### JRN-10: Operator — what my agents use (JTBD-11)
+### JRN-10: Operator, what my agents use (JTBD-11)
 
 | # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
 |---|---|---|---|---|---|---|
@@ -522,8 +522,8 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3
 - **Acceptance criteria:**
   - Given an agent whose well-known document declares its connections, when the host reads it, then each connection is shown with its kind, target and state.
-  - Given a `degraded[]` entry whose `source` equals a connection's id, when the host reads the document, then that connection is marked failing; a source equal only to a target marks nothing.
-  - Given a declaration that is invalid against its schema, names an id twice or carries a credential in a text member, when the host reads it, then none of it is shown and the reasons are.
+  - Given a `degraded[]` entry whose `source` equals a connection's id, when the host reads the document, then that connection is marked failing; a source equal only to a target marks no connection (a host may show it as a failing part of its own).
+  - Given a declaration that is invalid against its schema, names an id twice or carries a credential in any member, when the host reads it, then none of it is shown and the reasons are.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

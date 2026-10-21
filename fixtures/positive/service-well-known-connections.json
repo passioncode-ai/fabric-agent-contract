@@ -55,8 +55,8 @@
         {
           "id": "notify",
           "kind": "service",
-          "target": "personal-communicator.default",
-          "capability": "communicator.notify",
+          "target": "example-notifier.default",
+          "capability": "notifier.send",
           "state": "ok",
           "lastAt": "2026-10-20T09:00:00Z"
         },

@@ -510,8 +510,8 @@ flowchart TD
 - **Goal:** the operator sees an agent's connections with the failing ones marked, or learns that its declaration is invalid and why
 - **Entry points:** an agent's Connections tab in the host
 - **Success exit:** the operator names the failing connection and the agent or connector behind it
-- **Task analysis:** the host reads the agent's well-known document → it validates the value under the connections extension key → it checks each id is named once and no text member carries a credential → it marks each connection whose id a `degraded[].source` names → the operator follows a failing connection to its target.
-- **Rejected shape:** showing the valid part of an invalid declaration — rejected because a partial map reads as complete, and a declaration that carried a credential would put it on screen (DEC-0096).
+- **Task analysis:** the host reads the agent's well-known document → it validates the value under the connections extension key → it checks each id is named once and no member carries a credential → it marks each connection whose id a `degraded[].source` names → the operator follows a failing connection to its target.
+- **Rejected shape:** showing the valid part of an invalid declaration, rejected because a partial map reads as complete, and a declaration that carried a credential would put it on screen (DEC-0096).
 - **Flow:**
 
 ```mermaid

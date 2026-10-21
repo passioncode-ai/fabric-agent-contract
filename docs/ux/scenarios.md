@@ -496,13 +496,13 @@ independent agent author and P-02 project operator.
 - **Feature:** connections
 - **Traces:** ST-026, FLW-21 (JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3)
 - **Entry point:** `example-agent`'s Connections tab in the host
-- **Preconditions:** `example-agent` declares a service connection to `personal-communicator.default` for `communicator.notify`, a connector `telegram` and a model; its well-known document has `degraded: [{source: "telegram"}]`
+- **Preconditions:** `example-agent` declares a service connection to `example-notifier.default` for `notifier.send`, a connector `telegram` and a model; its well-known document has `degraded: [{source: "telegram"}]`
 - **Steps:**
   1. Operator opens the tab -> three connections, each with its kind, target and state.
   2. The `telegram` connector -> marked failing, with its reason.
-  3. Operator opens a second agent whose declaration names `notify` twice -> the tab shows none of it and says the id is named twice.
+  3. Operator opens a second agent whose declaration has the id `notify` on two connections -> the tab shows none of it and says the id is named twice.
 - **Expected result:** a valid declaration is shown whole with the failing connections marked; an invalid one shows nothing of itself and its reasons.
-- **Alt paths:** an agent that declares nothing -> the tab says so. A `degraded[].source` equal to a connection's target but not its id -> nothing is marked.
+- **Alt paths:** an agent that declares nothing -> the tab says so. A `degraded[].source` equal to a connection's target but not its id -> that connection is not marked; a host may show the source as a failing part of its own (Fabric Dashboards' SCN-073).
 - **UI elements:** the connections list, the failing mark, the reasons.
 - **States covered:** success, failing, invalid, empty
 - **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text.
