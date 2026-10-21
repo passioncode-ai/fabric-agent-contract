@@ -35,6 +35,10 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   the next space, so a password holding a bracket or a quote is found; the hosted CI checks out the whole history
   (`fetch-depth: 0`), because `pin:check`'s test asks whether a commit is on it; CT-72 records the folder-attribution
   growth tests' slack.
+- From the fourth readings: a URL is read from every scheme in a piece, with up to four closing characters put back
+  (an IPv6 host, a punctuation-only `api_key`, glued URLs); an `sk-` key and a bot token hold a digit and an upper-case
+  letter; the last private name in a vector replaced, and the name added to the operator's private-terms denylist so
+  the privacy check catches it; CT-70 measured against the final vectors; CT-73 for the two detectors (DEC-0044).
 
 ## Decisions
 
@@ -48,7 +52,8 @@ the final head's run is in the PR's gate comment.
 ## Next task
 
 Readings, merge, then post the merge commit on thread `131648c0` for Fabric Dashboards (FD-78) and
-fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs; set CT-70 and this handoff's
+fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs and a request to replace the private example name in
+its service-host README with `example-notifier.default` / `notifier.send`; set CT-70 and this handoff's
 row in `README.md` to merged with #135 and the merge commit; update the Contract row of fabric-workspace
 `knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync. Dashboards' re-pin (FD-78) lands before any
 kit emits the key (FAA-62).

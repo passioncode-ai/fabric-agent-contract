@@ -6002,7 +6002,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `target` an `id.instance` key or a product id; `state` `ok`, `degraded`, `down` or `unknown`.
   2. A `degraded[].source` equal to a connection's `id` is that connection failing.
   3. `connectionsView` is the reading: an invalid value, a repeated `id` or a credential in any string member is not
-     declared and is reported (`FAC-SEM-127`); a connection is data, never authority.
+     declared and is reported (`FAC-SEM-127`); a connection is data, never authority. The key shapes are a narrower,
+     word-bounded variant of DEC-0044's one detector (`src/connections.ts`); whether the shared one adopts them is CT-73.
 - **Why:** Fabric Dashboards' Connections tab (FD-78) needs the agent's own word for what it uses, and the operator
   asked for the whole chain in the contract (board thread `131648c0`, 2026-10-20).
 - **Alternatives refused:** a call count (the usage report's); a `usedBy` list (the host derives it from every agent's

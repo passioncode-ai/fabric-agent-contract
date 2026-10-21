@@ -51,7 +51,7 @@ function cases(): Json[] {
     ["a URL with a password", doc({ connections: [{ ...telegram, target: "postgres://user:pw@db.example.com/app" }] }), REPORTED],
     ["a capability with a hyphen (DEC-0020)", doc({ connections: [{ ...notify, capability: "fabric.job-get" }] }), view([{ ...notify, capability: "fabric.job-get", failing: false }])],
     ["a one-character capability", doc({ connections: [{ ...notify, capability: "x" }] }), REPORTED],
-    ["a service target that is no key or product id", doc({ connections: [{ ...notify, target: "Personal-Communicator.default" }] }), REPORTED],
+    ["a service target that is no key or product id", doc({ connections: [{ ...notify, target: "Example-Notifier.default" }] }), REPORTED],
     ["a service target that is a URL", doc({ connections: [{ ...notify, target: "https://example.com/a" }] }), REPORTED],
     ["a product id as a service target", doc({ connections: [{ ...notify, target: "example-notifier" }] }), view([{ ...notify, target: "example-notifier", failing: false }])],
     ["a connector target with a space", doc({ connections: [{ ...telegram, target: "Google Ads" }] }), REPORTED],

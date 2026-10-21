@@ -41,8 +41,11 @@ No string member carries a credential or a URL with one:
   brackets, quotes and full stop that close a sentence, and with up to four of them put back, since `]` closes an
   IPv6 host.
 
-A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one, and a path holding 40 or more mixed
-letters and digits is taken for a key (`secretArgument`).
+A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one; a path holding 40 or more mixed
+letters and digits is taken for a key (`secretArgument`), and so is a word that starts with `sk-`, runs 16 or more
+characters and holds a digit and an upper-case letter (a store named `sk-Prod-eu-west-1-db`, say), which hides the whole
+declaration. These key shapes are a narrower variant of the shared detector in `src/secret-shape.ts` (DEC-0044):
+whether that detector adopts the word start and the Telegram shape is CT-73.
 
 ## Reading it
 
