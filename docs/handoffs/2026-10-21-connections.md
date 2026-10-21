@@ -76,12 +76,18 @@ No call count, no `usedBy`, no `direction` (see DEC-0096's Alternatives refused 
 `pnpm run check` on each pushed head; the final head's run (exit code, test count, privacy findings) is the PR's gate
 comment, posted before the merge.
 
+## Merged
+
+Merged 2026-10-21 by squash as `bbebae6` (#135), the tree byte-identical to the read head `af81d68` (squash, because
+early branch commits carried a private name). Finish line: the unit readings of rounds 13 and 14 and the product
+reading of round 14 found nothing blocking; a fifteenth round on the unchanged head would only repeat a passed
+check, so none was run. Their non-blocking findings are CT-74 and three one-line fixes in the follow-up change.
+
 ## Next task
 
-Readings, merge, then post the merge commit on thread `131648c0` for Fabric Dashboards (FD-78) and
+Post the merge commit `bbebae6` on thread `131648c0` for Fabric Dashboards (FD-78) and
 fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs (its service-host README already uses the neutral
 `example-notifier.default`, Dashboards `087d633`, with `notifier.notify`, which is as good an example as this
-contract's `notifier.send`); set CT-70 and this handoff's
-row in `README.md` to merged with #135 and the merge commit; update the Contract row of fabric-workspace
+contract's `notifier.send`); update the Contract row of fabric-workspace
 `knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync. Dashboards' re-pin (FD-78) lands before any
 kit emits the key (FAA-62).
