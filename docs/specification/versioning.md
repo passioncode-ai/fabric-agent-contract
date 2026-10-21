@@ -56,13 +56,19 @@ commit, in full or abbreviated to at least seven characters (G-11). Dated record
 (retrospectives, handoffs, changelog entries) name the revision of their day and are
 excluded by the consumer.
 
-`pnpm pin:check <repository> [--pin <file>] [--exclude <path>]…` runs the reference
-check ([`src/pin-check.ts`](../../src/pin-check.ts)): a commit-like hash on a line that
-mentions the contract and differs from the pin fails, with its file and line, and so does a pin that is not a
-commit of the contract's history (`pinHistory`: an ancestor of `origin/main` in this checkout, else of `HEAD`), such
-as a commit a history rewrite left behind; a checkout git cannot read fails too. A
-consumer MAY carry an equivalent check in its own language; the Fabric Agent Adapter's
-`test/validate.py` does.
+`pnpm pin:check <repository> [--pin <file>] [--exclude <path>]… [--include-dated]` runs the reference
+check ([`src/pin-check.ts`](../../src/pin-check.ts)). It reads the lock and validates it against
+[`contract-pin.schema.json`](../../schemas/contract-pin.schema.json): a missing lock, a lock that is not JSON and a lock
+the schema refuses each print what is wrong and exit 2, as does a usage error. A commit that is not the full
+40-character lower-case hex id is its own state, `malformed`, with its own message, and git is not asked about it.
+Then a commit-like hash on a line that mentions the contract and differs from the pin fails, with its file and line,
+and so does a pin that is not a commit of the contract's history (`pinHistory`: an ancestor of `origin/main` in this
+checkout, else of `HEAD`), such as a commit a history rewrite left behind; a pin this checkout does not hold and a
+checkout git cannot read fail too; each of these exits 1. The dated records are excluded by default: a file whose
+name starts with `CHANGELOG`, and everything under `docs/handoffs/`, `docs/evidence/` and `.task-pipeline/`;
+`--exclude` adds paths and `--include-dated` scans the dated records as well. The success line, which names the
+history the pin was found on, is printed only when the exit code is 0. A consumer MAY carry an equivalent check in its
+own language; the Fabric Agent Adapter's `test/validate.py` does.
 
 Moving the pin is a compatibility change: the consumer reviews what changed between the
 two commits, updates the lock and every mention in one change, and releases.

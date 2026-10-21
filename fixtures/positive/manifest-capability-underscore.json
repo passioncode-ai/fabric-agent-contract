@@ -35,7 +35,7 @@
           "url": "https://agents.example/mcp"
         },
         "requiredFeatures": [
-          "tool:analyze_keywords"
+          "tool:read_message"
         ],
         "probes": [
           {

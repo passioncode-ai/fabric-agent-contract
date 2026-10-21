@@ -18,7 +18,7 @@
   "capabilities": [
     {
       "id": "https://agents.example/capabilities/keyword-analysis",
-      "name": "seo.keyword-analysis",
+      "name": "analyze_keywords",
       "inputSchema": "https://agents.example/schemas/keyword-input.json",
       "outputSchema": "https://agents.example/schemas/keyword-output.json",
       "effect": "none",
@@ -55,7 +55,7 @@
   "costPresets": [
     {
       "id": "quick",
-      "capability": "seo.keyword-analysis",
+      "capability": "analyze_keywords",
       "label": "Quick",
       "maxUsd": -1,
       "paidTools": 0,
@@ -63,7 +63,7 @@
     },
     {
       "id": "standard",
-      "capability": "seo.keyword-analysis",
+      "capability": "analyze_keywords",
       "label": "Standard",
       "maxUsd": 0.5,
       "paidTools": 2,
@@ -72,7 +72,7 @@
     },
     {
       "id": "deep",
-      "capability": "seo.keyword-analysis",
+      "capability": "analyze_keywords",
       "label": "Deep",
       "maxUsd": 3,
       "paidTools": 6,
