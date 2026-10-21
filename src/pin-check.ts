@@ -1,8 +1,10 @@
 // #region pin-check — docs: docs/specification/versioning.md#one-contract-pin
 import { execFileSync } from "node:child_process";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { SCHEMA_PREFIX } from "./contract.js";
+import { createValidator, validateDocument } from "./validator.js";
 
 /** A consumer's one pin (`fabric-contract.lock.json`, schema `contract-pin.schema.json`). */
 export interface ContractPin {
@@ -18,6 +20,11 @@ export interface PinDrift {
   found: string;
   message: string;
 }
+
+export const LOCK_FILE = "fabric-contract.lock.json";
+const PIN_SCHEMA = `${SCHEMA_PREFIX}schemas/contract-pin.schema.json`;
+/** A commit as the lock writes it: the full 40-character id in lower-case hex (`contract-pin.schema.json`). */
+const FULL_COMMIT = /^[0-9a-f]{40}$/;
 
 // A line is about this contract when it names it (or its pin) — a bare "contract"
 // is too common a word — or when it sits under a Markdown heading that does.
@@ -47,17 +54,23 @@ export function findPinDrift(files: Array<{ path: string; text: string }>, pin: 
   return drift;
 }
 
-/** How a pin stands against the contract's history: on it, off it, or not checkable here. */
-export type PinHistory = { state: "on-history"; base: string } | { state: "off-history"; base: string } | { state: "absent"; base: string } | { state: "unreadable"; reason: string };
+/** How a pin stands against the contract's history: on it, off it, not checkable here, or not a commit id at all. */
+export type PinHistory =
+  | { state: "on-history"; base: string }
+  | { state: "off-history"; base: string }
+  | { state: "absent"; base: string }
+  | { state: "unreadable"; reason: string }
+  | { state: "malformed"; commit: string };
 
 /**
  * Whether `commit` is a commit of the contract's published history: an ancestor of `origin/main` in the contract
- * checkout at `contractRoot` (or of `HEAD` where it has no `origin/main`). A pin that no checkout holds, or that a
- * rewritten history left behind, is `off-history`; a checkout git cannot read is `unreadable`, which the CLI fails on
- * too. `git` is injected for tests.
+ * checkout at `contractRoot` (or of `HEAD` where it has no `origin/main`). A pin that is not a full 40-character
+ * lower-case hex id is `malformed` and git is not asked; a pin that no checkout holds, or that a rewritten history left
+ * behind, is `off-history`; a checkout git cannot read is `unreadable`, which the CLI fails on too. `git` is injected
+ * for tests.
  */
 export function pinHistory(commit: string, contractRoot: string, git: (args: string[]) => string = (args) => execFileSync("git", ["-C", contractRoot, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })): PinHistory {
-  if (!/^[0-9a-f]{7,40}$/.test(commit)) return { state: "off-history", base: "(none)" };
+  if (!FULL_COMMIT.test(commit)) return { state: "malformed", commit };
   let base: string;
   try {
     base = git(["rev-parse", "--verify", "--quiet", "origin/main"]).trim() ? "origin/main" : "HEAD";
@@ -83,42 +96,158 @@ export function pinHistory(commit: string, contractRoot: string, git: (args: str
   }
 }
 
-async function walk(root: string, directory: string, excluded: string[]): Promise<string[]> {
+/** What the CLI says about a history state that fails; `on-history` says nothing here (the success line does). */
+export function historyMessage(history: PinHistory, commit: string): string | undefined {
+  switch (history.state) {
+    case "on-history":
+      return undefined;
+    case "malformed":
+      return `the pin's commit ${JSON.stringify(history.commit)} is not a commit id: write the full 40-character lower-case hex commit (git rev-parse <ref> in the contract checkout prints it)`;
+    case "off-history":
+      return `the pin ${commit} is in this contract checkout but not on its history (${history.base}): repin to a commit of ${history.base}`;
+    case "absent":
+      return `the pin ${commit} is not in this contract checkout: run git fetch in the contract and check again; if it is still absent, no published history holds it`;
+    case "unreadable":
+      return `the pin cannot be checked against the contract's history: ${history.reason}`;
+  }
+}
+
+/**
+ * Dated records name the revision of their day, and a consumer excludes them (versioning.md, "One contract pin"):
+ * changelogs, handoffs, evidence and task-pipeline runs. `--include-dated` scans them too.
+ */
+export const DATED_RECORDS: readonly string[] = ["docs/handoffs", "docs/evidence", ".task-pipeline"];
+const DATED_FILE = /^CHANGELOG/;
+
+/** Whether `relative` (to the repository root, `/`-separated) is a dated record the check skips by default. */
+export function isDatedRecord(relative: string): boolean {
+  if (DATED_FILE.test(path.basename(relative))) return true;
+  const posix = relative.split(path.sep).join("/");
+  return DATED_RECORDS.some((prefix) => posix === prefix || posix.startsWith(`${prefix}/`));
+}
+
+async function walk(root: string, directory: string, excluded: string[], includeDated: boolean): Promise<string[]> {
   const out: string[] = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if ([".git", "node_modules"].includes(entry.name)) continue;
     const target = path.join(directory, entry.name);
     const relative = path.relative(root, target);
-    if (excluded.some((prefix) => relative === prefix || relative.startsWith(`${prefix}/`))) continue;
-    if (entry.isDirectory()) out.push(...await walk(root, target, excluded));
+    if (excluded.some((prefix) => relative === prefix || relative.startsWith(`${prefix}${path.sep}`))) continue;
+    if (!includeDated && isDatedRecord(relative)) continue;
+    if (entry.isDirectory()) out.push(...await walk(root, target, excluded, includeDated));
     else if (/\.(md|json|ya?ml|py|m?js|ts|toml|txt)$/.test(entry.name)) out.push(target);
   }
   return out;
 }
 
-/** The CLI's exit code: 1 on any drifting mention, or when the pin is not a commit of the contract's history. */
-export const exitCodeOf = (drift: PinDrift[], history: PinHistory): 0 | 1 => (drift.length > 0 || history.state !== "on-history" ? 1 : 0);
+/**
+ * The CLI's exit code: 1 on any drifting mention, or when the pin is not a commit of the contract's history; 2 when
+ * the pin is no commit id at all, which is a mistake in the lock (as a schema failure is), not a drift.
+ */
+export const exitCodeOf = (drift: PinDrift[], history: PinHistory): 0 | 1 | 2 => (history.state === "malformed" ? 2 : drift.length > 0 || history.state !== "on-history" ? 1 : 0);
 
-/** CLI: `tsx src/pin-check.ts <repository> [--pin fabric-contract.lock.json] [--exclude <path>]...` */
-async function main(argv: string[]): Promise<number> {
-  const root = path.resolve(argv[0] ?? ".");
-  const pinIndex = argv.indexOf("--pin");
-  const pinFile = path.resolve(root, pinIndex >= 0 ? argv[pinIndex + 1] ?? "" : "fabric-contract.lock.json");
-  const excluded = argv.flatMap((value, index) => (argv[index - 1] === "--exclude" ? [value] : []));
-  const pin = JSON.parse(await readFile(pinFile, "utf8")) as ContractPin;
-  const files = await Promise.all((await walk(root, root, [path.relative(root, pinFile), ...excluded])).map(async (file) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") })));
+/** The lock's problems against `contract-pin.schema.json`, one line each; a commit of the wrong shape is `malformed`. */
+export async function lockProblems(lock: unknown): Promise<string[]> {
+  const result = validateDocument(await createValidator(), PIN_SCHEMA, lock);
+  const problems = new Set<string>();
+  for (const error of result.errors) {
+    if (error.instancePath === "/commit") {
+      const commit = (lock as { commit: unknown }).commit;
+      problems.add(historyMessage({ state: "malformed", commit: typeof commit === "string" ? commit : JSON.stringify(commit) }, "") as string);
+      continue;
+    }
+    const where = error.instancePath || "the lock";
+    const allowed = error.keyword === "const" ? `: it must be ${JSON.stringify(error.params.allowedValue)}`
+      : error.keyword === "additionalProperties" ? `: ${JSON.stringify(error.params.additionalProperty)} is not a member of a pin`
+        : error.keyword === "enum" ? `: one of ${(error.params.allowedValues as unknown[]).map((value) => JSON.stringify(value)).join(", ")}`
+          : ` ${error.message}`;
+    problems.add(`${where}${allowed}`);
+  }
+  return [...problems];
+}
+
+export interface PinCheckIo {
+  out: (line: string) => void;
+  err: (line: string) => void;
+  /** The contract checkout whose history the pin is checked against; default this kit's own. */
+  contractRoot?: string;
+  git?: (args: string[]) => string;
+}
+
+const USAGE = `usage: pin:check <repository> [--pin <file>] [--exclude <path>]... [--include-dated]`;
+const defaultIo: PinCheckIo = { out: (line) => console.log(line), err: (line) => console.error(line) };
+
+/** CLI: `tsx src/pin-check.ts <repository> [--pin fabric-contract.lock.json] [--exclude <path>]... [--include-dated]` */
+export async function main(argv: string[], io: PinCheckIo = defaultIo): Promise<0 | 1 | 2> {
+  const positional: string[] = [];
+  const excluded: string[] = [];
+  let pinArgument: string | undefined;
+  let includeDated = false;
+  for (let index = 0; index < argv.length; index += 1) {
+    const value = argv[index] as string;
+    if (value === "--include-dated") includeDated = true;
+    else if (value === "--pin" || value === "--exclude") {
+      const next = argv[index + 1];
+      if (next === undefined || next.startsWith("--")) {
+        io.err(`${value} needs a path; ${USAGE}`);
+        return 2;
+      }
+      if (value === "--pin") pinArgument = next;
+      else excluded.push(path.normalize(next).replace(/[\\/]+$/, ""));
+      index += 1;
+    } else if (value.startsWith("--")) {
+      io.err(`unknown option ${value}; ${USAGE}`);
+      return 2;
+    } else positional.push(value);
+  }
+  if (positional.length > 1) {
+    io.err(`one repository, not ${positional.length}; ${USAGE}`);
+    return 2;
+  }
+  const root = path.resolve(positional[0] ?? ".");
+  if (!(await stat(root).then((entry) => entry.isDirectory(), () => false))) {
+    io.err(`no repository folder at ${root}; ${USAGE}`);
+    return 2;
+  }
+  const pinFile = path.resolve(root, pinArgument ?? LOCK_FILE);
+  let text: string;
+  try {
+    text = await readFile(pinFile, "utf8");
+  } catch {
+    io.err(`no ${path.basename(pinFile)} at ${pinFile}; create one: {contract, version, repository, commit} (schemas/contract-pin.schema.json)`);
+    return 2;
+  }
+  let lock: unknown;
+  try {
+    lock = JSON.parse(text);
+  } catch (error) {
+    io.err(`${pinFile} is not JSON (${(error as Error).message}); a pin is {contract, version, repository, commit} (schemas/contract-pin.schema.json)`);
+    return 2;
+  }
+  const problems = await lockProblems(lock);
+  if (problems.length > 0) {
+    io.err(`${pinFile} is not a contract pin (schemas/contract-pin.schema.json):`);
+    for (const problem of problems) io.err(`  ${problem}`);
+    return 2;
+  }
+  const pin = lock as ContractPin;
+  const files = await Promise.all((await walk(root, root, [path.relative(root, pinFile), ...excluded], includeDated)).map(async (file) => ({ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") })));
   const drift = findPinDrift(files, pin);
-  for (const item of drift) console.error(item.message);
-  const contractRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const history = pinHistory(pin.commit, contractRoot);
-  if (history.state === "off-history") console.error(`the pin ${pin.commit} is in this contract checkout but not on its history (${history.base}): repin to a commit of ${history.base}`);
-  if (history.state === "absent") console.error(`the pin ${pin.commit} is not in this contract checkout: run git fetch in the contract and check again; if it is still absent, no published history holds it`);
-  if (history.state === "unreadable") console.error(`the pin cannot be checked against the contract's history: ${history.reason}`);
-  console.log(drift.length ? `${drift.length} mention(s) drift from the pin` : `every contract mention equals the pin ${pin.commit}`);
-  return exitCodeOf(drift, history);
+  for (const item of drift) io.err(item.message);
+  const history = pinHistory(pin.commit, io.contractRoot ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), io.git);
+  const failure = historyMessage(history, pin.commit);
+  if (failure) io.err(failure);
+  if (drift.length > 0) io.err(`${drift.length} mention(s) drift from the pin`);
+  const code = exitCodeOf(drift, history);
+  // Exit 0 means no drift and a pin on the history, so `history` is `on-history` here and carries its base.
+  if (code === 0) io.out(`every contract mention equals the pin ${pin.commit}, and the pin is on the contract's history (${(history as { base: string }).base})`);
+  return code;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = await main(process.argv.slice(2));
+/** Runs `main` when this file is the process's entry point; a test calls it with another entry to see it stay idle. */
+export async function runIfEntry(moduleUrl: string, argv: string[], run: (args: string[]) => Promise<number> = main): Promise<void> {
+  if (argv[1] !== undefined && moduleUrl === pathToFileURL(argv[1]).href) process.exitCode = await run(argv.slice(2));
 }
+
+await runIfEntry(import.meta.url, process.argv);
 // #endregion pin-check

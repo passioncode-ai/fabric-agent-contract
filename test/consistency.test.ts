@@ -131,21 +131,21 @@ describe("pin:check: the pin is a commit of the contract's history", () => {
     return "";
   };
   it("accepts a pin on origin/main's history and refuses one off it, such as a commit a rewrite left behind", () => {
-    expect(pinHistory("c55f2d5", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
-    expect(pinHistory("20a818e6", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
+    expect(pinHistory("20a818e648a4c09a60df0126d11626922e8b9094", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
   });
   it("falls back to HEAD without origin/main, refuses a pin that is no hash, and says when it cannot read the checkout", () => {
-    expect(pinHistory("c55f2d5", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
-    expect(pinHistory("main", ".", git(true)).state).toBe("off-history");
-    expect(pinHistory("c55f2d5", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
+    expect(pinHistory("main", ".", git(true)).state).toBe("malformed");
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
   });
   it("tells a commit this checkout has not fetched from one off the history, and fails the CLI on every state but on-history", () => {
-    expect(pinHistory("7e4ac91", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
+    expect(pinHistory("7e4ac91000000000000000000000000000000000", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
     expect(exitCodeOf([], { state: "on-history", base: "origin/main" })).toBe(0);
     for (const history of [{ state: "off-history", base: "origin/main" }, { state: "absent", base: "origin/main" }, { state: "unreadable", reason: "x" }] as const) expect(exitCodeOf([], history)).toBe(1);
     expect(exitCodeOf([{ path: "README.md", line: 1, found: "abc1234", message: "m" }], { state: "on-history", base: "origin/main" })).toBe(1);
   });
   it("finds this repository's own main commit on its history", () => {
-    expect(pinHistory("ca4cca7", projectRoot()).state).toBe("on-history");
+    expect(pinHistory("ca4cca7ad93183cdbd8c82084004222e6ba0383b", projectRoot()).state).toBe("on-history");
   });
 });
