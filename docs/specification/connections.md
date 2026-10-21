@@ -61,11 +61,12 @@ No string member carries a credential or a URL with one. What counts is defined 
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
 a store `sk-Prod-eu-west-1-db`, a URL path holding `sk-learn-classifier-v2` or a URL path segment of 40 or more mixed
-characters (a Google Docs or Notion page id), hides the whole declaration; its author removes a model id from the text
-or declares it as a model connection of its own whose `target` is the id, drops the link, or renames a target that is
-the author's own name. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower
-by the word start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a
-model's `target` outside a URL; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
+characters (a Google Docs document id, or a Notion link whose segment joins the page title and its id; a bare Notion
+id is lower-case hex), hides the whole declaration; its author removes a model id from the text or declares it as a
+model connection of its own whose `target` is the id, drops the link, or renames a target that is the author's own
+name. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word
+start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a model's
+`target` outside a URL; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 
@@ -73,7 +74,9 @@ model's `target` outside a URL; wider by the Telegram bot token. Whether the sha
 invalid against the schema, names an `id` twice or carries a credential is not declared and is reported; a host shows
 the agent as having declared nothing and says why, and never trusts a connection as authority (it is data, as every
 well-known member is). A valid list comes back with `failing` set on each connection a `degraded[].source` names. A
-host resolves a `service` target to an installed agent to draw the chain.
+service that names a failing connection in `degraded[]` reports a status other than `ready` (`FAC-SEM-011`); a
+connection that is down while the service stays ready is shown by its `state` alone. A host resolves a `service`
+target to an installed agent to draw the chain.
 
 ## Semantic rules
 

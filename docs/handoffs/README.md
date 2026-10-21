@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-21 connections](2026-10-21-connections.md) | DEC-0096 (CT-70) | open, branch `agent/connections-extension-20261021` |
+| [2026-10-21 connections](2026-10-21-connections.md) | DEC-0096 (CT-70) | merged, #135 `bbebae6` |
 | [2026-10-20 final pass](2026-10-20-final-pass.md) | DEC-0089 to DEC-0095 (CT-57, CT-58, CT-60 to CT-63, CT-65) | merged, #133 `ca4cca7` |
 | [2026-10-20 unmeasured calls](2026-10-20-unmeasured-calls.md) | DEC-0091 (CT-62) | merged, #127 `c90e31b` |
 | [2026-10-20 resolve pending](2026-10-20-resolve-pending.md) | DEC-0092 (CT-63) | merged, #128 `0de7640` |
