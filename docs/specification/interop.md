@@ -20,8 +20,17 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-Both keys are the constants in [`src/extensions.ts`](../../src/extensions.ts). The
-documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
+The contract defines five extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+
+| Key | Page |
+|---|---|
+| `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1` | [service](service.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` | this page |
+| `https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1` | [memory and learning](memory-and-learning.md#wire-memory01) (DEC-0023) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1` | [embedded dashboard](embedded-dashboard.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
+
+The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
 ADR-0003 and design used — host `passioncode.ai`, path `/fabric/extensions/…` — is not a
 key of this contract; consumers use the constants above.

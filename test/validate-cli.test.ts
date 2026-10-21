@@ -645,3 +645,12 @@ describe("the third unit reading's cases (contract review 2026-10-21)", () => {
     expect(out).toContain("the entry names no manifest");
   });
 });
+
+describe("the third product reading's cases (contract review 2026-10-21)", () => {
+  it("the extension-key hint's help lists every key the contract defines", async () => {
+    const { EXTENSION_KEYS } = await import("../src/extensions.js");
+    const page = readFileSync(path.join(root, "docs/specification/interop.md"), "utf8");
+    const section = page.slice(page.indexOf("## Extension key"), page.indexOf("\n## ", page.indexOf("## Extension key") + 3));
+    for (const key of Object.values(EXTENSION_KEYS)) expect(section).toContain(key);
+  });
+});

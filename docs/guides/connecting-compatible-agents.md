@@ -95,6 +95,7 @@ The descriptor, `<id>.<instance>.json` in the services folder:
     "data": "~/Library/Application Support/example-agent",
     "logs": ["~/Library/Logs/example-agent/service.log"]
   },
+  "fabricManifest": "~/Library/Application Support/example-agent/fabric-agent.json",
   "installedAt": "2026-10-21T09:00:00Z",
   "installedBy": "example-agent service install 0.1.0"
 }

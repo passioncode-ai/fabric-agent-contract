@@ -36,8 +36,8 @@ Pick the row that describes your agent. Each names what to read, what to write, 
 | A coding agent run as a local runner (Claude Code, Codex, Cursor and others) | [the local-runner profile](docs/specification/profiles.md#local-runner-profile), [runners](docs/specification/runners.md) | a [manifest](schemas/manifest.schema.json) whose capability uses the `local-runner` profile | [`manifest-local.json`](fixtures/positive/manifest-local.json), [`catalogue/coding-agents.json`](catalogue/coding-agents.json) | `pnpm validate <file>` |
 
 `pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` exits 0 when the document is clean, 1 when it
-has a problem and 2 on a usage error. The [guide](docs/guides/connecting-compatible-agents.md) walks each row with
-minimal examples, and the [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) scaffolds
+has a problem and 2 on a usage error. The [guide](docs/guides/connecting-compatible-agents.md) walks the service, stdio and
+local-runner rows with minimal examples; for an A2A peer, its profile and the fixture above are the example, and the [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) scaffolds
 and probes each kind.
 
 ## Start here
