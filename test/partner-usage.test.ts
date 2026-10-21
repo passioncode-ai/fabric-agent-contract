@@ -30,4 +30,10 @@ describe("partner usage (DEC-0090 item 2)", () => {
     expect(partnerUsage({ usage, publishers: ["acme"], step: "day" })).toMatchObject({ cells: expect.any(Array) });
     expect(partnerUsage({ usage: [...usage, usage[0]], publishers: ["acme"], step: "day" })).toEqual({ fault: "input-invalid" });
   });
+  // One cell holding every row (one agent, the period). A cost list copied per row made this quadratic: 16 s at load 70
+  // on 2026-10-21, against about 0.1 s linear. Not a clock bound: the ceiling is two orders above the linear time.
+  it("answers 100 000 rows in one cell without quadratic work", () => {
+    const oneCell = Array.from({ length: 100_000 }, () => ({ agentRef: "urn:fabric:agent:acme:a0", day: "2026-10-12", calls: 1, unpricedCalls: 0, costUsd: 1 }));
+    expect(partnerUsage({ usage: oneCell, publishers: ["acme"], step: "period" })).toMatchObject({ cells: [{ calls: 100_000, costUsd: 100_000 }] });
+  }, 30_000);
 });

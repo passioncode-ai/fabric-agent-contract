@@ -22,12 +22,11 @@ statements fixed in the branch. Each decision's own handoff names its readings.
 
 ## Open
 
-- Board posts for CT-58 (thread `6e66a023`), CT-60 (thread `617c8cbe`) and CT-65 (Project Observatory and the first
-  organization server): Fabric was down for its 0.3.7 release at the merges. Their texts are in this session's
-  transcript; the next session sends them with the keys `ct58-merged-6e66a023-20261020`,
-  `ct60-merged-617c8cbe-20261020`, `ct65-merged-observatory-orgserver-20261020`.
-- The products' adoption: backlog rows CT-58, CT-60 to CT-65.
-- New rows from the readings: CT-64, CT-66, CT-67, CT-68, CT-69.
+- The three board posts that waited on Fabric's release were sent on 2026-10-20 at 10:33 UTC: CT-58 on thread
+  `6e66a023` (message `b1064b69`), CT-60 on `617c8cbe` (`9dd4ed1a`), CT-65 to Project Observatory and the first
+  organization server (thread `c108c14e`, `2de37210`).
+- The products' adoption: backlog rows CT-57 to CT-63 and CT-65.
+- New rows from the readings: CT-64 (a decision), CT-66, CT-67, CT-68, CT-69.
 - Not done in this pass: CT-30 and CT-44 (nobody named them blocking).
 
 ## Decisions
@@ -42,4 +41,4 @@ statements fixed in the branch. Each decision's own handoff names its readings.
 
 ## Next task
 
-Send the three board posts above, then take CT-64 (what a collector sends for a session with no Project).
+Done: the posts are sent. Next: DEC-0096 (`extensions/connections/0.1`, CT-70), then CT-64.

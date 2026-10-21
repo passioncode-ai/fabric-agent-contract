@@ -59,6 +59,12 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     named.notMeasured = [...named.notMeasured, "checks"];
     expect(paths(named)).toEqual(["FAC-SEM-126 /checks"]);
   });
+  it("counts a check's pass rate as judged: it names the judge", () => {
+    const value = ok();
+    value.quality = { sampled: 0, helpedYes: 0, helpedPartly: 0, helpedNo: 0 };
+    value.judgeModel = null;
+    expect(paths(value)).toEqual(["FAC-SEM-126 /judgeModel"]);
+  });
   it("lets the median equal the 90th percentile", () => {
     const value = ok();
     value.nobodyDropped.firstReplyP50Ms = value.nobodyDropped.firstReplyP90Ms;

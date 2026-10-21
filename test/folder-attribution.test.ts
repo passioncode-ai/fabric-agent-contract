@@ -269,8 +269,15 @@ describe("totality: every function answers and never throws", () => {
       run();
       return performance.now() - started;
     }));
-    const small = best(n);
-    const large = best(4 * n);
+    // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth (x16 for
+    // x4 input) fails every try.
+    let small = 0;
+    let large = 0;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      small = best(n);
+      large = best(4 * n);
+      if (large < 8 * small + 300) break;
+    }
     expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(8 * small + 300);
   };
   it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {

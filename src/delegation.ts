@@ -316,7 +316,7 @@ export function chainDepth(act: unknown): number {
 
 function chainOf(act: Actor): string[] {
   const chain: string[] = [];
-  for (let node: Actor | PartnerActor | undefined = act; node; node = "act" in node ? node.act : undefined) chain.push("partner" in node ? node.partner : node.sub);
+  for (let node: Actor | PartnerActor | undefined = act; node; node = "act" in node ? node.act : undefined) chain.push(isPartnerActor(node) ? node.partner : node.sub);
   return chain;
 }
 
@@ -547,7 +547,7 @@ export function taskWindowKey(meterClaims: Pick<DelegationClaims, "task" | "act"
   if (!meterClaims.grant.includes(grantRef)) throw new RangeError("the meter checks only a grant its verified token names");
   if (meterClaims.task !== undefined) return `task:${meterClaims.task}`;
   // A partner actor (DEC-0090) holds no session: the walk stops there.
-  for (let actor: Actor | PartnerActor | undefined = meterClaims.act; actor !== undefined && !("partner" in actor); actor = actor.act) {
+  for (let actor: Actor | PartnerActor | undefined = meterClaims.act; actor !== undefined && !isPartnerActor(actor); actor = (actor as Actor).act) {
     if (actor.session !== undefined) return `session:${actor.sub}:${actor.session}`;
   }
   return `grant:${grantRef}`;

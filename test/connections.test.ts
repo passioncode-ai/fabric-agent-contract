@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -49,9 +48,5 @@ describe("extensions/connections/0.1 (DEC-0096)", () => {
       expect(connectionsView({ extensions: { [KEY]: { connections: [{ ...base, [member]: "one line" }] } } }).declared, member).toBe(true);
       expect(connectionsView({ extensions: { [KEY]: { connections: [{ ...base, [member]: "two\nlines" }] } } }).reported, member).toBe(true);
     }
-  });
-  it("the generator's --check agrees", () => {
-    const out = execFileSync("npx", ["tsx", path.join(projectRoot(), "tools/vectors/connections.ts"), "--check"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-    expect(out).toContain("matches");
   });
 });

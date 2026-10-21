@@ -247,7 +247,8 @@ independent agent author and P-02 project operator.
   1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id` and bound devices.
   2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.
   3. The second entry is `device.health` with the device id -> the member sees the read of their device's state.
-- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose; reads of summaries are not listed, because summaries carry no person.
+  4. A third entry is a partner organization's read of the usage of its agents the member used (`activity.usage`, service `org:<partnerOrgId>`, role `partner`, per day or period, no device; DEC-0090) -> the member sees which partner read sums that include them.
+- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums; other reads of summaries are not listed, because summaries carry no person.
 - **Alt paths:** no read in the range -> the empty state says so.
 - **UI elements:** entry list, reader role, scope, device, purpose.
 - **States covered:** empty, success
@@ -430,9 +431,9 @@ independent agent author and P-02 project operator.
 - **Feature:** delegation
 - **Traces:** ST-014, FLW-11 (JTBD-07, JRN-06/#3)
 - **Entry point:** Fabric's approval prompt
-- **Preconditions:** a partner's agent calls `example-publisher` under a share grant (T2) with a delegation token; pushing a build is an effect that needs approval
+- **Preconditions:** an outside person's agent calls `example-publisher` under a share grant (T2) with a delegation token; pushing a build is an effect that needs approval
 - **Steps:**
-  1. The partner's agent asks for the push -> `example-publisher` refuses `approval-required` with the action's digest.
+  1. That agent asks for the push -> `example-publisher` refuses `approval-required` with the action's digest.
   2. The caller asks the hub -> Fabric shows the operator the push, the callee and who asks.
   3. Operator approves -> Fabric signs one approval (`method: prompt`) for that digest and callee, valid at most 24 hours.
   4. The caller repeats the call with it -> the callee checks the token, the grant, then the approval, consumes its `jti` and pushes.

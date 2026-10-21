@@ -136,8 +136,10 @@
 ### SCR-09: Access log
 
 - **Used by:** FLW-06
-- **Purpose:** show a member every read of their raw telemetry and of devices bound to them.
-- **Elements:** time, reader role, scope, device, range, purpose (primary action: open the organization's notice).
+- **Purpose:** show a member every read of their raw telemetry and of devices bound to them, and each partner
+  organization's read of usage sums that include them.
+- **Elements:** time, reader role (a person's role, or `partner` with the partner organization), scope, device, range,
+  purpose (primary action: open the organization's notice).
 - **States:** empty — no read in the range; success — entries newest first.
 - **Coverage:** `access-log.schema.json`, fixture `positive/access-log.json`
 - **Scenarios:** SCN-010

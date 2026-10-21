@@ -1,5 +1,8 @@
 # Handoff: DEC-0089, folder attribution (2026-10-19)
 
+> Annotated 2026-10-21: merged as #124 `ebfddce` on 2026-10-20; the roadmap row and `knowledge/agents-first.md` name it.
+> What is left is CT-57's adoption and CT-66; the next task is the final-pass handoff's (`2026-10-20-final-pass.md`).
+>
 > Annotated 2026-10-20: the shape of the session-start answer proposed below is superseded by DEC-0092
 > ([2026-10-20 resolve pending](2026-10-20-resolve-pending.md)): `resolveAnswer`, no `record` and no `row`.
 

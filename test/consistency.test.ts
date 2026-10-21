@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS, foreignExtensionKeys } from "../src/extensions.js";
-import { findPinDrift } from "../src/pin-check.js";
+import { findPinDrift, pinHistory } from "../src/pin-check.js";
 import { checkRuleCodes, contextProfileNames, schemaProfileKinds } from "../src/docs-check.js";
 import { ruleCodeFindings } from "../src/rule-codes.js";
 
@@ -119,5 +119,26 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
     expect(ruleCodeFindings(register(wrongKind), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("the register says y");
     const late = register(rows + "\n| `FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
     expect(ruleCodeFindings(late, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009 must be defined in a specification");
+  });
+});
+
+describe("pin:check: the pin is a commit of the contract's history", () => {
+  const git = (ancestor: boolean, hasOrigin = true) => (args: string[]) => {
+    if (args[0] === "rev-parse" && args.includes("origin/main")) { if (!hasOrigin) throw new Error("no origin"); return "abc\n"; }
+    if (args[0] === "rev-parse") return "abc\n";
+    if (args[0] === "merge-base") { if (!ancestor) throw new Error("not an ancestor"); return ""; }
+    return "";
+  };
+  it("accepts a pin on origin/main's history and refuses one off it, such as a commit a rewrite left behind", () => {
+    expect(pinHistory("c55f2d5", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
+    expect(pinHistory("20a818e6", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
+  });
+  it("falls back to HEAD without origin/main, refuses a pin that is no hash, and says when it cannot read the checkout", () => {
+    expect(pinHistory("c55f2d5", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
+    expect(pinHistory("main", ".", git(true)).state).toBe("off-history");
+    expect(pinHistory("c55f2d5", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
+  });
+  it("finds this repository's own main commit on its history", () => {
+    expect(pinHistory("ca4cca7", projectRoot()).state).toBe("on-history");
   });
 });

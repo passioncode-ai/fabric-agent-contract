@@ -3,10 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0097` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
-
-**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
-heading here is held by an open branch, and its reservation is in the counter's log)
+**Next free ID:** `DEC-0097` (the CAS counter's next value when this line was last written; read
+`refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
@@ -5864,6 +5862,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-20
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-65.
+- **Annotated (2026-10-21):** the counter commit its Source cites (`4c4598f`) is no longer on origin's SEM chain: the
+  2026-10-21 reservation force-updated the ref (`4c4598f...b52fc3d`), the receipt-chain defect CT-44 records.
 - **Decision:** in [devices](specification/devices.md#enrollment):
   1. `key.storage` admits `file`: an owner-only PKCS#8 file. A file-held key is `exportable: true`, and every other
      store `exportable: false`; the schema ties the two, so a verifier always knows whether the key can be copied, and a
@@ -5905,6 +5905,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-20
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-61.
+- **Annotated (2026-10-21):** the counter commit its Source cites (`4c4598f`) is no longer on origin's SEM chain: the
+  2026-10-21 reservation force-updated the ref (`4c4598f...b52fc3d`), the receipt-chain defect CT-44 records.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a

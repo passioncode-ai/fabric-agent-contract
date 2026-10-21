@@ -1,4 +1,5 @@
 // #region pin-check — docs: docs/specification/versioning.md#one-contract-pin
+import { execFileSync } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -46,6 +47,36 @@ export function findPinDrift(files: Array<{ path: string; text: string }>, pin: 
   return drift;
 }
 
+/** How a pin stands against the contract's history: on it, off it, or not checkable here. */
+export type PinHistory = { state: "on-history"; base: string } | { state: "off-history"; base: string } | { state: "unreadable"; reason: string };
+
+/**
+ * Whether `commit` is a commit of the contract's published history: an ancestor of `origin/main` in the contract
+ * checkout at `contractRoot` (or of `HEAD` where it has no `origin/main`). A pin that no checkout holds, or that a
+ * rewritten history left behind, is `off-history`; a checkout git cannot read is `unreadable`, which the CLI fails on
+ * too. `git` is injected for tests.
+ */
+export function pinHistory(commit: string, contractRoot: string, git: (args: string[]) => string = (args) => execFileSync("git", ["-C", contractRoot, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })): PinHistory {
+  if (!/^[0-9a-f]{7,40}$/.test(commit)) return { state: "off-history", base: "(none)" };
+  let base: string;
+  try {
+    base = git(["rev-parse", "--verify", "--quiet", "origin/main"]).trim() ? "origin/main" : "HEAD";
+  } catch {
+    base = "HEAD";
+  }
+  try {
+    git(["rev-parse", "--verify", "--quiet", `${base}^{commit}`]);
+  } catch {
+    return { state: "unreadable", reason: `the contract checkout at ${contractRoot} has no ${base}` };
+  }
+  try {
+    git(["merge-base", "--is-ancestor", commit, base]);
+    return { state: "on-history", base };
+  } catch {
+    return { state: "off-history", base };
+  }
+}
+
 async function walk(root: string, directory: string, excluded: string[]): Promise<string[]> {
   const out: string[] = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -69,8 +100,12 @@ async function main(argv: string[]): Promise<number> {
   const files = await Promise.all((await walk(root, root, [path.relative(root, pinFile), ...excluded])).map(async (file) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") })));
   const drift = findPinDrift(files, pin);
   for (const item of drift) console.error(item.message);
+  const contractRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+  const history = pinHistory(pin.commit, contractRoot);
+  if (history.state === "off-history") console.error(`the pin ${pin.commit} is not a commit of the contract's history (${history.base}); fetch the contract and repin`);
+  if (history.state === "unreadable") console.error(`the pin cannot be checked against the contract's history: ${history.reason}`);
   console.log(drift.length ? `${drift.length} mention(s) drift from the pin` : `every contract mention equals the pin ${pin.commit}`);
-  return drift.length ? 1 : 0;
+  return drift.length || history.state !== "on-history" ? 1 : 0;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -118,6 +118,7 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a reader of support quality (a voice-of-the-customer agent) | recognises the payload by `data.value.kind`, never by `data.schema`; reads a `null` metric as not measured, never as `0`; reads the payload only at a revision it accepts (`support-quality-daily/1`); keeps, per service, channel and day, the latest event (the greatest id in that service's feed) | DEC-0095 | ([support quality](support-quality.md#the-payload)) |
 | a service declaring what it uses (fabric-agent-adapter's kits, any service) | writes `extensions/connections/0.1` valid against `service-connections-extension.schema.json`, each `id` once, no credential, `state` from its own health checks and a `degraded[].source` equal to the failing connection's `id` | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, vectors `fixtures/vectors/connections.json` ([connections](connections.md)) |
 | a host reading what an agent uses (Fabric Dashboards, Fabric) | reads the key only as `connectionsView` answers: an invalid value, a repeated `id` or a credential is not declared and is reported; never trusts a connection as authority; runs `fixtures/vectors/connections.json` in its gate | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, `src/connections.ts` `connectionsView` ([connections](connections.md#reading-it)) |
+| a host showing a service's usage report (Fabric Dashboards, the adapter's checker) | shows a cost as a lower bound while `unpricedCalls` is above 0 and the day's tokens as a lower bound while `unmeasuredCalls` is above 0 | DEC-0065, DEC-0091; `FAC-SEM-025` | the host's own test; the report: `test/usage-rules.test.ts` ([service](service.md#usage-report)) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
@@ -228,11 +229,13 @@ other code in the semantic-rules table of the specification this table names.
 `test/consistency.test.ts` (G-13) fails when a code is allocated twice, defined in two rows anywhere
 in the specifications, given other kinds there than here, named by `src/` without a row here, named by
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
-register and carry no receipt. `FAC-SEM-125` was taken while the SEM counter's receipt chain was broken (DEC-0094's Source). `FAC-SEM-095` was
+register and carry no receipt. `FAC-SEM-125` and `FAC-SEM-126` have no receipt on origin's SEM chain (the defect CT-44 records; DEC-0094 and
+DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's run) and are not used. `FAC-SEM-095` was
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-128` (the next value of the CAS counter `refs/agent-sync/ids/SEM`)
+**Next free rule code:** `FAC-SEM-128` (the CAS counter's next value when this line was last written; read
+`refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|

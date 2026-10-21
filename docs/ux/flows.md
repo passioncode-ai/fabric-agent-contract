@@ -157,7 +157,8 @@ flowchart TD
 - **Traces:** ST-007 (JTBD-04, JRN-03/#3)
 - **Goal:** every read of the member's data is visible with its purpose
 - **Entry points:** the organization's member page; a link in the notice
-- **Success exit:** the access log lists reads of raw events and of devices bound to the member
+- **Success exit:** the access log lists reads of raw events and of devices bound to the member, and a partner
+  organization's reads of usage sums that include the member (DEC-0090)
 - **Task analysis:** sign in → the receiver resolves the member's `user.id` and bound devices → list `access-log/1` entries newest first.
 - **Rejected shape:** log only reads keyed by `user.id` — rejected because device health and check-ins reveal a person's device state too.
 - **Flow:**

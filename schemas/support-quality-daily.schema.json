@@ -135,7 +135,8 @@
         "minimum": 0,
         "maximum": 1
       },
-      "description": "Each rubric check's pass rate among its non-NA verdicts (language, addressed, policy_safe, routing, actionable, continuity in rubric v1); a check with no verdict that day is left out; null when nothing was judged. At the top level so data.value stays two levels deep (DEC-0070)."
+      "description": "Each rubric check's pass rate among its non-NA verdicts (language, addressed, policy_safe, routing, actionable, continuity in rubric v1); a check with no verdict that day is left out; null when nothing was judged. At the top level so data.value stays two levels deep (DEC-0070). Never empty: with no check judged it is null.",
+      "minProperties": 1
     },
     "stability": {
       "type": "object",
