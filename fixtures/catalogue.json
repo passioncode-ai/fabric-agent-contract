@@ -98,6 +98,7 @@
   {"name": "fabric-proposal-refused-with-approver", "schema": "fabric-proposal.schema.json", "path": "negative/fabric-proposal-refused-with-approver.json", "valid": false, "keyword": "false schema"},
   {"name": "learning-note-without-source", "schema": "learning-note.schema.json", "path": "negative/learning-note-without-source.json", "valid": false, "keyword": "required"},
   {"name": "service-well-known", "schema": "service-well-known.schema.json", "path": "positive/service-well-known.json", "valid": true},
+  {"name": "service-well-known-connections", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-connections.json", "valid": true},
   {"name": "service-events-page", "schema": "service-events-page.schema.json", "path": "positive/service-events-page.json", "valid": true},
   {"name": "service-login-code", "schema": "service-login-code.schema.json", "path": "positive/service-login-code.json", "valid": true},
   {"name": "service-origin-not-loopback", "schema": "service-descriptor.schema.json", "path": "negative/service-descriptor-lan-origin.json", "valid": false, "keyword": "pattern"},

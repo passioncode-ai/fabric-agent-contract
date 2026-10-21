@@ -1,0 +1,741 @@
+{
+  "about": "Vectors for extensions/connections/0.1 (DEC-0096), written by tools/vectors/connections.ts, never by hand. connectionsView(wellKnown) answers {declared, reported, connections}: declared with each connection and `failing` (a degraded[].source equal to its id), or reported (an invalid value, a repeated id, a credential) with no connections, or neither when the key is absent. The `errors` lines are the reference's own wording and not part of a vector.",
+  "cases": [
+    {
+      "name": "no key: nothing declared",
+      "input": {
+        "extensions": {}
+      },
+      "expected": {
+        "declared": false,
+        "reported": false,
+        "connections": []
+      }
+    },
+    {
+      "name": "not a document: nothing declared",
+      "input": null,
+      "expected": {
+        "declared": false,
+        "reported": false,
+        "connections": []
+      }
+    },
+    {
+      "name": "an empty list is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": []
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": []
+      }
+    },
+    {
+      "name": "a service, a connector and a model; a degraded source marks its connection failing",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "notify",
+                "kind": "service",
+                "target": "personal-communicator.default",
+                "capability": "communicator.notify",
+                "state": "ok",
+                "lastAt": "2026-10-20T09:00:00Z"
+              },
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              },
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              }
+            ]
+          }
+        },
+        "degraded": [
+          {
+            "source": "telegram",
+            "reason": "flood wait"
+          }
+        ]
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "notify",
+            "kind": "service",
+            "target": "personal-communicator.default",
+            "capability": "communicator.notify",
+            "state": "ok",
+            "lastAt": "2026-10-20T09:00:00Z",
+            "failing": false
+          },
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads the operator chat",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": true
+          },
+          {
+            "id": "writer",
+            "kind": "model",
+            "target": "openrouter/xiaomi/mimo-v2.6-pro",
+            "state": "unknown",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "an id named twice",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "notify",
+                "kind": "service",
+                "target": "personal-communicator.default",
+                "capability": "communicator.notify",
+                "state": "ok",
+                "lastAt": "2026-10-20T09:00:00Z"
+              },
+              {
+                "id": "notify",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "capability on a connector",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s",
+                "capability": "telegram.read"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an unknown kind",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "queue",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an unknown state",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "broken",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an extra member (a call count is the usage report's)",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "notify",
+                "kind": "service",
+                "target": "personal-communicator.default",
+                "capability": "communicator.notify",
+                "state": "ok",
+                "lastAt": "2026-10-20T09:00:00Z",
+                "calls": 12
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a reason on two lines",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood\nwait"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a credential in a target",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "https://api.example.com/?token=sk-AAAAAAAAAAAAAAAAAAAAAAAA",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a credential in a reason",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "key sk-AAAAAAAAAAAAAAAAAAAAAAAA refused"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "65 connections",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "m0",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m1",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m2",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m3",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m4",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m5",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m6",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m7",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m8",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m9",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m10",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m11",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m12",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m13",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m14",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m15",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m16",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m17",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m18",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m19",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m20",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m21",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m22",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m23",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m24",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m25",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m26",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m27",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m28",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m29",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m30",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m31",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m32",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m33",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m34",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m35",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m36",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m37",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m38",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m39",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m40",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m41",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m42",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m43",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m44",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m45",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m46",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m47",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m48",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m49",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m50",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m51",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m52",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m53",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m54",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m55",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m56",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m57",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m58",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m59",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m60",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m61",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m62",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m63",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              },
+              {
+                "id": "m64",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "not an object",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": [
+            {
+              "id": "notify",
+              "kind": "service",
+              "target": "personal-communicator.default",
+              "capability": "communicator.notify",
+              "state": "ok",
+              "lastAt": "2026-10-20T09:00:00Z"
+            }
+          ]
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    }
+  ]
+}

@@ -115,6 +115,7 @@ export const NOT_SWEPT: readonly string[] = [
   "pipeline.schema.json",
   "runner-route-event.schema.json",
   "service-dashboard-extension.schema.json",
+  "service-connections-extension.schema.json",
   "schema-unsupported.schema.json",
   "service-login-code.schema.json",
   "work.schema.json",

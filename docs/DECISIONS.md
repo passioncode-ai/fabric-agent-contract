@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
+**Next free ID:** `DEC-0097` (the next value of the CAS counter `refs/agent-sync/ids/DEC`)
 
 **Next free ID:** `DEC-0096` (the next value of the CAS counter `refs/agent-sync/ids/DEC`; an ID below it with no
 heading here is held by an open branch, and its reservation is in the counter's log)
@@ -5985,3 +5985,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the chains on origin, the receipt-chain defect the CT-57 handoff records: DEC's (it moves from `a24dc0f`, next 90, to
   `7b857d5`, next 92) and `SEM-0124`'s `0bfa93f` (SEM moves from `5f2665c`, next 124, to `4c4598f`, next 127). No other
   branch uses DEC-0090 or `FAC-SEM-122` to `FAC-SEM-124`.
+
+### DEC-0096: What an agent uses: `extensions/connections/0.1` (`FAC-SEM-127`)
+
+- **Date:** 2026-10-21
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-70.
+- **Decision:** in [connections](specification/connections.md):
+  1. A service MAY declare, under the well-known document's `extensions`, the key
+     `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` with at most 64 connections, each
+     `{id, kind, target, capability?, state, label?, purpose?, reason?, lastAt?}`: `kind` `service`, `model`,
+     `connector`, `store` or `channel`; `capability` only on a `service`; `state` `ok`, `degraded`, `down` or `unknown`.
+  2. A `degraded[].source` equal to a connection's `id` is that connection failing.
+  3. `connectionsView` is the reading: an invalid value, a repeated `id` or a credential in a text member is not
+     declared and is reported (`FAC-SEM-127`); a connection is data, never authority.
+- **Why:** Fabric Dashboards' Connections tab (FD-78) needs the agent's own word for what it uses, and the operator
+  asked for the whole chain in the contract (board thread `131648c0`, 2026-10-20).
+- **Alternatives refused:** a call count (the usage report's); a `usedBy` list (the host derives it from every agent's
+  declaration); a `direction` member (not needed as data yet; `purpose` says it).
+- **Compatibility:** additive: a new extension key, ignored by a host that does not know it. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:** schema `schemas/service-connections-extension.schema.json`; code `src/connections.ts`,
+  `src/extensions.ts`, `src/semantic-rules.ts`; vectors `fixtures/vectors/connections.json` (written by
+  `tools/vectors/connections.ts`); fixtures `fixtures/positive/service-well-known-connections.json`,
+  `fixtures/semantic/service-well-known-connections-*`; tests `test/connections.test.ts`, `test/consistency.test.ts`,
+  `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`, `vitest.config.ts`; docs
+  `docs/specification/connections.md`, `service.md`, `conformance.md`, `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`,
+  `docs/backlog.md` (CT-70), `docs/handoffs/2026-10-21-connections.md`.
+- **Source:** Fabric Dashboards' proposal (board message `8866b1b4`, thread `131648c0`); fabric-agent-adapter's FAA-62
+  (`d463b07b`); DEC-0096 and `SEM-0127` reserved by git CAS (key `connections-extension-20261021`).
