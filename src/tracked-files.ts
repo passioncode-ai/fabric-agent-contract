@@ -35,8 +35,3 @@ function walk(directory: string): string[] {
   return output;
 }
 
-// `tsx src/tracked-files.ts '*.md'` prints the tracked Markdown files, one per line, for markdownlint.
-if (process.argv[1] && import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href) {
-  const suffix = (process.argv[2] ?? "").replace(/^\*/, "");
-  for (const file of trackedFiles(process.cwd())) if (file.endsWith(suffix)) process.stdout.write(`${path.relative(process.cwd(), file)}\n`);
-}

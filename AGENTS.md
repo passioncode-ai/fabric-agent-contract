@@ -29,6 +29,25 @@ conformance checker every provider is admitted by. It stands on its own; any hos
 | Consumer pin | `pnpm pin:check <consumer checkout>` |
 | MCP (register + proving call) | none — the contract serves no MCP tools; README "Quick start → MCP" |
 
+Every script in `package.json`, with what it needs beyond Node 22.13+ and the installed dependencies:
+
+| Script | What it does | Needs |
+|---|---|---|
+| `pnpm typecheck` | `tsc --noEmit` over `src/`, `test/` and `tools/` | |
+| `pnpm test` | every test with branch coverage and its per-file floors (`vitest.config.ts`) | `git` (the gate's file list) |
+| `pnpm test:fast` | the same tests without coverage | `git` |
+| `pnpm ux:lint` | the UX contract's integrity check (`docs/ux/lint.py`) | `python3` |
+| `pnpm docs:check` | links, Mermaid, decision paths, rule codes, then `pnpm lint:md` | |
+| `pnpm lint:md` | markdownlint over the tracked Markdown; the log carries the count, the errors and the summary | |
+| `pnpm pin:check <checkout>` | a consumer's pin of this contract | `git` |
+| `pnpm vectors:check` | every generator in `tools/vectors/` against its committed vector file (`tools/vectors/run.ts`) | |
+| `pnpm vectors:write` | writes every vector file from its generator; one generator alone: `tsx tools/vectors/<name>.ts --write` | |
+| `pnpm privacy:check` | the operator's private-name denylist, where it exists | `python3` |
+| `pnpm validate` | the author checker (added by the checker module) | |
+| `pnpm check` | the gate: typecheck, test, ux:lint, docs:check, privacy:check | `python3`, `git` |
+
+The fast loop while editing: `pnpm test:fast`, or one file with `pnpm vitest run test/<file>.test.ts`; then the gate.
+
 ## Local rules
 
 Then read `CONTEXT.md`, `docs/DOCMAP.md`, `docs/DECISIONS.md`, and the generated

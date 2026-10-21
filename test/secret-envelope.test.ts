@@ -40,7 +40,6 @@ const ctx = (over: Partial<OpenContext> = {}): OpenContext => ({
   now: new Date(vector.open.now),
   ...over
 });
-const clone = (): SecretEnvelope => JSON.parse(JSON.stringify(vector.envelope)) as SecretEnvelope;
 
 describe("HPKE base mode, DHKEM(P-256, HKDF-SHA256) / HKDF-SHA256 / AES-128-GCM", () => {
   it("reproduces RFC 9180 §A.3.1's encapsulated key and first ciphertext", () => {
