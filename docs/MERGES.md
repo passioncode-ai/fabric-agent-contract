@@ -1,4 +1,6 @@
 <!-- agent-sync:merge-log -->
+**Frozen since 2026-10-11.** Nothing is added here any more: read `git log --merges origin/main` for what landed, and the [handoffs index](handoffs/README.md) for why.
+
 
 # Merge log
 

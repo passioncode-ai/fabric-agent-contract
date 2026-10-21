@@ -627,8 +627,9 @@ placement run guards against rollback (DEC-0066).
   `SKILL.md` instruction package. Contract documents must qualify the term.
 - `Product manager` replaces Fabric's earlier `project manager` term: exactly one
   product manager owns each project's backlog and execution graph.
-- `Runtime` and `model` are separate concerns. Contract `0.1.0` selects a runtime;
-  model selection remains internal to the agent.
+- `Runtime` and `model` are separate concerns. Contract `0.1.0` selects a runtime; the agent chooses its model
+  within the classes a project allows. Model profiles, runner profiles and the model catalogue are contract objects
+  since DEC-0046 ([runners](docs/specification/runners.md#runner-and-model-profiles)).
 - `Activity event` (a service's events feed, `fabric-service/0.1`) and **Telemetry event**
   (`fabric-activity/0.1`, schema `telemetry-event`) are different records: the first is one sentence
   a service tells its operator, the second a measured interval or call. Specifications qualify which
