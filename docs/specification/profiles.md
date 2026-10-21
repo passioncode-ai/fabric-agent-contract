@@ -156,8 +156,8 @@ binding revision.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-056` | `manifest`, `provider-entry` | a stdio MCP server is declared for a project or on demand, never for every session (`scope: session`) |
-| `FAC-SEM-057` | `manifest`, `provider-entry`, `runner`, `runner-catalogue`, `service-descriptor` | no declared launch argument or MCP entry carries a credential |
+| <a id="fac-sem-056"></a>`FAC-SEM-056` | `manifest`, `provider-entry` | a stdio MCP server is declared for a project or on demand, never for every session (`scope: session`) |
+| <a id="fac-sem-057"></a>`FAC-SEM-057` | `manifest`, `provider-entry`, `runner`, `runner-catalogue`, `service-descriptor` | no declared launch argument or MCP entry carries a credential |
 
 Fixtures: `fixtures/semantic/stdio-scope-*.json`, `fixtures/semantic/command-line-*.json`; tests:
 [`test/service-hygiene.test.ts`](../../test/service-hygiene.test.ts).

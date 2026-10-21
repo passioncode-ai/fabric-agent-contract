@@ -16,7 +16,8 @@
  */
 export interface TextFile { path: string; text: string }
 
-const ROW = /^\|\s*`(FAC-SEM-\d{3})`\s*\|([^|]*)\|([^|]*)\|/gm;
+/** A row that starts with a code, after the code's own anchor `<a id="fac-sem-nnn"></a>` where the row carries one (REQ-05). */
+const ROW = /^\|\s*(?:<a id="([a-z0-9-]+)"><\/a>)?\s*`(FAC-SEM-\d{3})`\s*\|([^|]*)\|([^|]*)\|/gm;
 const NEXT_FREE = /\*\*Next free rule code:\*\* `FAC-SEM-(\d{3})`/;
 /** A code as a string literal: how a checker names it, directly or through a constant. */
 const LITERAL = /["'`](FAC-SEM-\d{3})["'`]/g;
@@ -34,22 +35,36 @@ const section = (text: string, heading: RegExp) => {
   return { inside: text.slice(start, end), outside: text.slice(0, start) + text.slice(end) };
 };
 
-export interface RegisterRow { code: string; kinds: string; home: string | undefined }
+export interface RegisterRow { code: string; kinds: string; home: string | undefined; anchor?: string }
 
 /** The register's rows, in file order, with the specification each names (undefined: defined in the register). */
 export function registerRows(register: string): RegisterRow[] {
   const { inside } = section(register, /^## Semantic rule codes$/m);
   return [...inside.matchAll(ROW)].map((match) => ({
-    code: match[1] ?? "",
-    kinds: kinds(match[2] ?? ""),
-    home: /\]\(([a-z-]+\.md)#semantic-rules\)/.exec(match[3] ?? "")?.[1]
+    code: match[2] ?? "",
+    kinds: kinds(match[3] ?? ""),
+    home: /\]\(([a-z-]+\.md)#semantic-rules\)/.exec(match[4] ?? "")?.[1],
+    ...(match[1] === undefined ? {} : { anchor: match[1] })
   }));
 }
 
 /** Every definition row a specification holds: a table row that starts with a code. */
-export function definitionRows(spec: string): Array<{ code: string; kinds: string }> {
-  return [...spec.matchAll(ROW)].map((match) => ({ code: match[1] ?? "", kinds: kinds(match[2] ?? "") }));
+export function definitionRows(spec: string): Array<{ code: string; kinds: string; anchor?: string }> {
+  return [...spec.matchAll(ROW)].map((match) => ({ code: match[2] ?? "", kinds: kinds(match[3] ?? ""), ...(match[1] === undefined ? {} : { anchor: match[1] }) }));
 }
+
+/** The anchor a code's definition row carries, so a finding's `help` link lands on it (REQ-05). */
+export const ruleAnchor = (code: string): string => code.toLowerCase();
+
+/**
+ * REQ-05: each allocated code's `help` link, `docs/specification/<page>.md#fac-sem-nnn`: the specification the register
+ * names, or the register's own page for a code it defines itself.
+ */
+export function ruleHelp(register: string, base = "docs/specification/"): Map<string, string> {
+  return new Map(registerRows(register).map((row) => [row.code, `${base}${row.home ?? "conformance.md"}#${ruleAnchor(row.code)}`]));
+}
+
+const unanchored = (file: string, code: string) => `${file}: ${code} is defined without its anchor <a id="${ruleAnchor(code)}"></a> (REQ-05)`;
 
 export function ruleCodeFindings(register: TextFile, specs: TextFile[], sources: TextFile[]): string[] {
   const findings: string[] = [];
@@ -62,6 +77,7 @@ export function ruleCodeFindings(register: TextFile, specs: TextFile[], sources:
     if (number(row.code) <= previous) findings.push(`${register.path}: ${row.code} is out of order (G-13)`);
     previous = Math.max(previous, number(row.code));
     if (row.home === undefined && number(row.code) > LAST_REGISTER_DEFINED) findings.push(`${register.path}: ${row.code} must be defined in a specification's semantic-rules table, not in the register (G-13)`);
+    if (row.home === undefined && row.anchor !== ruleAnchor(row.code)) findings.push(unanchored(register.path, row.code));
   }
 
   const nextFree = Number(NEXT_FREE.exec(register.text)?.[1] ?? Number.NaN);
@@ -72,7 +88,10 @@ export function ruleCodeFindings(register: TextFile, specs: TextFile[], sources:
   const documents = [...specs, { path: register.path, text: section(register.text, /^## Semantic rule codes$/m).outside }];
   const definitions = new Map<string, Array<{ path: string; kinds: string }>>();
   for (const document of documents) {
-    for (const row of definitionRows(document.text)) definitions.set(row.code, [...(definitions.get(row.code) ?? []), { path: document.path, kinds: row.kinds }]);
+    for (const row of definitionRows(document.text)) {
+      definitions.set(row.code, [...(definitions.get(row.code) ?? []), { path: document.path, kinds: row.kinds }]);
+      if (row.anchor !== ruleAnchor(row.code)) findings.push(unanchored(document.path, row.code));
+    }
   }
   for (const [code, rowsFound] of definitions) {
     const where = rowsFound.map((row) => row.path).join(", ");

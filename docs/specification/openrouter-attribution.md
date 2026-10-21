@@ -60,7 +60,7 @@ every product's app is public.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-098` | `openrouter-attribution` | the setting names a lower-case product slug, a printable-ASCII title of 1 to 100 characters with no space at either end, and at most two categories OpenRouter recognizes, each once (DEC-0065) |
+| <a id="fac-sem-098"></a>`FAC-SEM-098` | `openrouter-attribution` | the setting names a lower-case product slug, a printable-ASCII title of 1 to 100 characters with no space at either end, and at most two categories OpenRouter recognizes, each once (DEC-0065) |
 
 ## Consumers
 

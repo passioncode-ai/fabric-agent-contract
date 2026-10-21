@@ -171,7 +171,7 @@ describe("validateSessionHandoff(dir): a folder on disk", () => {
 describe("the specification", () => {
   it("defines SH-1…SH-13 once each and the three codes in its semantic-rules table", () => {
     for (let n = 1; n <= 13; n++) expect(spec.match(new RegExp(`\\*\\*SH-${n} — `, "g")), `SH-${n}`).toHaveLength(1);
-    for (const code of ["FAC-SEM-053", "FAC-SEM-054", "FAC-SEM-055"]) expect(spec).toMatch(new RegExp(`^\\| \`${code}\` \\|`, "m"));
+    for (const code of ["FAC-SEM-053", "FAC-SEM-054", "FAC-SEM-055"]) expect(spec).toMatch(new RegExp(`^\\| <a id="${code.toLowerCase()}"></a>\`${code}\` \\|`, "m"));
   });
 
   it("names the per-runtime rows the kit checks", () => {

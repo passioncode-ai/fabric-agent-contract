@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { KIND_OF_SCHEMA } from "../src/semantic-kinds.js";
 
 // Every positive fixture a single-document rule applies to passes the semantic rules: a rule that refused the
 // repository's own valid example would otherwise stay green (F-B-201, the 2026-10-11 board run).
@@ -10,52 +11,7 @@ const root = projectRoot();
 interface Entry { name: string; schema: string; path: string; valid: boolean }
 const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.json"), "utf8")) as Entry[];
 
-/** The rule kind that reads one document of a schema whole. */
-export const KIND_OF_SCHEMA: Readonly<Record<string, string>> = {
-  "comms-directory.schema.json": "comms-directory",
-  "interop-job.schema.json": "interop-job",
-  "comms-message.schema.json": "comms-message",
-  "activity-batch.schema.json": "activity-batch",
-  "fabric-proposal.schema.json": "proposal",
-  "versioned-setting.schema.json": "versioned-setting",
-  "service-events-page.schema.json": "service-events-page",
-  "device-check-in.schema.json": "device-check-in",
-  "openrouter-attribution.schema.json": "openrouter-attribution",
-  "approval.schema.json": "approval-claims",
-  "delegation-token.schema.json": "delegation-claims",
-  "estate-record.schema.json": "estate-record",
-  "enroll-token.schema.json": "enroll-token",
-  "fabric-package.schema.json": "package",
-  "governance.schema.json": "grant-spend",
-  "activity-summary.schema.json": "activity-summary",
-  "comms-submit.schema.json": "comms-submit",
-  "coordination.schema.json": "coordination",
-  "manifest.schema.json": "manifest",
-  "model-profile.schema.json": "model-profiles",
-  "provider.schema.json": "provider-entry",
-  "registry-models.schema.json": "model-catalogue",
-  "relay-frame.schema.json": "relay-frame",
-  "revocation-delta.schema.json": "revocation-delta",
-  "heartbeat.schema.json": "heartbeat",
-  "result.schema.json": "result",
-  "roles.schema.json": "roles",
-  "runner-profile.schema.json": "runner-profile",
-  "runner-route.schema.json": "runner-route",
-  "runners.schema.json": "runner-catalogue",
-  "secret-envelope.schema.json": "secret-envelope",
-  "service-descriptor.schema.json": "service-descriptor",
-  "service-usage.schema.json": "service-usage",
-  "support-quality-daily.schema.json": "support-quality-daily",
-  "service-well-known.schema.json": "service-well-known",
-  "session-handoff.schema.json": "session-handoff",
-  "settings-backup.schema.json": "settings-backup",
-  "spend-policy.schema.json": "spend-policy",
-  "telemetry-event.schema.json": "telemetry-event",
-  "window-lease.schema.json": "window-lease",
-  "entitlement.schema.json": "entitlement",
-  "entitlement-key-set.schema.json": "entitlement-key-set",
-  "share-registration.schema.json": "share-registration"
-};
+// The rule kind that reads one document of a schema whole is the registry's (REQ-02, src/semantic-kinds.ts).
 
 /**
  * Schemas with positive fixtures and no rule that reads one of their documents whole. Their rules, where they have

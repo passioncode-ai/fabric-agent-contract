@@ -21,7 +21,7 @@
   {"name": "conformance", "schema": "conformance-report.schema.json", "path": "positive/conformance-report.json", "valid": true},
   {"name": "conformance-report-unknown-status", "schema": "conformance-report.schema.json", "path": "negative/conformance-report-unknown-status.json", "valid": false, "keyword": "enum"},
   {"name": "wrong-contract-version", "schema": "manifest.schema.json", "path": "negative/manifest-wrong-version.json", "valid": false, "keyword": "const"},
-  {"name": "shell-string-not-array", "schema": "manifest.schema.json", "path": "negative/manifest-shell-string.json", "valid": false, "keyword": "oneOf"},
+  {"name": "shell-string-not-array", "schema": "manifest.schema.json", "path": "negative/manifest-shell-string.json", "valid": false, "keyword": "type"},
   {"name": "result-missing-not-verified", "schema": "result.schema.json", "path": "negative/result-missing-not-verified.json", "valid": false, "keyword": "required"},
   {"name": "learning-self-apply", "schema": "memory.schema.json", "path": "negative/learning-self-apply.json", "valid": false, "keyword": "const"},
   {"name": "context-allows-ambient", "schema": "execution-context.schema.json", "path": "negative/context-allows-ambient.json", "valid": false, "keyword": "const"},

@@ -13,6 +13,10 @@
 | policy | binding, scope, grant, role and data constraints | work quality |
 | checker | result acceptance for a specific node | unrelated claims or product outcomes |
 
+## The checker
+
+`pnpm validate <file or folder>` checks an author's own documents: it infers each file's schema (or takes `--schema`), runs the schema and the semantic rules that read it ([`src/semantic-kinds.ts`](../../src/semantic-kinds.ts)), checks a folder's descriptors, well-known documents, provider entries and manifests as pairs, and prints one line per problem with its path, rule and help link; it exits 0 clean, 1 on a problem and 2 on a usage error (`test/validate-cli.test.ts`). A hint (an extension key that is a near miss of one the contract defines, a profile version member on the wrong profile) and a classification marked `accepted` are printed as notes and never change the exit code, since a vendor key the contract does not know is legal.
+
 ## Conformance report
 
 A report pins contract version, subject, subject revision, check catalogue
@@ -289,15 +293,15 @@ for became a fix of `FAC-SEM-006`.
 
 | Code | Kind | Defined in | Receipt |
 |---|---|---|---|
-| `FAC-SEM-000` | any | here: the value checked is a JSON object | — |
-| `FAC-SEM-001` | `result` | here: a `succeeded` result lists no claim in `notVerified` (every reported claim is an acceptance claim, DEC-0064) | — |
-| `FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool, account references compared by normal form ([identifiers](identifiers.md), DEC-0076) | — |
-| `FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself (the schema's `selfApply: false` is the guarantee; the rule answers a schema-invalid input; approval separation is `FAC-SEM-094`, DEC-0064) | — |
-| `FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally | — |
-| `FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO | — |
-| `FAC-SEM-006` | `roles` | here: each project any active assignment scopes has exactly one active product manager; two spellings of one project id are one project ([identifiers](identifiers.md), DEC-0064, DEC-0076) | — |
-| `FAC-SEM-007` | `coordination` | here: a renew names the claim it renews | — |
-| `FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound | — |
+| <a id="fac-sem-000"></a>`FAC-SEM-000` | any | here: the value checked is a JSON object | — |
+| <a id="fac-sem-001"></a>`FAC-SEM-001` | `result` | here: a `succeeded` result lists no claim in `notVerified` (every reported claim is an acceptance claim, DEC-0064) | — |
+| <a id="fac-sem-002"></a>`FAC-SEM-002` | `execution-bundle` | here: the selected account is in the pinned project pool, account references compared by normal form ([identifiers](identifiers.md), DEC-0076) | — |
+| <a id="fac-sem-003"></a>`FAC-SEM-003` | `learning` | here: a learning proposal cannot apply itself (the schema's `selfApply: false` is the guarantee; the rule answers a schema-invalid input; approval separation is `FAC-SEM-094`, DEC-0064) | — |
+| <a id="fac-sem-004"></a>`FAC-SEM-004` | `promotion` | here: personal, credential or regulated content never promotes globally | — |
+| <a id="fac-sem-005"></a>`FAC-SEM-005` | `roles` | here: the estate has exactly one active CEO | — |
+| <a id="fac-sem-006"></a>`FAC-SEM-006` | `roles` | here: each project any active assignment scopes has exactly one active product manager; two spellings of one project id are one project ([identifiers](identifiers.md), DEC-0064, DEC-0076) | — |
+| <a id="fac-sem-007"></a>`FAC-SEM-007` | `coordination` | here: a renew names the claim it renews | — |
+| <a id="fac-sem-008"></a>`FAC-SEM-008` | `binding-bundle` | here: only an admitted provider revision is bound | — |
 | `FAC-SEM-009` | `service-observation` | [service](service.md#semantic-rules) | — |
 | `FAC-SEM-010` | `service-directory` | [service](service.md#semantic-rules) | — |
 | `FAC-SEM-011` | `service-well-known` | [service](service.md#semantic-rules) | — |

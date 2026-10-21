@@ -15,24 +15,30 @@
   ],
   "properties": {
     "protocol": {
+      "description": "Always fabric-provider/0.1 (docs/specification/provider.md).",
       "const": "fabric-provider/0.1"
     },
     "id": {
+      "description": "The entry's slug, equal to its file name's stem, providers/<id>.json (docs/specification/provider.md#rulings-dec-0017).",
       "$ref": "service-common.schema.json#/$defs/serviceId"
     },
     "providerId": {
+      "description": "The provider.id of the manifest this entry names, a URI (docs/specification/provider.md#rulings-dec-0017).",
       "$ref": "common.schema.json#/$defs/uri"
     },
     "name": {
+      "description": "The provider's name as a person reads it, 1 to 80 characters.",
       "type": "string",
       "minLength": 1,
       "maxLength": 80
     },
     "summary": {
+      "description": "One line on what the provider does, up to 200 characters.",
       "type": "string",
       "maxLength": 200
     },
     "manifest": {
+      "description": "The local path of the provider's manifest, a file named fabric-agent.json (docs/specification/provider.md#what-the-schema-adds-to-the-table).",
       "allOf": [
         {
           "$ref": "service-common.schema.json#/$defs/localPath"
@@ -44,88 +50,107 @@
       ]
     },
     "run": {
+      "description": "How a host starts or reaches the provider's MCP server (docs/specification/provider.md#what-the-schema-adds-to-the-table).",
       "type": "object",
       "required": [
         "mcp"
       ],
       "properties": {
         "mcp": {
-          "oneOf": [
-            {
-              "type": "object",
-              "required": [
-                "stdio"
-              ],
-              "properties": {
-                "stdio": {
-                  "type": "object",
-                  "required": [
-                    "command"
-                  ],
-                  "properties": {
-                    "command": {
-                      "$ref": "service-common.schema.json#/$defs/argv"
+          "description": "Either a stdio server or a loopback URL; the branch is chosen by the presence of stdio, so a mistake reports that branch's errors only (docs/specification/provider.md#what-the-schema-adds-to-the-table).",
+          "type": "object",
+          "if": {
+            "type": "object",
+            "required": [
+              "stdio"
+            ],
+            "properties": {
+              "stdio": true
+            }
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "stdio"
+            ],
+            "properties": {
+              "stdio": {
+                "description": "A stdio server the host starts.",
+                "type": "object",
+                "required": [
+                  "command"
+                ],
+                "properties": {
+                  "command": {
+                    "description": "The argv that starts the server: an absolute or home-relative executable, then its arguments, never a credential (docs/specification/profiles.md#no-secret-in-a-command-line).",
+                    "$ref": "service-common.schema.json#/$defs/argv"
+                  },
+                  "env": {
+                    "description": "Environment for the server; each value is a secret reference, secret-ref:NAME, never the secret (docs/specification/provider.md#semantic-rules).",
+                    "type": "object",
+                    "maxProperties": 64,
+                    "propertyNames": {
+                      "pattern": "^[A-Z_][A-Z0-9_]*$"
                     },
-                    "env": {
-                      "type": "object",
-                      "maxProperties": 64,
-                      "propertyNames": {
-                        "pattern": "^[A-Z_][A-Z0-9_]*$"
-                      },
-                      "additionalProperties": {
-                        "$ref": "#/$defs/secretRef"
-                      }
-                    },
-                    "scope": {
-                      "description": "DEC-0044, LC-19. Where a host starts this stdio server. project: for the sessions of a project that binds it, from that project's MCP configuration. on-demand (the default when absent): for the run that binds it, stopped when that run ends. session: in every session; spelled so that FAC-SEM-056 refuses it by name.",
-                      "enum": [
-                        "project",
-                        "on-demand",
-                        "session"
-                      ]
+                    "additionalProperties": {
+                      "$ref": "#/$defs/secretRef"
                     }
                   },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
+                  "scope": {
+                    "description": "DEC-0044, LC-19. Where a host starts this stdio server. project: for the sessions of a project that binds it, from that project's MCP configuration. on-demand (the default when absent): for the run that binds it, stopped when that run ends. session: in every session; spelled so that FAC-SEM-056 refuses it by name.",
+                    "enum": [
+                      "project",
+                      "on-demand",
+                      "session"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
             },
-            {
-              "type": "object",
-              "required": [
-                "url"
-              ],
-              "properties": {
-                "url": {
-                  "type": "string",
-                  "pattern": "^http://127\\.0\\.0\\.1:([1-9][0-9]{2,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])/mcp$"
-                }
-              },
-              "additionalProperties": false
-            }
-          ]
+            "additionalProperties": false
+          },
+          "else": {
+            "type": "object",
+            "required": [
+              "url"
+            ],
+            "properties": {
+              "url": {
+                "description": "A loopback Streamable HTTP endpoint, http://127.0.0.1:<port>/mcp, that the provider already serves.",
+                "type": "string",
+                "pattern": "^http://127\\.0\\.0\\.1:([1-9][0-9]{2,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])/mcp$"
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
     },
     "source": {
+      "description": "Where the provider's code comes from.",
       "type": "object",
       "properties": {
         "repository": {
+          "description": "The repository's URI.",
           "$ref": "common.schema.json#/$defs/uri"
         }
       },
       "additionalProperties": false
     },
     "installedAt": {
+      "description": "When the entry was written, an RFC 3339 UTC instant.",
       "$ref": "common.schema.json#/$defs/timestamp"
     },
     "installedBy": {
+      "description": "Who or what installed the provider, 1 to 200 characters.",
       "type": "string",
       "minLength": 1,
       "maxLength": 200
     },
     "extensions": {
+      "description": "Vendor data, keyed by an absolute URI (docs/specification/overview.md#extension-rule).",
       "$ref": "common.schema.json#/$defs/extensions"
     }
   },

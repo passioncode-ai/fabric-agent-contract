@@ -350,11 +350,12 @@ Read next: [the local-runner profile](../specification/profiles.md#local-runner-
 ## The checker
 
 `pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` reads a document or a folder, run from a
-checkout of this repository at the commit you pin ([the review's brief](../evidence/specs/2026-10-21-contract-review/brief.md),
-REQ-01). It infers the schema from the document,
-or takes `--schema`; runs the schema and then the semantic rules; and prints one line per problem with its path, its
-rule and a link to the rule. It exits 0 when everything is clean, 1 when a document has a problem, and 2 on a usage
-error. `--json` prints the same findings as JSON for a script or a CI step.
+checkout of this repository at the commit you pin. It infers the schema from the document, or takes `--schema`; runs
+the schema and then the semantic rules; checks a folder's descriptors, well-known documents, provider entries and
+manifests as pairs; and prints one line per problem with its path, its rule and a link to the rule. It exits 0 when
+everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
+letter away from the contract's, is printed as a note and does not fail the run. `--json` prints the same findings
+as JSON for a script or a CI step.
 
 ## Map an existing system
 

@@ -130,5 +130,5 @@ DL-20).
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-047` | `spend-policy` | the auto-approve threshold of a limited policy is at most its monthly limit; at most one offered option is preselected; "no project limit" is chosen only when it was offered |
-| `FAC-SEM-048` | `grant-spend` | a limited grant names each window once, and neither its per-call maximum nor its auto-approve threshold exceeds its smallest window |
+| <a id="fac-sem-047"></a>`FAC-SEM-047` | `spend-policy` | the auto-approve threshold of a limited policy is at most its monthly limit; at most one offered option is preselected; "no project limit" is chosen only when it was offered |
+| <a id="fac-sem-048"></a>`FAC-SEM-048` | `grant-spend` | a limited grant names each window once, and neither its per-call maximum nor its auto-approve threshold exceeds its smallest window |

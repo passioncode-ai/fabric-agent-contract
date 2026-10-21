@@ -86,7 +86,7 @@ target to an installed agent to draw the chain.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-127` | `service-well-known` | a value under the connections extension key is valid against `service-connections-extension.schema.json`, names each `id` once and carries no credential in any string member (`id`, `target`, `capability`, `label`, `purpose`, `reason`) (DEC-0096) |
+| <a id="fac-sem-127"></a>`FAC-SEM-127` | `service-well-known` | a value under the connections extension key is valid against `service-connections-extension.schema.json`, names each `id` once and carries no credential in any string member (`id`, `target`, `capability`, `label`, `purpose`, `reason`) (DEC-0096) |
 
 ## Compatibility
 

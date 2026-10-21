@@ -89,7 +89,7 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-092` | `estate-record`, `signing-credential` | a passkey that signs is a signing credential: its `rpId` is `sign.<domain>` (the first label `sign`, then at least two labels, lower case), and each origin it pins is `https://` on that RP ID or a host under it, with no port and no path |
+| <a id="fac-sem-092"></a>`FAC-SEM-092` | `estate-record`, `signing-credential` | a passkey that signs is a signing credential: its `rpId` is `sign.<domain>` (the first label `sign`, then at least two labels, lower case), and each origin it pins is `https://` on that RP ID or a host under it, with no port and no path |
 
 ## Who adopts it
 

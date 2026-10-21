@@ -27,6 +27,7 @@
     "pin:check": "tsx src/pin-check.ts",
     "vectors:check": "tsx tools/vectors/run.ts --check",
     "vectors:write": "tsx tools/vectors/run.ts --write",
+    "validate": "tsx src/validate-cli.ts",
     "privacy:check": "tsx src/privacy-check.ts",
     "check": "pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check && pnpm privacy:check"
   },

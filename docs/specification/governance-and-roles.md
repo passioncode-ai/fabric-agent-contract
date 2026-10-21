@@ -77,5 +77,5 @@ product manager (`FAC-SEM-006`), two spellings of one project id being one proje
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-094` | `learning`, `promotion` | an approved learning proposal or promotion names its approver, who is not its author, compared by normal form (DEC-0004, DEC-0012, DEC-0064, DEC-0076) |
-| `FAC-SEM-097` | `grant-window` | a standing grant's `expiresAt` is after its `startsAt`, both strict RFC 3339; given `{grant, at}`, an `active` grant is inside its window at `at` (DEC-0064) |
+| <a id="fac-sem-094"></a>`FAC-SEM-094` | `learning`, `promotion` | an approved learning proposal or promotion names its approver, who is not its author, compared by normal form (DEC-0004, DEC-0012, DEC-0064, DEC-0076) |
+| <a id="fac-sem-097"></a>`FAC-SEM-097` | `grant-window` | a standing grant's `expiresAt` is after its `startsAt`, both strict RFC 3339; given `{grant, at}`, an `active` grant is inside its window at `at` (DEC-0064) |

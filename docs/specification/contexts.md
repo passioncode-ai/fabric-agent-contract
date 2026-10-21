@@ -237,7 +237,7 @@ confirms. A membership in an organization another person controls does not run o
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-110` | `grant`, `estate-record` | a grant whose `principalKind` is `external` never has `context` `personal`; on an estate record, each of its `shareGrants[]` (DEC-0082) |
+| <a id="fac-sem-110"></a>`FAC-SEM-110` | `grant`, `estate-record` | a grant whose `principalKind` is `external` never has `context` `personal`; on an estate record, each of its `shareGrants[]` (DEC-0082) |
 
 | Kind | Input |
 |---|---|
