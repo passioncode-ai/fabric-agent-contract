@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { checkLinks, decisionPathFindings, mermaidBodies, outsideFences, scanFences } from "../src/docs-check.js";
 import { projectRoot } from "../src/contract.js";
 import { trackedFiles } from "../src/tracked-files.js";
@@ -25,6 +25,29 @@ describe("the gate's scope", () => {
       // Tracked and untracked-but-not-ignored files only: no ignored file, no other session's worktree.
       expect(files).toEqual([".gitignore", "a.md", "draft.md"]);
     } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("walks the directory tree when git is unavailable, skipping .git, .claude and node_modules, and says so once", () => {
+    const repo = mkdtempSync(path.join(tmpdir(), "untracked-"));
+    const savedPath = process.env.PATH;
+    const warnings: string[] = [];
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation((chunk: string | Uint8Array) => {
+      warnings.push(String(chunk));
+      return true;
+    });
+    try {
+      for (const dir of [".git", ".claude/worktrees/other", "node_modules/pkg", "docs/deep"]) mkdirSync(path.join(repo, dir), { recursive: true });
+      for (const file of [".git/HEAD", ".claude/worktrees/other/b.md", "node_modules/pkg/c.md", "a.md", "docs/deep/d.md"]) writeFileSync(path.join(repo, file), "# x\n");
+      // No git on PATH: execFileSync fails with ENOENT, as on a machine without git.
+      process.env.PATH = "";
+      const files = trackedFiles(repo).map((file) => path.relative(repo, file)).sort();
+      expect(files).toEqual(["a.md", path.join("docs", "deep", "d.md")]);
+      expect(warnings).toEqual(["tracked-files: git is unavailable; walking the directory tree instead\n"]);
+    } finally {
+      process.env.PATH = savedPath;
+      stderr.mockRestore();
       rmSync(repo, { recursive: true, force: true });
     }
   });

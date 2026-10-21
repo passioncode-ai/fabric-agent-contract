@@ -130,7 +130,9 @@ function listFindings(list: unknown[] | undefined, prefix: string): Finding[] {
   if (!list) return [{ code: "FAC-SEM-099", instancePath: prefix, message: "protocols is a list of protocol revisions" }];
   if (list.length === 0 || list.length > MAX_PROTOCOLS) return [{ code: "FAC-SEM-099", instancePath: prefix, message: `protocols lists 1 to ${MAX_PROTOCOLS} revisions` }];
   const findings: Finding[] = [];
-  const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-099", instancePath, message });
+  const flag = (instancePath: string, message: string): void => {
+    findings.push({ code: "FAC-SEM-099", instancePath, message });
+  };
   const byName = new Map<string, number[]>();
   const seen = new Set<string>();
   list.forEach((entry: unknown, i: number) => {

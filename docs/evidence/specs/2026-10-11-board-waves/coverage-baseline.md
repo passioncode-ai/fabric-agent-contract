@@ -194,3 +194,11 @@ whole set 7445 / 7518 (99.02 %).
 the measured set and reaches every branch, so its floor is 100. 117 plants, two equivalent, each other killed after its
 survivors were closed (`docs/handoffs/2026-10-19-folder-attribution.md`). Measured with `vitest run --coverage`: 77
 files, 5999 tests, whole set 7793 / 7866 (99.07 %).
+
+**Contract review REQ-15 (2026-10-21).** The gate's own checkers join the measured set, each at its measured floor:
+`src/docs-check.ts` 59 / 87 (67.81), `src/pipeline-check.ts` 121 / 144 (84.02), `src/rule-codes.ts` 50 / 65 (76.92),
+`src/seq-ranges.ts` 31 / 31, `src/service-feed.ts` 33 / 33, `src/settings-backup.ts` 34 / 34 and
+`src/tracked-files.ts` 4 / 4 (100 each; `tracked-files.ts` reaches its no-git walk through a new case in
+`test/docs-check.test.ts`, 0 / 4 before it). `src/proposal-rules.ts` (73 / 73) was measured through `src/*-rules.ts`
+without a floor of its own and now has 100. The whole-set floor rises from 86.85 % to 98.3 %: measured with
+`vitest run --coverage` on the REQ-15 branch, 83 files, 6265 tests, whole set 8384 / 8523 (98.36 %).

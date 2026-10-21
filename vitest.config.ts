@@ -12,12 +12,14 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/connections.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/entitlement.ts", "src/share-registration.ts", "src/job-limits.ts", "src/partner-usage.ts", "src/folder-attribution.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts", "src/pairing.ts", "src/enroll-token.ts", "src/pin-check.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/connections.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/entitlement.ts", "src/share-registration.ts", "src/job-limits.ts", "src/partner-usage.ts", "src/folder-attribution.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts", "src/pairing.ts", "src/enroll-token.ts", "src/docs-check.ts", "src/rule-codes.ts", "src/pipeline-check.ts", "src/tracked-files.ts", "src/seq-ranges.ts", "src/service-feed.ts", "src/settings-backup.ts", "src/pin-check.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
-        // The whole set: a new rule file is measured from its first commit, before it has its own floor.
-        branches: 86.85,
+        // The whole set: a new rule file is measured from its first commit, before it has its own floor. 86.85 until
+        // the contract review of 2026-10-21 (REQ-15) measured the set with the gate's own checkers in it: 98.36
+        // (8384 of 8523 branches), floored at 98.3.
+        branches: 98.3,
         // 97.16 until DEC-0083 moved the shared `indexed` helper, with its two covered branches, to src/findings.ts:
         // the same nine branches stay uncovered, out of 314 in place of 316.
         "src/activity-rules.ts": { branches: 97.13 },
@@ -84,7 +86,19 @@ export default defineConfig({
         "src/session-handoff.ts": { branches: 93.51 },
         "src/spend-rules.ts": { branches: 100 },
         "src/webauthn.ts": { branches: 100 },
-        "src/windows-token.ts": { branches: 100 }
+        "src/windows-token.ts": { branches: 100 },
+        // The gate's own checkers (REQ-15 of the contract review, 2026-10-21), each at its measured value. Below 100:
+        // docs-check (checkMermaid, the repository-wide run and its command line, which the gate runs as
+        // `pnpm docs:check`, not in a test), pipeline-check and rule-codes (branches no test reaches yet). A test that
+        // reaches one raises the floor.
+        "src/docs-check.ts": { branches: 67.81 },
+        "src/pipeline-check.ts": { branches: 84.02 },
+        "src/proposal-rules.ts": { branches: 100 },
+        "src/rule-codes.ts": { branches: 76.92 },
+        "src/seq-ranges.ts": { branches: 100 },
+        "src/service-feed.ts": { branches: 100 },
+        "src/settings-backup.ts": { branches: 100 },
+        "src/tracked-files.ts": { branches: 100 }
       }
     }
   }
