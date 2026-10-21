@@ -31,25 +31,29 @@ entries:
 No other member: a call count belongs to the [usage report](service.md#usage-report), and the reverse view (which agents
 use this one) is the host's, built from every agent's declaration.
 
-No string member carries a credential or a URL with one:
+No string member carries a credential or a URL with one. What counts is defined by the reference, `credential` in
+`src/connections.ts`, and the vectors `fixtures/vectors/connections.json` that every port runs; in summary:
 
 - a JWT anywhere in the member;
-- a provider key's shape where it starts a word: `sk-` and then 16 or more characters holding a digit and an
-  upper-case letter, or 32 or more holding a digit (an OpenRouter key is lower-case hex); `ghp_` and its kin, `xoxb-`
-  and its kin, `AKIA`, `glpat-`; a Telegram bot token, a bot id and a secret of exactly 35 characters that mixes cases.
-  So `flask-server`, `sk-learn-classifier-v2`, `sk-prod-eu-west-1-db`, `20261021:connections-reader-v2` and a ticket
-  `123456789:Implement-the-Connections-tab-reader` are names, not keys;
-- `Bearer` and a token holding a digit ("bearer authentication" is prose);
-- any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, or a parameter such
-  as `api_key` with a value). A URL runs from each scheme in a piece to the next space; it is read without the
-  brackets, quotes and punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6
-  host.
+- a provider key where it starts a word, with lower-case prefixes (so `SK-Telecom-…` is a name): `sk-` and then 16 or
+  more characters holding a digit and an upper-case letter, or 32 or more holding a digit (an OpenRouter key is
+  lower-case hex); `ghp_` and its kin, `xoxb-` and its kin, `AKIA`, `glpat-`; a Telegram bot token, a bot id of 6 to 12
+  digits, `:` and a secret of 34 or 35 characters mixing cases. `flask-server`, `sk-learn-classifier-v2`,
+  `sk-prod-eu-west-1-db`, `20261021:connections-reader-v2` and a ticket `123456789:Implement-the-Connections-tab-reader`
+  are names;
+- `Bearer` and a token of 12 or more characters holding a digit ("bearer authentication" is prose);
+- a run of 40 or more characters mixing upper case, lower case and digits (an AWS secret access key, say; a hex
+  digest such as a commit id is lower case and is not one), the shared `longSecret`;
+- any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, a parameter such as
+  `api_key` with a value, or any shape above, which the shared detector reads in a URL without a word start or a
+  case rule). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
+  punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host.
 
-A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A URL whose path holds 40 or more
-mixed letters and digits is taken for a key (`secretArgument`), and so is a store named, say, `sk-Prod-eu-west-1-db`
-(an upper-case letter and a digit in 16 or more characters after `sk-`); either hides the whole declaration. These
-shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word start and the
-`sk-` rules, wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
+A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such
+as a store `sk-Prod-eu-west-1-db` or a URL path holding `sk-learn-classifier-v2`, hides the whole declaration. These
+shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word start, the `sk-`
+rules, lower-case prefixes and a Bearer token's length and digit; wider by the Telegram bot token. Whether the shared
+detector adopts them is CT-73.
 
 ## Reading it
 

@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { BEARER_INSIDE, JWT_SHAPE, secretUrl } from "./secret-shape.js";
+import { BEARER_INSIDE, JWT_SHAPE, longSecret, secretUrl } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // extensions/connections/0.1 (DEC-0096): what an agent uses, and the contract-side check of it.
@@ -45,11 +45,11 @@ const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reaso
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
 // a word and is not a key (the shared SECRET_VALUE has no such boundary). An `sk-` key holds a digit and either an
 // upper-case letter or 32 or more characters (an OpenRouter key is lower-case hex), and a Telegram bot token
-// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) has a secret of exactly 35 characters
+// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) has a secret of 34 or 35 characters
 // that mixes cases, so names such as `sk-learn-classifier-v2`, `20261021:connections-reader-v2` or a ticket
 // `123456789:Implement-the-Connections-tab-reader` are not keys. A bearer token needs a
 // digit (BEARER_INSIDE), so "bearer authentication" is prose.
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{35}(?![A-Za-z0-9_-]))/;
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{34,35}(?![A-Za-z0-9_-]))/;
 const SCHEME = /[a-z][a-z0-9+.-]*:\/\//gi;
 const CLOSING = /[)\]}>"'.,;:!?]/;
 // One closing character is tried back on a URL: the `]` of an IPv6 host (`…@[::1].` trims to `…@[::1`), or a
@@ -74,9 +74,13 @@ function urlsIn(value: string): string[] {
   }
   return urls;
 }
-/** A credential in a connection's string member: a token's shape, or a URL that carries one. */
+/**
+ * A credential in a connection's string member: a token's shape, a long run mixing upper case, lower case and digits
+ * (the shared `longSecret`, an AWS secret access key say), or a URL that carries one. The reference: ports run
+ * `fixtures/vectors/connections.json`.
+ */
 const credential = (value: string): boolean =>
-  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || urlsIn(value).some(secretUrl);
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || longSecret(value) || urlsIn(value).some(secretUrl);
 
 /** The problems the schema cannot state: an id named twice, a credential in any string member. */
 function beyondShape(list: Connection[]): string[] {

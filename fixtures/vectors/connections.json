@@ -1977,7 +1977,7 @@
                 "kind": "model",
                 "target": "openrouter/xiaomi/mimo-v2.6-pro",
                 "state": "unknown",
-                "label": "Task 123456789:Implement-the-Connections-tab-reader-for-v2"
+                "label": "Task 123456789:Implement-the-Connections-tab-reader-for-version-two"
               }
             ]
           }
@@ -1993,7 +1993,7 @@
             "kind": "model",
             "target": "openrouter/xiaomi/mimo-v2.6-pro",
             "state": "unknown",
-            "label": "Task 123456789:Implement-the-Connections-tab-reader-for-v2",
+            "label": "Task 123456789:Implement-the-Connections-tab-reader-for-version-two",
             "failing": false
           }
         ]
@@ -2408,6 +2408,123 @@
       "expected": {
         "declared": false,
         "reported": true
+      }
+    },
+    {
+      "name": "a 40-character run mixing cases and digits (an AWS secret access key shape)",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "signed with wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a commit URL with a hex digest is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "pinned at https://github.com/o/r/commit/c55f2d5a11c55f2d5a11c55f2d5a11c55f2d5a11",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "pinned at https://github.com/o/r/commit/c55f2d5a11c55f2d5a11c55f2d5a11c55f2d5a11",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "a bot secret of 34 characters",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "token 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "Bearer and a short token is no credential",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "Bearer abc12 refused"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads the operator chat",
+            "state": "degraded",
+            "reason": "Bearer abc12 refused",
+            "failing": false
+          }
+        ]
       }
     },
     {

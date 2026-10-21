@@ -43,9 +43,12 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   (`sk-or-v1-` and 64 hex characters); an `sk-` key now holds a digit and an upper-case letter or 32 or more characters.
 - From the fifth readings: a Telegram bot secret is exactly 35 characters, so a ticket id and a title is a name; one
   closing character is put back, not four (no input needs more); vectors for an upper-case scheme, a credential in the
-  first of two glued URLs, AWS, GitLab and Slack shapes, and each closing character after an IPv6 host; the page lists
-  the shapes exactly (a JWT anywhere, 16 or 32 characters after `sk-`, a URL's path) and calls them a variant of
-  DEC-0044's detector, narrower and wider.
+  first of two glued URLs, AWS, GitLab and Slack shapes, and each closing character after an IPv6 host; the page
+  summarises the shapes and calls them a variant of DEC-0044's detector, narrower and wider.
+- From the sixth readings: the reference `credential` and the vectors define what counts, the page summarises them
+  (lower-case prefixes, a Bearer token's 12 characters, the mixed-case condition); a 40-character run mixing cases and
+  digits (an AWS secret access key) is refused outside a URL too; a bot secret is 34 or 35 characters; CT-73 lists
+  every measured difference from the shared detector.
 
 ## Decisions
 
@@ -53,8 +56,8 @@ No call count, no `usedBy`, no `direction` (see DEC-0096's Alternatives refused 
 
 ## Checks
 
-`pnpm run check` on each pushed head: exit 0 at `c8d37b4` (82 test files, 6173 tests, privacy check 0 findings);
-the final head's run is in the PR's gate comment.
+`pnpm run check` on each pushed head; the final head's run (exit code, test count, privacy findings) is the PR's gate
+comment, posted before the merge.
 
 ## Next task
 

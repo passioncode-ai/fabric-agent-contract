@@ -29,6 +29,7 @@ function cases(): Json[] {
   const fake = ["sk", "-", "A1".repeat(12)].join("");
   const bearer = ["abc123", "def456", "ghi789"].join("");
   // Lower-case like an OpenRouter key, but not its `sk-or-v1-` form, which the host's push protection blocks.
+  const awsSecret = ["wJalrXUtnFEMI", "K7MDENG", "bPxRfiCYEXAMPLEKEY"].join("/");
   const routerKey = ["sk", "-", "abc0123def4567".repeat(3)].join("");
   const ghToken = ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1"].join("");
   const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawX"].join("");
@@ -91,13 +92,17 @@ function cases(): Json[] {
     ["a short lower-case sk- name with a digit is no credential", doc({ connections: [{ ...model, target: "sk-prod-eu-west-1-db" }] }), view([{ ...model, target: "sk-prod-eu-west-1-db", failing: false }])],
     ["an sk- name with an upper-case letter and no digit is no credential", doc({ connections: [{ ...model, label: "sk-Learn-Classifier-Model-X" }] }), view([{ ...model, label: "sk-Learn-Classifier-Model-X", failing: false }])],
     ["a bot id and 35 upper-case characters is no credential", doc({ connections: [{ ...model, label: `123456789:${"A".repeat(35)}` }] }), view([{ ...model, label: `123456789:${"A".repeat(35)}`, failing: false }])],
-    ["a ticket id and a title is no credential", doc({ connections: [{ ...model, label: "Task 123456789:Implement-the-Connections-tab-reader-for-v2" }] }), view([{ ...model, label: "Task 123456789:Implement-the-Connections-tab-reader-for-v2", failing: false }])],
+    ["a ticket id and a title is no credential", doc({ connections: [{ ...model, label: "Task 123456789:Implement-the-Connections-tab-reader-for-version-two" }] }), view([{ ...model, label: "Task 123456789:Implement-the-Connections-tab-reader-for-version-two", failing: false }])],
     ["an upper-case scheme with a password", doc({ connections: [{ ...telegram, reason: "see HTTPS://user:pw@db.example.com/app" }] }), REPORTED],
     ["two URLs glued together, the first with a password", doc({ connections: [{ ...telegram, purpose: "https://u:p@a.example,https://b.example/docs" }] }), REPORTED],
     ["an AWS access key id", doc({ connections: [{ ...telegram, label: `uses ${["AKIA", "IOSFODNN7EXAMPLE"].join("")}` }] }), REPORTED],
     ["a GitLab token", doc({ connections: [{ ...telegram, label: `uses ${["glpat", "-", "notarealtokennotreal"].join("")}` }] }), REPORTED],
     ["a Slack token", doc({ connections: [{ ...telegram, label: `uses ${["xoxb", "-", "notarealtoken"].join("")}` }] }), REPORTED],
     ...[")", "]", "}", ">", '"', "'", ".", ",", ";", ":", "!", "?"].map((closing): [string, unknown, Json] => [`a password on an IPv6 host followed by ${closing}${closing}`, doc({ connections: [{ ...telegram, reason: `refused by http://u:p@[::1]${closing}${closing}` }] }), REPORTED]),
+    ["a 40-character run mixing cases and digits (an AWS secret access key shape)", doc({ connections: [{ ...telegram, reason: `signed with ${awsSecret}` }] }), REPORTED],
+    ["a commit URL with a hex digest is declared", doc({ connections: [{ ...telegram, purpose: `pinned at https://github.com/o/r/commit/${"c55f2d5a11".repeat(4)}` }] }), view([{ ...telegram, purpose: `pinned at https://github.com/o/r/commit/${"c55f2d5a11".repeat(4)}`, failing: false }])],
+    ["a bot secret of 34 characters", doc({ connections: [{ ...model, label: `token ${["110201543", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"].join("")}` }] }), REPORTED],
+    ["Bearer and a short token is no credential", doc({ connections: [{ ...telegram, reason: "Bearer abc12 refused" }] }), view([{ ...telegram, reason: "Bearer abc12 refused", failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

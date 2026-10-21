@@ -523,7 +523,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given an agent whose well-known document declares its connections, when the host reads it, then each connection is shown with its kind, target and state.
   - Given a `degraded[]` entry whose `source` equals a connection's id, when the host reads the document, then that connection is marked failing; a source equal only to a target marks no connection (a host may show it as a failing part of its own).
-  - Given a declaration that is invalid against its schema, names an id twice or carries a credential in any member, when the host reads it, then none of it is shown and the reasons are.
+  - Given a declaration that is invalid against its schema, names an id twice or carries a credential of a shape the connections page lists in any member, when the host reads it, then none of it is shown and the reasons are.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
