@@ -22,15 +22,16 @@ entries:
 |---|---|
 | `id` | `^[a-z0-9][a-z0-9._-]{0,63}$`, once in the list; a `degraded[].source` equal to it is this connection failing |
 | `kind` | `service` (another agent), `model`, `connector`, `store` or `channel` |
-| `target` | what it reaches, 1 to 200 characters, no space: an `id.instance` key or a product id for a `service`, `provider/model` for a `model`, otherwise a name |
-| `capability` | only on a `service`: the capability it calls |
+| `target` | what it reaches, 1 to 200 characters, no space: for a `service` an `id.instance` key or a product id (lower case, `^[a-z0-9][a-z0-9-]{0,63}(\.[a-z0-9][a-z0-9-]{0,63})?$`), `provider/model` for a `model`, otherwise a name |
+| `capability` | only on a `service`: the capability it calls, a [capability name](interop.md#capability-names) (DEC-0020) |
 | `state` | `ok`, `degraded`, `down` or `unknown` |
 | `label`, `purpose`, `reason` | optional, one line of 1 to 300 characters each |
-| `lastAt` | optional, when the service last used it or saw it work (RFC 3339) |
+| `lastAt` | optional, when the service last used it or saw it work, an RFC 3339 date-time (a date alone is refused) |
 
 No other member: a call count belongs to the [usage report](service.md#usage-report), and the reverse view (which agents
 use this one) is the host's, built from every agent's declaration. No member carries a credential or a URL with one
-(the same detector as [local channel](local-channel.md) LC-21, `secretUrl`).
+(a token's shape where it starts a word, or a URL that carries one, `secretUrl`; a name such as `flask-server` is
+not taken for a key).
 
 ## Reading it
 

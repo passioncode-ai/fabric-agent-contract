@@ -5907,6 +5907,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-61.
 - **Annotated (2026-10-21):** the counter commit its Source cites (`4c4598f`) is no longer on origin's SEM chain: the
   2026-10-21 reservation force-updated the ref (`4c4598f...b52fc3d`), the receipt-chain defect CT-44 records.
+- **Annotated (2026-10-21):** `checks` is never an empty object (`minProperties: 1`): with no check judged it is `null`,
+  as the page already said. A stricter schema at the same revision, because no producer had moved to `/1` yet (CT-61).
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -5996,7 +5998,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. A service MAY declare, under the well-known document's `extensions`, the key
      `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` with at most 64 connections, each
      `{id, kind, target, capability?, state, label?, purpose?, reason?, lastAt?}`: `kind` `service`, `model`,
-     `connector`, `store` or `channel`; `capability` only on a `service`; `state` `ok`, `degraded`, `down` or `unknown`.
+     `connector`, `store` or `channel`; `capability` only on a `service` and a DEC-0020 capability name; a `service`'s
+     `target` an `id.instance` key or a product id; `state` `ok`, `degraded`, `down` or `unknown`.
   2. A `degraded[].source` equal to a connection's `id` is that connection failing.
   3. `connectionsView` is the reading: an invalid value, a repeated `id` or a credential in a text member is not
      declared and is reported (`FAC-SEM-127`); a connection is data, never authority.

@@ -173,6 +173,7 @@
   {"name": "service-usage", "schema": "service-usage.schema.json", "path": "positive/service-usage.json", "valid": true},
   {"name": "service-usage-unmeasured", "schema": "service-usage.schema.json", "path": "positive/service-usage-unmeasured.json", "valid": true},
   {"name": "support-quality-daily", "schema": "support-quality-daily.schema.json", "path": "positive/support-quality-daily.json", "valid": true},
+  {"name": "support-quality-daily-empty-checks", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-empty-checks.json", "valid": false, "keyword": "minProperties"},
   {"name": "support-quality-daily-rate-above-one", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-rate-above-one.json", "valid": false, "keyword": "maximum"},
   {"name": "support-quality-daily-check-string", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-check-string.json", "valid": false, "keyword": "type"},
   {"name": "support-quality-daily-extra-text", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-extra-text.json", "valid": false, "keyword": "additionalProperties"},

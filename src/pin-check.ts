@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /** A consumer's one pin (`fabric-contract.lock.json`, schema `contract-pin.schema.json`). */
 export interface ContractPin {
@@ -48,7 +48,7 @@ export function findPinDrift(files: Array<{ path: string; text: string }>, pin: 
 }
 
 /** How a pin stands against the contract's history: on it, off it, or not checkable here. */
-export type PinHistory = { state: "on-history"; base: string } | { state: "off-history"; base: string } | { state: "unreadable"; reason: string };
+export type PinHistory = { state: "on-history"; base: string } | { state: "off-history"; base: string } | { state: "absent"; base: string } | { state: "unreadable"; reason: string };
 
 /**
  * Whether `commit` is a commit of the contract's published history: an ancestor of `origin/main` in the contract
@@ -68,6 +68,12 @@ export function pinHistory(commit: string, contractRoot: string, git: (args: str
     git(["rev-parse", "--verify", "--quiet", `${base}^{commit}`]);
   } catch {
     return { state: "unreadable", reason: `the contract checkout at ${contractRoot} has no ${base}` };
+  }
+  try {
+    git(["cat-file", "-e", `${commit}^{commit}`]);
+  } catch {
+    // Not in this checkout: a newer commit it has not fetched, or one no history holds. Fetching tells them apart.
+    return { state: "absent", base };
   }
   try {
     git(["merge-base", "--is-ancestor", commit, base]);
@@ -90,6 +96,9 @@ async function walk(root: string, directory: string, excluded: string[]): Promis
   return out;
 }
 
+/** The CLI's exit code: 1 on any drifting mention, or when the pin is not a commit of the contract's history. */
+export const exitCodeOf = (drift: PinDrift[], history: PinHistory): 0 | 1 => (drift.length > 0 || history.state !== "on-history" ? 1 : 0);
+
 /** CLI: `tsx src/pin-check.ts <repository> [--pin fabric-contract.lock.json] [--exclude <path>]...` */
 async function main(argv: string[]): Promise<number> {
   const root = path.resolve(argv[0] ?? ".");
@@ -100,12 +109,13 @@ async function main(argv: string[]): Promise<number> {
   const files = await Promise.all((await walk(root, root, [path.relative(root, pinFile), ...excluded])).map(async (file) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") })));
   const drift = findPinDrift(files, pin);
   for (const item of drift) console.error(item.message);
-  const contractRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+  const contractRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   const history = pinHistory(pin.commit, contractRoot);
-  if (history.state === "off-history") console.error(`the pin ${pin.commit} is not a commit of the contract's history (${history.base}); fetch the contract and repin`);
+  if (history.state === "off-history") console.error(`the pin ${pin.commit} is in this contract checkout but not on its history (${history.base}): repin to a commit of ${history.base}`);
+  if (history.state === "absent") console.error(`the pin ${pin.commit} is not in this contract checkout: run git fetch in the contract and check again; if it is still absent, no published history holds it`);
   if (history.state === "unreadable") console.error(`the pin cannot be checked against the contract's history: ${history.reason}`);
   console.log(drift.length ? `${drift.length} mention(s) drift from the pin` : `every contract mention equals the pin ${pin.commit}`);
-  return drift.length || history.state !== "on-history" ? 1 : 0;
+  return exitCodeOf(drift, history);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

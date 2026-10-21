@@ -30,10 +30,22 @@ describe("partner usage (DEC-0090 item 2)", () => {
     expect(partnerUsage({ usage, publishers: ["acme"], step: "day" })).toMatchObject({ cells: expect.any(Array) });
     expect(partnerUsage({ usage: [...usage, usage[0]], publishers: ["acme"], step: "day" })).toEqual({ fault: "input-invalid" });
   });
-  // One cell holding every row (one agent, the period). A cost list copied per row made this quadratic: 16 s at load 70
-  // on 2026-10-21, against about 0.1 s linear. Not a clock bound: the ceiling is two orders above the linear time.
-  it("answers 100 000 rows in one cell without quadratic work", () => {
-    const oneCell = Array.from({ length: 100_000 }, () => ({ agentRef: "urn:fabric:agent:acme:a0", day: "2026-10-12", calls: 1, unpricedCalls: 0, costUsd: 1 }));
-    expect(partnerUsage({ usage: oneCell, publishers: ["acme"], step: "period" })).toMatchObject({ cells: [{ calls: 100_000, costUsd: 100_000 }] });
-  }, 30_000);
+  // One cell holding every row (one agent, the period). A cost list copied per row made this quadratic (16 s on 100 000
+  // rows at load 70, 2026-10-21). Growth, not a clock: 4x the rows takes about 4x the time when linear and 16x when
+  // quadratic; three tries absorb a loaded machine, and quadratic growth fails all of them.
+  it("answers rows in one cell in linear time", () => {
+    const rows = (length: number) => Array.from({ length }, () => ({ agentRef: "urn:fabric:agent:acme:a0", day: "2026-10-12", calls: 1, unpricedCalls: 0, costUsd: 1 }));
+    expect(partnerUsage({ usage: rows(100_000), publishers: ["acme"], step: "period" })).toMatchObject({ cells: [{ calls: 100_000, costUsd: 100_000 }] });
+    const time = (input: unknown[]) => Math.min(...[0, 1, 2].map(() => { const started = performance.now(); partnerUsage({ usage: input, publishers: ["acme"], step: "period" }); return performance.now() - started; }));
+    const small = rows(12_500);
+    const large = rows(50_000);
+    let a = 0;
+    let b = 0;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      a = time(small);
+      b = time(large);
+      if (b < 8 * a + 150) break;
+    }
+    expect(b, `12500 rows ${a.toFixed(1)} ms, 50000 rows ${b.toFixed(1)} ms`).toBeLessThan(8 * a + 150);
+  }, 60_000);
 });

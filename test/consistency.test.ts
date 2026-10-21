@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS, foreignExtensionKeys } from "../src/extensions.js";
-import { findPinDrift, pinHistory } from "../src/pin-check.js";
+import { exitCodeOf, findPinDrift, pinHistory } from "../src/pin-check.js";
 import { checkRuleCodes, contextProfileNames, schemaProfileKinds } from "../src/docs-check.js";
 import { ruleCodeFindings } from "../src/rule-codes.js";
 
@@ -123,9 +123,10 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
 });
 
 describe("pin:check: the pin is a commit of the contract's history", () => {
-  const git = (ancestor: boolean, hasOrigin = true) => (args: string[]) => {
+  const git = (ancestor: boolean, hasOrigin = true, absent = false) => (args: string[]) => {
     if (args[0] === "rev-parse" && args.includes("origin/main")) { if (!hasOrigin) throw new Error("no origin"); return "abc\n"; }
     if (args[0] === "rev-parse") return "abc\n";
+    if (args[0] === "cat-file") { if (absent) throw new Error("missing"); return ""; }
     if (args[0] === "merge-base") { if (!ancestor) throw new Error("not an ancestor"); return ""; }
     return "";
   };
@@ -137,6 +138,12 @@ describe("pin:check: the pin is a commit of the contract's history", () => {
     expect(pinHistory("c55f2d5", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
     expect(pinHistory("main", ".", git(true)).state).toBe("off-history");
     expect(pinHistory("c55f2d5", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
+  });
+  it("tells a commit this checkout has not fetched from one off the history, and fails the CLI on every state but on-history", () => {
+    expect(pinHistory("7e4ac91", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
+    expect(exitCodeOf([], { state: "on-history", base: "origin/main" })).toBe(0);
+    for (const history of [{ state: "off-history", base: "origin/main" }, { state: "absent", base: "origin/main" }, { state: "unreadable", reason: "x" }] as const) expect(exitCodeOf([], history)).toBe(1);
+    expect(exitCodeOf([{ path: "README.md", line: 1, found: "abc1234", message: "m" }], { state: "on-history", base: "origin/main" })).toBe(1);
   });
   it("finds this repository's own main commit on its history", () => {
     expect(pinHistory("ca4cca7", projectRoot()).state).toBe("on-history");

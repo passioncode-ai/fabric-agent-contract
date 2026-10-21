@@ -229,8 +229,8 @@ other code in the semantic-rules table of the specification this table names.
 `test/consistency.test.ts` (G-13) fails when a code is allocated twice, defined in two rows anywhere
 in the specifications, given other kinds there than here, named by `src/` without a row here, named by
 two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were allocated before the
-register and carry no receipt. `FAC-SEM-125` and `FAC-SEM-126` have no receipt on origin's SEM chain (the defect CT-44 records; DEC-0094 and
-DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's run) and are not used. `FAC-SEM-095` was
+register and carry no receipt. `FAC-SEM-124` to `FAC-SEM-126` have no receipt on origin's SEM chain (the defect CT-44 records; DEC-0090, DEC-0094
+and DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's run) and are not used. `FAC-SEM-095` was
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 

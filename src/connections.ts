@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { secretUrl } from "./secret-shape.js";
+import { JWT_SHAPE, secretUrl } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // extensions/connections/0.1 (DEC-0096): what an agent uses, and the contract-side check of it.
@@ -41,6 +41,11 @@ function shape(): ValidateFunction {
 
 const NONE: ConnectionsView = { declared: false, reported: false, connections: [], errors: [] };
 const TEXT_MEMBERS = ["target", "label", "purpose", "reason"] as const;
+// A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
+// a word and is not a key (the shared SECRET_VALUE has no such boundary).
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})|\bbearer\s+\S{12,}/i;
+/** A credential in a connection's text: a token's shape, or a URL that carries one (`secretUrl`, for a URL only). */
+const credential = (value: string): boolean => JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || (/^[a-z][a-z0-9+.-]*:\/\//i.test(value) && secretUrl(value));
 
 /** The problems the schema cannot state: an id named twice, a credential in a text member. */
 function beyondShape(list: Connection[]): string[] {
@@ -51,7 +56,7 @@ function beyondShape(list: Connection[]): string[] {
     seen.add(connection.id);
     for (const member of TEXT_MEMBERS) {
       const value = connection[member];
-      if (typeof value === "string" && secretUrl(value)) errors.push(`/connections/${index}/${member} credential: a connection never carries a credential`);
+      if (typeof value === "string" && credential(value)) errors.push(`/connections/${index}/${member} credential: a connection never carries a credential`);
     }
   });
   return errors;

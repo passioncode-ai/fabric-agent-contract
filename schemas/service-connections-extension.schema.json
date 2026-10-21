@@ -47,14 +47,11 @@
           "minLength": 1,
           "maxLength": 200,
           "pattern": "^[^\\s]+$",
-          "description": "What it reaches: for a service an id.instance key or a product id, for a model provider/model, otherwise a name. Never a URL with a credential or a path."
+          "description": "What it reaches: for a service an id.instance key or a product id (lower case, at most one dot), for a model provider/model, otherwise a name. Never a credential or a URL with one."
         },
         "capability": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$",
-          "description": "Only on kind service: the capability it calls."
+          "$ref": "common.schema.json#/$defs/capabilityName",
+          "description": "Only on kind service: the capability it calls (a DEC-0020 capability name)."
         },
         "state": {
           "enum": [
@@ -88,23 +85,47 @@
           "description": "When the service last used it or saw it work (RFC 3339)."
         }
       },
-      "if": {
-        "properties": {
-          "kind": {
-            "not": {
-              "const": "service"
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "not": {
+                  "const": "service"
+                }
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "capability": false
             }
           }
         },
-        "required": [
-          "kind"
-        ]
-      },
-      "then": {
-        "properties": {
-          "capability": false
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "service"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,63}(\\.[a-z0-9][a-z0-9-]{0,63})?$"
+              }
+            }
+          }
         }
-      }
+      ]
     }
   }
 }

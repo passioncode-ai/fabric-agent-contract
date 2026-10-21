@@ -38,7 +38,7 @@ describe.each(surfaces)("capability-name compatibility through $schema", (surfac
   });
 });
 
-it("all four name-bearing schema surfaces reference the shared definition", async () => {
+it("every name-bearing schema surface references the shared definition", async () => {
   const uses: string[] = [];
   const visit = (value: unknown, location: string): void => {
     if (Array.isArray(value)) value.forEach((entry, i) => visit(entry, `${location}/${i}`));
@@ -65,6 +65,7 @@ it("all four name-bearing schema surfaces reference the shared definition", asyn
     "manifest.schema.json/properties/capabilities/items/properties/name",
     "manifest.schema.json/properties/costPresets/items/properties/capability",
     "pipeline.schema.json/$defs/stage/properties/capability",
+    "service-connections-extension.schema.json/$defs/connection/properties/capability",
     "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/capabilities/items",
     "spend-policy.schema.json/properties/credentialSources/items/oneOf/1/properties/capability"
   ]);
