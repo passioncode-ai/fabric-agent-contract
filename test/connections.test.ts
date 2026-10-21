@@ -43,6 +43,13 @@ describe("extensions/connections/0.1 (DEC-0096)", () => {
       expect(validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-connections-extension.schema.json`, value).valid, entry.name).toBe(true);
     }
   });
+  it("keeps label, purpose and reason to one line each", () => {
+    const base = { id: "telegram", kind: "connector", target: "telegram", state: "ok" };
+    for (const member of ["label", "purpose", "reason"]) {
+      expect(connectionsView({ extensions: { [KEY]: { connections: [{ ...base, [member]: "one line" }] } } }).declared, member).toBe(true);
+      expect(connectionsView({ extensions: { [KEY]: { connections: [{ ...base, [member]: "two\nlines" }] } } }).reported, member).toBe(true);
+    }
+  });
   it("the generator's --check agrees", () => {
     const out = execFileSync("npx", ["tsx", path.join(projectRoot(), "tools/vectors/connections.ts"), "--check"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
     expect(out).toContain("matches");
