@@ -43,22 +43,31 @@ function shape(): ValidateFunction {
 const none = (): ConnectionsView => ({ declared: false, reported: false, connections: [], errors: [] });
 const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reason"] as const;
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
-// a word and is not a key (the shared SECRET_VALUE has no such boundary), and an `sk-` key holds a digit, so a name
-// such as `sk-learn-classifier` is not one either. A Telegram bot token is `<bot id>:<secret>`, also inside a URL path
-// (`/bot123456789:AA…/getUpdates`). A bearer token needs a digit (BEARER_INSIDE), so "bearer authentication" is prose.
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:[A-Za-z0-9_-]{30,})/i;
-const SCHEME = /[a-z][a-z0-9+.-]*:\/\//i;
+// a word and is not a key (the shared SECRET_VALUE has no such boundary). An `sk-` key and a Telegram bot token
+// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) hold a digit and an upper-case letter,
+// so names such as `sk-learn-classifier-v2` or `20261021:connections-reader-v2` are not keys. A bearer token needs a
+// digit (BEARER_INSIDE), so "bearer authentication" is prose.
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{30,})/;
+const SCHEME = /[a-z][a-z0-9+.-]*:\/\//gi;
+const CLOSING = /[)\]}>"'.,;:!?]/;
+// How many closing characters are tried back on a URL: `]` of an IPv6 host and the full stop after it need two.
+const TRIED_BACK = 4;
 /**
- * Every URL in a member, at its start or inside prose ("refused at https://…?api_key=…"): each whitespace-delimited
- * piece from its scheme on, without the closing brackets, quotes and punctuation that end a sentence. A password or a
- * parameter value may hold `(`, `'` or `"`, so nothing is cut inside the URL. `secretUrl` reads each URL alone, never
- * the prose around it.
+ * The URLs a member may hold, at its start or inside prose ("refused at https://…?api_key=…"): in each
+ * whitespace-delimited piece, from every scheme on (two URLs glued together are two), each without the closing brackets,
+ * quotes and punctuation that end a sentence, and with up to TRIED_BACK of them put back, because `]` closes an IPv6
+ * host and a password may end in `)`. Nothing is cut inside a URL. `secretUrl` reads each candidate alone, never the
+ * prose around it.
  */
 function urlsIn(value: string): string[] {
   const urls: string[] = [];
   for (const piece of value.split(/\s+/)) {
-    const start = piece.search(SCHEME);
-    if (start >= 0) urls.push(piece.slice(start).replace(/[)\]}>"'.,;:!?]+$/, ""));
+    for (const match of piece.matchAll(SCHEME)) {
+      const url = piece.slice(match.index);
+      let end = url.length;
+      while (end > 0 && CLOSING.test(url[end - 1] as string)) end -= 1;
+      for (let back = 0; back <= TRIED_BACK && end + back <= url.length; back += 1) urls.push(url.slice(0, end + back));
+    }
   }
   return urls;
 }

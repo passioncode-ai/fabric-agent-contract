@@ -1416,7 +1416,7 @@
           "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
             "connections": [
               {
-                "id": "sk-a1a1a1a1a1a1a1a1a1a1a1a1",
+                "id": "ghp_a1b2c3d4e5f6g7h8i9j0k1",
                 "kind": "model",
                 "target": "openrouter/xiaomi/mimo-v2.6-pro",
                 "state": "unknown"
@@ -1441,7 +1441,7 @@
                 "id": "notify",
                 "kind": "service",
                 "target": "example-notifier.default",
-                "capability": "sk-a1a1a1a1a1a1a1a1a1a1a1a1",
+                "capability": "x.ghp_a1b2c3d4e5f6g7h8i9j0k1",
                 "state": "ok",
                 "lastAt": "2026-10-20T09:00:00Z"
               }
@@ -1489,7 +1489,7 @@
       }
     },
     {
-      "name": "a password with a bracket or a quote",
+      "name": "a password with a bracket",
       "input": {
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
@@ -1501,16 +1501,48 @@
                 "purpose": "reads the operator chat",
                 "state": "degraded",
                 "reason": "flood wait 30 s"
-              },
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a password ending in a bracket inside a purpose",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
               {
-                "id": "b",
+                "id": "writer",
                 "kind": "model",
                 "target": "openrouter/xiaomi/mimo-v2.6-pro",
                 "state": "unknown",
-                "purpose": "uses mysql://root:x)y2z@10.0.0.4:3306/db"
-              },
+                "purpose": "uses mysql://root:x)y2z@10.0.0.4:3306."
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a password with a quote at the end of a sentence",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
               {
-                "id": "c",
+                "id": "writer",
                 "kind": "model",
                 "target": "openrouter/xiaomi/mimo-v2.6-pro",
                 "state": "unknown",
@@ -1524,6 +1556,211 @@
       "expected": {
         "declared": false,
         "reported": true
+      }
+    },
+    {
+      "name": "a password on an IPv6 host",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "redis://:secret@[::1]",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a password on an IPv6 host at the end of a sentence",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "refused by http://user:pw@[2001:db8::1]."
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an IPv6 URL without a credential is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "(see https://[::1]/docs).",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "(see https://[::1]/docs).",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "two URLs glued together, the second with a password",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "docs https://a.example/(x)https://u:p@b.example and https://a.example,https://v:q@c.example",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an api_key whose value is punctuation",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "uses https://ex.com/?api_key=!?",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a key shape inside a word is no credential",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s",
+                "label": "xghp_a1b2c3d4e5f6g7h8i9j0k1"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads the operator chat",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "label": "xghp_a1b2c3d4e5f6g7h8i9j0k1",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "names that look like keys but are not",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "SK-Telecom-api-v2-gateway",
+                "purpose": "py-sk-learn-classifier-v2",
+                "reason": "release 20261021:connections-extension-reader-v2"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "writer",
+            "kind": "model",
+            "target": "openrouter/xiaomi/mimo-v2.6-pro",
+            "state": "unknown",
+            "label": "SK-Telecom-api-v2-gateway",
+            "purpose": "py-sk-learn-classifier-v2",
+            "reason": "release 20261021:connections-extension-reader-v2",
+            "failing": false
+          }
+        ]
       }
     },
     {

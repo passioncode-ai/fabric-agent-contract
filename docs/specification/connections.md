@@ -29,14 +29,20 @@ entries:
 | `lastAt` | optional, when the service last used it or saw it work, an RFC 3339 date-time (a date alone is refused) |
 
 No other member: a call count belongs to the [usage report](service.md#usage-report), and the reverse view (which agents
-use this one) is the host's, built from every agent's declaration. No member carries a credential or a URL with one:
-in any string member, a token's shape where it starts a word (a name such as `flask-server`, or `sk-learn-classifier`
-with no digit, is not taken for a key), a JWT, a Telegram bot token, `Bearer` and a
-token that holds a digit ("bearer authentication" is prose), or any URL in the member, at its start or inside prose,
-that carries one (`secretUrl`: a password, or a parameter such as `api_key` with a value; a URL is the piece from its
-scheme to the next space, without the brackets, quotes and full stop that close a sentence). A URL written without a
-scheme (`api.example.com/?api_key=…`) is not read as one, and a path holding 40 or more mixed letters and digits is
-taken for a key (`secretArgument`).
+use this one) is the host's, built from every agent's declaration.
+
+No string member carries a credential or a URL with one:
+
+- a token's shape where it starts a word: a provider key, a JWT, a Telegram bot token, `Bearer` and a token holding a
+  digit. An `sk-` key and a bot token hold a digit and an upper-case letter, so names such as `flask-server`,
+  `sk-learn-classifier-v2` or `20261021:connections-reader-v2` are not keys, and "bearer authentication" is prose;
+- any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, or a parameter such
+  as `api_key` with a value). A URL runs from each scheme in a piece to the next space; it is read without the
+  brackets, quotes and full stop that close a sentence, and with up to four of them put back, since `]` closes an
+  IPv6 host.
+
+A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one, and a path holding 40 or more mixed
+letters and digits is taken for a key (`secretArgument`).
 
 ## Reading it
 

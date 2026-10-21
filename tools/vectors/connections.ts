@@ -28,6 +28,7 @@ const NONE = { declared: false, reported: false, connections: [] };
 function cases(): Json[] {
   const fake = ["sk", "-", "A1".repeat(12)].join("");
   const bearer = ["abc123", "def456", "ghi789"].join("");
+  const ghToken = ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1"].join("");
   const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"].join("");
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
@@ -68,10 +69,19 @@ function cases(): Json[] {
     ["a label of 301 characters", doc({ connections: [{ ...model, label: "a".repeat(301) }] }), REPORTED],
     ["degraded entries that are not objects are ignored", doc({ connections: [telegram] }, [null, 5, "telegram", { source: 5 }]), view([{ ...telegram, failing: false }])],
     ["failing follows the id, not the target", doc({ connections: [{ ...telegram, id: "tg-reader" }, { ...model, id: "chat", target: "telegram" }] }, [{ source: "tg-reader" }, { source: "openrouter/xiaomi/mimo-v2.6-pro" }]), view([{ ...telegram, id: "tg-reader", failing: true }, { ...model, id: "chat", target: "telegram", failing: false }])],
-    ["a key-shaped id", doc({ connections: [{ ...model, id: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
-    ["a key-shaped capability", doc({ connections: [{ ...notify, capability: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
+    ["a key-shaped id", doc({ connections: [{ ...model, id: ghToken }] }), REPORTED],
+    ["a key-shaped capability", doc({ connections: [{ ...notify, capability: `x.${ghToken}` }] }), REPORTED],
     ["an sk- name without a digit is no credential", doc({ connections: [{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model" }] }), view([{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model", failing: false }])],
-    ["a password with a bracket or a quote", doc({ connections: [{ ...telegram, target: "postgres://app:pa(ss@db.example.com/app" }, { ...model, id: "b", purpose: "uses mysql://root:x)y2z@10.0.0.4:3306/db" }, { ...model, id: "c", reason: 'see redis://:a"b@cache:6379.' }] }), REPORTED],
+    ["a password with a bracket", doc({ connections: [{ ...telegram, target: "postgres://app:pa(ss@db.example.com/app" }] }), REPORTED],
+    ["a password ending in a bracket inside a purpose", doc({ connections: [{ ...model, purpose: "uses mysql://root:x)y2z@10.0.0.4:3306." }] }), REPORTED],
+    ["a password with a quote at the end of a sentence", doc({ connections: [{ ...model, reason: 'see redis://:a"b@cache:6379.' }] }), REPORTED],
+    ["a password on an IPv6 host", doc({ connections: [{ ...telegram, target: "redis://:secret@[::1]" }] }), REPORTED],
+    ["a password on an IPv6 host at the end of a sentence", doc({ connections: [{ ...telegram, reason: "refused by http://user:pw@[2001:db8::1]." }] }), REPORTED],
+    ["an IPv6 URL without a credential is declared", doc({ connections: [{ ...telegram, purpose: "(see https://[::1]/docs)." }] }), view([{ ...telegram, purpose: "(see https://[::1]/docs).", failing: false }])],
+    ["two URLs glued together, the second with a password", doc({ connections: [{ ...telegram, purpose: "docs https://a.example/(x)https://u:p@b.example and https://a.example,https://v:q@c.example" }] }), REPORTED],
+    ["an api_key whose value is punctuation", doc({ connections: [{ ...telegram, purpose: "uses https://ex.com/?api_key=!?" }] }), REPORTED],
+    ["a key shape inside a word is no credential", doc({ connections: [{ ...telegram, label: `x${ghToken}` }] }), view([{ ...telegram, label: `x${ghToken}`, failing: false }])],
+    ["names that look like keys but are not", doc({ connections: [{ ...model, label: "SK-Telecom-api-v2-gateway", purpose: "py-sk-learn-classifier-v2", reason: "release 20261021:connections-extension-reader-v2" }] }), view([{ ...model, label: "SK-Telecom-api-v2-gateway", purpose: "py-sk-learn-classifier-v2", reason: "release 20261021:connections-extension-reader-v2", failing: false }])],
     ["an api_key value in brackets inside a reason", doc({ connections: [{ ...telegram, reason: "refused (https://ex.com/?api_key=(abcd))" }] }), REPORTED],
     ["a URL in brackets or quotes without a credential is declared", doc({ connections: [{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'." }] }), view([{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'.", failing: false }])],
     ["a Telegram bot token in a URL path", doc({ connections: [{ ...telegram, purpose: `calls https://api.telegram.org/${botToken}/getUpdates` }] }), REPORTED],
