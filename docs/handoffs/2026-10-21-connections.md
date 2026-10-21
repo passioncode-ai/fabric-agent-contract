@@ -35,12 +35,17 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   the next space, so a password holding a bracket or a quote is found; the hosted CI checks out the whole history
   (`fetch-depth: 0`), because `pin:check`'s test asks whether a commit is on it; CT-72 records the folder-attribution
   growth tests' slack.
-- From the fourth readings: a URL is read from every scheme in a piece, with up to four closing characters put back
+- From the fourth readings: a URL is read from every scheme in a piece, with closing characters put back (one, since the fifth)
   (an IPv6 host, a punctuation-only `api_key`, glued URLs); an `sk-` key and a bot token hold a digit and an upper-case
   letter; the last private name in a vector replaced, and the name added to the operator's private-terms denylist so
   the privacy check catches it; CT-70 measured against the final vectors; CT-73 for the two detectors (DEC-0044).
 - Found by the author after the fourth readings: the upper-case rule missed a lower-case OpenRouter key
   (`sk-or-v1-` and 64 hex characters); an `sk-` key now holds a digit and an upper-case letter or 32 or more characters.
+- From the fifth readings: a Telegram bot secret is exactly 35 characters, so a ticket id and a title is a name; one
+  closing character is put back, not four (no input needs more); vectors for an upper-case scheme, a credential in the
+  first of two glued URLs, AWS, GitLab and Slack shapes, and each closing character after an IPv6 host; the page lists
+  the shapes exactly (a JWT anywhere, 16 or 32 characters after `sk-`, a URL's path) and calls them a variant of
+  DEC-0044's detector, narrower and wider.
 
 ## Decisions
 

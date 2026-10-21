@@ -45,19 +45,21 @@ const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reaso
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
 // a word and is not a key (the shared SECRET_VALUE has no such boundary). An `sk-` key holds a digit and either an
 // upper-case letter or 32 or more characters (an OpenRouter key is lower-case hex), and a Telegram bot token
-// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) mixes cases, so names such as
-// `sk-learn-classifier-v2` or `20261021:connections-reader-v2` are not keys. A bearer token needs a
+// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) has a secret of exactly 35 characters
+// that mixes cases, so names such as `sk-learn-classifier-v2`, `20261021:connections-reader-v2` or a ticket
+// `123456789:Implement-the-Connections-tab-reader` are not keys. A bearer token needs a
 // digit (BEARER_INSIDE), so "bearer authentication" is prose.
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{30,})/;
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{35}(?![A-Za-z0-9_-]))/;
 const SCHEME = /[a-z][a-z0-9+.-]*:\/\//gi;
 const CLOSING = /[)\]}>"'.,;:!?]/;
-// How many closing characters are tried back on a URL: `]` of an IPv6 host and the full stop after it need two.
-const TRIED_BACK = 4;
+// One closing character is tried back on a URL: the `]` of an IPv6 host (`…@[::1].` trims to `…@[::1`), or a
+// credential parameter whose whole value is closing characters (`?api_key=!?`).
+const TRIED_BACK = 1;
 /**
  * The URLs a member may hold, at its start or inside prose ("refused at https://…?api_key=…"): in each
  * whitespace-delimited piece, from every scheme on (two URLs glued together are two), each without the closing brackets,
- * quotes and punctuation that end a sentence, and with up to TRIED_BACK of them put back, because `]` closes an IPv6
- * host and a password may end in `)`. Nothing is cut inside a URL. `secretUrl` reads each candidate alone, never the
+ * quotes and punctuation that end a sentence, and with TRIED_BACK of them put back, because `]` closes an IPv6
+ * host. Nothing is cut inside a URL. `secretUrl` reads each candidate alone, never the
  * prose around it.
  */
 function urlsIn(value: string): string[] {

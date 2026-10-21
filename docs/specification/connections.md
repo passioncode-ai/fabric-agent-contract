@@ -33,20 +33,23 @@ use this one) is the host's, built from every agent's declaration.
 
 No string member carries a credential or a URL with one:
 
-- a token's shape where it starts a word: a provider key, a JWT, a Telegram bot token, `Bearer` and a token holding a
-  digit. An `sk-` key holds a digit and either an upper-case letter or 32 or more characters (an OpenRouter key
-  is lower-case hex), and a bot token mixes cases, so names such as `flask-server`, `sk-learn-classifier-v2`,
-  `sk-prod-eu-west-1-db` or `20261021:connections-reader-v2` are not keys, and "bearer authentication" is prose;
+- a JWT anywhere in the member;
+- a provider key's shape where it starts a word: `sk-` and then 16 or more characters holding a digit and an
+  upper-case letter, or 32 or more holding a digit (an OpenRouter key is lower-case hex); `ghp_` and its kin, `xoxb-`
+  and its kin, `AKIA`, `glpat-`; a Telegram bot token, a bot id and a secret of exactly 35 characters that mixes cases.
+  So `flask-server`, `sk-learn-classifier-v2`, `sk-prod-eu-west-1-db`, `20261021:connections-reader-v2` and a ticket
+  `123456789:Implement-the-Connections-tab-reader` are names, not keys;
+- `Bearer` and a token holding a digit ("bearer authentication" is prose);
 - any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, or a parameter such
   as `api_key` with a value). A URL runs from each scheme in a piece to the next space; it is read without the
-  brackets, quotes and full stop that close a sentence, and with up to four of them put back, since `]` closes an
-  IPv6 host.
+  brackets, quotes and punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6
+  host.
 
-A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one; a path holding 40 or more mixed
-letters and digits is taken for a key (`secretArgument`), and so is a word that starts with `sk-`, holds a digit and
-either an upper-case letter in 16 or more characters (a store named `sk-Prod-eu-west-1-db`, say) or 32 or more
-characters, which hides the whole declaration. These key shapes are a narrower variant of the shared detector in `src/secret-shape.ts` (DEC-0044):
-whether that detector adopts the word start and the Telegram shape is CT-73.
+A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A URL whose path holds 40 or more
+mixed letters and digits is taken for a key (`secretArgument`), and so is a store named, say, `sk-Prod-eu-west-1-db`
+(an upper-case letter and a digit in 16 or more characters after `sk-`); either hides the whole declaration. These
+shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word start and the
+`sk-` rules, wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 
