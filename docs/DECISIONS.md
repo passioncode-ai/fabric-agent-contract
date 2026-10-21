@@ -6005,7 +6005,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      declared and is reported (`FAC-SEM-127`); a connection is data, never authority. What counts as a credential is
      the reference `credential` in `src/connections.ts` and the vectors; its key shapes are a variant of DEC-0044's one
      detector, narrower by a word start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit and
-     no long run in a model's `target`, wider by a Telegram bot token; whether the shared one adopts them is CT-73.
+     no long run in a model's `target` outside a URL, wider by a Telegram bot token; whether the shared one adopts
+     them is CT-73.
 - **Why:** Fabric Dashboards' Connections tab (FD-78) needs the agent's own word for what it uses, and the operator
   asked for the whole chain in the contract (board thread `131648c0`, 2026-10-20).
 - **Alternatives refused:** a call count (the usage report's); a `usedBy` list (the host derives it from every agent's

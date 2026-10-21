@@ -65,7 +65,7 @@ characters (a Google Docs or Notion page id), hides the whole declaration; its a
 or declares it as a model connection of its own whose `target` is the id, drops the link, or renames a target that is
 the author's own name. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower
 by the word start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a
-model's `target`; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
+model's `target` outside a URL; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 

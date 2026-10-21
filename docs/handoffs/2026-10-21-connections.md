@@ -63,7 +63,8 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   from the eleventh: the cut is at the first real scheme's `://`, so a `://` with no scheme is text;
   the page promises nothing inside a URL beyond what the shared `secretUrl` finds (its gaps are CT-73's);
   from the twelfth: the long run splits at spaces only, so inside a URL only `secretUrl` reads (no widening by an
-  `=` in a path) and outside one a run joined by `=` is one run, as in the shared detector; vectors pin the long run's 39/40, 64 connections and the
+  `=` in a path) and outside one a run joined by `=` is one run, as in the shared detector;
+  from the thirteenth: DEC-0096 item 3 and the variant sentence say "outside a URL" too; vectors pin the long run's 39/40, 64 connections and the
   `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions
