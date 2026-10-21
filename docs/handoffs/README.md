@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-21 contract review](2026-10-21-contract-review.md) | none (REQ-01 to REQ-18; CT-42, CT-73, CT-75 to CT-79) | PR #137 |
 | [2026-10-21 connections](2026-10-21-connections.md) | DEC-0096 (CT-70) | merged, #135 `bbebae6` |
 | [2026-10-20 final pass](2026-10-20-final-pass.md) | DEC-0089 to DEC-0095 (CT-57, CT-58, CT-60 to CT-63, CT-65) | merged, #133 `ca4cca7` |
 | [2026-10-20 unmeasured calls](2026-10-20-unmeasured-calls.md) | DEC-0091 (CT-62) | merged, #127 `c90e31b` |

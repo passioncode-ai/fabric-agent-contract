@@ -99,7 +99,7 @@ describe("secret rules say how to fix (REQ-04)", () => {
   });
 
   it("FAC-SEM-057 points a URL credential to a header from a secret reference", () => {
-    const findings = evaluateSemanticRules("provider-entry", { run: { mcp: { url: "http://127.0.0.1:8080/mcp?api_key=ghp_abcdefghijklmnopqrstuvwxyz0123456789" } } });
+    const findings = evaluateSemanticRules("provider-entry", { run: { mcp: { url: ["http://127.0.0.1:8080/mcp?api_key=", "gh", "p_", "abcdefghijklmnopqrstuvwxyz0123456789"].join("") } } });
     expect(findings.map((finding) => finding.code)).toEqual(["FAC-SEM-057"]);
     expect(findings[0]?.message).toMatch(/header from a secret reference/);
   });
@@ -108,5 +108,18 @@ describe("secret rules say how to fix (REQ-04)", () => {
     const findings = evaluateSemanticRules("provider-entry", { run: { mcp: { stdio: { command: ["/bin/a"], env: { API_KEY: "plain-value" } } } } });
     expect(findings).toEqual([expect.objectContaining({ code: "FAC-SEM-015", instancePath: "/run/mcp/stdio/env/API_KEY" })]);
     expect(findings[0]?.message).toMatch(/write it as a secret reference, secret-ref:NAME/);
+  });
+});
+
+describe("FAC-SEM-057 says per kind where the value goes (contract review 2026-10-21, second unit reading)", () => {
+  const token = ["gh", "p_", "abcdefghijklmnopqrstuvwxyz0123456789"].join("");
+  it("a service descriptor's command reads the value from a file; it is not a server a provider entry declares", () => {
+    const findings = evaluateSemanticRules("service-descriptor", { commands: { doctor: ["/usr/local/bin/agent", "doctor", token] } });
+    expect(findings.find((finding) => finding.code === "FAC-SEM-057")?.message).toMatch(/read it from a file it is pointed at/);
+    expect(findings.find((finding) => finding.code === "FAC-SEM-057")?.message).not.toMatch(/provider entry/);
+  });
+  it("a manifest's launch argument may also move to a provider entry", () => {
+    const findings = evaluateSemanticRules("manifest", { capabilities: [{ profile: { kind: "mcp", connection: { mode: "stdio", executableRef: "file:///usr/local/bin/agent", args: ["--token", token] } } }] });
+    expect(findings.find((finding) => finding.code === "FAC-SEM-057")?.message).toMatch(/provider entry whose env holds a secret reference/);
   });
 });

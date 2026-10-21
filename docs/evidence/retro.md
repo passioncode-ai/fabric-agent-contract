@@ -8,6 +8,7 @@
 - A run may propose a prompt, pipeline, or policy change but may not mutate the rules governing itself.
 - A conformance probe for a placement reached through a platform is accepted only after it has run against a real instance behind that platform, not only against a sample the run itself wrote.
 - A reference function that answers for a schema is tested against that schema on the same inputs: every output it emits validates, and every input the schema refuses it refuses.
+- A check made stricter than it was (a closed schema, a new refusal) is run first against the consumers' real files on this machine; what they carry is either accepted or recorded as an exception before the change lands.
 
 ## Run stamps
 
@@ -43,8 +44,24 @@
 - `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings in three rounds; #121.
 - `2026-10-19-enterprise-cloud`: DEC-0088 (this run's pull request).
 - `2026-10-20-final-pass`: DEC-0089 to DEC-0095 merged as #124, #127, #128, #129, #130, #131, #132 (main `3d8cb17`).
+- `2026-10-21-contract-review`: PR #137 (REQ-01 to REQ-18, no decision); readings until two clean rounds.
 
 ## Recent log
+
+### 2026-10-21: The contract review (REQ-01 to REQ-18)
+
+- **Goal:** fewer author errors against the contract: a checker, one error per mistake, the author's path rewritten,
+  schemas without a behaviour change, consumers told what moved.
+- **Failed attempts:** (1) a unit reader run in the shared run worktree ran a mutation that reset files and destroyed
+  uncommitted edits; (2) inferring a schema from its discriminator alone broke two existing inference tests, because
+  several schemas share a constant (`contractVersion` `0.1.0` is in the manifest, the result and the conformance
+  report); (3) `pin:check` started validating the lock with a closed schema, and a seam reading found that kit-written
+  locks carry `adapter` and `kit`, so the stricter check would have refused consumers that passed before.
+- **Verified corrections:** each mutation reader gets its own detached worktree; the usage error names the schemas
+  whose constants match, narrowed to the ones the document misses fewest members of, instead of guessing; an unknown
+  lock member is a note and the exit code is unchanged, with a test.
+- **Learning:** a check made stricter in a review is a contract change for every consumer: read the consumers' real
+  files before closing a schema the contract never enforced.
 
 ### 2026-10-20: The final pass (DEC-0089 to DEC-0095)
 

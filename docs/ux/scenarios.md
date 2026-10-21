@@ -77,10 +77,10 @@ independent agent author and P-02 project operator.
   1. Author reads the first line -> it shows the file, the instance path, the rule (`schema/<keyword>`, `FAC-SEM-NNN` or `hint/...`), what to change (allowed values, the member to add or move, where vendor data goes, how to pass a credential) and a help link to the rule's row or the schema.
   2. Author corrects the declaration and reruns -> each line is reevaluated; exit 0 when none is left.
 - **Expected result:** the problem is corrected or remains printed; nothing is granted by retrying.
-- **Alt paths:** author keeps an older protocol revision -> the line names the revision the contract supports rather than translating it; a misspelt extension key, which the schema accepts -> a `hint/extension-key` line names the nearest key the contract defines.
+- **Alt paths:** author keeps an older protocol revision -> the line names the revision the contract supports rather than translating it; a misspelt extension key, which the schema accepts -> a `hint/extension-key` line names the nearest key the contract defines (the same name and version under another host or path, or one within three edits), else points at the list of keys.
 - **UI elements:** problem line, instance path, rule, recovery message, help link, `--json` report.
 - **States covered:** error, success
-- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind`, or an unreadable file -> exit 2 with the usage.
+- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error.
 - **Status:** validated
 - **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`
 - **Product:** unobserved

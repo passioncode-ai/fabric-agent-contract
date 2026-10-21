@@ -1,11 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { exitCodeOf, historyMessage, isDatedRecord, lockExtras, lockProblems, main, pinHistory, runIfEntry, type PinCheckIo } from "../src/pin-check.js";
+import { exitCodeOf, historyMessage, isDatedRecord, lockExtras, lockProblems, main, PIN_MEMBERS, pinHistory, runIfEntry, type PinCheckIo } from "../src/pin-check.js";
 
 // REQ-07 (contract review 2026-10-21): the pin:check CLI on a missing lock, a lock its schema refuses, a malformed
 // commit, the dated records versioning.md excludes, and the success line that only exit 0 prints.
@@ -87,7 +87,8 @@ describe("pin:check: the lock file", () => {
   });
 
   it("notes a member the pin schema does not define and checks the pin anyway (D2: consumers' locks carry them)", async () => {
-    const lock = { ...pinOf(ON_MAIN), adapter: "fabric-agent-adapter", kit: "node" };
+    // The shape kit-written locks carry (measured on a consumer's lock, 2026-10-21).
+    const lock = { ...pinOf(ON_MAIN), adapter: { repository: "https://github.com/passioncode-ai/fabric-agent-adapter", tag: "v0.39.1", commit: OTHER }, kit: { source: "node" } };
     expect(await lockProblems(lock)).toEqual([]);
     expect(lockExtras(lock)).toEqual(["adapter", "kit"]);
     expect(lockExtras(null)).toEqual([]);
@@ -239,4 +240,27 @@ describe("pin:check: usage", () => {
     expect(status).toBe(2);
     expect(stderr.trim()).toBe(`no fabric-contract.lock.json at ${path.join(dir, "fabric-contract.lock.json")}; create one: {contract, version, repository, commit} (schemas/contract-pin.schema.json)`);
   }, 30000);
+});
+
+describe("pin:check: files and folders it cannot read (contract review 2026-10-21, second unit reading)", () => {
+  it("skips a folder it cannot read and a broken link, and still checks the rest", async () => {
+    const dir = consumer({ "README.md": `fabric-agent-contract ${ON_MAIN}` });
+    symlinkSync(path.join(dir, "nowhere.md"), path.join(dir, "broken.md"));
+    const locked = path.join(dir, "locked");
+    mkdirSync(locked);
+    writeFileSync(path.join(locked, "x.md"), "x");
+    const root = process.getuid?.() === 0;
+    if (!root) chmodSync(locked, 0o000);
+    try {
+      const result = await run([dir]);
+      expect(result.code).toBe(0);
+    } finally {
+      chmodSync(locked, 0o755);
+    }
+  });
+
+  it("knows the members the pin schema defines, no more and no fewer", () => {
+    const schema = JSON.parse(readFileSync(path.join(root, "schemas/contract-pin.schema.json"), "utf8")) as { properties: Record<string, unknown> };
+    expect([...PIN_MEMBERS].sort()).toEqual(Object.keys(schema.properties).sort());
+  });
 });

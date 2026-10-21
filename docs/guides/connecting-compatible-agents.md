@@ -267,8 +267,9 @@ Its manifest, with the same server as a stdio connection:
 }
 ```
 
-The entry and the manifest both describe the server today; keep them the same command. Check the folder that holds
-both; the checker reads the documents of a folder together:
+The entry and the manifest both describe the server today; keep them the same command. The checker does not compare
+the two commands yet (no rule says which one a host launches, [CT-75](../backlog.md)), so keep them equal by hand.
+Check the folder that holds both; the checker reads the documents of a folder together:
 
 ```bash
 pnpm validate ./fabric/
@@ -351,9 +352,14 @@ Read next: [the local-runner profile](../specification/profiles.md#local-runner-
 ## The checker
 
 `pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` reads a document or a folder, run from a
-checkout of this repository at the commit you pin. It infers the schema from the document, or takes `--schema`; runs
-the schema and then the semantic rules; checks a folder's descriptors, well-known documents, provider entries and
-manifests as pairs; and prints one line per problem with its path, its rule and a link to the rule. It exits 0 when
+checkout of this repository at the commit you pin. For files in your own repository, run it from there with
+`pnpm --dir <path to the contract checkout> validate ./fabric/`: a relative path is read from where you ran it. It
+infers the schema from the document, or takes `--schema`; runs the schema and then the semantic rules; checks a
+folder's documents as pairs (a descriptor with its well-known document, a descriptor with the manifest its
+`fabricManifest` names, a provider entry with its manifest), saying in a note which file it read when a named path
+is not installed yet; and prints one line per problem with its path, its rule and a link to the rule. In a folder, a
+file that is no contract document (a JSON Schema, a test fixture) is noted and skipped, the lock file is read as a
+contract pin, and a folder in which no file is a contract document is a usage error. It exits 0 when
 everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
 letter away from the contract's, is printed as a note and does not fail the run. `--json` prints the same findings
 as JSON for a script or a CI step.

@@ -93,6 +93,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   }
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
+  if (name === "fabric-contract.lock.json") return "contract-pin.schema.json";
+  // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
+  if (name.endsWith(".schema.json") || (isObject(value) && typeof value.$schema === "string")) return undefined;
   if (path.basename(path.dirname(file)) === "providers") return "provider.schema.json";
   if (SERVICE_KEY.test(name.replace(/\.json$/, ""))) return "service-descriptor.schema.json";
   return undefined;
@@ -112,6 +115,24 @@ function unknownDiscriminator(value: unknown): { member: string; value: unknown;
 // #region hints
 const KNOWN_KEYS: readonly string[] = Object.values(EXTENSION_KEYS);
 const tail = (key: string) => key.split("/").slice(-2).join("/");
+/** Edit distance (Levenshtein), for the nearest contract key to a misspelt one. */
+function distance(a: string, b: string): number {
+  let row = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    const next = [i];
+    for (let j = 1; j <= b.length; j += 1) next.push(Math.min((row[j] as number) + 1, (next[j - 1] as number) + 1, (row[j - 1] as number) + (a[i - 1] === b[j - 1] ? 0 : 1)));
+    row = next;
+  }
+  return row[b.length] as number;
+}
+/** The contract key a misspelt key most likely meant: the same name and version, else one within three edits. */
+function nearestKey(key: string): string | undefined {
+  const same = KNOWN_KEYS.find((known) => tail(known) === tail(key));
+  if (same !== undefined) return same;
+  const ranked = KNOWN_KEYS.map((known) => [known, distance(known, key)] as const).sort((x, y) => x[1] - y[1]);
+  const best = ranked[0];
+  return best !== undefined && best[1] <= 3 && ranked[1]?.[1] !== best[1] ? best[0] : undefined;
+}
 const PROFILE_VERSION: Readonly<Record<string, string>> = { mcp: "protocolRevision", a2a: "protocolVersion", "local-runner": "profileVersion" };
 
 /** A key under an `extensions` member that looks like one of the contract's keys and is not one. */
@@ -131,11 +152,11 @@ function extensionHints(value: unknown, at: string, out: Hint[]): void {
       if (member === "extensions" && isObject(child)) {
         for (const key of Object.keys(child)) {
           if (KNOWN_KEYS.includes(key)) continue;
-          const near = KNOWN_KEYS.find((known) => tail(known) === tail(key));
+          const near = nearestKey(key);
           let host = "";
           try { host = new URL(key).hostname; } catch { /* not a URL: a vendor key the schema judges */ }
           if (near !== undefined) out.push([here, "hint/extension-key", `${key} is not an extension key the contract defines; did you mean ${near}?`]);
-          else if (/(^|\.)passioncode\.ai$/.test(host) && key.includes("/extensions/")) out.push([here, "hint/extension-key", `${key} is not an extension key the contract defines; the contract's keys are listed in src/extensions.ts`]);
+          else if (/(^|\.)passioncode\.ai$/.test(host) && key.includes("/extensions/")) out.push([here, "hint/extension-key", `${key} is not an extension key the contract defines; the contract's keys are listed in src/extensions.ts and docs/specification/interop.md#extension-key`]);
         }
       }
       children.push([child, here]);
@@ -149,8 +170,8 @@ function profileHints(schema: string | undefined, value: unknown, out: Hint[]): 
   if (schema !== "manifest.schema.json" || !isObject(value) || !Array.isArray(value.capabilities)) return;
   value.capabilities.forEach((capability, index) => {
     const profile = isObject(capability) && isObject(capability.profile) ? capability.profile : {};
-    const kind = String(profile.kind);
-    if (!Object.hasOwn(PROFILE_VERSION, kind)) return;
+    const kind = profile.kind;
+    if (typeof kind !== "string" || !Object.hasOwn(PROFILE_VERSION, kind)) return;
     const own = PROFILE_VERSION[kind] as string;
     for (const [other, member] of Object.entries(PROFILE_VERSION)) {
       if (member !== own && Object.hasOwn(profile, member)) {
@@ -160,7 +181,7 @@ function profileHints(schema: string | undefined, value: unknown, out: Hint[]): 
   });
 }
 const HINT_HELP = {
-  "hint/extension-key": "src/extensions.ts",
+  "hint/extension-key": "docs/specification/interop.md#extension-key",
   "hint/profile-version": "docs/specification/profiles.md",
   "hint/reader-pending": "docs/specification/provider.md",
 } as const;
@@ -186,7 +207,7 @@ function addFindings(run: Run, file: string, findings: Finding[]): void {
   }
 }
 
-function checkFile(run: Run, file: string, relative: string, schemaArg: string | undefined, kindArg: string | undefined): Checked | undefined {
+function checkFile(run: Run, file: string, relative: string, schemaArg: string | undefined, kindArg: string | undefined, inFolder = false): Checked | undefined {
   let text: string;
   try {
     text = readFileSync(file, "utf8");
@@ -198,7 +219,7 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   try {
     value = JSON.parse(text);
   } catch (error) {
-    run.problems.push({ file, path: "/", rule: "json", message: `the file is not JSON: ${(error as Error).message}` });
+    run.problems.push({ file, path: "/", rule: "json", message: `the file is not JSON: ${(error as Error).message}`, help: "docs/specification/conformance.md" });
     return undefined;
   }
   // `--kind` runs that rule instead of the inferred ones, and validates only with `--schema`: a rule's input is often
@@ -209,7 +230,7 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     // author's problem to fix, named by its member, not a question about which schema to pass.
     const unknown = unknownDiscriminator(value);
     if (unknown !== undefined) {
-      run.problems.push({ file, path: `/${unknown.member}`, rule: "schema/const", message: `${unknown.member} ${JSON.stringify(unknown.value)} is not one this checkout reads; it reads ${unknown.known.map((known) => JSON.stringify(known)).join(", ")}` });
+      run.problems.push({ file, path: `/${unknown.member}`, rule: "schema/const", message: `${unknown.member} ${JSON.stringify(unknown.value)} is not one this checkout reads; it reads ${unknown.known.map((known) => JSON.stringify(known)).join(", ")}`, help: "docs/specification/versioning.md" });
       return undefined;
     }
     // A document missing a required member still names what it may be: of the schemas its discriminators match, the
@@ -218,7 +239,11 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     const missing = (candidate: Discriminated) => candidate.required.filter((member) => !Object.hasOwn(value as JsonObject, member));
     const fewest = Math.min(...matching.map((candidate) => missing(candidate).length));
     const near = matching.filter((candidate) => missing(candidate).length === fewest).map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
-    run.usage.push(`cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`);
+    const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
+    // In a folder, a file that is no contract document (a test fixture, a JSON Schema) is not checked and not an
+    // error; one that is near a contract schema is still the author's mistake. A file named on its own is a usage error.
+    if (inFolder && near.length === 0) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked` });
+    else run.usage.push(text);
     return undefined;
   }
   const kinds = kindArg !== undefined ? [kindArg] : documentKindsOf(schema as string);
@@ -226,7 +251,13 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   if (schema !== undefined) {
     const validate = contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/${schema}`) as ValidateFunction;
     validate(value);
-    for (const line of formatSchemaErrors(validate.errors ?? [])) run.problems.push({ file, path: line.instancePath || "/", rule: `schema/${line.keyword}`, message: line.message, help: `schemas/${schema.replace(/#.*$/, "")}` });
+    for (const line of formatSchemaErrors(validate.errors ?? [])) {
+      const problem = { file, path: line.instancePath || "/", rule: `schema/${line.keyword}`, message: line.message, help: `schemas/${schema.replace(/#.*$/, "")}` };
+      // A lock member the pin schema does not define is a note, as `pnpm pin:check` reads it (kit-written locks carry
+      // `adapter` and `kit`).
+      if (schema === "contract-pin.schema.json" && line.keyword === "additionalProperties") run.notes.push({ ...problem, rule: "note/lock-member" });
+      else run.problems.push(problem);
+    }
   }
   for (const kind of kinds) addFindings(run, file, evaluateSemanticRules(kind, value));
   const hints: Hint[] = [];
@@ -240,7 +271,9 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
 }
 
 const expand = (local: string) => (local.startsWith("~/") ? path.join(homedir(), local.slice(2)) : local);
-const serviceKey = (value: JsonObject) => `${String(value.id)}.${String(value.instance ?? "default")}`;
+/** A document value as text, never a throw: a member may be any JSON, an object whose `toString` is data included. */
+const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
+const serviceKey = (value: JsonObject) => `${show(value.id)}.${show(value.instance ?? "default")}`;
 const stem = (file: string) => path.basename(file).replace(/\.json$/, "");
 
 function readJson(file: string): unknown {
@@ -281,12 +314,14 @@ function checkPairs(run: Run, checked: Checked[]): void {
     let manifest: unknown;
     if (named !== "" && existsSync(named)) manifest = readJson(named);
     else {
-      const inFolder = manifests.find((candidate) => candidate.relative.endsWith(`${String(entry.id)}/fabric-agent.json`)) ?? (manifests.length === 1 ? manifests[0] : undefined);
+      // The manifest of provider <id> sits in a folder named <id>: the whole segment, so `notes` is not `my-notes`.
+      const inFolder = manifests.find((candidate) => path.basename(candidate.relative) === "fabric-agent.json" && path.basename(path.dirname(candidate.relative)) === entry.id) ?? (manifests.length === 1 ? manifests[0] : undefined);
       if (inFolder === undefined) {
-        run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${String(entry.manifest)} was not found, so the entry is not checked against it (FAC-SEM-014)` });
+        run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${show(entry.manifest)} was not found, so the entry is not checked against it (FAC-SEM-014)` });
         continue;
       }
       manifest = inFolder.value;
+      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `${show(entry.manifest)} was not found, so the folder's ${inFolder.relative} is read as the manifest it names (FAC-SEM-014)` });
     }
     addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }
@@ -355,16 +390,20 @@ export function main(args: readonly string[]): CliResult {
 
   const run: Run = { problems: [], notes: [], usage: [], files: [] };
   // `pnpm --dir <checkout> validate ./x` runs in the checkout; a relative path is the author's, from where pnpm was
-  // run (INIT_CWD), not the checkout's.
-  const base = process.env.INIT_CWD ?? process.cwd();
+  // run (INIT_CWD), not the checkout's. Only when this script is the entry: another script that pnpm started may run
+  // the command from a folder of its own.
+  const base = process.env.npm_lifecycle_event === "validate" && process.env.INIT_CWD !== undefined ? process.env.INIT_CWD : process.cwd();
   for (const named of targets) {
     const target = path.resolve(base, named);
     let folder = false;
     try { folder = statSync(target).isDirectory(); } catch { /* a missing file is reported when it is read */ }
     if (!folder) { checkFile(run, target, target, schemaArg, kindArg); continue; }
+    const before = run.usage.length;
     const files = jsonFiles(target, run);
-    if (files.length === 0 && run.usage.length === 0) run.usage.push(`${target} holds no .json file`);
-    const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file), schemaArg, kindArg) ?? []);
+    if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no .json file`);
+    const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file), schemaArg, kindArg, true) ?? []);
+    // A folder in which no file was a document it could check checked nothing: that is not a clean run.
+    if (files.length > 0 && checked.length === 0 && run.usage.length === before && run.problems.length === 0) run.usage.push(`${target} holds no document this checkout can tell; the files it skipped are noted`);
     checkPairs(run, checked);
   }
   return { code: run.usage.length > 0 ? 2 : run.problems.length > 0 ? 1 : 0, out: render(run, asJson) };

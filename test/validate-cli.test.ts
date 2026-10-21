@@ -153,7 +153,13 @@ describe("one line per planted mistake", () => {
     expect(run(one("fabric-agent.json", host)).out).toContain("did you mean https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1?");
     const version = json("positive/manifest-mcp.json");
     version.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/memory/0.2": {} };
-    expect(run(one("fabric-agent.json", version)).out).toContain("is not an extension key the contract defines; the contract's keys are listed in src/extensions.ts");
+    expect(run(one("fabric-agent.json", version)).out).toContain("did you mean https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1?");
+    const typo = json("positive/manifest-mcp.json");
+    typo.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/servce/0.1": {} };
+    expect(run(one("fabric-agent.json", typo)).out).toContain("did you mean https://fabric.passioncode.ai/agent-contract/extensions/service/0.1?  docs/specification/interop.md#extension-key");
+    const unknown = json("positive/manifest-mcp.json");
+    unknown.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/billing/0.1": {} };
+    expect(run(one("fabric-agent.json", unknown)).out).toContain("is not an extension key the contract defines; the contract's keys are listed in src/extensions.ts and docs/specification/interop.md#extension-key");
     const vendor = json("positive/manifest-mcp.json");
     vendor.extensions = { "https://vendor.example/ext/colour/1": { colour: "blue" } };
     expect(run(one("fabric-agent.json", vendor))).toEqual({ code: 0, out: "" });
@@ -465,15 +471,21 @@ describe("the first unit and product readings' cases (contract review 2026-10-21
     expect(result.out).toContain('/contractVersion  schema/const  contractVersion "0.2.0" is not one this checkout reads; it reads "0.1.0"');
   });
 
-  it("a relative path is the author's, from where pnpm was run (INIT_CWD)", () => {
+  it("a relative path is the author's, from where pnpm was run (INIT_CWD), only when `validate` is the script", () => {
     const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
-    const before = process.env.INIT_CWD;
+    const before = { cwd: process.env.INIT_CWD, event: process.env.npm_lifecycle_event };
     process.env.INIT_CWD = dir;
     try {
+      process.env.npm_lifecycle_event = "validate";
       expect(run("./fabric-agent.json").code).toBe(0);
+      // Another script that pnpm started: the path is the process's, where no fabric-agent.json is.
+      process.env.npm_lifecycle_event = "other";
+      expect(run("./fabric-agent.json").code).toBe(2);
     } finally {
-      if (before === undefined) delete process.env.INIT_CWD;
-      else process.env.INIT_CWD = before;
+      for (const [name, value] of [["INIT_CWD", before.cwd], ["npm_lifecycle_event", before.event]] as const) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
     }
   });
 
@@ -506,3 +518,94 @@ describe("the first unit and product readings' cases (contract review 2026-10-21
   });
 });
 
+describe("the second unit and product readings' cases (contract review 2026-10-21)", () => {
+  const evil = { toString: 1 };
+
+  it("a member that is an object with a toString member is data, never a throw", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.capabilities[0].profile.kind = evil;
+    expect(() => run(one("fabric-agent.json", manifest))).not.toThrow();
+    expect(run(one("fabric-agent.json", manifest)).code).toBe(1);
+    const known = json("positive/service-well-known.json");
+    known.service.id = evil;
+    const dir = folder({ "example-agent.default.json": json("positive/service-descriptor.json"), "x.well-known.json": known, "y.well-known.json": json("positive/service-well-known.json") });
+    expect(() => JSON.parse(run(dir, "--json").out)).not.toThrow();
+    const entry = json("positive/provider-entry-stdio.json");
+    const pairs = folder({ "providers/agent.json": { ...entry, id: evil, manifest: "~/no-such-folder/fabric-agent.json" }, "a/fabric-agent.json": json("positive/manifest-mcp.json"), "b/fabric-agent.json": json("positive/manifest-mcp.json") });
+    expect(() => run(pairs)).not.toThrow();
+  });
+
+  it("a provider id that ends another's is not paired with the other's manifest", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    const entry = json("positive/provider-entry-stdio.json");
+    const files: Record<string, unknown> = {};
+    for (const id of ["notes", "my-notes"]) {
+      const providerId = `https://agents.example/providers/${id}`;
+      files[`${id}/fabric-agent.json`] = { ...manifest, provider: { ...manifest.provider, id: providerId } };
+      files[`providers/${id}.json`] = { ...entry, id, providerId, manifest: `~/no-such-folder/${id}/fabric-agent.json` };
+    }
+    const result = run(folder(files));
+    expect(result.out).not.toMatch(/  FAC-SEM-014  /);
+    expect(result.code).toBe(0);
+    expect(result.out).toContain("note/pair");
+  });
+
+  it("a bad member name is one line at the member, naming it", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    entry.run.mcp.stdio.env = { "bad name": "secret-ref:API_KEY" };
+    const out = run(one("agent.json", entry)).out.trimEnd().split("\n");
+    expect(out.filter((line: string) => line.includes("/run/mcp/stdio/env"))).toEqual([expect.stringContaining('/run/mcp/stdio/env/bad name  schema/pattern  the member name "bad name" must match pattern')]);
+    expect(out.join("\n")).not.toContain("propertyNames");
+  });
+
+  it("a hint carries its own help link", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.capabilities[0].profile.protocolVersion = "1.0";
+    const report = JSON.parse(run(one("fabric-agent.json", manifest), "--json").out) as { notes: Array<{ rule: string; help: string }> };
+    expect(report.notes.find((note) => note.rule === "hint/profile-version")?.help).toBe("docs/specification/profiles.md");
+  });
+
+  it("a file that is not JSON and an unknown contractVersion carry a help link", () => {
+    const dir = folder({});
+    writeFileSync(path.join(dir, "broken.json"), "{ nope");
+    const broken = JSON.parse(run(path.join(dir, "broken.json"), "--json").out) as { problems: Array<{ help?: string }> };
+    expect(broken.problems.every((problem) => problem.help !== undefined)).toBe(true);
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.contractVersion = "0.2.0";
+    const version = JSON.parse(run(one("vendor.json", manifest), "--json").out) as { problems: Array<{ help?: string }> };
+    expect(version.problems).toEqual([expect.objectContaining({ help: "docs/specification/versioning.md" })]);
+  });
+
+  it("an empty folder after a target that failed still says it holds no .json file", () => {
+    const empty = folder({});
+    const result = run(path.join(empty, "missing.json"), empty);
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("holds no .json file");
+  });
+});
+
+describe("the second seam reading's cases: a consumer's own folder (contract review 2026-10-21)", () => {
+  const lock = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "63bb2965cce23b585353caba7d0fdbff0c561ff0" };
+
+  it("a lock file is a contract pin, its kit-written members are notes", () => {
+    expect(inferSchema(lock, "x/fabric-contract.lock.json")).toBe("contract-pin.schema.json");
+    const result = run(one("fabric-contract.lock.json", { ...lock, adapter: { repository: "https://github.com/passioncode-ai/fabric-agent-adapter", tag: "v0.39.1" }, kit: { source: "node" } }));
+    expect(result.code).toBe(0);
+    expect(result.out).not.toContain("service-descriptor");
+    expect(result.out).toContain("note/lock-member");
+  });
+
+  it("a JSON Schema named like a service key is not a service descriptor", () => {
+    expect(inferSchema({ $schema: "https://json-schema.org/draft/2020-12/schema" }, "x/capability-input.schema.json")).toBeUndefined();
+    expect(inferSchema({ $schema: "https://json-schema.org/draft/2020-12/schema" }, "x/report.input.json")).toBeUndefined();
+  });
+
+  it("a folder with files that are no contract document checks the rest and notes them", () => {
+    const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "fabric-contract.lock.json": lock, "schemas/capability-input.schema.json": { $schema: "https://json-schema.org/draft/2020-12/schema", type: "object" }, "fixtures/case.json": { input: 1 } });
+    const result = run(dir);
+    expect(result.code).toBe(0);
+    expect(result.out).not.toContain("FAC-SEM-010");
+    expect(result.out).toContain("note/skipped");
+    expect(run(path.join(dir, "fixtures/case.json")).code).toBe(2);
+  });
+});

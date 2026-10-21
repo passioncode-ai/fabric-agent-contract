@@ -1,5 +1,6 @@
 // #region pin-check — docs: docs/specification/versioning.md#one-contract-pin
 import { execFileSync } from "node:child_process";
+import type { Dirent } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -128,7 +129,14 @@ export function isDatedRecord(relative: string): boolean {
 
 async function walk(root: string, directory: string, excluded: string[], includeDated: boolean): Promise<string[]> {
   const out: string[] = [];
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
+  // A folder the walk cannot read (a mode-000 or root-owned folder) holds no mention it could check: skip it.
+  let entries: Dirent[];
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const entry of entries) {
     if ([".git", "node_modules"].includes(entry.name)) continue;
     const target = path.join(directory, entry.name);
     const relative = path.relative(root, target);
@@ -175,7 +183,8 @@ export function lockExtras(lock: unknown): string[] {
   if (typeof lock !== "object" || lock === null || Array.isArray(lock)) return [];
   return Object.keys(lock).filter((member) => !PIN_MEMBERS.includes(member));
 }
-const PIN_MEMBERS: readonly string[] = ["contract", "version", "repository", "commit", "profile"];
+/** The members `contract-pin.schema.json` defines; a test holds this list equal to the schema's `properties`. */
+export const PIN_MEMBERS: readonly string[] = ["contract", "version", "repository", "commit", "profile"];
 
 export interface PinCheckIo {
   out: (line: string) => void;

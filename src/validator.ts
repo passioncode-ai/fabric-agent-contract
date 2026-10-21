@@ -67,12 +67,19 @@ function message(error: ErrorObject): string {
  * dropped when a leaf error sits at or under its instance path (the leaf says what to change; the wrapper only says
  * that some branch failed), except a `oneOf` that matched more than one branch. `enum` and `const` name their allowed
  * values, `required` the missing member, `additionalProperties` the extra member and, where the object's schema has
- * an `extensions` member (errors from a validator built with `verbose`), where vendor data goes. Order is kept.
+ * an `extensions` member (errors from a validator built with `verbose`), where vendor data goes. A bad member name is
+ * one line at that member's path. Order is kept.
  */
 export function formatSchemaErrors(errors: readonly ErrorObject[]): SchemaProblem[] {
   const leaves = errors.filter((error) => !WRAPPERS.has(error.keyword));
+  // A bad member name is one problem: Ajv reports the inner keyword (it carries `propertyName`) and then the
+  // `propertyNames` wrapper, both at the object. Keep the inner one, at the member's own path, naming the member.
+  const named = new Set(errors.flatMap((error) => (typeof error.propertyName === "string" ? [`${error.instancePath}\u0000${error.propertyName}`] : [])));
   return errors
+    .filter((error) => !(error.keyword === "propertyNames" && named.has(`${error.instancePath}\u0000${String(error.params.propertyName)}`)))
     .filter((error) => !WRAPPERS.has(error.keyword) || ambiguous(error) || !leaves.some((leaf) => under(leaf.instancePath, error.instancePath)))
-    .map((error) => ({ instancePath: error.instancePath, keyword: error.keyword, message: message(error) }));
+    .map((error) => typeof error.propertyName === "string"
+      ? { instancePath: `${error.instancePath}/${error.propertyName.replace(/~/g, "~0").replace(/\//g, "~1")}`, keyword: error.keyword, message: `the member name ${quoted(error.propertyName)} ${message(error)}` }
+      : { instancePath: error.instancePath, keyword: error.keyword, message: message(error) });
 }
 // #endregion schema-errors
