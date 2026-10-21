@@ -29,6 +29,7 @@
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
 | SCR-23 | My network's machines | FLW-20 | disabled | proposed | `test/ceremonies.test.ts` |
+| SCR-24 | An agent's connections | FLW-21 | disabled | proposed | `test/connections.test.ts` |
 
 ## Design system
 
@@ -136,8 +137,10 @@
 ### SCR-09: Access log
 
 - **Used by:** FLW-06
-- **Purpose:** show a member every read of their raw telemetry and of devices bound to them.
-- **Elements:** time, reader role, scope, device, range, purpose (primary action: open the organization's notice).
+- **Purpose:** show a member every read of their raw telemetry and of devices bound to them, and each partner
+  organization's read of usage sums that include them.
+- **Elements:** time, reader role (a person's role, or `partner` with the partner organization), scope, device, range,
+  purpose (primary action: open the organization's notice).
 - **States:** empty — no read in the range; success — entries newest first.
 - **Coverage:** `access-log.schema.json`, fixture `positive/access-log.json`
 - **Scenarios:** SCN-010
@@ -296,4 +299,15 @@
 - **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`), `test/ceremonies.test.ts`
 - **Scenarios:** SCN-029, SCN-030
 - **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
+- **Status:** proposed
+
+### SCR-24: An agent's connections
+
+- **Used by:** FLW-21
+- **Purpose:** the person sees what an agent uses and which connection fails.
+- **Elements:** one row per connection with its kind, target, state, purpose and last time; a failing mark on a connection whose id a `degraded[].source` names; the reasons when the declaration is invalid.
+- **States:** success, the connections listed; failing, one or more marked; invalid, none shown and the reasons are; empty, the agent declares nothing.
+- **Coverage:** `src/connections.ts` (`connectionsView`, `FAC-SEM-127`), `fixtures/vectors/connections.json`, `test/connections.test.ts`
+- **Scenarios:** SCN-032
+- **Resources:** connections specification; Fabric Dashboards' Connections tab (its SCN-073)
 - **Status:** proposed

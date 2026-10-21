@@ -375,6 +375,9 @@ digest and a revision's `contentHash`. They give different bytes for the same va
 a service (`fabric-provider/0.1`): its id, its manifest and how to reach it over
 MCP. Like a service descriptor, it describes an installation and grants nothing.
 
+**Connections**: What an agent uses (other agents, models, connectors, stores, channels) and whether each works,
+declared under its well-known document's `extensions/connections/0.1` so a host draws the chain (DEC-0096).
+
 **Coding-agent catalogue**: The contract's one list of coding agents every product reads
 (`catalogue/coding-agents.json`, DEC-0093): install, launch, permission evidence and recipes per agent, keyed by the
 stable id (the runner kind where the runners page lists one, else a new name); machine state stays with each product.

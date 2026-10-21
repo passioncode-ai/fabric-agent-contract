@@ -25,7 +25,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `notMeasured` | each metric not computed that day, as `family.metric`, or `checks` when nothing was judged |
 | `nobodyDropped` | `turns`, `replyCoverage` (0 to 1), `firstReplyP50Ms`, `firstReplyP90Ms`, `repeatAskRate`, `agentRepeats`, `answeredLater` |
 | `quality` | the judged `sampled` turns, `helpedYes`, `helpedPartly`, `helpedNo` |
-| `checks` | each rubric check's pass rate among its non-NA verdicts, a check with no verdict left out; `null` when nothing was judged. A member of its own, so the payload stays two levels deep |
+| `checks` | each rubric check's pass rate among its non-NA verdicts, a check with no verdict left out; `null` when nothing was judged, never an empty object. A member of its own, so the payload stays two levels deep |
 | `stability` | `turnErrors`, `modelCallFailures`, `recoveredByFallback`, `processErrors`, `restarts`, `knowledgeAgeHours` |
 | `autonomy` | `resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`, `queueOldestMinutes`, `queueSlaMinutes` |
 

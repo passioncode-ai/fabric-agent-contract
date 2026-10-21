@@ -6,7 +6,8 @@ export const EXTENSION_KEYS = {
   service: `${EXTENSION_BASE}service/0.1`,
   interop: `${EXTENSION_BASE}interop/0.1`,
   memory: `${EXTENSION_BASE}memory/0.1`,
-  dashboard: `${EXTENSION_BASE}dashboard/0.1`
+  dashboard: `${EXTENSION_BASE}dashboard/0.1`,
+  connections: `${EXTENSION_BASE}connections/0.1`
 } as const;
 
 const KNOWN = new Set<string>(Object.values(EXTENSION_KEYS));

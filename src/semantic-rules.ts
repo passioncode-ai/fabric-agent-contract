@@ -37,6 +37,7 @@ import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
+import { connectionsRules } from "./connections.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
@@ -156,6 +157,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });
   }
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
+  if (kind === "service-well-known") findings.push(...connectionsRules(value));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));

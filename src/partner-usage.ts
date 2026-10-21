@@ -63,7 +63,11 @@ export function partnerUsage(input: unknown): PartnerUsageAnswer {
     cell.calls += calls;
     cell.unpricedCalls += unpricedCalls;
     if (!Number.isSafeInteger(cell.calls)) return fault;
-    if (costUsd !== null) costs.set(key, [...(costs.get(key) ?? []), costUsd]);
+    if (costUsd !== null) {
+      const list = costs.get(key);
+      if (list) list.push(costUsd);
+      else costs.set(key, [costUsd]);
+    }
     cells.set(key, cell);
   }
   // The priced costs are summed smallest first, so the same rows in any order give the same cell.

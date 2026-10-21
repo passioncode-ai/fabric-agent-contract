@@ -45,10 +45,11 @@ describe("the coding-agent catalogue (DEC-0093)", () => {
     const out = execFileSync("python3", ["-I", path.join(root, "tools/catalogue/seed.py"), path.join(root, "tools/catalogue/permissions.json")], { encoding: "utf8" });
     expect(out).toBe(readFileSync(path.join(root, "catalogue/coding-agents.json"), "utf8"));
   });
-  it("raises revision whenever the file changes from the committed main's", () => {
+  it("raises revision whenever the file changes from its merge base with main", () => {
     let committed: string;
     try {
-      committed = execFileSync("git", ["-C", projectRoot(), "show", "origin/main:catalogue/coding-agents.json"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const base = execFileSync("git", ["-C", projectRoot(), "merge-base", "HEAD", "origin/main"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+      committed = execFileSync("git", ["-C", projectRoot(), "show", `${base}:catalogue/coding-agents.json`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
     } catch {
       return; // main has no catalogue yet, or no origin: nothing to compare
     }

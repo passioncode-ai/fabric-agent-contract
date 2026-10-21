@@ -3,19 +3,20 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS, foreignExtensionKeys } from "../src/extensions.js";
-import { findPinDrift } from "../src/pin-check.js";
+import { exitCodeOf, findPinDrift, pinHistory } from "../src/pin-check.js";
 import { checkRuleCodes, contextProfileNames, schemaProfileKinds } from "../src/docs-check.js";
 import { ruleCodeFindings } from "../src/rule-codes.js";
 
 const PIN = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "a5a27092ba0dcc5facfbeae8b359146dfb403e9a" };
 
 describe("G-08: one spelling of every extension key", () => {
-  it("names the service, interop, memory and dashboard keys on one host and path", () => {
+  it("names the service, interop, memory, dashboard and connections keys on one host and path", () => {
     expect(EXTENSION_KEYS).toEqual({
       service: "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1",
       interop: "https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1",
       memory: "https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1",
-      dashboard: "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1"
+      dashboard: "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1",
+      connections: "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1"
     });
   });
 
@@ -118,5 +119,33 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
     expect(ruleCodeFindings(register(wrongKind), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("the register says y");
     const late = register(rows + "\n| `FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
     expect(ruleCodeFindings(late, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009 must be defined in a specification");
+  });
+});
+
+describe("pin:check: the pin is a commit of the contract's history", () => {
+  const git = (ancestor: boolean, hasOrigin = true, absent = false) => (args: string[]) => {
+    if (args[0] === "rev-parse" && args.includes("origin/main")) { if (!hasOrigin) throw new Error("no origin"); return "abc\n"; }
+    if (args[0] === "rev-parse") return "abc\n";
+    if (args[0] === "cat-file") { if (absent) throw new Error("missing"); return ""; }
+    if (args[0] === "merge-base") { if (!ancestor) throw new Error("not an ancestor"); return ""; }
+    return "";
+  };
+  it("accepts a pin on origin/main's history and refuses one off it, such as a commit a rewrite left behind", () => {
+    expect(pinHistory("c55f2d5", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
+    expect(pinHistory("20a818e6", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
+  });
+  it("falls back to HEAD without origin/main, refuses a pin that is no hash, and says when it cannot read the checkout", () => {
+    expect(pinHistory("c55f2d5", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
+    expect(pinHistory("main", ".", git(true)).state).toBe("off-history");
+    expect(pinHistory("c55f2d5", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
+  });
+  it("tells a commit this checkout has not fetched from one off the history, and fails the CLI on every state but on-history", () => {
+    expect(pinHistory("7e4ac91", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
+    expect(exitCodeOf([], { state: "on-history", base: "origin/main" })).toBe(0);
+    for (const history of [{ state: "off-history", base: "origin/main" }, { state: "absent", base: "origin/main" }, { state: "unreadable", reason: "x" }] as const) expect(exitCodeOf([], history)).toBe(1);
+    expect(exitCodeOf([{ path: "README.md", line: 1, found: "abc1234", message: "m" }], { state: "on-history", base: "origin/main" })).toBe(1);
+  });
+  it("finds this repository's own main commit on its history", () => {
+    expect(pinHistory("ca4cca7", projectRoot()).state).toBe("on-history");
   });
 });

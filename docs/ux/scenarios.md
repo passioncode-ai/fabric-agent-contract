@@ -37,6 +37,7 @@
 | SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
 | SCN-031 | A job stops at a limit: the caller waits for the reset, resends under the same key, or hands it to a person | spend | P-02 | ST-013, FLW-10 | draft | not audited |
+| SCN-032 | See what an agent uses, follow the failing connection, or learn why its declaration is not shown | connections | P-02 | ST-026, FLW-21 | draft | not audited |
 
 ## Personas
 
@@ -247,7 +248,8 @@ independent agent author and P-02 project operator.
   1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id` and bound devices.
   2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.
   3. The second entry is `device.health` with the device id -> the member sees the read of their device's state.
-- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose; reads of summaries are not listed, because summaries carry no person.
+  4. A third entry is a partner organization's read of the usage of its agents the member used (`activity.usage`, service `org:<partnerOrgId>`, role `partner`, per day or period, no device; DEC-0090) -> the member sees which partner read sums that include them.
+- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums; other reads of summaries are not listed, because summaries carry no person.
 - **Alt paths:** no read in the range -> the empty state says so.
 - **UI elements:** entry list, reader role, scope, device, purpose.
 - **States covered:** empty, success
@@ -430,9 +432,9 @@ independent agent author and P-02 project operator.
 - **Feature:** delegation
 - **Traces:** ST-014, FLW-11 (JTBD-07, JRN-06/#3)
 - **Entry point:** Fabric's approval prompt
-- **Preconditions:** a partner's agent calls `example-publisher` under a share grant (T2) with a delegation token; pushing a build is an effect that needs approval
+- **Preconditions:** an outside person's agent calls `example-publisher` under a share grant (T2) with a delegation token; pushing a build is an effect that needs approval
 - **Steps:**
-  1. The partner's agent asks for the push -> `example-publisher` refuses `approval-required` with the action's digest.
+  1. That agent asks for the push -> `example-publisher` refuses `approval-required` with the action's digest.
   2. The caller asks the hub -> Fabric shows the operator the push, the callee and who asks.
   3. Operator approves -> Fabric signs one approval (`method: prompt`) for that digest and callee, valid at most 24 hours.
   4. The caller repeats the call with it -> the callee checks the token, the grant, then the approval, consumes its `jti` and pushes.
@@ -484,6 +486,28 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the named profile does not exist -> the launch is refused as an unknown profile, never run on another one; the profile's lane reads user content and its route has no open-vendor model -> the launch is refused naming the profile (`FAC-SEM-112`, DEC-0083), and the operator adds an open-vendor model to the profile.
 - **Status:** draft
 - **Coverage:** runners specification, Resolution and What a profile reads; `src/profile-rules.ts` `resolveModelProfile`, `closedUserContentRoute`; `test/runner-model-profiles.test.ts`, `test/open-vendor-user-content.test.ts`, `fixtures/semantic/profile-resolution-refused.json`, `fixtures/semantic/profile-resolution-user-content-*.json`
+- **Product:** unobserved
+
+## Connections
+
+### SCN-032: See what an agent uses, follow the failing connection, or learn why its declaration is not shown
+
+- **Persona:** P-02
+- **Feature:** connections
+- **Traces:** ST-026, FLW-21 (JTBD-11, JRN-10/#1, JRN-10/#2, JRN-10/#3)
+- **Entry point:** `example-agent`'s Connections tab in the host
+- **Preconditions:** `example-agent` declares a service connection to `example-notifier.default` for `notifier.send`, a connector `telegram` and a model; its well-known document has `degraded: [{source: "telegram"}]`
+- **Steps:**
+  1. Operator opens the tab -> three connections, each with its kind, target and state.
+  2. The `telegram` connector -> marked failing, with its reason.
+  3. Operator opens a second agent whose declaration has the id `notify` on two connections -> the tab shows none of it and says the id is named twice.
+- **Expected result:** a valid declaration is shown whole with the failing connections marked; an invalid one shows nothing of itself and its reasons.
+- **Alt paths:** an agent that declares nothing -> the tab says so. A `degraded[].source` equal to a connection's target but not its id -> that connection is not marked; a host may show the source as a failing part of its own (Fabric Dashboards' SCN-073).
+- **UI elements:** the connections list, the failing mark, the reasons.
+- **States covered:** success, failing, invalid, empty
+- **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text. A name that only looks like one (a long mixed model id in a purpose, a document link whose id is a long mixed run, a store target such as `sk-Prod-eu-west-1-db`) -> the same; the author removes the model id from the text or declares it as a model connection of its own whose `target` is the id, drops the link, or renames its own target.
+- **Status:** draft
+- **Coverage:** DEC-0096, `FAC-SEM-127`, `connectionsView` in `src/connections.ts`, `fixtures/vectors/connections.json`, `test/connections.test.ts`; Fabric Dashboards' SCN-073 is the host's own scenario
 - **Product:** unobserved
 
 ## Embedded dashboard

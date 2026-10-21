@@ -58,7 +58,9 @@ excluded by the consumer.
 
 `pnpm pin:check <repository> [--pin <file>] [--exclude <path>]…` runs the reference
 check ([`src/pin-check.ts`](../../src/pin-check.ts)): a commit-like hash on a line that
-mentions the contract and differs from the pin fails, with its file and line. A
+mentions the contract and differs from the pin fails, with its file and line, and so does a pin that is not a
+commit of the contract's history (`pinHistory`: an ancestor of `origin/main` in this checkout, else of `HEAD`), such
+as a commit a history rewrite left behind; a checkout git cannot read fails too. A
 consumer MAY carry an equivalent check in its own language; the Fabric Agent Adapter's
 `test/validate.py` does.
 

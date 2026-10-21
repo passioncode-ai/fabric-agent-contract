@@ -2,7 +2,8 @@
 
 # Merge log
 
-Written by `agent_sync.py merge`. Entries newer than 7 days keep their detail; older ones are compacted to one line each on the next write. Read it before starting work: it is the shortest answer to *what landed while I was on my branch*.
+Written by `agent_sync.py merge`. Entries newer than 7 days keep their detail; older ones are compacted to one line each on the next write. Read it before starting work: it is the shortest answer to *what landed while I was on my branch*. Not written
+since 2026-10-11: merges since then are in `git log --merges origin/main` and the handoffs index.
 
 ### 2026-10-11T17:32:37Z · `board-waves-20261011` · agent/board-waves-20261011 → main · `2afbe60`
 - run: r-d556b8420 (fabric-agent-contract-75), merged through PR #33

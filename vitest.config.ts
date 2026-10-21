@@ -12,7 +12,7 @@ export default defineConfig({
     // killed by a test; a covered one is killed only when a planted defect shows it.
     coverage: {
       provider: "v8",
-      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/entitlement.ts", "src/share-registration.ts", "src/job-limits.ts", "src/partner-usage.ts", "src/folder-attribution.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts", "src/pairing.ts", "src/enroll-token.ts"],
+      include: ["src/*-rules.ts", "src/canonical.ts", "src/comms-digest.ts", "src/delegation.ts", "src/ed25519.ts", "src/grant-projection.ts", "src/fabric-links.ts", "src/secret-shape.ts", "src/session-handoff.ts", "src/operator-session.ts", "src/p256.ts", "src/relay.ts", "src/secret-envelope.ts", "src/webauthn.ts", "src/dashboard-declaration.ts", "src/connections.ts", "src/service-supervisor.ts", "src/windows-token.ts", "src/http-signature.ts", "src/revocation-delta.ts", "src/rfc3339.ts", "src/hub-key-rules.ts", "src/window-lease.ts", "src/entitlement.ts", "src/share-registration.ts", "src/job-limits.ts", "src/partner-usage.ts", "src/folder-attribution.ts", "src/signing-challenges.ts", "src/core-rules.ts", "src/openrouter-attribution.ts", "src/protocol-revisions.ts", "src/local-channel.ts", "src/session-join.ts", "src/app-descriptor.ts", "src/relay-vectors.ts", "src/schema-closure.ts", "src/feed-data.ts", "src/privacy-plan.ts", "src/identifiers.ts", "src/comms-hold.ts", "src/comms-finding.ts", "src/context-route.ts", "src/findings.ts", "src/pairing.ts", "src/enroll-token.ts"],
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       thresholds: {
@@ -29,6 +29,7 @@ export default defineConfig({
         "src/context-route.ts": { branches: 100 },
         "src/context-rules.ts": { branches: 100 },
         "src/dashboard-declaration.ts": { branches: 100 },
+        "src/connections.ts": { branches: 100 },
         "src/delegation-rules.ts": { branches: 100 },
         "src/descriptor-rules.ts": { branches: 100 },
         "src/delegation.ts": { branches: 100 },
