@@ -104,3 +104,20 @@ describe("the author's first documents describe every member (REQ-03)", () => {
     expect(profile.properties.kind.enum).toEqual(profile.allOf.map((branch: any) => branch.if.properties.kind.const));
   });
 });
+
+describe("an MCP connection is checked on the branch its mode selects (REQ-03, the review's first unit reading)", () => {
+  const manifest = () => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/negative/manifest-stdio-unknown-scope.json"), "utf8")) as Record<string, any>;
+
+  it("a wrong stdio scope names the stdio member only", () => {
+    expect(lines("manifest.schema.json", manifest())).toEqual(['/capabilities/0/profile/connection/scope must be one of "project", "on-demand", "session"']);
+  });
+
+  it("a wrong streamable-http url names the url only, and an unknown mode is one line", () => {
+    const http = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/manifest-mcp.json"), "utf8")) as Record<string, any>;
+    http.capabilities[0].profile.connection.url = "not a uri";
+    expect(lines("manifest.schema.json", http).every((line) => line.startsWith("/capabilities/0/profile/connection/url "))).toBe(true);
+    const odd = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/manifest-mcp.json"), "utf8")) as Record<string, any>;
+    odd.capabilities[0].profile.connection.mode = "sse";
+    expect(lines("manifest.schema.json", odd)).toEqual(['/capabilities/0/profile/connection/mode must be one of "streamable-http", "stdio"']);
+  });
+});

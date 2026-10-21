@@ -146,11 +146,16 @@ async function walk(root: string, directory: string, excluded: string[], include
  */
 export const exitCodeOf = (drift: PinDrift[], history: PinHistory): 0 | 1 | 2 => (history.state === "malformed" ? 2 : drift.length > 0 || history.state !== "on-history" ? 1 : 0);
 
-/** The lock's problems against `contract-pin.schema.json`, one line each; a commit of the wrong shape is `malformed`. */
+/**
+ * The lock's problems against `contract-pin.schema.json`, one line each; a commit of the wrong shape is `malformed`.
+ * A member the schema does not define is not a problem here but a note (`lockExtras`): this command read locks
+ * without their schema before 2026-10-21, and consumers' locks carry such members (`adapter`, `kit`).
+ */
 export async function lockProblems(lock: unknown): Promise<string[]> {
   const result = validateDocument(await createValidator(), PIN_SCHEMA, lock);
   const problems = new Set<string>();
   for (const error of result.errors) {
+    if (error.keyword === "additionalProperties") continue;
     if (error.instancePath === "/commit") {
       const commit = (lock as { commit: unknown }).commit;
       problems.add(historyMessage({ state: "malformed", commit: typeof commit === "string" ? commit : JSON.stringify(commit) }, "") as string);
@@ -158,13 +163,19 @@ export async function lockProblems(lock: unknown): Promise<string[]> {
     }
     const where = error.instancePath || "the lock";
     const allowed = error.keyword === "const" ? `: it must be ${JSON.stringify(error.params.allowedValue)}`
-      : error.keyword === "additionalProperties" ? `: ${JSON.stringify(error.params.additionalProperty)} is not a member of a pin`
-        : error.keyword === "enum" ? `: one of ${(error.params.allowedValues as unknown[]).map((value) => JSON.stringify(value)).join(", ")}`
-          : ` ${error.message}`;
+      : error.keyword === "enum" ? `: one of ${(error.params.allowedValues as unknown[]).map((value) => JSON.stringify(value)).join(", ")}`
+        : ` ${error.message}`;
     problems.add(`${where}${allowed}`);
   }
   return [...problems];
 }
+
+/** The lock's members `contract-pin.schema.json` does not define, in the lock's order. */
+export function lockExtras(lock: unknown): string[] {
+  if (typeof lock !== "object" || lock === null || Array.isArray(lock)) return [];
+  return Object.keys(lock).filter((member) => !PIN_MEMBERS.includes(member));
+}
+const PIN_MEMBERS: readonly string[] = ["contract", "version", "repository", "commit", "profile"];
 
 export interface PinCheckIo {
   out: (line: string) => void;
@@ -230,8 +241,17 @@ export async function main(argv: string[], io: PinCheckIo = defaultIo): Promise<
     for (const problem of problems) io.err(`  ${problem}`);
     return 2;
   }
+  for (const member of lockExtras(lock)) io.out(`note: ${JSON.stringify(member)} in ${path.basename(pinFile)} is not a member of a pin (schemas/contract-pin.schema.json); this check ignores it`);
   const pin = lock as ContractPin;
-  const files = await Promise.all((await walk(root, root, [path.relative(root, pinFile), ...excluded], includeDated)).map(async (file) => ({ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") })));
+  // A file the walk lists but cannot be read (a broken link, a folder named like a file) holds no mention: skip it.
+  const listed = await walk(root, root, [path.relative(root, pinFile), ...excluded], includeDated);
+  const files = (await Promise.all(listed.map(async (file) => {
+    try {
+      return [{ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") }];
+    } catch {
+      return [];
+    }
+  }))).flat();
   const drift = findPinDrift(files, pin);
   for (const item of drift) io.err(item.message);
   const history = pinHistory(pin.commit, io.contractRoot ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), io.git);

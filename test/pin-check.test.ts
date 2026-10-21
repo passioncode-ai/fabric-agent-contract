@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { exitCodeOf, historyMessage, isDatedRecord, lockProblems, main, pinHistory, runIfEntry, type PinCheckIo } from "../src/pin-check.js";
+import { exitCodeOf, historyMessage, isDatedRecord, lockExtras, lockProblems, main, pinHistory, runIfEntry, type PinCheckIo } from "../src/pin-check.js";
 
 // REQ-07 (contract review 2026-10-21): the pin:check CLI on a missing lock, a lock its schema refuses, a malformed
 // commit, the dated records versioning.md excludes, and the success line that only exit 0 prints.
@@ -77,7 +77,6 @@ describe("pin:check: the lock file", () => {
     expect(result.code).toBe(2);
     expect(result.err[0]).toMatch(/is not a contract pin \(schemas\/contract-pin\.schema\.json\):$/);
     expect(result.err.slice(1)).toEqual([
-      '  the lock: "extra" is not a member of a pin',
       '  /contract: it must be "fabric-agent-contract"',
       expect.stringMatching(/^ {2}\/version must match pattern/),
       '  /profile: one of "mcp", "a2a", "local-runner"'
@@ -85,6 +84,17 @@ describe("pin:check: the lock file", () => {
     const { commit: _commit, ...withoutCommit } = pinOf(ON_MAIN);
     expect(await lockProblems(withoutCommit)).toEqual(["the lock must have required property 'commit'"]);
     expect(await lockProblems(pinOf(ON_MAIN))).toEqual([]);
+  });
+
+  it("notes a member the pin schema does not define and checks the pin anyway (D2: consumers' locks carry them)", async () => {
+    const lock = { ...pinOf(ON_MAIN), adapter: "fabric-agent-adapter", kit: "node" };
+    expect(await lockProblems(lock)).toEqual([]);
+    expect(lockExtras(lock)).toEqual(["adapter", "kit"]);
+    expect(lockExtras(null)).toEqual([]);
+    expect(lockExtras([1])).toEqual([]);
+    const result = await run([consumer({}, lock)]);
+    expect(result.code).toBe(0);
+    expect(result.out).toContain('note: "adapter" in fabric-contract.lock.json is not a member of a pin (schemas/contract-pin.schema.json); this check ignores it');
   });
 });
 

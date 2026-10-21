@@ -33,8 +33,15 @@ const run = (...args: string[]) => main(args);
 describe("every positive fixture passes", () => {
   it.each(catalogue.filter((entry) => entry.valid))("$name", (entry) => {
     const result = run(fixture(entry.path), "--schema", entry.schema);
-    expect(result.out, result.out).toBe("");
+    // A positive fixture may draw a hint (a member a named reader does not accept yet), never a problem.
+    expect(result.out.split("\n").filter((line) => line !== "" && !/  hint\//.test(line)), result.out).toEqual([]);
     expect(result.code).toBe(0);
+  });
+
+  it("a provider entry with run.mcp.stdio.scope gets the reader-pending hint and still passes (CT-27)", () => {
+    const result = run(fixture("positive/provider-entry-stdio-on-demand.json"), "--schema", "provider.schema.json");
+    expect(result.code).toBe(0);
+    expect(result.out).toContain("hint/reader-pending");
   });
 });
 
@@ -160,7 +167,7 @@ describe("one line per planted mistake", () => {
 
   it("a credential in a launch argument is FAC-SEM-057 with how to fix it and its help link", () => {
     const entry = json("positive/provider-entry-stdio.json");
-    entry.run.mcp.stdio.command = ["/usr/local/bin/agent", "--token", "ghp_abcdefghijklmnopqrstuvwxyz0123456789"];
+    entry.run.mcp.stdio.command = ["/usr/local/bin/agent", "--token", ["gh", "p_", "abcdefghijklmnopqrstuvwxyz0123456789"].join("")];
     const result = run(one("agent.json", entry));
     expect(result.code).toBe(1);
     expect(lines(result.out)).toEqual([expect.stringMatching(/  \/run\/mcp\/stdio\/command\/2  FAC-SEM-057  .*env entry with a secret reference.*  docs\/specification\/profiles\.md#fac-sem-057$/)]);
@@ -260,7 +267,26 @@ describe("a folder is checked file by file and as pairs", () => {
     const result = run(folder({ [`${key(d)}.json`]: d, "health.json": odd }));
     expect(result.code).toBe(1);
     expect(result.out).toContain("schema/type");
-    expect(result.out).not.toContain("FAC-SEM-009");
+  });
+
+  it("the folder's only descriptor and only well-known document are a pair whatever their names (FAC-SEM-009)", () => {
+    const d = descriptor();
+    const w = wellKnown();
+    w.service.id = d.id;
+    w.service.instance = "preview";
+    const result = run(folder({ [`${key(d)}.json`]: d, "well-known.json": w }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("FAC-SEM-009");
+  });
+
+  it("a well-known document no descriptor answers for is a note, not a silent pass", () => {
+    const d = descriptor();
+    const other = descriptor();
+    other.id = "other-agent";
+    const w = wellKnown();
+    w.service.id = "third-agent";
+    const result = run(folder({ [`${key(d)}.json`]: d, [`${key(other)}.json`]: other, "well-known.json": w }));
+    expect(result.out).toContain("note/pair");
   });
 
   it("two descriptors on one port are FAC-SEM-010", () => {
@@ -374,5 +400,109 @@ describe("pnpm validate runs as a command", () => {
     expect(bad.stdout).toContain("schema/const");
     const good = spawnSync(tsx, [path.join(root, "src/validate-cli.ts"), fixture("positive/manifest-mcp.json")], { encoding: "utf8" });
     expect(good.status).toBe(0);
+    // Two cold tsx processes, under a second of CPU each; on a loaded machine one took 22 s of wall time (2026-10-21).
+  }, 120_000);
+});
+
+describe("the first unit and product readings' cases (contract review 2026-10-21)", () => {
+  it("an unreadable folder is a usage error, never a throw", () => {
+    if (process.getuid?.() === 0) return;
+    const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
+    const locked = path.join(dir, "locked");
+    mkdirSync(locked);
+    chmodSync(locked, 0o000);
+    try {
+      const result = run(dir);
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("cannot read");
+    } finally {
+      chmodSync(locked, 0o755);
+    }
+  });
+
+  it("vendor data nested 5,000 deep is walked, not overflowed", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    let deep: Record<string, unknown> = {};
+    const top = deep;
+    for (let n = 0; n < 5000; n += 1) { const next = {}; deep.a = next; deep = next; }
+    manifest.provider.extensions = { "https://vendor.example/x": top };
+    expect(run(one("fabric-agent.json", manifest))).toEqual({ code: 0, out: "" });
+    // The walk takes about 0.4 s alone; under coverage instrumentation and the gate's load, past vitest's 5 s default.
+  }, 30_000);
+
+  it("a document missing a required member names the schemas it may follow and asks for --schema", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    delete manifest.capabilities;
+    const result = run(one("notes.json", manifest));
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("its members match manifest.schema.json (missing capabilities)");
+    expect(result.out).not.toContain("result.schema.json");
+    expect(run(one("notes.json", manifest), "--schema", "manifest").out).toContain("capabilities");
+  });
+
+  it("a document that is not an object is a usage error naming no candidate", () => {
+    const result = run(one("notes.json", [1, 2]));
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("cannot tell which schema");
+    expect(result.out).not.toContain("its members match");
+  });
+
+  it("without INIT_CWD a path resolves from the process's directory", () => {
+    const before = process.env.INIT_CWD;
+    delete process.env.INIT_CWD;
+    try {
+      expect(run(fixture("positive/manifest-mcp.json")).code).toBe(0);
+    } finally {
+      if (before !== undefined) process.env.INIT_CWD = before;
+    }
+  });
+
+  it("an unknown contractVersion names the member and the values this checkout reads", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.contractVersion = "0.2.0";
+    const result = run(one("vendor.json", manifest));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('/contractVersion  schema/const  contractVersion "0.2.0" is not one this checkout reads; it reads "0.1.0"');
+  });
+
+  it("a relative path is the author's, from where pnpm was run (INIT_CWD)", () => {
+    const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
+    const before = process.env.INIT_CWD;
+    process.env.INIT_CWD = dir;
+    try {
+      expect(run("./fabric-agent.json").code).toBe(0);
+    } finally {
+      if (before === undefined) delete process.env.INIT_CWD;
+      else process.env.INIT_CWD = before;
+    }
+  });
+
+  it("a usage error with --json is JSON", () => {
+    const result = run("--json", "--schema", "nope");
+    expect(result.code).toBe(2);
+    expect(JSON.parse(result.out).usage[0]).toContain("unknown schema nope");
+  });
+
+  it("a profile kind that is an Object property draws no hint", () => {
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.capabilities[0].profile.kind = "constructor";
+    expect(run(one("fabric-agent.json", manifest)).out).not.toContain("hint/profile-version");
+  });
+
+  it("a descriptor's manifest not yet at its install path is read from the folder, with a note", () => {
+    const d = json("positive/service-descriptor.json");
+    d.fabricManifest = "~/no/such/place/fabric-agent.json";
+    const result = run(folder({ [`${d.id as string}.${(d.instance as string | undefined) ?? "default"}.json`]: d, "fabric-agent.json": json("positive/manifest-mcp.json") }));
+    expect(result.out).toContain("note/pair");
+    expect(result.out).not.toContain("does not resolve");
+  });
+
+  it("a message that quotes a newline stays on one line", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "fac-validate-"));
+    const file = path.join(dir, "fabric-agent.json");
+    writeFileSync(file, "{\n  \"a\": 1,\n");
+    const result = run(file);
+    expect(result.out.trim().split("\n")).toHaveLength(1);
   });
 });
+

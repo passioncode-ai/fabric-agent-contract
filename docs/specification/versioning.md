@@ -67,8 +67,10 @@ checkout, else of `HEAD`), such as a commit a history rewrite left behind; a pin
 checkout git cannot read fail too; each of these exits 1. The dated records are excluded by default: a file whose
 name starts with `CHANGELOG`, and everything under `docs/handoffs/`, `docs/evidence/` and `.task-pipeline/`;
 `--exclude` adds paths and `--include-dated` scans the dated records as well. The success line, which names the
-history the pin was found on, is printed only when the exit code is 0. A consumer MAY carry an equivalent check in its
-own language; the Fabric Agent Adapter's `test/validate.py` does.
+history the pin was found on, is printed only when the exit code is 0. A consumer MAY carry its own check in its own
+language; the Fabric Agent Adapter's `test/validate.py` is one, and it is not this command: it excludes `test/` as
+well as the dated records, scans only some file types, allows the adapter's list of supported earlier revisions and
+does not look the pin up in the contract's history, so the two can disagree on one checkout.
 
 Moving the pin is a compatibility change: the consumer reviews what changed between the
 two commits, updates the lock and every mention in one change, and releases.

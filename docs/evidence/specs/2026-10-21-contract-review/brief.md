@@ -74,6 +74,20 @@ Frozen: adding is free, removing needs the operator. Each row names how it is ve
 | REQ-17 | Consumer findings reach their owners: the three `support-quality-daily` forks, stale pins, and the backlog rows the consumer review found done get their receipts | board messages and backlog rows with evidence |
 | REQ-18 | What this run does not do is a backlog row with its evidence: the credential detectors' union (CT-73), a manifest content hash definition, the local-runner placeholders, the launch declaration's single home, the extension point on wire documents, a decisions index, DOCMAP and backlog compaction | rows exist at the close |
 
+## Exceptions to D2, and what was dropped
+
+Each change below accepts or refuses something it did not before; each is recorded here, as D2 requires.
+
+| Change | What a pinned reader now does differently | Why it stands |
+|---|---|---|
+| `fabric-connections` enters `PROTOCOL_REVISIONS` with `0.1` (REQ-13) | FAC-SEM-099 refuses a `protocols` list naming `fabric-connections/<revision>` other than `0.1`, or two of its revisions that are not consecutive; before, an unregistered name passed | the protocol was published as `0.1` by DEC-0096 on 2026-10-21; no other revision exists to be declared, and every registered protocol is checked the same way |
+| `[0-9]` for `\d` in every schema pattern (REQ-13) | none for an ECMA-262 reader such as Ajv, where `\d` is `[0-9]`; a Python reader using `re`, whose `\d` matches any Unicode digit, now refuses digits outside `0-9` | JSON Schema reads patterns as ECMA-262 regular expressions (2020-12 Validation, section 6.3.3); the narrowing brings those readers to what the schema always meant |
+| `connection` keyed on `mode` (REQ-03, first unit reading) | the same accept set on every fixture; a wrong `mode` reports one error instead of every branch's | none needed: no verdict changes |
+
+Dropped from REQ-13: a shared `serviceInstanceKey` definition in common. The copies are two different constraints
+(`service-common` requires the `.<instance>` part, `manifest` makes it optional), so one definition would change one
+of them; they stay inline.
+
 ## Carry-over
 
 Every finding that is not a REQ above is listed with its review id in `carry-over.md` and leaves with a board row.

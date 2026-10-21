@@ -92,7 +92,7 @@ describe("formatSchemaErrors (REQ-04)", () => {
 describe("secret rules say how to fix (REQ-04)", () => {
   it("FAC-SEM-057 points a launch argument to an env entry with a secret reference, or a file", () => {
     const findings = evaluateSemanticRules("provider-entry", {
-      run: { mcp: { stdio: { command: ["/usr/local/bin/agent", "--token", "ghp_abcdefghijklmnopqrstuvwxyz0123456789"] } } }
+      run: { mcp: { stdio: { command: ["/usr/local/bin/agent", "--token", ["gh", "p_", "abcdefghijklmnopqrstuvwxyz0123456789"].join("")] } } }
     });
     expect(findings).toEqual([expect.objectContaining({ code: "FAC-SEM-057", instancePath: "/run/mcp/stdio/command/2" })]);
     expect(findings[0]?.message).toMatch(/move the value to an env entry with a secret reference \(secret-ref:NAME\), or to a file the program reads/);

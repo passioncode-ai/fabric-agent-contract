@@ -9,7 +9,7 @@
  * runs its own check in the gate; this runner is the one command for a change that moves several. A new generator is
  * added to `GENERATORS` below: `test/vectors-runner.test.ts` fails while a file in `tools/vectors/` is missing here.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { projectRoot } from "../../src/contract.js";
@@ -57,7 +57,7 @@ export function runVectors(write: boolean, root: string = projectRoot()): { file
       files.push(file);
       const target = path.join(root, file);
       if (write) writeFileSync(target, text);
-      else if (readFileSync(target, "utf8") !== text) stale.push(file);
+      else if (!existsSync(target) || readFileSync(target, "utf8") !== text) stale.push(file);
     }
   }
   return { files, stale };

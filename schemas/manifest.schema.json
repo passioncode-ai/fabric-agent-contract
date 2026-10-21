@@ -404,58 +404,97 @@
         },
         "connection": {
           "description": "How the host connects: streamable-http with a url, or stdio with an executable and its arguments (docs/specification/profiles.md#mcp-capability-profile).",
-          "oneOf": [
+          "type": "object",
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "description": "How the host reaches the server; the branch it selects is checked alone, so one mistake reports that branch's errors.",
+              "enum": [
+                "streamable-http",
+                "stdio"
+              ]
+            }
+          },
+          "allOf": [
             {
-              "type": "object",
-              "required": [
-                "mode",
-                "url"
-              ],
-              "properties": {
-                "mode": {
-                  "description": "Always streamable-http.",
-                  "const": "streamable-http"
-                },
-                "url": {
-                  "description": "The server's Streamable HTTP endpoint (docs/specification/profiles.md#mcp-capability-profile).",
-                  "$ref": "common.schema.json#/$defs/uri"
+              "if": {
+                "type": "object",
+                "required": [
+                  "mode"
+                ],
+                "properties": {
+                  "mode": {
+                    "const": "streamable-http"
+                  }
                 }
               },
-              "additionalProperties": false
-            },
-            {
-              "type": "object",
-              "required": [
-                "mode",
-                "executableRef",
-                "args"
-              ],
-              "properties": {
-                "mode": {
-                  "description": "Always stdio.",
-                  "const": "stdio"
-                },
-                "executableRef": {
-                  "description": "The URI of the executable the host starts (docs/specification/profiles.md#mcp-capability-profile).",
-                  "$ref": "common.schema.json#/$defs/uri"
-                },
-                "args": {
-                  "description": "The executable's arguments, an array of strings, never a shell string and never a credential (docs/specification/profiles.md#no-secret-in-a-command-line).",
-                  "type": "array",
-                  "items": {
-                    "type": "string"
+              "then": {
+                "type": "object",
+                "required": [
+                  "mode",
+                  "url"
+                ],
+                "properties": {
+                  "mode": {
+                    "description": "Always streamable-http.",
+                    "const": "streamable-http"
+                  },
+                  "url": {
+                    "description": "The server's Streamable HTTP endpoint (docs/specification/profiles.md#mcp-capability-profile).",
+                    "$ref": "common.schema.json#/$defs/uri"
                   }
                 },
-                "scope": {
-                  "description": "DEC-0044, LC-19. Where a host starts this stdio server. project: for the sessions of a project that binds it, from that project's MCP configuration. on-demand (the default when absent): for the run that binds it, stopped when that run ends. session: in every session; spelled so that FAC-SEM-056 refuses it by name.",
-                  "enum": [
-                    "project",
-                    "on-demand",
-                    "session"
-                  ]
+                "additionalProperties": false
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "mode"
+                ],
+                "properties": {
+                  "mode": {
+                    "const": "stdio"
+                  }
                 }
               },
-              "additionalProperties": false
+              "then": {
+                "type": "object",
+                "required": [
+                  "mode",
+                  "executableRef",
+                  "args"
+                ],
+                "properties": {
+                  "mode": {
+                    "description": "Always stdio.",
+                    "const": "stdio"
+                  },
+                  "executableRef": {
+                    "description": "The URI of the executable the host starts (docs/specification/profiles.md#mcp-capability-profile).",
+                    "$ref": "common.schema.json#/$defs/uri"
+                  },
+                  "args": {
+                    "description": "The executable's arguments, an array of strings, never a shell string and never a credential (docs/specification/profiles.md#no-secret-in-a-command-line).",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "scope": {
+                    "description": "DEC-0044, LC-19. Where a host starts this stdio server. project: for the sessions of a project that binds it, from that project's MCP configuration. on-demand (the default when absent): for the run that binds it, stopped when that run ends. session: in every session; spelled so that FAC-SEM-056 refuses it by name.",
+                    "enum": [
+                      "project",
+                      "on-demand",
+                      "session"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
             }
           ]
         },

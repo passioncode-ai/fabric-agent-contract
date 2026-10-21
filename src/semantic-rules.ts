@@ -547,7 +547,11 @@ function commandLines(kind: string, value: unknown): Finding[] {
     .map(([instancePath, , isUrl]) => ({
       code: "FAC-SEM-057",
       instancePath,
-      message: isUrl ? "a declared URL never carries a credential: pass it in a header from a secret reference (LC-21)" : "a launch argument never carries a credential: a process listing shows it; move the value to an env entry with a secret reference (secret-ref:NAME), or to a file the program reads (LC-21)"
+      message: isUrl
+        ? "a declared URL never carries a credential: pass it in a header from a secret reference (LC-21)"
+        : kind === "provider-entry"
+          ? "a launch argument never carries a credential: a process listing shows it; move the value to an env entry with a secret reference (secret-ref:NAME), or to a file the program reads (LC-21)"
+          : "a launch argument never carries a credential: a process listing shows it; have the program read it from a file, or declare the server in a provider entry whose env holds a secret reference (secret-ref:NAME) (LC-21)"
     }));
 }
 // #endregion declared-commands
