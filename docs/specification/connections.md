@@ -43,21 +43,25 @@ No string member carries a credential or a URL with one. What counts is defined 
   `sk-prod-eu-west-1-db`, `20261021:connections-reader-v2` and a ticket `123456789:Implement-the-Connections-tab-reader`
   are names;
 - `Bearer` and a token of 12 or more characters holding a digit ("bearer authentication" is prose);
-- a run of 40 or more characters of `A-Z a-z 0-9 + / _ -` mixing upper case, lower case and digits, in a piece of
-  the member (split at spaces and `=`) or, in a piece that reads as a path, between its `/` (the shared
-  `longSecretPiece`): an AWS secret access key is one, and so is a slug such as
-  `Prod-Analytics-Warehouse-EU-West-1-Replica`; a hex digest is lower case and a `provider/Model-Name-32B` id is a
-  path, so neither is;
+- in `label`, `purpose`, `reason` and the `target` of any kind but `model`: a run of 40 or more characters of
+  `A-Z a-z 0-9 + / = _ -` mixing upper case, lower case and digits, in a piece split at spaces and `=` and read whole
+  (the shared `longSecret`): an AWS secret access key is one, with or without `/`, and so are a slug such as
+  `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket title holding a digit and a long mixed model id written
+  in a purpose; a hex digest is lower case and is not. A model's `target` is a `provider/model` id and `id` and
+  `capability` are lower case, so no run is looked for there; a piece with a scheme is a URL, read as below;
 - any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, a parameter such as
   `api_key` with a value, or any shape above, which the shared detector reads in a URL without a word start or a
   case rule). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
-  punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host.
+  punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host. A query or
+  fragment value is read whole, `=` included; a path is read between its separators, as the shared detector reads
+  it, so a base64 secret written as a URL path segment is not found (CT-73).
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
-a store `sk-Prod-eu-west-1-db` or a URL path holding `sk-learn-classifier-v2`, hides the whole declaration. These
-shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word start, the `sk-`
-rules, case-sensitive prefixes and a Bearer token's length and digit; wider by the Telegram bot token. Whether the
-shared detector adopts them is CT-73.
+a store `sk-Prod-eu-west-1-db`, a URL path holding `sk-learn-classifier-v2` or a URL path segment of 40 or more mixed
+characters (a Google Docs or Notion page id), hides the whole declaration; its author moves a model id to `target` or
+drops the link. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the
+word start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a model's
+`target`; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 

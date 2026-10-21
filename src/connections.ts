@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { BEARER_INSIDE, JWT_SHAPE, longSecretPiece, secretUrl } from "./secret-shape.js";
+import { BEARER_INSIDE, JWT_SHAPE, longSecret, secretUrl } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // extensions/connections/0.1 (DEC-0096): what an agent uses, and the contract-side check of it.
@@ -75,13 +75,15 @@ function urlsIn(value: string): string[] {
   return urls;
 }
 /**
- * A credential in a connection's string member: a token's shape, a long run mixing upper case, lower case and digits
- * in a piece, or between the separators of a path-like piece (the shared `longSecretPiece`: an AWS secret access key
- * is one, a `provider/Model-Name-32B` id is not), or a URL that carries one. The reference: ports run
- * `fixtures/vectors/connections.json`.
+ * A long run mixing upper case, lower case and digits (the shared `longSecret`: an AWS secret access key, say), in a
+ * piece of the member split at spaces and `=`, read whole (a secret may hold `/`); a piece with a scheme is a URL and
+ * is read by `secretUrl` instead, between its path's separators. Not looked for in a model's `target`, which is a
+ * `provider/model` id, nor in `id` and `capability`, which the schema keeps lower case.
  */
-const credential = (value: string): boolean =>
-  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || longSecretPiece(value) || urlsIn(value).some(secretUrl);
+const longRun = (value: string): boolean => value.split(/[\s=]/).some((piece) => piece.search(SCHEME) < 0 && longSecret(piece));
+/** A credential in one member of a connection: a token's shape, a long run where one is looked for, or a URL that carries one. */
+const credential = (value: string, runs: boolean): boolean =>
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || (runs && longRun(value)) || urlsIn(value).some(secretUrl);
 
 /** The problems the schema cannot state: an id named twice, a credential in any string member. */
 function beyondShape(list: Connection[]): string[] {
@@ -92,7 +94,8 @@ function beyondShape(list: Connection[]): string[] {
     seen.add(connection.id);
     for (const member of STRING_MEMBERS) {
       const value = connection[member];
-      if (typeof value === "string" && credential(value)) errors.push(`/connections/${index}/${member} credential: a connection never carries a credential`);
+      const runs = member !== "id" && member !== "capability" && !(member === "target" && connection.kind === "model");
+      if (typeof value === "string" && credential(value, runs)) errors.push(`/connections/${index}/${member} credential: a connection never carries a credential`);
     }
   });
   return errors;

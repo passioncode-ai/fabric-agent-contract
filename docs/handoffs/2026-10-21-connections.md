@@ -53,6 +53,12 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   shared with `secretArgument`), so a `provider/Model-Name-32B` model id or a commit URL with an upper-case owner is
   declared; vectors pin each numeric boundary the page states;
   a ticket title of 40 or more mixed characters with a digit is recorded as a long run, not stepped around.
+- From the eighth readings: the long run follows the member, not a path guess: it is looked for whole in `label`,
+  `purpose`, `reason` and a non-model `target` (an AWS secret with `/` or a lower-case segment is found), never in a
+  model's `target` (any `provider/model` id, `NousResearch/…` too), and a URL is read by the shared `secretUrl`;
+  `src/secret-shape.ts` is back to its base apart from two exports; SCN-032 gives the recovery for a look-alike;
+  50 000 random AWS-shaped keys in a label are all refused; vectors pin the long run's 39/40, 64 connections and the
+  `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions
 
