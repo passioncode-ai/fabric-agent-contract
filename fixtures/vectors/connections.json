@@ -1847,6 +1847,60 @@
       }
     },
     {
+      "name": "a lower-case key of 32 or more characters (as an OpenRouter key is)",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "label": "key sk-abc0123def4567abc0123def4567abc0123def4567"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a short lower-case sk- name with a digit is no credential",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "writer",
+                "kind": "model",
+                "target": "sk-prod-eu-west-1-db",
+                "state": "unknown"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "writer",
+            "kind": "model",
+            "target": "sk-prod-eu-west-1-db",
+            "state": "unknown",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
       "name": "not an object",
       "input": {
         "extensions": {

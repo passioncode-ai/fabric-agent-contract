@@ -28,6 +28,8 @@ const NONE = { declared: false, reported: false, connections: [] };
 function cases(): Json[] {
   const fake = ["sk", "-", "A1".repeat(12)].join("");
   const bearer = ["abc123", "def456", "ghi789"].join("");
+  // Lower-case like an OpenRouter key, but not its `sk-or-v1-` form, which the host's push protection blocks.
+  const routerKey = ["sk", "-", "abc0123def4567".repeat(3)].join("");
   const ghToken = ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1"].join("");
   const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"].join("");
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
@@ -85,6 +87,8 @@ function cases(): Json[] {
     ["an api_key value in brackets inside a reason", doc({ connections: [{ ...telegram, reason: "refused (https://ex.com/?api_key=(abcd))" }] }), REPORTED],
     ["a URL in brackets or quotes without a credential is declared", doc({ connections: [{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'." }] }), view([{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'.", failing: false }])],
     ["a Telegram bot token in a URL path", doc({ connections: [{ ...telegram, purpose: `calls https://api.telegram.org/${botToken}/getUpdates` }] }), REPORTED],
+    ["a lower-case key of 32 or more characters (as an OpenRouter key is)", doc({ connections: [{ ...model, label: `key ${routerKey}` }] }), REPORTED],
+    ["a short lower-case sk- name with a digit is no credential", doc({ connections: [{ ...model, target: "sk-prod-eu-west-1-db" }] }), view([{ ...model, target: "sk-prod-eu-west-1-db", failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

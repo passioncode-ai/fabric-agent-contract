@@ -43,11 +43,12 @@ function shape(): ValidateFunction {
 const none = (): ConnectionsView => ({ declared: false, reported: false, connections: [], errors: [] });
 const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reason"] as const;
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
-// a word and is not a key (the shared SECRET_VALUE has no such boundary). An `sk-` key and a Telegram bot token
-// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) hold a digit and an upper-case letter,
-// so names such as `sk-learn-classifier-v2` or `20261021:connections-reader-v2` are not keys. A bearer token needs a
+// a word and is not a key (the shared SECRET_VALUE has no such boundary). An `sk-` key holds a digit and either an
+// upper-case letter or 32 or more characters (an OpenRouter key is lower-case hex), and a Telegram bot token
+// (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) mixes cases, so names such as
+// `sk-learn-classifier-v2` or `20261021:connections-reader-v2` are not keys. A bearer token needs a
 // digit (BEARER_INSIDE), so "bearer authentication" is prose.
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{30,})/;
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:(?=[A-Za-z0-9_-]*[A-Z])(?=[A-Za-z0-9_-]*[a-z])[A-Za-z0-9_-]{30,})/;
 const SCHEME = /[a-z][a-z0-9+.-]*:\/\//gi;
 const CLOSING = /[)\]}>"'.,;:!?]/;
 // How many closing characters are tried back on a URL: `]` of an IPv6 host and the full stop after it need two.

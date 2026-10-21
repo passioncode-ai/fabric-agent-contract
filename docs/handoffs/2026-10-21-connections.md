@@ -39,6 +39,8 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   (an IPv6 host, a punctuation-only `api_key`, glued URLs); an `sk-` key and a bot token hold a digit and an upper-case
   letter; the last private name in a vector replaced, and the name added to the operator's private-terms denylist so
   the privacy check catches it; CT-70 measured against the final vectors; CT-73 for the two detectors (DEC-0044).
+- Found by the author after the fourth readings: the upper-case rule missed a lower-case OpenRouter key
+  (`sk-or-v1-` and 64 hex characters); an `sk-` key now holds a digit and an upper-case letter or 32 or more characters.
 
 ## Decisions
 
