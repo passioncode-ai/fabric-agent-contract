@@ -61,7 +61,9 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   key with no digit, about one in a thousand, is not, as in DEC-0044's detector);
   from the tenth: the text glued before a URL's `://` is read for a long run (an `_` or `/` had left it unread);
   from the eleventh: the cut is at the first real scheme's `://`, so a `://` with no scheme is text;
-  the page promises nothing inside a URL beyond what the shared `secretUrl` finds (its gaps are CT-73's); vectors pin the long run's 39/40, 64 connections and the
+  the page promises nothing inside a URL beyond what the shared `secretUrl` finds (its gaps are CT-73's);
+  from the twelfth: the long run splits at spaces only, so inside a URL only `secretUrl` reads (no widening by an
+  `=` in a path) and outside one a run joined by `=` is one run, as in the shared detector; vectors pin the long run's 39/40, 64 connections and the
   `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions

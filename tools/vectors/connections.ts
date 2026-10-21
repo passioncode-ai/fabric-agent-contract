@@ -145,11 +145,14 @@ function cases(): Json[] {
     ["a URL query value holding = is read whole", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/?q=${"Ab1".repeat(7)}=${"Cd2".repeat(7)}` }] }), REPORTED],
     ["a long run glued before a scheme across an underscore", doc({ connections: [{ ...telegram, purpose: `${"Ab1".repeat(7)}_${"Cd2".repeat(7)}https://h.example/` }] }), REPORTED],
     ["an AWS secret glued before a scheme", doc({ connections: [{ ...telegram, purpose: `${awsSecret}https://h.example/` }] }), REPORTED],
-    ["in a purpose, a slashed secret after an = is a piece of its own", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}` }] }), REPORTED],
+    ["a slashed secret after an = at the end of a URL path", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}` }] }), REPORTED],
     ["a slashed secret in a URL path is not found", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/${awsSecret}` }] }), view([{ ...telegram, purpose: `reads https://h.example/${awsSecret}`, failing: false }])],
     ["a model target that is a URL is read as one", doc({ connections: [{ ...model, target: `https://h.example/${"Ab1".repeat(13)}c` }] }), REPORTED],
     ["a :// with no scheme before it is text", doc({ connections: [{ ...telegram, purpose: `://${"Ab1".repeat(13)}c` }] }), REPORTED],
     ["a secret before the first real scheme, after a :// with none", doc({ connections: [{ ...telegram, purpose: `_://x,${awsSecret}https://h.example/` }] }), REPORTED],
+    ["a run joined by = outside a URL is one run", doc({ connections: [{ ...model, label: `${"Ab1".repeat(7)}=${"Cd2".repeat(7)}` }] }), REPORTED],
+    ["a slashed secret after an = in a URL path, read by secretUrl", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}/docs` }] }), view([{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}/docs`, failing: false }])],
+    ["two glued URLs: the text before the first scheme only", doc({ connections: [{ ...telegram, purpose: "https://docs.example.com/API/v2/Reference/Connections/GetUpdates,https://b.example/" }] }), view([{ ...telegram, purpose: "https://docs.example.com/API/v2/Reference/Connections/GetUpdates,https://b.example/", failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

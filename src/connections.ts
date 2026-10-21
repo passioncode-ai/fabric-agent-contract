@@ -76,13 +76,13 @@ function urlsIn(value: string): string[] {
 }
 /**
  * A long run mixing upper case, lower case and digits (the shared `longSecret`: an AWS secret access key, say), in a
- * piece of the member split at spaces and `=`, read whole (a secret may hold `/`). In a piece that holds a URL, the
+ * piece of the member split at spaces, read whole (a secret may hold `/` or `=`). In a piece that holds a URL, the
  * text before the first scheme's `://` is read so (whatever is glued to the scheme), and the URL itself by `secretUrl`, between its
  * path's separators. Not looked for in a model's `target`, which is a `provider/model` id, nor in `id` and
  * `capability`, which the schema keeps lower case.
  */
 const longRun = (value: string): boolean =>
-  value.split(/[\s=]/).some((piece) => {
+  value.split(/\s+/).some((piece) => {
     // The `://` of the first real scheme; a `://` with no scheme before it is text (`search` ignores lastIndex).
     const at = piece.search(SCHEME);
     const cut = at < 0 ? -1 : piece.indexOf("://", at);

@@ -44,8 +44,8 @@ No string member carries a credential or a URL with one. What counts is defined 
   are names;
 - `Bearer` and a token of 12 or more characters holding a digit ("bearer authentication" is prose);
 - in `label`, `purpose`, `reason` and the `target` of any kind but `model`: a run of 40 or more characters of
-  `A-Z a-z 0-9 + / = _ -` that holds upper case, lower case and a digit, in a piece split at spaces and `=` and read
-  whole (the shared `longSecret`). An AWS secret access key that holds all three (all but about one in a thousand)
+  `A-Z a-z 0-9 + / = _ -` that holds upper case, lower case and a digit, in a piece split at spaces and read whole
+  (the shared `longSecret`). An AWS secret access key that holds all three (all but about one in a thousand)
   is one, with or without `/`, and so are a slug such as `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket
   title holding a digit and a long mixed model id written in a purpose; a hex digest is lower case and is not. A
   model's `target` is not checked for a long run outside a URL, and `id` and `capability` are lower case. In a piece
