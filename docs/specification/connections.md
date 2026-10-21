@@ -44,17 +44,20 @@ No string member carries a credential or a URL with one. What counts is defined 
   are names;
 - `Bearer` and a token of 12 or more characters holding a digit ("bearer authentication" is prose);
 - in `label`, `purpose`, `reason` and the `target` of any kind but `model`: a run of 40 or more characters of
-  `A-Z a-z 0-9 + / = _ -` mixing upper case, lower case and digits, in a piece split at spaces and `=` and read whole
-  (the shared `longSecret`): an AWS secret access key is one, with or without `/`, and so are a slug such as
-  `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket title holding a digit and a long mixed model id written
-  in a purpose; a hex digest is lower case and is not. A model's `target` is a `provider/model` id and `id` and
-  `capability` are lower case, so no run is looked for there; a piece with a scheme is a URL, read as below;
+  `A-Z a-z 0-9 + / = _ -` that holds upper case, lower case and a digit, in a piece split at spaces and `=` and read
+  whole (the shared `longSecret`). An AWS secret access key that holds all three (all but about one in a thousand)
+  is one, with or without `/`, and so are a slug such as `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket
+  title holding a digit and a long mixed model id written in a purpose; a hex digest is lower case and is not. A
+  model's `target` is not checked for a long run, whatever it holds, and `id` and `capability` are lower case; a
+  piece with a scheme is a URL, read as below, and text glued before the scheme in that piece is read only as part
+  of the URL;
 - any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, a parameter such as
   `api_key` with a value, or any shape above, which the shared detector reads in a URL without a word start or a
   case rule). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
   punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host. A query or
   fragment value is read whole, `=` included; a path is read between its separators, as the shared detector reads
-  it, so a base64 secret written as a URL path segment is not found (CT-73).
+  it, so a secret that a `/` splits into pieces under 40 characters is not found in a path, while a 40-character
+  mixed segment is (CT-73).
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
 a store `sk-Prod-eu-west-1-db`, a URL path holding `sk-learn-classifier-v2` or a URL path segment of 40 or more mixed

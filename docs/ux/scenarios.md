@@ -505,7 +505,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** an agent that declares nothing -> the tab says so. A `degraded[].source` equal to a connection's target but not its id -> that connection is not marked; a host may show the source as a failing part of its own (Fabric Dashboards' SCN-073).
 - **UI elements:** the connections list, the failing mark, the reasons.
 - **States covered:** success, failing, invalid, empty
-- **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text. A name that only looks like one (a long mixed model id in a purpose, a document link whose id is a long mixed run) -> the same; the author moves the model id to the connection's `target` or drops the link.
+- **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text. A name that only looks like one (a long mixed model id in a purpose, a document link whose id is a long mixed run) -> the same; the author removes the model id from the text or declares it as a model connection of its own whose `target` is the id, and drops the link.
 - **Status:** draft
 - **Coverage:** DEC-0096, `FAC-SEM-127`, `connectionsView` in `src/connections.ts`, `fixtures/vectors/connections.json`, `test/connections.test.ts`; Fabric Dashboards' SCN-073 is the host's own scenario
 - **Product:** unobserved

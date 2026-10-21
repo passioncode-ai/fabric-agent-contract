@@ -57,7 +57,8 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   `purpose`, `reason` and a non-model `target` (an AWS secret with `/` or a lower-case segment is found), never in a
   model's `target` (any `provider/model` id, `NousResearch/…` too), and a URL is read by the shared `secretUrl`;
   `src/secret-shape.ts` is back to its base apart from two exports; SCN-032 gives the recovery for a look-alike;
-  50 000 random AWS-shaped keys in a label are all refused; vectors pin the long run's 39/40, 64 connections and the
+  of 50 000 random AWS-shaped keys, every one that holds upper case, lower case and a digit is refused in a label (a
+  key with no digit, about one in a thousand, is not, as in DEC-0044's detector); vectors pin the long run's 39/40, 64 connections and the
   `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions
