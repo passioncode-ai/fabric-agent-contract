@@ -59,7 +59,8 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   `src/secret-shape.ts` is back to its base apart from two exports; SCN-032 gives the recovery for a look-alike;
   of 50 000 random AWS-shaped keys, every one that holds upper case, lower case and a digit is refused in a label (a
   key with no digit, about one in a thousand, is not, as in DEC-0044's detector);
-  from the tenth: the text glued before a URL's `://` is read for a long run (an `_` or `/` had left it unread); vectors pin the long run's 39/40, 64 connections and the
+  from the tenth: the text glued before a URL's `://` is read for a long run (an `_` or `/` had left it unread);
+  from the eleventh: the cut is at the first real scheme's `://`, so a `://` with no scheme is text; vectors pin the long run's 39/40, 64 connections and the
   `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions

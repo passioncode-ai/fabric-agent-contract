@@ -49,13 +49,13 @@ No string member carries a credential or a URL with one. What counts is defined 
   is one, with or without `/`, and so are a slug such as `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket
   title holding a digit and a long mixed model id written in a purpose; a hex digest is lower case and is not. A
   model's `target` is not checked for a long run outside a URL, and `id` and `capability` are lower case. In a piece
-  that holds a URL, the text before its `://` is read for a long run (whatever is glued to the scheme), and the URL
+  that holds a URL, the text before its first scheme's `://` is read for a long run (whatever is glued to the scheme), and the URL
   as below;
 - any URL in the member, at its start or inside prose, that carries one (`secretUrl`: a password, a parameter such as
   `api_key` with a value, or any shape above, which the shared detector reads in a URL without a word start or a
-  case rule). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
+  case rule; the Telegram shape, which it lacks, keeps its word start there). A URL runs from each scheme in a piece to the next space; it is read without the brackets, quotes and
   punctuation that close a sentence, and with one of them put back, since `]` closes an IPv6 host. A query or
-  fragment value is read whole, `=` included; a path is read between its separators, as the shared detector reads
+  fragment value is read whole, `=` included (a part with no `=` is read as a path); a path is read between its separators, as the shared detector reads
   it, so a secret that a `/` splits into pieces under 40 characters is not found in a path, while a 40-character
   mixed segment is, and so is a secret after an `=` in the path, which starts a piece of its own (CT-73).
 

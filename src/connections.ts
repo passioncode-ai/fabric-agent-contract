@@ -77,14 +77,16 @@ function urlsIn(value: string): string[] {
 /**
  * A long run mixing upper case, lower case and digits (the shared `longSecret`: an AWS secret access key, say), in a
  * piece of the member split at spaces and `=`, read whole (a secret may hold `/`). In a piece that holds a URL, the
- * text before its `://` is read so (whatever is glued to the scheme), and the URL itself by `secretUrl`, between its
+ * text before the first scheme's `://` is read so (whatever is glued to the scheme), and the URL itself by `secretUrl`, between its
  * path's separators. Not looked for in a model's `target`, which is a `provider/model` id, nor in `id` and
  * `capability`, which the schema keeps lower case.
  */
 const longRun = (value: string): boolean =>
   value.split(/[\s=]/).some((piece) => {
-    const scheme = piece.indexOf("://");
-    return longSecret(scheme < 0 ? piece : piece.slice(0, scheme));
+    // The `://` of the first real scheme; a `://` with no scheme before it is text (`search` ignores lastIndex).
+    const at = piece.search(SCHEME);
+    const cut = at < 0 ? -1 : piece.indexOf("://", at);
+    return longSecret(cut < 0 ? piece : piece.slice(0, cut));
   });
 /** A credential in one member of a connection: a token's shape, a long run where one is looked for, or a URL that carries one. */
 const credential = (value: string, runs: boolean): boolean =>

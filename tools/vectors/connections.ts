@@ -148,6 +148,8 @@ function cases(): Json[] {
     ["a slashed secret after an = in a URL path is a piece of its own", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}` }] }), REPORTED],
     ["a slashed secret in a URL path is not found", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/${awsSecret}` }] }), view([{ ...telegram, purpose: `reads https://h.example/${awsSecret}`, failing: false }])],
     ["a model target that is a URL is read as one", doc({ connections: [{ ...model, target: `https://h.example/${"Ab1".repeat(13)}c` }] }), REPORTED],
+    ["a :// with no scheme before it is text", doc({ connections: [{ ...telegram, purpose: `://${"Ab1".repeat(13)}c` }] }), REPORTED],
+    ["a secret before the first real scheme, after a :// with none", doc({ connections: [{ ...telegram, purpose: `_://x,${awsSecret}https://h.example/` }] }), REPORTED],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));
