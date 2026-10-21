@@ -133,7 +133,9 @@ async function walk(root: string, directory: string, excluded: string[], include
   let entries: Dirent[];
   try {
     entries = await readdir(directory, { withFileTypes: true });
-  } catch {
+  } catch (error) {
+    // The repository itself unreadable is no clean run: nothing was checked.
+    if (directory === root) throw error;
     return out;
   }
   for (const entry of entries) {
@@ -253,7 +255,13 @@ export async function main(argv: string[], io: PinCheckIo = defaultIo): Promise<
   for (const member of lockExtras(lock)) io.out(`note: ${JSON.stringify(member)} in ${path.basename(pinFile)} is not a member of a pin (schemas/contract-pin.schema.json); this check ignores it`);
   const pin = lock as ContractPin;
   // A file the walk lists but cannot be read (a broken link, a folder named like a file) holds no mention: skip it.
-  const listed = await walk(root, root, [path.relative(root, pinFile), ...excluded], includeDated);
+  let listed: string[];
+  try {
+    listed = await walk(root, root, [path.relative(root, pinFile), ...excluded], includeDated);
+  } catch (error) {
+    io.err(`cannot read ${root}: ${String((error as NodeJS.ErrnoException).code)}`);
+    return 2;
+  }
   const files = (await Promise.all(listed.map(async (file) => {
     try {
       return [{ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") }];

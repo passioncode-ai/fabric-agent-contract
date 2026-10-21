@@ -95,7 +95,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   if (name === "fabric-agent.json") return "manifest.schema.json";
   if (name === "fabric-contract.lock.json") return "contract-pin.schema.json";
   // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
-  if (name.endsWith(".schema.json") || (isObject(value) && typeof value.$schema === "string")) return undefined;
+  // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
+  // on a contract document, which the name rules below still read.
+  if (name.endsWith(".schema.json") || (isObject(value) && typeof value.$schema === "string" && /^https?:\/\/json-schema\.org\//.test(value.$schema))) return undefined;
   if (path.basename(path.dirname(file)) === "providers") return "provider.schema.json";
   if (SERVICE_KEY.test(name.replace(/\.json$/, ""))) return "service-descriptor.schema.json";
   return undefined;
@@ -117,6 +119,8 @@ const KNOWN_KEYS: readonly string[] = Object.values(EXTENSION_KEYS);
 const tail = (key: string) => key.split("/").slice(-2).join("/");
 /** Edit distance (Levenshtein), for the nearest contract key to a misspelt one. */
 function distance(a: string, b: string): number {
+  // Only distances up to three matter: a longer gap in length is never near, and costs a full table to say so.
+  if (Math.abs(a.length - b.length) > 3) return Math.abs(a.length - b.length);
   let row = Array.from({ length: b.length + 1 }, (_, index) => index);
   for (let i = 1; i <= a.length; i += 1) {
     const next = [i];
@@ -125,11 +129,14 @@ function distance(a: string, b: string): number {
   }
   return row[b.length] as number;
 }
-/** The contract key a misspelt key most likely meant: the same name and version, else one within three edits. */
-function nearestKey(key: string): string | undefined {
-  const same = KNOWN_KEYS.find((known) => tail(known) === tail(key));
+/**
+ * The contract key a misspelt key most likely meant: the same name and version, else the one key within three edits;
+ * two keys equally near name neither. Exported with its key list for the tie's test.
+ */
+export function nearestKey(key: string, known: readonly string[] = KNOWN_KEYS): string | undefined {
+  const same = known.find((candidate) => tail(candidate) === tail(key));
   if (same !== undefined) return same;
-  const ranked = KNOWN_KEYS.map((known) => [known, distance(known, key)] as const).sort((x, y) => x[1] - y[1]);
+  const ranked = known.map((candidate) => [candidate, distance(candidate, key)] as const).sort((x, y) => x[1] - y[1]);
   const best = ranked[0];
   return best !== undefined && best[1] <= 3 && ranked[1]?.[1] !== best[1] ? best[0] : undefined;
 }
@@ -272,7 +279,7 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
 
 const expand = (local: string) => (local.startsWith("~/") ? path.join(homedir(), local.slice(2)) : local);
 /** A document value as text, never a throw: a member may be any JSON, an object whose `toString` is data included. */
-const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
+const show = (value: unknown) => (typeof value === "string" ? value : value === undefined ? "(none)" : JSON.stringify(value));
 const serviceKey = (value: JsonObject) => `${show(value.id)}.${show(value.instance ?? "default")}`;
 const stem = (file: string) => path.basename(file).replace(/\.json$/, "");
 
@@ -321,7 +328,7 @@ function checkPairs(run: Run, checked: Checked[]): void {
         continue;
       }
       manifest = inFolder.value;
-      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `${show(entry.manifest)} was not found, so the folder's ${inFolder.relative} is read as the manifest it names (FAC-SEM-014)` });
+      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `${entry.manifest === undefined ? "the entry names no manifest" : `${show(entry.manifest)} was not found`}, so the folder's ${inFolder.relative} is read as the manifest it names (FAC-SEM-014)` });
     }
     addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }
@@ -399,11 +406,12 @@ export function main(args: readonly string[]): CliResult {
     try { folder = statSync(target).isDirectory(); } catch { /* a missing file is reported when it is read */ }
     if (!folder) { checkFile(run, target, target, schemaArg, kindArg); continue; }
     const before = run.usage.length;
+    const problemsBefore = run.problems.length;
     const files = jsonFiles(target, run);
     if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no .json file`);
     const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file), schemaArg, kindArg, true) ?? []);
     // A folder in which no file was a document it could check checked nothing: that is not a clean run.
-    if (files.length > 0 && checked.length === 0 && run.usage.length === before && run.problems.length === 0) run.usage.push(`${target} holds no document this checkout can tell; the files it skipped are noted`);
+    if (files.length > 0 && checked.length === 0 && run.usage.length === before && run.problems.length === problemsBefore) run.usage.push(`${target} holds no document this checkout can tell; the files it skipped are noted`);
     checkPairs(run, checked);
   }
   return { code: run.usage.length > 0 ? 2 : run.problems.length > 0 ? 1 : 0, out: render(run, asJson) };

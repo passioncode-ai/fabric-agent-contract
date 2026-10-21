@@ -259,6 +259,19 @@ describe("pin:check: files and folders it cannot read (contract review 2026-10-2
     }
   });
 
+  it("a repository it cannot list is exit 2, not a clean run", async () => {
+    if (process.getuid?.() === 0) return;
+    const dir = consumer({ "README.md": "x" });
+    chmodSync(dir, 0o300);
+    try {
+      const result = await run([dir]);
+      expect(result.code).toBe(2);
+      expect(result.err.join("\n")).toContain("cannot read");
+    } finally {
+      chmodSync(dir, 0o755);
+    }
+  });
+
   it("knows the members the pin schema defines, no more and no fewer", () => {
     const schema = JSON.parse(readFileSync(path.join(root, "schemas/contract-pin.schema.json"), "utf8")) as { properties: Record<string, unknown> };
     expect([...PIN_MEMBERS].sort()).toEqual(Object.keys(schema.properties).sort());

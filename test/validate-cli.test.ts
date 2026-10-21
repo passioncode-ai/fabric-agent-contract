@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { inferSchema, main } from "../src/validate-cli.js";
+import { inferSchema, main, nearestKey } from "../src/validate-cli.js";
 
 // REQ-01 (contract review 2026-10-21): `pnpm validate` is an author's first check. It infers the schema, runs the
 // schema and the semantic rules that read the document, prints one line per problem (path, rule, message, help)
@@ -607,5 +607,41 @@ describe("the second seam reading's cases: a consumer's own folder (contract rev
     expect(result.out).not.toContain("FAC-SEM-010");
     expect(result.out).toContain("note/skipped");
     expect(run(path.join(dir, "fixtures/case.json")).code).toBe(2);
+  });
+});
+
+describe("the third unit reading's cases (contract review 2026-10-21)", () => {
+  it("a contract document that carries a contract $schema is still checked", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    delete entry.protocol;
+    entry.$schema = "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/provider.schema.json";
+    const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), [`providers/${entry.id as string}.json`]: entry }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('is missing the required member "protocol"');
+    expect(inferSchema({ $schema: "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-descriptor.schema.json" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+  });
+
+  it("a folder with nothing to check is exit 2 whatever came before it", () => {
+    const broken = folder({});
+    writeFileSync(path.join(broken, "broken.json"), "{");
+    const skipped = folder({ "case.json": { input: 1 } });
+    for (const order of [[path.join(broken, "broken.json"), skipped], [skipped, path.join(broken, "broken.json")]]) {
+      const result = run(...order);
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("holds no document this checkout can tell");
+    }
+  });
+
+  it("two keys equally near name neither", () => {
+    expect(nearestKey("https://k.example/abcd", ["https://k.example/abcx", "https://k.example/abcy"])).toBeUndefined();
+    expect(nearestKey("https://k.example/abcd", ["https://k.example/abcx", "https://k.example/zzzzzz"])).toBe("https://k.example/abcx");
+  });
+
+  it("an entry without a manifest member says so, not 'undefined'", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    delete entry.manifest;
+    const out = run(folder({ [`providers/${entry.id as string}.json`]: entry, "fabric-agent.json": json("positive/manifest-mcp.json") })).out;
+    expect(out).not.toContain("undefined");
+    expect(out).toContain("the entry names no manifest");
   });
 });
