@@ -60,7 +60,8 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   of 50 000 random AWS-shaped keys, every one that holds upper case, lower case and a digit is refused in a label (a
   key with no digit, about one in a thousand, is not, as in DEC-0044's detector);
   from the tenth: the text glued before a URL's `://` is read for a long run (an `_` or `/` had left it unread);
-  from the eleventh: the cut is at the first real scheme's `://`, so a `://` with no scheme is text; vectors pin the long run's 39/40, 64 connections and the
+  from the eleventh: the cut is at the first real scheme's `://`, so a `://` with no scheme is text;
+  the page promises nothing inside a URL beyond what the shared `secretUrl` finds (its gaps are CT-73's); vectors pin the long run's 39/40, 64 connections and the
   `target`, `label`, `purpose` and `reason` lengths.
 
 ## Decisions
@@ -75,8 +76,9 @@ comment, posted before the merge.
 ## Next task
 
 Readings, merge, then post the merge commit on thread `131648c0` for Fabric Dashboards (FD-78) and
-fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs and a request to replace the private example name in
-its service-host README with `example-notifier.default` / `notifier.send`; set CT-70 and this handoff's
+fabric-agent-adapter (FAA-62), with CT-70's measured list of where Dashboards' reader differs (its service-host README already uses the neutral
+`example-notifier.default`, Dashboards `087d633`, with `notifier.notify`, which is as good an example as this
+contract's `notifier.send`); set CT-70 and this handoff's
 row in `README.md` to merged with #135 and the merge commit; update the Contract row of fabric-workspace
 `knowledge/roadmap.md` with DEC-0096 and the merge commit, then sync. Dashboards' re-pin (FD-78) lands before any
 kit emits the key (FAA-62).
