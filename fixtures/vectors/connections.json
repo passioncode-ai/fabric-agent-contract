@@ -1489,6 +1489,127 @@
       }
     },
     {
+      "name": "a password with a bracket or a quote",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "postgres://app:pa(ss@db.example.com/app",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              },
+              {
+                "id": "b",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "purpose": "uses mysql://root:x)y2z@10.0.0.4:3306/db"
+              },
+              {
+                "id": "c",
+                "kind": "model",
+                "target": "openrouter/xiaomi/mimo-v2.6-pro",
+                "state": "unknown",
+                "reason": "see redis://:a\"b@cache:6379."
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "an api_key value in brackets inside a reason",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads the operator chat",
+                "state": "degraded",
+                "reason": "refused (https://ex.com/?api_key=(abcd))"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
+      "name": "a URL in brackets or quotes without a credential is declared",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "reads (https://example.com/docs), see 'https://example.com/a'.",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": true,
+        "reported": false,
+        "connections": [
+          {
+            "id": "telegram",
+            "kind": "connector",
+            "target": "telegram",
+            "purpose": "reads (https://example.com/docs), see 'https://example.com/a'.",
+            "state": "degraded",
+            "reason": "flood wait 30 s",
+            "failing": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "a Telegram bot token in a URL path",
+      "input": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1": {
+            "connections": [
+              {
+                "id": "telegram",
+                "kind": "connector",
+                "target": "telegram",
+                "purpose": "calls https://api.telegram.org/bot123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw/getUpdates",
+                "state": "degraded",
+                "reason": "flood wait 30 s"
+              }
+            ]
+          }
+        },
+        "degraded": []
+      },
+      "expected": {
+        "declared": false,
+        "reported": true
+      }
+    },
+    {
       "name": "not an object",
       "input": {
         "extensions": {

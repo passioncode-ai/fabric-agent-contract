@@ -41,26 +41,39 @@ function shape(): ValidateFunction {
 
 // A fresh answer each time: a caller that changes one answer never changes the next.
 const none = (): ConnectionsView => ({ declared: false, reported: false, connections: [], errors: [] });
-const TEXT_MEMBERS = ["target", "label", "purpose", "reason"] as const;
+const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reason"] as const;
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
-// a word and is not a key (the shared SECRET_VALUE has no such boundary). A bearer token needs a digit (BEARER_INSIDE),
-// so "bearer authentication" in a purpose is prose.
-const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
-// Every URL in a member, at its start or inside prose ("refused at https://…?api_key=…"); `secretUrl` reads each URL
-// alone, never the prose around it.
-const URL_TOKEN = /[a-z][a-z0-9+.-]*:\/\/[^\s"'<>()]+/gi;
-/** A credential in a connection's text: a token's shape, or a URL that carries one. */
+// a word and is not a key (the shared SECRET_VALUE has no such boundary), and an `sk-` key holds a digit, so a name
+// such as `sk-learn-classifier` is not one either. A Telegram bot token is `<bot id>:<secret>`, also inside a URL path
+// (`/bot123456789:AA…/getUpdates`). A bearer token needs a digit (BEARER_INSIDE), so "bearer authentication" is prose.
+const KEY_SHAPE = /(?:^|[^A-Za-z0-9])(?:sk-(?=[A-Za-z0-9_-]*\d)[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}|(?:bot)?\d{6,12}:[A-Za-z0-9_-]{30,})/i;
+const SCHEME = /[a-z][a-z0-9+.-]*:\/\//i;
+/**
+ * Every URL in a member, at its start or inside prose ("refused at https://…?api_key=…"): each whitespace-delimited
+ * piece from its scheme on, without the closing brackets, quotes and punctuation that end a sentence. A password or a
+ * parameter value may hold `(`, `'` or `"`, so nothing is cut inside the URL. `secretUrl` reads each URL alone, never
+ * the prose around it.
+ */
+function urlsIn(value: string): string[] {
+  const urls: string[] = [];
+  for (const piece of value.split(/\s+/)) {
+    const start = piece.search(SCHEME);
+    if (start >= 0) urls.push(piece.slice(start).replace(/[)\]}>"'.,;:!?]+$/, ""));
+  }
+  return urls;
+}
+/** A credential in a connection's string member: a token's shape, or a URL that carries one. */
 const credential = (value: string): boolean =>
-  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || (value.match(URL_TOKEN) ?? []).some(secretUrl);
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || urlsIn(value).some(secretUrl);
 
-/** The problems the schema cannot state: an id named twice, a credential in a text member. */
+/** The problems the schema cannot state: an id named twice, a credential in any string member. */
 function beyondShape(list: Connection[]): string[] {
   const errors: string[] = [];
   const seen = new Set<string>();
   list.forEach((connection, index) => {
     if (seen.has(connection.id)) errors.push(`/connections/${index}/id duplicate: ${show(connection.id)} is named twice`);
     seen.add(connection.id);
-    for (const member of TEXT_MEMBERS) {
+    for (const member of STRING_MEMBERS) {
       const value = connection[member];
       if (typeof value === "string" && credential(value)) errors.push(`/connections/${index}/${member} credential: a connection never carries a credential`);
     }

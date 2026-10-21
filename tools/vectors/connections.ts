@@ -28,6 +28,7 @@ const NONE = { declared: false, reported: false, connections: [] };
 function cases(): Json[] {
   const fake = ["sk", "-", "A1".repeat(12)].join("");
   const bearer = ["abc123", "def456", "ghi789"].join("");
+  const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"].join("");
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
     ["no key: nothing declared", { extensions: {} }, NONE],
@@ -70,6 +71,10 @@ function cases(): Json[] {
     ["a key-shaped id", doc({ connections: [{ ...model, id: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
     ["a key-shaped capability", doc({ connections: [{ ...notify, capability: ["sk", "-", "a1".repeat(12)].join("") }] }), REPORTED],
     ["an sk- name without a digit is no credential", doc({ connections: [{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model" }] }), view([{ ...model, id: "sk-learn-classifier", label: "sk-learn-classifier-model", failing: false }])],
+    ["a password with a bracket or a quote", doc({ connections: [{ ...telegram, target: "postgres://app:pa(ss@db.example.com/app" }, { ...model, id: "b", purpose: "uses mysql://root:x)y2z@10.0.0.4:3306/db" }, { ...model, id: "c", reason: 'see redis://:a"b@cache:6379.' }] }), REPORTED],
+    ["an api_key value in brackets inside a reason", doc({ connections: [{ ...telegram, reason: "refused (https://ex.com/?api_key=(abcd))" }] }), REPORTED],
+    ["a URL in brackets or quotes without a credential is declared", doc({ connections: [{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'." }] }), view([{ ...telegram, purpose: "reads (https://example.com/docs), see 'https://example.com/a'.", failing: false }])],
+    ["a Telegram bot token in a URL path", doc({ connections: [{ ...telegram, purpose: `calls https://api.telegram.org/${botToken}/getUpdates` }] }), REPORTED],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

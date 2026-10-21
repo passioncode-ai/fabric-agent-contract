@@ -30,6 +30,11 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   bearer word without a token is prose, every answer is a fresh object, vectors for each detector branch and for
   `failing` by id rather than target; the growth tests time CPU, not the wall clock; the connections user path is
   JTBD-11, JRN-10, ST-026, FLW-21, SCR-24 and SCN-032.
+- From the third readings: a neutral example service in the vectors and fixtures (no private agent's name); every
+  string member is checked, an `sk-` key holds a digit, a Telegram bot token is a key, and a URL is the whole piece to
+  the next space, so a password holding a bracket or a quote is found; the hosted CI checks out the whole history
+  (`fetch-depth: 0`), because `pin:check`'s test asks whether a commit is on it; CT-72 records the folder-attribution
+  growth tests' slack.
 
 ## Decisions
 
