@@ -15,22 +15,27 @@
   ],
   "properties": {
     "protocol": {
-      "$ref": "service-common.schema.json#/$defs/protocol"
+      "$ref": "service-common.schema.json#/$defs/protocol",
+      "description": "The extension's protocol revision, fabric-service/0.1 (docs/specification/service.md#descriptor)."
     },
     "id": {
-      "$ref": "service-common.schema.json#/$defs/serviceId"
+      "$ref": "service-common.schema.json#/$defs/serviceId",
+      "description": "The service's id, a slug; with instance it names the descriptor's file, <id>.<instance>.json (docs/specification/service.md#descriptor)."
     },
     "instance": {
-      "$ref": "service-common.schema.json#/$defs/instance"
+      "$ref": "service-common.schema.json#/$defs/instance",
+      "description": "Which copy of the service this is; a second copy (a preview, a branch build) is a second instance, never a second id (docs/specification/service.md#descriptor)."
     },
     "name": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 80
+      "maxLength": 80,
+      "description": "The service's name as a host shows it, 1 to 80 characters (docs/specification/service.md#descriptor)."
     },
     "summary": {
       "type": "string",
-      "maxLength": 200
+      "maxLength": 200,
+      "description": "One line on what the service does, at most 200 characters (docs/specification/service.md#descriptor)."
     },
     "placement": {
       "enum": [
@@ -107,19 +112,22 @@
       ],
       "properties": {
         "tokenFile": {
-          "$ref": "service-common.schema.json#/$defs/localPath"
+          "$ref": "service-common.schema.json#/$defs/localPath",
+          "description": "The file that holds the service token, mode 0600 (on Windows the ACL of the token-file rule); a host reads it in a privileged process (docs/specification/service.md#authentication-and-network, docs/specification/service.md#windows-token-files)."
         },
         "header": {
           "type": "string",
           "pattern": "^[A-Za-z][A-Za-z0-9-]{0,63}$",
-          "default": "Authorization"
+          "default": "Authorization",
+          "description": "The request header the token travels in; Authorization when absent (docs/specification/service.md#authentication-and-network)."
         },
         "scheme": {
           "enum": [
             "Bearer",
             "none"
           ],
-          "default": "Bearer"
+          "default": "Bearer",
+          "description": "The scheme before the token in that header: Bearer (the default) or none for a bare token (docs/specification/service.md#authentication-and-network)."
         }
       },
       "allOf": [
@@ -148,7 +156,8 @@
           }
         }
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Where the service token is and how it travels: the token file, the header and its scheme; never the token (docs/specification/service.md#authentication-and-network)."
     },
     "channels": {
       "type": "object",
@@ -161,7 +170,8 @@
           "properties": {
             "protocol": {
               "type": "string",
-              "pattern": "^fabric-local-channel/[0-9]{1,4}(\\.[0-9]{1,4}){0,2}$"
+              "pattern": "^fabric-local-channel/[0-9]{1,4}(\\.[0-9]{1,4}){0,2}$",
+              "description": "The local channel's protocol revision, fabric-local-channel/<revision> (docs/specification/local-channel.md)."
             },
             "path": {
               "type": "string",
@@ -193,7 +203,8 @@
               }
             }
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Where a client reaches the service's local channel: its protocol revision and a socket path or a Windows pipe; a client never computes it (docs/specification/local-channel.md, DEC-0075)."
         }
       },
       "additionalProperties": false,
@@ -225,7 +236,8 @@
         },
         "label": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,254}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,254}$",
+          "description": "The launchd job label, beside manager launchd only (docs/specification/service.md#lifecycle)."
         },
         "plist": {
           "allOf": [
@@ -236,7 +248,8 @@
               "type": "string",
               "pattern": "\\.plist$"
             }
-          ]
+          ],
+          "description": "The launchd property list file, beside manager launchd only (docs/specification/service.md#lifecycle)."
         },
         "unit": {
           "type": "string",
@@ -373,7 +386,8 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Who supervises the service and the supervisor's own names for it; one supervisor per descriptor (docs/specification/service.md#lifecycle)."
     },
     "runner": {
       "type": "object",
@@ -383,8 +397,7 @@
       ],
       "properties": {
         "kind": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9-]{1,62}$",
+          "$ref": "common.schema.json#/$defs/slug",
           "description": "A shared runner kind (runners.md); a node placing the service checks it against its runner catalogue (FAC-SEM-087)."
         },
         "credentialKind": {
@@ -393,7 +406,8 @@
             "key",
             "platform-metered",
             "none"
-          ]
+          ],
+          "description": "The kind of the credential the service's model calls use: subscription, key, platform-metered or none; never the credential itself (docs/specification/service.md#descriptor, DEC-0061)."
         }
       },
       "additionalProperties": false,
@@ -435,50 +449,62 @@
       ],
       "properties": {
         "data": {
-          "$ref": "service-common.schema.json#/$defs/localPath"
+          "$ref": "service-common.schema.json#/$defs/localPath",
+          "description": "The data and configuration directory; it holds service.lock (docs/specification/service.md#directories-per-system)."
         },
         "config": {
-          "$ref": "service-common.schema.json#/$defs/localPath"
+          "$ref": "service-common.schema.json#/$defs/localPath",
+          "description": "The configuration directory, when it is not the data directory (docs/specification/service.md#directories-per-system)."
         },
         "cache": {
-          "$ref": "service-common.schema.json#/$defs/localPath"
+          "$ref": "service-common.schema.json#/$defs/localPath",
+          "description": "The cache directory, rebuilt when deleted (docs/specification/service.md#directories-per-system)."
         },
         "logs": {
           "type": "array",
           "maxItems": 16,
           "items": {
             "$ref": "service-common.schema.json#/$defs/localPath"
-          }
+          },
+          "description": "The log directories, at most 16 (docs/specification/service.md#directories-per-system)."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "The directories the service uses; where a writer puts them is per system (docs/specification/service.md#directories-per-system)."
     },
     "commands": {
       "type": "object",
       "properties": {
         "doctor": {
-          "$ref": "service-common.schema.json#/$defs/argv"
+          "$ref": "service-common.schema.json#/$defs/argv",
+          "description": "The argument array that checks the installation (docs/specification/service.md#descriptor)."
         },
         "update": {
-          "$ref": "service-common.schema.json#/$defs/argv"
+          "$ref": "service-common.schema.json#/$defs/argv",
+          "description": "The argument array that updates the service (docs/specification/service.md#descriptor)."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "The commands a host may run, as argument arrays: doctor and update only; a host runs no other (docs/specification/service.md#descriptor)."
     },
     "source": {
       "type": "object",
       "properties": {
         "repository": {
-          "$ref": "common.schema.json#/$defs/uri"
+          "$ref": "common.schema.json#/$defs/uri",
+          "description": "The repository of the service's code, which tells code apart from a store that versions data (docs/specification/service.md#lifecycle)."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Where the service's code comes from (docs/specification/service.md#lifecycle)."
     },
     "fabricManifest": {
-      "$ref": "service-common.schema.json#/$defs/localPath"
+      "$ref": "service-common.schema.json#/$defs/localPath",
+      "description": "The provider manifest of a service that has capabilities; that manifest names this descriptor back (FAC-SEM-020, docs/specification/service.md)."
     },
     "installedAt": {
-      "$ref": "common.schema.json#/$defs/timestamp"
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "When the instance was installed, an RFC 3339 date-time (docs/specification/service.md#descriptor)."
     },
     "installedBy": {
       "anyOf": [
@@ -547,10 +573,12 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "Who installed the instance: the installer and its version as a string, or {by, role?, tool}; a role, never a person (docs/specification/service.md#descriptor, DEC-0061)."
     },
     "extensions": {
-      "$ref": "common.schema.json#/$defs/extensions"
+      "$ref": "common.schema.json#/$defs/extensions",
+      "description": "Extension values keyed by URI; a host preserves and ignores the ones it does not know (docs/specification/service.md#descriptor)."
     }
   },
   "additionalProperties": false,

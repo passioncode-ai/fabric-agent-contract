@@ -21,7 +21,7 @@
       "properties": {
         "action": { "const": "session.new" },
         "project": { "$ref": "#/$defs/projectRef" },
-        "runner": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,62}$", "description": "A runner kind from the runner catalogue." }
+        "runner": { "$ref": "common.schema.json#/$defs/slug", "description": "A runner kind from the runner catalogue." }
       },
       "additionalProperties": false
     }

@@ -7,7 +7,7 @@
   "properties": {
     "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
     "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
-    "capability": { "$ref": "common.schema.json#/$defs/uri" },
+    "capability": { "$ref": "common.schema.json#/$defs/capabilityUri" },
     "state": { "enum": ["discovered", "declared", "identity-verified", "probing", "admitted", "rejected", "incompatible", "probe-failed", "suspended", "replaced"] },
     "trustTier": { "enum": ["untrusted", "verified", "admitted", "privileged"] },
     "checks": {

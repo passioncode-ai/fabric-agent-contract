@@ -1,4 +1,4 @@
-# What an agent uses: `extensions/connections/0.1`
+# What an agent uses: `fabric-connections/0.1`
 
 DEC-0096 · rule code `FAC-SEM-127` · schema
 [`service-connections-extension.schema.json`](../../schemas/service-connections-extension.schema.json) · code
@@ -13,6 +13,10 @@ it depends on, and whether each works now, so a host can draw the chain from one
 asked for it for its Connections tab (board thread `131648c0`, 2026-10-20).
 
 ## The declaration
+
+The protocol is named `fabric-connections/0.1` in the revision register
+([`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) `NAMED_ONLY`, [versioning](versioning.md#protocol-revisions));
+DEC-0096 recorded it as `extensions/connections/0.1`, and the extension key below keeps that path unchanged.
 
 A service MAY carry, under `extensions` in its well-known document, the key
 `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` with `{connections: [...]}`, at most 64

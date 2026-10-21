@@ -1,0 +1,35 @@
+{
+  "schema": "coding-agents/1",
+  "revision": 1,
+  "agents": [
+    {
+      "id": "Hermes",
+      "name": "Hermes Agent",
+      "maker": "Nous Research",
+      "url": "https://github.com/NousResearch/hermes-agent",
+      "install": [
+        {
+          "via": "script",
+          "script": "https://hermes-agent.nousresearch.com/install.sh"
+        }
+      ],
+      "launch": {
+        "argv": [
+          "hermes"
+        ]
+      },
+      "mcp": true,
+      "openrouter": {
+        "modelArgv": [
+          "--provider",
+          "openrouter",
+          "-m",
+          "{model}"
+        ]
+      },
+      "sources": [
+        "https://github.com/NousResearch/hermes-agent"
+      ]
+    }
+  ]
+}

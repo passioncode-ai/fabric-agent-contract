@@ -63,8 +63,7 @@
       "description": "Why the snapshot was taken. The spec names start, daily, uninstall and manual; a service may use another lowercase word."
     },
     "sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$",
+      "$ref": "common.schema.json#/$defs/sha256Hex",
       "description": "SHA-256, in lowercase hex, of the canonical JSON of `tables` (docs/specification/service.md#settings-backup)."
     },
     "counts": {

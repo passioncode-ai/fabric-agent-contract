@@ -88,6 +88,8 @@ export const NOT_SWEPT: readonly string[] = [
   "comms-responder-replace.schema.json",
   "comms-status-args.schema.json",
   "comms-status.schema.json",
+  // The coding-agent catalogue (DEC-0093) has no rule kind; test/coding-agents.test.ts reads the real catalogue.
+  "coding-agents.schema.json",
   "conformance-report.schema.json",
   "contract-pin.schema.json",
   "delegation-jwks.schema.json",

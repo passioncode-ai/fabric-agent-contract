@@ -10,8 +10,7 @@
     "id": { "$ref": "model-profile.schema.json#/$defs/profileId" },
     "name": { "type": "string", "minLength": 1, "maxLength": 80 },
     "runnerKind": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9-]{1,62}$",
+      "$ref": "common.schema.json#/$defs/slug",
       "description": "A shared runner kind (runners.md)."
     },
     "drive": {

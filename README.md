@@ -60,7 +60,7 @@ a published package, or an SDK with a stability promise beyond the pinned commit
 - [The revocation delta and the heartbeat — revocations within seconds, a signed commitment to them, and the 72-hour rule (`revocation-delta/1`, `heartbeat/1`, DEC-0054)](docs/specification/revocation-delta.md)
 - [Window leases — a hub-signed share of an estate window per machine, spent offline and closed at expiry (`window-lease/1`, DEC-0062)](docs/specification/window-lease.md)
 - [Entitlements: what a signed order entitles an organization or a person's estate to, under a key set an offline root signs (`entitlement/1`, `entitlement-key-set/1`, DEC-0085)](docs/specification/entitlement.md)
-- [What an agent uses: `extensions/connections/0.1` (DEC-0096)](docs/specification/connections.md)
+- [What an agent uses: `fabric-connections/0.1` (DEC-0096)](docs/specification/connections.md)
 - [Support quality: one support channel's quality per closed UTC day (DEC-0095)](docs/specification/support-quality.md)
 - [The partner channel: a partner's keys, its agents' usage and its delegation (DEC-0090)](docs/specification/partner-channel.md)
 - [Folder attribution: which Project a coding agent's folder belongs to, one rule set for Fabric, Fabric Switchboard and Project Observatory (DEC-0089)](docs/specification/folder-attribution.md)

@@ -23,6 +23,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["estate-record", ["1"]],
   ["execution-packet", ["1"]],
   ["fabric-activity", ["0.1"]],
+  ["fabric-connections", ["0.1"]],
   ["fabric-dashboard", ["0.1"]],
   ["fabric-delegation", ["0.1"]],
   ["fabric-device", ["0.1"]],
@@ -52,7 +53,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
 ]);
 
 /** Protocols the contract names in a specification's title but no schema pins with `const` (DEC-0067). */
-export const NAMED_ONLY: readonly string[] = ["approval/1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-local-channel/0.1", "pipeline/0.1"];
+export const NAMED_ONLY: readonly string[] = ["approval/1", "fabric-connections/0.1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-local-channel/0.1", "pipeline/0.1"];
 
 /** At most this many revisions of one protocol are accepted at once: N and N−1. */
 export const MAX_REVISIONS_PER_PROTOCOL = 2;

@@ -83,7 +83,7 @@ on different releases still talk:
 
 - **The register.** [`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) `PROTOCOL_REVISIONS` lists each
   contract protocol's published revisions, oldest first; a test keeps it equal to the revisions the schemas pin with
-  `const` plus `NAMED_ONLY` (`approval/1`, `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1` and `/0.2` (DEC-0087),
+  `const` plus `NAMED_ONLY` (`approval/1`, `fabric-connections/0.1` (the connections extension), `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1` and `/0.2` (DEC-0087),
   `fabric-local-channel/0.1`, `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
   there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
   `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,

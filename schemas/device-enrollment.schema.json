@@ -83,8 +83,7 @@
               "description": "False for the hardware and platform stores, true exactly for file (DEC-0094)."
             },
             "publicKeySha256": {
-              "type": "string",
-              "pattern": "^sha256:[a-f0-9]{64}$",
+              "$ref": "common.schema.json#/$defs/sha256",
               "description": "SHA-256 of the DER SubjectPublicKeyInfo in the CSR; the server checks it against the CSR, and it is the key on record for re-enrollment (FAC-SEM-044)."
             },
             "attestation": {

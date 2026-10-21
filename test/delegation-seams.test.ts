@@ -165,11 +165,13 @@ describe("9 — one definition of an agent id; code constants equal the schemas"
 
   it("matches EFFECT_CLASSES, the runner kind and the project ref", () => {
     expect([...EFFECT_CLASSES]).toEqual(common.effectClass?.enum);
+    // A runner kind is common's slug: the code constant equals it, and both schemas reference it.
+    expect(common.slug?.pattern).toBe(RUNNER_KIND.source);
     const runners = read("schemas/runners.schema.json");
-    expect(runners).toContain(JSON.stringify(RUNNER_KIND.source));
+    expect(runners).toContain(JSON.stringify("common.schema.json#/$defs/slug"));
     const link = schema("fabric-link.schema.json");
     expect(((link.$defs as Json).projectRef as Json).pattern).toBe(PROJECT_REF.source);
-    expect((((link.oneOf as Json[])[1]!.properties as Json).runner as Json).pattern).toBe(RUNNER_KIND.source);
+    expect((((link.oneOf as Json[])[1]!.properties as Json).runner as Json).$ref).toBe("common.schema.json#/$defs/slug");
   });
 });
 
