@@ -226,7 +226,10 @@ export async function main(argv: string[], io: PinCheckIo = defaultIo): Promise<
     io.err(`one repository, not ${positional.length}; ${USAGE}`);
     return 2;
   }
-  const root = path.resolve(positional[0] ?? ".");
+  // `pnpm --dir <contract checkout> pin:check .` runs in the checkout; a relative path is the consumer's, from where
+  // pnpm was run (INIT_CWD), as `pnpm validate` reads it.
+  const base = process.env.npm_lifecycle_event === "pin:check" && process.env.INIT_CWD !== undefined ? process.env.INIT_CWD : process.cwd();
+  const root = path.resolve(base, positional[0] ?? ".");
   if (!(await stat(root).then((entry) => entry.isDirectory(), () => false))) {
     io.err(`no repository folder at ${root}; ${USAGE}`);
     return 2;

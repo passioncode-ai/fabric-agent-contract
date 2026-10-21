@@ -359,8 +359,9 @@ infers the schema from the document, or takes `--schema`; runs the schema and th
 folder's documents as pairs (a descriptor with its well-known document, a descriptor with the manifest its
 `fabricManifest` names, a provider entry with its manifest), saying in a note which file it read when a named path
 is not installed yet; and prints one line per problem with its path, its rule and a link to the rule. In a folder, a
-file that is no contract document (a JSON Schema, a test fixture) is noted and skipped, the lock file is read as a
-contract pin, and a folder in which no file is a contract document is a usage error. It exits 0 when
+file the checker cannot tell (a JSON Schema, a test fixture, a file named like a service key that carries no
+descriptor member) is noted and skipped, and `--schema` checks it; the lock file is read as a contract pin; and a
+folder in which no file is a contract document is a usage error. It exits 0 when
 everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
 letter away from the contract's, is printed as a note and does not fail the run. `--json` prints the same findings
 as JSON for a script or a CI step.

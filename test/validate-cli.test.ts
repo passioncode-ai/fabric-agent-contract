@@ -81,8 +81,13 @@ describe("schema inference", () => {
 
   it("falls back to the file name: fabric-agent.json, providers/<id>.json and <id>.<instance>.json", () => {
     expect(inferSchema({}, "x/fabric-agent.json")).toBe("manifest.schema.json");
-    expect(inferSchema({}, "x/providers/agent.json")).toBe("provider.schema.json");
-    expect(inferSchema({}, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+    expect(inferSchema({ protocol: "x" }, "x/providers/agent.json")).toBe("provider.schema.json");
+    expect(inferSchema({ origin: "x" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+    // The name alone is not enough for the two weaker rules: a config or a fixture named a.b.json is no descriptor.
+    expect(inferSchema({}, "x/providers/agent.json")).toBeUndefined();
+    expect(inferSchema({ compilerOptions: {} }, "x/tsconfig.build.json")).toBeUndefined();
+    expect(inferSchema({ $id: "urn:x:a", properties: {}, origin: "x" }, "x/example-agent.default.json")).toBeUndefined();
+    expect(inferSchema({ $id: "urn:x:a", origin: "x" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
     expect(inferSchema({}, "x/notes.json")).toBeUndefined();
     expect(inferSchema([], "x/notes.json")).toBeUndefined();
   });
@@ -618,7 +623,7 @@ describe("the third unit reading's cases (contract review 2026-10-21)", () => {
     const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), [`providers/${entry.id as string}.json`]: entry }));
     expect(result.code).toBe(1);
     expect(result.out).toContain('is missing the required member "protocol"');
-    expect(inferSchema({ $schema: "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-descriptor.schema.json" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+    expect(inferSchema({ $schema: "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-descriptor.schema.json", origin: "http://127.0.0.1:47195" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
   });
 
   it("a folder with nothing to check is exit 2 whatever came before it", () => {
@@ -652,5 +657,26 @@ describe("the third product reading's cases (contract review 2026-10-21)", () =>
     const page = readFileSync(path.join(root, "docs/specification/interop.md"), "utf8");
     const section = page.slice(page.indexOf("## Extension key"), page.indexOf("\n## ", page.indexOf("## Extension key") + 3));
     for (const key of Object.values(EXTENSION_KEYS)) expect(section).toContain(key);
+  });
+});
+
+describe("the third seam reading's cases: files in a consumer's folder (contract review 2026-10-21)", () => {
+  it("fixtures named like a service key, schemas with $id, a tsconfig and a probe receipt are noted, not misread", () => {
+    const lock = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "63bb2965cce23b585353caba7d0fdbff0c561ff0" };
+    const dir = folder({
+      "fabric-agent.json": json("positive/manifest-mcp.json"),
+      "fabric-contract.lock.json": lock,
+      "fixtures/reports.query.json": { text: "x", locale: "en-US", idempotencyKey: "k" },
+      "fixtures/x.status.json": {},
+      "schemas/ask.input.json": { $id: "urn:x:ask", type: "object", properties: {} },
+      "tsconfig.build.json": { compilerOptions: {} },
+      "probe-receipts.json": { protocol: { name: "mcp", version: "2025-06-18" }, contractVersion: "0.1.0", capabilities: [] }
+    });
+    const result = run(dir);
+    expect(result.out).not.toContain("service-descriptor");
+    expect(result.out).not.toContain("FAC-SEM-010");
+    expect(result.out).not.toContain("schema/const");
+    expect(result.code).toBe(0);
+    expect(result.out.match(/note\/skipped/g)?.length).toBe(5);
   });
 });

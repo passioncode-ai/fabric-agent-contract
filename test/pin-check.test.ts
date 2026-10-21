@@ -272,6 +272,23 @@ describe("pin:check: files and folders it cannot read (contract review 2026-10-2
     }
   });
 
+  it("a relative repository is the consumer's, from where pnpm ran pin:check (INIT_CWD)", async () => {
+    const dir = consumer({ "README.md": "x" });
+    const before = { cwd: process.env.INIT_CWD, event: process.env.npm_lifecycle_event };
+    try {
+      process.env.INIT_CWD = dir;
+      process.env.npm_lifecycle_event = "pin:check";
+      expect((await run(["."])).code).toBe(0);
+      process.env.npm_lifecycle_event = "other";
+      expect((await run(["."])).err.join("\n")).not.toContain(dir);
+    } finally {
+      for (const [name, value] of [["INIT_CWD", before.cwd], ["npm_lifecycle_event", before.event]] as const) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
+    }
+  });
+
   it("knows the members the pin schema defines, no more and no fewer", () => {
     const schema = JSON.parse(readFileSync(path.join(root, "schemas/contract-pin.schema.json"), "utf8")) as { properties: Record<string, unknown> };
     expect([...PIN_MEMBERS].sort()).toEqual(Object.keys(schema.properties).sort());

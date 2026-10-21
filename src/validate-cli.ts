@@ -97,16 +97,35 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
   // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
   // on a contract document, which the name rules below still read.
-  if (name.endsWith(".schema.json") || (isObject(value) && typeof value.$schema === "string" && /^https?:\/\/json-schema\.org\//.test(value.$schema))) return undefined;
-  if (path.basename(path.dirname(file)) === "providers") return "provider.schema.json";
-  if (SERVICE_KEY.test(name.replace(/\.json$/, ""))) return "service-descriptor.schema.json";
+  if (name.endsWith(".schema.json") || isJsonSchema(value)) return undefined;
+  // A name alone is weak evidence (`tsconfig.build.json`, `reports.query.json` look like a service key), so the two
+  // weaker name rules take a document only when it carries a member that document kind has.
+  if (path.basename(path.dirname(file)) === "providers" && carries(value, PROVIDER_MEMBERS)) return "provider.schema.json";
+  if (SERVICE_KEY.test(name.replace(/\.json$/, "")) && carries(value, DESCRIPTOR_MEMBERS)) return "service-descriptor.schema.json";
   return undefined;
 }
+/** Members only a provider entry or a service descriptor has; one is enough for the name rule to take the file. */
+const PROVIDER_MEMBERS = ["protocol", "providerId", "run", "manifest"] as const;
+const DESCRIPTOR_MEMBERS = ["protocol", "origin", "lifecycle", "fabricManifest"] as const;
+const carries = (value: unknown, members: readonly string[]) => isObject(value) && members.some((member) => Object.hasOwn(value, member));
+
+/**
+ * A JSON Schema rather than a document: a `$schema` naming a JSON Schema dialect (a contract schema's URL in `$schema`
+ * is an editor's hint on a contract document), or a `$id` beside `type` or `properties`.
+ */
+function isJsonSchema(value: unknown): boolean {
+  if (!isObject(value)) return false;
+  if (typeof value.$schema === "string" && /^https?:\/\/json-schema\.org\//.test(value.$schema)) return true;
+  return typeof value.$id === "string" && (Object.hasOwn(value, "type") || Object.hasOwn(value, "properties"));
+}
+
 /** A discriminator member the document carries with a value no schema of this checkout holds, with the values it knows. */
 function unknownDiscriminator(value: unknown): { member: string; value: unknown; known: unknown[] } | undefined {
   if (!isObject(value)) return undefined;
   for (const member of ["contractVersion", "protocol"] as const) {
-    if (!Object.hasOwn(value, member)) continue;
+    // Only a string can be a revision or a version: an object under `protocol` (an MCP handshake in a probe receipt) is
+    // some other document's member.
+    if (typeof value[member] !== "string") continue;
     const known = [...new Set(contract().discriminated.flatMap((schema) => schema.consts.filter(([name]) => name === member).map(([, constant]) => constant)))];
     if (known.length > 0 && !known.includes(value[member])) return { member, value: value[member], known };
   }
@@ -247,9 +266,10 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     const fewest = Math.min(...matching.map((candidate) => missing(candidate).length));
     const near = matching.filter((candidate) => missing(candidate).length === fewest).map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
     const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
-    // In a folder, a file that is no contract document (a test fixture, a JSON Schema) is not checked and not an
-    // error; one that is near a contract schema is still the author's mistake. A file named on its own is a usage error.
-    if (inFolder && near.length === 0) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked` });
+    // In a folder, a file the checker cannot tell (a test fixture, a JSON Schema, a probe receipt that shares a
+    // discriminator) is noted, with the schema it is near if any, and not checked; the author passes --schema to check
+    // it. A file named on its own is a usage error.
+    if (inFolder) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked (pass --schema to check it)` });
     else run.usage.push(text);
     return undefined;
   }

@@ -57,7 +57,7 @@ commit, in full or abbreviated to at least seven characters (G-11). Dated record
 excluded by the consumer.
 
 `pnpm pin:check <repository> [--pin <file>] [--exclude <path>]… [--include-dated]` runs the reference
-check ([`src/pin-check.ts`](../../src/pin-check.ts)). It reads the lock and validates it against
+check; under `pnpm --dir <contract checkout> pin:check .` a relative path is read from where pnpm ran ([`src/pin-check.ts`](../../src/pin-check.ts)). It reads the lock and validates it against
 [`contract-pin.schema.json`](../../schemas/contract-pin.schema.json): a missing lock, a lock that is not JSON and a lock
 the schema refuses each print what is wrong and exit 2, as does a usage error. A member the schema does not define
 (kit-written locks carry `adapter` and `kit`) is printed as a note and does not fail the check. A commit that is not the full
