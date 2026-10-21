@@ -293,8 +293,7 @@
                   "maximum": 9007199254740991
                 },
                 "sha256": {
-                  "type": "string",
-                  "pattern": "^[a-f0-9]{64}$"
+                  "$ref": "common.schema.json#/$defs/sha256Hex"
                 }
               },
               "additionalProperties": false,

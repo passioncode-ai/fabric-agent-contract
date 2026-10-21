@@ -452,7 +452,7 @@ export function parseRelayRequest(value: string | null | undefined): { ok: true;
   return { ok: true, request: { alg, kid, recipients: recipients as string[], iat, sig } };
 }
 
-const OCTET = "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)";
+const OCTET = "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])";
 const IPV4 = `${OCTET}(?:\\.${OCTET}){3}`;
 const H16 = "(?:0|[1-9a-f][0-9a-f]{0,3})";
 const IPV6 = [
@@ -463,7 +463,7 @@ const IPV6 = [
 const LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
 // A host name of at most 253 characters whose last label is not a number (a URL parser reads `0x7f.1` or `relay.1` as IPv4).
 const NAME = `(?=[a-z0-9.-]{1,253}(?::|$))(?:${LABEL}\\.)*(?![0-9]+(?::|$))(?!0x[0-9a-f]*(?::|$))${LABEL}`;
-const PORT = "(?:6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{0,3})";
+const PORT = "(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3})";
 /** The pattern of `hello.relay` in `relay-frame.schema.json`; `isRelayOrigin` is the same rule, and a test holds them equal. */
 export const RELAY_ORIGIN_PATTERN =
   `^(?:https://(?:${IPV4}|\\[(?:${IPV6})\\]|${NAME})(?::(?!443$)${PORT})?|http://(?:127\\.${OCTET}\\.${OCTET}\\.${OCTET}|\\[::1\\])(?::(?!80$)${PORT})?)$`;
