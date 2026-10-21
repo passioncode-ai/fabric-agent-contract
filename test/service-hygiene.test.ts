@@ -119,9 +119,9 @@ describe("FAC-SEM-056: a stdio MCP server is declared for a project or on demand
 
   it("spells the scope the same way in the manifest and the provider entry", () => {
     const manifestSchema = read("schemas/manifest.schema.json");
-    const stdio = manifestSchema.$defs.profile.oneOf[0].properties.connection.oneOf[1].properties.scope;
+    const stdio = manifestSchema.$defs.mcpProfile.properties.connection.oneOf[1].properties.scope;
     const providerSchema = read("schemas/provider.schema.json");
-    expect(providerSchema.properties.run.properties.mcp.oneOf[0].properties.stdio.properties.scope).toEqual(stdio);
+    expect(providerSchema.properties.run.properties.mcp.then.properties.stdio.properties.scope).toEqual(stdio);
     expect(stdio.enum).toEqual(["project", "on-demand", "session"]);
   });
 

@@ -25,6 +25,7 @@
     "docs:check": "tsx src/docs-check.ts && pnpm lint:md",
     "lint:md": "tsx src/lint-md.ts",
     "pin:check": "tsx src/pin-check.ts",
+    "validate": "tsx src/validate-cli.ts",
     "privacy:check": "tsx src/privacy-check.ts",
     "check": "pnpm typecheck && pnpm test && pnpm ux:lint && pnpm docs:check && pnpm privacy:check"
   },

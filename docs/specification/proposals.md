@@ -72,6 +72,6 @@ this document, not a memory capability.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-103` | `proposal-submit` | a proposal leaves only to an organization server or as an export; never one about a private agent; an organization server receives an organization proposal (`sourceClass`) that is an approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home-folder path in its URIs, goal, change, finding id or text, evidence references, approving policy, `verifiedRun` or payload (DEC-0072) |
-| `FAC-SEM-104` | `proposal`, `proposal-transition` | a rule's `approvedBy` is `{role: operator}`, never a policy or another role; a proposal moves only along `PROPOSAL_TRANSITIONS`, and only a fix is verified (DEC-0072) |
-| `FAC-SEM-105` | `learning-rollout` | a `personal` or `unknown` learning note never feeds an organization rollout (DEC-0072) |
+| <a id="fac-sem-103"></a>`FAC-SEM-103` | `proposal-submit` | a proposal leaves only to an organization server or as an export; never one about a private agent; an organization server receives an organization proposal (`sourceClass`) that is an approved or applied rule or a live listing; nothing leaving carries a credential-shaped value or URL or a home-folder path in its URIs, goal, change, finding id or text, evidence references, approving policy, `verifiedRun` or payload (DEC-0072) |
+| <a id="fac-sem-104"></a>`FAC-SEM-104` | `proposal`, `proposal-transition` | a rule's `approvedBy` is `{role: operator}`, never a policy or another role; a proposal moves only along `PROPOSAL_TRANSITIONS`, and only a fix is verified (DEC-0072) |
+| <a id="fac-sem-105"></a>`FAC-SEM-105` | `learning-rollout` | a `personal` or `unknown` learning note never feeds an organization rollout (DEC-0072) |

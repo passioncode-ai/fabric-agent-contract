@@ -232,14 +232,14 @@ describe("estate-placement and placementTrust take the context (DEC-0082)", () =
 
 describe("the specifications", () => {
   it("restate FAC-SEM-074 and FAC-SEM-075 per context and define FAC-SEM-111 in the estate record", () => {
-    const row = (code: string) => estateSpec.split("\n").find((line) => line.startsWith(`| \`${code}\``)) ?? "";
+    const row = (code: string) => estateSpec.split("\n").find((line) => line.startsWith(`| <a id="${code.toLowerCase()}"></a>\`${code}\``)) ?? "";
     expect(row("FAC-SEM-074")).toMatch(/once per machine and context/);
     expect(row("FAC-SEM-075")).toMatch(/once per \(machine, agent, slot, context\)/);
     expect(row("FAC-SEM-111")).toMatch(/`estate-record`, `estate-placement`/);
     expect(estateSpec).not.toMatch(/placed once\s+per machine under/);
   });
   it("define FAC-SEM-110 and the context id in contexts.md", () => {
-    expect(contextsSpec).toMatch(/\| `FAC-SEM-110` \| `grant`, `estate-record` \|/);
+    expect(contextsSpec).toMatch(/\| <a id="fac-sem-110"><\/a>`FAC-SEM-110` \| `grant`, `estate-record` \|/);
     expect(contextsSpec).toContain("common.schema.json#/$defs/contextId");
   });
 });

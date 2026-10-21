@@ -105,7 +105,7 @@ describe("the declaration as a host reads it (DEC-0059, ED-6, ED-8, ED-9, FAC-SE
     expect(spec).toMatch(/takes nothing from the cookie: from the host it\s+follows `prefers-color-scheme` only/);
     expect(spec).toMatch(/treats an invalid\s+value as not declared/);
     expect(spec).not.toContain("on the service origin");
-    expect(spec).toMatch(/^\| `FAC-SEM-080` \| `service-well-known` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-080"><\/a>`FAC-SEM-080` \| `service-well-known` \|/m);
   });
 
   it("names the dashboard key the code reads", () => {

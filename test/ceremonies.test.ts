@@ -98,8 +98,8 @@ describe("verifyEstateRecord runs FAC-SEM-114 whenever it has a parent", () => {
 
   it("reads FAC-SEM-114 in ER-11 and in the ceremonies' rule table", () => {
     expect(estateSpec).toContain("`FAC-SEM-114`");
-    expect(spec).toMatch(/^\| `FAC-SEM-114` \| `estate-record-revision` \|/m);
-    expect(spec).toMatch(/^\| `FAC-SEM-113` \| `enroll-token` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-114"><\/a>`FAC-SEM-114` \| `estate-record-revision` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-113"><\/a>`FAC-SEM-113` \| `enroll-token` \|/m);
   });
 });
 

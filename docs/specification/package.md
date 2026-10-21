@@ -232,10 +232,10 @@ no private key: `crypto.verify` accepts it on Node 20 and 22 and refuses it on 2
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-064` | `package` | the package is whole: its `digest` is its own; each path is listed once and `fabric.package.json` never; the provider manifest, the service's entry, the evals suite and a vendored dependency are listed, the receipt's and the dependency's SHA-256 equal to the listed file's; a state path is declared once; a skill set lists its plugin manifest |
-| `FAC-SEM-065` | `package` | a package carries no secret: a slot is named once, and its name and purpose are not shaped like a credential; the service's entry carries none |
-| `FAC-SEM-066` | `package` | an agent's `agentRef` is `urn:fabric:agent:<publisher>:<id>` |
-| `FAC-SEM-102` | `package` | a package names each MCP role in `requires.mcp[]` once: one role, one server; each slot a role names in `secrets` is declared in `secrets[]`, and one slot feeds one role (DEC-0071, DEC-0074) |
+| <a id="fac-sem-064"></a>`FAC-SEM-064` | `package` | the package is whole: its `digest` is its own; each path is listed once and `fabric.package.json` never; the provider manifest, the service's entry, the evals suite and a vendored dependency are listed, the receipt's and the dependency's SHA-256 equal to the listed file's; a state path is declared once; a skill set lists its plugin manifest |
+| <a id="fac-sem-065"></a>`FAC-SEM-065` | `package` | a package carries no secret: a slot is named once, and its name and purpose are not shaped like a credential; the service's entry carries none |
+| <a id="fac-sem-066"></a>`FAC-SEM-066` | `package` | an agent's `agentRef` is `urn:fabric:agent:<publisher>:<id>` |
+| <a id="fac-sem-102"></a>`FAC-SEM-102` | `package` | a package names each MCP role in `requires.mcp[]` once: one role, one server; each slot a role names in `secrets` is declared in `secrets[]`, and one slot feeds one role (DEC-0071, DEC-0074) |
 
 ## Privacy
 

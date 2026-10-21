@@ -27,6 +27,7 @@ conformance checker every provider is admitted by. It stands on its own; any hos
 | Test (the gate) | `pnpm run check` — the merge gate, run by the merging session with its output in the PR; hosted CI is the nightly batch (org-index `docs/CI-BATCHING.md`), or `gh workflow run ci.yml --ref <branch>` once for an urgent branch |
 | Privacy check | `pnpm privacy:check` (part of the gate): runs org-index's `check_private.py` where the operator's denylist exists — from `ORG_INDEX`, this checkout's sibling, or, from a linked worktree, the main checkout's sibling; with the denylist present and no script found it fails rather than skips (`src/privacy-plan.ts`, CT-40) |
 | Consumer pin | `pnpm pin:check <consumer checkout>` |
+| Check one document or folder | `pnpm validate <file or folder> [--schema <name>] [--kind <kind>] [--json]`: schema and semantic rules, one line per problem; exit 0 clean, 1 a problem, 2 a usage error (`src/validate-cli.ts`) |
 | MCP (register + proving call) | none — the contract serves no MCP tools; README "Quick start → MCP" |
 
 ## Local rules

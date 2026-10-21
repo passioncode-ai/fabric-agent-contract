@@ -155,7 +155,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
   const BAD = { toString: 1 };
   const register = readFileSync(path.join(root, "docs/specification/conformance.md"), "utf8");
   const ALL_KINDS = [...new Set(register.split("\n").flatMap((line) => {
-    const match = /^\| `FAC-SEM-\d+` \| (.*?) \|/.exec(line);
+    const match = /^\| (?:<a id="fac-sem-\d+"><\/a>)?`FAC-SEM-\d+` \| (.*?) \|/.exec(line);
     return match ? [...(match[1] as string).matchAll(/`([a-z][a-z0-9-]*)`/g)].map((m) => m[1] as string) : [];
   }))].sort();
   type Path = Array<string | number>;

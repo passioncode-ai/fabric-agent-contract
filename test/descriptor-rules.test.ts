@@ -301,9 +301,9 @@ describe("service.md states DEC-0061 where a reader looks for it", () => {
   });
 
   it("the semantic-rules table defines the four codes with their kinds", () => {
-    expect(spec).toMatch(/^\| `FAC-SEM-085` \| `service-descriptor` \|/m);
-    expect(spec).toMatch(/^\| `FAC-SEM-086` \| `service-descriptor` \|/m);
-    expect(spec).toMatch(/^\| `FAC-SEM-087` \| `service-runner` \|/m);
-    expect(spec).toMatch(/^\| `FAC-SEM-088` \| `service-peer-request` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-085"><\/a>`FAC-SEM-085` \| `service-descriptor` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-086"><\/a>`FAC-SEM-086` \| `service-descriptor` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-087"><\/a>`FAC-SEM-087` \| `service-runner` \|/m);
+    expect(spec).toMatch(/^\| <a id="fac-sem-088"><\/a>`FAC-SEM-088` \| `service-peer-request` \|/m);
   });
 });

@@ -76,9 +76,9 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
   const register = (rows: string, next = "FAC-SEM-003") =>
     ({ path: "conformance.md", text: `## Semantic rule codes\n\n**Next free rule code:** \`${next}\`\n\n| Code | Kind | Defined in |\n|---|---|---|\n${rows}\n## Compatibility policy\n` });
   const spec = (name: string, codes: string[]) =>
-    ({ path: `docs/specification/${name}`, text: `## Semantic rules\n\n| Code | Kind | Rule |\n|---|---|---|\n${codes.map((code) => `| \`${code}\` | \`x\` | a rule |`).join("\n")}\n` });
+    ({ path: `docs/specification/${name}`, text: `## Semantic rules\n\n| Code | Kind | Rule |\n|---|---|---|\n${codes.map((code) => `| <a id="${code.toLowerCase()}"></a>\`${code}\` | \`x\` | a rule |`).join("\n")}\n` });
   const source = (codes: string[]) => ({ path: "src/rules.ts", text: codes.map((code) => `push({ code: "${code}", instancePath: "" })`).join("\n") });
-  const rows = "| `FAC-SEM-000` | any | here: an object |\n| `FAC-SEM-001` | `x` | [runners](runners.md#semantic-rules) |\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
+  const rows = "| <a id=\"fac-sem-000\"></a>`FAC-SEM-000` | any | here: an object |\n| `FAC-SEM-001` | `x` | [runners](runners.md#semantic-rules) |\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
 
   it("passes the repository's own register, specifications and checkers", async () => {
     expect(await checkRuleCodes()).toEqual([]);
@@ -110,14 +110,14 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
   });
 
   it("reads a definition in any table of any specification, the register file's other sections included", () => {
-    const elsewhere = { path: "conformance.md", text: register(rows).text + "\n## Clients\n\n| Code | Kind | Rule |\n|---|---|---|\n| `FAC-SEM-001` | `x` | another meaning |\n" };
+    const elsewhere = { path: "conformance.md", text: register(rows).text + "\n## Clients\n\n| Code | Kind | Rule |\n|---|---|---|\n| <a id=\"fac-sem-001\"></a>`FAC-SEM-001` | `x` | another meaning |\n" };
     expect(ruleCodeFindings(elsewhere, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("FAC-SEM-001 is defined in 2 rows");
   });
 
   it("refuses a register kind that disagrees with the specification, and a late code defined in the register", () => {
     const wrongKind = rows.replace("| `FAC-SEM-002` | `x` |", "| `FAC-SEM-002` | `y` |");
     expect(ruleCodeFindings(register(wrongKind), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("the register says y");
-    const late = register(rows + "\n| `FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
+    const late = register(rows + "\n| <a id=\"fac-sem-009\"></a>`FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
     expect(ruleCodeFindings(late, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009 must be defined in a specification");
   });
 });

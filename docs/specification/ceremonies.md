@@ -309,8 +309,8 @@ stays linkable ([contexts](contexts.md#linkability)).
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-113` | `enroll-token` | an `enroll-token/1`'s statement is the register's: `type` `enroll-token/1` and exactly its fields, `purpose` `agent-host`, `uses` 1, `scope` `estate:<id>`, `genesis` a digest, a 32-byte `nonce`, `ceiling` `null` or a digest; `notBefore` and `expiresAt` RFC 3339 read strictly, `expiresAt` after `notBefore` and at most 900 s after it |
-| `FAC-SEM-114` | `estate-record-revision` | what a revision drops, it revokes in the same revision: a machine of the parent it no longer lists as `machine <id>`, with its hub key as `hub-key <kid>`; a device key of a machine both list that it no longer lists, by its key reference `<kid>@sha256:<hex>` or by its kid; a hub key of a machine both list that it no longer certifies with the same kid and key, as `hub-key <old kid>`. `verifyEstateRecord` runs it whenever it has a parent (`rule-violation`) |
+| <a id="fac-sem-113"></a>`FAC-SEM-113` | `enroll-token` | an `enroll-token/1`'s statement is the register's: `type` `enroll-token/1` and exactly its fields, `purpose` `agent-host`, `uses` 1, `scope` `estate:<id>`, `genesis` a digest, a 32-byte `nonce`, `ceiling` `null` or a digest; `notBefore` and `expiresAt` RFC 3339 read strictly, `expiresAt` after `notBefore` and at most 900 s after it |
+| <a id="fac-sem-114"></a>`FAC-SEM-114` | `estate-record-revision` | what a revision drops, it revokes in the same revision: a machine of the parent it no longer lists as `machine <id>`, with its hub key as `hub-key <kid>`; a device key of a machine both list that it no longer lists, by its key reference `<kid>@sha256:<hex>` or by its kid; a hub key of a machine both list that it no longer certifies with the same kid and key, as `hub-key <old kid>`. `verifyEstateRecord` runs it whenever it has a parent (`rule-violation`) |
 
 DEC-0084 also extends two rules of the [estate record](estate-record.md#semantic-rules): `FAC-SEM-076` reads a
 `device-key` revocation as a kid or a key reference, refuses a record that lists the key either names, and refuses a ref

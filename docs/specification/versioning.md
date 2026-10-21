@@ -114,5 +114,5 @@ Vectors: [`fixtures/vectors/protocol-revisions.json`](../../fixtures/vectors/pro
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` (compared by normal form, [identifiers](identifiers.md)) and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064, DEC-0076) |
-| `FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |
+| <a id="fac-sem-096"></a>`FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` (compared by normal form, [identifiers](identifiers.md)) and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064, DEC-0076) |
+| <a id="fac-sem-099"></a>`FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |

@@ -148,7 +148,7 @@ schema, and so does this repository's checker (`FAC-SEM-080`). A rule a tool can
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-080` | `service-well-known` | a value under the dashboard extension key is valid against `service-dashboard-extension.schema.json`; an invalid one is reported once per schema error, and a host treats it as not declared (ED-9) |
+| <a id="fac-sem-080"></a>`FAC-SEM-080` | `service-well-known` | a value under the dashboard extension key is valid against `service-dashboard-extension.schema.json`; an invalid one is reported once per schema error, and a host treats it as not declared (ED-9) |
 
 ## Not decided here
 

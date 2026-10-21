@@ -160,9 +160,9 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-089` | `window-lease` | a lease's period is an instance of its window that exists, its times are strict RFC 3339, its life is positive and at most 24 hours and ends no later than its window instance, and its amount is a decimal string |
-| `FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports received before it |
-| `FAC-SEM-091` | `lease-reservation` | a meter's decision (`{lease, request, decision}`, `reserve` or `refuse`) is the one `mayReserve` gives |
+| <a id="fac-sem-089"></a>`FAC-SEM-089` | `window-lease` | a lease's period is an instance of its window that exists, its times are strict RFC 3339, its life is positive and at most 24 hours and ends no later than its window instance, and its amount is a decimal string |
+| <a id="fac-sem-090"></a>`FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports received before it |
+| <a id="fac-sem-091"></a>`FAC-SEM-091` | `lease-reservation` | a meter's decision (`{lease, request, decision}`, `reserve` or `refuse`) is the one `mayReserve` gives |
 
 ## Who adopts it
 

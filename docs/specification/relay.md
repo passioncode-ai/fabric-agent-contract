@@ -454,8 +454,8 @@ Every refusal of the relay family is data a port runs, not only a test in this r
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-070` | `secret-envelope` | sealed to a `#kem` key by a `#sig` key under `alg` `ES256`, with the one admitted suite, a life of more than zero and at most 24 hours between real instants, and an encapsulated key that is a valid uncompressed P-256 point |
-| `FAC-SEM-071` | `relay-frame` | `auth` names a `#sig` key, `alg` `ES256` and `fabric-relay/0.1`; `send` addresses a `#sig` key, with a `ttl` of 1 s to 7 days and a body of at most 765 KiB decoded |
+| <a id="fac-sem-070"></a>`FAC-SEM-070` | `secret-envelope` | sealed to a `#kem` key by a `#sig` key under `alg` `ES256`, with the one admitted suite, a life of more than zero and at most 24 hours between real instants, and an encapsulated key that is a valid uncompressed P-256 point |
+| <a id="fac-sem-071"></a>`FAC-SEM-071` | `relay-frame` | `auth` names a `#sig` key, `alg` `ES256` and `fabric-relay/0.1`; `send` addresses a `#sig` key, with a `ttl` of 1 s to 7 days and a body of at most 765 KiB decoded |
 
 ## Not decided here
 

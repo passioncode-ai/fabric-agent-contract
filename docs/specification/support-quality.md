@@ -37,7 +37,7 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge |
+| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge |
 
 ## Not decided here
 

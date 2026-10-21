@@ -217,7 +217,7 @@ vectors themselves (the board message `c95b4a22`) and reconcile later.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-121` | `folder-attribution` | an implementation's attribution of a snapshot (`{snapshot, answer}`) equals `attributeFolder`'s, row for row of the AT table |
+| <a id="fac-sem-121"></a>`FAC-SEM-121` | `folder-attribution` | an implementation's attribution of a snapshot (`{snapshot, answer}`) equals `attributeFolder`'s, row for row of the AT table |
 
 Fixtures: `fixtures/positive/folder-attribution-snapshot.json`, `fixtures/negative/folder-attribution-relative-folder.json`,
 `fixtures/semantic/folder-attribution-*`.

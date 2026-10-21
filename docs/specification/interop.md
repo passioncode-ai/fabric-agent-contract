@@ -314,13 +314,13 @@ The field is in [`service-well-known.schema.json`](../../schemas/service-well-kn
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations |
-| `FAC-SEM-023` | `interop-tool-list`, `interop-tool` | every served tool's `outputSchema`, when present, has root `type: "object"` |
-| `FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
-| `FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |
-| `FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
-| `FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
-| `FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
+| <a id="fac-sem-017"></a>`FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations |
+| <a id="fac-sem-023"></a>`FAC-SEM-023` | `interop-tool-list`, `interop-tool` | every served tool's `outputSchema`, when present, has root `type: "object"` |
+| <a id="fac-sem-018"></a>`FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
+| <a id="fac-sem-019"></a>`FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |
+| <a id="fac-sem-022"></a>`FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
+| <a id="fac-sem-119"></a>`FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
+| <a id="fac-sem-120"></a>`FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
 
 Fixtures: every `interop-*` entry of [`fixtures/catalogue.json`](../../fixtures/catalogue.json),
 `fixtures/semantic/job-limits-*` and the vectors [`fixtures/vectors/job-limits.json`](../../fixtures/vectors/job-limits.json);

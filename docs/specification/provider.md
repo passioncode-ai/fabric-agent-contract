@@ -79,9 +79,9 @@ These follow from the table and are enforced by the schema:
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-013` | `provider-directory` | no id is both a service and a provider, or two providers |
-| `FAC-SEM-014` | `provider-observation` | the entry's `id` is its file name's stem; its `providerId` equals the resolved manifest's `provider.id`, by normal form (DEC-0076) |
-| `FAC-SEM-015` | `provider-entry` | every `env` value has the form `secret-ref:NAME`, and NAME is not itself a credential |
+| <a id="fac-sem-013"></a>`FAC-SEM-013` | `provider-directory` | no id is both a service and a provider, or two providers |
+| <a id="fac-sem-014"></a>`FAC-SEM-014` | `provider-observation` | the entry's `id` is its file name's stem; its `providerId` equals the resolved manifest's `provider.id`, by normal form (DEC-0076) |
+| <a id="fac-sem-015"></a>`FAC-SEM-015` | `provider-entry` | every `env` value has the form `secret-ref:NAME`, and NAME is not itself a credential |
 
 A provider entry is also read by `FAC-SEM-056` (a stdio server's scope) and `FAC-SEM-057` (no credential in
 `command` or `url`), defined in [profiles](profiles.md#semantic-rules) because they apply to every document that

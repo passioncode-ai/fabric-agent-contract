@@ -191,7 +191,7 @@ and sets `fabric_button` with `owner=host`, so the page hides its own.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-052` | `deep-link` | a `fabric://` link has a known action, its required parameters, each known parameter once and within its grammar, and no parameter that can carry a credential |
+| <a id="fac-sem-052"></a>`FAC-SEM-052` | `deep-link` | a `fabric://` link has a known action, its required parameters, each known parameter once and within its grammar, and no parameter that can carry a credential |
 
 Fixtures: the `fabric-link-*` entries of [`fixtures/catalogue.json`](../../fixtures/catalogue.json) and
 `fixtures/semantic/deep-link-*`; tests: [`test/fabric-button.test.ts`](../../test/fabric-button.test.ts).
