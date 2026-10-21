@@ -32,6 +32,7 @@ function cases(): Json[] {
   const awsSecret = ["wJalrXUtnFEMI", "K7MDENG", "bPxRfiCYEXAMPLEKEY"].join("/");
   const routerKey = ["sk", "-", "abc0123def4567".repeat(3)].join("");
   const ghToken = ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1"].join("");
+  const botSecret = "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawX";
   const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawX"].join("");
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
@@ -103,6 +104,27 @@ function cases(): Json[] {
     ["a commit URL with a hex digest is declared", doc({ connections: [{ ...telegram, purpose: `pinned at https://github.com/o/r/commit/${"c55f2d5a11".repeat(4)}` }] }), view([{ ...telegram, purpose: `pinned at https://github.com/o/r/commit/${"c55f2d5a11".repeat(4)}`, failing: false }])],
     ["a bot secret of 34 characters", doc({ connections: [{ ...model, label: `token ${["110201543", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"].join("")}` }] }), REPORTED],
     ["Bearer and a short token is no credential", doc({ connections: [{ ...telegram, reason: "Bearer abc12 refused" }] }), view([{ ...telegram, reason: "Bearer abc12 refused", failing: false }])],
+    ["a provider/model id with a long mixed name is declared", doc({ connections: [{ ...model, target: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", purpose: "embeds with sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" }] }), view([{ ...model, target: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", purpose: "embeds with sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", failing: false }])],
+    ["a commit URL with an upper-case owner is declared", doc({ connections: [{ ...telegram, purpose: `pinned at https://github.com/Microsoft/TypeScript/commit/${"c55f2d5a11".repeat(4)}` }] }), view([{ ...telegram, purpose: `pinned at https://github.com/Microsoft/TypeScript/commit/${"c55f2d5a11".repeat(4)}`, failing: false }])],
+    ["a 40-character slug mixing cases and digits across hyphens", doc({ connections: [{ ...model, target: "store", label: "Prod-Analytics-Warehouse-EU-West-1-Replica" }] }), REPORTED],
+    ...([
+      ["sk- and 15 characters with an upper-case letter and a digit", `sk-${"Ab1".repeat(5)}`, false],
+      ["sk- and 16 characters with an upper-case letter and a digit", `sk-${"Ab1".repeat(5)}C`, true],
+      ["sk- and 31 lower-case characters with a digit", `sk-${"a1".repeat(15)}b`, false],
+      ["sk- and 32 lower-case characters with a digit", `sk-${"a1".repeat(16)}`, true],
+      ["a bot id of 5 digits", `12345:${botSecret}`, false],
+      ["a bot id of 6 digits", `123456:${botSecret}`, true],
+      ["a bot id of 12 digits", `123456789012:${botSecret}`, true],
+      ["a bot id of 13 digits", `1234567890123:${botSecret}`, false],
+      ["a bot secret of 33 characters", `123456789:${botSecret.slice(0, 33)}`, false],
+      ["a bot secret of 36 characters", `123456789:${botSecret}X`, false],
+      ["Bearer and 11 characters with a digit", `sent Bearer ${"abcdefghij1"}`, false],
+      ["Bearer and 12 characters with a digit", `sent Bearer ${"abcdefghijk1"}`, true]
+    ] as Array<[string, string, boolean]>).map(([name, label, reported]): [string, unknown, Json] => [name, doc({ connections: [{ ...model, label }] }), reported ? REPORTED : view([{ ...model, label, failing: false }])]),
+    ["a ticket title of 40 or more characters mixing cases and a digit is a long run", doc({ connections: [{ ...model, label: "Task 123456789:Implement-the-Connections-tab-reader-for-v2" }] }), REPORTED],
+    ["a mixed-case URL path is read between its slashes", doc({ connections: [{ ...telegram, purpose: "reads https://docs.example.com/API/v2/Reference/Connections/GetUpdates" }] }), view([{ ...telegram, purpose: "reads https://docs.example.com/API/v2/Reference/Connections/GetUpdates", failing: false }])],
+    ["a provider and a long model id are a path", doc({ connections: [{ ...model, target: "together/meta-llama/Meta-Llama-3-70B-Instruct-Turbo" }] }), view([{ ...model, target: "together/meta-llama/Meta-Llama-3-70B-Instruct-Turbo", failing: false }])],
+    ["an upper-case AKIA only", doc({ connections: [{ ...telegram, label: `uses ${["akia", "iosfodnn7example"].join("")}` }] }), view([{ ...telegram, label: `uses ${["akia", "iosfodnn7example"].join("")}`, failing: false }])],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));

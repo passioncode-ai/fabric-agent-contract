@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { BEARER_INSIDE, JWT_SHAPE, longSecret, secretUrl } from "./secret-shape.js";
+import { BEARER_INSIDE, JWT_SHAPE, longSecretPiece, secretUrl } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // extensions/connections/0.1 (DEC-0096): what an agent uses, and the contract-side check of it.
@@ -76,11 +76,12 @@ function urlsIn(value: string): string[] {
 }
 /**
  * A credential in a connection's string member: a token's shape, a long run mixing upper case, lower case and digits
- * (the shared `longSecret`, an AWS secret access key say), or a URL that carries one. The reference: ports run
+ * in a piece, or between the separators of a path-like piece (the shared `longSecretPiece`: an AWS secret access key
+ * is one, a `provider/Model-Name-32B` id is not), or a URL that carries one. The reference: ports run
  * `fixtures/vectors/connections.json`.
  */
 const credential = (value: string): boolean =>
-  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || longSecret(value) || urlsIn(value).some(secretUrl);
+  JWT_SHAPE.test(value) || KEY_SHAPE.test(value) || BEARER_INSIDE.test(value) || longSecretPiece(value) || urlsIn(value).some(secretUrl);
 
 /** The problems the schema cannot state: an id named twice, a credential in any string member. */
 function beyondShape(list: Connection[]): string[] {

@@ -49,6 +49,10 @@ Fabric Dashboards' proposal (thread `131648c0`): let an agent declare what it us
   (lower-case prefixes, a Bearer token's 12 characters, the mixed-case condition); a 40-character run mixing cases and
   digits (an AWS secret access key) is refused outside a URL too; a bot secret is 34 or 35 characters; CT-73 lists
   every measured difference from the shared detector.
+- From the seventh readings: the long run is looked for per piece and between a path's `/` (`longSecretPiece`, now
+  shared with `secretArgument`), so a `provider/Model-Name-32B` model id or a commit URL with an upper-case owner is
+  declared; vectors pin each numeric boundary the page states;
+  a ticket title of 40 or more mixed characters with a digit is recorded as a long run, not stepped around.
 
 ## Decisions
 

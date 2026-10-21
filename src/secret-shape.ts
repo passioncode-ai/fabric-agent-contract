@@ -60,7 +60,7 @@ export const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-
  * lower case and digits. A hex digest is lower case and passes.
  */
 const LONG_RUN = /[A-Za-z0-9+/=_-]{40,}/g;
-export const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
+const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
 /** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */
 export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || longSecret(value);
 
@@ -84,7 +84,9 @@ const pathLike = (piece: string): boolean =>
  * between path separators, so a folder path holding a session id is not taken for a key.
  */
 export const secretArgument = (value: string): boolean =>
-  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
+  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) || longSecretPiece(value);
+/** A long run in a value's pieces (split at spaces and `=`), looked for between the separators of a path-like piece. */
+export const longSecretPiece = (value: string): boolean =>
   value.split(/[\s=]/).some((piece) => (pathLike(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
 
 /** Percent-decode and keep `+` as `+`: `URLSearchParams` turns a raw `+` into a space, which would split a base64 run. */
