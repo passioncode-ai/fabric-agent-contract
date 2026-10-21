@@ -396,7 +396,7 @@ offered to others never names `subscription` ([service](service.md#offered-to-ot
 | <a id="fac-sem-021"></a>`FAC-SEM-021` | `runner-catalogue` | one entry per runner kind |
 | <a id="fac-sem-028"></a>`FAC-SEM-028` | `runner-route` | one candidate per runner kind |
 | <a id="fac-sem-029"></a>`FAC-SEM-029` | `runner-route` | a candidate must be able to run: attach or spawn |
-| <a id="fac-sem-030"></a>`FAC-SEM-030` | `route-bundle` | every candidate names a provider revision — id, revision and content hash — admitted for the route's capability |
+| <a id="fac-sem-030"></a>`FAC-SEM-030` | `route-bundle` | every candidate names a provider revision (id, revision and content hash) admitted for the route's capability |
 | <a id="fac-sem-032"></a>`FAC-SEM-032` | `route-bundle` | the binding that pins the route has its project, capability and the local-runner profile, a candidate as its provider, and this route as `runnerRoute` |
 | <a id="fac-sem-033"></a>`FAC-SEM-033` | `route-bundle` | every candidate's kind is in the host's runner catalogue, and a named drive is one its entry offers |
 | <a id="fac-sem-034"></a>`FAC-SEM-034` | `route-event` | the event names this route; every candidate it names is that position of the route, by an integer index; the probes cover every candidate above the selection, in order (all of them when exhausted, none for a sticky relaunch, which needs a conversation and sticky recovery); attach, spawn, `no-held-session` and `spawn-failed` obey the session policy; `held` only under `exhausted: hold`; `preferred-available` only under `recovery: reprobe`, moving up |

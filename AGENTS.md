@@ -44,7 +44,7 @@ Every script in `package.json`, with what it needs beyond Node 22.13+ and the in
 | `pnpm vectors:check` | every generator in `tools/vectors/` against its committed vector file (`tools/vectors/run.ts`) | |
 | `pnpm vectors:write` | writes every vector file from its generator; one generator alone: `tsx tools/vectors/<name>.ts --write` | |
 | `pnpm privacy:check` | the operator's private-name denylist, where it exists | `python3` |
-| `pnpm validate` | the author checker (added by the checker module) | |
+| `pnpm validate` | checks an author's own document or folder: the schema, the semantic rules and the pairs, one line per problem | |
 | `pnpm check` | the gate: typecheck, test, ux:lint, docs:check, privacy:check | `python3`, `git` |
 
 The fast loop while editing: `pnpm test:fast`, or one file with `pnpm vitest run test/<file>.test.ts`; then the gate.

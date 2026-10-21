@@ -192,7 +192,7 @@ The smallest answer to `GET /.well-known/fabric-service`, for the descriptor abo
 | Member | Required | What it holds |
 |---|---|---|
 | `protocol` | yes | `"fabric-service/0.1"` |
-| `service` | yes | `id`, `instance` and `name`, equal to the descriptor's; `version`; `build` with a `commit` or a `digest` |
+| `service` | yes | `id` and `instance`, equal to the descriptor's (`FAC-SEM-009`); `name`; `version`; `build` with a `commit` or a `digest` |
 | `process` | yes | the live process: `pid` and `startedAt` |
 | `status` | yes | `starting`, `ready`, `degraded` or `stopping` |
 | `degraded` | yes | the sources that do not work now; an empty list asserts full health |

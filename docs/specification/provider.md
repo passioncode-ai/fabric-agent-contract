@@ -31,7 +31,7 @@ the agent's installer, removed by its uninstaller.
 | `name` | string of at most 80 characters | yes | |
 | `summary` | string of at most 200 characters | no | |
 | `manifest` | absolute or `~/` path to `fabric-agent.json` | yes | the manifest must resolve |
-| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | yes | argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013). `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044). **Do not emit `run.mcp.stdio.scope` yet:** Fabric's registry and the Fabric Agent Adapter's admit only `command` and `env` today ([below](#what-the-schema-adds-to-the-table)); leave it out and the reader takes `on-demand` |
+| `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | yes | argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013). `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044). **Do not emit `run.mcp.stdio.scope` yet:** the Fabric Agent Adapter's reader accepts it (FAA-22), but Fabric's registry admits only `command` and `env` today (CT-27, [below](#what-the-schema-adds-to-the-table)); leave it out and the reader takes `on-demand` |
 | `source` | `{repository: URL}` | no | |
 | `installedAt` | RFC 3339 | yes | |
 | `installedBy` | string | yes | |
@@ -61,7 +61,7 @@ manifest's `provider.id`, and an `env` value is checked by its form.
 |---|---|
 | macOS | `~/Library/Application Support/ai.passioncode.fabric/providers/` |
 | Linux | `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/providers/` |
-| Windows | `%LOCALAPPDATA%\passioncode-fabric\providers\` (the services folder's root, DEC-0032) |
+| Windows | `%LOCALAPPDATA%\passioncode-fabric\providers\`: the same root as the services folder (DEC-0032 names only that one); no Windows reader of provider entries exists yet |
 | any | the value of `FABRIC_PROVIDERS_DIR` when set |
 
 The file is written atomically (temporary file, `fsync`, rename), as a descriptor is.
@@ -80,9 +80,9 @@ These follow from the table and are enforced by the schema:
 - `url` is `http://127.0.0.1:<port>/mcp`: loopback only, the port in range, no query.
 - `run.mcp.stdio.scope` is `project`, `on-demand` or `session`; the last is spelled so that `FAC-SEM-056` refuses it
   by name ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044). A writer does not emit
-  `run.mcp.stdio.scope` until the readers accept it: Fabric's registry (`apps/desktop/src/main/agentRegistry.ts:236`
-  at `487ef5b0`) and the adapter's (`fabric_provider.py:119`) admit only `command` and `env` today. An absent `scope`
-  is `on-demand`.
+  `run.mcp.stdio.scope` until every reader accepts it: the adapter's (`fabric_provider.py`, FAA-22, CT-28) does, and
+  Fabric's registry (`apps/desktop/src/main/agentRegistry.ts:236`) admits only `command` and `env` today (CT-27). An
+  absent `scope` is `on-demand`.
 
 ## Semantic rules
 

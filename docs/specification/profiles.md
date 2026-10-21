@@ -68,10 +68,10 @@ expose internal planning or model reasoning.
 The profile MUST declare:
 
 - profile revision `fabric-local-runner/0.1`, in the member `profileVersion`;
-- runner kind (`runnerKind`): one of the shared kind names of [runners](runners.md), such as `claude-code`, `codex`,
+- runner kind (`runnerKind`): a shared kind name of [runners](runners.md), such as `claude-code`, `codex`,
   `cursor-agent` or `gemini-cli`, which are also the ids of
-  [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json); a runner not listed there takes a new name on
-  the runners page before a host ships it;
+  [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json), or a namespaced extension; a runner a host
+  ships SHOULD take its shared name on the runners page first, so routes and events match across hosts;
 - executable reference and argument template with typed placeholders;
 - input mode and result-envelope location;
 - supported cancellation and heartbeat behavior;

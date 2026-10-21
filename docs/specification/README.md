@@ -2,7 +2,8 @@
 
 Every page of the specification, by topic. Each row says what the page defines and how mature it is:
 
-- **adopted by** names the public products that carry the surface;
+- **adopted by** names the public products that read or write the surface at their own pin; it does not say they
+  have adopted every decision on the page, which each one's backlog row tracks ([backlog](../backlog.md));
 - **specified, no consumer yet** means no product reads or writes it today;
 - **not measured** means the consumer review did not look at it.
 
@@ -32,8 +33,8 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 | Page | Defines | Maturity |
 |---|---|---|
 | [services](service.md) | `fabric-service/0.1`: the descriptor, the well-known document, events, the usage report, login, lifecycle | adopted by Fabric Dashboards, the Fabric Agent Adapter kits, Project Observatory, Fabric Inbox, the first organization server, Fabric and about a dozen provider agents of the estate |
-| [embedded dashboard](embedded-dashboard.md) | `fabric-dashboard/0.1`: a dashboard inside a host, and its declaration | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
-| [connections](connections.md) | `fabric-connections/0.1`: what an agent uses (DEC-0096) | specified, no consumer yet |
+| [embedded dashboard](embedded-dashboard.md) | `fabric-dashboard/0.1`: a dashboard inside a host, and its declaration | read by Fabric Dashboards and the Fabric Agent Adapter; Fabric's writer is open (CT-19, CT-21) |
+| [connections](connections.md) | `fabric-connections/0.1`: what an agent uses (DEC-0096) | read by Fabric Dashboards with its own reader, not yet re-pinned to the vectors (CT-70); no emitter yet |
 | [Fabric's button and links](fabric-button.md) | Fabric's button in a product and `fabric://` links | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [session handoff](session-handoff.md) | `session-handoff/1`: the folder a host hands a coding-agent session | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [folder attribution](folder-attribution.md) | which Project a coding agent's folder belongs to | adopted by Fabric and Project Observatory |

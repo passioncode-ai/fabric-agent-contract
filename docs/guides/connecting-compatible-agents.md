@@ -216,7 +216,7 @@ The provider entry, `<id>.json` in the providers folder:
 }
 ```
 
-Leave `run.mcp.stdio.scope` out for now: the readers do not accept it yet, and its absence means `on-demand`
+Leave `run.mcp.stdio.scope` out for now: Fabric's registry does not accept it yet (CT-27), and its absence means `on-demand`
 ([provider entries](../specification/provider.md)). An `env` value is always a `secret-ref:`, never the key; no
 argument carries a credential.
 
@@ -282,9 +282,10 @@ per-session state is better run once as a service (the section above).
 ## A coding agent as a local runner
 
 A host starts an installed coding agent as a terminal process, gives it an input file and reads a result envelope
-back. The manifest declares the capability with the `local-runner` profile. `runnerKind` is one of the shared kind
-names on the [runners](../specification/runners.md) page (`claude-code`, `codex`, `cursor-agent`, `gemini-cli` and
-others), which are also the ids of [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json).
+back. The manifest declares the capability with the `local-runner` profile. `runnerKind` should be one of the shared
+kind names on the [runners](../specification/runners.md) page (`claude-code`, `codex`, `cursor-agent`, `gemini-cli` and
+others), which are also the ids of [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json); a namespaced
+extension is allowed, but routes and events then match on no other host.
 
 <!-- example: manifest.schema.json kind=manifest -->
 
