@@ -3,7 +3,8 @@
 ## Objective
 
 The first organization server's ask 11 (board thread `ba63565c`): a transport refusal that tells a node its organization
-ended, so the node stops at once instead of retrying after `certificate-revoked` and `certificate-unknown`.
+ended, so a node can tell that from one machine's revocation (Project Observatory's node already ends an enrollment
+on `certificate-revoked` or `certificate-unknown`, OBS-204) and also learns it after the deletion.
 
 ## Done
 
@@ -33,6 +34,14 @@ wire's nested body: it answers `stop` for both shapes, with vectors). Product: t
 (the server sets `organizationClosedAt` only when both gates hold, the step table says so, the enrollment's end named in
 the Policy section, CT-106 for the share card, the next free id, SCN-011's UI elements). Unit: pass; its risks closed
 (the one-fault statements name the revoked organization cases, three schema negatives, a mismatched serial test).
+
+## Third round of readings
+
+Seam: pass; its risks closed ("product and version" is the server's own knowledge under `fabric-device/0.1`, the
+Expiry paragraph names the exception, the answer before signature verification discloses only `closedAt`). Product: one
+break, this handoff's objective still said the node retries; fixed, with its risks (an expired certificate meets only
+the enrollment's answer, the glossary's MAY, which enrollment end lifts locks, SCR-10's element and state, the vectors
+paragraph, the FAC-SEM-077 row's wording).
 
 ## Open
 

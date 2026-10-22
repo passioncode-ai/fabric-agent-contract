@@ -151,8 +151,8 @@
 
 - **Used by:** FLW-07
 - **Purpose:** show each effective policy key, the layer it came from and whether it is locked.
-- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key; `harness.baseline` and `repair.packages` are the organization's signed keys, not the person's to change, DEC-0102; the device's answer to such a change is CT-99).
-- **States:** success — effective settings; error — a change to a locked key refused, or a policy that failed to verify.
+- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key; `harness.baseline` and `repair.packages` are the organization's signed keys, not the person's to change, DEC-0102; the device's answer to such a change is CT-99); the closed organization's sentence and date (DEC-0103).
+- **States:** success: effective settings; error: a change to a locked key refused, or a policy that failed to verify; closed: the organization ended, the device no longer reports to it and its server locks are lifted (DEC-0103).
 - **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042), `test/node-summary.test.ts` (the two signed-only keys)
 - **Scenarios:** SCN-011
 - **Resources:** device-policy schema; devices specification, Policy

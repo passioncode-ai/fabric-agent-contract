@@ -290,7 +290,8 @@ person's activity.
 The vectors a receiver or a collector runs are [`fixtures/vectors/http-signature.json`](../../fixtures/vectors/http-signature.json):
 a good request with each key, the window's edges, an altered body and target, a lower-case method signed as sent, a
 stale `created`, a missing and a malformed `nonce`, a repeated one, a foreign key, the wrong `alg` for the key, unknown,
-revoked and expired certificates, unusable keys (a small-order forgery among them), another party's members, mutual TLS
+revoked and expired certificates, a closed organization's certificate signed and over mutual TLS (DEC-0103), unusable
+keys (a small-order forgery among them), another party's members, mutual TLS
 with and without a signature, and RFC 9421's own Ed25519 example with RFC 9530's digest. `FAC-SEM-077` holds a receiver's
 answer to them.
 
@@ -315,15 +316,23 @@ began; never the date it was requested). It is answered:
 - **an enrollment** carries no product or version, so the server cannot tell its pin and answers it as it does today
   (its own refusal) until a revision carries the pin (CT-67).
 
-A server puts `organizationClosedAt` on a certificate record only when all of these hold; a record without it goes on to
-step 5, so the step table and `FAC-SEM-077` answer 410 exactly for the records the server marked.
+A server puts `organizationClosedAt` on a certificate record only when the closing can no longer be cancelled and the
+node is pinned at or after DEC-0103; a record without it goes on to step 5, so the step table and `FAC-SEM-077` answer
+410 exactly for the records the server marked. Under `fabric-device/0.1` no request carries a product, so "product and
+version" is the server's own knowledge of which node product it serves and the version that node reported; a server that
+serves more than one node product with overlapping versions does not send the 410 until a revision carries the pin
+(CT-67). Like revocation at step 5, the answer comes before the signature is verified, so it discloses to whoever
+names a known serial only that the organization ended and when (`closedAt`). A node whose certificate expired before it
+learned of the closing meets only the enrollment's answer: it keeps that organization's server layer until a revision
+carries the pin, or until its own policy for an enrollment that ended applies.
 
 A server that never closes an organization never sends it. A node takes `organization-closed` as final **on one answer**:
 it stops every request to that organization, drops what it buffered for it (events, sums, registrations) and ends that
 enrollment, discarding that organization's `server` policy layer, key set, collection start and streams (an `mdm` layer
 stays the operating system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
-server's own enrollment refusals keep their meaning. The enrollment's end is the one event, besides a newer signed
-policy, that ends a `server` layer's locks ([precedence and locks](#policy)); an `mdm` lock survives it. In [`verifyDeviceRequest`](../../src/http-signature.ts) a
+server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event,
+besides a newer signed policy, that ends a `server` layer's locks; what a node does with the locks of an enrollment it
+ends on `certificate-revoked` the contract does not decide ([precedence and locks](#policy)); an `mdm` lock survives it. In [`verifyDeviceRequest`](../../src/http-signature.ts) a
 certificate record with `organizationClosedAt` gives this answer, `status: 410` with `closedAt` (an unreadable one is the
 receiver's `context-invalid`); the share registration's sender gate answers `stop`
 ([share registration](share-registration.md)).
@@ -416,7 +425,8 @@ It reports the revision it holds for each delivered layer in every check-in.
 **Expiry** (DEC-0053). A delivered layer MAY carry `expiresAt`. After the earliest one passes, and until
 a newer policy arrives, the device keeps every lock in force but stops honouring grants, stops remote
 execution, and lets no person's key serve someone else ([`expectedDecision`](../../src/device-rules.ts),
-`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked.
+`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked. The one exception is the enrollment's end
+on `organization-closed`, which discards that organization's `server` layer with its locks (DEC-0103).
 
 <a id="collection-start"></a>
 
