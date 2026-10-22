@@ -49,9 +49,10 @@ own record of them; which document carries it is not decided here. An entitlemen
 was paid for, not what runs, so they are not `own`.
 
 **Listed as signed, not as callable.** An estate's directory lists the record's placements as the revision signed
-them. A share grant that expired or a revocation delta applied since stops the call at once
-([contexts](contexts.md)); the entry stays until the next revision, so it is never a promise that a
-call will run. An organization's directory drops a registration as soon as it is withdrawn or outside its window.
+them, so it is never a promise that a call will run. A share grant that expired or a revocation delta applied since
+stops the call at once ([contexts](contexts.md)). A revoked grant's entry stays until the next revision, which
+refuses the placement (`FAC-SEM-111`); an expired grant's entry stays as long as a revision still places it, since no
+rule makes a revision drop it. An organization's directory drops a registration as soon as it is withdrawn or outside its window.
 
 **Two members, one agent.** Two people who share the same agent into one organization are one entry: the directory
 names agents, not who shared them, and does not choose between their instances.
@@ -122,7 +123,9 @@ the `structuredContent` of a `queue-full` refusal at start and of the `unknown-j
 nothing else: a provider that does not queue keeps C3.2's rule for `unknown-job` (its text or
 `structuredContent.error.code` carries it), and every provider's other refusals keep their own shapes. A validating client that listed the job tool may refuse a
 `structuredContent` outside the tool's `outputSchema` (`interop-job-tool-output`); the node therefore also writes
-the same JSON as the result's text content, which every client reads. The caller starts again after
+the same JSON as the result's text content, which every client reads. A key `quota-exhausted` or `limit-reached`
+admits again (DEC-0087) passes `admitJob` like any start; a `queue-full` refusal leaves the key holding its ended
+job. The caller starts again after
 `retryAfterSeconds` under the same idempotency key ([the intent's key](interop.md#limits-and-uncertain-effects)); the
 key holds no job, so the start is admitted or refused as any new start. `queue-full` never ends a job: `interop-job.schema.json` refuses a job's `error`
 with that code, and `jobCallerAction` answers `invalid` for one. It is a job tool's code, outside the delegation
@@ -156,14 +159,14 @@ under the descriptor's `auth.tokenFile` like the [usage report](service.md): `ge
 waitMs?, runMs?}`. `queued` and `running` are counts at the window's end (the last window may still be open: its counts are then at
 `generatedAt`); `completed` and `failed` count jobs that ended
 in the window (a cancelled job is not counted); `waitMs` is the `{p50, p95}` queue wait of the jobs that started in the
-window and `runMs` the run time of those that ended, each absent when there were none. Counts and durations only: no
+window and `runMs` the run time of those that completed or failed, each absent when there were none. Counts and durations only: no
 person, caller, prompt, output or job id. Reading it takes the descriptor token ([service](service.md#mcp-credentials),
 DL-12): the host holds it, and so does every MCP client configured with it under the default `surfaces.mcp.auth`. It
 is never sent to an organization server, and an organization's own view of an agent's load is not decided here.
 
 The extension describes one service: its `limits` apply to every agent it hosts alike, and its report sums them per
 context. A node that hosts several agents with their own limits serves one well-known document per agent service.
-A refused start (`queue-full`) and a cancelled job are counted in no row in this revision.
+A refused start (`queue-full`) is counted nowhere, and a cancellation is not counted as an end, in this revision.
 
 `FAC-SEM-133` (kind `service-well-known`) checks the declaration: a value under the load key is valid against
 `service-load-extension.schema.json`. A reader treats an invalid one as not declared and reports it, as with the
@@ -204,7 +207,7 @@ No other provider sends `queue-full` as a job tool's code. `agent-directory/1`,
 | the first organization server | keeps the registrations and its own machines' agents an organization's directory is derived from with `organizationDirectory`; which of it and the hub serves that directory is Fabric's to settle with it in CO-376; a member reads listed entries only |
 | a node hosting an agent | keys callers with `jobCallerKey`, keeping the answers of keys it stored before under their old caller; answers `queue-full` and `unknown-job` with `{error}` alone (the closed `interop-tool-error`); queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
 | a caller (the one that started the call, not the hub that forwarded it) | waits on a queued job like any `working` job, and starts again after `queue-full`'s `retryAfterSeconds` under the same key |
-| Fabric Dashboards | draws the load panels from `service-load/1` |
+| Fabric Dashboards | draws the load panels from `service-load/1`; treats an invalid load key as not declared and reports it (`FAC-SEM-133`), and shows a report that fails `FAC-SEM-132`, or a path that refuses the token, as unavailable with the reason |
 | fabric-agent-adapter's kits | at the re-pin: a kit-built node that queues ports `jobCallerKey` (the caller vectors) and keys a call with no token by its credential; `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |
 
 Each runs [`fixtures/vectors/agent-network.json`](../../fixtures/vectors/agent-network.json) in its gate.
@@ -230,7 +233,9 @@ Each runs [`fixtures/vectors/agent-network.json`](../../fixtures/vectors/agent-n
   would leave the intent to a person under today's caller table.
 - Mapping an entry's `agentRef` to the `agentId` a call names, and which instance a call reaches when two members
   share one agent.
-- What a node that queues does with keys stored under the hub's credential once the hub attaches tokens.
+- What a node that queues does with keys stored, and jobs in flight, under the hub's credential once the hub
+  attaches tokens.
+- Whether a revision drops a placement whose share grant expired.
 - How a hub span and a meter receipt count a `queue-full` refusal.
 - A per-caller limit on the hub before the call reaches the node; relaying `fabric.job.list` through the hub.
 - An organization's view of an agent's load; per-agent rows and limits inside one service; counting refused starts.
