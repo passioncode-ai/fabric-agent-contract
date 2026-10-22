@@ -541,11 +541,12 @@ independent agent author and P-02 project operator.
 - **Feature:** agent-network
 - **Traces:** ST-028, FLW-23 (JTBD-12, JRN-11/#2)
 - **Entry point:** an agent calls `example-agent`'s job-backed capability and polls `fabric.job.get`
-- **Preconditions:** `example-agent` declares `concurrency: 2`, `perCaller: 1`, `queueMax: 3`; two jobs run, one of them this caller's
+- **Preconditions:** `example-agent` declares `concurrency: 2`, `perCaller: 2`, `queueMax: 3`; both slots run jobs of caller A
 - **Steps:**
-  1. The caller starts a job -> `working`, `queued 1 of 1`; it polls.
-  2. Another caller with nothing running starts a job and a slot frees -> the other caller's job starts first, since this caller already runs one.
-  3. A slot frees again -> this caller's job starts and completes once.
+  1. Caller A starts a third job -> `working`, `queued 1 of 1`; it polls.
+  2. Caller B, with nothing running, starts a job -> it waits too.
+  3. One of A's jobs ends -> B's job starts first, though A's arrived earlier: B runs none, A still runs one.
+  4. The next slot frees -> A's third job starts and completes once.
 - **Expected result:** a burst of calls waits in line, each caller sees its place, and no caller holds the agent alone.
 - **Alt paths:** the queue already holds three -> the start is refused with `queue-full` and `retryAfterSeconds: 30`, nothing stored; the caller starts again after 30 seconds under the same key and that start runs once.
 - **UI elements:** the job's status message; the refusal's time to start again.

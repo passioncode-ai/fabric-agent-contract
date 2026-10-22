@@ -32,6 +32,7 @@
 | SCR-24 | An agent's connections | FLW-21 | disabled | proposed | `test/connections.test.ts` |
 | SCR-25 | Agent directory | FLW-22 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-26 | An agent's load | FLW-24 | disabled | proposed | `test/agent-network.test.ts` |
+| SCR-27 | A job's status for its caller | FLW-23 | disabled | proposed | `test/agent-network.test.ts` |
 
 ## Design system
 
@@ -167,7 +168,7 @@
 - **Elements:** notification text with a link, stop message with action buttons, confirmation with amount and expiry, reply prompt for free text (primary action: the stop's recommended button).
 - **States:** empty — not linked yet, the chat waits for the link code; success — a stop answered, keyboard removed; error — already decided, expired confirmation, or no effect for a sender outside the allowlist. silent — in a group shared with other bots, a message not addressed to this bot gets no answer (OC-14, OC-15); degraded — nobody receives, shown as `receiver-missing` (OC-17).
 - **Coverage:** `operator-channel-status.schema.json`, `test/operator-channel.test.ts`
-- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017, SCN-031, SCN-034
+- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017, SCN-031
 - **Resources:** operator-channel specification, Rules
 - **Status:** proposed
 
@@ -334,4 +335,15 @@
 - **Coverage:** `src/agent-network.ts` (`FAC-SEM-132`, `FAC-SEM-133`), `test/agent-network.test.ts`
 - **Scenarios:** SCN-035
 - **Resources:** agent network specification, Load; Fabric Dashboards' load panel
+- **Status:** proposed
+
+### SCR-27: A job's status for its caller
+
+- **Used by:** FLW-23
+- **Purpose:** the caller, an agent or the person behind it, sees where its call stands: waiting in line, refused for now, or done.
+- **Elements:** the job's status and status message (`queued <position> of <length>`); on a refusal, the time to start again; the result once completed.
+- **States:** queued, the place shown; refused, `queue-full` with its time and nothing started; success, the job completed once.
+- **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `test/agent-network.test.ts`
+- **Scenarios:** SCN-034
+- **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log, Fabric's job view)
 - **Status:** proposed

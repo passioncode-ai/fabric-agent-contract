@@ -226,8 +226,9 @@ request (a task id, a message id) when one principal asks twice for the same inp
 `idempotencyKey` ([C3.5](#c35-the-hub)) and capabilities whose input requires a UUID key. It answers no key for an input
 with no RFC 8785 form.
 
-**The provider's answer to a repeated key.** A provider keeps a key per authenticated caller, so two callers that send
-the same input never share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
+**The provider's answer to a repeated key.** A provider keeps a key per authenticated caller (for a call that carries a
+delegation token, its `sub`; [agent network](agent-network.md#call-queue)), so two callers that send the same input never
+share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
 longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
 again and never runs a second time. Any other key whose job ended is answered with that job.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/interop-tool-error.schema.json",
-  "title": "fabric-interop: the structuredContent of a tool result with isError: true (DEC-0104)",
-  "description": "A refusal that started nothing: queue-full at a job's start (with its data), unknown-job for an id the callee never issued or another caller's job. The error is interop-common's, so queue-full's data is bound here.",
+  "title": "fabric-interop: the structuredContent of a queue-full refusal at a job's start and of unknown-job (DEC-0104)",
+  "description": "A refusal that started nothing and stored nothing: queue-full at a job's start (with its data), or unknown-job for an id the callee never issued or another caller's job. Only these two; a provider's other refusals keep their own shapes. The error is interop-common's, so queue-full's data is bound here.",
   "type": "object",
   "required": [
     "error"

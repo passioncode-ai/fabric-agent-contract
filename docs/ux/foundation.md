@@ -127,7 +127,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller its place; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
-- **Success metric:** the owner's directory lists every placement once with unlisted ones marked, a member sees only the organization's listed agents, a waiting job reads its place, a full queue says when to start again, and a load panel shows waiting and running jobs per context.
+- **Success metric:** the owner's directory lists every agent once per context with unlisted ones marked, a member sees only the organization's listed agents, a waiting job reads its place, a full queue says when to start again, and a load panel shows waiting and running jobs per context.
 
 ## 3. Customer journeys
 

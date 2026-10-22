@@ -576,7 +576,7 @@ flowchart TD
   S --> D[Job completes once]
 ```
 
-- **Screens traversed:** SCR-11 success; SCR-11 error.
+- **Screens traversed:** SCR-27 queued; SCR-27 refused; SCR-27 success.
 
 ### FLW-24: Operator reads an agent's load
 
