@@ -401,7 +401,9 @@ even after it passes: it stays on the device (`FAC-SEM-068`).
 
 An unlocked value above the user layer is therefore a default the person may change; a locked one is
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
-key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`).
+key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
+`repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
+(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99).
 
 <a id="key-sets"></a>
 
