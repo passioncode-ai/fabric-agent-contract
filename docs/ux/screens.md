@@ -342,7 +342,7 @@
 - **Used by:** FLW-23
 - **Purpose:** the caller, an agent or the person behind it, sees where its call stands: waiting in line, refused for now, or done.
 - **Elements:** the job's status and status message (`queued <position> of <length>`); on a refusal, the time to start again; the result once completed.
-- **States:** queued, the place shown; refused, `queue-full` with its time and nothing started; success, the job completed once.
+- **States:** queued, the estimated place and the queue's length shown; refused, `queue-full` with its time and nothing started; success, the job completed once.
 - **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `test/agent-network.test.ts`
 - **Scenarios:** SCN-034
 - **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log)

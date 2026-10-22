@@ -40,11 +40,13 @@ first 1024 in that order (`DIRECTORY_MAX`; both reference functions cut there, s
 
 **`listed`** is a discovery flag the publisher of the directory sets: the owner for an estate, the organization's
 administrator for an organization. An unlisted agent is still called by whoever holds its grant; unlisting it hides it
-from discovery only. No `visible` flag exists: an entry a viewer may not read is absent, never present and hidden.
+from discovery only; an estate's directory has no reader but its owner, so there the mark hides nothing in this
+revision. No `visible` flag exists: an entry a viewer may not read is absent, never present and hidden.
 
 **What `own` is read from.** No contract document lists an organization's own machines' agents yet: an `org-cloud`
 machine is in no estate record and `node-summary/1` names services, not agents. `own` is the organization server's
-own record of them; which document carries it is not decided here.
+own record of them; which document carries it is not decided here. An entitlement's agents (`entitlement/1`) are what
+was paid for, not what runs, so they are not `own`.
 
 **Listed as signed, not as callable.** An estate's directory lists the record's placements as the revision signed
 them. A share grant that expired or a revocation delta applied since stops the call at once
@@ -87,8 +89,10 @@ MCP auth among them: they are one caller. A caller polls the way it started: a s
 **Limits.** A node that queues declares its limits in the [load extension](#load), which it therefore carries: `concurrency` (jobs run at once), `perCaller`
 (jobs of one authenticated caller run at once) and `queueMax` (jobs that may wait), each per (`agentRef`, context).
 
-**A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`, its rank in the order
-`nextQueuedJob` would start the waiting jobs if slots freed one at a time with no new arrival, position 1 next, both
+**A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`: `length` is how many jobs
+wait for that agent and context, and `position` is the node's estimate of the job's place, 1 for the job it expects
+to start next. With per-caller limits the order depends on which running job ends first, so the position is an
+estimate, never a promise; only which job starts is the reference's (`nextQueuedJob`, `FAC-SEM-131`). Both are
 decimal integers of one to six digits with no leading zero, 1 ≤ position ≤ length, nothing before or after
 (`queueStatusMessage` writes nothing outside it, `readQueuePosition`).
 `pollIntervalMs` SHOULD match the expected wait. A caller reads it as any `working` job (`jobCallerAction` answers
@@ -126,8 +130,8 @@ refusals' set ([delegation](delegation.md)), as `unknown-job` is.
 
 **Through the hub.** A hub that relays the queue (Fabric, CO-376) passes `queue-full` and its data unchanged to the
 caller it forwarded for, keeps no `agent.call` key for the refused start (nothing started), and lets the caller start
-again; it does not start again on its own. Fabric's hub today answers every product `isError` as `product-error` and
-keeps that answer under the key for 24 hours, so until CO-376 ships a caller through the hub sees `product-error`
+again; it does not start again on its own. Fabric's hub today answers every product `isError` as `product-error` (Fabric's ADR-0115, which tells the caller to
+check the effect before retrying; a `queue-full` refusal had none) and keeps that answer under the key for 24 hours, so until CO-376 ships a caller through the hub sees `product-error`
 and a resend under the same key replays it. A node reached through that hub queues all the same; the hub's fix is
 CO-376's. Relaying `fabric.job.list` through the hub is not decided here.
 

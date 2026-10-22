@@ -126,7 +126,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and, once I call, to know whether my call waits and for how long, so I can find it without asking around and without a burst of calls failing for nothing.
 - **Personas:** P-02
 - **Type:** functional
-- **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller its place; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
+- **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller roughly where it stands; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
 - **Success metric:** the owner's directory lists every agent once per context with unlisted ones marked, a member sees only the organization's listed agents, a waiting job reads its place, a full queue says when to start again, and a load panel shows waiting and running jobs per context.
 
 ## 3. Customer journeys
@@ -559,7 +559,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-028: A caller learns its place in a busy agent's queue, or when to start again
 
-- **Story:** As P-02, I want a call to a busy agent to wait in line with its place shown, or to be refused with a time to start again, so that a burst of calls neither fails for nothing nor runs twice.
+- **Story:** As P-02, I want a call to a busy agent to wait in line with an estimate of its place shown, or to be refused with a time to start again, so that a burst of calls neither fails for nothing nor runs twice.
 - **Traces:** JTBD-12, JRN-11/#2
 - **Acceptance criteria:**
   - Given an agent at its concurrency limit, when a call starts, then the job is `working` with `queued <position> of <length>` and the caller polls it as any working job.

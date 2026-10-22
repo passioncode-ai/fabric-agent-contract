@@ -136,7 +136,7 @@ interop extension block. Then:
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
 - A node that queues calls (DEC-0104) writes a waiting job's `statusMessage` as `queued <position> of <length>`,
-  refuses a start past its queue with `queue-full` and `retryAfterSeconds` (an `isError` result whose
+  refuses a start that would wait past its queue (`admitJob`) with `queue-full` and `retryAfterSeconds` (an `isError` result whose
   `structuredContent` is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json), as is its
   `unknown-job`), and serves
   `fabric.job.list` with the caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
