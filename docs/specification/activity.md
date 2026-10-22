@@ -387,6 +387,8 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
 **What the device keeps, and where the next batch starts.**
 
 - A device keeps every event above `seq` that is not in a `held` range, and MAY drop the rest.
+- A batch answered **410 `organization-closed`** (DEC-0103, [devices](devices.md#organization-closed)) is not consumed
+  event by event: the organization ended, and the device drops every event it holds for it and sends it nothing again.
 - The next batch starts at the device's oldest kept event that it has not yet sent on this
   connection. Events already in flight are not sent again until their batch fails or goes
   unacknowledged; then the device sends again from its oldest kept event.

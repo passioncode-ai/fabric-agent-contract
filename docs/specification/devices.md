@@ -1,13 +1,14 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) and DEC-0094 (a key in a file, idempotent rotation) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102 and DEC-0103 (a closed organization) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
 [`device-health`](../../schemas/device-health.schema.json),
 [`device-key-set`](../../schemas/device-key-set.schema.json),
-[`device-root-certification`](../../schemas/device-root-certification.schema.json), shared definitions in
+[`device-root-certification`](../../schemas/device-root-certification.schema.json),
+[`device-organization-closed`](../../schemas/device-organization-closed.schema.json), shared definitions in
 [`device-common`](../../schemas/device-common.schema.json)
 
 A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an
@@ -259,7 +260,8 @@ Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+
   epoch's binding (`FAC-SEM-045`).
 
 **What a receiver checks**, in this order ([`checkDeviceSignature`](../../src/http-signature.ts), then
-[`verifyDeviceRequest`](../../src/http-signature.ts)); each refusal is HTTP 401 with the code:
+[`verifyDeviceRequest`](../../src/http-signature.ts)); each refusal is HTTP 401 with the code, but `organization-closed`, HTTP 410
+([below](#organization-closed), DEC-0103):
 
 | Step | Refused when | Code |
 |---|---|---|
@@ -269,6 +271,7 @@ Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+
 | 2 | `Content-Digest` is not exactly `sha-256` of the body as received | `digest-mismatch` |
 | 3 | `created` is more than 300 seconds from the receiver's clock | `signature-stale` |
 | 4 | a client certificate is present and `keyid` is not its serial, or no certificate has the serial `keyid` names | `certificate-unknown` |
+| 4 | the certificate's organization closed and the closing can no longer be cancelled, for a node pinned at or after DEC-0103 (its record carries `organizationClosedAt`, which the server sets only then; an unreadable one is the receiver's own `context-invalid`) | `organization-closed` (HTTP 410) |
 | 5 | the certificate is revoked (a record's `revoked` present and not `false`) | `certificate-revoked` |
 | 6 | the receiver's clock is not in `notBefore` ≤ t < `notAfter`, each read as RFC 3339 with `T` and an offset | `certificate-expired` |
 | 7 | `alg` is not the signing key's, the key is not usable, the signature base cannot be built, or the signature does not verify | `signature-invalid` |
@@ -288,9 +291,52 @@ person's activity.
 The vectors a receiver or a collector runs are [`fixtures/vectors/http-signature.json`](../../fixtures/vectors/http-signature.json):
 a good request with each key, the window's edges, an altered body and target, a lower-case method signed as sent, a
 stale `created`, a missing and a malformed `nonce`, a repeated one, a foreign key, the wrong `alg` for the key, unknown,
-revoked and expired certificates, unusable keys (a small-order forgery among them), another party's members, mutual TLS
+revoked and expired certificates, a closed organization's certificate signed and over mutual TLS (DEC-0103), unusable
+keys (a small-order forgery among them), another party's members, mutual TLS
 with and without a signature, and RFC 9421's own Ed25519 example with RFC 9530's digest. `FAC-SEM-077` holds a receiver's
 answer to them.
+
+<a id="organization-closed"></a>
+
+**A closed organization** (DEC-0103). When an organization ends, its server MAY answer every device request of that
+organization (a check-in, an activity batch, a share registration, a rotation) with **HTTP 410**, no
+`Retry-After`, and the body [`device-organization-closed`](../../schemas/device-organization-closed.schema.json):
+`{error: {code: "organization-closed", message}, closedAt}`, the shape of every other device refusal with `closedAt`
+beside it, the time the closing began (the end of its notice period, or, with no notice period, when its deletion
+began; never the date it was requested). It is answered:
+
+- **only once the closing can no longer be cancelled**: a node acts on it at once and drops what it buffered;
+- **only to a node pinned at or after DEC-0103** (known from its product and version, as `protocols` is, CT-67): to an
+  older node the server answers what it answers today, `401 certificate-revoked` once it revoked the certificates, which
+  Project Observatory's node already ends an enrollment on (OBS-204);
+- **at transport step 4, before revocation**, so a machine whose certificate was revoked at the end of the notice period
+  learns that its organization ended, not that one machine was revoked;
+- **after the deletion too**: the server keeps, in its termination record, the serial of each of the organization's
+  certificates with the last product and version its node reported (no person), at least until that certificate's
+  `notAfter`; a serial whose node's pin it does not know gets what it gets today;
+- **an enrollment** carries no product or version, so the server cannot tell its pin and answers it as it does today
+  (its own refusal) until a revision carries the pin (CT-67).
+
+A server puts `organizationClosedAt` on a certificate record only when the closing can no longer be cancelled and the
+node is pinned at or after DEC-0103; a record without it goes on to step 5, so the step table and `FAC-SEM-077` answer
+410 exactly for the records the server marked. Under `fabric-device/0.1` no request carries a product, so "product and
+version" is the server's own knowledge of which node product it serves and the version that node reported; a server that
+serves more than one node product with overlapping versions does not send the 410 until a revision carries the pin
+(CT-67). Like revocation at step 5, the answer comes before the signature is verified, so it discloses to whoever
+names a known serial only that the organization ended and when (`closedAt`). A node whose certificate expired before it
+learned of the closing meets only the enrollment's answer: it keeps that organization's server layer until a revision
+carries the pin, or until its own policy for an enrollment that ended applies.
+
+A server that never closes an organization never sends it. A node takes `organization-closed` as final **on one answer**:
+it stops every request to that organization, drops what it buffered for it (events, sums, registrations) and ends that
+enrollment, discarding that organization's `server` policy layer, key set, collection start and streams (an `mdm` layer
+stays the operating system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
+server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
+contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
+enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)). In [`verifyDeviceRequest`](../../src/http-signature.ts) a
+certificate record with `organizationClosedAt` gives this answer, `status: 410` with `closedAt` (an unreadable one is the
+receiver's `context-invalid`); the share registration's sender gate answers `stop`
+([share registration](share-registration.md)).
 
 <a id="attribution"></a>
 
@@ -380,7 +426,8 @@ It reports the revision it holds for each delivered layer in every check-in.
 **Expiry** (DEC-0053). A delivered layer MAY carry `expiresAt`. After the earliest one passes, and until
 a newer policy arrives, the device keeps every lock in force but stops honouring grants, stops remote
 execution, and lets no person's key serve someone else ([`expectedDecision`](../../src/device-rules.ts),
-`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked.
+`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked. The one exception is the enrollment's end
+on `organization-closed`, which discards that organization's `server` layer with its locks (DEC-0103).
 
 <a id="collection-start"></a>
 
@@ -403,7 +450,8 @@ An unlocked value above the user layer is therefore a default the person may cha
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
 key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
-(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99).
+(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
+layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103).
 
 <a id="key-sets"></a>
 
@@ -592,7 +640,8 @@ computed by merging ranges, never seq by seq ([`tamperEvidence`](../../src/devic
 - **an epoch the server never issued** to the device;
 - **a collector counter that went back**: a `lastSeq` below a seq already held;
 - **a buffer floor that went back**: a `bufferedFrom` below one the device reported before. Events
-  leave a buffer only by acknowledgement or by an overflow, so the floor only rises;
+  leave a buffer only by acknowledgement, by an overflow, or with the whole enrollment when its organization closed
+  (DEC-0103), so the floor only rises;
 - **a policy revision that went back**: a revision below one the device acknowledged since it last
   enrolled.
 
@@ -612,7 +661,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-046"></a>`FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | <a id="fac-sem-068"></a>`FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
 | <a id="fac-sem-069"></a>`FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
-| <a id="fac-sem-077"></a>`FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold (naming the client certificate's serial when there is one) accepts an unsigned request only on a valid client certificate, and otherwise answers the 401 code of the first step that fails |
+| <a id="fac-sem-077"></a>`FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold (naming the client certificate's serial when there is one) accepts an unsigned request only on a valid client certificate, and otherwise answers the code of the first step that fails: 401, or 410 `organization-closed` for a certificate whose record carries `organizationClosedAt` (DEC-0103) |
 | <a id="fac-sem-125"></a>`FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
 
 Each kind checks one input:
@@ -627,7 +676,7 @@ Each kind checks one input:
 | `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
-| `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
+| `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, organizationClosedAt?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
 | `device-rotation` | `{answered: [{publicKeySha256, serial, certificate}], request: {publicKeySha256, serial}, response: {certificate}}`; `answered` the rotations the server already answered, at most one per (`publicKeySha256`, `serial`), `request` the CSR's key and the current certificate's serial; an entry or a request whose key or serial is not a string matches nothing |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are

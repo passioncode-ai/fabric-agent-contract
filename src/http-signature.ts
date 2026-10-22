@@ -36,8 +36,9 @@ const HTTP_ALG = new Map<string, HttpSignatureAlg>([["es256", "ecdsa-p256-sha256
 /** The RFC 9421 `alg` a device key signs with, or undefined for a key that signs no request. */
 export const httpAlgFor = (alg: unknown): HttpSignatureAlg | undefined => (typeof alg === "string" ? HTTP_ALG.get(alg) : undefined);
 
-/** A refusal the receiver answers with 401 and this code. */
+/** A refusal the receiver answers with 401 and this code; `organization-closed` (DEC-0103) with 410 and `closedAt`. */
 export type SignatureRefusal =
+  | "organization-closed"
   | "signature-missing"
   | "digest-mismatch"
   | "signature-stale"
@@ -379,6 +380,13 @@ export interface DeviceCertificateRecord {
   /** Present and not `false` means revoked. */
   revoked?: boolean;
   /**
+   * DEC-0103: the time the organization's closing began (RFC 3339), set only once the closing can no longer be cancelled
+   * and only for a node pinned at or after DEC-0103 (known from the last product and version it reported). The server
+   * keeps it from its termination record after the organization is deleted, so the device learns the end. An open
+   * organization's record omits the member: `null` is not absence, and an unreadable value is the receiver's fault.
+   */
+  organizationClosedAt?: string;
+  /**
    * The `#sig` key of the enrollment whose epoch the certificate carries (DEC-0053; rotation keeps it), or the certified key
    * when that enrollment listed no `deviceKeys`. Which one is the receiver's data model's to record.
    */
@@ -402,7 +410,8 @@ export interface DeviceSignatureContext {
 export type DeviceSignatureVerdict =
   | { ok: true; binding: "signature"; serial: string; nonce: string; created: number; keepUntil: number }
   | { ok: true; binding: "mutual-tls"; serial: string }
-  | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string };
+  | { ok: false; code: "organization-closed"; status: 410; reason: string; closedAt: string }
+  | { ok: false; code: Exclude<SignatureRefusal, "organization-closed"> | ReceiverFault; reason: string };
 
 /** The strict RFC 3339 reader (`T`, an offset and a day that exists), shared by every rule that compares a time. */
 export { strictTime } from "./rfc3339.js";
@@ -431,7 +440,7 @@ const signaturePresent = (headers: Map<string, string>): boolean =>
     const field = parseDictionary(headers.get(name) ?? "");
     return field !== null && (field.members.has(DEVICE_SIGNATURE_LABEL) || field.duplicates.has(DEVICE_SIGNATURE_LABEL));
   });
-const refuse = (code: SignatureRefusal | ReceiverFault, reason: string): DeviceSignatureVerdict => ({ ok: false, code, reason });
+const refuse = (code: Exclude<SignatureRefusal, "organization-closed"> | ReceiverFault, reason: string): DeviceSignatureVerdict => ({ ok: false, code, reason });
 
 /** The parsed binding: what a conforming `fabric-device` signature carries, or null when the request carries none. */
 interface ParsedSignature { created: number; nonce: string; keyid: string; alg: HttpSignatureAlg; signature: Uint8Array }
@@ -469,9 +478,11 @@ const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
  * `clock-unreadable`, `base-url-invalid`; never a throw); an unsigned request, accepted only on a mutual-TLS client
  * certificate that is known, not revoked and valid now (`binding: "mutual-tls"`); a conforming signature
  * (`signature-missing`), the body's digest (`digest-mismatch`), the window (`signature-stale`), `keyid` equal to the
- * client certificate's serial when there is one, and the certificate (`certificate-unknown`, `-revoked`, `-expired`), the
+ * client certificate's serial when there is one, and the certificate (`certificate-unknown`, then `organization-closed`
+ * for a closed organization's, DEC-0103, then `-revoked`, `-expired`), the
  * algorithm and key (`signature-invalid`), and the signature over the rebuilt base (`signature-invalid`). The vectors
- * carry one fault each, so a port that orders the checks otherwise answers them alike.
+ * carry one fault each, so a port that orders the checks otherwise answers them alike; the `organization` cases also
+ * carry a revocation on purpose, to pin step 4 before step 5 (DEC-0103).
  */
 export function checkDeviceSignature(request: DeviceRequest, context: DeviceSignatureContext): DeviceSignatureVerdict {
   // The receiver's own faults first: a context that is not an object, an unreadable clock — a NaN clock makes every window
@@ -488,6 +499,12 @@ export function checkDeviceSignature(request: DeviceRequest, context: DeviceSign
   const certificateRefusal = (serial: string): DeviceSignatureVerdict | DeviceCertificateRecord => {
     const record = context.certificate(serial);
     if (!isObjectLike(record) || record.serial !== serial) return refuse("certificate-unknown", "no certificate with this serial");
+    // DEC-0103: a closed organization answers before revocation, so the device learns the end, not one machine's revocation.
+    if (record.organizationClosedAt !== undefined) {
+      const closedAt = record.organizationClosedAt;
+      if (typeof closedAt !== "string" || Number.isNaN(strictTime(closedAt))) return refuse("context-invalid", "the receiver's record of the organization's closing has no readable time");
+      return { ok: false, code: "organization-closed", status: 410, reason: "the organization is closed: stop every request for it", closedAt };
+    }
     if (record.revoked !== undefined && record.revoked !== false) return refuse("certificate-revoked", "the certificate is revoked: re-enroll");
     const from = strictTime(record.notBefore), to = strictTime(record.notAfter);
     if (!(at >= from && at < to)) return refuse("certificate-expired", "the certificate is not valid now: re-enroll");

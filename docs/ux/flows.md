@@ -176,8 +176,8 @@ flowchart TD
 
 - **Traces:** ST-008 (JTBD-04, JRN-03/#2)
 - **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally
-- **Entry points:** a policy in a check-in response; a local settings change
-- **Success exit:** effective settings shown with the layer each came from and its lock
+- **Entry points:** a policy in a check-in response; a local settings change; a 410 `organization-closed` answer (DEC-0103)
+- **Success exit:** effective settings shown with the layer each came from and its lock; for a closed organization, its sentence and date with its server locks lifted
 - **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → show each key's source → refuse a local change to a locked key.
 - **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
 - **Flow:**
@@ -193,7 +193,7 @@ flowchart TD
   C -->|unlocked| U[User value becomes effective]
 ```
 
-- **Screens traversed:** SCR-10 success; SCR-10 error.
+- **Screens traversed:** SCR-10 success; SCR-10 error; SCR-10 closed.
 
 ### FLW-08: Operator answers an agent's stop in the messenger
 

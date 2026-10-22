@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-22 the readings of DEC-0098 to DEC-0101](2026-10-22-review-fixes.md) | DEC-0102 (CT-91 to CT-101 filed) | PR #145 |
+| [2026-10-22 a closed organization](2026-10-22-organization-closed.md) | DEC-0103 (CT-105; CT-106 filed) | PR #147 |
+| [2026-10-22 the readings of DEC-0098 to DEC-0101](2026-10-22-review-fixes.md) | DEC-0102 (CT-91 to CT-104 filed) | merged, #145 `c7376ea`; rows #146 `f33f4d8` |
 | [2026-10-22 a node's summary and repairs](2026-10-22-node-summary.md) | DEC-0101 (CT-83; CT-90 filed) | merged, #144 `4a29fcb` |
 | [2026-10-22 a purpose refusal and renewal after expiry](2026-10-22-refusals-renewal.md) | DEC-0100 (CT-88) | merged, #143 `1f31e5a` |
 | [2026-10-22 an organization's cloud machine](2026-10-22-org-cloud.md) | DEC-0099 (CT-82) | merged, #142 `de9cd7c` |

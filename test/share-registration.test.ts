@@ -109,7 +109,7 @@ describe("the schema (DEC-0086)", () => {
     expect(PROTOCOL_REVISIONS.get("share-registration-receipt")).toEqual(["1"]);
   });
 
-  it("takes from DEC-0056 exactly the transport's 401 codes and its step-0 faults", () => {
+  it("takes from DEC-0056 exactly the transport's 401 codes and DEC-0103's 410, and its step-0 faults", () => {
     const table = devices.slice(devices.indexOf("| Step | Refused when | Code |"), devices.indexOf("**The nonce store.**"));
     const rows = [...table.matchAll(/^\| ([0-8]) \|[^\n]*\| ([^|\n]+) \|$/gm)];
     const code = (step: string) => rows.filter((row) => row[1] === step).flatMap((row) => [...(row[2] ?? "").matchAll(/`([a-z-]+)`/g)].map((m) => m[1] as string));
@@ -177,7 +177,7 @@ describe("the vectors (DEC-0086)", () => {
     };
     for (const entry of vectors.intake as Json[]) {
       const answer = entry.expected as Json;
-      const want = answer.status === 200 ? "send" : answer.body ? expected[answer.body.error.code] : "hold";
+      const want = answer.status === 200 ? "send" : answer.status === 410 ? "stop" : answer.body ? expected[answer.body.error.code] : "hold";
       expect(gateGrantUsage(answer), entry.name).toBe(want);
     }
   });

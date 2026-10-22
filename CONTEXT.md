@@ -223,6 +223,10 @@ every batch, check-in, rotation and share-registration request with its `#sig` k
 terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
+**Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
+node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it
+([devices](docs/specification/devices.md#organization-closed), DEC-0103).
+
 **Collection start**: When a device starts collecting for the organization: the notice's acknowledgement, or under
 device management the earlier of that and the policy's deadline; the first acknowledgement, never moved by a later
 notice's (DEC-0102). Nothing that occurred before it is uploaded

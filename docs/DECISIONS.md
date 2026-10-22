@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0103` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0104` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6347,3 +6347,75 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/backlog.md`, `docs/evidence/retro.md`, `docs/handoffs/2026-10-22-review-fixes.md`.
 - **Source:** the three readings' reports (2026-10-22, recorded in the handoff); DEC-0102 reserved by git CAS (key
   `review-fixes-dec98-101-20261022`).
+
+### DEC-0103: `organization-closed`, a final transport refusal for an organization that ended (CT-105)
+
+- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105.
+- **Context:** the first organization server closes organizations (its organization export and termination, live on
+  2026-10-22): at the end of the notice period it revokes every machine certificate, then deletes the organization. Its
+  machines then meet `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`. Project Observatory's
+  node ends an enrollment on either (OBS-204, shipped 2026-10-22), but cannot tell an organization's end from one
+  machine's revocation, and after the deletion a machine whose certificate the server no longer knows learns nothing
+  final. `unknown-org` exists only on that server's enrollment and is not in the contract. The server's ask 11 (board
+  thread `ba63565c`, from Project Observatory's OBS-204, thread `5a0ecbde`).
+- **Decision:**
+  1. A server MAY answer any device request of an organization that ended (a check-in, a batch, a share registration, a
+     rotation) with **HTTP 410**,
+     no `Retry-After`, and the body `device-organization-closed`: `{error: {code: "organization-closed", message},
+     closedAt}`, the shape of every other device refusal with `closedAt` beside it; `message` is one path-free line
+     (`device-common#/$defs/detail`); `closedAt` is when the closing began (the end of its notice period, or, with no
+     notice period, when its deletion began; never the request's date). A server that never closes an organization
+     never sends it.
+  2. It answers so **only once the closing can no longer be cancelled**, and **only to a node pinned at or after
+     DEC-0103** (known from its product and version, as `protocols` is, CT-67); to an older node it answers what it
+     answers today (`401 certificate-revoked` once it revoked the certificates), which Project Observatory's node
+     already ends an enrollment on (OBS-204).
+  3. It is checked at transport step 4, after the certificate is found and before revocation; after the deletion the
+     server keeps in its termination record each of the organization's certificate serials with the last product and
+     version its node reported (no person), at least until that certificate's `notAfter`; a serial whose node's pin it
+     does not know gets today's answer. An enrollment carries no product or version, so it is answered as today (the
+     server's own refusal) until a revision carries the pin (CT-67). A server sets `organizationClosedAt` on a
+     certificate record only when the closing can no longer be cancelled and the node is pinned at or after DEC-0103.
+     In `verifyDeviceRequest`
+     a certificate record's `organizationClosedAt` gives `{ok: false, code: "organization-closed", status: 410,
+     closedAt}`; an unreadable one is the receiver's own `context-invalid`.
+  4. A node takes it as final on one answer: it stops every request to that organization, drops what it buffered for it
+     (events, sums, registrations) and ends that enrollment, discarding that organization's `server` policy layer, key
+     set, collection start and streams; an `mdm` layer stays the operating system's; its other enrollments are
+     untouched; the enrollment's end on `organization-closed` is the one event this contract decides, besides a newer
+     signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an enrollment a node ends on
+     `certificate-revoked` is not decided here. The share registration's sender gate answers `stop` (for the reference's
+     `{status: 410, code}` and for the wire's `{status: 410, body: {error: {code}}}` alike); `decideShareRegistration` gives `{status: 410,
+     code, closedAt}`, and a verdict without a readable `closedAt` is SR-0's `context-invalid`. A collector consumes a
+     batch's refusal whatever its reason; a 410 batch is the enrollment's end, not an event's rejection.
+  5. `certificate-revoked`, `certificate-unknown` and a server's own enrollment refusals keep their meaning.
+- **Why:** a closed organization should cost its former machines nothing: no buffered events kept for a server that will
+  never take them, no retries, and no locks of a dead organization's policy. One code, final by definition and sent only
+  when final, lets a node act on one answer without guessing from revocations; carrying only `closedAt` says nothing
+  about the organization's people. The first round of blind readings (unit, seam, product) found a forged signed vector,
+  `closedAt` read loosely, the shipped node's behaviour misstated, FAC-SEM-077 and SR-1 still saying 401, a free-text
+  body without the path bound and no rule for the policy a closed organization leaves; a second round found the pin gate
+  without a datum after deletion and at enrollment, and the gate's `hold` for the wire's nested body; a third round the
+  handoff's objective, the Expiry exception, the disclosure before verification and an expired certificate's path; a
+  fourth round two statements of which enrollment end lifts locks; all fixed here.
+- **Alternatives considered:** reuse `certificate-revoked` with a flag (a node cannot tell the two apart without reading
+  a member it may not know); 404 `unknown-org` (an unknown organization and an ended one are not the same, and an
+  enrollment-only code says nothing to a running node); a revocation delta naming the organization (the node may never
+  check in again to read it); sending 410 to every node (a node pinned before DEC-0103 would meet an unknown 410 where
+  today it meets `certificate-revoked` and ends the enrollment, so a server adopting first would stop that removal).
+- **Compatibility:** wider, and gated: a server sends the 410 only to a node pinned at or after DEC-0103, so an older
+  node meets exactly what it meets today. The http-signature vectors gain two cases (a port that asserts their exact
+  count moves to a lower bound); `ShareRegistrationAnswer` gains a 410 member (a typed consumer handles it at its
+  re-vendor). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schema `device-organization-closed`; `src/http-signature.ts` (`organization-closed`,
+  `organizationClosedAt`, the verdict's `status: 410`), `src/share-registration.ts` (`TRANSPORT_REFUSALS`, status 410,
+  gate `stop`), `src/device-transport-rules.ts` (FAC-SEM-077's comment); vectors `fixtures/vectors/http-signature.json`
+  (a closed organization's certificate, signed and mutual TLS, each with one fault) and
+  `fixtures/vectors/share-registration.json` (intake and gate); fixtures positive `device-organization-closed`, negative
+  `device-organization-closed-no-time`, `-extra`, `-path`, `-flat`, `-other-code`, `-error-extra`, `-bad-time`; tests `test/http-signature.test.ts`,
+  `test/share-registration.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`; docs
+  `devices.md` (#organization-closed, the step table, FAC-SEM-077, tamper evidence), `share-registration.md`,
+  `activity.md`, `conformance.md`, `CONTEXT.md`, `docs/ux/scenarios.md` (SCN-011), `screens.md` (SCR-10), `flows.md`
+  (FLW-07), `docs/backlog.md` (CT-105, CT-106), the handoff and its index.
+- **Source:** the first organization server's ask 11, board thread `ba63565c` (2026-10-22, 19:04), from Project
+  Observatory's OBS-204 (thread `5a0ecbde`).

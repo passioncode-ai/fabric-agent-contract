@@ -89,7 +89,7 @@ describe("the binding's vectors (DEC-0056)", () => {
 
   it("covers every fault the packet names, each refusal code, and acceptance", () => {
     const expected = new Set(cases.map((c) => c.expect));
-    expect([...expected].sort()).toEqual(["accepted", "certificate-expired", "certificate-revoked", "certificate-unknown", "digest-mismatch", "signature-invalid", "signature-missing", "signature-replayed", "signature-stale"]);
+    expect([...expected].sort()).toEqual(["accepted", "certificate-expired", "certificate-revoked", "certificate-unknown", "digest-mismatch", "organization-closed", "signature-invalid", "signature-missing", "signature-replayed", "signature-stale"]);
     const faults = new Set(cases.map((c) => c.fault));
     for (const fault of ["none", "body", "target", "created", "nonce", "key", "alg", "signature", "certificate"]) expect(faults).toContain(fault);
     expect(cases.length).toBeGreaterThanOrEqual(54);
@@ -99,11 +99,29 @@ describe("the binding's vectors (DEC-0056)", () => {
   it.each(cases.map((c) => [c.name, c] as const))("%s", async (_name, c) => {
     const verdict = await verifyDeviceRequest(c.request as DeviceRequest, { ...context(c.clientCertificateSerial ? { clientCertificateSerial: c.clientCertificateSerial } : {}), nonces: storeWith(c.seen) });
     expect(verdict.ok ? "accepted" : verdict.code).toBe(c.expect);
+    if (c.expectStatus !== undefined) expect(verdict).toMatchObject({ status: c.expectStatus, closedAt: c.expectClosedAt });
     if (c.signatureBase) {
       const digest = c.request.headers["content-digest"] as string;
       const params = parseDictionary(c.request.headers["signature-input"])!.members.get(DEVICE_SIGNATURE_LABEL) as Json;
       const [[, created], [, nonce], [, keyid], [, alg]] = params.params;
       expect(deviceSignatureBase(c.request.method, deviceTargetUri(vectors.publicBaseUrl, c.request.target)!, digest, deviceSignatureParams(created, nonce, keyid, alg))).toBe(c.signatureBase);
+    }
+  });
+
+  it("keeps each closed-organization case to one fault: revoked on purpose, and accepted once its closure and revocation are lifted (DEC-0103)", () => {
+    const closed = cases.filter((c) => c.fault === "organization");
+    expect(closed.length).toBe(2);
+    for (const c of cases) {
+      if (c.expect === "organization-closed") expect({ status: c.expectStatus, closedAt: typeof c.expectClosedAt }, c.name).toEqual({ status: 410, closedAt: "string" });
+      else expect(c.expectStatus ?? c.expectClosedAt, c.name).toBeUndefined();
+    }
+    for (const c of closed) {
+      const serial = (c.clientCertificateSerial as string | undefined) ?? "4a4b4c4d4e4f5051";
+      const record = bySerial.get(serial)!;
+      expect(record.revoked, c.name).toBe(true);
+      const { organizationClosedAt: _closed, revoked: _revoked, ...open } = record;
+      const lifted = checkDeviceSignature(c.request as DeviceRequest, context({ certificate: (s) => (s === serial ? open : bySerial.get(s)), ...(c.clientCertificateSerial ? { clientCertificateSerial: c.clientCertificateSerial } : {}) }));
+      expect(lifted, c.name).toMatchObject({ ok: true });
     }
   });
 
@@ -267,6 +285,11 @@ describe("the reference receiver", () => {
     expect(answer(record({ notAfter: "2026-10-12T09:00:01Z" }))).toMatchObject({ ok: true });
     expect(answer(record({ revoked: false }))).toMatchObject({ ok: true });
     for (const revoked of [true, "true", 1, 0, null]) expect(answer(record({ revoked: revoked as boolean })), String(revoked)).toMatchObject({ ok: false, code: "certificate-revoked" });
+    // DEC-0103: a closed organization answers before revocation and expiry, with its time; an unreadable time is the receiver's.
+    expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", revoked: true }))).toEqual({ ok: false, code: "organization-closed", status: 410, reason: expect.any(String), closedAt: "2026-10-10T00:00:00Z" });
+    expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", notAfter: "2026-10-08T00:00:00Z" }))).toMatchObject({ ok: false, code: "organization-closed" });
+    expect(answer(record({ serial: "aa02", organizationClosedAt: "2026-10-10T00:00:00Z" }))).toMatchObject({ ok: false, code: "certificate-unknown" });
+    for (const closedAt of ["2026-10-10", "2026-10-32T00:00:00Z", 7, null]) expect(answer(record({ organizationClosedAt: closedAt as string })), String(closedAt)).toMatchObject({ ok: false, code: "context-invalid" });
     expect(answer(7 as unknown as DeviceCertificateRecord)).toMatchObject({ ok: false, code: "certificate-unknown" });
     expect(answer({ ...record({}), key: null as unknown as DeviceCertificateRecord["key"] })).toMatchObject({ ok: false, reason: expect.stringMatching(/^wrong-alg/) });
     expect(answer(record({ key: { alg: "es256", publicKey: 7 as unknown as string } }))).toMatchObject({ ok: false, reason: expect.stringMatching(/^unusable-key/) });
