@@ -6148,7 +6148,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0100: A `purpose` rejection, a share registration sent again after the notice, and renewal within 30 days of expiry
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-88.
+- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
 - **Decision:**
   1. In [activity](specification/activity.md): a batch acknowledgement's `rejected[].reason` admits `purpose`: the
      receiver does not collect that event for that person under the notice they acknowledged. It is consumed like every

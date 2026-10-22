@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-22 a purpose refusal and renewal after expiry](2026-10-22-refusals-renewal.md) | DEC-0100 (CT-88) | this pull request |
+| [2026-10-22 a purpose refusal and renewal after expiry](2026-10-22-refusals-renewal.md) | DEC-0100 (CT-88) | PR #143 |
 | [2026-10-22 an organization's cloud machine](2026-10-22-org-cloud.md) | DEC-0099 (CT-82) | merged, #142 `de9cd7c` |
 | [2026-10-22 the board as Fabric 0.3.9 serves it](2026-10-22-board-additions.md) | DEC-0098 (CT-81) | merged, #141 `0076c66` |
 | [2026-10-22 a schema pattern never uses a bare `.`](2026-10-22-pattern-line-separator.md) | DEC-0097 (CT-87; CT-88, CT-89 filed) | merged, #140 `bfa9a67` |
