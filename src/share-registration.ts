@@ -458,7 +458,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
 export function gateGrantUsage(answer: unknown): GateAnswer {
   if (own(answer, "status") === 200 && own(own(answer, "receipt"), "type") === SHARE_REGISTRATION_RECEIPT_TYPE) return "send";
   // DEC-0103: the organization closed; the node keeps nothing for it and sends it nothing again.
-  if (own(answer, "status") === 410 && own(answer, "code") === "organization-closed") return "stop";
+  // The reference's shape and the wire's nested body alike (`device-organization-closed`).
+  if (own(answer, "status") === 410 && (own(answer, "code") === "organization-closed" || own(own(own(answer, "body"), "error"), "code") === "organization-closed")) return "stop";
   const code = own(own(own(answer, "body"), "error"), "code");
   const status = own(answer, "status");
   if (!isString(code)) return "hold";

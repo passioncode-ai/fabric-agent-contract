@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/device-organization-closed.schema.json",
   "title": "An organization server refusing a device request of an organization that ended: the HTTP 410 body (fabric-device/0.1, DEC-0103)",
-  "description": "Answered with HTTP 410 and no Retry-After to a device request (enrollment, check-in, activity batch, share registration, rotation) of an organization whose closing can no longer be cancelled, to a node pinned at or after DEC-0103, and after the organization's deletion from the server's termination record. The node treats it as final at once: it stops every request for that organization, drops what it buffered for it and ends that enrollment. The shape of every other device refusal body ({error: {code, message}}), with closedAt beside it. Optional for a server that never closes an organization.",
+  "description": "Answered with HTTP 410 and no Retry-After to a device request (check-in, activity batch, share registration, rotation) of an organization whose closing can no longer be cancelled, to a node pinned at or after DEC-0103 (from the last product and version it reported), and after the organization's deletion from the server's termination record. An enrollment carries no pin, so it is answered as before. The node treats it as final at once: it stops every request for that organization, drops what it buffered for it and ends that enrollment. The shape of every other device refusal body ({error: {code, message}}), with closedAt beside it. Optional for a server that never closes an organization.",
   "type": "object",
   "required": [
     "error",

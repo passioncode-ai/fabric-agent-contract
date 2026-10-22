@@ -25,6 +25,15 @@ device refusal with a path-free `message`). Their risks too: the verdict carries
 after deletion, only once the closing can no longer be cancelled, `closedAt` is the start of closing, ending an
 enrollment discards that organization's policy layer and key set, SCN-011 and the glossary, the node's resend rules.
 
+## Second round of readings
+
+Seam: two breaks, fixed (the pin gate had no datum after deletion or at enrollment: the termination record keeps each
+serial with the node's last product and version, an enrollment is answered as before; the gate answered `hold` for the
+wire's nested body: it answers `stop` for both shapes, with vectors). Product: the same pin break, fixed; its risks too
+(the server sets `organizationClosedAt` only when both gates hold, the step table says so, the enrollment's end named in
+the Policy section, CT-106 for the share card, the next free id, SCN-011's UI elements). Unit: pass; its risks closed
+(the one-fault statements name the revoked organization cases, three schema negatives, a mismatched serial test).
+
 ## Open
 
 - Adoption (CT-105): the first organization server answers it; Project Observatory's node and collector stop on it.
@@ -32,7 +41,7 @@ enrollment discards that organization's policy layer and key set, SCN-011 and th
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 987 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 995 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings); `pnpm vectors:check` exit 0, 14 vector files match their generators.
 
 ## Next task

@@ -927,5 +927,8 @@
   {"name": "device-organization-closed-no-time", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-no-time.json", "valid": false, "keyword": "required"},
   {"name": "device-organization-closed-extra", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-extra.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "device-organization-closed-path", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-path.json", "valid": false, "keyword": "pattern"},
-  {"name": "device-organization-closed-flat", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-flat.json", "valid": false, "keyword": "type"}
+  {"name": "device-organization-closed-flat", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-flat.json", "valid": false, "keyword": "type"},
+  {"name": "device-organization-closed-other-code", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-other-code.json", "valid": false, "keyword": "const"},
+  {"name": "device-organization-closed-error-extra", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-error-extra.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "device-organization-closed-bad-time", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-bad-time.json", "valid": false, "keyword": "format"}
 ]

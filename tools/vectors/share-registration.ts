@@ -359,6 +359,8 @@ function gateCases(): Json[] {
     ["organization-closed (DEC-0103): the node stops for that organization", { status: 410, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" }, "stop"],
     ["organization-closed under a status that is not its own", { status: 401, code: "organization-closed" }, "hold"],
     ["a 410 that is not organization-closed", { status: 410, code: "certificate-revoked" }, "hold"],
+    ["organization-closed as the wire's nested body", { status: 410, body: { error: { code: "organization-closed", message: "This organization closed." }, closedAt: "2026-11-30T00:00:00Z" } }, "stop"],
+    ["the wire's nested organization-closed under 401", { status: 401, body: { error: { code: "organization-closed", message: "This organization closed." }, closedAt: "2026-11-30T00:00:00Z" } }, "hold"],
     ["the receiver's own fault", { fault: "context-invalid" }, "hold"],
     ["a status 200 without a receipt", { status: 200 }, "hold"],
     ["a status 200 whose receipt is a registration", { status: 200, receipt: { type: TYPE } }, "hold"],

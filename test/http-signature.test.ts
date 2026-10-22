@@ -270,6 +270,7 @@ describe("the reference receiver", () => {
     // DEC-0103: a closed organization answers before revocation and expiry, with its time; an unreadable time is the receiver's.
     expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", revoked: true }))).toEqual({ ok: false, code: "organization-closed", status: 410, reason: expect.any(String), closedAt: "2026-10-10T00:00:00Z" });
     expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", notAfter: "2026-10-08T00:00:00Z" }))).toMatchObject({ ok: false, code: "organization-closed" });
+    expect(answer(record({ serial: "aa02", organizationClosedAt: "2026-10-10T00:00:00Z" }))).toMatchObject({ ok: false, code: "certificate-unknown" });
     for (const closedAt of ["2026-10-10", "2026-10-32T00:00:00Z", 7, null]) expect(answer(record({ organizationClosedAt: closedAt as string })), String(closedAt)).toMatchObject({ ok: false, code: "context-invalid" });
     expect(answer(7 as unknown as DeviceCertificateRecord)).toMatchObject({ ok: false, code: "certificate-unknown" });
     expect(answer({ ...record({}), key: null as unknown as DeviceCertificateRecord["key"] })).toMatchObject({ ok: false, reason: expect.stringMatching(/^wrong-alg/) });

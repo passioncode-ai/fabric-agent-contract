@@ -6581,6 +6581,34 @@
       "expected": "hold"
     },
     {
+      "name": "organization-closed as the wire's nested body",
+      "answer": {
+        "status": 410,
+        "body": {
+          "error": {
+            "code": "organization-closed",
+            "message": "This organization closed."
+          },
+          "closedAt": "2026-11-30T00:00:00Z"
+        }
+      },
+      "expected": "stop"
+    },
+    {
+      "name": "the wire's nested organization-closed under 401",
+      "answer": {
+        "status": 401,
+        "body": {
+          "error": {
+            "code": "organization-closed",
+            "message": "This organization closed."
+          },
+          "closedAt": "2026-11-30T00:00:00Z"
+        }
+      },
+      "expected": "hold"
+    },
+    {
       "name": "the receiver's own fault",
       "answer": {
         "fault": "context-invalid"

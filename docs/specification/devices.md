@@ -270,7 +270,7 @@ Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+
 | 2 | `Content-Digest` is not exactly `sha-256` of the body as received | `digest-mismatch` |
 | 3 | `created` is more than 300 seconds from the receiver's clock | `signature-stale` |
 | 4 | a client certificate is present and `keyid` is not its serial, or no certificate has the serial `keyid` names | `certificate-unknown` |
-| 4 | the certificate's organization is closing or closed (its record carries `organizationClosedAt`; an unreadable one is the receiver's own `context-invalid`) | `organization-closed` (HTTP 410) |
+| 4 | the certificate's organization closed and the closing can no longer be cancelled, for a node pinned at or after DEC-0103 (its record carries `organizationClosedAt`, which the server sets only then; an unreadable one is the receiver's own `context-invalid`) | `organization-closed` (HTTP 410) |
 | 5 | the certificate is revoked (a record's `revoked` present and not `false`) | `certificate-revoked` |
 | 6 | the receiver's clock is not in `notBefore` ≤ t < `notAfter`, each read as RFC 3339 with `T` and an offset | `certificate-expired` |
 | 7 | `alg` is not the signing key's, the key is not usable, the signature base cannot be built, or the signature does not verify | `signature-invalid` |
@@ -297,7 +297,7 @@ answer to them.
 <a id="organization-closed"></a>
 
 **A closed organization** (DEC-0103). When an organization ends, its server MAY answer every device request of that
-organization (an enrollment, a check-in, an activity batch, a share registration, a rotation) with **HTTP 410**, no
+organization (a check-in, an activity batch, a share registration, a rotation) with **HTTP 410**, no
 `Retry-After`, and the body [`device-organization-closed`](../../schemas/device-organization-closed.schema.json):
 `{error: {code: "organization-closed", message}, closedAt}`, the shape of every other device refusal with `closedAt`
 beside it, the time the closing began (the end of its notice period, or, with no notice period, when its deletion
@@ -309,14 +309,21 @@ began; never the date it was requested). It is answered:
   that node already ends an enrollment on;
 - **at transport step 4, before revocation**, so a machine whose certificate was revoked at the end of the notice period
   learns that its organization ended, not that one machine was revoked;
-- **after the deletion too**: the server keeps the serial of each of the organization's certificates in its termination
-  record (no person) at least until that certificate's `notAfter`; after it, a re-enrollment meets the enrollment's 410.
+- **after the deletion too**: the server keeps, in its termination record, the serial of each of the organization's
+  certificates with the last product and version its node reported (no person), at least until that certificate's
+  `notAfter`; a serial whose node's pin it does not know gets what it gets today;
+- **an enrollment** carries no product or version, so the server cannot tell its pin and answers it as it does today
+  (its own refusal) until a revision carries the pin (CT-67).
+
+A server puts `organizationClosedAt` on a certificate record only when all of these hold; a record without it goes on to
+step 5, so the step table and `FAC-SEM-077` answer 410 exactly for the records the server marked.
 
 A server that never closes an organization never sends it. A node takes `organization-closed` as final **on one answer**:
 it stops every request to that organization, drops what it buffered for it (events, sums, registrations) and ends that
 enrollment, discarding that organization's `server` policy layer, key set, collection start and streams (an `mdm` layer
 stays the operating system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
-server's own enrollment refusals keep their meaning. In [`verifyDeviceRequest`](../../src/http-signature.ts) a
+server's own enrollment refusals keep their meaning. The enrollment's end is the one event, besides a newer signed
+policy, that ends a `server` layer's locks ([precedence and locks](#policy)); an `mdm` lock survives it. In [`verifyDeviceRequest`](../../src/http-signature.ts) a
 certificate record with `organizationClosedAt` gives this answer, `status: 410` with `closedAt` (an unreadable one is the
 receiver's `context-invalid`); the share registration's sender gate answers `stop`
 ([share registration](share-registration.md)).
@@ -432,7 +439,8 @@ An unlocked value above the user layer is therefore a default the person may cha
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
 key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
-(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99).
+(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
+layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103).
 
 <a id="key-sets"></a>
 

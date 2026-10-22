@@ -380,8 +380,9 @@ export interface DeviceCertificateRecord {
   /** Present and not `false` means revoked. */
   revoked?: boolean;
   /**
-   * DEC-0103: present when the certificate's organization is closing or closed, the time its closing began (RFC 3339). The
-   * server keeps it from its termination record after the organization is deleted, so the device learns the end.
+   * DEC-0103: the time the organization's closing began (RFC 3339), set only once the closing can no longer be cancelled
+   * and only for a node pinned at or after DEC-0103 (known from the last product and version it reported). The server
+   * keeps it from its termination record after the organization is deleted, so the device learns the end.
    */
   organizationClosedAt?: string;
   /**
@@ -479,7 +480,8 @@ const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
  * client certificate's serial when there is one, and the certificate (`certificate-unknown`, then `organization-closed`
  * for a closed organization's, DEC-0103, then `-revoked`, `-expired`), the
  * algorithm and key (`signature-invalid`), and the signature over the rebuilt base (`signature-invalid`). The vectors
- * carry one fault each, so a port that orders the checks otherwise answers them alike.
+ * carry one fault each, so a port that orders the checks otherwise answers them alike; the `organization` cases also
+ * carry a revocation on purpose, to pin step 4 before step 5 (DEC-0103).
  */
 export function checkDeviceSignature(request: DeviceRequest, context: DeviceSignatureContext): DeviceSignatureVerdict {
   // The receiver's own faults first: a context that is not an object, an unreadable clock — a NaN clock makes every window
