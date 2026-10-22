@@ -6112,7 +6112,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0099: An organization's cloud machine enrolls by an `org-cloud` token and binds no person; `processor-hosted` custody
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-82.
+- **Status:** Accepted source change (on merge of PR #142). Consumer adoption: board row CT-82.
 - **Decision:**
   1. In [devices](specification/devices.md): a device certificate's binding MAY say `role: "org-cloud"`: the device
      is the organization's own cloud machine (its `org-cloud` or `enterprise-cloud` hosting, entitlement/1), a VM no
