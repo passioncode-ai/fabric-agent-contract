@@ -95,7 +95,19 @@ function directoryRule(value: Json): Finding[] {
 
 // --- The call queue (fabric-interop, DEC-0104) ---
 
-/** A job waiting at the hosting node: its id, its authenticated caller and when it arrived. */
+/**
+ * The key of a job's caller (DEC-0104), the same caller DEC-0087's repeated-key rule keys on: for a call whose delegation
+ * token the node accepted, the pair `verifyDelegation` names (`principal`, the token's `sub`, and `caller`, the outermost
+ * actor); otherwise the authenticated credential the node knows the caller by (a T0 or T1 call with no token, DL-26).
+ * So an owner's agent and a partner's agent under the same `sub` are two callers, and so are two people the hub forwards
+ * under one credential once it attaches their tokens (DL-10). `undefined` when neither is readable. It never throws.
+ */
+export function jobCallerKey(accepted: unknown, credential: unknown): string | undefined {
+  if (isObject(accepted) && accepted.ok === true && isString(accepted.principal) && accepted.principal !== "" && isString(accepted.caller) && accepted.caller !== "") return JSON.stringify(["delegated", accepted.principal, accepted.caller]);
+  return isString(credential) && credential !== "" ? JSON.stringify(["credential", credential]) : undefined;
+}
+
+/** A job waiting at the hosting node: its id, its caller's key (`jobCallerKey`) and when it arrived. */
 export interface QueuedJob { id: string; caller: string; at: string }
 /** A job running: its id and caller. */
 export interface RunningJob { id: string; caller: string }

@@ -6422,7 +6422,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0104: the agent network's S4: a directory, a call queue on `fabric.job.*` and a load report (CT-84)
 
-- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-84 (Fabric CO-376, the first organization
+- **Status:** Accepted source change (2026-10-22). S4 is Fabric's as a whole (the operator, 2026-10-22, roadmap
+  RM21-S4); per-agent token administration is not in this decision. Consumer adoption: CT-84 (Fabric CO-376, the first organization
   server, hosting nodes, Fabric Dashboards, fabric-agent-adapter's kits).
 - **Context:** S1 to S3 put an agent on a machine, in a context and in another person's hands. The hub, the hosting node
   and the panels asked three more things on the board (threads `ba63565c` items 1 to 3, `b2511678`; fabric-workspace
@@ -6446,8 +6447,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `perCaller` and `queueMax`. A waiting job stays `working` with `statusMessage` `queued <position> of <length>`. The
      next job is `nextQueuedJob`'s: nothing at the concurrency limit; of the callers below their own limit, the one
      running the fewest; then the oldest arrival; then the id; every running job holds a slot. Every per-caller rule
-     keys on the caller the node keeps idempotency keys for: the delegation token's `sub` when one is
-     present (DL-9, DL-10), else the credential. `FAC-SEM-131` (kind `job-queue`). A start whose
+     keys on the caller DEC-0087's repeated key already keys on, written as `jobCallerKey`: for an accepted delegation
+     token, `verifyDelegation`'s `principal` and `caller` (the outermost actor), else the credential; so a partner's
+     agent and the owner's under one `sub` are two callers. `FAC-SEM-131` (kind `job-queue`). A start whose
      job would not start at once and that finds `queueMax` jobs waiting is refused (`admitJob`), nothing started or stored, with `queue-full` and `data: {retryable: true,
      retryAfterSeconds}` (1 to 3600), an `isError` result shaped by `interop-tool-error.schema.json`; the
      caller starts again after it under the same key, and the hub relays it unchanged and keeps no key for it.
@@ -6474,16 +6476,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   caller key, the hub's relay, the directory's labels and the queue grammar's leading zeros.
 - **Alternatives considered:** a `queued` job status or a `position` member (breaks the closed schema and the MCP Task
   states, so a new `fabric-interop` revision); a `visible` flag beside `listed` (two flags for one decision, and a hidden
-  entry still leaks that it exists); a directory computed by the hub for organizations (the organization server holds
-  the registrations; the hub would need a copy); a global queue at the hub (the node is what runs out, and the hub
+  entry still leaks that it exists); a caller keyed on the token's `sub` alone (a partner's agent and the owner's would share
+  jobs, results and keys, against the partner channel and `verifyDelegation`'s caller); a global queue at the hub (the node is what runs out, and the hub
   cannot see a node's own callers); first-in first-out without fairness (one caller with a batch starves every other);
   partner scopes (DEC-0090) as a third source (a partner's view is the partner channel's; left for a later revision);
   load inside the usage report (usage is money and load is time: their readers and their cadence differ, and the usage
   report's shape is closed).
 - **Compatibility:** additive. A node that does not queue serves no load key and no `fabric.job.list`, and callers see
   what they see today; `queue-full` is a new code whose data constraint binds only that code. One provider of the
-  estate already sends `queue-full` without `data`: it adds `data` at its adoption (CT-84), and until then a caller
-  reads one without data as start again later, no sooner than 60 seconds. `queue-full` is now reserved: a job error
+  estate already sends `queue-full` without `data`: a validating caller reads that answer as malformed until the
+  provider adds `data` at its adoption (CT-84). `queue-full` is now reserved: a job error
   with that code, valid before, is refused, and `jobCallerAction` answers `invalid` for it, so the adapter's two kit
   ports and its vendored job-limit vectors move at its re-pin, with the three new protocol revisions. Fabric's hub
   answers a product `isError` as `product-error` and keeps it under the key today; CO-376 relays `queue-full` and
@@ -6502,7 +6504,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/positive-sweep.test.ts`; docs `agent-network.md` (new), `interop.md` (the extension keys, C3.2), `service.md`
   (Load), `conformance.md` (duties, register), `versioning.md` (NAMED_ONLY), `specification/README.md`, `DOCMAP.md`,
   `CONTEXT.md`, `docs/ux/foundation.md` (JTBD-12, JRN-11, ST-027 to ST-029), `docs/ux/flows.md` (FLW-22 to FLW-24),
-  `docs/ux/screens.md` (SCR-25, SCR-26), `docs/ux/scenarios.md` (SCN-033 to SCN-035),
+  `docs/ux/screens.md` (SCR-25, SCR-26, SCR-27), `docs/ux/scenarios.md` (SCN-033 to SCN-035),
   `docs/backlog.md` (CT-84), the handoff and its index.
 - **Source:** board threads `ba63565c` items 1 to 3 and `b2511678` (S4 of the agent network); fabric-workspace roadmap
   RM21-S4; backlog CT-84.

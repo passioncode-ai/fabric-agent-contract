@@ -564,7 +564,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given an agent at its concurrency limit, when a call starts, then the job is `working` with `queued <position> of <length>` and the caller polls it as any working job.
   - Given two callers, one with several jobs running, when a slot frees, then the job of the caller running fewer starts.
-  - Given a queue at `queueMax`, when a call starts, then it is refused with `queue-full` and `retryAfterSeconds`, nothing stored, and a start under the same key after that time runs once.
+  - Given a queue at `queueMax` and no slot this job could take, when a call starts, then it is refused with `queue-full` and `retryAfterSeconds`, nothing stored, and a start under the same key after that time is admitted again by the same rule.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

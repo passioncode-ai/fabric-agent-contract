@@ -292,7 +292,7 @@
     },
     "queueFullData": {
       "type": "object",
-      "description": "DEC-0104: the data of `queue-full`, answered to a job start when the agent's queue for that context holds `queueMax` jobs. Nothing started and nothing was stored; the caller starts again after `retryAfterSeconds` with the same idempotency key.",
+      "description": "DEC-0104: the data of `queue-full`, answered to a job start whose job would not start at once while `queueMax` jobs already wait for that agent and context (`admitJob`). Nothing started and nothing was stored; the caller starts again after `retryAfterSeconds` with the same idempotency key.",
       "required": [
         "retryable",
         "retryAfterSeconds"

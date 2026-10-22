@@ -544,7 +544,7 @@ independent agent author and P-02 project operator.
 - **Preconditions:** `example-agent` declares `concurrency: 2`, `perCaller: 2`, `queueMax: 3`; both slots run jobs of caller A
 - **Steps:**
   1. Caller A starts a third job -> `working`, `queued 1 of 1`; it polls.
-  2. Caller B, with nothing running, starts a job -> it waits too.
+  2. Caller B, with nothing running, starts a job -> it waits too, and since B will start first, A's job now reads `queued 2 of 2`.
   3. One of A's jobs ends -> B's job starts first, though A's arrived earlier: B runs none, A still runs one.
   4. The next slot frees -> A's third job starts and completes once.
 - **Expected result:** a burst of calls waits in line, each caller sees its place, and no caller holds the agent alone.

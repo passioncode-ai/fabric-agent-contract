@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { DIRECTORY_MAX, admitJob, agentNetworkRules, estateDirectory, loadExtensionRules, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
+import { DIRECTORY_MAX, admitJob, agentNetworkRules, estateDirectory, jobCallerKey, loadExtensionRules, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -11,7 +11,7 @@ import { buildAgentNetworkVectors } from "../tools/vectors/agent-network.js";
 // DEC-0104 (CT-84): the directory, the call queue and the load report; FAC-SEM-130 to FAC-SEM-132.
 type Json = Record<string, any>;
 const read = (file: string) => readFileSync(path.join(projectRoot(), file), "utf8");
-const vectors = JSON.parse(read("fixtures/vectors/agent-network.json")) as Record<"estate" | "organization" | "queue" | "admit" | "position", Json[]>;
+const vectors = JSON.parse(read("fixtures/vectors/agent-network.json")) as Record<"estate" | "organization" | "queue" | "admit" | "caller" | "position", Json[]>;
 const ajv = await createValidator();
 const nul = (value: unknown) => value ?? null;
 
@@ -31,6 +31,9 @@ describe("agent network vectors (DEC-0104)", () => {
   it.each(vectors.admit)("admit: $name", ({ queue, running, job, limits, retryAfterSeconds, expected }) => {
     expect(admitJob(queue, running, job, limits, retryAfterSeconds)).toEqual(expected);
   });
+  it.each(vectors.caller)("caller: $name", ({ accepted, credential, expected }) => {
+    expect(nul(jobCallerKey(accepted, credential))).toEqual(expected);
+  });
   it.each(vectors.position)("position: $name", ({ statusMessage, expected }) => {
     expect(nul(readQueuePosition(statusMessage))).toEqual(expected);
   });
@@ -47,6 +50,7 @@ describe("the reference functions", () => {
         expect(() => admitJob(a, b, a, b, a)).not.toThrow();
       }
       expect(() => readQueuePosition(a)).not.toThrow();
+      expect(() => jobCallerKey(a, a)).not.toThrow();
     }
   });
   it("organizationDirectory refuses an id that is not a string and an absent instant", () => {

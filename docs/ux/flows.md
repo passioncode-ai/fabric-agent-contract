@@ -561,17 +561,19 @@ flowchart TD
 - **Goal:** the caller's job runs once, after waiting in line or starting again after a refusal
 - **Entry points:** a call to a job-backed capability of a busy agent
 - **Success exit:** the job completes once
-- **Task analysis:** the node checks the queue → it admits the job as `queued <position> of <length>`, or refuses with `queue-full` → it starts the job of the caller running fewest when a slot frees → the caller polls, or starts again after `retryAfterSeconds` under the same key.
+- **Task analysis:** the node checks whether the job would start at once → if not, whether fewer than `queueMax` wait → it admits the job as `queued <position> of <length>`, or refuses with `queue-full` → it starts the job of the caller running fewest when a slot frees → the caller polls, or starts again after `retryAfterSeconds` under the same key.
 - **Rejected shape:** a new job state for a queued job, rejected because the job's states are the MCP Task states and a new one would cost a protocol revision (DEC-0104).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  C[Caller starts a job] --> Q{Queue holds queueMax?}
-  Q -->|yes| F[queue-full, retryAfterSeconds; nothing stored]
+  C[Caller starts a job] --> N{Would it start at once?}
+  N -->|yes| D
+  N -->|no| Q{Fewer than queueMax waiting?}
+  Q -->|no| F[queue-full, retryAfterSeconds; nothing stored]
   F --> W[Caller starts again later under the same key]
-  W --> Q
-  Q -->|no| P[working, queued position of length]
+  W --> N
+  Q -->|yes| P[working, queued position of length]
   P --> S[Slot frees: caller running fewest starts]
   S --> D[Job completes once]
 ```

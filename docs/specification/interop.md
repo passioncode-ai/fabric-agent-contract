@@ -124,7 +124,8 @@ interop extension block. Then:
 
 - if the request negotiated `io.modelcontextprotocol/tasks`, the server MAY return an MCP Task;
 - otherwise the tool returns, in `structuredContent`,
-  `{"job": {"id": "<opaque>", "status": "working"}}`, and the agent serves two tools:
+  `{"job": {"id": "<opaque>", "status": "working"}}`, and the agent serves two tools (a node that queues, a third,
+  `fabric.job.list`, DEC-0104):
   `fabric.job.get {id}` → `{"job": {id, status, statusMessage?, updatedAt, pollIntervalMs?,
   inputRequests?, result?, error?}}` and `fabric.job.cancel {id}` → the same shape.
 - `status` ∈ `working | input_required | completed | failed | cancelled` (the MCP Task states);
@@ -147,6 +148,8 @@ interop extension block. Then:
 | The result envelope | [`interop-result.schema.json`](../../schemas/interop-result.schema.json) |
 | A job-backed tool's `structuredContent` | [`interop-job-tool-output.schema.json`](../../schemas/interop-job-tool-output.schema.json) |
 | `usage` | `common.schema.json#/$defs/usage` (also optional on the full [result](results-and-evidence.md)) |
+| `fabric.job.list` arguments and answer (DEC-0104) | [`interop-job-list-request.schema.json`](../../schemas/interop-job-list-request.schema.json), [`interop-job-list.schema.json`](../../schemas/interop-job-list.schema.json) |
+| A `queue-full` refusal at start and `unknown-job` (DEC-0104) | [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json) |
 
 Derived constraints, from the MCP Tasks lifecycle rather than from new policy:
 
@@ -226,9 +229,9 @@ request (a task id, a message id) when one principal asks twice for the same inp
 `idempotencyKey` ([C3.5](#c35-the-hub)) and capabilities whose input requires a UUID key. It answers no key for an input
 with no RFC 8785 form.
 
-**The provider's answer to a repeated key.** A provider keeps a key per authenticated caller (for a call that carries a
-delegation token, its `sub`; [agent network](agent-network.md#call-queue)), so two callers that send the same input never
-share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
+**The provider's answer to a repeated key.** A provider keeps a key per authenticated caller (for a call whose delegation
+token it accepted, the `principal` and `caller` `verifyDelegation` names; `jobCallerKey`, [agent
+network](agent-network.md#call-queue)), so two callers that send the same input never share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
 longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
 again and never runs a second time. Any other key whose job ended is answered with that job.

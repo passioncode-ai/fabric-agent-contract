@@ -17,8 +17,10 @@ S1 to S3 of the agent network put an agent on a machine ([package](package.md), 
 in a context ([contexts](contexts.md)) and in another person's hands ([share registration](share-registration.md)).
 S4 answers three questions the hub, the hosting node and the panels asked on the board (threads `ba63565c` items 1 to 3
 and `b2511678`): which agents a viewer can find, what happens when more calls arrive than an agent can run, and how
-busy an agent is. The contract writes the wire and the reference functions; the hub, the node, the queue's storage
-and the panels are their products'.
+busy an agent is. The contract writes the wire and the reference functions. S4 is Fabric's as a whole (the operator's
+decision of 2026-10-22, fabric-workspace roadmap RM21-S4, Fabric CO-376): who serves each directory, the queue's
+storage and the panels are Fabric's products' to build; the visibility the roadmap names is `listed` below, and
+S4's per-agent token administration is not in this decision (CT-84 stays open for it).
 
 ## Directory
 
@@ -64,12 +66,15 @@ the agent, per (`agentRef`, context). The job's schema stays closed and its stat
 queue adds no state and no member and needs no new revision of `fabric-interop`.
 
 **The caller.** Every per-caller rule here (`perCaller`, fairness, `fabric.job.list`, another caller's id) keys on
-the same caller the node keeps idempotency keys for ([the provider's answer to a repeated key](interop.md#limits-and-uncertain-effects)):
-when a call carries a delegation token (DL-9, or `Fabric-Delegation` on a call the hub forwards, DL-10), the token's
-`sub` (the person); otherwise the authenticated credential. So two people whose calls the hub forwards under one
-credential are two callers, a poll under another acting chain of the same person still reads that person's job, and a
-T0 or T1 call with no token (DL-26) is its credential's. A caller polls under the same key it started with: a start
-with a token and a poll without one are two callers.
+the authenticated caller DEC-0087's repeated-key rule already keys on ([the provider's answer to a repeated
+key](interop.md#limits-and-uncertain-effects)), written as `jobCallerKey(accepted, credential)`: for a call whose
+delegation token the node accepted (DL-9, or `Fabric-Delegation` on a call the hub forwards, DL-10), the pair
+`verifyDelegation` names, `principal` (the token's `sub`) and `caller` (the outermost actor); otherwise the
+credential the node knows the caller by (a T0 or T1 call with no token, DL-26; a stdio caller is its connection). So
+an owner's agent and a partner's agent under the same `sub` are two callers and neither reads the other's jobs, and
+two people the hub forwards under one credential are two callers once it attaches their tokens. Fabric's hub
+attaches no `Fabric-Delegation` today, so until it does every call it forwards is one caller at the node, its
+credential. A caller polls the way it started: a start with a token and a poll without one are two callers.
 
 **Limits.** A node declares its limits in the [load extension](#load): `concurrency` (jobs run at once), `perCaller`
 (jobs of one authenticated caller run at once) and `queueMax` (jobs that may wait), each per (`agentRef`, context).
@@ -137,9 +142,9 @@ under the descriptor's `auth.tokenFile` like the [usage report](service.md): `ge
 waitMs?, runMs?}`. `queued` and `running` are counts at the window's end; `completed` and `failed` count jobs that ended
 in the window (a cancelled job is not counted); `waitMs` is the `{p50, p95}` queue wait of the jobs that started in the
 window and `runMs` the run time of those that ended, each absent when there were none. Counts and durations only: no
-person, caller, prompt, output or job id. The report stays with the host that holds the descriptor token, like the
-usage report: it is never sent to an organization server, and an organization's own view of an agent's load is not
-decided here.
+person, caller, prompt, output or job id. The report stays with the host that holds the descriptor token, which
+alone reads the endpoints that token guards (service.md, the descriptor token is the host's): it is never sent to an
+organization server, and an organization's own view of an agent's load is not decided here.
 
 The extension describes one service: its `limits` apply to every agent it hosts alike, and its report sums them per
 context. A node that hosts several agents with their own limits serves one well-known document per agent service.
@@ -163,23 +168,24 @@ A refused start (`queue-full`) and a cancelled job are counted in no row in this
 
 ## Compatibility
 
-Everything here is additive. A node that does not queue serves no load extension and no `fabric.job.list`, and its
-callers see what they see today. `queue-full` is a new error code: a caller that does not know it treats it as any
-failed start. The data constraint binds only that code. One provider of the estate already answers a full queue with
-`queue-full` and no `data`; until it adds `data` at its adoption (CT-84), a caller reads a `queue-full` without data
-as start again later, no sooner than 60 seconds. `agent-directory/1`,
+Additive, with two narrowings. A node that does not queue serves no load extension and no `fabric.job.list`, and its
+callers see what they see today; the caller key is the one DEC-0087 and `verifyDelegation` already name. `queue-full`
+is a new error code: a caller that does not know it treats it as any failed start. The narrowings: `queue-full` is
+reserved, so a job error with that code, valid before, is refused and `jobCallerAction` answers `invalid`; and its
+`data` is required. One provider of the estate already answers a full queue with `queue-full` and no `data`: a
+validating caller reads that answer as malformed until the provider adds `data` at its adoption (CT-84). `agent-directory/1`,
 `fabric-load/0.1` and `service-load/1` are new revisions in the register; `contractVersion` stays `0.1.0`.
 
 ## Who adopts it
 
 | Party | What it does |
 |---|---|
-| the hub (Fabric, CO-376) | derives a person's estate directory with `estateDirectory` and serves it only to that person's sessions; relays `queue-full` with its data and keeps no key for it (today it answers `product-error` and keeps it under the key) |
-| the first organization server | derives its directory with `organizationDirectory` from the registrations it keeps and its own machines; a member reads listed entries only |
-| a node hosting an agent | queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
+| Fabric, the hub (CO-376) | owns S4 as a whole; derives a person's estate directory with `estateDirectory` and serves it only to that person's sessions; attaches `Fabric-Delegation` so a node tells the callers it forwards apart (DL-10); relays `queue-full` with its data and keeps no key for it (today it answers `product-error` and keeps it under the key) |
+| the first organization server | keeps the registrations and its own machines' agents an organization's directory is derived from with `organizationDirectory`; which of it and the hub serves that directory is Fabric's to settle with it in CO-376; a member reads listed entries only |
+| a node hosting an agent | keys callers with `jobCallerKey`; queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
 | a caller (the one that started the call, not the hub that forwarded it) | waits on a queued job like any `working` job, and starts again after `queue-full`'s `retryAfterSeconds` under the same key |
 | Fabric Dashboards | draws the load panels from `service-load/1` |
-| fabric-agent-adapter's kits | at the re-pin: `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node may queue as above |
+| fabric-agent-adapter's kits | at the re-pin: `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |
 
 Each runs [`fixtures/vectors/agent-network.json`](../../fixtures/vectors/agent-network.json) in its gate.
 
