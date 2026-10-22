@@ -6245,8 +6245,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the second exception beside `grant.usage`.
   2. **Its reach:** the whole harness of the machine, whatever `machine.mode` says, as the operator decided (S8; the first
      organization server's ADR-0011); the services of the summary's own context only. Whether an organization also sees
-     a person's services in other contexts collides with unlinkable memberships (DEC-0082) and is the operator's
-     question, CT-92. (A first draft of this decision narrowed the harness under mode `C`; the second seam reading found
+     a person's services in other contexts, and the harness item names installed for another context, collides with
+     unlinkable memberships (DEC-0082) and is the operator's question, CT-92; until it is answered the whole harness
+     ships, as ADR-0011 says. (A first draft of this decision narrowed the harness under mode `C`; the second seam reading found
      it against ADR-0011, and it was withdrawn before merge.)
   3. **A harness name** carries at most one `@` suffix without a dot (a plugin's marketplace), so it can carry no e-mail
      address with a dotted domain; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
@@ -6271,10 +6272,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the rejection, absence at the rejection included (a first acknowledgement is a change: on a managed machine collection
      starts at the deadline, before any); a value that becomes absent is no signal. The person may acknowledge the notice already in
      force, which moves no policy. The member is on every check-in response once there is one. A receiver answers
-     `purpose` only when the purpose is not collected for that person when it answers; an event that occurred after
-     `collectionStart` but before the person acknowledged the notice that names its purpose, that purpose being
-     collected now (a buffered event from before that acknowledgement), is consumed with the new reason
-     `before-purpose`, which holds nothing, sent to every collector (a rejection is consumed whatever its reason, as
+     `purpose` only when the purpose is not collected for that person when it answers; an event from before its
+     purpose was collected for that person (their acknowledgement of the notice naming it, the mdm deadline where
+     the organization collects under it, or, on a device bound to no person such as an `org-cloud` machine, the time the
+     notice version naming it came into force), that purpose being collected now, may be kept; when a receiver does not keep
+     it (a buffered event from before that acknowledgement), it answers the new reason `before-purpose`, never
+     `purpose`; the reason is which holds nothing, sent to every collector (a rejection is consumed whatever its reason, as
      DEC-0100's Compatibility says for `purpose`); the name differs from GJ-4's `before-start`, a stored state of a
      `grant.usage`. `collectionStart` is
      no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
@@ -6295,7 +6298,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   before merge. A fourth seam reading found one more: a buffered event from before the acknowledgement, rejected
   `purpose`, held a kind for good; `before-purpose` answers it. A fifth product reading found the answer to an older
   collector stated three ways; the reason now goes to every collector. A fifth seam reading found that an absent value
-  at the rejection could never resume (the first acknowledgement on a managed machine); absence is now a held value.
+  at the rejection could never resume (the first acknowledgement on a managed machine); absence is now a held value. A sixth
+  product reading found CT-92's widening not carried to its pointers and `before-purpose` covering a managed machine's
+  deadline window; both fixed. A sixth seam reading found an `org-cloud` machine with no reason
+  for its buffered event (no person acknowledges); the notice version's coming into force is its start. A fourth
+  unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
+  signed-only keys from a user layer; both fixed, so FAC-SEM-042 reads them as FAC-SEM-128 and FAC-SEM-129 do.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
   for open questions) and is listed above.
 - **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape, a coding agent's an agent id and a service's an `id.instance` key; `minVersion` only
@@ -6316,6 +6324,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `device-policy-baseline-coding-agent-name`, `device-policy-baseline-service-name`, `device-policy-baseline-coding-agent-digest`,
   `device-policy-baseline-mcp-server-digest`, `device-policy-baseline-service-min-version`, `node-summary-mcp-dotted-suffix`,
   `node-summary-skill-two-at`, `node-summary-drift-dotted-suffix`, `repair-result-already-answered`,
+  `device-policy-baseline-mcp-server-min-version`, `device-policy-baseline-service-digest`,
   `comms-receipt-no-responder-long-message`, `device-check-in-response-acknowledged-bad`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
   `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
   docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,

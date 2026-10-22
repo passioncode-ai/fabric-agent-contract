@@ -56,17 +56,23 @@ export const POLICY_DEFAULTS: Readonly<Record<string, unknown>> = {
   "models.personal_key_sharing": "forbidden"
 };
 
+/** Policy keys a `user` layer never sets (DEC-0102). */
+export const SIGNED_ONLY_KEYS: readonly string[] = ["harness.baseline", "repair.packages"];
+
 /**
  * The effective value of every key across policy layers (DEC-0031): a key locked by any layer takes the
  * value of the highest layer that locks it; otherwise the user's own value; otherwise the highest layer
  * that sets it. Unlocked values above the user layer are defaults; a locked one is never overridden by a
  * lower layer. A key no layer sets takes its `POLICY_DEFAULTS` value, and `machine.mode` A counts only from
  * an mdm layer — a server or user layer cannot hand the whole machine to the organization (DEC-0053).
+ * `harness.baseline` and `repair.packages` count only from a signed layer: a person's own layer never sets
+ * what the organization expects or may repair (DEC-0102).
  */
 export function resolvePolicy(layers: readonly JsonObject[]): Record<string, EffectiveSetting> {
   const ordered = POLICY_PRECEDENCE.map((source) => layers.find((layer) => layer.source === source)).filter((layer): layer is JsonObject => layer !== undefined);
   const keysOf = (layer: JsonObject): JsonObject => {
-    const keys = isObject(layer.keys) ? layer.keys : {};
+    const all = isObject(layer.keys) ? layer.keys : {};
+    const keys = layer.source === "user" ? Object.fromEntries(Object.entries(all).filter(([name]) => !SIGNED_ONLY_KEYS.includes(name))) : all;
     const mode = keys["machine.mode"];
     if (layer.source === "mdm" || !isObject(mode) || mode.value !== "A") return keys;
     const { "machine.mode": _ignored, ...rest } = keys;

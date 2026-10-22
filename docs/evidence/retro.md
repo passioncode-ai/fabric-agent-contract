@@ -59,7 +59,7 @@
   holding back a withdrawal, a context the routing rule forbids, and seven documents left false. Twelve of thirty
   plants survived, and `repairDecision` threw on a schema-valid request. A second round found ten more (one unit: the
   baseline's old name shape; one seam: a narrowing against the operator's recorded ADR-0011; eight product), a
-  third seven (five product, one seam, one unit) a fourth five (four product, one seam) and a fifth two (one product, one seam), all fixed before the merge.
+  third seven (five product, one seam, one unit) a fourth five (four product, one seam) a fifth two (one product, one seam) a sixth three (two product, one seam) and a fourth unit reading one, all fixed before the merge.
 - **Verified corrections:** DEC-0102 with a test for each break and each surviving plant; the three readings' reports
   in the handoff.
 - **Learning:** a rule that restates another rule's condition calls that rule rather than copying it; and the readings

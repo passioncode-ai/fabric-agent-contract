@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-96)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-98)
 
 ## Objective
 
@@ -53,11 +53,25 @@ now also asks about harness item names installed for other contexts. Seam: one b
 `acknowledgedNoticeVersion` held never resumed on the first acknowledgement (a managed machine collects from the
 deadline); absence at the rejection is now a held value, and only a value becoming absent is no signal.
 
+## Sixth round
+
+Product: two breaks. CT-92's widening was not carried to node-summary.md, DEC-0102 item 2 and this handoff; it is now,
+with what ships meanwhile. `before-purpose` covered a managed machine's deadline window; it now covers an event from
+before its purpose was collected (the acknowledgement, or the mdm deadline where the organization collects under it),
+and a receiver may keep it. Its risks: `collectionStart` is the first acknowledgement, never moved, in devices.md and
+the glossary; a collector consumes every `rejected[]` entry whatever its reason. Seam: one break, an `org-cloud`
+machine (no person) had no reason for its buffered event; the notice version's coming into force is its start. Its
+risks: CT-97 (a reason for an event from before `collectionStart`), CT-98 (a resume reference with vectors), a late
+server's one extra round written down, and the SR-5a message names both triggers and the weekly resend. Unit (fourth, at 531af5ea): one break, an
+mcp-server `minVersion` and a service `digest` had no fixture; both added, the positive baseline names all five kinds,
+the document kind's duplicate, credential and escaping branches are tested, and `resolvePolicy` (FAC-SEM-042) no
+longer takes `harness.baseline` or `repair.packages` from a user layer.
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
   check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage, CT-94 for
-  derive's role input, CT-95 for the UX scenarios, CT-96 for a repair vector.
+  derive's role input, CT-95 for the UX scenarios, CT-96 for a repair vector, CT-97 and CT-98.
 - A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
   policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
   repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person
@@ -67,13 +81,13 @@ deadline); absence at the rejection is now a held value, and only a value becomi
 
 ## Open
 
-- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; CT-94; CT-95; CT-96; the adoption rows CT-81 to
+- CT-91; **CT-92 needs the operator** (other contexts' services and harness item names in a summary); CT-93; CT-94; CT-95; CT-96; CT-97; CT-98; the adoption rows CT-81 to
   CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 959 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 965 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
 list for `FAC-SEM-128`; both fixed. Four rounds of three blind readings ran on this branch; the PR merges after two consecutive clean rounds.
 

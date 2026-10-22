@@ -388,7 +388,8 @@ execution, and lets no person's key serve someone else ([`expectedDecision`](../
 `collectionStart`: the time the person acknowledged the notice ([activity](activity.md#notice)) or,
 under device management, the earlier of that and the `mdm` layer's `noticeDeadline`
 ([`collectionStart`](../../src/device-rules.ts)). The server states it in the enrollment and check-in
-responses. Without either, nothing is collected. An event that occurred before it is never uploaded,
+responses. It is the first acknowledgement (or the earlier deadline); a later notice's acknowledgement never moves it
+(DEC-0102). Without either, nothing is collected. An event that occurred before it is never uploaded,
 even after it passes: it stays on the device (`FAC-SEM-068`).
 
 **Precedence and locks.** Precedence is `mdm` > `server` > `user`. The effective value of a key is
@@ -602,7 +603,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-041"></a>`FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
-| <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
+| <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer, and `harness.baseline` and `repair.packages` never from a user layer (DEC-0102) |
 | <a id="fac-sem-043"></a>`FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; `role: "org-cloud"` exactly when an `org-cloud` token enrolled it, and then no user (DEC-0099); a renewal by the key on record only for a device on record, not revoked, within 30 days of its last certificate's end, from that key, keeping its user and role (DEC-0100); it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
 | <a id="fac-sem-045"></a>`FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused; a `grant.usage`'s `data.context` is `org:` and the certificate's `org.id`, as written (DEC-0086) |

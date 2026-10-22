@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { policySigningInput } from "../src/device-rules.js";
+import { policySigningInput, resolvePolicy } from "../src/device-rules.js";
 import { harnessBaseline, harnessDrift, repairDecision, signedPolicyValue, versionBelow } from "../src/node-summary.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
@@ -120,6 +120,28 @@ describe("FAC-SEM-128 beyond the fixtures", () => {
     // The summary read whole: the clauses that need no policy (DEC-0102).
     expect(codes("node-summary-document", load("positive/node-summary.json"))).toEqual([]);
     expect(codes("node-summary-document", twice)).toEqual(["FAC-SEM-128"]);
+    // Each list's duplicates, a credential anywhere, and a pointer that escapes its member names.
+    const paths = (value: unknown) => evaluateSemanticRules("node-summary-document", value).map((finding) => finding.instancePath);
+    const doubled = (list: "skills" | "mcpServers" | "codingAgents") => ({ ...summary, harness: { ...summary.harness, [list]: [summary.harness[list][0], summary.harness[list][0]] } });
+    expect(paths(doubled("skills"))).toEqual(["/harness/skills/1/name"]);
+    expect(paths(doubled("mcpServers"))).toEqual(["/harness/mcpServers/1/name"]);
+    expect(paths(doubled("codingAgents"))).toEqual(["/harness/codingAgents/1/id"]);
+    const keyed = { ...summary, harness: { ...summary.harness, mcpServers: [{ ...summary.harness.mcpServers[0], name: ["ghp", "0123456789abcdefghijABCDEFGHIJ"].join("_") }] } };
+    expect(paths(keyed)).toEqual(["/harness/mcpServers/0/name"]);
+    expect(paths({ ...summary, "a/b~c": "someone@example.com" })).toEqual(["/a~1b~0c"]);
+  });
+
+  it("never takes the baseline or the allowlist from a user layer, in FAC-SEM-042's resolution too (DEC-0102)", () => {
+    const server = { source: "server", revision: 7, keys: { "repair.packages": { value: [] } } };
+    const user = { source: "user", revision: 1, keys: { "repair.packages": { value: [{ agentRef: "x", digest: "y" }] }, "harness.baseline": { value: { items: [] } }, "x-example.banner": { value: "mine" } } };
+    const resolved = resolvePolicy([server, user]);
+    expect(resolved["repair.packages"]).toEqual({ value: [], from: "server" });
+    expect(resolved["harness.baseline"]).toBeUndefined();
+    expect(resolved["x-example.banner"]).toEqual({ value: "mine", from: "user" });
+  });
+
+  it("a degraded service is running, not stopped", () => {
+    expect(harnessDrift([{ kind: "service", name: "observatory-node.default" }], { ...summary, services: [{ key: "observatory-node.default", state: "degraded" }] })).toEqual([]);
   });
 });
 

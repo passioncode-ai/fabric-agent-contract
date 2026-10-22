@@ -180,7 +180,7 @@ const MESSAGES: Record<string, string> = {
   "agent-mismatch": "this grant is held for another agentRef",
   "stale-revision": "a higher revision of this grant is held",
   "revision-conflict": "this revision of the grant is held with other bytes",
-  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
 };
 const refused = (status: number, code: string) => ({ status, body: { error: { code, message: MESSAGES[code] } } });
 const unsupported = (protocol: string) => ({ status: 400, body: { error: { code: "schema-unsupported", message: "this receiver does not read that protocol revision", data: { protocol, accepted: [TYPE] } } } });

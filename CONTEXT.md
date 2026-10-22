@@ -224,7 +224,8 @@ terminates TLS still proves the device's key; its `keyid` is the certificate's s
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **Collection start**: When a device starts collecting for the organization: the notice's acknowledgement, or under
-device management the earlier of that and the policy's deadline. Nothing that occurred before it is uploaded
+device management the earlier of that and the policy's deadline; the first acknowledgement, never moved by a later
+notice's (DEC-0102). Nothing that occurred before it is uploaded
 (`FAC-SEM-068`, DEC-0053).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than

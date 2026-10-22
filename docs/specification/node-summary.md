@@ -3,7 +3,7 @@
 **Maturity:** specified, no consumer yet (DEC-0101, corrected by DEC-0102). Asked by the first organization server for the operator's targets S7,
 S8 and S10 (board thread `ba63565c`, items 7 and 8); the summary's first half was DV-CON-01, accepted on 2026-10-12.
 
-An organization sees what each enrolled machine runs for it (S8), how that differs from what it expects (S10), and can ask
+An organization sees what each enrolled machine runs (S8), how that differs from what it expects (S10), and can ask
 the machine to repair it, only under the machine's own policy and after the person is told. This page fixes three
 documents and two rules; how a node gathers its harness, and how a server shows it, are theirs.
 
@@ -31,7 +31,8 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 machine is transparent to its organization (S8; the first organization server's ADR-0011), and DEC-0102 keeps that.
 The services are those of the summary's own context only; whether an organization also sees the services a person
 runs in other contexts, as ADR-0011 words it, collides with unlinkable memberships (DEC-0082) and is the operator's
-question, board row CT-92.
+question, board row CT-92, which also asks about the harness item names (MCP servers, a plugin's `@marketplace`)
+installed for another context. Until the operator answers, the whole harness ships, as ADR-0011 says.
 
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
 or space, by schema; no string holds a home directory), a credential, an argument, an environment value, a prompt, an

@@ -60,7 +60,7 @@
               "purpose",
               "before-purpose"
             ],
-            "description": "purpose (DEC-0100, DEC-0102): the receiver does not collect events of this kind for this person now; consumed like every rejection, and the collector sends no event of that kind for that person until the device's policy names a later noticeVersion or a check-in response a changed acknowledgedNoticeVersion. before-purpose (DEC-0102): the event occurred after collectionStart but before the person acknowledged the notice that names its purpose, and that purpose is collected now; consumed, sent to every collector, and the collector holds nothing."
+            "description": "purpose (DEC-0100, DEC-0102): the receiver does not collect events of this kind for this person now; consumed like every rejection, and the collector sends no event of that kind for that person until the device's policy names a later noticeVersion or a check-in response a changed acknowledgedNoticeVersion. before-purpose (DEC-0102): the event occurred before its purpose was collected for that person (their acknowledgement of the notice naming it, the mdm deadline where the organization collects under it, or for a device bound to no person the notice version's coming into force), and that purpose is collected now; consumed, sent to every collector instead of purpose when the receiver does not keep it, and the collector holds nothing."
           }
         },
         "additionalProperties": false

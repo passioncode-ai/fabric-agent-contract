@@ -3922,7 +3922,7 @@
         "body": {
           "error": {
             "code": "purpose-not-collected",
-            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
           }
         }
       }
@@ -6347,7 +6347,7 @@
         "body": {
           "error": {
             "code": "purpose-not-collected",
-            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
           }
         }
       },
@@ -6360,7 +6360,7 @@
         "body": {
           "error": {
             "code": "purpose-not-collected",
-            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+            "message": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
           }
         }
       },
