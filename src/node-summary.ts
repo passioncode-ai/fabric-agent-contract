@@ -72,11 +72,15 @@ export function harnessDrift(baselineItems: unknown, summary: unknown): DriftIte
   return drift;
 }
 
-/** Every string inside `value`, with its JSON pointer. */
+/** Every string inside `value`, with its JSON pointer, walked with an explicit stack so depth never throws (DEC-0102). */
 function strings(value: unknown, at: string, out: Array<[string, string]>): Array<[string, string]> {
-  if (typeof value === "string") out.push([at, value]);
-  else if (Array.isArray(value)) value.forEach((item, i) => strings(item, `${at}/${i}`, out));
-  else if (isObject(value)) for (const [key, item] of Object.entries(value)) strings(item, `${at}/${key.replace(/~/g, "~0").replace(/\//g, "~1")}`, out);
+  const stack: Array<[unknown, string]> = [[value, at]];
+  while (stack.length > 0) {
+    const [node, where] = stack.pop() as [unknown, string];
+    if (typeof node === "string") out.push([where, node]);
+    else if (Array.isArray(node)) for (let i = node.length - 1; i >= 0; i -= 1) stack.push([node[i], `${where}/${i}`]);
+    else if (isObject(node)) for (const key of Object.keys(node).reverse()) stack.push([node[key], `${where}/${key.replace(/~/g, "~0").replace(/\//g, "~1")}`]);
+  }
   return out;
 }
 

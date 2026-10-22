@@ -99,6 +99,16 @@ describe("FAC-SEM-128 beyond the fixtures", () => {
     expect(evaluateSemanticRules("node-summary", { summary: twice, baseline }).map((finding) => finding.instancePath)).toContain("/summary/harness/plugins/1/name");
     const person = load("semantic/node-summary-person.json").input;
     expect(evaluateSemanticRules("node-summary", person).map((finding) => finding.instancePath)).toEqual(["/summary/harness/plugins/1/name"]);
+    // The context is compared as written, and a summary without one is refused.
+    expect(codes("node-summary", { summary: { ...summary, context: "org:ORG-7F3A" }, baseline, org: "org-7f3a" })).toEqual(["FAC-SEM-128"]);
+    const { context: _context, ...contextless } = summary;
+    expect(codes("node-summary", { summary: contextless, baseline, org: "org-7f3a" })).toEqual(["FAC-SEM-128"]);
+    // Depth never throws.
+    let deep: unknown = "x";
+    for (let i = 0; i < 20000; i += 1) deep = [deep];
+    expect(() => evaluateSemanticRules("node-summary-document", { ...summary, harness: { ...summary.harness, hooks: deep } })).not.toThrow();
+    const services = { ...summary, services: [summary.services[0], summary.services[0]] };
+    expect(evaluateSemanticRules("node-summary-document", services).map((finding) => finding.instancePath)).toEqual(["/services/1/key"]);
     // The summary read whole: the clauses that need no policy (DEC-0102).
     expect(codes("node-summary-document", load("positive/node-summary.json"))).toEqual([]);
     expect(codes("node-summary-document", twice)).toEqual(["FAC-SEM-128"]);
@@ -145,6 +155,16 @@ describe("repairDecision (FAC-SEM-129)", () => {
     expect(why({ layers: [] })).toBe("not-allowlisted");
     expect(why({ layers: [{ ...layers[0], keys: {} }, { source: "user", keys: { "repair.packages": { value: (layers[0] as (typeof layers)[number]).keys["repair.packages"].value } } }] })).toBe("not-allowlisted");
     expect(why({ answered: true })).toBe("already-answered");
+    expect(why({ answered: true, keys: [] })).toBe("already-answered");
+    // The key is judged at `at`, never at the signer's issuedAt (09:00); `at` is 10:00. Its window's own instants admit.
+    expect(why({ keys: [{ ...keys[0], notAfter: "2026-10-22T09:30:00Z" }] })).toBe("bad-signature");
+    expect(why({ keys: [{ ...keys[0], notBefore: "2026-10-22T09:30:00Z" }] })).toBeUndefined();
+    expect(why({ keys: [{ ...keys[0], notAfter: base.at }] })).toBeUndefined();
+    expect(why({ keys: [{ ...keys[0], notBefore: base.at }] })).toBeUndefined();
+    expect(why({ at: "not a time" })).toBe("bad-signature");
+    // An allowlist set only in an mdm layer binds; an org-cloud machine is not stopped by a declined notice.
+    expect(why({ layers: [{ source: "mdm", revision: 1, expiresAt: "2026-10-30T00:00:00Z", keys: { "repair.packages": { value: [{ agentRef: request.package.agentRef, digest: request.package.digest }] } } }] })).toBeUndefined();
+    expect(why({ declined: true, notifiedAt: undefined, device: { ...base.device, role: "org-cloud" } })).toBeUndefined();
     expect(() => repairDecision({ ...base, request: { ...request, task: "a \ud800 b" } })).not.toThrow();
     expect(why({ request: { ...request, task: "a \ud800 b" } })).toBe("bad-signature");
     // DEC-0102: an org-cloud machine binds no person; the organization's signed request is its notice.

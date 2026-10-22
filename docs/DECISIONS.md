@@ -6252,7 +6252,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      address; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
      duplicate), so `pnpm validate` and the positive sweep check it.
   4. **`harnessDrift`** compares a digest only for a skill or a plugin and a version only for a coding agent or a
-     plugin, the kinds whose rows carry them.
+     plugin, the kinds whose rows carry them; the `harness.baseline` schema admits `minVersion` and `digest` only there,
+     and its names take the summary's name shape, so no baseline names what no summary can report.
   5. **`repairDecision`:** the key is judged inside its `notBefore` and `notAfter` at that moment, as `FAC-SEM-041`
      judges a policy's; the policy's expiry is exactly `FAC-SEM-068`'s (no `expiresAt`, no expiry); `repair.packages`,
      like `harness.baseline`, is read from the `mdm` and `server` layers only, never a person's `user` layer

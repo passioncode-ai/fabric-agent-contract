@@ -21,7 +21,7 @@ Three blind readings, run as background subagents with no edits:
 |---|---|---|---|
 | seam | fail | 1: the mode-C narrowing went against the operator's recorded ADR-0011 | withdrawn; the whole harness, the operator's question on other contexts' services is CT-92 |
 | product | fail | 8: a check-in's context in devices.md and CONTEXT.md; the key table's user layer; renewal called a rotation; no annotations on DEC-0098 to DEC-0101; a weekly probe DEC-0100 had refused; the org-cloud exception missing in conformance; two em dashes; `already-answered` missing from the table | each fixed; CT-93 filed for an org-cloud machine's usage |
-| unit | see the pull request | | |
+| unit | fail | 1: the baseline's names kept the old shape, so a valid policy left no valid summary | the baseline takes the summary's name shape and per-kind fields; the walk is iterative; tests pin the key window at `at`, its own instants, `already-answered` first, the context as written, an mdm-only allowlist, org-cloud with a declined notice, renewal before the end, a long `noResponder.message` |
 
 ## Done
 

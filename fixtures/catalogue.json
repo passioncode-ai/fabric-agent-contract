@@ -902,5 +902,10 @@
   {"name": "node-summary-personal-context", "schema": "node-summary.schema.json", "path": "negative/node-summary-personal-context.json", "valid": false, "keyword": "pattern"},
   {"name": "activity-batch-ack-purpose", "schema": "activity-batch-ack.schema.json", "path": "positive/activity-batch-ack-purpose.json", "valid": true},
   {"name": "comms-read-ack-empty", "schema": "comms-read-ack.schema.json", "path": "negative/comms-read-ack-empty.json", "valid": false, "keyword": "minItems"},
-  {"name": "comms-host-wait-not-retryable", "schema": "comms-host-wait.schema.json", "path": "negative/comms-host-wait-not-retryable.json", "valid": false, "keyword": "const"}
+  {"name": "comms-host-wait-not-retryable", "schema": "comms-host-wait.schema.json", "path": "negative/comms-host-wait-not-retryable.json", "valid": false, "keyword": "const"},
+  {"name": "node-summary-dotted-suffix", "schema": "node-summary.schema.json", "path": "negative/node-summary-dotted-suffix.json", "valid": false, "keyword": "pattern"},
+  {"name": "comms-receipt-no-responder-long-message", "schema": "comms-receipt.schema.json", "path": "negative/comms-receipt-no-responder-long-message.json", "valid": false, "keyword": "maxLength"},
+  {"name": "device-policy-harness-baseline", "schema": "device-policy.schema.json", "path": "positive/device-policy-harness-baseline.json", "valid": true},
+  {"name": "device-policy-baseline-dotted-suffix", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-dotted-suffix.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-policy-baseline-skill-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-skill-min-version.json", "valid": false, "keyword": "false schema"}
 ]

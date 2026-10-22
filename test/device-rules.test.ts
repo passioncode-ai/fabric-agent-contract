@@ -159,6 +159,8 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     expect(codes("device-enrollment", issued("2026-11-06T08:30:00Z", "2026-11-13T08:30:00Z"))).toEqual([]);
     expect(codes("device-enrollment", issued("2026-11-06T08:30:01Z", "2026-11-13T08:30:01Z"))).toEqual(["FAC-SEM-044"]);
     expect(codes("device-enrollment", { ...issued("2027-02-01T00:00:00Z", "2027-02-08T00:00:00Z"), request: { ...fixture.request, requestedAt: "2026-10-27T08:30:00Z" } })).toEqual(["FAC-SEM-044"]);
+    // Before the last certificate's end the same request is taken: a re-enrollment by the key on record.
+    expect(codes("device-enrollment", issued("2026-10-06T08:30:00Z", "2026-10-13T08:30:00Z"))).toEqual([]);
     // No key in the request, an unreadable end, a role kept and a role changed, a user dropped.
     const { key: _key, ...keyless } = fixture.request;
     expect(paths("device-enrollment", { ...fixture, request: keyless })).toContain("FAC-SEM-044 /request/key/publicKeySha256");

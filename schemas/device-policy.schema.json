@@ -362,7 +362,8 @@
                       },
                       "name": {
                         "type": "string",
-                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$"
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
+                        "description": "The same name shape as a node summary's harness names (DEC-0102)."
                       },
                       "minVersion": {
                         "type": "string",
@@ -374,7 +375,52 @@
                         "description": "A skill's or plugin's expected digest; another digest is changed."
                       }
                     },
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "skill",
+                                "mcp-server",
+                                "service"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ]
+                        },
+                        "then": {
+                          "properties": {
+                            "minVersion": false
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "coding-agent",
+                                "mcp-server",
+                                "service"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ]
+                        },
+                        "then": {
+                          "properties": {
+                            "digest": false
+                          }
+                        }
+                      }
+                    ],
+                    "description": "DEC-0102: minVersion only for a coding agent or a plugin, digest only for a skill or a plugin, the kinds whose summary rows carry them."
                   }
                 }
               },
