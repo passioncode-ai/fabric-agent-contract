@@ -6191,7 +6191,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0101: A node's harness summary, the organization's baseline and drift, and repairs under the machine's policy (`FAC-SEM-128`, `FAC-SEM-129`)
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-83.
+- **Status:** Accepted source change (on merge of PR #144). Consumer adoption: board row CT-83.
 - **Decision:** in [node summary](specification/node-summary.md):
   1. **`node-summary/1`** (`schemas/node-summary.schema.json`), a check-in record (`records.nodeSummary`) for one
      context: the coding agents by catalogue id (DEC-0093), the MCP servers with source, transport and health, the
