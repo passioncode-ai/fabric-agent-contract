@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0102` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0103` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6229,3 +6229,56 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-22-node-summary.md`.
 - **Source:** the first organization server's items 7 and 8 (thread `ba63565c`, message `1503e2aa`); DEC-0101,
   `SEM-0128` and `SEM-0129` reserved by git CAS (keys `ct83-node-summary-20261022`, `-a`, `-b`).
+
+### DEC-0102: The readings of DEC-0098 to DEC-0101 corrected: a summary's context and reach, a repair's key, expiry, allowlist and repeat, the renewal clock, a withdrawal under SR-5a, resuming after `purpose`
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of its pull request). Annotates DEC-0098 to DEC-0101; their bodies are not
+  rewritten. Consumer adoption: the rows of the decisions it corrects (CT-81, CT-82, CT-83, CT-88).
+- **Decision:**
+  1. **A node summary's context** is `orgContextId`: its enrollment's own `org:<org.id>`, compared as written with the
+     certificate and refused when it differs (`FAC-SEM-128`); contexts.md's "no check-in carries a context" names it as
+     the second exception beside `grant.usage`.
+  2. **Its reach:** under `machine.mode` `C`, the default, the summary lists only harness items the organization's
+     baseline names (none without one); the whole harness only under mode `A`, which only an `mdm` layer sets.
+  3. **A harness name** carries at most one `@` suffix without a dot (a plugin's marketplace), so it can carry no e-mail
+     address; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
+     duplicate), so `pnpm validate` and the positive sweep check it.
+  4. **`harnessDrift`** compares a digest only for a skill or a plugin and a version only for a coding agent or a
+     plugin, the kinds whose rows carry them.
+  5. **`repairDecision`:** the key is judged inside its `notBefore` and `notAfter` at that moment, as `FAC-SEM-041`
+     judges a policy's; the policy's expiry is exactly `FAC-SEM-068`'s (no `expiresAt`, no expiry); `repair.packages`,
+     like `harness.baseline`, is read from signed layers only, never a person's `user` layer; a repair `id` runs at most
+     once (`already-answered`); a request with no canonical form is refused `bad-signature`, never thrown; on a machine
+     with role `org-cloud` the organization's signed request is the notice; `FAC-SEM-129` holds the reason exactly.
+  6. **Renewal by the key on record** is judged by the server's clock (the new certificate's `notBefore`), never the
+     device's `requestedAt`; before the last certificate's end the same request is a renewal equivalent to a rotation.
+  7. **SR-5a** refuses only an active registration: a withdrawal passes, because it reduces processing.
+  8. **After a `purpose` rejection** a collector sends that kind for that person again on a later `noticeVersion`, on a
+     later `collectionStart` in a check-in response, and at most once every 7 days to learn whether the receiver takes
+     it now.
+  9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; a request
+     stored before a board took DEC-0098 expires seven days after its message and one already replied to is answered on
+     the board's next pass; a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
+  10. **An `org-cloud` machine derives no share registrations**: share grants are a person's, and such a machine binds
+     none; its SR-5 `unassigned-device` is final, not a wait.
+  11. **Compatibility wording of DEC-0099 and DEC-0100:** no revision changed, so neither side can learn the other's pin
+     from `protocols`; the in-band sign is CT-67. Until then a node refused `key-on-record` falls back to a token or
+     SSO, and a server issues `role` only to a node whose product and version it knows read it.
+- **Why:** three blind readings of the range `bfa9a67..4a29fcb` on 2026-10-22 (unit, seam, product) failed it: seven
+  documentation breaks and four seam breaks, each reproduced; the unit tier's two breaks and twelve surviving plants.
+  Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
+  for open questions) and is listed above.
+- **Compatibility:** narrower for a node summary (an organization context; under mode `C` the baseline's items only) and
+  for a repair (a key in its window, signed layers, one run per id); a consumer of these surfaces has not adopted yet
+  (CT-83, CT-88). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `node-summary` (context, name), `comms-receipt` (`noResponder.message`); code
+  `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
+  `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures (three node-summary semantic,
+  one schema negative, `activity-batch-ack-purpose`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`); tests
+  `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
+  docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,
+  `conformance.md`, `docs/specification/README.md`, `CONTEXT.md`, `docs/ux/flows.md`, `screens.md`, `scenarios.md`,
+  `docs/backlog.md`, `docs/evidence/retro.md`, `docs/handoffs/2026-10-22-review-fixes.md`.
+- **Source:** the three readings' reports (2026-10-22, recorded in the handoff); DEC-0102 reserved by git CAS (key
+  `review-fixes-dec98-101-20261022`).

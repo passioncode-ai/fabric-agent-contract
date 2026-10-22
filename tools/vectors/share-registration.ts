@@ -258,6 +258,7 @@ function intakeCases(): Json[] {
     ["SR-11: the first registration", [], base, binding(), ok(held, "registered")],
     ["SR-11: a higher revision extends expiresAt", [held], higher, binding(), ok(heldActive(higher), "registered")],
     ["SR-11: a withdrawal of what is held keeps its agent and window", [held], withdrawal, binding(), ok(heldAfterWithdrawal, "withdrawn")],
+    ["SR-5a: a withdrawal passes when the notice does not name the purposes (DEC-0102)", [held], withdrawal, binding({ purposeAdmitted: false }), ok(heldAfterWithdrawal, "withdrawn")],
     ["SR-11: a withdrawal with nothing held is a tombstone", [], withdrawal, binding(), ok(tombstone, "withdrawn")],
     ["SR-11: two registrants with one grant id are two keys", [held], base, binding({ user: { id: OTHER_USER } }), ok(heldActive(base, OTHER_USER), "registered")],
     ["SR-11: another member cannot overwrite: another agent under the same id is that member's own", [held], active(A, { agentRef: NOTES }), binding({ user: { id: OTHER_USER } }), ok(heldActive(active(A, { agentRef: NOTES }), OTHER_USER), "registered")],

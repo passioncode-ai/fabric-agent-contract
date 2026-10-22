@@ -898,5 +898,9 @@
   {"name": "repair-result", "schema": "repair-result.schema.json", "path": "positive/repair-result.json", "valid": true},
   {"name": "repair-result-refused", "schema": "repair-result.schema.json", "path": "positive/repair-result-refused.json", "valid": true},
   {"name": "repair-result-refused-without-reason", "schema": "repair-result.schema.json", "path": "negative/repair-result-refused-without-reason.json", "valid": false, "keyword": "required"},
-  {"name": "repair-result-succeeded-unnotified", "schema": "repair-result.schema.json", "path": "negative/repair-result-succeeded-unnotified.json", "valid": false, "keyword": "required"}
+  {"name": "repair-result-succeeded-unnotified", "schema": "repair-result.schema.json", "path": "negative/repair-result-succeeded-unnotified.json", "valid": false, "keyword": "required"},
+  {"name": "node-summary-personal-context", "schema": "node-summary.schema.json", "path": "negative/node-summary-personal-context.json", "valid": false, "keyword": "pattern"},
+  {"name": "activity-batch-ack-purpose", "schema": "activity-batch-ack.schema.json", "path": "positive/activity-batch-ack-purpose.json", "valid": true},
+  {"name": "comms-read-ack-empty", "schema": "comms-read-ack.schema.json", "path": "negative/comms-read-ack-empty.json", "valid": false, "keyword": "minItems"},
+  {"name": "comms-host-wait-not-retryable", "schema": "comms-host-wait.schema.json", "path": "negative/comms-host-wait-not-retryable.json", "valid": false, "keyword": "const"}
 ]

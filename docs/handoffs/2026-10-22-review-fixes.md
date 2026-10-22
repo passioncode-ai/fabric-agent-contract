@@ -1,0 +1,42 @@
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91)
+
+## Objective
+
+Read the four decisions merged on 2026-10-22 (`bfa9a67..4a29fcb`) blind, as the iteration's plan promised and the
+merges skipped, and fix what the readings found before any consumer pins them.
+
+## The readings
+
+Three blind readings, run as background subagents with no edits:
+
+| Tier | Verdict | Breaks | Risks | Other |
+|---|---|---|---|---|
+| unit | fail | 2 (a repair under a policy without `expiresAt`; `repairDecision` throws on a schema-valid request) | 6 | 12 of 30 plants survived the suite |
+| seam | fail | 4 (a repair under a key past its window; repair and `FAC-SEM-068` disagree; the renewal grace judged by the device's clock; SR-5a refuses a withdrawal) | 9 | each reproduced at `4a29fcb` |
+| product | fail | 7 (a context the routing rule forbids; contradictory resend duties; the policy key table; the enrollment steps; who controls a cloud VM; the glossary; the board's UX contract) | 8 | no em dash added |
+
+## Done
+
+- **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
+  check-in's own rule over a summary.
+- A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
+  policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
+  repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person
+  fixture's path; the renewal on the server's clock; an SR-5a withdrawal vector; fixtures `comms-read-ack-empty`,
+  `comms-host-wait-not-retryable` with their plants, `activity-batch-ack-purpose`.
+- The UX contract (FLW-16, SCR-19, SCN-025) carries `answered`, the reaction and `noResponder`.
+
+## Open
+
+- CT-91; the adoption rows CT-81 to CT-83 and CT-88.
+- CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
+
+## Checks actually run
+
+`pnpm run check` exit 0: typecheck, 94 test files with 7 928 tests under coverage, UX lint, docs check (0 errors),
+markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
+list for `FAC-SEM-128`; both fixed. A second round of three blind readings runs on this branch before it merges.
+
+## Next task
+
+CT-84 (thread `ba63565c` items 1 to 3; Fabric's CO-376).

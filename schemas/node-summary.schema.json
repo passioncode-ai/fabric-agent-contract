@@ -30,8 +30,8 @@
       "additionalProperties": false
     },
     "context": {
-      "$ref": "common.schema.json#/$defs/contextId",
-      "description": "The context the summary is for; a summary sent to an organization server names that organization (org:<org.id>)."
+      "$ref": "common.schema.json#/$defs/orgContextId",
+      "description": "DEC-0102: the enrollment's own organization, org:<org.id>, compared as written with the certificate's org.id by the receiver, which refuses another (FAC-SEM-128). Never personal."
     },
     "sequence": {
       "type": "integer",
@@ -87,8 +87,8 @@
             "properties": {
               "name": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path (FAC-SEM-128)."
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -132,8 +132,8 @@
             "properties": {
               "name": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path (FAC-SEM-128)."
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -164,8 +164,8 @@
             "properties": {
               "name": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path (FAC-SEM-128)."
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -279,8 +279,8 @@
               },
               "name": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path (FAC-SEM-128)."
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
               },
               "state": {
                 "enum": [

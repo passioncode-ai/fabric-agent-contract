@@ -76,7 +76,10 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 A request's target must be a participant of a new thread (`FAC-SEM-026`).
 
 **A request never waits for ever** (DEC-0098). A request submitted without a `deadline` gets one seven days after it
-is stored; the board writes it into the request, so the message as read carries it. A request whose target Project
+is stored; the board writes it into the request, so the message as read carries it. A request stored before a board took
+this decision, with no deadline, expires seven days after its message was stored, and one its target had already
+replied to is answered by the board itself on its next pass (DEC-0102). A [hold](#holds) does not stop that clock: a
+request held longer than its deadline expires. A request whose target Project
 nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
@@ -88,7 +91,7 @@ carry `reaction` (`comms-common.schema.json#/$defs/reaction`): `adapted` with `r
 `row` with `ref` (the row id) and `due` (the day it is expected to close), or `not-affected` (the body says why).
 The board stores it with the message and every participant reads it. A `reaction` on any other message is refused
 `invalid_arguments`. A reader that meets a reply to an announcement without one reads the body's first word, as
-before.
+before (the estate's rule: fabric-workspace `knowledge/agents-first.md`, *Announcing a finished unit of work*).
 
 A message as read (`comms-message.schema.json`) carries the sender's Project and principal with
 provenance, the semantic digest the board computed, and the request's current state and effect
@@ -227,7 +230,7 @@ alive, a lease, a Telegram delivery or a read mark.
 | responder replaced | `claimed` → `queued`. `accepted` stays accepted; a new responder continues it only by an explicit checkpoint transfer |
 | lost result | `in_progress` → `outcome_unknown` |
 | `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only, by the current responder, or the estate owner when no responder holds the slot (DEC-0081) |
-| answer | `queued` → `answered`: a message from the request's target Project, not itself a request, whose `replyTo` is the request (`com.reply`, or `com.submit` of kind `reply`), in the same transaction as that message (DEC-0098) |
+| answer | `queued` → `answered`: a message of any kind but `request` from the request's target Project whose `replyTo` is the request, in the same transaction as that message (DEC-0098, DEC-0102) |
 
 An operator's [hold](#holds) (DEC-0079) is not an operation of this table: it moves no request and changes no revision,
 it refuses some operations while it lasts, and a held request's deadline keeps running. It is not the C4 sense of

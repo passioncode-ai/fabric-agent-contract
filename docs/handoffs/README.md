@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-22 a node's summary and repairs](2026-10-22-node-summary.md) | DEC-0101 (CT-83; CT-90 filed) | PR #144 |
+| [2026-10-22 the readings of DEC-0098 to DEC-0101](2026-10-22-review-fixes.md) | DEC-0102 (CT-91 filed) | this pull request |
+| [2026-10-22 a node's summary and repairs](2026-10-22-node-summary.md) | DEC-0101 (CT-83; CT-90 filed) | merged, #144 `4a29fcb` |
 | [2026-10-22 a purpose refusal and renewal after expiry](2026-10-22-refusals-renewal.md) | DEC-0100 (CT-88) | merged, #143 `1f31e5a` |
 | [2026-10-22 an organization's cloud machine](2026-10-22-org-cloud.md) | DEC-0099 (CT-82) | merged, #142 `de9cd7c` |
 | [2026-10-22 the board as Fabric 0.3.9 serves it](2026-10-22-board-additions.md) | DEC-0098 (CT-81) | merged, #141 `0076c66` |

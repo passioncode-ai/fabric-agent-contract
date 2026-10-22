@@ -79,14 +79,18 @@ enrollment of a machine gets keys of its own (the operator's NET-2); the contrac
      token. The certificate binds a `user.id` only when the token names the person the device is
      assigned to, and then that person (`FAC-SEM-044`). Otherwise the device is enrolled unassigned
      until an SSO sign-in re-enrolls it. **An organization's cloud machine** (its `org-cloud` or `enterprise-cloud`
-     hosting, a VM the organization owns and no person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
+     hosting: a VM run for the organization, on PassionCode's hosting as `processor-hosted` or on its own, that no
+     person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
      certificate's binding says `role: "org-cloud"` and binds no person, so a receiver shows it as the organization's
      cloud and attributes nothing it sends to a member. Only such a token gives the role (and a renewal by the key on
      record keeps it, DEC-0100), and a certificate issued on one always says it (`FAC-SEM-044`). How the server issues and records the token's role is its own.
+   - `key-on-record` (DEC-0100) — a device on record renews within 30 days of its last certificate's end, below
+     (*Renewal after a short absence*): the proof is the CSR's own signature by the key
+     on record, and the binding is the one on record.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
-   the proof, not from the request.
+   the proof, not from the request; for `key-on-record` there is no header proof, and the user and role are the record's.
 3. The server answers an `enrollment-response`:
    - the certificate: `der`, `serial`, `notBefore`, `notAfter`, `issuer`, and the `binding` to
      `org.id`, `device.id` and, when known, `user.id`, or `role: "org-cloud"` and no `user` for an organization's cloud
@@ -146,7 +150,8 @@ evidence of tampering. Nothing is renewed silently past `notAfter`.
 
 **Renewal after a short absence** (DEC-0100). A device that was offline past its certificate's end (a holiday, a laptop
 left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof, within **30 days** of its last
-certificate's `notAfter`: the CSR is from its key on record, and that CSR's own signature is the proof. The server
+certificate's `notAfter`, judged by the server's clock: the new certificate's `notBefore`, never the device's own
+`requestedAt` (DEC-0102). Before that end the same request is a renewal too, equivalent to a rotation: the CSR is from its key on record, and that CSR's own signature is the proof. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
@@ -332,6 +337,8 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
 | `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine. `A`: it administers the whole machine — taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`). |
+| `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}` | DEC-0101: what every enrolled machine is expected to run; a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
+| `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name. **Absent means no repair runs** (`FAC-SEM-129`). |
 
 Key names are dotted `snake_case` identifiers, so the `models.personalKeySharing` of the organization
 edition's plan is spelled `models.personal_key_sharing` here. **A key no layer sets resolves to a

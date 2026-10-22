@@ -1,5 +1,5 @@
 {
-  "description": "A summary whose drift is what harnessDrift computes against the policy's baseline (DEC-0101): no finding.",
+  "description": "A summary whose drift is what harnessDrift computes against the policy's baseline on a machine its organization administers whole, mode A (DEC-0101): no finding.",
   "kind": "node-summary",
   "expect": [],
   "input": {
@@ -106,6 +106,8 @@
           "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
         }
       ]
-    }
+    },
+    "mode": "A",
+    "org": "org-7f3a"
   }
 }

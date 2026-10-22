@@ -319,7 +319,8 @@ function enrollment(value: JsonObject): Finding[] {
   if (auth.method === "key-on-record") {
     const record = isObject(value.enrolled) ? value.enrolled : undefined;
     const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
-    const ended = Date.parse(show(record?.notAfter ?? "")), asked = Date.parse(show(request.requestedAt ?? ""));
+    // DEC-0102: the grace is judged by the server's clock, the new certificate's notBefore, never the device's requestedAt.
+    const ended = Date.parse(show(record?.notAfter ?? "")), asked = Date.parse(show(certificate.notBefore ?? ""));
     if (record === undefined) flag("/request/auth/method", "a renewal by the key on record needs a device on record");
     else if (record.revoked === true) flag("/request/auth/method", "a revoked device does not renew; it enrolls again with a token or SSO");
     else if (typeof key !== "string" || key !== record.keySha256) flag("/request/key/publicKeySha256", "a renewal by the key on record needs a CSR from that key");

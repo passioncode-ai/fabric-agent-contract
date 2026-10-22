@@ -150,7 +150,8 @@ Task Scheduler — or Project Observatory's node for the services it starts as i
 
 **Peer (a service offered to others)**: A service a colleague, an organization's members or a guest may call beside
 its operator — a listing. Its descriptor's `peer` names the `endpoint` they reach, the `custody` of the machine or
-account (organization-managed or personal), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
+account (organization-managed, personal, or processor-hosted for a machine a processor runs for an organization,
+DEC-0099), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
 internal, confidential, restricted) a host never sends above. It grants nobody access (DEC-0061).
 
 **Credential kind**: The kind of a runner's sign-in, never its value: `subscription` (the operator's own vendor login,
@@ -176,7 +177,9 @@ a Project: that hides it from discovery only, and it stays addressable by id
 ([project communication](docs/specification/project-comms.md#project-directory), DEC-0073).
 
 **Board receipt**: The one answer of every successful board mutation (`comms-receipt.schema.json`): `ok`,
-`repeated`, and the message, request, slot or attempt the call touched; never a sequence number (DEC-0073).
+`repeated`, and the message, request, slot or attempt the call touched; for a bulk read mark `marked`,
+`alreadyRead` and `more`, and for the requester's request nobody can answer now `noResponder` (DEC-0098); never a
+sequence number (DEC-0073).
 
 **Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
