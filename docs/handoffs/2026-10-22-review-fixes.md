@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-99)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-100)
 
 ## Objective
 
@@ -73,7 +73,8 @@ Product: three breaks (CT-88 kept the withdrawn scope; the start first chosen fo
 nowhere, so it is the mdm deadline and the rest joins CT-97; this section's round count), fixed; its risks too: the
 collector row names consuming any reason, item 8's sentence, and the `machine.mode` row points to the whole harness.
 Seam: pass at 5ceafc02, five risks: two already fixed by the product's corrections (the no-person start, CT-88), the
-precedence list names the two signed-only keys, the other three are CT-99.
+precedence list names the two signed-only keys, the other three are CT-99. Unit: pass at 5ceafc02 (78 of 93 plants
+die, five survivors equivalent); its five test gaps are CT-100.
 
 ## Done
 
@@ -89,7 +90,7 @@ precedence list names the two signed-only keys, the other three are CT-99.
 
 ## Open
 
-- CT-91; **CT-92 needs the operator** (other contexts' services and harness item names in a summary); CT-93; CT-94; CT-95; CT-96; CT-97; CT-98; CT-99; the adoption rows CT-81 to
+- CT-91; **CT-92 needs the operator** (other contexts' services and harness item names in a summary); CT-93; CT-94; CT-95; CT-96; CT-97; CT-98; CT-99; CT-100; the adoption rows CT-81 to
   CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
