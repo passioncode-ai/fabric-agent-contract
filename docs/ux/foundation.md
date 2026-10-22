@@ -123,7 +123,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### JTBD-12: Find an agent I may call, and know when it is busy
 
-- **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and to know whether a call will wait, so I can call it without asking around and without a burst of calls failing for nothing.
+- **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and, once I call, to know whether my call waits and for how long, so I can call it without asking around and without a burst of calls failing for nothing.
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller its place; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
@@ -564,7 +564,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given an agent at its concurrency limit, when a call starts, then the job is `working` with `queued <position> of <length>` and the caller polls it as any working job.
   - Given two callers, one with several jobs running, when a slot frees, then the job of the caller running fewer starts.
-  - Given a queue at `queueMax` and no slot this job could take, when a call starts, then it is refused with `queue-full` and `retryAfterSeconds`, nothing stored, and a start under the same key after that time is admitted again by the same rule.
+  - Given a queue at `queueMax` and no slot this job could take, when a call starts, then it is refused with `queue-full` and `retryAfterSeconds`, nothing stored, and a start under the same key after that time is admitted again by the same rule (on a direct call; through Fabric's hub before CO-376 the caller sees `product-error`).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

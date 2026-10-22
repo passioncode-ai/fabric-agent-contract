@@ -12,7 +12,13 @@
   "properties": {
     "path": {
       "type": "string",
-      "pattern": "^/[A-Za-z0-9._~/-]{0,255}$"
+      "allOf": [
+        {
+          "$ref": "service-common.schema.json#/$defs/originPath"
+        }
+      ],
+      "maxLength": 256,
+      "description": "An origin path of this service (service-common originPath: one leading slash, never two), like the usage report's."
     },
     "windowSeconds": {
       "type": "integer",

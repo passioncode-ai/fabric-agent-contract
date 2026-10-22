@@ -6484,9 +6484,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   load inside the usage report (usage is money and load is time: their readers and their cadence differ, and the usage
   report's shape is closed).
 - **Compatibility:** additive. A node that does not queue serves no load key and no `fabric.job.list`, and callers see
-  what they see today; `queue-full` is a new code whose data constraint binds only that code. One provider of the
-  estate already sends `queue-full` without `data`: a validating caller reads that answer as malformed until the
-  provider adds `data` at its adoption (CT-84). `queue-full` is now reserved: a job error
+  what they see today; `queue-full` is a new code whose data constraint binds only that code. One personal provider
+  of the estate already queues its job tools' starts and refuses past its queue with `queue-full` without `data` and
+  without the load extension: a validating caller reads that refusal as malformed until it adopts (CT-84); no other
+  provider sends `queue-full` as a job tool's code. `queue-full` is now reserved: a job error
   with that code, valid before, is refused, and `jobCallerAction` answers `invalid` for it, so the adapter's two kit
   ports and its vendored job-limit vectors move at its re-pin, with the three new protocol revisions. Fabric's hub
   answers a product `isError` as `product-error` and keeps it under the key today; CO-376 relays `queue-full` and

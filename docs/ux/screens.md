@@ -345,5 +345,5 @@
 - **States:** queued, the place shown; refused, `queue-full` with its time and nothing started; success, the job completed once.
 - **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `test/agent-network.test.ts`
 - **Scenarios:** SCN-034
-- **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log, Fabric's job view)
+- **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log)
 - **Status:** proposed

@@ -99,14 +99,15 @@ function directoryRule(value: Json): Finding[] {
  * The key of a job's caller at a node that queues (DEC-0104): for a call whose delegation token the node accepted, what
  * `verifyDelegation` names, `principal` (the token's `sub`) and `caller` (the outermost actor), and the partner
  * organization when the chain ends in one (DEC-0090); for a call that presented no token, the authenticated credential
- * the node knows the caller by (T0 or T1, DL-26). So an owner's agent and a partner's agent are two callers even under
+ * the node knows the caller by (T0 or T1, DL-26; a gate's pass with no token, `principal: null`, is that case too). So an owner's agent and a partner's agent are two callers even under
  * one `sub` and one agent id, and two people the hub forwards under one credential are two callers once it attaches
  * their tokens (DL-10). A refused verdict (`ok: false`) has no key: that call is refused, never keyed (DL-10). A
  * session is not a caller of its own: an agent's sessions share its jobs. `undefined` when nothing is readable. The key
  * is opaque; only equality matters. It never throws.
  */
 export function jobCallerKey(accepted: unknown, credential: unknown): string | undefined {
-  if (isObject(accepted)) {
+  // A gate's pass for a call that presented no token (the adapter's T0 or T1 verdict, principal null) is no token.
+  if (isObject(accepted) && !(accepted.ok === true && accepted.principal === null)) {
     if (accepted.ok !== true || !isString(accepted.principal) || accepted.principal === "" || !isString(accepted.caller) || accepted.caller === "") return undefined;
     const chain = Array.isArray(accepted.chain) ? accepted.chain : [];
     const last = chain[chain.length - 1];

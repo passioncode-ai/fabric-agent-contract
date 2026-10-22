@@ -521,7 +521,7 @@ independent agent author and P-02 project operator.
 - **Feature:** agent-network
 - **Traces:** ST-027, FLW-22 (JTBD-12, JRN-11/#1)
 - **Entry point:** the hub's directory in the owner's session; the organization's directory for a member or an administrator
-- **Preconditions:** `example-agent` runs on two of the owner's machines in `personal`, and is shared into `org:org_7kq2m4xw` by an active registration; the owner unlisted `example-writer`; the organization unlisted its own machine's `example-indexer`
+- **Preconditions:** `example-agent` runs on two of the owner's machines in `personal`, and is shared into `org:org_7kq2m4xw` by an active registration; `example-writer` runs on one of the owner's machines in `personal` and the owner unlisted it; the organization unlisted its own machine's `example-indexer`
 - **Steps:**
   1. Owner opens the hub's directory -> `example-agent` once in `personal`, once in the organization, and `example-writer` marked unlisted.
   2. A member opens the organization's directory -> `example-agent` only.

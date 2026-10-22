@@ -111,7 +111,8 @@ function callerCases(): Json[] {
     ["another person behind the same hub credential is another caller", accepted("urn:fabric:person:example:guest", "writer"), "hub-credential", '["delegated","urn:fabric:person:example:guest","writer"]'],
     ["a chain of agents keys on its outermost actor", accepted(owner, "writer", ["writer", "planner"]), "hub-credential", '["delegated","urn:fabric:person:example:owner","writer"]'],
     ["no token: the credential (T0, T1, DL-26)", undefined, "local-session-7", '["credential","local-session-7"]'],
-    ["a refused token has no key: the call is refused (DL-10)", { ok: false, code: "token-invalid" }, "local-session-7", null],
+    ["a gate's pass with no token is no token: the credential", { ok: true, tier: "T0", principal: null, caller: null, chain: [], claims: null, kid: null }, "local-session-7", '["credential","local-session-7"]'],
+    ["a refused token has no key: the call is refused (DL-10)", { ok: false, code: "unauthenticated", detail: "bad-signature" }, "local-session-7", null],
     ["an empty principal has no key", accepted("", "writer"), "local-session-7", null],
     ["neither readable", undefined, "", null]
   ];

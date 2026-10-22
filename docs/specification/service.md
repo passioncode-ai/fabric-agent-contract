@@ -393,9 +393,9 @@ only shows them.
 
 ### Load
 
-A service that queues calls to its agents (DEC-0104) carries the extension key, where it declares the queue's limits,
+A service that queues calls to its agents (DEC-0104) carries the extension key
 `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` in its well-known document, `{path, windowSeconds,
-limits}`, and serve at `path`, under the same `auth.tokenFile` as this report, a `service-load/1` report: queued,
+limits}`, where it declares the queue's limits, and serves at `path`, under the same `auth.tokenFile` as this report, a `service-load/1` report: queued,
 running, completed and failed jobs per window and context, with p50 and p95 wait and run time, and no person, caller or
 prompt. A service that does not queue carries neither. The [agent network](agent-network.md#load) defines both, `FAC-SEM-132` and `FAC-SEM-133`; the usage report is unchanged.
 

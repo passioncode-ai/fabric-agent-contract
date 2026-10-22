@@ -1162,10 +1162,25 @@
       "expected": "[\"credential\",\"local-session-7\"]"
     },
     {
+      "name": "a gate's pass with no token is no token: the credential",
+      "accepted": {
+        "ok": true,
+        "tier": "T0",
+        "principal": null,
+        "caller": null,
+        "chain": [],
+        "claims": null,
+        "kid": null
+      },
+      "credential": "local-session-7",
+      "expected": "[\"credential\",\"local-session-7\"]"
+    },
+    {
       "name": "a refused token has no key: the call is refused (DL-10)",
       "accepted": {
         "ok": false,
-        "code": "token-invalid"
+        "code": "unauthenticated",
+        "detail": "bad-signature"
       },
       "credential": "local-session-7",
       "expected": null

@@ -35,7 +35,7 @@ first 1024 in that order (`DIRECTORY_MAX`; both reference functions cut there, s
 
 | Source | Derived from | Who reads it | What `estateDirectory` / `organizationDirectory` answer |
 |---|---|---|---|
-| `estate` | the owner's [estate record](estate-record.md): every placement of every machine, a placement without `context` in `personal` | the owner's own sessions only (T0, T1); the hub refuses any other reader as it refuses a read of that estate; `viewer` is `owner` | one entry per (`agentRef`, `context`), every one, unlisted ones `listed: false` |
+| `estate` | the owner's [estate record](estate-record.md): every placement of every machine, a placement without `context` in `personal` | the owner's own sessions only (T0, T1); the hub refuses any other reader; `viewer` is `owner` | one entry per (`agentRef`, `context`), every one, unlisted ones `listed: false` |
 | `organization` | the share registrations the organization server holds and keeps active (`decideShareRegistration`, DEC-0086) whose window holds the instant (`startsAt` ≤ instant < `expiresAt`), and `own`: the agents the organization server records as running on its own `org-cloud` machines (DEC-0099), all in `org:<orgId>` | the organization's administrator (`admin`: every entry, unlisted ones marked) and members (`member`: listed entries only) | one entry per `agentRef`; an `orgId` that is not an organization id (`common.schema.json#/$defs/contextId`), an unreadable instant, an unknown viewer or `owner` answers none |
 
 **`listed`** is a discovery flag the publisher of the directory sets: the owner for an estate, the organization's
@@ -108,8 +108,9 @@ started and nothing stored: the tool result is `isError: true` with `structuredC
 {retryable: true, retryAfterSeconds}}`, `retryAfterSeconds` from 1 to 3600
 ([`#/$defs/queueFullData`](../../schemas/interop-common.schema.json), closed; `admitJob` answers it, 60 when the node's
 own value is not readable). Its shape is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json),
-the `structuredContent` of a `queue-full` refusal at start and of `unknown-job` (C3.2), and of nothing else here: a
-provider's other refusals keep their own shapes. A validating client that listed the job tool may refuse a
+the `structuredContent` of a `queue-full` refusal at start and of the `unknown-job` a node that queues answers, and of
+nothing else: a provider that does not queue keeps C3.2's rule for `unknown-job` (its text or
+`structuredContent.error.code` carries it), and every provider's other refusals keep their own shapes. A validating client that listed the job tool may refuse a
 `structuredContent` outside the tool's `outputSchema` (`interop-job-tool-output`); the node therefore also writes
 the same JSON as the result's text content, which every client reads. The caller starts again after
 `retryAfterSeconds` under the same idempotency key ([the intent's key](interop.md#limits-and-uncertain-effects)); the
@@ -142,7 +143,8 @@ served, the length of one window (60 to 86 400 seconds) and the queue's limits a
 The report at `path` is `service-load/1` ([`service-load.schema.json`](../../schemas/service-load.schema.json)), served
 under the descriptor's `auth.tokenFile` like the [usage report](service.md): `generatedAt`, `windowSeconds` and at most
 168 `windows`, each `{start, byContext}` with at most 64 rows of `{context, queued, running, completed, failed,
-waitMs?, runMs?}`. `queued` and `running` are counts at the window's end; `completed` and `failed` count jobs that ended
+waitMs?, runMs?}`. `queued` and `running` are counts at the window's end (the last window may still be open: its counts are then at
+`generatedAt`); `completed` and `failed` count jobs that ended
 in the window (a cancelled job is not counted); `waitMs` is the `{p50, p95}` queue wait of the jobs that started in the
 window and `runMs` the run time of those that ended, each absent when there were none. Counts and durations only: no
 person, caller, prompt, output or job id. Reading it takes the descriptor token ([service](service.md#mcp-credentials),
@@ -171,13 +173,17 @@ A refused start (`queue-full`) and a cancelled job are counted in no row in this
 
 ## Compatibility
 
-Additive, with two narrowings. A node that does not queue serves no load extension and no `fabric.job.list`, keeps
-its repeated keys as before, and its callers see what they see today; a node that starts to queue adopts
-`jobCallerKey` with it. `queue-full`
+Additive, with two narrowings. A node that queues is one that declares the load extension; a provider that does not
+declare it serves no `fabric.job.list`, keeps its repeated keys and its `unknown-job` as before, and its callers see
+what they see today, whatever it does inside. A node that starts to queue adopts `jobCallerKey` with it and keeps the
+answers of keys it stored before under their old caller, so an intent whose job ended `outcome-unknown` never runs a
+second time. `queue-full`
 is a new error code: a caller that does not know it treats it as any failed start. The narrowings: `queue-full` is
 reserved, so a job error with that code, valid before, is refused and `jobCallerAction` answers `invalid`; and its
-`data` is required. One provider of the estate already answers a full queue with `queue-full` and no `data`: a
-validating caller reads that answer as malformed until the provider adds `data` at its adoption (CT-84). `agent-directory/1`,
+`data` is required. One personal provider of the estate already queues the starts of its job tools by caller and
+refuses past its queue with `queue-full` and no `data`, with no load extension: until it adopts (CT-84) it is a node
+that queues without this page's wire, and a validating caller reads its refusal as malformed. No other provider
+sends `queue-full` as a job tool's code. `agent-directory/1`,
 `fabric-load/0.1` and `service-load/1` are new revisions in the register; `contractVersion` stays `0.1.0`.
 
 ## Who adopts it
