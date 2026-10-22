@@ -370,9 +370,6 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
   collected for that person when it answers (DEC-0102); the collector then sends no event of that kind for
   that person until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from the one held at the rejection resumes, absence at the rejection included (a first acknowledgement is a change, as on a managed machine whose collection started at the deadline); a value that becomes absent is no signal. `before-purpose` (DEC-0102) says the event occurred before its purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where the organization collects under it; a device bound to no person collects only from that deadline, its `collectionStart`), and that purpose is collected now: a receiver may keep such an event, and when it does not (a buffered event from before that start) it answers `before-purpose`, never `purpose`; the event is consumed and the collector holds nothing. A receiver sends it to every collector, whatever its pin: a rejection is consumed whatever its reason (DEC-0100), so a collector consumes each `rejected[]` entry by its `eventId` and never refuses an acknowledgement for a reason it does not know. A held collector whose server starts stating `acknowledgedNoticeVersion` late resumes once and may be refused again: one extra round, consumed, never a stall. A device bound to no person never receives the member and resumes on a later `noticeVersion`. An event from before `collectionStart` is not this case: it is never uploaded (`FAC-SEM-068`, [devices](devices.md#collection-start)), and one that is uploaded is the device's fault. An `attribution` rejection stays what it was:
   the event names another organization, device or user than its certificate.
-- A batch answered **410 `organization-closed`** (DEC-0103, [devices](devices.md#organization-closed)) is not consumed
-  event by event: the organization ended, and the collector drops every event it buffered for it and sends it nothing
-  again.
 - `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
   **everything the receiver holds for the stream across batches** — the same state it judges tamper
   evidence from ([`mergeStreams`](../../src/activity-rules.ts),
@@ -390,6 +387,8 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
 **What the device keeps, and where the next batch starts.**
 
 - A device keeps every event above `seq` that is not in a `held` range, and MAY drop the rest.
+- A batch answered **410 `organization-closed`** (DEC-0103, [devices](devices.md#organization-closed)) is not consumed
+  event by event: the organization ended, and the device drops every event it holds for it and sends it nothing again.
 - The next batch starts at the device's oldest kept event that it has not yet sent on this
   connection. Events already in flight are not sent again until their batch fails or goes
   unacknowledged; then the device sends again from its oldest kept event.

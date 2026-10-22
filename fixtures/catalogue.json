@@ -925,5 +925,7 @@
   {"name": "repair-result-org-cloud", "schema": "repair-result.schema.json", "path": "positive/repair-result-org-cloud.json", "valid": true},
   {"name": "device-organization-closed", "schema": "device-organization-closed.schema.json", "path": "positive/device-organization-closed.json", "valid": true},
   {"name": "device-organization-closed-no-time", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-no-time.json", "valid": false, "keyword": "required"},
-  {"name": "device-organization-closed-extra", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-extra.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "device-organization-closed-extra", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-extra.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "device-organization-closed-path", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-organization-closed-flat", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-flat.json", "valid": false, "keyword": "type"}
 ]

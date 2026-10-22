@@ -8,8 +8,9 @@ import { type DeviceCertificateRecord, type DeviceRequest, checkDeviceSignature,
  *
  * FAC-SEM-077: `{request: {method, target, headers, body}, publicBaseUrl, certificates, at, clientCertificateSerial?, seen?,
  * answer}` — the answer of a receiver that requires the signature, or that sees a client certificate, is the one the
- * binding gives: `accepted`, or the 401 code `checkDeviceSignature` names, or `signature-replayed` when `seen` — the
- * (serial, nonce) pairs the receiver holds, each with its `keepUntil` — already holds the pair at `at`. `certificates` are
+ * binding gives: `accepted`, or the code `checkDeviceSignature` names (401, or 410 `organization-closed` for a closed
+ * organization's certificate, DEC-0103), or `signature-replayed` when `seen` (the
+ * (serial, nonce) pairs the receiver holds, each with its `keepUntil`) already holds the pair at `at`. `certificates` are
  * the receiver's records by serial; `body` is the body as a UTF-8 string; `at` is the receiver's clock, RFC 3339 read
  * strictly; `clientCertificateSerial` is the mutual-TLS session's client certificate, when there is one.
  */

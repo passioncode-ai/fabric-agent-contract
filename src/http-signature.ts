@@ -408,7 +408,8 @@ export interface DeviceSignatureContext {
 export type DeviceSignatureVerdict =
   | { ok: true; binding: "signature"; serial: string; nonce: string; created: number; keepUntil: number }
   | { ok: true; binding: "mutual-tls"; serial: string }
-  | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string; closedAt?: string };
+  | { ok: false; code: "organization-closed"; status: 410; reason: string; closedAt: string }
+  | { ok: false; code: Exclude<SignatureRefusal, "organization-closed"> | ReceiverFault; reason: string };
 
 /** The strict RFC 3339 reader (`T`, an offset and a day that exists), shared by every rule that compares a time. */
 export { strictTime } from "./rfc3339.js";
@@ -437,7 +438,7 @@ const signaturePresent = (headers: Map<string, string>): boolean =>
     const field = parseDictionary(headers.get(name) ?? "");
     return field !== null && (field.members.has(DEVICE_SIGNATURE_LABEL) || field.duplicates.has(DEVICE_SIGNATURE_LABEL));
   });
-const refuse = (code: SignatureRefusal | ReceiverFault, reason: string): DeviceSignatureVerdict => ({ ok: false, code, reason });
+const refuse = (code: Exclude<SignatureRefusal, "organization-closed"> | ReceiverFault, reason: string): DeviceSignatureVerdict => ({ ok: false, code, reason });
 
 /** The parsed binding: what a conforming `fabric-device` signature carries, or null when the request carries none. */
 interface ParsedSignature { created: number; nonce: string; keyid: string; alg: HttpSignatureAlg; signature: Uint8Array }
@@ -499,7 +500,7 @@ export function checkDeviceSignature(request: DeviceRequest, context: DeviceSign
     if (record.organizationClosedAt !== undefined) {
       const closedAt = record.organizationClosedAt;
       if (typeof closedAt !== "string" || Number.isNaN(strictTime(closedAt))) return refuse("context-invalid", "the receiver's record of the organization's closing has no readable time");
-      return { ok: false, code: "organization-closed", reason: "the organization is closed: stop every request for it", closedAt };
+      return { ok: false, code: "organization-closed", status: 410, reason: "the organization is closed: stop every request for it", closedAt };
     }
     if (record.revoked !== undefined && record.revoked !== false) return refuse("certificate-revoked", "the certificate is revoked: re-enroll");
     const from = strictTime(record.notBefore), to = strictTime(record.notAfter);

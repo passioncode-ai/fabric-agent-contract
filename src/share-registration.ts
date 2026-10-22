@@ -25,7 +25,7 @@ export const RESEND_SECONDS = 7 * 24 * 60 * 60;
 export const MAX_MESSAGE = 200;
 /** The refusal codes of `share-registration.schema.json#/$defs/refusal`, in the order of the SR table. */
 export const SHARE_REFUSAL_CODES: readonly string[] = ["malformed", "wrong-organization", "unassigned-device", "already-withdrawn", "agent-mismatch", "stale-revision", "revision-conflict", "purpose-not-collected"];
-/** DEC-0056's 401 codes (devices.md, transport steps 1 to 8), which SR-1 answers as they come. */
+/** DEC-0056's codes (devices.md, transport steps 1 to 8), which SR-1 answers as they come: 401, or 410 for `organization-closed` (DEC-0103). */
 export const TRANSPORT_REFUSALS: readonly string[] = ["signature-missing", "digest-mismatch", "signature-stale", "certificate-unknown", "organization-closed", "certificate-revoked", "certificate-expired", "signature-invalid", "signature-replayed"];
 /** DEC-0056 step 0: a receiver whose own context is unusable accepts nothing, and the fault is its own. */
 export const RECEIVER_FAULTS: readonly string[] = ["context-invalid", "clock-unreadable", "base-url-invalid"];
@@ -245,6 +245,10 @@ export interface ShareRegistrationBinding {
 export type ShareRegistrationRefusal = { error: { code: string; message: string } };
 export type ShareRegistrationReceipt = { type: typeof SHARE_REGISTRATION_RECEIPT_TYPE; grantId: string; state: "registered" | "unchanged" | "withdrawn"; digest: string };
 
+/**
+ * The receiver's answer. The 401 and 410 answers carry no body: the receiver writes the HTTP body itself, for the 410
+ * `device-organization-closed` (`{error: {code, message}, closedAt}`, DEC-0103).
+ */
 export type ShareRegistrationAnswer =
   | { status: 200; receipt: ShareRegistrationReceipt; held: HeldShareRegistration }
   | { status: 400 | 403 | 409; body: ShareRegistrationRefusal | SchemaUnsupported }
@@ -310,7 +314,8 @@ const receipt = (held: HeldShareRegistration, state: ShareRegistrationReceipt["s
  * - SR-0: its own context unusable (`held` not a list of well-formed entries one per (user, grantId), a binding that is
  *   not `{transport, org: {id}, user?: {id}}`): `{fault: "context-invalid"}`; a transport verdict naming DEC-0056 step
  *   0's fault answers that fault;
- * - SR-1: the transport refused the request (DEC-0056 steps 1 to 8): 401 and its code;
+ * - SR-1: the transport refused the request (DEC-0056 steps 1 to 8): 401 and its code, or 410 `organization-closed` with
+ *   `closedAt` (DEC-0103; a verdict without a readable `closedAt` is SR-0's `context-invalid`);
  * - SR-2: an object whose `type` is a string other than `share-registration/1`: 400 `schema-unsupported` (DEC-0067);
  * - SR-3: not the schema's shape or `FAC-SEM-118`'s clauses: 400 `malformed`;
  * - SR-4: `context` is not `org:` and the certificate's `org.id` as written: 403 `wrong-organization`;
@@ -332,7 +337,7 @@ export function decideShareRegistration(held: unknown, registration: unknown, bi
   if (own(transport, "ok") !== true) {
     const code = own(transport, "ok") === false ? own(transport, "code") : undefined;
     const closedAt = own(transport, "closedAt");
-    if (code === "organization-closed") return isString(closedAt) ? { status: 410, code, closedAt } : { fault: "context-invalid" };
+    if (code === "organization-closed") return isString(closedAt) && !Number.isNaN(strictTime(closedAt)) ? { status: 410, code, closedAt } : { fault: "context-invalid" };
     if (isString(code) && TRANSPORT_REFUSALS.includes(code)) return { status: 401, code };
     return { fault: isString(code) && RECEIVER_FAULTS.includes(code) ? code : "context-invalid" };
   }
@@ -432,7 +437,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
 /**
  * The sender gate (DEC-0086 item 6): whether a collector may emit `grant.usage` for a grant toward one enrollment, given
  * that enrollment's latest answer to the grant's registration, in the shape `decideShareRegistration` answers
- * (`{status: 200, receipt}`, `{status, body: {error: {code}}}`, `{status: 401, code}`, `{fault}`), or `undefined`
+ * (`{status: 200, receipt}`, `{status, body: {error: {code}}}`, `{status: 401, code}`, `{status: 410, code, closedAt}`,
+ * `{fault}`), or `undefined`
  * before any answer:
  *
  * - `send`: a status 200 receipt, whatever its state, or a 409 `stale-revision` or `already-withdrawn`;
@@ -442,6 +448,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
  * - `hold-notice` (DEC-0100): 403 `purpose-not-collected`: the node keeps the sums, is not degraded, and sends the
  *   registration again when its policy names a later `noticeVersion` or a check-in response a new
  *   `acknowledgedNoticeVersion` (DEC-0102), and at the seven-day resend;
+ * - `stop` (DEC-0103): 410 `organization-closed`: the organization ended; the node keeps nothing for it and sends it
+ *   nothing again;
  * - `hold`: no answer yet, a transport refusal (401), a receiver's fault, a code whose status is not its own, or anything
  *   else: the node keeps the sums and sends the registration again with backoff.
  *

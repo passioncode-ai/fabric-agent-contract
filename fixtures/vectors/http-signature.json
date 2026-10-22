@@ -103,7 +103,7 @@
       "notAfter": "2026-10-14T08:30:05Z",
       "key": {
         "alg": "es256",
-        "publicKey": "BM/OA4VayGPuBPgWypZv+JRnyZUbLCPpfXK1uJPlrkt6x6sdDG7zLa6JptSQZ9XhseCIx94venWLQebeAfd5Vow="
+        "publicKey": "BFN/l26gtx7w3cwR0aWrow2T6cfuliHGYuhqIwbHDDrY/rIRzvKhtr+2AO9+8oXLHOMBnCsLgt0rBRS5+LFzXo8="
       },
       "revoked": true,
       "organizationClosedAt": "2026-10-10T00:00:00Z"
@@ -1005,7 +1005,7 @@
           "content-type": "application/json",
           "content-digest": "sha-256=:bcQgchKmtFToGclM0KEWux+drDCNmKqVlOFEJcn9I4Q=:",
           "signature-input": "fabric-device=(\"@method\" \"@target-uri\" \"content-digest\");created=1791795598;nonce=\"Qm9hcmQtcnVuLXdhdmUtNC1QNA\";keyid=\"4a4b4c4d4e4f5051\";alg=\"ecdsa-p256-sha256\"",
-          "signature": "fabric-device=:ZNgtpPxAJpVZL+LGm/uCUhHlw+vZ1xcxvoTgGXHrkI8aS64ZDSxGsM11NkXcEy8+RhHeIrkvZKTR7/4WsNXYAQ==:"
+          "signature": "fabric-device=:ONOMGcHq4lkRaknRq855FRpERS0y7tDnBhO2sy0Faqg4nw1leZJbF+nrfNUa1XZP7NvmdX5IQo3VHUV3QGGYJw==:"
         },
         "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
       },

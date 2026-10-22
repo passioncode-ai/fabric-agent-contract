@@ -6353,37 +6353,57 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105.
 - **Context:** the first organization server closes organizations (its organization export and termination, live on
   2026-10-22): at the end of the notice period it revokes every machine certificate, then deletes the organization. Its
-  machines then meet only `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`, which are one
-  machine's end; a node rightly refuses to treat any of them as final on one answer, so it keeps buffering and retrying
-  for an organization that no longer exists. `unknown-org` exists only on that server's enrollment and is not in the
-  contract. Its ask 11 (board thread `ba63565c`, raised by Project Observatory on thread `5a0ecbde`).
+  machines then meet `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`. Project Observatory's
+  node ends an enrollment on either (OBS-204, shipped 2026-10-22), but cannot tell an organization's end from one
+  machine's revocation, and after the deletion a machine whose certificate the server no longer knows learns nothing
+  final. `unknown-org` exists only on that server's enrollment and is not in the contract. The server's ask 11 (board
+  thread `ba63565c`, from Project Observatory's OBS-204, thread `5a0ecbde`).
 - **Decision:**
-  1. A server MAY answer any device request of an organization that is closing, being deleted or deleted, an enrollment
-     among them, with **HTTP 410** and `organization-closed`, no `Retry-After`, and the body
-     `device-organization-closed` (`error`, `code`, `closedAt`, nothing else). It keeps answering after the deletion from
-     its termination record, which holds no person. A server that never closes an organization never sends it.
-  2. It is checked at transport step 4, after the certificate is found and before revocation, so a device learns that
-     its organization ended rather than that its machine was revoked. In `verifyDeviceRequest` a certificate record's
-     `organizationClosedAt` gives it, with `closedAt`; an unreadable one is the receiver's own `context-invalid`.
-  3. A node takes it as final on one answer: it stops every request to that organization, drops what it buffered for it
-     and ends that enrollment; its other enrollments are untouched. The share registration's sender gate answers `stop`.
-  4. `certificate-revoked`, `certificate-unknown` and the server's own `unknown-org` are unchanged.
+  1. A server MAY answer any device request of an organization that ended, an enrollment among them, with **HTTP 410**,
+     no `Retry-After`, and the body `device-organization-closed`: `{error: {code: "organization-closed", message},
+     closedAt}`, the shape of every other device refusal with `closedAt` beside it; `message` is one path-free line
+     (`device-common#/$defs/detail`); `closedAt` is when the closing began (the end of its notice period, or, with no
+     notice period, when its deletion began; never the request's date). A server that never closes an organization
+     never sends it.
+  2. It answers so **only once the closing can no longer be cancelled**, and **only to a node pinned at or after
+     DEC-0103** (known from its product and version, as `protocols` is, CT-67); to an older node it answers what it
+     answers today (`401 certificate-revoked` once it revoked the certificates), which that node already ends an
+     enrollment on.
+  3. It is checked at transport step 4, after the certificate is found and before revocation; after the deletion the
+     server keeps each of the organization's certificate serials in its termination record (no person) at least until
+     that certificate's `notAfter`, and afterwards a re-enrollment meets the enrollment's 410. In `verifyDeviceRequest`
+     a certificate record's `organizationClosedAt` gives `{ok: false, code: "organization-closed", status: 410,
+     closedAt}`; an unreadable one is the receiver's own `context-invalid`.
+  4. A node takes it as final on one answer: it stops every request to that organization, drops what it buffered for it
+     (events, sums, registrations) and ends that enrollment, discarding that organization's `server` policy layer, key
+     set, collection start and streams; an `mdm` layer stays the operating system's; its other enrollments are
+     untouched. The share registration's sender gate answers `stop`; `decideShareRegistration` gives `{status: 410,
+     code, closedAt}`, and a verdict without a readable `closedAt` is SR-0's `context-invalid`. A collector consumes a
+     batch's refusal whatever its reason; a 410 batch is the enrollment's end, not an event's rejection.
+  5. `certificate-revoked`, `certificate-unknown` and a server's own enrollment refusals keep their meaning.
 - **Why:** a closed organization should cost its former machines nothing: no buffered events kept for a server that will
-  never take them, no retries. One code, final by definition, lets a node act on one answer without guessing from
-  revocations; carrying only `closedAt` says nothing about the organization's people.
+  never take them, no retries, and no locks of a dead organization's policy. One code, final by definition and sent only
+  when final, lets a node act on one answer without guessing from revocations; carrying only `closedAt` says nothing
+  about the organization's people. The first round of blind readings (unit, seam, product) found a forged signed vector,
+  `closedAt` read loosely, the shipped node's behaviour misstated, FAC-SEM-077 and SR-1 still saying 401, a free-text
+  body without the path bound and no rule for the policy a closed organization leaves; all fixed here.
 - **Alternatives considered:** reuse `certificate-revoked` with a flag (a node cannot tell the two apart without reading
   a member it may not know); 404 `unknown-org` (an unknown organization and an ended one are not the same, and an
   enrollment-only code says nothing to a running node); a revocation delta naming the organization (the node may never
-  check in again to read it).
-- **Compatibility:** wider. A node pinned before DEC-0103 meets an unknown 410 and treats it as it treats an unknown
-  refusal (it keeps retrying with backoff), which is what it does today with `certificate-revoked`; nothing is lost. A
-  server sends it only when it closes organizations. `contractVersion` stays `0.1.0`.
+  check in again to read it); sending 410 to every node (a node pinned before DEC-0103 would meet an unknown 410 where
+  today it meets `certificate-revoked` and ends the enrollment, so a server adopting first would stop that removal).
+- **Compatibility:** wider, and gated: a server sends the 410 only to a node pinned at or after DEC-0103, so an older
+  node meets exactly what it meets today. The http-signature vectors gain two cases (a port that asserts their exact
+  count moves to a lower bound); `ShareRegistrationAnswer` gains a 410 member (a typed consumer handles it at its
+  re-vendor). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schema `device-organization-closed`; `src/http-signature.ts` (`organization-closed`,
-  `organizationClosedAt`), `src/share-registration.ts` (`TRANSPORT_REFUSALS`, status 410, gate `stop`); vectors
-  `fixtures/vectors/http-signature.json` (a closed organization's certificate, signed and mutual TLS) and
+  `organizationClosedAt`, the verdict's `status: 410`), `src/share-registration.ts` (`TRANSPORT_REFUSALS`, status 410,
+  gate `stop`), `src/device-transport-rules.ts` (FAC-SEM-077's comment); vectors `fixtures/vectors/http-signature.json`
+  (a closed organization's certificate, signed and mutual TLS, each with one fault) and
   `fixtures/vectors/share-registration.json` (intake and gate); fixtures positive `device-organization-closed`, negative
-  `device-organization-closed-no-time`, `device-organization-closed-extra`; tests `test/http-signature.test.ts`,
+  `device-organization-closed-no-time`, `-extra`, `-path`, `-flat`; tests `test/http-signature.test.ts`,
   `test/share-registration.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`; docs
-  `devices.md`, `share-registration.md`, `activity.md`, `conformance.md`, `docs/backlog.md`, the handoff.
+  `devices.md` (#organization-closed, the step table, FAC-SEM-077, tamper evidence), `share-registration.md`,
+  `activity.md`, `conformance.md`, `CONTEXT.md`, `docs/ux/scenarios.md` (SCN-011), `docs/backlog.md`, the handoff.
 - **Source:** the first organization server's ask 11, board thread `ba63565c` (2026-10-22, 19:04), from Project
   Observatory's OBS-204 (thread `5a0ecbde`).

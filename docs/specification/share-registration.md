@@ -134,8 +134,8 @@ for the record to change as below, except SR-5a's `purpose-not-collected`, which
 its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection (DEC-0100, DEC-0102; a present value that differs from the one held at the rejection resumes, absence at the rejection included (a first acknowledgement is a change, as on a managed machine whose collection started at the deadline); a value that becomes absent is no signal). It keeps each receipt. It sends nothing again that the receiver
 answered with a typed refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded
 meanwhile, SR-5a again excepted: that grant is held, not degraded; after no
-answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the
-same split.
+answer, a transport refusal (401) or a receiver's fault it sends again with backoff; after 410 `organization-closed`
+(DEC-0103) it sends that organization nothing again. The sender gate below reads the same split.
 
 ## The receiver
 
@@ -156,8 +156,8 @@ registration's purposes (a value that is not a boolean is SR-0):
 
 | Row | Answer | When |
 |---|---|---|
-| SR-0 | `{fault: "context-invalid"}`, or the transport's own step-0 fault (`clock-unreadable`, `base-url-invalid`) | the receiver's own context is unusable: `held` is not a list of well-formed entries, one per (user, `grantId`); the binding is not `{transport, org: {id}}` with a string `org.id`, or its `user` is not `{id}` with a non-empty string; the transport verdict names no step's code. The fault is the receiver's; nothing is accepted |
-| SR-1 | 401 and the step's code | DEC-0056 steps 1 to 8 refused the request (`signature-missing` to `signature-replayed`) |
+| SR-0 | `{fault: "context-invalid"}`, or the transport's own step-0 fault (`clock-unreadable`, `base-url-invalid`) | an `organization-closed` verdict without a readable `closedAt`; the receiver's own context is unusable: `held` is not a list of well-formed entries, one per (user, `grantId`); the binding is not `{transport, org: {id}}` with a string `org.id`, or its `user` is not `{id}` with a non-empty string; the transport verdict names no step's code. The fault is the receiver's; nothing is accepted |
+| SR-1 | 401 and the step's code; 410 `organization-closed` with `closedAt` (DEC-0103) | DEC-0056 steps 1 to 8 refused the request (`signature-missing` to `signature-replayed`); a closed organization's certificate at step 4 |
 | SR-2 | 400 `schema-unsupported` (DEC-0067's body) | the body is an object whose `type` is a string other than `share-registration/1` |
 | SR-3 | 400 `malformed` | the body is not the schema's registration (a missing or extra member, a value outside its rule, a state's members wrong) or breaks `FAC-SEM-118`'s document clauses (an instant on a day that does not exist, a window that does not end after it starts) |
 | SR-4 | 403 `wrong-organization` | `context` is not `org:` followed by the certificate's `org.id` as written (never case-folded, never by prefix) |
@@ -171,7 +171,7 @@ registration's purposes (a value that is not a boolean is SR-0):
 | SR-11 | 200 `registered` or `withdrawn` | otherwise: the first registration, a higher revision (which replaces what is held and may extend `expiresAt`), or a withdrawal |
 
 The answer is `{status: 200, receipt, held}` with the entry to hold, `{status, body}` for a refusal, `{status: 401,
-code}` for SR-1, or `{fault}` for SR-0.
+code}` or `{status: 410, code: "organization-closed", closedAt}` for SR-1, or `{fault}` for SR-0.
 
 ### What the receiver holds
 
@@ -276,7 +276,8 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
   the receipts, withdraw on revocation or drop, send again after an enrollment, after a check-in response's `protocols` first lists `share-registration/1`
   (DEC-0094) and weekly (never what a typed refusal
   answered until the record changes, except SR-5a's `purpose-not-collected`, sent again weekly, on a later
-  `noticeVersion` and on a new `acknowledgedNoticeVersion`, DEC-0100, DEC-0102; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
+  `noticeVersion` and on a new `acknowledgedNoticeVersion`, DEC-0100, DEC-0102; with backoff after no answer, a 401 or a receiver's fault; nothing
+  after 410 `organization-closed`, DEC-0103), emit `grant.usage` with
   `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
   DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per
