@@ -111,6 +111,10 @@ describe("the binding's vectors (DEC-0056)", () => {
   it("keeps each closed-organization case to one fault: revoked on purpose, and accepted once its closure and revocation are lifted (DEC-0103)", () => {
     const closed = cases.filter((c) => c.fault === "organization");
     expect(closed.length).toBe(2);
+    for (const c of cases) {
+      if (c.expect === "organization-closed") expect({ status: c.expectStatus, closedAt: typeof c.expectClosedAt }, c.name).toEqual({ status: 410, closedAt: "string" });
+      else expect(c.expectStatus ?? c.expectClosedAt, c.name).toBeUndefined();
+    }
     for (const c of closed) {
       const serial = (c.clientCertificateSerial as string | undefined) ?? "4a4b4c4d4e4f5051";
       const record = bySerial.get(serial)!;

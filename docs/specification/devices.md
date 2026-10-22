@@ -1,13 +1,14 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) and DEC-0094 (a key in a file, idempotent rotation) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102 and DEC-0103 (a closed organization) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
 [`device-health`](../../schemas/device-health.schema.json),
 [`device-key-set`](../../schemas/device-key-set.schema.json),
-[`device-root-certification`](../../schemas/device-root-certification.schema.json), shared definitions in
+[`device-root-certification`](../../schemas/device-root-certification.schema.json),
+[`device-organization-closed`](../../schemas/device-organization-closed.schema.json), shared definitions in
 [`device-common`](../../schemas/device-common.schema.json)
 
 A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an

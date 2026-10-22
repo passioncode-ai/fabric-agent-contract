@@ -50,7 +50,9 @@ not absence).
 Product: one break, DEC-0103 item 4 and devices.md disagreed on which enrollment end lifts a server layer's locks; both
 now say the one event this contract decides is the end on `organization-closed`, and an end on `certificate-revoked` is
 not decided here. Its risks too: the older node named (Project Observatory's, OBS-204), the binding's verdict shapes,
-FLW-07's entry point and screen state, SCN-011's states, CT-105's first cell, DEC-0103's affected files.
+FLW-07's entry point and screen state, SCN-011's states, CT-105's first cell, DEC-0103's affected files. Unit and seam: pass; their risks closed (the vectors' `expectStatus`
+and `expectClosedAt` required on every closed-organization case, the table test's title, CT-105 names the vector
+tests' status check and Observatory's provisional `unknown-org`, the page header names DEC-0103 and its schema).
 
 ## Open
 
