@@ -6259,8 +6259,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      judges a policy's; the policy's expiry is exactly `FAC-SEM-068`'s (no `expiresAt`, no expiry); `repair.packages`,
      like `harness.baseline`, is read from the `mdm` and `server` layers only, never a person's `user` layer
      (`signedPolicyValue`, `harnessBaseline`); a repair `id` runs at most
-     once (`already-answered`, checked first and never sent as a result's reason); a request with no canonical form is refused `bad-signature`, never thrown; on a machine
-     with role `org-cloud` the organization's signed request is the notice; `FAC-SEM-129` holds the reason exactly.
+     once (`already-answered`, checked first and never sent as a result's reason), and its one result is sent again
+     unchanged for a redelivered request; an id is the issuing organization's (a node keeps results by `org.id` and
+     id, and a server asks again only under a new id); a request with no canonical form is refused `bad-signature`, never thrown; on a machine
+     with role `org-cloud` the organization's signed request is the notice, and a result's `notifiedAt` is when the
+     node verified it; `FAC-SEM-129` holds the reason exactly.
   6. **Renewal by the key on record** is judged by the server's clock (the new certificate's `notBefore`), never the
      device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
      with a new epoch (a rotation keeps the epoch).
@@ -6281,11 +6284,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      DEC-0100's Compatibility says for `purpose`); the name differs from GJ-4's `before-start`, a stored state of a
      `grant.usage`. `collectionStart` is
      no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
-  9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; a request
+  9. **The board's text:** the answer transition is a participant's message (never a responder's fenced message or
+     progress note) of any kind but a request, from its target Project, whose `replyTo` is the request; a request
      stored before DEC-0098 has no deadline in its event, and its default (seven days after it was stored) is read from
      its time, never written; on every pass a board expires each `queued` or `claimed` request whose deadline, its own
-     or that default, has passed, and before that answers each `queued` request its target already replied to (on every pass, as
-     Fabric's board does: a reply can come while the request is claimed and the request return to `queued`); a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
+     or that default, has passed, and before that answers each `queued` request its target already answered with such a reply (on
+     every pass: a participant's reply can come while the request is claimed and the request return to `queued`; a
+     replaced responder's notes never answer it, and Fabric's tick, which counts them today, narrows under CT-81); a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
   10. **An `org-cloud` machine derives no share registrations**: share grants are a person's, and such a machine binds
      none; its SR-5 `unassigned-device` is final, not a wait. What it reports for usage of agents it runs is CT-93.
   11. **Compatibility wording of DEC-0099 and DEC-0100:** no revision changed, so neither side can learn the other's pin
@@ -6305,7 +6310,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   deadline window; both fixed. An eighth product reading found the expiry of an older request without a deadline
   stated for its first pass only, and the UX of device settings promising a person's value for the two signed-only
   keys; both fixed. A ninth product reading found the handoff's round count stale and a repair result
-  called both once and repeated; the result is one per id, repeated unchanged for a redelivered request. A sixth seam reading found an `org-cloud` machine with no reason
+  called both once and repeated; the result is one per id, repeated unchanged for a redelivered request. A tenth
+  reading found a responder's progress note answering a request after the responder was replaced, the reply rule's old
+  sentence, the UX's answered state, an `org-cloud` result's `notifiedAt` and the check-in schema's "each once"; all
+  fixed. A sixth seam reading found an `org-cloud` machine with no reason
   for its buffered event (no person acknowledges); a seventh product reading found the instant first chosen for it
   defined nowhere, so such a device's start is its mdm deadline (its `collectionStart`) and the rest is CT-97. A fourth
   unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
@@ -6330,7 +6338,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `device-policy-baseline-coding-agent-name`, `device-policy-baseline-service-name`, `device-policy-baseline-coding-agent-digest`,
   `device-policy-baseline-mcp-server-digest`, `device-policy-baseline-service-min-version`, `node-summary-mcp-dotted-suffix`,
   `node-summary-skill-two-at`, `node-summary-drift-dotted-suffix`, `repair-result-already-answered`,
-  `device-policy-baseline-mcp-server-min-version`, `device-policy-baseline-service-digest`,
+  `device-policy-baseline-mcp-server-min-version`, `device-policy-baseline-service-digest`; positive `repair-result-org-cloud`;
   `comms-receipt-no-responder-long-message`, `device-check-in-response-acknowledged-bad`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
   `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
   docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,

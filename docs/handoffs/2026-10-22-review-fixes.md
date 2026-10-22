@@ -91,6 +91,16 @@ result called both once and repeated, now one per id, repeated unchanged), fixed
 tick as Fabric's does, the board's conformance row names the DEC-0098 duties, SCR-10 points to CT-99. The expire pair
 `claimed` to `expired` has no test (pre-existing, CT-100).
 
+## Tenth round
+
+Unit: pass. Seam: one break, the check-in schema's `records.repairResults` still said "each once"; fixed, with its
+risks (the server keeps one result per id and asks again only under a new id; an id is the issuing organization's;
+item 9 names the target Project). Product: four breaks, fixed: a responder's progress note answered a request after
+the responder was replaced (now only a participant's reply answers, and Fabric's tick narrows under CT-81); the reply
+rule's old sentence; the UX's answered state; an `org-cloud` result's `notifiedAt` (when the node verified the signed
+request, fixture `repair-result-org-cloud`). Its risks: item 5 names the repeated result, the board's other DEC-0098
+duties and Fabric's tool text join CT-81, the retro's punctuation.
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
@@ -111,10 +121,10 @@ tick as Fabric's does, the board's conformance row names the DEC-0098 duties, SC
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 965 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 967 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. Eight rounds of blind readings ran on this branch after the first on the merged range (second to ninth; seam and product in
-each, the unit tier in six of them, the last three at 5ceafc02, 944d039f and cc56eb67); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
+list for `FAC-SEM-128`; both fixed. Nine rounds of blind readings ran on this branch after the first on the merged range (second to tenth; seam and product in
+each, the unit tier in seven of them, the last four at 5ceafc02, 944d039f, cc56eb67 and 2e089699); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
 generators.
 
 ## Next task

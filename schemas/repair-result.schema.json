@@ -38,7 +38,7 @@
     },
     "notifiedAt": {
       "$ref": "common.schema.json#/$defs/timestamp",
-      "description": "When the person was told, before it started."
+      "description": "When the person was told, before it started; on a machine with role org-cloud, which binds no person, when the node verified the signed request, its notice (DEC-0102)."
     },
     "startedAt": {
       "$ref": "common.schema.json#/$defs/timestamp"

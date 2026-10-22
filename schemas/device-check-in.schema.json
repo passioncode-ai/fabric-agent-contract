@@ -335,7 +335,7 @@
               "items": {
                 "$ref": "repair-result.schema.json"
               },
-              "description": "DEC-0101: the node's answers to repairs it received, each once."
+              "description": "DEC-0101, DEC-0102: the node's one result per repair id, the same stored result again for a redelivered request."
             }
           },
           "additionalProperties": false,

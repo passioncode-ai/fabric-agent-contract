@@ -921,5 +921,6 @@
   {"name": "repair-result-already-answered", "schema": "repair-result.schema.json", "path": "negative/repair-result-already-answered.json", "valid": false, "keyword": "enum"},
   {"name": "activity-batch-ack-before-purpose", "schema": "activity-batch-ack.schema.json", "path": "positive/activity-batch-ack-before-purpose.json", "valid": true},
   {"name": "device-policy-baseline-mcp-server-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-mcp-server-min-version.json", "valid": false, "keyword": "false schema"},
-  {"name": "device-policy-baseline-service-digest", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-service-digest.json", "valid": false, "keyword": "false schema"}
+  {"name": "device-policy-baseline-service-digest", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-service-digest.json", "valid": false, "keyword": "false schema"},
+  {"name": "repair-result-org-cloud", "schema": "repair-result.schema.json", "path": "positive/repair-result-org-cloud.json", "valid": true}
 ]
