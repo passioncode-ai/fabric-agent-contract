@@ -269,11 +269,14 @@ function healthObservation(value: JsonObject): Finding[] {
 const DAY_MS = 86_400_000;
 /** The longest a device certificate may live (DEC-0031). */
 export const MAX_CERTIFICATE_DAYS = 30;
+/** How long after its last certificate ended a device on record may renew by its key on record (DEC-0100). */
+export const RENEWAL_GRACE_DAYS = 30;
 
 /**
  * FAC-SEM-044: `{request, response, issuedEpochs?, enrolled?, token?, proof?}` — the certificate is short-lived and bound to
  * what enrolled, and the epoch is new. `enrolled` is the record the server holds for the request's `device.id`
- * (`{keySha256}`), absent for a first enrollment; `token` is the server's record of the enrollment token the request names
+ * (`{keySha256, notAfter?, revoked?, userId?, role?}`, with the last certificate's end and binding for a renewal by
+ * the key on record, DEC-0100), absent for a first enrollment; `token` is the server's record of the enrollment token the request names
  * (`{tokenId, deviceId?, userId?, role?}`, `role: "org-cloud"` for an organization's cloud machine, DEC-0099); `proof` is what the `Authorization` proof names (`{userId?}`, the signed-in user for
  * SSO). An SSO certificate binds the user the proof names, and a token certificate binds a user only when the token names
  * that person (F-B-105). Re-enrolling a device that is already enrolled needs proof that it is that device: a CSR
@@ -303,12 +306,27 @@ function enrollment(value: JsonObject): Finding[] {
   }
   // DEC-0099: an organization's cloud machine is enrolled only by a token of that role, and the certificate says so.
   const cloudToken = auth.method === "enrollment-token" && token.role === "org-cloud";
-  if (binding.role === "org-cloud" && !cloudToken) flag("/response/certificate/binding/role", "only an enrollment token of role org-cloud enrolls an organization's cloud machine");
+  // A renewal by the key on record keeps the role on record (DEC-0100), so an org-cloud machine renews as one.
+  const cloudRenewal = auth.method === "key-on-record" && isObject(value.enrolled) && value.enrolled.role === "org-cloud";
+  if (binding.role === "org-cloud" && !cloudToken && !cloudRenewal) flag("/response/certificate/binding/role", "only an enrollment token of role org-cloud, or a renewal of a machine on record with that role, enrolls an organization's cloud machine");
   if (cloudToken && binding.role !== "org-cloud") flag("/response/certificate/binding/role", "a certificate issued on an org-cloud token says role org-cloud");
   if (binding.role === "org-cloud" && bound !== undefined) flag("/response/certificate/binding/user", "an organization's cloud machine binds no person");
   const from = Date.parse(show(certificate.notBefore ?? "")), to = Date.parse(show(certificate.notAfter ?? ""));
   if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
   else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
+  // DEC-0100: renewal after expiry. Only a device on record, not revoked, whose last certificate ended at most
+  // RENEWAL_GRACE_DAYS before the request, with a CSR from its key on record; it keeps its binding.
+  if (auth.method === "key-on-record") {
+    const record = isObject(value.enrolled) ? value.enrolled : undefined;
+    const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
+    const ended = Date.parse(show(record?.notAfter ?? "")), asked = Date.parse(show(request.requestedAt ?? ""));
+    if (record === undefined) flag("/request/auth/method", "a renewal by the key on record needs a device on record");
+    else if (record.revoked === true) flag("/request/auth/method", "a revoked device does not renew; it enrolls again with a token or SSO");
+    else if (typeof key !== "string" || key !== record.keySha256) flag("/request/key/publicKeySha256", "a renewal by the key on record needs a CSR from that key");
+    else if (!(asked - ended <= RENEWAL_GRACE_DAYS * DAY_MS)) flag("/request/auth/method", `a renewal by the key on record is taken at most ${RENEWAL_GRACE_DAYS} days after the last certificate ended`);
+    if (record !== undefined && (bound ?? null) !== (record.userId ?? null)) flag("/response/certificate/binding/user", "a renewal keeps the binding on record: the same user, or none");
+    if (record !== undefined && (binding.role ?? null) !== (record.role ?? null)) flag("/response/certificate/binding/role", "a renewal keeps the binding on record: the same role, or none");
+  }
   if (isObject(value.enrolled)) {
     const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
     const sameKey = typeof key === "string" && key === value.enrolled.keySha256;

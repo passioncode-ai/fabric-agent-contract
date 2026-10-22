@@ -56,8 +56,10 @@
               "content-field",
               "person-field",
               "stream",
-              "attribution"
-            ]
+              "attribution",
+              "purpose"
+            ],
+            "description": "purpose (DEC-0100): the receiver does not collect this event for this person under the notice they acknowledged; consumed like every rejection, and the collector sends no event of that kind for that person until the device's policy names a later noticeVersion."
           }
         },
         "additionalProperties": false

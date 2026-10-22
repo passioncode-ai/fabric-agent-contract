@@ -179,7 +179,8 @@ const MESSAGES: Record<string, string> = {
   "already-withdrawn": "this grant is already withdrawn for this user; a withdrawal is final",
   "agent-mismatch": "this grant is held for another agentRef",
   "stale-revision": "a higher revision of this grant is held",
-  "revision-conflict": "this revision of the grant is held with other bytes"
+  "revision-conflict": "this revision of the grant is held with other bytes",
+  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
 };
 const refused = (status: number, code: string) => ({ status, body: { error: { code, message: MESSAGES[code] } } });
 const unsupported = (protocol: string) => ({ status: 400, body: { error: { code: "schema-unsupported", message: "this receiver does not read that protocol revision", data: { protocol, accepted: [TYPE] } } } });
@@ -235,6 +236,10 @@ function intakeCases(): Json[] {
     ["SR-4: before the bound user is read", [], active(A, { context: OTHER_CTX }), unassigned(), refused(403, "wrong-organization")],
     // SR-5
     ["SR-5: no user bound to the epoch", [], base, unassigned(), refused(403, "unassigned-device")],
+    ["SR-5a: the bound user's notice does not name a share registration's purposes", [], base, binding({ purposeAdmitted: false }), refused(403, "purpose-not-collected")],
+    ["SR-5a: purposeAdmitted true is the registration as before", [], base, binding({ purposeAdmitted: true }), ok(held, "registered")],
+    ["SR-5 before SR-5a: an unassigned device whose notice is not known", [], base, { ...unassigned(), purposeAdmitted: false }, refused(403, "unassigned-device")],
+    ["SR-0: purposeAdmitted that is not a boolean", [], base, binding({ purposeAdmitted: "no" }), { fault: "context-invalid" }],
     // SR-6
     ["SR-6: an active registration over a withdrawal", [heldAfterWithdrawal], higher, binding(), refused(409, "already-withdrawn")],
     ["SR-6: tombstone then active: the withdrawal that arrived first stays final", [tombstone], base, binding(), refused(409, "already-withdrawn")],
@@ -339,6 +344,8 @@ function gateCases(): Json[] {
     ["agent-mismatch: the grant was re-pointed; revoke it and mint a new id", refused(409, "agent-mismatch"), "hold-degraded"],
     ["wrong-organization: the node sent to another organization", refused(403, "wrong-organization"), "hold-degraded"],
     ["unassigned-device: no user bound until the device is assigned and enrolled again", refused(403, "unassigned-device"), "hold-degraded"],
+    ["purpose-not-collected: sent again once the notice names its purposes", refused(403, "purpose-not-collected"), "hold-notice"],
+    ["purpose-not-collected under a status that is not its own", refused(409, "purpose-not-collected"), "hold"],
     ["malformed: the same bytes again do not clear it", refused(400, "malformed"), "hold-degraded"],
     ["schema-unsupported: the receiver does not read this revision", unsupported("share-registration/2"), "hold-degraded"],
     ["stale-revision under a status that is not its own", refused(401, "stale-revision"), "hold"],

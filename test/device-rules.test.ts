@@ -144,6 +144,34 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     ]));
   });
 
+  it("FAC-SEM-044: a device on record renews by its key within 30 days of expiry and keeps its binding (DEC-0100)", () => {
+    const fixture = load("semantic/device-enrollment-renewal-ok.json").input;
+    expect(codes("device-enrollment", fixture)).toEqual([]);
+    const at = (name: string) => paths("device-enrollment", load(`semantic/device-enrollment-renewal-${name}.json`).input);
+    expect(at("past-grace")).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    expect(at("revoked")).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    expect(at("other-key")).toEqual(["FAC-SEM-044 /request/key/publicKeySha256", "FAC-SEM-044 /request/device/id"]);
+    expect(at("new-user")).toEqual(["FAC-SEM-044 /response/certificate/binding/user"]);
+    expect(at("unknown-device")).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    // The 30th day is inside the grace, the instant after it is not.
+    const day30 = { ...fixture, request: { ...fixture.request, requestedAt: "2026-11-06T08:30:00Z" } };
+    expect(codes("device-enrollment", day30)).toEqual([]);
+    expect(codes("device-enrollment", { ...fixture, request: { ...fixture.request, requestedAt: "2026-11-06T08:30:01Z" } })).toEqual(["FAC-SEM-044"]);
+    // No key in the request, an unreadable end, a role kept and a role changed, a user dropped.
+    const { key: _key, ...keyless } = fixture.request;
+    expect(paths("device-enrollment", { ...fixture, request: keyless })).toContain("FAC-SEM-044 /request/key/publicKeySha256");
+    expect(paths("device-enrollment", { ...fixture, enrolled: { ...fixture.enrolled, notAfter: "not a time" } })).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    const { requestedAt: _at, ...timeless } = fixture.request;
+    expect(paths("device-enrollment", { ...fixture, request: timeless })).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    const cloud = { ...fixture, enrolled: { keySha256: fixture.enrolled.keySha256, notAfter: fixture.enrolled.notAfter, role: "org-cloud" }, token: { tokenId: "none" } };
+    const cloudBinding = { org: { id: "org-7f3a" }, role: "org-cloud", device: { id: "dev-01j9a" } };
+    const withBinding = (binding: unknown) => ({ ...cloud, response: { ...fixture.response, certificate: { ...fixture.response.certificate, binding } } });
+    expect(paths("device-enrollment", withBinding(cloudBinding))).toEqual([]);
+    expect(paths("device-enrollment", withBinding({ org: { id: "org-7f3a" }, device: { id: "dev-01j9a" } }))).toEqual(["FAC-SEM-044 /response/certificate/binding/role"]);
+    expect(paths("device-enrollment", { ...fixture, response: { ...fixture.response, certificate: { ...fixture.response.certificate, binding: { org: { id: "org-7f3a" }, device: { id: "dev-01j9a" } } } } }))
+      .toEqual(["FAC-SEM-044 /response/certificate/binding/user"]);
+  });
+
   it("FAC-SEM-044: an organization's cloud machine is enrolled only by an org-cloud token, says so, and binds no person (DEC-0099)", () => {
     const fixture = load("semantic/device-enrollment-org-cloud.json").input;
     expect(codes("device-enrollment", fixture)).toEqual([]);

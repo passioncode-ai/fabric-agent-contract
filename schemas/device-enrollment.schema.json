@@ -148,9 +148,22 @@
                 }
               },
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "method"
+              ],
+              "properties": {
+                "method": {
+                  "const": "key-on-record",
+                  "description": "DEC-0100: a device on record whose last certificate ended at most 30 days ago renews with a CSR from its key on record and no other proof; the server MAY refuse it by policy (a file-held key, a device it wants to see again)."
+                }
+              },
+              "additionalProperties": false
             }
           ],
-          "description": "How the request is authenticated. The proof itself (the SSO session or the enrollment token's secret) travels in the Authorization header, never in the body."
+          "description": "How the request is authenticated. The proof itself (the SSO session or the enrollment token's secret) travels in the Authorization header, never in the body; a renewal by the key on record (DEC-0100) carries none, the CSR's own signature by the key on record is its proof."
         },
         "requestedAt": {
           "$ref": "common.schema.json#/$defs/timestamp"

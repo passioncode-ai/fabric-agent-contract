@@ -886,5 +886,7 @@
   {"name": "device-enrollment-response-org-cloud", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-response-org-cloud.json", "valid": true},
   {"name": "device-enrollment-response-org-cloud-with-user", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-response-org-cloud-with-user.json", "valid": false, "keyword": "false schema"},
   {"name": "device-enrollment-response-unknown-role", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-response-unknown-role.json", "valid": false, "keyword": "const"},
-  {"name": "service-descriptor-peer-processor-hosted", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-peer-processor-hosted.json", "valid": true}
+  {"name": "service-descriptor-peer-processor-hosted", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-peer-processor-hosted.json", "valid": true},
+  {"name": "device-enrollment-request-key-on-record", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request-key-on-record.json", "valid": true},
+  {"name": "device-enrollment-key-on-record-with-token", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-key-on-record-with-token.json", "valid": false, "keyword": "additionalProperties"}
 ]

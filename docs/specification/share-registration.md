@@ -146,7 +146,9 @@ who register one grant id hold two registrations. It keeps the request's body by
 
 `decideShareRegistration(held, registration, binding)` answers in this order and never throws. `held` is the
 receiver's list of held entries; `binding` is `{transport, org: {id}, device?, user?: {id}}`, the certificate's binding
-for its epoch with `transport` the verdict of devices.md's transport steps (`{ok: true}` or `{ok: false, code}`):
+for its epoch with `transport` the verdict of devices.md's transport steps (`{ok: true}` or `{ok: false, code}`) and,
+optionally, `purposeAdmitted`, the receiver's own answer to whether that user's acknowledged notice names a share
+registration's purposes (a value that is not a boolean is SR-0):
 
 | Row | Answer | When |
 |---|---|---|
@@ -156,6 +158,7 @@ for its epoch with `transport` the verdict of devices.md's transport steps (`{ok
 | SR-3 | 400 `malformed` | the body is not the schema's registration (a missing or extra member, a value outside its rule, a state's members wrong) or breaks `FAC-SEM-118`'s document clauses (an instant on a day that does not exist, a window that does not end after it starts) |
 | SR-4 | 403 `wrong-organization` | `context` is not `org:` followed by the certificate's `org.id` as written (never case-folded, never by prefix) |
 | SR-5 | 403 `unassigned-device` | no user is bound to the certificate's epoch |
+| SR-5a | 403 `purpose-not-collected` | `binding.purposeAdmitted` is `false`: the notice the bound user acknowledged does not name the purposes a share registration serves (agent calls, usage and cost). The receiver states it from its own records; absent, nothing is checked here (DEC-0100) |
 | SR-6 | 409 `already-withdrawn` | an active registration while a withdrawal is held for (user, `grantId`), a tombstone included |
 | SR-7 | 409 `agent-mismatch` | an active registration naming another `agentRef` than the active one held, whatever its revision. A grant keeps its `agentRef` (`FAC-SEM-117`); the recovery is to revoke the grant, mint a new id and register that |
 | SR-8 | 409 `stale-revision` | an active registration with a lower `grantRevision` than held |
@@ -216,6 +219,7 @@ shown under its grant without an agent. Days compare as UTC days: a `startsAt` o
 |---|---|
 | `send` | a status 200 receipt, whatever its state (usage before a withdrawal still joins); a 409 `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
 | `hold-degraded` | a typed refusal of the SR table that sending the same registration again does not clear: 409 `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or `schema-unsupported`. The node keeps the sums, reports itself degraded and sends again only when the record changes |
+| `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion` ([devices](devices.md#policy)), and at the seven-day resend |
 | `hold` | no answer yet, a transport refusal (401), a receiver's fault, a code under a status that is not its own, or anything else: the node keeps the sums and sends the registration again with backoff |
 
 So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant
