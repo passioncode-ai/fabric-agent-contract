@@ -24,7 +24,7 @@ export const RESEND_SECONDS = 7 * 24 * 60 * 60;
 /** The longest refusal message. */
 export const MAX_MESSAGE = 200;
 /** The refusal codes of `share-registration.schema.json#/$defs/refusal`, in the order of the SR table. */
-export const SHARE_REFUSAL_CODES: readonly string[] = ["malformed", "wrong-organization", "unassigned-device", "already-withdrawn", "agent-mismatch", "stale-revision", "revision-conflict"];
+export const SHARE_REFUSAL_CODES: readonly string[] = ["malformed", "wrong-organization", "unassigned-device", "already-withdrawn", "agent-mismatch", "stale-revision", "revision-conflict", "purpose-not-collected"];
 /** DEC-0056's 401 codes (devices.md, transport steps 1 to 8), which SR-1 answers as they come. */
 export const TRANSPORT_REFUSALS: readonly string[] = ["signature-missing", "digest-mismatch", "signature-stale", "certificate-unknown", "certificate-revoked", "certificate-expired", "signature-invalid", "signature-replayed"];
 /** DEC-0056 step 0: a receiver whose own context is unusable accepts nothing, and the fault is its own. */
@@ -280,7 +280,8 @@ function boundUser(binding: JsonObject): string | undefined | null {
 
 /** Whether a binding is usable: an object with the organization's id and a well-formed or absent user. */
 function bindingOk(binding: unknown): binding is JsonObject {
-  return isObject(binding) && isString(own(own(binding, "org"), "id")) && boundUser(binding) !== null;
+  const admitted = own(binding, "purposeAdmitted");
+  return isObject(binding) && isString(own(own(binding, "org"), "id")) && boundUser(binding) !== null && (admitted === undefined || typeof admitted === "boolean");
 }
 
 const MESSAGES: Readonly<Record<string, string>> = {
@@ -290,7 +291,8 @@ const MESSAGES: Readonly<Record<string, string>> = {
   "already-withdrawn": "this grant is already withdrawn for this user; a withdrawal is final",
   "agent-mismatch": "this grant is held for another agentRef",
   "stale-revision": "a higher revision of this grant is held",
-  "revision-conflict": "this revision of the grant is held with other bytes"
+  "revision-conflict": "this revision of the grant is held with other bytes",
+  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
 };
 
 const refuse = (status: 400 | 403 | 409, code: string): ShareRegistrationAnswer => ({ status, body: { error: { code, message: MESSAGES[code] as string } } });
@@ -312,6 +314,8 @@ const receipt = (held: HeldShareRegistration, state: ShareRegistrationReceipt["s
  * - SR-3: not the schema's shape or `FAC-SEM-118`'s clauses: 400 `malformed`;
  * - SR-4: `context` is not `org:` and the certificate's `org.id` as written: 403 `wrong-organization`;
  * - SR-5: no user bound to the epoch: 403 `unassigned-device`;
+ * - SR-5a (DEC-0100): `binding.purposeAdmitted` is false, the bound user's acknowledged notice does not name the
+ *   purposes a share registration serves: 403 `purpose-not-collected`;
  * - SR-6…SR-9: an active registration over what is held for (user, grantId): withdrawn, 409 `already-withdrawn`;
  *   another `agentRef`, `agent-mismatch`; a lower `grantRevision`, `stale-revision`; the same revision with another
  *   digest, `revision-conflict`;
@@ -338,6 +342,9 @@ export function decideShareRegistration(held: unknown, registration: unknown, bi
   // bindingOk refused a user that is not {id}, so the user is a string or absent.
   const user = boundUser(binding) as string | undefined;
   if (user === undefined) return refuse(403, "unassigned-device");
+  // SR-5a (DEC-0100): the receiver's own fact that the bound user's acknowledged notice does not name the purposes a
+  // share registration serves (agent calls, usage and cost). The node holds the sums and sends again after the notice.
+  if (own(binding, "purposeAdmitted") === false) return refuse(403, "purpose-not-collected");
 
   const digest = shareRegistrationDigest(registration) as string;
   const grantId = registration.grantId as string;
@@ -408,7 +415,7 @@ export function joinGrantUsage(event: unknown, binding: unknown, registrations: 
 
 // ---- The sender gate (the collector) ----------------------------------------------------------------------------
 
-export type GateAnswer = "send" | "hold" | "hold-degraded";
+export type GateAnswer = "send" | "hold" | "hold-degraded" | "hold-notice";
 
 /** Refusals after which the grant's usage may be sent, with their status: the receiver holds a registration (or a final withdrawal). */
 const SEND_AFTER: ReadonlyMap<string, number> = new Map([["stale-revision", 409], ["already-withdrawn", 409]]);
@@ -427,6 +434,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
  * - `hold-degraded`: a typed refusal of the SR table that sending the same registration again does not clear (409
  *   `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or
  *   `schema-unsupported`): the node keeps the sums, reports itself degraded and sends again only when the record changes;
+ * - `hold-notice` (DEC-0100): 403 `purpose-not-collected`: the node keeps the sums, is not degraded, and sends the
+ *   registration again when its policy names a later `noticeVersion`, and at the seven-day resend;
  * - `hold`: no answer yet, a transport refusal (401), a receiver's fault, a code whose status is not its own, or anything
  *   else: the node keeps the sums and sends the registration again with backoff.
  *
@@ -438,6 +447,7 @@ export function gateGrantUsage(answer: unknown): GateAnswer {
   const status = own(answer, "status");
   if (!isString(code)) return "hold";
   if (SEND_AFTER.get(code) === status) return "send";
+  if (code === "purpose-not-collected" && status === 403) return "hold-notice";
   return DEGRADED_AFTER.get(code) === status ? "hold-degraded" : "hold";
 }
 

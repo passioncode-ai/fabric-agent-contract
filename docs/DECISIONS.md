@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0100` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0101` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6144,3 +6144,46 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-22-org-cloud.md`.
 - **Source:** passioncode-platform's ask (thread `348467e5`, message `7f194e53`, item 3); DEC-0099 reserved by git CAS
   (key `ct82-org-cloud-20261022`).
+
+### DEC-0100: A `purpose` rejection, a share registration sent again after the notice, and renewal within 30 days of expiry
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
+- **Decision:**
+  1. In [activity](specification/activity.md): a batch acknowledgement's `rejected[].reason` admits `purpose`: the
+     receiver does not collect that event for that person under the notice they acknowledged. It is consumed like every
+     rejection, and the collector sends no event of that kind for that person until the device's policy names a later
+     `noticeVersion`. `attribution` keeps its meaning (another organization, device or user than the certificate).
+  2. In [share registration](specification/share-registration.md): SR-5a, after SR-5, answers 403
+     `purpose-not-collected` when the receiver states `binding.purposeAdmitted: false` (the bound user's acknowledged
+     notice does not name a share registration's purposes); a `purposeAdmitted` that is not a boolean is SR-0. The
+     sender gate answers it `hold-notice`: the node keeps the sums, is not degraded, and sends the registration again
+     when its policy names a later `noticeVersion`, and at the seven-day resend.
+  3. In [devices](specification/devices.md): `auth.method: "key-on-record"`. A device on record, not revoked, renews
+     within 30 days of its last certificate's `notAfter` with a CSR from its key on record and no other proof; the
+     certificate keeps the user and role on record, a new epoch is issued, and the renewal is audited. `FAC-SEM-044`
+     checks it (`RENEWAL_GRACE_DAYS`). A server MAY refuse it by policy.
+- **Why:** the first organization server's asks 9 and 10 (board thread `ba63565c`, 2026-10-22, from its
+  production-readiness work): it now accepts an event only when the person's notice names every purpose the event
+  serves, and had to answer a purpose refusal as `attribution`, which misleads a node; a refused share registration was
+  not sent again until the share changed; and a machine offline for more than seven days needed a new token per
+  absence.
+- **Alternatives refused:** `purpose` as a soft `hold` the collector retries (the notice decides, not time); a longer
+  certificate (DEC-0031's 30-day ceiling and the SHOULD of 7 days stand; a stolen certificate stays short-lived); a
+  renewal signed by the expired certificate over mutual TLS (no receiver accepts an expired certificate at its transport
+  step 6); a grace longer than the longest certificate.
+- **Compatibility:** additive for a sender: a receiver pinned before this never answers the new values. A collector
+  pinned before this meets `purpose` and `purpose-not-collected` as unknown values: a rejection is consumed whatever its
+  reason, and the gate's `hold` already keeps the sums for a code it does not know, so nothing is lost before it repins.
+  A server pinned before this refuses `key-on-record` at its schema, so a node renews that way only toward a server
+  whose `protocols` it learned at or after this decision. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `activity-batch-ack` (`rejected[].reason`), `share-registration` (the refusal's
+  code), `device-enrollment` (`auth`); code `src/share-registration.ts` (`decideShareRegistration`, `gateGrantUsage`,
+  `SHARE_REFUSAL_CODES`), `src/device-rules.ts` (`FAC-SEM-044`, `RENEWAL_GRACE_DAYS`); vectors
+  `fixtures/vectors/share-registration.json` (written by `tools/vectors/share-registration.ts`); fixtures
+  `fixtures/semantic/device-enrollment-renewal-*.json`, `fixtures/positive/device-enrollment-request-key-on-record.json`,
+  `fixtures/negative/device-enrollment-key-on-record-with-token.json`; tests `test/device-rules.test.ts`,
+  `test/share-registration.test.ts`; docs `docs/specification/activity.md`, `share-registration.md`, `devices.md`,
+  `conformance.md`, `docs/backlog.md` (CT-88), `docs/handoffs/2026-10-22-refusals-renewal.md`.
+- **Source:** the first organization server's asks 9 and 10 (thread `ba63565c`, message `5e4a81b4`); DEC-0100 reserved
+  by git CAS (key `ct88-refusals-renewal-20261022`).

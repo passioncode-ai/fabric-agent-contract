@@ -81,8 +81,8 @@ enrollment of a machine gets keys of its own (the operator's NET-2); the contrac
      until an SSO sign-in re-enrolls it. **An organization's cloud machine** (its `org-cloud` or `enterprise-cloud`
      hosting, a VM the organization owns and no person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
      certificate's binding says `role: "org-cloud"` and binds no person, so a receiver shows it as the organization's
-     cloud and attributes nothing it sends to a member. Only such a token gives the role, and a certificate issued on
-     one always says it (`FAC-SEM-044`). How the server issues and records the token's role is its own.
+     cloud and attributes nothing it sends to a member. Only such a token gives the role (and a renewal by the key on
+     record keeps it, DEC-0100), and a certificate issued on one always says it (`FAC-SEM-044`). How the server issues and records the token's role is its own.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
@@ -136,13 +136,22 @@ certificate is valid. Once it holds the new certificate the device switches ever
 re-signs any request still in flight under the old one. The device enrolls again from
 step 2 when any of these happens:
 
-- its certificate expired;
+- its certificate expired (within 30 days of its end it renews instead, below);
 - a response says `re-enroll`;
 - a collector on it lost its persisted counter ([streams](activity.md#streams)).
 
 **Re-enrollment issues a new epoch and resets the device's policy-revision baseline**: a reinstalled
 collector starts again at seq 1 and reports the policy revisions it holds now, and neither is
 evidence of tampering. Nothing is renewed silently past `notAfter`.
+
+**Renewal after a short absence** (DEC-0100). A device that was offline past its certificate's end (a holiday, a laptop
+left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof, within **30 days** of its last
+certificate's `notAfter`: the CSR is from its key on record, and that CSR's own signature is the proof. The server
+takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
+or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
+audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
+A server MAY refuse a renewal by policy (a file-held key, which can be copied, DEC-0094; a device it wants an
+administrator to see again), with its own error.
 
 <a id="device-keys"></a>
 
@@ -572,7 +581,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-041"></a>`FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
 | <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
 | <a id="fac-sem-043"></a>`FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; `role: "org-cloud"` exactly when an `org-cloud` token enrolled it, and then no user (DEC-0099); it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
+| <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; `role: "org-cloud"` exactly when an `org-cloud` token enrolled it, and then no user (DEC-0099); a renewal by the key on record only for a device on record, not revoked, within 30 days of its last certificate's end, from that key, keeping its user and role (DEC-0100); it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
 | <a id="fac-sem-045"></a>`FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused; a `grant.usage`'s `data.context` is `org:` and the certificate's `org.id`, as written (DEC-0086) |
 | <a id="fac-sem-046"></a>`FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | <a id="fac-sem-068"></a>`FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |
