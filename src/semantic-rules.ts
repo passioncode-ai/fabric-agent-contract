@@ -36,7 +36,7 @@ import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
-import { agentNetworkRules } from "./agent-network.js";
+import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
 import { connectionsRules } from "./connections.js";
@@ -164,6 +164,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   }
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-well-known") findings.push(...connectionsRules(value));
+  if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));

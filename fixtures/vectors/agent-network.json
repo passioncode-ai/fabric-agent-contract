@@ -489,6 +489,18 @@
       "unlisted": [],
       "viewer": "member",
       "expected": []
+    },
+    {
+      "name": "an empty organization id lists nothing",
+      "orgId": "",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [],
+      "own": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "unlisted": [],
+      "viewer": "admin",
+      "expected": []
     }
   ],
   "queue": [
@@ -722,6 +734,27 @@
       "expected": null
     },
     {
+      "name": "a running job without a caller still holds a slot",
+      "queue": [
+        {
+          "id": "j1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "j0"
+        }
+      ],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 9
+      },
+      "expected": null
+    },
+    {
       "name": "an empty queue starts nothing",
       "queue": [],
       "running": [],
@@ -898,6 +931,11 @@
     {
       "name": "extra words",
       "statusMessage": "queued 1 of 3 behind a long job",
+      "expected": null
+    },
+    {
+      "name": "a leading zero",
+      "statusMessage": "queued 01 of 3",
       "expected": null
     },
     {

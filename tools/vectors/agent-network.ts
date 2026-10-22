@@ -53,7 +53,8 @@ function organizationCases(): Json[] {
     ["unlisted: a member does not see it", { held: [active(INBOX)], own: [WRITER], unlisted: [WRITER], viewer: "member" }, [entry(INBOX, ctx)]],
     ["unlisted: the administrator sees it marked", { held: [active(INBOX)], own: [WRITER], unlisted: [WRITER], viewer: "admin" }, [entry(INBOX, ctx), entry(WRITER, ctx, false)]],
     ["an owner is no viewer of an organization's directory", { held: [active(INBOX)], own: [], unlisted: [], viewer: "owner" }, []],
-    ["an unreadable clock lists nothing", { held: [active(INBOX)], own: [], unlisted: [], viewer: "member", at: "today" }, []]
+    ["an unreadable clock lists nothing", { held: [active(INBOX)], own: [], unlisted: [], viewer: "member", at: "today" }, []],
+    ["an empty organization id lists nothing", { orgId: "", held: [], own: [WRITER], unlisted: [], viewer: "admin" }, []]
   ];
   return cases.map(([name, input, expected]) => ({ name, orgId: ORG, at, ...input, expected }));
 }
@@ -72,6 +73,7 @@ function queueCases(): Json[] {
     ["a caller's own jobs go in arrival order", { queue: [job("j9", "a", "2026-10-22T09:00:09Z"), job("j8", "a", "2026-10-22T09:00:08Z")], running: [], limits: { concurrency: 2, perCaller: 2, queueMax: 3 } }, "j8"],
     ["an arrival that is not a time is skipped", { queue: [job("j1", "a", "yesterday"), job("j2", "b", "2026-10-22T09:00:02Z")], running: [], limits }, "j2"],
     ["unreadable limits start nothing", { queue: [job("j1", "a", "2026-10-22T09:00:01Z")], running: [], limits: { concurrency: 0, perCaller: 1, queueMax: 3 } }, null],
+    ["a running job without a caller still holds a slot", { queue: [job("j1", "a", "2026-10-22T09:00:01Z")], running: [{ id: "j0" }], limits: { concurrency: 1, perCaller: 1, queueMax: 9 } }, null],
     ["an empty queue starts nothing", { queue: [], running: [], limits }, null]
   ];
   return cases.map(([name, input, expected]) => ({ name, ...input, expected }));
@@ -99,6 +101,7 @@ function positionCases(): Json[] {
     ["position zero", "queued 0 of 3", null],
     ["a pause is not a place in the queue", "quota-exhausted until 2026-10-22T10:00:00Z", null],
     ["extra words", "queued 1 of 3 behind a long job", null],
+    ["a leading zero", "queued 01 of 3", null],
     ["not a string", 7, null]
   ];
   return cases.map(([name, statusMessage, expected]) => ({ name, statusMessage, expected }));

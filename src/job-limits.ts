@@ -12,6 +12,8 @@ import { strictTime } from "./rfc3339.js";
  * Every function here answers and never throws: malformed input is an answer.
  */
 export const QUOTA_EXHAUSTED = "quota-exhausted";
+/** DEC-0104: a refusal at a job's start (`interop-tool-error`); a job it ended is malformed. */
+export const QUEUE_FULL = "queue-full";
 export const OUTCOME_UNKNOWN = "outcome-unknown";
 /** DL-19's refusal of an exhausted spend window (delegation.md), relayed unchanged with its approval request. */
 export const LIMIT_REACHED = "limit-reached";
@@ -100,8 +102,8 @@ export interface CallerAction {
  *   and after the approval a resend under the same key;
  * - `failed` with any other code: `failed`;
  * - `invalid`: `now` unreadable, an answer that is not `{job}` with an id and a status, a `failed` job whose `error` is
- *   not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, or a
- *   malformed pause. On `invalid` a caller sends nothing new: it keeps polling a `working` job and reports any other
+ *   not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a job that
+ *   `queue-full` ended (a refusal at start that never ends a job, DEC-0104), or a malformed pause. On `invalid` a caller sends nothing new: it keeps polling a `working` job and reports any other
  *   answer as malformed.
  *
  * It never throws.
@@ -127,6 +129,7 @@ export function jobCallerAction(answer: unknown, now: unknown): CallerAction {
   const codeOk = (isString(code) && ERROR_CODE.test(code)) || Number.isInteger(code);
   const shapeOk = isObject(error) && Object.keys(error).every((name) => name === "code" || name === "message" || name === "data");
   if (!shapeOk || !codeOk || !isString(message) || message.length === 0 || codePoints(message) > MAX_ERROR_MESSAGE) return { action: "invalid" };
+  if (code === QUEUE_FULL) return { action: "invalid" };
   if (code === OUTCOME_UNKNOWN) return { action: "reconcile" };
   if (code === LIMIT_REACHED) return { action: "person" };
   if (code !== QUOTA_EXHAUSTED) return { action: "failed" };

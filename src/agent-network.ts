@@ -1,5 +1,9 @@
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import { SCHEMA_PREFIX } from "./contract.js";
+import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { strictTime } from "./rfc3339.js";
+import { createValidatorSync } from "./validator.js";
 
 // #region agent-network — docs: docs/specification/agent-network.md
 // DEC-0104 (CT-84, S4 of the agent network): the directory a viewer discovers, the call queue at the node hosting an
@@ -10,6 +14,8 @@ type Json = JsonObject;
 const list = (value: unknown): Json[] => (Array.isArray(value) ? value.filter(isObject) : []);
 const isString = (value: unknown): value is string => typeof value === "string";
 const PERSONAL = "personal";
+/** `common.schema.json#/$defs/orgId` inside `orgContextId`: a letter or digit, then up to 127 of [A-Za-z0-9_-]. */
+const ORG_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
 /** One directory entry: an agent in one context, and whether its publisher lists it. */
 export interface DirectoryEntry { agentRef: string; context: string; listed: boolean }
@@ -48,7 +54,7 @@ export function estateDirectory(record: unknown, unlisted: unknown): DirectoryEn
  * person, machine or grant is in an entry.
  */
 export function organizationDirectory(orgId: unknown, held: unknown, own: unknown, unlisted: unknown, viewer: DirectoryViewer, at: unknown): DirectoryEntry[] {
-  if (!isString(orgId) || (viewer !== "admin" && viewer !== "member")) return [];
+  if (!isString(orgId) || !ORG_ID.test(orgId) || (viewer !== "admin" && viewer !== "member")) return [];
   const now = isString(at) ? strictTime(at) : Number.NaN;
   if (Number.isNaN(now)) return [];
   const context = `org:${orgId}`;
@@ -73,9 +79,13 @@ export function organizationDirectory(orgId: unknown, held: unknown, own: unknow
 function directoryRule(value: Json): Finding[] {
   const want = value.source === "estate" ? estateDirectory(value.record, value.unlisted) : value.source === "organization" ? organizationDirectory(value.orgId, value.held, value.own, value.unlisted, value.viewer as DirectoryViewer, value.at) : undefined;
   if (want === undefined) return [{ code: "FAC-SEM-130", instancePath: "/source", message: `the source is ${show(value.source)}, not estate or organization` }];
-  const got = isObject(value.directory) ? value.directory.entries : undefined;
-  if (JSON.stringify(got) === JSON.stringify(want)) return [];
-  return [{ code: "FAC-SEM-130", instancePath: "/directory/entries", message: `the directory's entries are not the ones its ${value.source} derives: ${want.length} expected` }];
+  const directory = isObject(value.directory) ? value.directory : {};
+  const findings: Finding[] = [];
+  if (directory.source !== value.source) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/source", message: `the directory says source ${show(directory.source)}, derived from ${show(value.source)}` });
+  const viewer = value.source === "estate" ? "owner" : value.viewer;
+  if (directory.viewer !== viewer) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/viewer", message: `the directory says viewer ${show(directory.viewer)}, its reader is ${show(viewer)}` });
+  if (JSON.stringify(directory.entries) !== JSON.stringify(want)) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/entries", message: `the directory's entries are not the ones its ${value.source} derives: ${want.length} expected` });
+  return findings;
 }
 
 // --- The call queue (fabric-interop, DEC-0104) ---
@@ -97,10 +107,10 @@ const limitsOk = (limits: unknown): limits is QueueLimits => isObject(limits) &&
  */
 export function nextQueuedJob(queue: unknown, running: unknown, limits: unknown): string | undefined {
   if (!limitsOk(limits)) return undefined;
-  const runs = list(running).filter((job) => isString(job.caller));
-  if (runs.length >= limits.concurrency) return undefined;
+  // Every running job holds a slot, whether or not its caller is readable; only the per-caller counts need one.
+  if ((Array.isArray(running) ? running.length : 0) >= limits.concurrency) return undefined;
   const runningOf = new Map<string, number>();
-  for (const job of runs) runningOf.set(job.caller as string, (runningOf.get(job.caller as string) ?? 0) + 1);
+  for (const job of list(running).filter((job) => isString(job.caller))) runningOf.set(job.caller as string, (runningOf.get(job.caller as string) ?? 0) + 1);
   const waiting = list(queue)
     .filter((job): job is Json & QueuedJob => isString(job.id) && isString(job.caller) && isString(job.at) && !Number.isNaN(strictTime(job.at)))
     .filter((job) => (runningOf.get(job.caller) ?? 0) < limits.perCaller)
@@ -120,8 +130,8 @@ export function admitJob(waiting: unknown, limits: unknown, retryAfterSeconds: u
   return { admit: false, error: { code: "queue-full", message: "the agent's queue for this context is full: start again later", data: { retryable: true, retryAfterSeconds: after } } };
 }
 
-const QUEUED = /^queued (\d{1,6}) of (\d{1,6})$/;
-/** The `statusMessage` of a waiting job (DEC-0104): `queued <position> of <length>`, position 1 next. */
+const QUEUED = /^queued ([1-9]\d{0,5}) of ([1-9]\d{0,5})$/;
+/** The `statusMessage` of a waiting job (DEC-0104): `queued <position> of <length>`, position 1 next, 1 ≤ position ≤ length ≤ 999999, no leading zero. */
 export const queueStatusMessage = (position: number, length: number): string => `queued ${position} of ${length}`;
 /** A waiting job's place, read from its `statusMessage`, or `undefined` when it is not the queue's grammar. */
 export function readQueuePosition(statusMessage: unknown): { position: number; length: number } | undefined {
@@ -165,6 +175,22 @@ function loadRule(value: Json): Finding[] {
     });
   });
   return findings;
+}
+
+let loadShape: ValidateFunction | undefined;
+const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
+
+/**
+ * FAC-SEM-133 on a well-known document: a value under the load extension key is valid against
+ * `service-load-extension.schema.json`. A reader treats an invalid value as not declared and reports it (DEC-0104).
+ */
+export function loadExtensionRules(value: Json): Finding[] {
+  const extensions = isObject(value.extensions) ? value.extensions : undefined;
+  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.load)) return [];
+  loadShape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-load-extension.schema.json`) as ValidateFunction;
+  if (loadShape(extensions[EXTENSION_KEYS.load]) === true) return [];
+  const why = (loadShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`).join("; ");
+  return [{ code: "FAC-SEM-133", instancePath: `/extensions/${pointerToken(EXTENSION_KEYS.load)}`, message: `the load declaration is invalid (${why}); a reader treats it as not declared and reports it (DEC-0104)` }];
 }
 
 export function agentNetworkRules(kind: string, value: Json): Finding[] | undefined {

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { admitJob, agentNetworkRules, estateDirectory, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
+import { admitJob, agentNetworkRules, estateDirectory, loadExtensionRules, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -67,7 +67,8 @@ describe("the reference functions", () => {
   });
   it("nextQueuedJob ignores running jobs without a caller and limits that are not integers", () => {
     const queue = [{ id: "j1", caller: "a", at: "2026-10-22T09:00:01Z" }];
-    expect(nextQueuedJob(queue, [{ id: "j0" }], { concurrency: 1, perCaller: 1, queueMax: 1 })).toBe("j1");
+    expect(nextQueuedJob(queue, [{ id: "j0" }], { concurrency: 2, perCaller: 1, queueMax: 1 })).toBe("j1");
+    expect(nextQueuedJob(queue, "j0", { concurrency: 1, perCaller: 1, queueMax: 1 })).toBe("j1");
     expect(nextQueuedJob(queue, [], { concurrency: 1.5, perCaller: 1, queueMax: 1 })).toBeUndefined();
     expect(nextQueuedJob(queue, [], { concurrency: 1, perCaller: 1, queueMax: -1 })).toBeUndefined();
     expect(nextQueuedJob(queue, [], null)).toBeUndefined();
@@ -107,7 +108,7 @@ describe("the semantic rules (FAC-SEM-130 to FAC-SEM-132)", () => {
   });
   it("agent-directory-view refuses a directory without entries", () => {
     const value = { source: "estate", record: { machines: [] }, directory: null };
-    expect(agentNetworkRules("agent-directory-view", value)?.map((f) => f.instancePath)).toEqual(["/directory/entries"]);
+    expect(agentNetworkRules("agent-directory-view", value)?.map((f) => f.instancePath)).toEqual(["/directory/source", "/directory/viewer", "/directory/entries"]);
   });
   it("service-load reads an unreadable report without throwing, and checks only what it can read", () => {
     expect(agentNetworkRules("service-load", { windows: [{ start: 1, byContext: [{ context: 2, runMs: { p50: "1", p95: 0 } }] }] })).toEqual([]);
@@ -126,10 +127,22 @@ describe("the wire", () => {
       expect(valid("agent-directory.schema.json", doc), entry.name).toBe(true);
     }
   });
-  it("every queue-full refusal admitJob answers is a valid interop error", () => {
+  it("every queue-full refusal admitJob answers is a valid start refusal, and never ends a job", () => {
     for (const entry of vectors.admit.filter((e) => e.expected.admit === false)) {
-      expect(valid("interop-job.schema.json", { job: { id: "job_1", status: "failed", updatedAt: "2026-10-22T09:00:00Z", error: entry.expected.error } }), entry.name).toBe(true);
+      expect(valid("interop-tool-error.schema.json", { error: entry.expected.error }), entry.name).toBe(true);
+      expect(valid("interop-job.schema.json", { job: { id: "job_1", status: "failed", updatedAt: "2026-10-22T09:00:00Z", error: entry.expected.error } }), entry.name).toBe(false);
     }
+  });
+  it("checks the load key in a well-known document (FAC-SEM-133), and nothing without it", () => {
+    const wellKnown = JSON.parse(read("fixtures/positive/service-well-known.json")) as Json;
+    const ext = JSON.parse(read("fixtures/positive/service-load-extension.json")) as Json;
+    expect(loadExtensionRules(wellKnown)).toEqual([]);
+    expect(loadExtensionRules({ ...wellKnown, extensions: { [EXTENSION_KEYS.load]: ext } })).toEqual([]);
+    const bad = { ...wellKnown, extensions: { [EXTENSION_KEYS.load]: { ...ext, path: "load" } } };
+    const findings = evaluateSemanticRules("service-well-known", bad);
+    expect(findings.map((f) => f.code)).toEqual(["FAC-SEM-133"]);
+    expect(findings[0]?.instancePath).toBe("/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1load~10.1");
+    expect(loadExtensionRules({ extensions: null })).toEqual([]);
   });
   it("a queued job's message travels in a valid working job", () => {
     expect(valid("interop-job.schema.json", { job: { id: "job_1", status: "working", statusMessage: queueStatusMessage(1, 3), updatedAt: "2026-10-22T09:00:00Z" } })).toBe(true);

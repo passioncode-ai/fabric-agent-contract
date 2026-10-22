@@ -93,7 +93,9 @@ export const NOT_SWEPT: readonly string[] = [
   "agent-directory.schema.json",
   "interop-job-list.schema.json",
   "interop-job-list-request.schema.json",
-  "service-load-extension.schema.json"
+  "service-load-extension.schema.json",
+  // A refusal that started nothing (DEC-0104): a shape only.
+  "interop-tool-error.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

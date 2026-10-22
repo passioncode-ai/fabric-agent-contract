@@ -30,6 +30,8 @@
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
 | SCR-23 | My network's machines | FLW-20 | disabled | proposed | `test/ceremonies.test.ts` |
 | SCR-24 | An agent's connections | FLW-21 | disabled | proposed | `test/connections.test.ts` |
+| SCR-25 | Agent directory | FLW-22 | disabled | proposed | `test/agent-network.test.ts` |
+| SCR-26 | An agent's load | FLW-24 | disabled | proposed | `test/agent-network.test.ts` |
 
 ## Design system
 
@@ -165,7 +167,7 @@
 - **Elements:** notification text with a link, stop message with action buttons, confirmation with amount and expiry, reply prompt for free text (primary action: the stop's recommended button).
 - **States:** empty — not linked yet, the chat waits for the link code; success — a stop answered, keyboard removed; error — already decided, expired confirmation, or no effect for a sender outside the allowlist. silent — in a group shared with other bots, a message not addressed to this bot gets no answer (OC-14, OC-15); degraded — nobody receives, shown as `receiver-missing` (OC-17).
 - **Coverage:** `operator-channel-status.schema.json`, `test/operator-channel.test.ts`
-- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017, SCN-031
+- **Scenarios:** SCN-012, SCN-013, SCN-014, SCN-017, SCN-031, SCN-034
 - **Resources:** operator-channel specification, Rules
 - **Status:** proposed
 
@@ -310,4 +312,26 @@
 - **Coverage:** `src/connections.ts` (`connectionsView`, `FAC-SEM-127`), `fixtures/vectors/connections.json`, `test/connections.test.ts`
 - **Scenarios:** SCN-032
 - **Resources:** connections specification; Fabric Dashboards' Connections tab (its SCN-073)
+- **Status:** proposed
+
+### SCR-25: Agent directory
+
+- **Used by:** FLW-22
+- **Purpose:** the reader finds an agent they may call in their estate or their organization.
+- **Elements:** one row per agent and context; an unlisted mark for the owner and an administrator.
+- **States:** success, entries listed; empty, nothing the reader may see.
+- **Coverage:** `src/agent-network.ts` (`estateDirectory`, `organizationDirectory`, `FAC-SEM-130`), `fixtures/vectors/agent-network.json`, `test/agent-network.test.ts`
+- **Scenarios:** SCN-033
+- **Resources:** agent network specification, Directory; Fabric's hub (CO-376)
+- **Status:** proposed
+
+### SCR-26: An agent's load
+
+- **Used by:** FLW-24
+- **Purpose:** the person sees how busy an agent is.
+- **Elements:** per window and context: queued, running, completed, failed; p50 and p95 wait and run time; the queue's limits.
+- **States:** success, windows drawn; empty, the service declares no load; invalid, the declaration is not its schema's and the reasons are shown.
+- **Coverage:** `src/agent-network.ts` (`FAC-SEM-132`, `FAC-SEM-133`), `test/agent-network.test.ts`
+- **Scenarios:** SCN-035
+- **Resources:** agent network specification, Load; Fabric Dashboards' load panel
 - **Status:** proposed

@@ -1,0 +1,65 @@
+{
+  "description": "An estate's directory labelled with a member as its reader: an estate's is read by its owner only (FAC-SEM-130).",
+  "kind": "agent-directory-view",
+  "expect": [
+    "FAC-SEM-130"
+  ],
+  "input": {
+    "source": "estate",
+    "record": {
+      "machines": [
+        {
+          "id": "m-0",
+          "packages": [
+            {
+              "agentRef": "urn:fabric:agent:example:writer",
+              "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "publisherKid": "example-publisher-2026"
+            },
+            {
+              "agentRef": "urn:fabric:agent:example:inbox-digest",
+              "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "publisherKid": "example-publisher-2026"
+            },
+            {
+              "agentRef": "urn:fabric:agent:example:inbox-digest",
+              "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "publisherKid": "example-publisher-2026",
+              "context": "org:org_7kq2m4xw",
+              "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+            }
+          ]
+        }
+      ]
+    },
+    "unlisted": [
+      {
+        "agentRef": "urn:fabric:agent:example:writer",
+        "context": "personal"
+      }
+    ],
+    "directory": {
+      "type": "agent-directory/1",
+      "source": "estate",
+      "viewer": "member",
+      "generatedAt": "2026-10-22T09:00:00Z",
+      "entries": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "personal",
+          "listed": false
+        }
+      ]
+    }
+  }
+}

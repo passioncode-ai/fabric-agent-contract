@@ -135,8 +135,9 @@ interop extension block. Then:
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
 - A node that queues calls (DEC-0104) writes a waiting job's `statusMessage` as `queued <position> of <length>`,
-  refuses a start past its queue with `queue-full` and `retryAfterSeconds`, and serves `fabric.job.list` with the
-  caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
+  refuses a start past its queue with `queue-full` and `retryAfterSeconds` (an `isError` result whose
+  `structuredContent` is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json)), and serves
+  `fabric.job.list` with the caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
 
 | Shape | Schema |
 |---|---|
@@ -210,7 +211,7 @@ now)` does, `now` a UTC instant:
 | `failed`, `limit-reached` | `person`: its approval request reaches the operator (SCN-017); after the approval a resend under the same key |
 | `failed`, `outcome-unknown` | `reconcile`: observe whether the effect happened |
 | `failed`, any other code | `failed` |
-| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
+| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a job that `queue-full` ended (a refusal at start, DEC-0104), a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
 
 It never answers "submit anew". After `outcome-unknown` a caller sends nothing under a new key until it has observed that
 the effect did not happen; a new attempt is then a new intent (a new `request`, below). `FAC-SEM-120` (kind

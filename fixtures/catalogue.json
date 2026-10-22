@@ -947,6 +947,9 @@
   {"name": "interop-job-list-request-caller", "schema": "interop-job-list-request.schema.json", "path": "negative/interop-job-list-request-caller.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "interop-job-list-request-limit", "schema": "interop-job-list-request.schema.json", "path": "negative/interop-job-list-request-limit.json", "valid": false, "keyword": "maximum"},
   {"name": "interop-job-queued", "schema": "interop-job.schema.json", "path": "positive/interop-job-queued.json", "valid": true},
-  {"name": "interop-job-queue-full-no-data", "schema": "interop-job.schema.json", "path": "negative/interop-job-queue-full-no-data.json", "valid": false, "keyword": "required"},
-  {"name": "interop-job-queue-full-long-wait", "schema": "interop-job.schema.json", "path": "negative/interop-job-queue-full-long-wait.json", "valid": false, "keyword": "maximum"}
+  {"name": "interop-tool-error-queue-full", "schema": "interop-tool-error.schema.json", "path": "positive/interop-tool-error-queue-full.json", "valid": true},
+  {"name": "interop-tool-error-unknown-job", "schema": "interop-tool-error.schema.json", "path": "positive/interop-tool-error-unknown-job.json", "valid": true},
+  {"name": "interop-tool-error-queue-full-no-data", "schema": "interop-tool-error.schema.json", "path": "negative/interop-tool-error-queue-full-no-data.json", "valid": false, "keyword": "required"},
+  {"name": "interop-tool-error-queue-full-long-wait", "schema": "interop-tool-error.schema.json", "path": "negative/interop-tool-error-queue-full-long-wait.json", "valid": false, "keyword": "maximum"},
+  {"name": "interop-job-failed-queue-full", "schema": "interop-job.schema.json", "path": "negative/interop-job-failed-queue-full.json", "valid": false, "keyword": "not"}
 ]
