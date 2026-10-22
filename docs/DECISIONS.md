@@ -6273,11 +6273,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      starts at the deadline, before any); a value that becomes absent is no signal. The person may acknowledge the notice already in
      force, which moves no policy. The member is on every check-in response once there is one. A receiver answers
      `purpose` only when the purpose is not collected for that person when it answers; an event from before its
-     purpose was collected for that person (their acknowledgement of the notice naming it, the mdm deadline where
-     the organization collects under it, or, on a device bound to no person such as an `org-cloud` machine, the time the
-     notice version naming it came into force), that purpose being collected now, may be kept; when a receiver does not keep
-     it (a buffered event from before that acknowledgement), it answers the new reason `before-purpose`, never
-     `purpose`; the reason is which holds nothing, sent to every collector (a rejection is consumed whatever its reason, as
+     purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where
+     the organization collects under it; a device bound to no person collects only from that deadline, its
+     `collectionStart`), that purpose being collected now, may be kept; when a receiver does not keep it (a buffered
+     event from before that start), it answers the new reason `before-purpose`, never `purpose`, a reason that holds
+     nothing, sent to every collector (a rejection is consumed whatever its reason, as
      DEC-0100's Compatibility says for `purpose`); the name differs from GJ-4's `before-start`, a stored state of a
      `grant.usage`. `collectionStart` is
      no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
@@ -6301,7 +6301,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   at the rejection could never resume (the first acknowledgement on a managed machine); absence is now a held value. A sixth
   product reading found CT-92's widening not carried to its pointers and `before-purpose` covering a managed machine's
   deadline window; both fixed. A sixth seam reading found an `org-cloud` machine with no reason
-  for its buffered event (no person acknowledges); the notice version's coming into force is its start. A fourth
+  for its buffered event (no person acknowledges); a seventh product reading found the instant first chosen for it
+  defined nowhere, so such a device's start is its mdm deadline (its `collectionStart`) and the rest is CT-97. A fourth
   unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
   signed-only keys from a user layer; both fixed, so FAC-SEM-042 reads them as FAC-SEM-128 and FAC-SEM-129 do.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule

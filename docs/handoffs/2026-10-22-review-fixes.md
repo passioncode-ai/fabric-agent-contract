@@ -67,6 +67,12 @@ mcp-server `minVersion` and a service `digest` had no fixture; both added, the p
 the document kind's duplicate, credential and escaping branches are tested, and `resolvePolicy` (FAC-SEM-042) no
 longer takes `harness.baseline` or `repair.packages` from a user layer.
 
+## Seventh round
+
+Product: three breaks (CT-88 kept the withdrawn scope; the start first chosen for a device with no person was defined
+nowhere, so it is the mdm deadline and the rest joins CT-97; this section's round count), fixed; its risks too: the
+collector row names consuming any reason, item 8's sentence, and the `machine.mode` row points to the whole harness.
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
@@ -89,7 +95,8 @@ longer takes `harness.baseline` or `repair.packages` from a user layer.
 
 `pnpm run check` exit 0: typecheck, 94 test files with 7 965 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. Four rounds of three blind readings ran on this branch; the PR merges after two consecutive clean rounds.
+list for `FAC-SEM-128`; both fixed. Six rounds of blind readings ran on this branch after the first on the merged range (second to seventh; the unit tier
+in the second, third, sixth and seventh, seam and product in each); the PR merges after two consecutive clean rounds.
 
 ## Next task
 
