@@ -151,7 +151,7 @@
 
 - **Used by:** FLW-07
 - **Purpose:** show each effective policy key, the layer it came from and whether it is locked.
-- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key).
+- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key; `harness.baseline` and `repair.packages` are the organization's signed keys, not the person's to change, DEC-0102).
 - **States:** success — effective settings; error — a change to a locked key refused, or a policy that failed to verify.
 - **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042)
 - **Scenarios:** SCN-011

@@ -178,7 +178,7 @@ flowchart TD
 - **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally
 - **Entry points:** a policy in a check-in response; a local settings change
 - **Success exit:** effective settings shown with the layer each came from and its lock
-- **Task analysis:** verify signature and revision → resolve lock, then the user's value, then the highest default → show each key's source → refuse a local change to a locked key.
+- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → show each key's source → refuse a local change to a locked key.
 - **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
 - **Flow:**
 

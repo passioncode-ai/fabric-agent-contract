@@ -269,8 +269,8 @@ independent agent author and P-02 project operator.
   1. Member opens device settings -> each key shows its effective value, its source layer and its lock.
   2. Member switches logging off -> the device refuses: locked by the server.
   3. Member sets `x-example.banner` to `quiet` -> the user value becomes effective.
-- **Expected result:** the effective settings equal the resolution of the layers (lock, then the user's value, then the highest default); no locked key changes locally.
-- **Alt paths:** a new server policy whose signature does not verify -> the device keeps the held revision and reports `failed`.
+- **Expected result:** the effective settings equal the resolution of the layers (lock, then the user's value, then the highest default; `harness.baseline` and `repair.packages` never from the user); no locked key changes locally.
+- **Alt paths:** a new server policy whose signature does not verify -> the device keeps the held revision and reports `failed`; the member changes `harness.baseline` or `repair.packages` -> these are the organization's signed keys: shown with their signed layer and never taken from the member (DEC-0102; the device's answer to the change is CT-99).
 - **UI elements:** key, value, source layer, lock, held revision.
 - **States covered:** success, error
 - **Errors & recovery:** a refused change names the locking layer; the member asks the organization to change the policy.

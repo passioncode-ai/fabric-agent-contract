@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-100)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-101)
 
 ## Objective
 
@@ -74,13 +74,21 @@ nowhere, so it is the mdm deadline and the rest joins CT-97; this section's roun
 collector row names consuming any reason, item 8's sentence, and the `machine.mode` row points to the whole harness.
 Seam: pass at 5ceafc02, five risks: two already fixed by the product's corrections (the no-person start, CT-88), the
 precedence list names the two signed-only keys, the other three are CT-99. Unit: pass at 5ceafc02 (78 of 93 plants
-die, five survivors equivalent); its five test gaps are CT-100.
+die; of the fifteen survivors five are equivalent and ten are the five test gaps of CT-100).
+
+## Eighth round
+
+Seam: pass, two risks into CT-97 (the reference `collectionStart` moves with a later deadline before any
+acknowledgement; the first organization server collects nothing from a device with no proven user). Product: two
+breaks (an older request without a deadline expired only on the first pass; SCN-011, SCR-10 and FLW-07 promising a
+person's value for the two signed-only keys), fixed; its risks: the counts here, CT-88's wording, item 1's
+"second exception", `pnpm vectors:check` recorded, the glossary as CT-101.
 
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
   check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage, CT-94 for
-  derive's role input, CT-95 for the UX scenarios, CT-96 for a repair vector, CT-97 and CT-98.
+  derive's role input, CT-95 for the UX scenarios, CT-96 for a repair vector, CT-97, CT-98, CT-99, CT-100 and CT-101.
 - A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
   policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
   repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person
@@ -90,7 +98,7 @@ die, five survivors equivalent); its five test gaps are CT-100.
 
 ## Open
 
-- CT-91; **CT-92 needs the operator** (other contexts' services and harness item names in a summary); CT-93; CT-94; CT-95; CT-96; CT-97; CT-98; CT-99; CT-100; the adoption rows CT-81 to
+- CT-91; **CT-92 needs the operator** (other contexts' services and harness item names in a summary); CT-93; CT-94; CT-95; CT-96; CT-97; CT-98; CT-99; CT-100; CT-101; the adoption rows CT-81 to
   CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
@@ -99,7 +107,8 @@ die, five survivors equivalent); its five test gaps are CT-100.
 `pnpm run check` exit 0: typecheck, 94 test files with 7 965 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
 list for `FAC-SEM-128`; both fixed. Six rounds of blind readings ran on this branch after the first on the merged range (second to seventh; the unit tier
-in the second, third, sixth and seventh, seam and product in each); the PR merges after two consecutive clean rounds.
+in the second, third, sixth and seventh, seam and product in each); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
+generators.
 
 ## Next task
 
