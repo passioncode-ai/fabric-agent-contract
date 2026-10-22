@@ -1,5 +1,5 @@
 {
-  "$comment": "The device transport binding's vectors (DEC-0056, devices.md#transport): HTTP message signatures (RFC 9421 subset) with Content-Digest (RFC 9530). Each case is a FAC-SEM-077 rule input without `answer`: merge the top-level publicBaseUrl, certificates and at into it; `seen` is the receiver's nonce store before the request; `clientCertificateSerial`, when present, is the serial of a mutual-TLS session's client certificate (DEC-0056 item 1); `expect` is accepted or the 401 code, or `organization-closed` (410, DEC-0103) for a closed organization's certificate. Every case carries one fault (`fault`); the `organization` cases' certificate is also revoked on purpose, to pin step 4 before step 5 (DEC-0103). Keys are fresh, generated for these vectors; only their public halves are here, and ECDSA signatures are not reproducible, so a signer port is tested by verifying its own output. `rfc9421` and `rfc9530` are the RFCs' own examples, run by test/http-signature.test.ts.",
+  "$comment": "The device transport binding's vectors (DEC-0056, devices.md#transport): HTTP message signatures (RFC 9421 subset) with Content-Digest (RFC 9530). Each case is a FAC-SEM-077 rule input without `answer`: merge the top-level publicBaseUrl, certificates and at into it; `seen` is the receiver's nonce store before the request; `clientCertificateSerial`, when present, is the serial of a mutual-TLS session's client certificate (DEC-0056 item 1); `expect` is accepted or the 401 code, or `organization-closed` (410, DEC-0103) for a closed organization's certificate, whose cases also carry `expectStatus` 410 and `expectClosedAt`. Every case carries one fault (`fault`); the `organization` cases' certificate is also revoked on purpose, to pin step 4 before step 5 (DEC-0103). Keys are fresh, generated for these vectors; only their public halves are here, and ECDSA signatures are not reproducible, so a signer port is tested by verifying its own output. `rfc9421` and `rfc9530` are the RFCs' own examples, run by test/http-signature.test.ts.",
   "rfc9421": {
     "section": "RFC 9421 Appendix B.2.6, the key test-key-ed25519 (Appendix B.1.4), public half only",
     "publicKey": "JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=",
@@ -1009,7 +1009,9 @@
         },
         "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
       },
-      "expect": "organization-closed"
+      "expect": "organization-closed",
+      "expectStatus": 410,
+      "expectClosedAt": "2026-10-10T00:00:00Z"
     },
     {
       "name": "mutual TLS and an unsigned request of a closed organization (DEC-0103)",
@@ -1024,7 +1026,9 @@
         "body": "{\"protocol\":\"fabric-device/0.1\",\"kind\":\"check-in\",\"device\":{\"id\":\"dev-01j9a\"},\"sequenceNum\":289}"
       },
       "clientCertificateSerial": "4a4b4c4d4e4f5051",
-      "expect": "organization-closed"
+      "expect": "organization-closed",
+      "expectStatus": 410,
+      "expectClosedAt": "2026-10-10T00:00:00Z"
     }
   ]
 }

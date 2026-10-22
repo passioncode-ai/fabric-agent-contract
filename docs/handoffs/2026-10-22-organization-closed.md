@@ -41,7 +41,9 @@ Seam: pass; its risks closed ("product and version" is the server's own knowledg
 Expiry paragraph names the exception, the answer before signature verification discloses only `closedAt`). Product: one
 break, this handoff's objective still said the node retries; fixed, with its risks (an expired certificate meets only
 the enrollment's answer, the glossary's MAY, which enrollment end lifts locks, SCR-10's element and state, the vectors
-paragraph, the FAC-SEM-077 row's wording).
+paragraph, the FAC-SEM-077 row's wording). Unit: pass; its test gaps closed (a test keeps each closed-organization vector to
+one fault, the vectors carry `expectStatus` and `expectClosedAt`, two intake vectors pin SR-0 before SR-1, `null` is
+not absence).
 
 ## Open
 
@@ -50,7 +52,7 @@ paragraph, the FAC-SEM-077 row's wording).
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 995 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 998 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings); `pnpm vectors:check` exit 0, 14 vector files match their generators.
 
 ## Next task

@@ -99,11 +99,25 @@ describe("the binding's vectors (DEC-0056)", () => {
   it.each(cases.map((c) => [c.name, c] as const))("%s", async (_name, c) => {
     const verdict = await verifyDeviceRequest(c.request as DeviceRequest, { ...context(c.clientCertificateSerial ? { clientCertificateSerial: c.clientCertificateSerial } : {}), nonces: storeWith(c.seen) });
     expect(verdict.ok ? "accepted" : verdict.code).toBe(c.expect);
+    if (c.expectStatus !== undefined) expect(verdict).toMatchObject({ status: c.expectStatus, closedAt: c.expectClosedAt });
     if (c.signatureBase) {
       const digest = c.request.headers["content-digest"] as string;
       const params = parseDictionary(c.request.headers["signature-input"])!.members.get(DEVICE_SIGNATURE_LABEL) as Json;
       const [[, created], [, nonce], [, keyid], [, alg]] = params.params;
       expect(deviceSignatureBase(c.request.method, deviceTargetUri(vectors.publicBaseUrl, c.request.target)!, digest, deviceSignatureParams(created, nonce, keyid, alg))).toBe(c.signatureBase);
+    }
+  });
+
+  it("keeps each closed-organization case to one fault: revoked on purpose, and accepted once its closure and revocation are lifted (DEC-0103)", () => {
+    const closed = cases.filter((c) => c.fault === "organization");
+    expect(closed.length).toBe(2);
+    for (const c of closed) {
+      const serial = (c.clientCertificateSerial as string | undefined) ?? "4a4b4c4d4e4f5051";
+      const record = bySerial.get(serial)!;
+      expect(record.revoked, c.name).toBe(true);
+      const { organizationClosedAt: _closed, revoked: _revoked, ...open } = record;
+      const lifted = checkDeviceSignature(c.request as DeviceRequest, context({ certificate: (s) => (s === serial ? open : bySerial.get(s)), ...(c.clientCertificateSerial ? { clientCertificateSerial: c.clientCertificateSerial } : {}) }));
+      expect(lifted, c.name).toMatchObject({ ok: true });
     }
   });
 

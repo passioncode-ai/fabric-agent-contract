@@ -3269,6 +3269,71 @@
       }
     },
     {
+      "name": "SR-0 before SR-1: an unusable held list with a closed organization's verdict",
+      "held": "not a list",
+      "registration": {
+        "type": "share-registration/1",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "context": "org:org_7kq2m4xw",
+        "state": "active",
+        "grantRevision": 3,
+        "agentRef": "urn:fabric:agent:example:inbox-digest",
+        "startsAt": "2026-10-12T08:00:00Z",
+        "expiresAt": "2026-10-26T08:00:00Z"
+      },
+      "binding": {
+        "transport": {
+          "ok": false,
+          "code": "organization-closed",
+          "closedAt": "2026-11-30T00:00:00Z"
+        },
+        "org": {
+          "id": "org_7kq2m4xw"
+        },
+        "device": {
+          "id": "dev-01j9a"
+        },
+        "user": {
+          "id": "m-4821"
+        }
+      },
+      "expected": {
+        "fault": "context-invalid"
+      }
+    },
+    {
+      "name": "SR-0: a closed organization's code without ok false",
+      "held": [],
+      "registration": {
+        "type": "share-registration/1",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "context": "org:org_7kq2m4xw",
+        "state": "active",
+        "grantRevision": 3,
+        "agentRef": "urn:fabric:agent:example:inbox-digest",
+        "startsAt": "2026-10-12T08:00:00Z",
+        "expiresAt": "2026-10-26T08:00:00Z"
+      },
+      "binding": {
+        "transport": {
+          "code": "organization-closed",
+          "closedAt": "2026-11-30T00:00:00Z"
+        },
+        "org": {
+          "id": "org_7kq2m4xw"
+        },
+        "device": {
+          "id": "dev-01j9a"
+        },
+        "user": {
+          "id": "m-4821"
+        }
+      },
+      "expected": {
+        "fault": "context-invalid"
+      }
+    },
+    {
       "name": "SR-2: a revision this receiver does not read",
       "held": [],
       "registration": {

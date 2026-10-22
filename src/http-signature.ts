@@ -382,7 +382,8 @@ export interface DeviceCertificateRecord {
   /**
    * DEC-0103: the time the organization's closing began (RFC 3339), set only once the closing can no longer be cancelled
    * and only for a node pinned at or after DEC-0103 (known from the last product and version it reported). The server
-   * keeps it from its termination record after the organization is deleted, so the device learns the end.
+   * keeps it from its termination record after the organization is deleted, so the device learns the end. An open
+   * organization's record omits the member: `null` is not absence, and an unreadable value is the receiver's fault.
    */
   organizationClosedAt?: string;
   /**

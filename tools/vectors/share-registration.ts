@@ -215,6 +215,8 @@ function intakeCases(): Json[] {
     ["SR-1: a closed organization (DEC-0103): 410 with its closedAt", [held], base, binding({ transport: { ok: false, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" } }), { status: 410, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" }],
     ["SR-1: a closed organization without its time is the receiver's fault", [], base, binding({ transport: { ok: false, code: "organization-closed" } }), { fault: "context-invalid" }],
     ["SR-1: a closed organization with an unreadable time is the receiver's fault", [], base, binding({ transport: { ok: false, code: "organization-closed", closedAt: "2026-11-30" } }), { fault: "context-invalid" }],
+    ["SR-0 before SR-1: an unusable held list with a closed organization's verdict", "not a list", base, binding({ transport: { ok: false, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" } }), { fault: "context-invalid" }],
+    ["SR-0: a closed organization's code without ok false", [], base, binding({ transport: { code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" } }), { fault: "context-invalid" }],
     // SR-2
     ["SR-2: a revision this receiver does not read", [], { ...base, type: "share-registration/2" }, binding(), unsupported("share-registration/2")],
     ["SR-2: a receipt sent as a registration", [], { ...base, type: RECEIPT }, binding(), unsupported(RECEIPT)],
