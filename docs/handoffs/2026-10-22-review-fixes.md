@@ -27,7 +27,10 @@ Three blind readings, run as background subagents with no edits:
 
 Product: five breaks (DEC-0102's compatibility and fixture list; the baseline's per-kind fields in the prose; a
 `collectionStart` trigger that never fires under device management, dropped; the round counts; this handoff's
-checks), fixed. Unit and seam: see the pull request.
+checks), fixed. Seam: one break, the resume trigger after `purpose` missed a person acknowledging the notice already in
+force; the check-in response now names `acknowledgedNoticeVersion` and the collector resumes when it changes. Three
+seam risks: the wording aligned; `harnessBaseline` tests for mdm over server added; `deriveShareRegistrations` has no
+role input although the text says an `org-cloud` enrollment derives none (CT-94). Unit: see the pull request.
 
 ## Done
 

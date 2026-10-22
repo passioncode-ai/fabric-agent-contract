@@ -907,5 +907,7 @@
   {"name": "comms-receipt-no-responder-long-message", "schema": "comms-receipt.schema.json", "path": "negative/comms-receipt-no-responder-long-message.json", "valid": false, "keyword": "maxLength"},
   {"name": "device-policy-harness-baseline", "schema": "device-policy.schema.json", "path": "positive/device-policy-harness-baseline.json", "valid": true},
   {"name": "device-policy-baseline-dotted-suffix", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-dotted-suffix.json", "valid": false, "keyword": "pattern"},
-  {"name": "device-policy-baseline-skill-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-skill-min-version.json", "valid": false, "keyword": "false schema"}
+  {"name": "device-policy-baseline-skill-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-skill-min-version.json", "valid": false, "keyword": "false schema"},
+  {"name": "device-check-in-response-acknowledged", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-response-acknowledged.json", "valid": true},
+  {"name": "device-check-in-response-acknowledged-bad", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-response-acknowledged-bad.json", "valid": false, "keyword": "pattern"}
 ]

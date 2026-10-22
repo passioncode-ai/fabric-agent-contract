@@ -71,6 +71,12 @@ describe("harnessDrift (DEC-0101)", () => {
     expect(harnessBaseline([server, user])).toEqual({ revision: 7, items });
     expect(harnessBaseline([user])).toBeUndefined();
     expect(harnessBaseline("no")).toBeUndefined();
+    // mdm over server unless the server locks the key; the drift's revision is the setting layer's.
+    const mdmItems = [{ kind: "skill", name: "y" }];
+    const mdm = { source: "mdm", revision: 3, keys: { "harness.baseline": { value: { items: mdmItems } } } };
+    expect(harnessBaseline([mdm, server])).toEqual({ revision: 3, items: mdmItems });
+    const locked = { ...server, keys: { "harness.baseline": { value: { items }, locked: true } } };
+    expect(harnessBaseline([mdm, locked])).toEqual({ revision: 7, items });
     expect(signedPolicyValue([server, user], "repair.packages")).toEqual([]);
   });
 

@@ -6266,8 +6266,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   7. **SR-5a** refuses only an active registration: a withdrawal passes, because it reduces processing.
   8. **After a `purpose` rejection** a collector sends that kind for that person again only when the device's policy
      names a later `noticeVersion`, never on a timer (DEC-0100's refused alternative stands, and so does the first
-     organization server's ask: not until the notice changes). A later `collectionStart` is no signal: under device
-     management it is the earlier of the acknowledgement and the mdm deadline, so it may never move later.
+     organization server's ask: not until the notice changes), or when a check-in response's new member
+     `acknowledgedNoticeVersion` (the latest version the device's person acknowledged) differs from the one it held at
+     the rejection: the person may acknowledge the notice already in force, which moves no policy. `collectionStart` is
+     no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
   9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; on its
      first pass after taking DEC-0098 a board answers each `queued` request its target already replied to, then expires
      each `queued` or `claimed` request older than seven days that has no deadline, in that order; a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
@@ -6279,7 +6281,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Why:** three blind readings of the range `bfa9a67..4a29fcb` on 2026-10-22 (unit, seam, product) failed it: thirteen
   breaks (two unit, four seam, seven product; the unit and seam tiers found the repair's policy expiry both), each
   reproduced, and twelve surviving plants. A second round on this branch found ten more (one unit, one seam, eight
-  product) and a third five product breaks, all fixed here before merge.
+  product) and a third six (five product, one seam: the resume trigger missed an acknowledgement of the notice in force), all fixed here before merge.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
   for open questions) and is listed above.
 - **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape; `minVersion` only
@@ -6287,14 +6289,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   another is refused whole and the node keeps the revision it holds. Narrower for a node summary (an organization
   context only) and
   for a repair (a key in its window, signed layers, one run per id); a consumer of these surfaces has not adopted yet
-  (CT-83, CT-88). `contractVersion` stays `0.1.0`.
+  (CT-83, CT-88). Wider for a check-in response (`acknowledgedNoticeVersion`): the response is a closed object, so a
+  server sends the member only to a node pinned at or after DEC-0102, as DEC-0094 does for `protocols`. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schemas `node-summary` (context, name), `device-policy` (`harness.baseline`),
-  `comms-receipt` (`noResponder.message`); code
+  `comms-receipt` (`noResponder.message`), `device-check-in` (`acknowledgedNoticeVersion`); code
   `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
   `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;
-  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`; negative `node-summary-personal-context`,
+  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`, `device-check-in-response-acknowledged`; negative `node-summary-personal-context`,
   `node-summary-dotted-suffix`, `device-policy-baseline-dotted-suffix`, `device-policy-baseline-skill-min-version`,
-  `comms-receipt-no-responder-long-message`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
+  `comms-receipt-no-responder-long-message`, `device-check-in-response-acknowledged-bad`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
   `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
   docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,
   `conformance.md`, `docs/specification/README.md`, `CONTEXT.md`, `docs/ux/flows.md`, `screens.md`, `scenarios.md`,

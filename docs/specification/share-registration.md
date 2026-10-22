@@ -130,7 +130,7 @@ response's `protocols` first lists `share-registration/1` (DEC-0094). It SHOULD 
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
 redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
 for the record to change as below, except SR-5a's `purpose-not-collected`, which it sends again at the resend and when
-its policy names a later `noticeVersion` (DEC-0100). It keeps each receipt. It sends nothing again that the receiver
+its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection (DEC-0100, DEC-0102). It keeps each receipt. It sends nothing again that the receiver
 answered with a typed refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded
 meanwhile, SR-5a again excepted: that grant is held, not degraded; after no
 answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the
@@ -222,7 +222,7 @@ shown under its grant without an agent. Days compare as UTC days: a `startsAt` o
 |---|---|
 | `send` | a status 200 receipt, whatever its state (usage before a withdrawal still joins); a 409 `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
 | `hold-degraded` | a typed refusal of the SR table that sending the same registration again does not clear: 409 `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or `schema-unsupported`. The node keeps the sums, reports itself degraded and sends again only when the record changes |
-| `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion` ([devices](devices.md#policy)), and at the seven-day resend |
+| `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection ([devices](devices.md#policy), DEC-0102), and at the seven-day resend |
 | `hold` | no answer yet, a transport refusal (401), a receiver's fault, a code under a status that is not its own, or anything else: the node keeps the sums and sends the registration again with backoff |
 
 So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant
@@ -273,8 +273,8 @@ keeping its verdict. `contractVersion` stays `0.1.0`.
 - **Project Observatory's node and collector** derive registrations per enrollment and send them signed (DEC-0056), keep
   the receipts, withdraw on revocation or drop, send again after an enrollment, after a check-in response's `protocols` first lists `share-registration/1`
   (DEC-0094) and weekly (never what a typed refusal
-  answered until the record changes, except SR-5a's `purpose-not-collected`, sent again weekly and on a later
-  `noticeVersion`, DEC-0100; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
+  answered until the record changes, except SR-5a's `purpose-not-collected`, sent again weekly, on a later
+  `noticeVersion` and on a new `acknowledgedNoticeVersion`, DEC-0100, DEC-0102; with backoff after no answer, a 401 or a receiver's fault), emit `grant.usage` with
   `context` only as `gateGrantUsage` allows, and run `fixtures/vectors/share-registration.json` (its `gate` cases too).
 - **The first organization server** adds a device route for `share-registration/1` after DEC-0056's steps and
   DEC-0067's check, answers the SR rows and joins by the GJ rows, keys by (bound user, `grantId`) in one held list per

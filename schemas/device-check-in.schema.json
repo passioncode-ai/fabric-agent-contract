@@ -393,6 +393,10 @@
           "$ref": "common.schema.json#/$defs/timestamp",
           "description": "When this device's collection for the organization started: the notice's acknowledgement, or under device management the earlier of it and the deadline (DEC-0053). Absent: not started. Events that occurred before it are never uploaded."
         },
+        "acknowledgedNoticeVersion": {
+          "$ref": "activity-common.schema.json#/$defs/noticeVersion",
+          "description": "The latest noticeVersion this device's person acknowledged to the organization (DEC-0102). Absent: none yet. A collector held by a purpose rejection resumes when it differs from the one it held at the rejection."
+        },
         "keySet": {
           "$ref": "device-key-set.schema.json"
         },

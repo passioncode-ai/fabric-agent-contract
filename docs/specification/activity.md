@@ -367,7 +367,7 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
   `attribution`, `purpose`. **A rejected event is consumed with a rejection.** The collector does not resend
   it, and the stream does not stall on it. `purpose` (DEC-0100) says the receiver does not collect that event for that
   person under the notice they acknowledged ([notice](#notice)); the collector then sends no event of that kind for
-  that person until the device's policy names a later `noticeVersion`, never on a timer (DEC-0100, DEC-0102). An `attribution` rejection stays what it was:
+  that person until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). An `attribution` rejection stays what it was:
   the event names another organization, device or user than its certificate.
 - `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
   **everything the receiver holds for the stream across batches** — the same state it judges tamper

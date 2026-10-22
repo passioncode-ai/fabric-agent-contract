@@ -437,7 +437,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
  *   `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or
  *   `schema-unsupported`): the node keeps the sums, reports itself degraded and sends again only when the record changes;
  * - `hold-notice` (DEC-0100): 403 `purpose-not-collected`: the node keeps the sums, is not degraded, and sends the
- *   registration again when its policy names a later `noticeVersion`, and at the seven-day resend;
+ *   registration again when its policy names a later `noticeVersion` or a check-in response a new
+ *   `acknowledgedNoticeVersion` (DEC-0102), and at the seven-day resend;
  * - `hold`: no answer yet, a transport refusal (401), a receiver's fault, a code whose status is not its own, or anything
  *   else: the node keeps the sums and sends the registration again with backoff.
  *
