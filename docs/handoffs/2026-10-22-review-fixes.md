@@ -82,7 +82,14 @@ Seam: pass, two risks into CT-97 (the reference `collectionStart` moves with a l
 acknowledgement; the first organization server collects nothing from a device with no proven user). Product: two
 breaks (an older request without a deadline expired only on the first pass; SCN-011, SCR-10 and FLW-07 promising a
 person's value for the two signed-only keys), fixed; its risks: the counts here, CT-88's wording, item 1's
-"second exception", `pnpm vectors:check` recorded, the glossary as CT-101.
+"second exception", `pnpm vectors:check` recorded, the glossary as CT-101. Unit: pass.
+
+## Ninth round
+
+Unit and seam: pass; their risk, CT-81's stale wording, fixed. Product: two breaks (the round count here; a repair
+result called both once and repeated, now one per id, repeated unchanged), fixed; its risks: the pass answers on every
+tick as Fabric's does, the board's conformance row names the DEC-0098 duties, SCR-10 points to CT-99. The expire pair
+`claimed` to `expired` has no test (pre-existing, CT-100).
 
 ## Done
 
@@ -106,8 +113,8 @@ person's value for the two signed-only keys), fixed; its risks: the counts here,
 
 `pnpm run check` exit 0: typecheck, 94 test files with 7 965 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. Six rounds of blind readings ran on this branch after the first on the merged range (second to seventh; the unit tier
-in the second, third, sixth and seventh, seam and product in each); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
+list for `FAC-SEM-128`; both fixed. Eight rounds of blind readings ran on this branch after the first on the merged range (second to ninth; seam and product in
+each, the unit tier in six of them, the last three at 5ceafc02, 944d039f and cc56eb67); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
 generators.
 
 ## Next task

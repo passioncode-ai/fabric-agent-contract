@@ -81,8 +81,9 @@ by `agentRef`, `version` and `digest`, one line the person reads (`task`), and a
 | `not-allowlisted` | the policy key `repair.packages` does not list the package's `agentRef` and `digest`; absent, no repair runs |
 | `person-declined` | the person was not told before it started, or declined. A machine with role `org-cloud` binds no person: the organization's own signed request is its notice (DEC-0102) |
 
-Otherwise it runs. The node answers each request once with `repair-result.schema.json` in its next check-in
-(`records.repairResults`): `succeeded` with when the person was told and when it started, or `failed` or `refused` with the
+Otherwise it runs. The node keeps one result per request id and sends it with `repair-result.schema.json` in its next check-in
+(`records.repairResults`; a redelivered request gets that same stored result again, never a second run, and a receiver
+keeps one result per id): `succeeded` with when the person was told and when it started, or `failed` or `refused` with the
 reason. How the person is told, and the package's own run, are the node's.
 
 ## Semantic rules

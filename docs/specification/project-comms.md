@@ -78,8 +78,9 @@ A request's target must be a participant of a new thread (`FAC-SEM-026`).
 **A request never waits for ever** (DEC-0098). A request submitted without a `deadline` gets one seven days after it
 is stored; the board writes it into the request, so the message as read carries it. A request stored before this
 decision carries none: its default is read from the time it was stored, never written into its event. On every pass a
-board expires each `queued` or `claimed` request whose deadline, its own or that default, has passed; on its first pass
-after taking this decision it first answers each `queued` request its target had already replied to (DEC-0102). A [hold](#holds) does not stop that clock: a
+board expires each `queued` or `claimed` request whose deadline, its own or that default, has passed; and before that each
+`queued` request its target had already replied to is answered (a reply that came while the request was claimed, before a
+responder was replaced, or before the board took this decision; DEC-0102). A [hold](#holds) does not stop that clock: a
 queued or claimed request held longer than its deadline expires (accepted work is kept, C4). A request whose target Project
 nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
@@ -231,7 +232,7 @@ alive, a lease, a Telegram delivery or a read mark.
 | responder replaced | `claimed` → `queued`. `accepted` stays accepted; a new responder continues it only by an explicit checkpoint transfer |
 | lost result | `in_progress` → `outcome_unknown` |
 | `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only, by the current responder, or the estate owner when no responder holds the slot (DEC-0081) |
-| answer | `queued` → `answered`: a message of any kind but `request` from the request's target Project whose `replyTo` is the request, in the same transaction as that message (DEC-0098, DEC-0102) |
+| answer | `queued` → `answered`: a message of any kind but `request` from the request's target Project whose `replyTo` is the request, in the same transaction as that message, or on a board's pass for a `queued` request such a message already answered (DEC-0098, DEC-0102) |
 
 An operator's [hold](#holds) (DEC-0079) is not an operation of this table: it moves no request and changes no revision,
 it refuses some operations while it lasts, and a held request's deadline keeps running. It is not the C4 sense of

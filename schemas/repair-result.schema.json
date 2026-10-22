@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/repair-result.schema.json",
   "title": "A node's answer to a repair, repair-result/1 (DEC-0101)",
-  "description": "Sent once per repair-request id in the next check-in's records.repairResults, inside the signed device request.",
+  "description": "One result per repair-request id, sent in the next check-in's records.repairResults inside the signed device request; a redelivered request gets the same stored result again, and a receiver keeps one per id (DEC-0102).",
   "type": "object",
   "required": [
     "type",

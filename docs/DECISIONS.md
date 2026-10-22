@@ -6284,8 +6284,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; a request
      stored before DEC-0098 has no deadline in its event, and its default (seven days after it was stored) is read from
      its time, never written; on every pass a board expires each `queued` or `claimed` request whose deadline, its own
-     or that default, has passed, and on its first pass after taking DEC-0098 it first answers each `queued` request its
-     target already replied to; a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
+     or that default, has passed, and before that answers each `queued` request its target already replied to (on every pass, as
+     Fabric's board does: a reply can come while the request is claimed and the request return to `queued`); a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
   10. **An `org-cloud` machine derives no share registrations**: share grants are a person's, and such a machine binds
      none; its SR-5 `unassigned-device` is final, not a wait. What it reports for usage of agents it runs is CT-93.
   11. **Compatibility wording of DEC-0099 and DEC-0100:** no revision changed, so neither side can learn the other's pin
@@ -6304,7 +6304,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product reading found CT-92's widening not carried to its pointers and `before-purpose` covering a managed machine's
   deadline window; both fixed. An eighth product reading found the expiry of an older request without a deadline
   stated for its first pass only, and the UX of device settings promising a person's value for the two signed-only
-  keys; both fixed. A sixth seam reading found an `org-cloud` machine with no reason
+  keys; both fixed. A ninth product reading found the handoff's round count stale and a repair result
+  called both once and repeated; the result is one per id, repeated unchanged for a redelivered request. A sixth seam reading found an `org-cloud` machine with no reason
   for its buffered event (no person acknowledges); a seventh product reading found the instant first chosen for it
   defined nowhere, so such a device's start is its mdm deadline (its `collectionStart`) and the rest is CT-97. A fourth
   unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
