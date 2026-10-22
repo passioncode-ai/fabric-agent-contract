@@ -10,7 +10,7 @@
   "rejected": [
     {
       "eventId": "01J9A0000000000000000000ZZ",
-      "reason": "before-start"
+      "reason": "before-purpose"
     }
   ],
   "acks": [

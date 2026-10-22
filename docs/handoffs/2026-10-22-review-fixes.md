@@ -41,8 +41,17 @@ Product: four breaks (the pin condition for `acknowledgedNoticeVersion` only in 
 resume rule; the renewal's proof clause moved onto rotation; this handoff's counts), fixed; its risks too: an absent
 value is no signal, the `org-cloud` derivation points to CT-94, and CT-95 holds the missing UX scenarios. Seam: one break, a buffered event from before the acknowledgement rejected
 `purpose` held a kind for good; the receiver now answers `purpose` only for a purpose not collected now, and
-`before-start` (new) for the buffered event, which holds nothing. Its risks: the member is on every response, the
+`before-purpose` (new) for the buffered event, which holds nothing. Its risks: the member is on every response, the
 context-route comment names the summary's exception, FAC-SEM-128 on a check-in stays CT-91, a repair vector is CT-96.
+
+## Fifth round
+
+Product: one break, the answer to a collector pinned before DEC-0102 for that buffered event was stated three ways;
+the reason now goes to every collector (a rejection is consumed whatever its reason, DEC-0100), is named
+`before-purpose` (GJ-4's `before-start` is a stored state) and covers only an event after `collectionStart`; CT-92
+now also asks about harness item names installed for other contexts. Seam: one break, a hold taken with no
+`acknowledgedNoticeVersion` held never resumed on the first acknowledgement (a managed machine collects from the
+deadline); absence at the rejection is now a held value, and only a value becoming absent is no signal.
 
 ## Done
 

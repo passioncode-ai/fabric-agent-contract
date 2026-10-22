@@ -395,7 +395,7 @@
         },
         "acknowledgedNoticeVersion": {
           "$ref": "activity-common.schema.json#/$defs/noticeVersion",
-          "description": "The latest noticeVersion this device's person acknowledged to the organization (DEC-0102), on every response once there is one. Absent: none yet; an absent value never resumes. A collector held by a purpose rejection resumes when it differs from a present one it held at the rejection."
+          "description": "The latest noticeVersion this device's person acknowledged to the organization (DEC-0102), on every response once there is one. Absent: none yet. A collector held by a purpose rejection resumes when a present value differs from what it held at the rejection, absence included; a value that becomes absent never resumes."
         },
         "keySet": {
           "$ref": "device-key-set.schema.json"
