@@ -33,7 +33,7 @@
         "items": [
           {
             "kind": "plugin",
-            "name": "tool@market.place",
+            "name": "tool@example.com",
             "minVersion": "0.6"
           },
           {

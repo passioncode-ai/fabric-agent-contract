@@ -40,7 +40,7 @@
     ],
     "plugins": [
       {
-        "name": "tool@market.place",
+        "name": "tool@example.com",
         "source": "marketplace",
         "version": "0.6.61"
       }
