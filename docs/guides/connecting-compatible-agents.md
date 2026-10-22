@@ -364,16 +364,21 @@ its `fabricManifest` names, and a provider entry with its manifest. A file at th
 an installed copy outside the folder a note names it, so a stale install is visible rather than silently checked.
 Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder named after
 the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never one in a
-folder named after another owner, and a note says which file was read. A descriptor whose named manifest is found
-nowhere fails (FAC-SEM-020); an entry's is a note. A file checked on its own is checked without its pairs.
+folder named after another owner, and a note says which file was read. With two or more manifests and none of them in
+those places, none stands in. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a
+note. A file checked on its own is checked without its pairs. Save the well-known document as
+`<id>.<instance>.well-known.json`: folders whose name starts with a dot, and `node_modules`, are not read, so a copy
+under `.well-known/` is not checked. Beside a service in one folder, keep each manifest in a folder named after its
+owner (`example-reports/fabric-agent.json`), so each document finds its own.
 
 In a folder, a file the checker cannot tell (a JSON Schema, a test fixture, a probe receipt, a file named like a
 service key that carries no descriptor member) is noted and skipped, and `--schema` checks it; a file that does not
 parse is a problem whatever its name; the lock file is read as a contract pin; and a folder in which no file is a
-contract document is a usage error. It exits 0 when
+contract document is a usage error. A file by the lock's name that carries another tool's members (`schemas`,
+`releases`) is that tool's lock and is noted. It exits 0 when
 everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
-letter away from the contract's, is printed as a note and does not fail the run. `--json` prints the same findings
-as JSON for a script or a CI step.
+letter away from the contract's, is printed as a note and does not fail the run. `pnpm --silent validate <dir> --json` prints
+the same findings as JSON for a script or a CI step (`--silent` keeps pnpm's own lines off the output).
 
 ## Map an existing system
 

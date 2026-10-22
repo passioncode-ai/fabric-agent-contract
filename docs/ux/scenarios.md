@@ -58,12 +58,12 @@ independent agent author and P-02 project operator.
   2. Author fills the minimal manifest and runs `pnpm validate fabric-agent.json` -> the checker infers the manifest schema, checks the profile on the branch its `kind` selects (common and profile-specific fields separately) and runs the manifest's semantic rules.
   3. Author reads the result -> exit 0 with no line means shape and rules pass; it claims no protocol negotiation and no semantic admission, which the host still runs.
 - **Expected result:** author has a valid declaration and knows the remaining admission gate.
-- **Alt paths:** direct profile entry -> profile page links back to common objects and version policy; a folder with the provider entry, the manifest, the service descriptor and its well-known document -> `pnpm validate <folder>` checks each file and the pairs.
+- **Alt paths:** direct profile entry -> profile page links back to common objects and version policy; a folder with a service (descriptor, `<id>.<instance>.well-known.json`, manifest) and a provider entry with its own manifest under `<id>/` -> `pnpm validate <folder>` checks each file and the pairs, each document finding its own manifest, and a `note/pair` line names the file read when it is not the installed one at the named path.
 - **UI elements:** profile table, schema link, example, `pnpm validate` output (one line per problem: path, rule, message, help link) and exit code.
 - **States covered:** loading, error, success
 - **Errors & recovery:** a schema the checker cannot infer -> exit 2 asks for `--schema <name>`; an unsupported protocol revision -> one line naming the member and the value it must be.
 - **Status:** validated
-- **Coverage:** `test/validate-cli.test.ts` (every positive fixture exits 0; schema inference; folder pairs)
+- **Coverage:** `test/validate-cli.test.ts` (every positive fixture exits 0; schema inference; folder pairs; a service and a provider entry sharing one folder)
 - **Product:** unobserved
 
 ### SCN-002: Correct an invalid or incompatible declaration

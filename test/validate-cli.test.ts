@@ -73,6 +73,15 @@ describe("schema inference", () => {
     }
   });
 
+  it("the command, protocol signal included, never checks a catalogue entry against another schema", () => {
+    for (const entry of catalogue) {
+      const report = JSON.parse(run(fixture(entry.path), "--json").out) as { files: Array<{ schema: string | null }> };
+      const schema = report.files[0]?.schema ?? undefined;
+      if (schema === undefined || schema === entry.schema) continue;
+      expect(builtOn(entry.schema), entry.name).toContain(schema);
+    }
+  }, 120_000);
+
   it("checks the manifest, a provider entry, a descriptor and a well-known document with no --schema", () => {
     for (const file of ["positive/manifest-mcp.json", "positive/provider-entry-stdio.json", "positive/service-descriptor.json", "positive/service-well-known.json"]) {
       expect(run(fixture(file)), file).toEqual({ code: 0, out: "" });
@@ -798,8 +807,9 @@ describe("the fourth seam and product readings' cases: a consumer's folder as au
   });
 
   it("a document two schemas of one protocol fit equally is a problem in a folder", () => {
-    const device = { protocol: "fabric-device/0.1", kind: "x", org: "x", revision: 1, issuedAt: "2026-10-21T00:00:00Z", keys: [] };
-    const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "device.json": device }));
+    // comms-directory misses projects, comms-status misses responders: one member each.
+    const board = { protocol: "fabric-project-comms/0.1", snapshot: {}, cursor: null, board: {} };
+    const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "board.json": board }));
     expect(result.code).toBe(1);
     expect(result.out).toContain("pass --schema to say which");
   });
@@ -881,5 +891,38 @@ describe("the fifth unit reading's cases: pairing in a shared folder (contract r
     const result = run(folder({ "example-agent.default.json": service("example-agent", "~\\no-such-folder\\fabric-agent.json"), "fabric-agent.json": manifestFor("example-agent.default") }));
     expect(result.code).toBe(0);
     expect(result.out).toContain("is not installed yet, so the folder's fabric-agent.json is read");
+  });
+});
+
+describe("the fifth seam reading's cases (contract review 2026-10-21)", () => {
+  it("a document of a protocol a oneOf schema shares is not given to a sibling by the protocol alone", () => {
+    const result = run(fixture("positive/device-check-in.json"));
+    expect(result.code).toBe(2);
+    expect(result.out).not.toContain("schema/");
+  });
+
+  it("the positive fixtures as one folder report no schema problem on a valid file", () => {
+    const report = JSON.parse(run(path.join(root, "fixtures/positive"), "--json").out) as { problems: Array<{ file: string; rule: string }> };
+    expect(report.problems.filter((problem) => problem.rule.startsWith("schema/") && problem.file.endsWith(".json"))).toEqual([]);
+  }, 120_000);
+
+  it("an installed manifest at the named path, with no manifest in the folder, needs no note", () => {
+    const installed = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
+    const descriptor = { ...json("positive/service-descriptor.json"), fabricManifest: path.join(installed, "fabric-agent.json") };
+    expect(run(folder({ "example-agent.default.json": descriptor })).out).not.toContain("note/pair");
+  });
+
+  it("a damaged pin under the lock's name is still a pin, another tool's lock is not", () => {
+    expect(inferSchema({ version: "0.1.0", repository: "x" }, "x/fabric-contract.lock.json")).toBe("contract-pin.schema.json");
+    expect(inferSchema({ profile: "observatory-local-mcp", version: "1.2.0", schemas: [] }, "x/fabric-contract.lock.json")).toBeUndefined();
+  });
+});
+
+describe("the fifth product reading's cases (contract review 2026-10-21)", () => {
+  it("a half-written well-known document is checked as a well-known document, not as a usage report", () => {
+    const half = { protocol: "fabric-service/0.1", service: json("positive/service-well-known.json").service };
+    const out = run(folder({ "example-agent.default.json": json("positive/service-descriptor.json"), "example-agent.default.well-known.json": half })).out;
+    expect(out).toContain("schemas/service-well-known.schema.json");
+    expect(out).not.toContain("service-usage");
   });
 });

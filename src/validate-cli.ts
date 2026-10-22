@@ -36,7 +36,7 @@ const USAGE = [
 const root = projectRoot();
 
 interface Discriminated { file: string; required: string[]; consts: Array<[string, unknown]> }
-let cache: { validator: Ajv2020; schemas: ContractSchema[]; help: Map<string, string>; discriminated: Discriminated[] } | undefined;
+let cache: { validator: Ajv2020; schemas: ContractSchema[]; help: Map<string, string>; discriminated: Discriminated[]; blindProtocols: Set<string> } | undefined;
 function contract() {
   if (cache === undefined) {
     const schemas = loadSchemasSync();
@@ -44,7 +44,8 @@ function contract() {
       validator: createValidatorSync({ verbose: true }),
       schemas,
       help: ruleHelp(readFileSync(path.join(root, "docs/specification/conformance.md"), "utf8")),
-      discriminated: schemas.map((schema) => discriminated(schema, schemas))
+      discriminated: schemas.map((schema) => discriminated(schema, schemas)),
+      blindProtocols: blindProtocols(schemas)
     };
   }
   return cache;
@@ -53,6 +54,28 @@ function contract() {
 const fileOf = (schema: ContractSchema) => schema.$id.slice(`${SCHEMA_PREFIX}schemas/`.length);
 
 // #region schema-inference
+/**
+ * The protocols a schema without top-level `properties` uses (a `oneOf` of shapes: `device-check-in`, `activity-notice`):
+ * its discriminators are out of the checker's sight, so a document of that protocol is never given to a sibling schema
+ * by the protocol signal alone.
+ */
+function blindProtocols(schemas: readonly ContractSchema[]): Set<string> {
+  const commonProtocol = new Map(schemas.flatMap((schema) => {
+    const defs = isObject(schema.$defs) ? schema.$defs : {};
+    const protocol = isObject(defs.protocol) ? defs.protocol.const : undefined;
+    return typeof protocol === "string" ? [[fileOf(schema), protocol] as const] : [];
+  }));
+  const out = new Set<string>();
+  for (const schema of schemas) {
+    // A common schema (`service-common`) defines its protocol in `$defs` and describes no document of its own.
+    if (isObject(schema.properties) || commonProtocol.has(fileOf(schema))) continue;
+    const text = JSON.stringify(schema);
+    for (const match of text.matchAll(/"const":"(fabric-[a-z0-9-]+\/[0-9.]+)"/g)) out.add(match[1] as string);
+    for (const match of text.matchAll(/"\$ref":"([a-z0-9-]+\.schema\.json)#\/\$defs\/protocol"/g)) out.add(commonProtocol.get(match[1] as string) as string);
+  }
+  return out;
+}
+
 /** A schema's top-level discriminators: a `const` on format, schema, type, protocol or contractVersion. */
 const DISCRIMINATORS = ["format", "schema", "type", "protocol", "contractVersion"] as const;
 const SERVICE_KEY = /^[a-z][a-z0-9-]{1,62}\.[a-z][a-z0-9-]{0,31}$/;
@@ -93,8 +116,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   }
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
-  // A file by the lock's name that carries neither member of a pin is some other tool's lock.
-  if (name === "fabric-contract.lock.json" && carries(value, ["contract", "commit"])) return "contract-pin.schema.json";
+  // A file by the lock's name is a pin, damaged or not, unless it carries members another tool's lock has and a pin
+  // never does (the observatory engine's profile lock: `profile` as an object or with `schemas`, `releases`).
+  if (name === "fabric-contract.lock.json" && !(isObject(value) && (Object.hasOwn(value, "schemas") || Object.hasOwn(value, "releases") || Object.hasOwn(value, "schemaRelease")))) return "contract-pin.schema.json";
   // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
   // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
   // on a contract document, which the name rules below still read.
@@ -281,7 +305,12 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     // A `protocol` string a contract schema pins (`fabric-service/0.1`) says the file is a contract document: the one
     // schema it misses the fewest members of checks it, and its missing members are problems (exit 1). A shared
     // `contractVersion` says less: a probe receipt or a report carries it too, so it only names the near schemas.
-    const byProtocol = closest.filter((candidate) => candidate.consts.some(([member]) => member === "protocol"));
+    // Only where every schema of that protocol is in sight. A `.well-known.json` file is the well-known document
+    // whatever it misses, so a half-written one is not checked as a usage report that shares its protocol.
+    const blind = isObject(value) && contract().blindProtocols.has(value.protocol as string);
+    const protocolMatches = blind ? [] : matching.filter((candidate) => candidate.consts.some(([member]) => member === "protocol"));
+    const wellKnown = file.endsWith(".well-known.json") ? protocolMatches.filter((candidate) => candidate.file === "service-well-known.schema.json") : [];
+    const byProtocol = wellKnown.length === 1 ? wellKnown : protocolMatches.filter((candidate) => closest.includes(candidate));
     if (byProtocol.length === 1) schema = (byProtocol[0] as Discriminated).file;
     else {
       const near = closest.map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
@@ -343,7 +372,9 @@ function pairedManifest(run: Run, item: Checked, named: string, manifests: reado
   if (atPath !== undefined) return { located: true, value: atPath.value };
   if (existsSync(installed)) {
     const value = readJson(installed);
-    run.notes.push({ file: item.file, path: at, rule: "note/pair", message: value === undefined ? `the installed ${installed} does not parse as JSON (${rule})` : `the installed ${installed} is read as the manifest; the folder's copies are not paired (${rule})` });
+    // Say so when it matters: the file does not parse, or the folder holds a manifest the author may think is paired.
+    if (value === undefined) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} does not parse as JSON (${rule})` });
+    else if (manifests.length > 0) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} is read as the manifest; the folder's copies are not paired (${rule})` });
     return { located: true, value };
   }
   const base = installed.split(/[\\/]/).pop() as string;
