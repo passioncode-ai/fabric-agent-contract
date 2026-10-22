@@ -79,7 +79,7 @@ A request's target must be a participant of a new thread (`FAC-SEM-026`).
 is stored; the board writes it into the request, so the message as read carries it. A request stored before a board took
 this decision, with no deadline, expires seven days after its message was stored, and one its target had already
 replied to is answered by the board itself on its next pass (DEC-0102). A [hold](#holds) does not stop that clock: a
-request held longer than its deadline expires. A request whose target Project
+queued or claimed request held longer than its deadline expires (accepted work is kept, C4). A request whose target Project
 nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other

@@ -1,5 +1,5 @@
 {
-  "description": "A summary that names a person through an e-mail address on a machine its organization administers whole, mode A (DEC-0101): FAC-SEM-128.",
+  "description": "A summary that names a person through an e-mail address (DEC-0101): FAC-SEM-128.",
   "kind": "node-summary",
   "expect": [
     "FAC-SEM-128"
@@ -113,7 +113,6 @@
         }
       ]
     },
-    "mode": "A",
     "org": "org-7f3a"
   }
 }

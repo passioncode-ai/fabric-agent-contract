@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { policySigningInput } from "../src/device-rules.js";
-import { harnessDrift, repairDecision, versionBelow } from "../src/node-summary.js";
+import { harnessBaseline, harnessDrift, repairDecision, signedPolicyValue, versionBelow } from "../src/node-summary.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0101: node-summary/1, harnessDrift, and the node's decision on a repair (FAC-SEM-128, FAC-SEM-129).
@@ -14,9 +14,9 @@ const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, valu
 
 describe("node-summary semantic fixtures (FAC-SEM-128)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("node-summary-"));
-  it("has its eight fixtures, five refused", () => {
-    expect(files).toHaveLength(8);
-    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(5);
+  it("has its six fixtures, four refused", () => {
+    expect(files).toHaveLength(6);
+    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(4);
   });
   it.each(files)("%s", (name) => {
     const fixture = load(`semantic/${name}`);
@@ -64,6 +64,16 @@ describe("harnessDrift (DEC-0101)", () => {
     expect(harnessDrift([{ kind: "service", name: "observatory-node.default" }], unknownState)).toEqual([{ kind: "service", name: "observatory-node.default", state: "stopped" }]);
   });
 
+  it("reads the baseline and the allowlist from signed layers only, with the setting layer's revision (DEC-0102)", () => {
+    const items = [{ kind: "plugin", name: "x" }];
+    const server = { source: "server", revision: 7, keys: { "harness.baseline": { value: { items } }, "repair.packages": { value: [] } } };
+    const user = { source: "user", revision: 1, keys: { "harness.baseline": { value: { items: [] } }, "repair.packages": { value: [{ agentRef: "a", digest: "b" }] } } };
+    expect(harnessBaseline([server, user])).toEqual({ revision: 7, items });
+    expect(harnessBaseline([user])).toBeUndefined();
+    expect(harnessBaseline("no")).toBeUndefined();
+    expect(signedPolicyValue([server, user], "repair.packages")).toEqual([]);
+  });
+
   it("compares versions number by number; a version that is not dotted numbers is outdated", () => {
     expect(versionBelow("2.10.0", "2.9")).toBe(false);
     expect(versionBelow("2.9", "2.10")).toBe(true);
@@ -74,19 +84,19 @@ describe("harnessDrift (DEC-0101)", () => {
 });
 
 describe("FAC-SEM-128 beyond the fixtures", () => {
-  const { summary, baseline, mode } = load("semantic/node-summary-ok.json").input;
+  const { summary, baseline } = load("semantic/node-summary-ok.json").input;
   it("refuses a credential and a home path in any string, and drift without a baseline or under another revision", () => {
     const withSecret = { ...summary, harness: { ...summary.harness, plugins: [{ name: "ghp_0123456789abcdefghijABCDEFGHIJ", source: "local" }] } };
-    expect(codes("node-summary", { summary: withSecret, baseline, mode })).toContain("FAC-SEM-128");
+    expect(codes("node-summary", { summary: withSecret, baseline })).toContain("FAC-SEM-128");
     const withPath = { ...summary, services: [{ ...summary.services[0], mcpEndpoint: "https://host.example/Users/example/x" }] };
-    expect(evaluateSemanticRules("node-summary", { summary: withPath, baseline, mode }).map((finding) => finding.instancePath)).toEqual(["/summary/services/0/mcpEndpoint"]);
-    expect(codes("node-summary", { summary, mode })).toEqual(["FAC-SEM-128"]);
-    expect(codes("node-summary", { summary: { ...summary, drift: { ...summary.drift, policyRevision: 6 } }, baseline, mode })).toEqual(["FAC-SEM-128"]);
+    expect(evaluateSemanticRules("node-summary", { summary: withPath, baseline }).map((finding) => finding.instancePath)).toEqual(["/summary/services/0/mcpEndpoint"]);
+    expect(codes("node-summary", { summary })).toEqual(["FAC-SEM-128"]);
+    expect(codes("node-summary", { summary: { ...summary, drift: { ...summary.drift, policyRevision: 6 } }, baseline })).toEqual(["FAC-SEM-128"]);
     const { drift: _drift, ...undrifted } = summary;
-    expect(codes("node-summary", { summary: undrifted, baseline, mode })).toEqual(["FAC-SEM-128"]);
-    expect(codes("node-summary", { summary: "no", baseline: "no", mode })).toEqual([]);
+    expect(codes("node-summary", { summary: undrifted, baseline })).toEqual(["FAC-SEM-128"]);
+    expect(codes("node-summary", { summary: "no", baseline: "no" })).toEqual([]);
     const twice = { ...summary, harness: { ...summary.harness, plugins: [...summary.harness.plugins, summary.harness.plugins[0]] } };
-    expect(evaluateSemanticRules("node-summary", { summary: twice, baseline, mode }).map((finding) => finding.instancePath)).toContain("/summary/harness/plugins/1/name");
+    expect(evaluateSemanticRules("node-summary", { summary: twice, baseline }).map((finding) => finding.instancePath)).toContain("/summary/harness/plugins/1/name");
     const person = load("semantic/node-summary-person.json").input;
     expect(evaluateSemanticRules("node-summary", person).map((finding) => finding.instancePath)).toEqual(["/summary/harness/plugins/1/name"]);
     // The summary read whole: the clauses that need no policy (DEC-0102).

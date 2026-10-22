@@ -84,7 +84,7 @@ window at L3, not a grant limit (DEC-0041).
 organization server's opaque id (`common.schema.json#/$defs/contextId`), compared as written. A grant names the context
 its principal uses it in, never `personal` for an external one; an agent is placed on a machine once per context, an
 organization's instance under its own share grant; no event carries its session's context and no check-in carries a
-context: a device sends each enrollment's check-ins to that enrollment's server, a collector sends a session's events
+context but a node summary's own `org:<org.id>` (DEC-0102): a device sends each enrollment's check-ins to that enrollment's server, a collector sends a session's events
 only to its context's organization, and a grant's usage reaches the grant's organization as a daily `grant.usage`
 event, which carries the grant's own `org:<orgId>` (DEC-0086) ([contexts](docs/specification/contexts.md), DEC-0082).
 

@@ -27,10 +27,11 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 | `services` | the agent services placed in this summary's context, and no other: `key` (`id.instance`), `state`, `protocols`, an A2A card digest, the MCP endpoint as published |
 | `drift` | how the harness differs from the organization's baseline, under the policy revision that carried it |
 
-**How much it lists** (DEC-0102). Under the device policy's `machine.mode` `C`, the default, the organization manages
-only its own work on the machine, so the summary lists only the harness items its baseline names (none without a
-baseline) and the services of its context. Under mode `A`, which only an `mdm` layer sets, the organization administers
-the whole machine and the summary lists the whole harness (the operator's S8).
+**How much it lists.** The whole harness of the machine, whatever `machine.mode` says: the operator decided that a work
+machine is transparent to its organization (S8; the first organization server's ADR-0011), and DEC-0102 keeps that.
+The services are those of the summary's own context only; whether an organization also sees the services a person
+runs in other contexts, as ADR-0011 words it, collides with unlinkable memberships (DEC-0082) and is the operator's
+question, board row CT-92.
 
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
 or space, by schema; no string holds a home directory), a credential, an argument, an environment value, a prompt, an
@@ -43,7 +44,8 @@ purpose in its notice.
 The organization states what every machine is expected to run as the policy key `harness.baseline`
 ([device policy](devices.md#policy)): items by `kind` (`coding-agent`, `mcp-server`, `skill`, `plugin`, `service`) and
 `name`, with an optional `minVersion` (dotted numbers) and `digest`. A node reads it, and `repair.packages`, from the
-signed layers only (`mdm`, `server`): a person's own `user` layer never sets, widens or empties either (DEC-0102).
+`mdm` and `server` layers only: a person's own `user` layer never sets, widens or empties either (DEC-0102;
+`harnessBaseline` and `signedPolicyValue` in `src/node-summary.ts`).
 
 `harnessDrift(baselineItems, summary)` (`src/node-summary.ts`) answers, in the baseline's order, one state per item, the
 first that holds:
@@ -69,6 +71,7 @@ by `agentRef`, `version` and `digest`, one line the person reads (`task`), and a
 
 | Refused as | When |
 |---|---|
+| `already-answered` | this repair `id` was already answered: the node answers again with the stored result, runs nothing, and never sends this reason in a `repair-result/1` (DEC-0102) |
 | `bad-signature` | no key of the current set with that `keyId` and algorithm, inside its `notBefore` and `notAfter` at that moment (as `FAC-SEM-041` judges a policy's), verifies the signature; a request with no canonical form is refused here, never thrown (DEC-0102) |
 | `wrong-device` | the request names another device or organization |
 | `expired` | outside `issuedAt` ≤ now < `expiresAt`, or a window longer than 7 days |
@@ -76,8 +79,7 @@ by `agentRef`, `version` and `digest`, one line the person reads (`task`), and a
 | `not-allowlisted` | the policy key `repair.packages` does not list the package's `agentRef` and `digest`; absent, no repair runs |
 | `person-declined` | the person was not told before it started, or declined. A machine with role `org-cloud` binds no person: the organization's own signed request is its notice (DEC-0102) |
 
-Otherwise it runs. A node runs a repair `id` at most once: a request delivered again is answered with the stored result,
-not run again (`already-answered`, DEC-0102). The node answers each request once with `repair-result.schema.json` in its next check-in
+Otherwise it runs. The node answers each request once with `repair-result.schema.json` in its next check-in
 (`records.repairResults`): `succeeded` with when the person was told and when it started, or `failed` or `refused` with the
 reason. How the person is told, and the package's own run, are the node's.
 
@@ -85,7 +87,7 @@ reason. How the person is told, and the package's own run, are the node's.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-128"></a>`FAC-SEM-128` | `node-summary`, `node-summary-document` | `{summary, baseline?, org?, mode?}`: no string carries a credential, an e-mail address or a home path; no list names an item twice; `context` is `org:` and `org` as written; under mode `C` (or `mode` absent) every harness item is one the baseline names; with a baseline (`{revision, items}`), `drift` names its revision and equals `harnessDrift`, without one there is no `drift`. Kind `node-summary-document` reads a summary alone with the first two clauses (DEC-0102) |
+| <a id="fac-sem-128"></a>`FAC-SEM-128` | `node-summary`, `node-summary-document` | `{summary, baseline?, org?}`: no string carries a credential, an e-mail address or a home path; no list names an item twice; `context` is `org:` and `org` as written; with a baseline (`{revision, items}`), `drift` names its revision and equals `harnessDrift`, without one there is no `drift`. Kind `node-summary-document` reads a summary alone with the first two clauses (DEC-0102) |
 | <a id="fac-sem-129"></a>`FAC-SEM-129` | `repair-run` | `{request, keys, device: {id, org, role?}, layers, at, notifiedAt?, declined?, answered?, decision, reason?}`: the node's decision and reason are exactly `repairDecision`'s |
 
 ## Not decided here

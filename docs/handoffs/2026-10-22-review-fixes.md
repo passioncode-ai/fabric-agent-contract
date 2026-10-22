@@ -15,10 +15,18 @@ Three blind readings, run as background subagents with no edits:
 | seam | fail | 4 (a repair under a key past its window; repair and `FAC-SEM-068` disagree; the renewal grace judged by the device's clock; SR-5a refuses a withdrawal) | 9 | each reproduced at `4a29fcb` |
 | product | fail | 7 (a context the routing rule forbids; contradictory resend duties; the policy key table; the enrollment steps; who controls a cloud VM; the glossary; the board's UX contract) | 8 | no em dash added |
 
+## Second round (on this branch, before merge)
+
+| Tier | Verdict | Breaks | Fixed here |
+|---|---|---|---|
+| seam | fail | 1: the mode-C narrowing went against the operator's recorded ADR-0011 | withdrawn; the whole harness, the operator's question on other contexts' services is CT-92 |
+| product | fail | 8: a check-in's context in devices.md and CONTEXT.md; the key table's user layer; renewal called a rotation; no annotations on DEC-0098 to DEC-0101; a weekly probe DEC-0100 had refused; the org-cloud exception missing in conformance; two em dashes; `already-answered` missing from the table | each fixed; CT-93 filed for an org-cloud machine's usage |
+| unit | see the pull request | | |
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
-  check-in's own rule over a summary.
+  check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage.
 - A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
   policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
   repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person

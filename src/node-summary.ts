@@ -83,30 +83,17 @@ function strings(value: unknown, at: string, out: Array<[string, string]>): Arra
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/;
 
 /**
- * FAC-SEM-128 on `{summary, baseline?, org?, mode?}`: a node summary names no person, path or credential; names no item
+ * FAC-SEM-128 on `{summary, baseline?, org?}`: a node summary names no person, path or credential; names no item
  * twice in a list; when the policy it compared against carries a baseline, reports exactly `harnessDrift`'s drift under
  * that policy's revision. `baseline` is `{revision, items}`, the layer's revision and its `harness.baseline` value's
- * items. DEC-0102: its `context` is `org:` and the certificate's `org.id` (`org`) as written; under `machine.mode` `C`
- * (the default, `mode` absent) it lists only harness items the baseline names, and with no baseline none.
+ * items. DEC-0102: its `context` is `org:` and the certificate's `org.id` (`org`) as written.
  */
 function nodeSummaryRule(value: JsonObject): Finding[] {
   const findings: Finding[] = contentFindings(isObject(value.summary) ? value.summary : {}, "/summary");
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-128", instancePath, message });
   const summary = isObject(value.summary) ? value.summary : {};
-  const harness = isObject(summary.harness) ? summary.harness : {};
   const baseline = isObject(value.baseline) ? value.baseline : undefined;
   if (typeof value.org === "string" && summary.context !== `org:${value.org}`) flag("/summary/context", "a node summary names its enrollment's own organization, org: and the certificate's org.id as written");
-  if (value.mode !== "A") {
-    // Mode C: the organization manages only its own work, so it learns only the items its baseline names.
-    const named = new Set(list(baseline?.items).map((item) => `${show(item.kind)}\u0000${show(item.name)}`));
-    const rows: Array<[string, string, JsonObject[], string]> = [
-      ["coding-agent", "codingAgents", list(harness.codingAgents), "id"], ["mcp-server", "mcpServers", list(harness.mcpServers), "name"],
-      ["skill", "skills", list(harness.skills), "name"], ["plugin", "plugins", list(harness.plugins), "name"]
-    ];
-    for (const [kind, member, items, key] of rows) items.forEach((item, i) => {
-      if (!named.has(`${kind}\u0000${show(item[key])}`)) flag(`/summary/harness/${member}/${i}`, "under machine.mode C a summary lists only the harness items its organization's baseline names");
-    });
-  }
   const drift = isObject(summary.drift) ? summary.drift : undefined;
   if (baseline === undefined) {
     if (drift !== undefined) flag("/summary/drift", "a summary reports drift only against a baseline its policy carries");
@@ -146,6 +133,23 @@ function contentFindings(summary: JsonObject, prefix: string): Finding[] {
   return findings;
 }
 
+/** The value of a policy key resolved over the signed layers only (`mdm`, `server`): a person's own `user` layer never sets it (DEC-0102). */
+export function signedPolicyValue(layers: unknown, key: string): unknown {
+  return resolvePolicy(list(layers).filter((layer) => layer.source !== "user"))[key]?.value;
+}
+
+/**
+ * The baseline a node compares against (DEC-0101, DEC-0102): `harness.baseline` from the signed layers, with the revision
+ * of the layer that sets it, or `undefined` when no signed layer does. FAC-SEM-128's `baseline` input is this.
+ */
+export function harnessBaseline(layers: unknown): { revision: unknown; items: unknown } | undefined {
+  const signed = list(layers).filter((layer) => layer.source !== "user");
+  const setting = resolvePolicy(signed)["harness.baseline"];
+  if (setting === undefined || setting.from === "default") return undefined;
+  const layer = signed.find((candidate) => candidate.source === setting.from);
+  return { revision: layer?.revision, items: isObject(setting.value) ? setting.value.items : undefined };
+}
+
 export type RepairReason = "bad-signature" | "wrong-device" | "expired" | "policy-expired" | "not-allowlisted" | "person-declined" | "already-answered";
 
 /**
@@ -182,7 +186,7 @@ export function repairDecision(input: unknown): { decision: "run" | "refuse"; re
   // DEC-0102: the same answer as FAC-SEM-068's remote execution, so the two rules never disagree on one policy.
   if (expectedDecision(layers, show(value.at), { kind: "remote-execution" }).decision === "refuse") return refuse("policy-expired");
   // DEC-0102: the allowlist is read from signed layers only; a person's own user layer never widens or empties it.
-  const allowed = resolvePolicy(layers.filter((layer) => layer.source !== "user"))["repair.packages"]?.value;
+  const allowed = signedPolicyValue(layers, "repair.packages");
   const pkg = isObject(request.package) ? request.package : {};
   if (!Array.isArray(allowed) || !allowed.filter(isObject).some((entry) => entry.agentRef === pkg.agentRef && entry.digest === pkg.digest)) return refuse("not-allowlisted");
   // DEC-0102: a machine with role org-cloud binds no person; the organization's own signed request is its notice.
@@ -191,7 +195,7 @@ export function repairDecision(input: unknown): { decision: "run" | "refuse"; re
   return { decision: "run" };
 }
 
-/** FAC-SEM-129 on `{request, keys, device: {id, org, role?}, layers, at, notifiedAt?, declined?, decision, reason?}`: the node's decision is `repairDecision`'s. */
+/** FAC-SEM-129 on `{request, keys, device: {id, org, role?}, layers, at, notifiedAt?, declined?, answered?, decision, reason?}`: the node's decision is `repairDecision`'s. */
 function repairRule(value: JsonObject): Finding[] {
   const want = repairDecision(value);
   if (value.decision === want.decision && value.reason === want.reason) return [];

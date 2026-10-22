@@ -1,5 +1,5 @@
 {
-  "description": "A summary under a policy with no baseline reports no drift; this one has none and none is due on a machine its organization administers whole, mode A (DEC-0101): no finding.",
+  "description": "A summary under a policy with no baseline reports no drift; this one has none and none is due (DEC-0101): no finding.",
   "kind": "node-summary",
   "expect": [],
   "input": {
@@ -64,7 +64,6 @@
         }
       ]
     },
-    "mode": "A",
     "org": "org-7f3a"
   }
 }
