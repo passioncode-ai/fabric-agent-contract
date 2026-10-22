@@ -1,10 +1,22 @@
-/** A semantic-rule finding. `severity: "accepted"` marks a rule that classifies rather than rejects. */
+/**
+ * A semantic-rule finding. `severity: "accepted"` marks a rule that classifies rather than rejects. `help` links the
+ * row that defines the rule (`docs/specification/<page>.md#fac-sem-nnn`, REQ-05); rules leave it out and the checker
+ * adds it with `withHelp`.
+ */
 export interface Finding {
   code: string;
   instancePath: string;
   message: string;
   severity?: "rejected" | "accepted";
+  help?: string;
 }
+
+/** The findings with each one's `help` link from `help` (code to link, as `ruleHelp` builds it); a code it lacks keeps none. */
+export const withHelp = (findings: readonly Finding[], help: ReadonlyMap<string, string>): Finding[] =>
+  findings.map((finding) => {
+    const link = help.get(finding.code);
+    return link === undefined ? { ...finding } : { ...finding, help: link };
+  });
 
 export type JsonObject = Record<string, unknown>;
 export const isObject = (value: unknown): value is JsonObject => typeof value === "object" && value !== null && !Array.isArray(value);

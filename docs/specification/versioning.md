@@ -56,16 +56,27 @@ commit, in full or abbreviated to at least seven characters (G-11). Dated record
 (retrospectives, handoffs, changelog entries) name the revision of their day and are
 excluded by the consumer.
 
-`pnpm pin:check <repository> [--pin <file>] [--exclude <path>]…` runs the reference
-check ([`src/pin-check.ts`](../../src/pin-check.ts)): a commit-like hash on a line that
-mentions the contract and differs from the pin fails, with its file and line, and so does a pin that is not a
-commit of the contract's history (`pinHistory`: an ancestor of `origin/main` in this checkout, else of `HEAD`), such
-as a commit a history rewrite left behind; a checkout git cannot read fails too. A
-consumer MAY carry an equivalent check in its own language; the Fabric Agent Adapter's
-`test/validate.py` does.
+`pnpm pin:check <repository> [--pin <file>] [--exclude <path>]… [--include-dated]` runs the reference
+check; under `pnpm --dir <contract checkout> pin:check .` a relative path is read from where pnpm ran ([`src/pin-check.ts`](../../src/pin-check.ts)). It reads the lock and validates it against
+[`contract-pin.schema.json`](../../schemas/contract-pin.schema.json): a missing lock, a lock that is not JSON and a lock
+the schema refuses each print what is wrong and exit 2, as does a repository folder it cannot list and a usage error. A member the schema does not define
+(kit-written locks carry `adapter` and `kit`) is printed as a note and does not fail the check. A commit that is not the full
+40-character lower-case hex id is its own state, `malformed`, with its own message, and git is not asked about it.
+Then a commit-like hash on a line that mentions the contract and differs from the pin fails, with its file and line,
+and so does a pin that is not a commit of the contract's history (`pinHistory`: an ancestor of `origin/main` in this
+checkout, else of `HEAD`), such as a commit a history rewrite left behind; a pin this checkout does not hold and a
+checkout git cannot read fail too; each of these exits 1. The dated records are excluded by default: a file whose
+name starts with `CHANGELOG`, and everything under `docs/handoffs/`, `docs/evidence/` and `.task-pipeline/`;
+`--exclude` adds paths and `--include-dated` scans the dated records as well. The success line, which names the
+history the pin was found on, is printed only when the exit code is 0. A consumer MAY carry its own check in its own
+language; the Fabric Agent Adapter's `test/validate.py` is one, and it is not this command: it excludes `test/` as
+well as the dated records, scans only some file types, allows the adapter's list of supported earlier revisions and
+does not look the pin up in the contract's history, so the two can disagree on one checkout.
 
 Moving the pin is a compatibility change: the consumer reviews what changed between the
-two commits, updates the lock and every mention in one change, and releases.
+two commits, updates the lock and every mention in one change, and releases. A consumer that vendors schemas copies
+the `$ref` closure of the ones it reads ([`src/schema-closure.ts`](../../src/schema-closure.ts)), not a list picked
+by hand: a schema may start to reference `common.schema.json` or a new definition in it at any commit.
 
 ## Protocol revisions
 
@@ -77,7 +88,7 @@ on different releases still talk:
 
 - **The register.** [`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) `PROTOCOL_REVISIONS` lists each
   contract protocol's published revisions, oldest first; a test keeps it equal to the revisions the schemas pin with
-  `const` plus `NAMED_ONLY` (`approval/1`, `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1` and `/0.2` (DEC-0087),
+  `const` plus `NAMED_ONLY` (`approval/1`, `fabric-connections/0.1` (the connections extension), `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1` and `/0.2` (DEC-0087),
   `fabric-local-channel/0.1`, `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
   there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
   `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,
@@ -114,5 +125,5 @@ Vectors: [`fixtures/vectors/protocol-revisions.json`](../../fixtures/vectors/pro
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` (compared by normal form, [identifiers](identifiers.md)) and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064, DEC-0076) |
-| `FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |
+| <a id="fac-sem-096"></a>`FAC-SEM-096` | `versioned-setting` | `rollbackBasis` names the same setting's `id` (compared by normal form, [identifiers](identifiers.md)) and an earlier revision; every parent's revision is earlier than the setting's own (DEC-0007, DEC-0064, DEC-0076) |
+| <a id="fac-sem-099"></a>`FAC-SEM-099` | `protocols`, `service-well-known`, `device-check-in`, `device-enrollment` | a protocols list (`{protocols}`) has 1 to 64 entries and names each `<name>/<revision>` once, at most two revisions of one protocol, a contract protocol only in revisions the register publishes (an unpublished one is refused and not counted toward the two), and two of them consecutive in the register: N and N−1 (DEC-0067) |

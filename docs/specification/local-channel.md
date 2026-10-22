@@ -91,4 +91,4 @@ id).
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-106` | `local-channel-session` | the first request on the local channel is `channel.hello` (DEC-0075) |
+| <a id="fac-sem-106"></a>`FAC-SEM-106` | `local-channel-session` | the first request on the local channel is `channel.hello` (DEC-0075) |

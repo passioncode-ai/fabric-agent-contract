@@ -1,25 +1,51 @@
 # Creating and connecting compatible agents
 
-This guide is the practical entry point for an agent author and a Fabric project
-operator. The normative contract remains in the linked specifications and JSON
-Schemas. Contract version `0.1.0` is architecture and validation material: it does
-not yet ship a Fabric registry service, host runtime, SDK or CLI.
+This guide is the practical entry point for an agent author and a Fabric project operator. It is organised by the
+kind of agent you build. The normative rules stay in the linked specification pages and JSON Schemas; every example
+below is a minimal document that `test/guide-examples.test.ts` validates against its schema, so a copied example is
+a correct starting point.
+
+> **Words used here.** The full definitions are in [CONTEXT.md](../../CONTEXT.md).
+>
+> - **Provider**: anything that offers capabilities through a declared profile.
+> - **Agent**: a provider that accepts an outcome and owns the work needed to reach it.
+> - **Capability**: one named, versioned thing a provider does, with an input and an output schema.
+> - **Profile**: how a capability is reached: `mcp`, `a2a` or `local-runner`, as the manifest names it.
+> - **Manifest**: `fabric-agent.json`, the document that declares a provider and its capabilities.
+> - **Service**: a long-running agent process that follows `fabric-service/0.1`.
+> - **Descriptor**: the file an installer writes to announce one installed service instance.
+> - **Provider entry**: the file an installer writes to announce an agent that is not a service.
+> - **Runner**: an installed coding agent (Claude Code, Codex, Cursor Agent and others) a host can drive. The
+>   **local-runner profile** is how a manifest declares a capability that such a runner serves; the runner is the
+>   program, the profile is the declaration.
 
 ## What compatibility means
 
 A compatible integration has four independent proofs:
 
-1. a versioned provider manifest validates against the
-   [manifest schema](../../schemas/manifest.schema.json);
+1. its documents validate against their schemas and pass the semantic rules;
 2. its declared MCP, A2A or local-runner revision negotiates successfully;
 3. safe semantic probes prove each advertised capability;
-4. a project creates an immutable binding that supplies the allowed execution
-   context, account pool, grants and policies.
+4. a project creates an immutable binding that supplies the allowed execution context, account pool, grants and
+   policies.
 
-Passing the manifest schema proves declaration shape only. Discovery, admission
-and project authorization are separate states.
+The first proof is a command, `pnpm validate`, run from a checkout of this repository. Passing it proves declaration
+shape only. Discovery, admission and project authorization are separate states
+([registry, admission and binding](../specification/registry.md)).
 
-## Choose one profile per capability
+## Pick your kind
+
+| You are building | Section | Documents you write | The kit |
+|---|---|---|---|
+| A long-running process on the operator's machine with an MCP surface and usually a dashboard | [a local MCP service](#a-local-mcp-service) | a service descriptor and the well-known document it serves; a manifest when it offers capabilities | the Fabric Agent Adapter's service kits |
+| A CLI or a stdio MCP server that a host starts when it needs it | [an agent that is not a service](#an-agent-that-is-not-a-service) | a provider entry and its manifest | the Fabric Agent Adapter's provider bundle scaffold |
+| A coding agent that a host drives as a terminal process | [a coding agent as a local runner](#a-coding-agent-as-a-local-runner) | a manifest with a `local-runner` capability | the Fabric Agent Adapter's provider bundle scaffold, with the `local-runner` profile |
+
+The [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) is the kit that scaffolds each kind
+and probes it: its service kits write a descriptor and serve the well-known document, and its `check_service.py`
+probe checks a live service against these rules.
+
+### Choose one profile per capability
 
 ```mermaid
 flowchart TD
@@ -28,93 +54,364 @@ flowchart TD
   O -->|Fabric owns the loop and calls bounded capabilities| M{How is the capability reached?}
   M -->|Remote HTTP or stdio server| MCP[MCP capability profile]
   M -->|Installed terminal process| L[Local-runner profile]
-  A --> ADMIT[Identity, protocol and semantic admission]
-  MCP --> ADMIT
-  L --> ADMIT
-  ADMIT --> BIND[Project binding]
-  BIND --> RUN[Pinned run]
 ```
 
-| Profile | Use when | Exact contract revision | Provider must expose |
-|---|---|---|---|
-| A2A peer | the remote agent accepts an outcome and owns its opaque task lifecycle | A2A `1.0` | HTTPS Agent Card, skill IDs, REST/JSON-RPC/gRPC binding, task/cancel behavior and probes |
-| MCP capability | Fabric owns the loop and calls bounded tools, resources or prompts | MCP `2026-07-28` | streamable HTTP or stdio connection, exact feature names and probes |
-| Local runner | Fabric starts an installed terminal agent | `fabric-local-runner/0.1` | executable reference, argument array, typed input/result locations, cancellation, heartbeat and probes |
+Each profile names its revision in its own member. A manifest that writes the revision under another profile's member
+name is refused.
 
-One provider may offer several capabilities and use different profiles for them.
-One capability cannot switch profile inside a run; a new binding revision is
-required. See the normative [profile rules](../specification/profiles.md).
+| Profile | Use when | Version member | Provider must expose |
+|---|---|---|---|
+| `mcp` | Fabric owns the loop and calls bounded tools, resources or prompts | `protocolRevision`: `2026-07-28` | streamable HTTP or stdio connection, exact feature names and probes |
+| `a2a` | the remote agent accepts an outcome and owns its opaque task lifecycle | `protocolVersion`: `1.0` | HTTPS Agent Card, skill IDs, REST, JSON-RPC or gRPC binding, task and cancel behaviour, probes |
+| `local-runner` | Fabric starts an installed terminal agent | `profileVersion`: `fabric-local-runner/0.1` | runner kind, executable reference, argument array, input mode, result location, cancellation, heartbeat and probes |
+
+One provider may offer several capabilities with different profiles. One capability cannot switch profile inside a
+run; a new binding revision is required ([profiles](../specification/profiles.md)).
+
+## A local MCP service
+
+A service runs once on the machine, under its supervisor (launchd, systemd, the Task Scheduler or Project
+Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
+folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
+
+The descriptor, `<id>.<instance>.json` in the services folder:
+
+<!-- example: service-descriptor.schema.json kind=service-descriptor pair=service -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "id": "example-agent",
+  "instance": "default",
+  "name": "Example Agent",
+  "origin": "http://127.0.0.1:47195",
+  "auth": { "tokenFile": "~/.config/example-agent/service.token" },
+  "lifecycle": {
+    "manager": "launchd",
+    "label": "com.example.example-agent",
+    "plist": "~/Library/LaunchAgents/com.example.example-agent.plist"
+  },
+  "paths": {
+    "data": "~/Library/Application Support/example-agent",
+    "logs": ["~/Library/Logs/example-agent/service.log"]
+  },
+  "fabricManifest": "~/Library/Application Support/example-agent/fabric-agent.json",
+  "installedAt": "2026-10-21T09:00:00Z",
+  "installedBy": "example-agent service install 0.1.0"
+}
+```
+
+The answer to `GET /.well-known/fabric-service`, with an MCP surface:
+
+<!-- example: service-well-known.schema.json kind=service-well-known pair=service -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-agent",
+    "instance": "default",
+    "name": "Example Agent",
+    "version": "0.1.0",
+    "build": { "commit": "8b80be9" }
+  },
+  "process": { "pid": 51234, "startedAt": "2026-10-21T09:00:05Z" },
+  "status": "ready",
+  "degraded": [],
+  "surfaces": {
+    "mcp": { "path": "/mcp", "transport": "streamable-http", "capabilities": ["reports.draft"] },
+    "events": { "path": "/fabric/v1/events" }
+  }
+}
+```
+
+The manifest, `fabric-agent.json`, when the service offers capabilities. It names its descriptor, and the MCP tool it
+serves has the capability's name ([interop C3.1](../specification/interop.md#c31-capabilities)):
+
+<!-- example: manifest.schema.json kind=manifest pair=service -->
+
+```json
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "https://agents.example/providers/example-agent",
+    "revision": 1,
+    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "createdAt": "2026-10-21T09:00:00Z",
+    "createdBy": "https://agents.example/authors/team",
+    "name": "Example Agent",
+    "identity": { "subject": "https://agents.example/providers/example-agent", "method": "local-install" },
+    "supportedContractVersions": ["0.1.0"],
+    "extensions": {
+      "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1": { "descriptor": "example-agent.default" }
+    }
+  },
+  "capabilities": [
+    {
+      "id": "https://agents.example/capabilities/reports-draft",
+      "name": "reports.draft",
+      "inputSchema": "https://agents.example/schemas/report-request.json",
+      "outputSchema": "https://agents.example/schemas/report.json",
+      "effect": "draft",
+      "idempotency": "supported",
+      "dataClasses": ["project-internal"],
+      "profile": {
+        "kind": "mcp",
+        "protocolRevision": "2026-07-28",
+        "connection": { "mode": "streamable-http", "url": "http://127.0.0.1:47195/mcp" },
+        "requiredFeatures": ["tool:reports.draft"],
+        "probes": [
+          {
+            "id": "draft-shape",
+            "inputFixture": "https://agents.example/fixtures/report-request.json",
+            "outputSchema": "https://agents.example/schemas/report.json",
+            "timeoutMs": 30000,
+            "sideEffectCeiling": "draft",
+            "assertions": ["returns a draft report without sending it"]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Check the folder that holds the three files; the checker reads a descriptor and a well-known document as a pair:
+
+```bash
+pnpm validate ./fabric/
+```
+
+Read next: [services](../specification/service.md) (the token, the events feed, the usage report, lifecycle),
+[profiles](../specification/profiles.md), [interop](../specification/interop.md) when a capability runs as a job,
+and [embedded dashboard](../specification/embedded-dashboard.md) when the dashboard opens inside a host. The
+Fabric Agent Adapter's Python, Node and dashboard kits serve these documents for you.
+
+## An agent that is not a service
+
+A CLI or a stdio MCP server has no long-running process to answer a well-known document. Its installer writes a
+provider entry into the providers folder of the fabric home ([provider entries](../specification/provider.md)),
+and the entry points at the manifest. The entry's `providerId` is the manifest's `provider.id`.
+
+The provider entry, `<id>.json` in the providers folder:
+
+<!-- example: provider.schema.json kind=provider-entry pair=stdio -->
+
+```json
+{
+  "protocol": "fabric-provider/0.1",
+  "id": "example-reports",
+  "providerId": "https://agents.example/providers/example-reports",
+  "name": "Example Reports",
+  "manifest": "~/.local/share/example-reports/fabric-agent.json",
+  "run": {
+    "mcp": {
+      "stdio": {
+        "command": ["~/.local/bin/example-reports", "mcp"],
+        "env": { "EXAMPLE_API_KEY": "secret-ref:example-reports/EXAMPLE_API_KEY" }
+      }
+    }
+  },
+  "installedAt": "2026-10-21T09:00:00Z",
+  "installedBy": "example-reports install 1.0.0"
+}
+```
+
+Leave `run.mcp.stdio.scope` out for now: Fabric's registry does not accept it yet (CT-27), and its absence means `on-demand`
+([provider entries](../specification/provider.md)). An `env` value is always a `secret-ref:`, never the key; no
+argument carries a credential.
+
+Its manifest, with the same server as a stdio connection:
+
+<!-- example: manifest.schema.json kind=manifest pair=stdio -->
+
+```json
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "https://agents.example/providers/example-reports",
+    "revision": 1,
+    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "createdAt": "2026-10-21T09:00:00Z",
+    "createdBy": "https://agents.example/authors/team",
+    "name": "Example Reports",
+    "identity": { "subject": "https://agents.example/providers/example-reports", "method": "local-install" },
+    "supportedContractVersions": ["0.1.0"]
+  },
+  "capabilities": [
+    {
+      "id": "https://agents.example/capabilities/reports-summarize",
+      "name": "reports.summarize",
+      "inputSchema": "https://agents.example/schemas/summary-request.json",
+      "outputSchema": "https://agents.example/schemas/summary.json",
+      "effect": "none",
+      "idempotency": "supported",
+      "dataClasses": ["project-internal"],
+      "profile": {
+        "kind": "mcp",
+        "protocolRevision": "2026-07-28",
+        "connection": { "mode": "stdio", "executableRef": "urn:executable:example-reports", "args": ["mcp"] },
+        "requiredFeatures": ["tool:reports.summarize"],
+        "probes": [
+          {
+            "id": "summary-shape",
+            "inputFixture": "https://agents.example/fixtures/summary-request.json",
+            "outputSchema": "https://agents.example/schemas/summary.json",
+            "timeoutMs": 30000,
+            "sideEffectCeiling": "none",
+            "assertions": ["returns a summary with its sources"]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+The entry and the manifest both describe the server today; keep them the same command. The checker does not compare
+the two commands yet (no rule says which one a host launches, [CT-75](../backlog.md)), so keep them equal by hand.
+Check the folder that holds both; the checker reads the documents of a folder together:
+
+```bash
+pnpm validate ./fabric/
+```
+
+Read next: [provider entries](../specification/provider.md),
+[where a stdio server is declared](../specification/profiles.md#where-a-stdio-server-is-declared) and
+[no secret in a command line](../specification/profiles.md#no-secret-in-a-command-line). A server that holds no
+per-session state is better run once as a service (the section above).
+
+## A coding agent as a local runner
+
+A host starts an installed coding agent as a terminal process, gives it an input file and reads a result envelope
+back. The manifest declares the capability with the `local-runner` profile. `runnerKind` should be one of the shared
+kind names on the [runners](../specification/runners.md) page (`claude-code`, `codex`, `cursor-agent`, `gemini-cli` and
+others), which are also the ids of [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json); a namespaced
+extension is allowed, but routes and events then match on no other host.
+
+<!-- example: manifest.schema.json kind=manifest -->
+
+```json
+{
+  "contractVersion": "0.1.0",
+  "provider": {
+    "id": "urn:fabric:provider:codex-local",
+    "revision": 1,
+    "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "createdAt": "2026-10-21T09:00:00Z",
+    "createdBy": "urn:fabric:operator:local",
+    "name": "Codex local runner",
+    "identity": { "subject": "urn:fabric:provider:codex-local", "method": "local-install" },
+    "supportedContractVersions": ["0.1.0"]
+  },
+  "capabilities": [
+    {
+      "id": "urn:fabric:capability:software-development",
+      "name": "development.repository-change",
+      "inputSchema": "https://fabric.example/schemas/work-node.json",
+      "outputSchema": "https://fabric.example/schemas/result.json",
+      "effect": "draft",
+      "idempotency": "none",
+      "dataClasses": ["project-internal"],
+      "profile": {
+        "kind": "local-runner",
+        "profileVersion": "fabric-local-runner/0.1",
+        "runnerKind": "codex",
+        "executableRef": "urn:executable:codex",
+        "args": ["exec", "{inputFile}"],
+        "inputMode": "file-json",
+        "resultUriTemplate": "file:{worktree}/.fabric/result.json",
+        "cancellation": "signal",
+        "heartbeatSeconds": 30,
+        "probes": [
+          {
+            "id": "dry-run-result",
+            "inputFixture": "urn:fixture:local-runner:dry-run",
+            "outputSchema": "https://fabric.example/schemas/result.json",
+            "timeoutMs": 120000,
+            "sideEffectCeiling": "draft",
+            "assertions": ["writes a valid result envelope without external effects"]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+The host replaces `{inputFile}` and `{worktree}` when it starts the run; the contract does not yet list these
+placeholders in one table. Check the manifest:
+
+```bash
+pnpm validate ./fabric-agent.json
+```
+
+Read next: [the local-runner profile](../specification/profiles.md#local-runner-profile),
+[runners](../specification/runners.md) (the catalogue, runner routes, runner and model profiles) and
+[results and evidence](../specification/results-and-evidence.md) for the envelope the runner writes.
+
+## The checker
+
+`pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` reads a document or a folder, run from a
+checkout of this repository at the commit you pin. For files in your own repository, run it from there with
+`pnpm --dir <path to the contract checkout> validate ./fabric/`: a relative path is read from where you ran it. It
+runs the schema and then the semantic rules, and prints one line per problem with its path, its rule and a link to the
+rule. It exits 0 when everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an
+extension key one letter away from the contract's, is printed as a note and does not fail the run.
+`pnpm --silent validate <dir> --json` prints the same findings as JSON for a script or a CI step (`--silent` keeps
+pnpm's own lines off the output).
+
+Which schema a file is checked against is decided by the first row of this table that the file matches, in this
+order (`inferSchema` and `checkFile` in `src/validate-cli.ts`). Each row has a case in `test/validate-cli.test.ts`.
+
+| Signal the file gives | Checked as |
+|---|---|
+| a file that does not parse | a `json` problem, whatever its name |
+| `--schema <name>` on the command line | that schema |
+| a discriminator a schema pins (`protocol`, `contractVersion`, `format`) and every member that schema requires | that schema; of several, the one requiring the most members |
+| the name `fabric-agent.json` | a manifest |
+| the name `fabric-contract.lock.json` | a contract pin; a member the pin schema does not define is a note; a lock with none of a pin's `contract` and `commit` and another tool's members (`schemas`, `releases`, `schemaRelease`) is that tool's and is noted |
+| a JSON Schema: a `*.schema.json` name, a `$schema` naming json-schema.org, or a `$id` beside `type` or `properties` | no contract document |
+| a `providerId` with a `manifest` path or a `run` object | a provider entry, wherever it is saved |
+| a file under `providers/` with a `fabric-` protocol, `providerId`, `run` or `manifest` | a provider entry |
+| an `<id>.<instance>.json` name with a `fabric-` protocol, `origin`, `lifecycle` or `fabricManifest` | a service descriptor |
+| a `protocol` or `contractVersion` shaped like the contract's (`fabric-<name>/<revision>`, a semantic version) that this checkout does not hold, or one that is a number, an array or a boolean | a `schema/const` problem naming the values this checkout reads |
+| a `protocol` a contract schema pins, with members missing | the schema it misses the fewest members of, so its missing members are problems; a `.well-known.json` name picks the well-known document; a protocol a `oneOf` schema shares (the `fabric-device`, `fabric-activity` and `fabric-relay` families) is settled by validation: the first schema of that protocol that accepts the document checks it, and when none does, the file is a problem in a folder and a usage error on its own |
+| none of these | in a folder, a note (with the schemas a shared `contractVersion` is near) and the file is skipped; on its own, a usage error asking for `--schema` |
+
+A folder in which no file is a contract document is a usage error. Folders whose name starts with a dot, and
+`node_modules`, are not read, so save the well-known document as `<id>.<instance>.well-known.json`, not under
+`.well-known/`.
+
+A folder's documents are also checked as pairs: a descriptor with its well-known document, a descriptor with the
+manifest its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read. When it
+is an installed copy outside the folder, a note names it if the folder holds a copy that could have stood in, or if the
+pair rule then fails, so a stale install is visible: reinstall it, or check the folder's copy in a folder without the
+installed path. Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder
+named after the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never
+one in a folder named after another owner, and a note says which file was read; with two or more manifests and none in
+those places, none stands in. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a
+note. Beside a service in one folder, keep each manifest in a folder named after its owner
+(`example-reports/fabric-agent.json`). A file checked on its own is checked without its pairs.
 
 ## Map an existing system
 
 | Existing surface | Compatible path | Boundary |
 |---|---|---|
 | Native A2A agent | declare an A2A capability directly | Fabric observes protocol-visible task state, messages, evidence and artifacts, not private reasoning |
-| Native MCP server | declare each host-shaped capability through MCP | the server is a capability provider, not automatically an autonomous peer |
-| Claude Code, Codex, Cursor, DeepSeek CLI or another terminal agent | add a local-runner declaration and result adapter | the project chooses the runtime; model choice stays inside the provider |
+| Native MCP server | declare each host-shaped capability through MCP; run it as a service when it holds no per-session state | the server is a capability provider, not automatically an autonomous peer |
+| Claude Code (`claude-code`), Codex (`codex`), Cursor Agent (`cursor-agent`) or another runner the runners page lists | a local-runner declaration and a result adapter | the project chooses the runtime; the provider chooses the model within the project's classes |
 | Ordinary HTTP API with bounded operations | wrap it with an MCP adapter | Fabric remains responsible for the task loop |
 | Ordinary HTTP API that starts and owns long-running autonomous jobs | wrap it with an A2A peer adapter | the adapter maps the service job lifecycle to A2A tasks |
-| Web application with no stable API or CLI | not directly compatible | add a supported API/CLI first; browser automation is not a Fabric base profile |
+| Web application with no stable API or CLI | not directly compatible | add a supported API or CLI first; browser automation is not a Fabric base profile |
 
-The protocol choice is made per capability, not per vendor. An external product
-may therefore expose research as an A2A peer and a deterministic lookup operation
-as MCP.
-
-## Recommended provider project
-
-The repository layout is a packaging recommendation, not a required wire shape:
-
-```text
-provider-project/
-├── fabric-agent.json
-├── schemas/
-│   ├── capability-input.schema.json
-│   └── capability-output.schema.json
-├── fixtures/
-│   └── admission-input.json
-├── probes/
-│   └── assertions.md
-├── src/
-│   └── provider implementation or adapter
-├── agent-card.json
-├── Dockerfile
-└── README.md
-```
-
-`agent-card.json` is needed only for A2A. A local runner may not need a
-`Dockerfile`. Secrets never belong in the manifest, fixture, argument string or
-repository.
-
-## Provider manifest responsibilities
-
-The [manifest schema](../../schemas/manifest.schema.json) is authoritative. At a
-minimum, the author declares:
-
-| Area | Required responsibility |
-|---|---|
-| Provider identity | stable absolute URI, written in its normal form ([identifiers](../specification/identifiers.md), DEC-0076: a writer SHOULD emit it), monotonic revision, canonical content hash, creation provenance, identity method and supported contract versions |
-| Capability identity | stable URI (in its normal form) and semantic name independent of implementation or model |
-| Data contract | absolute input/output JSON Schema references |
-| Effects | side-effect class, idempotency behavior and accepted data classifications |
-| Protocol profile | exactly one MCP, A2A or local-runner declaration for the capability |
-| Admission proof | bounded fixtures, timeout, side-effect ceiling, result schema and assertions |
-
-Start from an executable positive fixture rather than copying a documentation
-snippet:
-
-- [A2A provider manifest](../../fixtures/positive/manifest-a2a.json)
-- [MCP provider manifest](../../fixtures/positive/manifest-mcp.json)
-- [local-runner provider manifest](../../fixtures/positive/manifest-local.json)
-
-Every revision changes the manifest revision and content hash. A moving URL may
-be used for discovery, but a run pins immutable provider, admission and binding
-revision references.
+The protocol choice is made per capability, not per vendor. An external product may expose research as an A2A peer
+and a deterministic lookup as MCP.
 
 ## Inputs, outputs and evidence
 
-Provider-specific input/output schemas describe the capability payload. Fabric
-also normalizes every completed or stopped invocation into the common
-[result envelope](../../schemas/result.schema.json):
+Provider-specific input and output schemas describe the capability payload. Fabric also normalises every completed
+or stopped invocation into the common [result envelope](../../schemas/result.schema.json):
 
 | Collection | Meaning |
 |---|---|
@@ -124,10 +421,9 @@ also normalizes every completed or stopped invocation into the common
 | `notVerified` | claims or surfaces that were not independently checked |
 | `artifacts` | immutable typed outputs |
 
-A2A artifacts map into Fabric artifacts. MCP and local-runner outputs are wrapped
-by their host adapter. A successful transport response is not proof that the
-semantic task succeeded. The full rules live in
-[results and evidence](../specification/results-and-evidence.md).
+A2A artifacts map into Fabric artifacts. MCP and local-runner outputs are wrapped by their host adapter. A successful
+transport response is not proof that the semantic task succeeded
+([results and evidence](../specification/results-and-evidence.md)).
 
 ## Discovery, admission and binding
 
@@ -152,44 +448,24 @@ sequenceDiagram
   Provider-->>Host: Result and artifacts
 ```
 
-The current lifecycle is:
-
-1. **Publish:** expose a manifest, referenced schemas, protocol endpoint or local
-   executable reference, and admission fixtures.
-2. **Discover:** add the manifest through direct configuration, a private
-   registry, an A2A well-known Agent Card, MCP configuration or a local catalogue.
-3. **Validate declaration:** compile the JSON Schemas and reject invalid or
-   unsupported revisions before credentials or project data are supplied.
-4. **Verify identity:** prove the provider subject through the method declared in
-   the manifest.
-5. **Negotiate protocol:** connect using exactly MCP `2026-07-28`, A2A `1.0` or
-   `fabric-local-runner/0.1` for contract `0.1.0`.
-6. **Probe semantics:** run bounded, non-publishing fixtures and evaluate declared
-   result assertions.
-7. **Admit capability:** append an immutable admission record for every capability
-   whose independent gates passed.
-8. **Bind project:** pin the admitted provider together with project execution,
-   account, data, coordination, grant and checker policies.
+1. **Publish:** expose a manifest, referenced schemas, protocol endpoint or local executable reference, and
+   admission fixtures.
+2. **Discover:** a host finds the manifest through a descriptor, a provider entry, direct configuration, a private
+   registry, an A2A Agent Card or a local catalogue.
+3. **Validate declaration:** compile the JSON Schemas and reject invalid or unsupported revisions before credentials
+   or project data are supplied.
+4. **Verify identity:** prove the provider subject through the method declared in the manifest.
+5. **Negotiate protocol:** connect using exactly MCP `2026-07-28`, A2A `1.0` or `fabric-local-runner/0.1` for
+   contract `0.1.0`.
+6. **Probe semantics:** run bounded, non-publishing fixtures and evaluate declared result assertions.
+7. **Admit capability:** append an immutable admission record for every capability whose independent gates passed.
+8. **Bind project:** pin the admitted provider together with project execution, account, data, coordination, grant
+   and checker policies ([binding schema](../../schemas/binding.schema.json)).
 9. **Run:** resolve the active binding once and keep the run pinned to it.
 
-The normative lifecycle and failure states are in
-[registry, admission and binding](../specification/registry.md).
-
-## What a project binding controls
-
-The [binding schema](../../schemas/binding.schema.json) pins:
-
-- project and capability;
-- provider and admission revisions;
-- profile kind;
-- execution context and project account pool;
-- grants and data policy;
-- coordination and checker policies;
-- optional role and node scope.
-
-This allows the same provider to serve several projects without sharing their
-accounts, filesystem, data or grants. A provider is never trusted because another
-project admitted or bound it.
+A binding lets the same provider serve several projects without sharing their accounts, filesystem, data or grants.
+A provider is never trusted because another project admitted or bound it. The normative lifecycle and failure states
+are in [registry, admission and binding](../specification/registry.md).
 
 ## Replacement and rollback
 
@@ -205,53 +481,10 @@ flowchart LR
   RB --> R3[Future runs use known-good provider]
 ```
 
-Replacement never mutates an active run. A new provider revision receives a new
-admission decision and project binding. Rollback is also a new revision based on a
-known-good earlier payload; it does not reactivate or edit history. See
-[immutable configuration versioning](../specification/versioning.md).
-
-## What exists now
-
-| Available in this repository | Not implemented in contract `0.1.0` |
-|---|---|
-| normative MCP/A2A/local-runner profiles | hosted provider registry or admission service |
-| manifest, admission, binding, result and policy schemas | `fabric agent` CLI and provider SDK |
-| positive and negative compatibility fixtures | runtime execution and account materialization |
-| schema/semantic validation harness and CI | live protocol probes against third-party providers |
-| UX scenarios for authoring, admission, binding and recovery | web UI or marketplace |
-
-From this repository today, run:
-
-```bash
-pnpm install --frozen-lockfile
-pnpm run check
-```
-
-That command proves the contract schemas, fixtures and documentation are
-internally consistent. It does not admit an external implementation. Until the
-host runtime exists, connecting a real provider means preparing the provider
-bundle and adapter above for a future admission run; the contract repository by
-itself cannot start or authorize it.
-
-## Proposed authoring automation
-
-The intended future CLI surface is shown to define the workflow, not as an
-installed command:
-
-```text
-fabric agent init
-fabric agent validate ./fabric-agent.json
-fabric agent probe ./fabric-agent.json
-fabric agent admit ./fabric-agent.json
-fabric agent bind --project <project> --capability <capability>
-fabric agent list
-fabric agent rollback --binding <revision>
-```
-
-An implementation project for this CLI/SDK must add schemas for its command
-results, connect admission records and bindings to a host runtime, test real
-protocol negotiation and preserve the lifecycle above. Installation alone must
-never imply admission.
+Every revision changes the manifest revision and content hash. Replacement never mutates an active run: a new
+provider revision receives a new admission decision and project binding. Rollback is also a new revision based on a
+known-good earlier payload; it does not reactivate or edit history
+([immutable configuration versioning](../specification/versioning.md)).
 
 ## Author checklist
 

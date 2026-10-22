@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-connections-extension.schema.json",
-  "title": "What an agent uses (extensions/connections/0.1, DEC-0096)",
+  "title": "What an agent uses (fabric-connections/0.1, DEC-0096)",
   "description": "The value a service puts under the extension key https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1 in its well-known document's extensions: the other agents, models, connectors, stores and channels it uses, and whether each works now. Data for a host's map, never an authority. A host validates the value against this schema and treats an invalid one as not declared; a checker reports it as FAC-SEM-127.",
   "type": "object",
   "required": [

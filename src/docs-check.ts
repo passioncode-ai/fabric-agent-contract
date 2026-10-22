@@ -102,10 +102,10 @@ export function contextProfileNames(context: string): string[] {
   return [...new Set([...sentence.matchAll(/`([a-z][a-z0-9-]*)`/g)].map((match) => match[1] ?? ""))].sort();
 }
 
-/** G-12: the profile kinds manifest.schema.json accepts. */
+/** G-12: the profile kinds manifest.schema.json accepts: each branch the profile selects on its kind (REQ-03). */
 export function schemaProfileKinds(manifest: unknown): string[] {
-  const variants = (manifest as { $defs?: { profile?: { oneOf?: Array<{ properties?: { kind?: { const?: string } } }> } } }).$defs?.profile?.oneOf ?? [];
-  return variants.map((variant) => variant.properties?.kind?.const ?? "").sort();
+  const branches = (manifest as { $defs?: { profile?: { allOf?: Array<{ if?: { properties?: { kind?: { const?: string } } } }> } } }).$defs?.profile?.allOf ?? [];
+  return branches.map((branch) => branch.if?.properties?.kind?.const ?? "").sort();
 }
 // #endregion glossary-profiles
 

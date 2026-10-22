@@ -171,6 +171,10 @@ sequenceDiagram
 
 ## Conceptual Memory API
 
+**Non-normative.** This section is the architecture's conceptual facade, not a wire surface: no tool is named
+`memory.query` or `memory.propose`. The wire is [`memory/0.1`](#wire-memory01) (DEC-0023), whose capabilities and
+schema are below; a provider implements those.
+
 The agent-facing facade is host-shaped and transport-neutral.
 
 | Operation | Caller | Result |
@@ -318,8 +322,9 @@ IDs, scores and provider receipts; the kernel re-authorizes and resolves the
 canonical revisions. The adapter cannot call promotion, conflict resolution or
 retention APIs.
 
-The first concrete mapping and alternatives are documented in the
-[`mcp-memory-service` adapter](../reference-architecture/mcp-memory-service-adapter.md).
+**History.** The first concrete mapping, onto `mcp-memory-service`, and its alternatives are kept in the
+[`mcp-memory-service` adapter](../reference-architecture/mcp-memory-service-adapter.md) for the record. It is
+superseded: the wire is [`memory/0.1`](#wire-memory01), whose first provider is Project Observatory (DEC-0023).
 
 ## Wire: memory/0.1
 

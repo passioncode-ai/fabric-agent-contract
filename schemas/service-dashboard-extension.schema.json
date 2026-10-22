@@ -30,7 +30,7 @@
     "kit": {
       "description": "The dashboard kit the page is built from, name@semver.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]{0,63}@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?$"
+      "pattern": "^[a-z][a-z0-9-]{0,63}@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"
     }
   },
   "additionalProperties": false

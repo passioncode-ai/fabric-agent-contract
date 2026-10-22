@@ -51,19 +51,19 @@ independent agent author and P-02 project operator.
 - **Persona:** P-01
 - **Feature:** authoring
 - **Traces:** ST-001, FLW-01 (JTBD-01, JRN-01/#2, JRN-01/#3)
-- **Entry point:** README profile chooser or direct profile link
+- **Entry point:** the author guide's profile chooser ([connecting-compatible-agents.md](../guides/connecting-compatible-agents.md)), then `pnpm validate <file or folder>`
 - **Preconditions:** provider has an MCP, A2A or local-runner interface
 - **Steps:**
-  1. Author identifies how the provider communicates -> contract names the matching profile and the boundary it owns.
-  2. Author fills the minimal manifest -> validator evaluates common and profile-specific fields separately.
-  3. Author runs conformance -> report shows shape and protocol verdicts without claiming semantic admission.
-- **Expected result:** author has a valid declaration and knows the remaining semantic admission gate.
-- **Alt paths:** direct profile entry -> profile page links back to common objects and version policy.
-- **UI elements:** profile table, schema link, example, conformance gate list.
+  1. Author identifies how the provider communicates -> the guide's chooser names the matching profile and the boundary it owns.
+  2. Author fills the minimal manifest and runs `pnpm validate fabric-agent.json` -> the checker infers the manifest schema, checks the profile on the branch its `kind` selects (common and profile-specific fields separately) and runs the manifest's semantic rules.
+  3. Author reads the result -> exit 0 with no line means shape and rules pass; it claims no protocol negotiation and no semantic admission, which the host still runs.
+- **Expected result:** author has a valid declaration and knows the remaining admission gate.
+- **Alt paths:** direct profile entry -> profile page links back to common objects and version policy; a folder with a service (descriptor, `<id>.<instance>.well-known.json`, manifest) and a provider entry with its own manifest under `<id>/` -> `pnpm validate <folder>` checks each file and the pairs, each document finding its own manifest, and a `note/pair` line names the file read when it is not the installed one at the named path.
+- **UI elements:** profile table, schema link, example, `pnpm validate` output (one line per problem: path, rule, message, help link) and exit code.
 - **States covered:** loading, error, success
-- **Errors & recovery:** unresolved schema or unsupported protocol revision -> report names the exact reference or revision and supported alternatives.
+- **Errors & recovery:** a schema the checker cannot infer -> exit 2 asks for `--schema <name>`; an unsupported protocol revision -> one line naming the member and the value it must be.
 - **Status:** validated
-- **Coverage:** none yet
+- **Coverage:** `test/validate-cli.test.ts` (every positive fixture exits 0; schema inference; folder pairs; a service and a provider entry sharing one folder)
 - **Product:** unobserved
 
 ### SCN-002: Correct an invalid or incompatible declaration
@@ -71,18 +71,18 @@ independent agent author and P-02 project operator.
 - **Persona:** P-01
 - **Feature:** authoring
 - **Traces:** ST-001, FLW-01 (JTBD-01, JRN-01/#3)
-- **Entry point:** failed conformance report
-- **Preconditions:** at least one gate failed
+- **Entry point:** `pnpm validate` output with exit 1
+- **Preconditions:** at least one problem was printed
 - **Steps:**
-  1. Author reads the first failing gate -> report shows instance path, rule and safe recovery action.
-  2. Author corrects the declaration and reruns -> unchanged gates remain comparable and corrected gate is reevaluated.
-- **Expected result:** failure is corrected or remains explicitly scoped; no provider access is granted by retrying.
-- **Alt paths:** author keeps an older protocol revision -> host reports incompatibility rather than silently translating it.
-- **UI elements:** failed gate, instance path, recovery action, evidence link.
+  1. Author reads the first line -> it shows the file, the instance path (a pair's line starts at the document it is in: `/descriptor`, `/wellKnown`, `/entry` or `/manifest`), the rule (`schema/<keyword>`, `FAC-SEM-NNN` or `hint/...`), what to change (allowed values, the member to add or move, where vendor data goes, how to pass a credential) and a help link to the rule's row or the schema.
+  2. Author corrects the declaration and reruns -> each line is reevaluated; exit 0 when none is left.
+- **Expected result:** the problem is corrected or remains printed; nothing is granted by retrying.
+- **Alt paths:** author keeps an older protocol revision -> the line names the revision the contract supports rather than translating it; a misspelt extension key, which the schema accepts -> a `hint/extension-key` line names the nearest key the contract defines (the same name and version under another host or path, or one within three edits), else points at the list of keys.
+- **UI elements:** problem line, instance path, rule, recovery message, help link, `--json` report.
 - **States covered:** error, success
-- **Errors & recovery:** malformed evidence URI -> report rejects the report itself and points to the conformance schema.
+- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error.
 - **Status:** validated
-- **Coverage:** none yet
+- **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`
 - **Product:** unobserved
 
 ## Admission and binding

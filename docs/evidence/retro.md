@@ -8,6 +8,8 @@
 - A run may propose a prompt, pipeline, or policy change but may not mutate the rules governing itself.
 - A conformance probe for a placement reached through a platform is accepted only after it has run against a real instance behind that platform, not only against a sample the run itself wrote.
 - A reference function that answers for a schema is tested against that schema on the same inputs: every output it emits validates, and every input the schema refuses it refuses.
+- A check made stricter than it was (a closed schema, a new refusal) is run first against the consumers' real files on this machine; what they carry is either accepted or recorded as an exception before the change lands.
+- A rule that decides by several signals (which schema a file follows, which manifest a pair reads) is written once as an ordered table in the code's order, with a test per row, before it is changed again.
 
 ## Run stamps
 
@@ -43,8 +45,30 @@
 - `2026-10-19-job-limits`: PR #120 `027a01c` (DEC-0087, squash) after five readings in three rounds; #121.
 - `2026-10-19-enterprise-cloud`: DEC-0088 (this run's pull request).
 - `2026-10-20-final-pass`: DEC-0089 to DEC-0095 merged as #124, #127, #128, #129, #130, #131, #132 (main `3d8cb17`).
+- `2026-10-21-contract-review`: PR #137 (REQ-01 to REQ-18, no decision); readings until two clean rounds.
 
 ## Recent log
+
+### 2026-10-21: The contract review (REQ-01 to REQ-18)
+
+- **Goal:** fewer author errors against the contract: a checker, one error per mistake, the author's path rewritten,
+  schemas without a behaviour change, consumers told what moved.
+- **Failed attempts:** (1) a unit reader run in the shared run worktree ran a mutation that reset files and destroyed
+  uncommitted edits; (2) inferring a schema from its discriminator alone broke two existing inference tests, because
+  several schemas share a constant (`contractVersion` `0.1.0` is in the manifest, the result and the conformance
+  report); (3) `pin:check` started validating the lock with a closed schema, and a seam reading found that kit-written
+  locks carry `adapter` and `kit`, so the stricter check would have refused consumers that passed before;
+  (4) the rule for a file the checker cannot tell in a folder changed in three consecutive rounds (usage error, note
+  when near nothing, note always), each fix answering the last reading's one case and breaking another's.
+- **Verified corrections:** each mutation reader gets its own detached worktree; the usage error names the schemas
+  whose constants match, narrowed to the ones the document misses fewest members of, instead of guessing; an unknown
+  lock member is a note and the exit code is unchanged, with a test; the folder rule is stated by the signal each file gives (a `protocol` the contract pins checks it, a shared
+  `contractVersion` only names the near schemas, anything else is noted), with a test for each signal.
+- **Learning:** a check made stricter in a review is a contract change for every consumer: read the consumers' real
+  files before closing a schema the contract never enforced. A rule fixed twice for the same reason is restated by its
+  signals, not patched a third time: the root cause of rounds 2 to 5 was that the inference and pairing rules lived in
+  code branches and in three paragraphs of prose, so each fix was judged against the prose it remembered; the guide now
+  holds them as one table in the code's order.
 
 ### 2026-10-20: The final pass (DEC-0089 to DEC-0095)
 

@@ -221,8 +221,7 @@ describe("the review's fixes", () => {
     expect(pairs(copy)).toBe(pairs(original));
   });
 
-  it("finds the folder's repository along its real path", () => {
-    if (process.platform === "win32") return;
+  it.skipIf(process.platform === "win32")("finds the folder's repository along its real path", () => {
     const repo = path.join(scratch, "repo");
     mkdirSync(path.join(repo, ".git"), { recursive: true });
     mkdirSync(path.join(repo, "deep"), { recursive: true });
@@ -238,15 +237,16 @@ describe("the review's fixes", () => {
       const found = onFolder("folder-ok", (f) => { Object.defineProperty(f.entries, name, { value: { mode: "600", text: "x" }, enumerable: true }); });
       expect(found, name).toContain(`${name} is not a file of the handoff; a folder holds handoff.json and the files it lists, nothing else`);
     }
-    if (process.platform === "win32") return;
+  });
+
+  it.skipIf(process.platform === "win32")("reads a file named __proto__ on disk as an entry of the folder", () => {
     const dir = path.join(scratch, "proto");
     mkdirSync(dir, { mode: 0o700 });
     writeFileSync(path.join(dir, "__proto__"), "x", { mode: 0o600 });
     expect(Object.keys(readSessionHandoff(dir).entries)).toEqual(["__proto__"]);
   });
 
-  it("digests a file's bytes, not their UTF-8 reading", () => {
-    if (process.platform === "win32") return;
+  it.skipIf(process.platform === "win32")("digests a file's bytes, not their UTF-8 reading", () => {
     const dir = path.join(scratch, "bytes");
     mkdirSync(dir, { mode: 0o700 });
     writeFileSync(path.join(dir, "context.md"), Buffer.from([0x63, 0xff, 0xfe, 0x0a]), { mode: 0o600 });

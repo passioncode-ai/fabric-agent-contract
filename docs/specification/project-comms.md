@@ -574,11 +574,11 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-026` | `comms-submit` | a request's target is a participant of the new thread; a reply names what it answers; only a request carries request details |
-| `FAC-SEM-027` | `comms-transition` | a request moves only along the lifecycle table; an effect that began is settled only by an observed result |
-| `FAC-SEM-107` | `comms-directory` | a directory page lists each Project once and each capability once per Project; ids and capability names compare as written (DEC-0077) |
-| `FAC-SEM-108` | `comms-submit`, `comms-message` | only a message of kind `finding` carries `finding`; no two unredacted `affects` items are the same, compared as written; a redacted item only in a message, never in a submit (DEC-0080) |
-| `FAC-SEM-109` | `comms-transition` | every `complete` and `reconcile` record names who settled the request, `responder` or `owner`, and no other record does; the estate owner settles only by `reconcile`, with a summary of 1–2000 characters, as a `trusted` `operator` principal (DEC-0081) |
+| <a id="fac-sem-026"></a>`FAC-SEM-026` | `comms-submit` | a request's target is a participant of the new thread; a reply names what it answers; only a request carries request details |
+| <a id="fac-sem-027"></a>`FAC-SEM-027` | `comms-transition` | a request moves only along the lifecycle table; an effect that began is settled only by an observed result |
+| <a id="fac-sem-107"></a>`FAC-SEM-107` | `comms-directory` | a directory page lists each Project once and each capability once per Project; ids and capability names compare as written (DEC-0077) |
+| <a id="fac-sem-108"></a>`FAC-SEM-108` | `comms-submit`, `comms-message` | only a message of kind `finding` carries `finding`; no two unredacted `affects` items are the same, compared as written; a redacted item only in a message, never in a submit (DEC-0080) |
+| <a id="fac-sem-109"></a>`FAC-SEM-109` | `comms-transition` | every `complete` and `reconcile` record names who settled the request, `responder` or `owner`, and no other record does; the estate owner settles only by `reconcile`, with a summary of 1–2000 characters, as a `trusted` `operator` principal (DEC-0081) |
 
 ## Limits
 

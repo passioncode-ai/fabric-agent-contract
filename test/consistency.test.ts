@@ -76,9 +76,9 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
   const register = (rows: string, next = "FAC-SEM-003") =>
     ({ path: "conformance.md", text: `## Semantic rule codes\n\n**Next free rule code:** \`${next}\`\n\n| Code | Kind | Defined in |\n|---|---|---|\n${rows}\n## Compatibility policy\n` });
   const spec = (name: string, codes: string[]) =>
-    ({ path: `docs/specification/${name}`, text: `## Semantic rules\n\n| Code | Kind | Rule |\n|---|---|---|\n${codes.map((code) => `| \`${code}\` | \`x\` | a rule |`).join("\n")}\n` });
+    ({ path: `docs/specification/${name}`, text: `## Semantic rules\n\n| Code | Kind | Rule |\n|---|---|---|\n${codes.map((code) => `| <a id="${code.toLowerCase()}"></a>\`${code}\` | \`x\` | a rule |`).join("\n")}\n` });
   const source = (codes: string[]) => ({ path: "src/rules.ts", text: codes.map((code) => `push({ code: "${code}", instancePath: "" })`).join("\n") });
-  const rows = "| `FAC-SEM-000` | any | here: an object |\n| `FAC-SEM-001` | `x` | [runners](runners.md#semantic-rules) |\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
+  const rows = "| <a id=\"fac-sem-000\"></a>`FAC-SEM-000` | any | here: an object |\n| `FAC-SEM-001` | `x` | [runners](runners.md#semantic-rules) |\n| `FAC-SEM-002` | `x` | [service](service.md#semantic-rules) |";
 
   it("passes the repository's own register, specifications and checkers", async () => {
     expect(await checkRuleCodes()).toEqual([]);
@@ -110,14 +110,14 @@ describe("G-13: one allocation and one definition of every semantic rule code", 
   });
 
   it("reads a definition in any table of any specification, the register file's other sections included", () => {
-    const elsewhere = { path: "conformance.md", text: register(rows).text + "\n## Clients\n\n| Code | Kind | Rule |\n|---|---|---|\n| `FAC-SEM-001` | `x` | another meaning |\n" };
+    const elsewhere = { path: "conformance.md", text: register(rows).text + "\n## Clients\n\n| Code | Kind | Rule |\n|---|---|---|\n| <a id=\"fac-sem-001\"></a>`FAC-SEM-001` | `x` | another meaning |\n" };
     expect(ruleCodeFindings(elsewhere, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("FAC-SEM-001 is defined in 2 rows");
   });
 
   it("refuses a register kind that disagrees with the specification, and a late code defined in the register", () => {
     const wrongKind = rows.replace("| `FAC-SEM-002` | `x` |", "| `FAC-SEM-002` | `y` |");
     expect(ruleCodeFindings(register(wrongKind), [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002"])]).join("\n")).toContain("the register says y");
-    const late = register(rows + "\n| `FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
+    const late = register(rows + "\n| <a id=\"fac-sem-009\"></a>`FAC-SEM-009` | `x` | here: a rule |", "FAC-SEM-010");
     expect(ruleCodeFindings(late, [spec("runners.md", ["FAC-SEM-001"]), spec("service.md", ["FAC-SEM-002"])], [source(["FAC-SEM-000", "FAC-SEM-001", "FAC-SEM-002", "FAC-SEM-009"])]).join("\n")).toContain("FAC-SEM-009 must be defined in a specification");
   });
 });
@@ -131,21 +131,21 @@ describe("pin:check: the pin is a commit of the contract's history", () => {
     return "";
   };
   it("accepts a pin on origin/main's history and refuses one off it, such as a commit a rewrite left behind", () => {
-    expect(pinHistory("c55f2d5", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
-    expect(pinHistory("20a818e6", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", git(true))).toEqual({ state: "on-history", base: "origin/main" });
+    expect(pinHistory("20a818e648a4c09a60df0126d11626922e8b9094", ".", git(false))).toEqual({ state: "off-history", base: "origin/main" });
   });
   it("falls back to HEAD without origin/main, refuses a pin that is no hash, and says when it cannot read the checkout", () => {
-    expect(pinHistory("c55f2d5", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
-    expect(pinHistory("main", ".", git(true)).state).toBe("off-history");
-    expect(pinHistory("c55f2d5", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", git(true, false))).toEqual({ state: "on-history", base: "HEAD" });
+    expect(pinHistory("main", ".", git(true)).state).toBe("malformed");
+    expect(pinHistory("c55f2d5a11c9a0197e958e87212fca7ae1154769", ".", () => { throw new Error("no git"); }).state).toBe("unreadable");
   });
   it("tells a commit this checkout has not fetched from one off the history, and fails the CLI on every state but on-history", () => {
-    expect(pinHistory("7e4ac91", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
+    expect(pinHistory("7e4ac91000000000000000000000000000000000", ".", git(false, true, true))).toEqual({ state: "absent", base: "origin/main" });
     expect(exitCodeOf([], { state: "on-history", base: "origin/main" })).toBe(0);
     for (const history of [{ state: "off-history", base: "origin/main" }, { state: "absent", base: "origin/main" }, { state: "unreadable", reason: "x" }] as const) expect(exitCodeOf([], history)).toBe(1);
     expect(exitCodeOf([{ path: "README.md", line: 1, found: "abc1234", message: "m" }], { state: "on-history", base: "origin/main" })).toBe(1);
   });
   it("finds this repository's own main commit on its history", () => {
-    expect(pinHistory("ca4cca7", projectRoot()).state).toBe("on-history");
+    expect(pinHistory("ca4cca7ad93183cdbd8c82084004222e6ba0383b", projectRoot()).state).toBe("on-history");
   });
 });

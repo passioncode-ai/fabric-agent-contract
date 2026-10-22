@@ -7,7 +7,7 @@
   "properties": {
     "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
     "project": { "$ref": "common.schema.json#/$defs/uri" },
-    "capability": { "$ref": "common.schema.json#/$defs/uri" },
+    "capability": { "$ref": "common.schema.json#/$defs/capabilityUri" },
     "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
     "admission": { "$ref": "common.schema.json#/$defs/revisionRef" },
     "profileKind": { "enum": ["mcp", "a2a", "local-runner"] },

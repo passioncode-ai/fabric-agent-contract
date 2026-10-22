@@ -16,7 +16,7 @@ classifications.
 
 The profile MUST declare:
 
-- MCP revision `2026-07-28` for contract 0.1.0;
+- MCP revision `2026-07-28` for contract 0.1.0, in the member `protocolRevision`;
 - connection mode `streamable-http` or `stdio`;
 - server identity and discovery endpoint or command reference;
 - required MCP tools/resources/prompts by exact name;
@@ -52,7 +52,7 @@ configurations are not contract documents; the adapter checks them.
 
 The profile MUST declare:
 
-- A2A version `1.0` for contract 0.1.0;
+- A2A version `1.0` for contract 0.1.0, in the member `protocolVersion`;
 - an HTTPS Agent Card URL, normally `/.well-known/agent-card.json`;
 - the exact Agent Card skill IDs used to satisfy Fabric capabilities;
 - supported binding (`REST`, `JSON-RPC` or `gRPC`) and optional streaming/push;
@@ -67,9 +67,11 @@ expose internal planning or model reasoning.
 
 The profile MUST declare:
 
-- profile revision `fabric-local-runner/0.1`;
-- runner kind such as `claude-code`, `codex`, `cursor`, `deepseek-cli` or a
-  namespaced extension;
+- profile revision `fabric-local-runner/0.1`, in the member `profileVersion`;
+- runner kind (`runnerKind`): a shared kind name of [runners](runners.md), such as `claude-code`, `codex`,
+  `cursor-agent` or `gemini-cli`, which are also the ids of
+  [`catalogue/coding-agents.json`](../../catalogue/coding-agents.json), or a namespaced extension; a runner a host
+  ships SHOULD take its shared name on the runners page first, so routes and events match across hosts;
 - executable reference and argument template with typed placeholders;
 - input mode and result-envelope location;
 - supported cancellation and heartbeat behavior;
@@ -103,8 +105,9 @@ DEC-0013), a `0600` file or the vault — never its arguments, which `ps` and ev
 user, and never a URL, which lands in logs and configuration files. On 2026-10-11 a plugin's MCP passed its bearer
 key to `mcp-remote` in argv (fabric-workspace `knowledge/lifecycle.md` LC-21).
 
-`FAC-SEM-057` applies one detector, [`src/secret-shape.ts`](../../src/secret-shape.ts), to every launch argument and MCP
-entry a contract document declares:
+`FAC-SEM-057` applies the shared detector, [`src/secret-shape.ts`](../../src/secret-shape.ts), to every launch argument
+and MCP entry a contract document declares ([connections](connections.md) use a variant of it; CT-73 holds whether
+the two become one):
 
 | Document | Read |
 |---|---|
@@ -153,8 +156,8 @@ binding revision.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-056` | `manifest`, `provider-entry` | a stdio MCP server is declared for a project or on demand, never for every session (`scope: session`) |
-| `FAC-SEM-057` | `manifest`, `provider-entry`, `runner`, `runner-catalogue`, `service-descriptor` | no declared launch argument or MCP entry carries a credential |
+| <a id="fac-sem-056"></a>`FAC-SEM-056` | `manifest`, `provider-entry` | a stdio MCP server is declared for a project or on demand, never for every session (`scope: session`) |
+| <a id="fac-sem-057"></a>`FAC-SEM-057` | `manifest`, `provider-entry`, `runner`, `runner-catalogue`, `service-descriptor` | no declared launch argument or MCP entry carries a credential |
 
 Fixtures: `fixtures/semantic/stdio-scope-*.json`, `fixtures/semantic/command-line-*.json`; tests:
 [`test/service-hygiene.test.ts`](../../test/service-hygiene.test.ts).

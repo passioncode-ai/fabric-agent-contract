@@ -37,8 +37,7 @@
           "maximum": 9007199254740991
         },
         "sha256": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
+          "$ref": "common.schema.json#/$defs/sha256Hex"
         }
       },
       "description": "A head of the revocation delta: the sequence of its last entry (0 before any) and the hex SHA-256 of that entry's RFC 8785 form without sig (the estate's genesis at 0). The shape of a device check-in's records.revocationDelta (DEC-0053) and a relay's welcome.deltaHead (DEC-0047)."
@@ -76,8 +75,7 @@
           "description": "1 for the estate's first entry, then the previous entry's plus one: never skipped, never repeated."
         },
         "prev": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$",
+          "$ref": "common.schema.json#/$defs/sha256Hex",
           "description": "The head hash before this entry: the previous entry's hash, or for entry 1 the estate's genesis, SHA-256 of the RFC 8785 form of {type: \"revocation-delta/1\", estate, sequence: 0}."
         },
         "at": {

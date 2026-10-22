@@ -73,7 +73,7 @@ function providerEntry(value: JsonObject): Finding[] {
     const text = show(raw);
     const reference = /^secret-ref:(.+)$/.exec(text)?.[1];
     if (reference === undefined || looksLikeCredential(reference)) {
-      findings.push({ code: "FAC-SEM-015", instancePath: `/run/mcp/stdio/env/${name}`, message: `env ${name} must be a secret reference, not a secret value` });
+      findings.push({ code: "FAC-SEM-015", instancePath: `/run/mcp/stdio/env/${name}`, message: `env ${name} must be a secret reference, not a secret value: write it as a secret reference, secret-ref:NAME, and keep the value in the vault` });
     }
   }
   return findings;

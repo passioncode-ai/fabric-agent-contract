@@ -69,4 +69,4 @@ unredacted credentials and private model reasoning MUST NOT appear in any field.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-093` | `result` | every `proof[].claimIds` member names a `done[].claimId`, and every done claim no proof names is listed in `notVerified` by its claim ID (DEC-0011, DEC-0064) |
+| <a id="fac-sem-093"></a>`FAC-SEM-093` | `result` | every `proof[].claimIds` member names a `done[].claimId`, and every done claim no proof names is listed in `notVerified` by its claim ID (DEC-0011, DEC-0064) |

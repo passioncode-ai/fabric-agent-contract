@@ -20,8 +20,17 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-Both keys are the constants in [`src/extensions.ts`](../../src/extensions.ts). The
-documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
+The contract defines five extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+
+| Key | Page |
+|---|---|
+| `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1` | [service](service.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` | this page |
+| `https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1` | [memory and learning](memory-and-learning.md#wire-memory01) (DEC-0023) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1` | [embedded dashboard](embedded-dashboard.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
+
+The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
 ADR-0003 and design used — host `passioncode.ai`, path `/fabric/extensions/…` — is not a
 key of this contract; consumers use the constants above.
@@ -314,13 +323,13 @@ The field is in [`service-well-known.schema.json`](../../schemas/service-well-kn
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations |
-| `FAC-SEM-023` | `interop-tool-list`, `interop-tool` | every served tool's `outputSchema`, when present, has root `type: "object"` |
-| `FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
-| `FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |
-| `FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
-| `FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
-| `FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
+| <a id="fac-sem-017"></a>`FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations |
+| <a id="fac-sem-023"></a>`FAC-SEM-023` | `interop-tool-list`, `interop-tool` | every served tool's `outputSchema`, when present, has root `type: "object"` |
+| <a id="fac-sem-018"></a>`FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
+| <a id="fac-sem-019"></a>`FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |
+| <a id="fac-sem-022"></a>`FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
+| <a id="fac-sem-119"></a>`FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
+| <a id="fac-sem-120"></a>`FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
 
 Fixtures: every `interop-*` entry of [`fixtures/catalogue.json`](../../fixtures/catalogue.json),
 `fixtures/semantic/job-limits-*` and the vectors [`fixtures/vectors/job-limits.json`](../../fixtures/vectors/job-limits.json);

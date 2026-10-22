@@ -27,7 +27,27 @@ conformance checker every provider is admitted by. It stands on its own; any hos
 | Test (the gate) | `pnpm run check` — the merge gate, run by the merging session with its output in the PR; hosted CI is the nightly batch (org-index `docs/CI-BATCHING.md`), or `gh workflow run ci.yml --ref <branch>` once for an urgent branch |
 | Privacy check | `pnpm privacy:check` (part of the gate): runs org-index's `check_private.py` where the operator's denylist exists — from `ORG_INDEX`, this checkout's sibling, or, from a linked worktree, the main checkout's sibling; with the denylist present and no script found it fails rather than skips (`src/privacy-plan.ts`, CT-40) |
 | Consumer pin | `pnpm pin:check <consumer checkout>` |
+| Check one document or folder | `pnpm validate <file or folder> [--schema <name>] [--kind <kind>] [--json]`: schema and semantic rules, one line per problem; exit 0 clean, 1 a problem, 2 a usage error (`src/validate-cli.ts`) |
 | MCP (register + proving call) | none — the contract serves no MCP tools; README "Quick start → MCP" |
+
+Every script in `package.json`, with what it needs beyond Node 22.13+ and the installed dependencies:
+
+| Script | What it does | Needs |
+|---|---|---|
+| `pnpm typecheck` | `tsc --noEmit` over `src/`, `test/` and `tools/` | |
+| `pnpm test` | every test with branch coverage and its per-file floors (`vitest.config.ts`) | `git` (the gate's file list) |
+| `pnpm test:fast` | the same tests without coverage | `git` |
+| `pnpm ux:lint` | the UX contract's integrity check (`docs/ux/lint.py`) | `python3` |
+| `pnpm docs:check` | links, Mermaid, decision paths, rule codes, then `pnpm lint:md` | |
+| `pnpm lint:md` | markdownlint over the tracked Markdown; the log carries the count, the errors and the summary | |
+| `pnpm pin:check <checkout>` | a consumer's pin of this contract | `git` |
+| `pnpm vectors:check` | every generator in `tools/vectors/` against its committed vector file (`tools/vectors/run.ts`) | |
+| `pnpm vectors:write` | writes every vector file from its generator; one generator alone: `tsx tools/vectors/<name>.ts --write` | |
+| `pnpm privacy:check` | the operator's private-name denylist, where it exists | `python3` |
+| `pnpm validate` | checks an author's own document or folder: the schema, the semantic rules and the pairs, one line per problem | |
+| `pnpm check` | the gate: typecheck, test, ux:lint, docs:check, privacy:check | `python3`, `git` |
+
+The fast loop while editing: `pnpm test:fast`, or one file with `pnpm vitest run test/<file>.test.ts`; then the gate.
 
 ## Local rules
 

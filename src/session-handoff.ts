@@ -1,4 +1,3 @@
-import { show } from "./findings.js";
 import { createHash } from "node:crypto";
 import { closeSync, constants, existsSync, fstatSync, lstatSync, openSync, readdirSync, readSync, realpathSync } from "node:fs";
 import path from "node:path";
@@ -28,6 +27,18 @@ export const MAX_LAUNCH_ARG = 1024;
 export const MAX_HANDOFF_FILE = 1_048_576;
 
 type Json = Record<string, unknown>;
+/*
+ * A value as text, without the throw `String()` raises on an object such as `{"toString": 1}`: the `show` of
+ * `src/findings.ts`, copied so this module stays standalone. `test/session-handoff-standalone.test.ts` checks the copy.
+ */
+function show(value: unknown): string {
+  if (typeof value === "string") return value;
+  try {
+    return String(value);
+  } catch {
+    return JSON.stringify(value) ?? typeof value;
+  }
+}
 const isObject = (value: unknown): value is Json => typeof value === "object" && value !== null && !Array.isArray(value);
 const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
 // eslint-disable-next-line no-control-regex

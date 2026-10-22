@@ -15,6 +15,28 @@ evidence and governance layer over existing transports.
 The contract version is `0.1.0`. All canonical JSON Schema identifiers begin
 with `https://fabric.passioncode.ai/agent-contract/0.1.0/`.
 
+## Using the schemas
+
+**A schema's `$id` is a name, not a location.** Nothing is served at
+`https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/…`, and a validator that tries to fetch a `$ref` from there
+fails. The same `$id` also names a different text at another commit, because additive changes stay under `0.1.0`
+(DEC-0016): what a `$id` means is the file at the commit you pin ([one contract pin](versioning.md#one-contract-pin)).
+
+To validate a document, load the files of [`schemas/`](../../schemas/) from your pinned checkout and register each
+under its own `$id`, so that every `$ref` resolves locally:
+
+- with ajv (JavaScript), compile against `Ajv2020` and call `addSchema` for every file, as
+  [`src/validator.ts`](../../src/validator.ts) does;
+- with Python's `jsonschema`, build a `referencing.Registry` from the files, keyed by `$id`;
+- in an editor, map the document to the local schema file (VS Code: `json.schemas` with a `fileMatch` and a `url` that
+  is a path in your checkout), never to the `$id` URL.
+
+**`format` must be asserted.** Draft 2020-12 treats `format` as an annotation unless the validator is told to check it,
+and the contract's schemas rely on it for `uri`, `date-time` and other members. With ajv add
+`ajv-formats` (this repository uses its version 3, [`package.json`](../../package.json)); with `jsonschema` pass a `FormatChecker`. A validator
+that skips `format` accepts documents this repository's checker refuses. This repository's validator,
+[`src/validator.ts`](../../src/validator.ts), asserts it.
+
 ## Conformance subjects
 
 | Subject | Conforms when |
@@ -73,8 +95,9 @@ classDiagram
 - **Local runner profile:** a project-approved terminal adapter starts a local
   agent command in a constrained execution context.
 
-Model choice is provider-internal in 0.1.0. A provider MAY expose model metadata
-as an extension, but hosts MUST NOT depend on it for base conformance.
+The provider chooses the model, within the model classes the project allows. Model profiles, runner profiles and
+the model catalogue are contract objects since DEC-0046 ([runners](runners.md#runner-and-model-profiles)); other
+model metadata a provider exposes is an extension, and hosts MUST NOT depend on it for base conformance.
 
 ## Base role invariants
 

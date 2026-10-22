@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-21 contract review](2026-10-21-contract-review.md) | none (REQ-01 to REQ-18; CT-42, CT-73, CT-75 to CT-79) | PR #137 |
 | [2026-10-21 connections](2026-10-21-connections.md) | DEC-0096 (CT-70) | merged, #135 `bbebae6` |
 | [2026-10-20 final pass](2026-10-20-final-pass.md) | DEC-0089 to DEC-0095 (CT-57, CT-58, CT-60 to CT-63, CT-65) | merged, #133 `ca4cca7` |
 | [2026-10-20 unmeasured calls](2026-10-20-unmeasured-calls.md) | DEC-0091 (CT-62) | merged, #127 `c90e31b` |
@@ -76,5 +77,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 Decisions merged without a handoff of their own: DEC-0021 (`c220147`), DEC-0023 and DEC-0024 (merged in `b8453f4`),
 DEC-0027 (`94b1829`), DEC-0032 (PR #23 `3168503`), DEC-0037 (PR #28 `934ca60`) and DEC-0038 (PR #29 `1e7a7d6`).
-Their open consumer work is on the [board](../backlog.md) (CT-18…CT-21) and their next contract work in the
-[board run](../evidence/specs/2026-10-11-board-waves/plan.md).
+Their open consumer work is on the [board](../backlog.md) (CT-18 to CT-21).
+
+**The next task** is the highest open row of the [backlog](../backlog.md), read together with the newest handoff in
+the table above. The [board run](../evidence/specs/2026-10-11-board-waves/plan.md) of 2026-10-11 is closed and
+names no next task.

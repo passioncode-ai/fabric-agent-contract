@@ -206,9 +206,9 @@ run it under `node --experimental-strip-types` against the folders it writes, pa
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-053` | `session-handoff`, `session-handoff-folder` | The manifest's declarations agree: a bearer only per session (SH-5), the preamble (SH-6), the brief's delivery (SH-8), the launch's limits (SH-10) and the per-runtime table (SH-11) |
-| `FAC-SEM-054` | `session-handoff-folder` | The folder: where it lives, its modes, its files and nothing else, the launch naming its own files, the integrity digests (SH-1…SH-4, SH-12) |
-| `FAC-SEM-055` | `session-handoff-folder` | `mcp.json` reaches the first call's server as `mcp.auth` declares, and a secret lives in `mcp.json` only (SH-9, SH-13) |
+| <a id="fac-sem-053"></a>`FAC-SEM-053` | `session-handoff`, `session-handoff-folder` | The manifest's declarations agree: a bearer only per session (SH-5), the preamble (SH-6), the brief's delivery (SH-8), the launch's limits (SH-10) and the per-runtime table (SH-11) |
+| <a id="fac-sem-054"></a>`FAC-SEM-054` | `session-handoff-folder` | The folder: where it lives, its modes, its files and nothing else, the launch naming its own files, the integrity digests (SH-1…SH-4, SH-12) |
+| <a id="fac-sem-055"></a>`FAC-SEM-055` | `session-handoff-folder` | `mcp.json` reaches the first call's server as `mcp.auth` declares, and a secret lives in `mcp.json` only (SH-9, SH-13) |
 
 Fixtures: `fixtures/positive/session-handoff-*.json`, `fixtures/negative/session-handoff-*.json` (the schema);
 `fixtures/semantic/session-handoff-*.json` (manifests, kind `session-handoff`) and

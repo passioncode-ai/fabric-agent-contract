@@ -184,8 +184,8 @@ output.
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
-| `FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
+| <a id="fac-sem-115"></a>`FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
+| <a id="fac-sem-116"></a>`FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
 
 ## Enterprise cloud (DEC-0088)
 

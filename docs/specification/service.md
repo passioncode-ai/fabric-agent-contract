@@ -47,6 +47,53 @@ flowchart LR
 
 Schema: [`service-descriptor.schema.json`](../../schemas/service-descriptor.schema.json).
 
+### Minimal local descriptor
+
+The smallest descriptor a local service installs, here for a service supervised by launchd on macOS:
+
+<!-- example: service-descriptor.schema.json kind=service-descriptor -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "id": "example-agent",
+  "instance": "default",
+  "name": "Example Agent",
+  "origin": "http://127.0.0.1:47195",
+  "auth": { "tokenFile": "~/.config/example-agent/service.token" },
+  "lifecycle": {
+    "manager": "launchd",
+    "label": "com.example.example-agent",
+    "plist": "~/Library/LaunchAgents/com.example.example-agent.plist"
+  },
+  "paths": {
+    "data": "~/Library/Application Support/example-agent",
+    "logs": ["~/Library/Logs/example-agent/service.log"]
+  },
+  "installedAt": "2026-10-21T09:00:00Z",
+  "installedBy": "example-agent service install 0.1.0"
+}
+```
+
+<!-- required-members: service-descriptor.schema.json -->
+
+| Member | Required | What it holds |
+|---|---|---|
+| `protocol` | yes | `"fabric-service/0.1"` |
+| `id` | yes | the service's slug, `^[a-z][a-z0-9-]{1,62}$`, the same on every machine |
+| `instance` | yes | which copy on this machine, `default` for the first |
+| `name` | yes | what a host shows, at most 80 characters |
+| `auth` | yes | `tokenFile`, where the token is; optionally the `header` it travels in and its `scheme` (below) |
+| `lifecycle` | yes | the one supervisor (`manager`) and its own names: launchd's `label` and `plist`, systemd's `unit`, the Task Scheduler's `task`, an app's `app` |
+| `installedAt` | yes | when it was installed, RFC 3339 |
+| `installedBy` | yes | the installer and its version, or `{by, role?, tool}` |
+| `origin` | local placement | `http://127.0.0.1:<port>`; an app's descriptor may leave it out |
+| `paths` | local placement | `data` and `logs` |
+
+**The token's header.** `auth.header` names the header the token travels in. Absent, it is `Authorization` with
+`auth.scheme: "Bearer"`. A custom header, any other name, MUST carry `auth.scheme: "none"`: the token is then the
+header's whole value, with no `Bearer` before it (schema).
+
 An installer MUST write one descriptor per installed service instance, and its
 uninstaller MUST remove it. The running service MUST NOT write its own descriptor: the
 descriptor describes an installation, not a run. The one exception is an app, below.
@@ -116,6 +163,40 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 ## Well-known document
 
 Schema: [`service-well-known.schema.json`](../../schemas/service-well-known.schema.json).
+
+### Minimal well-known document
+
+The smallest answer to `GET /.well-known/fabric-service`, for the descriptor above:
+
+<!-- example: service-well-known.schema.json kind=service-well-known -->
+
+```json
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-agent",
+    "instance": "default",
+    "name": "Example Agent",
+    "version": "0.1.0",
+    "build": { "commit": "8b80be9" }
+  },
+  "process": { "pid": 51234, "startedAt": "2026-10-21T09:00:05Z" },
+  "status": "ready",
+  "degraded": [],
+  "surfaces": { "events": { "path": "/fabric/v1/events" } }
+}
+```
+
+<!-- required-members: service-well-known.schema.json -->
+
+| Member | Required | What it holds |
+|---|---|---|
+| `protocol` | yes | `"fabric-service/0.1"` |
+| `service` | yes | `id` and `instance`, equal to the descriptor's (`FAC-SEM-009`); `name`; `version`; `build` with a `commit` or a `digest` |
+| `process` | yes | the live process: `pid` and `startedAt` |
+| `status` | yes | `starting`, `ready`, `degraded` or `stopping` |
+| `degraded` | yes | the sources that do not work now; an empty list asserts full health |
+| `surfaces` | yes | at least `events`; `dashboard`, `mcp` and `usage` when the service has them |
 
 `GET /.well-known/fabric-service` MUST answer without authentication, from memory, in
 under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote
@@ -731,20 +812,20 @@ token, it never presents a service's own descriptor token to call that service's
 
 | Code | Kind | Rule |
 |---|---|---|
-| `FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
-| `FAC-SEM-010` | `service-directory` | no two local descriptors claim one port (an app's descriptor without an origin claims none, DEC-0069); no two descriptors claim one `id.instance` |
-| `FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
-| `FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
-| `FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
-| `FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; a row has no more unpriced or unmeasured calls than calls (DEC-0091); an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once (by the normal form of `projectId`, DEC-0076) and each task run once within it, a project holds at least its task runs' calls and priced calls and, when its own cost is known, at least their known costs; all projects no more than the days' calls and known costs, a `null` cost counting as none, with the same unknown-cost rule (DEC-0065, CT-40; `src/usage-rules.ts`) |
-| `FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
-| `FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
-| `FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
-| `FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
-| `FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, saying the holder is unknown when it has no pid, or naming the markers |
-| `FAC-SEM-079` | `windows-token-file` | a Windows token file is a regular file in the profile, owned by the user, SYSTEM or Administrators, and every granting ACE names one of them (`windowsTokenAclProblem`) |
-| `FAC-SEM-085` | `service-descriptor` | a service offered to others is reached at a public DNS name: `peer.endpoint` is not a reserved name |
-| `FAC-SEM-086` | `service-descriptor` | `runner` and `installedBy` carry no value shaped like a credential (the shared detector); the finding names the place, never the value |
-| `FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
-| `FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
-| `FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
+| <a id="fac-sem-009"></a>`FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
+| <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors claim one port (an app's descriptor without an origin claims none, DEC-0069); no two descriptors claim one `id.instance` |
+| <a id="fac-sem-011"></a>`FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
+| <a id="fac-sem-012"></a>`FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
+| <a id="fac-sem-024"></a>`FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
+| <a id="fac-sem-025"></a>`FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; a row has no more unpriced or unmeasured calls than calls (DEC-0091); an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once (by the normal form of `projectId`, DEC-0076) and each task run once within it, a project holds at least its task runs' calls and priced calls and, when its own cost is known, at least their known costs; all projects no more than the days' calls and known costs, a `null` cost counting as none, with the same unknown-cost rule (DEC-0065, CT-40; `src/usage-rules.ts`) |
+| <a id="fac-sem-031"></a>`FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
+| <a id="fac-sem-020"></a>`FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
+| <a id="fac-sem-035"></a>`FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
+| <a id="fac-sem-036"></a>`FAC-SEM-036` | `service-feed-request` | a feed client sends the token only in the declared header, in the declared scheme |
+| <a id="fac-sem-078"></a>`FAC-SEM-078` | `service-lock-outcome` | a copy without the lock touches nothing; an unmarked copy tries once and does not wait, a marked one waits at most 300 s, markers that disagree never reach the lock; a copy that does not get the lock exits 75 naming the holder's pid, saying the holder is unknown when it has no pid, or naming the markers |
+| <a id="fac-sem-079"></a>`FAC-SEM-079` | `windows-token-file` | a Windows token file is a regular file in the profile, owned by the user, SYSTEM or Administrators, and every granting ACE names one of them (`windowsTokenAclProblem`) |
+| <a id="fac-sem-085"></a>`FAC-SEM-085` | `service-descriptor` | a service offered to others is reached at a public DNS name: `peer.endpoint` is not a reserved name |
+| <a id="fac-sem-086"></a>`FAC-SEM-086` | `service-descriptor` | `runner` and `installedBy` carry no value shaped like a credential (the shared detector); the finding names the place, never the value |
+| <a id="fac-sem-087"></a>`FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
+| <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
+| <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
