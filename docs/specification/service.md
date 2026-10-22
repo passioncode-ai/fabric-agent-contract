@@ -520,7 +520,7 @@ stays. `peer` adds where others reach it and what it may receive.
 | Member | Meaning | Values |
 |---|---|---|
 | `endpoint` | where others reach the service | `https://<dns-name>[:<port>][/<path>]`: no query, fragment or userinfo, never an IP literal, never a reserved name (`FAC-SEM-085`, the list of `FAC-SEM-024`) |
-| `custody` | who controls the machine or the account it runs on | `organization-managed` (an organization's managed machine or its own cloud account) or `personal` (a person's own machine or account) |
+| `custody` | who controls the machine or the account it runs on | `organization-managed` (an organization's managed machine or its own cloud account), `personal` (a person's own machine or account), or `processor-hosted` (a processor runs it for an organization under a processing agreement, such as the organization's cloud on PassionCode's hosting: the organization controls the data, the processor the machine; DEC-0099) |
 | `residency` | where it runs and keeps what it receives | 1–32 distinct ISO 3166-1 alpha-2 codes in upper case; `EU`, which ISO 3166-1 reserves for the European Union, is admitted; the user-assigned `AA`, `QM`–`QZ`, `XA`–`XZ` and `ZZ` are refused ([sources](../evidence/sources.md)) |
 | `maxDataClass` | the most sensitive data it may receive | the organization edition's classes, least sensitive first: `public`, `internal`, `confidential`, `restricted` — the classes of device policy (DEC-0053) |
 

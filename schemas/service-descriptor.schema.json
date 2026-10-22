@@ -64,9 +64,10 @@
         "custody": {
           "enum": [
             "organization-managed",
-            "personal"
+            "personal",
+            "processor-hosted"
           ],
-          "description": "Who controls the machine or the account the service runs on: an organization (its managed machine or its own cloud account) or a person (their own machine or account)."
+          "description": "Who controls the machine or the account the service runs on: an organization (its managed machine or its own cloud account), a person (their own machine or account), or a processor that runs it for an organization under a processing agreement (processor-hosted, DEC-0099: the organization's cloud on PassionCode's hosting; the organization controls the data, the processor the machine)."
         },
         "residency": {
           "type": "array",

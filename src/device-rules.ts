@@ -274,7 +274,7 @@ export const MAX_CERTIFICATE_DAYS = 30;
  * FAC-SEM-044: `{request, response, issuedEpochs?, enrolled?, token?, proof?}` — the certificate is short-lived and bound to
  * what enrolled, and the epoch is new. `enrolled` is the record the server holds for the request's `device.id`
  * (`{keySha256}`), absent for a first enrollment; `token` is the server's record of the enrollment token the request names
- * (`{tokenId, deviceId?, userId?}`); `proof` is what the `Authorization` proof names (`{userId?}`, the signed-in user for
+ * (`{tokenId, deviceId?, userId?, role?}`, `role: "org-cloud"` for an organization's cloud machine, DEC-0099); `proof` is what the `Authorization` proof names (`{userId?}`, the signed-in user for
  * SSO). An SSO certificate binds the user the proof names, and a token certificate binds a user only when the token names
  * that person (F-B-105). Re-enrolling a device that is already enrolled needs proof that it is that device: a CSR
  * from the key on record, or a device-management token issued for that device. Otherwise any member could enroll as
@@ -301,6 +301,11 @@ function enrollment(value: JsonObject): Finding[] {
   } else if (auth.method === "enrollment-token" && bound !== undefined && bound !== token.userId) {
     flag("/response/certificate/binding/user/id", "a token enrollment binds a user only when the token names that person");
   }
+  // DEC-0099: an organization's cloud machine is enrolled only by a token of that role, and the certificate says so.
+  const cloudToken = auth.method === "enrollment-token" && token.role === "org-cloud";
+  if (binding.role === "org-cloud" && !cloudToken) flag("/response/certificate/binding/role", "only an enrollment token of role org-cloud enrolls an organization's cloud machine");
+  if (cloudToken && binding.role !== "org-cloud") flag("/response/certificate/binding/role", "a certificate issued on an org-cloud token says role org-cloud");
+  if (binding.role === "org-cloud" && bound !== undefined) flag("/response/certificate/binding/user", "an organization's cloud machine binds no person");
   const from = Date.parse(show(certificate.notBefore ?? "")), to = Date.parse(show(certificate.notAfter ?? ""));
   if (!(to > from)) flag("/response/certificate/notAfter", "a certificate ends after it starts");
   else if (to - from > MAX_CERTIFICATE_DAYS * DAY_MS) flag("/response/certificate/notAfter", `a device certificate lives at most ${MAX_CERTIFICATE_DAYS} days`);
