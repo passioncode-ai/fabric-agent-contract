@@ -177,7 +177,7 @@ describe("the vectors (DEC-0086)", () => {
     };
     for (const entry of vectors.intake as Json[]) {
       const answer = entry.expected as Json;
-      const want = answer.status === 200 ? "send" : answer.body ? expected[answer.body.error.code] : "hold";
+      const want = answer.status === 200 ? "send" : answer.status === 410 ? "stop" : answer.body ? expected[answer.body.error.code] : "hold";
       expect(gateGrantUsage(answer), entry.name).toBe(want);
     }
   });

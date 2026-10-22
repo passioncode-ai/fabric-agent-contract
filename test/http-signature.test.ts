@@ -89,7 +89,7 @@ describe("the binding's vectors (DEC-0056)", () => {
 
   it("covers every fault the packet names, each refusal code, and acceptance", () => {
     const expected = new Set(cases.map((c) => c.expect));
-    expect([...expected].sort()).toEqual(["accepted", "certificate-expired", "certificate-revoked", "certificate-unknown", "digest-mismatch", "signature-invalid", "signature-missing", "signature-replayed", "signature-stale"]);
+    expect([...expected].sort()).toEqual(["accepted", "certificate-expired", "certificate-revoked", "certificate-unknown", "digest-mismatch", "organization-closed", "signature-invalid", "signature-missing", "signature-replayed", "signature-stale"]);
     const faults = new Set(cases.map((c) => c.fault));
     for (const fault of ["none", "body", "target", "created", "nonce", "key", "alg", "signature", "certificate"]) expect(faults).toContain(fault);
     expect(cases.length).toBeGreaterThanOrEqual(54);
@@ -267,6 +267,10 @@ describe("the reference receiver", () => {
     expect(answer(record({ notAfter: "2026-10-12T09:00:01Z" }))).toMatchObject({ ok: true });
     expect(answer(record({ revoked: false }))).toMatchObject({ ok: true });
     for (const revoked of [true, "true", 1, 0, null]) expect(answer(record({ revoked: revoked as boolean })), String(revoked)).toMatchObject({ ok: false, code: "certificate-revoked" });
+    // DEC-0103: a closed organization answers before revocation and expiry, with its time; an unreadable time is the receiver's.
+    expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", revoked: true }))).toEqual({ ok: false, code: "organization-closed", reason: expect.any(String), closedAt: "2026-10-10T00:00:00Z" });
+    expect(answer(record({ organizationClosedAt: "2026-10-10T00:00:00Z", notAfter: "2026-10-08T00:00:00Z" }))).toMatchObject({ ok: false, code: "organization-closed" });
+    for (const closedAt of ["2026-10-10", "2026-10-32T00:00:00Z", 7, null]) expect(answer(record({ organizationClosedAt: closedAt as string })), String(closedAt)).toMatchObject({ ok: false, code: "context-invalid" });
     expect(answer(7 as unknown as DeviceCertificateRecord)).toMatchObject({ ok: false, code: "certificate-unknown" });
     expect(answer({ ...record({}), key: null as unknown as DeviceCertificateRecord["key"] })).toMatchObject({ ok: false, reason: expect.stringMatching(/^wrong-alg/) });
     expect(answer(record({ key: { alg: "es256", publicKey: 7 as unknown as string } }))).toMatchObject({ ok: false, reason: expect.stringMatching(/^unusable-key/) });

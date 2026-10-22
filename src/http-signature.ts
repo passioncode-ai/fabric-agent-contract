@@ -36,8 +36,9 @@ const HTTP_ALG = new Map<string, HttpSignatureAlg>([["es256", "ecdsa-p256-sha256
 /** The RFC 9421 `alg` a device key signs with, or undefined for a key that signs no request. */
 export const httpAlgFor = (alg: unknown): HttpSignatureAlg | undefined => (typeof alg === "string" ? HTTP_ALG.get(alg) : undefined);
 
-/** A refusal the receiver answers with 401 and this code. */
+/** A refusal the receiver answers with 401 and this code; `organization-closed` (DEC-0103) with 410 and `closedAt`. */
 export type SignatureRefusal =
+  | "organization-closed"
   | "signature-missing"
   | "digest-mismatch"
   | "signature-stale"
@@ -379,6 +380,11 @@ export interface DeviceCertificateRecord {
   /** Present and not `false` means revoked. */
   revoked?: boolean;
   /**
+   * DEC-0103: present when the certificate's organization is closing or closed, the time its closing began (RFC 3339). The
+   * server keeps it from its termination record after the organization is deleted, so the device learns the end.
+   */
+  organizationClosedAt?: string;
+  /**
    * The `#sig` key of the enrollment whose epoch the certificate carries (DEC-0053; rotation keeps it), or the certified key
    * when that enrollment listed no `deviceKeys`. Which one is the receiver's data model's to record.
    */
@@ -402,7 +408,7 @@ export interface DeviceSignatureContext {
 export type DeviceSignatureVerdict =
   | { ok: true; binding: "signature"; serial: string; nonce: string; created: number; keepUntil: number }
   | { ok: true; binding: "mutual-tls"; serial: string }
-  | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string };
+  | { ok: false; code: SignatureRefusal | ReceiverFault; reason: string; closedAt?: string };
 
 /** The strict RFC 3339 reader (`T`, an offset and a day that exists), shared by every rule that compares a time. */
 export { strictTime } from "./rfc3339.js";
@@ -469,7 +475,8 @@ const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
  * `clock-unreadable`, `base-url-invalid`; never a throw); an unsigned request, accepted only on a mutual-TLS client
  * certificate that is known, not revoked and valid now (`binding: "mutual-tls"`); a conforming signature
  * (`signature-missing`), the body's digest (`digest-mismatch`), the window (`signature-stale`), `keyid` equal to the
- * client certificate's serial when there is one, and the certificate (`certificate-unknown`, `-revoked`, `-expired`), the
+ * client certificate's serial when there is one, and the certificate (`certificate-unknown`, then `organization-closed`
+ * for a closed organization's, DEC-0103, then `-revoked`, `-expired`), the
  * algorithm and key (`signature-invalid`), and the signature over the rebuilt base (`signature-invalid`). The vectors
  * carry one fault each, so a port that orders the checks otherwise answers them alike.
  */
@@ -488,6 +495,12 @@ export function checkDeviceSignature(request: DeviceRequest, context: DeviceSign
   const certificateRefusal = (serial: string): DeviceSignatureVerdict | DeviceCertificateRecord => {
     const record = context.certificate(serial);
     if (!isObjectLike(record) || record.serial !== serial) return refuse("certificate-unknown", "no certificate with this serial");
+    // DEC-0103: a closed organization answers before revocation, so the device learns the end, not one machine's revocation.
+    if (record.organizationClosedAt !== undefined) {
+      const closedAt = record.organizationClosedAt;
+      if (typeof closedAt !== "string" || Number.isNaN(strictTime(closedAt))) return refuse("context-invalid", "the receiver's record of the organization's closing has no readable time");
+      return { ok: false, code: "organization-closed", reason: "the organization is closed: stop every request for it", closedAt };
+    }
     if (record.revoked !== undefined && record.revoked !== false) return refuse("certificate-revoked", "the certificate is revoked: re-enroll");
     const from = strictTime(record.notBefore), to = strictTime(record.notAfter);
     if (!(at >= from && at < to)) return refuse("certificate-expired", "the certificate is not valid now: re-enroll");

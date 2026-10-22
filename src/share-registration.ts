@@ -26,7 +26,7 @@ export const MAX_MESSAGE = 200;
 /** The refusal codes of `share-registration.schema.json#/$defs/refusal`, in the order of the SR table. */
 export const SHARE_REFUSAL_CODES: readonly string[] = ["malformed", "wrong-organization", "unassigned-device", "already-withdrawn", "agent-mismatch", "stale-revision", "revision-conflict", "purpose-not-collected"];
 /** DEC-0056's 401 codes (devices.md, transport steps 1 to 8), which SR-1 answers as they come. */
-export const TRANSPORT_REFUSALS: readonly string[] = ["signature-missing", "digest-mismatch", "signature-stale", "certificate-unknown", "certificate-revoked", "certificate-expired", "signature-invalid", "signature-replayed"];
+export const TRANSPORT_REFUSALS: readonly string[] = ["signature-missing", "digest-mismatch", "signature-stale", "certificate-unknown", "organization-closed", "certificate-revoked", "certificate-expired", "signature-invalid", "signature-replayed"];
 /** DEC-0056 step 0: a receiver whose own context is unusable accepts nothing, and the fault is its own. */
 export const RECEIVER_FAULTS: readonly string[] = ["context-invalid", "clock-unreadable", "base-url-invalid"];
 
@@ -249,6 +249,7 @@ export type ShareRegistrationAnswer =
   | { status: 200; receipt: ShareRegistrationReceipt; held: HeldShareRegistration }
   | { status: 400 | 403 | 409; body: ShareRegistrationRefusal | SchemaUnsupported }
   | { status: 401; code: string }
+  | { status: 410; code: "organization-closed"; closedAt: string }
   | { fault: string };
 
 const ACTIVE_HELD = ["grantRevision", "agentRef", "startsAt", "expiresAt"] as const;
@@ -330,6 +331,8 @@ export function decideShareRegistration(held: unknown, registration: unknown, bi
   const transport = own(binding, "transport");
   if (own(transport, "ok") !== true) {
     const code = own(transport, "ok") === false ? own(transport, "code") : undefined;
+    const closedAt = own(transport, "closedAt");
+    if (code === "organization-closed") return isString(closedAt) ? { status: 410, code, closedAt } : { fault: "context-invalid" };
     if (isString(code) && TRANSPORT_REFUSALS.includes(code)) return { status: 401, code };
     return { fault: isString(code) && RECEIVER_FAULTS.includes(code) ? code : "context-invalid" };
   }
@@ -417,7 +420,7 @@ export function joinGrantUsage(event: unknown, binding: unknown, registrations: 
 
 // ---- The sender gate (the collector) ----------------------------------------------------------------------------
 
-export type GateAnswer = "send" | "hold" | "hold-degraded" | "hold-notice";
+export type GateAnswer = "send" | "hold" | "hold-degraded" | "hold-notice" | "stop";
 
 /** Refusals after which the grant's usage may be sent, with their status: the receiver holds a registration (or a final withdrawal). */
 const SEND_AFTER: ReadonlyMap<string, number> = new Map([["stale-revision", 409], ["already-withdrawn", 409]]);
@@ -446,6 +449,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
  */
 export function gateGrantUsage(answer: unknown): GateAnswer {
   if (own(answer, "status") === 200 && own(own(answer, "receipt"), "type") === SHARE_REGISTRATION_RECEIPT_TYPE) return "send";
+  // DEC-0103: the organization closed; the node keeps nothing for it and sends it nothing again.
+  if (own(answer, "status") === 410 && own(answer, "code") === "organization-closed") return "stop";
   const code = own(own(own(answer, "body"), "error"), "code");
   const status = own(answer, "status");
   if (!isString(code)) return "hold";

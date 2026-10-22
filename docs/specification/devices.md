@@ -259,7 +259,8 @@ Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+
   epoch's binding (`FAC-SEM-045`).
 
 **What a receiver checks**, in this order ([`checkDeviceSignature`](../../src/http-signature.ts), then
-[`verifyDeviceRequest`](../../src/http-signature.ts)); each refusal is HTTP 401 with the code:
+[`verifyDeviceRequest`](../../src/http-signature.ts)); each refusal is HTTP 401 with the code, but `organization-closed`, HTTP 410
+([below](#organization-closed), DEC-0103):
 
 | Step | Refused when | Code |
 |---|---|---|
@@ -269,6 +270,7 @@ Signature: fabric-device=:thW6jbfdp53+WsnK47qgmn5s6XTzu78X8CA1Gp2rHotzHuS9exh9C+
 | 2 | `Content-Digest` is not exactly `sha-256` of the body as received | `digest-mismatch` |
 | 3 | `created` is more than 300 seconds from the receiver's clock | `signature-stale` |
 | 4 | a client certificate is present and `keyid` is not its serial, or no certificate has the serial `keyid` names | `certificate-unknown` |
+| 4 | the certificate's organization is closing or closed (its record carries `organizationClosedAt`; an unreadable one is the receiver's own `context-invalid`) | `organization-closed` (HTTP 410) |
 | 5 | the certificate is revoked (a record's `revoked` present and not `false`) | `certificate-revoked` |
 | 6 | the receiver's clock is not in `notBefore` ≤ t < `notAfter`, each read as RFC 3339 with `T` and an offset | `certificate-expired` |
 | 7 | `alg` is not the signing key's, the key is not usable, the signature base cannot be built, or the signature does not verify | `signature-invalid` |
@@ -291,6 +293,24 @@ stale `created`, a missing and a malformed `nonce`, a repeated one, a foreign ke
 revoked and expired certificates, unusable keys (a small-order forgery among them), another party's members, mutual TLS
 with and without a signature, and RFC 9421's own Ed25519 example with RFC 9530's digest. `FAC-SEM-077` holds a receiver's
 answer to them.
+
+<a id="organization-closed"></a>
+
+**A closed organization** (DEC-0103). When an organization ends (the end of its notice period, then its deletion), its
+server MAY answer every device request of that organization (an enrollment, a check-in, an activity batch, a share
+registration, a rotation) with **HTTP 410** and `organization-closed`, no `Retry-After`, and the body
+[`device-organization-closed`](../../schemas/device-organization-closed.schema.json): `error`, `code` and `closedAt`, the
+time its closing began, nothing else. It answers so before a revocation (transport step 4, so the device learns that the
+organization ended, not that one machine was revoked) and keeps answering after the deletion from its termination record,
+which holds no person. A server that never closes an organization never sends it. An enrollment into such an organization
+is refused the same way.
+
+A node takes `organization-closed` as final **at once**, on one answer: it stops every request to that organization,
+drops what it buffered for it (events, sums, registrations), and ends that enrollment; its other enrollments are
+untouched. `certificate-revoked` and `certificate-unknown` stay what they were: one machine's end, which a node does not
+take as its organization's. In [`verifyDeviceRequest`](../../src/http-signature.ts) a certificate record with
+`organizationClosedAt` gives this answer (an unreadable one is the receiver's `context-invalid`), and the share
+registration's sender gate answers `stop` ([share registration](share-registration.md)).
 
 <a id="attribution"></a>
 

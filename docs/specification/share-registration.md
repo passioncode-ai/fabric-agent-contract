@@ -224,6 +224,7 @@ shown under its grant without an agent. Days compare as UTC days: a `startsAt` o
 | `send` | a status 200 receipt, whatever its state (usage before a withdrawal still joins); a 409 `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
 | `hold-degraded` | a typed refusal of the SR table that sending the same registration again does not clear: 409 `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or `schema-unsupported`. The node keeps the sums, reports itself degraded and sends again only when the record changes |
 | `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection ([devices](devices.md#policy), DEC-0102), and at the seven-day resend |
+| `stop` | 410 `organization-closed` (DEC-0103): the organization ended; the node keeps nothing for it and sends it nothing again ([devices](devices.md#organization-closed)) |
 | `hold` | no answer yet, a transport refusal (401), a receiver's fault, a code under a status that is not its own, or anything else: the node keeps the sums and sends the registration again with backoff |
 
 So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant

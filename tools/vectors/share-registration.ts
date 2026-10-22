@@ -212,6 +212,8 @@ function intakeCases(): Json[] {
     ["SR-1: the signature does not verify", [], base, binding({ transport: { ok: false, code: "signature-invalid" } }), { status: 401, code: "signature-invalid" }],
     ["SR-1: a replayed nonce", [held], base, binding({ transport: { ok: false, code: "signature-replayed" } }), { status: 401, code: "signature-replayed" }],
     ["SR-1: an expired certificate, before the body is read", [], { type: "share-registration/2" }, binding({ transport: { ok: false, code: "certificate-expired" } }), { status: 401, code: "certificate-expired" }],
+    ["SR-1: a closed organization (DEC-0103): 410 with its closedAt", [held], base, binding({ transport: { ok: false, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" } }), { status: 410, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" }],
+    ["SR-1: a closed organization without its time is the receiver's fault", [], base, binding({ transport: { ok: false, code: "organization-closed" } }), { fault: "context-invalid" }],
     // SR-2
     ["SR-2: a revision this receiver does not read", [], { ...base, type: "share-registration/2" }, binding(), unsupported("share-registration/2")],
     ["SR-2: a receipt sent as a registration", [], { ...base, type: RECEIPT }, binding(), unsupported(RECEIPT)],
@@ -353,6 +355,8 @@ function gateCases(): Json[] {
     ["agent-mismatch under status 200", { status: 200, body: { error: { code: "agent-mismatch" } } }, "hold"],
     ["wrong-organization under status 409", refused(409, "wrong-organization"), "hold"],
     ["a transport refusal", { status: 401, code: "signature-replayed" }, "hold"],
+    ["organization-closed (DEC-0103): the node stops for that organization", { status: 410, code: "organization-closed", closedAt: "2026-11-30T00:00:00Z" }, "stop"],
+    ["organization-closed under a status that is not its own", { status: 401, code: "organization-closed" }, "hold"],
     ["the receiver's own fault", { fault: "context-invalid" }, "hold"],
     ["a status 200 without a receipt", { status: 200 }, "hold"],
     ["a status 200 whose receipt is a registration", { status: 200, receipt: { type: TYPE } }, "hold"],

@@ -922,5 +922,8 @@
   {"name": "activity-batch-ack-before-purpose", "schema": "activity-batch-ack.schema.json", "path": "positive/activity-batch-ack-before-purpose.json", "valid": true},
   {"name": "device-policy-baseline-mcp-server-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-mcp-server-min-version.json", "valid": false, "keyword": "false schema"},
   {"name": "device-policy-baseline-service-digest", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-service-digest.json", "valid": false, "keyword": "false schema"},
-  {"name": "repair-result-org-cloud", "schema": "repair-result.schema.json", "path": "positive/repair-result-org-cloud.json", "valid": true}
+  {"name": "repair-result-org-cloud", "schema": "repair-result.schema.json", "path": "positive/repair-result-org-cloud.json", "valid": true},
+  {"name": "device-organization-closed", "schema": "device-organization-closed.schema.json", "path": "positive/device-organization-closed.json", "valid": true},
+  {"name": "device-organization-closed-no-time", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-no-time.json", "valid": false, "keyword": "required"},
+  {"name": "device-organization-closed-extra", "schema": "device-organization-closed.schema.json", "path": "negative/device-organization-closed-extra.json", "valid": false, "keyword": "additionalProperties"}
 ]
