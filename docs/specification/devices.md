@@ -307,7 +307,7 @@ began; never the date it was requested). It is answered:
 - **only once the closing can no longer be cancelled**: a node acts on it at once and drops what it buffered;
 - **only to a node pinned at or after DEC-0103** (known from its product and version, as `protocols` is, CT-67): to an
   older node the server answers what it answers today, `401 certificate-revoked` once it revoked the certificates, which
-  that node already ends an enrollment on;
+  Project Observatory's node already ends an enrollment on (OBS-204);
 - **at transport step 4, before revocation**, so a machine whose certificate was revoked at the end of the notice period
   learns that its organization ended, not that one machine was revoked;
 - **after the deletion too**: the server keeps, in its termination record, the serial of each of the organization's
@@ -330,9 +330,9 @@ A server that never closes an organization never sends it. A node takes `organiz
 it stops every request to that organization, drops what it buffered for it (events, sums, registrations) and ends that
 enrollment, discarding that organization's `server` policy layer, key set, collection start and streams (an `mdm` layer
 stays the operating system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
-server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event,
-besides a newer signed policy, that ends a `server` layer's locks; what a node does with the locks of an enrollment it
-ends on `certificate-revoked` the contract does not decide ([precedence and locks](#policy)); an `mdm` lock survives it. In [`verifyDeviceRequest`](../../src/http-signature.ts) a
+server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
+contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
+enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)). In [`verifyDeviceRequest`](../../src/http-signature.ts) a
 certificate record with `organizationClosedAt` gives this answer, `status: 410` with `closedAt` (an unreadable one is the
 receiver's `context-invalid`); the share registration's sender gate answers `stop`
 ([share registration](share-registration.md)).

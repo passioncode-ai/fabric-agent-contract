@@ -150,7 +150,7 @@ who register one grant id hold two registrations. It keeps the request's body by
 
 `decideShareRegistration(held, registration, binding)` answers in this order and never throws. `held` is the
 receiver's list of held entries; `binding` is `{transport, org: {id}, device?, user?: {id}}`, the certificate's binding
-for its epoch with `transport` the verdict of devices.md's transport steps (`{ok: true}` or `{ok: false, code}`) and,
+for its epoch with `transport` the verdict of devices.md's transport steps (`{ok: true}`, `{ok: false, code}`, or `{ok: false, code: "organization-closed", status: 410, closedAt}`, DEC-0103) and,
 optionally, `purposeAdmitted`, the receiver's own answer to whether that user's acknowledged notice names a share
 registration's purposes (a value that is not a boolean is SR-0):
 

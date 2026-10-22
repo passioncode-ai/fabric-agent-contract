@@ -45,6 +45,13 @@ paragraph, the FAC-SEM-077 row's wording). Unit: pass; its test gaps closed (a t
 one fault, the vectors carry `expectStatus` and `expectClosedAt`, two intake vectors pin SR-0 before SR-1, `null` is
 not absence).
 
+## Fourth round of readings
+
+Product: one break, DEC-0103 item 4 and devices.md disagreed on which enrollment end lifts a server layer's locks; both
+now say the one event this contract decides is the end on `organization-closed`, and an end on `certificate-revoked` is
+not decided here. Its risks too: the older node named (Project Observatory's, OBS-204), the binding's verdict shapes,
+FLW-07's entry point and screen state, SCN-011's states, CT-105's first cell, DEC-0103's affected files.
+
 ## Open
 
 - Adoption (CT-105): the first organization server answers it; Project Observatory's node and collector stop on it.

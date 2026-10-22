@@ -6368,8 +6368,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      never sends it.
   2. It answers so **only once the closing can no longer be cancelled**, and **only to a node pinned at or after
      DEC-0103** (known from its product and version, as `protocols` is, CT-67); to an older node it answers what it
-     answers today (`401 certificate-revoked` once it revoked the certificates), which that node already ends an
-     enrollment on.
+     answers today (`401 certificate-revoked` once it revoked the certificates), which Project Observatory's node
+     already ends an enrollment on (OBS-204).
   3. It is checked at transport step 4, after the certificate is found and before revocation; after the deletion the
      server keeps in its termination record each of the organization's certificate serials with the last product and
      version its node reported (no person), at least until that certificate's `notAfter`; a serial whose node's pin it
@@ -6382,8 +6382,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   4. A node takes it as final on one answer: it stops every request to that organization, drops what it buffered for it
      (events, sums, registrations) and ends that enrollment, discarding that organization's `server` policy layer, key
      set, collection start and streams; an `mdm` layer stays the operating system's; its other enrollments are
-     untouched; the enrollment's end is the one event besides a newer signed policy that ends a `server` layer's locks (an
-     `mdm` lock survives it). The share registration's sender gate answers `stop` (for the reference's
+     untouched; the enrollment's end on `organization-closed` is the one event this contract decides, besides a newer
+     signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an enrollment a node ends on
+     `certificate-revoked` is not decided here. The share registration's sender gate answers `stop` (for the reference's
      `{status: 410, code}` and for the wire's `{status: 410, body: {error: {code}}}` alike); `decideShareRegistration` gives `{status: 410,
      code, closedAt}`, and a verdict without a readable `closedAt` is SR-0's `context-invalid`. A collector consumes a
      batch's refusal whatever its reason; a 410 batch is the enrollment's end, not an event's rejection.
@@ -6394,7 +6395,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   about the organization's people. The first round of blind readings (unit, seam, product) found a forged signed vector,
   `closedAt` read loosely, the shipped node's behaviour misstated, FAC-SEM-077 and SR-1 still saying 401, a free-text
   body without the path bound and no rule for the policy a closed organization leaves; a second round found the pin gate
-  without a datum after deletion and at enrollment, and the gate's `hold` for the wire's nested body; all fixed here.
+  without a datum after deletion and at enrollment, and the gate's `hold` for the wire's nested body; a third round the
+  handoff's objective, the Expiry exception, the disclosure before verification and an expired certificate's path; a
+  fourth round two statements of which enrollment end lifts locks; all fixed here.
 - **Alternatives considered:** reuse `certificate-revoked` with a flag (a node cannot tell the two apart without reading
   a member it may not know); 404 `unknown-org` (an unknown organization and an ended one are not the same, and an
   enrollment-only code says nothing to a running node); a revocation delta naming the organization (the node may never
@@ -6412,6 +6415,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `device-organization-closed-no-time`, `-extra`, `-path`, `-flat`, `-other-code`, `-error-extra`, `-bad-time`; tests `test/http-signature.test.ts`,
   `test/share-registration.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`; docs
   `devices.md` (#organization-closed, the step table, FAC-SEM-077, tamper evidence), `share-registration.md`,
-  `activity.md`, `conformance.md`, `CONTEXT.md`, `docs/ux/scenarios.md` (SCN-011), `docs/backlog.md`, the handoff.
+  `activity.md`, `conformance.md`, `CONTEXT.md`, `docs/ux/scenarios.md` (SCN-011), `screens.md` (SCR-10), `flows.md`
+  (FLW-07), `docs/backlog.md` (CT-105, CT-106), the handoff and its index.
 - **Source:** the first organization server's ask 11, board thread `ba63565c` (2026-10-22, 19:04), from Project
   Observatory's OBS-204 (thread `5a0ecbde`).
