@@ -418,9 +418,48 @@
                             "digest": false
                           }
                         }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "coding-agent"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ]
+                        },
+                        "then": {
+                          "properties": {
+                            "name": {
+                              "$ref": "common.schema.json#/$defs/slug"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "service"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ]
+                        },
+                        "then": {
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "pattern": "^[a-z][a-z0-9-]{1,62}\\.[a-z0-9][a-z0-9-]{0,62}$"
+                            }
+                          }
+                        }
                       }
                     ],
-                    "description": "DEC-0102: minVersion only for a coding agent or a plugin, digest only for a skill or a plugin, the kinds whose summary rows carry them."
+                    "description": "DEC-0102: minVersion only for a coding agent or a plugin, digest only for a skill or a plugin, the kinds whose summary rows carry them; a coding agent's name is a summary's agent id and a service's its id.instance key."
                   }
                 }
               },

@@ -6268,7 +6268,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      names a later `noticeVersion`, never on a timer (DEC-0100's refused alternative stands, and so does the first
      organization server's ask: not until the notice changes), or when a check-in response's new member
      `acknowledgedNoticeVersion` (the latest version the device's person acknowledged) differs from the one it held at
-     the rejection: the person may acknowledge the notice already in force, which moves no policy. `collectionStart` is
+     the rejection (both present; an absent value is no signal): the person may acknowledge the notice already in
+     force, which moves no policy. `collectionStart` is
      no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
   9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; on its
      first pass after taking DEC-0098 a board answers each `queued` request its target already replied to, then expires
@@ -6281,10 +6282,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Why:** three blind readings of the range `bfa9a67..4a29fcb` on 2026-10-22 (unit, seam, product) failed it: thirteen
   breaks (two unit, four seam, seven product; the unit and seam tiers found the repair's policy expiry both), each
   reproduced, and twelve surviving plants. A second round on this branch found ten more (one unit, one seam, eight
-  product) and a third six (five product, one seam: the resume trigger missed an acknowledgement of the notice in force), all fixed here before merge.
+  product) and a third seven (five product; one seam, the resume trigger missed an acknowledgement of the notice in force; one
+  unit, a baseline could name a coding agent or a service in a shape no summary carries) and a fourth four product
+  (the new member's pin condition, CT-88's wording, the renewal's proof clause, the handoff's counts), all fixed here
+  before merge.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
   for open questions) and is listed above.
-- **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape; `minVersion` only
+- **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape, a coding agent's an agent id and a service's an `id.instance` key; `minVersion` only
   for a coding agent or a plugin, `digest` only for a skill or a plugin): a policy written to DEC-0101 that carries
   another is refused whole and the node keeps the revision it holds. Narrower for a node summary (an organization
   context only) and
@@ -6297,6 +6301,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;
   positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`, `device-check-in-response-acknowledged`; negative `node-summary-personal-context`,
   `node-summary-dotted-suffix`, `device-policy-baseline-dotted-suffix`, `device-policy-baseline-skill-min-version`,
+  `device-policy-baseline-coding-agent-name`, `device-policy-baseline-service-name`, `device-policy-baseline-coding-agent-digest`,
+  `device-policy-baseline-mcp-server-digest`, `device-policy-baseline-service-min-version`, `node-summary-mcp-dotted-suffix`,
+  `node-summary-skill-two-at`, `node-summary-drift-dotted-suffix`, `repair-result-already-answered`,
   `comms-receipt-no-responder-long-message`, `device-check-in-response-acknowledged-bad`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
   `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
   docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,

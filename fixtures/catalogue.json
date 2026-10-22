@@ -909,5 +909,14 @@
   {"name": "device-policy-baseline-dotted-suffix", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-dotted-suffix.json", "valid": false, "keyword": "pattern"},
   {"name": "device-policy-baseline-skill-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-skill-min-version.json", "valid": false, "keyword": "false schema"},
   {"name": "device-check-in-response-acknowledged", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-response-acknowledged.json", "valid": true},
-  {"name": "device-check-in-response-acknowledged-bad", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-response-acknowledged-bad.json", "valid": false, "keyword": "pattern"}
+  {"name": "device-check-in-response-acknowledged-bad", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-response-acknowledged-bad.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-policy-baseline-coding-agent-name", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-coding-agent-name.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-policy-baseline-service-name", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-service-name.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-policy-baseline-coding-agent-digest", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-coding-agent-digest.json", "valid": false, "keyword": "false schema"},
+  {"name": "device-policy-baseline-mcp-server-digest", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-mcp-server-digest.json", "valid": false, "keyword": "false schema"},
+  {"name": "device-policy-baseline-service-min-version", "schema": "device-policy.schema.json", "path": "negative/device-policy-baseline-service-min-version.json", "valid": false, "keyword": "false schema"},
+  {"name": "node-summary-mcp-dotted-suffix", "schema": "node-summary.schema.json", "path": "negative/node-summary-mcp-dotted-suffix.json", "valid": false, "keyword": "pattern"},
+  {"name": "node-summary-skill-two-at", "schema": "node-summary.schema.json", "path": "negative/node-summary-skill-two-at.json", "valid": false, "keyword": "pattern"},
+  {"name": "node-summary-drift-dotted-suffix", "schema": "node-summary.schema.json", "path": "negative/node-summary-drift-dotted-suffix.json", "valid": false, "keyword": "pattern"},
+  {"name": "repair-result-already-answered", "schema": "repair-result.schema.json", "path": "negative/repair-result-already-answered.json", "valid": false, "keyword": "enum"}
 ]

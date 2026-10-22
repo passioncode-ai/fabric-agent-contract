@@ -124,13 +124,14 @@ revocation carries. A start rounded up can move to the next UTC day (`23:59:59.9
 carries its window with at most three fraction digits, Fabric writes its revocations' `revokedAt` so, and the hub
 SHOULD (revocation-delta.md); the derivation floors whatever they write.
 
-A machine enrolled with role `org-cloud` (DEC-0099) derives no registration: share grants are a person's and such a
+A machine enrolled with role `org-cloud` (DEC-0099) derives no registration (`deriveShareRegistrations` takes no role
+yet, CT-94: until it does, the node skips derivation on such an enrollment itself): share grants are a person's and such a
 machine binds none, so its SR-5 is final, not a wait (DEC-0102). A node sends on change: after it applies a revision or a delta entry, after an enrollment, and after a check-in
 response's `protocols` first lists `share-registration/1` (DEC-0094). It SHOULD send each
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
 redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
 for the record to change as below, except SR-5a's `purpose-not-collected`, which it sends again at the resend and when
-its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection (DEC-0100, DEC-0102). It keeps each receipt. It sends nothing again that the receiver
+its policy names a later `noticeVersion`, or a check-in response whose `acknowledgedNoticeVersion` differs from the one it held at the rejection (DEC-0100, DEC-0102; both present, an absent value is no signal). It keeps each receipt. It sends nothing again that the receiver
 answered with a typed refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded
 meanwhile, SR-5a again excepted: that grant is held, not degraded; after no
 answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the

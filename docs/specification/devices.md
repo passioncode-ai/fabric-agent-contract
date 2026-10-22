@@ -149,11 +149,13 @@ collector starts again at seq 1 and reports the policy revisions it holds now, a
 evidence of tampering. Nothing is renewed silently past `notAfter`.
 
 **Renewal after a short absence** (DEC-0100). A device that was offline past its certificate's end (a holiday, a laptop
-left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof, within **30 days** of its last
+left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof (the CSR is from its key on record, and that CSR's
+own signature is the proof), within **30 days** of its last
 certificate's `notAfter`, judged by the server's clock: the new certificate's `notBefore`, never the device's own
-`requestedAt` (DEC-0102). Before that end the same request is also taken: a re-enrollment by the key on record with a new epoch, unlike a
+`requestedAt` (DEC-0102); the rule trusts the server for its own clock and cannot see a server that backdates
+`notBefore`. Before that end the same request is also taken: a re-enrollment by the key on record with a new epoch, unlike a
 rotation, which keeps the epoch; the old certificate ends when the new one is issued, and a node whose certificate is
-still valid rotates instead: the CSR is from its key on record, and that CSR's own signature is the proof. The server
+still valid rotates instead. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
@@ -523,7 +525,8 @@ device's [`collectionStart`](#collection-start) once it is known, the `noticeVer
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
 or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server accepts from the device (DEC-0067's list), so a
 node learns them at check-in; the latest list the node received is the server's current one. The response is a closed
-object, so a server sends it only to a node pinned at or after DEC-0094 or one that ignores unknown members;
+object, so a server sends `protocols` only to a node pinned at or after DEC-0094, and `acknowledgedNoticeVersion` only
+to a node pinned at or after DEC-0102, or to one that ignores unknown members;
 `fabric-device/0.1` carries no in-band sign of a node's pin, so the server knows it from the node's product and version
 (a revision that carries it is board row CT-67).
 

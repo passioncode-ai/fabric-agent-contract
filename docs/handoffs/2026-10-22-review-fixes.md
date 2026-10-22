@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-93)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-95)
 
 ## Objective
 
@@ -30,12 +30,22 @@ Product: five breaks (DEC-0102's compatibility and fixture list; the baseline's 
 checks), fixed. Seam: one break, the resume trigger after `purpose` missed a person acknowledging the notice already in
 force; the check-in response now names `acknowledgedNoticeVersion` and the collector resumes when it changes. Three
 seam risks: the wording aligned; `harnessBaseline` tests for mdm over server added; `deriveShareRegistrations` has no
-role input although the text says an `org-cloud` enrollment derives none (CT-94). Unit: see the pull request.
+role input although the text says an `org-cloud` enrollment derives none (CT-94). Unit: one break, a baseline could
+name a coding agent or a service in a shape no summary carries; the schema now narrows those two names. Its test
+gaps are closed with fixtures (each name position, each per-kind field, `already-answered` in a result) and a
+revision test; a backdated renewal is named as a limit in devices.md.
+
+## Fourth round
+
+Product: four breaks (the pin condition for `acknowledgedNoticeVersion` only in the decision; CT-88 stating the old
+resume rule; the renewal's proof clause moved onto rotation; this handoff's counts), fixed; its risks too: an absent
+value is no signal, the `org-cloud` derivation points to CT-94, and CT-95 holds the missing UX scenarios.
 
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
-  check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage.
+  check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage, CT-94 for
+  derive's role input, CT-95 for the UX scenarios.
 - A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
   policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
   repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person
@@ -45,15 +55,15 @@ role input although the text says an `org-cloud` enrollment derives none (CT-94)
 
 ## Open
 
-- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; the adoption rows CT-81 to
+- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; CT-94; CT-95; the adoption rows CT-81 to
   CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 928 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 957 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. A second round of three blind readings runs on this branch before it merges.
+list for `FAC-SEM-128`; both fixed. Four rounds of three blind readings ran on this branch; the PR merges after two consecutive clean rounds.
 
 ## Next task
 

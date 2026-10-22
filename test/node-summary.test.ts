@@ -77,6 +77,8 @@ describe("harnessDrift (DEC-0101)", () => {
     expect(harnessBaseline([mdm, server])).toEqual({ revision: 3, items: mdmItems });
     const locked = { ...server, keys: { "harness.baseline": { value: { items }, locked: true } } };
     expect(harnessBaseline([mdm, locked])).toEqual({ revision: 7, items });
+    const mdmOther = { source: "mdm", revision: 3, keys: { "repair.packages": { value: [] } } };
+    expect(harnessBaseline([mdmOther, server])).toEqual({ revision: 7, items });
     expect(signedPolicyValue([server, user], "repair.packages")).toEqual([]);
   });
 
