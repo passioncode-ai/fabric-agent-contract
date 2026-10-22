@@ -49,6 +49,21 @@
 
 ## Recent log
 
+### 2026-10-22: The iteration's plan (CT-81 to CT-89) and a bare `.` in two guards (DEC-0097)
+
+- **Goal:** read what the earlier sessions left, put every open ask in one plan with dates, carry it into
+  fabric-workspace, and fix what was found broken.
+- **What was missed:** four asks addressed to the contract, the roll call and the status of 2026-10-22 sat unanswered
+  for one to three days while two products reported themselves blocked on the contract; the runs had answered their
+  own threads but no run read the whole board for asks. And a guard written `(?!.*\.\.)` had passed every review:
+  each fixture was ASCII, and ECMAScript's `.` stops at U+2028 and U+2029 where Python's does not.
+- **Verified corrections:** the plan page and rows CT-81 to CT-86 (#139), CT-87 to CT-89 here; DEC-0097 with six
+  negative fixtures each accepted by `main` `66520f0` and refused after, and a test refusing a bare `.` in any schema
+  pattern.
+- **Learning:** a guard proves itself only against characters a reader's engine treats differently, so a pattern is
+  checked by what it is written with, not only by fixtures; and the board's asks are read in full at a run's start,
+  not only the threads a run opened.
+
 ### 2026-10-21: The contract review (REQ-01 to REQ-18)
 
 - **Goal:** fewer author errors against the contract: a checker, one error per mistake, the author's path rewritten,

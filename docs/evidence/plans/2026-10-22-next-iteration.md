@@ -24,7 +24,13 @@ Status lives in [the backlog](../../backlog.md); this page holds the order and t
 | S7, S8, S10: `node-summary/1` (harness per context, drift against a baseline) and the repair action | `ba63565c` items 7, 8 | the first organization server's VES-HARNESS, VES-INTEGRITY, VES-REMEDIATE; Project Observatory's node | CT-83 |
 | S4: directory and visibility, the call queue at the hosting node, the load section in `fabric-service/0.1` | `ba63565c` items 1 to 3; `b2511678` | Fabric CO-376 (2026-11-07), Fabric Dashboards' load panels, Observatory | CT-84 |
 | S1: `agent.call` over the relay and the T1 binding of an operator's own machines; A-6 trust profile per machine; A-7 the call rule | `ba63565c` item 4; `348467e5` items 1, 2 | the two-Mac test (S1), relay RLY-05/07, Fabric's hub issuer | CT-85 |
-| S5, S6: the credential request and its envelope; the call record | `ba63565c` items 5, 6 | Project Observatory (issuing), Fabric (call records), the first organization server | CT-86 |
+| S5, S6: the credential request and its envelope; the call record; the envelope between one person's own machines and the estate key | `ba63565c` items 5, 6; `21684886` | Project Observatory (issuing, OBS-191, OBS-194), Fabric (call records), the first organization server | CT-86 |
+| A `purpose` rejection reason, a share-registration refusal the node retries, the renewal of a recently expired device certificate | `ba63565c` items 9, 10 | the first organization server, Project Observatory's node | CT-88 |
+| The hub moved to another machine; passkey recovery | `b2511678` (readiness review, 2026-10-22) | Fabric's ceremonies (CO-320), the two-Mac test | CT-89 |
+| A package path and a device's free text cut short by U+2028 and U+2029 | `de8834d8` | every installer, every reader of device check-ins | DEC-0097 (done), CT-87 |
+
+**Done first, outside the order:** DEC-0097, an open security hole found on 2026-10-22 (a package path that
+traversed after U+2028); fixed the day it was found, CT-87 for its adoption.
 
 ## Order and dates
 
@@ -35,9 +41,11 @@ day the decision is merged on `main`, after which each consumer adopts at its ne
 |---|---|---|---|
 | 1 | CT-81 | Fabric already serves these bytes; until the contract carries them every pinned reader of `comms-*` schemas refuses or misreads `answered` and `noResponder` | 2026-10-24 |
 | 2 | CT-82 | small, additive, and the first organization server's VES-REC has a date | 2026-10-26 |
+| 2a | CT-88 | small, and the first organization server misreads a refusal today | 2026-10-27 |
 | 3 | CT-83 | the first organization server's three rows are blocked on it now (roll call line 4) | 2026-10-28 |
 | 4 | CT-84 | Fabric starts CO-376 after 0.3.10 and needs the wire first | 2026-10-31 |
 | 5 | CT-85 | the two-Mac test needs it, and it waits on nothing the contract does not own except the relay's deploy, which can follow | 2026-11-04 |
+| 5a | CT-89 | the ceremonies' two missing texts, before the two-Mac test is accepted | 2026-11-05 |
 | 6 | CT-86 | builds on CT-84's queue and CT-85's call; Observatory's issuing doors come first | 2026-11-07 |
 
 Between them, as slack: CT-75 (the author documents' open definitions), then CT-80, CT-78, CT-77, CT-79 and CT-76

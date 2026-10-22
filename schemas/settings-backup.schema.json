@@ -95,7 +95,7 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,62}$",
       "not": {
-        "pattern": "^((.+_)?(account_connections?|account_connection_drafts?|tokens?|secrets?|credentials?|passwords?|login_codes?)|(operator_)?sessions?)$"
+        "pattern": "^(([\\s\\S]+_)?(account_connections?|account_connection_drafts?|tokens?|secrets?|credentials?|passwords?|login_codes?)|(operator_)?sessions?)$"
       },
       "description": "A table holding connections, drafts of them, tokens, secrets, credentials, passwords, login codes or operator sessions is never backed up."
     },
@@ -103,7 +103,7 @@
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
       "not": {
-        "pattern": "^(?:.+_)?(?:[Tt]oken|[Ss]ecret|[Pp]assword|[Pp]assphrase|[Aa]pi_?[Kk]ey|[Pp]rivate_[Kk]ey|[Cc]ookie|[Ll]ogin_[Cc]ode|[Oo]tp|[Cc]redential)s?$"
+        "pattern": "^(?:[\\s\\S]+_)?(?:[Tt]oken|[Ss]ecret|[Pp]assword|[Pp]assphrase|[Aa]pi_?[Kk]ey|[Pp]rivate_[Kk]ey|[Cc]ookie|[Ll]ogin_[Cc]ode|[Oo]tp|[Cc]redential)s?$"
       },
       "description": "A column whose name says it holds a credential value is refused. A secret is named, never stored: `secret_name` or `token_slot` is allowed, `access_token` is not."
     },
