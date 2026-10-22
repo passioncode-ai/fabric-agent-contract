@@ -536,8 +536,8 @@ flowchart TD
 - **Traces:** ST-027 (JTBD-12, JRN-11/#1)
 - **Goal:** the operator finds an agent in their estate or their organization
 - **Entry points:** the hub's directory (the owner's sessions); the organization's directory (its members and administrator)
-- **Success exit:** the operator names the agent and its context, and calls it under the grant that already allows it
-- **Task analysis:** the hub or the organization server derives the directory from placements or from active share registrations and its own machines → it drops what the reader may not see → the reader picks an entry → the call goes through the grant as before.
+- **Success exit:** the operator names the agent and its context; a call then goes through the hub, which resolves the agent and checks the grant that already allows it
+- **Task analysis:** the hub or the organization server derives the directory from placements or from active share registrations and its own machines → it drops what the reader may not see → the reader picks an entry → a call goes through the hub's resolution and the grant as before.
 - **Rejected shape:** a directory that grants access, rejected because who may call an agent stays its grant (DEC-0104).
 - **Flow:**
 

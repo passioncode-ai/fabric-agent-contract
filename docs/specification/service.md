@@ -234,7 +234,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   the appearance it applies, its themes and its kit (ED-9, DEC-0036). How the page behaves inside a
   host (width, navigation, scrolling, appearance) is that profile's, not this one's. It MAY also carry what the
   agent uses under `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1`
-  ([connections](connections.md), DEC-0096).
+  ([connections](connections.md), DEC-0096), and, for a service that queues, its load under
+  `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.

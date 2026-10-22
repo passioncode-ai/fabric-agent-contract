@@ -52,7 +52,12 @@ them. A share grant that expired or a revocation delta applied since stops the c
 call will run. An organization's directory drops a registration as soon as it is withdrawn or outside its window.
 
 **Two members, one agent.** Two people who share the same agent into one organization are one entry: the directory
-names agents, not who shared them.
+names agents, not who shared them, and does not choose between their instances.
+
+**Finding is not calling.** An entry names an agent by `agentRef`; `agent.call` names a registry `agentId`, and the
+contract does not map one to the other ([contexts](contexts.md), Not decided). An entry also carries no machine or
+endpoint. A reader finds an agent here; the call goes through the hub, which resolves it in its own registry and
+under the reader's grant (Fabric, CO-376), until a revision maps the two.
 
 `FAC-SEM-130` (kind `agent-directory-view`) compares an implementation's directory with the one its source derives,
 its `source` with the source it came from and its `viewer` with its reader (`owner` for an estate):
@@ -82,7 +87,8 @@ MCP auth among them: they are one caller. A caller polls the way it started: a s
 **Limits.** A node that queues declares its limits in the [load extension](#load), which it therefore carries: `concurrency` (jobs run at once), `perCaller`
 (jobs of one authenticated caller run at once) and `queueMax` (jobs that may wait), each per (`agentRef`, context).
 
-**A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`, position 1 next, both
+**A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`, its rank in the order
+`nextQueuedJob` would start the waiting jobs if slots freed one at a time with no new arrival, position 1 next, both
 decimal integers of one to six digits with no leading zero, 1 ≤ position ≤ length, nothing before or after
 (`queueStatusMessage` writes nothing outside it, `readQueuePosition`).
 `pollIntervalMs` SHOULD match the expected wait. A caller reads it as any `working` job (`jobCallerAction` answers
@@ -181,9 +187,9 @@ second time. `queue-full`
 is a new error code: a caller that does not know it treats it as any failed start. The narrowings: `queue-full` is
 reserved, so a job error with that code, valid before, is refused and `jobCallerAction` answers `invalid`; and its
 `data` is required. One personal provider of the estate already queues the starts of its job tools by caller and
-refuses past its queue with `queue-full` and no `data`, with no load extension: until it adopts (CT-84) it is a node
-that queues without this page's wire, and a validating caller reads its refusal as malformed. No other provider
-sends `queue-full` as a job tool's code. `agent-directory/1`,
+refuses past its queue with `queue-full` and no `data`; it declares no load extension, so it is not yet a node that
+queues in this page's sense, and its refusal is its own until it declares the extension and adopts the wire (CT-84).
+No other provider sends `queue-full` as a job tool's code. `agent-directory/1`,
 `fabric-load/0.1` and `service-load/1` are new revisions in the register; `contractVersion` stays `0.1.0`.
 
 ## Who adopts it
@@ -192,7 +198,7 @@ sends `queue-full` as a job tool's code. `agent-directory/1`,
 |---|---|
 | Fabric, the hub (CO-376) | owns S4 as a whole; derives a person's estate directory with `estateDirectory` and serves it only to that person's sessions; attaches `Fabric-Delegation` so a node tells the callers it forwards apart (DL-10); relays `queue-full` with its data and keeps no key for it (today it answers `product-error` and keeps it under the key) |
 | the first organization server | keeps the registrations and its own machines' agents an organization's directory is derived from with `organizationDirectory`; which of it and the hub serves that directory is Fabric's to settle with it in CO-376; a member reads listed entries only |
-| a node hosting an agent | keys callers with `jobCallerKey`; queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
+| a node hosting an agent | keys callers with `jobCallerKey`, keeping the answers of keys it stored before under their old caller; answers `queue-full` and `unknown-job` with `{error}` alone (the closed `interop-tool-error`); queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
 | a caller (the one that started the call, not the hub that forwarded it) | waits on a queued job like any `working` job, and starts again after `queue-full`'s `retryAfterSeconds` under the same key |
 | Fabric Dashboards | draws the load panels from `service-load/1` |
 | fabric-agent-adapter's kits | at the re-pin: a kit-built node that queues ports `jobCallerKey` (the caller vectors) and keys a call with no token by its credential; `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |
@@ -218,6 +224,10 @@ Each runs [`fixtures/vectors/agent-network.json`](../../fixtures/vectors/agent-n
 - A node keeps its queued jobs across its restarts (a job id is stable across restarts, C3.2). How a node that lost
   one ends it, and whether its key then admits the intent again, is not decided here: `failed` with another code
   would leave the intent to a person under today's caller table.
+- Mapping an entry's `agentRef` to the `agentId` a call names, and which instance a call reaches when two members
+  share one agent.
+- What a node that queues does with keys stored under the hub's credential once the hub attaches tokens.
+- How a hub span and a meter receipt count a `queue-full` refusal.
 - A per-caller limit on the hub before the call reaches the node; relaying `fabric.job.list` through the hub.
 - An organization's view of an agent's load; per-agent rows and limits inside one service; counting refused starts.
 - A `visible` flag (dropped: an entry a reader may not see is absent) and per-agent token administration, both asked

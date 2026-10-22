@@ -123,7 +123,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### JTBD-12: Find an agent I may call, and know when it is busy
 
-- **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and, once I call, to know whether my call waits and for how long, so I can call it without asking around and without a burst of calls failing for nothing.
+- **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and, once I call, to know whether my call waits and for how long, so I can find it without asking around and without a burst of calls failing for nothing.
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller its place; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
@@ -547,7 +547,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-027: Operator finds the agents of their estate and their organization
 
-- **Story:** As P-02, I want one list of the agents I may find, so that I call the right one without asking where it runs.
+- **Story:** As P-02, I want one list of the agents I may find, so that I find the right one without asking where it runs.
 - **Traces:** JTBD-12, JRN-11/#1
 - **Acceptance criteria:**
   - Given an estate record with placements on two machines, when the hub derives the owner's directory, then each agent appears once per context and an agent the owner unlisted appears marked as unlisted.
