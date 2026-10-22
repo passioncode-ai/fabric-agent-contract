@@ -355,30 +355,43 @@ Read next: [the local-runner profile](../specification/profiles.md#local-runner-
 `pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` reads a document or a folder, run from a
 checkout of this repository at the commit you pin. For files in your own repository, run it from there with
 `pnpm --dir <path to the contract checkout> validate ./fabric/`: a relative path is read from where you ran it. It
-infers the schema from the document (a `protocol` the contract pins, a provider entry's own members, a file name),
-or takes `--schema`; runs the schema and then the semantic rules; and prints one line per problem with its path, its
-rule and a link to the rule.
+runs the schema and then the semantic rules, and prints one line per problem with its path, its rule and a link to the
+rule. It exits 0 when everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an
+extension key one letter away from the contract's, is printed as a note and does not fail the run.
+`pnpm --silent validate <dir> --json` prints the same findings as JSON for a script or a CI step (`--silent` keeps
+pnpm's own lines off the output).
 
-A folder's documents are checked as pairs: a descriptor with its well-known document, a descriptor with the manifest
-its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read, and when it is
-an installed copy outside the folder a note names it, so a stale install is visible rather than silently checked.
-Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder named after
-the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never one in a
-folder named after another owner, and a note says which file was read. With two or more manifests and none of them in
+Which schema a file is checked against is decided by the first row of this table that the file matches, in this
+order (`inferSchema` and `checkFile` in `src/validate-cli.ts`). Each row has a case in `test/validate-cli.test.ts`.
+
+| Signal the file gives | Checked as |
+|---|---|
+| a file that does not parse | a `json` problem, whatever its name |
+| `--schema <name>` on the command line | that schema |
+| a discriminator a schema pins (`protocol`, `contractVersion`, `format`) and every member that schema requires | that schema; of several, the one requiring the most members |
+| the name `fabric-agent.json` | a manifest |
+| the name `fabric-contract.lock.json` | a contract pin; a member the pin schema does not define is a note; a lock with another tool's members (`schemas`, `releases`, `schemaRelease`) is no pin |
+| a JSON Schema: a `*.schema.json` name, a `$schema` naming json-schema.org, or a `$id` beside `type` or `properties` | no contract document |
+| a `providerId` with a `manifest` path or a `run` object | a provider entry, wherever it is saved |
+| a file under `providers/` with a `fabric-` protocol, `providerId`, `run` or `manifest` | a provider entry |
+| an `<id>.<instance>.json` name with a `fabric-` protocol, `origin`, `lifecycle` or `fabricManifest` | a service descriptor |
+| a `protocol` or `contractVersion` shaped like the contract's (`fabric-<name>/<revision>`, a semantic version) that this checkout does not hold, or one that is a number, an array or a boolean | a `schema/const` problem naming the values this checkout reads |
+| a `protocol` a contract schema pins, with members missing | the schema it misses the fewest members of, so its missing members are problems; a `.well-known.json` name picks the well-known document; a protocol a `oneOf` schema shares (the `fabric-device` and `fabric-activity` families) gives no pick |
+| none of these | in a folder, a note (with the schemas a shared `contractVersion` is near) and the file is skipped; on its own, a usage error asking for `--schema` |
+
+A folder in which no file is a contract document is a usage error. Folders whose name starts with a dot, and
+`node_modules`, are not read, so save the well-known document as `<id>.<instance>.well-known.json`, not under
+`.well-known/`.
+
+A folder's documents are also checked as pairs: a descriptor with its well-known document, a descriptor with the
+manifest its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read, and when
+it is an installed copy outside the folder while the folder holds manifests, a note names it, so a stale install is
+visible. Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder
+named after the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never
+one in a folder named after another owner, and a note says which file was read; with two or more manifests and none in
 those places, none stands in. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a
-note. A file checked on its own is checked without its pairs. Save the well-known document as
-`<id>.<instance>.well-known.json`: folders whose name starts with a dot, and `node_modules`, are not read, so a copy
-under `.well-known/` is not checked. Beside a service in one folder, keep each manifest in a folder named after its
-owner (`example-reports/fabric-agent.json`), so each document finds its own.
-
-In a folder, a file the checker cannot tell (a JSON Schema, a test fixture, a probe receipt, a file named like a
-service key that carries no descriptor member) is noted and skipped, and `--schema` checks it; a file that does not
-parse is a problem whatever its name; the lock file is read as a contract pin; and a folder in which no file is a
-contract document is a usage error. A file by the lock's name that carries another tool's members (`schemas`,
-`releases`) is that tool's lock and is noted. It exits 0 when
-everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
-letter away from the contract's, is printed as a note and does not fail the run. `pnpm --silent validate <dir> --json` prints
-the same findings as JSON for a script or a CI step (`--silent` keeps pnpm's own lines off the output).
+note. Beside a service in one folder, keep each manifest in a folder named after its owner
+(`example-reports/fabric-agent.json`). A file checked on its own is checked without its pairs.
 
 ## Map an existing system
 

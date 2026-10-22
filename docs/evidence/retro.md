@@ -9,6 +9,7 @@
 - A conformance probe for a placement reached through a platform is accepted only after it has run against a real instance behind that platform, not only against a sample the run itself wrote.
 - A reference function that answers for a schema is tested against that schema on the same inputs: every output it emits validates, and every input the schema refuses it refuses.
 - A check made stricter than it was (a closed schema, a new refusal) is run first against the consumers' real files on this machine; what they carry is either accepted or recorded as an exception before the change lands.
+- A rule that decides by several signals (which schema a file follows, which manifest a pair reads) is written once as an ordered table in the code's order, with a test per row, before it is changed again.
 
 ## Run stamps
 
@@ -65,7 +66,9 @@
   `contractVersion` only names the near schemas, anything else is noted), with a test for each signal.
 - **Learning:** a check made stricter in a review is a contract change for every consumer: read the consumers' real
   files before closing a schema the contract never enforced. A rule fixed twice for the same reason is restated by its
-  signals, not patched a third time.
+  signals, not patched a third time: the root cause of rounds 2 to 5 was that the inference and pairing rules lived in
+  code branches and in three paragraphs of prose, so each fix was judged against the prose it remembered; the guide now
+  holds them as one table in the code's order.
 
 ### 2026-10-20: The final pass (DEC-0089 to DEC-0095)
 
