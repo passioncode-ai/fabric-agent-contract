@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-load-extension.schema.json",
+  "title": "extensions/load/0.1: where a service reports its load, and the queue limits it applies (fabric-load/0.1, DEC-0104)",
+  "description": "The value of the load extension key in a service's well-known document. `path` is served under the descriptor's auth.tokenFile like the usage report; `limits` are the queue's own (one per agentRef and context the service hosts).",
+  "type": "object",
+  "required": [
+    "path",
+    "windowSeconds",
+    "limits"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "pattern": "^/[A-Za-z0-9._~/-]{0,255}$"
+    },
+    "windowSeconds": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 86400,
+      "description": "The length of one window of the report."
+    },
+    "limits": {
+      "type": "object",
+      "required": [
+        "concurrency",
+        "perCaller",
+        "queueMax"
+      ],
+      "properties": {
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024,
+          "description": "Jobs run at once per agentRef and context."
+        },
+        "perCaller": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024,
+          "description": "Jobs of one caller run at once per agentRef and context."
+        },
+        "queueMax": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000,
+          "description": "Jobs that may wait per agentRef and context; one more answers queue-full."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

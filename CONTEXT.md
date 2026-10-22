@@ -383,6 +383,14 @@ digest and a revision's `contentHash`. They give different bytes for the same va
 a service (`fabric-provider/0.1`): its id, its manifest and how to reach it over
 MCP. Like a service descriptor, it describes an installation and grants nothing.
 
+**Agent directory**: The agents a viewer can find (`agent-directory/1`, DEC-0104): an estate's, read by its owner's
+own sessions, or an organization's, its members reading the listed entries. Derived from placements and share
+registrations, never authority: calling an agent still takes its grant; `listed` only hides an agent from discovery.
+
+**Call queue**: Jobs waiting at the node that hosts an agent, per agent and context (DEC-0104): a waiting job stays
+`working` with `queued <position> of <length>`, the caller running the fewest starts next, and a full queue answers
+`queue-full` with when to start again. Its load (`service-load/1`) is counts and durations per window and context.
+
 **Connections**: What an agent uses (other agents, models, connectors, stores, channels) and whether each works,
 declared under its well-known document's `extensions/connections/0.1` so a host draws the chain (DEC-0096).
 

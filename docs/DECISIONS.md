@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0104` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0105` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6419,3 +6419,64 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (FLW-07), `docs/backlog.md` (CT-105, CT-106), the handoff and its index.
 - **Source:** the first organization server's ask 11, board thread `ba63565c` (2026-10-22, 19:04), from Project
   Observatory's OBS-204 (thread `5a0ecbde`).
+
+### DEC-0104: the agent network's S4: a directory, a call queue on `fabric.job.*` and a load report (CT-84)
+
+- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-84 (Fabric CO-376, the first organization
+  server, hosting nodes, Fabric Dashboards).
+- **Context:** S1 to S3 put an agent on a machine, in a context and in another person's hands. The hub, the hosting node
+  and the panels asked three more things on the board (threads `ba63565c` items 1 to 3, `b2511678`; fabric-workspace
+  roadmap RM21-S4): which agents a viewer can find across machines and organizations, what happens when more calls
+  arrive than an agent can run, and how busy an agent is. Fabric starts CO-376 after its 0.3.10 (thread `fc563ce0`).
+  The job schema is closed and its states are the MCP Task states (interop.md, DEC-0087), and a protocol accepts at most
+  two revisions, so a queue that needs a new state or member would cost a revision of `fabric-interop`.
+- **Decision:**
+  1. A **directory** is `agent-directory/1`: `{type, source, viewer, generatedAt, entries}`, each entry `{agentRef,
+     context, listed}` sorted by context then agentRef. It is a derived view, never authority: who may call an agent
+     stays its grant. An estate's comes from its record's placements (`estateDirectory`) and is read only by the
+     owner's own sessions, unlisted entries marked; an organization's comes from the share registrations it keeps
+     active whose window holds the instant and its own machines' agents (`organizationDirectory`), every entry for its
+     administrator and the listed ones for a member. `listed` is a discovery flag of the directory's publisher; no
+     `visible` flag exists, an entry a viewer may not read is absent. No person, machine, grant or digest is in it.
+     `FAC-SEM-130` (kind `agent-directory-view`).
+  2. The **call queue** lives at the node that hosts the agent, per (`agentRef`, context), with limits `concurrency`,
+     `perCaller` and `queueMax`. A waiting job stays `working` with `statusMessage` `queued <position> of <length>`. The
+     next job is `nextQueuedJob`'s: nothing at the concurrency limit; of the callers below their own limit, the one
+     running the fewest; then the oldest arrival; then the id. `FAC-SEM-131` (kind `job-queue`). A start past
+     `queueMax` is refused, nothing started or stored, with `queue-full` and `data: {retryable: true,
+     retryAfterSeconds}` (1 to 3600, `admitJob`); the caller starts again after it under the same key.
+     `fabric.job.list {cursor?, limit?}` answers the authenticated caller's own jobs only, newest first, `{id, status,
+     createdAt, updatedAt}`; another caller's job id answers `unknown-job`.
+  3. The **load** is the extension key `extensions/load/0.1` (protocol `fabric-load/0.1`): `{path, windowSeconds,
+     limits}`; at `path`, under the descriptor's `auth.tokenFile`, a `service-load/1` report of queued, running,
+     completed and failed jobs and p50 and p95 wait and run time per window and context, with no person, caller,
+     prompt, output or job id. `FAC-SEM-132` (kind `service-load`): windows in order one `windowSeconds` apart and none
+     after `generatedAt`, one row per context, p50 at most p95, a run time only where a job ended.
+- **Why:** a directory derived from what already grants access cannot widen access, and one derivation per source
+  gives the hub and the organization server the same answer for the same facts. A queue position in `statusMessage`
+  and a refusal at start fit the existing job lifecycle, so no caller and no revision changes; fairness by running
+  count stops one busy caller from holding an agent; a per-caller log closes the question "which of my jobs are where"
+  without showing anyone else's. Counts and durations per context are what the panels draw, and nothing else leaves
+  the node.
+- **Alternatives considered:** a `queued` job status or a `position` member (breaks the closed schema and the MCP Task
+  states, so a new `fabric-interop` revision); a `visible` flag beside `listed` (two flags for one decision, and a hidden
+  entry still leaks that it exists); a directory computed by the hub for organizations (the organization server holds
+  the registrations; the hub would need a copy); a global queue at the hub (the node is what runs out, and the hub
+  cannot see a node's own callers); first-in first-out without fairness (one caller with a batch starves every other);
+  partner scopes (DEC-0090) as a third source (a partner's view is the partner channel's; left for a later revision).
+- **Compatibility:** additive. A node that does not queue serves no load key and no `fabric.job.list`, and callers see
+  what they see today; `queue-full` is a new code whose data constraint binds only that code. Revisions
+  `agent-directory/1`, `fabric-load/0.1` and `service-load/1` are added to the register; the extension keys are six.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `agent-directory`, `interop-job-list-request`, `interop-job-list`,
+  `service-load-extension`, `service-load`, and `interop-common` (`queueFullData`, the `queue-full` binding);
+  `src/agent-network.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/extensions.ts` (`load`),
+  `src/protocol-revisions.ts`; vectors `fixtures/vectors/agent-network.json` written by
+  `tools/vectors/agent-network.ts`; positive and negative fixtures for each schema and `interop-job-queued`,
+  `interop-job-queue-full-*`; semantic fixtures `agent-directory-view-*`, `job-queue-*`, `service-load-*`; tests
+  `test/agent-network.test.ts`, `test/consistency.test.ts`, `test/schema-compilation.test.ts`,
+  `test/positive-sweep.test.ts`; docs `agent-network.md` (new), `interop.md` (the extension keys, C3.2), `service.md`
+  (Load), `conformance.md` (duties, register), `specification/README.md`, `DOCMAP.md`, `CONTEXT.md`,
+  `docs/backlog.md` (CT-84), the handoff and its index.
+- **Source:** board threads `ba63565c` items 1 to 3 and `b2511678` (S4 of the agent network); fabric-workspace roadmap
+  RM21-S4; backlog CT-84.

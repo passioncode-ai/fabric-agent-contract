@@ -173,6 +173,9 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | an agent that answers people, publishing its support quality (a support bot, any VoC-style producer) | publishes, per closed UTC day and channel, one event of kind `support.quality_daily` whose `data.value` is valid against `support-quality-daily.schema.json` and whose `data.schema` is the URI of its published copy of that schema (service.md); writes a metric it did not compute as `null` and names it in `notMeasured`, never a `0`; names the rubric version and the judge of a judged sample; puts no person's words, ids or judge notes in it | DEC-0095; `FAC-SEM-126` | `test/support-quality.test.ts`, `src/support-quality-rules.ts`, fixtures `fixtures/positive/support-quality-daily.json`, `fixtures/semantic/support-quality-daily-*` ([support quality](support-quality.md)) |
 | a reader of support quality (a voice-of-the-customer agent) | recognises the payload by `data.value.kind`, never by `data.schema`; reads a `null` metric as not measured, never as `0`; reads the payload only at a revision it accepts (`support-quality-daily/1`); keeps, per service, channel and day, the latest event (the greatest id in that service's feed) | DEC-0095 | ([support quality](support-quality.md#the-payload)) |
 | a service declaring what it uses (fabric-agent-adapter's kits, any service) | writes `extensions/connections/0.1` valid against `service-connections-extension.schema.json`, each `id` once, no credential, `state` from its own health checks and a `degraded[].source` equal to the failing connection's `id` | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, vectors `fixtures/vectors/connections.json` ([connections](connections.md)) |
+| a hub or an organization server serving a directory (Fabric, the first organization server) | serves `agent-directory/1` exactly as `estateDirectory` (to the owner's own sessions only) or `organizationDirectory` (a member reads listed entries only) derives it; never treats an entry or `listed` as authority to call | DEC-0104; `FAC-SEM-130` | `test/agent-network.test.ts`, vectors `fixtures/vectors/agent-network.json` ([agent network](agent-network.md#directory)) |
+| a node hosting a job-backed agent that queues (any provider node) | queues per (`agentRef`, context) as `nextQueuedJob` answers, writes a waiting job's `statusMessage` as `queued <position> of <length>`, refuses a start past `queueMax` with `queue-full` and its `retryAfterSeconds` (nothing started or stored), lists only the caller's own jobs in `fabric.job.list` and answers another caller's job id `unknown-job`; serves the load extension and a `service-load/1` report with no person, caller or prompt | DEC-0104; `FAC-SEM-131`, `FAC-SEM-132` | `test/agent-network.test.ts`, vectors `fixtures/vectors/agent-network.json`, fixtures `fixtures/semantic/{job-queue,service-load}-*` ([agent network](agent-network.md#call-queue)) |
+| a caller of a queued agent (Fabric's hub, any agent) | polls a queued job as any `working` job; after `queue-full` starts again no sooner than `retryAfterSeconds`, under the same idempotency key | DEC-0104 | `test/agent-network.test.ts` `readQueuePosition`, `admitJob` ([agent network](agent-network.md#call-queue)) |
 | a host reading what an agent uses (Fabric Dashboards, Fabric) | reads the key only as `connectionsView` answers: an invalid value, a repeated `id` or a credential is not declared and is reported; never trusts a connection as authority; runs `fixtures/vectors/connections.json` in its gate | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, `src/connections.ts` `connectionsView` ([connections](connections.md#reading-it)) |
 | a host showing a service's usage report (Fabric Dashboards, the adapter's checker) | shows a cost as a lower bound while `unpricedCalls` is above 0 and the day's tokens as a lower bound while `unmeasuredCalls` is above 0 | DEC-0065, DEC-0091; `FAC-SEM-025` | the host's own test; the report: `test/usage-rules.test.ts` ([service](service.md#usage-report)) |
 
@@ -290,7 +293,7 @@ and DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-130` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-133` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -421,6 +424,9 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-127` | `service-well-known` | [connections](connections.md#semantic-rules) | SEM-0127 |
 | `FAC-SEM-128` | `node-summary`, `node-summary-document` | [node summary](node-summary.md#semantic-rules) | SEM-0128 |
 | `FAC-SEM-129` | `repair-run` | [node summary](node-summary.md#semantic-rules) | SEM-0129 |
+| `FAC-SEM-130` | `agent-directory-view` | [agent network](agent-network.md#semantic-rules) | SEM-0130 |
+| `FAC-SEM-131` | `job-queue` | [agent network](agent-network.md#semantic-rules) | SEM-0131 |
+| `FAC-SEM-132` | `service-load` | [agent network](agent-network.md#semantic-rules) | SEM-0132 |
 
 ## Compatibility policy
 

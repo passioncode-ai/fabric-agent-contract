@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/interop-job-list.schema.json",
+  "title": "fabric-interop fabric.job.list: the caller's own jobs on this callee, newest first (DEC-0104)",
+  "description": "The per-caller log: only jobs the authenticated caller started, never another caller's. No input, result or output: a caller reads one job with fabric.job.get.",
+  "type": "object",
+  "required": [
+    "jobs"
+  ],
+  "properties": {
+    "jobs": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "interop-common.schema.json#/$defs/jobId"
+          },
+          "status": {
+            "$ref": "interop-common.schema.json#/$defs/jobStatus"
+          },
+          "createdAt": {
+            "$ref": "interop-common.schema.json#/$defs/utcInstant"
+          },
+          "updatedAt": {
+            "$ref": "interop-common.schema.json#/$defs/utcInstant"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false
+}

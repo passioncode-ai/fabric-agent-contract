@@ -1,0 +1,49 @@
+{
+  "description": "A member is shown an entry the organization unlisted (FAC-SEM-130).",
+  "kind": "agent-directory-view",
+  "expect": [
+    "FAC-SEM-130"
+  ],
+  "input": {
+    "source": "organization",
+    "orgId": "org_7kq2m4xw",
+    "held": [
+      {
+        "user": "u-1",
+        "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+        "state": "active",
+        "grantRevision": 1,
+        "agentRef": "urn:fabric:agent:example:inbox-digest",
+        "startsAt": "2026-10-01T00:00:00Z",
+        "expiresAt": "2026-11-01T00:00:00Z",
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "own": [
+      "urn:fabric:agent:example:writer"
+    ],
+    "unlisted": [
+      "urn:fabric:agent:example:writer"
+    ],
+    "viewer": "member",
+    "at": "2026-10-22T09:00:00Z",
+    "directory": {
+      "type": "agent-directory/1",
+      "source": "organization",
+      "viewer": "member",
+      "generatedAt": "2026-10-22T09:00:00Z",
+      "entries": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "org:org_7kq2m4xw",
+          "listed": false
+        }
+      ]
+    }
+  }
+}

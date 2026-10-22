@@ -87,7 +87,13 @@ export const NOT_SWEPT: readonly string[] = [
   "learning-note-answer.schema.json",
   // A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other
   // side's reveal, never whole by a rule kind.
-  "pairing-message.schema.json"
+  "pairing-message.schema.json",
+  // The agent network (DEC-0104): a directory is checked against what it derives from (kind `agent-directory-view`), the
+  // load extension and fabric.job.list are shapes only.
+  "agent-directory.schema.json",
+  "interop-job-list.schema.json",
+  "interop-job-list-request.schema.json",
+  "service-load-extension.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {
@@ -99,7 +105,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

@@ -1,0 +1,37 @@
+{
+  "description": "The node starts a job while concurrency jobs run (FAC-SEM-131).",
+  "kind": "job-queue",
+  "expect": [
+    "FAC-SEM-131"
+  ],
+  "input": {
+    "queue": [
+      {
+        "id": "j2",
+        "caller": "a",
+        "at": "2026-10-22T09:00:01Z"
+      },
+      {
+        "id": "j3",
+        "caller": "b",
+        "at": "2026-10-22T09:00:02Z"
+      }
+    ],
+    "running": [
+      {
+        "id": "j1",
+        "caller": "a"
+      },
+      {
+        "id": "j0",
+        "caller": "c"
+      }
+    ],
+    "limits": {
+      "concurrency": 2,
+      "perCaller": 1,
+      "queueMax": 3
+    },
+    "started": "j3"
+  }
+}

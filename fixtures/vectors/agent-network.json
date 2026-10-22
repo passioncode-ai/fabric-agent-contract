@@ -1,0 +1,909 @@
+{
+  "$comment": "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(waiting, limits, retryAfterSeconds). position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
+  "estate": [
+    {
+      "name": "one personal placement",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "the same agent on two machines is one entry",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          },
+          {
+            "id": "m-1",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "one agent in two contexts is two entries, the organization's first",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              },
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026",
+                "context": "org:org_7kq2m4xw",
+                "grant": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "unlisted by the owner, still read by the owner",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:writer",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              },
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "personal"
+        }
+      ],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "personal",
+          "listed": false
+        }
+      ]
+    },
+    {
+      "name": "an unlisted entry of another context leaves this one listed",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw"
+        }
+      ],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "no record",
+      "record": null,
+      "unlisted": [],
+      "expected": []
+    },
+    {
+      "name": "a placement without agentRef is skipped",
+      "record": {
+        "machines": [
+          {
+            "id": "m-0",
+            "packages": [
+              {
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              {
+                "agentRef": "urn:fabric:agent:example:inbox-digest",
+                "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "publisherKid": "example-publisher-2026"
+              }
+            ]
+          }
+        ]
+      },
+      "unlisted": [],
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "personal",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "machines that are not a list",
+      "record": {
+        "machines": "m-1"
+      },
+      "unlisted": [],
+      "expected": []
+    }
+  ],
+  "organization": [
+    {
+      "name": "a member reads an active registration",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "two members share the same agent: one entry",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "user": "u-2",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "a withdrawn registration is not listed",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "withdrawn",
+          "withdrawnAt": "2026-10-10T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": []
+    },
+    {
+      "name": "a window not yet started",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-23T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": []
+    },
+    {
+      "name": "a window that ended at the instant",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-10-22T09:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": []
+    },
+    {
+      "name": "a window that starts at the instant",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-22T09:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "the organization's own machine runs an agent",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [],
+      "own": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "unlisted: a member does not see it",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "unlisted": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "viewer": "member",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        }
+      ]
+    },
+    {
+      "name": "unlisted: the administrator sees it marked",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "unlisted": [
+        "urn:fabric:agent:example:writer"
+      ],
+      "viewer": "admin",
+      "expected": [
+        {
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "context": "org:org_7kq2m4xw",
+          "listed": true
+        },
+        {
+          "agentRef": "urn:fabric:agent:example:writer",
+          "context": "org:org_7kq2m4xw",
+          "listed": false
+        }
+      ]
+    },
+    {
+      "name": "an owner is no viewer of an organization's directory",
+      "orgId": "org_7kq2m4xw",
+      "at": "2026-10-22T09:00:00Z",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "owner",
+      "expected": []
+    },
+    {
+      "name": "an unreadable clock lists nothing",
+      "orgId": "org_7kq2m4xw",
+      "at": "today",
+      "held": [
+        {
+          "user": "u-1",
+          "grantId": "urn:fabric:share:3f9c2a7e5b1d4c608e2f71a9d0b6c4e8",
+          "state": "active",
+          "grantRevision": 1,
+          "agentRef": "urn:fabric:agent:example:inbox-digest",
+          "startsAt": "2026-10-01T00:00:00Z",
+          "expiresAt": "2026-11-01T00:00:00Z",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "own": [],
+      "unlisted": [],
+      "viewer": "member",
+      "expected": []
+    }
+  ],
+  "queue": [
+    {
+      "name": "the oldest job starts when nothing runs",
+      "queue": [
+        {
+          "id": "j2",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        },
+        {
+          "id": "j1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "j1"
+    },
+    {
+      "name": "nothing starts at the concurrency limit",
+      "queue": [
+        {
+          "id": "j3",
+          "caller": "c",
+          "at": "2026-10-22T09:00:03Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "j1",
+          "caller": "a"
+        },
+        {
+          "id": "j2",
+          "caller": "b"
+        }
+      ],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": null
+    },
+    {
+      "name": "a caller at its own limit waits; another caller's job starts",
+      "queue": [
+        {
+          "id": "j2",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "j3",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "j1",
+          "caller": "a"
+        }
+      ],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "j3"
+    },
+    {
+      "name": "every waiting caller at its limit: nothing starts",
+      "queue": [
+        {
+          "id": "j2",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "j1",
+          "caller": "a"
+        }
+      ],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": null
+    },
+    {
+      "name": "fairness: the caller running fewer wins over an older job",
+      "queue": [
+        {
+          "id": "j3",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "j4",
+          "caller": "b",
+          "at": "2026-10-22T09:00:05Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "j1",
+          "caller": "a"
+        }
+      ],
+      "limits": {
+        "concurrency": 4,
+        "perCaller": 3,
+        "queueMax": 9
+      },
+      "expected": "j4"
+    },
+    {
+      "name": "between callers running as many, the oldest arrival",
+      "queue": [
+        {
+          "id": "j5",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        },
+        {
+          "id": "j4",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "j4"
+    },
+    {
+      "name": "an arrival tie breaks by id",
+      "queue": [
+        {
+          "id": "jb",
+          "caller": "b",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "ja",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "ja"
+    },
+    {
+      "name": "a caller's own jobs go in arrival order",
+      "queue": [
+        {
+          "id": "j9",
+          "caller": "a",
+          "at": "2026-10-22T09:00:09Z"
+        },
+        {
+          "id": "j8",
+          "caller": "a",
+          "at": "2026-10-22T09:00:08Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 2,
+        "queueMax": 3
+      },
+      "expected": "j8"
+    },
+    {
+      "name": "an arrival that is not a time is skipped",
+      "queue": [
+        {
+          "id": "j1",
+          "caller": "a",
+          "at": "yesterday"
+        },
+        {
+          "id": "j2",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "j2"
+    },
+    {
+      "name": "unreadable limits start nothing",
+      "queue": [
+        {
+          "id": "j1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 0,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": null
+    },
+    {
+      "name": "an empty queue starts nothing",
+      "queue": [],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": null
+    }
+  ],
+  "admit": [
+    {
+      "name": "room in the queue",
+      "waiting": [
+        {}
+      ],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 2
+      },
+      "retryAfterSeconds": 30,
+      "expected": {
+        "admit": true
+      }
+    },
+    {
+      "name": "the queue is full",
+      "waiting": [
+        {},
+        {}
+      ],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 2
+      },
+      "retryAfterSeconds": 30,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 30
+          }
+        }
+      }
+    },
+    {
+      "name": "queueMax 0 refuses every wait",
+      "waiting": [],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 0
+      },
+      "retryAfterSeconds": 5,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 5
+          }
+        }
+      }
+    },
+    {
+      "name": "an unreadable retry-after becomes 60",
+      "waiting": [
+        {},
+        {}
+      ],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 2
+      },
+      "retryAfterSeconds": 0,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 60
+          }
+        }
+      }
+    },
+    {
+      "name": "a retry-after above an hour becomes 60",
+      "waiting": [
+        {},
+        {}
+      ],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 2
+      },
+      "retryAfterSeconds": 3601,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 60
+          }
+        }
+      }
+    },
+    {
+      "name": "unreadable limits refuse",
+      "waiting": [],
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1
+      },
+      "retryAfterSeconds": 10,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 10
+          }
+        }
+      }
+    }
+  ],
+  "position": [
+    {
+      "name": "first of three",
+      "statusMessage": "queued 1 of 3",
+      "expected": {
+        "position": 1,
+        "length": 3
+      }
+    },
+    {
+      "name": "last of three",
+      "statusMessage": "queued 3 of 3",
+      "expected": {
+        "position": 3,
+        "length": 3
+      }
+    },
+    {
+      "name": "a position past the length",
+      "statusMessage": "queued 4 of 3",
+      "expected": null
+    },
+    {
+      "name": "position zero",
+      "statusMessage": "queued 0 of 3",
+      "expected": null
+    },
+    {
+      "name": "a pause is not a place in the queue",
+      "statusMessage": "quota-exhausted until 2026-10-22T10:00:00Z",
+      "expected": null
+    },
+    {
+      "name": "extra words",
+      "statusMessage": "queued 1 of 3 behind a long job",
+      "expected": null
+    },
+    {
+      "name": "not a string",
+      "statusMessage": 7,
+      "expected": null
+    }
+  ]
+}

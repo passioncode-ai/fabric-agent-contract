@@ -1,0 +1,11 @@
+{
+  "job": {
+    "id": "job_7f3a2f",
+    "status": "failed",
+    "updatedAt": "2026-10-22T09:00:03Z",
+    "error": {
+      "code": "queue-full",
+      "message": "the agent's queue for this context is full: start again later"
+    }
+  }
+}

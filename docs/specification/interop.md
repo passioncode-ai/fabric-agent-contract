@@ -20,7 +20,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines five extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines six extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -29,6 +29,7 @@ The contract defines five extension keys, the constants in [`src/extensions.ts`]
 | `https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1` | [memory and learning](memory-and-learning.md#wire-memory01) (DEC-0023) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1` | [embedded dashboard](embedded-dashboard.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` | [agent network](agent-network.md#load) (DEC-0104) |
 
 The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
@@ -133,6 +134,9 @@ interop extension block. Then:
   wallMs}`) required: one shape, no subset (DEC-0017, OQ-0002; `interop-result.schema.json`).
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
+- A node that queues calls (DEC-0104) writes a waiting job's `statusMessage` as `queued <position> of <length>`,
+  refuses a start past its queue with `queue-full` and `retryAfterSeconds`, and serves `fabric.job.list` with the
+  caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
 
 | Shape | Schema |
 |---|---|

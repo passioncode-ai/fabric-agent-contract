@@ -36,6 +36,7 @@ import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
+import { agentNetworkRules } from "./agent-network.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
 import { connectionsRules } from "./connections.js";
@@ -92,6 +93,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (share) return share;
   const summary = nodeSummaryRules(kind, value);
   if (summary) return summary;
+  const network = agentNetworkRules(kind, value);
+  if (network) return network;
   const signing = signingRules(kind, value);
   if (signing) return signing;
   const attribution = attributionRules(kind, value);

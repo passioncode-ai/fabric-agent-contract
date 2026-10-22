@@ -391,6 +391,14 @@ only shows them.
   `period`, `limitUsd` and `spentUsd` (`FAC-SEM-031`). A service whose machine limit counts a
   rolling window, not a calendar period, omits `budget`.
 
+### Load
+
+A service that queues calls to its agents (DEC-0104) MAY carry the extension key
+`https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` in its well-known document, `{path, windowSeconds,
+limits}`, and serve at `path`, under the same `auth.tokenFile` as this report, a `service-load/1` report: queued,
+running, completed and failed jobs per window and context, with p50 and p95 wait and run time, and no person, caller or
+prompt. The [agent network](agent-network.md#load) defines both and `FAC-SEM-132`; the usage report is unchanged.
+
 ## Operator login
 
 Schema: [`service-login-code.schema.json`](../../schemas/service-login-code.schema.json).
