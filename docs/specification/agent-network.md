@@ -27,7 +27,8 @@ A directory is a **derived view, never authority**: who may call an agent stays 
 ([`agent-directory.schema.json`](../../schemas/agent-directory.schema.json)): `source`, `viewer`, `generatedAt` and at
 most 1024 `entries` of `{agentRef, context, listed}`, sorted by `context`, then `agentRef`, as UTF-16 code units. No
 person, machine, grant, capability or digest is in it. A source that derives more than 1024 entries is served as the
-first 1024 in that order; paging a directory is not decided in this revision.
+first 1024 in that order (`DIRECTORY_MAX`; both reference functions cut there, so `FAC-SEM-130` compares the same
+1024); paging a directory is not decided in this revision.
 
 | Source | Derived from | Who reads it | What `estateDirectory` / `organizationDirectory` answer |
 |---|---|---|---|
@@ -72,7 +73,7 @@ one credential are two callers, and a T0 or T1 call with no token (DL-26) is its
 
 **A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`, position 1 next, both
 decimal integers of one to six digits with no leading zero, 1 ≤ position ≤ length, nothing before or after
-(`queueStatusMessage`, `readQueuePosition`).
+(`queueStatusMessage` writes nothing outside it, `readQueuePosition`).
 `pollIntervalMs` SHOULD match the expected wait. A caller reads it as any `working` job (`jobCallerAction` answers
 `poll`); `readQueuePosition` answers no place for any other message, a `quota-exhausted` pause among them.
 
@@ -81,11 +82,14 @@ running job holds a slot, whether or not its caller is known); of the
 waiting jobs whose caller runs fewer than `perCaller`, the one whose caller runs the fewest wins, so a caller with many
 jobs never starves one with few; between those callers, the one whose oldest waiting job arrived first; within a
 caller, its oldest; an arrival tie breaks by id. A job's arrival `at` is a UTC instant with at most three fraction
-digits (`interop-common.schema.json#/$defs/utcInstant`), compared to the millisecond; an unreadable one never starts. `FAC-SEM-131` (kind `job-queue`, `{queue, running, limits, started}`,
+digits (`interop-common.schema.json#/$defs/utcInstant`), compared to the millisecond; one that is not (lower case, an
+offset, four fraction digits) never starts. `FAC-SEM-131` (kind `job-queue`, `{queue, running, limits, started}`,
 `started` the id the node started or `null`) compares a node's choice with it.
 
-**A full queue.** A start that would make more than `queueMax` jobs wait is refused, nothing started and nothing
-stored: the tool result is `isError: true` with `structuredContent.error` `{code: "queue-full", message, data:
+**A full queue.** `admitJob(queue, running, job, limits, retryAfterSeconds)` admits a start whose job would start at
+once (`nextQueuedJob` over the queue with it added answers its id), or one that finds fewer than `queueMax` jobs
+waiting; so `queueMax: 0` refuses every wait and never a start into a free slot. Any other start is refused, nothing
+started and nothing stored: the tool result is `isError: true` with `structuredContent.error` `{code: "queue-full", message, data:
 {retryable: true, retryAfterSeconds}}`, `retryAfterSeconds` from 1 to 3600
 ([`#/$defs/queueFullData`](../../schemas/interop-common.schema.json), closed; `admitJob` answers it, 60 when the node's
 own value is not readable). Its shape is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json),

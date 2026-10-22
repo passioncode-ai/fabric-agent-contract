@@ -2,6 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
+import { QUEUE_FULL, utcTime } from "./job-limits.js";
 import { strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -24,8 +25,12 @@ export type DirectoryViewer = "owner" | "admin" | "member";
 
 const key = (entry: { agentRef: string; context: string }) => `${entry.context}\u0000${entry.agentRef}`;
 const unlistedSet = (unlisted: unknown) => new Set(list(unlisted).filter((u) => isString(u.agentRef) && isString(u.context)).map((u) => key(u as unknown as DirectoryEntry)));
+/** The most entries a directory carries (`agent-directory.schema.json` `entries.maxItems`); a longer one is cut here. */
+export const DIRECTORY_MAX = 1024;
 // Map keys are unique, so two keys never compare equal.
-const sorted = (entries: Map<string, DirectoryEntry>) => [...entries.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([, entry]) => entry);
+const sorted = (entries: Map<string, DirectoryEntry>) => [...entries.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).slice(0, DIRECTORY_MAX).map(([, entry]) => entry);
+const sameEntries = (got: unknown, want: DirectoryEntry[]) =>
+  Array.isArray(got) && got.length === want.length && got.every((entry, i) => isObject(entry) && Object.keys(entry).length === 3 && entry.agentRef === want[i]?.agentRef && entry.context === want[i]?.context && entry.listed === want[i]?.listed);
 
 /**
  * An estate's directory (DEC-0104): every placement of the record's machines, once per (agentRef, context), a placement
@@ -82,9 +87,9 @@ function directoryRule(value: Json): Finding[] {
   const directory = isObject(value.directory) ? value.directory : {};
   const findings: Finding[] = [];
   if (directory.source !== value.source) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/source", message: `the directory says source ${show(directory.source)}, derived from ${show(value.source)}` });
-  const viewer = value.source === "estate" ? "owner" : value.viewer;
-  if (directory.viewer !== viewer) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/viewer", message: `the directory says viewer ${show(directory.viewer)}, its reader is ${show(viewer)}` });
-  if (JSON.stringify(directory.entries) !== JSON.stringify(want)) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/entries", message: `the directory's entries are not the ones its ${value.source} derives: ${want.length} expected` });
+  const viewer = value.source === "estate" ? "owner" : value.viewer === "admin" || value.viewer === "member" ? value.viewer : undefined;
+  if (viewer === undefined || directory.viewer !== viewer) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/viewer", message: `the directory says viewer ${show(directory.viewer)}, its reader is ${show(viewer)}` });
+  if (!sameEntries(directory.entries, want)) findings.push({ code: "FAC-SEM-130", instancePath: "/directory/entries", message: `the directory's entries are not the ones its ${value.source} derives: ${want.length} expected` });
   return findings;
 }
 
@@ -112,9 +117,9 @@ export function nextQueuedJob(queue: unknown, running: unknown, limits: unknown)
   const runningOf = new Map<string, number>();
   for (const job of list(running).filter((job) => isString(job.caller))) runningOf.set(job.caller as string, (runningOf.get(job.caller as string) ?? 0) + 1);
   const waiting = list(queue)
-    .filter((job): job is Json & QueuedJob => isString(job.id) && isString(job.caller) && isString(job.at) && !Number.isNaN(strictTime(job.at)))
+    .filter((job): job is Json & QueuedJob => isString(job.id) && isString(job.caller) && Number.isFinite(utcTime(job.at)))
     .filter((job) => (runningOf.get(job.caller) ?? 0) < limits.perCaller)
-    .sort((a, b) => strictTime(a.at) - strictTime(b.at) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    .sort((a, b) => utcTime(a.at) - utcTime(b.at) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   let best: (Json & QueuedJob) | undefined;
   for (const job of waiting) {
     if (best === undefined || (runningOf.get(job.caller) ?? 0) < (runningOf.get(best.caller) ?? 0)) best = job;
@@ -122,17 +127,23 @@ export function nextQueuedJob(queue: unknown, running: unknown, limits: unknown)
   return best?.id;
 }
 
-/** Whether one more job may wait (`admit`), or the start answers `queue-full` with this `retryAfterSeconds`. */
-export function admitJob(waiting: unknown, limits: unknown, retryAfterSeconds: unknown): { admit: true } | { admit: false; error: { code: "queue-full"; message: string; data: { retryable: true; retryAfterSeconds: number } } } {
-  const count = Array.isArray(waiting) ? waiting.length : Number.NaN;
-  if (limitsOk(limits) && count < limits.queueMax) return { admit: true };
+/**
+ * Whether a start is admitted (DEC-0104): it is when the job would start at once (`nextQueuedJob` over the queue with it
+ * added answers its id), or when fewer than `queueMax` jobs wait; otherwise the start answers `queue-full` with this
+ * `retryAfterSeconds` (1 to 3600, else 60). Unreadable limits or job refuse. It never throws.
+ */
+export function admitJob(queue: unknown, running: unknown, job: unknown, limits: unknown, retryAfterSeconds: unknown): { admit: true } | { admit: false; error: { code: typeof QUEUE_FULL; message: string; data: { retryable: true; retryAfterSeconds: number } } } {
+  const waiting = list(queue);
+  const readable = isObject(job) && isString(job.id) && isString(job.caller) && Number.isFinite(utcTime(job.at));
+  if (limitsOk(limits) && readable && (nextQueuedJob([...waiting, job], running, limits) === job.id || waiting.length < limits.queueMax)) return { admit: true };
   const after = Number.isSafeInteger(retryAfterSeconds) && (retryAfterSeconds as number) >= 1 && (retryAfterSeconds as number) <= 3600 ? (retryAfterSeconds as number) : 60;
-  return { admit: false, error: { code: "queue-full", message: "the agent's queue for this context is full: start again later", data: { retryable: true, retryAfterSeconds: after } } };
+  return { admit: false, error: { code: QUEUE_FULL, message: "the agent's queue for this context is full: start again later", data: { retryable: true, retryAfterSeconds: after } } };
 }
 
 const QUEUED = /^queued ([1-9]\d{0,5}) of ([1-9]\d{0,5})$/;
 /** The `statusMessage` of a waiting job (DEC-0104): `queued <position> of <length>`, position 1 next, 1 ≤ position ≤ length ≤ 999999, no leading zero. */
-export const queueStatusMessage = (position: number, length: number): string => `queued ${position} of ${length}`;
+export const queueStatusMessage = (position: number, length: number): string | undefined =>
+  Number.isSafeInteger(position) && Number.isSafeInteger(length) && position >= 1 && position <= length && length <= 999999 ? `queued ${position} of ${length}` : undefined;
 /** A waiting job's place, read from its `statusMessage`, or `undefined` when it is not the queue's grammar. */
 export function readQueuePosition(statusMessage: unknown): { position: number; length: number } | undefined {
   const match = isString(statusMessage) ? QUEUED.exec(statusMessage) : null;

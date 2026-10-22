@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { admitJob, agentNetworkRules, estateDirectory, loadExtensionRules, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
+import { DIRECTORY_MAX, admitJob, agentNetworkRules, estateDirectory, loadExtensionRules, nextQueuedJob, organizationDirectory, queueStatusMessage, readQueuePosition } from "../src/agent-network.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -28,8 +28,8 @@ describe("agent network vectors (DEC-0104)", () => {
   it.each(vectors.queue)("queue: $name", ({ queue, running, limits, expected }) => {
     expect(nul(nextQueuedJob(queue, running, limits))).toEqual(expected);
   });
-  it.each(vectors.admit)("admit: $name", ({ waiting, limits, retryAfterSeconds, expected }) => {
-    expect(admitJob(waiting, limits, retryAfterSeconds)).toEqual(expected);
+  it.each(vectors.admit)("admit: $name", ({ queue, running, job, limits, retryAfterSeconds, expected }) => {
+    expect(admitJob(queue, running, job, limits, retryAfterSeconds)).toEqual(expected);
   });
   it.each(vectors.position)("position: $name", ({ statusMessage, expected }) => {
     expect(nul(readQueuePosition(statusMessage))).toEqual(expected);
@@ -44,7 +44,7 @@ describe("the reference functions", () => {
         expect(() => estateDirectory(a, b)).not.toThrow();
         expect(() => organizationDirectory("org_1", a, b, a, "admin", "2026-10-22T09:00:00Z")).not.toThrow();
         expect(() => nextQueuedJob(a, b, { concurrency: 1, perCaller: 1, queueMax: 1 })).not.toThrow();
-        expect(() => admitJob(a, b, a)).not.toThrow();
+        expect(() => admitJob(a, b, a, b, a)).not.toThrow();
       }
       expect(() => readQueuePosition(a)).not.toThrow();
     }
@@ -61,11 +61,32 @@ describe("the reference functions", () => {
     expect(organizationDirectory("org_1", [{ ...base, expiresAt: 5 }], [], [], "member", at)).toEqual([]);
     expect(organizationDirectory("org_1", [base], [], [], "member", at)).toEqual([{ agentRef: base.agentRef, context: "org:org_1", listed: true }]);
   });
+  it("a directory carries at most DIRECTORY_MAX entries, the first in order", () => {
+    const packages = Array.from({ length: DIRECTORY_MAX + 1 }, (_, n) => ({ agentRef: `urn:fabric:agent:example:a${String(n).padStart(5, "0")}` }));
+    const entries = estateDirectory({ machines: [{ packages }] }, []);
+    expect(entries).toHaveLength(DIRECTORY_MAX);
+    expect(entries.at(-1)?.agentRef).toBe(`urn:fabric:agent:example:a${String(DIRECTORY_MAX - 1).padStart(5, "0")}`);
+    const own = packages.map((p) => p.agentRef);
+    expect(organizationDirectory("org_1", [], own, [], "admin", "2026-10-22T09:00:00Z")).toHaveLength(DIRECTORY_MAX);
+    const doc = { type: "agent-directory/1", source: "estate", viewer: "owner", generatedAt: "2026-10-22T09:00:00Z", entries };
+    expect(agentNetworkRules("agent-directory-view", { source: "estate", record: { machines: [{ packages }] }, directory: doc })).toEqual([]);
+  });
+  it("compares entries by member, not by the order members are written in", () => {
+    const record = { machines: [{ packages: [{ agentRef: "urn:fabric:agent:example:writer" }] }] };
+    const directory = { source: "estate", viewer: "owner", entries: [{ listed: true, context: "personal", agentRef: "urn:fabric:agent:example:writer" }] };
+    expect(agentNetworkRules("agent-directory-view", { source: "estate", record, directory })).toEqual([]);
+    expect(agentNetworkRules("agent-directory-view", { source: "estate", record, directory: { ...directory, entries: [{ ...directory.entries[0], extra: 1 }] } })?.map((f) => f.instancePath)).toEqual(["/directory/entries"]);
+    expect(agentNetworkRules("agent-directory-view", { source: "estate", record, directory: { ...directory, entries: [null] } })?.map((f) => f.instancePath)).toEqual(["/directory/entries"]);
+  });
+  it("an organization's directory is never an owner's", () => {
+    const value = { source: "organization", orgId: "org_1", held: [], own: [], viewer: "owner", at: "2026-10-22T09:00:00Z", directory: { source: "organization", viewer: "owner", entries: [] } };
+    expect(agentNetworkRules("agent-directory-view", value)?.map((f) => f.instancePath)).toEqual(["/directory/viewer"]);
+  });
   it("estateDirectory reads an unlisted list only of agentRef and context pairs", () => {
     const record = { machines: [{ packages: [{ agentRef: "urn:fabric:agent:example:writer" }] }] };
     expect(estateDirectory(record, [{ agentRef: "urn:fabric:agent:example:writer" }, "x"])).toEqual([{ agentRef: "urn:fabric:agent:example:writer", context: "personal", listed: true }]);
   });
-  it("nextQueuedJob ignores running jobs without a caller and limits that are not integers", () => {
+  it("a running job without a caller holds a slot but no caller's count; limits that are not integers start nothing", () => {
     const queue = [{ id: "j1", caller: "a", at: "2026-10-22T09:00:01Z" }];
     expect(nextQueuedJob(queue, [{ id: "j0" }], { concurrency: 2, perCaller: 1, queueMax: 1 })).toBe("j1");
     expect(nextQueuedJob(queue, "j0", { concurrency: 1, perCaller: 1, queueMax: 1 })).toBe("j1");
@@ -75,12 +96,15 @@ describe("the reference functions", () => {
     expect(nextQueuedJob([{ id: "j1", caller: "a", at: "2026-10-22T09:00:01Z" }, { id: "j1", caller: "b", at: "2026-10-22T09:00:01Z" }], [], { concurrency: 1, perCaller: 1, queueMax: 9 })).toBe("j1");
     expect(nextQueuedJob([{ id: "jb", caller: "a", at: "2026-10-22T09:00:01Z" }, { id: "ja", caller: "b", at: "2026-10-22T09:00:01Z" }, { id: "jc", caller: "c", at: "2026-10-22T09:00:01Z" }], [], { concurrency: 1, perCaller: 1, queueMax: 9 })).toBe("ja");
   });
-  it("admitJob refuses a waiting list that is not a list", () => {
-    expect(admitJob(undefined, { concurrency: 1, perCaller: 1, queueMax: 5 }, 9)).toMatchObject({ admit: false, error: { data: { retryAfterSeconds: 9 } } });
-    expect(admitJob([], { concurrency: 1, perCaller: 1, queueMax: 5 }, 1.5)).toEqual({ admit: true });
+  it("admitJob reads a queue that is not a list as empty and refuses a job it cannot read", () => {
+    const job = { id: "jn", caller: "n", at: "2026-10-22T09:00:09Z" };
+    expect(admitJob(undefined, [{ id: "r", caller: "a" }], job, { concurrency: 1, perCaller: 1, queueMax: 5 }, 9)).toEqual({ admit: true });
+    expect(admitJob([], [], { id: "jn" }, { concurrency: 1, perCaller: 1, queueMax: 5 }, 9)).toMatchObject({ admit: false, error: { data: { retryAfterSeconds: 9 } } });
+    expect(admitJob([], [], null, { concurrency: 1, perCaller: 1, queueMax: 5 }, 1.5)).toMatchObject({ admit: false, error: { data: { retryAfterSeconds: 60 } } });
   });
   it("queueStatusMessage writes what readQueuePosition reads", () => {
     expect(readQueuePosition(queueStatusMessage(2, 5))).toEqual({ position: 2, length: 5 });
+    for (const [p, l] of [[0, 3], [1.5, 3], [4, 3], [1, 1000000]]) expect(queueStatusMessage(p as number, l as number)).toBeUndefined();
     expect(readQueuePosition("queued 1234567 of 1234567")).toBeUndefined();
   });
 });

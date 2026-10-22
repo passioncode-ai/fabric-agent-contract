@@ -72,6 +72,7 @@ function queueCases(): Json[] {
     ["an arrival tie breaks by id", { queue: [job("jb", "b", "2026-10-22T09:00:01Z"), job("ja", "a", "2026-10-22T09:00:01Z")], running: [], limits }, "ja"],
     ["a caller's own jobs go in arrival order", { queue: [job("j9", "a", "2026-10-22T09:00:09Z"), job("j8", "a", "2026-10-22T09:00:08Z")], running: [], limits: { concurrency: 2, perCaller: 2, queueMax: 3 } }, "j8"],
     ["an arrival that is not a time is skipped", { queue: [job("j1", "a", "yesterday"), job("j2", "b", "2026-10-22T09:00:02Z")], running: [], limits }, "j2"],
+    ["an arrival in lower case or at an offset is not a UTC instant: skipped", { queue: [job("j1", "a", "2026-10-22t09:00:01z"), job("j2", "b", "2026-10-22T11:00:00+02:00"), job("j3", "c", "2026-10-22T09:00:05Z")], running: [], limits }, "j3"],
     ["unreadable limits start nothing", { queue: [job("j1", "a", "2026-10-22T09:00:01Z")], running: [], limits: { concurrency: 0, perCaller: 1, queueMax: 3 } }, null],
     ["a running job without a caller still holds a slot", { queue: [job("j1", "a", "2026-10-22T09:00:01Z")], running: [{ id: "j0" }], limits: { concurrency: 1, perCaller: 1, queueMax: 9 } }, null],
     ["an empty queue starts nothing", { queue: [], running: [], limits }, null]
@@ -81,14 +82,21 @@ function queueCases(): Json[] {
 
 function admitCases(): Json[] {
   const limits = { concurrency: 1, perCaller: 1, queueMax: 2 };
+  const job = (id: string, caller: string, at: string) => ({ id, caller, at });
+  const mine = job("jn", "n", "2026-10-22T09:00:09Z");
   const full = (after: number) => ({ admit: false, error: { code: "queue-full", message: "the agent's queue for this context is full: start again later", data: { retryable: true, retryAfterSeconds: after } } });
+  const busy = [{ id: "r1", caller: "a" }];
+  const two = [job("w1", "a", "2026-10-22T09:00:01Z"), job("w2", "b", "2026-10-22T09:00:02Z")];
   const cases: Array<[string, Json, Json]> = [
-    ["room in the queue", { waiting: [{}], limits, retryAfterSeconds: 30 }, { admit: true }],
-    ["the queue is full", { waiting: [{}, {}], limits, retryAfterSeconds: 30 }, full(30)],
-    ["queueMax 0 refuses every wait", { waiting: [], limits: { ...limits, queueMax: 0 }, retryAfterSeconds: 5 }, full(5)],
-    ["an unreadable retry-after becomes 60", { waiting: [{}, {}], limits, retryAfterSeconds: 0 }, full(60)],
-    ["a retry-after above an hour becomes 60", { waiting: [{}, {}], limits, retryAfterSeconds: 3601 }, full(60)],
-    ["unreadable limits refuse", { waiting: [], limits: { concurrency: 1, perCaller: 1 }, retryAfterSeconds: 10 }, full(10)]
+    ["room in the queue", { queue: [two[0]], running: busy, job: mine, limits, retryAfterSeconds: 30 }, { admit: true }],
+    ["the queue is full", { queue: two, running: busy, job: mine, limits, retryAfterSeconds: 30 }, full(30)],
+    ["an idle agent admits a start that runs at once, even with queueMax 0", { queue: [], running: [], job: mine, limits: { ...limits, queueMax: 0 }, retryAfterSeconds: 5 }, { admit: true }],
+    ["queueMax 0 refuses a start that would wait", { queue: [], running: busy, job: mine, limits: { ...limits, queueMax: 0 }, retryAfterSeconds: 5 }, full(5)],
+    ["a free slot behind a caller at its own limit: the start runs at once", { queue: [job("w1", "a", "2026-10-22T09:00:01Z")], running: busy, job: mine, limits: { concurrency: 4, perCaller: 1, queueMax: 1 }, retryAfterSeconds: 30 }, { admit: true }],
+    ["an unreadable retry-after becomes 60", { queue: two, running: busy, job: mine, limits, retryAfterSeconds: 0 }, full(60)],
+    ["a retry-after above an hour becomes 60", { queue: two, running: busy, job: mine, limits, retryAfterSeconds: 3601 }, full(60)],
+    ["unreadable limits refuse", { queue: [], running: [], job: mine, limits: { concurrency: 1, perCaller: 1 }, retryAfterSeconds: 10 }, full(10)],
+    ["a job whose arrival is not a UTC instant is refused", { queue: [], running: [], job: job("jn", "n", "2026-10-22T11:00:09+02:00"), limits, retryAfterSeconds: 10 }, full(10)]
   ];
   return cases.map(([name, input, expected]) => ({ name, ...input, expected }));
 }
@@ -109,7 +117,7 @@ function positionCases(): Json[] {
 
 export function buildAgentNetworkVectors(): string {
   const vectors = {
-    $comment: "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(waiting, limits, retryAfterSeconds). position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
+    $comment: "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
     estate: estateCases(),
     organization: organizationCases(),
     queue: queueCases(),

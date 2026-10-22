@@ -44,7 +44,8 @@ export const USAGE_NUMBERS: readonly string[] = ["inputTokens", "outputTokens", 
 const isString = (value: unknown): value is string => typeof value === "string";
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
 /** A UTC instant as milliseconds, or NaN: the pattern and a day that exists (`strictTime`). */
-const utcTime = (value: unknown): number => (isString(value) && UTC_INSTANT.test(value) ? strictTime(value) : Number.NaN);
+/** An RFC 3339 instant in UTC (`T`, `Z`, at most three fraction digits) as epoch milliseconds, `NaN` otherwise. */
+export const utcTime = (value: unknown): number => (isString(value) && UTC_INSTANT.test(value) ? strictTime(value) : Number.NaN);
 
 /** Whether `data` is `quota-exhausted`'s: closed, `retryable` a boolean, `resetsAt` a UTC instant and only with `retryable: true`. */
 export function quotaDataOk(data: unknown): data is { retryable: boolean; resetsAt?: string } {

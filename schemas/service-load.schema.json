@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-load.schema.json",
   "title": "service-load/1: a service's load per window and context (DEC-0104)",
-  "description": "Counts and durations only: no person, no caller, no prompt, no output, no job id. A context is the one the work ran in (personal or org:<orgId>); a service shows an organization only its own context's rows.",
+  "description": "Counts and durations only: no person, no caller, no prompt, no output, no job id. A context is the one the work ran in (personal or org:<orgId>); the report stays with the host that holds the descriptor token and is never sent to an organization server; an organization's view of an agent's load is not decided in this revision.",
   "type": "object",
   "required": [
     "type",

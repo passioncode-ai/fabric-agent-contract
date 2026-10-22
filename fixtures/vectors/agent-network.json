@@ -1,5 +1,5 @@
 {
-  "$comment": "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(waiting, limits, retryAfterSeconds). position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
+  "$comment": "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
   "estate": [
     {
       "name": "one personal placement",
@@ -717,6 +717,33 @@
       "expected": "j2"
     },
     {
+      "name": "an arrival in lower case or at an offset is not a UTC instant: skipped",
+      "queue": [
+        {
+          "id": "j1",
+          "caller": "a",
+          "at": "2026-10-22t09:00:01z"
+        },
+        {
+          "id": "j2",
+          "caller": "b",
+          "at": "2026-10-22T11:00:00+02:00"
+        },
+        {
+          "id": "j3",
+          "caller": "c",
+          "at": "2026-10-22T09:00:05Z"
+        }
+      ],
+      "running": [],
+      "limits": {
+        "concurrency": 2,
+        "perCaller": 1,
+        "queueMax": 3
+      },
+      "expected": "j3"
+    },
+    {
       "name": "unreadable limits start nothing",
       "queue": [
         {
@@ -769,9 +796,24 @@
   "admit": [
     {
       "name": "room in the queue",
-      "waiting": [
-        {}
+      "queue": [
+        {
+          "id": "w1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
       ],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1,
@@ -784,10 +826,29 @@
     },
     {
       "name": "the queue is full",
-      "waiting": [
-        {},
-        {}
+      "queue": [
+        {
+          "id": "w1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "w2",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        }
       ],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1,
@@ -807,8 +868,38 @@
       }
     },
     {
-      "name": "queueMax 0 refuses every wait",
-      "waiting": [],
+      "name": "an idle agent admits a start that runs at once, even with queueMax 0",
+      "queue": [],
+      "running": [],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 0
+      },
+      "retryAfterSeconds": 5,
+      "expected": {
+        "admit": true
+      }
+    },
+    {
+      "name": "queueMax 0 refuses a start that would wait",
+      "queue": [],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1,
@@ -828,11 +919,60 @@
       }
     },
     {
-      "name": "an unreadable retry-after becomes 60",
-      "waiting": [
-        {},
-        {}
+      "name": "a free slot behind a caller at its own limit: the start runs at once",
+      "queue": [
+        {
+          "id": "w1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        }
       ],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
+      "limits": {
+        "concurrency": 4,
+        "perCaller": 1,
+        "queueMax": 1
+      },
+      "retryAfterSeconds": 30,
+      "expected": {
+        "admit": true
+      }
+    },
+    {
+      "name": "an unreadable retry-after becomes 60",
+      "queue": [
+        {
+          "id": "w1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "w2",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        }
+      ],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1,
@@ -853,10 +993,29 @@
     },
     {
       "name": "a retry-after above an hour becomes 60",
-      "waiting": [
-        {},
-        {}
+      "queue": [
+        {
+          "id": "w1",
+          "caller": "a",
+          "at": "2026-10-22T09:00:01Z"
+        },
+        {
+          "id": "w2",
+          "caller": "b",
+          "at": "2026-10-22T09:00:02Z"
+        }
       ],
+      "running": [
+        {
+          "id": "r1",
+          "caller": "a"
+        }
+      ],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1,
@@ -877,10 +1036,43 @@
     },
     {
       "name": "unreadable limits refuse",
-      "waiting": [],
+      "queue": [],
+      "running": [],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T09:00:09Z"
+      },
       "limits": {
         "concurrency": 1,
         "perCaller": 1
+      },
+      "retryAfterSeconds": 10,
+      "expected": {
+        "admit": false,
+        "error": {
+          "code": "queue-full",
+          "message": "the agent's queue for this context is full: start again later",
+          "data": {
+            "retryable": true,
+            "retryAfterSeconds": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "a job whose arrival is not a UTC instant is refused",
+      "queue": [],
+      "running": [],
+      "job": {
+        "id": "jn",
+        "caller": "n",
+        "at": "2026-10-22T11:00:09+02:00"
+      },
+      "limits": {
+        "concurrency": 1,
+        "perCaller": 1,
+        "queueMax": 2
       },
       "retryAfterSeconds": 10,
       "expected": {

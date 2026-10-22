@@ -6447,9 +6447,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      next job is `nextQueuedJob`'s: nothing at the concurrency limit; of the callers below their own limit, the one
      running the fewest; then the oldest arrival; then the id; every running job holds a slot. Every per-caller rule
      keys on the caller the node keeps idempotency keys for: the delegation token's `sub` and chain when one is
-     present (DL-9, DL-10), else the credential. `FAC-SEM-131` (kind `job-queue`). A start past
-     `queueMax` is refused, nothing started or stored, with `queue-full` and `data: {retryable: true,
-     retryAfterSeconds}` (1 to 3600, `admitJob`), an `isError` result shaped by `interop-tool-error.schema.json`; the
+     present (DL-9, DL-10), else the credential. `FAC-SEM-131` (kind `job-queue`). A start whose
+     job would not start at once and that finds `queueMax` jobs waiting is refused (`admitJob`), nothing started or stored, with `queue-full` and `data: {retryable: true,
+     retryAfterSeconds}` (1 to 3600), an `isError` result shaped by `interop-tool-error.schema.json`; the
      caller starts again after it under the same key, and the hub relays it unchanged and keeps no key for it.
      `queue-full` never ends a job: `interop-job.schema.json` refuses it in a job's `error` and `jobCallerAction`
      answers `invalid`.
@@ -6488,7 +6488,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/agent-network.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/extensions.ts` (`load`),
   `src/protocol-revisions.ts`; vectors `fixtures/vectors/agent-network.json` written by
   `tools/vectors/agent-network.ts`; positive and negative fixtures for each schema and `interop-job-queued`,
-  `interop-job-queue-full-*`; semantic fixtures `agent-directory-view-*`, `job-queue-*`, `service-load-*`; tests
+  `interop-job-failed-queue-full`; semantic fixtures `agent-directory-view-*`, `job-queue-*`, `service-load-*`; tests
   `test/agent-network.test.ts`, `test/consistency.test.ts`, `test/schema-compilation.test.ts`,
   `test/positive-sweep.test.ts`; docs `agent-network.md` (new), `interop.md` (the extension keys, C3.2), `service.md`
   (Load), `conformance.md` (duties, register), `versioning.md` (NAMED_ONLY), `specification/README.md`, `DOCMAP.md`,
