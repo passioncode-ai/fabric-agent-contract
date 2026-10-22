@@ -370,13 +370,13 @@ order (`inferSchema` and `checkFile` in `src/validate-cli.ts`). Each row has a c
 | `--schema <name>` on the command line | that schema |
 | a discriminator a schema pins (`protocol`, `contractVersion`, `format`) and every member that schema requires | that schema; of several, the one requiring the most members |
 | the name `fabric-agent.json` | a manifest |
-| the name `fabric-contract.lock.json` | a contract pin; a member the pin schema does not define is a note; a lock with another tool's members (`schemas`, `releases`, `schemaRelease`) is no pin |
+| the name `fabric-contract.lock.json` | a contract pin; a member the pin schema does not define is a note; a lock with none of a pin's `contract` and `commit` and another tool's members (`schemas`, `releases`, `schemaRelease`) is that tool's and is noted |
 | a JSON Schema: a `*.schema.json` name, a `$schema` naming json-schema.org, or a `$id` beside `type` or `properties` | no contract document |
 | a `providerId` with a `manifest` path or a `run` object | a provider entry, wherever it is saved |
 | a file under `providers/` with a `fabric-` protocol, `providerId`, `run` or `manifest` | a provider entry |
 | an `<id>.<instance>.json` name with a `fabric-` protocol, `origin`, `lifecycle` or `fabricManifest` | a service descriptor |
 | a `protocol` or `contractVersion` shaped like the contract's (`fabric-<name>/<revision>`, a semantic version) that this checkout does not hold, or one that is a number, an array or a boolean | a `schema/const` problem naming the values this checkout reads |
-| a `protocol` a contract schema pins, with members missing | the schema it misses the fewest members of, so its missing members are problems; a `.well-known.json` name picks the well-known document; a protocol a `oneOf` schema shares (the `fabric-device` and `fabric-activity` families) gives no pick |
+| a `protocol` a contract schema pins, with members missing | the schema it misses the fewest members of, so its missing members are problems; a `.well-known.json` name picks the well-known document; a protocol a `oneOf` schema shares (the `fabric-device`, `fabric-activity` and `fabric-relay` families) is settled by validation: the first schema of that protocol that accepts the document checks it, and when none does, the file is a problem in a folder and a usage error on its own |
 | none of these | in a folder, a note (with the schemas a shared `contractVersion` is near) and the file is skipped; on its own, a usage error asking for `--schema` |
 
 A folder in which no file is a contract document is a usage error. Folders whose name starts with a dot, and
@@ -384,9 +384,10 @@ A folder in which no file is a contract document is a usage error. Folders whose
 `.well-known/`.
 
 A folder's documents are also checked as pairs: a descriptor with its well-known document, a descriptor with the
-manifest its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read, and when
-it is an installed copy outside the folder while the folder holds manifests, a note names it, so a stale install is
-visible. Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder
+manifest its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read. When it
+is an installed copy outside the folder, a note names it if the folder holds a copy that could have stood in, or if the
+pair rule then fails, so a stale install is visible: reinstall it, or check the folder's copy in a folder without the
+installed path. Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder
 named after the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never
 one in a folder named after another owner, and a note says which file was read; with two or more manifests and none in
 those places, none stands in. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a

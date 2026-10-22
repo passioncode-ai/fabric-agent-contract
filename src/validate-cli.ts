@@ -36,7 +36,7 @@ const USAGE = [
 const root = projectRoot();
 
 interface Discriminated { file: string; required: string[]; consts: Array<[string, unknown]> }
-let cache: { validator: Ajv2020; schemas: ContractSchema[]; help: Map<string, string>; discriminated: Discriminated[]; blindProtocols: Set<string> } | undefined;
+let cache: { validator: Ajv2020; schemas: ContractSchema[]; help: Map<string, string>; discriminated: Discriminated[]; blindProtocols: Map<string, string[]> } | undefined;
 function contract() {
   if (cache === undefined) {
     const schemas = loadSchemasSync();
@@ -59,19 +59,20 @@ const fileOf = (schema: ContractSchema) => schema.$id.slice(`${SCHEMA_PREFIX}sch
  * its discriminators are out of the checker's sight, so a document of that protocol is never given to a sibling schema
  * by the protocol signal alone.
  */
-function blindProtocols(schemas: readonly ContractSchema[]): Set<string> {
+export function blindProtocols(schemas: readonly ContractSchema[]): Map<string, string[]> {
   const commonProtocol = new Map(schemas.flatMap((schema) => {
     const defs = isObject(schema.$defs) ? schema.$defs : {};
     const protocol = isObject(defs.protocol) ? defs.protocol.const : undefined;
     return typeof protocol === "string" ? [[fileOf(schema), protocol] as const] : [];
   }));
-  const out = new Set<string>();
+  const out = new Map<string, string[]>();
+  const add = (protocol: string, file: string) => out.set(protocol, [...new Set([...(out.get(protocol) ?? []), file])]);
   for (const schema of schemas) {
     // A common schema (`service-common`) defines its protocol in `$defs` and describes no document of its own.
     if (isObject(schema.properties) || commonProtocol.has(fileOf(schema))) continue;
     const text = JSON.stringify(schema);
-    for (const match of text.matchAll(/"const":"(fabric-[a-z0-9-]+\/[0-9.]+)"/g)) out.add(match[1] as string);
-    for (const match of text.matchAll(/"\$ref":"([a-z0-9-]+\.schema\.json)#\/\$defs\/protocol"/g)) out.add(commonProtocol.get(match[1] as string) as string);
+    for (const match of text.matchAll(/"const":"(fabric-[a-z0-9-]+\/[0-9.]+)"/g)) add(match[1] as string, fileOf(schema));
+    for (const match of text.matchAll(/"\$ref":"([a-z0-9-]+\.schema\.json)#\/\$defs\/protocol"/g)) add(commonProtocol.get(match[1] as string) as string, fileOf(schema));
   }
   return out;
 }
@@ -116,9 +117,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   }
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
-  // A file by the lock's name is a pin, damaged or not, unless it carries members another tool's lock has and a pin
-  // never does (the observatory engine's profile lock: `profile` as an object or with `schemas`, `releases`).
-  if (name === "fabric-contract.lock.json" && !(isObject(value) && (Object.hasOwn(value, "schemas") || Object.hasOwn(value, "releases") || Object.hasOwn(value, "schemaRelease")))) return "contract-pin.schema.json";
+  // A file by the lock's name is a pin, damaged or not, unless it carries no pin member (`contract`, `commit`) and the
+  // members another tool's lock has (the observatory engine's profile lock: `schemas`, `releases`, `schemaRelease`).
+  if (name === "fabric-contract.lock.json" && !(isObject(value) && !carries(value, ["contract", "commit"]) && (Object.hasOwn(value, "schemas") || Object.hasOwn(value, "releases") || Object.hasOwn(value, "schemaRelease")))) return "contract-pin.schema.json";
   // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
   // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
   // on a contract document, which the name rules below still read.
@@ -307,18 +308,27 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     // `contractVersion` says less: a probe receipt or a report carries it too, so it only names the near schemas.
     // Only where every schema of that protocol is in sight. A `.well-known.json` file is the well-known document
     // whatever it misses, so a half-written one is not checked as a usage report that shares its protocol.
-    const blind = isObject(value) && contract().blindProtocols.has(value.protocol as string);
+    // A protocol a `oneOf` schema shares is settled by validation: the first of its schemas, the `oneOf` ones included,
+    // that accepts the document checks it; when none does, no schema is picked (a problem in a folder).
+    const blindFiles = isObject(value) ? contract().blindProtocols.get(value.protocol as string) : undefined;
+    const blind = blindFiles !== undefined;
+    if (blind) {
+      const family = [...(blindFiles as string[]), ...matching.filter((candidate) => candidate.consts.some(([member]) => member === "protocol")).map((candidate) => candidate.file)];
+      const accepting = family.find((candidate) => (contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/${candidate}`) as ValidateFunction)(value));
+      if (accepting !== undefined) schema = accepting;
+    }
     const protocolMatches = blind ? [] : matching.filter((candidate) => candidate.consts.some(([member]) => member === "protocol"));
     const wellKnown = file.endsWith(".well-known.json") ? protocolMatches.filter((candidate) => candidate.file === "service-well-known.schema.json") : [];
     const byProtocol = wellKnown.length === 1 ? wellKnown : protocolMatches.filter((candidate) => closest.includes(candidate));
-    if (byProtocol.length === 1) schema = (byProtocol[0] as Discriminated).file;
+    if (schema !== undefined) { /* settled by validation above */ }
+    else if (byProtocol.length === 1) schema = (byProtocol[0] as Discriminated).file;
     else {
       const near = closest.map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
       const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
       // In a folder, a file that names a contract protocol shared by several schemas is the author's to fix; any other
       // file the checker cannot tell (a test fixture, a JSON Schema, a probe receipt) is noted and not checked. A file
       // named on its own is a usage error.
-      if (inFolder && byProtocol.length > 1) run.problems.push({ file, path: "/", rule: "schema/required", message: text.replace(/; pass --schema.*$/, "; pass --schema to say which"), help: `schemas/${(byProtocol[0] as Discriminated).file}` });
+      if (inFolder && (byProtocol.length > 1 || (blind && closest.length > 0))) run.problems.push({ file, path: "/", rule: "schema/required", message: text.replace(/; pass --schema.*$/, "; pass --schema to say which"), help: `schemas/${((byProtocol[0] ?? closest[0]) as Discriminated).file}` });
       else if (inFolder) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked (pass --schema to check it)` });
       else run.usage.push(text);
       return undefined;
@@ -363,29 +373,44 @@ function readJson(file: string): unknown {
  * The manifest a descriptor or an entry names. A file at the named path is read: installed, or the folder's own copy
  * at that path. With nothing there (checked before it is installed), the folder's copy stands in: a manifest with the
  * named file name in a folder named after this owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the
- * folder's only manifest, never one in a folder named after another owner. A note names the file read whenever it is
- * not a copy inside the folder at the named path. `located` is false when no file stands for the manifest.
+ * folder's only manifest, never one in a folder named after another owner. A note names the file read when a folder
+ * copy stands in, when an installed file is read over a folder copy that could have stood in, and (through `quiet`)
+ * when the pair rule fails on an installed file. `located` is false when no file stands for the manifest.
  */
-function pairedManifest(run: Run, item: Checked, named: string, manifests: readonly Checked[], owners: readonly string[], others: ReadonlySet<string>, at: string, rule: string): { located: boolean; value: unknown } {
+function pairedManifest(run: Run, item: Checked, named: string, manifests: readonly Checked[], owners: readonly string[], others: ReadonlySet<string>, at: string, rule: string): { located: boolean; value: unknown; quiet?: string } {
   const installed = expand(named);
   const atPath = manifests.find((candidate) => path.resolve(candidate.file) === path.resolve(installed));
   if (atPath !== undefined) return { located: true, value: atPath.value };
-  if (existsSync(installed)) {
-    const value = readJson(installed);
-    // Say so when it matters: the file does not parse, or the folder holds a manifest the author may think is paired.
-    if (value === undefined) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} does not parse as JSON (${rule})` });
-    else if (manifests.length > 0) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} is read as the manifest; the folder's copies are not paired (${rule})` });
-    return { located: true, value };
-  }
   const base = installed.split(/[\\/]/).pop() as string;
   const folderOf = (candidate: Checked) => path.basename(path.dirname(candidate.relative));
   const named_ = (where: (candidate: Checked) => boolean) => manifests.find((candidate) => path.basename(candidate.relative) === base && where(candidate));
+  // The folder copy that would stand in for this owner's manifest: never one in a folder named after another owner.
   const standIn = named_((candidate) => owners.includes(folderOf(candidate)))
-    ?? named_((candidate) => path.dirname(candidate.relative) === ".")
+    ?? named_((candidate) => path.dirname(candidate.relative) === "." )
     ?? (manifests.length === 1 && !others.has(folderOf(manifests[0] as Checked)) ? manifests[0] : undefined);
+  if (existsSync(installed)) {
+    if (statSync(installed).isDirectory()) {
+      run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `${installed} is a folder, not a manifest file (${rule})` });
+      return { located: true, value: undefined };
+    }
+    const value = readJson(installed);
+    if (value === undefined) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} does not parse as JSON (${rule})` });
+    // The folder's own copy is not paired once a manifest is installed: say so, and how to check the copy.
+    else if (standIn !== undefined) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} is read as the manifest, not the folder's ${standIn.relative} (reinstall it, or check the folder's copy in a folder without the installed path) (${rule})` });
+    // Otherwise the read is the ordinary one and stays quiet, unless the pair rule then fails (`quiet`, said by the caller).
+    return { located: true, value, ...(value !== undefined && standIn === undefined ? { quiet: installed } : {}) };
+  }
   if (standIn === undefined) return { located: false, value: undefined };
   run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `${named} is not installed yet, so the folder's ${standIn.relative} is read as the manifest it names (${rule})` });
   return { located: true, value: standIn.value };
+}
+
+/** A pair rule's findings; when they fail against an installed manifest read quietly, a note names that file. */
+function pairFindings(run: Run, item: Checked, quiet: string | undefined, at: string, findings: Finding[]): void {
+  addFindings(run, item.file, findings);
+  if (quiet !== undefined && findings.some((finding) => finding.severity !== "accepted")) {
+    run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the manifest read is the installed ${quiet}; if it is stale, reinstall it` });
+  }
 }
 
 /** The folder's pairs: services with their well-known documents and manifests, providers with theirs. */
@@ -413,8 +438,8 @@ function checkPairs(run: Run, checked: Checked[]): void {
     if (typeof named !== "string") continue;
     const owners = [show(value.id), `${show(value.id)}.${show(value.instance ?? "default")}`];
     const others = new Set([...allOwners].filter((owner) => !owners.includes(owner)));
-    const { value: manifest } = pairedManifest(run, item, named, manifests, owners, others, "/fabricManifest", "the descriptor's pair rule, FAC-SEM-020 in the register");
-    addFindings(run, item.file, evaluateSemanticRules("service-manifest", { descriptor: item.value, manifest }));
+    const { value: manifest, quiet } = pairedManifest(run, item, named, manifests, owners, others, "/fabricManifest", "the descriptor's pair rule, FAC-SEM-020 in the register");
+    pairFindings(run, item, quiet, "/fabricManifest", evaluateSemanticRules("service-manifest", { descriptor: item.value, manifest }));
   }
   const entries = entriesHere;
   for (const item of entries) {
@@ -435,13 +460,13 @@ function checkPairs(run: Run, checked: Checked[]): void {
       addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest: own.value }));
       continue;
     }
-    const { located, value: manifest } = pairedManifest(run, item, entry.manifest, manifests, owners, others, "/manifest", "the entry's pair rule, FAC-SEM-014 in the register");
+    const { located, value: manifest, quiet } = pairedManifest(run, item, entry.manifest, manifests, owners, others, "/manifest", "the entry's pair rule, FAC-SEM-014 in the register");
     if (!located) {
       run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${entry.manifest} was not found, so the entry is not checked against it (FAC-SEM-014)` });
       continue;
     }
     // A located manifest that does not parse goes to the rule as it is: it does not resolve to a provider manifest.
-    addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
+    pairFindings(run, item, quiet, "/manifest", evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }
   if (entries.length > 0) addFindings(run, path.dirname(entries[0]?.file as string), evaluateSemanticRules("provider-directory", { services: descriptors.map((item) => item.value), providers: entries.map((item) => item.value) }));
 }

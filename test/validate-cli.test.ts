@@ -3,8 +3,8 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, w
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
-import { inferSchema, main, nearestKey } from "../src/validate-cli.js";
+import { loadSchemasSync, projectRoot } from "../src/contract.js";
+import { blindProtocols, inferSchema, main, nearestKey } from "../src/validate-cli.js";
 
 // REQ-01 (contract review 2026-10-21): `pnpm validate` is an author's first check. It infers the schema, runs the
 // schema and the semantic rules that read the document, prints one line per problem (path, rule, message, help)
@@ -758,7 +758,7 @@ describe("the fourth seam and product readings' cases: a consumer's folder as au
     const at = path.join(installed, "fabric-agent.json");
     const result = run(folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: at }, "fabric-agent.json": manifest() }));
     expect(result.code).toBe(1);
-    expect(result.out).toContain(`the installed ${at} is read as the manifest; the folder's copies are not paired`);
+    expect(result.out).toContain(`the installed ${at} is read as the manifest, not the folder's fabric-agent.json`);
     expect(result.out).toContain("FAC-SEM-020");
   });
 
@@ -896,9 +896,10 @@ describe("the fifth unit reading's cases: pairing in a shared folder (contract r
 
 describe("the fifth seam reading's cases (contract review 2026-10-21)", () => {
   it("a document of a protocol a oneOf schema shares is not given to a sibling by the protocol alone", () => {
-    const result = run(fixture("positive/device-check-in.json"));
-    expect(result.code).toBe(2);
-    expect(result.out).not.toContain("schema/");
+    // Settled by validation: the oneOf schema that accepts it, never device-health.
+    const result = run(fixture("positive/device-check-in.json"), "--json");
+    expect(result.code).toBe(0);
+    expect((JSON.parse(result.out) as { files: Array<{ schema: string }> }).files[0]?.schema).toBe("device-check-in.schema.json");
   });
 
   it("the positive fixtures as one folder report no schema problem on a valid file", () => {
@@ -906,8 +907,10 @@ describe("the fifth seam reading's cases (contract review 2026-10-21)", () => {
     expect(report.problems.filter((problem) => problem.rule.startsWith("schema/") && problem.file.endsWith(".json"))).toEqual([]);
   }, 120_000);
 
-  it("an installed manifest at the named path, with no manifest in the folder, needs no note", () => {
-    const installed = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
+  it("an installed manifest at the named path, with no manifest in the folder, needs no note while its pair holds", () => {
+    const paired = json("positive/manifest-mcp.json");
+    paired.provider.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1": { descriptor: "example-agent.default" } };
+    const installed = folder({ "fabric-agent.json": paired });
     const descriptor = { ...json("positive/service-descriptor.json"), fabricManifest: path.join(installed, "fabric-agent.json") };
     expect(run(folder({ "example-agent.default.json": descriptor })).out).not.toContain("note/pair");
   });
@@ -924,5 +927,76 @@ describe("the fifth product reading's cases (contract review 2026-10-21)", () =>
     const out = run(folder({ "example-agent.default.json": json("positive/service-descriptor.json"), "example-agent.default.well-known.json": half })).out;
     expect(out).toContain("schemas/service-well-known.schema.json");
     expect(out).not.toContain("service-usage");
+  });
+});
+
+describe("the sixth readings' cases (contract review 2026-10-21)", () => {
+  const service = (id: string, fabricManifest: string, port: number) => ({ ...json("positive/service-descriptor.json"), id, fabricManifest, origin: `http://127.0.0.1:${port}` });
+  const manifestFor = (descriptorKey: string) => {
+    const value = json("positive/manifest-mcp.json");
+    value.provider.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1": { descriptor: descriptorKey } };
+    return value;
+  };
+
+  it("a broken document of a protocol a oneOf schema shares is a problem in a folder, not a skipped note", () => {
+    const health = json("positive/device-health-re-enrolled.json");
+    delete health.reasons;
+    const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "health.json": health }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("reasons");
+  });
+
+  it("blindProtocols names the protocols whose oneOf schemas the checker cannot see, and their schemas", () => {
+    const blind = blindProtocols(loadSchemasSync());
+    expect([...blind.keys()].sort()).toEqual(["fabric-activity/0.1", "fabric-device/0.1", "fabric-relay/0.1"]);
+    expect(blind.get("fabric-device/0.1")).toContain("device-check-in.schema.json");
+  });
+
+  it("a manifest in another owner's folder never stands in", () => {
+    const result = run(folder({ "alpha.default.json": service("alpha", "~/no-such-folder/alpha/fabric-agent.json", 47195), "beta.default.json": service("beta", "~/no-such-folder/beta/fabric-agent.json", 47196), "beta/fabric-agent.json": manifestFor("beta.default") }));
+    expect(result.out).not.toContain("alpha.default.json  /fabricManifest  note/pair");
+    expect(result.out).toMatch(/alpha\.default\.json  \/descriptor\/fabricManifest  FAC-SEM-020  .*does not resolve/);
+    const entry = json("positive/provider-entry-stdio.json");
+    delete entry.manifest;
+    const shared = run(folder({ "beta.default.json": service("beta", "~/no-such-folder/beta/fabric-agent.json", 47196), "beta/fabric-agent.json": manifestFor("beta.default"), [`providers/${entry.id as string}.json`]: entry }));
+    expect(shared.out).toContain("the entry names no manifest, so the entry is not checked against it");
+  });
+
+  it("a stale installed manifest with no folder copy is named when its pair fails", () => {
+    const stale = folder({ "fabric-agent.json": manifestFor("example-agent.old") });
+    const at = path.join(stale, "fabric-agent.json");
+    const result = run(folder({ "example-agent.default.json": { ...service("example-agent", at, 47195) } }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain(`the manifest read is the installed ${at}; if it is stale, reinstall it`);
+  });
+
+  it("a folder at the named manifest path is said to be a folder", () => {
+    const dir = folder({});
+    expect(run(folder({ "example-agent.default.json": service("example-agent", dir, 47195) })).out).toContain("is a folder, not a manifest file");
+  });
+
+  it("the lock rule: another tool's lock carries no pin member and one of schemas, releases, schemaRelease", () => {
+    for (const member of ["schemas", "releases", "schemaRelease"]) expect(inferSchema({ version: "1.2.0", [member]: [] }, "x/fabric-contract.lock.json")).toBeUndefined();
+    expect(inferSchema({ contract: "fabric-agent-contract", commit: "x", schemas: [] }, "x/fabric-contract.lock.json")).toBe("contract-pin.schema.json");
+  });
+
+  it("an entry is told by a string providerId and a run object or a manifest string only", () => {
+    expect(inferSchema({ providerId: 7, run: {} }, "x/a.json")).toBeUndefined();
+    expect(inferSchema({ providerId: "x", run: "npx x" }, "x/a.json")).toBeUndefined();
+  });
+
+  it("a Windows home path is the home folder, and its file name is read with either separator", () => {
+    const home = folder({ "fabric-agent.json": manifestFor("example-agent.default") });
+    const before = process.env.HOME;
+    process.env.HOME = home;
+    try {
+      const result = run(folder({ "example-agent.default.json": service("example-agent", "~\\fabric-agent.json", 47195), "fabric-agent.json": manifestFor("other.default"), "other/fabric-agent.json": manifestFor("other.default") }));
+      expect(result.out).not.toMatch(/  FAC-SEM-020  /);
+    } finally {
+      if (before === undefined) delete process.env.HOME;
+      else process.env.HOME = before;
+    }
+    const top = run(folder({ "example-agent.default.json": service("example-agent", "~\\no-such-folder\\fabric-agent.json", 47195), "fabric-agent.json": manifestFor("example-agent.default"), "other/fabric-agent.json": manifestFor("other.default") }));
+    expect(top.out).toContain("so the folder's fabric-agent.json is read");
   });
 });

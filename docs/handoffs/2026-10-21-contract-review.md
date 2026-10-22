@@ -46,12 +46,23 @@ every finding outside the REQs is in [`carry-over.md`](../evidence/specs/2026-10
 
 - Consumers move their pins in their own repositories. **A re-pin past this run copies `common.schema.json` from the
   same commit with any vendored schema**, because several schemas now reference its new definitions.
-- CT-73, CT-75 to CT-79 hold everything the review found and this run did not do, each with its evidence.
+- CT-73, CT-75 to CT-80 hold everything the review found and this run did not do, each with its evidence.
 
 ## Checks actually run
 
-`pnpm run check` on the run's head: typecheck, 7 673 tests with coverage, UX lint, docs check, markdownlint, privacy
-check (0 findings), exit 0. Three blind readings per round (unit in its own worktree, seam and product by `git show`).
+`pnpm run check` on the merged head: typecheck, 7 732 tests with coverage, UX lint, docs check, markdownlint, privacy
+check (0 findings), exit 0. Six rounds of three blind readings (unit in a worktree of its own, seam and product by
+`git show` and a shared read-only worktree); each round's breaks were fixed before the next, and what blocked nothing
+went to CT-78 and CT-80. The checker was run on the consumer folders of this machine: the installed services folder
+exits 0 with no note, the `fabric/` folders that hold contract documents exit 0, the ones that hold none exit 2 saying
+so, and `fixtures/positive` as one folder reports no schema problem.
+
+## Root cause of the six rounds
+
+The inference and pairing rules lived in code branches and in three paragraphs of prose, so each fix was judged
+against the prose it remembered, and the next reading found the case the fix broke. The guide now holds the rules as
+one ordered table in `inferSchema`'s and `checkFile`'s order, each row with a test, and the retro carries a standing
+instruction for any rule decided by several signals.
 
 ## Next task
 
