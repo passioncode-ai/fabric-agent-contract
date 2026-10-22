@@ -91,9 +91,12 @@ export function inferSchema(value: unknown, file: string): string | undefined {
     const chosen = complete.filter((schema) => schema.required.length === best);
     if (chosen.length === 1) return (chosen[0] as Discriminated).file;
   }
+  // A provider entry is told by its own members wherever it is saved (the guide saves it as <id>.json).
+  if (isObject(value) && Object.hasOwn(value, "providerId") && (Object.hasOwn(value, "run") || Object.hasOwn(value, "manifest"))) return "provider.schema.json";
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
-  if (name === "fabric-contract.lock.json") return "contract-pin.schema.json";
+  // A file by the lock's name that carries neither member of a pin is some other tool's lock.
+  if (name === "fabric-contract.lock.json" && carries(value, ["contract", "commit"])) return "contract-pin.schema.json";
   // A JSON Schema (a `*.schema.json` file, a top-level `$schema`) is no contract document, whatever its name looks like.
   // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
   // on a contract document, which the name rules below still read.
@@ -107,7 +110,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
 /** Members only a provider entry or a service descriptor has; one is enough for the name rule to take the file. */
 const PROVIDER_MEMBERS = ["protocol", "providerId", "run", "manifest"] as const;
 const DESCRIPTOR_MEMBERS = ["protocol", "origin", "lifecycle", "fabricManifest"] as const;
-const carries = (value: unknown, members: readonly string[]) => isObject(value) && members.some((member) => Object.hasOwn(value, member));
+/** `protocol` counts only as a contract protocol (`fabric-…`): `{protocol: "https"}` is any server's config. */
+const carries = (value: unknown, members: readonly string[]) => isObject(value) && members.some((member) =>
+  Object.hasOwn(value, member) && (member !== "protocol" || (typeof value.protocol === "string" && value.protocol.startsWith("fabric-"))));
 
 /**
  * A JSON Schema rather than a document: a `$schema` naming a JSON Schema dialect (a contract schema's URL in `$schema`
@@ -119,13 +124,17 @@ function isJsonSchema(value: unknown): boolean {
   return typeof value.$id === "string" && (Object.hasOwn(value, "type") || Object.hasOwn(value, "properties"));
 }
 
+const CONTRACT_SHAPE = { protocol: /^[a-z][a-z0-9-]*\/[0-9]+(\.[0-9]+)*$/, contractVersion: /^[0-9]+\.[0-9]+\.[0-9]+$/ } as const;
+
 /** A discriminator member the document carries with a value no schema of this checkout holds, with the values it knows. */
 function unknownDiscriminator(value: unknown): { member: string; value: unknown; known: unknown[] } | undefined {
   if (!isObject(value)) return undefined;
   for (const member of ["contractVersion", "protocol"] as const) {
-    // Only a string can be a revision or a version: an object under `protocol` (an MCP handshake in a probe receipt) is
-    // some other document's member.
-    if (typeof value[member] !== "string") continue;
+    // A value shaped like the contract's (`<name>/<revision>`, a semantic version) that this checkout does not hold is
+    // the author's to fix, and so is a number, an array or a boolean; an object (an MCP handshake in a probe receipt) or
+    // a string of another shape (an MCP date revision in a test fixture) is some other document's member.
+    if (!Object.hasOwn(value, member) || isObject(value[member])) continue;
+    if (typeof value[member] === "string" && !CONTRACT_SHAPE[member].test(value[member] as string)) continue;
     const known = [...new Set(contract().discriminated.flatMap((schema) => schema.consts.filter(([name]) => name === member).map(([, constant]) => constant)))];
     if (known.length > 0 && !known.includes(value[member])) return { member, value: value[member], known };
   }
@@ -245,12 +254,15 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   try {
     value = JSON.parse(text);
   } catch (error) {
+    // A file that does not parse is a problem even in a folder: by its name alone a broken descriptor
+    // (`example-agent.default.json`) and a JSONC config (`tsconfig.base.json`) cannot be told apart.
     run.problems.push({ file, path: "/", rule: "json", message: `the file is not JSON: ${(error as Error).message}`, help: "docs/specification/conformance.md" });
     return undefined;
   }
   // `--kind` runs that rule instead of the inferred ones, and validates only with `--schema`: a rule's input is often
   // a wrapper or part of a document, which no schema describes whole.
-  const schema = schemaArg ?? (kindArg === undefined ? inferSchema(value, relative) : undefined);
+  // The name rules read the file's own path, so a `providers/` folder named as the target is still `providers/`.
+  let schema = schemaArg ?? (kindArg === undefined ? inferSchema(value, file) : undefined);
   if (schema === undefined && kindArg === undefined) {
     // A discriminator this checkout does not know (an older or newer contractVersion, an unknown protocol) is the
     // author's problem to fix, named by its member, not a question about which schema to pass.
@@ -264,14 +276,23 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     const matching = isObject(value) ? contract().discriminated.filter((candidate) => candidate.consts.length > 0 && candidate.consts.every(([member, constant]) => value[member] === constant)) : [];
     const missing = (candidate: Discriminated) => candidate.required.filter((member) => !Object.hasOwn(value as JsonObject, member));
     const fewest = Math.min(...matching.map((candidate) => missing(candidate).length));
-    const near = matching.filter((candidate) => missing(candidate).length === fewest).map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
-    const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
-    // In a folder, a file the checker cannot tell (a test fixture, a JSON Schema, a probe receipt that shares a
-    // discriminator) is noted, with the schema it is near if any, and not checked; the author passes --schema to check
-    // it. A file named on its own is a usage error.
-    if (inFolder) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked (pass --schema to check it)` });
-    else run.usage.push(text);
-    return undefined;
+    const closest = matching.filter((candidate) => missing(candidate).length === fewest);
+    // A `protocol` string a contract schema pins (`fabric-service/0.1`) says the file is a contract document: the one
+    // schema it misses the fewest members of checks it, and its missing members are problems (exit 1). A shared
+    // `contractVersion` says less: a probe receipt or a report carries it too, so it only names the near schemas.
+    const byProtocol = closest.filter((candidate) => candidate.consts.some(([member]) => member === "protocol"));
+    if (byProtocol.length === 1) schema = (byProtocol[0] as Discriminated).file;
+    else {
+      const near = closest.map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
+      const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
+      // In a folder, a file that names a contract protocol shared by several schemas is the author's to fix; any other
+      // file the checker cannot tell (a test fixture, a JSON Schema, a probe receipt) is noted and not checked. A file
+      // named on its own is a usage error.
+      if (inFolder && byProtocol.length > 1) run.problems.push({ file, path: "/", rule: "schema/required", message: text.replace(/; pass --schema.*$/, "; pass --schema to say which"), help: `schemas/${(byProtocol[0] as Discriminated).file}` });
+      else if (inFolder) run.notes.push({ file, path: "/", rule: "note/skipped", message: `${text.replace(/; pass --schema.*$/, "")}; not checked (pass --schema to check it)` });
+      else run.usage.push(text);
+      return undefined;
+    }
   }
   const kinds = kindArg !== undefined ? [kindArg] : documentKindsOf(schema as string);
   run.files.push({ file, schema: schema ?? null, kinds });
@@ -307,6 +328,32 @@ function readJson(file: string): unknown {
   try { return JSON.parse(readFileSync(file, "utf8")) as unknown; } catch { return undefined; }
 }
 
+/**
+ * The manifest a descriptor or an entry names, as the author's folder holds it. The folder copy wins over an installed
+ * one, because it is the file being edited: a manifest with the named file name at the folder's top or in a folder named
+ * after the owner (`<id>/`, `<id>.<instance>/`), else the folder's only manifest. With none, the installed file at the
+ * named path is read. Whenever the file read is not the one at the named path, a note says which was read.
+ */
+function pairedManifest(run: Run, item: Checked, named: string, manifests: readonly Checked[], owners: readonly string[], at: string, rule: string): unknown {
+  const installed = expand(named);
+  const base = path.basename(installed);
+  const named_ = (where: (folder: string) => boolean) => manifests.find((candidate) => path.basename(candidate.relative) === base && where(path.dirname(candidate.relative)));
+  const inFolder = manifests.find((candidate) => path.resolve(candidate.file) === path.resolve(installed))
+    ?? named_((folder) => owners.includes(path.basename(folder)))
+    ?? named_((folder) => folder === ".")
+    ?? (manifests.length === 1 ? manifests[0] : undefined);
+  const exists = existsSync(installed);
+  if (inFolder !== undefined) {
+    if (path.resolve(inFolder.file) !== path.resolve(installed)) {
+      run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the folder's ${inFolder.relative} is read as the manifest ${named} names${exists ? `, not the installed copy at ${installed}` : ", which is not installed yet"} (${rule})` });
+    }
+    return inFolder.value;
+  }
+  if (!exists) return undefined;
+  run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `no manifest in the folder is ${base}, so the installed ${installed} is read (${rule})` });
+  return readJson(installed);
+}
+
 /** The folder's pairs: services with their well-known documents and manifests, providers with theirs. */
 function checkPairs(run: Run, checked: Checked[]): void {
   const of = (schema: string) => checked.filter((item) => item.schema === schema && isObject(item.value));
@@ -324,31 +371,31 @@ function checkPairs(run: Run, checked: Checked[]): void {
   }
   if (descriptors.length > 1) addFindings(run, path.dirname(descriptors[0]?.file as string), evaluateSemanticRules("service-directory", { descriptors: descriptors.map((item) => item.value) }));
   for (const item of descriptors) {
-    const named = (item.value as JsonObject).fabricManifest;
+    const value = item.value as JsonObject;
+    const named = value.fabricManifest;
     if (typeof named !== "string") continue;
-    let manifest = existsSync(expand(named)) ? readJson(expand(named)) : undefined;
-    // Checked before it is installed, the manifest sits in the folder rather than at the install path it names.
-    if (manifest === undefined && manifests.length === 1) {
-      manifest = (manifests[0] as Checked).value;
-      run.notes.push({ file: item.file, path: "/fabricManifest", rule: "note/pair", message: `${named} was not found, so the folder's ${(manifests[0] as Checked).relative} is read as the manifest it names (FAC-SEM-020)` });
-    }
+    const owners = [show(value.id), `${show(value.id)}.${show(value.instance)}`];
+    const manifest = pairedManifest(run, item, named, manifests, owners, "/fabricManifest", "the descriptor's pair rule, FAC-SEM-020 in the register");
     addFindings(run, item.file, evaluateSemanticRules("service-manifest", { descriptor: item.value, manifest }));
   }
   const entries = of("provider.schema.json");
   for (const item of entries) {
     const entry = item.value as JsonObject;
-    const named = typeof entry.manifest === "string" ? expand(entry.manifest) : "";
-    let manifest: unknown;
-    if (named !== "" && existsSync(named)) manifest = readJson(named);
-    else {
-      // The manifest of provider <id> sits in a folder named <id>: the whole segment, so `notes` is not `my-notes`.
-      const inFolder = manifests.find((candidate) => path.basename(candidate.relative) === "fabric-agent.json" && path.basename(path.dirname(candidate.relative)) === entry.id) ?? (manifests.length === 1 ? manifests[0] : undefined);
-      if (inFolder === undefined) {
-        run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${show(entry.manifest)} was not found, so the entry is not checked against it (FAC-SEM-014)` });
+    if (typeof entry.manifest !== "string") {
+      // With no manifest named, the folder's one manifest, or the one in a folder named after the entry, is its pair.
+      const own = manifests.find((candidate) => path.basename(candidate.relative) === "fabric-agent.json" && path.basename(path.dirname(candidate.relative)) === entry.id) ?? (manifests.length === 1 ? manifests[0] : undefined);
+      if (own === undefined) {
+        run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: "the entry names no manifest, so the entry is not checked against it (FAC-SEM-014)" });
         continue;
       }
-      manifest = inFolder.value;
-      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `${entry.manifest === undefined ? "the entry names no manifest" : `${show(entry.manifest)} was not found`}, so the folder's ${inFolder.relative} is read as the manifest it names (FAC-SEM-014)` });
+      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the entry names no manifest, so the folder's ${own.relative} is read as the manifest it names (FAC-SEM-014)` });
+      addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest: own.value }));
+      continue;
+    }
+    const manifest = pairedManifest(run, item, entry.manifest, manifests, [show(entry.id)], "/manifest", "the entry's pair rule, FAC-SEM-014 in the register");
+    if (manifest === undefined) {
+      run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${entry.manifest} was not found, so the entry is not checked against it (FAC-SEM-014)` });
+      continue;
     }
     addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }

@@ -59,7 +59,7 @@ excluded by the consumer.
 `pnpm pin:check <repository> [--pin <file>] [--exclude <path>]… [--include-dated]` runs the reference
 check; under `pnpm --dir <contract checkout> pin:check .` a relative path is read from where pnpm ran ([`src/pin-check.ts`](../../src/pin-check.ts)). It reads the lock and validates it against
 [`contract-pin.schema.json`](../../schemas/contract-pin.schema.json): a missing lock, a lock that is not JSON and a lock
-the schema refuses each print what is wrong and exit 2, as does a usage error. A member the schema does not define
+the schema refuses each print what is wrong and exit 2, as does a repository folder it cannot list and a usage error. A member the schema does not define
 (kit-written locks carry `adapter` and `kit`) is printed as a note and does not fail the check. A commit that is not the full
 40-character lower-case hex id is its own state, `malformed`, with its own message, and git is not asked about it.
 Then a commit-like hash on a line that mentions the contract and differs from the pin fails, with its file and line,

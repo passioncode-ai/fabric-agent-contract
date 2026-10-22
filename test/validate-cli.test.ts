@@ -81,7 +81,7 @@ describe("schema inference", () => {
 
   it("falls back to the file name: fabric-agent.json, providers/<id>.json and <id>.<instance>.json", () => {
     expect(inferSchema({}, "x/fabric-agent.json")).toBe("manifest.schema.json");
-    expect(inferSchema({ protocol: "x" }, "x/providers/agent.json")).toBe("provider.schema.json");
+    expect(inferSchema({ providerId: "x" }, "x/providers/agent.json")).toBe("provider.schema.json");
     expect(inferSchema({ origin: "x" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
     // The name alone is not enough for the two weaker rules: a config or a fixture named a.b.json is no descriptor.
     expect(inferSchema({}, "x/providers/agent.json")).toBeUndefined();
@@ -678,5 +678,129 @@ describe("the third seam reading's cases: files in a consumer's folder (contract
     expect(result.out).not.toContain("schema/const");
     expect(result.code).toBe(0);
     expect(result.out.match(/note\/skipped/g)?.length).toBe(5);
+  });
+});
+
+describe("the fourth unit reading's cases (contract review 2026-10-21)", () => {
+  it("a well-known document missing a member is checked, in a folder and alone, and still paired", () => {
+    const known = json("positive/service-well-known.json");
+    delete known.surfaces;
+    const dir = folder({ "example-agent.default.json": json("positive/service-descriptor.json"), "example-agent.default.well-known.json": known });
+    const result = run(dir);
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('is missing the required member "surfaces"');
+    expect(result.out).not.toContain("note/skipped");
+    expect(run(path.join(dir, "example-agent.default.well-known.json")).code).toBe(1);
+  });
+
+  it("a discriminator of the wrong type is a problem; only an object under protocol is another document's", () => {
+    const known = json("positive/service-well-known.json");
+    known.protocol = ["fabric-service/0.1"];
+    const result = run(folder({ "example-agent.default.json": json("positive/service-descriptor.json"), "x.well-known.json": known }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("schema/const");
+    const manifest = json("positive/manifest-mcp.json");
+    manifest.contractVersion = 0.1;
+    expect(run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "other.json": manifest })).code).toBe(1);
+  });
+
+  it("a server config with a protocol member is no descriptor; a descriptor with lifecycle alone still is", () => {
+    expect(inferSchema({ protocol: "https", port: 8080 }, "x/server.config.json")).toBeUndefined();
+    expect(inferSchema({ lifecycle: {} }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+    expect(inferSchema({ protocol: "fabric-service/0.2" }, "x/example-agent.default.json")).toBe("service-descriptor.schema.json");
+  });
+
+  it("an entry with no manifest member and none in the folder says so", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    delete entry.manifest;
+    const out = run(folder({ [`providers/${entry.id as string}.json`]: entry })).out;
+    expect(out).toContain("the entry names no manifest, so the entry is not checked against it");
+    expect(out).not.toContain("(none)");
+  });
+
+  it("a key three characters longer and three edits away is named; four edits is not", () => {
+    expect(nearestKey("https://k.example/abcdefgh", ["https://k.example/abcde"])).toBe("https://k.example/abcde");
+    expect(nearestKey("https://k.example/abcdefgh", ["https://k.example/abcdz"])).toBeUndefined();
+  });
+});
+
+describe("the fourth seam and product readings' cases: a consumer's folder as authors lay it out (contract review 2026-10-21)", () => {
+  const descriptor = () => ({ ...json("positive/service-descriptor.json"), fabricManifest: "~/no-such-folder/example-agent/fabric-agent.json" });
+  const manifest = () => {
+    const value = json("positive/manifest-mcp.json");
+    value.provider.extensions = { "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1": { descriptor: "example-agent.default" } };
+    return value;
+  };
+
+  it("a service and a provider entry share one folder: each finds its own manifest", () => {
+    const id = "example-reports";
+    const entry = { ...json("positive/provider-entry-stdio.json"), id, providerId: `https://agents.example/providers/${id}` };
+    const other = json("positive/manifest-mcp.json");
+    other.provider.id = entry.providerId;
+    const result = run(folder({ "example-agent.default.json": descriptor(), "fabric-agent.json": manifest(), [`${id}.json`]: { ...entry, manifest: `~/no-such-folder/${id}/fabric-agent.json` }, [`${id}/fabric-agent.json`]: other }));
+    expect(result.out).not.toMatch(/  FAC-SEM-0(14|20)  /);
+    expect(result.code).toBe(0);
+    expect(result.out.match(/note\/pair/g)?.length).toBe(2);
+  });
+
+  it("the folder's manifest wins over an installed copy, and the note names the installed one", () => {
+    const installed = folder({ "fabric-agent.json": { ...manifest(), provider: { ...manifest().provider, extensions: { "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1": { descriptor: "example-agent.old" } } } } });
+    const result = run(folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: path.join(installed, "fabric-agent.json") }, "fabric-agent.json": manifest() }));
+    expect(result.code).toBe(0);
+    expect(result.out).toContain(`not the installed copy at ${path.join(installed, "fabric-agent.json")}`);
+    const alone = run(folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: path.join(installed, "fabric-agent.json") } }));
+    expect(alone.out).toContain(`so the installed ${path.join(installed, "fabric-agent.json")} is read`);
+    expect(alone.code).toBe(1);
+  });
+
+  it("a manifest the descriptor names under another file name is the folder's only manifest", () => {
+    const result = run(folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: "~/no-such-folder/custom-name.json" }, "fabric-agent.json": manifest() }));
+    expect(result.code).toBe(0);
+    expect(result.out).toContain("the folder's fabric-agent.json is read as the manifest ~/no-such-folder/custom-name.json names");
+  });
+
+  it("a provider entry is told by its members wherever it is saved, so a lost protocol is a problem", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    delete entry.protocol;
+    expect(inferSchema(entry, "x/agent.json")).toBe("provider.schema.json");
+    const result = run(folder({ "agent.json": entry, "fabric-agent.json": json("positive/manifest-mcp.json") }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('is missing the required member "protocol"');
+  });
+
+  it("a providers/ folder named as the target still reads its entries as entries", () => {
+    const entry = json("positive/provider-entry-stdio.json");
+    const home = folder({ [`providers/${entry.id as string}.json`]: { ...entry, protocol: undefined, providerId: undefined, run: undefined, manifest: undefined, name: "x" } });
+    expect(inferSchema({ name: "x" }, path.join(home, "providers", "a.json"))).toBeUndefined();
+    expect(inferSchema({ manifest: "x" }, path.join(home, "providers", "a.json"))).toBe("provider.schema.json");
+    const target = run(path.join(home, "providers"));
+    expect(target.code).toBe(2);
+  });
+
+  it("a test fixture with an MCP date revision under protocol is noted, a contract-shaped unknown revision is a problem", () => {
+    const fixture = { version: "0.3.0", protocol: "2026-07-28", tools: [] };
+    const skipped = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "contract.json": fixture }));
+    expect(skipped.code).toBe(0);
+    expect(skipped.out).not.toContain("schema/const");
+    const known = json("positive/service-well-known.json");
+    known.protocol = "fabric-service/0.9";
+    expect(run(one("x.json", known)).out).toContain('protocol "fabric-service/0.9" is not one this checkout reads');
+  });
+
+  it("in a folder, a file that does not parse is a problem, whatever its name", () => {
+    const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
+    writeFileSync(path.join(dir, "example-agent.default.json"), "{");
+    expect(run(dir).code).toBe(1);
+  });
+
+  it("another tool's lock under the lock's name is no contract pin", () => {
+    expect(inferSchema({ profile: "observatory-local-mcp", version: "1.2.0", schemas: [] }, "x/fabric-contract.lock.json")).toBeUndefined();
+  });
+
+  it("a document two schemas of one protocol fit equally is a problem in a folder", () => {
+    const device = { protocol: "fabric-device/0.1", kind: "x", org: "x", revision: 1, issuedAt: "2026-10-21T00:00:00Z", keys: [] };
+    const result = run(folder({ "fabric-agent.json": json("positive/manifest-mcp.json"), "device.json": device }));
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("pass --schema to say which");
   });
 });

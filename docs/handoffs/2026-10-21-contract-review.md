@@ -39,6 +39,8 @@ every finding outside the REQs is in [`carry-over.md`](../evidence/specs/2026-10
 | `d0d274d0` | fabric-agent-adapter | the protocol register's `fabric-connections`, the pin check's differences, the `common.schema.json` closure and the mode-keyed `connection` |
 | `c95a946a` | org-index | `check_private.py` scans every file twice and covers tracked files only (carry-over D11, D19) |
 | `f3ef6b51` | the three `support-quality-daily` emitters | their forked schemas (CT-61) |
+| `15d9e4fa` | Fabric | what its next repin meets: the comms fixture count, the schema closure, the kind-keyed profiles |
+| `d506eb0f` | Project Observatory | the observatory engine keeps its own profile lock under the contract pin's file name |
 
 ## Open
 

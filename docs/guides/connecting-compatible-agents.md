@@ -355,13 +355,22 @@ Read next: [the local-runner profile](../specification/profiles.md#local-runner-
 `pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` reads a document or a folder, run from a
 checkout of this repository at the commit you pin. For files in your own repository, run it from there with
 `pnpm --dir <path to the contract checkout> validate ./fabric/`: a relative path is read from where you ran it. It
-infers the schema from the document, or takes `--schema`; runs the schema and then the semantic rules; checks a
-folder's documents as pairs (a descriptor with its well-known document, a descriptor with the manifest its
-`fabricManifest` names, a provider entry with its manifest), saying in a note which file it read when a named path
-is not installed yet; and prints one line per problem with its path, its rule and a link to the rule. In a folder, a
-file the checker cannot tell (a JSON Schema, a test fixture, a file named like a service key that carries no
-descriptor member) is noted and skipped, and `--schema` checks it; the lock file is read as a contract pin; and a
-folder in which no file is a contract document is a usage error. It exits 0 when
+infers the schema from the document (a `protocol` the contract pins, a provider entry's own members, a file name),
+or takes `--schema`; runs the schema and then the semantic rules; and prints one line per problem with its path, its
+rule and a link to the rule.
+
+A folder's documents are checked as pairs: a descriptor with its well-known document, a descriptor with the manifest
+its `fabricManifest` names, and a provider entry with its manifest. The manifest is looked for in the folder first,
+because that is the file you are editing: a file with the named file name in a folder named after the owner
+(`<id>/`, `<id>.<instance>/`) or at the folder's top, else the folder's only manifest; only when the folder holds
+none is the installed file at the named path read. A note names the file read whenever it is not the one at the named
+path. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a note. A file checked on
+its own is checked without its pairs.
+
+In a folder, a file the checker cannot tell (a JSON Schema, a test fixture, a probe receipt, a file named like a
+service key that carries no descriptor member) is noted and skipped, and `--schema` checks it; a file that does not
+parse is a problem whatever its name; the lock file is read as a contract pin; and a folder in which no file is a
+contract document is a usage error. It exits 0 when
 everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an extension key one
 letter away from the contract's, is printed as a note and does not fail the run. `--json` prints the same findings
 as JSON for a script or a CI step.

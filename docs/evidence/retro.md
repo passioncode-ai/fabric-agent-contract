@@ -56,12 +56,16 @@
   uncommitted edits; (2) inferring a schema from its discriminator alone broke two existing inference tests, because
   several schemas share a constant (`contractVersion` `0.1.0` is in the manifest, the result and the conformance
   report); (3) `pin:check` started validating the lock with a closed schema, and a seam reading found that kit-written
-  locks carry `adapter` and `kit`, so the stricter check would have refused consumers that passed before.
+  locks carry `adapter` and `kit`, so the stricter check would have refused consumers that passed before;
+  (4) the rule for a file the checker cannot tell in a folder changed in three consecutive rounds (usage error, note
+  when near nothing, note always), each fix answering the last reading's one case and breaking another's.
 - **Verified corrections:** each mutation reader gets its own detached worktree; the usage error names the schemas
   whose constants match, narrowed to the ones the document misses fewest members of, instead of guessing; an unknown
-  lock member is a note and the exit code is unchanged, with a test.
+  lock member is a note and the exit code is unchanged, with a test; the folder rule is stated by the signal each file gives (a `protocol` the contract pins checks it, a shared
+  `contractVersion` only names the near schemas, anything else is noted), with a test for each signal.
 - **Learning:** a check made stricter in a review is a contract change for every consumer: read the consumers' real
-  files before closing a schema the contract never enforced.
+  files before closing a schema the contract never enforced. A rule fixed twice for the same reason is restated by its
+  signals, not patched a third time.
 
 ### 2026-10-20: The final pass (DEC-0089 to DEC-0095)
 

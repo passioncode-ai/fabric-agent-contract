@@ -279,8 +279,11 @@ describe("pin:check: files and folders it cannot read (contract review 2026-10-2
       process.env.INIT_CWD = dir;
       process.env.npm_lifecycle_event = "pin:check";
       expect((await run(["."])).code).toBe(0);
+      // Under another script the path is the process's: this checkout, which holds no lock.
       process.env.npm_lifecycle_event = "other";
-      expect((await run(["."])).err.join("\n")).not.toContain(dir);
+      const other = await run(["."]);
+      expect(other.code).toBe(2);
+      expect(other.err.join("\n")).toContain(path.join(process.cwd(), "fabric-contract.lock.json"));
     } finally {
       for (const [name, value] of [["INIT_CWD", before.cwd], ["npm_lifecycle_event", before.event]] as const) {
         if (value === undefined) delete process.env[name];
