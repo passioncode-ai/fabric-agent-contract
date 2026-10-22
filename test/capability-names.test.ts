@@ -55,6 +55,7 @@ it("every name-bearing schema surface references the shared definition", async (
     "comms-directory.schema.json/properties/projects/items/properties/capabilities/items/properties/capability",
     "comms-enroll.schema.json/properties/capability",
     "comms-message.schema.json/properties/request/properties/capability",
+    "comms-receipt.schema.json/properties/noResponder/properties/capability",
     "comms-receipt.schema.json/properties/slot/properties/capability",
     "comms-responder-replace.schema.json/properties/capability",
     "comms-status.schema.json/properties/responders/items/properties/capability",
