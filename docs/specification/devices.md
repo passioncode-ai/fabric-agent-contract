@@ -78,14 +78,19 @@ enrollment of a machine gets keys of its own (the operator's NET-2); the contrac
    - `enrollment-token` — unattended creation by device management (MDM); `tokenId` names the
      token. The certificate binds a `user.id` only when the token names the person the device is
      assigned to, and then that person (`FAC-SEM-044`). Otherwise the device is enrolled unassigned
-     until an SSO sign-in re-enrolls it.
+     until an SSO sign-in re-enrolls it. **An organization's cloud machine** (its `org-cloud` or `enterprise-cloud`
+     hosting, a VM the organization owns and no person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
+     certificate's binding says `role: "org-cloud"` and binds no person, so a receiver shows it as the organization's
+     cloud and attributes nothing it sends to a member. Only such a token gives the role, and a certificate issued on
+     one always says it (`FAC-SEM-044`). How the server issues and records the token's role is its own.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
    the proof, not from the request.
 3. The server answers an `enrollment-response`:
    - the certificate: `der`, `serial`, `notBefore`, `notAfter`, `issuer`, and the `binding` to
-     `org.id`, `device.id` and, when known, `user.id`;
+     `org.id`, `device.id` and, when known, `user.id`, or `role: "org-cloud"` and no `user` for an organization's cloud
+     machine (DEC-0099);
    - **`streamEpoch`**: the epoch every collector on the device uses from now on, greater than every
      epoch issued to this device before (`FAC-SEM-044`);
    - **`policyRootKey`**: the organization's root key (`keyId`, `alg` and the public key), which signs
@@ -567,7 +572,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-041"></a>`FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
 | <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
 | <a id="fac-sem-043"></a>`FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
-| <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
+| <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; `role: "org-cloud"` exactly when an `org-cloud` token enrolled it, and then no user (DEC-0099); it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
 | <a id="fac-sem-045"></a>`FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused; a `grant.usage`'s `data.context` is `org:` and the certificate's `org.id`, as written (DEC-0086) |
 | <a id="fac-sem-046"></a>`FAC-SEM-046` | `device-key-set` | a key set is signed by the root key from enrollment in that key's algorithm, moves its revision forward in its organization, names each key once with a window that ends after it starts and none of small order (DEC-0045), holds a key valid at its `issuedAt`, and keeps every key of the current set that is still valid unless it revokes it by name |
 | <a id="fac-sem-068"></a>`FAC-SEM-068` | `device-action` | a device's decision is the one its policy gives: after expiry no grant, remote execution or person's key for others, and every lock kept; a person's key serves others only when sharing is `allowed`; nothing that occurred before the collection start is uploaded |

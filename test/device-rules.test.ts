@@ -144,6 +144,17 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     ]));
   });
 
+  it("FAC-SEM-044: an organization's cloud machine is enrolled only by an org-cloud token, says so, and binds no person (DEC-0099)", () => {
+    const fixture = load("semantic/device-enrollment-org-cloud.json").input;
+    expect(codes("device-enrollment", fixture)).toEqual([]);
+    // SSO binds the signed-in user, which an organization's cloud machine never has: both findings.
+    expect(paths("device-enrollment", load("semantic/device-enrollment-org-cloud-by-sso.json").input)).toEqual(["FAC-SEM-044 /response/certificate/binding/role", "FAC-SEM-044 /response/certificate/binding/user"]);
+    expect(paths("device-enrollment", load("semantic/device-enrollment-org-cloud-unsaid.json").input)).toEqual(["FAC-SEM-044 /response/certificate/binding/role"]);
+    expect(paths("device-enrollment", load("semantic/device-enrollment-org-cloud-with-person.json").input)).toEqual(["FAC-SEM-044 /response/certificate/binding/user"]);
+    // A token of another role, or none, is a person's or unassigned device as before.
+    expect(codes("device-enrollment", { ...fixture, token: { tokenId: "tok-cloud-01" } })).toEqual(["FAC-SEM-044"]);
+  });
+
   it("does not accept a token issued for another device as proof", () => {
     const fixture = load("semantic/device-enrollment-mdm-token-for-device.json").input;
     fixture.token.deviceId = "dev-other";

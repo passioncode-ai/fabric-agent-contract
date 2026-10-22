@@ -882,5 +882,9 @@
   {"name": "comms-submit-reply-reaction", "schema": "comms-submit.schema.json", "path": "positive/comms-submit-reply-reaction.json", "valid": true},
   {"name": "comms-submit-reaction-on-message", "schema": "comms-submit.schema.json", "path": "negative/comms-submit-reaction-on-message.json", "valid": false, "keyword": "false schema"},
   {"name": "comms-host-wait", "schema": "comms-host-wait.schema.json", "path": "positive/comms-host-wait.json", "valid": true},
-  {"name": "comms-host-wait-unknown-code", "schema": "comms-host-wait.schema.json", "path": "negative/comms-host-wait-unknown-code.json", "valid": false, "keyword": "enum"}
+  {"name": "comms-host-wait-unknown-code", "schema": "comms-host-wait.schema.json", "path": "negative/comms-host-wait-unknown-code.json", "valid": false, "keyword": "enum"},
+  {"name": "device-enrollment-response-org-cloud", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-response-org-cloud.json", "valid": true},
+  {"name": "device-enrollment-response-org-cloud-with-user", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-response-org-cloud-with-user.json", "valid": false, "keyword": "false schema"},
+  {"name": "device-enrollment-response-unknown-role", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-response-unknown-role.json", "valid": false, "keyword": "const"},
+  {"name": "service-descriptor-peer-processor-hosted", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-peer-processor-hosted.json", "valid": true}
 ]

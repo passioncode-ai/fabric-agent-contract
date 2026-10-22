@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0099` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0100` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6108,3 +6108,39 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-22-board-additions.md`.
 - **Source:** Fabric's ask (thread `a5969ac5`, messages `db2904ed`, `38959402`); thread `c430513b`; DEC-0098 reserved by
   git CAS (key `ct81-board-additions-20261022`).
+
+### DEC-0099: An organization's cloud machine enrolls by an `org-cloud` token and binds no person; `processor-hosted` custody
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-82.
+- **Decision:**
+  1. In [devices](specification/devices.md): a device certificate's binding MAY say `role: "org-cloud"`: the device
+     is the organization's own cloud machine (its `org-cloud` or `enterprise-cloud` hosting, entitlement/1), a VM no
+     person uses. Such a binding names no `user` (schema). `FAC-SEM-044` reads the server's record of the token: the
+     role is given only by an `enrollment-token` whose record says `role: "org-cloud"`, and a certificate issued on one
+     always says it. An SSO sign-in never gives it. How the server issues and records the token's role is its own.
+  2. In [service](specification/service.md): `peer.custody` admits `processor-hosted`: a processor runs the machine or
+     account for an organization under a processing agreement (the organization's cloud on PassionCode's hosting); the
+     organization controls the data, the processor the machine. It is shown beside the service like the other two.
+- **Why:** the cloud architecture's A-3 (fabric-workspace `docs/reports/2026-10-21-cloud-architecture/README.md`,
+  accepted by the operator as the target on 2026-10-22), asked of the contract on board thread `348467e5`: the first
+  organization server's VES-REC needs to tell an organization's cloud from a member's machine by 2026-10-31, and
+  CX-CON-08's verdict of 2026-10-12 was to amend `peer.custody` with `processor-hosted`.
+- **Alternatives refused:** a role member on the enrollment request (the node would claim what only the token proves);
+  binding the organization's administrator as the cloud's user (its activity would read as that person's); a fourth
+  hosting product name for the role (`org-cloud` already names the organization's hosting in entitlement/1, and an
+  `enterprise-cloud` VM is the same kind of machine).
+- **Compatibility:** additive: a certificate without `role` and the two custody values keep their meaning. A receiver
+  pinned before this refuses a binding with `role` and a descriptor with `processor-hosted` at its schema, so a server
+  issues the role, and a descriptor declares the custody, only toward readers that pin this decision. `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:** schemas `device-enrollment` (`binding.role`), `service-descriptor` (`peer.custody`); code
+  `src/device-rules.ts` (`FAC-SEM-044`); fixtures `fixtures/semantic/device-enrollment-org-cloud*.json`,
+  `fixtures/positive/device-enrollment-response-org-cloud.json`,
+  `fixtures/negative/device-enrollment-response-org-cloud-with-user.json`,
+  `fixtures/negative/device-enrollment-response-unknown-role.json`,
+  `fixtures/positive/service-descriptor-peer-processor-hosted.json`; test `test/device-rules.test.ts`; docs
+  `docs/specification/devices.md`, `docs/specification/service.md`, `docs/backlog.md` (CT-82),
+  `docs/handoffs/2026-10-22-org-cloud.md`.
+- **Source:** passioncode-platform's ask (thread `348467e5`, message `7f194e53`, item 3); DEC-0099 reserved by git CAS
+  (key `ct82-org-cloud-20261022`).

@@ -214,6 +214,10 @@
                 "org": {
                   "$ref": "device-common.schema.json#/$defs/org"
                 },
+                "role": {
+                  "const": "org-cloud",
+                  "description": "DEC-0099: the device is the organization's own cloud machine (an org-cloud or enterprise-cloud hosting), enrolled by an enrollment token of that role; it binds no person. Absent: a person's or an unassigned device, as before."
+                },
                 "user": {
                   "$ref": "activity-common.schema.json#/$defs/user"
                 },
@@ -221,7 +225,22 @@
                   "$ref": "activity-common.schema.json#/$defs/device"
                 }
               },
-              "additionalProperties": false
+              "additionalProperties": false,
+              "if": {
+                "properties": {
+                  "role": {
+                    "const": "org-cloud"
+                  }
+                },
+                "required": [
+                  "role"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "user": false
+                }
+              }
             },
             "issuer": {
               "$ref": "activity-common.schema.json#/$defs/opaqueId"
