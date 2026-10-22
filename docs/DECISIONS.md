@@ -6026,7 +6026,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0097: A schema pattern never uses a bare `.`: a package path and a device's free text hold across U+2028 and U+2029
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-87.
+- **Status:** Accepted source change (on merge of PR #140). Consumer adoption: board row CT-87.
 - **Decision:**
   1. In every schema `pattern`, any character is written `[\s\S]`, never `.` outside a character class. ECMAScript's
      `.` (Ajv compiles with the `u` flag) does not match U+2028 or U+2029, so a negative lookahead written `(?!.*X)`
