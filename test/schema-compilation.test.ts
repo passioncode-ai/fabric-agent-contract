@@ -52,6 +52,48 @@ describe("schema patterns", () => {
     expect(patterns({ properties: { day: { type: "string", pattern: "^\\d{4}$" } } }, "", [])).toEqual([["/properties/day/pattern", "^\\d{4}$"]]);
   });
 
+  // DEC-0097: ECMAScript's `.` stops at U+2028 and U+2029 (Python's `re` does not), so a guard written `(?!.*\.\.)`
+  // let `a\u2028/../x` through `fabric-package/1`'s path. Any character is `[\s\S]`; a `.` outside a class is refused.
+  const bareDots = (pattern: string): number => {
+    let count = 0;
+    let inClass = false;
+    for (let index = 0; index < pattern.length; index += 1) {
+      const char = pattern[index];
+      if (char === "\\") index += 1;
+      else if (inClass) inClass = char !== "]";
+      else if (char === "[") inClass = true;
+      else if (char === ".") count += 1;
+    }
+    return count;
+  };
+
+  it("never use a bare . (it stops at U+2028 and U+2029)", async () => {
+    const found: string[] = [];
+    for (const schema of await loadSchemas()) {
+      for (const [where, pattern] of patterns(schema, "", [])) if (bareDots(pattern) > 0) found.push(`${schema.$id}#${where}`);
+    }
+    expect(found).toEqual([]);
+  });
+
+  it("counts a bare . and leaves an escaped or classed one", () => {
+    expect(bareDots("^(?!.*//)a.b$")).toBe(2);
+    expect(bareDots("^a\\.b[.]c[\\]]d$")).toBe(0);
+    expect(bareDots("^[^\\]]x.$")).toBe(1);
+  });
+
+  it("refuses every line-separator plant in a package path and a device detail", async () => {
+    const validator = await createValidator();
+    const base = `${SCHEMA_PREFIX}schemas/`;
+    const path = validator.getSchema(`${base}fabric-package.schema.json#/$defs/path`);
+    const detail = validator.getSchema(`${base}device-common.schema.json#/$defs/detail`);
+    for (const separator of ["\u2028", "\u2029"]) {
+      for (const tail of ["/../../etc/passwd", "\\..\\etc", "//etc/passwd", "/./x"]) expect(path?.(`skills${separator}${tail}`)).toBe(false);
+      for (const tail of ["C:\\Users\\bob", "%2Fhome", "x-Users-bob", "/Users/bob", "~/notes"]) expect(detail?.(`cannot read${separator}${tail}`)).toBe(false);
+    }
+    expect(path?.("skills/plain-words/SKILL.md")).toBe(true);
+    expect(detail?.("cannot read the journal")).toBe(true);
+  });
+
   it("gives every common definition a description", async () => {
     const common = (await loadSchemas()).find((schema) => schema.$id.endsWith("/schemas/common.schema.json"))!;
     const missing = Object.entries(common.$defs as Record<string, Record<string, unknown>>).filter(([, def]) => typeof def.description !== "string").map(([name]) => name);

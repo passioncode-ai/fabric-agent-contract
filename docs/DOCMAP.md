@@ -94,7 +94,7 @@ and recorded as DEC-0001.
 | Extension key spellings | `src/extensions.ts` |
 | A consumer's contract pin | `docs/specification/versioning.md#one-contract-pin` |
 | Agent-registry run (AR-1) record and handoff | `docs/evidence/plans/2026-09-30-ar1-contract.md` |
-| The current iteration's order and dates (CT-81 to CT-86) | `docs/evidence/plans/2026-10-22-next-iteration.md` |
+| The current iteration's order and dates (CT-81 to CT-89) | `docs/evidence/plans/2026-10-22-next-iteration.md` |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
 | Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |
 | Licence text, commercial terms, contributor agreement | `LICENSE`, `COMMERCIAL-LICENSE.md`, `CLA.md` (knowledge base templates) |

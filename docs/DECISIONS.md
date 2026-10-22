@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0097` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0098` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6022,3 +6022,39 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/backlog.md` (CT-70), `docs/handoffs/2026-10-21-connections.md`.
 - **Source:** Fabric Dashboards' proposal (board message `8866b1b4`, thread `131648c0`); fabric-agent-adapter's FAA-62
   (`d463b07b`); DEC-0096 and `SEM-0127` reserved by git CAS (key `connections-extension-20261021`).
+
+### DEC-0097: A schema pattern never uses a bare `.`: a package path and a device's free text hold across U+2028 and U+2029
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-87.
+- **Decision:**
+  1. In every schema `pattern`, any character is written `[\s\S]`, never `.` outside a character class. ECMAScript's
+     `.` (Ajv compiles with the `u` flag) does not match U+2028 or U+2029, so a negative lookahead written `(?!.*X)`
+     stops at the first such character and lets `X` through after it; Python's `re` matches them, so the two engines
+     disagreed. `test/schema-compilation.test.ts` refuses a bare `.` in any schema pattern.
+  2. Two guards change what they accept, each only for a string that holds a line or paragraph separator:
+     `fabric-package.schema.json#/$defs/path` refuses `skills\u2028/../../etc/passwd`, a backslash and a doubled slash
+     after one (a path traversal for an installer that trusts the schema and extracts by listed path); and
+     `device-common.schema.json#/$defs/detail` refuses `C:\Users\<name>`, `%2Fhome` and `-Users-<name>` after one (a
+     private path in a device's free text, F-B-104).
+  3. Five other patterns are rewritten the same way with an unchanged accept set, because their character classes
+     already exclude both separators: `device-policy` `workspace.folders`, `activity-common` `sourceKey` and its string
+     `extScalar`, `settings-backup` `tableName` and `columnName`.
+- **Why:** fabric-agent-adapter's audit of 2026-10-22 (finding 40, report `docs/reports/2026-10-22-adapter-audit/README.md`
+  at `1bc740c`, board thread `de8834d8`) found the package path accepting a traversal in the contract's own Ajv at the pin
+  and in the adapter's Node twin. An open security hole is fixed when found.
+- **Measured:** with the patterns of `main` `66520f0` compiled under `u`, each of the six new negative fixtures was
+  accepted; with this change each is refused; the positive package and device fixtures keep their verdicts (the full
+  suite under `pnpm run check`).
+- **Alternatives refused:** excluding U+2028 and U+2029 from the path's and the detail's body (narrower than needed, and
+  it leaves the next guard written with `.` open); the `s` flag (a schema `pattern` carries no flags).
+- **Compatibility:** narrows two patterns to refuse what their descriptions already forbade; a document a writer could
+  produce in good faith keeps its verdict. `contractVersion` stays `0.1.0`. A consumer that vendors these schemas takes
+  them from the same commit.
+- **Consequences / affects:** schemas `fabric-package`, `device-common`, `device-policy`, `activity-common`,
+  `settings-backup`; fixtures `fixtures/negative/fabric-package-path-*-separator-*`,
+  `fixtures/negative/device-check-in-detail-*-separator-home.json`, `fixtures/catalogue.json`; test
+  `test/schema-compilation.test.ts`; docs `docs/specification/package.md`, `docs/specification/devices.md`,
+  `docs/backlog.md` (CT-87), `docs/evidence/retro.md`.
+- **Source:** the adapter's finding (thread `de8834d8`, message `95ba2bb0`); DEC-0097 reserved by git CAS (key
+  `pattern-line-separator-20261022`).

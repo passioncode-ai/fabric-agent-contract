@@ -854,5 +854,11 @@
   {"name": "coding-agents", "schema": "coding-agents.schema.json", "path": "positive/coding-agents.json", "valid": true},
   {"name": "coding-agents-id-upper-case", "schema": "coding-agents.schema.json", "path": "negative/coding-agents-id-upper-case.json", "valid": false, "keyword": "pattern"},
   {"name": "service-connections-extension", "schema": "service-connections-extension.schema.json", "path": "positive/service-connections-extension.json", "valid": true},
-  {"name": "service-connections-extension-unknown-kind", "schema": "service-connections-extension.schema.json", "path": "negative/service-connections-extension-unknown-kind.json", "valid": false, "keyword": "enum"}
+  {"name": "service-connections-extension-unknown-kind", "schema": "service-connections-extension.schema.json", "path": "negative/service-connections-extension-unknown-kind.json", "valid": false, "keyword": "enum"},
+  {"name": "fabric-package-path-line-separator-dot-dot", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-line-separator-dot-dot.json", "valid": false, "keyword": "pattern"},
+  {"name": "fabric-package-path-paragraph-separator-dot-dot", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-paragraph-separator-dot-dot.json", "valid": false, "keyword": "pattern"},
+  {"name": "fabric-package-path-line-separator-backslash", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-line-separator-backslash.json", "valid": false, "keyword": "pattern"},
+  {"name": "fabric-package-path-line-separator-double-slash", "schema": "fabric-package.schema.json", "path": "negative/fabric-package-path-line-separator-double-slash.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-check-in-detail-line-separator-home", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-detail-line-separator-home.json", "valid": false, "keyword": "pattern"},
+  {"name": "device-check-in-detail-paragraph-separator-home", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-detail-paragraph-separator-home.json", "valid": false, "keyword": "pattern"}
 ]

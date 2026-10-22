@@ -64,7 +64,8 @@ and its scope is `publisher`, not a dotted prefix.
 
 A path in the package (`files[]`, `provider`, the service's entry, `evals.suite`, a dependency's `path`, a `state[]`
 path) is relative, with forward slashes, and has no `.` or `..` segment, no drive and no control character
-(`$defs/path`).
+(`$defs/path`). The rule holds across a line or paragraph separator (U+2028, U+2029): `a\u2028/../x` has a `..`
+segment and is refused (DEC-0097).
 
 ### What each source listed, and where it went
 
