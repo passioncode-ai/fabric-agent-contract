@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0101` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0102` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6187,3 +6187,45 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `conformance.md`, `docs/backlog.md` (CT-88), `docs/handoffs/2026-10-22-refusals-renewal.md`.
 - **Source:** the first organization server's asks 9 and 10 (thread `ba63565c`, message `5e4a81b4`); DEC-0100 reserved
   by git CAS (key `ct88-refusals-renewal-20261022`).
+
+### DEC-0101: A node's harness summary, the organization's baseline and drift, and repairs under the machine's policy (`FAC-SEM-128`, `FAC-SEM-129`)
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-83.
+- **Decision:** in [node summary](specification/node-summary.md):
+  1. **`node-summary/1`** (`schemas/node-summary.schema.json`), a check-in record (`records.nodeSummary`) for one
+     context: the coding agents by catalogue id (DEC-0093), the MCP servers with source, transport and health, the
+     skills and plugins with their digests and versions, the hook count, the agent services placed in that context, and
+     the drift. It names no person, path, credential, argument, environment value, prompt, output or file content
+     (`FAC-SEM-128`; a name holds no slash, backslash, tilde or space by schema). It travels inside the device request
+     DEC-0056 signs; its own signature for the relay is CT-90.
+  2. **The baseline:** the policy key `harness.baseline`, signed with the policy; `harnessDrift` is the drift, one state
+     per baseline item in its order (`missing`, `stopped`, `changed`, `outdated`), reported under the layer's revision
+     (`FAC-SEM-128`).
+  3. **Repairs:** `repair-request/1` in a check-in response's `records.repairs`, signed like a policy layer by a key of
+     the current policy key set; the node runs it only as `repairDecision` answers (`FAC-SEM-129`): a verified
+     signature, this device and organization, inside a window of at most 7 days, an unexpired policy (`FAC-SEM-068`'s
+     remote execution), a package `repair.packages` lists by `agentRef` and digest, and the person told before it
+     started. `repair-result/1` answers each once in `records.repairResults`.
+- **Why:** the operator's targets S7, S8 and S10 (board thread `b2511678`; the first organization server's ADR-0011),
+  asked of the contract as items 7 and 8 on thread `ba63565c`; the first organization server's VES-HARNESS,
+  VES-INTEGRITY and VES-REMEDIATE and Project Observatory's OBS-192 and OBS-193 wait on it. DV-CON-01's accepted
+  constraints (2026-10-12) hold: per context, services by `id.instance` with `protocols`, A2A card digests and MCP
+  endpoints as published, no person and no path, a check-in record.
+- **Alternatives refused:** the summary signed separately inside a signed request (two signatures over one body; the
+  relay case is CT-90); a repair as a `device-action` kind (an action is the device's own decision record, a repair is
+  the organization's signed request); a baseline outside the policy (a node would need a second trust root for it);
+  hook commands or server arguments (they carry paths and secrets).
+- **Compatibility:** additive: new schemas, two new optional policy keys and three optional record members. A receiver
+  pinned before this refuses the new members at its schema, so a node sends them only to a server whose `protocols` it
+  learned at or after this decision. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `node-summary`, `repair-request`, `repair-result`, `device-policy`
+  (`harness.baseline`, `repair.packages`), `device-check-in` (`records`); code `src/node-summary.ts`,
+  `src/semantic-rules.ts`, `src/semantic-kinds.ts`; fixtures `fixtures/positive/node-summary.json`,
+  `fixtures/positive/repair-*.json`, `fixtures/negative/node-summary-*.json`, `fixtures/negative/repair-*.json`,
+  `fixtures/semantic/node-summary-*.json`; tests `test/node-summary.test.ts`, `test/schema-compilation.test.ts`,
+  `test/positive-sweep.test.ts`; docs `docs/specification/node-summary.md`, `devices.md`, `conformance.md`,
+  `docs/specification/README.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-83, CT-90),
+  `docs/handoffs/2026-10-22-node-summary.md`.
+- **Source:** the first organization server's items 7 and 8 (thread `ba63565c`, message `1503e2aa`); DEC-0101,
+  `SEM-0128` and `SEM-0129` reserved by git CAS (keys `ct83-node-summary-20261022`, `-a`, `-b`).

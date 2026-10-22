@@ -888,5 +888,15 @@
   {"name": "device-enrollment-response-unknown-role", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-response-unknown-role.json", "valid": false, "keyword": "const"},
   {"name": "service-descriptor-peer-processor-hosted", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-peer-processor-hosted.json", "valid": true},
   {"name": "device-enrollment-request-key-on-record", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request-key-on-record.json", "valid": true},
-  {"name": "device-enrollment-key-on-record-with-token", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-key-on-record-with-token.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "device-enrollment-key-on-record-with-token", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-key-on-record-with-token.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "node-summary", "schema": "node-summary.schema.json", "path": "positive/node-summary.json", "valid": true},
+  {"name": "node-summary-path-in-name", "schema": "node-summary.schema.json", "path": "negative/node-summary-path-in-name.json", "valid": false, "keyword": "pattern"},
+  {"name": "node-summary-server-arguments", "schema": "node-summary.schema.json", "path": "negative/node-summary-server-arguments.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "node-summary-endpoint-query", "schema": "node-summary.schema.json", "path": "negative/node-summary-endpoint-query.json", "valid": false, "keyword": "pattern"},
+  {"name": "repair-request", "schema": "repair-request.schema.json", "path": "positive/repair-request.json", "valid": true},
+  {"name": "repair-request-task-two-lines", "schema": "repair-request.schema.json", "path": "negative/repair-request-task-two-lines.json", "valid": false, "keyword": "pattern"},
+  {"name": "repair-result", "schema": "repair-result.schema.json", "path": "positive/repair-result.json", "valid": true},
+  {"name": "repair-result-refused", "schema": "repair-result.schema.json", "path": "positive/repair-result-refused.json", "valid": true},
+  {"name": "repair-result-refused-without-reason", "schema": "repair-result.schema.json", "path": "negative/repair-result-refused-without-reason.json", "valid": false, "keyword": "required"},
+  {"name": "repair-result-succeeded-unnotified", "schema": "repair-result.schema.json", "path": "negative/repair-result-succeeded-unnotified.json", "valid": false, "keyword": "required"}
 ]

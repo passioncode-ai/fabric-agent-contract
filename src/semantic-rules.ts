@@ -35,6 +35,7 @@ import { feedDataRules } from "./feed-data.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
+import { nodeSummaryRules } from "./node-summary.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
 import { connectionsRules } from "./connections.js";
@@ -89,6 +90,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (jobLimits) return jobLimits;
   const share = shareRegistrationRules(kind, value);
   if (share) return share;
+  const summary = nodeSummaryRules(kind, value);
+  if (summary) return summary;
   const signing = signingRules(kind, value);
   if (signing) return signing;
   const attribution = attributionRules(kind, value);

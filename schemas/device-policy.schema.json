@@ -328,6 +328,97 @@
             }
           },
           "additionalProperties": false
+        },
+        "harness.baseline": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "object",
+              "required": [
+                "items"
+              ],
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "maxItems": 1024,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "coding-agent",
+                          "mcp-server",
+                          "skill",
+                          "plugin",
+                          "service"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,127}$"
+                      },
+                      "minVersion": {
+                        "type": "string",
+                        "pattern": "^[0-9]+(?:\\.[0-9]+){0,3}$",
+                        "description": "The lowest version that is not outdated (dotted numbers, compared number by number)."
+                      },
+                      "digest": {
+                        "$ref": "common.schema.json#/$defs/sha256",
+                        "description": "A skill's or plugin's expected digest; another digest is changed."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "description": "DEC-0101: the organization's baseline of the harness: what every enrolled machine is expected to run. A node compares its harness against it and reports the drift in node-summary/1 (harnessDrift, FAC-SEM-128). A service in it is expected running."
+        },
+        "repair.packages": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "object",
+                "required": [
+                  "agentRef",
+                  "digest"
+                ],
+                "properties": {
+                  "agentRef": {
+                    "$ref": "fabric-package.schema.json#/$defs/agentRef"
+                  },
+                  "digest": {
+                    "$ref": "common.schema.json#/$defs/sha256"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "locked": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "description": "DEC-0101: the packages a repair-request/1 may name, by agentRef and digest; absent, the node runs no repair (FAC-SEM-129)."
         }
       },
       "additionalProperties": {
