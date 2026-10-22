@@ -324,7 +324,8 @@ function commsSubmit(value: JsonObject): Finding[] {
  *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
  *  `outcome_unknown` — by the current responder, or by the estate owner when no responder holds the
  *  slot (DEC-0081). No operation moves `outcome_unknown` to `cancelled`: there is no abandon path.
- *  Accepted work is held on expiry and on responder replacement. A target's reply answers a queued request (DEC-0098):
+ *  Accepted work is held on expiry and on responder replacement. The target's participant reply answers a queued
+ *  request, never a responder's fenced reply or progress note (DEC-0098, DEC-0102):
  *  `answered` is left only by the requester's cancel. */
 export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {
   claim: [["queued", "claimed"], ["claimed", "claimed"]],
@@ -336,7 +337,8 @@ export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string
   replace: [["claimed", "queued"], ["accepted", "accepted"]],
   lost_result: [["in_progress", "outcome_unknown"]],
   reconcile: [["outcome_unknown", "completed"], ["outcome_unknown", "failed_known"]],
-  // DEC-0098: a message from the target Project that is not a request and names a queued request as its replyTo.
+  // DEC-0098, DEC-0102: a participant's message from the target Project, not a request and never a responder's fenced
+  // reply or progress note, whose replyTo is a queued request (at once, or on the board's pass).
   answer: [["queued", "answered"]],
 };
 

@@ -57,7 +57,7 @@
         "outcome_unknown",
         "answered"
       ],
-      "description": "answered (DEC-0098): a message from the request's target Project that is not a request and names it as replyTo moved it from queued. It is not open: no responder claims it and its deadline no longer expires it; the requester may still cancel it. A reply is not a completion: answered says the target answered, never that the asked work was done."
+      "description": "answered (DEC-0098, DEC-0102): the target Project's participant message of any kind but request (never a responder's fenced reply or progress note) whose replyTo is the request moved it from queued, at once or on the board's pass for one that came while it was claimed. It is not open: no responder claims it and its deadline no longer expires it; the requester may still cancel it. A reply is not a completion: answered says the target answered, never that the asked work was done."
     },
     "effectState": {
       "enum": [

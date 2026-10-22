@@ -101,6 +101,16 @@ rule's old sentence; the UX's answered state; an `org-cloud` result's `notifiedA
 request, fixture `repair-result-org-cloud`). Its risks: item 5 names the repeated result, the board's other DEC-0098
 duties and Fabric's tool text join CT-81, the retro's punctuation.
 
+## Eleventh round
+
+Seam: pass, three risks fixed (the comments on `COMMS_TRANSITIONS`; CT-81's wording and what Fabric's tick needs to
+tell a fenced message; the repair duties' tests named as the server's and the node's own). Product: one break,
+`comms-common`'s `requestState` gave the old answer rule; fixed, with its risks (the lifecycle's "not answered by a
+reply" names the pass, the UX names a fenced reply too, CT-81 says what happens to requests answered by a note before
+Fabric narrows). Unit: pass at 19dc80d5 (14 of 16 plants die; the two survivors, `replace` and
+`expire` pairs, are CT-100); the claim-or-answer race after a replacement joins CT-81, FLW-16's edge reads "responder
+replaced".
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
@@ -123,8 +133,8 @@ duties and Fabric's tool text join CT-81, the retro's punctuation.
 
 `pnpm run check` exit 0: typecheck, 94 test files with 7 967 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. Nine rounds of blind readings ran on this branch after the first on the merged range (second to tenth; seam and product in
-each, the unit tier in seven of them, the last four at 5ceafc02, 944d039f, cc56eb67 and 2e089699); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
+list for `FAC-SEM-128`; both fixed. Ten rounds of blind readings ran on this branch after the first on the merged range (second to eleventh; seam and product in
+each, the unit tier in eight of them, the last five at 5ceafc02, 944d039f, cc56eb67, 2e089699 and 19dc80d5); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
 generators.
 
 ## Next task

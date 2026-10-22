@@ -242,7 +242,8 @@ it refuses some operations while it lasts, and a held request's deadline keeps r
 `FAC-SEM-027` checks this table. `completed`, `failed_known`, `cancelled` and `expired` are
 terminal. `answered` is not open: no responder claims it, its deadline no longer expires it, and only the requester's
 `com.cancel` moves it. It says the target answered, never that the asked work was done; a request a responder already
-holds is not answered by a reply. `outcome_unknown` is left only by reconciliation (`com.reconcile`, by the current responder or, while no
+holds is not answered by a reply while the responder holds it; if it returns to `queued`, the board's pass answers it
+for a participant reply that came meanwhile. `outcome_unknown` is left only by reconciliation (`com.reconcile`, by the current responder or, while no
 responder holds the slot, the [estate owner](#owner-settlement)), and no expiry, restore, compaction or cancellation
 erases it.
 

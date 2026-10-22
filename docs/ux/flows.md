@@ -405,7 +405,7 @@ flowchart TD
   U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
   Q -->|deadline before accept| X[Expired]
   Q -->|the target's participant replies to it| N[Answered]
-  C -->|responder replaced after a participant reply| Q
+  C -->|responder replaced| Q
   N -->|the requester cancels| K[Cancelled]
 ```
 

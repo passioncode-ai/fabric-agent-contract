@@ -6313,7 +6313,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   called both once and repeated; the result is one per id, repeated unchanged for a redelivered request. A tenth
   reading found a responder's progress note answering a request after the responder was replaced, the reply rule's old
   sentence, the UX's answered state, an `org-cloud` result's `notifiedAt` and the check-in schema's "each once"; all
-  fixed. A sixth seam reading found an `org-cloud` machine with no reason
+  fixed. An eleventh product reading found `comms-common`'s `requestState` still giving the old answer rule; fixed,
+  with the code comments on `COMMS_TRANSITIONS`. A sixth seam reading found an `org-cloud` machine with no reason
   for its buffered event (no person acknowledges); a seventh product reading found the instant first chosen for it
   defined nowhere, so such a device's start is its mdm deadline (its `collectionStart`) and the rest is CT-97. A fourth
   unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
@@ -6329,7 +6330,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   server sends the member only to a node pinned at or after DEC-0102, as DEC-0094 does for `protocols`. Wider for a
   batch acknowledgement (`before-purpose`), sent to every collector: a rejection is consumed whatever its reason. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schemas `node-summary` (context, name), `device-policy` (`harness.baseline`),
-  `comms-receipt` (`noResponder.message`), `device-check-in` (`acknowledgedNoticeVersion`), `activity-batch-ack`
+  `comms-receipt` (`noResponder.message`), `comms-common` (the `requestState` description), `device-check-in` (`acknowledgedNoticeVersion`), `activity-batch-ack`
   (`before-purpose`); code
   `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
   `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;

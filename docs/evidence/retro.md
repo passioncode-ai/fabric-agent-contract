@@ -61,7 +61,7 @@
   baseline's old name shape; one seam: a narrowing against the operator's recorded ADR-0011; eight product), a
   third seven (five product, one seam, one unit), a fourth five (four product, one seam), a fifth two (one product, one seam),
   a sixth three (two product, one seam), a fourth unit reading one, a seventh product three, an eighth product two, a
-  ninth product two and a tenth five (four product, one seam), all fixed before the merge.
+  ninth product two, a tenth five (four product, one seam) and an eleventh product one, all fixed before the merge.
 - **Verified corrections:** DEC-0102 with a test for each break and each surviving plant; the three readings' reports
   in the handoff.
 - **Learning:** a rule that restates another rule's condition calls that rule rather than copying it; and the readings
