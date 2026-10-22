@@ -111,6 +111,15 @@ Fabric narrows). Unit: pass at 19dc80d5 (14 of 16 plants die; the two survivors,
 `expire` pairs, are CT-100); the claim-or-answer race after a replacement joins CT-81, FLW-16's edge reads "responder
 replaced".
 
+## Twelfth and thirteenth rounds
+
+Both at 4bc8d1a0, unit, seam and product: pass, nothing blocking. Their risks are wording and test gaps for a
+follow-up row: "participant reply" defined once, `requestState` naming the pre-DEC-0098 pass case, an older request
+read with no deadline, FLW-16's claimed expiry edge, CT-100's source labels, DEC-0102's fixture list order, the
+device-policy descriptions of the two signed-only keys, Fabric's com.list and com.get tool texts under CT-81, a check
+that one check-in carries one result per repair id, org-cloud repairs still refused by the earlier clauses, an SR-5a
+tombstone vector, harnessBaseline's dead default branch, and an unreadable `at` named as `bad-signature`.
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
@@ -133,8 +142,8 @@ replaced".
 
 `pnpm run check` exit 0: typecheck, 94 test files with 7 967 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
-list for `FAC-SEM-128`; both fixed. Ten rounds of blind readings ran on this branch after the first on the merged range (second to eleventh; seam and product in
-each, the unit tier in eight of them, the last five at 5ceafc02, 944d039f, cc56eb67, 2e089699 and 19dc80d5); the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
+list for `FAC-SEM-128`; both fixed. Twelve rounds of blind readings ran on this branch after the first on the merged range (second to thirteenth; seam and product in
+each, the unit tier in ten of them); the twelfth and thirteenth, both at 4bc8d1a0, passed at every tier, which is the merge condition; the PR merges after two consecutive clean rounds. `pnpm vectors:check` exit 0, 14 vector files match their
 generators.
 
 ## Next task
