@@ -360,12 +360,12 @@ or takes `--schema`; runs the schema and then the semantic rules; and prints one
 rule and a link to the rule.
 
 A folder's documents are checked as pairs: a descriptor with its well-known document, a descriptor with the manifest
-its `fabricManifest` names, and a provider entry with its manifest. The manifest is looked for in the folder first,
-because that is the file you are editing: a file with the named file name in a folder named after the owner
-(`<id>/`, `<id>.<instance>/`) or at the folder's top, else the folder's only manifest; only when the folder holds
-none is the installed file at the named path read. A note names the file read whenever it is not the one at the named
-path. A descriptor whose named manifest is found nowhere fails (FAC-SEM-020); an entry's is a note. A file checked on
-its own is checked without its pairs.
+its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read, and when it is
+an installed copy outside the folder a note names it, so a stale install is visible rather than silently checked.
+Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder named after
+the owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the folder's only manifest, never one in a
+folder named after another owner, and a note says which file was read. A descriptor whose named manifest is found
+nowhere fails (FAC-SEM-020); an entry's is a note. A file checked on its own is checked without its pairs.
 
 In a folder, a file the checker cannot tell (a JSON Schema, a test fixture, a probe receipt, a file named like a
 service key that carries no descriptor member) is noted and skipped, and `--schema` checks it; a file that does not

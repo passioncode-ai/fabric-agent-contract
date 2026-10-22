@@ -91,8 +91,6 @@ export function inferSchema(value: unknown, file: string): string | undefined {
     const chosen = complete.filter((schema) => schema.required.length === best);
     if (chosen.length === 1) return (chosen[0] as Discriminated).file;
   }
-  // A provider entry is told by its own members wherever it is saved (the guide saves it as <id>.json).
-  if (isObject(value) && Object.hasOwn(value, "providerId") && (Object.hasOwn(value, "run") || Object.hasOwn(value, "manifest"))) return "provider.schema.json";
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
   // A file by the lock's name that carries neither member of a pin is some other tool's lock.
@@ -101,6 +99,9 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   // A `$schema` that names a JSON Schema dialect marks a schema; one that names a contract schema is an editor's hint
   // on a contract document, which the name rules below still read.
   if (name.endsWith(".schema.json") || isJsonSchema(value)) return undefined;
+  // A provider entry is told by its own members wherever it is saved (the guide saves it as <id>.json): its provider id,
+  // and the manifest path it names or the run it declares.
+  if (isObject(value) && typeof value.providerId === "string" && (typeof value.manifest === "string" || isObject(value.run))) return "provider.schema.json";
   // A name alone is weak evidence (`tsconfig.build.json`, `reports.query.json` look like a service key), so the two
   // weaker name rules take a document only when it carries a member that document kind has.
   if (path.basename(path.dirname(file)) === "providers" && carries(value, PROVIDER_MEMBERS)) return "provider.schema.json";
@@ -124,7 +125,7 @@ function isJsonSchema(value: unknown): boolean {
   return typeof value.$id === "string" && (Object.hasOwn(value, "type") || Object.hasOwn(value, "properties"));
 }
 
-const CONTRACT_SHAPE = { protocol: /^[a-z][a-z0-9-]*\/[0-9]+(\.[0-9]+)*$/, contractVersion: /^[0-9]+\.[0-9]+\.[0-9]+$/ } as const;
+const CONTRACT_SHAPE = { protocol: /^fabric-[a-z0-9-]+\/[0-9]+(\.[0-9]+)*$/, contractVersion: /^[0-9]+\.[0-9]+\.[0-9]+$/ } as const;
 
 /** A discriminator member the document carries with a value no schema of this checkout holds, with the values it knows. */
 function unknownDiscriminator(value: unknown): { member: string; value: unknown; known: unknown[] } | undefined {
@@ -318,7 +319,8 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   return { file, relative, value, schema };
 }
 
-const expand = (local: string) => (local.startsWith("~/") ? path.join(homedir(), local.slice(2)) : local);
+/** `~/` and `~\\` (a Windows local path, DEC-0032) are the home folder. */
+const expand = (local: string) => (/^~[\\/]/.test(local) ? path.join(homedir(), local.slice(2)) : local);
 /** A document value as text, never a throw: a member may be any JSON, an object whose `toString` is data included. */
 const show = (value: unknown) => (typeof value === "string" ? value : value === undefined ? "(none)" : JSON.stringify(value));
 const serviceKey = (value: JsonObject) => `${show(value.id)}.${show(value.instance ?? "default")}`;
@@ -329,29 +331,30 @@ function readJson(file: string): unknown {
 }
 
 /**
- * The manifest a descriptor or an entry names, as the author's folder holds it. The folder copy wins over an installed
- * one, because it is the file being edited: a manifest with the named file name at the folder's top or in a folder named
- * after the owner (`<id>/`, `<id>.<instance>/`), else the folder's only manifest. With none, the installed file at the
- * named path is read. Whenever the file read is not the one at the named path, a note says which was read.
+ * The manifest a descriptor or an entry names. A file at the named path is read: installed, or the folder's own copy
+ * at that path. With nothing there (checked before it is installed), the folder's copy stands in: a manifest with the
+ * named file name in a folder named after this owner (`<id>/`, `<id>.<instance>/`), else at the folder's top, else the
+ * folder's only manifest, never one in a folder named after another owner. A note names the file read whenever it is
+ * not a copy inside the folder at the named path. `located` is false when no file stands for the manifest.
  */
-function pairedManifest(run: Run, item: Checked, named: string, manifests: readonly Checked[], owners: readonly string[], at: string, rule: string): unknown {
+function pairedManifest(run: Run, item: Checked, named: string, manifests: readonly Checked[], owners: readonly string[], others: ReadonlySet<string>, at: string, rule: string): { located: boolean; value: unknown } {
   const installed = expand(named);
-  const base = path.basename(installed);
-  const named_ = (where: (folder: string) => boolean) => manifests.find((candidate) => path.basename(candidate.relative) === base && where(path.dirname(candidate.relative)));
-  const inFolder = manifests.find((candidate) => path.resolve(candidate.file) === path.resolve(installed))
-    ?? named_((folder) => owners.includes(path.basename(folder)))
-    ?? named_((folder) => folder === ".")
-    ?? (manifests.length === 1 ? manifests[0] : undefined);
-  const exists = existsSync(installed);
-  if (inFolder !== undefined) {
-    if (path.resolve(inFolder.file) !== path.resolve(installed)) {
-      run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the folder's ${inFolder.relative} is read as the manifest ${named} names${exists ? `, not the installed copy at ${installed}` : ", which is not installed yet"} (${rule})` });
-    }
-    return inFolder.value;
+  const atPath = manifests.find((candidate) => path.resolve(candidate.file) === path.resolve(installed));
+  if (atPath !== undefined) return { located: true, value: atPath.value };
+  if (existsSync(installed)) {
+    const value = readJson(installed);
+    run.notes.push({ file: item.file, path: at, rule: "note/pair", message: value === undefined ? `the installed ${installed} does not parse as JSON (${rule})` : `the installed ${installed} is read as the manifest; the folder's copies are not paired (${rule})` });
+    return { located: true, value };
   }
-  if (!exists) return undefined;
-  run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `no manifest in the folder is ${base}, so the installed ${installed} is read (${rule})` });
-  return readJson(installed);
+  const base = installed.split(/[\\/]/).pop() as string;
+  const folderOf = (candidate: Checked) => path.basename(path.dirname(candidate.relative));
+  const named_ = (where: (candidate: Checked) => boolean) => manifests.find((candidate) => path.basename(candidate.relative) === base && where(candidate));
+  const standIn = named_((candidate) => owners.includes(folderOf(candidate)))
+    ?? named_((candidate) => path.dirname(candidate.relative) === ".")
+    ?? (manifests.length === 1 && !others.has(folderOf(manifests[0] as Checked)) ? manifests[0] : undefined);
+  if (standIn === undefined) return { located: false, value: undefined };
+  run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `${named} is not installed yet, so the folder's ${standIn.relative} is read as the manifest it names (${rule})` });
+  return { located: true, value: standIn.value };
 }
 
 /** The folder's pairs: services with their well-known documents and manifests, providers with theirs. */
@@ -370,20 +373,29 @@ function checkPairs(run: Run, checked: Checked[]): void {
     else if (descriptors.length > 0) run.notes.push({ file: known.file, path: "/service", rule: "note/pair", message: `no descriptor in the folder is ${serviceKey(answered)} or named ${stem(known.file).replace(/\.well-known$/, "")}.json, so this document is not checked against one (FAC-SEM-009); name it <id>.<instance>.well-known.json` });
   }
   if (descriptors.length > 1) addFindings(run, path.dirname(descriptors[0]?.file as string), evaluateSemanticRules("service-directory", { descriptors: descriptors.map((item) => item.value) }));
+  // Every owner the folder holds, so a manifest in another owner's folder never stands in for this one's.
+  const entriesHere = of("provider.schema.json");
+  const allOwners = new Set([...descriptors.flatMap((item) => { const value = item.value as JsonObject; return [show(value.id), `${show(value.id)}.${show(value.instance ?? "default")}`]; }), ...entriesHere.map((item) => show((item.value as JsonObject).id))]);
   for (const item of descriptors) {
     const value = item.value as JsonObject;
     const named = value.fabricManifest;
     if (typeof named !== "string") continue;
-    const owners = [show(value.id), `${show(value.id)}.${show(value.instance)}`];
-    const manifest = pairedManifest(run, item, named, manifests, owners, "/fabricManifest", "the descriptor's pair rule, FAC-SEM-020 in the register");
+    const owners = [show(value.id), `${show(value.id)}.${show(value.instance ?? "default")}`];
+    const others = new Set([...allOwners].filter((owner) => !owners.includes(owner)));
+    const { value: manifest } = pairedManifest(run, item, named, manifests, owners, others, "/fabricManifest", "the descriptor's pair rule, FAC-SEM-020 in the register");
     addFindings(run, item.file, evaluateSemanticRules("service-manifest", { descriptor: item.value, manifest }));
   }
-  const entries = of("provider.schema.json");
+  const entries = entriesHere;
   for (const item of entries) {
     const entry = item.value as JsonObject;
-    if (typeof entry.manifest !== "string") {
-      // With no manifest named, the folder's one manifest, or the one in a folder named after the entry, is its pair.
-      const own = manifests.find((candidate) => path.basename(candidate.relative) === "fabric-agent.json" && path.basename(path.dirname(candidate.relative)) === entry.id) ?? (manifests.length === 1 ? manifests[0] : undefined);
+    // A manifest member that is not a string is the schema's error; there is nothing to pair.
+    if (entry.manifest !== undefined && typeof entry.manifest !== "string") continue;
+    const owners = [show(entry.id)];
+    const others = new Set([...allOwners].filter((owner) => !owners.includes(owner)));
+    if (entry.manifest === undefined) {
+      // With no manifest named, the manifest in a folder named after the entry, or the folder's only one, is its pair.
+      const own = manifests.find((candidate) => path.basename(candidate.relative) === "fabric-agent.json" && path.basename(path.dirname(candidate.relative)) === entry.id)
+        ?? (manifests.length === 1 && !others.has(path.basename(path.dirname((manifests[0] as Checked).relative))) ? manifests[0] : undefined);
       if (own === undefined) {
         run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: "the entry names no manifest, so the entry is not checked against it (FAC-SEM-014)" });
         continue;
@@ -392,11 +404,12 @@ function checkPairs(run: Run, checked: Checked[]): void {
       addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest: own.value }));
       continue;
     }
-    const manifest = pairedManifest(run, item, entry.manifest, manifests, [show(entry.id)], "/manifest", "the entry's pair rule, FAC-SEM-014 in the register");
-    if (manifest === undefined) {
+    const { located, value: manifest } = pairedManifest(run, item, entry.manifest, manifests, owners, others, "/manifest", "the entry's pair rule, FAC-SEM-014 in the register");
+    if (!located) {
       run.notes.push({ file: item.file, path: "/manifest", rule: "note/pair", message: `the manifest ${entry.manifest} was not found, so the entry is not checked against it (FAC-SEM-014)` });
       continue;
     }
+    // A located manifest that does not parse goes to the rule as it is: it does not resolve to a provider manifest.
     addFindings(run, item.file, evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }
   if (entries.length > 0) addFindings(run, path.dirname(entries[0]?.file as string), evaluateSemanticRules("provider-directory", { services: descriptors.map((item) => item.value), providers: entries.map((item) => item.value) }));
