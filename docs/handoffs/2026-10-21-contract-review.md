@@ -50,7 +50,7 @@ every finding outside the REQs is in [`carry-over.md`](../evidence/specs/2026-10
 
 ## Checks actually run
 
-`pnpm run check` on the merged head: typecheck, 7 732 tests with coverage, UX lint, docs check, markdownlint, privacy
+`pnpm run check` on the merged head (`05b19d9`, merged as `ec21af7`): typecheck, 7 732 tests with coverage, UX lint, docs check, markdownlint, privacy
 check (0 findings), exit 0. Six rounds of three blind readings (unit in a worktree of its own, seam and product by
 `git show` and a shared read-only worktree); each round's breaks were fixed before the next, and what blocked nothing
 went to CT-78 and CT-80. The checker was run on the consumer folders of this machine: the installed services folder
