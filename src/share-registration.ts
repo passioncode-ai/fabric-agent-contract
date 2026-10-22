@@ -292,7 +292,7 @@ const MESSAGES: Readonly<Record<string, string>> = {
   "agent-mismatch": "this grant is held for another agentRef",
   "stale-revision": "a higher revision of this grant is held",
   "revision-conflict": "this revision of the grant is held with other bytes",
-  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
 };
 
 const refuse = (status: 400 | 403 | 409, code: string): ShareRegistrationAnswer => ({ status, body: { error: { code, message: MESSAGES[code] as string } } });
@@ -314,8 +314,9 @@ const receipt = (held: HeldShareRegistration, state: ShareRegistrationReceipt["s
  * - SR-3: not the schema's shape or `FAC-SEM-118`'s clauses: 400 `malformed`;
  * - SR-4: `context` is not `org:` and the certificate's `org.id` as written: 403 `wrong-organization`;
  * - SR-5: no user bound to the epoch: 403 `unassigned-device`;
- * - SR-5a (DEC-0100): `binding.purposeAdmitted` is false, the bound user's acknowledged notice does not name the
- *   purposes a share registration serves: 403 `purpose-not-collected`;
+ * - SR-5a (DEC-0100): an active registration while `binding.purposeAdmitted` is false, the bound user's acknowledged
+ *   notice does not name the purposes a share registration serves: 403 `purpose-not-collected` (a withdrawal passes,
+ *   DEC-0102);
  * - SR-6…SR-9: an active registration over what is held for (user, grantId): withdrawn, 409 `already-withdrawn`;
  *   another `agentRef`, `agent-mismatch`; a lower `grantRevision`, `stale-revision`; the same revision with another
  *   digest, `revision-conflict`;
@@ -344,7 +345,8 @@ export function decideShareRegistration(held: unknown, registration: unknown, bi
   if (user === undefined) return refuse(403, "unassigned-device");
   // SR-5a (DEC-0100): the receiver's own fact that the bound user's acknowledged notice does not name the purposes a
   // share registration serves (agent calls, usage and cost). The node holds the sums and sends again after the notice.
-  if (own(binding, "purposeAdmitted") === false) return refuse(403, "purpose-not-collected");
+  // DEC-0102: a withdrawal reduces processing and is never held back by SR-5a.
+  if (own(binding, "purposeAdmitted") === false && registration.state === "active") return refuse(403, "purpose-not-collected");
 
   const digest = shareRegistrationDigest(registration) as string;
   const grantId = registration.grantId as string;
@@ -435,7 +437,8 @@ const DEGRADED_AFTER: ReadonlyMap<string, number> = new Map([
  *   `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or
  *   `schema-unsupported`): the node keeps the sums, reports itself degraded and sends again only when the record changes;
  * - `hold-notice` (DEC-0100): 403 `purpose-not-collected`: the node keeps the sums, is not degraded, and sends the
- *   registration again when its policy names a later `noticeVersion`, and at the seven-day resend;
+ *   registration again when its policy names a later `noticeVersion` or a check-in response a new
+ *   `acknowledgedNoticeVersion` (DEC-0102), and at the seven-day resend;
  * - `hold`: no answer yet, a transport refusal (401), a receiver's fault, a code whose status is not its own, or anything
  *   else: the node keeps the sums and sends the registration again with backoff.
  *

@@ -84,7 +84,7 @@ window at L3, not a grant limit (DEC-0041).
 organization server's opaque id (`common.schema.json#/$defs/contextId`), compared as written. A grant names the context
 its principal uses it in, never `personal` for an external one; an agent is placed on a machine once per context, an
 organization's instance under its own share grant; no event carries its session's context and no check-in carries a
-context: a device sends each enrollment's check-ins to that enrollment's server, a collector sends a session's events
+context but a node summary's own `org:<org.id>` (DEC-0102): a device sends each enrollment's check-ins to that enrollment's server, a collector sends a session's events
 only to its context's organization, and a grant's usage reaches the grant's organization as a daily `grant.usage`
 event, which carries the grant's own `org:<orgId>` (DEC-0086) ([contexts](docs/specification/contexts.md), DEC-0082).
 
@@ -150,7 +150,8 @@ Task Scheduler — or Project Observatory's node for the services it starts as i
 
 **Peer (a service offered to others)**: A service a colleague, an organization's members or a guest may call beside
 its operator — a listing. Its descriptor's `peer` names the `endpoint` they reach, the `custody` of the machine or
-account (organization-managed or personal), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
+account (organization-managed, personal, or processor-hosted for a machine a processor runs for an organization,
+DEC-0099), the `residency` (ISO 3166-1 alpha-2 codes) and the `maxDataClass` (public,
 internal, confidential, restricted) a host never sends above. It grants nobody access (DEC-0061).
 
 **Credential kind**: The kind of a runner's sign-in, never its value: `subscription` (the operator's own vendor login,
@@ -176,7 +177,9 @@ a Project: that hides it from discovery only, and it stays addressable by id
 ([project communication](docs/specification/project-comms.md#project-directory), DEC-0073).
 
 **Board receipt**: The one answer of every successful board mutation (`comms-receipt.schema.json`): `ok`,
-`repeated`, and the message, request, slot or attempt the call touched; never a sequence number (DEC-0073).
+`repeated`, and the message, request, slot or attempt the call touched; for a bulk read mark `marked`,
+`alreadyRead` and `more`, and for the requester's request nobody can answer now `noResponder` (DEC-0098); never a
+sequence number (DEC-0073).
 
 **Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
@@ -221,7 +224,8 @@ terminates TLS still proves the device's key; its `keyid` is the certificate's s
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **Collection start**: When a device starts collecting for the organization: the notice's acknowledgement, or under
-device management the earlier of that and the policy's deadline. Nothing that occurred before it is uploaded
+device management the earlier of that and the policy's deadline; the first acknowledgement, never moved by a later
+notice's (DEC-0102). Nothing that occurred before it is uploaded
 (`FAC-SEM-068`, DEC-0053).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than

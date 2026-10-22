@@ -153,16 +153,20 @@ describe("FAC-SEM-044: the certificate is what was enrolled", () => {
     expect(at("other-key")).toEqual(["FAC-SEM-044 /request/key/publicKeySha256", "FAC-SEM-044 /request/device/id"]);
     expect(at("new-user")).toEqual(["FAC-SEM-044 /response/certificate/binding/user"]);
     expect(at("unknown-device")).toEqual(["FAC-SEM-044 /request/auth/method"]);
-    // The 30th day is inside the grace, the instant after it is not.
-    const day30 = { ...fixture, request: { ...fixture.request, requestedAt: "2026-11-06T08:30:00Z" } };
-    expect(codes("device-enrollment", day30)).toEqual([]);
-    expect(codes("device-enrollment", { ...fixture, request: { ...fixture.request, requestedAt: "2026-11-06T08:30:01Z" } })).toEqual(["FAC-SEM-044"]);
+    // DEC-0102: the server's clock judges the grace, the new certificate's notBefore; the 30th day is inside, the instant
+    // after it is not, and the device's own requestedAt moves nothing.
+    const issued = (notBefore: string, notAfter: string) => ({ ...fixture, response: { ...fixture.response, certificate: { ...fixture.response.certificate, notBefore, notAfter } } });
+    expect(codes("device-enrollment", issued("2026-11-06T08:30:00Z", "2026-11-13T08:30:00Z"))).toEqual([]);
+    expect(codes("device-enrollment", issued("2026-11-06T08:30:01Z", "2026-11-13T08:30:01Z"))).toEqual(["FAC-SEM-044"]);
+    expect(codes("device-enrollment", { ...issued("2027-02-01T00:00:00Z", "2027-02-08T00:00:00Z"), request: { ...fixture.request, requestedAt: "2026-10-27T08:30:00Z" } })).toEqual(["FAC-SEM-044"]);
+    // Before the last certificate's end the same request is taken: a re-enrollment by the key on record.
+    expect(codes("device-enrollment", issued("2026-10-06T08:30:00Z", "2026-10-13T08:30:00Z"))).toEqual([]);
     // No key in the request, an unreadable end, a role kept and a role changed, a user dropped.
     const { key: _key, ...keyless } = fixture.request;
     expect(paths("device-enrollment", { ...fixture, request: keyless })).toContain("FAC-SEM-044 /request/key/publicKeySha256");
     expect(paths("device-enrollment", { ...fixture, enrolled: { ...fixture.enrolled, notAfter: "not a time" } })).toEqual(["FAC-SEM-044 /request/auth/method"]);
-    const { requestedAt: _at, ...timeless } = fixture.request;
-    expect(paths("device-enrollment", { ...fixture, request: timeless })).toEqual(["FAC-SEM-044 /request/auth/method"]);
+    const { notBefore: _nb, ...unissued } = fixture.response.certificate;
+    expect(paths("device-enrollment", { ...fixture, response: { ...fixture.response, certificate: unissued } })).toContain("FAC-SEM-044 /request/auth/method");
     const cloud = { ...fixture, enrolled: { keySha256: fixture.enrolled.keySha256, notAfter: fixture.enrolled.notAfter, role: "org-cloud" }, token: { tokenId: "none" } };
     const cloudBinding = { org: { id: "org-7f3a" }, role: "org-cloud", device: { id: "dev-01j9a" } };
     const withBinding = (binding: unknown) => ({ ...cloud, response: { ...fixture.response, certificate: { ...fixture.response.certificate, binding } } });

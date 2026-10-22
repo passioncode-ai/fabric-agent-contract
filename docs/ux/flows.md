@@ -178,7 +178,7 @@ flowchart TD
 - **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally
 - **Entry points:** a policy in a check-in response; a local settings change
 - **Success exit:** effective settings shown with the layer each came from and its lock
-- **Task analysis:** verify signature and revision → resolve lock, then the user's value, then the highest default → show each key's source → refuse a local change to a locked key.
+- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → show each key's source → refuse a local change to a locked key.
 - **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
 - **Flow:**
 
@@ -389,7 +389,7 @@ flowchart TD
 - **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
 - **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
 - **Entry points:** a request submitted to a Project's capability on the board
-- **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner
+- **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner, or `answered` when the target's participant replied to it while it was queued, or while it was claimed and it returned to queued (DEC-0098, DEC-0102)
 - **Task analysis:** an agent submits a request → a responder claims and accepts it → it begins the effect → it completes with an observed result, or the result is lost → the operator reads the state in the thread.
 - **Rejected shape:** inferring completion from a delivery, a read mark or a live process — rejected because request state and effect state are separate facts (project comms, Request lifecycle).
 - **Flow:**
@@ -404,9 +404,12 @@ flowchart TD
   U -->|observed reconciliation| D
   U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
   Q -->|deadline before accept| X[Expired]
+  Q -->|the target's participant replies to it| N[Answered]
+  C -->|responder replaced| Q
+  N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired.
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered.
 
 ### FLW-17: A second copy of a service starts while one runs
 

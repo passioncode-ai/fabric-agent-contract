@@ -306,7 +306,9 @@ const PLANTS: Array<{ schema: string; killer: string; fixtures?: string } & Muta
   { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-adapted-without-ref", name: "adapted without a ref", mutate: (s) => { common(s).reaction.allOf[0].then.required = []; } },
   { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-unknown-type", name: "reaction any type", mutate: (s) => { common(s).reaction.properties.type = { type: "string" }; } },
   { schema: SUBMIT, killer: "comms-submit-reaction-on-message", name: "reaction on any kind", mutate: (s) => { s.allOf = (s.allOf as Record<string, any>[]).filter((branch) => !(branch.if?.properties?.kind?.const === "reply" && branch.else)); } },
-  { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-unknown-code", name: "code any string", mutate: (s) => { s.properties.code = { type: "string" }; } }
+  { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-unknown-code", name: "code any string", mutate: (s) => { s.properties.code = { type: "string" }; } },
+  { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-not-retryable", name: "retryable any boolean", mutate: (s) => { s.properties.retryable = { type: "boolean" }; } },
+  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-empty", name: "an empty list of messages", mutate: (s) => { s.oneOf[1].properties.messages.minItems = 0; } }
 ];
 
 describe("every refusal of DEC-0073 and its amendments (DEC-0078, DEC-0079, DEC-0080) is killed by its fixture", () => {

@@ -185,7 +185,7 @@
           "$ref": "common.schema.json#/$defs/capabilityName"
         },
         "message": {
-          "description": "One sentence a person reads.",
+          "description": "For a person: at most 300 characters.",
           "type": "string",
           "minLength": 1,
           "maxLength": 300

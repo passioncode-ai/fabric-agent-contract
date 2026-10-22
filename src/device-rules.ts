@@ -56,17 +56,23 @@ export const POLICY_DEFAULTS: Readonly<Record<string, unknown>> = {
   "models.personal_key_sharing": "forbidden"
 };
 
+/** Policy keys a `user` layer never sets (DEC-0102). */
+export const SIGNED_ONLY_KEYS: readonly string[] = ["harness.baseline", "repair.packages"];
+
 /**
  * The effective value of every key across policy layers (DEC-0031): a key locked by any layer takes the
  * value of the highest layer that locks it; otherwise the user's own value; otherwise the highest layer
  * that sets it. Unlocked values above the user layer are defaults; a locked one is never overridden by a
  * lower layer. A key no layer sets takes its `POLICY_DEFAULTS` value, and `machine.mode` A counts only from
  * an mdm layer — a server or user layer cannot hand the whole machine to the organization (DEC-0053).
+ * `harness.baseline` and `repair.packages` count only from a signed layer: a person's own layer never sets
+ * what the organization expects or may repair (DEC-0102).
  */
 export function resolvePolicy(layers: readonly JsonObject[]): Record<string, EffectiveSetting> {
   const ordered = POLICY_PRECEDENCE.map((source) => layers.find((layer) => layer.source === source)).filter((layer): layer is JsonObject => layer !== undefined);
   const keysOf = (layer: JsonObject): JsonObject => {
-    const keys = isObject(layer.keys) ? layer.keys : {};
+    const all = isObject(layer.keys) ? layer.keys : {};
+    const keys = layer.source === "user" ? Object.fromEntries(Object.entries(all).filter(([name]) => !SIGNED_ONLY_KEYS.includes(name))) : all;
     const mode = keys["machine.mode"];
     if (layer.source === "mdm" || !isObject(mode) || mode.value !== "A") return keys;
     const { "machine.mode": _ignored, ...rest } = keys;
@@ -319,7 +325,8 @@ function enrollment(value: JsonObject): Finding[] {
   if (auth.method === "key-on-record") {
     const record = isObject(value.enrolled) ? value.enrolled : undefined;
     const key = isObject(request.key) ? request.key.publicKeySha256 : undefined;
-    const ended = Date.parse(show(record?.notAfter ?? "")), asked = Date.parse(show(request.requestedAt ?? ""));
+    // DEC-0102: the grace is judged by the server's clock, the new certificate's notBefore, never the device's requestedAt.
+    const ended = Date.parse(show(record?.notAfter ?? "")), asked = Date.parse(show(certificate.notBefore ?? ""));
     if (record === undefined) flag("/request/auth/method", "a renewal by the key on record needs a device on record");
     else if (record.revoked === true) flag("/request/auth/method", "a revoked device does not renew; it enrolls again with a token or SSO");
     else if (typeof key !== "string" || key !== record.keySha256) flag("/request/key/publicKeySha256", "a renewal by the key on record needs a CSR from that key");

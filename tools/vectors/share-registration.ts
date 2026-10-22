@@ -180,7 +180,7 @@ const MESSAGES: Record<string, string> = {
   "agent-mismatch": "this grant is held for another agentRef",
   "stale-revision": "a higher revision of this grant is held",
   "revision-conflict": "this revision of the grant is held with other bytes",
-  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes"
+  "purpose-not-collected": "the notice this person acknowledged does not name the purposes a share registration serves; send it again when the notice changes or the person acknowledges it, and at the weekly resend"
 };
 const refused = (status: number, code: string) => ({ status, body: { error: { code, message: MESSAGES[code] } } });
 const unsupported = (protocol: string) => ({ status: 400, body: { error: { code: "schema-unsupported", message: "this receiver does not read that protocol revision", data: { protocol, accepted: [TYPE] } } } });
@@ -258,6 +258,7 @@ function intakeCases(): Json[] {
     ["SR-11: the first registration", [], base, binding(), ok(held, "registered")],
     ["SR-11: a higher revision extends expiresAt", [held], higher, binding(), ok(heldActive(higher), "registered")],
     ["SR-11: a withdrawal of what is held keeps its agent and window", [held], withdrawal, binding(), ok(heldAfterWithdrawal, "withdrawn")],
+    ["SR-5a: a withdrawal passes when the notice does not name the purposes (DEC-0102)", [held], withdrawal, binding({ purposeAdmitted: false }), ok(heldAfterWithdrawal, "withdrawn")],
     ["SR-11: a withdrawal with nothing held is a tombstone", [], withdrawal, binding(), ok(tombstone, "withdrawn")],
     ["SR-11: two registrants with one grant id are two keys", [held], base, binding({ user: { id: OTHER_USER } }), ok(heldActive(base, OTHER_USER), "registered")],
     ["SR-11: another member cannot overwrite: another agent under the same id is that member's own", [held], active(A, { agentRef: NOTES }), binding({ user: { id: OTHER_USER } }), ok(heldActive(active(A, { agentRef: NOTES }), OTHER_USER), "registered")],

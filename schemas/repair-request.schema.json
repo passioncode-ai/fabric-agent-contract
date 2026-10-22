@@ -24,7 +24,7 @@
     },
     "id": {
       "$ref": "activity-common.schema.json#/$defs/opaqueId",
-      "description": "The repair's id; the node answers it once in repair-result/1."
+      "description": "The repair's id; the node runs it at most once and keeps one repair-result/1 for it, repeated unchanged for a redelivered request."
     },
     "device": {
       "type": "object",

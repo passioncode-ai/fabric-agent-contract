@@ -35,7 +35,6 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 | [services](service.md) | `fabric-service/0.1`: the descriptor, the well-known document, events, the usage report, login, lifecycle | adopted by Fabric Dashboards, the Fabric Agent Adapter kits, Project Observatory, Fabric Inbox, the first organization server, Fabric and about a dozen provider agents of the estate |
 | [embedded dashboard](embedded-dashboard.md) | `fabric-dashboard/0.1`: a dashboard inside a host, and its declaration | read by Fabric Dashboards and the Fabric Agent Adapter; Fabric's writer is open (CT-19, CT-21) |
 | [connections](connections.md) | `fabric-connections/0.1`: what an agent uses (DEC-0096) | read by Fabric Dashboards with its own reader, not yet re-pinned to the vectors (CT-70); no emitter yet |
-| [node summary](node-summary.md) | `node-summary/1`, the organization's harness baseline and drift, `repair-request/1` and `repair-result/1` (DEC-0101) | decided; no consumer yet (CT-83) |
 | [Fabric's button and links](fabric-button.md) | Fabric's button in a product and `fabric://` links | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [session handoff](session-handoff.md) | `session-handoff/1`: the folder a host hands a coding-agent session | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [folder attribution](folder-attribution.md) | which Project a coding agent's folder belongs to | adopted by Fabric and Project Observatory |
@@ -56,6 +55,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 
 | Page | Defines | Maturity |
 |---|---|---|
+| [node summary](node-summary.md) | `node-summary/1`, the organization's harness baseline and drift, `repair-request/1` and `repair-result/1` (DEC-0101, DEC-0102) | specified, no consumer yet (CT-83) |
 | [estate record](estate-record.md) | `estate-record/1`: machines, keys, placements and grants, signed by a passkey | adopted by the relay, the Project Observatory node, the first organization server and the Fabric Agent Adapter |
 | [devices](devices.md) | `fabric-device/0.1`: enrollment, policy, check-in, the request signature | adopted by the relay, the Project Observatory node, the first organization server and the Fabric Agent Adapter |
 | [estate ceremonies](ceremonies.md) | creating a network, adding a machine, the enroll token, pairing | adopted by the Fabric Agent Adapter and the Project Observatory node |

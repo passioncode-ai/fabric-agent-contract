@@ -151,9 +151,9 @@
 
 - **Used by:** FLW-07
 - **Purpose:** show each effective policy key, the layer it came from and whether it is locked.
-- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key).
+- **Elements:** key, value, source layer, lock, held revision per layer (primary action: change an unlocked key; `harness.baseline` and `repair.packages` are the organization's signed keys, not the person's to change, DEC-0102; the device's answer to such a change is CT-99).
 - **States:** success — effective settings; error — a change to a locked key refused, or a policy that failed to verify.
-- **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042)
+- **Coverage:** `test/device-rules.test.ts` (FAC-SEM-041, FAC-SEM-042), `test/node-summary.test.ts` (the two signed-only keys)
 - **Scenarios:** SCN-011
 - **Resources:** device-policy schema; devices specification, Policy
 - **Status:** proposed
@@ -250,9 +250,9 @@
 
 - **Used by:** FLW-16
 - **Purpose:** the operator reads one thread between Projects and the state of each request in it.
-- **Elements:** participants fixed at creation, messages with sender Project and principal provenance, each request's state and effect state, and a mark on a request the owner settled (primary action, conditional: on an `outcome_unknown` request of a Project the operator owns whose slot no responder holds, "Settle" with a summary of what they observed; otherwise none, and responders act through the board's operations).
-- **States:** success — a request completed with an observed result; unknown — `outcome_unknown` after a lost result; expired — a deadline passed before anyone accepted.
-- **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027, FAC-SEM-109)
+- **Elements:** participants fixed at creation, messages with sender Project and principal provenance, each request's state and effect state, a reply's reaction to an announcement (`adapted`, `row` with its id and day, `not-affected`), the requester's own notice, from its submit receipt and shown to the requester only, that nobody answers its request's capability now (`noResponder`), and a mark on a request the owner settled (primary action, conditional: on an `outcome_unknown` request of a Project the operator owns whose slot no responder holds, "Settle" with a summary of what they observed; otherwise none, and responders act through the board's operations).
+- **States:** success: a request completed with an observed result; unknown: `outcome_unknown` after a lost result; expired: a deadline passed before anyone accepted (a request without its own deadline gets one seven days out); answered: the target's participant replied while it was queued, or while it was claimed and it returned to queued (never a responder's own fenced reply or progress note): not open, never expired, left only by the requester's cancel, and never read as the work done.
+- **Coverage:** `comms-submit.schema.json`, `comms-message.schema.json`, `comms-receipt.schema.json`, `test/comms-rules.test.ts` (FAC-SEM-026, FAC-SEM-027, FAC-SEM-109)
 - **Scenarios:** SCN-025
 - **Resources:** project-comms specification, Request lifecycle
 - **Status:** proposed

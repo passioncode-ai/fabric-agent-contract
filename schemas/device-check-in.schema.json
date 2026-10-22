@@ -335,7 +335,7 @@
               "items": {
                 "$ref": "repair-result.schema.json"
               },
-              "description": "DEC-0101: the node's answers to repairs it received, each once."
+              "description": "DEC-0101, DEC-0102: the node's one result per repair id, the same stored result again for a redelivered request."
             }
           },
           "additionalProperties": false,
@@ -392,6 +392,10 @@
         "collectionStart": {
           "$ref": "common.schema.json#/$defs/timestamp",
           "description": "When this device's collection for the organization started: the notice's acknowledgement, or under device management the earlier of it and the deadline (DEC-0053). Absent: not started. Events that occurred before it are never uploaded."
+        },
+        "acknowledgedNoticeVersion": {
+          "$ref": "activity-common.schema.json#/$defs/noticeVersion",
+          "description": "The latest noticeVersion this device's person acknowledged to the organization (DEC-0102), on every response once there is one. Absent: none yet. A collector held by a purpose rejection resumes when a present value differs from what it held at the rejection, absence included; a value that becomes absent never resumes."
         },
         "keySet": {
           "$ref": "device-key-set.schema.json"

@@ -79,14 +79,18 @@ enrollment of a machine gets keys of its own (the operator's NET-2); the contrac
      token. The certificate binds a `user.id` only when the token names the person the device is
      assigned to, and then that person (`FAC-SEM-044`). Otherwise the device is enrolled unassigned
      until an SSO sign-in re-enrolls it. **An organization's cloud machine** (its `org-cloud` or `enterprise-cloud`
-     hosting, a VM the organization owns and no person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
+     hosting: a VM run for the organization, on PassionCode's hosting as `processor-hosted` or on its own, that no
+     person uses) enrolls with a token of role `org-cloud` (DEC-0099): its
      certificate's binding says `role: "org-cloud"` and binds no person, so a receiver shows it as the organization's
      cloud and attributes nothing it sends to a member. Only such a token gives the role (and a renewal by the key on
      record keeps it, DEC-0100), and a certificate issued on one always says it (`FAC-SEM-044`). How the server issues and records the token's role is its own.
+   - `key-on-record` (DEC-0100): a device on record renews within 30 days of its last certificate's end, below
+     (*Renewal after a short absence*): the proof is the CSR's own signature by the key
+     on record, and the binding is the one on record.
 
    **The proof — the SSO session or the token's secret — travels in the `Authorization` header,
    never in the body** (the schema refuses any other `auth` field). The server takes the user from
-   the proof, not from the request.
+   the proof, not from the request; for `key-on-record` there is no header proof, and the user and role are the record's.
 3. The server answers an `enrollment-response`:
    - the certificate: `der`, `serial`, `notBefore`, `notAfter`, `issuer`, and the `binding` to
      `org.id`, `device.id` and, when known, `user.id`, or `role: "org-cloud"` and no `user` for an organization's cloud
@@ -145,13 +149,20 @@ collector starts again at seq 1 and reports the policy revisions it holds now, a
 evidence of tampering. Nothing is renewed silently past `notAfter`.
 
 **Renewal after a short absence** (DEC-0100). A device that was offline past its certificate's end (a holiday, a laptop
-left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof, within **30 days** of its last
-certificate's `notAfter`: the CSR is from its key on record, and that CSR's own signature is the proof. The server
+left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof (the CSR is from its key on record, and that CSR's
+own signature is the proof), within **30 days** of its last
+certificate's `notAfter`, judged by the server's clock: the new certificate's `notBefore`, never the device's own
+`requestedAt` (DEC-0102); the rule trusts the server for its own clock and cannot see a server that backdates
+`notBefore`. Before that end the same request is also taken: a re-enrollment by the key on record with a new epoch, unlike a
+rotation, which keeps the epoch; the old certificate ends when the new one is issued, and a node whose certificate is
+still valid rotates instead. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
 A server MAY refuse a renewal by policy (a file-held key, which can be copied, DEC-0094; a device it wants an
-administrator to see again), with its own error.
+administrator to see again), with its own error. A server pinned before DEC-0100 refuses `key-on-record` at its schema;
+the node then enrolls with a token or SSO as before. No `protocols` entry tells either side the other's pin (CT-67), so a
+server issues `role: "org-cloud"` (DEC-0099) only to a node whose product and version it knows reads it (DEC-0102).
 
 <a id="device-keys"></a>
 
@@ -331,7 +342,9 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.credentials` | list of `{credentialRef, provider, credentialKind: "api-org", fingerprint, callers?, quota?, dataClasses}` | The organization's API keys a device may use — never a subscription, a seat or a person's own key (schema). `fingerprint` is `hmac-sha256:` of the key under the organization's salt, so a node recognises the slot that holds it, and so its provenance, without the policy carrying the key. `quota.usd` is a decimal string. |
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
-| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine. `A`: it administers the whole machine — taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`). |
+| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine; it does not narrow what `node-summary/1` reports, the whole harness ([node summary](node-summary.md), DEC-0102). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`). |
+| `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}`: `minVersion` only for a coding agent or a plugin, `digest` only for a skill or a plugin | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
+| `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102). **Absent means no repair runs** (`FAC-SEM-129`). |
 
 Key names are dotted `snake_case` identifiers, so the `models.personalKeySharing` of the organization
 edition's plan is spelled `models.personal_key_sharing` here. **A key no layer sets resolves to a
@@ -375,7 +388,8 @@ execution, and lets no person's key serve someone else ([`expectedDecision`](../
 `collectionStart`: the time the person acknowledged the notice ([activity](activity.md#notice)) or,
 under device management, the earlier of that and the `mdm` layer's `noticeDeadline`
 ([`collectionStart`](../../src/device-rules.ts)). The server states it in the enrollment and check-in
-responses. Without either, nothing is collected. An event that occurred before it is never uploaded,
+responses. It is the first acknowledgement (or the earlier deadline); a later notice's acknowledgement never moves it
+(DEC-0102). Without either, nothing is collected. An event that occurred before it is never uploaded,
 even after it passes: it stays on the device (`FAC-SEM-068`).
 
 **Precedence and locks.** Precedence is `mdm` > `server` > `user`. The effective value of a key is
@@ -387,7 +401,9 @@ even after it passes: it stays on the device (`FAC-SEM-068`).
 
 An unlocked value above the user layer is therefore a default the person may change; a locked one is
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
-key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`).
+key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
+`repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
+(which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99).
 
 <a id="key-sets"></a>
 
@@ -495,7 +511,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
 
 **One enrollment per organization** (DEC-0082). A device enrolled in several organizations holds one enrollment,
 certificate and stream epoch in each. It sends each enrollment's check-ins to that enrollment's own server, on that
-enrollment's interval, reporting only that enrollment's streams; a check-in carries no context, and the organization is
+enrollment's interval, reporting only that enrollment's streams; a check-in carries no context but its `node-summary/1`
+record's own `org:<org.id>` (DEC-0102), and the organization is
 the one its certificate binds ([attribution](#attribution)). A check-in has no session, so no session's context routes
 it. A session's events go where `routeTarget` answers, and a grant's daily usage where `routeGrantUsage` answers
 (`src/context-route.ts`, the shared vectors
@@ -506,11 +523,14 @@ Until a key per context exists (CX-CON-06), the device shows both organizations 
 `records` to each, so the two can link it ([contexts → linkability](contexts.md#linkability)).
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
-device's [`collectionStart`](#collection-start) once it is known, a newer [key set](#key-sets) and a
+device's [`collectionStart`](#collection-start) once it is known, the `noticeVersion` its person last acknowledged
+(`acknowledgedNoticeVersion`, DEC-0102, on every response once there is one, so a collector held by a `purpose`
+rejection learns the acknowledgement), a newer [key set](#key-sets) and a
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
 or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server accepts from the device (DEC-0067's list), so a
 node learns them at check-in; the latest list the node received is the server's current one. The response is a closed
-object, so a server sends it only to a node pinned at or after DEC-0094 or one that ignores unknown members;
+object, so a server sends `protocols` only to a node pinned at or after DEC-0094, and `acknowledgedNoticeVersion` only
+to a node pinned at or after DEC-0102, or to one that ignores unknown members;
 `fabric-device/0.1` carries no in-band sign of a node's pin, so the server knows it from the node's product and version
 (a revision that carries it is board row CT-67).
 
@@ -585,7 +605,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-041"></a>`FAC-SEM-041` | `device-policy-update` | a delivered policy is signed when it is a server policy, verifies under a key of the current set that is valid when the device verifies, stays in its organization and layer, moves its revision forward and is not issued before the held one; a user layer is never delivered |
-| <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer |
+| <a id="fac-sem-042"></a>`FAC-SEM-042` | `device-policy-resolution` | the effective settings are the resolution of the layers: lock first, then the user's value, then the highest default, then the contract's default for an unset key, with one layer per source, no lock in the user layer, and `machine.mode` `A` only from an mdm layer, and `harness.baseline` and `repair.packages` never from a user layer (DEC-0102) |
 | <a id="fac-sem-043"></a>`FAC-SEM-043` | `device-health-observation` | a health state is `tampered` when there is tamper evidence, and is `logging_disabled` or `tampered` when required logging is reported off |
 | <a id="fac-sem-044"></a>`FAC-SEM-044` | `device-enrollment` | re-enrolling a device on record needs a CSR from its key on record or a device-management token for that device; the certificate binds the request's organization and device, the user the sign-in proves for SSO, and for a token enrollment a user only when the token names that person; `role: "org-cloud"` exactly when an `org-cloud` token enrolled it, and then no user (DEC-0099); a renewal by the key on record only for a device on record, not revoked, within 30 days of its last certificate's end, from that key, keeping its user and role (DEC-0100); it lives at most 30 days; each device key is listed as `<device.id>#sig` or `#kem` in its role's algorithm, valid (SEC 1 §3.2.2 for P-256, not small-order for Ed25519) and never in both roles, and listed keys hold exactly one `#sig` and at most one `#kem` (DEC-0056); the stream epoch is above every epoch issued before |
 | <a id="fac-sem-045"></a>`FAC-SEM-045` | `device-attribution` | a batch's or check-in's device is the client certificate's device (or the certificate a verified request signature names, DEC-0056); every event's user is the user bound to its epoch, or absent when that epoch has none; an event of an epoch with no recorded binding is refused; a `grant.usage`'s `data.context` is `org:` and the certificate's `org.id`, as written (DEC-0086) |

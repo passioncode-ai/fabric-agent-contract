@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0102` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0103` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6063,6 +6063,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
+  Annotated (2026-10-22): corrected by DEC-0102, items 9 (the answer transition, the pass over earlier requests, holds, `noResponder.message`).
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
      `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
@@ -6113,6 +6114,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #142). Consumer adoption: board row CT-82.
+  Annotated (2026-10-22): corrected by DEC-0102, items 10 (an `org-cloud` machine derives no share registration) and 11 (compatibility wording).
 - **Decision:**
   1. In [devices](specification/devices.md): a device certificate's binding MAY say `role: "org-cloud"`: the device
      is the organization's own cloud machine (its `org-cloud` or `enterprise-cloud` hosting, entitlement/1), a VM no
@@ -6149,6 +6151,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
+  Annotated (2026-10-22): corrected by DEC-0102, items 6 (the renewal clock), 7 (SR-5a lets a withdrawal pass), 8 (resuming after `purpose`) and 11 (compatibility wording).
 - **Decision:**
   1. In [activity](specification/activity.md): a batch acknowledgement's `rejected[].reason` admits `purpose`: the
      receiver does not collect that event for that person under the notice they acknowledged. It is consumed like every
@@ -6192,6 +6195,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #144). Consumer adoption: board row CT-83.
+  Annotated (2026-10-22): corrected by DEC-0102, items 1 to 5 (the summary's context, its reach, names, drift per kind, the repair decision).
 - **Decision:** in [node summary](specification/node-summary.md):
   1. **`node-summary/1`** (`schemas/node-summary.schema.json`), a check-in record (`records.nodeSummary`) for one
      context: the coding agents by catalogue id (DEC-0093), the MCP servers with source, transport and health, the
@@ -6229,3 +6233,117 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-22-node-summary.md`.
 - **Source:** the first organization server's items 7 and 8 (thread `ba63565c`, message `1503e2aa`); DEC-0101,
   `SEM-0128` and `SEM-0129` reserved by git CAS (keys `ct83-node-summary-20261022`, `-a`, `-b`).
+
+### DEC-0102: The readings of DEC-0098 to DEC-0101 corrected: a summary's context and reach, a repair's key, expiry, allowlist and repeat, the renewal clock, a withdrawal under SR-5a, resuming after `purpose`
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of PR #145). Annotates DEC-0098 to DEC-0101; their bodies are not
+  rewritten. Consumer adoption: the rows of the decisions it corrects (CT-81, CT-82, CT-83, CT-88).
+- **Decision:**
+  1. **A node summary's context** is `orgContextId`: its enrollment's own `org:<org.id>`, compared as written with the
+     certificate and refused when it differs (`FAC-SEM-128`); contexts.md's "no check-in carries a context" names it as
+     an exception beside `grant.usage` and the share registration.
+  2. **Its reach:** the whole harness of the machine, whatever `machine.mode` says, as the operator decided (S8; the first
+     organization server's ADR-0011); the services of the summary's own context only. Whether an organization also sees
+     a person's services in other contexts, and the harness item names installed for another context, collides with
+     unlinkable memberships (DEC-0082) and is the operator's question, CT-92; until it is answered the whole harness
+     ships, as ADR-0011 says. (A first draft of this decision narrowed the harness under mode `C`; the second seam reading found
+     it against ADR-0011, and it was withdrawn before merge.)
+  3. **A harness name** carries at most one `@` suffix without a dot (a plugin's marketplace), so it can carry no e-mail
+     address with a dotted domain; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
+     duplicate), so `pnpm validate` and the positive sweep check it.
+  4. **`harnessDrift`** compares a digest only for a skill or a plugin and a version only for a coding agent or a
+     plugin, the kinds whose rows carry them; the `harness.baseline` schema admits `minVersion` and `digest` only there,
+     and its names take the summary's name shape, so no baseline names what no summary can report.
+  5. **`repairDecision`:** the key is judged inside its `notBefore` and `notAfter` at that moment, as `FAC-SEM-041`
+     judges a policy's; the policy's expiry is exactly `FAC-SEM-068`'s (no `expiresAt`, no expiry); `repair.packages`,
+     like `harness.baseline`, is read from the `mdm` and `server` layers only, never a person's `user` layer
+     (`signedPolicyValue`, `harnessBaseline`); a repair `id` runs at most
+     once (`already-answered`, checked first and never sent as a result's reason), and its one result is sent again
+     unchanged for a redelivered request; an id is the issuing organization's (a node keeps results by `org.id` and
+     id, and a server asks again only under a new id); a request with no canonical form is refused `bad-signature`, never thrown; on a machine
+     with role `org-cloud` the organization's signed request is the notice, and a result's `notifiedAt` is when the
+     node verified it; `FAC-SEM-129` holds the reason exactly.
+  6. **Renewal by the key on record** is judged by the server's clock (the new certificate's `notBefore`), never the
+     device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
+     with a new epoch (a rotation keeps the epoch).
+  7. **SR-5a** refuses only an active registration: a withdrawal passes, because it reduces processing.
+  8. **After a `purpose` rejection** a collector sends that kind for that person again only when the device's policy
+     names a later `noticeVersion`, never on a timer (DEC-0100's refused alternative stands, and so does the first
+     organization server's ask: not until the notice changes), or when a check-in response's new member
+     `acknowledgedNoticeVersion` (the latest version the device's person acknowledged) differs from the one it held at
+     the rejection, absence at the rejection included (a first acknowledgement is a change: on a managed machine collection
+     starts at the deadline, before any); a value that becomes absent is no signal. The person may acknowledge the notice already in
+     force, which moves no policy. The member is on every check-in response once there is one. A receiver answers
+     `purpose` only when the purpose is not collected for that person when it answers; an event from before its
+     purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where
+     the organization collects under it; a device bound to no person collects only from that deadline, its
+     `collectionStart`), that purpose being collected now, may be kept; when a receiver does not keep it (a buffered
+     event from before that start), it answers the new reason `before-purpose`, never `purpose`, a reason that holds
+     nothing, sent to every collector (a rejection is consumed whatever its reason, as
+     DEC-0100's Compatibility says for `purpose`); the name differs from GJ-4's `before-start`, a stored state of a
+     `grant.usage`. `collectionStart` is
+     no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
+  9. **The board's text:** the answer transition is a participant's message (never a responder's fenced message or
+     progress note) of any kind but a request, from its target Project, whose `replyTo` is the request; a request
+     stored before DEC-0098 has no deadline in its event, and its default (seven days after it was stored) is read from
+     its time, never written; on every pass a board expires each `queued` or `claimed` request whose deadline, its own
+     or that default, has passed, and before that answers each `queued` request its target already answered with such a reply (on
+     every pass: a participant's reply can come while the request is claimed and the request return to `queued`; a
+     replaced responder's notes never answer it, and Fabric's tick, which counts them today, narrows under CT-81); a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
+  10. **An `org-cloud` machine derives no share registrations**: share grants are a person's, and such a machine binds
+     none; its SR-5 `unassigned-device` is final, not a wait. What it reports for usage of agents it runs is CT-93.
+  11. **Compatibility wording of DEC-0099 and DEC-0100:** no revision changed, so neither side can learn the other's pin
+     from `protocols`; the in-band sign is CT-67. Until then a node refused `key-on-record` falls back to a token or
+     SSO, and a server issues `role` only to a node whose product and version it knows read it.
+- **Why:** three blind readings of the range `bfa9a67..4a29fcb` on 2026-10-22 (unit, seam, product) failed it: thirteen
+  breaks (two unit, four seam, seven product; the unit and seam tiers found the repair's policy expiry both), each
+  reproduced, and twelve surviving plants. A second round on this branch found ten more (one unit, one seam, eight
+  product) and a third seven (five product; one seam, the resume trigger missed an acknowledgement of the notice in force; one
+  unit, a baseline could name a coding agent or a service in a shape no summary carries) and a fourth four product
+  (the new member's pin condition, CT-88's wording, the renewal's proof clause, the handoff's counts), all fixed here
+  before merge. A fourth seam reading found one more: a buffered event from before the acknowledgement, rejected
+  `purpose`, held a kind for good; `before-purpose` answers it. A fifth product reading found the answer to an older
+  collector stated three ways; the reason now goes to every collector. A fifth seam reading found that an absent value
+  at the rejection could never resume (the first acknowledgement on a managed machine); absence is now a held value. A sixth
+  product reading found CT-92's widening not carried to its pointers and `before-purpose` covering a managed machine's
+  deadline window; both fixed. An eighth product reading found the expiry of an older request without a deadline
+  stated for its first pass only, and the UX of device settings promising a person's value for the two signed-only
+  keys; both fixed. A ninth product reading found the handoff's round count stale and a repair result
+  called both once and repeated; the result is one per id, repeated unchanged for a redelivered request. A tenth
+  reading found a responder's progress note answering a request after the responder was replaced, the reply rule's old
+  sentence, the UX's answered state, an `org-cloud` result's `notifiedAt` and the check-in schema's "each once"; all
+  fixed. An eleventh product reading found `comms-common`'s `requestState` still giving the old answer rule; fixed,
+  with the code comments on `COMMS_TRANSITIONS`. A sixth seam reading found an `org-cloud` machine with no reason
+  for its buffered event (no person acknowledges); a seventh product reading found the instant first chosen for it
+  defined nowhere, so such a device's start is its mdm deadline (its `collectionStart`) and the rest is CT-97. A fourth
+  unit reading found two per-kind fields without a fixture and `resolvePolicy` (FAC-SEM-042) taking the two
+  signed-only keys from a user layer; both fixed, so FAC-SEM-042 reads them as FAC-SEM-128 and FAC-SEM-129 do.
+  Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
+  for open questions) and is listed above.
+- **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape, a coding agent's an agent id and a service's an `id.instance` key; `minVersion` only
+  for a coding agent or a plugin, `digest` only for a skill or a plugin): a policy written to DEC-0101 that carries
+  another is refused whole and the node keeps the revision it holds. Narrower for a node summary (an organization
+  context only) and
+  for a repair (a key in its window, signed layers, one run per id); a consumer of these surfaces has not adopted yet
+  (CT-83, CT-88). Wider for a check-in response (`acknowledgedNoticeVersion`): the response is a closed object, so a
+  server sends the member only to a node pinned at or after DEC-0102, as DEC-0094 does for `protocols`. Wider for a
+  batch acknowledgement (`before-purpose`), sent to every collector: a rejection is consumed whatever its reason. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `node-summary` (context, name), `device-policy` (`harness.baseline`),
+  `comms-receipt` (`noResponder.message`), `comms-common` (the `requestState` description), `device-check-in` (`acknowledgedNoticeVersion`), `activity-batch-ack`
+  (`before-purpose`); code
+  `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
+  `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;
+  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`, `device-check-in-response-acknowledged`, `activity-batch-ack-before-purpose`; negative `node-summary-personal-context`,
+  `node-summary-dotted-suffix`, `device-policy-baseline-dotted-suffix`, `device-policy-baseline-skill-min-version`,
+  `device-policy-baseline-coding-agent-name`, `device-policy-baseline-service-name`, `device-policy-baseline-coding-agent-digest`,
+  `device-policy-baseline-mcp-server-digest`, `device-policy-baseline-service-min-version`, `node-summary-mcp-dotted-suffix`,
+  `node-summary-skill-two-at`, `node-summary-drift-dotted-suffix`, `repair-result-already-answered`,
+  `device-policy-baseline-mcp-server-min-version`, `device-policy-baseline-service-digest`; positive `repair-result-org-cloud`;
+  `comms-receipt-no-responder-long-message`, `device-check-in-response-acknowledged-bad`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
+  `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
+  docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,
+  `conformance.md`, `docs/specification/README.md`, `CONTEXT.md`, `docs/ux/flows.md`, `screens.md`, `scenarios.md`,
+  `docs/backlog.md`, `docs/evidence/retro.md`, `docs/handoffs/2026-10-22-review-fixes.md`.
+- **Source:** the three readings' reports (2026-10-22, recorded in the handoff); DEC-0102 reserved by git CAS (key
+  `review-fixes-dec98-101-20261022`).

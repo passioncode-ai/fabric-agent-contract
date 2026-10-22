@@ -10,6 +10,7 @@
 - A reference function that answers for a schema is tested against that schema on the same inputs: every output it emits validates, and every input the schema refuses it refuses.
 - A check made stricter than it was (a closed schema, a new refusal) is run first against the consumers' real files on this machine; what they carry is either accepted or recorded as an exception before the change lands.
 - A rule that decides by several signals (which schema a file follows, which manifest a pair reads) is written once as an ordered table in the code's order, with a test per row, before it is changed again.
+- A rule that decides what another rule already decides (an expiry, a key's window) calls that rule, never a copy of its condition; and a decision is read blind before it merges, not after a run of merges.
 
 ## Run stamps
 
@@ -48,6 +49,23 @@
 - `2026-10-21-contract-review`: PR #137 (REQ-01 to REQ-18, no decision); readings until two clean rounds.
 
 ## Recent log
+
+### 2026-10-22: Four decisions in one afternoon, then their readings (DEC-0098 to DEC-0102)
+
+- **Goal:** CT-81, CT-82, CT-88 and CT-83 merged ahead of their dates.
+- **Failed attempt:** each was merged after its gate and its own plants, without the blind readings the plan promised.
+  The three readings of the range found thirteen breaks: two rules that decide one thing disagreed (a repair's policy
+  expiry and `FAC-SEM-068`; a repair's key and `FAC-SEM-041`), a grace judged by the requester's own clock, SR-5a
+  holding back a withdrawal, a context the routing rule forbids, and seven documents left false. Twelve of thirty
+  plants survived, and `repairDecision` threw on a schema-valid request. A second round found ten more (one unit: the
+  baseline's old name shape; one seam: a narrowing against the operator's recorded ADR-0011; eight product), a
+  third seven (five product, one seam, one unit), a fourth five (four product, one seam), a fifth two (one product, one seam),
+  a sixth three (two product, one seam), a fourth unit reading one, a seventh product three, an eighth product two, a
+  ninth product two, a tenth five (four product, one seam) and an eleventh product one, all fixed before the merge.
+- **Verified corrections:** DEC-0102 with a test for each break and each surviving plant; the three readings' reports
+  in the handoff.
+- **Learning:** a rule that restates another rule's condition calls that rule rather than copying it; and the readings
+  run before the merge, not after a run of merges, so a defect does not reach a consumer's pin.
 
 ### 2026-10-22: The iteration's plan (CT-81 to CT-89) and a bare `.` in two guards (DEC-0097)
 

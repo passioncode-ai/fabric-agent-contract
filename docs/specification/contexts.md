@@ -95,13 +95,15 @@ take the context, `personal` when it is not given, so a caller written before DE
 
 ## Routing
 
-**No event carries its session's context, and no check-in carries a context.** An organization server already knows the
+**No event carries its session's context, and no check-in carries a context**, except the records named below. An organization server already knows the
 organization from the device certificate: the certificate binds `org.id`, and a receiver attributes by it, never by the
 body (DEC-0031, `FAC-SEM-045`). A context field would add nothing it does not know, and it could leak `personal` or
 another organization's id to a receiver, which unlinkable memberships forbid (the RM-28 report's CX-22). A `grant.usage`
 and a share registration carry their grant's own `org:<orgId>` (DEC-0086, amending DEC-0082 item 5): the receiver
 compares it with its certificate's `org.id` and refuses it when they differ, so the field adds a check and tells the
-receiver nothing it does not know ([share registration](share-registration.md#the-join)). What a device
+receiver nothing it does not know ([share registration](share-registration.md#the-join)). A check-in's
+`node-summary/1` record carries its enrollment's own `org:<org.id>` the same way: the receiver compares it with the
+certificate's `org.id` as written and refuses it when they differ (DEC-0102, [node summary](node-summary.md)). What a device
 sends, and to which organization server, is decided three ways:
 
 - **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per

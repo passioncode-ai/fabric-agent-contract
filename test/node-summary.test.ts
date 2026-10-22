@@ -3,8 +3,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { policySigningInput } from "../src/device-rules.js";
-import { harnessDrift, repairDecision, versionBelow } from "../src/node-summary.js";
+import { policySigningInput, resolvePolicy } from "../src/device-rules.js";
+import { harnessBaseline, harnessDrift, repairDecision, signedPolicyValue, versionBelow } from "../src/node-summary.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0101: node-summary/1, harnessDrift, and the node's decision on a repair (FAC-SEM-128, FAC-SEM-129).
@@ -14,9 +14,9 @@ const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, valu
 
 describe("node-summary semantic fixtures (FAC-SEM-128)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("node-summary-"));
-  it("has its five fixtures, three refused", () => {
-    expect(files).toHaveLength(5);
-    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(3);
+  it("has its six fixtures, four refused", () => {
+    expect(files).toHaveLength(6);
+    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(4);
   });
   it.each(files)("%s", (name) => {
     const fixture = load(`semantic/${name}`);
@@ -52,6 +52,36 @@ describe("harnessDrift (DEC-0101)", () => {
     expect(harnessDrift("not a list", summary)).toEqual([]);
     expect(harnessDrift(items, null).map((item) => item.state)).toEqual(["missing", "missing", "missing", "missing", "missing"]);
   });
+  it("compares only what a kind carries, and changed comes before outdated (DEC-0102)", () => {
+    const items = [
+      { kind: "mcp-server", name: "fabric", minVersion: "9", digest: `sha256:${"c".repeat(64)}` },
+      { kind: "service", name: "observatory-node.default", minVersion: "9" },
+      { kind: "coding-agent", name: "claude-code", digest: `sha256:${"c".repeat(64)}` },
+      { kind: "plugin", name: "switchboard@passioncode", minVersion: "9", digest: `sha256:${"c".repeat(64)}` }
+    ];
+    expect(harnessDrift(items, summary)).toEqual([{ kind: "plugin", name: "switchboard@passioncode", state: "changed" }]);
+    const unknownState = { ...summary, services: [{ key: "observatory-node.default", state: "unknown" }] };
+    expect(harnessDrift([{ kind: "service", name: "observatory-node.default" }], unknownState)).toEqual([{ kind: "service", name: "observatory-node.default", state: "stopped" }]);
+  });
+
+  it("reads the baseline and the allowlist from signed layers only, with the setting layer's revision (DEC-0102)", () => {
+    const items = [{ kind: "plugin", name: "x" }];
+    const server = { source: "server", revision: 7, keys: { "harness.baseline": { value: { items } }, "repair.packages": { value: [] } } };
+    const user = { source: "user", revision: 1, keys: { "harness.baseline": { value: { items: [] } }, "repair.packages": { value: [{ agentRef: "a", digest: "b" }] } } };
+    expect(harnessBaseline([server, user])).toEqual({ revision: 7, items });
+    expect(harnessBaseline([user])).toBeUndefined();
+    expect(harnessBaseline("no")).toBeUndefined();
+    // mdm over server unless the server locks the key; the drift's revision is the setting layer's.
+    const mdmItems = [{ kind: "skill", name: "y" }];
+    const mdm = { source: "mdm", revision: 3, keys: { "harness.baseline": { value: { items: mdmItems } } } };
+    expect(harnessBaseline([mdm, server])).toEqual({ revision: 3, items: mdmItems });
+    const locked = { ...server, keys: { "harness.baseline": { value: { items }, locked: true } } };
+    expect(harnessBaseline([mdm, locked])).toEqual({ revision: 7, items });
+    const mdmOther = { source: "mdm", revision: 3, keys: { "repair.packages": { value: [] } } };
+    expect(harnessBaseline([mdmOther, server])).toEqual({ revision: 7, items });
+    expect(signedPolicyValue([server, user], "repair.packages")).toEqual([]);
+  });
+
   it("compares versions number by number; a version that is not dotted numbers is outdated", () => {
     expect(versionBelow("2.10.0", "2.9")).toBe(false);
     expect(versionBelow("2.9", "2.10")).toBe(true);
@@ -73,6 +103,45 @@ describe("FAC-SEM-128 beyond the fixtures", () => {
     const { drift: _drift, ...undrifted } = summary;
     expect(codes("node-summary", { summary: undrifted, baseline })).toEqual(["FAC-SEM-128"]);
     expect(codes("node-summary", { summary: "no", baseline: "no" })).toEqual([]);
+    const twice = { ...summary, harness: { ...summary.harness, plugins: [...summary.harness.plugins, summary.harness.plugins[0]] } };
+    expect(evaluateSemanticRules("node-summary", { summary: twice, baseline }).map((finding) => finding.instancePath)).toContain("/summary/harness/plugins/1/name");
+    const person = load("semantic/node-summary-person.json").input;
+    expect(evaluateSemanticRules("node-summary", person).map((finding) => finding.instancePath)).toEqual(["/summary/harness/plugins/1/name"]);
+    // The context is compared as written, and a summary without one is refused.
+    expect(codes("node-summary", { summary: { ...summary, context: "org:ORG-7F3A" }, baseline, org: "org-7f3a" })).toEqual(["FAC-SEM-128"]);
+    const { context: _context, ...contextless } = summary;
+    expect(codes("node-summary", { summary: contextless, baseline, org: "org-7f3a" })).toEqual(["FAC-SEM-128"]);
+    // Depth never throws.
+    let deep: unknown = "x";
+    for (let i = 0; i < 20000; i += 1) deep = [deep];
+    expect(() => evaluateSemanticRules("node-summary-document", { ...summary, harness: { ...summary.harness, hooks: deep } })).not.toThrow();
+    const services = { ...summary, services: [summary.services[0], summary.services[0]] };
+    expect(evaluateSemanticRules("node-summary-document", services).map((finding) => finding.instancePath)).toEqual(["/services/1/key"]);
+    // The summary read whole: the clauses that need no policy (DEC-0102).
+    expect(codes("node-summary-document", load("positive/node-summary.json"))).toEqual([]);
+    expect(codes("node-summary-document", twice)).toEqual(["FAC-SEM-128"]);
+    // Each list's duplicates, a credential anywhere, and a pointer that escapes its member names.
+    const paths = (value: unknown) => evaluateSemanticRules("node-summary-document", value).map((finding) => finding.instancePath);
+    const doubled = (list: "skills" | "mcpServers" | "codingAgents") => ({ ...summary, harness: { ...summary.harness, [list]: [summary.harness[list][0], summary.harness[list][0]] } });
+    expect(paths(doubled("skills"))).toEqual(["/harness/skills/1/name"]);
+    expect(paths(doubled("mcpServers"))).toEqual(["/harness/mcpServers/1/name"]);
+    expect(paths(doubled("codingAgents"))).toEqual(["/harness/codingAgents/1/id"]);
+    const keyed = { ...summary, harness: { ...summary.harness, mcpServers: [{ ...summary.harness.mcpServers[0], name: ["ghp", "0123456789abcdefghijABCDEFGHIJ"].join("_") }] } };
+    expect(paths(keyed)).toEqual(["/harness/mcpServers/0/name"]);
+    expect(paths({ ...summary, "a/b~c": "someone@example.com" })).toEqual(["/a~1b~0c"]);
+  });
+
+  it("never takes the baseline or the allowlist from a user layer, in FAC-SEM-042's resolution too (DEC-0102)", () => {
+    const server = { source: "server", revision: 7, keys: { "repair.packages": { value: [] } } };
+    const user = { source: "user", revision: 1, keys: { "repair.packages": { value: [{ agentRef: "x", digest: "y" }] }, "harness.baseline": { value: { items: [] } }, "x-example.banner": { value: "mine" } } };
+    const resolved = resolvePolicy([server, user]);
+    expect(resolved["repair.packages"]).toEqual({ value: [], from: "server" });
+    expect(resolved["harness.baseline"]).toBeUndefined();
+    expect(resolved["x-example.banner"]).toEqual({ value: "mine", from: "user" });
+  });
+
+  it("a degraded service is running, not stopped", () => {
+    expect(harnessDrift([{ kind: "service", name: "observatory-node.default" }], { ...summary, services: [{ key: "observatory-node.default", state: "degraded" }] })).toEqual([]);
   });
 });
 
@@ -102,6 +171,34 @@ describe("repairDecision (FAC-SEM-129)", () => {
     expect(why({ notifiedAt: undefined })).toBe("person-declined");
     expect(why({ notifiedAt: "2026-10-22T10:00:01Z" })).toBe("person-declined");
     expect(why({ declined: true })).toBe("person-declined");
+    // Boundaries: exactly 7 days, the person told at the very instant, the policy's own expiry instant.
+    expect(why({ request: signed({ ...request, expiresAt: "2026-10-29T09:00:00Z" }) })).toBeUndefined();
+    expect(why({ notifiedAt: base.at })).toBeUndefined();
+    expect(why({ layers: [{ ...layers[0], expiresAt: base.at }] })).toBeUndefined();
+    // The allowlist names the digest too: the same agent at another digest is not allowlisted.
+    expect(why({ layers: [{ ...layers[0], keys: { "repair.packages": { value: [{ agentRef: request.package.agentRef, digest: `sha256:${"c".repeat(64)}` }] } } }] })).toBe("not-allowlisted");
+    // DEC-0102: a key outside its window, a policy with no expiresAt, a user layer, a repeat, no canonical form.
+    expect(why({ keys: [{ ...keys[0], notAfter: "2026-10-01T00:00:00Z" }] })).toBe("bad-signature");
+    expect(why({ keys: [{ ...keys[0], notBefore: "2026-10-23T00:00:00Z" }] })).toBe("bad-signature");
+    const { expiresAt: _never, ...lasting } = layers[0] as (typeof layers)[number];
+    expect(why({ layers: [lasting] })).toBeUndefined();
+    expect(why({ layers: [] })).toBe("not-allowlisted");
+    expect(why({ layers: [{ ...layers[0], keys: {} }, { source: "user", keys: { "repair.packages": { value: (layers[0] as (typeof layers)[number]).keys["repair.packages"].value } } }] })).toBe("not-allowlisted");
+    expect(why({ answered: true })).toBe("already-answered");
+    expect(why({ answered: true, keys: [] })).toBe("already-answered");
+    // The key is judged at `at`, never at the signer's issuedAt (09:00); `at` is 10:00. Its window's own instants admit.
+    expect(why({ keys: [{ ...keys[0], notAfter: "2026-10-22T09:30:00Z" }] })).toBe("bad-signature");
+    expect(why({ keys: [{ ...keys[0], notBefore: "2026-10-22T09:30:00Z" }] })).toBeUndefined();
+    expect(why({ keys: [{ ...keys[0], notAfter: base.at }] })).toBeUndefined();
+    expect(why({ keys: [{ ...keys[0], notBefore: base.at }] })).toBeUndefined();
+    expect(why({ at: "not a time" })).toBe("bad-signature");
+    // An allowlist set only in an mdm layer binds; an org-cloud machine is not stopped by a declined notice.
+    expect(why({ layers: [{ source: "mdm", revision: 1, expiresAt: "2026-10-30T00:00:00Z", keys: { "repair.packages": { value: [{ agentRef: request.package.agentRef, digest: request.package.digest }] } } }] })).toBeUndefined();
+    expect(why({ declined: true, notifiedAt: undefined, device: { ...base.device, role: "org-cloud" } })).toBeUndefined();
+    expect(() => repairDecision({ ...base, request: { ...request, task: "a \ud800 b" } })).not.toThrow();
+    expect(why({ request: { ...request, task: "a \ud800 b" } })).toBe("bad-signature");
+    // DEC-0102: an org-cloud machine binds no person; the organization's signed request is its notice.
+    expect(repairDecision({ ...base, notifiedAt: undefined, device: { ...base.device, role: "org-cloud" } })).toEqual({ decision: "run" });
     expect(repairDecision(null)).toEqual({ decision: "refuse", reason: "bad-signature" });
   });
   it("FAC-SEM-129 holds the node to that decision and its reason", () => {
@@ -109,5 +206,6 @@ describe("repairDecision (FAC-SEM-129)", () => {
     expect(codes("repair-run", { ...base, keys: [], decision: "refuse", reason: "bad-signature" })).toEqual([]);
     expect(codes("repair-run", { ...base, keys: [], decision: "refuse", reason: "expired" })).toEqual(["FAC-SEM-129"]);
     expect(codes("repair-run", { ...base, decision: "refuse", reason: "person-declined" })).toEqual(["FAC-SEM-129"]);
+    expect(codes("repair-run", { ...base, decision: "run", reason: "expired" })).toEqual(["FAC-SEM-129"]);
   });
 });
