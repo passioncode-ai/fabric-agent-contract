@@ -521,7 +521,8 @@ Until a key per context exists (CX-CON-06), the device shows both organizations 
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, the `noticeVersion` its person last acknowledged
-(`acknowledgedNoticeVersion`, DEC-0102, so a collector held by a `purpose` rejection learns the acknowledgement), a newer [key set](#key-sets) and a
+(`acknowledgedNoticeVersion`, DEC-0102, on every response once there is one, so a collector held by a `purpose`
+rejection learns the acknowledgement), a newer [key set](#key-sets) and a
 newer signed `policy` when there are some (never a `user` layer), and a `certificate.action` (`rotate`
 or `re-enroll`) when one is due. The response MAY carry `protocols` (DEC-0094), the revisions the server accepts from the device (DEC-0067's list), so a
 node learns them at check-in; the latest list the node received is the server's current one. The response is a closed

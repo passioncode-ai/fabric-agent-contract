@@ -364,10 +364,11 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
   duplicate (`device.id`, `eventId`) is accepted again and counted, never an error. A retried batch
   is harmless.
 - `rejected[]` — `eventId` and `reason`: `schema`, `content-field`, `person-field`, `stream`,
-  `attribution`, `purpose`. **A rejected event is consumed with a rejection.** The collector does not resend
+  `attribution`, `purpose`, `before-start`. **A rejected event is consumed with a rejection.** The collector does not resend
   it, and the stream does not stall on it. `purpose` (DEC-0100) says the receiver does not collect that event for that
-  person under the notice they acknowledged ([notice](#notice)); the collector then sends no event of that kind for
-  that person until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from a present value held at the rejection resumes; an absent one, at the rejection or after, is no signal. An `attribution` rejection stays what it was:
+  person now, under the notice they acknowledged ([notice](#notice)): a receiver answers it only when the purpose is not
+  collected for that person when it answers (DEC-0102); the collector then sends no event of that kind for
+  that person until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from a present value held at the rejection resumes; an absent one, at the rejection or after, is no signal. `before-start` (DEC-0102) says the event occurred before collection, or its purpose, started for that person while the purpose is collected now (a buffered event from before the person's acknowledgement): it is consumed and the collector holds nothing. A receiver sends `before-start` only to a collector pinned at or after DEC-0102; to an older one it answers `purpose`, which that collector holds until the notice changes. An `attribution` rejection stays what it was:
   the event names another organization, device or user than its certificate.
 - `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
   **everything the receiver holds for the stream across batches** — the same state it judges tamper

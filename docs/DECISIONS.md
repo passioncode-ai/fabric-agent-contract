@@ -6269,7 +6269,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      organization server's ask: not until the notice changes), or when a check-in response's new member
      `acknowledgedNoticeVersion` (the latest version the device's person acknowledged) differs from the one it held at
      the rejection (both present; an absent value is no signal): the person may acknowledge the notice already in
-     force, which moves no policy. `collectionStart` is
+     force, which moves no policy. The member is on every check-in response once there is one. A receiver answers
+     `purpose` only when the purpose is not collected for that person when it answers; an event that occurred before
+     collection, or its purpose, started for that person while the purpose is collected now (a buffered event from
+     before the acknowledgement) is consumed with the new reason `before-start`, which holds nothing, sent only to a
+     collector pinned at or after DEC-0102. `collectionStart` is
      no signal: it is the first acknowledgement (or the earlier mdm deadline) and never moves later.
   9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; on its
      first pass after taking DEC-0098 a board answers each `queued` request its target already replied to, then expires
@@ -6285,7 +6289,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product) and a third seven (five product; one seam, the resume trigger missed an acknowledgement of the notice in force; one
   unit, a baseline could name a coding agent or a service in a shape no summary carries) and a fourth four product
   (the new member's pin condition, CT-88's wording, the renewal's proof clause, the handoff's counts), all fixed here
-  before merge.
+  before merge. A fourth seam reading found one more: a buffered event from before the acknowledgement, rejected
+  `purpose`, held a kind for good; `before-start` answers it.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
   for open questions) and is listed above.
 - **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape, a coding agent's an agent id and a service's an `id.instance` key; `minVersion` only
@@ -6294,12 +6299,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   context only) and
   for a repair (a key in its window, signed layers, one run per id); a consumer of these surfaces has not adopted yet
   (CT-83, CT-88). Wider for a check-in response (`acknowledgedNoticeVersion`): the response is a closed object, so a
-  server sends the member only to a node pinned at or after DEC-0102, as DEC-0094 does for `protocols`. `contractVersion` stays `0.1.0`.
+  server sends the member only to a node pinned at or after DEC-0102, as DEC-0094 does for `protocols`; so too the
+  batch acknowledgement's new reason `before-start`. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** schemas `node-summary` (context, name), `device-policy` (`harness.baseline`),
-  `comms-receipt` (`noResponder.message`), `device-check-in` (`acknowledgedNoticeVersion`); code
+  `comms-receipt` (`noResponder.message`), `device-check-in` (`acknowledgedNoticeVersion`), `activity-batch-ack`
+  (`before-start`); code
   `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
   `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;
-  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`, `device-check-in-response-acknowledged`; negative `node-summary-personal-context`,
+  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`, `device-check-in-response-acknowledged`, `activity-batch-ack-before-start`; negative `node-summary-personal-context`,
   `node-summary-dotted-suffix`, `device-policy-baseline-dotted-suffix`, `device-policy-baseline-skill-min-version`,
   `device-policy-baseline-coding-agent-name`, `device-policy-baseline-service-name`, `device-policy-baseline-coding-agent-digest`,
   `device-policy-baseline-mcp-server-digest`, `device-policy-baseline-service-min-version`, `node-summary-mcp-dotted-suffix`,

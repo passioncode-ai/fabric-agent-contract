@@ -918,5 +918,6 @@
   {"name": "node-summary-mcp-dotted-suffix", "schema": "node-summary.schema.json", "path": "negative/node-summary-mcp-dotted-suffix.json", "valid": false, "keyword": "pattern"},
   {"name": "node-summary-skill-two-at", "schema": "node-summary.schema.json", "path": "negative/node-summary-skill-two-at.json", "valid": false, "keyword": "pattern"},
   {"name": "node-summary-drift-dotted-suffix", "schema": "node-summary.schema.json", "path": "negative/node-summary-drift-dotted-suffix.json", "valid": false, "keyword": "pattern"},
-  {"name": "repair-result-already-answered", "schema": "repair-result.schema.json", "path": "negative/repair-result-already-answered.json", "valid": false, "keyword": "enum"}
+  {"name": "repair-result-already-answered", "schema": "repair-result.schema.json", "path": "negative/repair-result-already-answered.json", "valid": false, "keyword": "enum"},
+  {"name": "activity-batch-ack-before-start", "schema": "activity-batch-ack.schema.json", "path": "positive/activity-batch-ack-before-start.json", "valid": true}
 ]

@@ -57,9 +57,10 @@
               "person-field",
               "stream",
               "attribution",
-              "purpose"
+              "purpose",
+              "before-start"
             ],
-            "description": "purpose (DEC-0100): the receiver does not collect this event for this person under the notice they acknowledged; consumed like every rejection, and the collector sends no event of that kind for that person until the device's policy names a later noticeVersion."
+            "description": "purpose (DEC-0100, DEC-0102): the receiver does not collect events of this kind for this person now; consumed like every rejection, and the collector sends no event of that kind for that person until the device's policy names a later noticeVersion or a check-in response a changed acknowledgedNoticeVersion. before-start (DEC-0102): the event occurred before collection, or its purpose, started for that person, and the purpose is collected now; consumed, and the collector holds nothing."
           }
         },
         "additionalProperties": false

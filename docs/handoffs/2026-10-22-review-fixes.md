@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-95)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-96)
 
 ## Objective
 
@@ -39,13 +39,16 @@ revision test; a backdated renewal is named as a limit in devices.md.
 
 Product: four breaks (the pin condition for `acknowledgedNoticeVersion` only in the decision; CT-88 stating the old
 resume rule; the renewal's proof clause moved onto rotation; this handoff's counts), fixed; its risks too: an absent
-value is no signal, the `org-cloud` derivation points to CT-94, and CT-95 holds the missing UX scenarios.
+value is no signal, the `org-cloud` derivation points to CT-94, and CT-95 holds the missing UX scenarios. Seam: one break, a buffered event from before the acknowledgement rejected
+`purpose` held a kind for good; the receiver now answers `purpose` only for a purpose not collected now, and
+`before-start` (new) for the buffered event, which holds nothing. Its risks: the member is on every response, the
+context-route comment names the summary's exception, FAC-SEM-128 on a check-in stays CT-91, a repair vector is CT-96.
 
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
   check-in's own rule over a summary, CT-92 for the operator, CT-93 for an org-cloud machine's usage, CT-94 for
-  derive's role input, CT-95 for the UX scenarios.
+  derive's role input, CT-95 for the UX scenarios, CT-96 for a repair vector.
 - A test for each break and each surviving plant: repair boundaries (exactly 7 days, `notifiedAt` at the instant, the
   policy's own expiry instant), the allowlist's digest, a key outside its window, a lasting policy, a user layer, a
   repeat, a lone surrogate, the strict reason; drift per kind and state order; a duplicate plugin; the person
@@ -55,13 +58,13 @@ value is no signal, the `org-cloud` derivation points to CT-94, and CT-95 holds 
 
 ## Open
 
-- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; CT-94; CT-95; the adoption rows CT-81 to
+- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; CT-94; CT-95; CT-96; the adoption rows CT-81 to
   CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
 ## Checks actually run
 
-`pnpm run check` exit 0: typecheck, 94 test files with 7 957 tests under coverage, UX lint, docs check (0 errors),
+`pnpm run check` exit 0: typecheck, 94 test files with 7 959 tests under coverage, UX lint, docs check (0 errors),
 markdownlint, privacy check (0 findings). Earlier runs failed on two test-typing errors and the rule register's kind
 list for `FAC-SEM-128`; both fixed. Four rounds of three blind readings ran on this branch; the PR merges after two consecutive clean rounds.
 
