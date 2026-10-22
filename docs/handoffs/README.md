@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-22 the board as Fabric 0.3.9 serves it](2026-10-22-board-additions.md) | DEC-0098 (CT-81) | this pull request |
+| [2026-10-22 the board as Fabric 0.3.9 serves it](2026-10-22-board-additions.md) | DEC-0098 (CT-81) | PR #141 |
 | [2026-10-22 a schema pattern never uses a bare `.`](2026-10-22-pattern-line-separator.md) | DEC-0097 (CT-87; CT-88, CT-89 filed) | merged, #140 `bfa9a67` |
 | [2026-10-22 the iteration's plan](2026-10-22-iteration-plan.md) | none (CT-81 to CT-86) | merged, #139 `66520f0` |
 | [2026-10-21 contract review](2026-10-21-contract-review.md) | none (REQ-01 to REQ-18; CT-42, CT-73, CT-75 to CT-80) | merged, #137 `ec21af7` |

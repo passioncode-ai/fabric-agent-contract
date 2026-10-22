@@ -6062,7 +6062,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0098: The board as Fabric 0.3.9 serves it: `answered`, a default deadline, `noResponder`, reading what is new, bulk read marks, a host's wait, and a typed reaction on a reply to an announcement
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-81.
+- **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
      `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
