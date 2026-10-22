@@ -54,6 +54,15 @@ FLW-07's entry point and screen state, SCN-011's states, CT-105's first cell, DE
 and `expectClosedAt` required on every closed-organization case, the table test's title, CT-105 names the vector
 tests' status check and Observatory's provisional `unknown-org`, the page header names DEC-0103 and its schema).
 
+## Fifth and sixth rounds
+
+Both at `fa01b944`, unit, seam and product: pass, nothing blocking, which is the merge condition. Their risks go to a
+follow-up row (a fixture requiring `error.message`, FAC-SEM-077 comparing the code alone, the gate's `stop` on a 410
+without a readable `closedAt`, a future `closedAt` unpinned, `closedAt` read by the schema's `date-time` and by
+`strictTime`, FLW-07's diagram, the FAC-SEM-068 and conformance wording on locks, the trust a 410 rests on, an expired
+certificate's and an mdm layer's state on the node, the page headers, SCN-011's and SCR-10's coverage, contexts.md and
+CT-106 on a share grant into a closed organization, activity.md's overflow sentence, the glossary's "never").
+
 ## Open
 
 - Adoption (CT-105): the first organization server answers it; Project Observatory's node and collector stop on it.
