@@ -88,7 +88,7 @@
               "name": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address with a dotted domain (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -133,7 +133,7 @@
               "name": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address with a dotted domain (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -165,7 +165,7 @@
               "name": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address with a dotted domain (FAC-SEM-128, DEC-0102)."
               },
               "source": {
                 "enum": [
@@ -280,7 +280,7 @@
               "name": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}(?:@[A-Za-z0-9_:+-]{1,64})?$",
-                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address (FAC-SEM-128, DEC-0102)."
+                "description": "A name as the harness shows it: no slash, backslash, tilde or space, so it can carry no path, and at most one @ suffix without a dot, a plugin's marketplace, so it can carry no e-mail address with a dotted domain (FAC-SEM-128, DEC-0102)."
               },
               "state": {
                 "enum": [

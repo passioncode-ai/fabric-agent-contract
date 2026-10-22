@@ -57,8 +57,9 @@
   The three readings of the range found thirteen breaks: two rules that decide one thing disagreed (a repair's policy
   expiry and `FAC-SEM-068`; a repair's key and `FAC-SEM-041`), a grace judged by the requester's own clock, SR-5a
   holding back a withdrawal, a context the routing rule forbids, and seven documents left false. Twelve of thirty
-  plants survived, and `repairDecision` threw on a schema-valid request. A second round found one more seam break (a
-  narrowing against the operator's recorded ADR-0011) and eight product breaks, fixed before the merge.
+  plants survived, and `repairDecision` threw on a schema-valid request. A second round found ten more (one unit: the
+  baseline's old name shape; one seam: a narrowing against the operator's recorded ADR-0011; eight product), and a
+  third five product breaks, all fixed before the merge.
 - **Verified corrections:** DEC-0102 with a test for each break and each surviving plant; the three readings' reports
   in the handoff.
 - **Learning:** a rule that restates another rule's condition calls that rule rather than copying it; and the readings

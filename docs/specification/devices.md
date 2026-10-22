@@ -152,7 +152,8 @@ evidence of tampering. Nothing is renewed silently past `notAfter`.
 left in a drawer) enrolls again with `auth.method: "key-on-record"` and no other proof, within **30 days** of its last
 certificate's `notAfter`, judged by the server's clock: the new certificate's `notBefore`, never the device's own
 `requestedAt` (DEC-0102). Before that end the same request is also taken: a re-enrollment by the key on record with a new epoch, unlike a
-rotation, which keeps the epoch: the CSR is from its key on record, and that CSR's own signature is the proof. The server
+rotation, which keeps the epoch; the old certificate ends when the new one is issued, and a node whose certificate is
+still valid rotates instead: the CSR is from its key on record, and that CSR's own signature is the proof. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
@@ -340,7 +341,7 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
 | `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine. `A`: it administers the whole machine — taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`). |
-| `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}` | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
+| `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}`: `minVersion` only for a coding agent or a plugin, `digest` only for a skill or a plugin | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
 | `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102). **Absent means no repair runs** (`FAC-SEM-129`). |
 
 Key names are dotted `snake_case` identifiers, so the `models.personalKeySharing` of the organization

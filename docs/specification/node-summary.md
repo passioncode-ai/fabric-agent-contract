@@ -43,7 +43,8 @@ purpose in its notice.
 
 The organization states what every machine is expected to run as the policy key `harness.baseline`
 ([device policy](devices.md#policy)): items by `kind` (`coding-agent`, `mcp-server`, `skill`, `plugin`, `service`) and
-`name`, with an optional `minVersion` (dotted numbers) and `digest`. A node reads it, and `repair.packages`, from the
+`name`, with an optional `minVersion` (dotted numbers) for a coding agent or a plugin and an optional `digest` for a
+skill or a plugin; the schema refuses either on another kind (DEC-0102). A node reads it, and `repair.packages`, from the
 `mdm` and `server` layers only: a person's own `user` layer never sets, widens or empties either (DEC-0102;
 `harnessBaseline` and `signedPolicyValue` in `src/node-summary.ts`).
 
@@ -54,8 +55,8 @@ first that holds:
 |---|---|
 | `missing` | the harness has no item of that kind and name |
 | `stopped` | a service whose state is not `ok` or `degraded`, or an MCP server whose health is `down` |
-| `changed` | the baseline names a digest and the item carries another, or none; compared only for a skill or a plugin (DEC-0102) |
-| `outdated` | the baseline names a `minVersion` and the item's version is below it, compared number by number, or is not dotted numbers; compared only for a coding agent or a plugin (DEC-0102) |
+| `changed` | the baseline names a digest and the item carries another, or none: a skill or a plugin, the only kinds the baseline may give a digest (DEC-0102) |
+| `outdated` | the baseline names a `minVersion` and the item's version is below it, compared number by number, or is not dotted numbers: a coding agent or a plugin, the only kinds the baseline may give a `minVersion` (DEC-0102) |
 
 A summary under a policy with a baseline carries `drift` with that policy layer's revision and exactly these items (an
 empty list when none); under a policy without one it carries no `drift` (`FAC-SEM-128`).

@@ -6249,7 +6249,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      question, CT-92. (A first draft of this decision narrowed the harness under mode `C`; the second seam reading found
      it against ADR-0011, and it was withdrawn before merge.)
   3. **A harness name** carries at most one `@` suffix without a dot (a plugin's marketplace), so it can carry no e-mail
-     address; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
+     address with a dotted domain; kind `node-summary-document` reads a summary alone (no credential, e-mail address, home path or
      duplicate), so `pnpm validate` and the positive sweep check it.
   4. **`harnessDrift`** compares a digest only for a skill or a plugin and a version only for a coding agent or a
      plugin, the kinds whose rows carry them; the `harness.baseline` schema admits `minVersion` and `digest` only there,
@@ -6264,12 +6264,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
      with a new epoch (a rotation keeps the epoch).
   7. **SR-5a** refuses only an active registration: a withdrawal passes, because it reduces processing.
-  8. **After a `purpose` rejection** a collector sends that kind for that person again on a later `noticeVersion` or a
-     later `collectionStart` in a check-in response, never on a timer (DEC-0100's refused alternative stands); SR-5a's
-     `hold-notice` takes the same two triggers beside its seven-day resend.
-  9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; a request
-     stored before a board took DEC-0098 expires seven days after its message and one already replied to is answered on
-     the board's next pass; a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
+  8. **After a `purpose` rejection** a collector sends that kind for that person again only when the device's policy
+     names a later `noticeVersion`, never on a timer (DEC-0100's refused alternative stands, and so does the first
+     organization server's ask: not until the notice changes). A later `collectionStart` is no signal: under device
+     management it is the earlier of the acknowledgement and the mdm deadline, so it may never move later.
+  9. **The board's text:** the answer transition is any message but a request whose `replyTo` is the request; on its
+     first pass after taking DEC-0098 a board answers each `queued` request its target already replied to, then expires
+     each `queued` or `claimed` request older than seven days that has no deadline, in that order; a hold does not stop the default deadline; `noResponder.message` is at most 300 characters.
   10. **An `org-cloud` machine derives no share registrations**: share grants are a person's, and such a machine binds
      none; its SR-5 `unassigned-device` is final, not a wait. What it reports for usage of agents it runs is CT-93.
   11. **Compatibility wording of DEC-0099 and DEC-0100:** no revision changed, so neither side can learn the other's pin
@@ -6277,17 +6278,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      SSO, and a server issues `role` only to a node whose product and version it knows read it.
 - **Why:** three blind readings of the range `bfa9a67..4a29fcb` on 2026-10-22 (unit, seam, product) failed it: thirteen
   breaks (two unit, four seam, seven product; the unit and seam tiers found the repair's policy expiry both), each
-  reproduced, and twelve surviving plants. A second round on this branch found nine more (one seam, eight product),
-  fixed here before merge.
+  reproduced, and twelve surviving plants. A second round on this branch found ten more (one unit, one seam, eight
+  product) and a third five product breaks, all fixed here before merge.
   Every break is fixed here; what needed a decision was decided by the safest reversible option (the operator's rule
   for open questions) and is listed above.
-- **Compatibility:** narrower for a node summary (an organization context only) and
+- **Compatibility:** narrower for the policy key `harness.baseline` (a name in the summary's shape; `minVersion` only
+  for a coding agent or a plugin, `digest` only for a skill or a plugin): a policy written to DEC-0101 that carries
+  another is refused whole and the node keeps the revision it holds. Narrower for a node summary (an organization
+  context only) and
   for a repair (a key in its window, signed layers, one run per id); a consumer of these surfaces has not adopted yet
   (CT-83, CT-88). `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** schemas `node-summary` (context, name), `comms-receipt` (`noResponder.message`); code
+- **Consequences / affects:** schemas `node-summary` (context, name), `device-policy` (`harness.baseline`),
+  `comms-receipt` (`noResponder.message`); code
   `src/node-summary.ts`, `src/device-rules.ts` (renewal clock), `src/share-registration.ts` (SR-5a),
-  `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures (three node-summary semantic,
-  one schema negative, `activity-batch-ack-purpose`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`); tests
+  `src/semantic-kinds.ts`; vectors `fixtures/vectors/share-registration.json`; fixtures: semantic `node-summary-other-org`;
+  positive `device-policy-harness-baseline`, `activity-batch-ack-purpose`; negative `node-summary-personal-context`,
+  `node-summary-dotted-suffix`, `device-policy-baseline-dotted-suffix`, `device-policy-baseline-skill-min-version`,
+  `comms-receipt-no-responder-long-message`, `comms-read-ack-empty`, `comms-host-wait-not-retryable`; tests
   `test/node-summary.test.ts`, `test/device-rules.test.ts`, `test/comms-tools.test.ts`, `test/positive-sweep.test.ts`;
   docs `node-summary.md`, `devices.md`, `share-registration.md`, `activity.md`, `project-comms.md`, `contexts.md`,
   `conformance.md`, `docs/specification/README.md`, `CONTEXT.md`, `docs/ux/flows.md`, `screens.md`, `scenarios.md`,

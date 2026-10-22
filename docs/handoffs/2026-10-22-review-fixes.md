@@ -1,4 +1,4 @@
-# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91)
+# 2026-10-22: the readings of DEC-0098 to DEC-0101 and their corrections (DEC-0102; CT-91 to CT-93)
 
 ## Objective
 
@@ -23,6 +23,12 @@ Three blind readings, run as background subagents with no edits:
 | product | fail | 8: a check-in's context in devices.md and CONTEXT.md; the key table's user layer; renewal called a rotation; no annotations on DEC-0098 to DEC-0101; a weekly probe DEC-0100 had refused; the org-cloud exception missing in conformance; two em dashes; `already-answered` missing from the table | each fixed; CT-93 filed for an org-cloud machine's usage |
 | unit | fail | 1: the baseline's names kept the old shape, so a valid policy left no valid summary | the baseline takes the summary's name shape and per-kind fields; the walk is iterative; tests pin the key window at `at`, its own instants, `already-answered` first, the context as written, an mdm-only allowlist, org-cloud with a declined notice, renewal before the end, a long `noResponder.message` |
 
+## Third round
+
+Product: five breaks (DEC-0102's compatibility and fixture list; the baseline's per-kind fields in the prose; a
+`collectionStart` trigger that never fires under device management, dropped; the round counts; this handoff's
+checks), fixed. Unit and seam: see the pull request.
+
 ## Done
 
 - **DEC-0102**: every break fixed and every decision the risks needed taken (its items 1 to 11); CT-91 filed for the
@@ -36,7 +42,8 @@ Three blind readings, run as background subagents with no edits:
 
 ## Open
 
-- CT-91; the adoption rows CT-81 to CT-83 and CT-88.
+- CT-91; **CT-92 needs the operator** (other contexts' services in a summary); CT-93; the adoption rows CT-81 to
+  CT-83 and CT-88.
 - CT-84 next in the plan's order (S4, by 2026-10-31), read blind before it merges.
 
 ## Checks actually run

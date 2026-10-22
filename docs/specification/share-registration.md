@@ -130,7 +130,7 @@ response's `protocols` first lists `share-registration/1` (DEC-0094). It SHOULD 
 active registration again at least every 7 days (`RESEND_SECONDS`), so a receiver that lost one learns it again; a
 redelivery answers `unchanged`. That resend skips a registration the receiver refused with a typed refusal, which waits
 for the record to change as below, except SR-5a's `purpose-not-collected`, which it sends again at the resend and when
-its policy names a later `noticeVersion` or a check-in response a later `collectionStart` (DEC-0100, DEC-0102). It keeps each receipt. It sends nothing again that the receiver
+its policy names a later `noticeVersion` (DEC-0100). It keeps each receipt. It sends nothing again that the receiver
 answered with a typed refusal of the SR table (SR-2 to SR-9) until the record changes, and reports the grant degraded
 meanwhile, SR-5a again excepted: that grant is held, not degraded; after no
 answer, a transport refusal (401) or a receiver's fault it sends again with backoff. The sender gate below reads the
@@ -222,7 +222,7 @@ shown under its grant without an agent. Days compare as UTC days: a `startsAt` o
 |---|---|
 | `send` | a status 200 receipt, whatever its state (usage before a withdrawal still joins); a 409 `stale-revision` or `already-withdrawn` (the receiver holds a registration or a final withdrawal) |
 | `hold-degraded` | a typed refusal of the SR table that sending the same registration again does not clear: 409 `revision-conflict` or `agent-mismatch`, 403 `wrong-organization` or `unassigned-device`, 400 `malformed` or `schema-unsupported`. The node keeps the sums, reports itself degraded and sends again only when the record changes |
-| `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion` ([devices](devices.md#policy)) or a check-in response a later `collectionStart` (DEC-0102), and at the seven-day resend |
+| `hold-notice` | 403 `purpose-not-collected` (DEC-0100): the node keeps the sums, is not degraded, and sends the registration again when its policy names a later `noticeVersion` ([devices](devices.md#policy)), and at the seven-day resend |
 | `hold` | no answer yet, a transport refusal (401), a receiver's fault, a code under a status that is not its own, or anything else: the node keeps the sums and sends the registration again with backoff |
 
 So no `grant.usage` reaches a receiver that has no way to read it. After `agent-mismatch` the usage of the old grant
