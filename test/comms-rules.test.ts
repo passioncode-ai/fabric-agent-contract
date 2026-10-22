@@ -27,6 +27,18 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
     expect(codes("comms-transition", { op: "cancel", from: "in_progress", to: "cancelled" })).toContain("FAC-SEM-027");
   });
 
+  it("FAC-SEM-027 answers only a queued request, and an answered one leaves only by the requester's cancel (DEC-0098)", () => {
+    expect(codes("comms-transition", { op: "answer", from: "queued", to: "answered" })).toEqual([]);
+    expect(codes("comms-transition", { op: "cancel", from: "answered", to: "cancelled" })).toEqual([]);
+    for (const from of ["claimed", "accepted", "in_progress", "outcome_unknown", "completed"]) {
+      expect(codes("comms-transition", { op: "answer", from, to: "answered" }), from).toContain("FAC-SEM-027");
+    }
+    expect(codes("comms-transition", { op: "expire", from: "answered", to: "expired" })).toContain("FAC-SEM-027");
+    expect(codes("comms-transition", { op: "claim", from: "answered", to: "claimed" })).toContain("FAC-SEM-027");
+    const leaving = Object.entries(COMMS_TRANSITIONS).flatMap(([op, pairs]) => pairs.filter(([from]) => from === "answered").map(([, to]) => `${op}:${to}`));
+    expect(leaving).toEqual(["cancel:cancelled"]);
+  });
+
   it("FAC-SEM-027 settles a started effect only by an observed result", () => {
     expect(codes("comms-transition", { op: "complete", from: "in_progress", to: "completed", observed: false })).toContain("FAC-SEM-027");
     expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "failed_known" })).toContain("FAC-SEM-027");

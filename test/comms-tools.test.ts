@@ -67,7 +67,7 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
 
   it("answers a mutation with the one receipt, which names no sequence number", async () => {
     const receipt = await schema("comms-receipt.schema.json");
-    expect(Object.keys(receipt.properties).sort()).toEqual(["at", "attempt", "message", "ok", "repeated", "request", "slot", "thread", "transferred"]);
+    expect(Object.keys(receipt.properties).sort()).toEqual(["alreadyRead", "at", "attempt", "marked", "message", "more", "noResponder", "ok", "repeated", "request", "slot", "thread", "transferred"]);
     for (const row of TOOLS.filter((cells) => cells[3] !== "— (a read)")) expect(ticked(row[2] as string)[0], row[0]).toBe("comms-receipt.schema.json");
   });
 
@@ -293,7 +293,20 @@ const PLANTS: Array<{ schema: string; killer: string; fixtures?: string } & Muta
   { schema: "comms-directory.schema.json", killer: "comms-directory-held-not-boolean", name: "held any value", mutate: (s) => { s.properties.projects.items.properties.capabilities.items.properties.held = {}; } },
   { schema: "comms-directory.schema.json", killer: "comms-directory-entry-held", name: "held on the Project entry", mutate: (s) => { s.properties.projects.items.properties.held = { type: "boolean" }; } },
   { schema: "comms-status.schema.json", killer: "comms-status-held-not-boolean", name: "responder held any value", mutate: (s) => { s.properties.responders.items.properties.held = {}; } },
-  { schema: "comms-refusal.schema.json", killer: "comms-refusal-held-not-retryable", name: "held may be final", mutate: (s) => { delete s.properties.error.if; delete s.properties.error.then; } }
+  { schema: "comms-refusal.schema.json", killer: "comms-refusal-held-not-retryable", name: "held may be final", mutate: (s) => { delete s.properties.error.if; delete s.properties.error.then; } },
+  // DEC-0098: Fabric 0.3.9's board additions and the typed reaction.
+  { schema: "comms-list.schema.json", killer: "comms-list-unread-string", name: "unread any value", mutate: (s) => { s.properties.unread = {}; } },
+  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-too-many", name: "named messages unbounded", mutate: (s) => { delete s.oneOf[1].properties.messages.maxItems; } },
+  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-repeated-message", name: "a message named twice", mutate: (s) => { delete s.oneOf[1].properties.messages.uniqueItems; } },
+  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-two-forms", name: "named messages open", mutate: (s) => { s.oneOf[1].additionalProperties = true; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-more-false", name: "more any value", mutate: (s) => { s.properties.more = { type: "boolean" }; } },
+  { schema: "comms-receipt.schema.json", killer: "comms-receipt-no-responder-without-message", name: "noResponder without its sentence", mutate: (s) => { s.properties.noResponder.required = ["target", "capability"]; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-row-without-due", name: "row without a day", mutate: (s) => { common(s).reaction.allOf[1].then.required = []; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-due-on-adapted", name: "a day on any reaction", mutate: (s) => { delete common(s).reaction.allOf[1].else; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-adapted-without-ref", name: "adapted without a ref", mutate: (s) => { common(s).reaction.allOf[0].then.required = []; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-reaction-unknown-type", name: "reaction any type", mutate: (s) => { common(s).reaction.properties.type = { type: "string" }; } },
+  { schema: SUBMIT, killer: "comms-submit-reaction-on-message", name: "reaction on any kind", mutate: (s) => { s.allOf = (s.allOf as Record<string, any>[]).filter((branch) => !(branch.if?.properties?.kind?.const === "reply" && branch.else)); } },
+  { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-unknown-code", name: "code any string", mutate: (s) => { s.properties.code = { type: "string" }; } }
 ];
 
 describe("every refusal of DEC-0073 and its amendments (DEC-0078, DEC-0079, DEC-0080) is killed by its fixture", () => {

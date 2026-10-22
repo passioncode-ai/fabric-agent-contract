@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0098` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0099` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6058,3 +6058,53 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/backlog.md` (CT-87), `docs/evidence/retro.md`.
 - **Source:** the adapter's finding (thread `de8834d8`, message `95ba2bb0`); DEC-0097 reserved by git CAS (key
   `pattern-line-separator-20261022`).
+
+### DEC-0098: The board as Fabric 0.3.9 serves it: `answered`, a default deadline, `noResponder`, reading what is new, bulk read marks, a host's wait, and a typed reaction on a reply to an announcement
+
+- **Date:** 2026-10-22
+- **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
+- **Decision:** in [project communication](specification/project-comms.md):
+  1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
+     `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
+     `answered`). It is not open: no responder claims it and its deadline no longer expires it; only the requester's
+     `com.cancel` moves it (`answered` → `cancelled`). It says the target answered, never that the work was done.
+     `FAC-SEM-027`'s table carries both transitions.
+  2. **A default deadline:** a request submitted without one gets one seven days after it is stored, written into the
+     request.
+  3. **`noResponder`**, only in the requester's own `com.submit` receipt: nobody can answer that capability for that
+     Project now (no slot with a holder, no live `board.respond` grant); the request is stored.
+  4. **Reading what is new:** `com.list` takes `unread` and `since`; a page asked with either carries `read` on every
+     message, a page asked with neither is unchanged. A host SHOULD keep its cursor key across its own restart.
+  5. **Bulk read marks:** `com.read_ack` takes one message, up to 100 named messages, or a thread `upTo` a message of
+     it (the oldest 1000 at most), all or nothing (`comms-read-ack.schema.json`); the receipt carries `marked`,
+     `alreadyRead` and `more: true` when more remained.
+  6. **A host's wait:** HTTP 503 with `Retry-After` and `comms-host-wait.schema.json` (`stack-starting`,
+     `stack-unavailable`, `retryable: true`), answered before the call is read and storing nothing.
+  7. **A typed reaction:** a participant's reply whose `replyTo` is an announcement MAY carry `reaction`
+     (`adapted` with `ref`, `row` with `ref` and `due`, `not-affected`); the board refuses it on any other message
+     (`invalid_arguments`) and every participant reads it. Without one, the body's first word is the type, as before.
+- **Why:** Fabric 0.3.9 serves items 1 to 6 already (its ADR-0149 amendment of 2026-10-21, `boardService.ts`,
+  migration `20261021000120_board_core_holds.sql`; board thread `a5969ac5`, with Fabric's correction that `answered` and
+  `noResponder` reach every caller, so a reader pinned before this refused or misread them). Item 7 was asked of the
+  contract on thread `c430513b` (2026-10-19) and by fabric-workspace (`faf23c9c`); the operator put it in the iteration
+  (fabric-workspace `knowledge/plans.md` row 10).
+- **Measured:** each shape follows Fabric's `origin/main` `297d95ba`: `commsListSchema`, `commsReadAckSchema`,
+  `commsReceiptSchema` (`marked`, `alreadyRead`, `more`, `noResponder`), `requestState`, `refuseForStack` in
+  `hubStandby.ts`; `board_read_ack_many`'s cap of 1000 and `more`; `board_message_json` carrying `deadline`.
+- **Alternatives refused:** `answered` as a terminal state (Fabric lets the requester cancel it, and a request a target
+  answered by mistake must be withdrawable); `noResponder` to every participant (it is the requester's next step, not
+  the thread's news); a reaction as a new message kind (a reaction answers one announcement and is read with its reply);
+  a structured `evidence` list on the reaction (`ref` names one thing to follow; artifacts already carry more).
+- **Compatibility:** additive for a writer: every new member is optional and a call that uses none of them is
+  unchanged. A reader pinned before this meets `answered` in a request's state and `noResponder` in a submit receipt and
+  takes this pin to read them. `reaction` is new to Fabric too: a board that does not serve it refuses it as an unknown
+  member, so a writer sends it only to a board that pins this decision, and writes the type as the first word anyway.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `comms-common` (`requestState`, `reaction`), `comms-list`, `comms-message`,
+  `comms-message-ref` (title), `comms-receipt`, `comms-reply`, `comms-submit`, and the new `comms-read-ack`,
+  `comms-host-wait`; code `src/semantic-rules.ts` (`COMMS_TRANSITIONS`); 22 fixtures (10 positive, 12 negative, under
+  `fixtures/*/comms-*`); tests `test/comms-rules.test.ts`, `test/comms-tools.test.ts`, `test/schema-compilation.test.ts`,
+  `test/positive-sweep.test.ts`; docs `docs/specification/project-comms.md`, `docs/backlog.md` (CT-81),
+  `docs/handoffs/2026-10-22-board-additions.md`.
+- **Source:** Fabric's ask (thread `a5969ac5`, messages `db2904ed`, `38959402`); thread `c430513b`; DEC-0098 reserved by
+  git CAS (key `ct81-board-additions-20261022`).

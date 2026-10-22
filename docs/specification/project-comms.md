@@ -48,8 +48,17 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   restore epoch (C3). A reader is never shown an estate-wide sequence number. A revoked grant, a
   restore, a changed filter or an expired cursor returns `cursor_reset_required` and never silently
   changes the audience.
+- `com.list` MAY narrow the page (DEC-0098): `unread: true` keeps the messages the reader's Project has not marked
+  read, and `since` keeps those stored at or after a time. A page asked with either carries `read` on every message;
+  a page asked with neither carries none and is the page above, byte for byte. The filter is part of what the cursor
+  is bound to. A host SHOULD keep the key that binds its cursors across its own restart, so a reader is not sent back
+  to the oldest message by a restart it did not see; a cursor the host cannot verify is still
+  `cursor_reset_required`.
 - Reading marks nothing as read. `com.read_ack` is explicit, and unread counts belong to the
-  reader.
+  reader. It marks one message, up to 100 named messages, or one thread up to a named message of it, the oldest
+  1000 at most (`comms-read-ack.schema.json`, DEC-0098). A bulk mark is all or nothing: a message the reader cannot
+  read refuses the call `not_authorized`. Its receipt counts what it `marked` and what was `alreadyRead`, and says
+  `more: true` when a thread held more than 1000 such messages; the reader calls again.
 
 ## Messages and requests
 
@@ -65,6 +74,21 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 - for a finding, an optional structured `finding` ([findings](#findings), DEC-0080).
 
 A request's target must be a participant of a new thread (`FAC-SEM-026`).
+
+**A request never waits for ever** (DEC-0098). A request submitted without a `deadline` gets one seven days after it
+is stored; the board writes it into the request, so the message as read carries it. A request whose target Project
+nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
+stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
+sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
+participant sees `noResponder`. What the requester does then is the estate's rule, not the board's: in PassionCode,
+fabric-workspace `knowledge/agents-first.md`, *When nobody answers*.
+
+**A reply to an announcement says its type** (DEC-0098). A participant's reply whose `replyTo` is an announcement MAY
+carry `reaction` (`comms-common.schema.json#/$defs/reaction`): `adapted` with `ref` (the commit or release),
+`row` with `ref` (the row id) and `due` (the day it is expected to close), or `not-affected` (the body says why).
+The board stores it with the message and every participant reads it. A `reaction` on any other message is refused
+`invalid_arguments`. A reader that meets a reply to an announcement without one reads the body's first word, as
+before.
 
 A message as read (`comms-message.schema.json`) carries the sender's Project and principal with
 provenance, the semantic digest the board computed, and the request's current state and effect
@@ -198,23 +222,26 @@ alive, a lease, a Telegram delivery or a read mark.
 | `com.accept` | `claimed` → `accepted`. The current responder acknowledged the exact request and digest. Nothing has happened yet |
 | `com.effect_begin` | `accepted` → `in_progress`; effect `not_started` → `started` |
 | `com.complete` | `accepted` or `in_progress` → `completed` / `failed_known`. After an effect began, only an **observed** result settles it |
-| `com.cancel` | `queued` / `claimed` / `accepted` → `cancelled`. After an effect began: → `outcome_unknown`, because a started effect may have happened |
+| `com.cancel` | `queued` / `claimed` / `accepted` / `answered` → `cancelled`. After an effect began: → `outcome_unknown`, because a started effect may have happened |
 | deadline | `queued` / `claimed` → `expired`. Accepted work is **held**, not expired (C4) |
 | responder replaced | `claimed` → `queued`. `accepted` stays accepted; a new responder continues it only by an explicit checkpoint transfer |
 | lost result | `in_progress` → `outcome_unknown` |
 | `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only, by the current responder, or the estate owner when no responder holds the slot (DEC-0081) |
+| answer | `queued` → `answered`: a message from the request's target Project, not itself a request, whose `replyTo` is the request (`com.reply`, or `com.submit` of kind `reply`), in the same transaction as that message (DEC-0098) |
 
 An operator's [hold](#holds) (DEC-0079) is not an operation of this table: it moves no request and changes no revision,
 it refuses some operations while it lasts, and a held request's deadline keeps running. It is not the C4 sense of
 *held* above, in which accepted work outlives its deadline.
 
 `FAC-SEM-027` checks this table. `completed`, `failed_known`, `cancelled` and `expired` are
-terminal. `outcome_unknown` is left only by reconciliation (`com.reconcile`, by the current responder or, while no
+terminal. `answered` is not open: no responder claims it, its deadline no longer expires it, and only the requester's
+`com.cancel` moves it. It says the target answered, never that the asked work was done; a request a responder already
+holds is not answered by a reply. `outcome_unknown` is left only by reconciliation (`com.reconcile`, by the current responder or, while no
 responder holds the slot, the [estate owner](#owner-settlement)), and no expiry, restore, compaction or cancellation
 erases it.
 
 A reply is not a completion. `com.complete` (`comms-complete.schema.json`) names the request
-through its fence.
+through its fence. The target's reply to a `queued` request answers it (above), and nothing else.
 
 ### Owner settlement
 
@@ -351,6 +378,12 @@ communication health without reading any message (Fabric COM-11). It returns:
 
 A host shows a board it cannot reach as unreachable, never as an empty board.
 
+**A host that cannot serve yet** (DEC-0098) answers every call with HTTP 503, a `Retry-After` header and the body
+`comms-host-wait.schema.json`: `code` `stack-starting` while its store starts, `stack-unavailable` after it was lost,
+`retryable: true` and one sentence. It answers before reading the call, the same for every caller, and stores
+nothing, so the caller waits and calls again with the same arguments. It is not a refusal of the call
+(`comms-refusal.schema.json`), and a client shows it as the host starting, not as the board being empty.
+
 ## Tools, arguments and answers
 
 Every tool's arguments are a closed schema (DEC-0073): a member the schema does not name is refused
@@ -361,10 +394,10 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 
 | Tool | Arguments | Answer | Receipt stored |
 |---|---|---|---|
-| `com.submit` | `comms-submit.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at`, and `request` for a request | yes |
+| `com.submit` | `comms-submit.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at`, and `request` for a request, with `noResponder` when nobody can answer it now | yes |
 | `com.list` | `comms-list.schema.json` | `comms-page.schema.json` | — (a read) |
 | `com.get` | `comms-message-ref.schema.json` | `comms-message.schema.json` | — (a read) |
-| `com.read_ack` | `comms-message-ref.schema.json` | `comms-receipt.schema.json`: `message`, `at` | no key and no receipt; marking read twice is one mark |
+| `com.read_ack` | `comms-read-ack.schema.json` | `comms-receipt.schema.json`: `message`, `at` for one message; `marked`, `alreadyRead`, `at` and `more` for a bulk mark | no key and no receipt; marking read twice is one mark |
 | `com.reply` | `comms-reply.schema.json` | `comms-receipt.schema.json`: `message`, `thread`, `at` | yes |
 | `com.cancel` | `comms-cancel.schema.json` | `comms-receipt.schema.json`: `request` | yes |
 | `com.status` | `comms-status-args.schema.json` | `comms-status.schema.json` | — (a read) |

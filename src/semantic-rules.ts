@@ -321,17 +321,20 @@ function commsSubmit(value: JsonObject): Finding[] {
  *  an effect that began and was not observed is `unknown`, and only reconciliation leaves
  *  `outcome_unknown` — by the current responder, or by the estate owner when no responder holds the
  *  slot (DEC-0081). No operation moves `outcome_unknown` to `cancelled`: there is no abandon path.
- *  Accepted work is held on expiry and on responder replacement. */
+ *  Accepted work is held on expiry and on responder replacement. A target's reply answers a queued request (DEC-0098):
+ *  `answered` is left only by the requester's cancel. */
 export const COMMS_TRANSITIONS: Readonly<Record<string, readonly [string, string][]>> = {
   claim: [["queued", "claimed"], ["claimed", "claimed"]],
   accept: [["claimed", "accepted"]],
   effect_begin: [["accepted", "in_progress"]],
   complete: [["accepted", "completed"], ["accepted", "failed_known"], ["in_progress", "completed"], ["in_progress", "failed_known"]],
-  cancel: [["queued", "cancelled"], ["claimed", "cancelled"], ["accepted", "cancelled"], ["in_progress", "outcome_unknown"]],
+  cancel: [["queued", "cancelled"], ["claimed", "cancelled"], ["accepted", "cancelled"], ["answered", "cancelled"], ["in_progress", "outcome_unknown"]],
   expire: [["queued", "expired"], ["claimed", "expired"]],
   replace: [["claimed", "queued"], ["accepted", "accepted"]],
   lost_result: [["in_progress", "outcome_unknown"]],
   reconcile: [["outcome_unknown", "completed"], ["outcome_unknown", "failed_known"]],
+  // DEC-0098: a message from the target Project that is not a request and names a queued request as its replyTo.
+  answer: [["queued", "answered"]],
 };
 
 /** FAC-SEM-027: a transition `{from, op, to}` is in the table; `complete` after an effect began needs `observed`. */
