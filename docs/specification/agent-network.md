@@ -65,18 +65,21 @@ A call to a job-backed capability ([C3.2](interop.md#c32-jobs)) is admitted, que
 the agent, per (`agentRef`, context). The job's schema stays closed and its states stay the MCP Task states, so the
 queue adds no state and no member and needs no new revision of `fabric-interop`.
 
-**The caller.** Every per-caller rule here (`perCaller`, fairness, `fabric.job.list`, another caller's id) keys on
-the authenticated caller DEC-0087's repeated-key rule already keys on ([the provider's answer to a repeated
-key](interop.md#limits-and-uncertain-effects)), written as `jobCallerKey(accepted, credential)`: for a call whose
-delegation token the node accepted (DL-9, or `Fabric-Delegation` on a call the hub forwards, DL-10), the pair
-`verifyDelegation` names, `principal` (the token's `sub`) and `caller` (the outermost actor); otherwise the
-credential the node knows the caller by (a T0 or T1 call with no token, DL-26; a stdio caller is its connection). So
-an owner's agent and a partner's agent under the same `sub` are two callers and neither reads the other's jobs, and
-two people the hub forwards under one credential are two callers once it attaches their tokens. Fabric's hub
+**The caller.** A node that queues keys every per-caller rule here (`perCaller`, fairness, `fabric.job.list`,
+another caller's id) and its repeated keys ([the provider's answer to a repeated key](interop.md#limits-and-uncertain-effects))
+with `jobCallerKey(accepted, credential)`: for a call whose delegation token it accepted (DL-9, or
+`Fabric-Delegation` on a call the hub forwards, DL-10), what `verifyDelegation` names, `principal` (the token's
+`sub`) and `caller` (the outermost actor), and the partner organization when the chain ends in one (DEC-0090); for a
+call that presented no token, the credential it knows the caller by (T0 or T1, DL-26; a stdio caller is its
+connection). A call whose token it refused is refused, never keyed. So an owner's agent and a partner's agent are two
+callers even under one `sub` and one agent id, and neither reads the other's jobs; two people the hub forwards under
+one credential are two callers once it attaches their tokens; an agent's sessions share its jobs. A provider that
+does not queue keeps its repeated keys as DEC-0087 left them. Fabric's hub
 attaches no `Fabric-Delegation` today, so until it does every call it forwards is one caller at the node, its
-credential. A caller polls the way it started: a start with a token and a poll without one are two callers.
+credential. The same holds for local callers that present one credential, the descriptor token under the default
+MCP auth among them: they are one caller. A caller polls the way it started: a start with a token and a poll without one are two callers.
 
-**Limits.** A node declares its limits in the [load extension](#load): `concurrency` (jobs run at once), `perCaller`
+**Limits.** A node that queues declares its limits in the [load extension](#load), which it therefore carries: `concurrency` (jobs run at once), `perCaller`
 (jobs of one authenticated caller run at once) and `queueMax` (jobs that may wait), each per (`agentRef`, context).
 
 **A waiting job** is `working` and its `statusMessage` is `queued <position> of <length>`, position 1 next, both
@@ -110,7 +113,7 @@ provider's other refusals keep their own shapes. A validating client that listed
 `structuredContent` outside the tool's `outputSchema` (`interop-job-tool-output`); the node therefore also writes
 the same JSON as the result's text content, which every client reads. The caller starts again after
 `retryAfterSeconds` under the same idempotency key ([the intent's key](interop.md#limits-and-uncertain-effects)); the
-key holds no job, so the start runs. `queue-full` never ends a job: `interop-job.schema.json` refuses a job's `error`
+key holds no job, so the start is admitted or refused as any new start. `queue-full` never ends a job: `interop-job.schema.json` refuses a job's `error`
 with that code, and `jobCallerAction` answers `invalid` for one. It is a job tool's code, outside the delegation
 refusals' set ([delegation](delegation.md)), as `unknown-job` is.
 
@@ -142,9 +145,9 @@ under the descriptor's `auth.tokenFile` like the [usage report](service.md): `ge
 waitMs?, runMs?}`. `queued` and `running` are counts at the window's end; `completed` and `failed` count jobs that ended
 in the window (a cancelled job is not counted); `waitMs` is the `{p50, p95}` queue wait of the jobs that started in the
 window and `runMs` the run time of those that ended, each absent when there were none. Counts and durations only: no
-person, caller, prompt, output or job id. The report stays with the host that holds the descriptor token, which
-alone reads the endpoints that token guards (service.md, the descriptor token is the host's): it is never sent to an
-organization server, and an organization's own view of an agent's load is not decided here.
+person, caller, prompt, output or job id. Reading it takes the descriptor token ([service](service.md#mcp-credentials),
+DL-12): the host holds it, and so does every MCP client configured with it under the default `surfaces.mcp.auth`. It
+is never sent to an organization server, and an organization's own view of an agent's load is not decided here.
 
 The extension describes one service: its `limits` apply to every agent it hosts alike, and its report sums them per
 context. A node that hosts several agents with their own limits serves one well-known document per agent service.
@@ -168,8 +171,9 @@ A refused start (`queue-full`) and a cancelled job are counted in no row in this
 
 ## Compatibility
 
-Additive, with two narrowings. A node that does not queue serves no load extension and no `fabric.job.list`, and its
-callers see what they see today; the caller key is the one DEC-0087 and `verifyDelegation` already name. `queue-full`
+Additive, with two narrowings. A node that does not queue serves no load extension and no `fabric.job.list`, keeps
+its repeated keys as before, and its callers see what they see today; a node that starts to queue adopts
+`jobCallerKey` with it. `queue-full`
 is a new error code: a caller that does not know it treats it as any failed start. The narrowings: `queue-full` is
 reserved, so a job error with that code, valid before, is refused and `jobCallerAction` answers `invalid`; and its
 `data` is required. One provider of the estate already answers a full queue with `queue-full` and no `data`: a
@@ -185,11 +189,17 @@ validating caller reads that answer as malformed until the provider adds `data` 
 | a node hosting an agent | keys callers with `jobCallerKey`; queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
 | a caller (the one that started the call, not the hub that forwarded it) | waits on a queued job like any `working` job, and starts again after `queue-full`'s `retryAfterSeconds` under the same key |
 | Fabric Dashboards | draws the load panels from `service-load/1` |
-| fabric-agent-adapter's kits | at the re-pin: `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |
+| fabric-agent-adapter's kits | at the re-pin: a kit-built node that queues ports `jobCallerKey` (the caller vectors) and keys a call with no token by its credential; `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |
 
 Each runs [`fixtures/vectors/agent-network.json`](../../fixtures/vectors/agent-network.json) in its gate.
 
 ## Not decided here
+
+- Whether the operator credential of a node that queues reads every caller's jobs (a provider whose operator key sees
+  every job keeps that view only while it does not queue).
+- What `usage.wallMs` of a job that waited measures (its run alone, or the wait too).
+- How the queue's message, `queue-full` and `fabric.job.list` travel on the MCP Task route (C3.2); the rules here bind
+  the `fabric.job.*` route.
 
 - Partner scopes (DEC-0090) in a directory: a partner's own view of the agents it may call is the partner channel's,
   not a third source here; a later revision may add one.

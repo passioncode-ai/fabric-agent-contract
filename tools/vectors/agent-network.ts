@@ -103,14 +103,16 @@ function admitCases(): Json[] {
 
 function callerCases(): Json[] {
   const owner = "urn:fabric:person:example:owner";
-  const accepted = (principal: string, caller: string) => ({ ok: true, principal, caller });
+  const accepted = (principal: string, caller: string, chain: string[] = [caller]) => ({ ok: true, principal, caller, chain });
   const cases: Array<[string, unknown, unknown, string | null]> = [
-    ["the owner's own agent under a token", accepted(owner, "urn:fabric:agent:example:writer"), "hub-credential", '["delegated","urn:fabric:person:example:owner","urn:fabric:agent:example:writer"]'],
-    ["a partner's agent under the same sub is another caller", accepted(owner, "urn:fabric:agent:partner:assistant"), "hub-credential", '["delegated","urn:fabric:person:example:owner","urn:fabric:agent:partner:assistant"]'],
-    ["another person behind the same hub credential is another caller", accepted("urn:fabric:person:example:guest", "urn:fabric:agent:example:writer"), "hub-credential", '["delegated","urn:fabric:person:example:guest","urn:fabric:agent:example:writer"]'],
+    ["the owner's own agent under a token", accepted(owner, "writer"), "hub-credential", '["delegated","urn:fabric:person:example:owner","writer"]'],
+    ["another agent of the owner is another caller", accepted(owner, "assistant"), "hub-credential", '["delegated","urn:fabric:person:example:owner","assistant"]'],
+    ["a partner's agent with the owner's agent id under the same sub is another caller", accepted(owner, "writer", ["writer", "org:partner_7k"]), "hub-credential", '["delegated","urn:fabric:person:example:owner","writer","org:partner_7k"]'],
+    ["another person behind the same hub credential is another caller", accepted("urn:fabric:person:example:guest", "writer"), "hub-credential", '["delegated","urn:fabric:person:example:guest","writer"]'],
+    ["a chain of agents keys on its outermost actor", accepted(owner, "writer", ["writer", "planner"]), "hub-credential", '["delegated","urn:fabric:person:example:owner","writer"]'],
     ["no token: the credential (T0, T1, DL-26)", undefined, "local-session-7", '["credential","local-session-7"]'],
-    ["a token the node did not accept: the credential", { ok: false, code: "token-invalid" }, "local-session-7", '["credential","local-session-7"]'],
-    ["an empty principal: the credential", accepted("", "urn:fabric:agent:example:writer"), "local-session-7", '["credential","local-session-7"]'],
+    ["a refused token has no key: the call is refused (DL-10)", { ok: false, code: "token-invalid" }, "local-session-7", null],
+    ["an empty principal has no key", accepted("", "writer"), "local-session-7", null],
     ["neither readable", undefined, "", null]
   ];
   return cases.map(([name, acceptedValue, credential, expected]) => ({ name, accepted: acceptedValue, credential, expected }));
@@ -132,7 +134,7 @@ function positionCases(): Json[] {
 
 export function buildAgentNetworkVectors(): string {
   const vectors = {
-    $comment: "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). caller: jobCallerKey(accepted, credential), accepted shaped as verifyDelegation answers. position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
+    $comment: "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). caller: jobCallerKey(accepted, credential), accepted shaped as verifyDelegation answers; a key is JSON.stringify of an array (no whitespace, no ASCII escaping), opaque, compared for equality only. position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
     estate: estateCases(),
     organization: organizationCases(),
     queue: queueCases(),

@@ -96,14 +96,23 @@ function directoryRule(value: Json): Finding[] {
 // --- The call queue (fabric-interop, DEC-0104) ---
 
 /**
- * The key of a job's caller (DEC-0104), the same caller DEC-0087's repeated-key rule keys on: for a call whose delegation
- * token the node accepted, the pair `verifyDelegation` names (`principal`, the token's `sub`, and `caller`, the outermost
- * actor); otherwise the authenticated credential the node knows the caller by (a T0 or T1 call with no token, DL-26).
- * So an owner's agent and a partner's agent under the same `sub` are two callers, and so are two people the hub forwards
- * under one credential once it attaches their tokens (DL-10). `undefined` when neither is readable. It never throws.
+ * The key of a job's caller at a node that queues (DEC-0104): for a call whose delegation token the node accepted, what
+ * `verifyDelegation` names, `principal` (the token's `sub`) and `caller` (the outermost actor), and the partner
+ * organization when the chain ends in one (DEC-0090); for a call that presented no token, the authenticated credential
+ * the node knows the caller by (T0 or T1, DL-26). So an owner's agent and a partner's agent are two callers even under
+ * one `sub` and one agent id, and two people the hub forwards under one credential are two callers once it attaches
+ * their tokens (DL-10). A refused verdict (`ok: false`) has no key: that call is refused, never keyed (DL-10). A
+ * session is not a caller of its own: an agent's sessions share its jobs. `undefined` when nothing is readable. The key
+ * is opaque; only equality matters. It never throws.
  */
 export function jobCallerKey(accepted: unknown, credential: unknown): string | undefined {
-  if (isObject(accepted) && accepted.ok === true && isString(accepted.principal) && accepted.principal !== "" && isString(accepted.caller) && accepted.caller !== "") return JSON.stringify(["delegated", accepted.principal, accepted.caller]);
+  if (isObject(accepted)) {
+    if (accepted.ok !== true || !isString(accepted.principal) || accepted.principal === "" || !isString(accepted.caller) || accepted.caller === "") return undefined;
+    const chain = Array.isArray(accepted.chain) ? accepted.chain : [];
+    const last = chain[chain.length - 1];
+    const partner = chain.length > 1 && isString(last) && last.startsWith("org:") ? [last] : [];
+    return JSON.stringify(["delegated", accepted.principal, accepted.caller, ...partner]);
+  }
   return isString(credential) && credential !== "" ? JSON.stringify(["credential", credential]) : undefined;
 }
 

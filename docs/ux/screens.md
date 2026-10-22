@@ -330,7 +330,7 @@
 
 - **Used by:** FLW-24
 - **Purpose:** the person sees how busy an agent is.
-- **Elements:** per window and context: queued, running, completed, failed; p50 and p95 wait and run time; the queue's limits.
+- **Elements:** per window and context: queued, running (jobs waiting on a person or paused at a limit included), completed, failed; p50 and p95 wait and run time; the queue's limits, which apply to each agent the service hosts while the rows sum them.
 - **States:** success, windows drawn; empty, the service declares no load; invalid, the declaration is not its schema's and the reasons are shown.
 - **Coverage:** `src/agent-network.ts` (`FAC-SEM-132`, `FAC-SEM-133`), `test/agent-network.test.ts`
 - **Scenarios:** SCN-035

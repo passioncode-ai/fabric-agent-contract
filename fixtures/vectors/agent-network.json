@@ -1,5 +1,5 @@
 {
-  "$comment": "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). caller: jobCallerKey(accepted, credential), accepted shaped as verifyDelegation answers. position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
+  "$comment": "Vectors for DEC-0104 (agent-network.md), written by tools/vectors/agent-network.ts, never by hand. estate: estateDirectory(record, unlisted). organization: organizationDirectory(orgId, held, own, unlisted, viewer, at); held is what decideShareRegistration keeps. queue: nextQueuedJob(queue, running, limits) is the id to start, null for none. admit: admitJob(queue, running, job, limits, retryAfterSeconds). caller: jobCallerKey(accepted, credential), accepted shaped as verifyDelegation answers; a key is JSON.stringify of an array (no whitespace, no ASCII escaping), opaque, compared for equality only. position: readQueuePosition(statusMessage). expected is exactly what the reference returns, with null for undefined; entries are sorted by context, then agentRef, as UTF-16 code units.",
   "estate": [
     {
       "name": "one personal placement",
@@ -1094,30 +1094,67 @@
       "accepted": {
         "ok": true,
         "principal": "urn:fabric:person:example:owner",
-        "caller": "urn:fabric:agent:example:writer"
+        "caller": "writer",
+        "chain": [
+          "writer"
+        ]
       },
       "credential": "hub-credential",
-      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"urn:fabric:agent:example:writer\"]"
+      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"writer\"]"
     },
     {
-      "name": "a partner's agent under the same sub is another caller",
+      "name": "another agent of the owner is another caller",
       "accepted": {
         "ok": true,
         "principal": "urn:fabric:person:example:owner",
-        "caller": "urn:fabric:agent:partner:assistant"
+        "caller": "assistant",
+        "chain": [
+          "assistant"
+        ]
       },
       "credential": "hub-credential",
-      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"urn:fabric:agent:partner:assistant\"]"
+      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"assistant\"]"
+    },
+    {
+      "name": "a partner's agent with the owner's agent id under the same sub is another caller",
+      "accepted": {
+        "ok": true,
+        "principal": "urn:fabric:person:example:owner",
+        "caller": "writer",
+        "chain": [
+          "writer",
+          "org:partner_7k"
+        ]
+      },
+      "credential": "hub-credential",
+      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"writer\",\"org:partner_7k\"]"
     },
     {
       "name": "another person behind the same hub credential is another caller",
       "accepted": {
         "ok": true,
         "principal": "urn:fabric:person:example:guest",
-        "caller": "urn:fabric:agent:example:writer"
+        "caller": "writer",
+        "chain": [
+          "writer"
+        ]
       },
       "credential": "hub-credential",
-      "expected": "[\"delegated\",\"urn:fabric:person:example:guest\",\"urn:fabric:agent:example:writer\"]"
+      "expected": "[\"delegated\",\"urn:fabric:person:example:guest\",\"writer\"]"
+    },
+    {
+      "name": "a chain of agents keys on its outermost actor",
+      "accepted": {
+        "ok": true,
+        "principal": "urn:fabric:person:example:owner",
+        "caller": "writer",
+        "chain": [
+          "writer",
+          "planner"
+        ]
+      },
+      "credential": "hub-credential",
+      "expected": "[\"delegated\",\"urn:fabric:person:example:owner\",\"writer\"]"
     },
     {
       "name": "no token: the credential (T0, T1, DL-26)",
@@ -1125,23 +1162,26 @@
       "expected": "[\"credential\",\"local-session-7\"]"
     },
     {
-      "name": "a token the node did not accept: the credential",
+      "name": "a refused token has no key: the call is refused (DL-10)",
       "accepted": {
         "ok": false,
         "code": "token-invalid"
       },
       "credential": "local-session-7",
-      "expected": "[\"credential\",\"local-session-7\"]"
+      "expected": null
     },
     {
-      "name": "an empty principal: the credential",
+      "name": "an empty principal has no key",
       "accepted": {
         "ok": true,
         "principal": "",
-        "caller": "urn:fabric:agent:example:writer"
+        "caller": "writer",
+        "chain": [
+          "writer"
+        ]
       },
       "credential": "local-session-7",
-      "expected": "[\"credential\",\"local-session-7\"]"
+      "expected": null
     },
     {
       "name": "neither readable",

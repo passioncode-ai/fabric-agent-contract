@@ -6447,9 +6447,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `perCaller` and `queueMax`. A waiting job stays `working` with `statusMessage` `queued <position> of <length>`. The
      next job is `nextQueuedJob`'s: nothing at the concurrency limit; of the callers below their own limit, the one
      running the fewest; then the oldest arrival; then the id; every running job holds a slot. Every per-caller rule
-     keys on the caller DEC-0087's repeated key already keys on, written as `jobCallerKey`: for an accepted delegation
-     token, `verifyDelegation`'s `principal` and `caller` (the outermost actor), else the credential; so a partner's
-     agent and the owner's under one `sub` are two callers. `FAC-SEM-131` (kind `job-queue`). A start whose
+     and the node's repeated keys key on `jobCallerKey`: for an accepted delegation token, `verifyDelegation`'s
+     `principal` and `caller` (the outermost actor) and the partner organization a chain ends in, else the credential of
+     a call with no token; a refused token is refused, never keyed. A provider that does not queue keeps its keys as
+     DEC-0087 left them. `FAC-SEM-131` (kind `job-queue`). A start whose
      job would not start at once and that finds `queueMax` jobs waiting is refused (`admitJob`), nothing started or stored, with `queue-full` and `data: {retryable: true,
      retryAfterSeconds}` (1 to 3600), an `isError` result shaped by `interop-tool-error.schema.json`; the
      caller starts again after it under the same key, and the hub relays it unchanged and keeps no key for it.

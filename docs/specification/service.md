@@ -393,11 +393,11 @@ only shows them.
 
 ### Load
 
-A service that queues calls to its agents (DEC-0104) MAY carry the extension key
+A service that queues calls to its agents (DEC-0104) carries the extension key, where it declares the queue's limits,
 `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` in its well-known document, `{path, windowSeconds,
 limits}`, and serve at `path`, under the same `auth.tokenFile` as this report, a `service-load/1` report: queued,
 running, completed and failed jobs per window and context, with p50 and p95 wait and run time, and no person, caller or
-prompt. The [agent network](agent-network.md#load) defines both, `FAC-SEM-132` and `FAC-SEM-133`; the usage report is unchanged.
+prompt. A service that does not queue carries neither. The [agent network](agent-network.md#load) defines both, `FAC-SEM-132` and `FAC-SEM-133`; the usage report is unchanged.
 
 ## Operator login
 
@@ -793,7 +793,7 @@ supervisor, rather than as a stdio server each session starts (LC-19, [profiles]
 ### MCP credentials (DEC-0024)
 
 The descriptor's token is the **host's** credential: the well-known document of a remote
-placement, the events feed, the usage report and the operator login code. By default
+placement, the events feed, the usage report, the load report (DEC-0104) and the operator login code. By default
 (`surfaces.mcp.auth` absent or `descriptor`) the MCP surface takes the same token in the declared
 header.
 

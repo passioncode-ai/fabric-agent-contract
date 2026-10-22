@@ -147,7 +147,7 @@ callee, enforces attenuation:
   line or a usage report. `readDelegationToken` reads the two headers, `Fabric-Delegation` first.
 - **DL-12 — The descriptor token is the host's.** A service's descriptor token
   ([service](service.md#mcp-credentials)) is the host's credential for the well-known document, the events
-  feed, the usage report and the login code. It is not presented to call a capability once the caller can
+  feed, the usage report, the load report (DEC-0104) and the login code. It is not presented to call a capability once the caller can
   mint: calling a service's capability with that service's own descriptor token is retired by this profile
   **across the machine boundary** (DL-25; existing callers switch when the issuer exists). On the operator's own
   machine it stays attribution hygiene, not a requirement: a caller SHOULD NOT call a capability with another

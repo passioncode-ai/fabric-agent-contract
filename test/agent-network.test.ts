@@ -106,6 +106,11 @@ describe("the reference functions", () => {
     expect(admitJob([], [], { id: "jn" }, { concurrency: 1, perCaller: 1, queueMax: 5 }, 9)).toMatchObject({ admit: false, error: { data: { retryAfterSeconds: 9 } } });
     expect(admitJob([], [], null, { concurrency: 1, perCaller: 1, queueMax: 5 }, 1.5)).toMatchObject({ admit: false, error: { data: { retryAfterSeconds: 60 } } });
   });
+  it("jobCallerKey reads a chain that is absent, not a list or not ending in a partner as no partner", () => {
+    const base = { ok: true, principal: "urn:fabric:person:example:owner", caller: "writer" };
+    const key = '["delegated","urn:fabric:person:example:owner","writer"]';
+    for (const chain of [undefined, "writer", ["writer"], ["writer", 7], ["writer", "planner"], ["org:solo"]]) expect(jobCallerKey({ ...base, chain }, "c")).toBe(key);
+  });
   it("queueStatusMessage writes what readQueuePosition reads", () => {
     expect(readQueuePosition(queueStatusMessage(2, 5))).toEqual({ position: 2, length: 5 });
     for (const [p, l] of [[0, 3], [1.5, 3], [4, 3], [1, 1000000]]) expect(queueStatusMessage(p as number, l as number)).toBeUndefined();

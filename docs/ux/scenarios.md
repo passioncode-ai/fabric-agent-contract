@@ -548,7 +548,7 @@ independent agent author and P-02 project operator.
   3. One of A's jobs ends -> B's job starts first, though A's arrived earlier: B runs none, A still runs one.
   4. The next slot frees -> A's third job starts and completes once.
 - **Expected result:** a burst of calls waits in line, each caller sees its place, and no caller holds the agent alone.
-- **Alt paths:** the queue already holds three -> the start is refused with `queue-full` and `retryAfterSeconds: 30`, nothing stored; the caller starts again after 30 seconds under the same key and that start runs once.
+- **Alt paths:** the queue already holds three -> the start is refused with `queue-full` and `retryAfterSeconds: 30`, nothing stored; the caller starts again after 30 seconds under the same key and, with room in the queue or a free slot, that start runs once. Through Fabric's hub before CO-376 the caller sees `product-error` instead, and the hub replays it under the key for 24 hours.
 - **UI elements:** the job's status message; the refusal's time to start again.
 - **States covered:** success, error
 - **Errors & recovery:** a job that `queue-full` ended -> malformed (`jobCallerAction` answers `invalid`); the caller reports it and starts nothing new under another key.
@@ -566,7 +566,7 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. Operator opens the panel -> the last windows, per context: queued, running, completed, failed, wait and run time.
   2. A window with jobs waiting in the organization's context -> it stands out, with its p95 wait.
-- **Expected result:** the operator sees where and when an agent was saturated, with no person, caller or prompt shown.
+- **Expected result:** the operator sees the queued and running jobs at each window's end and the wait and run times, per context, with no person, caller or prompt shown; refused starts are not shown in this revision.
 - **Alt paths:** an agent that declares no load -> the panel says so. A declaration that is not its schema's -> the panel shows nothing of it and says why (`FAC-SEM-133`).
 - **UI elements:** the windows, the per-context rows, the limits.
 - **States covered:** success, empty, invalid
