@@ -522,6 +522,12 @@ directory in its slash or dash form (`Users/<name>`, `-Users-<name>-`), before o
 
 <a id="health"></a>
 
+**A node's summary and repairs** (DEC-0101). A check-in MAY carry `records.nodeSummary`, the node's `node-summary/1`
+for this organization, and `records.repairResults`, its answers to repairs; a check-in response MAY carry
+`records.repairs`, signed `repair-request/1` documents. The policy keys `harness.baseline` and `repair.packages` state
+what the organization expects the harness to be and which packages a repair may run. All of it is on
+[node summary](node-summary.md).
+
 ## Health
 
 Schema: [`device-health.schema.json`](../../schemas/device-health.schema.json).

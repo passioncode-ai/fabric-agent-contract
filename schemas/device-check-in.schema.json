@@ -324,6 +324,18 @@
                 "additionalProperties": false
               },
               "description": "The window leases the device's meter holds (window-lease/1, DEC-0062), each by leaseId and expiresAt, with what it spent."
+            },
+            "nodeSummary": {
+              "$ref": "node-summary.schema.json",
+              "description": "DEC-0101: the node's summary of its harness for this enrollment's organization, when it changed or at least once a day."
+            },
+            "repairResults": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "$ref": "repair-result.schema.json"
+              },
+              "description": "DEC-0101: the node's answers to repairs it received, each once."
             }
           },
           "additionalProperties": false,
@@ -422,6 +434,14 @@
                 "$ref": "window-lease.schema.json",
                 "description": "A window lease (window-lease/1, DEC-0062), carried unchanged; the device's meter verifies it before it spends against it."
               }
+            },
+            "repairs": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "repair-request.schema.json"
+              },
+              "description": "DEC-0101: repairs the organization asks of this node, each signed by a key of the current policy key set, carried unchanged."
             }
           },
           "additionalProperties": false,

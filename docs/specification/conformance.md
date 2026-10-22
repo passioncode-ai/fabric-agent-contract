@@ -288,7 +288,7 @@ and DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-128` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-130` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -417,6 +417,8 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-125` | `device-rotation` | [devices](devices.md#semantic-rules) | SEM-0125 |
 | `FAC-SEM-126` | `support-quality-daily` | [support quality](support-quality.md#semantic-rules) | SEM-0126 |
 | `FAC-SEM-127` | `service-well-known` | [connections](connections.md#semantic-rules) | SEM-0127 |
+| `FAC-SEM-128` | `node-summary` | [node summary](node-summary.md#semantic-rules) | SEM-0128 |
+| `FAC-SEM-129` | `repair-run` | [node summary](node-summary.md#semantic-rules) | SEM-0129 |
 
 ## Compatibility policy
 
