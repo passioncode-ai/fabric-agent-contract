@@ -37,7 +37,8 @@ installed for another context. Until the operator answers, the whole harness shi
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
 or space, by schema; no string holds a home directory, the dash forms runtimes write into file names included after
 any character that is not an ASCII letter or digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
-output or a file's content. A personal agent service is not listed toward an organization; the organization sees the
+output or a file's content, and no member that says the summary is withheld (DEC-0105). A personal agent service is
+not listed toward an organization; the organization sees the
 machine's harness because the operator decided work machines are transparent to their organization (S8), named as a
 purpose in its notice.
 
@@ -100,5 +101,5 @@ reason. How the person is told, and the package's own run, are the node's.
 - How often a server may ask for a summary, and how long it keeps one: the organization's retention.
 - What a server shows, and to whom: its own interface, under its notice.
 - Whether a node may withhold its summary from an organization, or leave names out, by the person's choice: until
-  the operator answers CT-92 the whole harness ships (S8). No member says "not shared": a server that has no summary
-  from a node within a day knows it has none (DEC-0105).
+  the operator answers CT-92 the whole harness ships (S8), and a server that has no summary from a node within a day
+  knows it has none (DEC-0105).
