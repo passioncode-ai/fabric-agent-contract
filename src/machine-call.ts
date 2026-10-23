@@ -65,9 +65,9 @@ export function relayCallerTier(input: { applied: unknown; self: unknown; from: 
   const machine = input.from.slice(0, -"#sig".length);
   const record = admission.held;
   const revoked = new Set([...list(record.revocations), ...extra].filter((entry) => entry.kind === "device-key").map((entry) => entry.ref));
-  const own = list(record.machines).find((entry) => entry.id === machine);
-  // A kid listed twice names no key a sealer could resolve again unambiguously, so it names none (as the #sig path, F7).
-  const kemKeys = list(own?.deviceKeys).filter((key) => key.kid === `${machine}#kem`);
+  // A kid listed twice anywhere in the record names no key a sealer could resolve again unambiguously, so it names none
+  // (as the #sig path, F7, relay.ts).
+  const kemKeys = list(record.machines).flatMap((entry) => list(entry.deviceKeys)).filter((key) => key.kid === `${machine}#kem`);
   const kemKey = kemKeys.length === 1 && kemKeys[0]?.use === "kem" ? kemKeys[0] : undefined;
   let kem: string | undefined;
   if (kemKey && canonicalBase64(kemKey.publicKey)) {
@@ -136,8 +136,15 @@ export function sealAgentCall(message: unknown, ctx: { from: unknown; to: unknow
   }
   if (plaintext.length > MAX_AGENT_CALL_BYTES) return { ok: false, refusal: "too-large" };
   const kind = message.kind as "call" | "answer";
+  let aad: Buffer;
   try {
-    const { enc, ct } = hpkeSealBase(key, INFO, agentCallAad({ kind, from: ctx.from, to: ctx.to, msgId: ctx.msgId, kem: kid }), plaintext, ctx.ephemeral);
+    aad = agentCallAad({ kind, from: ctx.from, to: ctx.to, msgId: ctx.msgId, kem: kid });
+  } catch {
+    // A string with a lone surrogate has no RFC 8785 form.
+    return { ok: false, refusal: "malformed" };
+  }
+  try {
+    const { enc, ct } = hpkeSealBase(key, INFO, aad, plaintext, ctx.ephemeral);
     return { ok: true, sealed: { type: AGENT_CALL_TYPE, kind, kem: kid, enc: enc.toString("base64url"), ct: ct.toString("base64url") } };
   } catch {
     return { ok: false, refusal: "bad-key" };

@@ -124,10 +124,12 @@ reads neither ([`agent-call-sealed.schema.json`](../../schemas/agent-call-sealed
    the caller's `#kem` as `relayCallerTier` named it.
 4. Otherwise the call runs, and its answer is sealed the same way.
 
-A refusal that is not answered is logged with its code and `msgId`, and the delivery is acknowledged so the relay stops
+This order is the node's duty: the four functions are the reference for each step, and no reference function composes
+them. A refusal that is not answered is logged with its code and `msgId`, and the delivery is acknowledged so the relay stops
 redelivering. A caller that has no answer by its body's signed `exp` treats the call as failed: it never learns which
 of these happened, and an unanswered call is retried under the same idempotency key, as any call whose outcome is
-unknown. A machine with no usable `#kem` is neither called nor answered: a caller seals only to a usable `#kem` and
+unknown. A call whose capability has an effect therefore carries `idempotencyKey` (optional in `agent.call`): one
+retried without it may run twice. A machine with no usable `#kem` is neither called nor answered: a caller seals only to a usable `#kem` and
 calls only from a machine that has one.
 
 ## Semantic rules

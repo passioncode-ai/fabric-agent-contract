@@ -248,7 +248,8 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
     revoked: `relayCallerTier` places it, and `machineCallVerdict` judges its call by the two machines' profiles
     ([machine calls](machine-calls.md), DEC-0106). DL-26 applies.
   - **T2** is anything else. That includes a machine listed only in an organization record, to a recipient of another
-    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies.
+    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
+    relay from outside the estate are not decided ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 
 ## The secret envelope
 

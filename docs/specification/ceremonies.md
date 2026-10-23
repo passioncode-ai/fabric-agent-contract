@@ -307,7 +307,10 @@ A machine that becomes `member` gives up the hub key in the same revision (the h
 `from` (`FAC-SEM-134`). A node that applies the revision judges the next call it receives by the new profile; a call it
 accepted before keeps running. Until each node applies it, a node still on the parent judges calls by the old profile,
 so a machine made `view` can still be called with an effect there; the revision reaches every machine with the next
-heartbeat, which a running hub signs right after every revision (DEC-0054). Fabric writes no `profile` until every reader of its records is pinned at or after
+heartbeat, which a running hub signs right after every revision (DEC-0054); with no running hub, the old profile holds
+until the node's delta stops being current, after which it refuses every call from another machine. A change that
+makes the hub's machine `member` or `view` waits for the hub to move first (`FAC-SEM-134` refuses a hub key on either;
+CT-89). Fabric writes no `profile` until every reader of its records is pinned at or after
 DEC-0106 ([machine calls](machine-calls.md#compatibility)).
 
 ## Linkability

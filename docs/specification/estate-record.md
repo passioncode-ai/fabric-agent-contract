@@ -118,7 +118,7 @@ kept outside the signed record, so the record carries no label a person chose:
   context) (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
   `estate-placement`). The value travels sealed to this machine's `#kem` key (v4 Path 2 step 3), never in the record.
 - **`profile`**: what the machine may do (DEC-0106): `full` (absent means `full`), `member` (no hub key) or `view` (no
-  placement, no secret, no hub key, never a secret's `from`; it calls and is called only to read). `FAC-SEM-134` checks
+  placement, no secret, no hub key, never a secret's `from`; over the relay it calls and is called only to read). `FAC-SEM-134` checks
   it; [machine calls](machine-calls.md#machine-profiles) says what each profile allows on a call between machines.
 
 ## Share grants

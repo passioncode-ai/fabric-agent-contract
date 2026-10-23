@@ -102,6 +102,7 @@ function callerCases(): Json[] {
     ["a #kem that is no point of the curve: no kem", { from: "m-f#sig" }, t1("m-f", "full")],
     ["full written out", { from: "m-g#sig" }, t1("m-g", "full", "m-g#kem")],
     ["a #kem kid listed twice names no kem", { from: "m-a#sig", applied: twiceKem() }, t1("m-a", "full")],
+    ["a #kem kid listed again under another machine names no kem", { from: "m-a#sig", applied: kemElsewhere() }, t1("m-a", "full")],
     ["a #kem not in canonical base64 names no kem", { from: "m-a#sig", applied: looseKem() }, t1("m-a", "full")],
     ["a #kem a delta revokes by its key reference: no kem", { from: "m-g#sig", revocations: [{ kind: "device-key", ref: ref("m-g#kem", K.gKem), revokedAt: REVOKED_AT }] }, t1("m-g", "full")],
     ["a #sig a delta revokes: not T1", { from: "m-d#sig", revocations: [{ kind: "device-key", ref: "m-d#sig", revokedAt: REVOKED_AT }] }, notT1],
@@ -128,6 +129,13 @@ function callerCases(): Json[] {
 function twiceKem(): Json {
   const rec = record();
   ((rec.machines as Json[])[0]!.deviceKeys as Json[]).push(kem("m-a", K.gKem));
+  return rec;
+}
+
+/** The shared record with `m-a#kem` listed again under `m-d`. */
+function kemElsewhere(): Json {
+  const rec = record();
+  ((rec.machines as Json[])[3]!.deviceKeys as Json[]).push(kem("m-a", K.gKem));
   return rec;
 }
 
@@ -236,7 +244,8 @@ function sealCases(): Json[] {
     ["a recipient kid that is no #kem", callMessage(), ctx({ recipient: { kid: "m-b#sig", publicKey: K.bKem.octets } }), { ok: false, refusal: "bad-key" }],
     ["a recipient key that is no point of the curve", callMessage(), ctx({ recipient: { kid: B_KEM, publicKey: offCurve(K.bKem) } }), { ok: false, refusal: "bad-key" }],
     ["a recipient key with a character base64 ignores", callMessage(), ctx({ recipient: { kid: B_KEM, publicKey: `!${K.bKem.octets}` } }), { ok: false, refusal: "bad-key" }],
-    ["no msgId", callMessage(), ctx({ msgId: undefined }), { ok: false, refusal: "malformed" }]
+    ["no msgId", callMessage(), ctx({ msgId: undefined }), { ok: false, refusal: "malformed" }],
+    ["a msgId with a lone surrogate has no RFC 8785 form", callMessage(), ctx({ msgId: "msg-\ud800" }), { ok: false, refusal: "malformed" }]
   ];
   return cases.map(([name, message, context, expect]) => ({ name, message, context, expect }));
 }

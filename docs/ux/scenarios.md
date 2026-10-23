@@ -592,7 +592,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the target's delta is not current -> refused `unknown-state`, logged and not answered; no fallback to T2. The sender's machine was revoked -> not T1, refused and not answered. A sealed call copied into another body -> `cannot-open`, logged and not answered. In each, the caller has no answer by the body's `exp` and treats the call as failed. A machine with no `#kem` -> neither called nor answered, so it does not call.
 - **UI elements:** the caller's job status; the refusal's code and reason.
 - **States covered:** success, error
-- **Errors & recovery:** an answered refusal names its code (`profile-forbids`, or the token's); the caller calls from a `full` or `member` machine. An unanswered call reads as failed at its `exp`; the caller retries under the same idempotency key once the target's delta is current, or asks the person to look at the target machine.
+- **Errors & recovery:** an answered refusal names its code (`profile-forbids`, or the token's); the caller calls from a `full` or `member` machine. An unanswered call reads as failed at its `exp`; the caller retries it under the same idempotency key, or asks the person to look at the target machine.
 - **Status:** draft
 - **Coverage:** DEC-0106, `FAC-SEM-135`, `FAC-SEM-136`, `relayCallerTier`, `machineCallVerdict`, `sealAgentCall`, `openAgentCall` in `src/machine-call.ts`, `fixtures/vectors/machine-call.json`, `test/machine-call.test.ts`
 - **Product:** unobserved
@@ -824,7 +824,7 @@ independent agent author and P-02 project operator.
   1. The person picks "Change profile" on `m-b` and chooses `view` -> the drafter removes `m-b`'s placement and secret placement in the same revision.
   2. The person signs it with a passkey -> the list shows `m-b` as `view`; every node applies the revision.
   3. An agent on `m-a` calls `m-b` with a capability that changes something -> refused `profile-forbids`.
-- **Expected result:** the machine runs no agent, holds no secret and takes no call that changes anything, by the signed record alone.
+- **Expected result:** by the signed record alone, the machine holds no placement, no secret and no hub key, and sends or takes no call over the relay that changes anything.
 - **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> `FAC-SEM-134` refuses a member with a hub key, so the hub moves first (CT-89). A record written before profiles -> every machine reads as `full`. Until every reader of the record is pinned at or after DEC-0106, "Change profile" is unavailable and says why. Between the signature and each node applying the revision, a node still on the parent judges calls by the old profile.
 - **UI elements:** the profile in each machine's row; "Change profile" in the overflow menu.
 - **States covered:** success, error

@@ -602,7 +602,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-13, JRN-12/#1
 - **Acceptance criteria:**
   - Given a current delta and a record that lists both machines, when a sealed call arrives, then the node places its sender in T1, opens the call and runs it without a token.
-  - Given a delta that is not current, or a sender the record or the delta revokes, when a call arrives, then it is refused (`unknown-state`, or `unauthenticated` without a token) and nothing runs.
+  - Given a delta that is not current, or a sender the record or the delta revokes, when a call arrives, then it is refused (`unknown-state` or `unauthenticated`), not answered, and nothing runs.
   - Given a sealed call copied into another relay message, when the node opens it, then it does not open (`cannot-open`) and is not answered.
 - **Priority:** must
 - **Status:** draft
@@ -610,7 +610,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-031: Operator keeps a machine for reading only
 
-- **Story:** As P-02, I want to mark a machine `view` in my network, so that it can read status but never runs an agent, holds a secret or receives a call that changes something.
+- **Story:** As P-02, I want to mark a machine `view` in my network, so that it holds no agent placement, no secret and no hub key, and sends or takes no call over the relay that changes anything.
 - **Traces:** JTBD-13, JRN-12/#2
 - **Acceptance criteria:**
   - Given a revision that marks a machine `view`, when it carries a placement, a secret or the hub key for that machine, then the revision is refused (`FAC-SEM-134`).

@@ -40,6 +40,10 @@ Round 1: unit one break (a plaintext with a byte-order mark opened), seam one br
 the two new schemas apart: the protocol sits in `type`), product four breaks (a machine without `#kem` "can be
 called", answers to refusals the node cannot seal, two readers missing from the rollout gate, interop C3.5's
 "only in headers"); all fixed with their risks.
+Round 2: unit and seam pass, their risks fixed (a `#kem` kid listed under another machine, a lone surrogate, the
+node's order named a duty, relay.md's T2); product three breaks (an em dash in SCR-23, ST-030 and relay.md still
+admitting a T2 sender with a token, "a view machine runs no agent"), fixed with its risks (the idempotency key, the
+rollout signal, the hub before a profile change, the window with no hub).
 
 ## Checks actually run
 
