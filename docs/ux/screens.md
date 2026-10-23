@@ -299,7 +299,7 @@
 - **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, each by one signed revision.
 - **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none.
 - **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106.
-- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`), `test/ceremonies.test.ts`
+- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`; `machineProfile`, `FAC-SEM-134`), `fixtures/semantic/estate-profile-*`, `test/ceremonies.test.ts`, `test/estate-record.test.ts`
 - **Scenarios:** SCN-029, SCN-030, SCN-037
 - **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
 - **Status:** proposed

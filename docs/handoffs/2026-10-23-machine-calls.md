@@ -44,6 +44,8 @@ Round 2: unit and seam pass, their risks fixed (a `#kem` kid listed under anothe
 node's order named a duty, relay.md's T2); product three breaks (an em dash in SCR-23, ST-030 and relay.md still
 admitting a T2 sender with a token, "a view machine runs no agent"), fixed with its risks (the idempotency key, the
 rollout signal, the hub before a profile change, the window with no hub).
+Round 3: unit, seam and product pass; product's risks fixed (SCR-23's coverage, the rollout signal per reader),
+unit's one risk filed as CT-112.
 
 ## Checks actually run
 
