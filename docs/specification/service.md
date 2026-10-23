@@ -321,6 +321,15 @@ show every agent's spend beside its health without knowing any provider.
   ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated. A row's route SHOULD match the descriptor's
   `runner.credentialKind` of the same name, and a service whose kind is `none` makes no model calls to report; no rule
   checks this yet beyond FAC-SEM-087's refusal of `subscription` rows on an offered service (DEC-0061).
+- **Money is summed over the rows not on a subscription** (DEC-0110). A `subscription` row's `costUsd` is what its calls
+  would cost at list price: an estimate, not money spent. A host MUST NOT add it to money spent, to a budget or to a
+  spending limit, and MAY show it apart, labelled as an estimate. Money is the sum of `costUsd` over every row whose
+  `route` is `key`, `platform-metered` or absent (a report written before DEC-0046 keeps its meaning); a window whose
+  calls were all on a subscription spent `0`, never `null`; money is a lower bound while any call off a subscription is
+  unpriced, and `null` only when none of them is priced. Calls and tokens count on every route. A day's `costUsd` sums
+  every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; `budget.spentUsd` and each
+  `budgets[]` entry count money only. `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the
+  reference sum: it refuses an unknown `route` rather than guess.
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),
@@ -486,9 +495,13 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the process, it MUST refuse a request whose platform-set forwarded scheme is not `https`.
 - It MUST refuse a `Host` other than its origin's host (and port, where the origin names one),
   a foreign `Origin`, and `Sec-Fetch-Site: cross-site` on every protocol route.
-- `GET /.well-known/fabric-service` MUST require the service token. Without it — or with a
-  wrong one, compared in constant time — the answer MUST be `401` with an empty body: no build,
-  pid, status or tiles. With it, the document is the one this extension defines.
+- `GET /.well-known/fabric-service` MUST require the service token. Without it, or with a
+  wrong one compared in constant time, the answer MUST be `401`, and its body MUST carry none of
+  the service's own data: no build, pid, status, tiles, identity or member of the document. The
+  body SHOULD be empty; an identity proxy in front of the service (Cloudflare Access, an ingress)
+  MAY answer that `401` with its own page, which the service never sees (DEC-0109). A host reads
+  the status of that `401` and never its body. With the token, the document is the one this
+  extension defines.
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
   `SameSite=Strict` and `Path=/` and no `Domain`.

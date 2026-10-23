@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-23 two asks from the project board](2026-10-23-board-asks.md) | DEC-0109, DEC-0110 (CT-114, CT-115 filed) | open |
 | [2026-10-23 calls between machines](2026-10-23-machine-calls.md) | DEC-0106 (CT-85; CT-110, CT-111, CT-112 filed) | merged, #152 |
 | [2026-10-23 the dash-encoded home path](2026-10-23-dec0105.md) | DEC-0105 (CT-92 widened, CT-109 filed) | merged, #151 `f1a2cd1f` |
 | [2026-10-22 the agent network's S4](2026-10-22-s4.md) | DEC-0104 (CT-84; CT-108 filed) | merged, #149 `f6b5044c` |

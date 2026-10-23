@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0107` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0111` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6625,3 +6625,58 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   done, CT-110 and CT-111 filed.
 - **Source:** the platform, board thread `348467e5` (A-6, A-7); the first organization server, thread `ba63565c`
   item 4; CT-85.
+
+### DEC-0109: a remote service's 401 without a token may carry an identity proxy's page
+
+- **Status:** Accepted (2026-10-23). Consumer adoption: the Fabric Agent Adapter's `check_service.py`
+  (`well-known.requires-token` takes any `401` whose body carries none of the service's data, CT-114).
+- **Context:** `service.md` *Remote placement* said that without the service token `GET /.well-known/fabric-service`
+  MUST answer `401` "with an empty body". Fabric Inbox runs on Cloudflare Workers behind Cloudflare Access: from 0.29.4
+  its protocol routes sit behind an Access application with Service Auth only, so a request without a token gets
+  Access's own `401` with its HTML page (37 794 bytes); the Worker never sees the request and cannot empty the body.
+  `check_service.py fabric-inbox` failed that one rule. The events and usage rules already accept any `401`. Fabric
+  Inbox asked for a decision (board thread `a1c375d2`, request `9ecc43cb`, row B-150; adapter thread `199b9549`).
+- **Decision:** without the token, or with a wrong one, the well-known route MUST answer `401` and its body MUST carry
+  none of the service's own data: no build, pid, status, tiles, identity or member of the document. The body SHOULD be
+  empty; an identity proxy in front of the service MAY answer that `401` with its own page. A host reads the status of
+  that `401` and never its body.
+- **Why:** the rule exists so the document does not leak without a token, and a proxy's page leaks none of it; an empty
+  body is still what a service that answers the request itself writes. Reading only the status keeps a host's behaviour
+  the same for both bodies.
+- **Alternatives considered:** keep "empty body" and name services behind an identity proxy a known gap (the rule would
+  fail a service that discloses nothing, and push it to answer before its proxy, weakening the proxy); allow any body
+  (a service could put its status in it).
+- **Compatibility:** a widening: every answer the old rule admitted is still admitted. A checker pinned before this
+  decision fails such a service on that rule alone until it moves. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (*Remote placement*, the service), CT-114.
+- **Source:** Fabric Inbox's request on board thread `a1c375d2` (2026-10-23).
+
+### DEC-0110: a host sums money over the usage rows not on a subscription
+
+- **Status:** Accepted (2026-10-23). Consumer adoption: Fabric's spend tiles and view sum as below (CT-115); Fabric
+  Dashboards already does since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0); Frame Agent and every
+  service keep their reports unchanged.
+- **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
+  subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is
+  the sum of every row (`FAC-SEM-025`), and the report has no money-only total, so a host that summed `costUsd` showed
+  Frame Agent's $147.26 for the month where $6.80 had been spent (board thread `ea2e4f3d`, 2026-10-22). Fabric Dashboards
+  fixed its sum from DEC-0046's own words ("not metered") and asked the contract to write the host rule so every host
+  sums alike (message `76f420d9`, and `e99aa05f` on thread `f22685d2`).
+- **Decision:** money is the sum of `costUsd` over every row whose `route` is `key`, `platform-metered` or absent; a
+  `subscription` row's `costUsd` is an estimate, which a host MUST NOT add to money spent, to a budget or to a spending
+  limit, and MAY show apart, labelled as an estimate. A window whose calls were all on a subscription spent `0`, never
+  `null`; money is a lower bound while any call off a subscription is unpriced and `null` only when none of them is
+  priced; calls and tokens count on every route. A day's `costUsd` stays the sum of every row, so it is money only while
+  no row is on a subscription; `budget.spentUsd` and `budgets[]` count money only. `usageSpend(rows)`
+  (`src/usage-rules.ts`) is the reference sum and refuses an unknown `route`.
+- **Why:** an operator reading "spend" reads money, and limits are money: an estimate in the sum trips a limit on calls
+  nobody paid for per call. A host rule changes no byte a service writes, so every report stays valid.
+- **Alternatives considered:** a money-only total in `service-usage.schema.json` (every service would write a new member
+  and every reader pinned before it would refuse the report; the rows already carry what the sum needs); counting a row
+  with no `route` as an estimate (a report written before DEC-0046 would lose its money).
+- **Compatibility:** no wire change. A host that summed every row now shows less money for a report with subscription
+  rows, which is the correction. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `src/usage-rules.ts` (`usageSpend`),
+  `test/usage-rules.test.ts`, CT-115.
+- **Source:** Frame Agent's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
+  `f22685d2` (2026-10-22).

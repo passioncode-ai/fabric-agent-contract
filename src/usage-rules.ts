@@ -152,4 +152,60 @@ function usageArithmetic(value: JsonObject): Finding[] {
 export function usageRules(value: JsonObject): Finding[] {
   return [...usageArithmetic(value), ...usageWindow(value), ...usageProjects(value)];
 }
+
+/** What a host shows for a set of usage rows (DEC-0110): money spent apart from a subscription's estimate. */
+export interface UsageSpend {
+  calls: number;
+  moneyUsd: number | null; // the sum over rows not on a subscription; 0 when every call was on one, null when none is priced
+  moneyLowerBound: boolean; // some of those calls are unpriced, so the money is at least moneyUsd
+  estimateUsd: number | null; // what the subscription rows' calls would cost at list price; null when none of them is priced
+  estimateLowerBound: boolean;
+  subscriptionCalls: number;
+}
+
+const ROUTES = ["subscription", "key", "platform-metered"];
+const known = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value >= 0;
+const sum = (values: number[]) => values.sort((a, b) => a - b).reduce((n, x) => n + x, 0);
+
+/**
+ * The host's sum over usage rows (`days[].byModel[]`, of one day or of several), DEC-0110: money is the `costUsd` of
+ * every row whose `route` is `key`, `platform-metered` or absent; a `subscription` row's `costUsd` is an estimate at list
+ * price, summed apart and never into money. A window whose calls were all on a subscription spent 0, never null; money is
+ * null only when it has calls off a subscription and none of them is priced, and a lower bound while any of them is
+ * unpriced. An unknown `route` or a row whose counts or cost the schema refuses answers `undefined`, never a guess. It
+ * never throws.
+ */
+export function usageSpend(rows: unknown): UsageSpend | undefined {
+  if (!Array.isArray(rows)) return undefined;
+  const money: number[] = [], estimate: number[] = [];
+  let calls = 0, paidCalls = 0, paidPriced = false, paidUnpriced = false, subscriptionCalls = 0, subPriced = false, subUnpriced = false;
+  for (const row of rows) {
+    if (!isObject(row)) return undefined;
+    const route = row.route;
+    if (route !== undefined && !(typeof route === "string" && ROUTES.includes(route))) return undefined;
+    const rowCalls = row.calls, unpriced = row.unpricedCalls ?? 0, rowCost = row.costUsd;
+    if (!Number.isSafeInteger(rowCalls) || (rowCalls as number) < 0 || !Number.isSafeInteger(unpriced) || (unpriced as number) < 0 || (unpriced as number) > (rowCalls as number)) return undefined;
+    if (rowCost !== null && !known(rowCost)) return undefined;
+    // FAC-SEM-025's own pairing: null exactly when every call of a row with calls is unpriced.
+    if ((rowCalls as number) > 0 && (rowCost === null) !== (unpriced === rowCalls)) return undefined;
+    calls += rowCalls as number;
+    if (route === "subscription") {
+      subscriptionCalls += rowCalls as number;
+      if (known(rowCost)) { estimate.push(rowCost); subPriced = true; }
+      if ((unpriced as number) > 0) subUnpriced = true;
+    } else {
+      paidCalls += rowCalls as number;
+      if (known(rowCost)) { money.push(rowCost); paidPriced = true; }
+      if ((unpriced as number) > 0) paidUnpriced = true;
+    }
+  }
+  return {
+    calls,
+    moneyUsd: paidCalls === 0 ? 0 : paidPriced ? sum(money) : null,
+    moneyLowerBound: paidCalls > 0 && paidPriced && paidUnpriced,
+    estimateUsd: subscriptionCalls === 0 ? 0 : subPriced ? sum(estimate) : null,
+    estimateLowerBound: subscriptionCalls > 0 && subPriced && subUnpriced,
+    subscriptionCalls
+  };
+}
 // #endregion usage-rules
