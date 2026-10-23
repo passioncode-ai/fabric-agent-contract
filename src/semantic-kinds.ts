@@ -31,6 +31,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "call-record": doc("call-record.schema.json"),
   "credential-decision": wrap("request", "decision"),
   "credential-envelope-check": wrap("envelope", "context", "answer"),
+  "credential-exchange": wrap("sent", "response"),
   "credential-request": wrap("request", "org"),
   "credential-request-document": doc("credential-request.schema.json"),
   "comms-directory": doc("comms-directory.schema.json"),

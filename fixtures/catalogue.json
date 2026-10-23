@@ -970,5 +970,7 @@
   {"name": "credential-envelope-personal-request", "schema": "credential-envelope.schema.json", "path": "negative/credential-envelope-personal-request.json", "valid": false, "keyword": "false schema"},
   {"name": "credential-envelope-org-no-end", "schema": "credential-envelope.schema.json", "path": "negative/credential-envelope-org-no-end.json", "valid": false, "keyword": "required"},
   {"name": "credential-revocation-unsigned", "schema": "credential-revocation.schema.json", "path": "negative/credential-revocation-unsigned.json", "valid": false, "keyword": "required"},
-  {"name": "call-record-prompt", "schema": "call-record.schema.json", "path": "negative/call-record-prompt.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "call-record-prompt", "schema": "call-record.schema.json", "path": "negative/call-record-prompt.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "device-check-in-credentials", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-credentials.json", "valid": true},
+  {"name": "device-check-in-response-credentials", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-response-credentials.json", "valid": true}
 ]

@@ -7,7 +7,7 @@ import { evaluateSemanticRules } from "../src/semantic-rules.js";
 // Every activity, device, estate-record, hub-key (FAC-SEM-081), relay, revocation-delta (FAC-SEM-082…084), one-copy, Windows token-file, well-known (FAC-SEM-080), descriptor (FAC-SEM-085, FAC-SEM-086), runner (FAC-SEM-087) peer-request (FAC-SEM-088), window-lease (FAC-SEM-089…091), signing-credential (FAC-SEM-092), the identifier-comparing kinds (DEC-0076), openrouter-attribution (FAC-SEM-098), protocols (FAC-SEM-099), session-join (FAC-SEM-100), directory-page (FAC-SEM-107), comms-transition (FAC-SEM-027, FAC-SEM-109), board-finding (FAC-SEM-108), grant (FAC-SEM-110), profile-resolution (FAC-SEM-060, FAC-SEM-112), enroll-token (FAC-SEM-113) and entitlement (FAC-SEM-115, FAC-SEM-116) rule kind reads a malformed input — missing members, members of the wrong type — and
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
-  "credential-request", "credential-request-document", "credential-decision", "credential-envelope-check", "call-record",
+  "credential-request", "credential-request-document", "credential-decision", "credential-envelope-check", "credential-exchange", "call-record",
   "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",

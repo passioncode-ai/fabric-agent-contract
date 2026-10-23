@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-23 a check-in's own rules read the credential members](2026-10-23-check-in-credentials.md) | DEC-0112 (CT-119) | open |
 | [2026-10-23 the contract's first release](2026-10-23-release.md) | DEC-0108 (`v0.1.0+2026-10-23`) | merged, #157 `2f020a69`; tagged |
 | [2026-10-23 credentials on request and the call record](2026-10-23-credentials.md) | DEC-0111 (CT-86; CT-117 to CT-120 filed) | merged, #156 `19b05c20` |
 | [2026-10-23 two asks from the project board](2026-10-23-board-asks.md) | DEC-0109, DEC-0110 (CT-114, CT-115, CT-116 filed) | merged, #155 `3222ae38` |
