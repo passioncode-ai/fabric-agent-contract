@@ -59,7 +59,7 @@ It names no person and carries no value. Its times, like the decision's and the 
 offset. `FAC-SEM-138` (kind `credential-request` on `{request, org}`) holds that the
 context is the enrollment's own organization, that the credential is asked for after the request and for at most 30
 days, and that the reason and the scope carry no path and no word shaped like a credential (kind
-`credential-request-document` checks a request alone). A node sends a request in every check-in until its envelope opens or a `refused` decision answers it: an `issued`
+`credential-request-document` checks a request alone). A node sends a request in every check-in until its envelope opens, a `refused` decision answers it, or a revocation naming it stands (DEC-0113): an `issued`
 decision whose envelope did not open (lost, or expired in transit) keeps the request in the next check-in, and the
 issuer, seeing it again, seals again under its next sequence.
 
@@ -92,7 +92,7 @@ Two profiles, told apart by `context`:
 |---|---|---|
 | `context` | `org:<id>` | `personal` |
 | Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA`, inside its window on the target's own clock, as a policy and a repair are judged | the sending machine's `#sig`, `alg: ES256`, low-S |
-| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened nor a refusal has come | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
+| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened, nor a refusal has come, nor a revocation naming it has stood | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
 | Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it, or when the target becomes `view` |
 | Travels | in a check-in response's `records.credentials`, after the decision that issued it | over the relay, as the inner `payload` of a relay message body (`fabric-relay-message/1`), addressed to the target's machine ([relay](relay.md#the-secret-envelope)); a target refuses an envelope whose `signer` is not the `#sig` of the body's verified `from` |
 | Lands in | the organization instance's vault slot for `agentRef` and `slot` | the personal vault slot for `agentRef` and `slot` |
@@ -131,8 +131,8 @@ the first that fails names the refusal:
     issued decision named (the request held open carries the decision's `credential.expiresAt` as `expiresAt`, never the
     end the request asked for; an end that is absent or does not read admits none).
 
-`openCredential` then opens the ciphertext (`cannot-open` when it does not). The target writes the value and the mark
-`{context, agentRef, slot, sequence, digest}` in one transaction, and stores nothing after a refusal. `FAC-SEM-139`
+`openCredential` then opens the ciphertext (`cannot-open` when it does not). The target writes the value with the `requestId` it answers (in an organization's context, the `held` a revocation is
+matched against, DEC-0113) and the mark `{context, agentRef, slot, sequence, digest}` in one transaction, and stores nothing after a refusal. `FAC-SEM-139`
 (kind `credential-envelope-check`) holds a target's answer to the envelope's own checks equal to `checkCredentialEnvelope`'s. A sealer that cannot produce
 an envelope a target opens refuses before it signs (`sealCredential`: a shape the schema refuses, a life past 24 hours,
 a credential that ends before `iat` or more than 30 days after it, a signer or a signing key of the other profile), so no sequence is
@@ -148,9 +148,10 @@ by a key of the organization's current policy key set (as a [repair request](nod
 `credentialRevocationStands` accepts it (the signature, the key's window on the device's own clock, this device,
 this organization's context), the node deletes the value when the credential it holds in that slot answers the
 revocation's `requestId` (`held`; the answer's `deletes`, DEC-0113), and keeps the mark with `revoked: true`, so the same
-envelope delivered again opens nothing (`replayed`) and a reissue, under a new request and a higher sequence, still
-opens. A revocation whose request is not the one the slot's credential answers stands and deletes nothing: delivered
-late, it never deletes a reissue. The node also stops holding the request open. The issuer revokes the credential at its provider too;
+envelope delivered again opens nothing and a reissue, under a new request and a higher sequence, still opens. A revocation that stands and names the held request
+ends that request (the node stops sending it), so a repeat delivery answers `not-requested` at step 7; the revoked mark refuses
+it `replayed` at step 8 behind that, for a node that still holds the request and in the personal profile. A revocation whose request is not the one the slot's credential answers stands and deletes nothing: delivered
+late, it never deletes a reissue. The issuer revokes the credential at its provider too;
 a credential the provider cannot revoke ends at its `credentialExpiresAt`. When a member leaves, the organization sends a revocation for every credential issued to the agents of their enrollment
 before it revokes their device's certificate, and a node deletes every credential of an organization's context when
 that enrollment ends for any reason (`organization-closed`, the person leaving): a value never outlives the enrollment it
@@ -228,7 +229,7 @@ Each party moves at its next pin (CT-117).
 | Party | Does |
 |---|---|
 | Project Observatory (the issuer, OBS-191 parts 2 and 3; OBS-194 step 2) | reads the organization's request queue, issues from a door with an expiry, seals `fabric-credential-envelope/1` under the organization's policy key, revokes at the provider; holds the estate's digest key it receives and computes `keyedDigest` |
-| Project Observatory's node | sends `credentialRequests` and `callRecords`; opens envelopes only as `checkCredentialEnvelope` allows, into the context's vault slot, and deletes at `credentialExpiresAt` or on a revocation that stands |
+| Project Observatory's node | sends `credentialRequests` and `callRecords`; opens envelopes only as `checkCredentialEnvelope` allows, into the context's vault slot, and deletes at `credentialExpiresAt` or on a revocation that stands and names the request its held credential answers (DEC-0113) |
 | The first organization server | queues requests for the issuer, keeps the ledger by name, relays decisions, envelopes and revocations in check-in responses, and reads call records of its context under the notice's purpose (VES-CREDS-ISSUED) |
 | Fabric | the hub keeps the personal estate's call records and shows them in the network view (S7), alone generates the estate's digest key, once, and sends it from the hub's machine; its nodes write call records for calls they answer, open personal envelopes (the digest key) as `checkCredentialEnvelope` allows, and hold credentials for an organization's instances as Project Observatory's node does |
 | Fabric Switchboard | reads a delivered OpenRouter key from its vault slot by name into the project's key slot, so one key is never issued twice (SB-167); a key issued into an organization's context goes only to a key slot of that organization's project, never to a personal one |

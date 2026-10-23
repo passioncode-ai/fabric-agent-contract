@@ -915,7 +915,7 @@ independent agent author and P-02 project operator.
 - **States covered:** revoked
 - **Errors & recovery:** the provider cannot revoke a key -> it ends at its `credentialExpiresAt`, and the ledger says so.
 - **Status:** draft
-- **Coverage:** DEC-0111, `credentialRevocationStands` in `src/credentials.ts`, `fixtures/vectors/credential-envelope.json` (`revocation`), `test/credential-envelope.test.ts`
+- **Coverage:** DEC-0111, DEC-0113, `credentialRevocationStands` in `src/credentials.ts`, `fixtures/vectors/credential-envelope.json` (`revocation`), `test/credential-envelope.test.ts`
 - **Product:** unobserved
 
 ### SCN-042: See every call between agents, and nobody's prompts

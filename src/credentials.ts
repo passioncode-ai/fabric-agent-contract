@@ -297,9 +297,11 @@ export function openCredential(value: unknown, ctx: CredentialCheckContext, ownK
 // ---- Revocation --------------------------------------------------------------------------------------------------
 
 /**
- * Whether a `credential-revocation/1` an organization sent this machine stands (`{revocation, keys, device, at}`): signed
- * like a policy layer by a key of the organization's current policy key set, inside the key's window on the device's
- * clock `at`, for this device and a context of this organization. A revocation that stands deletes the value and its mark; it never needs the value.
+ * Whether a `credential-revocation/1` an organization sent this machine stands (`{revocation, keys, device, at, held}`):
+ * signed like a policy layer by a key of the organization's current policy key set, inside the key's window on the
+ * device's clock `at`, for this device and a context of this organization, naming a `requestId`. A revocation that stands
+ * answers `deletes` (DEC-0113): true only when `held`, the request the credential held in that slot answers, is the one
+ * it names; the node then deletes the value and keeps the mark with `revoked: true`. It never needs the value.
  */
 export function credentialRevocationStands(input: unknown): { ok: true; deletes: boolean } | { ok: false; reason: "malformed" | "bad-signature" | "wrong-device" } {
   const value = isObject(input) ? input : {};

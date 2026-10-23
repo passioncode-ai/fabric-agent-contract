@@ -6807,7 +6807,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0111: narrow credentials on request, the estate's keyed digests, and the call record
 
 - **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory (the issuer and its node), the
-  first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117).
+  first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117). Annotated (2026-10-23): items 3
+  and 4 amended by DEC-0113 (a revocation names its request and deletes only that credential; it ends the request; the
+  mark is kept as revoked).
 - **Context:** S5 of the agent network asks that an agent in an organization request a narrow credential (a token for
   one DNS zone, an OpenRouter key with a ceiling), that the organization decide, and that the value arrive sealed into
   that organization's context on the agent's machine, never into the person's own context, every request, decision and
@@ -6921,20 +6923,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. `credentialRevocationStands` takes `held`, the `requestId` the credential the node holds in that slot answers, and
      answers `{ok: true, deletes}`: `deletes` is true only when `held` is the revocation's `requestId`. A revocation that
      names no request is `malformed`.
-  3. When it deletes, the node keeps the slot's mark with `revoked: true`; `checkCredentialEnvelope` answers `replayed`
-     for an envelope at or below a revoked mark's sequence, so the revoked envelope never opens again and a reissue
-     (a new request, a higher sequence) still does. A mark's `revoked` is absent or `true`; anything else does not read.
+  3. When it deletes, the node ends the revoked request (it stops sending it, so a repeat delivery of the envelope
+     answers `not-requested` at step 7) and keeps the slot's mark with `revoked: true`; behind that, and in the personal
+     profile, `checkCredentialEnvelope` answers `replayed` for an envelope at or below a revoked mark's sequence. The
+     revoked envelope never opens again and a reissue (a new request, a higher sequence) still does. A mark's `revoked`
+     is absent or `true`; anything else does not read.
+  4. The node writes the value with the `requestId` it answers, which it passes as `held`. The issuer writes each
+     revocation's `requestId`, one per issued request; the organization server relays it unchanged.
 - **Why:** the request is the instance's name the node already holds (the envelope carries it), so no new identifier
   is needed, and a tombstone mark is the smallest state that keeps replay closed.
 - **Alternatives considered:** naming the envelope's sequence (a sealer that lost its sequence restarts at the clock,
   so a sequence is a weaker name than the request); deleting the mark and keeping the request id in a second list (two
   stores for one fact).
-- **Compatibility:** narrower: a revocation without `requestId` is refused by a reader pinned at or after this
-  decision, and `credentialRevocationStands`'s answer gains `deletes`. Nobody writes revocations yet (CT-117), so
-  nothing on the wire is refused. `contractVersion` stays `0.1.0`.
+- **Compatibility:** narrower in both directions, under the same `credential-revocation/1`: a revocation without
+  `requestId` is refused by a reader pinned at or after this decision, and one with it is refused by a reader pinned at
+  the release `v0.1.0+2026-10-23` (the object is closed), so a check-in response carrying it fails there. Nobody writes
+  or reads revocations yet (CT-117), so no deployed pair is refused and no `/2` is taken; the next release notes list
+  this narrowing. `credentialRevocationStands`'s answer gains `deletes`. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/credential-revocation.schema.json`, `src/credentials.ts`
   (`credentialRevocationStands`, the marks, step 8), `docs/specification/credentials.md` (Revocation, steps 1 and 8),
-  `conformance.md` (the node's row), SCN-041, ST-033; vectors `fixtures/vectors/credential-envelope.json` by
+  `conformance.md` (the issuer's and the node's rows), SCN-041, ST-033, DEC-0111's status; vectors `fixtures/vectors/credential-envelope.json` by
   `tools/vectors/credential-envelope.ts` (`revocation`, `check`); the fixtures that carry a revocation; backlog CT-118
   done.
 - **Source:** CT-118 (the seam reading of PR #156, 2026-10-23).
