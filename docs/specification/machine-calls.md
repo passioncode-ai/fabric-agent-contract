@@ -171,7 +171,7 @@ Each party moves at its next pin (CT-110).
 
 - Which capabilities a `member` machine may call beyond the effect rule; per-agent token administration stays CT-84's.
 - An answer larger than the limit (a blob reference) and a streamed answer.
-- Calls between estates (DL, *Not decided here*), the hub moving to another machine and passkey recovery (CT-89),
-  credentials on request and the call record (CT-86).
+- Calls between estates (DL, *Not decided here*), credentials on request and the call record (CT-86). Moving the hub and
+  recovering a lost passkey are [ceremonies](ceremonies.md#move-the-hub) (DEC-0107).
 - What a machine shows its person about calls it received (CT-95).
 - Calls over the relay from outside the estate (T2), and how their answers are sealed.

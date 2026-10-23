@@ -60,7 +60,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 | [node summary](node-summary.md) | `node-summary/1`, the organization's harness baseline and drift, `repair-request/1` and `repair-result/1` (DEC-0101, DEC-0102) | specified, no consumer yet (CT-83) |
 | [estate record](estate-record.md) | `estate-record/1`: machines, keys, placements and grants, signed by a passkey | adopted by the relay, the Project Observatory node, the first organization server and the Fabric Agent Adapter |
 | [devices](devices.md) | `fabric-device/0.1`: enrollment, policy, check-in, the request signature | adopted by the relay, the Project Observatory node, the first organization server and the Fabric Agent Adapter |
-| [estate ceremonies](ceremonies.md) | creating a network, adding a machine, the enroll token, pairing | adopted by the Fabric Agent Adapter and the Project Observatory node |
+| [estate ceremonies](ceremonies.md) | creating a network, adding a machine, the enroll token, pairing, moving the hub and recovering a lost passkey (DEC-0107) | DEC-0084's ceremonies adopted by the Fabric Agent Adapter and the Project Observatory node; DEC-0107: no consumer yet (CT-113) |
 | [relay](relay.md) | `fabric-relay/0.1` and the secret envelope | adopted by the relay and the Project Observatory node |
 | [revocation delta](revocation-delta.md) | `revocation-delta/1`, `heartbeat/1` | not measured |
 | [window leases](window-lease.md) | `window-lease/1` (DEC-0062) | specified, no consumer yet |

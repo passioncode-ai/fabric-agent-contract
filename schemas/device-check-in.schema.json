@@ -297,7 +297,7 @@
                 }
               },
               "additionalProperties": false,
-              "description": "The head of the revocation delta the device has applied (DEC-0054): the sequence of its last entry (0 before any) and that entry's hash (the estate's genesis at 0)."
+              "description": "The head of the revocation delta the device has applied (DEC-0054): the sequence of its last entry (0 before any) and that entry's hash (the estate's genesis at 0), or the delta anchor's sequence and hash when it holds no entry after an anchor (deltaHead, DEC-0107)."
             },
             "leases": {
               "type": "array",

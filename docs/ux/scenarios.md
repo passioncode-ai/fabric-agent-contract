@@ -43,6 +43,8 @@
 | SCN-035 | See how busy an agent is, or learn why its load is not shown | agent-network | P-02 | ST-029, FLW-24 | draft | not audited |
 | SCN-036 | An agent calls an agent on another of the owner's machines, or is refused by a machine's profile | machine-calls | P-02 | ST-030, FLW-25 | draft | not audited |
 | SCN-037 | Keep a machine for reading only | machine-calls | P-02 | ST-031, FLW-26 | draft | not audited |
+| SCN-038 | The hub goes quiet: hear of it after a day and move it to another machine | network | P-02 | ST-032, FLW-27 | draft | not audited |
+| SCN-039 | Lose a passkey and keep the network | network | P-02 | ST-032, FLW-27 | draft | not audited |
 
 ## Personas
 
@@ -781,10 +783,10 @@ independent agent author and P-02 project operator.
 - **Preconditions:** the node runs on this machine; no network exists
 - **Steps:**
   1. Operator chooses "Create my network" -> the machine makes its device keys and the hub's own key.
-  2. Fabric drafts revision 1 -> the passkey prompt opens; the operator signs.
+  2. Fabric asks for a second passkey on another authenticator (a phone, a security key) -> the operator registers it; Fabric drafts revision 1 -> the passkey prompt opens; the operator signs.
   3. The machine verifies revision 1 under that passkey and pins it -> Fabric and the machine show the network's fingerprint.
 - **Expected result:** the network exists with this machine and its hub key; later machines join it.
-- **Alt paths:** created on another machine -> revision 1 lists that machine only, and the hub key comes with the revision that adds the always-on machine.
+- **Alt paths:** created on another machine -> revision 1 lists that machine only, and the hub key comes with the revision that adds the always-on machine; until then no machine shows a hub alert, and the network asks for the always-on machine. The operator goes on with one passkey -> Fabric tells them that losing it loses the network, and "Add a passkey" stays offered.
 - **UI elements:** "Create my network", the passkey prompt, the fingerprint.
 - **States covered:** empty, error, success
 - **Errors & recovery:** the operator cancels the prompt -> nothing is signed and no machine pins anything; the operator starts again.
@@ -800,12 +802,12 @@ independent agent author and P-02 project operator.
 - **Entry point:** the network's machine list in Fabric
 - **Preconditions:** the network has three machines; one was lost; another's keystore was reset
 - **Steps:**
-  1. Operator chooses "Remove" on the lost machine -> Fabric drafts a revision that revokes the machine and its hub key; the operator signs.
+  1. Operator chooses "Remove" on the lost machine -> Fabric drafts a revision that revokes the machine (and its device keys); the operator signs.
   2. The hub sends the revocations as delta entries -> within seconds the relay turns the lost machine away and ends its sessions.
   3. Operator chooses "Replace key" on the reset machine -> it pairs again under its id, the codes match, the operator signs a revision listing its new keys and revoking the old ones by reference.
   4. The machine holds the new keys -> it applies the revision; a session or envelope under the old key is refused.
 - **Expected result:** the lost machine is out; the re-keyed machine keeps its id and its agents.
-- **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself.
+- **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself. The lost machine holds the hub key -> "Remove" opens "Move the hub" (SCN-038): one revision with a new hub key on a `full` machine, the lost one removed and revoked, so the network keeps a hub.
 - **UI elements:** "Remove", "Replace key", the comparison code, the passkey prompt.
 - **States covered:** error, success
 - **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine pinned at or after DEC-0084 (`FAC-SEM-114`; an older reader accepts it, ceremonies *Compatibility*); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
@@ -825,10 +827,49 @@ independent agent author and P-02 project operator.
   2. The person signs it with a passkey -> the list shows `m-b` as `view`; every node applies the revision.
   3. An agent on `m-a` calls `m-b` with a capability that changes something -> refused `profile-forbids`.
 - **Expected result:** by the signed record alone, the machine holds no placement, no secret and no hub key, and sends or takes no call over the relay that changes anything.
-- **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> `FAC-SEM-134` refuses a member with a hub key, so the hub moves first (CT-89). A record written before profiles -> every machine reads as `full`. Until every reader of the record is pinned at or after DEC-0106, "Change profile" is unavailable and says why. Between the signature and each node applying the revision, a node still on the parent judges calls by the old profile.
+- **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> `FAC-SEM-134` refuses a member with a hub key, so the hub moves first ("Move the hub" on `m-a`'s row, a planned move: ceremonies "Move the hub", DEC-0107). A record written before profiles -> every machine reads as `full`. Until every reader of the record is pinned at or after DEC-0106, "Change profile" is unavailable and says why. Between the signature and each node applying the revision, a node still on the parent judges calls by the old profile.
 - **UI elements:** the profile in each machine's row; "Change profile" in the overflow menu.
 - **States covered:** success, error
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again; a revision that keeps a placement on a `view` machine -> `FAC-SEM-134` names it and the drafter removes it.
 - **Status:** draft
 - **Coverage:** DEC-0106, `FAC-SEM-134` in `src/estate-record-rules.ts` (`machineProfile`), fixtures `fixtures/semantic/estate-profile-*`, `test/estate-record.test.ts`, `test/machine-call.test.ts`
+- **Product:** unobserved
+
+### SCN-038: The hub goes quiet: hear of it after a day and move it to another machine
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-032, FLW-27 (JTBD-10, JRN-09/#4)
+- **Entry point:** a machine's alert in My network's machines
+- **Preconditions:** a network of `m-a` (the hub's machine, `full`) and `m-b` (`full`); `m-a` is lost (dead or stolen) and its last heartbeat is 30 hours old
+- **Steps:**
+  1. The person opens Fabric on `m-b` -> it reconnects to the relay, the latest heartbeat it then holds is still 30 hours old, and it says "This machine has not heard from the hub for 30 hours", with "Move the hub".
+  2. They pick `m-b`, which is always on -> its node makes a new hub key; Fabric fetches the delta from the relay and drafts one revision: `m-b`'s `hubKey`, `m-a`'s old key revoked as `hub-key`, `m-a` removed and revoked as `machine m-a`, the delta anchored at the head (once every reader of the record is pinned at or after DEC-0107).
+  3. They sign with a passkey -> `m-b`'s hub signs a heartbeat; the alert clears on each machine once it holds that heartbeat.
+- **Expected result:** the network has a hub again before calls between machines stop at 72 hours, under a key that never left `m-b`.
+- **Alt paths:** `m-b` was only asleep and the hub is running -> after reconnecting it holds a fresh heartbeat, the alert clears and no move is offered. `m-a` is only switched off and can be turned on -> the person turns it on, the alert clears, and they choose "Move the hub" on `m-a`'s row (a planned move); it takes two revisions (DL-15): the new key certified and published, the switch, then the old key revoked and the delta anchored; `m-a` stays in the network. Before every reader is pinned at or after DEC-0107 (today) -> the move carries no anchor, and a machine added after it refuses calls from other machines (`behind`) until Fabric's first revision after the gate anchors the delta; Fabric says so on that machine. A machine added after an anchored move -> it starts its chain at the anchor and never needs the old hub's entries; before the readers' pin gate opens the move carries no anchor, and Fabric anchors its first revision after the gate. `m-a` turns up after it was removed -> the relay turns it away (`unauthenticated`, 4401, with no reason) and Fabric on `m-a` shows the guidance for a machine the relay no longer admits; anything its old key signs is refused (`revoked-signer`), and it joins again under a new id (Add a machine). No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
+- **UI elements:** the alert with the hours since; "Move the hub"; the machine picker.
+- **States covered:** alert, success, error
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the alert stays; the old hub signed an entry at a sequence the new one also used -> a machine that saw both is `broken` (recovery from a fork is the revocation delta's open item).
+- **Status:** draft
+- **Coverage:** DEC-0107, `hubSilence`, `hubMove` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `anchorDelta`, `FAC-SEM-137`, `test/revocation-delta.test.ts`; `FAC-SEM-114`
+- **Product:** unobserved
+
+### SCN-039: Lose a passkey and keep the network
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-032, FLW-27 (JTBD-10, JRN-09/#4)
+- **Entry point:** the network's passkeys in My network's machines
+- **Preconditions:** revision 1 listed two passkeys, `cred-a` on the person's laptop and `cred-b` on a security key; the laptop is lost
+- **Steps:**
+  1. The person signs with `cred-b` a revision that removes `cred-a`, lists it as `authority cred-a` in `revocations` and adds `cred-c` on a new phone.
+  2. Every machine applies it -> the network shows two passkeys again (`recoveryReady`: ready).
+- **Expected result:** the network survives the lost passkey; the lost one can sign no later revision.
+- **Alt paths:** the network was created with one passkey -> Fabric warned at creation and shows "Add a passkey" until a second is listed. Every passkey is lost -> no revision can be signed; the network expires with its applied revision (at most 30 days) and the person creates a new one and adds each machine again.
+- **UI elements:** the passkeys list; "Add a passkey"; the one-passkey warning.
+- **States covered:** alert, success, error
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again with the passkey left. Whoever holds the lost passkey signs a competing revision first -> two revisions of one number exist; what a machine does with such a fork is open in the estate record (Not decided here), so the person acts at once.
+- **Status:** draft
+- **Coverage:** DEC-0107, `recoveryReady` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `verifyEstateRecord` (a parent's authority signs the next revision)
 - **Product:** unobserved
