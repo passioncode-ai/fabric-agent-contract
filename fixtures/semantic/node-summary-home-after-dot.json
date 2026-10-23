@@ -40,6 +40,11 @@
         ],
         "skills": [
           {
+            "name": "task-pipeline",
+            "source": "plugin",
+            "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+          },
+          {
             "name": "x.-Users-example-DATA-secret",
             "source": "plugin",
             "digest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"

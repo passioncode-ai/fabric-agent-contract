@@ -6532,7 +6532,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. The dashed form `-Users-<x>` or `-home-<x>` is a home path after any character that is not an ASCII letter or
      digit (ASCII), or at the start: `HOME_PATH`'s second pattern is `(?:^|[^A-Za-z0-9])-(?:[Uu]sers|home)-[A-Za-z0-9]`, and the
      `sourceKey` pattern of `activity-common.schema.json` refuses it after any character its alphabet allows that is not
-     a letter or digit (`._:~#-`). `my-users-list` and `Users-guide` stay ordinary.
+     a letter or digit (`._:~#-`). `my-users-list` and `Users-guide` stay ordinary; a lower-case root after such a
+     character (`x.-users-list`) is refused like any other, which errs on the safe side.
   2. A node summary carries no member that says it is withheld. Whether a node may withhold its summary, or leave names
      out, by the person's choice is the operator's CT-92; until then the whole harness ships, as the operator decided
      for work machines (S8). A server that has no summary from a node within a day knows it has none.

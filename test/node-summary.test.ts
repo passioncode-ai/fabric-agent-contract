@@ -18,6 +18,12 @@ describe("node-summary semantic fixtures (FAC-SEM-128)", () => {
     expect(files).toHaveLength(8);
     expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(6);
   });
+  it("its two dash-encoded home-path fixtures are refused at the name, and for nothing else (DEC-0105)", () => {
+    for (const [name, at] of [["node-summary-home-after-dot.json", "/summary/harness/skills/1/name"], ["node-summary-home-after-at.json", "/summary/harness/plugins/1/name"]]) {
+      const fixture = load(`semantic/${name}`);
+      expect(evaluateSemanticRules(fixture.kind, fixture.input).map((f) => f.instancePath), name).toEqual([at]);
+    }
+  });
   it.each(files)("%s", (name) => {
     const fixture = load(`semantic/${name}`);
     expect([...new Set(codes(fixture.kind, fixture.input))]).toEqual(fixture.expect);

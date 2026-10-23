@@ -70,6 +70,8 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
     expect(valid("p~-home-example-x")).toBe(false);
     expect(valid("x_-home-example-y")).toBe(false);
     expect(valid("x#-Users-example-y")).toBe(false);
+    // DEC-0105 refuses a lower-case root after a separator too: the boundary is the character, not the case.
+    expect(valid("x.-users-list")).toBe(false);
     expect(valid("my-users-list:4")).toBe(true);
   });
 

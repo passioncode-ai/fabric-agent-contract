@@ -47,6 +47,11 @@
         ],
         "plugins": [
           {
+            "name": "switchboard@passioncode",
+            "source": "marketplace",
+            "version": "0.6.61"
+          },
+          {
             "name": "p@-Users-example-x",
             "source": "marketplace",
             "version": "0.6.61"
