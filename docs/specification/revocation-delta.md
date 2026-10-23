@@ -179,7 +179,8 @@ them. When a machine applies such a revision it runs `anchorDelta(state, record)
   `issuedAt`), so an anchor never takes a revocation out of force: otherwise the answer is `unreconciled`, naming the
   entries, and nothing changes. The drafter lists every revocation up to the anchor whatever its time;
 - an anchor whose hash differs from the entry held at its sequence: `fork`, and the machine is `broken`;
-- a held entry that is no object or names no sequence: `malformed`, and nothing changes.
+- a held entry that is no object or names no sequence: `malformed`, and nothing changes; a record of another estate
+  is `wrong-estate`.
 
 `applyDelta` then skips an entry below the anchor, one identical to the anchor, and one identical to an entry held,
 before it looks up the signer (another entry at the anchor's sequence is refused as at any held sequence: `fork` when a key the revision certifies signed it, `revoked-signer` or `unknown-signer` otherwise), so an entry an estate key signed that a later revision no longer certifies (the hub moved, its key revoked)

@@ -66,6 +66,10 @@ Round 6: seam pass (its risks fixed: the lease-issuer conformance row, the head 
 descriptions, the Fabric Agent Adapter's kits named as a reader in the status and CT-113); product two breaks, fixed:
 "Remove" on the hub's machine is a third way into the move (a machine declared lost takes the one-revision move whatever
 the alert says), and the conformance row raises the alert only while the record certifies a hub key.
+Round 7: product pass; its risks fixed (the move before the pin gate in SCN-038, a clock that does not read offers no
+move, the profile change after a move, `wrong-estate` named, the lost-or-retired question in SCR-23, the decision's
+list of changed files); FLW-27's diagram branches filed into CT-113. The finish line: unit round 5, seam round 6 and
+product round 7 clean after the last code change (round 5); rounds 6 and 7 changed documents only.
 
 ## Checks actually run
 

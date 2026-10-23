@@ -321,10 +321,11 @@ alert:
    hub's own longest interval (`HEARTBEAT_MAX_INTERVAL_SECONDS`), the answer is `silent`; past 72 hours `stale`, and
    calls from other machines are refused ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)). A machine that
    holds no readable heartbeat answers `unknown` (`no-heartbeat`) and refuses those calls too. In each case it tells
-   its person, with the hours since, that *this machine* has not heard from the hub. Before it offers "Move the hub" it
+   its person, with the hours since, that *this machine* has not heard from the hub. A machine whose own clock does not
+   read (`unknown`, `no-clock`) says that instead and offers no move: reconnecting cannot repair a clock. Before it offers "Move the hub" it
    reconnects to the relay (`welcome` carries the delta's head and the latest heartbeat, `delta-query` fetches what it
    lacks) and reads `hubSilence` again over the latest heartbeat it then holds: it offers the move only while that is
-   still `silent`, `stale` or `unknown`, so a machine that was only asleep does not move a running hub.
+   still `silent`, `stale` or `unknown` for lack of a heartbeat, so a machine that was only asleep does not move a running hub.
 2. **The new hub.** An always-on `full` machine of the estate ([machine calls](machine-calls.md#machine-profiles));
    Fabric warns when the person says the chosen one sleeps (the record marks no machine always-on). Its node is caught
    up before anything is drafted: it holds the delta's head and the latest heartbeat the relay serves, has applied the
@@ -400,7 +401,7 @@ so a second passkey is the recovery (DEC-0107):
 
 A machine's `profile` (DEC-0106, [machine calls](machine-calls.md#machine-profiles)) is part of the record, so the person
 changes it as every other change: a revision they sign with a passkey, with the machine listed under its new profile.
-A machine that becomes `member` gives up the hub key only after the hub has moved ([Move the hub](#move-the-hub)), in a revision of its own; one that becomes
+A machine that becomes `member` changes its profile only after the hub has moved ([Move the hub](#move-the-hub)), in a revision after the move's last one, which has already dropped and revoked its hub key; one that becomes
 `view` gives up its placements and secret placements in the same revision, and no other machine's secret names it as
 `from` (`FAC-SEM-134`). A node that applies the revision judges the next call it receives by the new profile; a call it
 accepted before keeps running. Until each node applies it, a node still on the parent judges calls by the old profile,

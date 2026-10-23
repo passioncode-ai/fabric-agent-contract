@@ -6644,7 +6644,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      rule), `unknown` when the clock or the heartbeat does not read. While the record it applied certifies a hub key, a
      machine tells its person at once on `silent`, `stale` and `unknown`, as what *it* has heard, and offers the
      unplanned move only while `hubSilence` over the latest heartbeat it holds after reconnecting to the relay is still
-     `silent`, `stale` or `unknown`; a record that certifies no hub key yet asks for the always-on machine instead. A
+     `silent`, `stale` or `unknown` for lack of a heartbeat (a clock that does not read offers no move); a record that certifies no hub key yet asks for the always-on machine instead. A
      planned move (the hub's machine retired or replaced, or about to become `member` or `view`) is offered on the hub
      machine's own row whatever `hubSilence` answers, and follows DL-15. "Remove" on the hub's machine opens the move
      too, whatever `hubSilence` answers: the person declaring the machine lost (stolen, dead, or running out of reach)
@@ -6708,7 +6708,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`deltaAnchor`); vectors `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`; tests `test/hub-move.test.ts`,
   `test/revocation-delta.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost
   passkey), `revocation-delta.md` (the anchor, `FAC-SEM-137`, Not decided), `estate-record.md`, `machine-calls.md`,
-  `conformance.md`, `relay.md` (the anchor), `delegation.md` (DL-15's lost-hub exception), `window-lease.md` (after a hub
+  `conformance.md`, `relay.md` (the anchor), `devices.md` and the head's description in `device-check-in` and
+  `revocation-delta` (the head under an anchor), `delegation.md` (DL-15's lost-hub exception), `window-lease.md` (after a hub
   move), README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-024, ST-032, FLW-20, FLW-27, SCN-029, SCN-030, SCN-037, SCN-038, SCN-039, ST-025,
   SCR-23); backlog
   CT-89 done, CT-113 filed.
