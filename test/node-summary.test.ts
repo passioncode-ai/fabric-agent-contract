@@ -14,9 +14,9 @@ const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, valu
 
 describe("node-summary semantic fixtures (FAC-SEM-128)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("node-summary-"));
-  it("has its six fixtures, four refused", () => {
-    expect(files).toHaveLength(6);
-    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(4);
+  it("has its eight fixtures, six refused (two hide a dash-encoded home directory, DEC-0105)", () => {
+    expect(files).toHaveLength(8);
+    expect(files.filter((name) => load(`semantic/${name}`).expect.length > 0)).toHaveLength(6);
   });
   it.each(files)("%s", (name) => {
     const fixture = load(`semantic/${name}`);
