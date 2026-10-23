@@ -32,7 +32,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `parent` | the parent revision's `digest`; absent exactly in revision 1 (schema) |
 | `issuedAt`, `validUntil` | the validity window: positive and at most 30 days ([freshness](#freshness)) |
 | `authorities[]` | the passkeys that may sign the next revision ([authorities](#authorities)) |
-| `machines[]` | each machine: `id`, `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
+| `machines[]` | each machine: `id`, `profile` (DEC-0106), `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
 | `publisherKeys[]` | the publisher keys the estate's machines pin, as public Ed25519 JWKs naming their `alg` |
 | `publisherScopes[]` | optional: a partner's publisher key scoped to the organization contexts it is trusted in, `{kid, partner, contexts}` ([the partner channel](partner-channel.md#a-partners-publisher-key-trusted-per-context-fac-sem-122), DEC-0090) |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
@@ -117,6 +117,9 @@ kept outside the signed record, so the record carries no label a person chose:
   ([contexts](contexts.md#one-instance-per-context-on-a-machine)); a slot is placed once per (machine, agent, slot,
   context) (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
   `estate-placement`). The value travels sealed to this machine's `#kem` key (v4 Path 2 step 3), never in the record.
+- **`profile`**: what the machine may do (DEC-0106): `full` (absent means `full`), `member` (no hub key) or `view` (no
+  placement, no secret, no hub key, never a secret's `from`; it calls and is called only to read). `FAC-SEM-134` checks
+  it; [machine calls](machine-calls.md#machine-profiles) says what each profile allows on a call between machines.
 
 ## Share grants
 

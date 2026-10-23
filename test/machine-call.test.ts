@@ -171,7 +171,7 @@ describe("FAC-SEM-135 and FAC-SEM-136 (DEC-0106)", () => {
     const answer = relayCallerTier(callerInput);
     expect(evaluateSemanticRules("relay-caller", { ...callerInput, answer })).toEqual([]);
     expect(evaluateSemanticRules("relay-caller", { ...callerInput, answer: { ...answer, profile: "full" } }).map((f) => f.code)).toEqual(["FAC-SEM-135"]);
-    const verdict = { caller: "full", target: "view", capability: "files.write", effect: "local" };
+    const verdict = { caller: "full", target: "view", capability: "files.write", effect: "draft" };
     expect(evaluateSemanticRules("machine-call", { ...verdict, answer: machineCallVerdict(verdict) })).toEqual([]);
     expect(evaluateSemanticRules("machine-call", { ...verdict, answer: { ok: true } }).map((f) => [f.code, f.instancePath])).toEqual([["FAC-SEM-136", "/answer"]]);
     expect(evaluateSemanticRules("machine-call", verdict).map((f) => f.code)).toEqual(["FAC-SEM-136"]);

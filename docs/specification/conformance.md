@@ -81,6 +81,7 @@ detector; connections use a variant of it in `src/connections.ts`, and whether t
 | [`src/relay.ts`](../../src/relay.ts) | relay admission, blob requests and message bodies | [`relay.json`](../../fixtures/vectors/relay.json) | DEC-0047 |
 | [`src/secret-envelope.ts`](../../src/secret-envelope.ts) | the HPKE secret envelope | [`secret-envelope.json`](../../fixtures/vectors/secret-envelope.json) | DEC-0047 |
 | [`src/relay-vectors.ts`](../../src/relay-vectors.ts) | the framework-free runner of the relay's shared vectors | [`relay.json`](../../fixtures/vectors/relay.json), [`secret-envelope.json`](../../fixtures/vectors/secret-envelope.json) | DEC-0066 |
+| [`src/machine-call.ts`](../../src/machine-call.ts) | calls between machines of one estate: the T1 binding over the relay, the call rule by machine profile, the sealed call and answer | [`machine-call.json`](../../fixtures/vectors/machine-call.json) | DEC-0106 |
 | [`src/http-signature.ts`](../../src/http-signature.ts) | the device request signature's signer and receiver | [`http-signature.json`](../../fixtures/vectors/http-signature.json) | DEC-0056 |
 | [`src/revocation-delta.ts`](../../src/revocation-delta.ts) | the revocation delta, the heartbeat and the 72-hour rule | [`revocation-delta.json`](../../fixtures/vectors/revocation-delta.json) | DEC-0054 |
 | [`src/window-lease.ts`](../../src/window-lease.ts) | window leases | [`window-lease.json`](../../fixtures/vectors/window-lease.json) | DEC-0062 |
@@ -177,6 +178,9 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a node hosting a job-backed agent that queues (any provider node) | queues per (`agentRef`, context) as `nextQueuedJob` answers, writes a waiting job's `statusMessage` as `queued <position> of <length>`, refuses a start as `admitJob` answers (a start that would run at once is admitted; one that would wait past `queueMax` gets `queue-full` and its `retryAfterSeconds`, nothing started or stored, its JSON as the result's text content and no `structuredContent`), lists only the caller's own jobs in `fabric.job.list` and answers another caller's job id `unknown-job`; serves the load extension (valid against its schema) and a `service-load/1` report with no person, caller or prompt, readable by every holder of the descriptor token (service.md, MCP credentials); keys every per-caller rule with `jobCallerKey` (an accepted token's `principal` and `caller`, else the credential); counts every started job that has not ended, `input_required` and paused ones too, as running | DEC-0104; `FAC-SEM-131`, `FAC-SEM-132`, `FAC-SEM-133` | `test/agent-network.test.ts`, vectors `fixtures/vectors/agent-network.json`, fixtures `fixtures/semantic/{job-queue,service-load}-*` ([agent network](agent-network.md#call-queue)) |
 | a host reading an agent's load (Fabric Dashboards) | treats an invalid load key as not declared and reports it; shows a report that fails `FAC-SEM-132`, or a path that refuses the token, as unavailable with the reason | DEC-0104; `FAC-SEM-132`, `FAC-SEM-133` | `test/agent-network.test.ts` `loadExtensionRules` ([agent network](agent-network.md#load)) |
 | a caller of a queued agent (any agent; the hub only relays) | polls a queued job as any `working` job; after `queue-full` starts again no sooner than `retryAfterSeconds`, under the same idempotency key (on a direct call; through Fabric's hub before CO-376 it sees `product-error`, [agent network](agent-network.md#call-queue)); the hub relays `queue-full` unchanged and keeps no key for it | DEC-0104 | `test/agent-network.test.ts` `readQueuePosition`, `admitJob` ([agent network](agent-network.md#call-queue)) |
+| a node taking calls from another machine of its estate over the relay (Fabric's nodes, any node) | places the sender as `relayCallerTier` answers from the record it applied last and the revocations in force, never from the connection; refuses `unknown-state` without falling back to T2; judges a T1 call with `machineCallVerdict` and refuses `profile-forbids`; opens a sealed call only as `openAgentCall` does, answers a refused call with a sealed `isError` answer and an unopened one not at all; keys a tokenless call by `relay:<from>` when it queues | DEC-0106; `FAC-SEM-135`, `FAC-SEM-136` | `test/machine-call.test.ts`, vectors `fixtures/vectors/machine-call.json` ([machine calls](machine-calls.md)) |
+| a node calling another machine of its estate over the relay (Fabric's nodes, any node) | seals the call to the target's `#kem` as `sealAgentCall` does, the hub's token, when it carries one, only in `delegation`; calls only from a machine with a usable `#kem`, so its answer can reach it | DEC-0106 | `test/machine-call.test.ts` ([machine calls](machine-calls.md#the-sealed-call)) |
+| the drafter of an estate record (Fabric's hub) | writes a machine's `profile` only once every reader of its records is pinned at or after DEC-0106, and a revision that passes `FAC-SEM-134` | DEC-0106; `FAC-SEM-134` | `test/estate-record.test.ts`, fixtures `fixtures/semantic/estate-profile-*` ([machine calls](machine-calls.md#compatibility)) |
 | a host reading what an agent uses (Fabric Dashboards, Fabric) | reads the key only as `connectionsView` answers: an invalid value, a repeated `id` or a credential is not declared and is reported; never trusts a connection as authority; runs `fixtures/vectors/connections.json` in its gate | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, `src/connections.ts` `connectionsView` ([connections](connections.md#reading-it)) |
 | a host showing a service's usage report (Fabric Dashboards, the adapter's checker) | shows a cost as a lower bound while `unpricedCalls` is above 0 and the day's tokens as a lower bound while `unmeasuredCalls` is above 0 | DEC-0065, DEC-0091; `FAC-SEM-025` | the host's own test; the report: `test/usage-rules.test.ts` ([service](service.md#usage-report)) |
 
@@ -294,7 +298,7 @@ and DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`.
 
-**Next free rule code:** `FAC-SEM-134` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-137` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -429,6 +433,9 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-131` | `job-queue` | [agent network](agent-network.md#semantic-rules) | SEM-0131 |
 | `FAC-SEM-132` | `service-load` | [agent network](agent-network.md#semantic-rules) | SEM-0132 |
 | `FAC-SEM-133` | `service-well-known` | [agent network](agent-network.md#semantic-rules) | SEM-0133 |
+| `FAC-SEM-134` | `estate-record` | [machine calls](machine-calls.md#semantic-rules) | SEM-0134 |
+| `FAC-SEM-135` | `relay-caller` | [machine calls](machine-calls.md#semantic-rules) | SEM-0135 |
+| `FAC-SEM-136` | `machine-call` | [machine calls](machine-calls.md#semantic-rules) | SEM-0136 |
 
 ## Compatibility policy
 

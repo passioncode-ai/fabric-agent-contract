@@ -643,7 +643,7 @@
         "caller": "full",
         "target": "full",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": true
@@ -655,7 +655,7 @@
         "caller": "member",
         "target": "full",
         "capability": "files.write",
-        "effect": "external"
+        "effect": "send"
       },
       "expect": {
         "ok": true
@@ -667,7 +667,7 @@
         "caller": "full",
         "target": "member",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": true
@@ -679,7 +679,7 @@
         "caller": "member",
         "target": "member",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": true
@@ -703,7 +703,7 @@
         "caller": "full",
         "target": "view",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": false,
@@ -756,7 +756,7 @@
         "caller": "view",
         "target": "full",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": false,
@@ -770,7 +770,7 @@
         "caller": "view",
         "target": "view",
         "capability": "files.write",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": false,
@@ -796,7 +796,7 @@
         "caller": "view",
         "target": "view",
         "capability": "fabric.job.get",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": true
@@ -808,7 +808,7 @@
         "caller": "full",
         "target": "view",
         "capability": "fabric.job.cancel",
-        "effect": "local"
+        "effect": "draft"
       },
       "expect": {
         "ok": true

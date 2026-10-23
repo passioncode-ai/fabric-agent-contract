@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0106` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0107` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6557,3 +6557,64 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   filed), `conformance.md` (the receiver and the summarising node rows).
 - **Source:** Project Observatory, board thread `b2511678`, message `72d70cd3` (2026-10-23).
 
+
+### DEC-0106: calls between machines of one estate: machine profiles, the T1 binding over the relay, the sealed call
+
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Fabric (its hub writes `profile` once every
+  reader of its records is pinned at or after this decision; its nodes place, judge, seal and open calls), Fabric
+  Dashboards (the profile shown), the first organization server's vendored estate-record schema, each at its next pin
+  (CT-110).
+- **Context:** S1 of the agent network is one person's machines calling each other's agents. DL-25 left the binding that
+  places a caller in T1 to RM-21, and nothing said how `agent.call` travels between machines. The platform asked for
+  both, with machine profiles (A-6) and a call rule (A-7) (board thread `348467e5`, items 1 and 2); the first
+  organization server asked how its relay treats such a call (thread `ba63565c`, item 4). CT-85.
+- **Decision:**
+  1. **Profiles.** `estate-record/1` gains an optional `machines[].profile`: `full`, `member` or `view`; absent is
+     `full`. Only a `full` machine carries a `hubKey`; a `view` machine has no `packages`, no `secrets`, and no secret
+     placement names it as `from` (`FAC-SEM-134`, kind `estate-record`). A profile changes only by a passkey-signed
+     revision. `machineProfile(record, id)` answers it, or none when unreadable.
+  2. **The T1 binding over the relay.** A node places the sender of a relay message whose body it verified with
+     `relayCallerTier({applied, self, from, at, freshness, revocations?})`: `unknown-state` when its delta is not
+     current, its clock does not read, the record it applied last gives no admission set, or its own `#sig` is not in
+     it; `unauthenticated` (`not-t1`) when `from` is not in the set; otherwise T1 with the machine, its profile and its
+     usable `#kem` (`FAC-SEM-135`, kind `relay-caller`). `unknown-state` is a denial, never a fall back to T2. A
+     tokenless relay call is keyed `relay:<from>` (`relayCallerCredential`) where a node queues (DEC-0104).
+  3. **The call rule.** `machineCallVerdict({caller, target, capability, effect})`: an unreadable profile is refused;
+     the job tools pass in every profile; an effect that is not `none` (unknown or absent counts above it) to a `view`
+     target, then from a `view` caller, is refused `profile-forbids`, a new DL-19 code (403); every other T1 call is
+     admitted and needs no token, approval or grant record (DL-26). A token the call carries is verified (DL-13) and
+     used for attribution and narrowing (`FAC-SEM-136`, kind `machine-call`).
+  4. **The sealed call.** A call and its answer are the relay body's inner `payload`, `fabric-agent-call/1`
+     (`agent-call-sealed.schema.json`): HPKE base mode, suite `[16, 1, 1]`, to the recipient's `#kem`, `info` the
+     protocol name, the additional data the RFC 8785 bytes of `{type, kind, from, to, msgId, kem}`; the plaintext is the
+     RFC 8785 form of an `agent-call-message` (a `call` with the hub's `agent.call` arguments, an optional
+     `delegation` and `traceparent`; an `answer` with `replyTo` and `isError`, `structuredContent`, `content`), at most
+     393 216 bytes. `sealAgentCall` and `openAgentCall` refuse by name and never throw. DL-11 is amended: over the relay
+     the token travels in the sealed `delegation` member only, never in `call.input`. A call that does not open is
+     logged and not answered; a call refused after it opens is answered with a sealed `isError` answer carrying the
+     refusal; an answer is sealed to the caller's `#kem`, so a machine with none does not call.
+- **Why:** the record the node already verified is the one source of who belongs to the estate, so T1 comes from it and
+  from nothing the connection says; a stale delta could admit a machine the person removed, so it denies. Profiles in
+  the signed record cannot be widened by the machine they limit. Sealing to `#kem` keeps the call and the token out of
+  the relay's sight with the suite the secret envelope already uses, and binding the additional data to the body's
+  `from`, `to` and `msgId` stops a sealed call from being replayed inside another body.
+- **Alternatives considered:** the hub's token on every T1 call, as A-7's wording reads (it contradicts DL-26 and would
+  put a bearer token where the relay could log it, unsealed); a profile as a node's own setting (a machine could widen
+  itself); `profile_forbids` in snake case (every DL-19 code is kebab-case); checking only the target's profile (a
+  `view` machine could still make changes elsewhere); a signed but unsealed call (the relay reads arguments and
+  results).
+- **Compatibility:** additive, with two narrowings: a record carrying `profile` is refused by a reader pinned before this
+  decision (the machine object is closed), so the hub writes none until its readers move; `profile-forbids` is refused
+  by an older copy of `delegation-refusal.schema.json`. `fabric-agent-call/1` is a new protocol in the register; the
+  relay carries it unread. Every record without `profile` reads as before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/machine-call.ts` (new), `src/estate-record-rules.ts` (`machineProfile`,
+  `FAC-SEM-134`), `src/delegation.ts` (`REFUSAL_CODES`), `src/protocol-revisions.ts`, `src/semantic-kinds.ts`,
+  `src/semantic-rules.ts`; schemas `agent-call-sealed`, `agent-call-message` (new), `estate-record` (`profile`),
+  `delegation-refusal`; vectors `fixtures/vectors/machine-call.json` by `tools/vectors/machine-call.ts`; fixtures
+  `estate-profile-*`, `machine-call-*`, `machine-caller-*`, `agent-call-*`; `test/machine-call.test.ts`; docs
+  `machine-calls.md` (new), `delegation.md` (DL-11, DL-19, DL-25, Not decided), `relay.md`, `interop.md` (C3.5),
+  `estate-record.md`, `ceremonies.md` (Change a machine's profile), `agent-network.md`, `conformance.md`,
+  `versioning.md`, the UX layer (JTBD-13, JRN-12, ST-030, ST-031, FLW-25, FLW-26, SCN-036, SCN-037); backlog CT-85
+  done, CT-110 and CT-111 filed.
+- **Source:** the platform, board thread `348467e5` (A-6, A-7); the first organization server, thread `ba63565c`
+  item 4; CT-85.

@@ -8,7 +8,7 @@
     "caller": "full",
     "target": "view",
     "capability": "files.write",
-    "effect": "local",
+    "effect": "draft",
     "answer": {
       "ok": true
     }

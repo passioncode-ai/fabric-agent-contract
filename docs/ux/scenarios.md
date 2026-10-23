@@ -41,6 +41,8 @@
 | SCN-033 | Find an agent in my estate or my organization; an unlisted one is marked for its publisher and absent for a member | agent-network | P-02 | ST-027, FLW-22 | draft | not audited |
 | SCN-034 | A call to a busy agent waits with its place shown, or is refused with a time to start again | agent-network | P-02 | ST-028, FLW-23 | draft | not audited |
 | SCN-035 | See how busy an agent is, or learn why its load is not shown | agent-network | P-02 | ST-029, FLW-24 | draft | not audited |
+| SCN-036 | An agent calls an agent on another of the owner's machines, or is refused by a machine's profile | machine-calls | P-02 | ST-030, FLW-25 | draft | not audited |
+| SCN-037 | Keep a machine for reading only | machine-calls | P-02 | ST-031, FLW-26 | draft | not audited |
 
 ## Personas
 
@@ -575,6 +577,26 @@ independent agent author and P-02 project operator.
 - **Coverage:** DEC-0104, `FAC-SEM-132`, `FAC-SEM-133` in `src/agent-network.ts`, `service-load.schema.json`, `service-load-extension.schema.json`, `test/agent-network.test.ts`
 - **Product:** unobserved
 
+### SCN-036: An agent calls an agent on another of the owner's machines, or is refused by a machine's profile
+
+- **Persona:** P-02
+- **Feature:** machine-calls
+- **Traces:** ST-030, FLW-25 (JTBD-13, JRN-12/#1)
+- **Entry point:** an agent on machine `m-a` calls `example-agent` on machine `m-b` over the relay
+- **Preconditions:** the record both nodes applied lists `m-a` (full) and `m-b` (full, then `view` in step 3), each with a `#sig` and a `#kem`; `m-b`'s revocation delta is current
+- **Steps:**
+  1. `m-a`'s node seals the call to `m-b#kem` and sends it -> `m-b`'s node places `m-a#sig` in T1, opens the call and runs it with no token.
+  2. The answer is sealed to `m-a#kem` -> `m-a`'s node opens it and the caller reads the result.
+  3. The person marks `m-b` as `view`, and `m-a` calls a capability whose effect is `draft` -> refused `profile-forbids`; a read (effect `none`) still runs.
+- **Expected result:** a call between one person's machines runs with no token, the relay reads none of it, and a machine kept for reading takes no call that changes anything.
+- **Alt paths:** the delta is not current -> refused `unknown-state`, no fallback to T2. The sender's machine was revoked -> not T1; with no token in `delegation` refused `unauthenticated`. A sealed call copied into another body -> `cannot-open`, logged and not answered. The caller's machine has no `#kem` -> it can be called but cannot receive an answer, so it does not call.
+- **UI elements:** the caller's job status; the refusal's code and reason.
+- **States covered:** success, error
+- **Errors & recovery:** a refused call names its code (`profile-forbids`, `unauthenticated`, `unknown-state`); the caller calls a `full` or `member` machine, or waits for its node's delta to be current and calls again.
+- **Status:** draft
+- **Coverage:** DEC-0106, `FAC-SEM-135`, `FAC-SEM-136`, `relayCallerTier`, `machineCallVerdict`, `sealAgentCall`, `openAgentCall` in `src/machine-call.ts`, `fixtures/vectors/machine-call.json`, `test/machine-call.test.ts`
+- **Product:** unobserved
+
 ## Embedded dashboard
 
 ### SCN-021: Widen the console beside a dashboard: navigation stays reachable, the page keeps its floor
@@ -789,4 +811,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine pinned at or after DEC-0084 (`FAC-SEM-114`; an older reader accepts it, ceremonies *Compatibility*); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
 - **Status:** draft
 - **Coverage:** ceremonies specification, Remove a machine, Replace a machine's key; `src/estate-record-rules.ts`, `src/relay.ts` `sessionStands`; `test/ceremonies.test.ts`, `fixtures/vectors/relay.json`
+- **Product:** unobserved
+
+### SCN-037: Keep a machine for reading only
+
+- **Persona:** P-02
+- **Feature:** machine-calls
+- **Traces:** ST-031, FLW-26 (JTBD-13, JRN-12/#2)
+- **Entry point:** My network's machines
+- **Preconditions:** a network of two machines, `m-a` holding the hub key and `m-b` with one placement and one secret placement
+- **Steps:**
+  1. The person picks "Change profile" on `m-b` and chooses `view` -> the drafter removes `m-b`'s placement and secret placement in the same revision.
+  2. The person signs it with a passkey -> the list shows `m-b` as `view`; every node applies the revision.
+  3. An agent on `m-a` calls `m-b` with a capability that changes something -> refused `profile-forbids`.
+- **Expected result:** the machine runs no agent, holds no secret and takes no call that changes anything, by the signed record alone.
+- **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> the drafter refuses until the hub moves (CT-89). A record written before profiles -> every machine reads as `full`. Fabric writes no profile until every reader of its records is pinned at or after DEC-0106.
+- **UI elements:** the profile in each machine's row; "Change profile" in the overflow menu.
+- **States covered:** success, error
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again; a revision that keeps a placement on a `view` machine -> `FAC-SEM-134` names it and the drafter removes it.
+- **Status:** draft
+- **Coverage:** DEC-0106, `FAC-SEM-134` in `src/estate-record-rules.ts` (`machineProfile`), fixtures `fixtures/semantic/estate-profile-*`, `test/estate-record.test.ts`, `test/machine-call.test.ts`
 - **Product:** unobserved

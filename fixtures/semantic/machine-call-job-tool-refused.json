@@ -8,7 +8,7 @@
     "caller": "view",
     "target": "view",
     "capability": "fabric.job.cancel",
-    "effect": "local",
+    "effect": "draft",
     "answer": {
       "ok": false,
       "code": "profile-forbids",

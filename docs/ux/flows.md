@@ -602,6 +602,53 @@ flowchart TD
 
 - **Screens traversed:** SCR-26 success; SCR-26 empty; SCR-26 invalid.
 
+### FLW-25: An agent calls an agent on another of the owner's machines
+
+- **Traces:** ST-030 (JTBD-13, JRN-12/#1)
+- **Goal:** the call runs on the other machine once, and its answer reaches the caller
+- **Entry points:** a call from an agent on one machine to an agent on another machine of the same estate
+- **Success exit:** the caller reads the sealed answer
+- **Task analysis:** the caller's node seals the call to the target's `#kem` → the relay carries the signed body → the target's node verifies the body and its replay window → places the sender (`relayCallerTier`) → opens the call → judges it (`machineCallVerdict`) → runs it → seals the answer to the caller's `#kem`.
+- **Rejected shape:** the hub's token on every call between one person's machines, rejected because DL-26 needs none inside the boundary and a token in the relay's sight would leak it (DEC-0106).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  S[Caller seals the call to the target's kem] --> R[Relay delivers the signed body]
+  R --> V{Body verified, not a replay?}
+  V -->|no| X[Dropped by the relay rules]
+  V -->|yes| T{relayCallerTier}
+  T -->|unknown-state| U[Refused, a sealed isError answer]
+  T -->|not T1, no token| U
+  T -->|T1| O{openAgentCall}
+  O -->|refused| L[Logged, acknowledged, not answered]
+  O -->|opens| J{machineCallVerdict}
+  J -->|profile-forbids| U
+  J -->|admitted| Run[The call runs; the answer is sealed to the caller's kem]
+```
+
+- **Screens traversed:** SCR-27 success; SCR-27 refused.
+
+### FLW-26: Operator changes a machine's profile
+
+- **Traces:** ST-031 (JTBD-13, JRN-12/#2)
+- **Goal:** the machine does only what its new profile allows
+- **Entry points:** My network's machines
+- **Success exit:** the signed revision lists the machine under its new profile, and its nodes apply it
+- **Task analysis:** the person picks a profile → the drafter removes what the profile forbids (placements, secrets, the hub key) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
+- **Rejected shape:** a node's own setting for its profile, rejected because a machine could then widen itself; the profile is the signed record's (DEC-0106).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  P[Person picks a profile] --> D[Drafter removes what it forbids]
+  D --> G{Passkey signs?}
+  G -->|no| N[Nothing changed]
+  G -->|yes| A[Nodes apply the revision; the next call is judged by it]
+```
+
+- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

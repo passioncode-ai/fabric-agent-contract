@@ -11,7 +11,7 @@
  * from a published label, and the additional data written out here from the decision, so a port reproduces each byte.
  * Nothing here imports `src/machine-call.ts`, so the gate checks that the reference returns what this file expects.
  */
-import { createECDH, createHash } from "node:crypto";
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -128,20 +128,20 @@ function verdictCases(): Json[] {
   const ok: Json = { ok: true };
   const no = (detail: string): Json => ({ ok: false, code: "profile-forbids", detail });
   const cases: Array<[string, unknown, unknown, unknown, unknown, Json]> = [
-    ["full to full, an effect", "full", "full", "files.write", "local", ok],
-    ["member to full, an effect", "member", "full", "files.write", "external", ok],
-    ["full to member, an effect", "full", "member", "files.write", "local", ok],
-    ["member to member, an effect", "member", "member", "files.write", "local", ok],
+    ["full to full, an effect", "full", "full", "files.write", "draft", ok],
+    ["member to full, an effect", "member", "full", "files.write", "send", ok],
+    ["full to member, an effect", "full", "member", "files.write", "draft", ok],
+    ["member to member, an effect", "member", "member", "files.write", "draft", ok],
     ["full to view, a read", "full", "view", "status.read", "none", ok],
-    ["full to view, an effect", "full", "view", "files.write", "local", no("target-view")],
+    ["full to view, an effect", "full", "view", "files.write", "draft", no("target-view")],
     ["full to view, no effect named", "full", "view", "files.write", undefined, no("target-view")],
     ["full to view, an unknown effect", "full", "view", "files.write", "maybe", no("target-view")],
     ["view to full, a read", "view", "full", "status.read", "none", ok],
-    ["view to full, an effect", "view", "full", "files.write", "local", no("caller-view")],
-    ["view to view, an effect: the target first", "view", "view", "files.write", "local", no("target-view")],
+    ["view to full, an effect", "view", "full", "files.write", "draft", no("caller-view")],
+    ["view to view, an effect: the target first", "view", "view", "files.write", "draft", no("target-view")],
     ["view to view, a read", "view", "view", "status.read", "none", ok],
-    ["the job tools in every profile: get", "view", "view", "fabric.job.get", "local", ok],
-    ["the job tools in every profile: cancel", "full", "view", "fabric.job.cancel", "local", ok],
+    ["the job tools in every profile: get", "view", "view", "fabric.job.get", "draft", ok],
+    ["the job tools in every profile: cancel", "full", "view", "fabric.job.cancel", "draft", ok],
     ["the job tools in every profile: list", "view", "member", "fabric.job.list", undefined, ok],
     ["a caller's profile unread", null, "full", "status.read", "none", no("profile-unreadable")],
     ["a target's profile unread", "full", "owner", "fabric.job.get", "none", no("profile-unreadable")]
