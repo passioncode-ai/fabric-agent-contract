@@ -34,6 +34,7 @@ export default defineConfig({
         "src/connections.ts": { branches: 100 },
         "src/agent-network.ts": { branches: 100 },
         "src/machine-call.ts": { branches: 100 },
+        "src/hub-move.ts": { branches: 100 },
         "src/delegation-rules.ts": { branches: 100 },
         "src/descriptor-rules.ts": { branches: 100 },
         "src/delegation.ts": { branches: 100 },

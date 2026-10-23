@@ -1,0 +1,735 @@
+{
+  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation. Every case holds in every time zone.",
+  "silence": [
+    {
+      "name": "an hour old",
+      "heartbeatAt": "2026-10-23T11:00:00Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "speaking",
+        "sinceSeconds": 3600
+      }
+    },
+    {
+      "name": "24 hours exactly: still speaking",
+      "heartbeatAt": "2026-10-22T12:00:00Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "speaking",
+        "sinceSeconds": 86400
+      }
+    },
+    {
+      "name": "a second past 24 hours: silent, the person is told",
+      "heartbeatAt": "2026-10-22T11:59:59Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "silent",
+        "sinceSeconds": 86401
+      }
+    },
+    {
+      "name": "half a second past 24 hours: silent, the seconds floored",
+      "heartbeatAt": "2026-10-22T11:59:59.500Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "silent",
+        "sinceSeconds": 86400
+      }
+    },
+    {
+      "name": "two days old",
+      "heartbeatAt": "2026-10-21T12:00:00Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "silent",
+        "sinceSeconds": 172800
+      }
+    },
+    {
+      "name": "72 hours exactly: still silent, calls still accepted",
+      "heartbeatAt": "2026-10-20T12:00:00Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "silent",
+        "sinceSeconds": 259200
+      }
+    },
+    {
+      "name": "a second past 72 hours: stale",
+      "heartbeatAt": "2026-10-20T11:59:59Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "stale",
+        "sinceSeconds": 259201
+      }
+    },
+    {
+      "name": "a heartbeat ahead of the clock reads as just signed",
+      "heartbeatAt": "2026-10-23T12:00:30Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "speaking",
+        "sinceSeconds": 0
+      }
+    },
+    {
+      "name": "an offset other than Z",
+      "heartbeatAt": "2026-10-23T13:00:00+02:00",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "speaking",
+        "sinceSeconds": 3600
+      }
+    },
+    {
+      "name": "no heartbeat held",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "unknown",
+        "reason": "no-heartbeat"
+      }
+    },
+    {
+      "name": "a heartbeat time that does not read",
+      "heartbeatAt": "2026-02-30T12:00:00Z",
+      "at": "2026-10-23T12:00:00Z",
+      "expect": {
+        "answer": "unknown",
+        "reason": "no-heartbeat"
+      }
+    },
+    {
+      "name": "a clock that does not read",
+      "heartbeatAt": "2026-10-23T11:00:00Z",
+      "at": "noon",
+      "expect": {
+        "answer": "unknown",
+        "reason": "no-clock"
+      }
+    },
+    {
+      "name": "no clock and no heartbeat: the clock first",
+      "heartbeatAt": null,
+      "at": 7,
+      "expect": {
+        "answer": "unknown",
+        "reason": "no-clock"
+      }
+    }
+  ],
+  "recovery": [
+    {
+      "name": "one passkey: a lost one loses the estate",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "ready": false,
+        "authorities": 1
+      }
+    },
+    {
+      "name": "two passkeys",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-b",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "ready": true,
+        "authorities": 2
+      }
+    },
+    {
+      "name": "two passkeys, one revoked",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-b",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "authority",
+            "ref": "cred-b",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ready": false,
+        "authorities": 1
+      }
+    },
+    {
+      "name": "one passkey listed twice counts once",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "ready": false,
+        "authorities": 1
+      }
+    },
+    {
+      "name": "a revocation of another kind with the same ref changes nothing",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-b",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "machine",
+            "ref": "cred-b",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ready": true,
+        "authorities": 2
+      }
+    },
+    {
+      "name": "an authority without a credential id is not counted",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "alg": "ES256"
+          }
+        ]
+      },
+      "expect": {
+        "ready": false,
+        "authorities": 1
+      }
+    },
+    {
+      "name": "three passkeys",
+      "record": {
+        "authorities": [
+          {
+            "credentialId": "cred-a",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-b",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          },
+          {
+            "credentialId": "cred-c",
+            "alg": "ES256",
+            "rpId": "sign.example.org",
+            "origins": [
+              "https://sign.example.org"
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "ready": true,
+        "authorities": 3
+      }
+    },
+    {
+      "name": "no authorities",
+      "record": {},
+      "expect": {
+        "ready": false,
+        "authorities": 0
+      }
+    },
+    {
+      "name": "no record",
+      "record": null,
+      "expect": {
+        "ready": false,
+        "authorities": 0
+      }
+    }
+  ],
+  "move": [
+    {
+      "name": "an orderly move: the old key removed, not revoked",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-b",
+            "kid": "hub-b"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "a move from a lost machine: the old key revoked",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-b",
+            "kid": "hub-b"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "a move with the lost machine removed",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "machine",
+            "ref": "m-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          },
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-b",
+            "kid": "hub-b"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "a second hub added: no move",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [
+          {
+            "machine": "m-b",
+            "kid": "hub-b"
+          }
+        ],
+        "removed": []
+      }
+    },
+    {
+      "name": "the hub removed with none in its place: no move, the estate has no hub",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "the hub's key replaced on the same machine",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a2",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a2"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "nothing changed",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
+        "removed": []
+      }
+    },
+    {
+      "name": "revision 1, no parent",
+      "parent": null,
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a"
+          }
+        ],
+        "removed": []
+      }
+    }
+  ]
+}
