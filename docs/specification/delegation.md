@@ -385,7 +385,9 @@ context of its own.
   The token's `spend` claim is what was left at mint, not a reservation.
 - **DL-22 — Usage stays opaque.** A usage report attributes spend by grant reference only (`byGrant`,
   [service](service.md#usage-report)), the value of the token's `grant` claim. It never carries the principal,
-  the chain or a caller's identity; the mapping from grant to chain lives in the issuer's journal.
+  the chain or a caller's identity; the mapping from grant to chain lives in the issuer's journal. A call between
+  agents is recorded apart, in `call-record/1`, which names the two agents and never a person and never enters a usage
+  report ([credentials](credentials.md#the-call-record), DEC-0111).
 
 ## The hub's grant projection
 

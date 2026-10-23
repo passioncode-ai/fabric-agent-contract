@@ -137,6 +137,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: a call between my own machines needs the same tokens as a stranger's; a spare laptop holds secrets it never uses; pull: one signed record that says what each machine may do; anxiety: a relay or an outsider reading my calls, a revoked machine still calling; habit: copying files and keys by hand.
 - **Success metric:** a call from a machine my current record lists runs with no token; a call that changes something to or from a `view` machine is refused `profile-forbids`; the relay reads no call; a machine my delta revoked is not T1.
 
+### JTBD-14: Give my organization's agents narrow credentials, and see every call between them
+
+- **Statement:** When an agent that works for my organization needs a credential (a token for one DNS zone, a model key with a ceiling), I want it to ask, me or my policy to decide, and the value to arrive sealed into my organization's context on that machine only, every request and issue recorded by name, and every call between agents recorded without anyone's prompts or outputs, so I can hand out access without pasting keys and still know who called whom.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: keys pasted into chats and `.env` files, one shared key for every agent, no record of which agent called which; pull: one request, one decision, one sealed value that ends by itself; anxiety: a value landing in a person's own context, a relay or a server reading it, a leaver keeping access; habit: creating keys by hand at each provider.
+- **Success metric:** a requested credential reaches only the requesting agent's organization instance, sealed, and ends at most 30 days after it was issued; the server's ledger lists it by name and never by value; every call between agents in the organization's context leaves one record with no person, argument or output.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -244,6 +252,15 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 |---|---|---|---|---|---|---|
 | 1 | Call | an agent on the laptop calls an agent on the always-on machine | the caller's job status | 3 | a token asked of a call between one person's machines | T1 from the applied record, no token, the call sealed end to end (priority 9) |
 | 2 | Limit | keeps a machine for reading only | My network's machines | 3 | every machine can do everything | a `view` profile in the signed record, refused calls named `profile-forbids` (priority 8) |
+
+### JRN-13: Administrator, credentials for agents and the record of their calls (JTBD-14)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Ask | an agent asks for a token for one zone | the organization's credential queue | 3 | the agent waits for someone to paste a key | a typed request in the check-in, decided by the policy or the administrator (priority 9) |
+| 2 | Deliver | the token reaches the agent's machine | the agent's vault slot | 4 | the value crosses chats and servers | sealed to the machine's key under the organization's policy key, opened only in its context (priority 9) |
+| 3 | Revoke | a member leaves | the credentials issued into the organization | 2 | keys outlive the people who held them | a signed revocation per credential, deleted at once on the machine (priority 8) |
+| 4 | Trace | the administrator reads who called whom | the calls between agents | 3 | no record, or one full of prompts | one call record per call, agents and outcome only (priority 7) |
 
 ## 4. User stories
 
@@ -630,6 +647,30 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a revision that marks a machine `view`, when it carries a placement, a secret or the hub key for that machine, then the revision is refused (`FAC-SEM-134`).
   - Given a `view` machine, when a full machine calls it with a capability whose effect is not `none`, then the call is refused `profile-forbids`; a read and the job tools pass.
   - Given a record written before profiles, when a node reads it, then every machine reads as `full`.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-033: An agent asks for a narrow credential and gets it in its organization's context
+
+- **Story:** As P-02 administering an organization, I want an agent in it to ask for a narrow credential and receive it sealed into the organization's context on its machine, so that no key is pasted by hand and none lands in a person's own context.
+- **Traces:** JTBD-14, JRN-13/#1, JRN-13/#2, JRN-13/#3
+- **Acceptance criteria:**
+  - Given an agent in `org:<id>`, when its node sends `credential-request/1`, then the request names that context, at most 30 days, and a reason with no path or credential (`FAC-SEM-138`).
+  - Given an issued decision, when the envelope arrives, then the node opens it only when it answers a request it sent, under a key of the organization's current policy key set, into that context's vault slot, and deletes it at `credentialExpiresAt` (`FAC-SEM-139`).
+  - Given a revocation signed by the organization, when the node applies it, then the value and its mark are deleted.
+  - Given two of my own machines, when one sends the estate's digest key to the other, then it travels in the personal profile, refused from or to a `view` machine.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-034: Administrator sees every call between agents in the organization
+
+- **Story:** As P-02, I want one record per call between agents in my organization's context, so that I know who called whom, when, how it ended and what it cost, without seeing anyone's prompts or outputs.
+- **Traces:** JTBD-14, JRN-13/#4
+- **Acceptance criteria:**
+  - Given a call answered or refused, when the callee's node records it, then `call-record/1` names the two agents, the context, the capability, the times, the outcome and the cost, and no person, argument or output (`FAC-SEM-140`).
+  - Given a member whose acknowledged notice does not name agent calls, when the server answers a check-in with `callRecordsAccepted: false`, then their node sends no call record to the organization.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

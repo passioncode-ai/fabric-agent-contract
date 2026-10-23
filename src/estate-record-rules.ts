@@ -383,7 +383,7 @@ function secretReferences(value: JsonObject, flag: Flag): void {
       if (!placed.has(keyOf(secret.agentRef, contextOf(secret)))) flag(`${at}/agentRef`, "a secret goes only where a placed package declares it (v4 Path 2): this agent is not placed on this machine in the secret's context");
       if (!machineIds.has(secret.from)) flag(`${at}/from`, "the slot is filled from a machine of this estate");
       // An envelope names no context (DEC-0082), so an organization's instance fills its slot on its own machine.
-      else if (contextOf(secret) !== PERSONAL_CONTEXT && secret.from !== machine.id) flag(`${at}/from`, "an organization's instance fills its slot from its own machine's vault, never by an envelope from another machine");
+      else if (contextOf(secret) !== PERSONAL_CONTEXT && secret.from !== machine.id) flag(`${at}/from`, "an organization's instance fills its slot from its own machine's vault, never by a secret envelope from another machine");
       const key = keyOf(secret.agentRef, secret.slot, contextOf(secret));
       if (slots.has(key)) flag(`${at}/slot`, `slot ${show(secret.slot)} is placed twice for one agent in one context on one machine`);
       slots.add(key);

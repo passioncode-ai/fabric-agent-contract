@@ -118,8 +118,9 @@ supervisor, the paths, `installedAt` and `installedBy`. The entry passes no cred
 
 `secrets[]` names the slots the agent needs: `name` (`^[A-Z][A-Z0-9_]{0,63}$`), a plain-words `purpose`, and
 `optional`. A slot holds no value and the schema admits no other member (DEC-0013). The installing machine fills a
-slot from the vault, where the estate record places it (v4 §6 Path 2: secrets go only where a placed package
-declares them). `FAC-SEM-065` refuses a slot named twice and a name or purpose shaped like a credential.
+slot from the vault, where the estate record places it (v4 §6 Path 2: a placed package's secrets go only where it
+declares them; a credential an agent asks for, and one moved between one person's machines outside a placement, arrive in
+a [credential envelope](credentials.md#the-envelope), DEC-0111). `FAC-SEM-065` refuses a slot named twice and a name or purpose shaped like a credential.
 
 ## Cost presets
 

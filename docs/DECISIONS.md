@@ -6780,3 +6780,70 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0027, DEC-0046; CT-115, CT-116.
 - **Source:** a service's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
   `f22685d2` (2026-10-22).
+
+### DEC-0111: narrow credentials on request, the estate's keyed digests, and the call record
+
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory (the issuer and its node), the
+  first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117).
+- **Context:** S5 of the agent network asks that an agent in an organization request a narrow credential (a token for
+  one DNS zone, an OpenRouter key with a ceiling), that the organization decide, and that the value arrive sealed into
+  that organization's context on the agent's machine, never into the person's own context, every request, decision and
+  issue recorded; S6 asks for one record per call between agents (board thread `ba63565c` items 5 and 6, `b2511678` with
+  the operator's addition of 2026-10-22). The secret envelope (DEC-0047, DEC-0082) fills only a personal secret placement,
+  and nothing moved a credential between one person's machines outside a placement, or carried the key the estate's
+  keyed digests use (Project Observatory OBS-194 step 2). CT-86.
+- **Decision:**
+  1. **The request.** `credential-request/1` travels in a check-in's `records.credentialRequests` inside the signed
+     device request: `requestId`, `agentRef`, `context` (the organization's `org:<id>`), `provider`, `preset`, optional
+     `scope` and `limit`, `expiresAt`, `reason`, `requestedAt`; no person, no value. `FAC-SEM-138`: the enrollment's own
+     organization, at most 30 days, no path or credential in the reason or the scope.
+  2. **The decision.** `credential-decision/1` in a check-in response's `records.credentialDecisions`: `issued`
+     (the credential by slot, provider, preset and end, no later than asked), `refused` (a reason) or `pending`, by the
+     administrator or the policy (`FAC-SEM-138`). The organization server records every request, decision, issue and
+     revocation by name, never a value.
+  3. **The envelope.** `fabric-credential-envelope/1` (`credential-envelope.schema.json`): HPKE base mode, suite
+     `[16, 1, 1]`, to the target's `#kem`, `info` the protocol name, the header the additional data, signed over the RFC
+     8785 bytes of `{header, ct}`. In an organization's context it is signed `EdDSA` by a key of the organization's
+     current policy key set, inside its window on the target's clock, answers a request the node holds open
+     (`requestId`, its slot from the `issued` decision, until the envelope opens or a refusal comes; the node resends it
+     until then, and the issuer seals again) and ends at `credentialExpiresAt`, at most 30 days after `iat`; in the personal context it is signed `ES256` by the `#sig` of a machine of the estate
+     record the target applied, neither machine `view` nor the target itself, never into a slot a personal secret placement declares, the estate's digest
+     key only from the machine holding a hub key the record certifies and neither the record nor the delta revokes. `checkCredentialEnvelope` names the first
+     failing check (`FAC-SEM-139`), `openCredential` opens; the value and its mark are written in one transaction into
+     that context's vault slot, never another's.
+  4. **Revocation.** `credential-revocation/1` in `records.credentialRevocations`, signed like a policy layer; the node
+     deletes the value when `credentialRevocationStands` accepts it (the key's window on the device's clock), and the
+     issuer revokes at the provider. A node deletes every credential of an organization's context when that enrollment
+     ends, and the server sends a leaver's revocations before it revokes the certificate.
+  5. **The estate's digest key.** 32 random bytes generated on the hub's machine, delivered by the personal profile
+     (`agentRef: urn:fabric:agent:fabric:estate`, `slot: ESTATE_DIGEST_KEY`); `keyedDigest(key, value)` is
+     `kd1:<keyId>:<hex>`, HMAC-SHA256 over `fabric-keyed-digest/1`, a zero byte and the value.
+  6. **The call record.** `call-record/1`: `callId`, `traceId`, `caller`, `callee`, `context`, `capability`,
+     `transport`, times, `outcome`, `code`, `cost`; written by the callee's node (and the caller's for a call with no
+     answer, joined by `callId`, the callee's outcome first), never naming a person, an argument or an output, never in a
+     usage report and never added to money (DL-22); an organization reads its own context's in `records.callRecords`
+     only after a check-in response says `callRecordsAccepted: true`, from the notice's agent-calls purpose
+     (`FAC-SEM-140`).
+- **Why:** the check-in is the one signed channel a machine already has with its organization, so a request and its
+  answer need no new transport, and the device and organization come from the transport instead of the request. The
+  organization's policy key set already signs what an organization tells a machine (policies, repairs), so a credential
+  signed by it needs no new trust anchor; the personal profile reuses the estate record's admission set. Sealing to
+  `#kem` with the secret envelope's suite keeps the value out of the server's and the relay's sight.
+- **Alternatives considered:** widening `fabric-secret-envelope/1` with a context (an envelope pinned before DEC-0082
+  names none, and older readers would open an organization's value as a personal one); delivering through the relay
+  (an organization server is not a relay participant of the person's estate); the issuer signing with its own key (a new
+  anchor every node would have to pin); a call record inside the usage report (DL-22 keeps the chain out of it); the
+  request as a profile on the delegation and grant records, as CT-86 first proposed (the request is the node's, and its
+  only signed channel to the organization is the check-in).
+- **Compatibility:** additive. Five new protocols in the register and six new check-in members; each side sends them
+  only to a peer that lists the protocol in its `protocols`, since the check-in objects are closed.
+  `fabric-secret-envelope/1` is unchanged. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/credentials.md` (new), `devices.md` (the check-in members),
+  `relay.md` (the secret envelope's pointer), `delegation.md` (DL-22), `contexts.md` (an organization's slot), `package.md` (secrets), `machine-calls.md`, `conformance.md`,
+  `versioning.md`, `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md`; `src/credentials.ts` (new),
+  `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/protocol-revisions.ts`, `src/estate-record-rules.ts` (FAC-SEM-075's message); schemas `credential-request`,
+  `credential-decision`, `credential-envelope`, `credential-revocation`, `call-record` (new), `device-check-in`; vectors
+  `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts`; tests
+  `test/credential-envelope.test.ts`; fixtures; the UX layer; backlog CT-86 done, CT-117 to CT-120 filed.
+- **Source:** board thread `ba63565c` items 5 and 6 (the first organization server, 2026-10-21), `b2511678` (S5, S6,
+  and the addition of 2026-10-22), `21684886` (the estate's own credentials); Project Observatory OBS-191, OBS-194; CT-86.

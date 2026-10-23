@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/call-record.schema.json",
+  "title": "One call between two agents, call-record/1 (DEC-0111)",
+  "description": "Written by the callee's node for each call it answered or refused, and by the caller's for a call that got no answer. It names agents, a context, a capability, times, an outcome and a cost, never a person, an argument, an output or a token (DL-22), and never enters a usage report. An organization reads the records of its context in check-in records.callRecords while its acknowledged notice names agent calls. FAC-SEM-140. docs/specification/credentials.md#the-call-record.",
+  "type": "object",
+  "required": [
+    "type",
+    "callId",
+    "traceId",
+    "caller",
+    "callee",
+    "context",
+    "capability",
+    "transport",
+    "startedAt",
+    "endedAt",
+    "outcome"
+  ],
+  "properties": {
+    "type": {
+      "const": "call-record/1"
+    },
+    "callId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "the call's id; caller and callee record one call under one id"
+    },
+    "traceId": {
+      "$ref": "common.schema.json#/$defs/traceId",
+      "description": "links the calls of one task (W3C Trace Context)"
+    },
+    "parentCallId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "the call this one was made for, when a callee calls on"
+    },
+    "caller": {
+      "$ref": "fabric-package.schema.json#/$defs/agentRef"
+    },
+    "callee": {
+      "$ref": "fabric-package.schema.json#/$defs/agentRef"
+    },
+    "context": {
+      "$ref": "common.schema.json#/$defs/contextId"
+    },
+    "capability": {
+      "$ref": "common.schema.json#/$defs/capabilityName"
+    },
+    "transport": {
+      "enum": [
+        "local",
+        "relay",
+        "http",
+        "a2a"
+      ]
+    },
+    "startedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "endedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "outcome": {
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled",
+        "refused",
+        "timeout",
+        "unknown"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$",
+      "description": "the refusal or error code (DL-19 or the callee's own); absent exactly when completed"
+    },
+    "cost": {
+      "type": "object",
+      "required": [
+        "usd"
+      ],
+      "properties": {
+        "usd": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,8})(\\.[0-9]{1,6})?$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "what the callee spent on the call, decimal USD; null when unknown, never 0 for unknown"
+        },
+        "route": {
+          "enum": [
+            "subscription",
+            "key",
+            "platform-metered"
+          ],
+          "description": "as a usage row's route (DEC-0110): a subscription's usd is an estimate"
+        }
+      },
+      "additionalProperties": false
+    },
+    "recordedBy": {
+      "enum": [
+        "callee",
+        "caller"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

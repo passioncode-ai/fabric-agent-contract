@@ -256,6 +256,16 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 **Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
 
+**Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued
+by the organization's issuer from an account its door holds and delivered sealed into that organization's context on
+the agent's machine (`fabric-credential-envelope/1`), ending at most 30 days after it was issued (DEC-0111).
+
+**Call record**: One call between two agents (`call-record/1`): the agents, the context, the capability, the times,
+the outcome and the cost, never a person, an argument or an output; kept apart from usage reports (DEC-0111).
+
+**Keyed digest**: An HMAC under the estate's digest key (`keyedDigest`), so machines compare two credential values
+without moving either (DEC-0111).
+
 **Machine profile**: What a machine of an estate may do, in the signed record (DEC-0106): `full` (the default), `member`
 (no hub key) or `view` (no placement, no secret, no hub key; over the relay it calls and is called only to read); a
 call between machines over the relay that a profile does not allow is refused `profile-forbids` ([machine calls](docs/specification/machine-calls.md)).
