@@ -37,6 +37,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `publisherScopes[]` | optional: a partner's publisher key scoped to the organization contexts it is trusted in, `{kid, partner, contexts}` ([the partner channel](partner-channel.md#a-partners-publisher-key-trusted-per-context-fac-sem-122), DEC-0090) |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
 | `revocations[]` | every revocation of the estate so far ([revocations](#revocations)) |
+| `deltaAnchor` | optional: the revocation delta's head this revision vouches for, where a machine that lacks the entries before it starts its chain ([revocation delta](revocation-delta.md#the-anchor), DEC-0107, `FAC-SEM-137`) |
 | `digest` | the [digest](#the-digest) |
 | `signature` | the passkey assertion ([the signature](#the-signature)) |
 | `extensions` | namespaced extensions, inside the digest |

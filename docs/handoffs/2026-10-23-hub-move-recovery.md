@@ -1,4 +1,4 @@
-# 2026-10-23: moving the hub, and recovering a lost passkey (DEC-0107)
+# 2026-10-23: moving the hub, recovering a lost passkey, and the delta anchor (DEC-0107)
 
 ## Objective
 
@@ -10,6 +10,8 @@ message `c938af7d`).
 - **DEC-0107** and [ceremonies](../specification/ceremonies.md): "Move the hub" (an alert past 24 hours with
   `hubSilence`; a new hub key on a `full` machine, the old one revoked; `hubMove` names a move) and "Recover a lost
   passkey" (revision 1 with two passkeys, `recoveryReady`; a passkey left signs the recovery).
+- **The delta anchor**: `deltaAnchor` in `estate-record/1`, `anchorDelta` and the skip before the signer in
+  `src/revocation-delta.ts`, `FAC-SEM-137`; a machine added after a move starts its chain at the anchor.
 - `src/hub-move.ts`, vectors `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`, `test/hub-move.test.ts`
   (100% branches).
 - Docs: ceremonies, revocation delta, conformance (two rows, the module row), README, DOCMAP; UX JRN-09 #4, ST-032,
@@ -19,6 +21,14 @@ message `c938af7d`).
 
 - Adoption (CT-113): Fabric's drafter and ceremonies; every machine's alert.
 - Recovery from a fork after a move whose old hub kept signing stays the revocation delta's open item.
+
+## Readings
+
+Round 1: unit pass (its risks fixed: `hubMove` compares kid and key, a machine's first entry); seam one break (after a
+move a machine without the old hub's entries could never verify them), fixed by the delta anchor, with its risks (the
+heartbeat jump, `unreconciled`, DL-15 for a reachable hub, the tests the conformance row cites, `unknown` alerts);
+product three breaks (machine-calls.md still listing CT-89, a move from a machine that was only asleep, what the move
+ends), fixed with its risks.
 
 ## Checks actually run
 

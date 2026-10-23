@@ -163,6 +163,24 @@ admission set (DEC-0047; a relay subtracts the revocations in force from its adm
 the hub key a delegation verifier trusts (DL-14: the delta's part, `deltaRevocations`, goes to
 `hubKeyCertified(..., {extraRevocations})` and to the verifiers' `estateRevocations`, DEC-0060), the package a node installs.
 
+### The anchor
+
+A revision may carry `deltaAnchor`, `{sequence, sha256}`: a head of the delta it vouches for (DEC-0107). Every revocation
+of the entries up to it is in the revision, as [reconciliation](#reconciliation) requires of a revision issued after
+them. When a machine applies such a revision it runs `anchorDelta(state, record)`:
+
+- no anchor, an anchor below where its held chain starts, or one at a sequence it holds with the same hash: nothing
+  changes;
+- an anchor past the head it holds: the held chain starts there (`DeltaState.anchor`); the entries held before it are
+  dropped, their revocations being the record's, and the next entry is the anchor's sequence + 1;
+- an anchor whose hash differs from the entry held at its sequence: `fork`, and the machine is `broken`.
+
+`applyDelta` then skips an entry at or below the anchor, and an entry identical to one held, before it looks up the
+signer, so an entry an estate key signed that a later revision no longer certifies (the hub moved, its key revoked)
+never refuses a page. `deltaHead` and `deltaFreshness` count from the anchor. A heartbeat whose head is below the
+anchor is compared with nothing there. A revision keeps an anchor once one is set, never moves it back and never names
+another hash at the same sequence (`FAC-SEM-137`). This is the checkpoint the earlier *Not decided* item named.
+
 ## Reconciliation
 
 A revision issued at or after an entry's `at` lists that entry's revocation (the same `kind` and `ref`; a `grant` ref
@@ -188,6 +206,7 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 | <a id="fac-sem-082"></a>`FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, name a `device-key` by a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084; `applyDelta` refuses any other `@` form as `malformed`), are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
 | <a id="fac-sem-083"></a>`FAC-SEM-083` | `heartbeat`, `delta-freshness` | a heartbeat is `EdDSA`, has a readable `at`, and a head at sequence 0 is the estate's genesis; `{at, applied: {sequence, revision}, heartbeat, broken, answer}`: the machine's answer is the one the 72-hour rule gives |
 | <a id="fac-sem-084"></a>`FAC-SEM-084` | `delta-reconciliation` | `{revision, entries}`: a revision issued at or after an entry lists its revocation |
+| <a id="fac-sem-137"></a>`FAC-SEM-137` | `estate-record-revision` | a revision whose parent carries `deltaAnchor` carries one too, at the parent's sequence or later, with the parent's hash at the same sequence (DEC-0107); `verifyEstateRecord` runs it whenever it has a parent |
 
 ## Who adopts it
 
@@ -213,8 +232,8 @@ counter, a time, a head and a revision. Neither names a person, a place or an ac
   of administrators sign while the organization server is down.
 - Recovery from a fork: a new chain anchored in a revision. Until it is decided, a `broken` machine stays broken and the
   person's own work continues.
-- Compaction: a machine that enrolls later fetches the chain from entry 1; a checkpoint anchored in a revision is not
-  defined.
+- Compaction beyond the anchor: when the hub anchors a revision other than a move's ([the anchor](#the-anchor),
+  DEC-0107 sets one at every hub move).
 - How two hubs of one estate agree on the next sequence and the next heartbeat (Fabric's).
 - Members, digests outside a placement, and `subject.erase` (v4 §7's list): kinds of the organization's delta.
 - Fabric's D3 (which key is the hub key) and D2 (ES256 for it).

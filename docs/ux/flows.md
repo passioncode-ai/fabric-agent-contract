@@ -661,8 +661,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  A{What happened?} -->|hub silent past 24 h| M[Pick a full machine; it makes a new hub key]
-  M --> R[Revision: new hubKey, old hub-key revoked]
+  A{What happened?} -->|this machine has not heard the hub for 24 h| C{Still not current after reconnecting?}
+  C -->|no| Z[The alert clears; no move]
+  C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
+  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored]
   A -->|a passkey lost| P{Another passkey left?}
   P -->|yes| Q[Revision signed by it: lost one removed and revoked, a new one added]
   P -->|no| N[No revision can be signed: create a new network]

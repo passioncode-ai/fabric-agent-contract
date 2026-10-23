@@ -6626,42 +6626,67 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the platform, board thread `348467e5` (A-6, A-7); the first organization server, thread `ba63565c`
   item 4; CT-85.
 
-### DEC-0107: moving the hub, and recovering a lost passkey
+### DEC-0107: moving the hub, recovering a lost passkey, and the delta anchor
 
-- **Status:** Accepted source change (2026-10-23). Consumer adoption: Fabric's drafter and ceremonies, every machine's
-  alert (Fabric's nodes, Project Observatory's node), each at its next pin (CT-113).
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Fabric's drafter, hub and ceremonies, every
+  machine's alert and anchor (Fabric's nodes, Project Observatory's node), the relay and the first organization server's
+  vendored estate-record schema, each at its next pin (CT-113).
 - **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
   happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
   `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
-  1. CT-89.
+  1 (CT-89). A move revokes the old hub key, and `applyDelta` verifies every entry under the highest revision applied,
+  so a machine without the old hub's entries (one added later, one that was behind) could never verify them: the
+  revocation delta's open "compaction" item, which a move would make routine.
 - **Decision:**
   1. **The alert.** `hubSilence(heartbeatAt, at)` reads the heartbeat a machine holds: `speaking` up to 24 hours (the
-     hub's own longest interval, `HEARTBEAT_MAX_INTERVAL_SECONDS`, exactly 24 included), `silent` past it up to 72
-     hours, `stale` past 72 hours (the 72-hour rule), `unknown` when the clock or the heartbeat does not read;
-     `sinceSeconds` floored, never below zero. A machine tells its person when the answer is `silent` or `stale`.
-  2. **Moving the hub** is one revision: a new Ed25519 hub key generated on a `full` machine (DEC-0106) and certified as
-     its `hubKey`, the old key removed and revoked as `hub-key` in the same revision (`FAC-SEM-114`), a lost machine
-     removed and revoked as well. The key is never copied between machines. The new hub continues the one chain from
-     the highest sequences it holds and signs a heartbeat right after the revision; the old hub stops first when it
-     can. `hubMove(parent, next)` names what a revision added and removed, and whether each removed key is revoked.
-  3. **Recovery.** Fabric drafts revision 1 with two passkeys on two authenticators unless the person goes on with one
+     hub's own longest interval, exactly 24 included), `silent` past it up to 72 hours, `stale` past 72 (the 72-hour
+     rule), `unknown` when the clock or the heartbeat does not read. A machine tells its person on `silent`, `stale` and
+     `unknown`, as what *it* has heard, and offers to move the hub only after reconnecting to the relay leaves it still
+     not current.
+  2. **The anchor.** `estate-record/1` gains an optional `deltaAnchor` `{sequence, sha256}`: a head of the delta the
+     revision vouches for, every revocation up to it listed in the record. `anchorDelta(state, record)` starts a
+     machine's chain at an anchor past its head (`DeltaState.anchor`), changes nothing for one it already holds with the
+     same hash, and is a `fork` for another hash. `applyDelta` skips an entry at or below the anchor, and one identical
+     to an entry held, before looking up its signer. A revision keeps an anchor once set and never moves it back
+     (`FAC-SEM-137`, kind `estate-record-revision`, run by `verifyEstateRecord` with a parent).
+  3. **Moving the hub.** From a `current` machine, to a new Ed25519 hub key generated on an always-on `full` machine
+     (DEC-0106), never a copied key. A reachable hub follows DL-15 (certify, publish, switch, then drop and revoke in a
+     second revision); a lost hub is replaced in one revision that drops and revokes its key and its machine, and the
+     lost key leaves the published key set at once. The revision that revokes the old key anchors the delta's head,
+     which the drafter fetches from the relay first. The new hub's first entry is the anchor's sequence + 1; its first
+     heartbeat jumps `HUB_MOVE_HEARTBEAT_JUMP` (2^20) past the highest sequence it holds. Tokens, approvals and window
+     leases the old key signed end when a verifier applies the revocation; the new hub treats the old hub's unreported
+     leases as spent until their window instance ends. `hubMove(parent, next)` names what a revision added and removed
+     (by machine, kid and key) and whether each removed key is revoked.
+  4. **Recovery.** Fabric drafts revision 1 with two passkeys on two authenticators unless the person goes on with one
      after being told what it costs; `recoveryReady(record)` is `ready` with at least two passkeys, by distinct
-     `credentialId`, that the record does not revoke. With one passkey lost and another left, the one left signs a
-     revision that removes the lost one, revokes it as `authority` and adds a new one. With every passkey lost no
-     revision can be signed: the estate expires with its applied revision and the person creates a new network.
+     `credentialId`, that the record does not revoke (two passkeys, not two devices). With one passkey lost and another
+     left, the one left signs a revision that removes the lost one, revokes it as `authority` and adds a new one. With
+     every passkey lost no revision can be signed: the estate expires with its applied revision and the person creates
+     a new network.
 - **Why:** the hub signs every heartbeat, so its silence is the first sign that calls between machines will stop at 72
-  hours; telling the person at 24, the hub's own deadline, leaves two days to act. A new key per move keeps a copy on a
-  lost disk from signing anything a machine on the new revision accepts. Only a passkey can sign a revision, and nothing
-  else may sign one instead, so a second passkey is the whole recovery.
+  hours; telling the person at 24, the hub's own deadline, leaves two days to act, and checking the relay first keeps a
+  machine that only slept from moving a running hub. The record already lists every revocation the anchored entries
+  carry, so starting a chain at a passkey-signed anchor loses nothing and lets the hub's key change without stranding a
+  machine. A new key per move keeps a copy on a lost disk from signing anything a machine on the new revision accepts.
+  Only a passkey signs a revision; with recovery by a printed code not decided (v4 §7), a second passkey is the
+  recovery.
 - **Alternatives considered:** copying the hub's private key to the new machine (a lost disk keeps a working key);
+  verifying each entry under the revision in force at its sequence (every machine would keep every revision); keeping
+  the old key certified but revoked "from a sequence" (a new member of the revocation, and the key stays in the record);
   letting the hub or the relay sign a recovery revision (either would become the estate's authority); requiring two
-  passkeys in every record (refuses every one-passkey estate that exists today; the drafter's choice instead); an alert
-  at 72 hours (too late: calls have stopped).
-- **Compatibility:** additive: three reference functions with vectors and two ceremony texts. No schema, rule code or
-  protocol changes; a one-passkey record stays valid. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `src/hub-move.ts` (new), `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`,
-  `test/hub-move.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost passkey, the
-  profile change's wait), `revocation-delta.md` (the hub's own key), `conformance.md` (two rows, the module row),
-  README, DOCMAP; the UX layer (JRN-09 #4, ST-032, FLW-27, SCN-038, SCN-039, SCR-23's alert state); backlog CT-89
-  done, CT-113 filed.
+  passkeys in every record (refuses every one-passkey estate that exists today); recovery by a printed code (v4 §7:
+  left not decided); an alert at 72 hours (too late: calls have stopped).
+- **Compatibility:** additive with one narrowing: a record carrying `deltaAnchor` is refused by a reader pinned before
+  this decision (the record object is closed), so Fabric writes none until its readers are pinned at or after it (as
+  for DEC-0106's `profile`). `applyDelta` now accepts an overlapping page whose held entries were signed by a key no
+  longer certified, which it refused before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/hub-move.ts` (new: `hubSilence`, `recoveryReady`, `hubMove`,
+  `HUB_MOVE_HEARTBEAT_JUMP`), `src/revocation-delta.ts` (`anchorDelta`, `DeltaState.anchor`, the skip before the
+  signer), `src/estate-record-rules.ts` (`deltaAnchorOf`, `FAC-SEM-137`), `schemas/estate-record.schema.json`
+  (`deltaAnchor`); vectors `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`; tests `test/hub-move.test.ts`,
+  `test/revocation-delta.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost
+  passkey), `revocation-delta.md` (the anchor, `FAC-SEM-137`, Not decided), `estate-record.md`, `machine-calls.md`,
+  `conformance.md`, README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-032, FLW-27, SCN-038, SCN-039, SCR-23); backlog
+  CT-89 done, CT-113 filed.
 - **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.

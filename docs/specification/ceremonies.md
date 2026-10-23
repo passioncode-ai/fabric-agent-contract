@@ -302,38 +302,65 @@ does not read a key reference in a delta entry (see *Compatibility*). It joins a
 
 ## Move the hub
 
-The hub runs on one machine (NET-3). When that machine is retired, replaced or lost, the person moves the hub with one
-revision (DEC-0107):
+The hub runs on one always-on machine (NET-3). When that machine is retired, replaced or lost, the person moves the hub
+(DEC-0107):
 
 1. **The alert.** Every machine reads the heartbeat it holds with `hubSilence(heartbeatAt, at)`. Past 24 hours, the
-   hub's own longest interval (`HEARTBEAT_MAX_INTERVAL_SECONDS`), the answer is `silent` and the machine tells its
-   person, with the hours since, to bring the hub back or move it. Past 72 hours it is `stale`: calls from other
-   machines are refused ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)) until a heartbeat arrives.
-2. **The new hub.** On a `full` machine of the estate ([machine calls](machine-calls.md#machine-profiles)), its node
-   generates a new Ed25519 hub key. It already holds the delta and the heartbeat it applied, so it continues the one
-   chain: its first entry and heartbeat take the next sequences after the highest it holds.
-3. **The revision.** Fabric drafts it: the new machine's `hubKey`, and the old one removed and revoked as
-   `hub-key <old kid>` (`FAC-SEM-114`); a lost machine is also removed and revoked as `machine <id>`
-   ([Remove a machine](#remove-a-machine)). The person signs it with a passkey on any device; `hubMove(parent, next)`
-   names what moved, and whether each old key is revoked, for the network view.
-4. **The switch.** When the old hub is reachable it stops signing before the person signs; the new hub signs a heartbeat
-   right after the revision (DEC-0054). A machine that applied the revision refuses anything the old key signs after it
-   (`revoked-signer`, RD-7). An entry the old hub signed at a sequence the new hub also used, before a machine applied
-   the revision, is a second signed history (`fork`): recovery from a fork is still the revocation delta's open item.
+   hub's own longest interval (`HEARTBEAT_MAX_INTERVAL_SECONDS`), the answer is `silent`; past 72 hours `stale`, and
+   calls from other machines are refused ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)). A machine that
+   holds no readable heartbeat answers `unknown` (`no-heartbeat`) and refuses those calls too. In each case it tells
+   its person, with the hours since, that *this machine* has not heard from the hub: before it offers "Move the hub" it
+   reconnects to the relay (`welcome` carries the delta's head and the latest heartbeat, `delta-query` fetches what it
+   lacks) and offers the move only while it is still not current, so a machine that was only asleep does not move a
+   running hub.
+2. **The new hub.** An always-on `full` machine of the estate ([machine calls](machine-calls.md#machine-profiles)); Fabric
+   warns when the one chosen sleeps. Its node is `current` (`deltaFreshness`) before anything is drafted, so it holds
+   the delta's head and the latest heartbeat, and generates a new Ed25519 hub key. The key is never copied from the old
+   hub.
+3. **A reachable hub** follows DL-15 ([delegation](delegation.md#keys-publication-and-rotation)): a first revision
+   certifies the new machine's `hubKey`; the new key is published in the key set; the old hub stops signing and the new
+   one starts; a second revision drops the old key and revokes it as `hub-key <old kid>` (`FAC-SEM-114`), and anchors
+   the delta (below). `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
+4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed
+   and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)), and the delta anchored. The lost key leaves the
+   published key set at once, with no DL-15 grace. `hubMove(parent, next)` names the move and that the old key is
+   revoked.
+5. **The anchor.** The revision that revokes the old key sets `deltaAnchor` to the delta's head the new hub holds
+   ([revocation delta](revocation-delta.md#the-anchor)): every revocation of the entries up to it is in the record, as
+   reconciliation requires, so a machine that does not hold those entries (one added later, or one that was behind)
+   starts its chain at the anchor instead of verifying entries signed by a key the record no longer certifies. The
+   drafter fetches the delta from the relay (`delta-query` from its own head) before it drafts, so the revision lists
+   every revocation a machine may hold; a machine that holds an old-hub entry the revision does not list refuses it as
+   `unreconciled` and keeps its parent until a revision lists it.
+6. **The switch.** The new hub's first entry takes the anchor's sequence + 1. Its first heartbeat takes a sequence
+   `HUB_MOVE_HEARTBEAT_JUMP` (2^20) past the highest it holds, so it never repeats a sequence the old hub may have
+   signed while the new machine was not listening (HB-2), and it signs it right after the revision (DEC-0054). A hub whose
+   key the newest revision revokes stops signing; a hub back after downtime fetches the newest revision before it signs.
+   A machine that applied the revision refuses anything the old key signs after it (`revoked-signer`, RD-7). An entry
+   the old hub signed at a sequence the new hub also used, before a machine applied the revision, is a second signed
+   history (`fork`): recovery from a fork is still the revocation delta's open item.
+7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
+   (DL-14): delegation tokens and approvals ([delegation](delegation.md)), window leases ([window lease](window-lease.md))
+   and the hub's tokens on calls between machines. Callers mint again from the new hub. The new hub holds none of the old
+   hub's lease division, so it treats every lease the old hub issued and no meter reported as spent until that window
+   instance ends.
 
-The hub key never travels between machines: a move is always a new key, so a copy of the old one on a lost disk signs
-nothing a machine on the new revision accepts.
+A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that
+reads the published key set accepts once the lost key leaves it.
 
 ## Recover a lost passkey
 
 Any passkey the parent lists, and does not revoke, signs the next revision ([estate record](estate-record.md#the-signature)),
 so a second passkey is the recovery (DEC-0107):
 
+- **Two passkeys, not two devices.** `recoveryReady` counts passkeys by `credentialId`. The drafter registers the second
+  on another authenticator (a phone, a security key); two passkeys on one laptop read `ready` and are lost together. A
+  passkey a platform syncs across devices is one passkey.
 - **One passkey lost, another left.** The person signs, with the one left, a revision that removes the lost passkey from
   `authorities`, lists it as `authority <credentialId>` in `revocations` and adds a new passkey; `recoveryReady` is then
   `ready` again. The revocation delta carries no `authority` revocation (RD-5), so this is always a revision.
 - **Every passkey lost.** No one can sign the next revision, and nothing in the contract signs instead: the record is the
-  person's, not the hub's or the relay's. The estate expires with its applied revision (`validUntil`, at most 30 days);
+  person's, not the hub's or the relay's (recovery by a printed code, v4 §7, is not decided here). The estate expires with its applied revision (`validUntil`, at most 30 days);
   the person creates a new network and adds each machine to it again. Fabric says so before it lets the person create a
   network with one passkey.
 

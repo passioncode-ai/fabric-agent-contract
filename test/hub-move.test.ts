@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { HUB_SILENT_SECONDS, hubMove, hubSilence, recoveryReady } from "../src/hub-move.js";
+import { HUB_MOVE_HEARTBEAT_JUMP, HUB_SILENT_SECONDS, hubMove, hubSilence, recoveryReady } from "../src/hub-move.js";
 import { HEARTBEAT_MAX_INTERVAL_SECONDS } from "../src/revocation-delta.js";
 import { VECTOR_FILE, buildHubMoveVectors } from "../tools/vectors/hub-move.js";
 
@@ -31,6 +31,8 @@ describe("the hub-move vectors (DEC-0107)", () => {
 describe("hub-move beyond the vectors", () => {
   it("alerts at the hub's own daily interval", () => {
     expect(HUB_SILENT_SECONDS).toBe(HEARTBEAT_MAX_INTERVAL_SECONDS);
+    // A hub signing a heartbeat every second for 24 hours stays below the jump.
+    expect(HUB_MOVE_HEARTBEAT_JUMP).toBeGreaterThan(24 * 60 * 60);
   });
 
   it("never throws on hostile input", () => {
