@@ -374,7 +374,7 @@ function requestFindings(request: JsonObject, prefix: string): Finding[] {
 function requestRule(value: JsonObject): Finding[] {
   const request = isObject(value.request) ? value.request : {};
   const findings = requestFindings(request, "/request");
-  if (request.context !== `${ORG_CONTEXT_PREFIX}${show(value.org)}`) findings.push(flag("FAC-SEM-138", "/request/context", "a request names its own enrollment's organization context, org:<org.id>"));
+  if (!isString(value.org) || request.context !== `${ORG_CONTEXT_PREFIX}${value.org}`) findings.push(flag("FAC-SEM-138", "/request/context", "a request names its own enrollment's organization context, org:<org.id>"));
   return findings;
 }
 

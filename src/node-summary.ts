@@ -217,7 +217,7 @@ export function checkInSummaryFindings(checkIn: JsonObject): Finding[] {
   const findings = contentFindings(summary, "/records/nodeSummary");
   const own = isObject(checkIn.device) ? checkIn.device.id : undefined;
   const named = isObject(summary.device) ? summary.device.id : undefined;
-  if (named !== own) findings.push({ code: "FAC-SEM-128", instancePath: "/records/nodeSummary/device/id", message: "a check-in's node summary is the checking-in device's" });
+  if (typeof named !== "string" || named !== own) findings.push({ code: "FAC-SEM-128", instancePath: "/records/nodeSummary/device/id", message: "a check-in's node summary is the checking-in device's" });
   return findings;
 }
 

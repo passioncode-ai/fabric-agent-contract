@@ -355,7 +355,10 @@ that enrollment (`org`, `device`, `user` when one was bound). For a batch or a c
   epoch was issued with no user;
 - an event of an epoch with no recorded binding for this device is refused;
 - a `grant.usage`'s `data.context` MUST be `org:` followed by the certificate's `org.id` as written: it is the grant's
-  own context (DEC-0086), and another organization's usage, or one whose context differs only in case, is refused.
+  own context (DEC-0086), and another organization's usage, or one whose context differs only in case, is refused;
+- a check-in's `records.nodeSummary` `device.id` MUST be the certificate's device, and its `context`, like every
+  `credentialRequests` and `callRecords` entry's `context`, MUST be `org:` followed by the certificate's `org.id` as
+  written (DEC-0114).
 
 So when a device is re-enrolled to another person:
 

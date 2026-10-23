@@ -195,7 +195,7 @@ and `recordedBy`.
   `FAC-SEM-140` (kind `call-record`) holds that it ends no earlier than it starts, that a completed call names no code
   and every other outcome names one, that its trace id is not all zeros, that caller and callee differ, and that no
   member carries a path or a credential.
-- An organization reads the records of its own context in a check-in's `records.callRecords`, and only while the notice
+- An organization refuses a record of another context as attribution (`FAC-SEM-045`, DEC-0114) and reads the records of its own context in a check-in's `records.callRecords`, and only while the notice
   its member acknowledged names agent calls (the purpose share registration's SR-5a names): the server says so in each
   check-in response, `records.callRecordsAccepted`, from its own records, and a node sends call records only after a
   response that says `true` and stops on `false` or its absence. A node never sends another context's. The hub

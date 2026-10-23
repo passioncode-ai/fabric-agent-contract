@@ -309,6 +309,10 @@ describe("a check-in's credential members (DEC-0112)", () => {
     // DEC-0114: the summary is the checking-in device's, read by FAC-SEM-128's clauses under its member's path.
     expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: "x", context: "org:org-7f3a" } }))).toEqual(["FAC-SEM-128 /records/nodeSummary/device/id"]);
     expect(at("device-check-in", { ...withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-7f3a" } }), device: 7 })).toEqual(["FAC-SEM-128 /records/nodeSummary/device/id"]);
+    expect(at("device-check-in", { ...withRecords(checkIn, { nodeSummary: { context: "org:org-7f3a" } }), device: undefined })).toEqual(["FAC-SEM-128 /records/nodeSummary/device/id"]);
+    // A request's organization is a string as the certificate binds it, never shown as one (FAC-SEM-138).
+    expect(at("credential-request", { request: { ...request, context: "org:7" }, org: 7 })).toEqual(["FAC-SEM-138 /request/context"]);
+    expect(at("credential-request", { request: { ...request, context: "org:undefined" } })).toEqual(["FAC-SEM-138 /request/context"]);
     expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-7f3a", services: [{ key: "a.b" }, { key: "a.b" }] } }))).toEqual(["FAC-SEM-128 /records/nodeSummary/services/1/key"]);
   });
 

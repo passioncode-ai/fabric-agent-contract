@@ -22,6 +22,13 @@ records DEC-0111 added are held to the certificate's organization too.
 
 - CT-120's items; CT-92 (the operator's question on a summary's other contexts).
 
+## Readings
+
+Seam (covering the unit and the documents): one documentation break fixed (devices.md's Attribution list now names the
+summary, request and call-record duties), with its risks: a request's organization read as a string in FAC-SEM-138, a
+summary without a device refused, the node summary's device row, the server's rows (refuse another context as
+attribution), a positive check-in fixture carrying a summary. The loop stops here.
+
 ## Checks actually run
 
 `pnpm run check` (output in the pull request).
