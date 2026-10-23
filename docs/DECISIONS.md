@@ -6738,7 +6738,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `0.1.0`, which they are not).
 - **Compatibility:** none on the wire; a tag and a GitHub release.
 - **Consequences / affects:** `docs/specification/versioning.md` (Releases), `README.md` (Licence paragraph), the tag
-  and the GitHub release.
+  and the GitHub release; handoff `docs/handoffs/2026-10-23-release.md`.
 - **Source:** the operator's instruction of 2026-10-23 to finish the plan and publish a new version.
 
 ### DEC-0109: a remote service's 401 without a token may carry an identity proxy's page
