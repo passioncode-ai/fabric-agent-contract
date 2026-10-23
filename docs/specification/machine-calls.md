@@ -59,7 +59,8 @@ revocations?})`, in this order:
 5. **The sender is in it.** The body's verified `from` is a `#sig` kid in the set → otherwise `unauthenticated`
    (`not-t1`).
 6. **T1.** The answer names the sender's machine, its profile (`null` when unreadable) and its `#kem` when the record
-   lists one, it is a valid P-256 point, and neither its kid nor its key reference is revoked.
+   lists that kid once, under the sender's own machine (as F7 asks of a `#sig`, CT-112), it is a valid P-256 point, and
+   neither its kid nor its key reference is revoked.
 
 `unknown-state` is a denial (DL-19): the node refuses the call and does not fall back to T2. A sender that is not T1 is
 refused `unauthenticated`: this decision defines calls between machines of one estate, and a call from outside it over

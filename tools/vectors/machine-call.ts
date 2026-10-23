@@ -103,6 +103,8 @@ function callerCases(): Json[] {
     ["full written out", { from: "m-g#sig" }, t1("m-g", "full", "m-g#kem")],
     ["a #kem kid listed twice names no kem", { from: "m-a#sig", applied: twiceKem() }, t1("m-a", "full")],
     ["a #kem kid listed again under another machine names no kem", { from: "m-a#sig", applied: kemElsewhere() }, t1("m-a", "full")],
+    ["a #kem kid listed only under another machine names no kem", { from: "m-a#sig", applied: kemOnlyElsewhere() }, t1("m-a", "full")],
+    ["an applied record whose revision is no number", { from: "m-b#sig", applied: poisonedRevision() }, unknown("no-estate")],
     ["a #kem not in canonical base64 names no kem", { from: "m-a#sig", applied: looseKem() }, t1("m-a", "full")],
     ["a #kem a delta revokes by its key reference: no kem", { from: "m-g#sig", revocations: [{ kind: "device-key", ref: ref("m-g#kem", K.gKem), revokedAt: REVOKED_AT }] }, t1("m-g", "full")],
     ["a #sig a delta revokes: not T1", { from: "m-d#sig", revocations: [{ kind: "device-key", ref: "m-d#sig", revokedAt: REVOKED_AT }] }, notT1],
@@ -137,6 +139,20 @@ function kemElsewhere(): Json {
   const rec = record();
   ((rec.machines as Json[])[3]!.deviceKeys as Json[]).push(kem("m-a", K.gKem));
   return rec;
+}
+
+/** The shared record with `m-a#kem` moved from `m-a` to `m-d`: listed once, under another machine (CT-112). */
+function kemOnlyElsewhere(): Json {
+  const rec = record();
+  const own = (rec.machines as Json[])[0]!.deviceKeys as Json[];
+  const moved = own.splice(own.findIndex((key) => key.kid === "m-a#kem"), 1)[0]!;
+  ((rec.machines as Json[])[3]!.deviceKeys as Json[]).push(moved);
+  return rec;
+}
+
+/** The shared record with a revision that is no primitive, which `Number` would throw on (CT-111). */
+function poisonedRevision(): Json {
+  return { ...record(), revision: { toString: 1 } };
 }
 
 /** The shared record with `m-a`'s `#kem` written with a character base64 ignores. */
