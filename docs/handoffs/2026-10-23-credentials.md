@@ -20,7 +20,7 @@ one record per call between agents. Board threads `ba63565c` items 5 and 6, `b25
 - Vectors `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts` (`check` 49, `open` 4,
   `digest` 4, `revocation` 7), built without the reference; `sealCredential` reproduces the organization's vector byte
   for byte. Fixtures: six positive, six negative, seven semantic.
-- Docs: devices (the check-in members), relay (the secret envelope's pointer), delegation (DL-22), machine calls,
+- Docs: devices (the check-in members), relay (the secret envelope's pointer), contexts, package, delegation (DL-22), machine calls,
   conformance (module row, three party rows, the register), versioning, the specification README, DOCMAP, CONTEXT; UX
   JTBD-14, JRN-13, ST-033, ST-034, FLW-28, SCR-28, SCR-29, SCN-040 to SCN-042.
 - Backlog: CT-86 done; CT-117 (adoption), CT-118 (a revocation names no instance), CT-119 (check-in rules and a
@@ -28,6 +28,11 @@ one record per call between agents. Board threads `ba63565c` items 5 and 6, `b25
 
 ## Decisions taken here
 
+- Fabric alone generates the estate's digest key, once, on the hub's machine, and sends it: it runs the hub (ceremonies.md, Create my network),
+  and two generators would make two keys. Project Observatory holds the key it receives and computes `keyedDigest`.
+- A node answered `certificate-revoked` by an organization deletes that context's credentials at once, whatever it decides
+  about the rest of the enrollment, so a leaver's machine that was offline loses them at its first contact.
+- Marks read only as an array of complete marks, one per `(context, agentRef, slot)`; anything else opens nothing.
 - The vector file is `credential-envelope.json`, not `credentials.json`: a file named `credentials.json` is read by
   credential guards (an agent's shell hook refused it) as a secret store.
 - An unreadable bound of a policy key's window closes the window (the key is refused), as an absent bound opens it.
@@ -36,6 +41,8 @@ one record per call between agents. Board threads `ba63565c` items 5 and 6, `b25
 ## Open
 
 - CT-117: Project Observatory (the issuer and its node), the first organization server, Fabric, Fabric Switchboard.
+- CT-118 (a revocation names no instance), CT-119 (check-in rules and a fixture of the new members), CT-120 (what
+  the round-2 readings left).
 
 ## Readings
 
@@ -57,6 +64,14 @@ to the secret envelope (and FAC-SEM-075's message), a node deleting an organizat
 `certificate-revoked` (SCN-041, devices.md), the digest key refused from a revoked hub key and the same key resent
 across a hub move, the placed-slot check reading personal placements only, Switchboard's slot bound to the
 organization's context, the handoff's counts. What blocks nothing is CT-119 and CT-120.
+
+Round 3: unit one break (an array of marks with an unreadable or duplicate entry slipped past step 1), fixed (every
+mark read at step 1, one per triple), with a sealer refusing a key off P-256; seam and product breaks, all wording,
+fixed: the personal carrier is the inner `payload` of a relay message body (the signer must be the body's `from`),
+one generator of the digest key (Fabric), the member profile's description in the estate-record schema, SCN-040's
+Switchboard path bound to the organization, the PR body's counts; with the risks: a credential envelope's mark per
+triple in relay.md, deletion on `certificate-revoked` only under the current certificate, a machine made `view`
+deleting what envelopes gave it, `expiresAt` read as the decision's end, FLW-28. The rest is in CT-120.
 
 ## Checks actually run
 

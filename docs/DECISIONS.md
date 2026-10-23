@@ -6807,8 +6807,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      current policy key set, inside its window on the target's clock, answers a request the node holds open
      (`requestId`, its slot from the `issued` decision, until the envelope opens or a refusal comes; the node resends it
      until then, and the issuer seals again) and ends at `credentialExpiresAt`, at most 30 days after `iat`; in the personal context it is signed `ES256` by the `#sig` of a machine of the estate
-     record the target applied, neither machine `view` nor the target itself, never into a slot a placed package declares, the estate's digest
-     key only from the machine holding the hub key. `checkCredentialEnvelope` names the first
+     record the target applied, neither machine `view` nor the target itself, never into a slot a personal secret placement declares, the estate's digest
+     key only from the machine holding a hub key the record certifies and neither the record nor the delta revokes. `checkCredentialEnvelope` names the first
      failing check (`FAC-SEM-139`), `openCredential` opens; the value and its mark are written in one transaction into
      that context's vault slot, never another's.
   4. **Revocation.** `credential-revocation/1` in `records.credentialRevocations`, signed like a policy layer; the node
@@ -6839,9 +6839,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   only to a peer that lists the protocol in its `protocols`, since the check-in objects are closed.
   `fabric-secret-envelope/1` is unchanged. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/credentials.md` (new), `devices.md` (the check-in members),
-  `relay.md` (the secret envelope's pointer), `delegation.md` (DL-22), `contexts.md` (an organization's slot), `machine-calls.md`, `conformance.md`,
+  `relay.md` (the secret envelope's pointer), `delegation.md` (DL-22), `contexts.md` (an organization's slot), `package.md` (secrets), `machine-calls.md`, `conformance.md`,
   `versioning.md`, `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md`; `src/credentials.ts` (new),
-  `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/protocol-revisions.ts`; schemas `credential-request`,
+  `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/protocol-revisions.ts`, `src/estate-record-rules.ts` (FAC-SEM-075's message); schemas `credential-request`,
   `credential-decision`, `credential-envelope`, `credential-revocation`, `call-record` (new), `device-check-in`; vectors
   `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts`; tests
   `test/credential-envelope.test.ts`; fixtures; the UX layer; backlog CT-86 done, CT-117 to CT-120 filed.

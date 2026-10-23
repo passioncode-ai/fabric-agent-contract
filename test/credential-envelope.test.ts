@@ -247,6 +247,9 @@ describe("the unit reading of PR #156: boundaries the vectors did not reach", ()
     // A key of the other profile signs nothing a target opens: P-256 for an organization, Ed25519 for a machine.
     expect(() => sealCredential({ ...base, ...org, signer: { keyId: "k1", privateKey: machine }, credentialExpiresAt: new Date("2026-10-30T10:00:00Z") })).toThrow(/bad-key/);
     expect(() => sealCredential({ ...base, signer: { kid: "m-b#sig", privateKey: policy }, context: "personal" })).toThrow(/bad-key/);
+    const k1 = generateKeyPairSync("ec", { namedCurve: "secp256k1" });
+    expect(() => sealCredential({ ...base, signer: { kid: "m-b#sig", privateKey: k1.privateKey }, context: "personal" })).toThrow(/bad-key/);
+    expect(() => sealCredential({ ...base, signer: { kid: "m-b#sig", privateKey: k1.publicKey }, context: "personal" })).toThrow(/bad-key/);
   });
 
   it("reads a document's times with any offset, as the schemas admit, and an org id only as written", () => {

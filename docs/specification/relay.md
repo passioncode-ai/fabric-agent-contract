@@ -1,6 +1,6 @@
 # Relay `fabric-relay/0.1`
 
-A relay carries sessions, messages, sealed secret and credential envelopes and package blobs between the machines it admits: one
+A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
 owner's estate (an organization's members once `org-authority/1`, Fabric D8, gives them a record). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
@@ -55,8 +55,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   normalises its signature with `toLowS`, which needs no key: a Secure Enclave, a TPM or Python's `cryptography` signs as
   it does and normalises after. Passkey assertions (WebAuthn) are exempt: the authenticator makes them, and nothing keys
   on them. So nobody but the signer can make a second valid encoding of a signature.
-- **Identity is never the digest.** A message's identity is `(from, msgId)`; an envelope's, for deduplication and
-  anti-rollback, is `(sender, agentRef, slot, envelopeSequence)`. `envelopeDigest` is the relay's storage name: ECDSA is
+- **Identity is never the digest.** A message's identity is `(from, msgId)`; a secret envelope's, for deduplication and
+  anti-rollback, is `(sender, agentRef, slot, envelopeSequence)`; a credential envelope's mark is per
+  `(context, agentRef, slot)`, whoever sent it ([credentials](credentials.md#the-envelope)). `envelopeDigest` is the relay's storage name: ECDSA is
   randomised, so the legitimate signer can always make another valid envelope of the same content.
 - **Times** are RFC 3339 UTC: `Z`, an upper-case `T`, at most nine fractional digits, on a day its month has (`instant`,
   through `strictTime`). `2026-02-30`, hour 24 and a leap second `:60` are refused, never rolled forward or compared. A

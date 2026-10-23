@@ -697,11 +697,13 @@ flowchart TD
   C -->|expired in transit| W
   D -->|issued| E[Sealed envelope in the check-in response]
   E --> C{checkCredentialEnvelope}
-  C -->|refused| L[Logged by its refusal; nothing stored]
+  C -->|refused| L[Logged by its refusal; nothing stored; the request stays open]
+  L --> W
   C -->|ok| O[Opened into the organization instance's slot]
   O --> T{Ends or revoked?}
   T -->|credentialExpiresAt| Z[Deleted]
   T -->|signed revocation| Z
+  T -->|certificate-revoked or organization-closed| Z
 ```
 
 - **Screens traversed:** SCR-28 queue, issued, refused, revoked; SCR-29 the calls between agents.

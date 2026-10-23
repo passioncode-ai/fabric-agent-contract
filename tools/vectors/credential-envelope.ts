@@ -140,6 +140,10 @@ function checkCases(): Json[] {
     ["a credential that outlives the end its decision issued", envelope(orgHeader({ credentialExpiresAt: "2026-10-29T09:59:00Z" }), orgSigner, K.aKem, "past-decision"), orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "2026-10-28T09:59:00Z" }] } }), no("credential-expired")],
     ["an end its decision named that does not read", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "next week" }] } }), no("credential-expired")],
     ["a held request that names no end admits none", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN" }] } }), no("credential-expired")],
+    ["a mark that is not an object does not read", personal, personalCtx({ marks: [null] }), no("malformed")],
+    ["a mark whose slot does not read", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: 5, sequence: 9, digest: "sha256:00" }] }), no("malformed")],
+    ["a mark whose sequence does not read refuses at step 1", envelope(orgHeader({ alg: "ES256" }), orgSigner, K.aKem, "marks-first"), orgCtx({ marks: [{ context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", sequence: "x", digest: "sha256:00" }] }), no("malformed")],
+    ["two marks for one triple do not read", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 1, digest: "sha256:00" }, { context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 6, digest: "sha256:00" }] }), no("malformed")],
     ["marks that do not read refuse before any later check", envelope(orgHeader({ alg: "ES256" }), orgSigner, K.aKem, "marks-first"), orgCtx({ marks: "x" }), no("malformed")],
     ["a credential issued for more than 30 days", envelope(orgHeader({ credentialExpiresAt: "2026-11-23T09:59:00Z" }), orgSigner, K.aKem, "too-long"), orgCtx(), no("credential-expired")]
   ];

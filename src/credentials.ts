@@ -146,7 +146,8 @@ export interface CredentialSealInput {
 export function sealCredential(input: CredentialSealInput): CredentialEnvelope {
   const org = "keyId" in input.signer;
   // An organization signs with Ed25519, a machine with ES256 (P-256): the other key signs nothing a target opens.
-  if (input.signer.privateKey.asymmetricKeyType !== (org ? "ed25519" : "ec")) throw new Error("bad-key: the signer's key is not of its profile");
+  const key = input.signer.privateKey;
+  if (key.type !== "private" || key.asymmetricKeyType !== (org ? "ed25519" : "ec") || (!org && key.asymmetricKeyDetails?.namedCurve !== "prime256v1")) throw new Error("bad-key: the signer's key is not of its profile");
   if (p256KeyRefusal(input.recipientKey) !== null) throw new Error("bad-key: the recipient key is not a valid P-256 key");
   const ephemeral = createECDH("prime256v1");
   if (input.ephemeralPrivateKey) ephemeral.setPrivateKey(input.ephemeralPrivateKey);
@@ -175,12 +176,26 @@ export function sealCredential(input: CredentialSealInput): CredentialEnvelope {
   return { ...unsigned, sig };
 }
 
+/** Marks read when absent, or an array of objects each with a string context, agentRef, slot and digest and a sequence, one per triple. */
+function marksRead(marks: unknown): boolean {
+  if (marks === undefined) return true;
+  if (!Array.isArray(marks)) return false;
+  const seen = new Set<string>();
+  for (const m of marks) {
+    if (!isObject(m) || !isString(m.context) || !isString(m.agentRef) || !isString(m.slot) || !isString(m.digest) || !counter(m.sequence)) return false;
+    const key = JSON.stringify([m.context, m.agentRef, m.slot]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+  }
+  return true;
+}
+
 /** What a target knows when it checks a credential envelope; plain JSON, so a semantic fixture can carry it. */
 export interface CredentialCheckContext {
   ownKemKid: string;
   at: string; // the target's clock, RFC 3339
   // An organization the machine is enrolled in: its id, its current verified policy key set's keys, and the requests
-  // this machine holds open ({requestId, agentRef, slot, expiresAt}: the slot and end from the issued decision).
+  // this machine holds open ({requestId, agentRef, slot, expiresAt}: the slot and the decision's `credential.expiresAt`, never the end the request asked for).
   org?: { id: string; keys: readonly JsonObject[]; requested: readonly JsonObject[] };
   // The personal context: the estate record the machine applied last, its own machine id and the delta's revocations.
   personal?: { applied: JsonObject; self: string; revocations?: readonly JsonObject[] };
@@ -202,7 +217,7 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   const org = h.context !== PERSONAL_CONTEXT;
   const at = when(ctx.at);
   // Marks that do not read fail closed: a target that cannot read its marks opens nothing.
-  if (at === undefined || ctx.marks !== undefined && !Array.isArray(ctx.marks)) return no("malformed");
+  if (at === undefined || !marksRead(ctx.marks)) return no("malformed");
   if (h.alg !== (org ? ORG_ALG : PERSONAL_ALG)) return no("unsupported-alg");
   if (h.recipient !== ctx.ownKemKid) return no("wrong-recipient");
   if (org ? !isObject(ctx.org) || !isString(ctx.org.id) || h.context !== `${ORG_CONTEXT_PREFIX}${ctx.org.id}` : !isObject(ctx.personal) || !isObject(ctx.personal.applied)) return no("wrong-context");
@@ -245,7 +260,7 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   const digest = credentialEnvelopeDigest(value);
   const mark = list(ctx.marks).find((m) => m.context === h.context && m.agentRef === h.agentRef && m.slot === h.slot);
   if (mark !== undefined) {
-    if (!counter(mark.sequence) || h.sequence < mark.sequence) return no("replayed");
+    if (h.sequence < (mark.sequence as number)) return no("replayed");
     if (h.sequence === mark.sequence && mark.digest !== digest) return no("sequence-reused");
   }
   const iat = instant(h.iat) as number, exp = instant(h.exp) as number;
