@@ -1,4 +1,4 @@
-import { createPrivateKey, sign } from "node:crypto";
+import { createPrivateKey, generateKeyPairSync, sign } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -9,6 +9,7 @@ import {
   MAX_FUTURE_SECONDS,
   type DeltaState,
   acceptHeartbeat,
+  anchorDelta,
   applyDelta,
   deltaEntryHash,
   deltaFreshness,
@@ -302,12 +303,25 @@ describe("tolerance: every verifier answers, never throws", () => {
         expect(() => reconcileRevision(state as DeltaState, value)).not.toThrow();
         expect(() => effectiveRevocations(value, state as DeltaState)).not.toThrow();
         expect(() => unreconciled(value, [value])).not.toThrow();
+        expect(() => anchorDelta(state as DeltaState, value)).not.toThrow();
+        expect(() => anchorDelta(state as DeltaState, { estate: ESTATE, revocations: [], deltaAnchor: { sequence: 5, sha256: "a".repeat(64) } })).not.toThrow();
       }
     }
     expect(applyDelta(7 as never, { entries: [] }, trust)).toMatchObject({ ok: false, problem: "malformed" });
     expect(acceptHeartbeat(7 as never, {}, trust)).toMatchObject({ ok: false, problem: "malformed" });
     expect(reconcileRevision(7 as never, {})).toMatchObject({ ok: false, problem: "malformed" });
     expect(deltaFreshness(7 as never, trust)).toMatchObject({ answer: "stale" });
+    // A held entry that is no object, or names no sequence, makes the state malformed for an anchor past it (round 3).
+    const past = { estate: ESTATE, revocations: [], deltaAnchor: { sequence: 5, sha256: "a".repeat(64) } };
+    for (const bad of [null, undefined, 7, "x", {}, { sequence: "1" }]) {
+      expect(anchorDelta(held([bad as unknown as Json]), past)).toMatchObject({ ok: false, problem: "malformed" });
+      // At the anchor's own sequence too: malformed, never a fork that breaks the state (round 4).
+      expect(anchorDelta(held([bad as unknown as Json]), { ...past, deltaAnchor: { sequence: 1, sha256: "a".repeat(64) } })).toMatchObject({ ok: false, problem: "malformed" });
+    }
+    // A revocation whose kind has no primitive form is never coerced: the entry counts as unlisted (round 4).
+    const hostile = { sequence: 1, revocation: { kind: { toString: 1 }, ref: "k" } } as unknown as Json;
+    expect(() => anchorDelta(held([hostile]), past)).not.toThrow();
+    expect(anchorDelta(held([hostile]), past)).toMatchObject({ ok: false, problem: "unreconciled", missing: [1] });
   });
 
   it("reads a held heartbeat that is not readable as stale, and one with no RFC 8785 form as no match", () => {
@@ -389,5 +403,117 @@ describe("every shape an entry or a heartbeat must have is checked", () => {
     expect(codes("revocation-delta", { head: { sequence: 1, sha256: e1.hash }, entries: [{ ...e1.entry, revocation: { ...e1.entry.revocation, ref: "\ud800" } }] }).length).toBe(1);
     expect(evaluateSemanticRules("revocation-delta", { head: {}, entries: "x" })).toEqual([]);
     expect(codes("delta-freshness", { at: "2026-10-12T12:00:00Z", applied: { sequence: 2, revision: 3 }, heartbeat: { ...hb, at: "2026-10-12T11:00:00Z" }, broken: false, answer: "stale" })).toEqual(["FAC-SEM-083"]);
+  });
+});
+
+describe("the delta anchor across a hub move (DEC-0107, FAC-SEM-137)", () => {
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  const x = (publicKey.export({ format: "jwk" }) as { x: string }).x;
+  const E1 = e1.entry as Json, E2 = e2.entry as Json;
+  const signNew = (body: Json): Json => ({ ...body, sig: sign(null, signingInput(body), privateKey).toString("base64url") });
+  // The move: m-4c1e's hub key dropped and revoked, a new key on m-9a07 (whose old key e1 revoked), every entry's
+  // revocation listed, as reconciliation requires.
+  const moved = (anchor?: Json): Json => {
+    const r = structuredClone(record) as Json;
+    delete r.machines[0].hubKey;
+    r.machines[1].hubKey = { kty: "OKP", crv: "Ed25519", alg: "EdDSA", kid: "hub-m-9a07-2", x };
+    r.revision = (record.revision as number) + 1;
+    r.revocations = [E1.revocation, E2.revocation, { kind: "hub-key", ref: "hub-m-4c1e-1", revokedAt: "2026-10-12T11:00:00Z" }];
+    if (anchor) r.deltaAnchor = anchor;
+    return r;
+  };
+  const anchor = { sequence: 2, sha256: deltaEntryHash(E2) };
+  const E3 = signNew({ type: "revocation-delta/1", alg: "EdDSA", estate: ESTATE, sequence: 3, prev: deltaEntryHash(E2), at: "2026-10-12T11:30:00Z", revocation: { kind: "grant", ref: "grant-share-0043", revokedAt: "2026-10-12T11:30:00Z" }, kid: "hub-m-9a07-2" });
+  const page = (...entries: Json[]) => ({ head: { sequence: 3, sha256: deltaEntryHash(E3) }, entries });
+
+  it("without an anchor, a machine enrolled after the move cannot verify the old hub's entries", () => {
+    const verdict = applyDelta(emptyDeltaState(ESTATE), page(E1, E2, E3), { record: moved(), at: AT });
+    expect(verdict.ok).toBe(false);
+    expect(!verdict.ok && verdict.index).toBe(0);
+  });
+
+  it("with an anchor, a machine enrolled after the move starts at it and applies the new hub's entries", () => {
+    const R2 = moved(anchor);
+    const anchored = anchorDelta(emptyDeltaState(ESTATE), R2);
+    expect(anchored).toEqual({ ok: true, state: { estate: ESTATE, anchor, entries: [] } });
+    if (!anchored.ok) return;
+    const verdict = applyDelta(anchored.state, page(E1, E2, E3), { record: R2, at: AT });
+    expect(verdict.ok && verdict.applied).toBe(1);
+    expect(verdict.ok && deltaHead(verdict.state)).toEqual({ sequence: 3, sha256: deltaEntryHash(E3) });
+  });
+
+  it("a machine that was behind adopts the anchor; one that was current keeps its chain and skips what it holds", () => {
+    const R2 = moved(anchor);
+    const behind = anchorDelta(held([E1]), R2);
+    expect(behind.ok && behind.state).toEqual({ estate: ESTATE, anchor, entries: [] });
+    const current = anchorDelta(held([E1, E2]), R2);
+    expect(current.ok && current.state).toEqual(held([E1, E2]));
+    const verdict = applyDelta(held([E1, E2]), page(E2, E3), { record: R2, at: AT });
+    expect(verdict.ok && verdict.applied).toBe(1);
+  });
+
+  it("an anchor never takes a revocation out of force: one the record does not list is unreconciled", () => {
+    const R2 = moved({ sequence: 3, sha256: deltaEntryHash(E3) });
+    const omitted = { ...R2, revocations: (R2.revocations as Json[]).filter((r) => r !== E2.revocation) };
+    expect(anchorDelta(held([E1, E2]), omitted)).toMatchObject({ ok: false, problem: "unreconciled", missing: [2], state: held([E1, E2]) });
+    expect(anchorDelta(held([E1, E2]), R2)).toEqual({ ok: true, state: { estate: ESTATE, anchor: R2.deltaAnchor, entries: [] } });
+    // An entry that is no object, or names no revocation, is held by nothing the record could list.
+    expect(anchorDelta(held([{ sequence: 1 } as Json]), R2)).toMatchObject({ ok: false, problem: "unreconciled", missing: [1] });
+  });
+
+  it("another entry at the anchor's own sequence is a second history; a hostile anchor reads as none", () => {
+    const anchoredAt1 = { estate: ESTATE, anchor: { sequence: 1, sha256: "b".repeat(64) }, entries: [] } as DeltaState;
+    const verdict = applyDelta(anchoredAt1, { entries: [E1] }, { record, at: AT });
+    expect(verdict).toMatchObject({ ok: false, problem: "fork", state: { broken: true } });
+    expect(deltaHead({ estate: ESTATE, anchor: { sequence: "5", sha256: "x" }, entries: [] } as unknown as DeltaState)).toEqual({ sequence: 0, sha256: deltaGenesis(ESTATE) });
+  });
+
+  it("an anchor with another hash than the entry held at its sequence is a second history", () => {
+    const other = anchorDelta(held([E1, E2]), moved({ sequence: 2, sha256: "0".repeat(64) }));
+    expect(other).toMatchObject({ ok: false, problem: "fork", state: { broken: true } });
+  });
+
+  it("refuses what it cannot read, and changes nothing for no anchor or an older one", () => {
+    expect(anchorDelta(held([E1]), moved())).toEqual({ ok: true, state: held([E1]) });
+    expect(anchorDelta(held([E1]), { ...moved(), estate: "estate-other" })).toMatchObject({ ok: false, problem: "wrong-estate" });
+    expect(anchorDelta(held([E1]), null)).toMatchObject({ ok: false, problem: "wrong-estate" });
+    expect(anchorDelta(held([E1]), moved({ sequence: 0, sha256: anchor.sha256 }))).toMatchObject({ ok: false, problem: "malformed" });
+    expect(anchorDelta({ estate: ESTATE } as DeltaState, moved(anchor))).toMatchObject({ ok: false, problem: "malformed" });
+    const later = { estate: ESTATE, anchor: { sequence: 5, sha256: "a".repeat(64) }, entries: [] };
+    expect(anchorDelta(later, moved(anchor))).toEqual({ ok: true, state: later });
+    expect(applyDelta({ ...later, anchor: { sequence: 0, sha256: "x" } } as DeltaState, page(E3), { record: moved(anchor), at: AT })).toMatchObject({ ok: false, problem: "malformed" });
+  });
+
+  it("an anchored machine reads its applied sequence from the anchor, and a heartbeat below it breaks nothing", () => {
+    const R2 = moved(anchor);
+    const state = { estate: ESTATE, anchor, entries: [E3] } as DeltaState;
+    const heartbeat = (vectors.heartbeats as Json[])[0]!.heartbeat as Json;
+    const { sig: _sig, ...body }: Json = { ...heartbeat, sequence: (heartbeat.sequence as number) + 2 ** 20, at: "2026-10-12T11:40:00Z", deltaHead: { sequence: 1, sha256: deltaEntryHash(E1) }, estateRecord: { revision: R2.revision, digest: R2.digest }, kid: "hub-m-9a07-2" };
+    const verdict = acceptHeartbeat(state, signNew(body), { record: R2, at: AT });
+    expect(verdict.ok).toBe(true);
+    const fresh = deltaFreshness(verdict.ok ? verdict.state : state, { record: R2, at: AT });
+    expect(fresh.answer).toBe("current");
+  });
+
+  it("the schema takes an anchor of a sequence and a lower-case hash, and nothing else", () => {
+    expect(valid("estate-record", anchor, "#/properties/deltaAnchor")).toBe(true);
+    for (const bad of [{ sequence: 0, sha256: anchor.sha256 }, { sequence: 2, sha256: anchor.sha256.toUpperCase() }, { sequence: 2 }, { ...anchor, head: 3 }]) {
+      expect(valid("estate-record", bad, "#/properties/deltaAnchor"), JSON.stringify(bad)).toBe(false);
+    }
+  });
+
+  it("FAC-SEM-137: a revision keeps an anchor once set, never moves it back, never names another hash", () => {
+    const at137 = (parent: Json, next: Json) => evaluateSemanticRules("estate-record-revision", { parent, next }).filter((f) => f.code === "FAC-SEM-137").map((f) => f.instancePath);
+    const R2 = moved(anchor);
+    const R3 = (deltaAnchor?: Json) => {
+      const { deltaAnchor: _parentAnchor, ...rest } = R2;
+      return { ...rest, revision: (R2.revision as number) + 1, ...(deltaAnchor ? { deltaAnchor } : {}) };
+    };
+    expect(at137(R2, R3({ sequence: 3, sha256: deltaEntryHash(E3) }))).toEqual([]);
+    expect(at137(R2, R3(anchor))).toEqual([]);
+    expect(at137(moved(), R3())).toEqual([]);
+    expect(at137(R2, R3())).toEqual(["/next/deltaAnchor"]);
+    expect(at137(R2, R3({ sequence: 1, sha256: deltaEntryHash(E1) }))).toEqual(["/next/deltaAnchor/sequence"]);
+    expect(at137(R2, R3({ sequence: 2, sha256: "0".repeat(64) }))).toEqual(["/next/deltaAnchor/sha256"]);
   });
 });

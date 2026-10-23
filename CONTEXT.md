@@ -96,8 +96,12 @@ organization's network and sharing into it are share grants (DEC-0082). No schem
 
 **Estate ceremony**: How a signed estate revision is made (DEC-0084): "create my network" (revision 1), "add a
 machine" nearby or remotely (a **Comparison code**) or without a screen (an **Enroll token**), "remove a machine" and
-"replace a machine's key". Each ends in a revision the person's passkey signs and each machine applies offline; what a
+"replace a machine's key", and (DEC-0107) "move the hub" and "recover a lost passkey". Each ends in a revision the person's passkey signs and each machine applies offline; what a
 revision drops it revokes in the same revision (`FAC-SEM-114`) ([ceremonies](docs/specification/ceremonies.md)).
+
+**Delta anchor**: A head of the revocation delta a revision vouches for (`deltaAnchor`, DEC-0107): a machine that lacks
+the entries before it starts its chain there, so entries signed by a hub key that has since moved never block it
+([revocation delta](docs/specification/revocation-delta.md#the-anchor)).
 
 **Comparison code**: The six digits both screens show when a machine pairs with a trusted one (DEC-0084): from the
 SHA-256 of the RFC 8785 transcript of both sides' keys, both nonces and the trusted side's estate `genesis`, after both
