@@ -618,16 +618,16 @@ flowchart TD
   R --> V{Body verified, not a replay?}
   V -->|no| X[Dropped by the relay rules]
   V -->|yes| T{relayCallerTier}
-  T -->|unknown-state| U[Refused, a sealed isError answer]
-  T -->|not T1, no token| U
+  T -->|unknown-state or not T1| L[Logged, acknowledged, not answered]
   T -->|T1| O{openAgentCall}
-  O -->|refused| L[Logged, acknowledged, not answered]
-  O -->|opens| J{machineCallVerdict}
-  J -->|profile-forbids| U
+  O -->|refused| L
+  O -->|opens| J{machineCallVerdict, then a token if carried}
+  J -->|profile-forbids or a token refused| U[A sealed isError answer to the caller's kem]
   J -->|admitted| Run[The call runs; the answer is sealed to the caller's kem]
+  L --> E[The caller has no answer by the body's exp: the call failed]
 ```
 
-- **Screens traversed:** SCR-27 success; SCR-27 refused.
+- **Screens traversed:** SCR-27 success; SCR-27 refused; SCR-27 unanswered.
 
 ### FLW-26: Operator changes a machine's profile
 

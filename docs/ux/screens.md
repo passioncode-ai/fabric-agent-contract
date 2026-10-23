@@ -298,7 +298,7 @@
 - **Used by:** FLW-20, FLW-26
 - **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, each by one signed revision.
 - **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none.
-- **States:** success — the revision is signed and the list shows the change; error — the passkey ceremony failed and nothing changed; empty — no network yet, with "Create my network".
+- **States:** success — the revision is signed and the list shows the change; error — the passkey ceremony failed and nothing changed; empty — no network yet, with "Create my network"; unavailable — "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106.
 - **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`), `test/ceremonies.test.ts`
 - **Scenarios:** SCN-029, SCN-030, SCN-037
 - **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
@@ -342,7 +342,7 @@
 - **Used by:** FLW-23, FLW-25
 - **Purpose:** the caller, an agent or the person behind it, sees where its call stands: waiting in line, refused for now, or done; for a call to another of the owner's machines, the sealed answer or its refusal.
 - **Elements:** the job's status and status message (`queued <position> of <length>`); on a refusal, the time to start again; the result once completed.
-- **States:** queued, the estimated place and the queue's length shown; refused, `queue-full` with its time and nothing started, or a call between machines refused `profile-forbids`, `unauthenticated` or `unknown-state` with its reason; success, the job completed once.
+- **States:** queued, the estimated place and the queue's length shown; refused, `queue-full` with its time and nothing started, or a call between machines refused `profile-forbids` (or its token refused) with its reason; unanswered, a call between machines with no answer by its body's `exp`, shown as failed with no reason, since the target answers no refusal it cannot seal; success, the job completed once.
 - **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `src/machine-call.ts` (`relayCallerTier`, `machineCallVerdict`, `openAgentCall`), `test/agent-network.test.ts`, `test/machine-call.test.ts`
 - **Scenarios:** SCN-034, SCN-036
 - **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log)

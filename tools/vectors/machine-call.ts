@@ -101,6 +101,8 @@ function callerCases(): Json[] {
     ["an unreadable profile reads as null, the sender still T1", { from: "m-e#sig" }, t1("m-e", null)],
     ["a #kem that is no point of the curve: no kem", { from: "m-f#sig" }, t1("m-f", "full")],
     ["full written out", { from: "m-g#sig" }, t1("m-g", "full", "m-g#kem")],
+    ["a #kem kid listed twice names no kem", { from: "m-a#sig", applied: twiceKem() }, t1("m-a", "full")],
+    ["a #kem not in canonical base64 names no kem", { from: "m-a#sig", applied: looseKem() }, t1("m-a", "full")],
     ["a #kem a delta revokes by its key reference: no kem", { from: "m-g#sig", revocations: [{ kind: "device-key", ref: ref("m-g#kem", K.gKem), revokedAt: REVOKED_AT }] }, t1("m-g", "full")],
     ["a #sig a delta revokes: not T1", { from: "m-d#sig", revocations: [{ kind: "device-key", ref: "m-d#sig", revokedAt: REVOKED_AT }] }, notT1],
     ["a machine a delta revokes: not T1", { from: "m-b#sig", revocations: [{ kind: "machine", ref: "m-b", revokedAt: REVOKED_AT }] }, notT1],
@@ -120,6 +122,21 @@ function callerCases(): Json[] {
     for (const key of Object.keys(input)) if (input[key] === undefined) delete input[key];
     return { name, input, expect };
   });
+}
+
+/** The shared record with `m-a`'s `#kem` listed a second time, under another key. */
+function twiceKem(): Json {
+  const rec = record();
+  ((rec.machines as Json[])[0]!.deviceKeys as Json[]).push(kem("m-a", K.gKem));
+  return rec;
+}
+
+/** The shared record with `m-a`'s `#kem` written with a character base64 ignores. */
+function looseKem(): Json {
+  const rec = record();
+  const key = ((rec.machines as Json[])[0]!.deviceKeys as Json[])[1]!;
+  key.publicKey = `!${String(key.publicKey)}`;
+  return rec;
 }
 
 // ---- verdict: machineCallVerdict({caller, target, capability, effect}) --------------------------------------------
@@ -202,7 +219,8 @@ function openCases(): Json[] {
     ["a plaintext not in its RFC 8785 form", seal(JSON.stringify(callMessage(), null, 1), "spaced"), ctx(), refused("malformed")],
     ["a plaintext whose kind is not the sealed one", seal(rfc8785(callMessage()), "kind", { kind: "answer" }), ctx(), refused("malformed")],
     ["a plaintext the schema refuses: a member the call does not know", sealed(callMessage({ call: { agentId: "inbox-digest", capability: "digest.summarise", input: {}, token: "x" } }), "schema"), ctx(), refused("malformed")],
-    ["a plaintext that is not JSON", seal("not json", "text"), ctx(), refused("malformed")]
+    ["a plaintext that is not JSON", seal("not json", "text"), ctx(), refused("malformed")],
+    ["a plaintext with a byte-order mark before its RFC 8785 form", seal(`\ufeff${rfc8785(callMessage())}`, "bom"), ctx(), refused("malformed")]
   ];
   return cases.map(([name, sealedCall, context, expect]) => ({ name, sealed: sealedCall, context, expect }));
 }
@@ -216,7 +234,9 @@ function sealCases(): Json[] {
     ["another type", { ...callMessage(), type: "fabric-agent-call/2" }, ctx(), { ok: false, refusal: "malformed" }],
     ["another kind", { ...callMessage(), kind: "event" }, ctx(), { ok: false, refusal: "malformed" }],
     ["a recipient kid that is no #kem", callMessage(), ctx({ recipient: { kid: "m-b#sig", publicKey: K.bKem.octets } }), { ok: false, refusal: "bad-key" }],
-    ["a recipient key that is no point of the curve", callMessage(), ctx({ recipient: { kid: B_KEM, publicKey: offCurve(K.bKem) } }), { ok: false, refusal: "bad-key" }]
+    ["a recipient key that is no point of the curve", callMessage(), ctx({ recipient: { kid: B_KEM, publicKey: offCurve(K.bKem) } }), { ok: false, refusal: "bad-key" }],
+    ["a recipient key with a character base64 ignores", callMessage(), ctx({ recipient: { kid: B_KEM, publicKey: `!${K.bKem.octets}` } }), { ok: false, refusal: "bad-key" }],
+    ["no msgId", callMessage(), ctx({ msgId: undefined }), { ok: false, refusal: "malformed" }]
   ];
   return cases.map(([name, message, context, expect]) => ({ name, message, context, expect }));
 }

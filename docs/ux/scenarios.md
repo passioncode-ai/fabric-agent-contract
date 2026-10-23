@@ -587,12 +587,12 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. `m-a`'s node seals the call to `m-b#kem` and sends it -> `m-b`'s node places `m-a#sig` in T1, opens the call and runs it with no token.
   2. The answer is sealed to `m-a#kem` -> `m-a`'s node opens it and the caller reads the result.
-  3. The person marks `m-b` as `view`, and `m-a` calls a capability whose effect is `draft` -> refused `profile-forbids`; a read (effect `none`) still runs.
+  3. The person marks `m-b` as `view` (its `example-agent` placement removed in the same revision), and an agent on `m-b` started by hand calls `m-a`'s capability whose effect is `draft` -> refused `profile-forbids` with a sealed answer; a read (effect `none`) and the job tools still run.
 - **Expected result:** a call between one person's machines runs with no token, the relay reads none of it, and a machine kept for reading takes no call that changes anything.
-- **Alt paths:** the delta is not current -> refused `unknown-state`, no fallback to T2. The sender's machine was revoked -> not T1; with no token in `delegation` refused `unauthenticated`. A sealed call copied into another body -> `cannot-open`, logged and not answered. The caller's machine has no `#kem` -> it can be called but cannot receive an answer, so it does not call.
+- **Alt paths:** the target's delta is not current -> refused `unknown-state`, logged and not answered; no fallback to T2. The sender's machine was revoked -> not T1, refused and not answered. A sealed call copied into another body -> `cannot-open`, logged and not answered. In each, the caller has no answer by the body's `exp` and treats the call as failed. A machine with no `#kem` -> neither called nor answered, so it does not call.
 - **UI elements:** the caller's job status; the refusal's code and reason.
 - **States covered:** success, error
-- **Errors & recovery:** a refused call names its code (`profile-forbids`, `unauthenticated`, `unknown-state`); the caller calls a `full` or `member` machine, or waits for its node's delta to be current and calls again.
+- **Errors & recovery:** an answered refusal names its code (`profile-forbids`, or the token's); the caller calls from a `full` or `member` machine. An unanswered call reads as failed at its `exp`; the caller retries under the same idempotency key once the target's delta is current, or asks the person to look at the target machine.
 - **Status:** draft
 - **Coverage:** DEC-0106, `FAC-SEM-135`, `FAC-SEM-136`, `relayCallerTier`, `machineCallVerdict`, `sealAgentCall`, `openAgentCall` in `src/machine-call.ts`, `fixtures/vectors/machine-call.json`, `test/machine-call.test.ts`
 - **Product:** unobserved
@@ -825,7 +825,7 @@ independent agent author and P-02 project operator.
   2. The person signs it with a passkey -> the list shows `m-b` as `view`; every node applies the revision.
   3. An agent on `m-a` calls `m-b` with a capability that changes something -> refused `profile-forbids`.
 - **Expected result:** the machine runs no agent, holds no secret and takes no call that changes anything, by the signed record alone.
-- **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> the drafter refuses until the hub moves (CT-89). A record written before profiles -> every machine reads as `full`. Fabric writes no profile until every reader of its records is pinned at or after DEC-0106.
+- **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> `FAC-SEM-134` refuses a member with a hub key, so the hub moves first (CT-89). A record written before profiles -> every machine reads as `full`. Until every reader of the record is pinned at or after DEC-0106, "Change profile" is unavailable and says why. Between the signature and each node applying the revision, a node still on the parent judges calls by the old profile.
 - **UI elements:** the profile in each machine's row; "Change profile" in the overflow menu.
 - **States covered:** success, error
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again; a revision that keeps a placement on a `view` machine -> `FAC-SEM-134` names it and the drafter removes it.

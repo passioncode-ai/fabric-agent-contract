@@ -36,6 +36,11 @@ A machine of an [estate record](estate-record.md) carries an optional `profile`:
   `from`. The schema refuses an unknown value too.
 - A profile is part of the passkey-signed record, so changing it is a new revision
   ([ceremonies](ceremonies.md#change-a-machines-profile)), never a node's own setting.
+- **What enforces it.** The record's rules (`FAC-SEM-134`: placements, secrets, the hub key) and the call rule below,
+  on calls between machines over the relay. A profile does not reach a path this decision does not define: the hub's
+  `agent.call` over HTTP ([interop C3.5](interop.md#c35-the-hub)), T1 other than over the relay, an organization's
+  repair (`node-summary.md`), or what a person starts by hand on the machine itself. "Runs agents: no" means no agent is
+  placed there by the record.
 
 ## The T1 binding over the relay
 
@@ -45,8 +50,11 @@ revocations?})`, in this order:
 
 1. **The delta is current.** Its revocation delta's freshness is not `current` → `unknown-state` (`not-current`).
 2. **The clock reads.** `at` is no instant → `unknown-state` (`no-clock`).
-3. **The record admits.** The estate record the node applied last, with the revocations in force (the record's and the
-   delta's), gives an admission set (`relayAdmissionSet`) → otherwise `unknown-state` (`no-estate`).
+3. **The record admits.** The estate record the node applied last, with the revocations in force, gives an admission
+   set (`relayAdmissionSet`) → otherwise `unknown-state` (`no-estate`). `revocations` is the delta's part,
+   `deltaRevocations(state)`, each `{kind, ref}` as the record writes a revocation
+   ([revocation delta](revocation-delta.md#the-72-hour-rule)); the record's own come with `applied`. A port that passes
+   the delta's entries themselves, whose revocation sits under `revocation`, revokes nothing.
 4. **The node is in it.** Its own `<machine>#sig` is in the set → otherwise `unknown-state` (`self-not-admitted`).
 5. **The sender is in it.** The body's verified `from` is a `#sig` kid in the set → otherwise `unauthenticated`
    (`not-t1`).
@@ -54,11 +62,13 @@ revocations?})`, in this order:
    lists one, it is a valid P-256 point, and neither its kid nor its key reference is revoked.
 
 `unknown-state` is a denial (DL-19): the node refuses the call and does not fall back to T2. A sender that is not T1 is
-T2. It takes the whole profile: the call needs the hub's token in its `delegation` member (DL-8, DL-13), and a call
-without one is refused `unauthenticated`. The tier is the body's, never the connection's (relay, *Trust tiers*).
+refused `unauthenticated`: this decision defines calls between machines of one estate, and a call from outside it over
+the relay (T2) is not decided here. The tier is the body's, never the connection's (relay, *Trust tiers*).
 
 A node that queues ([agent network](agent-network.md#call-queue)) keys a call that carries no token by
-`relayCallerCredential(from)`, which is `relay:<from>` (DEC-0104's `jobCallerKey` takes it as the credential).
+`relayCallerCredential(from)`, which is `relay:<from>` (DEC-0104's `jobCallerKey` takes it as the credential), and a
+call with a token by its delegation, as for any delegated call. The two are different callers to the queue: the job
+tools are called the way the job was started, and per-caller fairness counts them apart.
 
 ## The call rule
 
@@ -104,11 +114,21 @@ reads neither ([`agent-call-sealed.schema.json`](../../schemas/agent-call-sealed
   included); `malformed` (a plaintext that is not UTF-8 JSON in its own RFC 8785 form, whose `type` or `kind` is not the
   sealed one's, or that the message schema refuses). It never throws.
 
-A call that does not open is not answered: the node logs its refusal and `msgId`, and acknowledges the delivery so the
-relay stops redelivering. A call that opens and is then refused (its tier, the call rule, a token) is answered with a
-sealed `answer` whose `isError` is `true` and whose `structuredContent` is the [refusal](delegation.md#refusal-codes).
-An answer is sealed to the caller's `#kem`, so a machine with no usable `#kem` can be called but receives no answer;
-it does not call.
+**The node's order.** After the relay body is verified and is not a replay:
+
+1. `relayCallerTier`. A sender that is not T1 (`unknown-state`, `unauthenticated`) is refused and **not answered**: the
+   node has no key of the caller it trusts to seal to.
+2. `openAgentCall`. A call that does not open is refused and **not answered**.
+3. `machineCallVerdict`, then the token when the call carries one (DL-13). A refusal here is **answered**: a sealed
+   `answer` whose `isError` is `true` and whose `structuredContent` is the [refusal](delegation.md#refusal-codes), to
+   the caller's `#kem` as `relayCallerTier` named it.
+4. Otherwise the call runs, and its answer is sealed the same way.
+
+A refusal that is not answered is logged with its code and `msgId`, and the delivery is acknowledged so the relay stops
+redelivering. A caller that has no answer by its body's signed `exp` treats the call as failed: it never learns which
+of these happened, and an unanswered call is retried under the same idempotency key, as any call whose outcome is
+unknown. A machine with no usable `#kem` is neither called nor answered: a caller seals only to a usable `#kem` and
+calls only from a machine that has one.
 
 ## Semantic rules
 
@@ -123,8 +143,9 @@ it does not call.
 Additive, with two narrowings:
 
 - A record with a `profile` is refused by a reader pinned before DEC-0106, whose machine schema is closed. Fabric writes
-  `profile` only once every reader of its records (nodes, the relay) is pinned at or after DEC-0106; until then a
-  record carries none and every machine reads as `full`.
+  `profile` only once every reader of its records is pinned at or after DEC-0106: its own nodes, the relay, Project
+  Observatory's node, the Fabric Agent Adapter's kits and the first organization server's vendored schema
+  ([estate record](estate-record.md#who-adopts-it)); until then a record carries none and every machine reads as `full`.
 - `profile-forbids` is a new DL-19 code. A reader that checks refusals against an older
   `delegation-refusal.schema.json` refuses it.
 - `fabric-agent-call/1` is a new protocol. The relay carries the payload unread, so it needs no change.
@@ -140,6 +161,7 @@ Each party moves at its next pin (CT-110).
 | Fabric (the hub and the operator's ceremonies) | writes `profile` in a record revision once its readers are pinned; seals and opens `fabric-agent-call/1` on its nodes; places relay senders with `relayCallerTier` and judges calls with `machineCallVerdict` | its next pin |
 | A node that takes relay calls | the same four functions; keys a tokenless call by `relay:<from>` when it queues | its next pin |
 | The first organization server's relay, and the relay | nothing on the wire: the payload is opaque to a relay; a vendored estate-record schema moves at its next pin | its next pin |
+| Project Observatory's node, the Fabric Agent Adapter's kits | read a record that carries `profile`; a node that takes relay calls also does what the row above says | their next pin |
 | Fabric Dashboards | shows a machine's profile where it shows the machine | its next pin |
 
 ## Not decided here
@@ -148,4 +170,5 @@ Each party moves at its next pin (CT-110).
 - An answer larger than the limit (a blob reference) and a streamed answer.
 - Calls between estates (DL, *Not decided here*), the hub moving to another machine and passkey recovery (CT-89),
   credentials on request and the call record (CT-86).
-- What a machine shows its person about calls it received (CT-95's family of person-facing scenarios).
+- What a machine shows its person about calls it received (CT-95).
+- Calls over the relay from outside the estate (T2), and how their answers are sealed.

@@ -425,6 +425,298 @@
       }
     },
     {
+      "name": "a #kem kid listed twice names no kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-a#sig",
+        "applied": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
+                },
+                {
+                  "kid": "m-a#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
+                },
+                {
+                  "kid": "m-a#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "profile": "view",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
+                },
+                {
+                  "kid": "m-b#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "profile": "member",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
+                },
+                {
+                  "kid": "m-c#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
+                }
+              ]
+            },
+            {
+              "id": "m-d",
+              "profile": "member",
+              "deviceKeys": [
+                {
+                  "kid": "m-d#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
+                }
+              ]
+            },
+            {
+              "id": "m-e",
+              "profile": "owner",
+              "deviceKeys": [
+                {
+                  "kid": "m-e#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
+                }
+              ]
+            },
+            {
+              "id": "m-f",
+              "deviceKeys": [
+                {
+                  "kid": "m-f#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
+                },
+                {
+                  "kid": "m-f#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
+                }
+              ]
+            },
+            {
+              "id": "m-g",
+              "profile": "full",
+              "deviceKeys": [
+                {
+                  "kid": "m-g#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+                },
+                {
+                  "kid": "m-g#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+                }
+              ]
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "device-key",
+              "ref": "m-c#kem",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-a",
+        "profile": "full"
+      }
+    },
+    {
+      "name": "a #kem not in canonical base64 names no kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-a#sig",
+        "applied": {
+          "schema": "estate-record/1",
+          "estate": "urn:fabric:estate:example",
+          "revision": 4,
+          "issuedAt": "2026-10-12T09:00:00Z",
+          "validUntil": "2026-11-11T09:00:00Z",
+          "machines": [
+            {
+              "id": "m-a",
+              "deviceKeys": [
+                {
+                  "kid": "m-a#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
+                },
+                {
+                  "kid": "m-a#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "!BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
+                }
+              ]
+            },
+            {
+              "id": "m-b",
+              "profile": "view",
+              "deviceKeys": [
+                {
+                  "kid": "m-b#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
+                },
+                {
+                  "kid": "m-b#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+                }
+              ]
+            },
+            {
+              "id": "m-c",
+              "profile": "member",
+              "deviceKeys": [
+                {
+                  "kid": "m-c#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
+                },
+                {
+                  "kid": "m-c#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
+                }
+              ]
+            },
+            {
+              "id": "m-d",
+              "profile": "member",
+              "deviceKeys": [
+                {
+                  "kid": "m-d#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
+                }
+              ]
+            },
+            {
+              "id": "m-e",
+              "profile": "owner",
+              "deviceKeys": [
+                {
+                  "kid": "m-e#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
+                }
+              ]
+            },
+            {
+              "id": "m-f",
+              "deviceKeys": [
+                {
+                  "kid": "m-f#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
+                },
+                {
+                  "kid": "m-f#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
+                }
+              ]
+            },
+            {
+              "id": "m-g",
+              "profile": "full",
+              "deviceKeys": [
+                {
+                  "kid": "m-g#sig",
+                  "use": "sig",
+                  "alg": "es256",
+                  "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+                },
+                {
+                  "kid": "m-g#kem",
+                  "use": "kem",
+                  "alg": "ecdh-p256",
+                  "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+                }
+              ]
+            }
+          ],
+          "revocations": [
+            {
+              "kind": "device-key",
+              "ref": "m-c#kem",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-a",
+        "profile": "full"
+      }
+    },
+    {
       "name": "a #kem a delta revokes by its key reference: no kem",
       "input": {
         "self": "m-a",
@@ -1371,6 +1663,29 @@
         "ok": false,
         "refusal": "malformed"
       }
+    },
+    {
+      "name": "a plaintext with a byte-order mark before its RFC 8785 form",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BOP2fgCXwkthnx1Vt4NREzGS7RmuCmqDglmnVPhpE8tVCNABpn_q7KZmGOzvWyfOb2KyU5EX2opvJS7Ds34t7JM",
+        "ct": "JmN8Gg1pinfSPGtRWWwXJASr6yrlBkRcQlye4e_qzbCdamEiWBnncOUoHEvst-09adwsVEE2ddqIInIQ18emrnNmbLzjVpU7-MPygA8vZ4Qlfs6YiQHFlE8w0o36AAFbwedAkW-TY750Ki5xBk8tuREoVbbXvSNF3LYw07_6otBd3BTGOtxdjHRnzW_FTCqTT6bpbvsNJb2va16W2dZy8N3PeQeLu9wQgx-o-c-0"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
     }
   ],
   "seal": [
@@ -1563,6 +1878,63 @@
       "expect": {
         "ok": false,
         "refusal": "bad-key"
+      }
+    },
+    {
+      "name": "a recipient key with a character base64 ignores",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "call": {
+          "agentId": "inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "!BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "bad-key"
+      }
+    },
+    {
+      "name": "no msgId",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "call": {
+          "agentId": "inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
       }
     }
   ]

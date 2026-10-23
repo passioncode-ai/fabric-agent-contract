@@ -28,6 +28,9 @@ export const SEAL_REFUSALS = ["malformed", "bad-key", "too-large"] as const;
 export type AgentCallRefusal = (typeof AGENT_CALL_REFUSALS)[number];
 export type SealRefusal = (typeof SEAL_REFUSALS)[number];
 
+/** Standard base64 that decodes and encodes back to the same text: no foreign character Node would drop. */
+const canonicalBase64 = (value: unknown): value is string => isString(value) && value.length > 0 && Buffer.from(value, "base64").toString("base64") === value;
+
 const isProfile = (value: unknown): value is MachineProfile => isString(value) && (MACHINE_PROFILES as readonly string[]).includes(value);
 
 // --- The T1 binding over the relay ---
@@ -63,9 +66,11 @@ export function relayCallerTier(input: { applied: unknown; self: unknown; from: 
   const record = admission.held;
   const revoked = new Set([...list(record.revocations), ...extra].filter((entry) => entry.kind === "device-key").map((entry) => entry.ref));
   const own = list(record.machines).find((entry) => entry.id === machine);
-  const kemKey = list(own?.deviceKeys).find((key) => key.kid === `${machine}#kem` && key.use === "kem" && isString(key.publicKey));
+  // A kid listed twice names no key a sealer could resolve again unambiguously, so it names none (as the #sig path, F7).
+  const kemKeys = list(own?.deviceKeys).filter((key) => key.kid === `${machine}#kem`);
+  const kemKey = kemKeys.length === 1 && kemKeys[0]?.use === "kem" ? kemKeys[0] : undefined;
   let kem: string | undefined;
-  if (kemKey) {
+  if (kemKey && canonicalBase64(kemKey.publicKey)) {
     const octets = new Uint8Array(Buffer.from(kemKey.publicKey as string, "base64"));
     // A valid point has a fingerprint, so its key reference is defined here.
     const usable = octets.length === 65 && p256KeyRefusal(octets) === null;
@@ -119,8 +124,9 @@ const INFO = Buffer.from(AGENT_CALL_TYPE, "ascii");
  */
 export function sealAgentCall(message: unknown, ctx: { from: unknown; to: unknown; msgId: unknown; recipient: { kid: unknown; publicKey: unknown }; ephemeral?: Buffer }): { ok: true; sealed: SealedAgentCall } | { ok: false; refusal: SealRefusal } {
   if (!isObject(message) || message.type !== AGENT_CALL_TYPE || !KINDS.includes(message.kind as string)) return { ok: false, refusal: "malformed" };
+  if (!isString(ctx.from) || !isString(ctx.to) || !isString(ctx.msgId)) return { ok: false, refusal: "malformed" };
   const kid = ctx.recipient?.kid;
-  const key = isString(ctx.recipient?.publicKey) ? Buffer.from(ctx.recipient.publicKey as string, "base64") : Buffer.alloc(0);
+  const key = canonicalBase64(ctx.recipient?.publicKey) ? Buffer.from(ctx.recipient.publicKey as string, "base64") : Buffer.alloc(0);
   if (!isString(kid) || !KEM_KID.test(kid) || key.length !== 65 || p256KeyRefusal(new Uint8Array(key)) !== null) return { ok: false, refusal: "bad-key" };
   let plaintext: Buffer;
   try {
@@ -157,16 +163,16 @@ export function openAgentCall(sealed: unknown, ctx: { from: unknown; to: unknown
   if (sealed.kem !== ctx.own?.kid) return { ok: false, refusal: "wrong-recipient" };
   let plaintext: Buffer;
   try {
-    const sk = isString(ctx.own.privateKey) ? Buffer.from(ctx.own.privateKey, "base64") : Buffer.alloc(0);
+    const sk = canonicalBase64(ctx.own.privateKey) ? Buffer.from(ctx.own.privateKey, "base64") : Buffer.alloc(0);
     plaintext = hpkeOpenBase(sk, enc, INFO, agentCallAad({ kind: sealed.kind, from: ctx.from, to: ctx.to, msgId: ctx.msgId, kem: sealed.kem }), ct);
   } catch {
     return { ok: false, refusal: "cannot-open" };
   }
   let message: unknown;
   try {
-    const text = new TextDecoder("utf-8", { fatal: true }).decode(plaintext);
-    message = JSON.parse(text);
-    if (rfc8785(message) !== text) return { ok: false, refusal: "malformed" };
+    // The bytes are compared, not the decoded text: a decoder drops a leading byte-order mark by default.
+    message = JSON.parse(new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(plaintext));
+    if (!Buffer.from(rfc8785(message), "utf8").equals(plaintext)) return { ok: false, refusal: "malformed" };
   } catch {
     return { ok: false, refusal: "malformed" };
   }

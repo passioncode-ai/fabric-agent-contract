@@ -131,7 +131,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### JTBD-13: Call an agent on another of my machines, within what each machine may do
 
-- **Statement:** When an agent on one of my machines needs an agent on another of my machines, I want the call to go through without a token or an approval, and a machine I keep only for reading never to run or receive work that changes anything, so I can spread work over my machines without opening them to each other.
+- **Statement:** When an agent on one of my machines needs an agent on another of my machines, I want the call to go through without a token or an approval, and a machine I keep only for reading to hold no agent placement, no secret and no hub key, and to send or take no call over the relay that changes anything, so I can spread work over my machines without opening them to each other.
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: a call between my own machines needs the same tokens as a stranger's; a spare laptop holds secrets it never uses; pull: one signed record that says what each machine may do; anxiety: a relay or an outsider reading my calls, a revoked machine still calling; habit: copying files and keys by hand.

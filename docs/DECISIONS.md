@@ -6574,7 +6574,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      placement names it as `from` (`FAC-SEM-134`, kind `estate-record`). A profile changes only by a passkey-signed
      revision. `machineProfile(record, id)` answers it, or none when unreadable.
   2. **The T1 binding over the relay.** A node places the sender of a relay message whose body it verified with
-     `relayCallerTier({applied, self, from, at, freshness, revocations?})`: `unknown-state` when its delta is not
+     `relayCallerTier({applied, self, from, at, freshness, revocations?})`, `revocations` the delta's part as
+     `deltaRevocations` gives it: `unknown-state` when its delta is not
      current, its clock does not read, the record it applied last gives no admission set, or its own `#sig` is not in
      it; `unauthenticated` (`not-t1`) when `from` is not in the set; otherwise T1 with the machine, its profile and its
      usable `#kem` (`FAC-SEM-135`, kind `relay-caller`). `unknown-state` is a denial, never a fall back to T2. A
@@ -6589,10 +6590,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      protocol name, the additional data the RFC 8785 bytes of `{type, kind, from, to, msgId, kem}`; the plaintext is the
      RFC 8785 form of an `agent-call-message` (a `call` with the hub's `agent.call` arguments, an optional
      `delegation` and `traceparent`; an `answer` with `replyTo` and `isError`, `structuredContent`, `content`), at most
-     393 216 bytes. `sealAgentCall` and `openAgentCall` refuse by name and never throw. DL-11 is amended: over the relay
-     the token travels in the sealed `delegation` member only, never in `call.input`. A call that does not open is
-     logged and not answered; a call refused after it opens is answered with a sealed `isError` answer carrying the
-     refusal; an answer is sealed to the caller's `#kem`, so a machine with none does not call.
+     393 216 bytes. `sealAgentCall` and `openAgentCall` refuse by name and never throw; the plaintext is compared as
+     bytes with its RFC 8785 form, so a byte-order mark is `malformed`. DL-11 is amended: over the relay the token
+     travels in the sealed `delegation` member only, never in `call.input` (the sender's duty: `input` is free-form and
+     no schema checks it).
+  5. **The node's order.** Tier, then open, then the call rule and a carried token. A sender that is not T1 and a call
+     that does not open are logged and not answered (the node has no trusted key of the caller to seal to); a refusal
+     by the call rule or the token is answered with a sealed `isError` answer to the caller's `#kem`. A caller with no
+     answer by its body's `exp` treats the call as failed. A machine with no usable `#kem` is neither called nor
+     answered. A call over the relay from outside the estate (T2) is not decided here.
 - **Why:** the record the node already verified is the one source of who belongs to the estate, so T1 comes from it and
   from nothing the connection says; a stale delta could admit a machine the person removed, so it denies. Profiles in
   the signed record cannot be widened by the machine they limit. Sealing to `#kem` keeps the call and the token out of
@@ -6604,7 +6610,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `view` machine could still make changes elsewhere); a signed but unsealed call (the relay reads arguments and
   results).
 - **Compatibility:** additive, with two narrowings: a record carrying `profile` is refused by a reader pinned before this
-  decision (the machine object is closed), so the hub writes none until its readers move; `profile-forbids` is refused
+  decision (the machine object is closed), so the hub writes none until its readers move (its nodes, the relay, Project
+  Observatory's node, the Fabric Agent Adapter's kits, the first organization server's vendored schema); `profile-forbids` is refused
   by an older copy of `delegation-refusal.schema.json`. `fabric-agent-call/1` is a new protocol in the register; the
   relay carries it unread. Every record without `profile` reads as before. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-call.ts` (new), `src/estate-record-rules.ts` (`machineProfile`,

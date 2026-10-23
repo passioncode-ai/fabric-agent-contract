@@ -34,6 +34,13 @@ CT-85, S1 of the agent network: one person's machines calling each other's agent
   server's vendored schema. The hub writes no `profile` until its readers are pinned at or after DEC-0106.
 - The two-Mac test of S1 needs the relay deployed (RLY-05, RLY-07).
 
+## Readings
+
+Round 1: unit one break (a plaintext with a byte-order mark opened), seam one break (`pnpm validate` could not tell
+the two new schemas apart: the protocol sits in `type`), product four breaks (a machine without `#kem` "can be
+called", answers to refusals the node cannot seal, two readers missing from the rollout gate, interop C3.5's
+"only in headers"); all fixed with their risks.
+
 ## Checks actually run
 
 `pnpm run check` and `pnpm vectors:check` (output in the pull request).

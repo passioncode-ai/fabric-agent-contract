@@ -305,7 +305,9 @@ changes it as every other change: a revision they sign with a passkey, with the 
 A machine that becomes `member` gives up the hub key in the same revision (the hub moves first, CT-89); one that becomes
 `view` gives up its placements and secret placements in the same revision, and no other machine's secret names it as
 `from` (`FAC-SEM-134`). A node that applies the revision judges the next call it receives by the new profile; a call it
-accepted before keeps running. Fabric writes no `profile` until every reader of its records is pinned at or after
+accepted before keeps running. Until each node applies it, a node still on the parent judges calls by the old profile,
+so a machine made `view` can still be called with an effect there; the revision reaches every machine with the next
+heartbeat, which a running hub signs right after every revision (DEC-0054). Fabric writes no `profile` until every reader of its records is pinned at or after
 DEC-0106 ([machine calls](machine-calls.md#compatibility)).
 
 ## Linkability

@@ -957,6 +957,6 @@
   {"name": "agent-call-sealed-padded-enc", "schema": "agent-call-sealed.schema.json", "path": "negative/agent-call-sealed-padded-enc.json", "valid": false, "keyword": "pattern"},
   {"name": "agent-call-message-call", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-call.json", "valid": true},
   {"name": "agent-call-message-answer", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-answer.json", "valid": true},
-  {"name": "agent-call-message-token-in-input", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-token-in-input.json", "valid": false, "keyword": "oneOf"},
+  {"name": "agent-call-message-unknown-call-member", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-unknown-call-member.json", "valid": false, "keyword": "oneOf"},
   {"name": "agent-call-message-answer-without-reply", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-answer-without-reply.json", "valid": false, "keyword": "oneOf"}
 ]
