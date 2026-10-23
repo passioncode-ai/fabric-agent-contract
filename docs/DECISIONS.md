@@ -6769,10 +6769,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0110: a host sums money over the usage rows not on a subscription
 
-- **Status:** Accepted (2026-10-23). No wire change. Consumer adoption: Fabric's spend tiles and view sum as below,
-  and the Fabric Agent Adapter's service kit counts only money in `budget.spentUsd` (CT-115); Fabric Dashboards already
-  sums money this way since 0.7.23 (its estimate side reads an unpriced subscription row as 0, CT-115) (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0). A per-project split by route is
-  CT-116.
+- **Status:** Accepted (2026-10-23). No wire change. Consumer adoption: Fabric's spend tiles and view sum as below
+  (CT-115). The Fabric Agent Adapter's service kit counts only money in `budget.spentUsd` since 0.48.0 (FAA-109, PR #178).
+  Fabric Dashboards sums money this way since 0.7.23 (FD-88), and its estimate side reads an unpriced subscription row
+  as `null` or a lower bound, as `usageSpend` does, since its row FD-97 (PR #192, `@passioncode-ai/fabric-service-host`
+  0.8.0, release 0.7.27; board thread `147a5538`, 2026-10-23). A per-project split by route is CT-116.
 - **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
   subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is
   the sum of every row (`FAC-SEM-025`), and the report has no money-only total, so a host that summed `costUsd` showed
