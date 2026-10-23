@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0112` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0113` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6870,3 +6870,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/credential-envelope.test.ts`; fixtures; the UX layer; backlog CT-86 done, CT-117 to CT-120 filed.
 - **Source:** board thread `ba63565c` items 5 and 6 (the first organization server, 2026-10-21), `b2511678` (S5, S6,
   and the addition of 2026-10-22), `21684886` (the estate's own credentials); Project Observatory OBS-191, OBS-194; CT-86.
+
+### DEC-0112: a check-in's own rules read DEC-0111's credential members
+
+- **Status:** Accepted (2026-10-23). No wire change.
+- **Context:** DEC-0111 added six members to a check-in's `records` (`credentialRequests` and `callRecords` in the
+  request; `credentialDecisions`, `credentials`, `credentialRevocations` and `callRecordsAccepted` in the response), but
+  kind `device-check-in` ran only `FAC-SEM-099` on its `protocols`, and no committed fixture carried the members, so a
+  receiver that runs only the check-in's rules accepted a request asked for 90 days, a personal call record sent to an
+  organization, or an envelope for a request the same response refused (CT-119, the round-2 readings of PR #156).
+- **Decision:**
+  1. Kind `device-check-in` runs, beside `FAC-SEM-099`, each `credentialRequests` entry under `FAC-SEM-138`'s rules for a
+     request alone and each `callRecords` entry under `FAC-SEM-140`, each finding under its member's path.
+  2. A check-in sends each `requestId` once (`FAC-SEM-138`) and each `callId` once (`FAC-SEM-140`); its call records name
+     an organization's context only (`FAC-SEM-140`), and its requests and call records name one context, since a
+     check-in goes to one organization (`FAC-SEM-138` when it carries a request, else `FAC-SEM-140`).
+  3. A response decides each `requestId` once and carries no envelope for a request it refuses or leaves pending
+     (`FAC-SEM-138`). An envelope whose decision came in an earlier response passes: the node reads the decisions it
+     holds.
+  4. Kind `credential-exchange` on `{sent, response}` (the requests a node sent to one organization and holds open, and
+     that organization's response): every decision answers a request the node sent and passes `FAC-SEM-138` against it,
+     and every envelope names a request the node sent (`FAC-SEM-138`).
+  5. Fixtures `device-check-in-credentials.json` and `device-check-in-response-credentials.json` carry the six members,
+     so the schema's wiring is in the gate.
+- **Why:** a receiver and a node judge these members where they arrive, in one check-in, without a second document;
+  the pair kind is the one judgement that needs what the node sent.
+- **Alternatives considered:** a new rule code (the rules are DEC-0111's own, applied where the members travel);
+  requiring an envelope's decision in the same response (a node resends a request after an issued decision whose
+  envelope did not open, so the envelope can follow an earlier response's decision); judging `credentialRevocations`
+  here (a revocation stands only on the device's keys and clock, `credentialRevocationStands`).
+- **Compatibility:** narrower for a check-in that broke DEC-0111's rules: kind `device-check-in` now refuses it, where
+  it passed. No schema, byte or `$id` changes; `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/credentials.ts` (`checkInCredentialFindings`, `credential-exchange`),
+  `src/semantic-rules.ts`, `src/semantic-kinds.ts`; `docs/specification/credentials.md` (semantic rules,
+  compatibility), `conformance.md` (the register's kinds); fixtures `fixtures/positive/device-check-in-credentials.json`,
+  `fixtures/positive/device-check-in-response-credentials.json`, `fixtures/semantic/credential-check-in-*`,
+  `fixtures/semantic/credential-exchange-*`; tests
+  `test/credential-envelope.test.ts`, `test/rule-tolerance.test.ts`; backlog CT-119 done.
+- **Source:** CT-119 (the seam and product readings of PR #156, round 2, 2026-10-23).

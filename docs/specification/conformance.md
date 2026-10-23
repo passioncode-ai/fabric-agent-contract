@@ -446,9 +446,9 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-135` | `relay-caller` | [machine calls](machine-calls.md#semantic-rules) | SEM-0135 |
 | `FAC-SEM-136` | `machine-call` | [machine calls](machine-calls.md#semantic-rules) | SEM-0136 |
 | `FAC-SEM-137` | `estate-record-revision` | [revocation delta](revocation-delta.md#semantic-rules) | SEM-0137 |
-| `FAC-SEM-138` | `credential-request`, `credential-request-document`, `credential-decision` | [credentials](credentials.md#semantic-rules) | SEM-0138 |
+| `FAC-SEM-138` | `credential-request`, `credential-request-document`, `credential-decision`, `credential-exchange`, `device-check-in` | [credentials](credentials.md#semantic-rules) | SEM-0138 |
 | `FAC-SEM-139` | `credential-envelope-check` | [credentials](credentials.md#semantic-rules) | SEM-0139 |
-| `FAC-SEM-140` | `call-record` | [credentials](credentials.md#semantic-rules) | SEM-0140 |
+| `FAC-SEM-140` | `call-record`, `device-check-in` | [credentials](credentials.md#semantic-rules) | SEM-0140 |
 
 ## Compatibility policy
 

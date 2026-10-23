@@ -1,6 +1,6 @@
 # Credentials on request, and the call record
 
-DEC-0111 (CT-86, S5 and S6 of the agent network) · rule codes `FAC-SEM-138` to `FAC-SEM-140` · schemas
+DEC-0111 (CT-86, S5 and S6 of the agent network), DEC-0112 (CT-119) · rule codes `FAC-SEM-138` to `FAC-SEM-140` · schemas
 [`credential-request.schema.json`](../../schemas/credential-request.schema.json),
 [`credential-decision.schema.json`](../../schemas/credential-decision.schema.json),
 [`credential-envelope.schema.json`](../../schemas/credential-envelope.schema.json),
@@ -196,9 +196,9 @@ and `recordedBy`.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-138"></a>`FAC-SEM-138` | `credential-request`, `credential-request-document`, `credential-decision` | a request names its enrollment's organization, asks for a credential after it and for at most 30 days, and carries no path or credential in its reason or scope; a decision answers its request, an issued credential is the request's provider and ends no later than asked, and each outcome carries exactly its members (DEC-0111) |
+| <a id="fac-sem-138"></a>`FAC-SEM-138` | `credential-request`, `credential-request-document`, `credential-decision`, `credential-exchange`, `device-check-in` | a request names its enrollment's organization, asks for a credential after it and for at most 30 days, and carries no path or credential in its reason or scope; a decision answers its request, an issued credential is the request's provider and ends no later than asked, and each outcome carries exactly its members (DEC-0111); a check-in sends each request once, its requests and call records name one organization's context, a response decides each request once and carries no envelope for a request it refuses or leaves pending, and against the requests a node sent (`credential-exchange` on `{sent, response}`) every decision and envelope names one of them (DEC-0112) |
 | <a id="fac-sem-139"></a>`FAC-SEM-139` | `credential-envelope-check` | a target's answer to a credential envelope is `checkCredentialEnvelope(envelope, context)`'s (DEC-0111) |
-| <a id="fac-sem-140"></a>`FAC-SEM-140` | `call-record` | a call ends no earlier than it starts; a completed call names no code and every other outcome names one; its trace id is not all zeros; caller and callee differ; no member carries a path or a credential (DEC-0111) |
+| <a id="fac-sem-140"></a>`FAC-SEM-140` | `call-record`, `device-check-in` | a call ends no earlier than it starts; a completed call names no code and every other outcome names one; its trace id is not all zeros; caller and callee differ; no member carries a path or a credential (DEC-0111); a check-in carries each call record once and only call records of an organization's context, the one its requests name (DEC-0112) |
 
 ## Compatibility
 
@@ -209,8 +209,9 @@ before it refuses a response with the new response members (both objects are clo
 peer that lists the protocol in its `protocols` (as `node-summary/1` and `repair-request/1` are gated, DEC-0101):
 `credential-request/1` gates `credentialRequests`, `credential-decision/1` gates `credentialDecisions`,
 `fabric-credential-envelope/1` gates `credentials`, `credential-revocation/1` gates `credentialRevocations`, and
-`call-record/1` gates `callRecords` and `callRecordsAccepted`. A check-in's own rules do not yet read these members
-(CT-119).
+`call-record/1` gates `callRecords` and `callRecordsAccepted`. A check-in's own rules read them since DEC-0112 (kind
+`device-check-in`: each request and call record by its own rule, under its member's path; fixtures
+`device-check-in-credentials.json` and `device-check-in-response-credentials.json`).
 `fabric-secret-envelope/1` is unchanged: a placed package's personal secret still moves by it. `contractVersion` stays
 `0.1.0`.
 

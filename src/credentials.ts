@@ -425,7 +425,82 @@ export function callRecordFindings(record: unknown, prefix = ""): Finding[] {
   return findings;
 }
 
+/**
+ * DEC-0112 on a bare check-in or check-in response (kind `device-check-in`, beside FAC-SEM-099): a check-in's
+ * `credentialRequests` each pass FAC-SEM-138's own rules, name one `requestId` once and one organization's context, the
+ * one its `callRecords` name; its `callRecords` each pass FAC-SEM-140 and name one `callId` once. A response's
+ * `credentialDecisions` name one `requestId` once, and an envelope in its `credentials` never names a request that the
+ * same response refuses or leaves pending. Never throws on a JSON value.
+ */
+export function checkInCredentialFindings(value: JsonObject): Finding[] {
+  const records = isObject(value.records) ? value.records : {};
+  const findings: Finding[] = [];
+  const contexts = new Set<string>();
+  const once = (entries: JsonObject[], key: string, code: string, at: string, message: string) => {
+    const seen = new Set<string>();
+    entries.forEach((entry, index) => {
+      const id = entry[key];
+      if (!isString(id)) return;
+      if (seen.has(id)) findings.push(flag(code, `${at}/${index}/${key}`, message));
+      seen.add(id);
+    });
+  };
+  const requests = indexed(records.credentialRequests);
+  requests.forEach(([request, index]) => {
+    findings.push(...requestFindings(request, `/records/credentialRequests/${index}`));
+    if (isString(request.context)) contexts.add(request.context);
+  });
+  once(requests.map(([r]) => r), "requestId", "FAC-SEM-138", "/records/credentialRequests", "a check-in sends each request once");
+  const calls = indexed(records.callRecords);
+  calls.forEach(([record, index]) => {
+    findings.push(...callRecordFindings(record, `/records/callRecords/${index}`));
+    // A call record goes to an organization only for that organization's own context (DL-22, never a personal call).
+    if (!isString(record.context) || !record.context.startsWith(ORG_CONTEXT_PREFIX)) findings.push(flag("FAC-SEM-140", `/records/callRecords/${index}/context`, "a check-in carries call records of an organization's context only"));
+    else contexts.add(record.context);
+  });
+  once(calls.map(([r]) => r), "callId", "FAC-SEM-140", "/records/callRecords", "a check-in sends each call record once");
+  if (contexts.size > 1) findings.push(flag(requests.length > 0 ? "FAC-SEM-138" : "FAC-SEM-140", "/records", "a check-in goes to one organization: its requests and call records name one context"));
+  const decisions = indexed(records.credentialDecisions);
+  once(decisions.map(([d]) => d), "requestId", "FAC-SEM-138", "/records/credentialDecisions", "a response decides each request once");
+  const unissued = new Set(decisions.filter(([d]) => d.outcome !== "issued").map(([d]) => d.requestId));
+  indexed(records.credentials).forEach(([envelope, index]) => {
+    const header = isObject(envelope.header) ? envelope.header : {};
+    if (isString(header.requestId) && unissued.has(header.requestId)) findings.push(flag("FAC-SEM-138", `/records/credentials/${index}/header/requestId`, "an envelope answers an issued decision, never one its response refuses or leaves pending"));
+  });
+  return findings;
+}
+
+/**
+ * DEC-0112, kind `credential-exchange` on `{sent, response}`: `sent` the requests a node sent to one organization and
+ * holds open, `response` that organization's check-in response. Every decision answers a request the node sent and
+ * passes FAC-SEM-138 against it; every envelope names a request the node sent.
+ */
+function exchangeRule(value: JsonObject): Finding[] {
+  const sent = indexed(value.sent).map(([request]) => request);
+  const byId = new Map<string, JsonObject>();
+  for (const request of sent) if (isString(request.requestId) && !byId.has(request.requestId)) byId.set(request.requestId, request);
+  const response = isObject(value.response) ? value.response : {};
+  const records = isObject(response.records) ? response.records : {};
+  const findings: Finding[] = [];
+  indexed(records.credentialDecisions).forEach(([decision, index]) => {
+    const at = `/response/records/credentialDecisions/${index}`;
+    const request = isString(decision.requestId) ? byId.get(decision.requestId) : undefined;
+    if (request === undefined) { findings.push(flag("FAC-SEM-138", `${at}/requestId`, "a decision answers a request the node sent")); return; }
+    for (const finding of decisionRule({ request, decision })) findings.push({ ...finding, instancePath: finding.instancePath.replace(/^\/decision/, at) });
+  });
+  indexed(records.credentials).forEach(([envelope, index]) => {
+    const header = isObject(envelope.header) ? envelope.header : {};
+    if (!isString(header.requestId) || !byId.has(header.requestId)) findings.push(flag("FAC-SEM-138", `/response/records/credentials/${index}/header/requestId`, "an envelope names a request the node sent"));
+  });
+  return findings;
+}
+
+/** The object entries of an array member with their indices; anything else is none. */
+const indexed = (value: unknown): Array<[JsonObject, number]> =>
+  Array.isArray(value) ? value.flatMap((entry, index): Array<[JsonObject, number]> => (isObject(entry) ? [[entry, index]] : [])) : [];
+
 export function credentialRules(kind: string, value: JsonObject): Finding[] | undefined {
+  if (kind === "credential-exchange") return exchangeRule(value);
   if (kind === "credential-request") return requestRule(value);
   if (kind === "credential-request-document") return requestFindings(value, "");
   if (kind === "credential-decision") return decisionRule(value);
