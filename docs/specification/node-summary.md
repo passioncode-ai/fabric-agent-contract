@@ -1,6 +1,6 @@
 # A node's summary and an organization's repairs (`node-summary/1`, `repair-request/1`)
 
-**Maturity:** specified (DEC-0101, corrected by DEC-0102, narrowed by DEC-0105); implemented by Project Observatory's node at contract pin `f33f4d8a` (engine PR #345). Asked by the first organization server for the operator's targets S7,
+**Maturity:** specified (DEC-0101, corrected by DEC-0102, narrowed by DEC-0105 and DEC-0118); implemented by Project Observatory's node at contract pin `f33f4d8a` (engine PR #345), the `machine.mode` reach (DEC-0118) owed at its re-pin (OBS-217). Asked by the first organization server for the operator's targets S7,
 S8 and S10 (board thread `ba63565c`, items 7 and 8); the summary's first half was DV-CON-01, accepted on 2026-10-12.
 
 An organization sees what each enrolled machine runs (S8), how that differs from what it expects (S10), and can ask
@@ -35,11 +35,13 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 - **`C`**, the default (the organization manages only its own work on the machine, the person's own machine with an
   organization's context beside its others): the summary lists only what belongs to this organization's context. That
   is each coding agent by its catalogue id and version and the hook count (the tools the context's work runs on, no
-  name of the person's), and only those MCP servers, skills and plugins that the organization placed (`source:
-  managed`, or a package placed in this context) or that are installed in a folder attributed to this context
-  (DEC-0089), together with every item the organization's `harness.baseline` names, by that name, whether present or
-  not. An item installed for the person (`source: user`) or for another context is not listed: no name of another
-  context reaches this organization (CX-22).
+  name of the person's), and only those MCP servers, skills and plugins that are a package placed in this context, or
+  installed in a folder matching the organization's own `workspace.folders` ([device policy](devices.md#policy)), or
+  named by its `harness.baseline` (`coding-agent`, `mcp-server`, `skill`, `plugin`), each listed when present. An
+  item installed for the person (`source: user`), machine-wide (`source: managed`, which belongs to no one
+  organization) or for another context is not listed unless one of those three admits it: no name of another context
+  reaches this organization (CX-22). A baseline `service` is judged against this context's services only, so one that
+  runs only in another context reads `missing`.
 - **`A`** (the organization administers the whole machine, set only from an `mdm` layer): the whole harness of the
   machine, as the operator decided for a work machine that is transparent to its organization (S8; the first
   organization server's ADR-0011).
@@ -113,5 +115,6 @@ reason. How the person is told, and the package's own run, are the node's.
 - How often a server may ask for a summary, and how long it keeps one: the organization's retention.
 - What a server shows, and to whom: its own interface, under its notice.
 - Whether a node may withhold its summary from an organization, or leave names out, by the person's choice: until
-  DEC-0118 the summary lists what `machine.mode` admits, and a server that has no summary from a node within a day knows
-  it has none (DEC-0105); a person's choice to send none is not decided here.
+  DEC-0118 the summary lists what `machine.mode` admits (before it, the whole harness whatever the mode, DEC-0102), and a
+  server that has no summary from a node within a day knows it has none (DEC-0105); whether a person may send none is
+  CT-92's open half.
