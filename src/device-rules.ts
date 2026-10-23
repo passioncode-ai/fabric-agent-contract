@@ -386,6 +386,21 @@ function attribution(value: JsonObject): Finding[] {
     if (!body) continue;
     if (!isObject(body.device) || body.device.id !== device) flag(`/${doc}/device/id`, "the device is the client certificate's device, never the body's word");
   }
+  // DEC-0114: what a check-in's records name is judged against the certificate too: the node summary's device and
+  // context, and the context of every credential request and call record (DEC-0111), as written, never case-folded.
+  const checkIn = isObject(value.checkIn) ? value.checkIn : {};
+  const records = isObject(checkIn.records) ? checkIn.records : {};
+  const ownContext = typeof org === "string" ? `org:${org}` : undefined;
+  if (isObject(records.nodeSummary)) {
+    const summary = records.nodeSummary;
+    if (!isObject(summary.device) || summary.device.id !== device) flag("/checkIn/records/nodeSummary/device/id", "a node summary is the client certificate's device's, never another's");
+    if (ownContext === undefined || summary.context !== ownContext) flag("/checkIn/records/nodeSummary/context", "a node summary names the client certificate's organization, org: and its org.id as written");
+  }
+  for (const member of ["credentialRequests", "callRecords"] as const) {
+    (Array.isArray(records[member]) ? (records[member] as unknown[]) : []).forEach((entry, i) => {
+      if (isObject(entry) && (ownContext === undefined || entry.context !== ownContext)) flag(`/checkIn/records/${member}/${i}/context`, "a check-in's credential requests and call records name the client certificate's organization");
+    });
+  }
   const epochs = new Map<number, JsonObject>();
   for (const entry of Array.isArray(value.epochs) ? value.epochs.filter(isObject) : []) {
     const bound = isObject(entry.binding) ? entry.binding : {};

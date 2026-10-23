@@ -17,6 +17,7 @@ import { rfc8785 } from "./canonical.js";
 import { ORG_CONTEXT_PREFIX, PERSONAL_CONTEXT } from "./context-route.js";
 import { policySigningInput, verifyWith } from "./device-rules.js";
 import { machineProfile } from "./estate-record-rules.js";
+import { checkInSummaryFindings } from "./node-summary.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { p256KeyRefusal, p256Point, signEs256, type P256Key } from "./p256.js";
 import { looksLikeCredential } from "./registry-rules.js";
@@ -373,7 +374,7 @@ function requestFindings(request: JsonObject, prefix: string): Finding[] {
 function requestRule(value: JsonObject): Finding[] {
   const request = isObject(value.request) ? value.request : {};
   const findings = requestFindings(request, "/request");
-  if (request.context !== `${ORG_CONTEXT_PREFIX}${show(value.org)}`) findings.push(flag("FAC-SEM-138", "/request/context", "a request names its own enrollment's organization context, org:<org.id>"));
+  if (!isString(value.org) || request.context !== `${ORG_CONTEXT_PREFIX}${value.org}`) findings.push(flag("FAC-SEM-138", "/request/context", "a request names its own enrollment's organization context, org:<org.id>"));
   return findings;
 }
 
@@ -468,6 +469,8 @@ export function checkInCredentialFindings(value: JsonObject): Finding[] {
   // The node summary names its enrollment's own context too (DEC-0102), so it joins the one organization.
   const summary = isObject(records.nodeSummary) ? records.nodeSummary.context : undefined;
   if (isString(summary)) contexts.add(summary);
+  // DEC-0114: the summary is read with the check-in (FAC-SEM-128, node-summary.ts).
+  findings.push(...checkInSummaryFindings(value));
   if (contexts.size > 1) findings.push(flag(requests.length > 0 ? "FAC-SEM-138" : "FAC-SEM-140", "/records", "a check-in goes to one organization: its requests and call records name one context"));
   const decisions = indexed(records.credentialDecisions);
   once(decisions, "requestId", "FAC-SEM-138", "/records/credentialDecisions", "a response decides each request once");

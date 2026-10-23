@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-23 a credential revocation names its request](2026-10-23-revocation-instance.md) | DEC-0113 (CT-118) | open |
+| [2026-10-23 a check-in's records against its certificate](2026-10-23-check-in-summary.md) | DEC-0114 (CT-91) | open |
+| [2026-10-23 a credential revocation names its request](2026-10-23-revocation-instance.md) | DEC-0113 (CT-118) | merged, #163 `b2fd0b32` |
 | [2026-10-23 a check-in's own rules read the credential members](2026-10-23-check-in-credentials.md) | DEC-0112 (CT-119) | merged, #162 `5675ba4a` |
 | [2026-10-23 the contract's first release](2026-10-23-release.md) | DEC-0108 (`v0.1.0+2026-10-23`) | merged, #157 `2f020a69`; tagged |
 | [2026-10-23 credentials on request and the call record](2026-10-23-credentials.md) | DEC-0111 (CT-86; CT-117 to CT-120 filed) | merged, #156 `19b05c20` |
