@@ -102,8 +102,9 @@ admission decision before a project binding can grant access.
 Open source under the [GNU AGPL-3.0](LICENSE). A [commercial license](COMMERCIAL-LICENSE.md) is
 available for use that does not meet the AGPL's terms: [passioncode.ai/business](https://passioncode.ai/business/).
 Earlier commits carried no licence: the repository was private and unlicensed
-([design](docs/evidence/specs/2026-08-26-fabric-agent-contract-design.md)), and the contract has
-no `vX.Y.Z` release.
+([design](docs/evidence/specs/2026-08-26-fabric-agent-contract-design.md)). Releases are tags
+`v<contractVersion>+<YYYY-MM-DD>` on `main`, the first `v0.1.0+2026-10-23`
+([versioning](docs/specification/versioning.md#releases), DEC-0108); a consumer still pins the release's commit.
 Whether the schemas should carry a permissive exception so any host can implement them is open
 for the operator as CO-KB-02 in the knowledge base's
 [licensing](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/licensing.md#open-for-the-operator).

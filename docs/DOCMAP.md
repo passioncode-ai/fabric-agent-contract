@@ -95,6 +95,7 @@ and recorded as DEC-0001.
 | Pipelines and PL-1…PL-4 (`pipeline/0.1`) | `docs/specification/pipeline.md` |
 | Extension key spellings | `src/extensions.ts` |
 | A consumer's contract pin | `docs/specification/versioning.md#one-contract-pin` |
+| Releases: the tag `v<contractVersion>+<YYYY-MM-DD>` and its notes (DEC-0108) | `docs/specification/versioning.md#releases` |
 | Agent-registry run (AR-1) record and handoff | `docs/evidence/plans/2026-09-30-ar1-contract.md` |
 | The current iteration's order and dates (CT-81 to CT-89) | `docs/evidence/plans/2026-10-22-next-iteration.md` |
 | A node's harness summary, the baseline and its drift, repairs; `FAC-SEM-128`, `FAC-SEM-129` | `docs/specification/node-summary.md`, `src/node-summary.ts` (DEC-0101) |

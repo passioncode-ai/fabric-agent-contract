@@ -73,6 +73,17 @@ language; the Fabric Agent Adapter's `test/validate.py` is one, and it is not th
 well as the dated records, scans only some file types, allows the adapter's list of supported earlier revisions and
 does not look the pin up in the contract's history, so the two can disagree on one checkout.
 
+### Releases
+
+A **release** names a commit of `main` for people and for consumers that read releases rather than commits (DEC-0108):
+an annotated tag `v<contractVersion>+<YYYY-MM-DD>` on a commit whose gate (`pnpm run check`) and `pnpm vectors:check`
+passed, with a GitHub release whose notes list the decisions since the previous release. The version part is the
+`contractVersion` the schemas carry (`$id` prefix and the manifest member), so an additive release keeps `0.1.0`
+(DEC-0016) and the build metadata after `+` tells two releases of one version apart by day; SemVer gives build
+metadata no precedence (SemVer 2.0.0 §10), so a reader orders releases by the date, and more than one release on a day
+takes `.2`, `.3` after the date. A release changes no pin by itself: a consumer still pins the release's full commit in
+`fabric-contract.lock.json`. The first release is `v0.1.0+2026-10-23`.
+
 Moving the pin is a compatibility change: the consumer reviews what changed between the
 two commits, updates the lock and every mention in one change, and releases. A consumer that vendors schemas copies
 the `$ref` closure of the ones it reads ([`src/schema-closure.ts`](../../src/schema-closure.ts)), not a list picked

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0108` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0109` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6665,3 +6665,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   README, DOCMAP; the UX layer (JRN-09 #4, ST-032, FLW-27, SCN-038, SCN-039, SCR-23's alert state); backlog CT-89
   done, CT-113 filed.
 - **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.
+
+### DEC-0108: releases of the contract
+
+- **Status:** Accepted (2026-10-23). The first release, `v0.1.0+2026-10-23`, is tagged on the merge of its pull request.
+- **Context:** consumers pin a commit (DEC-0016, `fabric-contract.lock.json`), and the README said the contract had no
+  `vX.Y.Z` release. The operator asked for a new version once DEC-0105 to DEC-0107 landed. Raising `contractVersion`
+  would change every schema's `$id` prefix and make each vendored copy refuse the next, for additions DEC-0016 keeps
+  under `0.1.0`.
+- **Decision:** a release is an annotated tag `v<contractVersion>+<YYYY-MM-DD>` on a commit of `main` whose gate and
+  vector check passed, with a GitHub release whose notes list the decisions since the previous release. The version is
+  the `contractVersion` the schemas carry; the build metadata is the release's UTC day, with `.2`, `.3` for a second and
+  third release that day. `contractVersion` moves only by a decision that changes something required. A release
+  changes no pin: a consumer pins the release's full commit. `package.json` keeps `version` equal to `contractVersion`.
+- **Why:** a release gives people and tools a named, dated snapshot without moving any `$id`; SemVer build metadata
+  says "the same version, another build", which is what an additive release of `0.1.0` is.
+- **Alternatives considered:** `v0.2.0` (every `$id` prefix and every vendored copy moves for additions); dated tags
+  without a version (they say nothing about compatibility); pre-release tags `v0.1.0-rN` (SemVer orders them below
+  `0.1.0`, which they are not).
+- **Compatibility:** none on the wire; a tag and a GitHub release.
+- **Consequences / affects:** `docs/specification/versioning.md` (Releases), `README.md` (Licence paragraph), the tag
+  and the GitHub release.
+- **Source:** the operator's instruction of 2026-10-23 to finish the plan and publish a new version.
