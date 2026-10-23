@@ -220,8 +220,8 @@ Additive. Five new protocols in the register (`credential-request/1`, `credentia
 `fabric-credential-envelope/1`, `credential-revocation/1`, `call-record/1`) and six new members of a check-in's
 `records`. A server pinned before DEC-0111 refuses a check-in that carries the new request members, and a node pinned
 before it refuses a response with the new response members (both objects are closed), so each side sends them only to a
-peer that lists the protocol in its `protocols`, each side's own list (DEC-0116; a node-sent `node-summary/1` is
-gated so too, DEC-0101): a node sends `credentialRequests` only to a server whose response `protocols` (what it
+peer that lists the protocol in its `protocols`, each side's own list (DEC-0116; a node summary and a repair are
+gated so too, DEC-0117): a node sends `credentialRequests` only to a server whose response `protocols` (what it
 accepts from the device) lists `credential-request/1`, and `callRecords` only to one that lists `call-record/1`; a
 server sends `credentialDecisions`, `credentials`, `credentialRevocations` and `callRecordsAccepted` only to a node whose
 check-in `protocols` (what it reads) lists `credential-decision/1`, `fabric-credential-envelope/1`,
