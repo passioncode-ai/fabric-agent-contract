@@ -6640,16 +6640,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:**
   1. **The alert.** `hubSilence(heartbeatAt, at)` reads the heartbeat a machine holds: `speaking` up to 24 hours (the
      hub's own longest interval, exactly 24 included), `silent` past it up to 72 hours, `stale` past 72 (the 72-hour
-     rule), `unknown` when the clock or the heartbeat does not read. A machine tells its person on `silent`, `stale` and
-     `unknown`, as what *it* has heard, and offers to move the hub only while `hubSilence` over the latest heartbeat it
-     holds after reconnecting to the relay is still `silent`, `stale` or `unknown`.
+     rule), `unknown` when the clock or the heartbeat does not read. While the record it applied certifies a hub key, a
+     machine tells its person at once on `silent`, `stale` and `unknown`, as what *it* has heard, and offers the
+     unplanned move only while `hubSilence` over the latest heartbeat it holds after reconnecting to the relay is still
+     `silent`, `stale` or `unknown`; a record that certifies no hub key yet asks for the always-on machine instead. A
+     planned move (the hub's machine retired or replaced, or about to become `member` or `view`) is offered on the hub
+     machine's own row whatever `hubSilence` answers, and follows DL-15.
   2. **The anchor.** `estate-record/1` gains an optional `deltaAnchor` `{sequence, sha256}`: a head of the delta the
      revision vouches for, every revocation up to it listed in the record. `anchorDelta(state, record)` starts a
      machine's chain at an anchor past its head (`DeltaState.anchor`) only when the record lists the revocation of every
      entry it drops (otherwise `unreconciled`, nothing changes), changes nothing for one it already holds with the same
      hash, and is a `fork` for another hash. `applyDelta` skips an entry below the anchor, the anchor's own entry
      (its hash), and one identical to an entry held, before looking up its signer; another entry at the anchor's
-     sequence is a `fork`. A machine applies the anchor after `reconcileRevision`, and a refusal by either refuses
+     sequence is refused as at any held sequence (`fork` when a key the revision certifies signed it, `revoked-signer`
+     or `unknown-signer` otherwise). A machine applies the anchor after `reconcileRevision`, and a refusal by either refuses
      the revision. A revision keeps an anchor once set and never moves it back
      (`FAC-SEM-137`, kind `estate-record-revision`, run by `verifyEstateRecord` with a parent).
   3. **Moving the hub.** From a machine caught up with the relay (its delta head and latest heartbeat, not `broken`;
@@ -6660,10 +6664,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      key leaves the key set Fabric publishes online at once. The revision that revokes the old key anchors the delta's
      head, which the drafter fetches from the relay first, listing every revocation up to it, once every reader of the
      record is pinned at or after this decision; before that a move carries no anchor and every machine fetches the old
-     hub's entries before applying it. The new hub's first
+     hub's entries before applying it, and the first revision drafted after the gate opens anchors the head. The same
+     anchor goes with every revision that revokes a hub key, a re-key on the hub's own machine included. The relay applies
+     the anchor of the revision it holds after applying the revision (its admission stays the revision's alone), keeps its
+     delta as it was when `anchorDelta` refuses, and answers a `delta-query` at or below the anchor from the anchor's next
+     entry. The new hub's first
      heartbeat jumps `HUB_MOVE_HEARTBEAT_JUMP` (2^20) past the highest sequence it holds. Tokens, approvals and window
-     leases the old key signed end when a verifier applies the revocation; the new hub treats the old hub's unreported
-     leases as spent until their window instance ends. `hubMove(parent, next)` names what a revision added and removed
+     leases the old key signed end when a verifier applies the revocation; the new hub holds none of the old hub's
+     division, so it issues no lease of a window instance the old hub divided until that instance ends or every machine
+     holding one of its leases has reported it after the revocation. The lost key leaves the published set without
+     DL-15's grace. `hubMove(parent, next)` names what a revision added and removed
      (by machine, kid and key) and whether each removed key is revoked.
   4. **Recovery.** Fabric drafts revision 1 with two passkeys on two authenticators unless the person goes on with one
      after being told what it costs; `recoveryReady(record)` is `ready` with at least two passkeys, by distinct
@@ -6694,6 +6704,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`deltaAnchor`); vectors `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`; tests `test/hub-move.test.ts`,
   `test/revocation-delta.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost
   passkey), `revocation-delta.md` (the anchor, `FAC-SEM-137`, Not decided), `estate-record.md`, `machine-calls.md`,
-  `conformance.md`, README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-032, FLW-27, SCN-038, SCN-039, SCR-23); backlog
+  `conformance.md`, `relay.md` (the anchor), `delegation.md` (DL-15's lost-hub exception), `window-lease.md` (after a hub
+  move), README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-024, ST-032, FLW-20, FLW-27, SCN-029, SCN-038, SCN-039,
+  SCR-23); backlog
   CT-89 done, CT-113 filed.
 - **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.

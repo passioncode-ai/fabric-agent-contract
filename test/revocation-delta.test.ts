@@ -315,7 +315,13 @@ describe("tolerance: every verifier answers, never throws", () => {
     const past = { estate: ESTATE, revocations: [], deltaAnchor: { sequence: 5, sha256: "a".repeat(64) } };
     for (const bad of [null, undefined, 7, "x", {}, { sequence: "1" }]) {
       expect(anchorDelta(held([bad as unknown as Json]), past)).toMatchObject({ ok: false, problem: "malformed" });
+      // At the anchor's own sequence too: malformed, never a fork that breaks the state (round 4).
+      expect(anchorDelta(held([bad as unknown as Json]), { ...past, deltaAnchor: { sequence: 1, sha256: "a".repeat(64) } })).toMatchObject({ ok: false, problem: "malformed" });
     }
+    // A revocation whose kind has no primitive form is never coerced: the entry counts as unlisted (round 4).
+    const hostile = { sequence: 1, revocation: { kind: { toString: 1 }, ref: "k" } } as unknown as Json;
+    expect(() => anchorDelta(held([hostile]), past)).not.toThrow();
+    expect(anchorDelta(held([hostile]), past)).toMatchObject({ ok: false, problem: "unreconciled", missing: [1] });
   });
 
   it("reads a held heartbeat that is not readable as stale, and one with no RFC 8785 form as no match", () => {

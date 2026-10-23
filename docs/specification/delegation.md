@@ -249,7 +249,8 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   published for at least one token lifetime plus the leeway after the last token it signed (660 s), and for 24
   hours plus the leeway when the key signed an approval, because an approval lives up to 24 hours. A callee
   caches the set for at most 10 minutes and, on an unknown `kid`, re-reads it at most once a minute before
-  refusing. Where callees read the estate record, a new key is also certified by a revision before the issuer signs
+  refusing. One exception: a lost hub's key leaves the published set at once, with no grace (DEC-0107,
+  [ceremonies](ceremonies.md#move-the-hub)), since a copy on a lost disk must not keep signing. Where callees read the estate record, a new key is also certified by a revision before the issuer signs
   with it: a callee whose applied revision does not certify the key refuses its tokens `kid-not-certified` (DL-14).
   To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
   key once the check-ins it reads (`records.estateRecord.revision`, DEC-0053) show the certifying revision applied, and

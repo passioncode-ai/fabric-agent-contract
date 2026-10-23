@@ -108,8 +108,10 @@ A meter reports each lease it holds in its check-in, `records.leases[]`: `{lease
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
-What a meter has not reported counts as spent. The hub counts, for each machine, the most it may have spent
-(`windowRemainder`):
+What a meter has not reported counts as spent. After a hub move the new hub holds none of the old hub's division, so it
+issues no lease of a window instance the old hub divided until that instance ends or every machine holding one of the
+old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub)). The hub
+counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
 - an expired lease counts the `spent` of a report received at or after its expiry, under it or a later lease of the

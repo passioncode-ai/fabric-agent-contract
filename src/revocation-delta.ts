@@ -235,15 +235,16 @@ export function anchorDelta(state: DeltaState, record: unknown): { ok: true; sta
   if (record.deltaAnchor === undefined) return { ok: true, state };
   const anchor = deltaAnchorOf(record);
   if (anchor === undefined) return { ok: false, problem: "malformed", state };
+  // A held entry that is no object, or names no sequence, cannot be checked against the anchor or the record: the state
+  // is malformed, whichever branch would read it.
+  if (!state.entries.every((entry) => isObject(entry) && Number.isSafeInteger(entry.sequence))) return { ok: false, problem: "malformed", state };
   const base = baseOf(state);
   const held = base + state.entries.length;
   if (anchor.sequence > held) {
-    // An entry that is no object, or names no sequence, cannot be checked against the record: the state is malformed.
-    if (!state.entries.every((entry) => isObject(entry) && Number.isSafeInteger(entry.sequence))) return { ok: false, problem: "malformed", state };
     const listed = list(record.revocations);
     const missing = state.entries.filter((entry) => {
       const revocation = isObject(entry.revocation) ? entry.revocation : {};
-      return !isRevoked(listed, String(revocation.kind), revocation.ref);
+      return !(isString(revocation.kind) && isRevoked(listed, revocation.kind, revocation.ref));
     }).map((entry) => entry.sequence as number);
     if (missing.length > 0) return { ok: false, problem: "unreconciled", state, missing };
     return { ok: true, state: { ...state, anchor, entries: [] } };
@@ -254,9 +255,10 @@ export function anchorDelta(state: DeltaState, record: unknown): { ok: true; sta
 
 /**
  * Apply a page of entries (`{head, entries}`, the relay's `delta` frame and the check-in response's
- * `records.revocationDelta`) to what a machine holds, in order. Each entry is checked — shape, estate, `EdDSA`, an
- * admitted kind, not more than 60 s ahead, an estate key the record certifies and nothing revokes, the signature —
- * and only then placed: an entry already held is skipped; one past the next sequence is a `gap` (ask with
+ * `records.revocationDelta`) to what a machine holds, in order. An entry below the anchor, the anchor's own entry and
+ * one identical to an entry held are skipped first, before the signer is looked up (DEC-0107). Every other entry is
+ * checked — shape, estate, `EdDSA`, an admitted kind, not more than 60 s ahead, an estate key the record certifies and
+ * nothing revokes, the signature — and only then placed; one past the next sequence is a `gap` (ask with
  * `delta-query`); a signed entry whose `prev` is not the held head, or that differs from the entry held at its
  * sequence, is a second signed history (`broken-chain`, `fork`), and the state becomes `broken`, keeping that entry's
  * revocation in force. The page's `head` is the relay's hint and binds nothing; a heartbeat's head does. On a refusal,

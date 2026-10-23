@@ -269,7 +269,8 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    `FAC-SEM-076` refuses a record that lists a key it revokes; the key reference revokes the old key alone. `@` never
    occurs in a kid, so the two forms never collide.
 3. If the hub key was on that machine, the same revision re-certifies it under a **new kid** and revokes the old kid
-   (`hub-key`), or revokes it with no successor (`FAC-SEM-114`).
+   (`hub-key`), or revokes it with no successor (`FAC-SEM-114`); like a move, that revision anchors the delta's head
+   ([Move the hub](#move-the-hub), step 5).
 4. The machine applies the revision only if it holds every key the record lists for it: `ownKeysDecision(record, id,
    held)` answers `apply`, with `retire` naming the held keys the record no longer lists, which the node destroys.
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or
@@ -306,9 +307,12 @@ does not read a key reference in a delta entry (see *Compatibility*). It joins a
 ## Move the hub
 
 The hub runs on one always-on machine (NET-3). When that machine is retired, replaced or lost, the person moves the hub
-(DEC-0107):
+(DEC-0107). A **planned move** (the machine retired or replaced, or about to become `member` or `view`) starts from
+"Move the hub" on the hub machine's own row, while the hub still runs, and follows step 3. An **unplanned move** starts
+from the alert:
 
-1. **The alert.** Every machine reads the heartbeat it holds with `hubSilence(heartbeatAt, at)`. Past 24 hours, the
+1. **The alert.** While the record it applied certifies a hub key, every machine reads the heartbeat it holds with
+   `hubSilence(heartbeatAt, at)`; a record that certifies none yet asks for the always-on machine instead. Past 24 hours, the
    hub's own longest interval (`HEARTBEAT_MAX_INTERVAL_SECONDS`), the answer is `silent`; past 72 hours `stale`, and
    calls from other machines are refused ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)). A machine that
    holds no readable heartbeat answers `unknown` (`no-heartbeat`) and refuses those calls too. In each case it tells
@@ -330,7 +334,7 @@ The hub runs on one always-on machine (NET-3). When that machine is retired, rep
    and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)), and the delta anchored at the head the new hub
    holds; the new hub's first entry is the anchor's sequence + 1. Fabric withdraws the lost key from the key set it
    publishes online (DL-14) at once, with no DL-15 grace. A service whose `auth.delegation.jwks` (DL-16) names that
-   published copy stops accepting the lost key at once; one that names the old hub's own `/.well-known/jwks.json`, which
+   published copy stops accepting the lost key within its cache time (at most 10 minutes, DL-15); one that names the old hub's own `/.well-known/jwks.json`, which
    the well-known schema allows, reads nothing once that machine is gone and accepts no token until its declaration
    names the published copy or the new hub's endpoint, so a service SHOULD name the published copy. `hubMove(parent,
    next)` names the move and that the old key is revoked.
@@ -358,8 +362,10 @@ The hub runs on one always-on machine (NET-3). When that machine is retired, rep
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
    (DL-14): delegation tokens and approvals ([delegation](delegation.md)), window leases ([window lease](window-lease.md))
    and the hub's tokens on calls between machines. Callers mint again from the new hub. The new hub holds none of the old
-   hub's lease division, so until that window instance ends it divides only the window's limit less the spend meters
-   have reported; how a meter orders a new hub's lease after an old hub's (`superseded`) is CT-113's.
+   hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
+   machine holding one of the old hub's leases has reported it after the revocation
+   ([window lease](window-lease.md#reporting)); how a meter orders a new hub's lease after an old hub's (`superseded`)
+   is CT-113's.
 
 A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that
 reads the published key set accepts once the lost key leaves it.
@@ -381,8 +387,7 @@ so a second passkey is the recovery (DEC-0107):
   network with one passkey.
 
 - **A second passkey later.** A network created with one passkey adds another by a revision that adds it to
-  `authorities`, signed by the passkey listed; `recoveryReady` then reads `ready`. Fabric offers it while the answer is
-  `one-passkey`.
+  `authorities`, signed by the passkey listed; `recoveryReady` then reads `ready`. Fabric offers it while `ready` is `false`.
 
 ## Change a machine's profile
 
@@ -458,7 +463,7 @@ Fixtures: `fixtures/semantic/enroll-token-*`, `fixtures/semantic/estate-revision
 
 For DEC-0107: **Fabric** alerts on `hubSilence`, offers the move only after reconnecting, drafts the move's revision
 (caught up first, the anchor only once every reader is pinned) and the revision that lists a straggler's entry, and
-offers a second passkey while `recoveryReady` is `one-passkey`; **every machine** (Fabric's nodes, Project
+offers a second passkey while `recoveryReady`'s `ready` is `false`; **every machine** (Fabric's nodes, Project
 Observatory's node) reads `hubSilence` and applies a revision's anchor (`anchorDelta`) after `reconcileRevision`;
 **the relay** applies the anchor of the revision it holds too, so it carries the chain from there, and answers a
 `delta-query` at or below its anchor from the anchor's next entry ([relay](relay.md#revocation-and-heartbeat)). Their

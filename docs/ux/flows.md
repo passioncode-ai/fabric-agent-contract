@@ -489,13 +489,13 @@ flowchart TD
 - **Goal:** a signed revision that creates the network, drops a machine, or replaces a machine's keys, revoking what it drops
 - **Entry points:** Fabric's "Create my network", and the network's machine list with "Remove" and "Replace key" per machine
 - **Success exit:** the person signed; machines apply the revision, and the delta carries each revocation within seconds
-- **Task analysis:** create: the first machine makes its keys → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it and its hub key → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
+- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it and its hub key → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
 - **Rejected shape:** dropping a machine or a key without revoking it — rejected because a revision that drops without revoking leaves caches and deltas without the revocation (`FAC-SEM-114`).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  A{What changes?} -->|create| C[Revision 1: passkey, first machine]
+  A{What changes?} -->|create| C[Revision 1: two passkeys, or one after the warning; first machine]
   A -->|remove| R[Revision without the machine, revoking it and its hub key]
   A -->|re-key| K[Pair again under the id, or sign on the lone machine]
   K --> N[Revision with the new keys, old ones revoked by reference]
@@ -653,15 +653,18 @@ flowchart TD
 
 - **Traces:** ST-032 (JTBD-10, JRN-09/#4)
 - **Goal:** the network keeps a hub and a passkey that can sign its next revision
-- **Entry points:** a machine's alert that it has not heard from the hub; the network's passkeys in My network's machines
+- **Entry points:** "Move the hub" on the hub machine's own row (a planned move, while the hub runs); a machine's alert that it has not heard from the hub (an unplanned move, while the record certifies a hub key); the network's passkeys in My network's machines
 - **Success exit:** the signed revisions with the new hub key (the old one revoked, the delta anchored) or the new passkey (the lost one revoked)
-- **Task analysis:** move: a machine reads `hubSilence` → it reconnects to the relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`).
+- **Task analysis:** planned move: the person chooses "Move the hub" on the hub machine's row → picks a `full` machine that stays on → two revisions (DL-15). Unplanned move: a machine reads `hubSilence` → it reconnects to the relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`).
 - **Rejected shape:** copying the hub's private key to the new machine, rejected because a copy left on a lost disk would keep signing; a move is always a new key (DEC-0107).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  A{What happened?} -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
+  A{What happened?} -->|the hub's machine is retired, replaced or changing profile| L[Move the hub on its row; pick a full machine]
+  L --> T[Two revisions, DL-15: certify and switch, then revoke and anchor]
+  T --> S
+  A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
   M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored]
