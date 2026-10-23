@@ -462,8 +462,9 @@ function keySet(value: JsonObject): Finding[] {
     ids.add(key.keyId);
     if (key.keyId === root.keyId) flag(`/next/keys/${i}/keyId`, "the root key is never a policy signing key");
     if (typeof key.publicKey === "string" && isSmallOrderKey(Buffer.from(key.publicKey, "base64"))) flag(`/next/keys/${i}/publicKey`, "a key of small order verifies forged signatures and is never published (DEC-0045)");
-    const from = Date.parse(show(key.notBefore ?? "")), to = Date.parse(show(key.notAfter ?? ""));
-    if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts");
+    // DEC-0115: the bounds are read as keyWindowHolds reads them, so a device never holds a key it cannot use.
+    const from = strictTime(key.notBefore), to = strictTime(key.notAfter);
+    if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts, both bounds RFC 3339 instants");
     if (at >= from && at <= to) validNow = true;
   });
   if (!validNow) flag("/next/keys", "a key set holds a key valid at its issuedAt, so a device is never left without one");
@@ -474,7 +475,7 @@ function keySet(value: JsonObject): Finding[] {
     const revoked = new Set(Array.isArray(next.revoked) ? next.revoked : []);
     const kept = new Map(keys.map((key) => [key.keyId, key]));
     (Array.isArray(current.keys) ? current.keys.filter(isObject) : []).forEach((key) => {
-      if (revoked.has(key.keyId) || Date.parse(show(key.notAfter ?? "")) <= at) return;
+      if (revoked.has(key.keyId) || strictTime(key.notAfter) <= at) return;
       const same = kept.get(key.keyId);
       if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${show(key.keyId)} is still valid until ${show(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
     });

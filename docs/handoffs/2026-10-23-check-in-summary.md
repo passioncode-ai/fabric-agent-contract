@@ -36,7 +36,9 @@ attribution), a positive check-in fixture carrying a summary. The loop stops her
 ## After the merge: DEC-0115
 
 CT-120's first item: `keyWindowHolds(t, key)` in `src/device-rules.ts` is the one key-window reference (an absent
-bound open, an unreadable one closing it); `FAC-SEM-041`, `repairDecision` and the credential checks use it.
+bound open, an unreadable one closing it); `FAC-SEM-041`, `repairDecision` and the credential checks use it. Its seam reading found one break, fixed: two bounds the schema's
+`date-time` admits (`+0100`, a space for `T`) verified before and closed after, so the key set's own rule
+(`FAC-SEM-046`) now reads its bounds the same way and refuses such a set at receipt; DEC-0115's Compatibility says so.
 
 ## Next task
 

@@ -686,6 +686,13 @@ describe("keyWindowHolds: a key's window (DEC-0115)", () => {
     expect(keyWindowHolds(Number.NaN, {})).toBe(false);
     expect(keyWindowHolds(t, { notBefore: "2026-10-07T09:00:01Z" })).toBe(false);
   });
+  it("refuses at receipt a key set whose bound strictTime does not read, so no device holds such a key (FAC-SEM-046)", () => {
+    const set = load("semantic/device-key-set-ok.json").input;
+    for (const bound of ["2026-12-31T23:59:59+0100", "2026-12-31 23:59:59Z"]) {
+      const next = { ...set.next, keys: set.next.keys.map((k: Json, i: number) => (i === 0 ? { ...k, notAfter: bound } : k)) };
+      expect(paths("device-key-set", { ...set, next })).toContain("FAC-SEM-046 /next/keys/0/notAfter");
+    }
+  });
   it("closes a delivered policy's key whose bound does not read (FAC-SEM-041)", () => {
     const input = load("semantic/device-policy-update-ok.json").input;
     const broken = { ...input, trustedKeys: input.trustedKeys.map((k: Json) => ({ ...k, notAfter: "the end of the year" })) };

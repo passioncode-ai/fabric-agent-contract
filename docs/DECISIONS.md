@@ -6990,9 +6990,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** refusing an unreadable bound only in the key set's own rule (`FAC-SEM-046`, which
   already refuses a window that does not end after it starts): a key that reaches a verifier by another path would
   still open.
-- **Compatibility:** narrower only for a key whose bound does not read, which no schema-valid key set holds.
+- **Compatibility:** narrower for a key bound the schema's `date-time` admits but RFC 3339 read strictly does not
+  (`+0100`, a space for `T`, `+01`, a leap second `:60`). `Date.parse` read the first two, so such a key verified
+  before; now the key set's own rule (`FAC-SEM-046`) refuses it when the device receives the set, reading the bounds
+  as `keyWindowHolds` does, so a device never holds a key it cannot use. No committed fixture carries such a bound.
   `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `src/device-rules.ts` (`keyWindowHolds`, `policyUpdate`), `src/node-summary.ts`
-  (`repairDecision`), `src/credentials.ts`; `docs/specification/devices.md` (`FAC-SEM-041`'s row); tests
+- **Consequences / affects:** `src/device-rules.ts` (`keyWindowHolds`, `policyUpdate`, `keySet`), `src/node-summary.ts`
+  (`repairDecision`), `src/credentials.ts`; `docs/specification/devices.md` (`FAC-SEM-041`'s and `FAC-SEM-046`'s rows), `node-summary.md` (a repair's key); tests
   `test/device-rules.test.ts`, `test/node-summary.test.ts`; backlog CT-120 (that item done).
 - **Source:** CT-120.
