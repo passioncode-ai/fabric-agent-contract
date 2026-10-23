@@ -129,6 +129,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller roughly where it stands; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
 - **Success metric:** the owner's directory lists every agent once per context with unlisted ones marked, a member sees only the organization's listed agents, a waiting job reads its place, a full queue says when to start again, and a load panel shows waiting and running jobs per context.
 
+### JTBD-13: Call an agent on another of my machines, within what each machine may do
+
+- **Statement:** When an agent on one of my machines needs an agent on another of my machines, I want the call to go through without a token or an approval, and a machine I keep only for reading to hold no agent placement, no secret and no hub key, and to send or take no call over the relay that changes anything, so I can spread work over my machines without opening them to each other.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: a call between my own machines needs the same tokens as a stranger's; a spare laptop holds secrets it never uses; pull: one signed record that says what each machine may do; anxiety: a relay or an outsider reading my calls, a revoked machine still calling; habit: copying files and keys by hand.
+- **Success metric:** a call from a machine my current record lists runs with no token; a call that changes something to or from a `view` machine is refused `profile-forbids`; the relay reads no call; a machine my delta revoked is not T1.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -228,6 +236,13 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Find | looks for an agent in their estate or their organization | the hub's or the organization's directory | 3 | nobody can say which agents exist where | one directory per source, derived from placements and share registrations (priority 8) |
 | 2 | Wait | calls a busy agent | the job's status message | 2 | a call fails or hangs with no word on why | `queued <position> of <length>`, and `queue-full` with when to start again (priority 9) |
 | 3 | Watch | opens an agent's load | Fabric Dashboards' load panel | 3 | no sign that an agent is saturated | waiting, running, completed and failed jobs and their wait and run time per window and context (priority 7) |
+
+### JRN-12: Operator, calling agents between their own machines (JTBD-13)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Call | an agent on the laptop calls an agent on the always-on machine | the caller's job status | 3 | a token asked of a call between one person's machines | T1 from the applied record, no token, the call sealed end to end (priority 9) |
+| 2 | Limit | keeps a machine for reading only | My network's machines | 3 | every machine can do everything | a `view` profile in the signed record, refused calls named `profile-forbids` (priority 8) |
 
 ## 4. User stories
 
@@ -577,6 +592,30 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a service that declares the load extension, when the host reads its report, then each window shows queued, running, completed and failed jobs per context with p50 and p95 times.
   - Given a declaration that is not its schema's, when the host reads the well-known document, then it treats the load as not declared and says why.
   - Given a report, then no person, caller, prompt, output or job id is in it.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-030: An agent calls an agent on another of the owner's machines
+
+- **Story:** As P-02, I want an agent on one of my machines to call an agent on another over the relay with no token, so that my machines work together and nothing between them reads the call.
+- **Traces:** JTBD-13, JRN-12/#1
+- **Acceptance criteria:**
+  - Given a current delta and a record that lists both machines, when a sealed call arrives, then the node places its sender in T1, opens the call and runs it without a token.
+  - Given a delta that is not current, or a sender the record or the delta revokes, when a call arrives, then it is refused (`unknown-state` or `unauthenticated`), not answered, and nothing runs.
+  - Given a sealed call copied into another relay message, when the node opens it, then it does not open (`cannot-open`) and is not answered.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-031: Operator keeps a machine for reading only
+
+- **Story:** As P-02, I want to mark a machine `view` in my network, so that it holds no agent placement, no secret and no hub key, and sends or takes no call over the relay that changes anything.
+- **Traces:** JTBD-13, JRN-12/#2
+- **Acceptance criteria:**
+  - Given a revision that marks a machine `view`, when it carries a placement, a secret or the hub key for that machine, then the revision is refused (`FAC-SEM-134`).
+  - Given a `view` machine, when a full machine calls it with a capability whose effect is not `none`, then the call is refused `profile-forbids`; a read and the job tools pass.
+  - Given a record written before profiles, when a node reads it, then every machine reads as `full`.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

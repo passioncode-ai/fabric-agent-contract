@@ -304,9 +304,12 @@ Fabric's MCP is the only route between agents: an agent reaches another agent
 by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?}` (and
 `fabric.job.get/cancel` for the job it returns). Fabric enforces the caller's MCP access binding
 (ADR-0026), mints the callee's credential itself, and journals one span per hop. Credentials
-travel only in headers (`Authorization: Bearer <token>`); never in a URL, argv, or log.
+travel over HTTP only in headers (`Authorization: Bearer <token>`), and over the relay only in a sealed call's
+`delegation` member (DL-11, DEC-0106); never in a URL, argv, or log.
 
-Arguments: [`interop-agent-call.schema.json`](../../schemas/interop-agent-call.schema.json).
+Arguments: [`interop-agent-call.schema.json`](../../schemas/interop-agent-call.schema.json). Between two machines of
+one estate the same arguments travel over the relay inside a sealed `fabric-agent-call/1`
+([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond the four, so a credential cannot ride in
 the arguments.

@@ -13,7 +13,8 @@ DEC-0104 (CT-84, S4 of the agent network) · rule codes `FAC-SEM-130` to `FAC-SE
 [`tools/vectors/agent-network.ts`](../../tools/vectors/agent-network.ts) · tests
 [`test/agent-network.test.ts`](../../test/agent-network.test.ts)
 
-S1 to S3 of the agent network put an agent on a machine ([package](package.md), [estate record](estate-record.md)),
+S1 to S3 of the agent network put an agent on a machine ([package](package.md), [estate record](estate-record.md); a
+call between one person's machines is [machine calls](machine-calls.md), DEC-0106),
 in a context ([contexts](contexts.md)) and in another person's hands ([share registration](share-registration.md)).
 S4 answers three questions the hub, the hosting node and the panels asked on the board (threads `ba63565c` items 1 to 3
 and `b2511678`): which agents a viewer can find, what happens when more calls arrive than an agent can run, and how

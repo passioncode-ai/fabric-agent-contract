@@ -32,7 +32,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `parent` | the parent revision's `digest`; absent exactly in revision 1 (schema) |
 | `issuedAt`, `validUntil` | the validity window: positive and at most 30 days ([freshness](#freshness)) |
 | `authorities[]` | the passkeys that may sign the next revision ([authorities](#authorities)) |
-| `machines[]` | each machine: `id`, `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
+| `machines[]` | each machine: `id`, `profile` (DEC-0106), `deviceKeys`, `hubKey`, `packages[]` (each in a context), `secrets[]` ([machines](#machines)) |
 | `publisherKeys[]` | the publisher keys the estate's machines pin, as public Ed25519 JWKs naming their `alg` |
 | `publisherScopes[]` | optional: a partner's publisher key scoped to the organization contexts it is trusted in, `{kid, partner, contexts}` ([the partner channel](partner-channel.md#a-partners-publisher-key-trusted-per-context-fac-sem-122), DEC-0090) |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
@@ -117,6 +117,9 @@ kept outside the signed record, so the record carries no label a person chose:
   ([contexts](contexts.md#one-instance-per-context-on-a-machine)); a slot is placed once per (machine, agent, slot,
   context) (`FAC-SEM-075`); and the package declares the slot (`FAC-SEM-075`, kind
   `estate-placement`). The value travels sealed to this machine's `#kem` key (v4 Path 2 step 3), never in the record.
+- **`profile`**: what the machine may do (DEC-0106): `full` (absent means `full`), `member` (no hub key) or `view` (no
+  placement, no secret, no hub key, never a secret's `from`; over the relay it calls and is called only to read). `FAC-SEM-134` checks
+  it; [machine calls](machine-calls.md#machine-profiles) says what each profile allows on a call between machines.
 
 ## Share grants
 
@@ -248,7 +251,7 @@ keys are DEC-0053's.
   pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
-  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111` and `FAC-SEM-122`) and it is
+  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` and `FAC-SEM-134`) and it is
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054); installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
@@ -256,6 +259,9 @@ keys are DEC-0053's.
   `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
+- **Every reader** (the Fabric Agent Adapter's kits and the first organization server's vendored schema among them)
+  reads a revision that carries a machine's `profile` only once pinned at or after DEC-0106, and Fabric writes none
+  before ([machine calls](machine-calls.md#compatibility)).
 
 ## Privacy
 

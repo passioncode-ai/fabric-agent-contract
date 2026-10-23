@@ -249,6 +249,11 @@ grant (DEC-0045).
 **Trust tier**: Where a caller stands against the machine boundary (DEC-0045, delegation DL-25): **T0** the
 operator's own machine, **T1** an enrolled machine of the same owner, **T2** everything else. A callee requires no
 **Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
+Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
+
+**Machine profile**: What a machine of an estate may do, in the signed record (DEC-0106): `full` (the default), `member`
+(no hub key) or `view` (no placement, no secret, no hub key; over the relay it calls and is called only to read); a
+call between machines over the relay that a profile does not allow is refused `profile-forbids` ([machine calls](docs/specification/machine-calls.md)).
 
 **Small-order key**: An Ed25519 public key whose point has order 1, 2, 4 or 8 — libsodium's seven encodings, sign bit
 ignored. Anyone can forge a signature under one, and Node 20 and 22 accept the forgery, so every Ed25519 check in

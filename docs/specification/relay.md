@@ -229,7 +229,8 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
     `exp` and refuses a second delivery as `replay`; it acks the duplicate without acting on it, or the relay redelivers
     it until its `ttl`. After `exp` the body is `expired` whatever the store holds, so the window is the message's signed
     life (at most 7 days) and a relay cannot push a replay past it.
-  - A payload that must stay secret from the relay carries a secret envelope.
+  - A payload that must stay secret from the relay carries a secret envelope, or, for a call between machines and its
+    answer, a sealed `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 - **Presence**: `presence` frames `{kid, state: online | offline, lastSeen}` go only to machines of the same owner. An
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
@@ -244,9 +245,11 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
 - **The tier is the recipient's decision**, taken from the body's verified `from`, never from the connection the
   frame arrived on.
   - **T1** is an enrolled machine of the recipient's **same owner** (DL-25), listed in the current record and not
-    revoked. DL-26 applies.
+    revoked: `relayCallerTier` places it, and `machineCallVerdict` judges its call by the two machines' profiles
+    ([machine calls](machine-calls.md), DEC-0106). DL-26 applies.
   - **T2** is anything else. That includes a machine listed only in an organization record, to a recipient of another
-    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies.
+    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
+    relay from outside the estate are not decided ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 
 ## The secret envelope
 

@@ -298,6 +298,21 @@ Between `issuedAt` and that application a verifier still on the parent accepts t
 A **stolen** machine is removed, not re-keyed: re-keying keeps its id in the network, and a relay pinned before DEC-0084
 does not read a key reference in a delta entry (see *Compatibility*). It joins again, if it comes back, under a new id.
 
+## Change a machine's profile
+
+A machine's `profile` (DEC-0106, [machine calls](machine-calls.md#machine-profiles)) is part of the record, so the person
+changes it as every other change: a revision they sign with a passkey, with the machine listed under its new profile.
+A machine that becomes `member` gives up the hub key in the same revision (the hub moves first, CT-89); one that becomes
+`view` gives up its placements and secret placements in the same revision, and no other machine's secret names it as
+`from` (`FAC-SEM-134`). A node that applies the revision judges the next call it receives by the new profile; a call it
+accepted before keeps running. Until each node applies it, a node still on the parent judges calls by the old profile,
+so a machine made `view` can still be called with an effect there; the revision reaches every machine with the next
+heartbeat, which a running hub signs right after every revision (DEC-0054); with no running hub, the old profile holds
+until the node's delta stops being current, after which it refuses every call from another machine. A change that
+makes the hub's machine `member` or `view` waits for the hub to move first (`FAC-SEM-134` refuses a hub key on either;
+CT-89). Fabric writes no `profile` until every reader of its records is pinned at or after
+DEC-0106 ([machine calls](machine-calls.md#compatibility)).
+
 ## Linkability
 
 NET-2 answers K-1: each organization enrollment of a machine gets its own keys, so organizations cannot link the

@@ -24,6 +24,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["estate-record", ["1"]],
   ["execution-packet", ["1"]],
   ["fabric-activity", ["0.1"]],
+  ["fabric-agent-call", ["1"]],
   ["fabric-connections", ["0.1"]],
   ["fabric-load", ["0.1"]],
   ["fabric-dashboard", ["0.1"]],

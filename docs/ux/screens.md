@@ -28,11 +28,11 @@
 | SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
-| SCR-23 | My network's machines | FLW-20 | disabled | proposed | `test/ceremonies.test.ts` |
+| SCR-23 | My network's machines | FLW-20, FLW-26 | disabled | proposed | `test/ceremonies.test.ts` |
 | SCR-24 | An agent's connections | FLW-21 | disabled | proposed | `test/connections.test.ts` |
 | SCR-25 | Agent directory | FLW-22 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-26 | An agent's load | FLW-24 | disabled | proposed | `test/agent-network.test.ts` |
-| SCR-27 | A job's status for its caller | FLW-23 | disabled | proposed | `test/agent-network.test.ts` |
+| SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
 
 ## Design system
 
@@ -295,12 +295,12 @@
 
 ### SCR-23: My network's machines
 
-- **Used by:** FLW-20
-- **Purpose:** the person creates the network, and removes a machine or replaces its key, each by one signed revision.
-- **Elements:** the network's fingerprint; one row per machine with its id and key fingerprint, "Replace key" (primary action) and "Remove" in an overflow menu; "Create my network" when there is none.
-- **States:** success — the revision is signed and the list shows the change; error — the passkey ceremony failed and nothing changed; empty — no network yet, with "Create my network".
-- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`), `test/ceremonies.test.ts`
-- **Scenarios:** SCN-029, SCN-030
+- **Used by:** FLW-20, FLW-26
+- **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, each by one signed revision.
+- **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none.
+- **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106.
+- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`; `machineProfile`, `FAC-SEM-134`), `fixtures/semantic/estate-profile-*`, `test/ceremonies.test.ts`, `test/estate-record.test.ts`
+- **Scenarios:** SCN-029, SCN-030, SCN-037
 - **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
 - **Status:** proposed
 
@@ -339,11 +339,11 @@
 
 ### SCR-27: A job's status for its caller
 
-- **Used by:** FLW-23
-- **Purpose:** the caller, an agent or the person behind it, sees where its call stands: waiting in line, refused for now, or done.
+- **Used by:** FLW-23, FLW-25
+- **Purpose:** the caller, an agent or the person behind it, sees where its call stands: waiting in line, refused for now, or done; for a call to another of the owner's machines, the sealed answer or its refusal.
 - **Elements:** the job's status and status message (`queued <position> of <length>`); on a refusal, the time to start again; the result once completed.
-- **States:** queued, the estimated place and the queue's length shown; refused, `queue-full` with its time and nothing started; success, the job completed once.
-- **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `test/agent-network.test.ts`
-- **Scenarios:** SCN-034
+- **States:** queued, the estimated place and the queue's length shown; refused, `queue-full` with its time and nothing started, or a call between machines refused `profile-forbids` (or its token refused) with its reason; unanswered, a call between machines with no answer by its body's `exp`, shown as failed with no reason, since the target answers no refusal it cannot seal; success, the job completed once.
+- **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `src/machine-call.ts` (`relayCallerTier`, `machineCallVerdict`, `openAgentCall`), `test/agent-network.test.ts`, `test/machine-call.test.ts`
+- **Scenarios:** SCN-034, SCN-036
 - **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log)
 - **Status:** proposed

@@ -21,6 +21,7 @@ import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as jobLimits from "./job-limits.js";
+import * as machineCall from "./machine-call.js";
 import * as pairing from "./pairing.js";
 import * as partnerUsage from "./partner-usage.js";
 import * as relayCrypto from "./relay-crypto.js";
@@ -40,6 +41,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
+  { source: "machine-call.ts", build: one(machineCall.VECTOR_FILE, machineCall.buildMachineCallVectors) },
   { source: "pairing.ts", build: one(pairing.VECTOR_FILE, pairing.buildPairingVectors) },
   { source: "partner-usage.ts", build: one(partnerUsage.VECTOR_FILE, partnerUsage.buildPartnerUsageVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },

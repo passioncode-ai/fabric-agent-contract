@@ -310,10 +310,13 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     // whatever it misses, so a half-written one is not checked as a usage report that shares its protocol.
     // A protocol a `oneOf` schema shares is settled by validation: the first of its schemas, the `oneOf` ones included,
     // that accepts the document checks it; when none does, no schema is picked (a problem in a folder).
-    const blindFiles = isObject(value) ? contract().blindProtocols.get(value.protocol as string) : undefined;
+    // The protocol sits in `protocol` (`fabric-device/0.1`) or, for a sealed call and its plaintext, in `type`
+    // (`fabric-agent-call/1`, DEC-0106).
+    const blindMember = isObject(value) ? (["protocol", "type"] as const).find((member) => contract().blindProtocols.has(value[member] as string)) : undefined;
+    const blindFiles = blindMember !== undefined ? contract().blindProtocols.get((value as JsonObject)[blindMember] as string) : undefined;
     const blind = blindFiles !== undefined;
     if (blind) {
-      const family = [...(blindFiles as string[]), ...matching.filter((candidate) => candidate.consts.some(([member]) => member === "protocol")).map((candidate) => candidate.file)];
+      const family = [...(blindFiles as string[]), ...matching.filter((candidate) => candidate.consts.some(([member]) => member === blindMember)).map((candidate) => candidate.file)];
       const accepting = family.find((candidate) => (contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/${candidate}`) as ValidateFunction)(value));
       if (accepting !== undefined) schema = accepting;
     }

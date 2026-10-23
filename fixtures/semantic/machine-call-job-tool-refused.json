@@ -1,0 +1,18 @@
+{
+  "description": "A job tool refused on a view machine: the job tools pass in every profile (FAC-SEM-136, DEC-0106).",
+  "kind": "machine-call",
+  "expect": [
+    "FAC-SEM-136"
+  ],
+  "input": {
+    "caller": "view",
+    "target": "view",
+    "capability": "fabric.job.cancel",
+    "effect": "draft",
+    "answer": {
+      "ok": false,
+      "code": "profile-forbids",
+      "detail": "target-view"
+    }
+  }
+}

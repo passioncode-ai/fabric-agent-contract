@@ -33,6 +33,8 @@ export const REFUSAL_CODES = [
   "principal-unproven",
   "credential-source-refused",
   "chain-too-deep",
+  // DEC-0106: a call outside the caller's or the target's machine profile; only a passkey-signed revision lifts it.
+  "profile-forbids",
   "issuer-unavailable",
   "unknown-state"
 ] as const;

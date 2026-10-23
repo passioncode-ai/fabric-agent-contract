@@ -144,7 +144,9 @@ callee, enforces attenuation:
   `Fabric-Delegation: <token>`, so the callee sees the chain whichever way the call came. A present but invalid
   `Fabric-Delegation` is refused, never ignored.
 - **DL-11 — Never elsewhere.** A token never travels in a URL, an argument vector, a tool's arguments, a log
-  line or a usage report. `readDelegationToken` reads the two headers, `Fabric-Delegation` first.
+  line or a usage report. `readDelegationToken` reads the two headers, `Fabric-Delegation` first. Over the relay a
+  call has no header: the token travels in the sealed call's `delegation` member, which the relay cannot read, and
+  never in `call.input` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 - **DL-12 — The descriptor token is the host's.** A service's descriptor token
   ([service](service.md#mcp-credentials)) is the host's credential for the well-known document, the events
   feed, the usage report, the load report (DEC-0104) and the login code. It is not presented to call a capability once the caller can
@@ -328,6 +330,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `principal-unproven` | the caller's proof to the hub is missing or stale | hub, meter | 401 |
 | `credential-source-refused` | the grant names a credential source that is not the project's own key or another agent's capability | meter | 403 |
 | `chain-too-deep` | the chain would exceed four actors (five for the meter's token, DL-6) | hub, callee (verifier) | 403 |
+| `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 
@@ -441,7 +444,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 | Tier | Who | Placed by |
 |---|---|---|
 | **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
-| **T1** | an enrolled machine of the same owner | its enrolment in the agent network; the binding that proves it is RM-21's to decide, not this profile's |
+| **T1** | an enrolled machine of the same owner | its enrolment in the agent network; over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
 | **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 | — |
 
 A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
@@ -494,8 +497,8 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 - Proof of possession (DPoP, mutual TLS) binding a token to its caller's key.
 - A device approval (`method: device`): removed by DEC-0045 until a decision says which device signal it is
   and who signs it.
-- The binding that places a caller in T1 (RM-21), and how a surface that declares `surfaces.mcp.auth:
-  "delegation"` admits a T0 or T1 caller that presents no token.
+- The binding that places a caller in T1 other than over the relay (DEC-0106 decides the relay's), and how a surface
+  that declares `surfaces.mcp.auth: "delegation"` admits a T0 or T1 caller that presents no token.
 - A grant check by a T0 or T1 callee called without a token: `grant-check-request` requires the `tokenJti` of
   the callee's own token, and the meter's token-less answer (Observatory's `slotsRequireGrant: when-token`) is
   the meter's (CT-30).

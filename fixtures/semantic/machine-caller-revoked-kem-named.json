@@ -1,0 +1,148 @@
+{
+  "description": "A node that seals to a #kem the record revokes: the sender is T1 with no kem (FAC-SEM-135, DEC-0106).",
+  "kind": "relay-caller",
+  "expect": [
+    "FAC-SEM-135"
+  ],
+  "input": {
+    "applied": {
+      "schema": "estate-record/1",
+      "estate": "urn:fabric:estate:example",
+      "revision": 4,
+      "issuedAt": "2026-10-12T09:00:00Z",
+      "validUntil": "2026-11-11T09:00:00Z",
+      "machines": [
+        {
+          "id": "m-a",
+          "deviceKeys": [
+            {
+              "kid": "m-a#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
+            },
+            {
+              "kid": "m-a#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
+            }
+          ]
+        },
+        {
+          "id": "m-b",
+          "profile": "view",
+          "deviceKeys": [
+            {
+              "kid": "m-b#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
+            },
+            {
+              "kid": "m-b#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+            }
+          ]
+        },
+        {
+          "id": "m-c",
+          "profile": "member",
+          "deviceKeys": [
+            {
+              "kid": "m-c#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
+            },
+            {
+              "kid": "m-c#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
+            }
+          ]
+        },
+        {
+          "id": "m-d",
+          "profile": "member",
+          "deviceKeys": [
+            {
+              "kid": "m-d#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
+            }
+          ]
+        },
+        {
+          "id": "m-e",
+          "profile": "owner",
+          "deviceKeys": [
+            {
+              "kid": "m-e#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
+            }
+          ]
+        },
+        {
+          "id": "m-f",
+          "deviceKeys": [
+            {
+              "kid": "m-f#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
+            },
+            {
+              "kid": "m-f#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
+            }
+          ]
+        },
+        {
+          "id": "m-g",
+          "profile": "full",
+          "deviceKeys": [
+            {
+              "kid": "m-g#sig",
+              "use": "sig",
+              "alg": "es256",
+              "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+            },
+            {
+              "kid": "m-g#kem",
+              "use": "kem",
+              "alg": "ecdh-p256",
+              "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+            }
+          ]
+        }
+      ],
+      "revocations": [
+        {
+          "kind": "device-key",
+          "ref": "m-c#kem",
+          "revokedAt": "2026-10-12T10:00:00Z"
+        }
+      ]
+    },
+    "self": "m-a",
+    "from": "m-c#sig",
+    "at": "2026-10-13T00:00:00Z",
+    "freshness": "current",
+    "answer": {
+      "ok": true,
+      "tier": "T1",
+      "machine": "m-c",
+      "profile": "member",
+      "kem": "m-c#kem"
+    }
+  }
+}
