@@ -256,10 +256,10 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
 
 ## The secret envelope
 
-A secret moves to a machine only where a placed package declares it (a credential an agent asks for, and one moved
-between one person's machines outside a placement, travel in `fabric-credential-envelope/1`,
-[credentials](credentials.md#the-envelope), DEC-0111)
-([`secret-envelope.schema.json`](../../schemas/secret-envelope.schema.json), `fabric-secret-envelope/1`).
+A placed package's secret moves to a machine only where the package declares it
+([`secret-envelope.schema.json`](../../schemas/secret-envelope.schema.json), `fabric-secret-envelope/1`); a credential
+an agent asks for, and one moved between one person's machines outside a placement, travel in
+`fabric-credential-envelope/1` ([credentials](credentials.md#the-envelope), DEC-0111).
 
 - **Seal.**
   - HPKE (RFC 9180), base mode;

@@ -56,7 +56,7 @@ const record = (): Json => ({
   issuedAt: "2026-10-22T09:00:00Z",
   validUntil: "2026-11-21T09:00:00Z",
   machines: [
-    { id: "m-a", deviceKeys: [{ kid: "m-a#sig", use: "sig", alg: "es256", publicKey: K.aSig.octets }, { kid: "m-a#kem", use: "kem", alg: "ecdh-p256", publicKey: K.aKem.octets }] },
+    { id: "m-a", hubKey: { kid: "m-a#hub", alg: "EdDSA", publicKey: edPublic(ed25519("credentials m-a hub")) }, deviceKeys: [{ kid: "m-a#sig", use: "sig", alg: "es256", publicKey: K.aSig.octets }, { kid: "m-a#kem", use: "kem", alg: "ecdh-p256", publicKey: K.aKem.octets }] },
     { id: "m-b", profile: "member", deviceKeys: [{ kid: "m-b#sig", use: "sig", alg: "es256", publicKey: K.bSig.octets }, { kid: "m-b#kem", use: "kem", alg: "ecdh-p256", publicKey: K.bKem.octets }] },
     { id: "m-v", profile: "view", deviceKeys: [{ kid: "m-v#sig", use: "sig", alg: "es256", publicKey: K.vSig.octets }, { kid: "m-v#kem", use: "kem", alg: "ecdh-p256", publicKey: K.vKem.octets }] }
   ],
@@ -107,11 +107,14 @@ function checkCases(): Json[] {
     ["an organization's envelope on a machine with no enrollment there", org, orgCtx({ org: undefined }), no("wrong-context")],
     ["a personal envelope on a machine that holds no estate record", personal, { ownKemKid: "m-b#kem", at: AT }, no("wrong-context")],
     ["a key the policy key set does not list", envelope(orgHeader({ signer: "org-7f3a.policy-old" }), { org: POLICY, keyId: "org-7f3a.policy-old" }, K.aKem, "unlisted"), orgCtx(), no("bad-key")],
-    ["a policy key outside its window at iat", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notBefore: "2026-10-24T00:00:00Z" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
+    ["a policy key not yet valid on the target's clock", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notBefore: "2026-10-24T00:00:00Z" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
+    ["a policy key that ended before the target's clock, though valid at the iat the signer chose", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notAfter: "2026-10-23T09:59:30Z" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
+    ["the envelope delivered with its issued decision: the slot comes from the decision", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN" }] } }), ok(org)],
     ["a signer that is no machine of the record", envelope(personalHeader({ signer: "m-z#sig" }), { machine: K.aSig, kid: "m-z#sig" }, K.bKem, "stranger"), personalCtx(), no("bad-key")],
     ["an enc that is no point of the curve", { ...org, header: { ...(org.header as Json), enc: Buffer.alloc(65, 4).toString("base64url") } }, orgCtx(), no("bad-key")],
     ["a policy key whose window does not read", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notBefore: "the first of October" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
-    ["a personal context with no estate record applied", personal, personalCtx({ personal: { self: "m-b" } }), no("bad-key")],
+    ["a personal context with no estate record applied", personal, personalCtx({ personal: { self: "m-b" } }), no("wrong-context")],
+    ["marks that do not read open nothing", org, orgCtx({ marks: "x" }), no("malformed")],
     ["a personal envelope whose signer is no #sig kid", envelope(personalHeader({ signer: "m-a.key" }), { machine: K.aSig, kid: "m-a.key" }, K.bKem, "not-sig"), personalCtx(), no("bad-key")],
     ["a signer the delta revoked", personal, personalCtx({ personal: { applied: record(), self: "m-b", revocations: [{ kind: "machine", ref: "m-a", revokedAt: "2026-10-23T08:00:00Z" }] } }), no("bad-key")],
     ["signed by another organization's key under this one's keyId", envelope(orgHeader(), { org: OTHER_POLICY, keyId: "org-7f3a.policy-2026-10" }, K.aKem, "forged"), orgCtx(), no("bad-signature")],
@@ -119,6 +122,8 @@ function checkCases(): Json[] {
     ["signed by another machine's key under m-a's kid", envelope(personalHeader(), { machine: K.bSig, kid: "m-a#sig" }, K.bKem, "forged-personal"), personalCtx(), no("bad-signature")],
     ["a view machine sends", envelope(personalHeader({ signer: "m-v#sig" }), { machine: K.vSig, kid: "m-v#sig" }, K.bKem, "from-view"), personalCtx(), no("sender-not-allowed")],
     ["a view machine receives", envelope(personalHeader({ recipient: "m-v#kem" }), { machine: K.aSig, kid: "m-a#sig" }, K.vKem, "to-view"), personalCtx({}, "m-v"), no("sender-not-allowed")],
+    ["the estate's digest key from a machine that holds no hub key", envelope(personalHeader({ signer: "m-b#sig", recipient: "m-a#kem" }), { machine: K.bSig, kid: "m-b#sig" }, K.aKem, "digest-from-member"), personalCtx({}, "m-a"), no("sender-not-allowed")],
+    ["a slot a placed package declares is not filled by this envelope", envelope(personalHeader({ agentRef: AGENT, slot: "PLACED_TOKEN" }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "placed"), personalCtx({ personal: { applied: { ...record(), machines: (record().machines as Json[]).map((m) => (m.id === "m-b" ? { ...m, secrets: [{ agentRef: AGENT, slot: "PLACED_TOKEN", from: "m-a" }] } : m)) }, self: "m-b" } }), no("sender-not-allowed")],
     ["a machine sends to itself", envelope(personalHeader({ recipient: "m-a#kem" }), { machine: K.aSig, kid: "m-a#sig" }, K.aKem, "to-self"), personalCtx({}, "m-a"), no("sender-not-allowed")],
     ["a credential nobody asked for", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [] } }), no("not-requested")],
     ["a request of another slot", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "OTHER_TOKEN" }] } }), no("not-requested")],
@@ -129,6 +134,8 @@ function checkCases(): Json[] {
     ["an envelope that lives more than 24 hours", envelope(orgHeader({ exp: "2026-10-24T10:00:00Z" }), orgSigner, K.aKem, "long"), orgCtx(), no("lifetime-too-long")],
     ["an envelope past its exp", org, orgCtx({ at: "2026-10-23T21:59:00Z" }), no("expired")],
     ["a credential that ends before it arrives", envelope(orgHeader({ credentialExpiresAt: "2026-10-23T09:59:30Z" }), orgSigner, K.aKem, "ended"), orgCtx(), no("credential-expired")],
+    ["a credential that outlives the end its decision issued", envelope(orgHeader({ credentialExpiresAt: "2026-10-29T09:59:00Z" }), orgSigner, K.aKem, "past-decision"), orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "2026-10-28T09:59:00Z" }] } }), no("credential-expired")],
+    ["an end its decision named that does not read", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "next week" }] } }), no("credential-expired")],
     ["a credential issued for more than 30 days", envelope(orgHeader({ credentialExpiresAt: "2026-11-23T09:59:00Z" }), orgSigner, K.aKem, "too-long"), orgCtx(), no("credential-expired")]
   ];
   return cases.map(([name, env, context, expect]) => ({ name, envelope: env, context, expect }));
@@ -163,20 +170,22 @@ function revocationCases(): Json[] {
   const unsigned = (over: Json = {}): Json => ({ type: "credential-revocation/1", org: { id: ORG }, device: { id: "dev-01j9a" }, context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", revokedAt: "2026-10-24T09:00:00Z", reason: "administrator", ...over });
   const signed = (doc: Json, key = POLICY): Json => ({ ...doc, signature: { alg: "ed25519", keyId: "org-7f3a.policy-2026-10", value: sign(null, Buffer.from(settingsCanonicalJson(doc), "utf8"), key).toString("base64") } });
   const device = { id: "dev-01j9a", org: ORG };
+  const at = "2026-10-24T09:00:00Z";
   return [
-    { name: "a revocation for this device stands", input: { revocation: signed(unsigned()), keys: KEYS, device }, expect: { ok: true } },
-    { name: "signed by another key", input: { revocation: signed(unsigned(), OTHER_POLICY), keys: KEYS, device }, expect: { ok: false, reason: "bad-signature" } },
-    { name: "after the key's window", input: { revocation: signed(unsigned({ revokedAt: "2027-01-01T00:00:00Z" })), keys: KEYS, device }, expect: { ok: false, reason: "bad-signature" } },
-    { name: "another device's", input: { revocation: signed(unsigned({ device: { id: "dev-other" } })), keys: KEYS, device }, expect: { ok: false, reason: "wrong-device" } },
-    { name: "another organization's context", input: { revocation: signed(unsigned({ context: "org:org-9c1d" })), keys: KEYS, device }, expect: { ok: false, reason: "wrong-device" } },
-    { name: "not a revocation", input: { revocation: { type: "credential-request/1" }, keys: KEYS, device }, expect: { ok: false, reason: "malformed" } }
+    { name: "a revocation for this device stands", input: { revocation: signed(unsigned()), keys: KEYS, device, at }, expect: { ok: true } },
+    { name: "signed by another key", input: { revocation: signed(unsigned(), OTHER_POLICY), keys: KEYS, device, at }, expect: { ok: false, reason: "bad-signature" } },
+    { name: "after the key's window on the device's clock", input: { revocation: signed(unsigned()), keys: KEYS, device, at: "2027-01-01T00:00:00Z" }, expect: { ok: false, reason: "bad-signature" } },
+    { name: "a revokedAt the signer chose inside the window does not save a key ended on the device's clock", input: { revocation: signed(unsigned({ revokedAt: "2026-10-24T09:00:00Z" })), keys: KEYS, device, at: "2027-01-02T00:00:00Z" }, expect: { ok: false, reason: "bad-signature" } },
+    { name: "another device's", input: { revocation: signed(unsigned({ device: { id: "dev-other" } })), keys: KEYS, device, at }, expect: { ok: false, reason: "wrong-device" } },
+    { name: "another organization's context", input: { revocation: signed(unsigned({ context: "org:org-9c1d" })), keys: KEYS, device, at }, expect: { ok: false, reason: "wrong-device" } },
+    { name: "not a revocation", input: { revocation: { type: "credential-request/1" }, keys: KEYS, device, at }, expect: { ok: false, reason: "malformed" } }
   ];
 }
 
 export function credentialVectors(): Json {
   return {
     about:
-      "Vectors for credentials on request (DEC-0111), written by tools/vectors/credential-envelope.ts, never by hand. check: checkCredentialEnvelope(envelope, context); an absent member is absent. open: openCredential(envelope, context, privateKey), privateKey the base64 P-256 scalar, secret the UTF-8 value (the digest key as base64 of its 32 bytes). digest: keyedDigest(key, value), key hex, null for undefined. revocation: credentialRevocationStands(input). An envelope is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-credential-envelope/1, the additional data the RFC 8785 UTF-8 bytes of the header, signed over the RFC 8785 bytes of {header, ct}: EdDSA by an organization's policy key (Ed25519), ES256 low-S as r ‖ s by a machine's #sig; enc, ct and sig are unpadded base64url. The organization's policy key set is keys; the estate record is record.",
+      "Vectors for credentials on request (DEC-0111), written by tools/vectors/credential-envelope.ts, never by hand. check: checkCredentialEnvelope(envelope, context); an absent member is absent. open: openCredential(envelope, context, privateKey), privateKey the base64 P-256 scalar, secret the UTF-8 value (the digest key as base64 of its 32 bytes). digest: keyedDigest(key, value), key hex, null for undefined. revocation: credentialRevocationStands(input), input.at the device's clock. An envelope is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-credential-envelope/1, the additional data the RFC 8785 UTF-8 bytes of the header, signed over the RFC 8785 bytes of {header, ct}: EdDSA by an organization's policy key (Ed25519), ES256 low-S as r ‖ s by a machine's #sig; enc, ct and sig are unpadded base64url. The organization's policy key set is keys; the estate record is record.",
     keys: KEYS,
     record: record(),
     check: checkCases(),

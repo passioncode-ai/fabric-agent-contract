@@ -366,7 +366,7 @@
 - **Used by:** FLW-28
 - **Purpose:** the administrator, in the organization's context, and the person, in their own network view, see who called whom.
 - **Elements:** one row per call: caller and callee agents, capability, transport, start and end, outcome and code, cost (an estimate on a subscription, shown apart); grouped by trace id.
-- **States:** success, the calls listed; empty, none recorded; withheld, a member whose notice does not name agent calls sends none.
+- **States:** success, the calls listed; empty, none recorded; withheld, a member whose notice does not name agent calls sends none (`callRecordsAccepted: false`); one call, its caller's and callee's records joined by `callId` and shown with the callee's outcome.
 - **Coverage:** `src/credentials.ts` (`callRecordFindings`, `FAC-SEM-140`), `test/credential-envelope.test.ts`
 - **Scenarios:** SCN-042
 - **Resources:** credentials specification, The call record

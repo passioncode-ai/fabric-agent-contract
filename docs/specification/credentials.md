@@ -55,11 +55,13 @@ device and its organization come from the transport, never from the request. It 
 - `expiresAt`, when the credential should end, and `requestedAt`.
 - `reason`: one line the administrator reads.
 
-It names no person and carries no value. `FAC-SEM-138` (kind `credential-request` on `{request, org}`) holds that the
+It names no person and carries no value. Its times, like the decision's and the call record's, are RFC 3339 with any
+offset. `FAC-SEM-138` (kind `credential-request` on `{request, org}`) holds that the
 context is the enrollment's own organization, that the credential is asked for after the request and for at most 30
 days, and that the reason and the scope carry no path and no word shaped like a credential (kind
-`credential-request-document` checks a request alone). A node sends a request in every check-in until a decision other
-than `pending` answers it.
+`credential-request-document` checks a request alone). A node sends a request in every check-in until its envelope opens or a `refused` decision answers it: an `issued`
+decision whose envelope did not open (lost, or expired in transit) keeps the request in the next check-in, and the
+issuer, seeing it again, seals again under its next sequence.
 
 ## The decision
 
@@ -89,34 +91,39 @@ Two profiles, told apart by `context`:
 | | Organization's context | Personal context |
 |---|---|---|
 | `context` | `org:<id>` | `personal` |
-| Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA` | the sending machine's `#sig`, `alg: ES256`, low-S |
-| Admitted when | the node sent that request (`requestId`, `agentRef`, `slot`) and has no decision closing it | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, and it is not the target itself |
+| Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA`, inside its window on the target's own clock, as a policy and a repair are judged | the sending machine's `#sig`, `alg: ES256`, low-S |
+| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened nor a refusal has come | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a placed package declares on the target (that one is the secret envelope's); the estate's digest key only from the machine the record certifies a hub key for |
 | Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it |
 | Lands in | the organization instance's vault slot for `agentRef` and `slot` | the personal vault slot for `agentRef` and `slot` |
 
 `checkCredentialEnvelope(envelope, context)` runs every check short of decryption, in this order; the first that fails
 names the refusal:
 
-1. `malformed`: not the schema's shape (`credentialEnvelopeShape`, held equal to the schema over every vector), or a
-   clock that does not read.
+1. `malformed`: not the schema's shape (`credentialEnvelopeShape`, held equal to the schema over every vector), a
+   clock that does not read, or marks that do not read (a target that cannot read its marks opens nothing).
 2. `unsupported-alg`: `EdDSA` outside an organization's context, `ES256` outside the personal one.
 3. `wrong-recipient`: another `#kem`.
-4. `wrong-context`: an organization this machine is not enrolled in, or a personal envelope on a machine that holds no
-   estate record.
-5. `bad-key`: an `enc` that is no point of the curve; a policy key the set does not list, or outside its window at `iat`
-   (an unreadable bound closes the window); a signer that is no `#sig` of an admitted machine (`relayAdmissionSet` over
+4. `wrong-context`: an organization this machine is not enrolled in (its id compared as written), or a personal envelope
+   on a machine that holds no estate record.
+5. `bad-key`: an `enc` that is no point of the curve; a policy key the set does not list, or outside its window on the
+   target's clock (an unreadable bound closes the window); a signer that is no `#sig` of an admitted machine (`relayAdmissionSet` over
    the applied record and the delta's revocations).
 6. `bad-signature`.
 7. `sender-not-allowed` (personal) or `not-requested` (organization).
-8. `replayed` (a sequence below the target's mark for `(context, agentRef, slot)`) and `sequence-reused` (another
-   envelope at the mark's sequence); the same envelope again passes, a repeat delivery.
+8. `replayed` (a sequence below the target's mark for `(context, agentRef, slot)`, whoever sent it) and
+   `sequence-reused` (another envelope at the mark's sequence); the same envelope again passes, a repeat delivery. A
+   sealer keeps its last sequence for `(context, agentRef, slot)` durably, and one that lost it (a new hub after a
+   move among them) starts at `max(last + 1, now)`, now in milliseconds, as the secret envelope's sealer does.
 9. `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (more than 24 hours), `expired`.
-10. `credential-expired`: `credentialExpiresAt` already past, or more than 30 days after `iat`.
+10. `credential-expired`: `credentialExpiresAt` already past, more than 30 days after `iat`, or later than the end the
+    issued decision named (the request held open carries it; an end that does not read admits none).
 
 `openCredential` then opens the ciphertext (`cannot-open` when it does not). The target writes the value and the mark
 `{context, agentRef, slot, sequence, digest}` in one transaction, and stores nothing after a refusal. `FAC-SEM-139`
 (kind `credential-envelope-check`) holds a target's answer to `checkCredentialEnvelope`'s. A sealer that cannot produce
-an envelope a target opens refuses before it signs (`sealCredential`), so no sequence is spent on it.
+an envelope a target opens refuses before it signs (`sealCredential`: a shape the schema refuses, a life past 24 hours,
+a credential that ends before `iat` or more than 30 days after it, a signer of the other profile), so no sequence is
+spent on it.
 
 An envelope never carries a value into the other context's vault: an organization's key cannot sign into the personal
 context, and a machine's key cannot sign into an organization's.
@@ -125,10 +132,12 @@ context, and a machine's key cannot sign into an organization's.
 
 `credential-revocation/1` travels in a check-in response's `records.credentialRevocations`, signed like a policy layer
 by a key of the organization's current policy key set (as a [repair request](node-summary.md#repairs)). When
-`credentialRevocationStands` accepts it (the signature, the key's window at `revokedAt`, this device, this
-organization's context) the node deletes the value and its mark. The issuer revokes the credential at its provider too;
-a credential the provider cannot revoke ends at its `credentialExpiresAt`. When a member leaves, the organization revokes
-every credential issued to the agents of their enrollment.
+`credentialRevocationStands` accepts it (the signature, the key's window on the device's own clock, this device,
+this organization's context) the node deletes the value and its mark. The issuer revokes the credential at its provider too;
+a credential the provider cannot revoke ends at its `credentialExpiresAt`. When a member leaves, the organization sends a revocation for every credential issued to the agents of their enrollment
+before it revokes their device's certificate, and a node deletes every credential of an organization's context when
+that enrollment ends for any reason (`organization-closed`, a certificate it ends the enrollment on, the person leaving):
+a value never outlives the enrollment it was issued into.
 
 ## The estate's digest key
 
@@ -136,9 +145,12 @@ The machines of one estate compare credential values without moving them (a key 
 twice) by a keyed digest: `keyedDigest(key, value)` is `kd1:<keyId>:<hex>`, the HMAC-SHA256 under the estate's digest key
 of the label `fabric-keyed-digest/1`, a zero byte and the value; `keyId` is `ekd-` and the first 16 hex digits of the
 key's SHA-256 (`estateDigestKeyId`). Digests under two keys never compare equal. The key is 32 random bytes, generated
-once on the hub's machine and delivered to every other machine of the estate by a personal envelope with
-`agentRef: urn:fabric:agent:fabric:estate` and `slot: ESTATE_DIGEST_KEY`; a new key is a new sequence, and digests are
-compared only under the same `keyId`.
+once on the hub's machine and delivered from it to every other machine of the estate that is not `view` (a `view`
+machine holds no secret and compares no digest) by a personal envelope with
+`agentRef: urn:fabric:agent:fabric:estate`, `slot: ESTATE_DIGEST_KEY` and `provider: fabric`; a new key is a new sequence, and digests are
+compared only under the same `keyId`. A target accepts the key only from the machine the record certifies a hub key for,
+so one estate holds one key; after a hub move (DEC-0107) the new hub's machine sends it, and a newly enrolled machine
+gets it from the hub.
 
 ## The call record
 
@@ -150,13 +162,18 @@ the calls of one task) and optionally `parentCallId`, `caller` and `callee` (`ag
 and `recordedBy`.
 
 - The callee's node writes one for each call it answered or refused; the caller's node writes one for a call that got
-  no answer (`unknown` or `timeout`). Both use the call's `callId`, so a reader joins them.
+  no answer (`unknown` or `timeout`). Both use the call's `callId`, so a reader joins them into one call, and the
+  callee's record names its outcome when both exist.
+- Its `cost` describes spend the callee's usage report already counts: a host never adds it to money spent, a budget or
+  a limit.
 - It names agents, never a person, an argument, an output or a token (DL-22), and it never enters a usage report.
   `FAC-SEM-140` (kind `call-record`) holds that it ends no earlier than it starts, that a completed call names no code
   and every other outcome names one, that its trace id is not all zeros, that caller and callee differ, and that no
   member carries a path or a credential.
 - An organization reads the records of its own context in a check-in's `records.callRecords`, and only while the notice
-  its member acknowledged names agent calls ([activity](activity.md)); a node never sends another context's. The hub
+  its member acknowledged names agent calls (the purpose share registration's SR-5a names): the server says so in each
+  check-in response, `records.callRecordsAccepted`, from its own records, and a node sends call records only after a
+  response that says `true` and stops on `false` or its absence. A node never sends another context's. The hub
   keeps the personal estate's records for the person's own network view.
 
 ## Semantic rules
@@ -173,7 +190,11 @@ Additive. Five new protocols in the register (`credential-request/1`, `credentia
 `fabric-credential-envelope/1`, `credential-revocation/1`, `call-record/1`) and five new members of a check-in's
 `records`. A server pinned before DEC-0111 refuses a check-in that carries the new request members, and a node pinned
 before it refuses a response with the new response members (both objects are closed), so each side sends them only to a
-peer that lists the protocol in its `protocols` (as `node-summary/1` and `repair-request/1` are gated, DEC-0101).
+peer that lists the protocol in its `protocols` (as `node-summary/1` and `repair-request/1` are gated, DEC-0101):
+`credential-request/1` gates `credentialRequests`, `credential-decision/1` gates `credentialDecisions`,
+`fabric-credential-envelope/1` gates `credentials`, `credential-revocation/1` gates `credentialRevocations`, and
+`call-record/1` gates `callRecords` and `callRecordsAccepted`. A check-in's own rules do not yet read these members
+(CT-91).
 `fabric-secret-envelope/1` is unchanged: a placed package's personal secret still moves by it. `contractVersion` stays
 `0.1.0`.
 
@@ -186,7 +207,7 @@ Each party moves at its next pin (CT-117).
 | Project Observatory (the issuer, OBS-191 parts 2 and 3; OBS-194 step 2) | reads the organization's request queue, issues from a door with an expiry, seals `fabric-credential-envelope/1` under the organization's policy key, revokes at the provider; generates the estate's digest key and delivers it by the personal profile; computes `keyedDigest` |
 | Project Observatory's node | sends `credentialRequests` and `callRecords`; opens envelopes only as `checkCredentialEnvelope` allows, into the context's vault slot, and deletes at `credentialExpiresAt` or on a revocation that stands |
 | The first organization server | queues requests for the issuer, keeps the ledger by name, relays decisions, envelopes and revocations in check-in responses, and reads call records of its context under the notice's purpose (VES-CREDS-ISSUED) |
-| Fabric | the hub keeps the personal estate's call records and shows them in the network view (S7); its nodes write call records for calls they answer |
+| Fabric | the hub keeps the personal estate's call records and shows them in the network view (S7), generates and sends the estate's digest key from its machine; its nodes write call records for calls they answer, open personal envelopes (the digest key) as `checkCredentialEnvelope` allows, and hold credentials for an organization's instances as Project Observatory's node does |
 | Fabric Switchboard | reads a delivered OpenRouter key from its vault slot by name into the project's key slot, so one key is never issued twice (SB-167) |
 
 ## Not decided here
@@ -195,4 +216,5 @@ Each party moves at its next pin (CT-117).
   server's defaults: allowlisted presets, at most 7 days, linked organizations only).
 - A credential for a person rather than an agent instance (the same flow with a person's own instance as `agentRef` is
   the default; a person-level holder is open).
-- How the hub exports personal call records beyond the network view, and their retention.
+- How a node hands the hub its personal call records, how the hub exports them beyond the network view, and their
+  retention.

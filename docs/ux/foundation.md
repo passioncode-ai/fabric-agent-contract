@@ -670,7 +670,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-14, JRN-13/#4
 - **Acceptance criteria:**
   - Given a call answered or refused, when the callee's node records it, then `call-record/1` names the two agents, the context, the capability, the times, the outcome and the cost, and no person, argument or output (`FAC-SEM-140`).
-  - Given a member whose acknowledged notice does not name agent calls, then their node sends no call record to the organization.
+  - Given a member whose acknowledged notice does not name agent calls, when the server answers a check-in with `callRecordsAccepted: false`, then their node sends no call record to the organization.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

@@ -215,8 +215,45 @@ describe("credentialRevocationStands: inputs it refuses without throwing", () =>
   const good = (vectors.revocation as Json[])[0]!.input;
   it("refuses a revocation with no canonical form, an unreadable time and no device", () => {
     expect(credentialRevocationStands({ ...good, revocation: { ...good.revocation, reason: "\ud800" } })).toEqual({ ok: false, reason: "bad-signature" });
-    expect(credentialRevocationStands({ ...good, revocation: { ...good.revocation, revokedAt: "soon" } })).toEqual({ ok: false, reason: "bad-signature" });
+    expect(credentialRevocationStands({ ...good, at: "soon" })).toEqual({ ok: false, reason: "bad-signature" });
     expect(credentialRevocationStands({ ...good, device: 7 })).toEqual({ ok: false, reason: "wrong-device" });
     expect(credentialRevocationStands({ ...good, keys: [{ ...good.keys[0], notAfter: "never" }] })).toEqual({ ok: false, reason: "bad-signature" });
+  });
+});
+
+describe("the unit reading of PR #156: boundaries the vectors did not reach", () => {
+  const kem = testKey("credentials boundary kem");
+  const policy = createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), Buffer.alloc(32, 3)]), format: "der", type: "pkcs8" });
+  const machine = generateKeyPairSync("ec", { namedCurve: "P-256" }).privateKey;
+  const iat = new Date("2026-10-23T10:00:00Z"), exp = new Date("2026-10-23T22:00:00Z");
+  const base = { recipientKid: "m-a#kem", recipientKey: Buffer.from(kem.octets, "base64"), agentRef: "urn:fabric:agent:passioncode:dns-agent", slot: "CLOUDFLARE_API_TOKEN", provider: "cloudflare", sequence: 1, iat, exp, secret: Buffer.from("v") };
+  const org = { signer: { keyId: "k1", privateKey: policy }, context: "org:org-1", requestId: "5b1f0c4e-8a2d-4f3b-9c6e-1d7a2b3c4d5e" };
+
+  it("holds the signer to the schema at both ends: a 128-character machine id seals, a bare #sig does not read", () => {
+    const longId = `m${"x".repeat(127)}`;
+    const env = sealCredential({ ...base, signer: { kid: `${longId}#sig`, privateKey: machine }, context: "personal" });
+    expect(credentialEnvelopeShape(env)).toBe(true);
+    expect(envelopeValid(env)).toBe(true);
+    const bare = { ...env, header: { ...env.header, signer: "#sig" } };
+    expect(credentialEnvelopeShape(bare)).toBe(envelopeValid(bare));
+    expect(credentialEnvelopeShape(bare)).toBe(false);
+  });
+
+  it("refuses to seal a credential no target accepts", () => {
+    expect(() => sealCredential({ ...base, ...org, credentialExpiresAt: new Date("2026-11-23T10:00:01Z") })).toThrow(/credential-expired/);
+    expect(() => sealCredential({ ...base, ...org, credentialExpiresAt: new Date("2026-10-23T09:00:00Z") })).toThrow(/credential-expired/);
+    expect(() => sealCredential({ ...base, signer: { kid: "m-b", privateKey: machine }, context: "personal" })).toThrow(/bad-key/);
+    expect(() => sealCredential({ ...base, ...org, signer: { keyId: "m-b#sig", privateKey: policy }, credentialExpiresAt: new Date("2026-10-30T10:00:00Z") })).toThrow(/bad-key/);
+  });
+
+  it("reads a document's times with any offset, as the schemas admit, and an org id only as written", () => {
+    const request = {
+      type: "credential-request/1", requestId: "5b1f0c4e-8a2d-4f3b-9c6e-1d7a2b3c4d5e", agentRef: "urn:fabric:agent:passioncode:dns-agent", context: "org:org-1",
+      provider: "cloudflare", preset: "zone-dns-edit", expiresAt: "2026-10-30T11:00:00+02:00", reason: "update records", requestedAt: "2026-10-23T11:00:00+02:00"
+    };
+    expect(evaluateSemanticRules("credential-request", { request, org: "org-1" })).toEqual([]);
+    expect(callRecordFindings({ type: "call-record/1", callId: "1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f", traceId: "4bf92f3577b34da6a3ce929d0e0e4736", caller: "urn:fabric:agent:a:b", callee: "urn:fabric:agent:a:c", startedAt: "2026-10-23T11:00:00+02:00", endedAt: "2026-10-23T09:00:01Z", outcome: "completed" })).toEqual([]);
+    const env = (vectors.check as Json[])[0]!;
+    expect(checkCredentialEnvelope(env.envelope, ctxOf({ ...env.context, org: { ...env.context.org, id: ["org-7f3a"] } }))).toEqual({ ok: false, refusal: "wrong-context" });
   });
 });

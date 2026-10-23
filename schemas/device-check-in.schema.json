@@ -343,7 +343,7 @@
               "items": {
                 "$ref": "call-record.schema.json"
               },
-              "description": "DEC-0111: call records of this organization's context, sent only while the acknowledged notice names agent calls; never another context's."
+              "description": "DEC-0111: call records of this organization's context, sent only after a check-in response with records.callRecordsAccepted true; never another context's."
             },
             "repairResults": {
               "type": "array",
@@ -454,6 +454,10 @@
                 "$ref": "window-lease.schema.json",
                 "description": "A window lease (window-lease/1, DEC-0062), carried unchanged; the device's meter verifies it before it spends against it."
               }
+            },
+            "callRecordsAccepted": {
+              "type": "boolean",
+              "description": "DEC-0111: whether the organization collects this device's call records: true only while the notice its person acknowledged names agent calls (as share-registration's purposeAdmitted). A node sends records.callRecords only after a response that says true, and stops on false or on its absence."
             },
             "credentialDecisions": {
               "type": "array",

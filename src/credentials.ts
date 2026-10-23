@@ -21,6 +21,7 @@ import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { p256KeyRefusal, p256Point, signEs256, type P256Key } from "./p256.js";
 import { looksLikeCredential } from "./registry-rules.js";
 import { CLOCK_SKEW_SECONDS, instant, relayAdmissionSet, verifyEs256 } from "./relay.js";
+import { strictTime } from "./rfc3339.js";
 import { ENVELOPE_SUITE, MAX_ENVELOPE_LIFETIME_SECONDS, hpkeOpenBase, hpkeSealBase } from "./secret-envelope.js";
 
 export const CREDENTIAL_ENVELOPE_TYPE = "fabric-credential-envelope/1";
@@ -59,9 +60,14 @@ const isString = (value: unknown): value is string => typeof value === "string";
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 const counter = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 1;
 const second = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, "Z");
+/** An RFC 3339 date-time with any offset, as `common.schema.json#/$defs/timestamp` admits, or undefined. */
+const when = (value: unknown): number | undefined => {
+  const t = strictTime(value);
+  return Number.isFinite(t) ? t : undefined;
+};
 /** Whether instant `t` lies in a key's window; an absent bound is open, an unreadable one closes the window (FAC-SEM-041). */
 const inKeyWindow = (t: number, key: JsonObject): boolean => {
-  const from = key.notBefore === undefined ? -Infinity : instant(key.notBefore), to = key.notAfter === undefined ? Infinity : instant(key.notAfter);
+  const from = key.notBefore === undefined ? -Infinity : when(key.notBefore), to = key.notAfter === undefined ? Infinity : when(key.notAfter);
   return from !== undefined && to !== undefined && t >= from && t <= to;
 };
 const sameMembers = (value: JsonObject, required: readonly string[], optional: readonly string[] = []) => {
@@ -104,7 +110,7 @@ export function credentialEnvelopeShape(value: unknown): value is CredentialEnve
   // An organization's credential answers a request and ends; the personal profile names neither.
   if (org !== (h.requestId !== undefined) || org !== (h.credentialExpiresAt !== undefined)) return false;
   return h.type === CREDENTIAL_ENVELOPE_TYPE && isString(h.alg) && h.alg.length <= 16 && JSON.stringify(h.suite) === JSON.stringify(ENVELOPE_SUITE)
-    && isString(h.recipient) && KEM_KID.test(h.recipient) && isString(h.signer) && KEY_ID.test(h.signer.replace(/#sig$/, "x"))
+    && isString(h.recipient) && KEM_KID.test(h.recipient) && isString(h.signer) && KEY_ID.test(h.signer.replace(/#sig$/, ""))
     && isString(h.agentRef) && h.agentRef.length <= 146 && AGENT_REF.test(h.agentRef) && isString(h.slot) && SLOT.test(h.slot)
     && isString(h.provider) && PROVIDER.test(h.provider) && (h.requestId === undefined || (isString(h.requestId) && UUID.test(h.requestId)))
     && (h.credentialExpiresAt === undefined || instant(h.credentialExpiresAt) !== undefined) && counter(h.sequence)
@@ -152,8 +158,14 @@ export function sealCredential(input: CredentialSealInput): CredentialEnvelope {
   };
   if (!credentialEnvelopeShape({ header, ct: "AA", sig: "A".repeat(86) })) throw new Error("malformed: the envelope would not have the schema's shape");
   if (org !== (header.context !== PERSONAL_CONTEXT)) throw new Error("wrong-context: an organization's key signs into its context, a machine's into the personal one");
+  // The signer names its kind: a policy keyId in an organization's context, a machine's #sig in the personal one.
+  if (org ? header.signer.endsWith("#sig") : !SIG_KID.test(header.signer)) throw new Error("bad-key: the signer is no key of its profile");
   const life = (instant(header.exp) as number) - (instant(header.iat) as number);
   if (life <= 0 || life > MAX_ENVELOPE_LIFETIME_SECONDS * 1000) throw new Error("lifetime-too-long: an envelope lives more than zero and at most 24 hours");
+  if (header.credentialExpiresAt !== undefined) {
+    const iat = instant(header.iat) as number, until = instant(header.credentialExpiresAt) as number;
+    if (until <= iat || until - iat > MAX_CREDENTIAL_DAYS * DAY_MS) throw new Error("credential-expired: a credential ends after iat and at most 30 days after it");
+  }
   const { ct } = hpkeSealBase(p256Point(input.recipientKey), INFO, Buffer.from(rfc8785(header), "utf8"), input.secret, ephemeral.getPrivateKey());
   const unsigned = { header, ct: ct.toString("base64url") };
   const bytes = Buffer.from(signingInput(unsigned), "utf8");
@@ -166,7 +178,7 @@ export interface CredentialCheckContext {
   ownKemKid: string;
   at: string; // the target's clock, RFC 3339
   // An organization the machine is enrolled in: its id, its current verified policy key set's keys, and the requests
-  // this machine sent that are still open ({requestId, agentRef, slot}).
+  // this machine holds open ({requestId, agentRef, slot, expiresAt?}: the slot and end from the issued decision).
   org?: { id: string; keys: readonly JsonObject[]; requested: readonly JsonObject[] };
   // The personal context: the estate record the machine applied last, its own machine id and the delta's revocations.
   personal?: { applied: JsonObject; self: string; revocations?: readonly JsonObject[] };
@@ -186,26 +198,27 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   if (!credentialEnvelopeShape(value) || !isObject(ctx)) return no("malformed");
   const h = value.header;
   const org = h.context !== PERSONAL_CONTEXT;
-  const at = instant(ctx.at);
+  const at = when(ctx.at);
   if (at === undefined) return no("malformed");
   if (h.alg !== (org ? ORG_ALG : PERSONAL_ALG)) return no("unsupported-alg");
   if (h.recipient !== ctx.ownKemKid) return no("wrong-recipient");
-  if (org ? !isObject(ctx.org) || h.context !== `${ORG_CONTEXT_PREFIX}${show(ctx.org.id)}` : !isObject(ctx.personal)) return no("wrong-context");
+  if (org ? !isObject(ctx.org) || !isString(ctx.org.id) || h.context !== `${ORG_CONTEXT_PREFIX}${ctx.org.id}` : !isObject(ctx.personal) || !isObject(ctx.personal.applied)) return no("wrong-context");
   const enc = Buffer.from(h.enc, "base64url");
   if (p256KeyRefusal(enc) !== null) return no("bad-key");
   const bytes = signingInput(value);
   if (org) {
     const o = ctx.org as NonNullable<CredentialCheckContext["org"]>;
-    // A key of the organization's current policy key set, inside its window at the envelope's `iat` (as FAC-SEM-041).
-    const iat = instant(h.iat) as number;
+    // A key of the organization's current policy key set, inside its window on the target's own clock, never at the
+    // `iat` the signer chose (as a policy and a repair are judged, devices.md F-B-106).
     const key = list(o.keys).find((candidate) => candidate.keyId === h.signer);
-    if (key === undefined || (key.alg ?? "ed25519") !== "ed25519" || !inKeyWindow(iat, key)) return no("bad-key");
+    if (key === undefined || (key.alg ?? "ed25519") !== "ed25519" || !inKeyWindow(at, key)) return no("bad-key");
     if (!verifyWith(key, Buffer.from(bytes, "utf8"), Buffer.from(value.sig, "base64url").toString("base64"))) return no("bad-signature");
     if (!list(o.requested).some((r) => r.requestId === h.requestId && r.agentRef === h.agentRef && r.slot === h.slot)) return no("not-requested");
   } else {
     const p = ctx.personal as NonNullable<CredentialCheckContext["personal"]>;
-    // The sender is a machine of the estate record the target applied, not revoked by it or by the delta (F7).
-    const admission = relayAdmissionSet({ ...(isObject(p.applied) ? { held: p.applied } : {}), pinned: [], at: new Date(at), schemaValid: () => false, extraRevocations: list(p.revocations) });
+    // The sender is a machine of the estate record the target applied (an object, checked at wrong-context), not revoked
+    // by it or by the delta (F7).
+    const admission = relayAdmissionSet({ held: p.applied as JsonObject, pinned: [], at: new Date(at), schemaValid: () => false, extraRevocations: list(p.revocations) });
     const key = admission.ok && SIG_KID.test(h.signer) ? admission.set.get(h.signer) : undefined;
     if (key === undefined || !admission.ok) return no("bad-key");
     if (verifyEs256(key, bytes, value.sig) !== true) return no("bad-signature");
@@ -213,8 +226,16 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
     const sender = h.signer.slice(0, -"#sig".length);
     const record = admission.held;
     if (sender === p.self || machineProfile(record, sender) !== "full" && machineProfile(record, sender) !== "member" || machineProfile(record, p.self) === "view" || machineProfile(record, p.self) === undefined) return no("sender-not-allowed");
+    const machines = list(record.machines);
+    // The estate's digest key comes only from the machine the record certifies a hub key for, so one estate holds one key.
+    if (h.agentRef === ESTATE_AGENT_REF && h.slot === ESTATE_DIGEST_SLOT && !isObject(machines.find((m) => m.id === sender)?.hubKey)) return no("sender-not-allowed");
+    // A slot a placed package declares on this machine is filled by the secret envelope only (DEC-0047), never by this one.
+    const self = machines.find((m) => m.id === p.self);
+    if (list(self?.secrets).some((secret) => secret.agentRef === h.agentRef && secret.slot === h.slot)) return no("sender-not-allowed");
   }
   const digest = credentialEnvelopeDigest(value);
+  // Marks that do not read fail closed: a target that cannot read its marks opens nothing.
+  if (ctx.marks !== undefined && !Array.isArray(ctx.marks)) return no("malformed");
   const mark = list(ctx.marks).find((m) => m.context === h.context && m.agentRef === h.agentRef && m.slot === h.slot);
   if (mark !== undefined) {
     if (!counter(mark.sequence) || h.sequence < mark.sequence) return no("replayed");
@@ -226,7 +247,11 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   if (at >= exp) return no("expired");
   if (h.credentialExpiresAt !== undefined) {
     const until = instant(h.credentialExpiresAt) as number;
-    if (until <= at || until - iat > MAX_CREDENTIAL_DAYS * DAY_MS) return no("credential-expired");
+    // Never past the end the issued decision named: the request held open carries it (`expiresAt`).
+    // An organization's envelope reached here only through a request held open (step 7), so `held` is that request.
+    const held = list(ctx.org?.requested).find((r) => r.requestId === h.requestId && r.agentRef === h.agentRef && r.slot === h.slot) as JsonObject;
+    const issued = held.expiresAt === undefined ? Infinity : when(held.expiresAt) ?? -Infinity;
+    if (until <= at || until - iat > MAX_CREDENTIAL_DAYS * DAY_MS || until > issued) return no("credential-expired");
   }
   return { ok: true, mark: { context: h.context, agentRef: h.agentRef, slot: h.slot, sequence: h.sequence, digest } };
 }
@@ -247,16 +272,17 @@ export function openCredential(value: unknown, ctx: CredentialCheckContext, ownK
 // ---- Revocation --------------------------------------------------------------------------------------------------
 
 /**
- * Whether a `credential-revocation/1` an organization sent this machine stands: signed like a policy layer by a key of
- * the organization's current policy key set, inside the key's window at `revokedAt`, for this device and a context of
- * this organization. A revocation that stands deletes the value and its mark; it never needs the value.
+ * Whether a `credential-revocation/1` an organization sent this machine stands (`{revocation, keys, device, at}`): signed
+ * like a policy layer by a key of the organization's current policy key set, inside the key's window on the device's
+ * clock `at`, for this device and a context of this organization. A revocation that stands deletes the value and its mark; it never needs the value.
  */
 export function credentialRevocationStands(input: unknown): { ok: true } | { ok: false; reason: "malformed" | "bad-signature" | "wrong-device" } {
   const value = isObject(input) ? input : {};
   const revocation = isObject(value.revocation) ? value.revocation : undefined;
   if (!revocation || revocation.type !== CREDENTIAL_REVOCATION_TYPE || !isObject(revocation.signature)) return { ok: false, reason: "malformed" };
   const signature = revocation.signature;
-  const at = instant(revocation.revokedAt);
+  // The key's window is judged on the device's own clock (`at`), never at the `revokedAt` the signer chose.
+  const at = when(value.at);
   const key = list(value.keys).find((candidate) => candidate.keyId === signature.keyId && (candidate.alg ?? "ed25519") === signature.alg);
   let signed: Buffer | undefined;
   try {
@@ -302,7 +328,7 @@ const leaks = (value: string) => hasHomePath(value) || value.split(/\s+/).some((
 /** FAC-SEM-138 on a request alone: its window, and a reason and scope that carry no path and no credential. */
 function requestFindings(request: JsonObject, prefix: string): Finding[] {
   const findings: Finding[] = [];
-  const from = instant(request.requestedAt), to = instant(request.expiresAt);
+  const from = when(request.requestedAt), to = when(request.expiresAt);
   if (from === undefined || to === undefined || !(from < to && to - from <= MAX_CREDENTIAL_DAYS * DAY_MS)) {
     findings.push(flag("FAC-SEM-138", `${prefix}/expiresAt`, `a credential is asked for after its request and for at most ${MAX_CREDENTIAL_DAYS} days`));
   }
@@ -336,7 +362,7 @@ function decisionRule(value: JsonObject): Finding[] {
   if (decision.outcome === "issued") {
     if (!credential || decision.reason !== undefined) findings.push(flag("FAC-SEM-138", "/decision", "an issued decision names its credential and no reason"));
     else {
-      const until = instant(credential.expiresAt), asked = instant(request.expiresAt);
+      const until = when(credential.expiresAt), asked = when(request.expiresAt);
       if (until === undefined || asked === undefined || until > asked) findings.push(flag("FAC-SEM-138", "/decision/credential/expiresAt", "an issued credential ends no later than the request asked"));
       if (credential.provider !== request.provider) findings.push(flag("FAC-SEM-138", "/decision/credential/provider", "an issued credential is the provider's the request named"));
     }
@@ -364,7 +390,7 @@ const TRACE_ID = /^[0-9a-f]{32}$/;
 export function callRecordFindings(record: unknown, prefix = ""): Finding[] {
   if (!isObject(record)) return [];
   const findings: Finding[] = [];
-  const start = instant(record.startedAt), end = instant(record.endedAt);
+  const start = when(record.startedAt), end = when(record.endedAt);
   if (start === undefined || end === undefined || end < start) findings.push(flag("FAC-SEM-140", `${prefix}/endedAt`, "a call ends no earlier than it starts"));
   if ((record.outcome === "completed") !== (record.code === undefined)) findings.push(flag("FAC-SEM-140", `${prefix}/code`, "a completed call names no code; every other outcome names one"));
   if (!isString(record.traceId) || !TRACE_ID.test(record.traceId) || /^0+$/.test(record.traceId)) findings.push(flag("FAC-SEM-140", `${prefix}/traceId`, "a trace id is 32 lower-case hex digits, not all zero"));

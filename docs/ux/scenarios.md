@@ -889,12 +889,12 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. The agent needs to update `example.com` -> its node sends `credential-request/1` (provider `cloudflare`, preset `zone-dns-edit`, scope `zone: example.com`, 7 days, a one-line reason) at check-in.
   2. The policy issues it -> the issuer mints the token with a 7-day expiry and seals it to the machine's `#kem` under the organization's policy key.
-  3. The next check-in response carries the decision and the envelope -> the node opens it into the organization instance's slot `CLOUDFLARE_API_TOKEN`; the ledger lists it by name.
+  3. The next check-in response carries the decision and the envelope -> the node reads the decision first (its slot `CLOUDFLARE_API_TOKEN`), then opens the envelope into the organization instance's slot; the ledger lists it by name.
 - **Expected result:** the agent holds a token for one zone for 7 days, in its organization's context only; nobody pasted a key.
 - **Alt paths:** the request asks for 60 days -> `FAC-SEM-138` refuses it before it is sent. The preset is not allowed -> the administrator decides, or the decision is `refused` with `not-allowed`. The envelope names another request, or comes signed by a key outside the policy key set -> the node refuses it (`not-requested`, `bad-key`) and stores nothing. The same OpenRouter key is asked for a project the person also runs in Switchboard -> Switchboard reads the delivered slot by name instead of issuing another.
 - **UI elements:** the queue's row with "Issue" and "Refuse"; the issued credential's row with its end.
 - **States covered:** queue, issued, refused
-- **Errors & recovery:** the provider is down -> `refused` with `provider-unavailable`, and the agent asks again later; the envelope expired in transit -> refused `expired`, and the issuer seals again under the next sequence.
+- **Errors & recovery:** the provider is down -> `refused` with `provider-unavailable`, and the agent asks again later; the envelope expired in transit (the machine was offline for a day) -> refused `expired`; the node keeps sending the request, and the issuer, seeing it again, seals again under its next sequence.
 - **Status:** draft
 - **Coverage:** DEC-0111, `src/credentials.ts` (`checkCredentialEnvelope`, `FAC-SEM-138`, `FAC-SEM-139`), `fixtures/vectors/credential-envelope.json`, `test/credential-envelope.test.ts`
 - **Product:** unobserved
@@ -910,7 +910,7 @@ independent agent author and P-02 project operator.
   1. The administrator removes the member -> the server sends a signed `credential-revocation/1` for each, and the issuer revokes each at its provider.
   2. The member's node applies each revocation that stands -> it deletes the value and its mark.
 - **Expected result:** neither credential works at its provider nor stays on the machine.
-- **Alt paths:** the machine is offline -> the provider's revocation stops the credential at once, and the node deletes it at its next check-in or at `credentialExpiresAt`, whichever comes first. A revocation signed by a key outside the set -> refused, and the credential still ends at its expiry.
+- **Alt paths:** the machine is offline -> the provider's revocation stops the credential at once, and the node deletes it at its next check-in or at `credentialExpiresAt`, whichever comes first. The member's enrollment ends (their certificate revoked, or the organization closed) before a revocation arrives -> the node deletes every credential of that organization's context with the enrollment. A revocation signed by a key outside the set -> refused, and the credential still ends at its expiry.
 - **UI elements:** "Revoke" on each row; the revoked state with its time and reason.
 - **States covered:** revoked
 - **Errors & recovery:** the provider cannot revoke a key -> it ends at its `credentialExpiresAt`, and the ledger says so.
@@ -929,7 +929,7 @@ independent agent author and P-02 project operator.
   1. The DNS agent answers -> its node writes `call-record/1` (the two agents, `dns.records.update`, the times, `completed`, its cost) and sends it at check-in.
   2. The administrator opens the calls -> the record is listed under its trace id.
 - **Expected result:** the administrator knows who called whom, how it ended and what it cost; no prompt, argument or output is in the record.
-- **Alt paths:** the call was refused `profile-forbids` -> the record says `refused` with that code. The caller got no answer -> the caller's node records `timeout` under the same `callId`. A member's notice does not name agent calls -> their node sends none.
+- **Alt paths:** the call was refused by the callee (its queue full, `queue-full`) -> the record says `refused` with that code. The caller got no answer -> the caller's node records `timeout` under the same `callId`. A member's notice does not name agent calls -> the server's check-in responses say `callRecordsAccepted: false`, and their node sends none.
 - **UI elements:** one row per call, grouped by trace.
 - **States covered:** success, empty
 - **Errors & recovery:** a record that ends before it starts, or a completed call with a code -> `FAC-SEM-140` names it.

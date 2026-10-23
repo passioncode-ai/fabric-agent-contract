@@ -329,8 +329,9 @@ carries the pin, or until its own policy for an enrollment that ended applies.
 
 A server that never closes an organization never sends it. A node takes `organization-closed` as final **on one answer**:
 it stops every request to that organization, drops what it buffered for it (events, sums, registrations) and ends that
-enrollment, discarding that organization's `server` policy layer, key set, collection start and streams (an `mdm` layer
-stays the operating system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
+enrollment, discarding that organization's `server` policy layer, key set, collection start and streams, and deleting every
+credential of its context ([credentials](credentials.md#revocation), DEC-0111) (an `mdm` layer stays the operating
+system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
 server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
 contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
 enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)). In [`verifyDeviceRequest`](../../src/http-signature.ts) a
@@ -600,8 +601,9 @@ what the organization expects the harness to be and which packages a repair may 
 **Credentials and call records** (DEC-0111). A check-in MAY carry `records.credentialRequests`, the node's
 `credential-request/1` documents for its agents in this organization's context, and `records.callRecords`, the
 `call-record/1` documents of that context while the acknowledged notice names agent calls; a check-in response MAY carry
-`records.credentialDecisions`, `records.credentials` (sealed `fabric-credential-envelope/1`) and
-`records.credentialRevocations`. Each side sends them only to a peer that lists the protocol in its `protocols`
+`records.credentialDecisions`, `records.credentials` (sealed `fabric-credential-envelope/1`),
+`records.credentialRevocations` and `records.callRecordsAccepted` (whether the notice names agent calls); a node sends
+`callRecords` only after a response that says `true`. Each side sends them only to a peer that lists the protocol in its `protocols`
 ([credentials](credentials.md)).
 
 ## Health

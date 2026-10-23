@@ -694,6 +694,7 @@ flowchart TD
   R[Node sends credential-request] --> D{Decision}
   D -->|refused| X[The agent is told the reason]
   D -->|pending| W[The node asks again at the next check-in]
+  C -->|expired in transit| W
   D -->|issued| E[Sealed envelope in the check-in response]
   E --> C{checkCredentialEnvelope}
   C -->|refused| L[Logged by its refusal; nothing stored]

@@ -82,7 +82,9 @@ names an `agentRef` and a slot, never a context, so the target's open context (`
 [open step 6](relay.md#the-secret-envelope)) reads only its personal secret placements: the personal instance's slot alone
 is filled by an envelope, and the answer does not depend on the order of the record's secret placements (the `placement`
 group of `fixtures/vectors/secret-envelope.json` lists an organization's placement first). An organization's instance fills its slot from its own machine's vault
-and never admits an envelope for it (`FAC-SEM-075`). An envelope that names a context is not decided here.
+and never admits a secret envelope for it (`FAC-SEM-075`); a credential the organization issues to it arrives in a
+`fabric-credential-envelope/1`, which names the context and is signed by the organization's policy key
+([credentials](credentials.md#the-envelope), DEC-0111). The secret envelope stays context-free.
 
 `FAC-SEM-111` reads record revisions only. A revoked share grant stops calls at once where it is checked — the hub
 mints no token under it and the meter denies it (`grant-revoked`, DL-24), both reading the revocation delta (DEC-0054) —
@@ -283,6 +285,7 @@ The board rows are CT-51 and, for share registrations, CT-56.
   (Fabric's CX-FAB-08).
 - Whether a share grant's `audience` names the placed agent: `audience` is an agent id and a placement names an
   `agentRef`, and the contract does not map one to the other.
-- A context on a secret envelope: until one is decided, an organization's slot is filled on its own machine only.
+- A context on the secret envelope itself: DEC-0111 left `fabric-secret-envelope/1` context-free and delivers an
+  organization's credentials in `fabric-credential-envelope/1` instead.
 - Fabric confirms the context form and the placement key in its organization decision (D8). If D8 decides otherwise, a
   later decision changes them with a compatibility note.

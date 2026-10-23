@@ -36,6 +36,18 @@ one record per call between agents. Board threads `ba63565c` items 5 and 6, `b25
 
 - CT-117: Project Observatory (the issuer and its node), the first organization server, Fabric, Fabric Switchboard.
 
+## Readings
+
+Round 1: unit two breaks (the shape check's `signer` against the schema at 128 characters; the sealer sealing what no
+target opens), fixed with their risks (offset times read, an org id compared as written, marks that do not read fail
+closed, a personal context without a record is `wrong-context`); seam and product breaks, fixed: the request held open
+until its envelope opens (its slot and end from the issued decision; the node resends it and the issuer seals again),
+the personal profile never filling a slot a placed package declares and the digest key only from the hub's machine
+(never to a `view` machine), the policy key's window on the target's clock (and a revocation's on the device's),
+`callRecordsAccepted` in the check-in response, a credential deleted with its enrollment and a leaver's revocations
+before the certificate's, `contexts.md`, the protocol that gates each member, the sealer's restart rule, the constant
+test, the tolerance kinds, Fabric's nodes in CT-117; CT-118 filed (a revocation names no instance).
+
 ## Checks actually run
 
 `pnpm run check` and `pnpm vectors:check` (output in the pull request).
