@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation. Every case holds in every time zone.",
+  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
   "silence": [
     {
       "name": "an hour old",
@@ -336,7 +336,7 @@
   ],
   "move": [
     {
-      "name": "an orderly move: the old key removed, not revoked",
+      "name": "a move that leaves the old key unrevoked: FAC-SEM-114 refuses such a revision",
       "parent": {
         "machines": [
           {
@@ -389,7 +389,7 @@
       }
     },
     {
-      "name": "a move from a lost machine: the old key revoked",
+      "name": "a move: the old key revoked in the same revision",
       "parent": {
         "machines": [
           {
@@ -565,7 +565,7 @@
       }
     },
     {
-      "name": "the hub removed with none in its place: no move, the estate has no hub",
+      "name": "the hub removed with none in its place, unrevoked: no move, no hub, and FAC-SEM-114 refuses it",
       "parent": {
         "machines": [
           {
@@ -606,7 +606,7 @@
       }
     },
     {
-      "name": "the hub's key replaced on the same machine",
+      "name": "the hub's key replaced on the same machine, unrevoked: FAC-SEM-114 refuses it",
       "parent": {
         "machines": [
           {

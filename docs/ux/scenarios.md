@@ -43,6 +43,8 @@
 | SCN-035 | See how busy an agent is, or learn why its load is not shown | agent-network | P-02 | ST-029, FLW-24 | draft | not audited |
 | SCN-036 | An agent calls an agent on another of the owner's machines, or is refused by a machine's profile | machine-calls | P-02 | ST-030, FLW-25 | draft | not audited |
 | SCN-037 | Keep a machine for reading only | machine-calls | P-02 | ST-031, FLW-26 | draft | not audited |
+| SCN-038 | The hub goes quiet: hear of it after a day and move it to another machine | network | P-02 | ST-032, FLW-27 | draft | not audited |
+| SCN-039 | Lose a passkey and keep the network | network | P-02 | ST-032, FLW-27 | draft | not audited |
 
 ## Personas
 
@@ -831,4 +833,43 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again; a revision that keeps a placement on a `view` machine -> `FAC-SEM-134` names it and the drafter removes it.
 - **Status:** draft
 - **Coverage:** DEC-0106, `FAC-SEM-134` in `src/estate-record-rules.ts` (`machineProfile`), fixtures `fixtures/semantic/estate-profile-*`, `test/estate-record.test.ts`, `test/machine-call.test.ts`
+- **Product:** unobserved
+
+### SCN-038: The hub goes quiet: hear of it after a day and move it to another machine
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-032, FLW-27 (JTBD-10, JRN-09/#4)
+- **Entry point:** a machine's alert in My network's machines
+- **Preconditions:** a network of `m-a` (the hub's machine, `full`) and `m-b` (`full`); `m-a` is switched off and its last heartbeat is 30 hours old
+- **Steps:**
+  1. The person opens Fabric on `m-b` -> "The hub has been silent for 30 hours", with "Move the hub".
+  2. They pick `m-b` -> its node makes a new hub key; Fabric drafts the revision with `m-b`'s `hubKey` and `m-a`'s old key revoked as `hub-key`.
+  3. They sign with a passkey -> `m-b`'s hub signs a heartbeat; the alert clears on every machine that applies the revision.
+- **Expected result:** the network has a hub again before calls between machines stop at 72 hours, under a key that never left `m-b`.
+- **Alt paths:** `m-a` comes back -> it applies the revision and signs nothing more; anything its old key signs is refused (`revoked-signer`). `m-a` is lost for good -> the same revision also removes and revokes it. No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
+- **UI elements:** the alert with the hours since; "Move the hub"; the machine picker.
+- **States covered:** alert, success, error
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the alert stays; the old hub signed an entry at a sequence the new one also used -> a machine that saw both is `broken` (recovery from a fork is the revocation delta's open item).
+- **Status:** draft
+- **Coverage:** DEC-0107, `hubSilence`, `hubMove` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `FAC-SEM-114`
+- **Product:** unobserved
+
+### SCN-039: Lose a passkey and keep the network
+
+- **Persona:** P-02
+- **Feature:** network
+- **Traces:** ST-032, FLW-27 (JTBD-10, JRN-09/#4)
+- **Entry point:** the network's passkeys in My network's machines
+- **Preconditions:** revision 1 listed two passkeys, `cred-a` on the person's laptop and `cred-b` on a security key; the laptop is lost
+- **Steps:**
+  1. The person signs with `cred-b` a revision that removes `cred-a`, lists it as `authority cred-a` in `revocations` and adds `cred-c` on a new phone.
+  2. Every machine applies it -> the network shows two passkeys again (`recoveryReady`: ready).
+- **Expected result:** the network survives the lost passkey; the lost one can sign no later revision.
+- **Alt paths:** the network was created with one passkey -> Fabric warned at creation and shows "Add a passkey" until a second is listed. Every passkey is lost -> no revision can be signed; the network expires with its applied revision (at most 30 days) and the person creates a new one and adds each machine again.
+- **UI elements:** the passkeys list; "Add a passkey"; the one-passkey warning.
+- **States covered:** alert, success, error
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again with the passkey left.
+- **Status:** draft
+- **Coverage:** DEC-0107, `recoveryReady` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `verifyEstateRecord` (a parent's authority signs the next revision)
 - **Product:** unobserved

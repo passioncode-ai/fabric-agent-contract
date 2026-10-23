@@ -82,7 +82,9 @@ Fabric runs it in the person's own Fabric, under the signing credential (DEC-006
 
 1. The machine generates its device keys, `<id>#sig` and `<id>#kem` (DEC-0053). On the machine that will be always on
    it also generates the hub's Ed25519 key.
-2. Fabric drafts **revision 1**: the signing passkey in `authorities`; the first machine with its `deviceKeys`; and, when
+2. Fabric drafts **revision 1**: the signing passkey in `authorities`, and a second one the person registers on another
+   authenticator (a phone, a security key) so that a lost passkey does not lose the estate (DEC-0107; the drafter shows
+   `recoveryReady` and lets the person go on with one, told what it costs); the first machine with its `deviceKeys`; and, when
    the first machine is the hub's, its `hubKey`. A hub key is a member of the machine it runs on (DEC-0055), so when the
    network is created on another machine, the hub key is certified in the revision that adds the always-on machine.
    Revision 1 has no `parent` (the schema).
@@ -298,6 +300,43 @@ Between `issuedAt` and that application a verifier still on the parent accepts t
 A **stolen** machine is removed, not re-keyed: re-keying keeps its id in the network, and a relay pinned before DEC-0084
 does not read a key reference in a delta entry (see *Compatibility*). It joins again, if it comes back, under a new id.
 
+## Move the hub
+
+The hub runs on one machine (NET-3). When that machine is retired, replaced or lost, the person moves the hub with one
+revision (DEC-0107):
+
+1. **The alert.** Every machine reads the heartbeat it holds with `hubSilence(heartbeatAt, at)`. Past 24 hours, the
+   hub's own longest interval (`HEARTBEAT_MAX_INTERVAL_SECONDS`), the answer is `silent` and the machine tells its
+   person, with the hours since, to bring the hub back or move it. Past 72 hours it is `stale`: calls from other
+   machines are refused ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)) until a heartbeat arrives.
+2. **The new hub.** On a `full` machine of the estate ([machine calls](machine-calls.md#machine-profiles)), its node
+   generates a new Ed25519 hub key. It already holds the delta and the heartbeat it applied, so it continues the one
+   chain: its first entry and heartbeat take the next sequences after the highest it holds.
+3. **The revision.** Fabric drafts it: the new machine's `hubKey`, and the old one removed and revoked as
+   `hub-key <old kid>` (`FAC-SEM-114`); a lost machine is also removed and revoked as `machine <id>`
+   ([Remove a machine](#remove-a-machine)). The person signs it with a passkey on any device; `hubMove(parent, next)`
+   names what moved, and whether each old key is revoked, for the network view.
+4. **The switch.** When the old hub is reachable it stops signing before the person signs; the new hub signs a heartbeat
+   right after the revision (DEC-0054). A machine that applied the revision refuses anything the old key signs after it
+   (`revoked-signer`, RD-7). An entry the old hub signed at a sequence the new hub also used, before a machine applied
+   the revision, is a second signed history (`fork`): recovery from a fork is still the revocation delta's open item.
+
+The hub key never travels between machines: a move is always a new key, so a copy of the old one on a lost disk signs
+nothing a machine on the new revision accepts.
+
+## Recover a lost passkey
+
+Any passkey the parent lists, and does not revoke, signs the next revision ([estate record](estate-record.md#the-signature)),
+so a second passkey is the recovery (DEC-0107):
+
+- **One passkey lost, another left.** The person signs, with the one left, a revision that removes the lost passkey from
+  `authorities`, lists it as `authority <credentialId>` in `revocations` and adds a new passkey; `recoveryReady` is then
+  `ready` again. The revocation delta carries no `authority` revocation (RD-5), so this is always a revision.
+- **Every passkey lost.** No one can sign the next revision, and nothing in the contract signs instead: the record is the
+  person's, not the hub's or the relay's. The estate expires with its applied revision (`validUntil`, at most 30 days);
+  the person creates a new network and adds each machine to it again. Fabric says so before it lets the person create a
+  network with one passkey.
+
 ## Change a machine's profile
 
 A machine's `profile` (DEC-0106, [machine calls](machine-calls.md#machine-profiles)) is part of the record, so the person
@@ -310,7 +349,7 @@ so a machine made `view` can still be called with an effect there; the revision 
 heartbeat, which a running hub signs right after every revision (DEC-0054); with no running hub, the old profile holds
 until the node's delta stops being current, after which it refuses every call from another machine. A change that
 makes the hub's machine `member` or `view` waits for the hub to move first (`FAC-SEM-134` refuses a hub key on either;
-CT-89). Fabric writes no `profile` until every reader of its records is pinned at or after
+[Move the hub](#move-the-hub)). Fabric writes no `profile` until every reader of its records is pinned at or after
 DEC-0106 ([machine calls](machine-calls.md#compatibility)).
 
 ## Linkability

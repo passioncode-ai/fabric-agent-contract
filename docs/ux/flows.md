@@ -649,6 +649,31 @@ flowchart TD
 
 - **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed).
 
+### FLW-27: Operator moves the hub, or recovers from a lost passkey
+
+- **Traces:** ST-032 (JTBD-10, JRN-09/#4)
+- **Goal:** the network keeps a hub and a passkey that can sign its next revision
+- **Entry points:** a machine's alert that the hub is silent; the network's passkeys in My network's machines
+- **Success exit:** a signed revision with the new hub key (the old one revoked) or the new passkey (the lost one revoked)
+- **Task analysis:** move: a machine reads `hubSilence` → silent past 24 hours: the person picks a `full` machine → its node makes a new hub key → Fabric drafts the revision (`hubMove` shows it) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`).
+- **Rejected shape:** copying the hub's private key to the new machine, rejected because a copy left on a lost disk would keep signing; a move is always a new key (DEC-0107).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A{What happened?} -->|hub silent past 24 h| M[Pick a full machine; it makes a new hub key]
+  M --> R[Revision: new hubKey, old hub-key revoked]
+  A -->|a passkey lost| P{Another passkey left?}
+  P -->|yes| Q[Revision signed by it: lost one removed and revoked, a new one added]
+  P -->|no| N[No revision can be signed: create a new network]
+  R --> S{Passkey signs?}
+  Q --> S
+  S -->|no| X[Nothing changed]
+  S -->|yes| D[Machines apply it; the new hub's heartbeat follows]
+```
+
+- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed); SCR-23 alert (the hub silent).
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

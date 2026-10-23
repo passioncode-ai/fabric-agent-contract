@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0107` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0108` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6625,3 +6625,43 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   done, CT-110 and CT-111 filed.
 - **Source:** the platform, board thread `348467e5` (A-6, A-7); the first organization server, thread `ba63565c`
   item 4; CT-85.
+
+### DEC-0107: moving the hub, and recovering a lost passkey
+
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Fabric's drafter and ceremonies, every machine's
+  alert (Fabric's nodes, Project Observatory's node), each at its next pin (CT-113).
+- **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
+  happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
+  `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
+  1. CT-89.
+- **Decision:**
+  1. **The alert.** `hubSilence(heartbeatAt, at)` reads the heartbeat a machine holds: `speaking` up to 24 hours (the
+     hub's own longest interval, `HEARTBEAT_MAX_INTERVAL_SECONDS`, exactly 24 included), `silent` past it up to 72
+     hours, `stale` past 72 hours (the 72-hour rule), `unknown` when the clock or the heartbeat does not read;
+     `sinceSeconds` floored, never below zero. A machine tells its person when the answer is `silent` or `stale`.
+  2. **Moving the hub** is one revision: a new Ed25519 hub key generated on a `full` machine (DEC-0106) and certified as
+     its `hubKey`, the old key removed and revoked as `hub-key` in the same revision (`FAC-SEM-114`), a lost machine
+     removed and revoked as well. The key is never copied between machines. The new hub continues the one chain from
+     the highest sequences it holds and signs a heartbeat right after the revision; the old hub stops first when it
+     can. `hubMove(parent, next)` names what a revision added and removed, and whether each removed key is revoked.
+  3. **Recovery.** Fabric drafts revision 1 with two passkeys on two authenticators unless the person goes on with one
+     after being told what it costs; `recoveryReady(record)` is `ready` with at least two passkeys, by distinct
+     `credentialId`, that the record does not revoke. With one passkey lost and another left, the one left signs a
+     revision that removes the lost one, revokes it as `authority` and adds a new one. With every passkey lost no
+     revision can be signed: the estate expires with its applied revision and the person creates a new network.
+- **Why:** the hub signs every heartbeat, so its silence is the first sign that calls between machines will stop at 72
+  hours; telling the person at 24, the hub's own deadline, leaves two days to act. A new key per move keeps a copy on a
+  lost disk from signing anything a machine on the new revision accepts. Only a passkey can sign a revision, and nothing
+  else may sign one instead, so a second passkey is the whole recovery.
+- **Alternatives considered:** copying the hub's private key to the new machine (a lost disk keeps a working key);
+  letting the hub or the relay sign a recovery revision (either would become the estate's authority); requiring two
+  passkeys in every record (refuses every one-passkey estate that exists today; the drafter's choice instead); an alert
+  at 72 hours (too late: calls have stopped).
+- **Compatibility:** additive: three reference functions with vectors and two ceremony texts. No schema, rule code or
+  protocol changes; a one-passkey record stays valid. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/hub-move.ts` (new), `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`,
+  `test/hub-move.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost passkey, the
+  profile change's wait), `revocation-delta.md` (the hub's own key), `conformance.md` (two rows, the module row),
+  README, DOCMAP; the UX layer (JRN-09 #4, ST-032, FLW-27, SCN-038, SCN-039, SCR-23's alert state); backlog CT-89
+  done, CT-113 filed.
+- **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.

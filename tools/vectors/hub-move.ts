@@ -63,17 +63,17 @@ const machine = (id: string, kid?: string): Json => ({ id, ...(kid ? { hubKey: h
 function moveCases(): Json[] {
   const parent = { machines: [machine("m-a", "hub-a"), machine("m-b")] };
   const cases: Array<[string, unknown, unknown, Json]> = [
-    ["an orderly move: the old key removed, not revoked", parent, { machines: [machine("m-a"), machine("m-b", "hub-b")] },
+    ["a move that leaves the old key unrevoked: FAC-SEM-114 refuses such a revision", parent, { machines: [machine("m-a"), machine("m-b", "hub-b")] },
       { moved: true, added: [{ machine: "m-b", kid: "hub-b" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
-    ["a move from a lost machine: the old key revoked", parent, { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+    ["a move: the old key revoked in the same revision", parent, { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
       { moved: true, added: [{ machine: "m-b", kid: "hub-b" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: true }] }],
     ["a move with the lost machine removed", parent, { machines: [machine("m-b", "hub-b")], revocations: [{ kind: "machine", ref: "m-a", revokedAt: NOW }, { kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
       { moved: true, added: [{ machine: "m-b", kid: "hub-b" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: true }] }],
     ["a second hub added: no move", parent, { machines: [machine("m-a", "hub-a"), machine("m-b", "hub-b")] },
       { moved: false, added: [{ machine: "m-b", kid: "hub-b" }], removed: [] }],
-    ["the hub removed with none in its place: no move, the estate has no hub", parent, { machines: [machine("m-a"), machine("m-b")] },
+    ["the hub removed with none in its place, unrevoked: no move, no hub, and FAC-SEM-114 refuses it", parent, { machines: [machine("m-a"), machine("m-b")] },
       { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
-    ["the hub's key replaced on the same machine", parent, { machines: [machine("m-a", "hub-a2"), machine("m-b")] },
+    ["the hub's key replaced on the same machine, unrevoked: FAC-SEM-114 refuses it", parent, { machines: [machine("m-a", "hub-a2"), machine("m-b")] },
       { moved: true, added: [{ machine: "m-a", kid: "hub-a2" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["nothing changed", parent, parent, { moved: false, added: [], removed: [] }],
     ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }]
@@ -84,7 +84,7 @@ function moveCases(): Json[] {
 export function hubMoveVectors(): Json {
   return {
     about:
-      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation. Every case holds in every time zone.",
+      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
     silence: silenceCases(),
     recovery: recoveryCases(),
     move: moveCases()

@@ -41,7 +41,9 @@ its id) nor by an entry applied before (`estateSigner`). Any hub of the estate m
 - **The hub's own key** (DEC-0084, the operator's NET-3): in a personal estate the hub runs on the always-on machine
   and holds a private key of its own, the Ed25519 key the record certifies as that machine's `hubKey`, never the
   machine's `#sig` key ([ceremonies](ceremonies.md#who-holds-which-key)); when it is away, heartbeats stop and the
-  72-hour rule below applies. Whichever key the record certifies as `hubKey` is the one that signs here. Domain
+  72-hour rule below applies; past 24 hours each machine tells its person, and the person moves the hub with a revision
+  ([Move the hub](ceremonies.md#move-the-hub), `hubSilence`, DEC-0107). Whichever key the record certifies as `hubKey`
+  is the one that signs here. Domain
   separation holds: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
   input, which starts with `eyJ`; and every signed document here names its `type`.
 

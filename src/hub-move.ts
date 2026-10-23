@@ -63,7 +63,7 @@ const holders = (record: JsonObject): HubHolder[] =>
 /**
  * What a revision did to the hub keys (DEC-0107): `added`, the keys `next` certifies that `parent` did not (by machine
  * and kid); `removed`, those `parent` certified that `next` does not, each with `revoked`, whether `next` lists it as a
- * `hub-key` revocation. `moved` when a key was added and one removed. A side that is no object reads as no hub.
+ * `hub-key` revocation (a removed key not revoked is a revision the record's own rules refuse, DEC-0084). `moved` when a key was added and one removed. A side that is no object reads as no hub.
  */
 export function hubMove(parent: unknown, next: unknown): { moved: boolean; added: HubHolder[]; removed: Array<HubHolder & { revoked: boolean }> } {
   const before = isObject(parent) ? holders(parent) : [];
