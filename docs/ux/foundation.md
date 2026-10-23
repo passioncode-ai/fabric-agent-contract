@@ -658,7 +658,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given an agent in `org:<id>`, when its node sends `credential-request/1`, then the request names that context, at most 30 days, and a reason with no path or credential (`FAC-SEM-138`).
   - Given an issued decision, when the envelope arrives, then the node opens it only when it answers a request it sent, under a key of the organization's current policy key set, into that context's vault slot, and deletes it at `credentialExpiresAt` (`FAC-SEM-139`).
-  - Given a revocation signed by the organization, when the node applies it, then the value and its mark are deleted.
+  - Given a revocation signed by the organization, when the node applies it, then the value of the request it names is deleted and its mark kept as revoked, so the envelope never opens again.
   - Given two of my own machines, when one sends the estate's digest key to the other, then it travels in the personal profile, refused from or to a `view` machine.
 - **Priority:** must
 - **Status:** draft

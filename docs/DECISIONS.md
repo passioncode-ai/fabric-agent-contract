@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0113` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0114` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6908,3 +6908,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/credential-exchange-*`; tests
   `test/credential-envelope.test.ts`, `test/rule-tolerance.test.ts`; backlog CT-119 done.
 - **Source:** CT-119 (the seam and product readings of PR #156, round 2, 2026-10-23).
+
+### DEC-0113: a credential revocation names its request, and the mark it leaves is revoked
+
+- **Status:** Accepted (2026-10-23). No producer or consumer has adopted `credential-revocation/1` yet (CT-117).
+- **Context:** a `credential-revocation/1` named only `(agentRef, slot)`, and the node deleted the value and its mark
+  when it stood. A revocation delivered late (a check-in response retried after the issuer had reissued into the same
+  slot) deleted the reissue, and deleting the mark let the revoked envelope open again on a repeat delivery inside its
+  `exp` (CT-118, the seam reading of PR #156).
+- **Decision:**
+  1. `credential-revocation/1` requires `requestId`, the `credential-request/1` whose credential it revokes.
+  2. `credentialRevocationStands` takes `held`, the `requestId` the credential the node holds in that slot answers, and
+     answers `{ok: true, deletes}`: `deletes` is true only when `held` is the revocation's `requestId`. A revocation that
+     names no request is `malformed`.
+  3. When it deletes, the node keeps the slot's mark with `revoked: true`; `checkCredentialEnvelope` answers `replayed`
+     for an envelope at or below a revoked mark's sequence, so the revoked envelope never opens again and a reissue
+     (a new request, a higher sequence) still does. A mark's `revoked` is absent or `true`; anything else does not read.
+- **Why:** the request is the instance's name the node already holds (the envelope carries it), so no new identifier
+  is needed, and a tombstone mark is the smallest state that keeps replay closed.
+- **Alternatives considered:** naming the envelope's sequence (a sealer that lost its sequence restarts at the clock,
+  so a sequence is a weaker name than the request); deleting the mark and keeping the request id in a second list (two
+  stores for one fact).
+- **Compatibility:** narrower: a revocation without `requestId` is refused by a reader pinned at or after this
+  decision, and `credentialRevocationStands`'s answer gains `deletes`. Nobody writes revocations yet (CT-117), so
+  nothing on the wire is refused. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/credential-revocation.schema.json`, `src/credentials.ts`
+  (`credentialRevocationStands`, the marks, step 8), `docs/specification/credentials.md` (Revocation, steps 1 and 8),
+  `conformance.md` (the node's row), SCN-041, ST-033; vectors `fixtures/vectors/credential-envelope.json` by
+  `tools/vectors/credential-envelope.ts` (`revocation`, `check`); the fixtures that carry a revocation; backlog CT-118
+  done.
+- **Source:** CT-118 (the seam reading of PR #156, 2026-10-23).
