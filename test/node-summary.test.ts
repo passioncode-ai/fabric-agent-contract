@@ -168,6 +168,8 @@ describe("repairDecision (FAC-SEM-129)", () => {
     const why = (change: Record<string, unknown>) => repairDecision({ ...base, ...change }).reason;
     expect(why({ request: { ...request, task: "something else" } })).toBe("bad-signature");
     expect(why({ keys: [] })).toBe("bad-signature");
+    // DEC-0115: a key window whose bound does not read is closed, never open.
+    expect(why({ keys: keys.map((k: Record<string, unknown>) => ({ ...k, notAfter: "next year" })) })).toBe("bad-signature");
     expect(why({ device: { id: "dev-other", org: "org-7f3a" } })).toBe("wrong-device");
     expect(why({ device: { id: "dev-01j9a", org: "org-other" } })).toBe("wrong-device");
     expect(why({ at: "2026-10-23T09:00:00Z" })).toBe("expired");

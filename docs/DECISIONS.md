@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0115` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0116` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6975,3 +6975,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/device-attribution-summary-*`, `fixtures/semantic/credential-check-in-summary-*`; tests
   `test/device-rules.test.ts`, `test/credential-envelope.test.ts`; backlog CT-91 done.
 - **Source:** CT-91 (the seam reading of `bfa9a67..4a29fcb`, 2026-10-22).
+
+### DEC-0115: a key window whose bound does not read is closed
+
+- **Status:** Accepted (2026-10-23). No wire change.
+- **Context:** three checks judge a signing key's validity window at the verifier's clock: a delivered policy's key
+  (`FAC-SEM-041`), a repair's key (`repairDecision`, DEC-0102) and a credential's key (DEC-0111). The first two read a
+  bound with `Date.parse` and skipped one that was not a string, so a bound that did not read left the window open,
+  while the third closed it (CT-120, the seam reading of PR #156, round 2).
+- **Decision:** one reference, `keyWindowHolds(t, key)` in `src/device-rules.ts`: an absent `notBefore` or `notAfter`
+  is open, one that is not an RFC 3339 instant (any offset, read strictly) closes the window, and both bounds are
+  inside. All three checks use it.
+- **Why:** a key whose window cannot be read is not known to be valid, and a security check fails closed.
+- **Alternatives considered:** refusing an unreadable bound only in the key set's own rule (`FAC-SEM-046`, which
+  already refuses a window that does not end after it starts): a key that reaches a verifier by another path would
+  still open.
+- **Compatibility:** narrower only for a key whose bound does not read, which no schema-valid key set holds.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/device-rules.ts` (`keyWindowHolds`, `policyUpdate`), `src/node-summary.ts`
+  (`repairDecision`), `src/credentials.ts`; `docs/specification/devices.md` (`FAC-SEM-041`'s row); tests
+  `test/device-rules.test.ts`, `test/node-summary.test.ts`; backlog CT-120 (that item done).
+- **Source:** CT-120.

@@ -33,7 +33,12 @@ attribution), a positive check-in fixture carrying a summary. The loop stops her
 
 `pnpm run check` (output in the pull request).
 
+## After the merge: DEC-0115
+
+CT-120's first item: `keyWindowHolds(t, key)` in `src/device-rules.ts` is the one key-window reference (an absent
+bound open, an unreadable one closing it); `FAC-SEM-041`, `repairDecision` and the credential checks use it.
+
 ## Next task
 
-CT-120 by priority: `policyUpdate` and `repairDecision` reading a key window with `Date.parse` (an unreadable bound
-opens the window where `credentials.ts` closes it).
+CT-120's remaining items by priority: `callRecordsAccepted`'s gate (`call-record/1` in a list of what a node reads),
+then the call record of a queued `fabric.job.*` call.

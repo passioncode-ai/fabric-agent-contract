@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
-import { type DeviceState, certificationSigningInput, collectionStart, expectedDecision, mergeDeviceState, policyExpiry, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature, verifyWith } from "../src/device-rules.js";
+import { type DeviceState, certificationSigningInput, collectionStart, expectedDecision, keyWindowHolds, mergeDeviceState, policyExpiry, policySigningInput, resolvePolicy, tamperEvidence, verifyPolicySignature, verifyWith } from "../src/device-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { mergeRanges, uncovered } from "../src/seq-ranges.js";
 
@@ -675,3 +675,21 @@ describe("a check-in's records against the client certificate (DEC-0114)", () =>
     expect(paths({ ...fixture, checkIn: 7 })).toEqual([]);
   });
 });
+
+describe("keyWindowHolds: a key's window (DEC-0115)", () => {
+  const t = Date.parse("2026-10-07T09:00:00Z");
+  it("is open at an absent bound, closed at an unreadable one, both bounds inside", () => {
+    expect(keyWindowHolds(t, {})).toBe(true);
+    expect(keyWindowHolds(t, { notBefore: "2026-10-07T09:00:00Z", notAfter: "2026-10-07T11:00:00+02:00" })).toBe(true);
+    expect(keyWindowHolds(t, { notAfter: "next year" })).toBe(false);
+    expect(keyWindowHolds(t, { notBefore: 7 })).toBe(false);
+    expect(keyWindowHolds(Number.NaN, {})).toBe(false);
+    expect(keyWindowHolds(t, { notBefore: "2026-10-07T09:00:01Z" })).toBe(false);
+  });
+  it("closes a delivered policy's key whose bound does not read (FAC-SEM-041)", () => {
+    const input = load("semantic/device-policy-update-ok.json").input;
+    const broken = { ...input, trustedKeys: input.trustedKeys.map((k: Json) => ({ ...k, notAfter: "the end of the year" })) };
+    expect(paths("device-policy-update", broken)).toContain("FAC-SEM-041 /next/signature/keyId");
+  });
+});
+
