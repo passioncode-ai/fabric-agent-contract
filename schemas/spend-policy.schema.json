@@ -133,7 +133,7 @@
                   "type": "null"
                 }
               ],
-              "description": "The project's spend over the last 30 days from usage reports; null when none is known."
+              "description": "The project's money spent over the last 30 days from usage reports; null when none is known, and while a usage row of the window is on a subscription (DEC-0110: the project's money is then unknown)."
             },
             "workKind": {
               "type": "string",
