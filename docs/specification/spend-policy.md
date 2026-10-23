@@ -30,7 +30,7 @@ the launcher computes the options for that project from:
 - the presets its agents declare;
 - its recent spend, from usage reports ([DEC-0021](service.md)): money only, summed over the rows not on a subscription
   ([DEC-0110](service.md#usage-report)). While a row of the window is on a subscription a project's money is unknown,
-  at most its `costUsd` (`byProject`): the launcher writes `recentSpendUsd: null` and may name that bound in the offer's
+  at most its `costUsd` (`byProject`) while its `unpricedCalls` is 0 and with no bound otherwise: the launcher writes `recentSpendUsd: null` and may name that bound in the offer's
   own wording, outside `proposal.inputs` (a member for it, and a split by route, are CT-116);
 - the kind of work.
 

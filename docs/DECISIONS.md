@@ -6732,7 +6732,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** without the token, or with a wrong one, the well-known route MUST answer `401` and its body MUST carry
   none of the service's own data: no build, pid, status, tiles, identity or member of the document. The body SHOULD be
   empty; an identity proxy in front of the service MAY answer that `401` with its own page. A host reads the status of
-  that `401` and never its body.
+  that `401` and never its body; a conformance checker reads the body only to find none of the service's data in it.
 - **Why:** the rule exists so the document does not leak without a token, and a proxy's page leaks none of it; an empty
   body is still what a service that answers the request itself writes. Reading only the status keeps a host's behaviour
   the same for both bodies.
@@ -6742,7 +6742,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** a widening: every answer the old rule admitted is still admitted. A checker pinned before this
   decision fails such a service on that rule alone until it moves. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (*Remote placement*, the service), `conformance.md`
-  (the host row), the annotation on DEC-0019, CT-114.
+  (the host and checker rows), the annotation on DEC-0019, CT-114.
 - **Source:** Fabric Inbox's request on board thread `a1c375d2` (2026-10-23).
 
 ### DEC-0110: a host sums money over the usage rows not on a subscription
@@ -6758,12 +6758,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   fixed its sum from DEC-0046's own words ("not metered") and asked the contract to write the host rule so every host
   sums alike (message `76f420d9`, and `e99aa05f` on thread `f22685d2`).
 - **Decision:** money is the sum of `costUsd` over every row whose `route` is `key`, `platform-metered` or absent; a
-  `subscription` row's `costUsd` is an estimate, which a host MUST NOT add to money spent, to a budget or to a spending
-  limit, and MAY show apart, labelled as an estimate. A window whose calls were all on a subscription spent `0`, never
+  `subscription` row's `costUsd` is an estimate, which a host MUST NOT add to money spent, to a budget, to a service's
+  spending limit or to a spend policy's level, and MAY show apart, labelled as an estimate. A window whose calls were all on a subscription spent `0`, never
   `null`; money is a lower bound while any call off a subscription is unpriced and `null` only when none of them is
   priced; calls and tokens count on every route. A day's `costUsd` stays the sum of every row, so it is money only while
   no row is on a subscription, and so are `byProject`, `taskRuns` and `byGrant`'s, which carry no route: a host shows
-  them as cost including estimates and never counts them against a limit while a row of the window is on one; a project's money is then unknown, at most its `costUsd`. A host
+  them as cost including estimates and never counts them against a limit while a row of the window is on one; a project's money is then unknown, at most its `costUsd` while its `unpricedCalls` is 0 and with no bound otherwise. A host
   reads `budget.spentUsd` and `budgets[]` as money, and a service SHOULD count only money there. `usageSpend(rows)`
   (`src/usage-rules.ts`) is the reference sum over `days[].byModel[]` rows and refuses an unknown `route`.
 - **Why:** an operator reading "spend" reads money, and limits are money: an estimate in the sum trips a limit on calls

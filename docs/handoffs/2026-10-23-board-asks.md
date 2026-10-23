@@ -37,6 +37,10 @@ subscription row, the pull request's checks, `usageSpend`'s comment on a missing
 Round 3: five text breaks (the launcher's bound has no `proposal.inputs` member, so `recentSpendUsd` is null; the usage
 schema's descriptions said spent; the checker's row split from the host's; CT-116 in the records; the next task's
 reference), fixed.
+Round 4: three text breaks (a project's bound holds only while its `unpricedCalls` is 0; the checker row's list of
+forbidden members against the well-known schema; "spent" in the usage report's opening), fixed; risks fixed: the host
+and checker sentence in service.md and the decision, one wording of where an estimate never goes, `recentSpendUsd`'s
+description.
 
 ## Checks actually run
 

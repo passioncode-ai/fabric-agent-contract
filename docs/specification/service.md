@@ -295,8 +295,9 @@ Schema: [`service-usage.schema.json`](../../schemas/service-usage.schema.json). 
 service that calls paid models or tools SHOULD offer it (DEC-0021).
 
 `GET <surfaces.usage.path>` (conventionally `/fabric/v1/usage`) MUST require the service token
-and answers what the service spent, self-reported from its own usage receipts, so a host can
-show every agent's spend beside its health without knowing any provider.
+and answers what the service's calls cost, self-reported from its own usage receipts (money, and a subscription's
+estimate apart by route, DEC-0110), so a host can show every agent's spend beside its health without knowing any
+provider.
 
 - `days` covers at most the last 31 UTC days, oldest first, one entry per date, today last if
   there was activity today. A day without calls MAY be omitted. There is no paging and no query. Every date exists,
@@ -330,7 +331,7 @@ show every agent's spend beside its health without knowing any provider.
   every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; so are a project's, a task run's
   and a grant's `costUsd` (`byProject`, `taskRuns`, `byGrant`), which carry no route: a host shows them as cost
   including estimates while any row of the window is on a subscription, and never counts them against a budget, a
-  service's spending limit or a spend policy's level then: a project's money is unknown, at most its `costUsd` (a
+  service's spending limit or a spend policy's level then: a project's money is unknown, at most its `costUsd` while its `unpricedCalls` is 0 and with no bound otherwise (a
   split by route is CT-116). A
   host reads `budget.spentUsd` and each `budgets[]` entry as money, and a service SHOULD count only money there.
   `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the reference sum over `days[].byModel[]`
@@ -505,7 +506,8 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the service's own data: no build, pid, status, tiles, identity or member of the document. The
   body SHOULD be empty; an identity proxy in front of the service (Cloudflare Access, an ingress)
   MAY answer that `401` with its own page, which the service never sees (DEC-0109). A host reads
-  the status of that `401` and never its body. With the token, the document is the one this
+  the status of that `401` and never its body; a conformance checker reads the body only to find none of
+  the service's data in it. With the token, the document is the one this
   extension defines.
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
