@@ -929,10 +929,10 @@ independent agent author and P-02 project operator.
   1. The DNS agent answers -> its node writes `call-record/1` (the two agents, `dns.records.update`, the times, `completed`, its cost) and sends it at check-in.
   2. The administrator opens the calls -> the record is listed under its trace id.
 - **Expected result:** the administrator knows who called whom, how it ended and what it cost; no prompt, argument or output is in the record.
-- **Alt paths:** the call was refused by the callee (its queue full, `queue-full`) -> the record says `refused` with that code. The caller got no answer -> the caller's node records `timeout` under the same `callId`. A member's notice does not name agent calls -> the server's check-in responses say `callRecordsAccepted: false`, and their node sends none.
+- **Alt paths:** the call was refused by the callee (its queue full, `queue-full`) -> the record says `refused` with that code. The callee queued the call as a job -> one record when the job ends, from its start to its final state, and none for the caller's `fabric.job.get` polls (DEC-0116). The caller got no answer -> the caller's node records `timeout` under the same `callId`. A member's notice does not name agent calls -> the server's check-in responses say `callRecordsAccepted: false`, and their node sends none.
 - **UI elements:** one row per call, grouped by trace.
 - **States covered:** success, empty
 - **Errors & recovery:** a record that ends before it starts, or a completed call with a code -> `FAC-SEM-140` names it.
 - **Status:** draft
-- **Coverage:** DEC-0111, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
+- **Coverage:** DEC-0111, DEC-0116, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
 - **Product:** unobserved

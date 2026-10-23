@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0116` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0117` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6999,3 +6999,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`repairDecision`), `src/credentials.ts`; `docs/specification/devices.md` (`FAC-SEM-041`'s and `FAC-SEM-046`'s rows), `node-summary.md` (a repair's key); tests
   `test/device-rules.test.ts`, `test/node-summary.test.ts`; backlog CT-120 (that item done).
 - **Source:** CT-120.
+
+### DEC-0116: which `protocols` list gates each credential member, and one call record for a queued call
+
+- **Status:** Accepted (2026-10-23). No wire change.
+- **Context:** DEC-0111 gated each new check-in member on "a peer that lists the protocol in its `protocols`", but a
+  node's `protocols` lists what it reads and a server's what it accepts from the device (DEC-0067, DEC-0094), and
+  `callRecordsAccepted` was gated on `call-record/1` in a node's list although a node reads no call record. Nor did
+  DEC-0111 say who writes the call record of a call the callee queued as a `fabric.job.*` job (CT-120).
+- **Decision:**
+  1. Each side gates on the other's own list: a node sends `credentialRequests` and `callRecords` only to a server whose
+     response `protocols` lists `credential-request/1` and `call-record/1`; a server sends `credentialDecisions`,
+     `credentials`, `credentialRevocations` and `callRecordsAccepted` only to a node whose check-in `protocols` lists
+     `credential-decision/1`, `fabric-credential-envelope/1`, `credential-revocation/1` and `call-record/1`. A node
+     lists `call-record/1` among what it reads when it reads `callRecordsAccepted`.
+  2. A queued call is one call: the callee writes one record when the job reaches a final state, from the start to
+     that state, with the job's outcome (a `failed` job's code its `error.code`, a `cancelled` job's `job-cancelled`,
+     as `FAC-SEM-140` asks a code of every outcome but `completed`); `fabric.job.get`, `list` and `cancel` write none
+     of their own. A job the caller learns is lost (`unknown-job`) or stops waiting for is a call that got no answer:
+     the caller writes `unknown` under the starting call's `callId`.
+- **Why:** the lists already exist with these meanings, so the gate needs no new member; a job is the call the caller
+  made, and one record per call keeps the join by `callId`.
+- **Alternatives considered:** a separate `writes` list on the node (a new member for one boolean); one record per
+  `fabric.job.*` call (a poll loop would write hundreds for one task).
+- **Compatibility:** none on the wire; a node or server that gated on the other list reads it from the right one.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/credentials.md` (Compatibility, the call record), `devices.md` (the
+  check-in's credential members), `conformance.md` (the node's row), SCN-042, ST-034; fixture
+  `fixtures/semantic/call-record-job-cancelled.json`; backlog CT-120 (those two items done, the repair request's gate
+  filed).
+- **Source:** CT-120 (the round-2 readings of PR #156).
