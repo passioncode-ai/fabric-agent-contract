@@ -6883,10 +6883,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. Kind `device-check-in` runs, beside `FAC-SEM-099`, each `credentialRequests` entry under `FAC-SEM-138`'s rules for a
      request alone and each `callRecords` entry under `FAC-SEM-140`, each finding under its member's path.
   2. A check-in sends each `requestId` once (`FAC-SEM-138`) and each `callId` once (`FAC-SEM-140`); its call records name
-     an organization's context only (`FAC-SEM-140`), and its requests and call records name one context, since a
+     an organization's context only (`FAC-SEM-140`), and its requests, call records and `nodeSummary` name one context, since a
      check-in goes to one organization (`FAC-SEM-138` when it carries a request, else `FAC-SEM-140`).
-  3. A response decides each `requestId` once and carries no envelope for a request it refuses or leaves pending
-     (`FAC-SEM-138`). An envelope whose decision came in an earlier response passes: the node reads the decisions it
+  3. A response decides each `requestId` once, carries only envelopes of an organization's context (a personal one
+     travels over the relay) and none for a request it refuses or leaves pending (`FAC-SEM-138`). An envelope whose decision came in an earlier response passes: the node reads the decisions it
      holds.
   4. Kind `credential-exchange` on `{sent, response}` (the requests a node sent to one organization and holds open, and
      that organization's response): every decision answers a request the node sent and passes `FAC-SEM-138` against it,

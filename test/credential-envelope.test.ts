@@ -291,6 +291,10 @@ describe("a check-in's credential members (DEC-0112)", () => {
     expect(at("device-check-in", withRecords(checkIn, { credentialRequests: [request, request] }))).toEqual(["FAC-SEM-138 /records/credentialRequests/1/requestId"]);
     expect(at("device-check-in", withRecords(checkIn, { callRecords: [call, call] }))).toEqual(["FAC-SEM-140 /records/callRecords/1/callId"]);
     expect(at("device-check-in", withRecords(checkIn, { callRecords: [{ ...call, callId: 7 }, { ...call, callId: 7 }] }))).toEqual([]);
+    // The path names the duplicate's own index, whatever comes before it.
+    expect(at("device-check-in", withRecords(checkIn, { credentialRequests: [7, request, request] }))).toEqual(["FAC-SEM-138 /records/credentialRequests/2/requestId"]);
+    expect(at("device-check-in", withRecords(checkIn, { callRecords: [null, call, call] }))).toEqual(["FAC-SEM-140 /records/callRecords/2/callId"]);
+    expect(at("device-check-in", withRecords(response, { credentialDecisions: ["x", decision, decision] }))).toEqual(["FAC-SEM-138 /records/credentialDecisions/2/requestId"]);
   });
 
   it("carries call records of one organization's context, the one its requests name", () => {
@@ -298,6 +302,10 @@ describe("a check-in's credential members (DEC-0112)", () => {
     expect(at("device-check-in", withRecords(checkIn, { callRecords: [{ ...call, context: 7 }] }))).toEqual(["FAC-SEM-140 /records/callRecords/0/context"]);
     expect(at("device-check-in", withRecords(checkIn, { callRecords: [{ ...call, context: "org:org-9c1d" }] }))).toEqual(["FAC-SEM-138 /records"]);
     expect(at("device-check-in", withRecords(checkIn, { credentialRequests: [], callRecords: [call, { ...call, callId: "2c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f", context: "org:org-9c1d" }] }))).toEqual(["FAC-SEM-140 /records"]);
+    // The node summary names the enrollment's context too.
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { context: "org:org-9c1d" } }))).toEqual(["FAC-SEM-138 /records"]);
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { context: "org:org-7f3a" } }))).toEqual([]);
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: "x" }))).toEqual([]);
   });
 
   it("decides each request once and seals only an issued one", () => {
@@ -307,6 +315,7 @@ describe("a check-in's credential members (DEC-0112)", () => {
     // An envelope whose decision came in an earlier response passes: the node reads the decisions it holds.
     expect(at("device-check-in", withRecords(response, { credentialDecisions: [] }))).toEqual([]);
     expect(at("device-check-in", withRecords(response, { credentials: [{ ...envelope, header: "x" }] }))).toEqual([]);
+    expect(at("device-check-in", withRecords(response, { credentials: [{ ...envelope, header: { ...(envelope.header as Json), context: "personal", requestId: undefined } }] }))).toEqual(["FAC-SEM-138 /records/credentials/0/header/context"]);
   });
 
   it("matches a response's decisions and envelopes against the requests the node sent", () => {

@@ -427,18 +427,18 @@ export function callRecordFindings(record: unknown, prefix = ""): Finding[] {
 
 /**
  * DEC-0112 on a bare check-in or check-in response (kind `device-check-in`, beside FAC-SEM-099): a check-in's
- * `credentialRequests` each pass FAC-SEM-138's own rules, name one `requestId` once and one organization's context, the
- * one its `callRecords` name; its `callRecords` each pass FAC-SEM-140 and name one `callId` once. A response's
- * `credentialDecisions` name one `requestId` once, and an envelope in its `credentials` never names a request that the
- * same response refuses or leaves pending. Never throws on a JSON value.
+ * `credentialRequests` each pass FAC-SEM-138's own rules and name one `requestId` once; its `callRecords` each pass
+ * FAC-SEM-140, name one `callId` once and an organization's context; its requests, call records and node summary name one
+ * context. A response's `credentialDecisions` name one `requestId` once, and an envelope in its `credentials` is an
+ * organization's and never names a request that the same response refuses or leaves pending. Never throws on a JSON value.
  */
 export function checkInCredentialFindings(value: JsonObject): Finding[] {
   const records = isObject(value.records) ? value.records : {};
   const findings: Finding[] = [];
   const contexts = new Set<string>();
-  const once = (entries: JsonObject[], key: string, code: string, at: string, message: string) => {
+  const once = (entries: Array<[JsonObject, number]>, key: string, code: string, at: string, message: string) => {
     const seen = new Set<string>();
-    entries.forEach((entry, index) => {
+    entries.forEach(([entry, index]) => {
       const id = entry[key];
       if (!isString(id)) return;
       if (seen.has(id)) findings.push(flag(code, `${at}/${index}/${key}`, message));
@@ -450,7 +450,7 @@ export function checkInCredentialFindings(value: JsonObject): Finding[] {
     findings.push(...requestFindings(request, `/records/credentialRequests/${index}`));
     if (isString(request.context)) contexts.add(request.context);
   });
-  once(requests.map(([r]) => r), "requestId", "FAC-SEM-138", "/records/credentialRequests", "a check-in sends each request once");
+  once(requests, "requestId", "FAC-SEM-138", "/records/credentialRequests", "a check-in sends each request once");
   const calls = indexed(records.callRecords);
   calls.forEach(([record, index]) => {
     findings.push(...callRecordFindings(record, `/records/callRecords/${index}`));
@@ -458,13 +458,18 @@ export function checkInCredentialFindings(value: JsonObject): Finding[] {
     if (!isString(record.context) || !record.context.startsWith(ORG_CONTEXT_PREFIX)) findings.push(flag("FAC-SEM-140", `/records/callRecords/${index}/context`, "a check-in carries call records of an organization's context only"));
     else contexts.add(record.context);
   });
-  once(calls.map(([r]) => r), "callId", "FAC-SEM-140", "/records/callRecords", "a check-in sends each call record once");
+  once(calls, "callId", "FAC-SEM-140", "/records/callRecords", "a check-in sends each call record once");
+  // The node summary names its enrollment's own context too (DEC-0102), so it joins the one organization.
+  const summary = isObject(records.nodeSummary) ? records.nodeSummary.context : undefined;
+  if (isString(summary)) contexts.add(summary);
   if (contexts.size > 1) findings.push(flag(requests.length > 0 ? "FAC-SEM-138" : "FAC-SEM-140", "/records", "a check-in goes to one organization: its requests and call records name one context"));
   const decisions = indexed(records.credentialDecisions);
-  once(decisions.map(([d]) => d), "requestId", "FAC-SEM-138", "/records/credentialDecisions", "a response decides each request once");
+  once(decisions, "requestId", "FAC-SEM-138", "/records/credentialDecisions", "a response decides each request once");
   const unissued = new Set(decisions.filter(([d]) => d.outcome !== "issued").map(([d]) => d.requestId));
   indexed(records.credentials).forEach(([envelope, index]) => {
     const header = isObject(envelope.header) ? envelope.header : {};
+    // A personal envelope travels over the relay, never in a check-in response (credentials.md, the profiles).
+    if (header.context === PERSONAL_CONTEXT) findings.push(flag("FAC-SEM-138", `/records/credentials/${index}/header/context`, "a check-in response carries an organization's envelopes only"));
     if (isString(header.requestId) && unissued.has(header.requestId)) findings.push(flag("FAC-SEM-138", `/records/credentials/${index}/header/requestId`, "an envelope answers an issued decision, never one its response refuses or leaves pending"));
   });
   return findings;

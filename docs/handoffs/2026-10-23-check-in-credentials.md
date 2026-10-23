@@ -26,6 +26,14 @@ them.
 - CT-91 (a check-in's `records.nodeSummary` judged with the certificate's device and organization) stays open: it needs
   the certificate as input, which a bare check-in does not carry.
 
+## Readings
+
+Unit: pass, one risk fixed (a duplicate's path named its index among object entries, not its own). Seam with the
+documents: one break fixed (conformance's collector row said a check-in carries no context but the node summary's),
+with its risks: the node summary joins the one-organization rule, a response carries no personal envelope, the
+FAC-SEM-140 row and the organization server's row name DEC-0112's duties; a semantic fixture's schema not held by the
+gate is filed in CT-120. What remains is wording, so the loop stops here.
+
 ## Checks actually run
 
 `pnpm run check` (output in the pull request).
