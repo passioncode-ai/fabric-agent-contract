@@ -6630,7 +6630,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Status:** Accepted source change (2026-10-23). Consumer adoption: Fabric's drafter, hub and ceremonies, every
   machine's alert and anchor (Fabric's nodes, Project Observatory's node), the relay and the first organization server's
-  vendored estate-record schema, each at its next pin (CT-113).
+  vendored estate-record schema, the Fabric Agent Adapter's kits (`FAC-SEM-137`, `fixtures/vectors/hub-move.json`),
+  each at its next pin (CT-113).
 - **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
   happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
   `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
@@ -6645,7 +6646,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      unplanned move only while `hubSilence` over the latest heartbeat it holds after reconnecting to the relay is still
      `silent`, `stale` or `unknown`; a record that certifies no hub key yet asks for the always-on machine instead. A
      planned move (the hub's machine retired or replaced, or about to become `member` or `view`) is offered on the hub
-     machine's own row whatever `hubSilence` answers, and follows DL-15.
+     machine's own row whatever `hubSilence` answers, and follows DL-15. "Remove" on the hub's machine opens the move
+     too, whatever `hubSilence` answers: the person declaring the machine lost (stolen, dead, or running out of reach)
+     takes the one-revision move of a lost hub, otherwise the planned one.
   2. **The anchor.** `estate-record/1` gains an optional `deltaAnchor` `{sequence, sha256}`: a head of the delta the
      revision vouches for, every revocation up to it listed in the record. `anchorDelta(state, record)` starts a
      machine's chain at an anchor past its head (`DeltaState.anchor`) only when the record lists the revocation of every

@@ -311,8 +311,10 @@ does not read a key reference in a delta entry (see *Compatibility*). It joins a
 
 The hub runs on one always-on machine (NET-3). When that machine is retired, replaced or lost, the person moves the hub
 (DEC-0107). A **planned move** (the machine retired or replaced, or about to become `member` or `view`) starts from
-"Move the hub" on the hub machine's own row, while the hub still runs, and follows step 3. An **unplanned move** starts
-from the alert:
+"Move the hub" on the hub machine's own row, whatever `hubSilence` answers, and follows step 3. "Remove" on the hub's
+machine opens the move as well: a machine the person declares lost (stolen, dead, or running out of reach) takes step
+4's one revision whatever `hubSilence` answers, any other the planned move. An **unplanned move** starts from the
+alert:
 
 1. **The alert.** While the record it applied certifies a hub key, every machine reads the heartbeat it holds with
    `hubSilence(heartbeatAt, at)`; a record that certifies none yet asks for the always-on machine instead. Past 24 hours, the

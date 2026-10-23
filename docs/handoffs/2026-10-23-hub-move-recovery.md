@@ -62,6 +62,10 @@ item 3 words it (the lease rule, the relay's refusal branch); risks fixed: the s
 Compatibility and the delta's text, the check-in head under an anchor (devices.md), the relay's refusal branch in the
 ceremonies' adopters; shared vectors for the anchored `applyDelta` and `FAC-SEM-137` through `verifyEstateRecord` go to
 CT-113.
+Round 6: seam pass (its risks fixed: the lease-issuer conformance row, the head under an anchor in two schema
+descriptions, the Fabric Agent Adapter's kits named as a reader in the status and CT-113); product two breaks, fixed:
+"Remove" on the hub's machine is a third way into the move (a machine declared lost takes the one-revision move whatever
+the alert says), and the conformance row raises the alert only while the record certifies a hub key.
 
 ## Checks actually run
 
