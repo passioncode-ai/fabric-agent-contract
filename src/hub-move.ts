@@ -26,7 +26,7 @@ export type HubSilence =
  * How long the hub has been silent, from the `at` of the heartbeat a machine holds (DEC-0107): `speaking` up to 24 hours
  * (24 hours exactly included), `silent` past it and up to 72 hours (the person is told to move the hub), `stale` past 72
  * hours (calls from other machines are refused, `deltaFreshness`). `sinceSeconds` is whole seconds, floored, never below
- * zero; a heartbeat ahead of the clock reads as just signed. `unknown` when the clock does not read or no heartbeat is held.
+ * zero; a heartbeat ahead of the clock reads as just signed (a held one was accepted at most 60 s ahead, RD-6). `unknown` when the clock does not read or no heartbeat is held.
  */
 export function hubSilence(heartbeatAt: unknown, at: unknown): HubSilence {
   const now = isString(at) ? strictTime(at) : Number.NaN;
@@ -57,21 +57,31 @@ export function recoveryReady(record: unknown): { ready: boolean; authorities: n
 /** One machine's certified hub key, by machine id and kid. */
 export interface HubHolder { machine: string; kid: string }
 
-const holders = (record: JsonObject): HubHolder[] =>
-  list(record.machines).flatMap((machine) => (isString(machine.id) && isObject(machine.hubKey) && isString(machine.hubKey.kid) ? [{ machine: machine.id, kid: machine.hubKey.kid }] : []));
+/** A machine's hub key, its public `x` beside it so a key replaced under the same kid reads as a change. */
+interface Held extends HubHolder { x: unknown }
+
+/** The hub keys a record certifies, the first entry of a machine listed twice only, as the record's own rules read it. */
+const holders = (record: JsonObject): Held[] => {
+  const seen = new Set<unknown>();
+  return list(record.machines).flatMap((machine) => {
+    if (seen.has(machine.id)) return [];
+    seen.add(machine.id);
+    return isString(machine.id) && isObject(machine.hubKey) && isString(machine.hubKey.kid) ? [{ machine: machine.id, kid: machine.hubKey.kid, x: machine.hubKey.x }] : [];
+  });
+};
 
 /**
- * What a revision did to the hub keys (DEC-0107): `added`, the keys `next` certifies that `parent` did not (by machine
- * and kid); `removed`, those `parent` certified that `next` does not, each with `revoked`, whether `next` lists it as a
+ * What a revision did to the hub keys (DEC-0107): `added`, the keys `next` certifies that `parent` did not (by machine,
+ * kid and public `x`, so a key replaced under one kid is added and removed); `removed`, those `parent` certified that `next` does not, each with `revoked`, whether `next` lists it as a
  * `hub-key` revocation (a removed key not revoked is a revision the record's own rules refuse, DEC-0084). `moved` when a key was added and one removed. A side that is no object reads as no hub.
  */
 export function hubMove(parent: unknown, next: unknown): { moved: boolean; added: HubHolder[]; removed: Array<HubHolder & { revoked: boolean }> } {
   const before = isObject(parent) ? holders(parent) : [];
   const after = isObject(next) ? holders(next) : [];
-  const same = (a: HubHolder) => (b: HubHolder) => a.machine === b.machine && a.kid === b.kid;
+  const same = (a: Held) => (b: Held) => a.machine === b.machine && a.kid === b.kid && a.x === b.x;
   const gone = isObject(next) ? revoked(next, "hub-key") : new Set<unknown>();
-  const added = after.filter((holder) => !before.some(same(holder)));
-  const removed = before.filter((holder) => !after.some(same(holder))).map((holder) => ({ ...holder, revoked: gone.has(holder.kid) }));
+  const added = after.filter((holder) => !before.some(same(holder))).map(({ machine, kid }) => ({ machine, kid }));
+  const removed = before.filter((holder) => !after.some(same(holder))).map(({ machine, kid }) => ({ machine, kid, revoked: gone.has(kid) }));
   return { moved: added.length > 0 && removed.length > 0, added, removed };
 }
 // #endregion hub-move

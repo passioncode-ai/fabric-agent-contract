@@ -57,8 +57,10 @@ function recoveryCases(): Json[] {
   return cases.map(([name, record, expect]) => ({ name, record, expect }));
 }
 
-const hubKey = (kid: string): Json => ({ kty: "OKP", crv: "Ed25519", alg: "EdDSA", kid, x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo" });
-const machine = (id: string, kid?: string): Json => ({ id, ...(kid ? { hubKey: hubKey(kid) } : {}) });
+const X = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
+const X2 = "Pr10mR4vI7xmKAz9WpIG3oPBWHnApm7gtEmRbHtnmdc";
+const hubKey = (kid: string, x = X): Json => ({ kty: "OKP", crv: "Ed25519", alg: "EdDSA", kid, x });
+const machine = (id: string, kid?: string, x?: string): Json => ({ id, ...(kid ? { hubKey: hubKey(kid, x) } : {}) });
 
 function moveCases(): Json[] {
   const parent = { machines: [machine("m-a", "hub-a"), machine("m-b")] };
@@ -76,6 +78,10 @@ function moveCases(): Json[] {
     ["the hub's key replaced on the same machine, unrevoked: FAC-SEM-114 refuses it", parent, { machines: [machine("m-a", "hub-a2"), machine("m-b")] },
       { moved: true, added: [{ machine: "m-a", kid: "hub-a2" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["nothing changed", parent, parent, { moved: false, added: [], removed: [] }],
+    ["another key under the same kid: added and removed, as the record's rules read it", parent, { machines: [machine("m-a", "hub-a", X2), machine("m-b")] },
+      { moved: true, added: [{ machine: "m-a", kid: "hub-a" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
+    ["a machine listed twice: its first entry only", parent, { machines: [machine("m-a"), machine("m-a", "hub-a"), machine("m-b")] },
+      { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }]
   ];
   return cases.map(([name, parentRecord, next, expect]) => ({ name, parent: parentRecord, next, expect }));
@@ -84,7 +90,7 @@ function moveCases(): Json[] {
 export function hubMoveVectors(): Json {
   return {
     about:
-      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine and kid in the order the record lists machines, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
+      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
     silence: silenceCases(),
     recovery: recoveryCases(),
     move: moveCases()
