@@ -6518,7 +6518,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0105: the dash-encoded home path after any separator, and no "not shared" member in a node summary
 
 - **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory's node (its own stricter
-  check already runs), any port of `hasHomePath` or of the `sourceKey` pattern.
+  check already runs; its default of summaries off per organization does not meet the at-least-daily duty until the
+  operator answers CT-92), the first organization server (its vendored `activity-rules.ts` and `activity-common`
+  schema, as receiver of activity batches and summaries) and the relay's vendored `activity-common` schema, each at
+  its next pin; any other port of `hasHomePath` or of the `sourceKey` pattern.
 - **Context:** Project Observatory's review of its `node-summary/1` implementation (engine PR #345, at contract pin
   `f33f4d8a`; board thread `b2511678`, message `72d70cd3`) found two things. `FAC-SEM-128`'s second home-path pattern,
   shared with `FAC-SEM-037` (`HOME_PATH` in `src/activity-rules.ts`), fires only when the dashed form follows `/`,
@@ -6527,7 +6530,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   while it keeps summaries off by default per organization until the operator answers CT-92.
 - **Decision:**
   1. The dashed form `-Users-<x>` or `-home-<x>` is a home path after any character that is not an ASCII letter or
-     digit, or at the start: `HOME_PATH`'s second pattern is `(?:^|[^A-Za-z0-9])-(?:[Uu]sers|home)-[A-Za-z0-9]`, and the
+     digit (ASCII), or at the start: `HOME_PATH`'s second pattern is `(?:^|[^A-Za-z0-9])-(?:[Uu]sers|home)-[A-Za-z0-9]`, and the
      `sourceKey` pattern of `activity-common.schema.json` refuses it after any character its alphabet allows that is not
      a letter or digit (`._:~#-`). `my-users-list` and `Users-guide` stay ordinary.
   2. A node summary carries no member that says it is withheld. Whether a node may withhold its summary, or leave names
@@ -6542,7 +6545,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   character, valid before, is refused. No valid example of the contract changes. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/activity-rules.ts` (`HOME_PATH`), `schemas/activity-common.schema.json`
   (`sourceKey`), fixtures `fixtures/semantic/node-summary-home-after-dot.json` and
-  `fixtures/semantic/node-summary-home-after-at.json`, `test/activity-rules.test.ts`; docs `node-summary.md` (what it
-  never carries, Not decided).
+  `fixtures/semantic/node-summary-home-after-at.json`, `test/activity-rules.test.ts`, `test/node-summary.test.ts`;
+  docs `node-summary.md` (what it never carries, Not decided), `activity.md` (the dash forms), `docs/backlog.md`
+  (CT-92 gains the person's-choice question, CT-109 filed).
 - **Source:** Project Observatory, board thread `b2511678`, message `72d70cd3` (2026-10-23).
 

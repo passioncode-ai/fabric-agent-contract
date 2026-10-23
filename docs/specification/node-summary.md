@@ -36,7 +36,7 @@ installed for another context. Until the operator answers, the whole harness shi
 
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
 or space, by schema; no string holds a home directory, the dash forms runtimes write into file names included after
-any character that is not a letter or a digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
+any character that is not an ASCII letter or digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
 output or a file's content. A personal agent service is not listed toward an organization; the organization sees the
 machine's harness because the operator decided work machines are transparent to their organization (S8), named as a
 purpose in its notice.

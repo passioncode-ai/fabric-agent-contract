@@ -272,7 +272,8 @@ kind, followed by a name. The forms it covers:
   `C:\Users\<name>`;
 - URL-encoded slash forms, once or twice: `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
 - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`,
-  `-home-<name>-`;
+  `-home-<name>-`, at the start or after any character that is not an ASCII letter or digit (`x.-Users-<name>`,
+  `p@-Users-<name>`, DEC-0105);
 - tilde forms: `~/` and `~<name>/`.
 
 `Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not

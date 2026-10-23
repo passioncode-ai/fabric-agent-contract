@@ -68,6 +68,8 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
     expect(valid("proj--home-example-x:4")).toBe(false);
     expect(valid("x.-Users-example-work:4")).toBe(false);
     expect(valid("p~-home-example-x")).toBe(false);
+    expect(valid("x_-home-example-y")).toBe(false);
+    expect(valid("x#-Users-example-y")).toBe(false);
     expect(valid("my-users-list:4")).toBe(true);
   });
 
