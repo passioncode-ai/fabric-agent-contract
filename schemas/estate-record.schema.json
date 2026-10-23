@@ -97,6 +97,26 @@
       },
       "description": "Share grants (DEC-0037, DEC-0039): standing grants to a person or organization outside the estate, each a delegation grant with an audience. A share grant into an organization carries its context, org:<orgId>, never personal (DEC-0082, FAC-SEM-110); an instance placed in that context names it (FAC-SEM-111)."
     },
+    "deltaAnchor": {
+      "type": "object",
+      "required": [
+        "sequence",
+        "sha256"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "description": "DEC-0107: the revocation delta's head this revision vouches for, as a check-in reports it. Every revocation of the entries up to it is in this record (reconciliation, DEC-0054), so a machine that does not hold those entries starts its chain here (anchorDelta) instead of verifying entries an estate key the record no longer certifies signed. Never moves back (FAC-SEM-137)."
+    },
     "revocations": {
       "type": "array",
       "maxItems": 4096,

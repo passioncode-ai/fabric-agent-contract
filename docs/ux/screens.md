@@ -28,7 +28,7 @@
 | SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
-| SCR-23 | My network's machines | FLW-20, FLW-26 | disabled | proposed | `test/ceremonies.test.ts` |
+| SCR-23 | My network's machines | FLW-20, FLW-26, FLW-27 | disabled | proposed | `test/ceremonies.test.ts` |
 | SCR-24 | An agent's connections | FLW-21 | disabled | proposed | `test/connections.test.ts` |
 | SCR-25 | Agent directory | FLW-22 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-26 | An agent's load | FLW-24 | disabled | proposed | `test/agent-network.test.ts` |
@@ -295,13 +295,13 @@
 
 ### SCR-23: My network's machines
 
-- **Used by:** FLW-20, FLW-26
-- **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, each by one signed revision.
-- **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none.
-- **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106.
-- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`; `machineProfile`, `FAC-SEM-134`), `fixtures/semantic/estate-profile-*`, `test/ceremonies.test.ts`, `test/estate-record.test.ts`
-- **Scenarios:** SCN-029, SCN-030, SCN-037
-- **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
+- **Used by:** FLW-20, FLW-26, FLW-27
+- **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, moves the hub, and adds or replaces a passkey, each by a signed revision.
+- **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none; "Move the hub" on the hub machine's own row (a planned move); "Remove" on the hub's machine asks whether it is lost (one revision) or retired (the planned move); the hub alert with the hours since and "Move the hub" (an unplanned move), each opening a picker of the `full` machines with a note to choose one that stays on; the passkeys list with "Add a passkey" and the one-passkey warning.
+- **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106; alert: while the record certifies a hub key, this machine has not heard from the hub for more than 24 hours, or holds no heartbeat, shown at once with the hours since, whether calls between machines have stopped (past 72 hours, or no readable heartbeat) and "Move the hub", offered only after reconnecting to the relay and reading `hubSilence` again; or one passkey only, with "Add a passkey" (`recoveryReady`).
+- **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`; `machineProfile`, `FAC-SEM-134`), `fixtures/semantic/estate-profile-*`, `test/ceremonies.test.ts`, `test/estate-record.test.ts`, `src/hub-move.ts`, `test/hub-move.test.ts`
+- **Scenarios:** SCN-029, SCN-030, SCN-037, SCN-038, SCN-039
+- **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key, Move the hub, Recover a lost passkey
 - **Status:** proposed
 
 ### SCR-24: An agent's connections

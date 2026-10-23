@@ -41,7 +41,9 @@ its id) nor by an entry applied before (`estateSigner`). Any hub of the estate m
 - **The hub's own key** (DEC-0084, the operator's NET-3): in a personal estate the hub runs on the always-on machine
   and holds a private key of its own, the Ed25519 key the record certifies as that machine's `hubKey`, never the
   machine's `#sig` key ([ceremonies](ceremonies.md#who-holds-which-key)); when it is away, heartbeats stop and the
-  72-hour rule below applies. Whichever key the record certifies as `hubKey` is the one that signs here. Domain
+  72-hour rule below applies; past 24 hours each machine tells its person, and the person moves the hub with a revision
+  ([Move the hub](ceremonies.md#move-the-hub), `hubSilence`, DEC-0107). Whichever key the record certifies as `hubKey`
+  is the one that signs here. Domain
   separation holds: a delta entry and a heartbeat sign RFC 8785 JSON, which starts with `{`; a delegation token signs a JWS signing
   input, which starts with `eyJ`; and every signed document here names its `type`.
 
@@ -115,7 +117,9 @@ before a refused one stay applied, since each is a valid revocation:
 | RD-9 | `gap` | the sequence is past the next one: the machine asks from its head with `delta-query` |
 | RD-10 | `broken-chain`, `fork` | a signed entry whose `prev` is not the head the machine holds, or that differs from the entry it holds at that sequence: a second signed history |
 
-An entry the machine already holds (the same hash at its sequence) is skipped, so a repeated page changes nothing.
+An entry the machine already holds (the same hash at its sequence) is skipped before its signature is checked
+(DEC-0107), so a repeated page changes nothing, whatever signature the copy carries: the hash covers everything but
+`sig`, and the held entry's own signature was verified when it was placed.
 Signatures are checked before the chain, so only a validly signed entry can mark a machine `broken`: an unsigned or
 altered entry is `bad-signature`, and a relay cannot break a machine by injecting one. On `broken-chain` and `fork` the
 machine becomes `broken` and keeps that entry's revocation in force (`forked`): revocation outranks addition.
@@ -161,6 +165,29 @@ admission set (DEC-0047; a relay subtracts the revocations in force from its adm
 the hub key a delegation verifier trusts (DL-14: the delta's part, `deltaRevocations`, goes to
 `hubKeyCertified(..., {extraRevocations})` and to the verifiers' `estateRevocations`, DEC-0060), the package a node installs.
 
+### The anchor
+
+A revision may carry `deltaAnchor`, `{sequence, sha256}`: a head of the delta it vouches for (DEC-0107). Every revocation
+of the entries up to it is in the revision, as [reconciliation](#reconciliation) requires of a revision issued after
+them. When a machine applies such a revision it runs `anchorDelta(state, record)`:
+
+- no anchor, an anchor below where its held chain starts, or one at a sequence it holds with the same hash: nothing
+  changes;
+- an anchor past the head it holds: the held chain starts there (`DeltaState.anchor`); the entries held before it are
+  dropped, and the next entry is the anchor's sequence + 1. An entry is dropped only when the record lists its
+  revocation, whatever the entry's time (reconciliation alone asks this only of entries dated by the revision's
+  `issuedAt`), so an anchor never takes a revocation out of force: otherwise the answer is `unreconciled`, naming the
+  entries, and nothing changes. The drafter lists every revocation up to the anchor whatever its time;
+- an anchor whose hash differs from the entry held at its sequence: `fork`, and the machine is `broken`;
+- a held entry that is no object or names no sequence: `malformed`, and nothing changes; a record of another estate
+  is `wrong-estate`.
+
+`applyDelta` then skips an entry below the anchor, one identical to the anchor, and one identical to an entry held,
+before it looks up the signer (another entry at the anchor's sequence is refused as at any held sequence: `fork` when a key the revision certifies signed it, `revoked-signer` or `unknown-signer` otherwise), so an entry an estate key signed that a later revision no longer certifies (the hub moved, its key revoked)
+never refuses a page. `deltaHead` and `deltaFreshness` count from the anchor. A heartbeat whose head is below the
+anchor is compared with nothing there. A revision keeps an anchor once one is set, never moves it back and never names
+another hash at the same sequence (`FAC-SEM-137`). This is the checkpoint the earlier *Not decided* item named.
+
 ## Reconciliation
 
 A revision issued at or after an entry's `at` lists that entry's revocation (the same `kind` and `ref`; a `grant` ref
@@ -169,7 +196,10 @@ holding the entry refuses such a revision as `unreconciled` and keeps the one it
 `FAC-SEM-084`); a revision issued before the entry need not list it, and the entry stays in force. Times are compared as
 instants, never as strings (an entry at `19:05:00+09:00` is `10:05:00Z`), and an unreadable time is `malformed`, never
 compared. A machine applies a revision only when it is valid against the schema, `verifyEstateRecord` accepts it
-(DEC-0055) and it is reconciled with the entries the machine holds.
+(DEC-0055) and it is reconciled with the entries the machine holds; it then applies the revision's anchor
+([the anchor](#the-anchor)), and a refusal by `anchorDelta` (`unreconciled`, `fork`, `malformed`) refuses the revision
+too: the machine keeps the one it holds (DEC-0107). A missing entry's `index` from `reconcileRevision` is into the held
+entries, so its sequence is the anchor's sequence (0 without one) plus the index plus one.
 
 ## The organization
 
@@ -186,18 +216,21 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 | <a id="fac-sem-082"></a>`FAC-SEM-082` | `revocation-delta` | a page's entries are `EdDSA`, carry an admitted kind, name a `device-key` by a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084; `applyDelta` refuses any other `@` form as `malformed`), are never dated before their revocation and have readable times; one estate; consecutive (the next sequence, `prev` the hash of the entry before, entry 1's `prev` the genesis); the page's `head` is its last entry's |
 | <a id="fac-sem-083"></a>`FAC-SEM-083` | `heartbeat`, `delta-freshness` | a heartbeat is `EdDSA`, has a readable `at`, and a head at sequence 0 is the estate's genesis; `{at, applied: {sequence, revision}, heartbeat, broken, answer}`: the machine's answer is the one the 72-hour rule gives |
 | <a id="fac-sem-084"></a>`FAC-SEM-084` | `delta-reconciliation` | `{revision, entries}`: a revision issued at or after an entry lists its revocation |
+| <a id="fac-sem-137"></a>`FAC-SEM-137` | `estate-record-revision` | a revision whose parent carries `deltaAnchor` carries one too, at the parent's sequence or later, with the parent's hash at the same sequence (DEC-0107); `verifyEstateRecord` runs it whenever it has a parent |
 
 ## Who adopts it
 
 - **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, lists every entry in the next
-  revision, and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
+  revision (every entry up to an anchor it sets, whatever its time, DEC-0107), and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
-  the heartbeat in its check-in, refuses what arrives from other machines unless `current`, and refuses an unreconciled
-  revision (CT-20, CT-34).
+  the heartbeat in its check-in, refuses what arrives from other machines unless `current`, refuses an unreconciled
+  revision (CT-20, CT-34), and applies each revision's delta anchor with `anchorDelta` (DEC-0107, CT-113).
 - **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
   holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them
   unchanged in `delta`, `heartbeat` and `welcome` frames, answers `delta-query`, subtracts the revocations in force from
-  its admission set and closes the sessions they revoke (DEC-0047, DEC-0066); it never signs one.
+  its admission set and closes the sessions they revoke (DEC-0047, DEC-0066), applies a revision's delta anchor
+  after the revision (`anchorDelta`, DEC-0107), keeping its delta as it was when `anchorDelta` refuses, since it admits
+  by the revision alone ([relay](relay.md#revocation-and-heartbeat)); it never signs one.
 
 ## Privacy
 
@@ -211,8 +244,9 @@ counter, a time, a head and a revision. Neither names a person, a place or an ac
   of administrators sign while the organization server is down.
 - Recovery from a fork: a new chain anchored in a revision. Until it is decided, a `broken` machine stays broken and the
   person's own work continues.
-- Compaction: a machine that enrolls later fetches the chain from entry 1; a checkpoint anchored in a revision is not
-  defined.
+- Compaction beyond the anchor: anchoring a revision that revokes no hub key. DEC-0107 anchors every revision that
+  revokes a hub key (a move, a re-key on the hub's own machine) and the first revision after the readers' pin gate
+  opens when a move happened before it ([the anchor](#the-anchor)).
 - How two hubs of one estate agree on the next sequence and the next heartbeat (Fabric's).
 - Members, digests outside a placement, and `subject.erase` (v4 §7's list): kinds of the organization's delta.
 - Fabric's D3 (which key is the hub key) and D2 (ES256 for it).
