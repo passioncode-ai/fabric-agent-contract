@@ -506,8 +506,8 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the service's own data: no build, pid, status, tiles, identity or member of the document. The
   body SHOULD be empty; an identity proxy in front of the service (Cloudflare Access, an ingress)
   MAY answer that `401` with its own page, which the service never sees (DEC-0109). A host reads
-  the status of that `401` and never its body; a conformance checker reads the body only to find none of
-  the service's data in it. With the token, the document is the one this
+  the status of that `401` and never its body; a conformance checker admits a body that
+  neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`). With the token, the document is the one this
   extension defines.
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,

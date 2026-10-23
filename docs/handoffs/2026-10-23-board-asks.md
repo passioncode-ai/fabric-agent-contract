@@ -44,6 +44,8 @@ description.
 Round 5: unit pass; product one break (the SCN-016 alternative's state missing from SCR-13, FLW-10 and the scenario's
 states), fixed; risks fixed (the checker matches the document or the service's identity values, DEC-0109's adoption
 read as pending, Fabric Dashboards' estimate side in CT-115, the byProject description's sentence).
+Round 6: product one break (the checker's test worded three ways), fixed: CT-114, DEC-0109 and service.md state the
+conformance row's test. Unit passed in round 5 on the code, unchanged since; the review loop stopped here.
 
 ## Checks actually run
 

@@ -6722,7 +6722,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0109: a remote service's 401 without a token may carry an identity proxy's page
 
 - **Status:** Accepted (2026-10-23). Consumer adoption pending: the Fabric Agent Adapter's `check_service.py`
-  (`well-known.requires-token` takes any `401` whose body carries none of the service's data, CT-114).
+  (`well-known.requires-token` admits a `401` whose body neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`), as conformance's checker row says, CT-114).
 - **Context:** `service.md` *Remote placement* said that without the service token `GET /.well-known/fabric-service`
   MUST answer `401` "with an empty body". Fabric Inbox runs on Cloudflare Workers behind Cloudflare Access: from 0.29.4
   its protocol routes sit behind an Access application with Service Auth only, so a request without a token gets
@@ -6732,7 +6732,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** without the token, or with a wrong one, the well-known route MUST answer `401` and its body MUST carry
   none of the service's own data: no build, pid, status, tiles, identity or member of the document. The body SHOULD be
   empty; an identity proxy in front of the service MAY answer that `401` with its own page. A host reads the status of
-  that `401` and never its body; a conformance checker reads the body only to find none of the service's data in it.
+  that `401` and never its body; a conformance checker admits a body that neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`).
 - **Why:** the rule exists so the document does not leak without a token, and a proxy's page leaks none of it; an empty
   body is still what a service that answers the request itself writes. Reading only the status keeps a host's behaviour
   the same for both bodies.
