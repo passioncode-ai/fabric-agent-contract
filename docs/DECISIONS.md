@@ -6654,12 +6654,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0110: a host sums money over the usage rows not on a subscription
 
 - **Status:** Accepted (2026-10-23). Consumer adoption: Fabric's spend tiles and view sum as below (CT-115); Fabric
-  Dashboards already does since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0); Frame Agent and every
-  service keep their reports unchanged.
+  Dashboards already does since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0); every
+  service keeps its report unchanged.
 - **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
   subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is
   the sum of every row (`FAC-SEM-025`), and the report has no money-only total, so a host that summed `costUsd` showed
-  Frame Agent's $147.26 for the month where $6.80 had been spent (board thread `ea2e4f3d`, 2026-10-22). Fabric Dashboards
+  one service's $147.26 for the month where $6.80 had been spent (board thread `ea2e4f3d`, 2026-10-22). Fabric Dashboards
   fixed its sum from DEC-0046's own words ("not metered") and asked the contract to write the host rule so every host
   sums alike (message `76f420d9`, and `e99aa05f` on thread `f22685d2`).
 - **Decision:** money is the sum of `costUsd` over every row whose `route` is `key`, `platform-metered` or absent; a
@@ -6678,5 +6678,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rows, which is the correction. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `src/usage-rules.ts` (`usageSpend`),
   `test/usage-rules.test.ts`, CT-115.
-- **Source:** Frame Agent's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
+- **Source:** a service's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
   `f22685d2` (2026-10-22).

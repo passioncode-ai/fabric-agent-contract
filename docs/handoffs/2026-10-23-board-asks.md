@@ -3,8 +3,8 @@
 ## Objective
 
 Answer the two asks addressed to the contract that had no answer: Fabric Inbox's request on `service.md`'s
-no-token `401` (thread `a1c375d2`, request `9ecc43cb`) and the host's sum of a usage report's subscription rows (Frame
-Agent's finding and Fabric Dashboards' reply on thread `ea2e4f3d`, the request on `f22685d2`).
+no-token `401` (thread `a1c375d2`, request `9ecc43cb`) and the host's sum of a usage report's subscription rows (a
+service's finding and Fabric Dashboards' reply on thread `ea2e4f3d`, the request on `f22685d2`).
 
 ## Done
 
