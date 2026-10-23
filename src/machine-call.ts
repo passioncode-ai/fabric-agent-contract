@@ -45,7 +45,7 @@ export type RelayCaller =
  * (DEC-0106): T1 only when its delta is `current`, its clock reads, the estate revision it applied last gives an
  * admission set (`relayAdmissionSet`, with the revocations in force) that holds the node's own `<machine>#sig` and holds
  * `from`. It names the sender's machine, its profile (`null` when unreadable) and its `#kem` when that key is listed,
- * is a P-256 key and is revoked neither by kid nor by key reference. It never throws.
+ * is a P-256 key and is revoked neither by kid nor by key reference. It never throws on JSON values.
  */
 export function relayCallerTier(input: { applied: unknown; self: unknown; from: unknown; at: unknown; freshness: unknown; revocations?: unknown }): RelayCaller {
   if (input.freshness !== "current") return { ok: false, code: "unknown-state", detail: "not-current" };

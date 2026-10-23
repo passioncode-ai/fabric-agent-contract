@@ -234,7 +234,7 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
     const poisoned = { ...rev1, machines: rev1.machines.map((machine: Record<string, unknown>) => ({ ...machine, id: { toString: 1 } })) };
     const result = relayAdmissionSet({ held: poisoned, pinned, at: at1, schemaValid });
     expect(result.ok && [...result.set.keys()]).toEqual([]);
-    expect(result.ok && result.excluded).toEqual([]);
+    expect(result.ok && result.excluded.map((entry) => entry.reason)).toEqual(rev1.machines.flatMap((machine: Record<string, any>) => machine.deviceKeys.filter((key: Record<string, unknown>) => key.use === "sig").map(() => "bad-key")));
   });
 
   it("drops a machine revoked while still listed, and reads a record without revocations", () => {
