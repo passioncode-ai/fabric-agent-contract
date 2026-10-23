@@ -103,7 +103,8 @@ on different releases still talk:
   `fabric-load/0.1` (the load extension, DEC-0104), `fabric-local-channel/0.1`, `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
   there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
   `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,
-  `WINDOW_LEASE_TYPE`, `COMMS_PROTOCOL`, `AGENT_CALL_TYPE` for `fabric-agent-call/1`, DEC-0106).
+  `WINDOW_LEASE_TYPE`, `COMMS_PROTOCOL`, `AGENT_CALL_TYPE` for `fabric-agent-call/1`, DEC-0106;
+  `CREDENTIAL_ENVELOPE_TYPE` for `fabric-credential-envelope/1`, DEC-0111).
 - **N and N−1.** A receiver accepts the newest revision of a protocol it implements (N) and the one before it in the
   register (N−1), and no other (`acceptedRevisions`). A protocol with one published revision has no N−1.
 - **`protocols`.** A party says which revisions it reads in a list of at most N and N−1 per protocol

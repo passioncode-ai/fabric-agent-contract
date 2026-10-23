@@ -33,6 +33,8 @@
 | SCR-25 | Agent directory | FLW-22 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-26 | An agent's load | FLW-24 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
+| SCR-28 | Credentials issued into an organization | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
+| SCR-29 | Calls between agents | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
 
 ## Design system
 
@@ -346,4 +348,26 @@
 - **Coverage:** `src/agent-network.ts` (`admitJob`, `readQueuePosition`), `src/job-limits.ts` (`jobCallerAction`), `src/machine-call.ts` (`relayCallerTier`, `machineCallVerdict`, `openAgentCall`), `test/agent-network.test.ts`, `test/machine-call.test.ts`
 - **Scenarios:** SCN-034, SCN-036
 - **Resources:** agent network specification, Call queue; interop C3.2; the caller's own console (an agent's log)
+- **Status:** proposed
+
+### SCR-28: Credentials issued into an organization
+
+- **Used by:** FLW-28
+- **Purpose:** the administrator decides on agents' requests and sees every credential issued into the organization, by name; a person sees those of the agents in their own enrollment.
+- **Elements:** the queue of requests (agent, provider, preset, scope, end asked, reason) with "Issue" and "Refuse"; one row per issued credential (agent, provider, preset, slot, end, state) with "Revoke"; never a value.
+- **States:** queue, requests waiting; issued, the credential's end shown; refused, the reason; revoked, when and why; empty, nothing asked yet.
+- **Coverage:** `src/credentials.ts` (`FAC-SEM-138`, `credentialRevocationStands`), `test/credential-envelope.test.ts`
+- **Scenarios:** SCN-040, SCN-041
+- **Resources:** credentials specification, The request, The decision, Revocation
+- **Status:** proposed
+
+### SCR-29: Calls between agents
+
+- **Used by:** FLW-28
+- **Purpose:** the administrator, in the organization's context, and the person, in their own network view, see who called whom.
+- **Elements:** one row per call: caller and callee agents, capability, transport, start and end, outcome and code, cost (an estimate on a subscription, shown apart); grouped by trace id.
+- **States:** success, the calls listed; empty, none recorded; withheld, a member whose notice does not name agent calls sends none (`callRecordsAccepted: false`); one call, its caller's and callee's records joined by `callId` and shown with the callee's outcome.
+- **Coverage:** `src/credentials.ts` (`callRecordFindings`, `FAC-SEM-140`), `test/credential-envelope.test.ts`
+- **Scenarios:** SCN-042
+- **Resources:** credentials specification, The call record
 - **Status:** proposed

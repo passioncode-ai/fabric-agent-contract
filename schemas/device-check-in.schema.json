@@ -329,6 +329,22 @@
               "$ref": "node-summary.schema.json",
               "description": "DEC-0101: the node's summary of its harness for this enrollment's organization, when it changed or at least once a day."
             },
+            "credentialRequests": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "credential-request.schema.json"
+              },
+              "description": "DEC-0111: credentials the node's agents ask this organization for; a request is sent in every check-in until its envelope opens or a refused decision answers it (credentials.md)."
+            },
+            "callRecords": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "$ref": "call-record.schema.json"
+              },
+              "description": "DEC-0111: call records of this organization's context, sent only after a check-in response with records.callRecordsAccepted true; never another context's."
+            },
             "repairResults": {
               "type": "array",
               "maxItems": 64,
@@ -438,6 +454,34 @@
                 "$ref": "window-lease.schema.json",
                 "description": "A window lease (window-lease/1, DEC-0062), carried unchanged; the device's meter verifies it before it spends against it."
               }
+            },
+            "callRecordsAccepted": {
+              "type": "boolean",
+              "description": "DEC-0111: whether the organization collects this device's call records: true only while the notice its person acknowledged names agent calls (as share-registration's purposeAdmitted). A node sends records.callRecords only after a response that says true, and stops on false or on its absence."
+            },
+            "credentialDecisions": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "credential-decision.schema.json"
+              },
+              "description": "DEC-0111: the organization's decisions on this node's credential requests."
+            },
+            "credentials": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "credential-envelope.schema.json"
+              },
+              "description": "DEC-0111: issued credentials sealed to this node's #kem, each opened only as checkCredentialEnvelope allows."
+            },
+            "credentialRevocations": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "credential-revocation.schema.json"
+              },
+              "description": "DEC-0111: credentials the organization revoked on this node, each signed by a key of its current policy key set."
             },
             "repairs": {
               "type": "array",

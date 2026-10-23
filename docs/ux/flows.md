@@ -679,6 +679,35 @@ flowchart TD
 
 - **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed); SCR-23 alert (the hub silent).
 
+### FLW-28: An agent's narrow credential, from request to revocation
+
+- **Traces:** ST-033, ST-034 (JTBD-14, JRN-13/#1, JRN-13/#2, JRN-13/#3, JRN-13/#4)
+- **Goal:** the agent holds the credential it asked for, sealed in its organization's context, for no longer than issued
+- **Entry points:** an agent's need for a credential; the organization's credential queue; a member leaving
+- **Success exit:** the value in the organization instance's vault slot with its mark, the ledger naming it, and it deleted at its end or on revocation
+- **Task analysis:** the node sends `credential-request/1` at check-in → the server queues it → the policy or the administrator decides → the issuer issues at the provider and seals `fabric-credential-envelope/1` to the machine's `#kem` under the organization's policy key → the server hands the decision and the envelope back at check-in → the node checks it (`checkCredentialEnvelope`) and opens it into the context's slot → at `credentialExpiresAt`, on a signed revocation, or when its organization answers `certificate-revoked` or `organization-closed`, the node deletes it.
+- **Rejected shape:** the value pasted into the agent's settings, or delivered into the person's own vault, rejected because it outlives its purpose and crosses the boundary between the person's and the organization's context (DEC-0111).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  R[Node sends credential-request] --> D{Decision}
+  D -->|refused| X[The agent is told the reason]
+  D -->|pending| W[The node asks again at the next check-in]
+  C -->|expired in transit| W
+  D -->|issued| E[Sealed envelope in the check-in response]
+  E --> C{checkCredentialEnvelope}
+  C -->|refused| L[Logged by its refusal; nothing stored; the request stays open]
+  L --> W
+  C -->|ok| O[Opened into the organization instance's slot]
+  O --> T{Ends or revoked?}
+  T -->|credentialExpiresAt| Z[Deleted]
+  T -->|signed revocation| Z
+  T -->|certificate-revoked or organization-closed| Z
+```
+
+- **Screens traversed:** SCR-28 queue, issued, refused, revoked; SCR-29 the calls between agents.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

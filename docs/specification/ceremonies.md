@@ -403,7 +403,8 @@ A machine's `profile` (DEC-0106, [machine calls](machine-calls.md#machine-profil
 changes it as every other change: a revision they sign with a passkey, with the machine listed under its new profile.
 A machine that becomes `member` changes its profile only after the hub has moved ([Move the hub](#move-the-hub)), in a revision after the move's last one, which has already dropped and revoked its hub key; one that becomes
 `view` gives up its placements and secret placements in the same revision, and no other machine's secret names it as
-`from` (`FAC-SEM-134`). A node that applies the revision judges the next call it receives by the new profile; a call it
+`from` (`FAC-SEM-134`); applying it, the machine deletes the estate's digest key and every personal credential it holds
+([credentials](credentials.md#the-estates-digest-key)). A node that applies the revision judges the next call it receives by the new profile; a call it
 accepted before keeps running. Until each node applies it, a node still on the parent judges calls by the old profile,
 so a machine made `view` can still be called with an effect there; the revision reaches every machine with the next
 heartbeat, which a running hub signs right after every revision (DEC-0054); with no running hub, the old profile holds
