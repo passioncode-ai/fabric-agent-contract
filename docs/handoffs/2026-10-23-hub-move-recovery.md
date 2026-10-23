@@ -8,8 +8,9 @@ message `c938af7d`).
 ## Done
 
 - **DEC-0107** and [ceremonies](../specification/ceremonies.md): "Move the hub" (an alert past 24 hours with
-  `hubSilence`; a new hub key on a `full` machine, the old one revoked; `hubMove` names a move) and "Recover a lost
-  passkey" (revision 1 with two passkeys, `recoveryReady`; a passkey left signs the recovery).
+  `hubSilence`, offered after reconnecting; a new hub key on an always-on `full` machine caught up with the relay; one
+  revision for a lost hub, DL-15's two for a reachable one; the delta anchored behind the readers' pin; `hubMove` names a
+  move) and "Recover a lost passkey" (revision 1 with two passkeys, `recoveryReady`; a passkey left signs the recovery).
 - **The delta anchor**: `deltaAnchor` in `estate-record/1`, `anchorDelta` and the skip before the signer in
   `src/revocation-delta.ts`, `FAC-SEM-137`; a machine added after a move starts its chain at the anchor.
 - `src/hub-move.ts`, vectors `fixtures/vectors/hub-move.json` by `tools/vectors/hub-move.ts`, `test/hub-move.test.ts`
@@ -29,6 +30,11 @@ move a machine without the old hub's entries could never verify them), fixed by 
 heartbeat jump, `unreconciled`, DL-15 for a reachable hub, the tests the conformance row cites, `unknown` alerts);
 product three breaks (machine-calls.md still listing CT-89, a move from a machine that was only asleep, what the move
 ends), fixed with its risks.
+Round 2: unit and seam one break each, the same (`anchorDelta` dropped held entries whose revocation the record did
+not list), fixed: `unreconciled`; seam and product: the move's precondition (`current`) could never hold past 72 hours
+nor offer the move before them, fixed: caught up with the relay, offered while still silent; product: the anchor's pin
+gate, the UX layer, CT-89's receipt, fixed; risks: shared `anchorDelta` vectors, FAC-SEM-137 fixtures, the coverage
+include list, the published key set, `unreconciled` after a move.
 
 ## Checks actually run
 

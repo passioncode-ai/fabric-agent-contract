@@ -439,6 +439,22 @@ describe("the delta anchor across a hub move (DEC-0107, FAC-SEM-137)", () => {
     expect(verdict.ok && verdict.applied).toBe(1);
   });
 
+  it("an anchor never takes a revocation out of force: one the record does not list is unreconciled", () => {
+    const R2 = moved({ sequence: 3, sha256: deltaEntryHash(E3) });
+    const omitted = { ...R2, revocations: (R2.revocations as Json[]).filter((r) => r !== E2.revocation) };
+    expect(anchorDelta(held([E1, E2]), omitted)).toMatchObject({ ok: false, problem: "unreconciled", missing: [2], state: held([E1, E2]) });
+    expect(anchorDelta(held([E1, E2]), R2)).toEqual({ ok: true, state: { estate: ESTATE, anchor: R2.deltaAnchor, entries: [] } });
+    // An entry that is no object, or names no revocation, is held by nothing the record could list.
+    expect(anchorDelta(held([{ sequence: 1 } as Json]), R2)).toMatchObject({ ok: false, problem: "unreconciled", missing: [1] });
+  });
+
+  it("another entry at the anchor's own sequence is a second history; a hostile anchor reads as none", () => {
+    const anchoredAt1 = { estate: ESTATE, anchor: { sequence: 1, sha256: "b".repeat(64) }, entries: [] } as DeltaState;
+    const verdict = applyDelta(anchoredAt1, { entries: [E1] }, { record, at: AT });
+    expect(verdict).toMatchObject({ ok: false, problem: "fork", state: { broken: true } });
+    expect(deltaHead({ estate: ESTATE, anchor: { sequence: "5", sha256: "x" }, entries: [] } as unknown as DeltaState)).toEqual({ sequence: 0, sha256: deltaGenesis(ESTATE) });
+  });
+
   it("an anchor with another hash than the entry held at its sequence is a second history", () => {
     const other = anchorDelta(held([E1, E2]), moved({ sequence: 2, sha256: "0".repeat(64) }));
     expect(other).toMatchObject({ ok: false, problem: "fork", state: { broken: true } });

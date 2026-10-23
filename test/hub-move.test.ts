@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { HUB_MOVE_HEARTBEAT_JUMP, HUB_SILENT_SECONDS, hubMove, hubSilence, recoveryReady } from "../src/hub-move.js";
 import { HEARTBEAT_MAX_INTERVAL_SECONDS } from "../src/revocation-delta.js";
+import { anchorDelta, type DeltaState } from "../src/revocation-delta.js";
 import { VECTOR_FILE, buildHubMoveVectors } from "../tools/vectors/hub-move.js";
 
 type Json = Record<string, any>;
@@ -25,6 +26,10 @@ describe("the hub-move vectors (DEC-0107)", () => {
 
   it.each(vectors.move as Json[])("move: $name", (c) => {
     expect(hubMove(c.parent, c.next)).toEqual(c.expect);
+  });
+
+  it.each(vectors.anchor as Json[])("anchor: $name", (c) => {
+    expect(anchorDelta(c.state as DeltaState, c.record)).toEqual(c.expect);
   });
 });
 

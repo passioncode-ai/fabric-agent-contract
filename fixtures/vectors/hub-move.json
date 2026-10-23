@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
+  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
   "silence": [
     {
       "name": "an hour old",
@@ -833,6 +833,684 @@
           }
         ],
         "removed": []
+      }
+    }
+  ],
+  "anchor": [
+    {
+      "name": "no anchor: nothing changes",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ok": true,
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "a machine that holds nothing starts at the anchor",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": []
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [],
+          "anchor": {
+            "sequence": 2,
+            "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+          }
+        }
+      }
+    },
+    {
+      "name": "a machine that was behind starts at the anchor, the entry it drops listed",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [],
+          "anchor": {
+            "sequence": 2,
+            "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+          }
+        }
+      }
+    },
+    {
+      "name": "a machine that holds the anchor's entry with its hash keeps its chain",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          },
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 2,
+            "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+            "at": "2026-10-12T19:05:00+09:00",
+            "revocation": {
+              "kind": "package",
+              "ref": "sha256:abababababababababababababababababababababababababababababababab",
+              "revokedAt": "2026-10-12T10:04:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            },
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 2,
+              "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+              "at": "2026-10-12T19:05:00+09:00",
+              "revocation": {
+                "kind": "package",
+                "ref": "sha256:abababababababababababababababababababababababababababababababab",
+                "revokedAt": "2026-10-12T10:04:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "another hash at a held sequence: a second history",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          },
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 2,
+            "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+            "at": "2026-10-12T19:05:00+09:00",
+            "revocation": {
+              "kind": "package",
+              "ref": "sha256:abababababababababababababababababababababababababababababababab",
+              "revokedAt": "2026-10-12T10:04:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "problem": "fork",
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            },
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 2,
+              "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+              "at": "2026-10-12T19:05:00+09:00",
+              "revocation": {
+                "kind": "package",
+                "ref": "sha256:abababababababababababababababababababababababababababababababab",
+                "revokedAt": "2026-10-12T10:04:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+            }
+          ],
+          "broken": true
+        }
+      }
+    },
+    {
+      "name": "an entry it would drop whose revocation the record does not list: unreconciled, nothing changes",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          },
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 2,
+            "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+            "at": "2026-10-12T19:05:00+09:00",
+            "revocation": {
+              "kind": "package",
+              "ref": "sha256:abababababababababababababababababababababababababababababababab",
+              "revokedAt": "2026-10-12T10:04:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 3,
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "problem": "unreconciled",
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            },
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 2,
+              "prev": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce",
+              "at": "2026-10-12T19:05:00+09:00",
+              "revocation": {
+                "kind": "package",
+                "ref": "sha256:abababababababababababababababababababababababababababababababab",
+                "revokedAt": "2026-10-12T10:04:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "GCM6y4X0PXWdKRCyPwPGw61EbBPtuv-Q38GdaDIcw835YESNGYlMvImtpPo39KSaJNiId-nENxYf0NTAjTWcBw"
+            }
+          ]
+        },
+        "missing": [
+          2
+        ]
+      }
+    },
+    {
+      "name": "an anchor below where the chain already starts changes nothing",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [],
+        "anchor": {
+          "sequence": 5,
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [],
+          "anchor": {
+            "sequence": 5,
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      }
+    },
+    {
+      "name": "another estate's record",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-other",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362f1a7cdcbbb64b4f9103e2232aaa2a280cd603821649452c6637873bd9abe"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "problem": "wrong-estate",
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "an anchor at sequence 0",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 0,
+          "sha256": "8659f8dea5d71a315decaad3037408a17f85b7a03e87145fc76c62de1540f0ce"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "problem": "malformed",
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "an anchor hash in upper case",
+      "state": {
+        "estate": "estate-5d0f1a",
+        "entries": [
+          {
+            "type": "revocation-delta/1",
+            "alg": "EdDSA",
+            "estate": "estate-5d0f1a",
+            "sequence": 1,
+            "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+            "at": "2026-10-12T10:00:00Z",
+            "revocation": {
+              "kind": "hub-key",
+              "ref": "hub-m-9a07-1",
+              "revokedAt": "2026-10-12T10:00:00Z"
+            },
+            "kid": "hub-m-4c1e-1",
+            "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+          }
+        ]
+      },
+      "record": {
+        "estate": "estate-5d0f1a",
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-m-9a07-1",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          },
+          {
+            "kind": "package",
+            "ref": "sha256:abababababababababababababababababababababababababababababababab",
+            "revokedAt": "2026-10-12T10:04:00Z"
+          }
+        ],
+        "deltaAnchor": {
+          "sequence": 2,
+          "sha256": "7362F1A7CDCBBB64B4F9103E2232AAA2A280CD603821649452C6637873BD9ABE"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "problem": "malformed",
+        "state": {
+          "estate": "estate-5d0f1a",
+          "entries": [
+            {
+              "type": "revocation-delta/1",
+              "alg": "EdDSA",
+              "estate": "estate-5d0f1a",
+              "sequence": 1,
+              "prev": "eeed1162e2371d24eeb238e7b568fe95871936219c5e7719fa5080530b8e8b1f",
+              "at": "2026-10-12T10:00:00Z",
+              "revocation": {
+                "kind": "hub-key",
+                "ref": "hub-m-9a07-1",
+                "revokedAt": "2026-10-12T10:00:00Z"
+              },
+              "kid": "hub-m-4c1e-1",
+              "sig": "LivBR4NMBjX7PwBZecQDNV3etFFsGs4KgkTs-2FPFMZe2e86Svh-3SizSmz1r3askoYHSA6h73M64n-t1pqQCA"
+            }
+          ]
+        }
       }
     }
   ]

@@ -653,15 +653,15 @@ flowchart TD
 
 - **Traces:** ST-032 (JTBD-10, JRN-09/#4)
 - **Goal:** the network keeps a hub and a passkey that can sign its next revision
-- **Entry points:** a machine's alert that the hub is silent; the network's passkeys in My network's machines
-- **Success exit:** a signed revision with the new hub key (the old one revoked) or the new passkey (the lost one revoked)
-- **Task analysis:** move: a machine reads `hubSilence` → silent past 24 hours: the person picks a `full` machine → its node makes a new hub key → Fabric drafts the revision (`hubMove` shows it) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`).
+- **Entry points:** a machine's alert that it has not heard from the hub; the network's passkeys in My network's machines
+- **Success exit:** the signed revisions with the new hub key (the old one revoked, the delta anchored) or the new passkey (the lost one revoked)
+- **Task analysis:** move: a machine reads `hubSilence` → it reconnects to the relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`).
 - **Rejected shape:** copying the hub's private key to the new machine, rejected because a copy left on a lost disk would keep signing; a move is always a new key (DEC-0107).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  A{What happened?} -->|this machine has not heard the hub for 24 h| C{Still not current after reconnecting?}
+  A{What happened?} -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
   M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored]

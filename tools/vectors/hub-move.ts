@@ -87,13 +87,40 @@ function moveCases(): Json[] {
   return cases.map(([name, parentRecord, next, expect]) => ({ name, parent: parentRecord, next, expect }));
 }
 
+// ---- anchor: anchorDelta(state, record), over the revocation delta's committed entries --------------------------
+
+function anchorCases(): Json[] {
+  const delta = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/revocation-delta.json"), "utf8")) as { record: Json; entries: Record<string, { entry: Json; hash: string }> };
+  const estate = delta.record.estate as string;
+  const { e1, e2 } = delta.entries as { e1: { entry: Json; hash: string }; e2: { entry: Json; hash: string } };
+  const E1 = e1.entry, E2 = e2.entry;
+  const state = (entries: Json[], extra: Json = {}): Json => ({ estate, entries, ...extra });
+  const rec = (deltaAnchor?: Json, revocations: Json[] = [E1.revocation as Json, E2.revocation as Json], other: Json = {}): Json => ({ estate, revocations, ...(deltaAnchor ? { deltaAnchor } : {}), ...other });
+  const at2 = { sequence: 2, sha256: e2.hash };
+  const at3 = { sequence: 3, sha256: "c".repeat(64) };
+  const cases: Array<[string, Json, Json, Json]> = [
+    ["no anchor: nothing changes", state([E1]), rec(), { ok: true, state: state([E1]) }],
+    ["a machine that holds nothing starts at the anchor", state([]), rec(at2), { ok: true, state: state([], { anchor: at2 }) }],
+    ["a machine that was behind starts at the anchor, the entry it drops listed", state([E1]), rec(at2), { ok: true, state: state([], { anchor: at2 }) }],
+    ["a machine that holds the anchor's entry with its hash keeps its chain", state([E1, E2]), rec(at2), { ok: true, state: state([E1, E2]) }],
+    ["another hash at a held sequence: a second history", state([E1, E2]), rec({ sequence: 2, sha256: "0".repeat(64) }), { ok: false, problem: "fork", state: state([E1, E2], { broken: true }) }],
+    ["an entry it would drop whose revocation the record does not list: unreconciled, nothing changes", state([E1, E2]), rec(at3, [E1.revocation as Json]), { ok: false, problem: "unreconciled", state: state([E1, E2]), missing: [2] }],
+    ["an anchor below where the chain already starts changes nothing", state([], { anchor: { sequence: 5, sha256: "a".repeat(64) } }), rec(at2), { ok: true, state: state([], { anchor: { sequence: 5, sha256: "a".repeat(64) } }) }],
+    ["another estate's record", state([E1]), rec(at2, undefined, { estate: "estate-other" }), { ok: false, problem: "wrong-estate", state: state([E1]) }],
+    ["an anchor at sequence 0", state([E1]), rec({ sequence: 0, sha256: e1.hash }), { ok: false, problem: "malformed", state: state([E1]) }],
+    ["an anchor hash in upper case", state([E1]), rec({ sequence: 2, sha256: e2.hash.toUpperCase() }), { ok: false, problem: "malformed", state: state([E1]) }]
+  ];
+  return cases.map(([name, held, record, expect]) => ({ name, state: held, record, expect }));
+}
+
 export function hubMoveVectors(): Json {
   return {
     about:
-      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). Every case holds in every time zone.",
+      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
     silence: silenceCases(),
     recovery: recoveryCases(),
-    move: moveCases()
+    move: moveCases(),
+    anchor: anchorCases()
   };
 }
 

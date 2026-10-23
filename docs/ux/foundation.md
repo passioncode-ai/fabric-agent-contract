@@ -220,7 +220,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Create | creates the network on a first machine | Fabric, "Create my network" | 3 | no record says which machines are mine | revision 1 signed by the passkey, the network's fingerprint shown (priority 7) |
 | 2 | Add | adds a second machine, nearby or from afar | Fabric on the trusted machine, the new machine's node | 2 | a code from one key's fingerprint can be brute-forced; a stranger slips in | commit before reveal and a six-digit code over both sides' keys, nonces and the network (priority 9) |
 | 3 | Remove or re-key | removes a lost machine, or replaces a machine's key | Fabric | 2 | a removed machine keeps being admitted | one revision that revokes what it drops, carried within seconds by the delta (priority 8) |
-| 4 | Recover | the hub's machine goes quiet, or a passkey is lost | every machine's alert, Fabric | 1 | calls between machines stop at 72 hours with no warning; one lost passkey loses the network | an alert after 24 hours, a hub moved by one revision, a second passkey from the start (priority 9) |
+| 4 | Recover | the hub's machine goes quiet, or a passkey is lost | every machine's alert, Fabric | 1 | calls between machines stop at 72 hours with no warning; one lost passkey loses the network | an alert after 24 hours, a hub moved by one revision when lost or two when reachable, a second passkey from the start (priority 9) |
 
 ### JRN-10: Operator, what my agents use (JTBD-11)
 
@@ -550,11 +550,11 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-032: Operator moves the hub, or recovers from a lost passkey
 
-- **Story:** As P-02, I want to hear when my hub has gone quiet and move it with one revision, and to keep my network when I lose a passkey, so that no single machine or authenticator holds my network hostage.
+- **Story:** As P-02, I want to hear when my machine has not heard from the hub for a day and move the hub, and to keep my network when I lose a passkey, so that no single machine or authenticator holds my network hostage.
 - **Traces:** JTBD-10, JRN-09/#4
 - **Acceptance criteria:**
-  - Given a hub whose last heartbeat is more than 24 hours old, when a machine reads it, then it tells me the hours since and offers to move the hub; past 72 hours it says calls between machines have stopped.
-  - Given a `full` machine I choose as the new hub, when I sign, then the revision certifies its new hub key and revokes the old one, and the new hub's heartbeat follows.
+  - Given a machine whose last heartbeat is more than 24 hours old, when it reconnects to the relay and the latest heartbeat it then holds is still more than 24 hours old (or none), then it tells me the hours since and offers to move the hub; past 72 hours it says calls between machines have stopped.
+  - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta; given a reachable hub, two revisions follow DL-15.
   - Given two passkeys in my network and one lost, when I sign with the other, then the lost one is removed and revoked and a new one added; given one passkey, Fabric tells me before I create the network that losing it loses the network.
 - **Priority:** must
 - **Status:** draft

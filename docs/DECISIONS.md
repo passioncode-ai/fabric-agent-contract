@@ -6641,19 +6641,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **The alert.** `hubSilence(heartbeatAt, at)` reads the heartbeat a machine holds: `speaking` up to 24 hours (the
      hub's own longest interval, exactly 24 included), `silent` past it up to 72 hours, `stale` past 72 (the 72-hour
      rule), `unknown` when the clock or the heartbeat does not read. A machine tells its person on `silent`, `stale` and
-     `unknown`, as what *it* has heard, and offers to move the hub only after reconnecting to the relay leaves it still
-     not current.
+     `unknown`, as what *it* has heard, and offers to move the hub only while `hubSilence` over the latest heartbeat it
+     holds after reconnecting to the relay is still `silent`, `stale` or `unknown`.
   2. **The anchor.** `estate-record/1` gains an optional `deltaAnchor` `{sequence, sha256}`: a head of the delta the
      revision vouches for, every revocation up to it listed in the record. `anchorDelta(state, record)` starts a
-     machine's chain at an anchor past its head (`DeltaState.anchor`), changes nothing for one it already holds with the
-     same hash, and is a `fork` for another hash. `applyDelta` skips an entry at or below the anchor, and one identical
+     machine's chain at an anchor past its head (`DeltaState.anchor`) only when the record lists the revocation of every
+     entry it drops (otherwise `unreconciled`, nothing changes), changes nothing for one it already holds with the same
+     hash, and is a `fork` for another hash. `applyDelta` skips an entry at or below the anchor, and one identical
      to an entry held, before looking up its signer. A revision keeps an anchor once set and never moves it back
      (`FAC-SEM-137`, kind `estate-record-revision`, run by `verifyEstateRecord` with a parent).
-  3. **Moving the hub.** From a `current` machine, to a new Ed25519 hub key generated on an always-on `full` machine
+  3. **Moving the hub.** From a machine caught up with the relay (its delta head and latest heartbeat, not `broken`;
+     not necessarily `current`, which no machine is past 72 hours), to a new Ed25519 hub key generated on an always-on `full` machine
      (DEC-0106), never a copied key. A reachable hub follows DL-15 (certify, publish, switch, then drop and revoke in a
-     second revision); a lost hub is replaced in one revision that drops and revokes its key and its machine, and the
-     lost key leaves the published key set at once. The revision that revokes the old key anchors the delta's head,
-     which the drafter fetches from the relay first. The new hub's first entry is the anchor's sequence + 1; its first
+     second revision, the new hub continuing the chain from the switch); a lost hub is replaced in one revision that
+     drops and revokes its key and its machine, the new hub's first entry being the anchor's sequence + 1, and the lost
+     key leaves the key set Fabric publishes online at once. The revision that revokes the old key anchors the delta's
+     head, which the drafter fetches from the relay first, listing every revocation up to it, once every reader of the
+     record is pinned at or after this decision; before that a move carries no anchor and every machine fetches the old
+     hub's entries before applying it. The new hub's first
      heartbeat jumps `HUB_MOVE_HEARTBEAT_JUMP` (2^20) past the highest sequence it holds. Tokens, approvals and window
      leases the old key signed end when a verifier applies the revocation; the new hub treats the old hub's unreported
      leases as spent until their window instance ends. `hubMove(parent, next)` names what a revision added and removed

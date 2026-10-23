@@ -187,7 +187,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
   pinned. A revision may revoke its own signer when it removes it (a passkey rotated out signs its own removal);
 - the record keeps its own rules, `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111` (DEC-0082) and `FAC-SEM-122`
   (DEC-0090), and with a
-  parent `FAC-SEM-114`: what it drops from the parent it revokes (DEC-0084). The schema is not checked here: a machine applies a
+  parent `FAC-SEM-114`: what it drops from the parent it revokes (DEC-0084), and `FAC-SEM-137`: its delta anchor never moves back (DEC-0107). The schema is not checked here: a machine applies a
   revision only when it is valid against [`estate-record`](../../schemas/estate-record.schema.json) and
   `verifyEstateRecord` accepts it — a signed record of the wrong shape (say `authorities: null`) would otherwise lock
   the estate out at the next revision.
@@ -252,8 +252,8 @@ keys are DEC-0053's.
   pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
-  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` and `FAC-SEM-134`) and it is
-  reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054); installs a
+  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` and `FAC-SEM-134`, and with a parent `FAC-SEM-114` and `FAC-SEM-137`) and it is
+  reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107); installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
   instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision in its check-in's
@@ -261,8 +261,9 @@ keys are DEC-0053's.
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
 - **Every reader** (the Fabric Agent Adapter's kits and the first organization server's vendored schema among them)
-  reads a revision that carries a machine's `profile` only once pinned at or after DEC-0106, and Fabric writes none
-  before ([machine calls](machine-calls.md#compatibility)).
+  reads a revision that carries a machine's `profile` only once pinned at or after DEC-0106, and one that carries
+  `deltaAnchor` only once pinned at or after DEC-0107; Fabric writes neither before ([machine calls](machine-calls.md#compatibility),
+  [ceremonies](ceremonies.md#move-the-hub)).
 
 ## Privacy
 

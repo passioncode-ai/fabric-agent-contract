@@ -172,11 +172,14 @@ them. When a machine applies such a revision it runs `anchorDelta(state, record)
 - no anchor, an anchor below where its held chain starts, or one at a sequence it holds with the same hash: nothing
   changes;
 - an anchor past the head it holds: the held chain starts there (`DeltaState.anchor`); the entries held before it are
-  dropped, their revocations being the record's, and the next entry is the anchor's sequence + 1;
+  dropped, and the next entry is the anchor's sequence + 1. An entry is dropped only when the record lists its
+  revocation, whatever the entry's time (reconciliation alone asks this only of entries dated by the revision's
+  `issuedAt`), so an anchor never takes a revocation out of force: otherwise the answer is `unreconciled`, naming the
+  entries, and nothing changes. The drafter lists every revocation up to the anchor whatever its time;
 - an anchor whose hash differs from the entry held at its sequence: `fork`, and the machine is `broken`.
 
-`applyDelta` then skips an entry at or below the anchor, and an entry identical to one held, before it looks up the
-signer, so an entry an estate key signed that a later revision no longer certifies (the hub moved, its key revoked)
+`applyDelta` then skips an entry below the anchor, one identical to the anchor, and one identical to an entry held,
+before it looks up the signer (another entry at the anchor's sequence is a `fork`, as at any held sequence), so an entry an estate key signed that a later revision no longer certifies (the hub moved, its key revoked)
 never refuses a page. `deltaHead` and `deltaFreshness` count from the anchor. A heartbeat whose head is below the
 anchor is compared with nothing there. A revision keeps an anchor once one is set, never moves it back and never names
 another hash at the same sequence (`FAC-SEM-137`). This is the checkpoint the earlier *Not decided* item named.
@@ -211,14 +214,15 @@ that record exists; until then a device's `records.heartbeat` reports its estate
 ## Who adopts it
 
 - **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, lists every entry in the next
-  revision, and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
+  revision (every entry up to an anchor it sets, whatever its time, DEC-0107), and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
-  the heartbeat in its check-in, refuses what arrives from other machines unless `current`, and refuses an unreconciled
-  revision (CT-20, CT-34).
+  the heartbeat in its check-in, refuses what arrives from other machines unless `current`, refuses an unreconciled
+  revision (CT-20, CT-34), and applies each revision's delta anchor with `anchorDelta` (DEC-0107, CT-113).
 - **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
   holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them
   unchanged in `delta`, `heartbeat` and `welcome` frames, answers `delta-query`, subtracts the revocations in force from
-  its admission set and closes the sessions they revoke (DEC-0047, DEC-0066); it never signs one.
+  its admission set and closes the sessions they revoke (DEC-0047, DEC-0066), applies a revision's delta anchor
+  (`anchorDelta`, DEC-0107); it never signs one.
 
 ## Privacy
 

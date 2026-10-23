@@ -85,9 +85,9 @@ export const emptyDeltaState = (estate: string): DeltaState => ({ estate, entrie
 /** The hash of the head at `sequence` in the chain a state holds: the genesis at 0; "" (never a hash) for what the state does not hold. */
 const headAt = (state: DeltaState, sequence: number): string => {
   try {
-    // A sequence below an anchor indexes no held entry and reads "" (every caller checks the anchor first).
     const base = baseOf(state);
-    if (state.anchor !== undefined && sequence === base) return state.anchor.sha256;
+    if (base > 0 && sequence === base) return (state.anchor as { sha256: string }).sha256;
+    // Every caller reads a sequence at or above the anchor; one below it indexes no held entry and reads "".
     if (sequence === 0) return deltaGenesis(state.estate);
     const entry = state.entries[sequence - base - 1];
     return isObject(entry) ? deltaEntryHash(entry) : "";
@@ -97,7 +97,7 @@ const headAt = (state: DeltaState, sequence: number): string => {
 };
 
 /** The sequence the held chain starts after: the anchor's, or 0 (DEC-0107). */
-const baseOf = (state: DeltaState): number => state.anchor?.sequence ?? 0;
+const baseOf = (state: DeltaState): number => (Number.isSafeInteger(state.anchor?.sequence) ? (state.anchor as { sequence: number }).sequence : 0);
 
 /** Whether a state is one this module could have produced: an estate id, a list of entries and, if any, an anchor. */
 const usable = (state: unknown): state is DeltaState =>
@@ -218,16 +218,18 @@ export interface DeltaTrust {
   at: Date;
 }
 
-export type AnchorProblem = "malformed" | "wrong-estate" | "fork";
+export type AnchorProblem = "malformed" | "wrong-estate" | "fork" | "unreconciled";
 
 /**
  * Apply a revision's delta anchor (DEC-0107) to what a machine holds, when the machine applies the revision. No anchor,
  * or one at or below what the machine holds with the hash it holds there, changes nothing. An anchor past the held head
- * becomes where the chain starts: the entries held before it are dropped (their revocations are in the record, which a
- * machine applies only once `reconcileRevision` passes) and the next entry is the anchor's sequence + 1. An anchor
- * whose hash differs from the entry held at its sequence is a second history (`fork`); the state becomes `broken`.
+ * becomes where the chain starts: the entries held before it are dropped, and the next entry is the anchor's sequence + 1.
+ * An entry is dropped only when the record lists its revocation (`isRevoked` on `record.revocations`), whatever its
+ * time, so an anchor never takes a revocation out of force: one the record does not list is `unreconciled`, naming
+ * the entries, and nothing changes. An anchor whose hash differs from the entry held at its sequence is a second
+ * history (`fork`); the state becomes `broken`.
  */
-export function anchorDelta(state: DeltaState, record: unknown): { ok: true; state: DeltaState } | { ok: false; problem: AnchorProblem; state: DeltaState } {
+export function anchorDelta(state: DeltaState, record: unknown): { ok: true; state: DeltaState } | { ok: false; problem: AnchorProblem; state: DeltaState; missing?: number[] } {
   if (!usable(state)) return { ok: false, problem: "malformed", state };
   if (!isObject(record) || record.estate !== state.estate) return { ok: false, problem: "wrong-estate", state };
   if (record.deltaAnchor === undefined) return { ok: true, state };
@@ -235,7 +237,15 @@ export function anchorDelta(state: DeltaState, record: unknown): { ok: true; sta
   if (anchor === undefined) return { ok: false, problem: "malformed", state };
   const base = baseOf(state);
   const held = base + state.entries.length;
-  if (anchor.sequence > held) return { ok: true, state: { ...state, anchor, entries: [] } };
+  if (anchor.sequence > held) {
+    const listed = list(record.revocations);
+    const missing = state.entries.filter((entry) => {
+      const revocation = isObject(entry.revocation) ? entry.revocation : {};
+      return !isRevoked(listed, String(revocation.kind), revocation.ref);
+    }).map((entry) => entry.sequence as number);
+    if (missing.length > 0) return { ok: false, problem: "unreconciled", state, missing };
+    return { ok: true, state: { ...state, anchor, entries: [] } };
+  }
   if (anchor.sequence < base || headAt(state, anchor.sequence) === anchor.sha256) return { ok: true, state };
   return { ok: false, problem: "fork", state: { ...state, broken: true } };
 }
