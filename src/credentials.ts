@@ -176,13 +176,14 @@ export function sealCredential(input: CredentialSealInput): CredentialEnvelope {
   return { ...unsigned, sig };
 }
 
-/** Marks read when absent, or an array of objects each with a string context, agentRef, slot and digest and a sequence, one per triple. */
+/** Marks read when absent, or an array of objects each with a string context, agentRef, slot and digest, a sequence and `revoked` absent or true (DEC-0113), one per triple. */
 function marksRead(marks: unknown): boolean {
   if (marks === undefined) return true;
   if (!Array.isArray(marks)) return false;
   const seen = new Set<string>();
   for (const m of marks) {
     if (!isObject(m) || !isString(m.context) || !isString(m.agentRef) || !isString(m.slot) || !isString(m.digest) || !counter(m.sequence)) return false;
+    if (m.revoked !== undefined && m.revoked !== true) return false;
     const key = JSON.stringify([m.context, m.agentRef, m.slot]);
     if (seen.has(key)) return false;
     seen.add(key);
@@ -203,7 +204,7 @@ export interface CredentialCheckContext {
   marks?: readonly JsonObject[];
 }
 
-export interface CredentialMark { context: string; agentRef: string; slot: string; sequence: number; digest: string }
+export interface CredentialMark { context: string; agentRef: string; slot: string; sequence: number; digest: string; revoked?: true }
 export type CredentialCheck = { ok: true; mark: CredentialMark } | { ok: false; refusal: CredentialRefusal };
 
 /**
@@ -260,7 +261,8 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   const digest = credentialEnvelopeDigest(value);
   const mark = list(ctx.marks).find((m) => m.context === h.context && m.agentRef === h.agentRef && m.slot === h.slot);
   if (mark !== undefined) {
-    if (h.sequence < (mark.sequence as number)) return no("replayed");
+    // A revoked mark (DEC-0113) admits no envelope at or below its sequence: a repeat delivery opens nothing again.
+    if (h.sequence < (mark.sequence as number) || (mark.revoked === true && h.sequence === mark.sequence)) return no("replayed");
     if (h.sequence === mark.sequence && mark.digest !== digest) return no("sequence-reused");
   }
   const iat = instant(h.iat) as number, exp = instant(h.exp) as number;
@@ -295,14 +297,16 @@ export function openCredential(value: unknown, ctx: CredentialCheckContext, ownK
 // ---- Revocation --------------------------------------------------------------------------------------------------
 
 /**
- * Whether a `credential-revocation/1` an organization sent this machine stands (`{revocation, keys, device, at}`): signed
- * like a policy layer by a key of the organization's current policy key set, inside the key's window on the device's
- * clock `at`, for this device and a context of this organization. A revocation that stands deletes the value and its mark; it never needs the value.
+ * Whether a `credential-revocation/1` an organization sent this machine stands (`{revocation, keys, device, at, held}`):
+ * signed like a policy layer by a key of the organization's current policy key set, inside the key's window on the
+ * device's clock `at`, for this device and a context of this organization, naming a `requestId`. A revocation that stands
+ * answers `deletes` (DEC-0113): true only when `held`, the request the credential held in that slot answers, is the one
+ * it names; the node then deletes the value and keeps the mark with `revoked: true`. It never needs the value.
  */
-export function credentialRevocationStands(input: unknown): { ok: true } | { ok: false; reason: "malformed" | "bad-signature" | "wrong-device" } {
+export function credentialRevocationStands(input: unknown): { ok: true; deletes: boolean } | { ok: false; reason: "malformed" | "bad-signature" | "wrong-device" } {
   const value = isObject(input) ? input : {};
   const revocation = isObject(value.revocation) ? value.revocation : undefined;
-  if (!revocation || revocation.type !== CREDENTIAL_REVOCATION_TYPE || !isObject(revocation.signature)) return { ok: false, reason: "malformed" };
+  if (!revocation || revocation.type !== CREDENTIAL_REVOCATION_TYPE || !isObject(revocation.signature) || !isString(revocation.requestId) || !UUID.test(revocation.requestId)) return { ok: false, reason: "malformed" };
   const signature = revocation.signature;
   // The key's window is judged on the device's own clock (`at`), never at the `revokedAt` the signer chose.
   const at = when(value.at);
@@ -318,7 +322,9 @@ export function credentialRevocationStands(input: unknown): { ok: true } | { ok:
   const ownDevice = isObject(revocation.device) && revocation.device.id === device.id;
   const ownOrg = isObject(revocation.org) && revocation.org.id === device.org && revocation.context === `${ORG_CONTEXT_PREFIX}${show(device.org)}`;
   if (!ownDevice || !ownOrg) return { ok: false, reason: "wrong-device" };
-  return { ok: true };
+  // DEC-0113: only the credential that answers the revoked request is deleted (`held`, the `requestId` of the credential
+  // the node holds in that slot), so a revocation delivered late never deletes a reissue.
+  return { ok: true, deletes: value.held === revocation.requestId };
 }
 
 // ---- The estate's digest key --------------------------------------------------------------------------------------

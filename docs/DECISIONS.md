@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0113` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0114` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6807,7 +6807,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0111: narrow credentials on request, the estate's keyed digests, and the call record
 
 - **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory (the issuer and its node), the
-  first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117).
+  first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117). Annotated (2026-10-23): items 3
+  and 4 amended by DEC-0113 (a revocation names its request and deletes only that credential; it ends the request; the
+  mark is kept as revoked).
 - **Context:** S5 of the agent network asks that an agent in an organization request a narrow credential (a token for
   one DNS zone, an OpenRouter key with a ceiling), that the organization decide, and that the value arrive sealed into
   that organization's context on the agent's machine, never into the person's own context, every request, decision and
@@ -6908,3 +6910,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/credential-exchange-*`; tests
   `test/credential-envelope.test.ts`, `test/rule-tolerance.test.ts`; backlog CT-119 done.
 - **Source:** CT-119 (the seam and product readings of PR #156, round 2, 2026-10-23).
+
+### DEC-0113: a credential revocation names its request, and the mark it leaves is revoked
+
+- **Status:** Accepted (2026-10-23). No producer or consumer has adopted `credential-revocation/1` yet (CT-117).
+- **Context:** a `credential-revocation/1` named only `(agentRef, slot)`, and the node deleted the value and its mark
+  when it stood. A revocation delivered late (a check-in response retried after the issuer had reissued into the same
+  slot) deleted the reissue, and deleting the mark let the revoked envelope open again on a repeat delivery inside its
+  `exp` (CT-118, the seam reading of PR #156).
+- **Decision:**
+  1. `credential-revocation/1` requires `requestId`, the `credential-request/1` whose credential it revokes.
+  2. `credentialRevocationStands` takes `held`, the `requestId` the credential the node holds in that slot answers, and
+     answers `{ok: true, deletes}`: `deletes` is true only when `held` is the revocation's `requestId`. A revocation that
+     names no request is `malformed`.
+  3. A revocation that stands ends the request it names, whether or not it deletes: the node stops sending it, so an
+     envelope for it (a repeat delivery, or one lost in transit and sealed again) answers `not-requested` at step 7, and
+     the node reads a response's revocations before its envelopes. When it deletes, the node also keeps the slot's mark
+     with `revoked: true`, behind which `checkCredentialEnvelope` answers `replayed` for an envelope at or below its
+     sequence; the function holds this in the personal profile too, where no flow writes a revoked mark today. The
+     revoked envelope never opens again and a reissue (a new request, a higher sequence) still does. A mark's `revoked`
+     is absent or `true`; anything else does not read.
+  4. The node writes the value with the `requestId` it answers, which it passes as `held`. The issuer writes each
+     revocation's `requestId`, one per issued request; the organization server relays it unchanged.
+- **Why:** the request is the instance's name the node already holds (the envelope carries it), so no new identifier
+  is needed, and a tombstone mark is the smallest state that keeps replay closed.
+- **Alternatives considered:** naming the envelope's sequence (a sealer that lost its sequence restarts at the clock,
+  so a sequence is a weaker name than the request); deleting the mark and keeping the request id in a second list (two
+  stores for one fact).
+- **Compatibility:** narrower in both directions, under the same `credential-revocation/1`: a revocation without
+  `requestId` is refused by a reader pinned at or after this decision, and one with it is refused by a reader pinned at
+  the release `v0.1.0+2026-10-23` (the object is closed), so a check-in response carrying it fails there. Nobody writes
+  or reads revocations yet (CT-117), so no deployed pair is refused and no `/2` is taken; the next release notes list
+  this narrowing. `credentialRevocationStands`'s answer gains `deletes`. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/credential-revocation.schema.json`, `src/credentials.ts`
+  (`credentialRevocationStands`, the marks, step 8), `docs/specification/credentials.md` (Revocation, steps 1 and 8),
+  `conformance.md` (the issuer's and the node's rows), SCN-041, ST-033, DEC-0111's status; vectors `fixtures/vectors/credential-envelope.json` by
+  `tools/vectors/credential-envelope.ts` (`revocation`, `check`); the fixtures that carry a revocation; backlog CT-118
+  done.
+- **Source:** CT-118 (the seam reading of PR #156, 2026-10-23).

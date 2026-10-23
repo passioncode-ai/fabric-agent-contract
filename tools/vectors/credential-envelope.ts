@@ -144,6 +144,12 @@ function checkCases(): Json[] {
     ["a mark whose slot does not read", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: 5, sequence: 9, digest: "sha256:00" }] }), no("malformed")],
     ["a mark whose sequence does not read refuses at step 1", envelope(orgHeader({ alg: "ES256" }), orgSigner, K.aKem, "marks-first"), orgCtx({ marks: [{ context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", sequence: "x", digest: "sha256:00" }] }), no("malformed")],
     ["two marks for one triple do not read", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 1, digest: "sha256:00" }, { context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 6, digest: "sha256:00" }] }), no("malformed")],
+    ["an organization's revoked envelope again, its request no longer held", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [] }, marks: [{ context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", sequence: 1, digest: digestOf(org), revoked: true }] }), no("not-requested")],
+    ["an organization's revoked envelope again, its request still held: the revoked mark refuses it", org, orgCtx({ marks: [{ context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", sequence: 1, digest: digestOf(org), revoked: true }] }), no("replayed")],
+    ["another envelope at a revoked mark's sequence is replayed, not reused", org, orgCtx({ marks: [{ context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", sequence: 1, digest: "sha256:00", revoked: true }] }), no("replayed")],
+    ["a revoked mark refuses the same envelope again", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 1, digest: digestOf(personal), revoked: true }] }), no("replayed")],
+    ["a revoked mark admits a later sequence", envelope(personalHeader({ sequence: 2 }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "after-revoked"), personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 1, digest: digestOf(personal), revoked: true }] }), ok(envelope(personalHeader({ sequence: 2 }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "after-revoked"))],
+    ["a mark whose revoked does not read", personal, personalCtx({ marks: [{ context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", sequence: 1, digest: digestOf(personal), revoked: false }] }), no("malformed")],
     ["marks that do not read refuse before any later check", envelope(orgHeader({ alg: "ES256" }), orgSigner, K.aKem, "marks-first"), orgCtx({ marks: "x" }), no("malformed")],
     ["a credential issued for more than 30 days", envelope(orgHeader({ credentialExpiresAt: "2026-11-23T09:59:00Z" }), orgSigner, K.aKem, "too-long"), orgCtx(), no("credential-expired")]
   ];
@@ -176,12 +182,15 @@ function digestCases(): Json[] {
 }
 
 function revocationCases(): Json[] {
-  const unsigned = (over: Json = {}): Json => ({ type: "credential-revocation/1", org: { id: ORG }, device: { id: "dev-01j9a" }, context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", revokedAt: "2026-10-24T09:00:00Z", reason: "administrator", ...over });
+  const unsigned = (over: Json = {}): Json => Object.fromEntries(Object.entries({ type: "credential-revocation/1", org: { id: ORG }, device: { id: "dev-01j9a" }, context: ORG_CONTEXT, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", requestId: REQUEST, revokedAt: "2026-10-24T09:00:00Z", reason: "administrator", ...over } as Json).filter(([, v]) => v !== undefined));
   const signed = (doc: Json, key = POLICY): Json => ({ ...doc, signature: { alg: "ed25519", keyId: "org-7f3a.policy-2026-10", value: sign(null, Buffer.from(settingsCanonicalJson(doc), "utf8"), key).toString("base64") } });
   const device = { id: "dev-01j9a", org: ORG };
   const at = "2026-10-24T09:00:00Z";
   return [
-    { name: "a revocation for this device stands", input: { revocation: signed(unsigned()), keys: KEYS, device, at }, expect: { ok: true } },
+    { name: "a revocation for this device stands and deletes the credential that answers its request", input: { revocation: signed(unsigned()), keys: KEYS, device, at, held: REQUEST }, expect: { ok: true, deletes: true } },
+    { name: "a late revocation stands but never deletes a reissue answering another request", input: { revocation: signed(unsigned()), keys: KEYS, device, at, held: "6c2f1d5e-9b3e-4a4c-8d7f-2e8b3c4d5e6f" }, expect: { ok: true, deletes: false } },
+    { name: "a revocation of a slot the node holds nothing in deletes nothing", input: { revocation: signed(unsigned()), keys: KEYS, device, at }, expect: { ok: true, deletes: false } },
+    { name: "a revocation that names no request", input: { revocation: signed(unsigned({ requestId: undefined })), keys: KEYS, device, at, held: REQUEST }, expect: { ok: false, reason: "malformed" } },
     { name: "signed by another key", input: { revocation: signed(unsigned(), OTHER_POLICY), keys: KEYS, device, at }, expect: { ok: false, reason: "bad-signature" } },
     { name: "after the key's window on the device's clock", input: { revocation: signed(unsigned()), keys: KEYS, device, at: "2027-01-01T00:00:00Z" }, expect: { ok: false, reason: "bad-signature" } },
     { name: "a revokedAt the signer chose inside the window does not save a key ended on the device's clock", input: { revocation: signed(unsigned({ revokedAt: "2026-10-24T09:00:00Z" })), keys: KEYS, device, at: "2027-01-02T00:00:00Z" }, expect: { ok: false, reason: "bad-signature" } },
@@ -194,7 +203,7 @@ function revocationCases(): Json[] {
 export function credentialVectors(): Json {
   return {
     about:
-      "Vectors for credentials on request (DEC-0111), written by tools/vectors/credential-envelope.ts, never by hand. check: checkCredentialEnvelope(envelope, context); an absent member is absent. open: openCredential(envelope, context, privateKey), privateKey the base64 P-256 scalar, secret the UTF-8 value (the digest key as base64 of its 32 bytes). digest: keyedDigest(key, value), key hex, null for undefined. revocation: credentialRevocationStands(input), input.at the device's clock. An envelope is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-credential-envelope/1, the additional data the RFC 8785 UTF-8 bytes of the header, signed over the RFC 8785 bytes of {header, ct}: EdDSA by an organization's policy key (Ed25519), ES256 low-S as r ‖ s by a machine's #sig; enc, ct and sig are unpadded base64url. The organization's policy key set is keys; the estate record is record.",
+      "Vectors for credentials on request (DEC-0111), written by tools/vectors/credential-envelope.ts, never by hand. check: checkCredentialEnvelope(envelope, context); an absent member is absent. open: openCredential(envelope, context, privateKey), privateKey the base64 P-256 scalar, secret the UTF-8 value (the digest key as base64 of its 32 bytes). digest: keyedDigest(key, value), key hex, null for undefined. revocation: credentialRevocationStands(input), input.at the device's clock, input.held the requestId the slot's credential answers (absent when it holds nothing); a revocation that stands answers deletes (DEC-0113). An envelope is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-credential-envelope/1, the additional data the RFC 8785 UTF-8 bytes of the header, signed over the RFC 8785 bytes of {header, ct}: EdDSA by an organization's policy key (Ed25519), ES256 low-S as r ‖ s by a machine's #sig; enc, ct and sig are unpadded base64url. The organization's policy key set is keys; the estate record is record.",
     keys: KEYS,
     record: record(),
     check: checkCases(),
