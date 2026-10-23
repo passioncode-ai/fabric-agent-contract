@@ -168,43 +168,46 @@ const known = (value: unknown): value is number => typeof value === "number" && 
 const sum = (values: number[]) => values.sort((a, b) => a - b).reduce((n, x) => n + x, 0);
 
 /**
- * The host's sum over usage rows (`days[].byModel[]`, of one day or of several), DEC-0110: money is the `costUsd` of
+ * The host's sum over usage rows: `days[].byModel[]`, of one day or of several, the only rows that carry `route`
+ * (a day's totals, `byProject` and `byGrant` mix routes and are never passed here). DEC-0110: money is the `costUsd` of
  * every row whose `route` is `key`, `platform-metered` or absent; a `subscription` row's `costUsd` is an estimate at list
  * price, summed apart and never into money. A window whose calls were all on a subscription spent 0, never null; money is
- * null only when it has calls off a subscription and none of them is priced, and a lower bound while any of them is
- * unpriced. An unknown `route` or a row whose counts or cost the schema refuses answers `undefined`, never a guess. It
+ * null only when it has calls off a subscription and none of them is priced (a row without calls never prices them),
+ * and a lower bound while some are priced and some are not. An unknown `route` or a row whose counts or cost the schema refuses answers `undefined`, never a guess. It
  * never throws.
  */
 export function usageSpend(rows: unknown): UsageSpend | undefined {
   if (!Array.isArray(rows)) return undefined;
   const money: number[] = [], estimate: number[] = [];
-  let calls = 0, paidCalls = 0, paidPriced = false, paidUnpriced = false, subscriptionCalls = 0, subPriced = false, subUnpriced = false;
+  let calls = 0, subscriptionCalls = 0;
+  // Per side: calls, calls with a known price, and whether any call is unpriced.
+  const paid = { calls: 0, priced: 0, unpriced: false }, sub = { calls: 0, priced: 0, unpriced: false };
   for (const row of rows) {
     if (!isObject(row)) return undefined;
     const route = row.route;
     if (route !== undefined && !(typeof route === "string" && ROUTES.includes(route))) return undefined;
-    const rowCalls = row.calls, unpriced = row.unpricedCalls ?? 0, rowCost = row.costUsd;
+    const rowCalls = row.calls, unpriced = row.unpricedCalls === undefined ? 0 : row.unpricedCalls, rowCost = row.costUsd;
     if (!Number.isSafeInteger(rowCalls) || (rowCalls as number) < 0 || !Number.isSafeInteger(unpriced) || (unpriced as number) < 0 || (unpriced as number) > (rowCalls as number)) return undefined;
     if (rowCost !== null && !known(rowCost)) return undefined;
     // FAC-SEM-025's own pairing: null exactly when every call of a row with calls is unpriced.
     if ((rowCalls as number) > 0 && (rowCost === null) !== (unpriced === rowCalls)) return undefined;
     calls += rowCalls as number;
-    if (route === "subscription") {
-      subscriptionCalls += rowCalls as number;
-      if (known(rowCost)) { estimate.push(rowCost); subPriced = true; }
-      if ((unpriced as number) > 0) subUnpriced = true;
-    } else {
-      paidCalls += rowCalls as number;
-      if (known(rowCost)) { money.push(rowCost); paidPriced = true; }
-      if ((unpriced as number) > 0) paidUnpriced = true;
-    }
+    const side = route === "subscription" ? sub : paid;
+    if (route === "subscription") subscriptionCalls += rowCalls as number;
+    side.calls += rowCalls as number;
+    side.priced += (rowCalls as number) - (unpriced as number);
+    if ((unpriced as number) > 0) side.unpriced = true;
+    if (known(rowCost)) (route === "subscription" ? estimate : money).push(rowCost);
   }
+  // A side with calls and none of them priced is unknown (null), whatever a row without calls costs; a side without
+  // calls is the sum of what its rows cost, 0 when none does.
+  const total = (side: typeof paid, costs: number[]) => (side.calls > 0 && side.priced === 0 ? null : sum(costs));
   return {
     calls,
-    moneyUsd: paidCalls === 0 ? 0 : paidPriced ? sum(money) : null,
-    moneyLowerBound: paidCalls > 0 && paidPriced && paidUnpriced,
-    estimateUsd: subscriptionCalls === 0 ? 0 : subPriced ? sum(estimate) : null,
-    estimateLowerBound: subscriptionCalls > 0 && subPriced && subUnpriced,
+    moneyUsd: total(paid, money),
+    moneyLowerBound: paid.priced > 0 && paid.unpriced,
+    estimateUsd: total(sub, estimate),
+    estimateLowerBound: sub.priced > 0 && sub.unpriced,
     subscriptionCalls
   };
 }

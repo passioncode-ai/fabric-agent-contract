@@ -264,6 +264,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-02
 - **Status:** Accepted
+- **Annotated (2026-10-23):** the no-token `401` on the well-known route carries none of the service's data, and an identity proxy MAY answer it with its own page; the body is no longer required empty (DEC-0109).
 - **Decision:** A descriptor gains the optional field `placement`, `local` by default. A
   `remote` placement is an online agent or dashboard at an `https://<dns-name>[:<port>]` origin,
   supervised by its platform (`lifecycle.manager: "none"`, no launchd fields, `doctor` only). It
@@ -329,6 +330,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
+- **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -608,6 +610,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-23):** a host counts only money against a budget or a limit, never a subscription's estimate (DEC-0110).
 - **Amends:** the `fabric-service/0.1` usage report of DEC-0021 (additive, DEC-0016 extension
   policy)
 - **Decision:** `service-usage.schema.json` gains an optional `budgets` array, at most 64
@@ -1999,6 +2002,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the adapter's kit implements `resolveModelProfile`, reads the catalogue and shows the slots; Project Observatory
   supplies prices and the tool-use probe, issues keys with the allow-list and meters by route; Fabric Dashboards shows
   each agent's configuration.
+- **Annotated (2026-10-23):** a `subscription` row's `costUsd` is an estimate at list price; a host sums money over the other routes only (DEC-0110).
 - **Annotated (2026-10-12):** a usage report's `route` admits `platform-metered` beside `subscription` and `key`, and a
   descriptor names its runner's credential kind, by DEC-0061.
 - **Annotated (2026-10-15):** amended by DEC-0083: the closed model classes gain `open-vendor` (seven classes), a model
@@ -6648,7 +6652,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (a service could put its status in it).
 - **Compatibility:** a widening: every answer the old rule admitted is still admitted. A checker pinned before this
   decision fails such a service on that rule alone until it moves. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/service.md` (*Remote placement*, the service), CT-114.
+- **Consequences / affects:** `docs/specification/service.md` (*Remote placement*, the service), `conformance.md`
+  (the host row), the annotation on DEC-0019, CT-114.
 - **Source:** Fabric Inbox's request on board thread `a1c375d2` (2026-10-23).
 
 ### DEC-0110: a host sums money over the usage rows not on a subscription
@@ -6667,16 +6672,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   limit, and MAY show apart, labelled as an estimate. A window whose calls were all on a subscription spent `0`, never
   `null`; money is a lower bound while any call off a subscription is unpriced and `null` only when none of them is
   priced; calls and tokens count on every route. A day's `costUsd` stays the sum of every row, so it is money only while
-  no row is on a subscription; `budget.spentUsd` and `budgets[]` count money only. `usageSpend(rows)`
-  (`src/usage-rules.ts`) is the reference sum and refuses an unknown `route`.
+  no row is on a subscription, and so are `byProject`, `taskRuns` and `byGrant`'s, which carry no route: a host shows
+  them as cost including estimates and never counts them against a limit while a row of the window is on one. A host
+  reads `budget.spentUsd` and `budgets[]` as money, and a service SHOULD count only money there. `usageSpend(rows)`
+  (`src/usage-rules.ts`) is the reference sum over `days[].byModel[]` rows and refuses an unknown `route`.
 - **Why:** an operator reading "spend" reads money, and limits are money: an estimate in the sum trips a limit on calls
   nobody paid for per call. A host rule changes no byte a service writes, so every report stays valid.
 - **Alternatives considered:** a money-only total in `service-usage.schema.json` (every service would write a new member
-  and every reader pinned before it would refuse the report; the rows already carry what the sum needs); counting a row
+  and every reader pinned before it would refuse the report; the `days[].byModel[]` rows already carry what the sum
+  needs, and a per-project split by route is left to a later decision); counting a row
   with no `route` as an estimate (a report written before DEC-0046 would lose its money).
 - **Compatibility:** no wire change. A host that summed every row now shows less money for a report with subscription
   rows, which is the correction. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `src/usage-rules.ts` (`usageSpend`),
-  `test/usage-rules.test.ts`, CT-115.
+- **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `spend-policy.md` (the launcher's
+  recent spend), `conformance.md` (the host row), `CONTEXT.md`, `src/usage-rules.ts` (`usageSpend`),
+  `test/usage-rules.test.ts`; annotations on DEC-0021, DEC-0027, DEC-0046; CT-115.
 - **Source:** a service's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
   `f22685d2` (2026-10-22).

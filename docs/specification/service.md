@@ -327,9 +327,12 @@ show every agent's spend beside its health without knowing any provider.
   `route` is `key`, `platform-metered` or absent (a report written before DEC-0046 keeps its meaning); a window whose
   calls were all on a subscription spent `0`, never `null`; money is a lower bound while any call off a subscription is
   unpriced, and `null` only when none of them is priced. Calls and tokens count on every route. A day's `costUsd` sums
-  every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; `budget.spentUsd` and each
-  `budgets[]` entry count money only. `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the
-  reference sum: it refuses an unknown `route` rather than guess.
+  every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; so are a project's, a task run's
+  and a grant's `costUsd` (`byProject`, `taskRuns`, `byGrant`), which carry no route: a host shows them as cost
+  including estimates while any row of the window is on a subscription, and never counts them against a limit then. A
+  host reads `budget.spentUsd` and each `budgets[]` entry as money, and a service SHOULD count only money there.
+  `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the reference sum over `days[].byModel[]`
+  rows: it refuses an unknown `route` rather than guess.
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),

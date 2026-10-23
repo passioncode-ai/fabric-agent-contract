@@ -28,7 +28,8 @@ A project's policy is chosen **once**, at the first run that would spend money. 
 the launcher computes the options for that project from:
 
 - the presets its agents declare;
-- its recent spend, from usage reports ([DEC-0021](service.md));
+- its recent spend, from usage reports ([DEC-0021](service.md)): money only, summed over the rows not on a subscription
+  ([DEC-0110](service.md#usage-report)), never a project's `costUsd` while a row of the window is on one;
 - the kind of work.
 
 It names these inputs in `proposal.inputs`. For example, it offers about the expected month, twice that,

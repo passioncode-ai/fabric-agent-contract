@@ -165,6 +165,12 @@ describe("usageSpend: money apart from a subscription's estimate (DEC-0110)", ()
     ]) expect(usageSpend(bad), JSON.stringify(bad)).toBeUndefined();
     for (const bad of [undefined, null, {}, "rows", { length: 1 }]) expect(usageSpend(bad)).toBeUndefined();
     expect(usageSpend([row("key", 0, null)])).toMatchObject({ calls: 0, moneyUsd: 0 });
+    // A row without calls prices no call: money stays unknown beside unpriced calls, and its cost still counts alone.
+    expect(usageSpend([row("key", 0, 0), row("key", 3, null, 3)])).toMatchObject({ moneyUsd: null, moneyLowerBound: false });
+    expect(usageSpend([row("subscription", 0, 0), row("subscription", 3, null, 3)])).toMatchObject({ estimateUsd: null, estimateLowerBound: false });
+    expect(usageSpend([row("key", 0, 5)])).toMatchObject({ moneyUsd: 5, moneyLowerBound: false });
+    expect(usageSpend([row("key", 0, 5), row("key", 1, 1)])).toMatchObject({ moneyUsd: 6 });
+    expect(usageSpend([{ ...row("key", 1, 1), unpricedCalls: null }])).toBeUndefined();
     // A row without `unpricedCalls` has every call priced.
     expect(usageSpend([{ provider: "p", model: "m", route: "key", calls: 2, costUsd: 0.5 }])).toMatchObject({ moneyUsd: 0.5, moneyLowerBound: false });
   });
