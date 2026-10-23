@@ -45,7 +45,8 @@ node's order named a duty, relay.md's T2); product three breaks (an em dash in S
 admitting a T2 sender with a token, "a view machine runs no agent"), fixed with its risks (the idempotency key, the
 rollout signal, the hub before a profile change, the window with no hub).
 Round 3: unit, seam and product pass; product's risks fixed (SCR-23's coverage, the rollout signal per reader),
-unit's one risk filed as CT-112.
+unit's one risk filed as CT-112. Round 4: product pass; its one risk (Observatory's node reports no contract pin to Fabric)
+fixed in CT-110. The finish line: unit rounds 2 and 3, seam rounds 2 and 3, product rounds 3 and 4.
 
 ## Checks actually run
 
