@@ -189,8 +189,10 @@ and `recordedBy`.
 - The callee's node writes one for each call it answered or refused; the caller's node writes one for a call that got
   no answer (`unknown` or `timeout`). A call the callee queued (`fabric.job.*`, [agent network](agent-network.md)) is
   one call: the callee writes its record when the job reaches a final state, from the call that started it to that
-  state (`startedAt` the start, `endedAt` the final state, its outcome the job's); a `fabric.job.get`, `list` or
-  `cancel` that reads or stops it is part of that call and writes no record of its own (DEC-0116). Both use the call's `callId`, so a reader joins them into one call, and the
+  state (`startedAt` the start, `endedAt` the final state, its outcome the job's: a `failed` job's code is its
+  `error.code`, a `cancelled` job's `job-cancelled`); a `fabric.job.get`, `list` or `cancel` that reads or stops it is
+  part of that call and writes no record of its own. A job the caller learns is lost (`unknown-job`) or stops waiting
+  for is a call that got no answer: the caller writes `unknown` under the starting call's `callId` (DEC-0116). Both use the call's `callId`, so a reader joins them into one call, and the
   callee's record names its outcome when both exist.
 - Its `cost` describes spend the callee's usage report already counts: a host never adds it to money spent, a budget or
   a limit.
@@ -218,8 +220,8 @@ Additive. Five new protocols in the register (`credential-request/1`, `credentia
 `fabric-credential-envelope/1`, `credential-revocation/1`, `call-record/1`) and six new members of a check-in's
 `records`. A server pinned before DEC-0111 refuses a check-in that carries the new request members, and a node pinned
 before it refuses a response with the new response members (both objects are closed), so each side sends them only to a
-peer that lists the protocol in its `protocols` (as `node-summary/1` and `repair-request/1` are gated, DEC-0101), each
-side's own list (DEC-0116): a node sends `credentialRequests` only to a server whose response `protocols` (what it
+peer that lists the protocol in its `protocols`, each side's own list (DEC-0116; a node-sent `node-summary/1` is
+gated so too, DEC-0101): a node sends `credentialRequests` only to a server whose response `protocols` (what it
 accepts from the device) lists `credential-request/1`, and `callRecords` only to one that lists `call-record/1`; a
 server sends `credentialDecisions`, `credentials`, `credentialRevocations` and `callRecordsAccepted` only to a node whose
 check-in `protocols` (what it reads) lists `credential-decision/1`, `fabric-credential-envelope/1`,

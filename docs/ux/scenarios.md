@@ -934,5 +934,5 @@ independent agent author and P-02 project operator.
 - **States covered:** success, empty
 - **Errors & recovery:** a record that ends before it starts, or a completed call with a code -> `FAC-SEM-140` names it.
 - **Status:** draft
-- **Coverage:** DEC-0111, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
+- **Coverage:** DEC-0111, DEC-0116, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
 - **Product:** unobserved
