@@ -6647,8 +6647,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      revision vouches for, every revocation up to it listed in the record. `anchorDelta(state, record)` starts a
      machine's chain at an anchor past its head (`DeltaState.anchor`) only when the record lists the revocation of every
      entry it drops (otherwise `unreconciled`, nothing changes), changes nothing for one it already holds with the same
-     hash, and is a `fork` for another hash. `applyDelta` skips an entry at or below the anchor, and one identical
-     to an entry held, before looking up its signer. A revision keeps an anchor once set and never moves it back
+     hash, and is a `fork` for another hash. `applyDelta` skips an entry below the anchor, the anchor's own entry
+     (its hash), and one identical to an entry held, before looking up its signer; another entry at the anchor's
+     sequence is a `fork`. A machine applies the anchor after `reconcileRevision`, and a refusal by either refuses
+     the revision. A revision keeps an anchor once set and never moves it back
      (`FAC-SEM-137`, kind `estate-record-revision`, run by `verifyEstateRecord` with a parent).
   3. **Moving the hub.** From a machine caught up with the relay (its delta head and latest heartbeat, not `broken`;
      not necessarily `current`, which no machine is past 72 hours), to a new Ed25519 hub key generated on an always-on `full` machine

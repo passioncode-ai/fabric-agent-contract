@@ -192,7 +192,10 @@ holding the entry refuses such a revision as `unreconciled` and keeps the one it
 `FAC-SEM-084`); a revision issued before the entry need not list it, and the entry stays in force. Times are compared as
 instants, never as strings (an entry at `19:05:00+09:00` is `10:05:00Z`), and an unreadable time is `malformed`, never
 compared. A machine applies a revision only when it is valid against the schema, `verifyEstateRecord` accepts it
-(DEC-0055) and it is reconciled with the entries the machine holds.
+(DEC-0055) and it is reconciled with the entries the machine holds; it then applies the revision's anchor
+([the anchor](#the-anchor)), and a refusal by `anchorDelta` (`unreconciled`, `fork`, `malformed`) refuses the revision
+too: the machine keeps the one it holds (DEC-0107). A missing entry's `index` from `reconcileRevision` is into the held
+entries, so its sequence is the anchor's sequence (0 without one) plus the index plus one.
 
 ## The organization
 

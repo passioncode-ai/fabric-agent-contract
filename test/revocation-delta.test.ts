@@ -303,12 +303,19 @@ describe("tolerance: every verifier answers, never throws", () => {
         expect(() => reconcileRevision(state as DeltaState, value)).not.toThrow();
         expect(() => effectiveRevocations(value, state as DeltaState)).not.toThrow();
         expect(() => unreconciled(value, [value])).not.toThrow();
+        expect(() => anchorDelta(state as DeltaState, value)).not.toThrow();
+        expect(() => anchorDelta(state as DeltaState, { estate: ESTATE, revocations: [], deltaAnchor: { sequence: 5, sha256: "a".repeat(64) } })).not.toThrow();
       }
     }
     expect(applyDelta(7 as never, { entries: [] }, trust)).toMatchObject({ ok: false, problem: "malformed" });
     expect(acceptHeartbeat(7 as never, {}, trust)).toMatchObject({ ok: false, problem: "malformed" });
     expect(reconcileRevision(7 as never, {})).toMatchObject({ ok: false, problem: "malformed" });
     expect(deltaFreshness(7 as never, trust)).toMatchObject({ answer: "stale" });
+    // A held entry that is no object, or names no sequence, makes the state malformed for an anchor past it (round 3).
+    const past = { estate: ESTATE, revocations: [], deltaAnchor: { sequence: 5, sha256: "a".repeat(64) } };
+    for (const bad of [null, undefined, 7, "x", {}, { sequence: "1" }]) {
+      expect(anchorDelta(held([bad as unknown as Json]), past)).toMatchObject({ ok: false, problem: "malformed" });
+    }
   });
 
   it("reads a held heartbeat that is not readable as stale, and one with no RFC 8785 form as no match", () => {

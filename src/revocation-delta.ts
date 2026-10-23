@@ -68,7 +68,7 @@ export function deltaGenesis(estate: string): string {
   return sha256hex(Buffer.from(rfc8785({ type: DELTA_TYPE, estate, sequence: 0 }), "utf8"));
 }
 
-/** What a machine holds of one estate's delta. `entries[n - 1]` is entry n; `forked` keeps signed entries that conflict with the chain, for their revocations and as evidence. */
+/** What a machine holds of one estate's delta. `entries[i]` is entry `(anchor?.sequence ?? 0) + i + 1` (entry n is `entries[n - 1]` without an anchor); `forked` keeps signed entries that conflict with the chain, for their revocations and as evidence. */
 export interface DeltaState {
   estate: string;
   /** DEC-0107: the head a revision vouched for, where the held chain starts; `entries` are the ones after it. */
@@ -238,6 +238,8 @@ export function anchorDelta(state: DeltaState, record: unknown): { ok: true; sta
   const base = baseOf(state);
   const held = base + state.entries.length;
   if (anchor.sequence > held) {
+    // An entry that is no object, or names no sequence, cannot be checked against the record: the state is malformed.
+    if (!state.entries.every((entry) => isObject(entry) && Number.isSafeInteger(entry.sequence))) return { ok: false, problem: "malformed", state };
     const listed = list(record.revocations);
     const missing = state.entries.filter((entry) => {
       const revocation = isObject(entry.revocation) ? entry.revocation : {};
@@ -457,7 +459,12 @@ export function unreconciled(revision: unknown, entries: readonly unknown[]): { 
   return { missing, unreadable };
 }
 
-/** Whether a machine holding `state` may apply `revision` (already schema-valid and accepted by `verifyEstateRecord`). */
+/**
+ * Whether a machine holding `state` may apply `revision` (already schema-valid and accepted by `verifyEstateRecord`).
+ * A missing entry's `index` is into `state.entries`, so its sequence is `(state.anchor?.sequence ?? 0) + index + 1`. A
+ * machine then applies the revision's anchor (`anchorDelta`); a refusal by either refuses the revision, and the machine
+ * keeps the one it holds (DEC-0107).
+ */
 export function reconcileRevision(state: DeltaState, revision: unknown): { ok: true } | { ok: false; problem: "malformed" | "unreconciled"; missing: Array<{ index: number; kind: string; ref: string }> } {
   if (!usable(state)) return { ok: false, problem: "malformed", missing: [] };
   const result = unreconciled(revision, state.entries);

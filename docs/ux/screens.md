@@ -296,12 +296,12 @@
 ### SCR-23: My network's machines
 
 - **Used by:** FLW-20, FLW-26, FLW-27
-- **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, each by one signed revision.
-- **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none.
-- **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106; alert: this machine has not heard from the hub for more than 24 hours, or holds no heartbeat, after reconnecting to the relay, with the hours since, whether calls between machines have stopped (past 72 hours) and "Move the hub" (`hubSilence`); or one passkey only, with "Add a passkey" (`recoveryReady`).
+- **Purpose:** the person creates the network, and removes a machine, replaces its key or changes its profile, moves the hub, and adds or replaces a passkey, each by a signed revision.
+- **Elements:** the network's fingerprint; one row per machine with its id, key fingerprint and profile (full, member, view), "Replace key" (primary action), and "Change profile" and "Remove" in an overflow menu; "Create my network" when there is none; the hub alert with the hours since and "Move the hub", which opens a picker of the always-on `full` machines; the passkeys list with "Add a passkey" and the one-passkey warning.
+- **States:** success: the revision is signed and the list shows the change; error: the passkey ceremony failed and nothing changed; empty: no network yet, with "Create my network"; unavailable: "Change profile" is disabled, with the reason, until every reader of the record is pinned at or after DEC-0106; alert: this machine has not heard from the hub for more than 24 hours, or holds no heartbeat, shown at once with the hours since, whether calls between machines have stopped (past 72 hours) and "Move the hub", offered only after reconnecting to the relay and reading `hubSilence` again; or one passkey only, with "Add a passkey" (`recoveryReady`).
 - **Coverage:** `src/estate-record-rules.ts` (`FAC-SEM-114`; `machineProfile`, `FAC-SEM-134`), `fixtures/semantic/estate-profile-*`, `test/ceremonies.test.ts`, `test/estate-record.test.ts`, `src/hub-move.ts`, `test/hub-move.test.ts`
 - **Scenarios:** SCN-029, SCN-030, SCN-037, SCN-038, SCN-039
-- **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key
+- **Resources:** ceremonies specification, Create my network, Remove a machine, Replace a machine's key, Move the hub, Recover a lost passkey
 - **Status:** proposed
 
 ### SCR-24: An agent's connections

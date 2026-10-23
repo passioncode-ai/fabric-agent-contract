@@ -253,7 +253,7 @@ keys are DEC-0053's.
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
   (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` and `FAC-SEM-134`, and with a parent `FAC-SEM-114` and `FAC-SEM-137`) and it is
-  reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107); installs a
+  reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107), refusing the revision and keeping its parent when either refuses it; installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
   instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision in its check-in's
