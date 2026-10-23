@@ -66,10 +66,17 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
     expect(valid("Users-guide-17")).toBe(true);
     expect(valid("C--Users-example-work.jsonl:4")).toBe(false);
     expect(valid("proj--home-example-x:4")).toBe(false);
+    expect(valid("x.-Users-example-work:4")).toBe(false);
+    expect(valid("p~-home-example-x")).toBe(false);
+    expect(valid("x_-home-example-y")).toBe(false);
+    expect(valid("x#-Users-example-y")).toBe(false);
+    // DEC-0105 refuses a lower-case root after a separator too: the boundary is the character, not the case.
+    expect(valid("x.-users-list")).toBe(false);
+    expect(valid("my-users-list:4")).toBe(true);
   });
 
   it("finds a home directory in the encoded forms runtimes write into file names, and not in an ordinary branch", () => {
-    for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes"]) {
+    for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes", "x.-Users-alice-DATA-secret", "p@-Users-alice-x", "a_-home-bob-proj", "see -home-page", "café-Users-x", "a:-Users-bob-x", "a+-home-bob-x"]) {
       expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
     }
     for (const value of ["feature/home-page", "homework-17", "users-guide", "req_011CT"]) expect(forbiddenKeys({ v: value }, "", new Set()), value).toEqual([]);

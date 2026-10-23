@@ -103,7 +103,7 @@ policy key names).
 | `eventId` | The idempotency key ([below](#event-id)). |
 | `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
-| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and every encoded home-directory fragment. |
+| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
 | `occurred` | The device's wall clock when it happened. |
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
@@ -272,7 +272,8 @@ kind, followed by a name. The forms it covers:
   `C:\Users\<name>`;
 - URL-encoded slash forms, once or twice: `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
 - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`,
-  `-home-<name>-`;
+  `-home-<name>-`, at the start or after any character that is not an ASCII letter or digit (`x.-Users-<name>`,
+  `p@-Users-<name>`, DEC-0105);
 - tilde forms: `~/` and `~<name>/`.
 
 `Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not

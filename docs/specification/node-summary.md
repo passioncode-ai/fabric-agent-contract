@@ -1,6 +1,6 @@
 # A node's summary and an organization's repairs (`node-summary/1`, `repair-request/1`)
 
-**Maturity:** specified, no consumer yet (DEC-0101, corrected by DEC-0102). Asked by the first organization server for the operator's targets S7,
+**Maturity:** specified (DEC-0101, corrected by DEC-0102, narrowed by DEC-0105); implemented by Project Observatory's node at contract pin `f33f4d8a` (engine PR #345). Asked by the first organization server for the operator's targets S7,
 S8 and S10 (board thread `ba63565c`, items 7 and 8); the summary's first half was DV-CON-01, accepted on 2026-10-12.
 
 An organization sees what each enrolled machine runs (S8), how that differs from what it expects (S10), and can ask
@@ -35,8 +35,10 @@ question, board row CT-92, which also asks about the harness item names (MCP ser
 installed for another context. Until the operator answers, the whole harness ships, as ADR-0011 says.
 
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
-or space, by schema; no string holds a home directory), a credential, an argument, an environment value, a prompt, an
-output or a file's content. A personal agent service is not listed toward an organization; the organization sees the
+or space, by schema; no string holds a home directory, the dash forms runtimes write into file names included after
+any character that is not an ASCII letter or digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
+output or a file's content, and no member that says the summary is withheld (DEC-0105). A personal agent service is
+not listed toward an organization; the organization sees the
 machine's harness because the operator decided work machines are transparent to their organization (S8), named as a
 purpose in its notice.
 
@@ -98,3 +100,6 @@ reason. How the person is told, and the package's own run, are the node's.
 - The summary's own signature over the relay (CT-90).
 - How often a server may ask for a summary, and how long it keeps one: the organization's retention.
 - What a server shows, and to whom: its own interface, under its notice.
+- Whether a node may withhold its summary from an organization, or leave names out, by the person's choice: until
+  the operator answers CT-92 the whole harness ships (S8), and a server that has no summary from a node within a day
+  knows it has none (DEC-0105).

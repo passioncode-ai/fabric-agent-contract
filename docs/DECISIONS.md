@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0105` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0106` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6514,3 +6514,46 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/backlog.md` (CT-84), the handoff and its index.
 - **Source:** board threads `ba63565c` items 1 to 3 and `b2511678` (S4 of the agent network); fabric-workspace roadmap
   RM21-S4; backlog CT-84.
+
+### DEC-0105: the dash-encoded home path after any separator, and no "not shared" member in a node summary
+
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory's node (its port of
+  `hasHomePath`, its fixture-parity test, which now meets eight node-summary fixtures, and its copy of the
+  `activity-common` schema move at its next pin; its separate name filter is not a superset of the rule; its default of summaries off per organization does not meet the at-least-daily duty of the
+  conformance node row; CT-92 may change that duty), the first organization server (its vendored `activity-rules.ts` and `activity-common`
+  schema, as receiver of activity batches and summaries) and the relay's vendored `activity-common` schema, each at
+  its next pin; any other port of `hasHomePath` or of the `sourceKey` pattern.
+- **Context:** Project Observatory's review of its `node-summary/1` implementation (engine PR #345, at contract pin
+  `f33f4d8a`; board thread `b2511678`, message `72d70cd3`) found two things. `FAC-SEM-128`'s second home-path pattern,
+  shared with `FAC-SEM-037` (`HOME_PATH` in `src/activity-rules.ts`), fires only when the dashed form follows `/`,
+  `\`, `:` or `-`, so `x.-Users-alice-DATA-secret` and `p@-Users-alice-x` pass it and the name schema; the activity
+  `sourceKey` pattern has the same gap after `.`, `_`, `~` and `#`. And it asked how a "not shared" signal should look
+  while it keeps summaries off by default per organization until the operator answers CT-92.
+- **Decision:**
+  1. The dashed form `-Users-<x>` or `-home-<x>` is a home path after any character that is not an ASCII letter or
+     digit (ASCII), or at the start: `HOME_PATH`'s second pattern is `(?:^|[^A-Za-z0-9])-(?:[Uu]sers|home)-[A-Za-z0-9]`, and the
+     `sourceKey` pattern of `activity-common.schema.json` refuses it after any character its alphabet allows that is not
+     a letter or digit (`._:~#-`). `my-users-list` and `Users-guide` stay ordinary; a lower-case root after such a
+     character (`x.-users-list`) is refused like any other, which errs on the safe side.
+  2. A node summary carries no member that says it is withheld. Whether a node may withhold its summary, or leave names
+     out, by the person's choice is the operator's CT-92; until then the whole harness ships, as the operator decided
+     for work machines (S8). A server that has no summary from a node within a day knows it has none.
+- **Why:** a detector that names its separators misses the next one; the complement of letters and digits covers every
+  separator a runtime or a person can write, and keeps the ordinary words the tests list. A "not shared" member would
+  be a second channel for what absence already says, and would prejudge the operator's question. Absence says only
+  that the server has no summary, for whatever reason: a node pinned before DEC-0101, a node that does not send, or
+  a person's choice once CT-92 allows one; a server does not show it as the person's refusal.
+- **Alternatives considered:** listing more separators (the next one is missed again); a `shared: false` member or an
+  empty summary as the signal (it decides CT-92 by the wire, and an empty summary reads as a machine with nothing on it).
+- **Compatibility:** narrower: a name or key holding the dashed form after `.`, `@`, `_`, `~`, `#` or any other such
+  character, valid before, is refused. The same narrowing reaches every value `FAC-SEM-037` reads in a telemetry event
+  and every activity summary `FAC-SEM-040` checks (`opt -home-x` is now refused): a receiver at the new pin refuses
+  such an event from a collector at an older one until that collector moves. No valid example of the contract changes. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/activity-rules.ts` (`HOME_PATH`), `schemas/activity-common.schema.json`
+  (`sourceKey`), fixtures `fixtures/semantic/node-summary-home-after-dot.json` and
+  `fixtures/semantic/node-summary-home-after-at.json`, `test/activity-rules.test.ts`, `test/node-summary.test.ts`;
+  docs `node-summary.md` (what it never carries, Not decided), `activity.md` (the dash forms), `docs/backlog.md`
+  (CT-92 gains the person's-choice question, CT-95 the scenario of what a person is told about the summary, CT-109
+  filed), `conformance.md` (the receiver and the summarising node rows).
+- **Source:** Project Observatory, board thread `b2511678`, message `72d70cd3` (2026-10-23).
+

@@ -41,7 +41,8 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * separators of the same kind, followed by a name. Matched forms:
  * - slash forms, absolute or relative, plain or URL-encoded once or twice: `/Users/<name>`, `users/<name>`,
  *   `home/<name>`, `C:\Users\<name>`, `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
- * - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`;
+ * - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, after any
+ *   character that is not an ASCII letter or digit (`x.-Users-<name>`, `p@-Users-<name>`, DEC-0105);
  * - tilde forms: `~/`, `~<name>/`.
  * `Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not matched.
  *
@@ -52,7 +53,8 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
 const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [
   new RegExp(String.raw`(?:^|[^A-Za-z0-9]|%(?:25)?2[fF])(?:[Uu]sers|home)${SLASH}[A-Za-z0-9_]`),
-  /(?:^|[\/\\:-])-(?:[Uu]sers|home)-[A-Za-z0-9]/,
+  // DEC-0105: any character that is not an ASCII letter or digit may precede the dashed form (`x.-Users-…`, `p@-Users-…`).
+  /(?:^|[^A-Za-z0-9])-(?:[Uu]sers|home)-[A-Za-z0-9]/,
   /(?:^|[\s"'=\/\\])~(?:[A-Za-z_][A-Za-z0-9_.-]*)?(?:[\/\\]|$)/
 ];
 export const hasHomePath = (value: string) => HOME_PATH.some((pattern) => pattern.test(value));
