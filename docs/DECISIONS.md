@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0118` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0119` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6241,7 +6241,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0102: The readings of DEC-0098 to DEC-0101 corrected: a summary's context and reach, a repair's key, expiry, allowlist and repeat, the renewal clock, a withdrawal under SR-5a, resuming after `purpose`
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of PR #145). Annotates DEC-0098 to DEC-0101; their bodies are not
+- **Status:** Accepted source change (on merge of PR #145). Annotated (2026-10-23): item 2's reach replaced by
+  DEC-0118 (it follows `machine.mode`). Annotates DEC-0098 to DEC-0101; their bodies are not
   rewritten. Consumer adoption: the rows of the decisions it corrects (CT-81, CT-82, CT-83, CT-88).
 - **Decision:**
   1. **A node summary's context** is `orgContextId`: its enrollment's own `org:<org.id>`, compared as written with the
@@ -6521,7 +6522,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0105: the dash-encoded home path after any separator, and no "not shared" member in a node summary
 
-- **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory's node (its port of
+- **Status:** Accepted source change (2026-10-23). Annotated (2026-10-23): item 2's interim whole harness replaced by
+  DEC-0118. Consumer adoption: Project Observatory's node (its port of
   `hasHomePath`, its fixture-parity test, which now meets eight node-summary fixtures, and its copy of the
   `activity-common` schema move at its next pin; its separate name filter is not a superset of the rule; its default of summaries off per organization does not meet the at-least-daily duty of the
   conformance node row; CT-92 may change that duty), the first organization server (its vendored `activity-rules.ts` and `activity-common`
@@ -7053,3 +7055,44 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the node's rows), `credentials.md` (the gate's sentence), `versioning.md` (the sender's revision), the specification README;
   backlog CT-120 (that item done), CT-83 (the owed duties).
 - **Source:** the product reading of PR #166 (DEC-0116), 2026-10-23.
+
+### DEC-0118: what a node summary lists follows `machine.mode`
+
+- **Date:** 2026-10-23
+- **Status:** Accepted (2026-10-23) by the contract on the operator's recorded decisions, CT-92 answered; the operator
+  may reverse it. Consumer adoption: Project Observatory's node (OBS-192, OBS-217); the first organization server
+  (VES-HARNESS).
+- **Context:** DEC-0102 shipped the whole harness of a machine to every organization it is enrolled in, whatever
+  `machine.mode` says, from the operator's S8 (a work machine is transparent to its organization) and left CT-92 to the
+  operator: whether an organization sees harness names and services of other contexts on one machine, against
+  unlinkable memberships (CX-22, DEC-0082). The operator's rollout decisions of 2026-10-23 (the first organization
+  server's rollout design of 2026-10-23, D-R2) enroll the operator's two personal
+  Macs in a client organization beside the personal network, and the first organization server relayed the rule it
+  derives (board thread `305f39c3`, request `a90c37b2`): on such a machine the organization sees only its own
+  context, never the operator's personal services or harness names.
+- **Decision:**
+  1. Under `machine.mode` `C`, the default (the organization manages only its own work on the machine), a node summary
+     lists only what belongs to the organization's context: each coding agent by catalogue id and version, the hook
+     count, and the MCP servers, skills and plugins that are a package placed in this context, or installed in a folder
+     matching the organization's own `workspace.folders`, or named by its `harness.baseline` (`coding-agent`,
+     `mcp-server`, `skill`, `plugin`), each listed when present. Nothing else is listed: an item installed for the
+     person (`source: user`), machine-wide (`source: managed`, which belongs to no one organization) or for another
+     context. A baseline `service` is judged against this context's services only (item 3), so one that runs only in
+     another context reads `missing`.
+  2. Under `machine.mode` `A` (the organization administers the whole machine, from an `mdm` layer only), the summary
+     lists the whole harness (S8).
+  3. Under either mode the services are those of the summary's own context only (DEC-0102, unchanged).
+- **Why:** S8 and D-R2 then hold together: a machine the organization administers is transparent to it, and a
+  person's own machine with an organization's context beside its others shows that organization only its own work,
+  which unlinkable memberships ask. `machine.mode` already says which of the two a machine is, so no new member.
+- **Alternatives considered:** the whole harness on every machine (refuses D-R2's rule on the operator's own Macs);
+  only this context's items on every machine (refuses S8 for a machine the organization administers); a person's
+  per-organization switch (not decided: CT-92's second half, a person withholding the summary, stays open).
+- **Compatibility:** narrower for a node under `C`: items the baseline does not name, outside this context's packages
+  and `workspace.folders`, leave the summary; drift is unchanged for every item the baseline names, which is still
+  listed when present. A server cannot tell a narrowed summary from a full one sent by a node pinned before this
+  decision; both are valid. No schema change. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/node-summary.md` (How much it lists, Not decided), `devices.md`
+  (`machine.mode`), `conformance.md` (the node's row); backlog CT-92 (its first half answered), CT-122.
+- **Source:** the first organization server's request on board thread `305f39c3` (request `a90c37b2`, 2026-10-23); the
+  operator's D-R2; CT-92.
