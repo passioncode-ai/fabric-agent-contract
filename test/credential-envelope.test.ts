@@ -121,9 +121,9 @@ describe("FAC-SEM-138: a credential request and its decision", () => {
     expect(codes("credential-request-document", { ...request, expiresAt: "2026-11-23T09:00:01Z" })).toEqual(["FAC-SEM-138"]);
     expect(codes("credential-request-document", { ...request, expiresAt: request.requestedAt })).toEqual(["FAC-SEM-138"]);
     expect(codes("credential-request-document", { ...request, expiresAt: `2026-10-23T09:00:00Z`.replace("23T09", "23T08") })).toEqual(["FAC-SEM-138"]);
-    expect(codes("credential-request-document", { ...request, reason: "copy it from /Users/alice/keys" })).toEqual(["FAC-SEM-138"]);
+    expect(codes("credential-request-document", { ...request, reason: "copy it from /Users/example/keys" })).toEqual(["FAC-SEM-138"]);
     expect(codes("credential-request-document", { ...request, reason: "use ghp_abcdefghijklmnopqrstuvwxyz012345 please" })).toEqual(["FAC-SEM-138"]);
-    expect(codes("credential-request-document", { ...request, scope: { zone: "/home/bob/zone" } })).toEqual(["FAC-SEM-138"]);
+    expect(codes("credential-request-document", { ...request, scope: { zone: "/home/example/zone" } })).toEqual(["FAC-SEM-138"]);
     expect(MAX_CREDENTIAL_DAYS).toBe(30);
   });
 
@@ -177,7 +177,7 @@ describe("FAC-SEM-140: a call record", () => {
     expect(codes({ ...record, traceId: "0".repeat(32) })).toEqual(["/traceId"]);
     expect(codes({ ...record, callee: record.caller })).toEqual(["/callee"]);
     expect(codes({ ...record, outcome: "failed", code: "home-users-alice" })).toEqual([]);
-    expect(codes({ ...record, capability: "read /Users/alice/x" })).toEqual(["/capability"]);
+    expect(codes({ ...record, capability: "read /Users/example/x" })).toEqual(["/capability"]);
     expect(callRecordFindings(7)).toEqual([]);
   });
 });

@@ -597,6 +597,13 @@ for this organization, and `records.repairResults`, its answers to repairs; a ch
 what the organization expects the harness to be and which packages a repair may run. All of it is on
 [node summary](node-summary.md).
 
+**Credentials and call records** (DEC-0111). A check-in MAY carry `records.credentialRequests`, the node's
+`credential-request/1` documents for its agents in this organization's context, and `records.callRecords`, the
+`call-record/1` documents of that context while the acknowledged notice names agent calls; a check-in response MAY carry
+`records.credentialDecisions`, `records.credentials` (sealed `fabric-credential-envelope/1`) and
+`records.credentialRevocations`. Each side sends them only to a peer that lists the protocol in its `protocols`
+([credentials](credentials.md)).
+
 ## Health
 
 Schema: [`device-health.schema.json`](../../schemas/device-health.schema.json).

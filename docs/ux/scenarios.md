@@ -45,6 +45,9 @@
 | SCN-037 | Keep a machine for reading only | machine-calls | P-02 | ST-031, FLW-26 | draft | not audited |
 | SCN-038 | The hub goes quiet: hear of it after a day and move it to another machine | network | P-02 | ST-032, FLW-27 | draft | not audited |
 | SCN-039 | Lose a passkey and keep the network | network | P-02 | ST-032, FLW-27 | draft | not audited |
+| SCN-040 | An agent asks for a token for one zone and gets it in its organization's context | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
+| SCN-041 | A member leaves and the credentials of their agents end | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
+| SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
 
 ## Personas
 
@@ -872,4 +875,64 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again with the passkey left. Whoever holds the lost passkey signs a competing revision first -> two revisions of one number exist; what a machine does with such a fork is open in the estate record (Not decided here), so the person acts at once.
 - **Status:** draft
 - **Coverage:** DEC-0107, `recoveryReady` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `verifyEstateRecord` (a parent's authority signs the next revision)
+- **Product:** unobserved
+
+## Credentials
+
+### SCN-040: An agent asks for a token for one zone and gets it in its organization's context
+
+- **Persona:** P-02
+- **Feature:** credentials
+- **Traces:** ST-033, FLW-28 (JTBD-14, JRN-13/#1, JRN-13/#2)
+- **Entry point:** the organization's credential queue
+- **Preconditions:** a DNS agent runs as an instance of `org:acme` on a member's machine; the issuer's door holds a Cloudflare account; the organization's policy allows the preset `zone-dns-edit` for at most 7 days
+- **Steps:**
+  1. The agent needs to update `example.com` -> its node sends `credential-request/1` (provider `cloudflare`, preset `zone-dns-edit`, scope `zone: example.com`, 7 days, a one-line reason) at check-in.
+  2. The policy issues it -> the issuer mints the token with a 7-day expiry and seals it to the machine's `#kem` under the organization's policy key.
+  3. The next check-in response carries the decision and the envelope -> the node opens it into the organization instance's slot `CLOUDFLARE_API_TOKEN`; the ledger lists it by name.
+- **Expected result:** the agent holds a token for one zone for 7 days, in its organization's context only; nobody pasted a key.
+- **Alt paths:** the request asks for 60 days -> `FAC-SEM-138` refuses it before it is sent. The preset is not allowed -> the administrator decides, or the decision is `refused` with `not-allowed`. The envelope names another request, or comes signed by a key outside the policy key set -> the node refuses it (`not-requested`, `bad-key`) and stores nothing. The same OpenRouter key is asked for a project the person also runs in Switchboard -> Switchboard reads the delivered slot by name instead of issuing another.
+- **UI elements:** the queue's row with "Issue" and "Refuse"; the issued credential's row with its end.
+- **States covered:** queue, issued, refused
+- **Errors & recovery:** the provider is down -> `refused` with `provider-unavailable`, and the agent asks again later; the envelope expired in transit -> refused `expired`, and the issuer seals again under the next sequence.
+- **Status:** draft
+- **Coverage:** DEC-0111, `src/credentials.ts` (`checkCredentialEnvelope`, `FAC-SEM-138`, `FAC-SEM-139`), `fixtures/vectors/credential-envelope.json`, `test/credential-envelope.test.ts`
+- **Product:** unobserved
+
+### SCN-041: A member leaves and the credentials of their agents end
+
+- **Persona:** P-02
+- **Feature:** credentials
+- **Traces:** ST-033, FLW-28 (JTBD-14, JRN-13/#3)
+- **Entry point:** the credentials issued into the organization
+- **Preconditions:** two credentials were issued to agents of one member's enrollment
+- **Steps:**
+  1. The administrator removes the member -> the server sends a signed `credential-revocation/1` for each, and the issuer revokes each at its provider.
+  2. The member's node applies each revocation that stands -> it deletes the value and its mark.
+- **Expected result:** neither credential works at its provider nor stays on the machine.
+- **Alt paths:** the machine is offline -> the provider's revocation stops the credential at once, and the node deletes it at its next check-in or at `credentialExpiresAt`, whichever comes first. A revocation signed by a key outside the set -> refused, and the credential still ends at its expiry.
+- **UI elements:** "Revoke" on each row; the revoked state with its time and reason.
+- **States covered:** revoked
+- **Errors & recovery:** the provider cannot revoke a key -> it ends at its `credentialExpiresAt`, and the ledger says so.
+- **Status:** draft
+- **Coverage:** DEC-0111, `credentialRevocationStands` in `src/credentials.ts`, `fixtures/vectors/credential-envelope.json` (`revocation`), `test/credential-envelope.test.ts`
+- **Product:** unobserved
+
+### SCN-042: See every call between agents, and nobody's prompts
+
+- **Persona:** P-02
+- **Feature:** credentials
+- **Traces:** ST-034, FLW-28 (JTBD-14, JRN-13/#4)
+- **Entry point:** the calls between agents
+- **Preconditions:** members' notices name agent calls; an observatory agent calls the DNS agent in `org:acme`
+- **Steps:**
+  1. The DNS agent answers -> its node writes `call-record/1` (the two agents, `dns.records.update`, the times, `completed`, its cost) and sends it at check-in.
+  2. The administrator opens the calls -> the record is listed under its trace id.
+- **Expected result:** the administrator knows who called whom, how it ended and what it cost; no prompt, argument or output is in the record.
+- **Alt paths:** the call was refused `profile-forbids` -> the record says `refused` with that code. The caller got no answer -> the caller's node records `timeout` under the same `callId`. A member's notice does not name agent calls -> their node sends none.
+- **UI elements:** one row per call, grouped by trace.
+- **States covered:** success, empty
+- **Errors & recovery:** a record that ends before it starts, or a completed call with a code -> `FAC-SEM-140` names it.
+- **Status:** draft
+- **Coverage:** DEC-0111, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
 - **Product:** unobserved
