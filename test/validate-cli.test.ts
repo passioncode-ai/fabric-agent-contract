@@ -948,7 +948,7 @@ describe("the sixth readings' cases (contract review 2026-10-21)", () => {
 
   it("blindProtocols names the protocols whose oneOf schemas the checker cannot see, and their schemas", () => {
     const blind = blindProtocols(loadSchemasSync());
-    expect([...blind.keys()].sort()).toEqual(["fabric-activity/0.1", "fabric-device/0.1", "fabric-relay/0.1"]);
+    expect([...blind.keys()].sort()).toEqual(["fabric-activity/0.1", "fabric-agent-call/1", "fabric-device/0.1", "fabric-relay/0.1"]);
     expect(blind.get("fabric-device/0.1")).toContain("device-check-in.schema.json");
   });
 

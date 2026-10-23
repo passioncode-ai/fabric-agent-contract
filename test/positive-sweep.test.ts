@@ -24,6 +24,8 @@ export const NOT_SWEPT: readonly string[] = [
   "activity-batch-ack.schema.json",
   "activity-notice.schema.json",
   "admission.schema.json",
+  "agent-call-message.schema.json",
+  "agent-call-sealed.schema.json",
   "binding.schema.json",
   "comms-cancel.schema.json",
   "comms-claim.schema.json",

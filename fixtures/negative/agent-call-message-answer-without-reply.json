@@ -1,0 +1,16 @@
+{
+  "type": "fabric-agent-call/1",
+  "kind": "answer",
+  "answer": {
+    "isError": false,
+    "structuredContent": {
+      "items": 3
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "three items"
+      }
+    ]
+  }
+}

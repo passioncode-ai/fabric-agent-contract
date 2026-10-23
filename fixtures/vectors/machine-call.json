@@ -13,11 +13,13 @@
           {
             "kid": "m-a#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
           },
           {
             "kid": "m-a#kem",
             "use": "kem",
+            "alg": "ecdh-p256",
             "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
           }
         ]
@@ -29,11 +31,13 @@
           {
             "kid": "m-b#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
           },
           {
             "kid": "m-b#kem",
             "use": "kem",
+            "alg": "ecdh-p256",
             "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
           }
         ]
@@ -45,11 +49,13 @@
           {
             "kid": "m-c#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
           },
           {
             "kid": "m-c#kem",
             "use": "kem",
+            "alg": "ecdh-p256",
             "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
           }
         ]
@@ -61,6 +67,7 @@
           {
             "kid": "m-d#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
           }
         ]
@@ -72,6 +79,7 @@
           {
             "kid": "m-e#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
           }
         ]
@@ -82,11 +90,13 @@
           {
             "kid": "m-f#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
           },
           {
             "kid": "m-f#kem",
             "use": "kem",
+            "alg": "ecdh-p256",
             "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
           }
         ]
@@ -98,11 +108,13 @@
           {
             "kid": "m-g#sig",
             "use": "sig",
+            "alg": "es256",
             "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
           },
           {
             "kid": "m-g#kem",
             "use": "kem",
+            "alg": "ecdh-p256",
             "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
           }
         ]
@@ -162,11 +174,13 @@
               {
                 "kid": "m-a#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
               },
               {
                 "kid": "m-a#kem",
                 "use": "kem",
+                "alg": "ecdh-p256",
                 "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
               }
             ]
@@ -178,11 +192,13 @@
               {
                 "kid": "m-b#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
               },
               {
                 "kid": "m-b#kem",
                 "use": "kem",
+                "alg": "ecdh-p256",
                 "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
               }
             ]
@@ -194,11 +210,13 @@
               {
                 "kid": "m-c#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
               },
               {
                 "kid": "m-c#kem",
                 "use": "kem",
+                "alg": "ecdh-p256",
                 "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
               }
             ]
@@ -210,6 +228,7 @@
               {
                 "kid": "m-d#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
               }
             ]
@@ -221,6 +240,7 @@
               {
                 "kid": "m-e#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
               }
             ]
@@ -231,11 +251,13 @@
               {
                 "kid": "m-f#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
               },
               {
                 "kid": "m-f#kem",
                 "use": "kem",
+                "alg": "ecdh-p256",
                 "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
               }
             ]
@@ -247,11 +269,13 @@
               {
                 "kid": "m-g#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
               },
               {
                 "kid": "m-g#kem",
                 "use": "kem",
+                "alg": "ecdh-p256",
                 "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
               }
             ]
@@ -262,6 +286,7 @@
               {
                 "kid": "m-a#sig",
                 "use": "sig",
+                "alg": "es256",
                 "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
               }
             ]
@@ -837,7 +862,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -854,7 +879,7 @@
           "type": "fabric-agent-call/1",
           "kind": "call",
           "call": {
-            "agentId": "urn:fabric:agent:example:inbox-digest",
+            "agentId": "inbox-digest",
             "capability": "digest.summarise",
             "input": {
               "days": 7
@@ -910,7 +935,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BF7dQOhCG4rrbOhIY2xtcIo-l18NY9jTPDIt41VDyKFIyQokHgyExFWjRgEjKmJLIeX0pgMecyJP_-zo3HsZ8fc",
-        "ct": "SK7KnUwGtzGiyZClLdk_scax6qt5tZiDQ6MlpzgPaZehiuMrRBryPrbRD8Ln98xIHCVqPeGbaZUih-rsm5Vt5vTBoYmqpFqR06G4-TvGEjj_LxL_yVLK19IJxaQwR5y7NbyKU4RpvI88yhPFCJDgPy2BzUpRY7_iVO6W9YVculr7iPQjuoOCfPjgfFvWg6dBP3RtX2Epmz40K8TAacB7KpQdcWfZko-q9h1rJhkQ7DYVMLnWzFiyhtsplHI2YpMaew02_mUfCopJtl7iWJd3Dz-7wRMMtVPMyx_oailSVd1sS_Yc4zUW9rIkXIuPu3j2806ZH5wiOHgDf-7-Sa1MJqu7kb9cdI0tRqOhDZ-4VL4qIhmBlf6JfBxnuLtyAYmU1J0F4tCQFD5wG-X0H1uwBeTRv81CxlWxw6lS0ssVCfag6MhCmk8FIZJuOjEd"
+        "ct": "SK7KnUwGtzGiyZClLdk_scax6qtlqZTWXe8jvDYJIILkw688Hw_rPbLNCtOkvJgIFzQgPPuIIpUjyKuvip1u4rSE74m6uBXbnrG08D3MLXP1eEWwy0HPyJoay6p7SpemMKfcDJEooaUgwBPFHY78f2PImQQYJrf4TfSM9YUF_UfQmeVG492waJ6EQnvospFzASQsVDpZwz8aKMXtR-l-ALoRQ17buLeyy2d8a04FyG5dRZvW7VXa0JwNs2o5B8dURhFns2NdB5YO9AirC9sjHSitwBRZ6xfT3FytaXkDQd0oT6sLpDYG_-Y5DdmMtn2j9laeGJghOisDKL-vS_FFJvDojOpdM5U4Aez8WI3kRu58IQrYlLLRK0tr-7shUcfU2dhe739x1bNXGYGriMa-DJuj8m0"
       },
       "context": {
         "from": "m-a#sig",
@@ -927,7 +952,7 @@
           "type": "fabric-agent-call/1",
           "kind": "call",
           "call": {
-            "agentId": "urn:fabric:agent:example:inbox-digest",
+            "agentId": "inbox-digest",
             "capability": "digest.summarise",
             "input": {
               "days": 7
@@ -946,7 +971,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -969,7 +994,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -992,7 +1017,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1015,7 +1040,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-c#sig",
@@ -1038,7 +1063,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1061,7 +1086,7 @@
         "kind": "answer",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1084,7 +1109,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_OkAq0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_OkAq0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1107,7 +1132,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BLAuifgl4kFWreYI-KBe1qIcIdw_1QH9uQxxYM2qumJf3-jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOg",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1130,7 +1155,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-",
         "note": "x"
       },
       "context": {
@@ -1176,7 +1201,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1199,7 +1224,7 @@
         "kind": "call",
         "kem": "m-b#sig",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1222,7 +1247,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
-        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw="
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZASzPsPdpgh36iO5uris1ON79cfDCX-amwHKI-BoRbQ4YN-lxEm4J43g33WqbwupeBH2Wvv0gqiluBdJSITXZiKii2glcesBKQ5cSrNCN93GZObNirHzbhQljsXPLhjHSwCRLE7h0SCl-yrB8PmBmwpcJopFZLt8DZzz8-Utzp5d8H1M9FtAK7dnvFlDnAulrswSN9Y3JG-="
       },
       "context": {
         "from": "m-a#sig",
@@ -1262,7 +1287,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BGFZPj7ITy0O71SWHsQ2hrzDq0gtZL4JO7m8eYAtoDg0yiSrmPGRManCf9xNs8YDSQGZF27xtE_0OaaX1TOej3I",
-        "ct": "iZ8je2pAre-CfDvLcZLOdinwCyMQsGE4NiUFKL-H47VoKY0CuYQbyZbasaR4jMd5jCfWgmy_F14T02yglDfOnh-1jdvDt8wxAa_ETlrrSW40KjLrsBn6E4FJ5JiVKLMh1HW71MRSH92rdrvbVFSB-FQPgdTwqf9_X2XkPl79fDwqYl1z7zrzoOBSLxbWHa58n3yXmqkOoqxZ0M_iQyLIOaAur2v059CX4qdDA5yccV-5N0L3q2bbxwOXGXTKoVuDZ0iY4deeyIxSTulofc1VBlNeMEl7mV1qhSuRN2jKLvemOcqDbfra7A"
+        "ct": "iZ8je2pAre-CfDvLcZLOdinwCyMQsGE4NiUFKL-H47VoKY0CuYQbyZbasaR4jMd5jCfWgmy_F14T02yglDfOnh-1jdvDt8wxAa_ETkb3RTsqZjTwvh-zBsQAgMyPb6ghyWS12JJSBcbmNLadWVqD7lNZg62l5LB9THz2ORW9H2hzYg49vSvu5b8BIDKFSOMzmm-Hmu4WrpFz0M32AVidbaB963WTt5_Dpa1BA6TbMl20HUC0tya9yhKXejDSxlbYRUrYvwv9RcJTbkAVcJ1R"
       },
       "context": {
         "from": "m-a#sig",
@@ -1285,7 +1310,7 @@
         "kind": "answer",
         "kem": "m-b#kem",
         "enc": "BL3Ay1HQp_wSCuU7031X3kFOss3R9XIi_5oYgSlWarMG3Uzypp7K57K8xLM2zxFaH85Z-TgtORWL-2jYF99210U",
-        "ct": "Fg5iNscWeqUgNxmACFYauC7GwYFYvZJ3XFujMg5UTPAxi1YbW7W3RfIWjAay4mKA1mWowIuYHAM5uyUBCeFPkjZFOW0Gx_38dvSgp4ZWiq9oCPs1nGNLD26cmQW8PrcMxZEb0vbGImmeYMh6q_xiQN9Oqc3p-lZT2eIEbux8Sybkf8-3DFwPqMLp-25v704kpjY130mtjRQ88z6eE218QYlrbMG_Hek3AaNExTFICladob1kA7MbYLBCcWI9uMly-Kvz7g"
+        "ct": "Fg5iNscWeqUgNxmACFYauC7GwYFEoZ4iQhelKQBSBeV0whoMAKCuRvYKiRfxqTbA3XTiwZGLVwM49GRCGOlMlnYAd20W27K2O-SsroBcteRiX6x6nnBOECaPlwv3M7wRwIpNjeOHP0OCash6vuJ-AJEI8YGh-gUfyvYcIPQrSzb8dtm3DEkUtIy5-WQs6gt76iF50ETjzRl5qDM_d278EDqQUJ9444eZ5s8-"
       },
       "context": {
         "from": "m-a#sig",
@@ -1308,7 +1333,7 @@
         "kind": "call",
         "kem": "m-b#kem",
         "enc": "BFdaDDaGGSI12xEnvUHHUhShVs3gNp9ikigw6K7mdYmE8B3GWksBsHWTnhWluozxbTHlu8onRAKA2l-uQqlEaT0",
-        "ct": "jK9-O1hPpQElRasYBEcZU9WvEZ6vhvIccygZgXOgwKKcypCaN22nt7FrljTP0r7zmWGB3C_31RY9ap-kaAq-63KfHKyldBQEJpnSk73MzAT1cghx7FrmvLLycryq38-qBmxNVOyAe7F3Wx4xcfp9Y3Ay9bDyUKX13RQkO0npd9kBshFa4dKfLA4b0TXrSgFu_wABCb-JfSrt-QxZAmozxW5mRE_Fhj6CL8sqcCXa"
+        "ct": "jK9-O1hPpQElRasYBEcZU9WvEZ6zmv5JbWQfmn2mibfZg9yNbHi-tLV3kyWMmeqzknDL3TXknhY8Jd7neQK97zLaUqy_fUNKJsfAifSdzEXtYgs-twr37ar8fPWq39v9SGwUTv3Ae-k6RAIvNuJlOTQuu-DwWubwmEtoLAXmepdBv1QB7H8T3ye_6GaPWomT68EQFH0"
       },
       "context": {
         "from": "m-a#sig",
@@ -1355,7 +1380,7 @@
         "type": "fabric-agent-call/1",
         "kind": "call",
         "call": {
-          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "agentId": "inbox-digest",
           "capability": "digest.summarise",
           "input": {
             "days": 7
@@ -1380,7 +1405,7 @@
           "kind": "call",
           "kem": "m-b#kem",
           "enc": "BFK2Gl9Bw4xUn9uCrU5lx0PlJk4Mx_JfCt_RngI8UHDgEpR0JtHw3h_c6vX7zxmpgdzXsxaG1lIAHAEVjatZW5s",
-          "ct": "V2bbQqCM9zAxK3_RhK3xacQmTOfQ-Qaix5jwE7hZ0AIv9r2tRVcEzQNCHUn7MgkmQ06p6ZjCgCI_M2aXw4BVjwqw3MtV-RgEAX3mKZIOX3XkDYMWpzkBFx0nC94HTQmJwOMn42lYjt-guxifXDmZZ3yH10OzcAjITZTWsJIeVgVhJXZ_xv44CX7qs45-5Bic9XHy6i97YvvLj_-ISZS3X-0yhLQfJHq_f6xgOCGHmA0fYUrtueG7H5G7-MzJJvtz7ecM6A"
+          "ct": "V2bbQqCM9zAxK3_RhK3xacQmTOfM5Qr32dT2CLZfmRdqv_G6HkIdzgdeGFi4eV1mSF_j6ILRyyI-fCfU0ohWi0r1kstF5VdOTG3qIJQEYD7uWtRZpSoECFU0BdBMQAKUxfhxvHwZk_W8sRifSSeFJzLBjw_7cFuEXoDO_opJVhV5LGB_xusjFTC6sYQ94V3DuWa-5SI1IvaO1PJBRVbQNqRgdwt7rGDeB4UY"
         }
       }
     },
@@ -1430,7 +1455,7 @@
         "type": "fabric-agent-call/2",
         "kind": "call",
         "call": {
-          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "agentId": "inbox-digest",
           "capability": "digest.summarise",
           "input": {
             "days": 7
@@ -1459,7 +1484,7 @@
         "type": "fabric-agent-call/1",
         "kind": "event",
         "call": {
-          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "agentId": "inbox-digest",
           "capability": "digest.summarise",
           "input": {
             "days": 7
@@ -1488,7 +1513,7 @@
         "type": "fabric-agent-call/1",
         "kind": "call",
         "call": {
-          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "agentId": "inbox-digest",
           "capability": "digest.summarise",
           "input": {
             "days": 7
@@ -1517,7 +1542,7 @@
         "type": "fabric-agent-call/1",
         "kind": "call",
         "call": {
-          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "agentId": "inbox-digest",
           "capability": "digest.summarise",
           "input": {
             "days": 7

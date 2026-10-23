@@ -1,0 +1,14 @@
+{
+  "description": "A read (effect none) from a full machine to a view machine is admitted (FAC-SEM-136, DEC-0106).",
+  "kind": "machine-call",
+  "expect": [],
+  "input": {
+    "caller": "full",
+    "target": "view",
+    "capability": "status.read",
+    "effect": "none",
+    "answer": {
+      "ok": true
+    }
+  }
+}

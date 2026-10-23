@@ -202,9 +202,9 @@ describe("one refusal code set (DEC-0039)", () => {
   const schemaCodes = ((JSON.parse(read("schemas/delegation-refusal.schema.json")) as Json).$defs as Json).code as { enum: string[] };
   const spec = read("docs/specification/delegation.md");
 
-  it("is the same seventeen codes in the verifier, the schema and the specification's table", () => {
+  it("is the same eighteen codes in the verifier, the schema and the specification's table", () => {
     expect([...REFUSAL_CODES]).toEqual(schemaCodes.enum);
-    expect(REFUSAL_CODES).toHaveLength(17);
+    expect(REFUSAL_CODES).toHaveLength(18);
     for (const refusal of REFUSAL_CODES) expect(spec, refusal).toMatch(new RegExp(`^\\| \`${refusal}\` \\|`, "m"));
   });
 

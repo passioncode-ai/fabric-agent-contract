@@ -1,6 +1,6 @@
 import { rfc8785 } from "./canonical.js";
 import { MACHINE_PROFILES, deviceKeyRef, machineProfile, type MachineProfile } from "./estate-record-rules.js";
-import { type Finding, type JsonObject, isObject, show } from "./findings.js";
+import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
 import { p256KeyRefusal } from "./p256.js";
 import { relayAdmissionSet } from "./relay.js";
 import { strictTime } from "./rfc3339.js";
@@ -49,7 +49,13 @@ export function relayCallerTier(input: { applied: unknown; self: unknown; from: 
   const t = isString(input.at) ? strictTime(input.at) : Number.NaN;
   if (!Number.isFinite(t)) return { ok: false, code: "unknown-state", detail: "no-clock" };
   const extra = list(input.revocations);
-  const admission = relayAdmissionSet({ ...(isObject(input.applied) ? { held: input.applied } : {}), pinned: [], at: new Date(t), schemaValid: () => false, extraRevocations: extra });
+  let admission: ReturnType<typeof relayAdmissionSet>;
+  try {
+    admission = relayAdmissionSet({ ...(isObject(input.applied) ? { held: input.applied } : {}), pinned: [], at: new Date(t), schemaValid: () => false, extraRevocations: extra });
+  } catch {
+    // `relayAdmissionSet` reads `revision` with `Number`, which throws on a member that is no primitive (CT-111).
+    return { ok: false, code: "unknown-state", detail: "no-estate" };
+  }
   if (!admission.ok) return { ok: false, code: "unknown-state", detail: "no-estate" };
   if (!isString(input.self) || !admission.set.has(`${input.self}#sig`)) return { ok: false, code: "unknown-state", detail: "self-not-admitted" };
   if (!isString(input.from) || !admission.set.has(input.from)) return { ok: false, code: "unauthenticated", detail: "not-t1" };
@@ -59,9 +65,11 @@ export function relayCallerTier(input: { applied: unknown; self: unknown; from: 
   const own = list(record.machines).find((entry) => entry.id === machine);
   const kemKey = list(own?.deviceKeys).find((key) => key.kid === `${machine}#kem` && key.use === "kem" && isString(key.publicKey));
   let kem: string | undefined;
-  if (kemKey && !revoked.has(kemKey.kid) && !revoked.has(deviceKeyRef(kemKey) ?? "")) {
+  if (kemKey) {
     const octets = new Uint8Array(Buffer.from(kemKey.publicKey as string, "base64"));
-    if (octets.length === 65 && p256KeyRefusal(octets) === null) kem = kemKey.kid as string;
+    // A valid point has a fingerprint, so its key reference is defined here.
+    const usable = octets.length === 65 && p256KeyRefusal(octets) === null;
+    if (usable && !revoked.has(kemKey.kid) && !revoked.has(String(deviceKeyRef(kemKey)))) kem = kemKey.kid as string;
   }
   return { ok: true, tier: "T1", machine, profile: machineProfile(record, machine) ?? null, ...(kem ? { kem } : {}) };
 }
@@ -174,17 +182,15 @@ export function openAgentCall(sealed: unknown, ctx: { from: unknown; to: unknown
 
 // --- Semantic rules ---
 
-const same = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
-
 /** FAC-SEM-135 on `{applied, self, from, at, freshness, revocations?, answer}`; FAC-SEM-136 on `{caller, target, capability, effect, answer}`. */
 export function machineCallRules(kind: string, value: Json): Finding[] | undefined {
   if (kind === "relay-caller") {
     const want = relayCallerTier({ applied: value.applied, self: value.self, from: value.from, at: value.at, freshness: value.freshness, revocations: value.revocations });
-    return same(value.answer, want) ? [] : [{ code: "FAC-SEM-135", instancePath: "/answer", message: `the node places the sender as ${JSON.stringify(want)}, as relayCallerTier does` }];
+    return jsonEqual(value.answer, want) ? [] : [{ code: "FAC-SEM-135", instancePath: "/answer", message: `the node places the sender as ${JSON.stringify(want)}, as relayCallerTier does` }];
   }
   if (kind === "machine-call") {
     const want = machineCallVerdict({ caller: value.caller, target: value.target, capability: value.capability, effect: value.effect });
-    return same(value.answer, want) ? [] : [{ code: "FAC-SEM-136", instancePath: "/answer", message: `the call's verdict is ${JSON.stringify(want)}, as machineCallVerdict gives it (${show(value.caller)} to ${show(value.target)})` }];
+    return jsonEqual(value.answer, want) ? [] : [{ code: "FAC-SEM-136", instancePath: "/answer", message: `the call's verdict is ${JSON.stringify(want)}, as machineCallVerdict gives it (${show(value.caller)} to ${show(value.target)})` }];
   }
   return undefined;
 }

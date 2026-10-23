@@ -952,5 +952,11 @@
   {"name": "interop-tool-error-queue-full-no-data", "schema": "interop-tool-error.schema.json", "path": "negative/interop-tool-error-queue-full-no-data.json", "valid": false, "keyword": "required"},
   {"name": "interop-tool-error-queue-full-long-wait", "schema": "interop-tool-error.schema.json", "path": "negative/interop-tool-error-queue-full-long-wait.json", "valid": false, "keyword": "maximum"},
   {"name": "interop-job-failed-queue-full", "schema": "interop-job.schema.json", "path": "negative/interop-job-failed-queue-full.json", "valid": false, "keyword": "not"},
-  {"name": "service-load-extension-network-path", "schema": "service-load-extension.schema.json", "path": "negative/service-load-extension-network-path.json", "valid": false, "keyword": "pattern"}
+  {"name": "service-load-extension-network-path", "schema": "service-load-extension.schema.json", "path": "negative/service-load-extension-network-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "agent-call-sealed", "schema": "agent-call-sealed.schema.json", "path": "positive/agent-call-sealed.json", "valid": true},
+  {"name": "agent-call-sealed-padded-enc", "schema": "agent-call-sealed.schema.json", "path": "negative/agent-call-sealed-padded-enc.json", "valid": false, "keyword": "pattern"},
+  {"name": "agent-call-message-call", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-call.json", "valid": true},
+  {"name": "agent-call-message-answer", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-answer.json", "valid": true},
+  {"name": "agent-call-message-token-in-input", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-token-in-input.json", "valid": false, "keyword": "oneOf"},
+  {"name": "agent-call-message-answer-without-reply", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-answer-without-reply.json", "valid": false, "keyword": "oneOf"}
 ]

@@ -42,8 +42,8 @@ const offCurve = (key: TestKey) => {
   octets[64] = (octets[64] ?? 0) ^ 0x01;
   return octets.toString("base64");
 };
-const sig = (id: string, key: TestKey) => ({ kid: `${id}#sig`, use: "sig", publicKey: key.octets });
-const kem = (id: string, key: TestKey | string) => ({ kid: `${id}#kem`, use: "kem", publicKey: typeof key === "string" ? key : key.octets });
+const sig = (id: string, key: TestKey) => ({ kid: `${id}#sig`, use: "sig", alg: "es256", publicKey: key.octets });
+const kem = (id: string, key: TestKey | string) => ({ kid: `${id}#kem`, use: "kem", alg: "ecdh-p256", publicKey: typeof key === "string" ? key : key.octets });
 
 const AT = "2026-10-13T00:00:00Z";
 const REVOKED_AT = "2026-10-12T10:00:00Z";
@@ -157,7 +157,7 @@ function verdictCases(): Json[] {
 
 const FROM = "m-a#sig", TO = "m-b#sig", MSG = "msg-7f3a", B_KEM = "m-b#kem";
 const callMessage = (over: Json = {}): Json => ({
-  type: TYPE, kind: "call", call: { agentId: "urn:fabric:agent:example:inbox-digest", capability: "digest.summarise", input: { days: 7 }, idempotencyKey: "call-1" }, ...over
+  type: TYPE, kind: "call", call: { agentId: "inbox-digest", capability: "digest.summarise", input: { days: 7 }, idempotencyKey: "call-1" }, ...over
 });
 const answerMessage = (): Json => ({ type: TYPE, kind: "answer", replyTo: MSG, answer: { isError: false, structuredContent: { items: 3 }, content: [{ type: "text", text: "three items" }] } });
 const ephemeral = (label: string) => sha256(`${LABEL}ephemeral/${label}`);
@@ -201,7 +201,7 @@ function openCases(): Json[] {
     ["no sealed object", "sealed", ctx(), refused("malformed")],
     ["a plaintext not in its RFC 8785 form", seal(JSON.stringify(callMessage(), null, 1), "spaced"), ctx(), refused("malformed")],
     ["a plaintext whose kind is not the sealed one", seal(rfc8785(callMessage()), "kind", { kind: "answer" }), ctx(), refused("malformed")],
-    ["a plaintext the schema refuses: a member the call does not know", sealed(callMessage({ call: { agentId: "urn:fabric:agent:example:inbox-digest", capability: "digest.summarise", input: {}, token: "x" } }), "schema"), ctx(), refused("malformed")],
+    ["a plaintext the schema refuses: a member the call does not know", sealed(callMessage({ call: { agentId: "inbox-digest", capability: "digest.summarise", input: {}, token: "x" } }), "schema"), ctx(), refused("malformed")],
     ["a plaintext that is not JSON", seal("not json", "text"), ctx(), refused("malformed")]
   ];
   return cases.map(([name, sealedCall, context, expect]) => ({ name, sealed: sealedCall, context, expect }));
