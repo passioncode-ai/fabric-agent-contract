@@ -30,20 +30,29 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 | `services` | the agent services placed in this summary's context, and no other: `key` (`id.instance`), `state`, `protocols`, an A2A card digest, the MCP endpoint as published |
 | `drift` | how the harness differs from the organization's baseline, under the policy revision that carried it |
 
-**How much it lists.** The whole harness of the machine, whatever `machine.mode` says: the operator decided that a work
-machine is transparent to its organization (S8; the first organization server's ADR-0011), and DEC-0102 keeps that.
-The services are those of the summary's own context only; whether an organization also sees the services a person
-runs in other contexts, as ADR-0011 words it, collides with unlinkable memberships (DEC-0082) and is the operator's
-question, board row CT-92, which also asks about the harness item names (MCP servers, a plugin's `@marketplace`)
-installed for another context. Until the operator answers, the whole harness ships, as ADR-0011 says.
+**How much it lists** (DEC-0118, answering CT-92). It follows `machine.mode` ([device policy](devices.md#policy)):
+
+- **`C`**, the default (the organization manages only its own work on the machine, the person's own machine with an
+  organization's context beside its others): the summary lists only what belongs to this organization's context. That
+  is each coding agent by its catalogue id and version and the hook count (the tools the context's work runs on, no
+  name of the person's), and only those MCP servers, skills and plugins that the organization placed (`source:
+  managed`, or a package placed in this context) or that are installed in a folder attributed to this context
+  (DEC-0089), together with every item the organization's `harness.baseline` names, by that name, whether present or
+  not. An item installed for the person (`source: user`) or for another context is not listed: no name of another
+  context reaches this organization (CX-22).
+- **`A`** (the organization administers the whole machine, set only from an `mdm` layer): the whole harness of the
+  machine, as the operator decided for a work machine that is transparent to its organization (S8; the first
+  organization server's ADR-0011).
+
+Under either mode the services are those of the summary's own context only (DEC-0102).
 
 **What it never carries** (`FAC-SEM-128`): a person (no e-mail address), a path (a name holds no slash, backslash, tilde
 or space, by schema; no string holds a home directory, the dash forms runtimes write into file names included after
 any character that is not an ASCII letter or digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
 output or a file's content, and no member that says the summary is withheld (DEC-0105). A personal agent service is
-not listed toward an organization; the organization sees the
-machine's harness because the operator decided work machines are transparent to their organization (S8), named as a
-purpose in its notice.
+not listed toward an organization; under `machine.mode` `A` the organization sees the machine's harness because the
+operator decided work machines are transparent to their organization (S8), named as a purpose in its notice, and under
+`C` only its own context's (DEC-0118).
 
 ## The baseline and the drift
 
@@ -104,5 +113,5 @@ reason. How the person is told, and the package's own run, are the node's.
 - How often a server may ask for a summary, and how long it keeps one: the organization's retention.
 - What a server shows, and to whom: its own interface, under its notice.
 - Whether a node may withhold its summary from an organization, or leave names out, by the person's choice: until
-  the operator answers CT-92 the whole harness ships (S8), and a server that has no summary from a node within a day
-  knows it has none (DEC-0105).
+  DEC-0118 the summary lists what `machine.mode` admits, and a server that has no summary from a node within a day knows
+  it has none (DEC-0105); a person's choice to send none is not decided here.
