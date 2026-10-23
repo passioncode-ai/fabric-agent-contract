@@ -74,7 +74,8 @@ describe("SEMANTIC_KINDS (REQ-02)", () => {
     expect(strays).toEqual([]);
   });
 
-  it("every schema a kind names compiles", () => {
+  // Compiling every schema takes seconds on a loaded machine; 5 s timed out at a load average of 97 (2026-10-23).
+  it("every schema a kind names compiles", { timeout: 60_000 }, () => {
     const validator = createValidatorSync();
     const missing = Object.keys(SEMANTIC_KINDS).flatMap((kind) => {
       const schema = schemaOfKind(kind);
