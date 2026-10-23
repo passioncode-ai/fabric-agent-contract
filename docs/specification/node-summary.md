@@ -1,6 +1,6 @@
 # A node's summary and an organization's repairs (`node-summary/1`, `repair-request/1`)
 
-**Maturity:** specified, no consumer yet (DEC-0101, corrected by DEC-0102). Asked by the first organization server for the operator's targets S7,
+**Maturity:** specified (DEC-0101, corrected by DEC-0102, narrowed by DEC-0105); implemented by Project Observatory's node at contract pin `f33f4d8a` (engine PR #345). Asked by the first organization server for the operator's targets S7,
 S8 and S10 (board thread `ba63565c`, items 7 and 8); the summary's first half was DV-CON-01, accepted on 2026-10-12.
 
 An organization sees what each enrolled machine runs (S8), how that differs from what it expects (S10), and can ask

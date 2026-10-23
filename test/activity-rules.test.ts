@@ -76,7 +76,7 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
   });
 
   it("finds a home directory in the encoded forms runtimes write into file names, and not in an ordinary branch", () => {
-    for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes", "x.-Users-alice-DATA-secret", "p@-Users-alice-x", "a_-home-bob-proj"]) {
+    for (const value of ["projects/-Users-ivan-DATA-secret-proj/5d1e.jsonl", "C--Users-ivan-work", "%2FUsers%2Fivan", "/home/example/x", "-home-ivan-proj", "~/notes", "x.-Users-alice-DATA-secret", "p@-Users-alice-x", "a_-home-bob-proj", "see -home-page", "café-Users-x", "a:-Users-bob-x", "a+-home-bob-x"]) {
       expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
     }
     for (const value of ["feature/home-page", "homework-17", "users-guide", "req_011CT"]) expect(forbiddenKeys({ v: value }, "", new Set()), value).toEqual([]);

@@ -6540,15 +6540,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      for work machines (S8). A server that has no summary from a node within a day knows it has none.
 - **Why:** a detector that names its separators misses the next one; the complement of letters and digits covers every
   separator a runtime or a person can write, and keeps the ordinary words the tests list. A "not shared" member would
-  be a second channel for what absence already says, and would prejudge the operator's question.
+  be a second channel for what absence already says, and would prejudge the operator's question. Absence says only
+  that the server has no summary, for whatever reason: a node pinned before DEC-0101, a node that does not send, or
+  a person's choice once CT-92 allows one; a server does not show it as the person's refusal.
 - **Alternatives considered:** listing more separators (the next one is missed again); a `shared: false` member or an
   empty summary as the signal (it decides CT-92 by the wire, and an empty summary reads as a machine with nothing on it).
 - **Compatibility:** narrower: a name or key holding the dashed form after `.`, `@`, `_`, `~`, `#` or any other such
-  character, valid before, is refused. No valid example of the contract changes. `contractVersion` stays `0.1.0`.
+  character, valid before, is refused. The same narrowing reaches every value `FAC-SEM-037` reads in a telemetry event
+  and every activity summary `FAC-SEM-040` checks (`opt -home-x` is now refused): a receiver at the new pin refuses
+  such an event from a collector at an older one until that collector moves. No valid example of the contract changes. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/activity-rules.ts` (`HOME_PATH`), `schemas/activity-common.schema.json`
   (`sourceKey`), fixtures `fixtures/semantic/node-summary-home-after-dot.json` and
   `fixtures/semantic/node-summary-home-after-at.json`, `test/activity-rules.test.ts`, `test/node-summary.test.ts`;
   docs `node-summary.md` (what it never carries, Not decided), `activity.md` (the dash forms), `docs/backlog.md`
-  (CT-92 gains the person's-choice question, CT-109 filed).
+  (CT-92 gains the person's-choice question, CT-95 the scenario of what a person is told about the summary, CT-109
+  filed), `conformance.md` (the receiver and the summarising node rows).
 - **Source:** Project Observatory, board thread `b2511678`, message `72d70cd3` (2026-10-23).
 
