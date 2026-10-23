@@ -6452,7 +6452,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a call with no token; a refused token is refused, never keyed. A provider that does not queue keeps its keys as
      DEC-0087 left them. `FAC-SEM-131` (kind `job-queue`). A start whose
      job would not start at once and that finds `queueMax` jobs waiting is refused (`admitJob`), nothing started or stored, with `queue-full` and `data: {retryable: true,
-     retryAfterSeconds}` (1 to 3600), an `isError` result shaped by `interop-tool-error.schema.json`, its JSON also as the result's text content; the
+     retryAfterSeconds}` (1 to 3600), an `isError` result with no `structuredContent` whose text content is JSON of `interop-tool-error.schema.json`
+     (a client validates `structuredContent` against the job tool's `outputSchema` even on an error); the
      caller starts again after it under the same key, and the hub relays it unchanged and keeps no key for it.
      `queue-full` never ends a job: `interop-job.schema.json` refuses it in a job's `error` and `jobCallerAction`
      answers `invalid`.

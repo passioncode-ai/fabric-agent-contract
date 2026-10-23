@@ -115,15 +115,18 @@ offset, four fraction digits) never starts. `FAC-SEM-131` (kind `job-queue`, `{q
 **A full queue.** `admitJob(queue, running, job, limits, retryAfterSeconds)` admits a start whose job would start at
 once (`nextQueuedJob` over the queue with it added answers its id), or one that finds fewer than `queueMax` jobs
 waiting; so `queueMax: 0` refuses every wait and never a start into a free slot. Any other start is refused, nothing
-started and nothing stored: the tool result is `isError: true` with `structuredContent.error` `{code: "queue-full", message, data:
-{retryable: true, retryAfterSeconds}}`, `retryAfterSeconds` from 1 to 3600
+started and nothing stored: the tool result is `isError: true`, no `structuredContent`, and one text content item
+whose text is the JSON `{error: {code: "queue-full", message, data:
+{retryable: true, retryAfterSeconds}}}`, `retryAfterSeconds` from 1 to 3600
 ([`#/$defs/queueFullData`](../../schemas/interop-common.schema.json), closed; `admitJob` answers it, 60 when the node's
 own value is not readable). Its shape is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json),
-the `structuredContent` of a `queue-full` refusal at start and of the `unknown-job` a node that queues answers, and of
+the JSON of that text for a `queue-full` refusal at start and for the `unknown-job` a node that queues answers, and of
 nothing else: a provider that does not queue keeps C3.2's rule for `unknown-job` (its text or
-`structuredContent.error.code` carries it), and every provider's other refusals keep their own shapes. A validating client that listed the job tool may refuse a
-`structuredContent` outside the tool's `outputSchema` (`interop-job-tool-output`); the node therefore also writes
-the same JSON as the result's text content, which every client reads. A key `quota-exhausted` or `limit-reached`
+`structuredContent.error.code` carries it), and every provider's other refusals keep their own shapes. The JSON
+travels as text, never as `structuredContent`, because a client that listed the job tool validates any
+`structuredContent` against the tool's `outputSchema` (`interop-job-tool-output`), error or not (the MCP TypeScript
+SDK does), and would throw before the caller saw `retryAfterSeconds`; an `isError` result with no `structuredContent`
+reaches every client. A key `quota-exhausted` or `limit-reached`
 admits again (DEC-0087) passes `admitJob` like any start; a `queue-full` refusal leaves the key holding its ended
 job. The caller starts again after
 `retryAfterSeconds` under the same idempotency key ([the intent's key](interop.md#limits-and-uncertain-effects)); the
@@ -205,7 +208,7 @@ No other provider sends `queue-full` as a job tool's code. `agent-directory/1`,
 |---|---|
 | Fabric, the hub (CO-376) | owns S4 as a whole; derives a person's estate directory with `estateDirectory` and serves it only to that person's sessions; attaches `Fabric-Delegation` so a node tells the callers it forwards apart (DL-10); relays `queue-full` with its data and keeps no key for it (today it answers `product-error` and keeps it under the key) |
 | the first organization server | keeps the registrations and its own machines' agents an organization's directory is derived from with `organizationDirectory`; which of it and the hub serves that directory is Fabric's to settle with it in CO-376; a member reads listed entries only |
-| a node hosting an agent | keys callers with `jobCallerKey`, keeping the answers of keys it stored before under their old caller; answers `queue-full` and `unknown-job` with `{error}` alone (the closed `interop-tool-error`); queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
+| a node hosting an agent | keys callers with `jobCallerKey`, keeping the answers of keys it stored before under their old caller; answers `queue-full` and `unknown-job` as text content whose JSON is `{error}` alone (the closed `interop-tool-error`), never as `structuredContent`; queues per (`agentRef`, context) as `nextQueuedJob` and `admitJob` answer, writes `queued <position> of <length>`, serves `fabric.job.list` per caller and the load extension and report |
 | a caller (the one that started the call, not the hub that forwarded it) | waits on a queued job like any `working` job, and starts again after `queue-full`'s `retryAfterSeconds` under the same key |
 | Fabric Dashboards | draws the load panels from `service-load/1`; treats an invalid load key as not declared and reports it (`FAC-SEM-133`), and shows a report that fails `FAC-SEM-132`, or a path that refuses the token, as unavailable with the reason |
 | fabric-agent-adapter's kits | at the re-pin: a kit-built node that queues ports `jobCallerKey` (the caller vectors) and keys a call with no token by its credential; `jobCallerAction` answers `invalid` for a job `queue-full` ended (the job-limit vectors), the protocol register gains `agent-directory/1`, `fabric-load/0.1` and `service-load/1`, and a kit-built node that queues answers another caller's job id `unknown-job` (not `scope-not-granted`); a kit-built service that vendors the kit moves when it re-vendors |

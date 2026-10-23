@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/interop-tool-error.schema.json",
-  "title": "fabric-interop: at a node that queues, the structuredContent of a queue-full refusal at a job's start and of unknown-job (DEC-0104)",
-  "description": "A refusal that started nothing and stored nothing, at a node that queues (one that declares the load extension): queue-full at a job's start (with its data), or unknown-job for an id the callee never issued or another caller's job. Only these two; a provider that does not queue keeps C3.2's unknown-job rule, and every provider's other refusals keep their own shapes. The error is interop-common's, so queue-full's data is bound here.",
+  "title": "fabric-interop: at a node that queues, the JSON of the text content of a queue-full refusal at a job's start and of unknown-job (DEC-0104)",
+  "description": "An isError tool result with no structuredContent (a client validates structuredContent against the job tool's outputSchema even on an error) and one text content item whose text is this JSON: a refusal that started nothing and stored nothing, at a node that queues (one that declares the load extension): queue-full at a job's start (with its data), or unknown-job for an id the callee never issued or another caller's job. Only these two; a provider that does not queue keeps C3.2's unknown-job rule, and every provider's other refusals keep their own shapes. The error is interop-common's, so queue-full's data is bound here.",
   "type": "object",
   "required": [
     "error"

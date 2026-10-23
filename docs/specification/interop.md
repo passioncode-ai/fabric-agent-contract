@@ -136,8 +136,8 @@ interop extension block. Then:
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
 - A node that queues calls (DEC-0104) writes a waiting job's `statusMessage` as `queued <position> of <length>`,
-  refuses a start that would wait past its queue (`admitJob`) with `queue-full` and `retryAfterSeconds` (an `isError` result whose
-  `structuredContent` is [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json), as is its
+  refuses a start that would wait past its queue (`admitJob`) with `queue-full` and `retryAfterSeconds` (an `isError` result with no
+  `structuredContent`, whose text content is JSON of [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json), as is its
   `unknown-job`), and serves
   `fabric.job.list` with the caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
 
@@ -150,7 +150,7 @@ interop extension block. Then:
 | A job-backed tool's `structuredContent` | [`interop-job-tool-output.schema.json`](../../schemas/interop-job-tool-output.schema.json) |
 | `usage` | `common.schema.json#/$defs/usage` (also optional on the full [result](results-and-evidence.md)) |
 | `fabric.job.list` arguments and answer (DEC-0104) | [`interop-job-list-request.schema.json`](../../schemas/interop-job-list-request.schema.json), [`interop-job-list.schema.json`](../../schemas/interop-job-list.schema.json) |
-| At a node that queues, a `queue-full` refusal at start and `unknown-job` (DEC-0104) | [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json) |
+| At a node that queues, the text content's JSON of a `queue-full` refusal at start and of `unknown-job` (DEC-0104) | [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json) |
 
 Derived constraints, from the MCP Tasks lifecycle rather than from new policy:
 
