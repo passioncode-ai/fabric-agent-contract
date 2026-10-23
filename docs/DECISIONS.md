@@ -6776,6 +6776,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rows, which is the correction. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `spend-policy.md` (the launcher's
   recent spend), `conformance.md` (the host row), `CONTEXT.md`, `src/usage-rules.ts` (`usageSpend`),
-  `test/usage-rules.test.ts`; annotations on DEC-0021, DEC-0027, DEC-0046; CT-115.
+  `test/usage-rules.test.ts`, SCN-016, the descriptions in `service-usage.schema.json`; annotations on DEC-0021,
+  DEC-0027, DEC-0046; CT-115, CT-116.
 - **Source:** a service's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
   `f22685d2` (2026-10-22).

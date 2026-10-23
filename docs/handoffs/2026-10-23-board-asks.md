@@ -14,7 +14,8 @@ service's finding and Fabric Dashboards' reply on thread `ea2e4f3d`, the request
 - **DEC-0110**: money is summed over the usage rows not on a subscription; a subscription row's `costUsd` is an estimate
   shown apart, never in money, a budget or a limit; `usageSpend(rows)` in `src/usage-rules.ts` with tests in
   `test/usage-rules.test.ts` ([service](../specification/service.md#usage-report)). CT-115 for Fabric's spend view.
-- DOCMAP's usage row; backlog CT-114, CT-115.
+- DOCMAP's usage row; spend-policy.md, conformance (host and checker rows), CONTEXT, SCN-016, the usage schema's
+  descriptions; annotations on DEC-0019, DEC-0021, DEC-0027, DEC-0046; backlog CT-114, CT-115, CT-116.
 
 ## Decisions taken here
 
@@ -33,6 +34,9 @@ Round 1: one unit break (money 0 with a lower bound beside only unpriced calls) 
 byGrant mixing routes, the annotations on DEC-0019/0021/0027/0046, the conformance host rows), fixed. Round 2: four
 product breaks (the adapter's kit writing an estimate into `budget.spentUsd`, a project's money in a window with a
 subscription row, the pull request's checks, `usageSpend`'s comment on a missing `unpricedCalls`), fixed; CT-116 filed.
+Round 3: five text breaks (the launcher's bound has no `proposal.inputs` member, so `recentSpendUsd` is null; the usage
+schema's descriptions said spent; the checker's row split from the host's; CT-116 in the records; the next task's
+reference), fixed.
 
 ## Checks actually run
 
@@ -40,4 +44,5 @@ subscription row, the pull request's checks, `usageSpend`'s comment on a missing
 
 ## Next task
 
-CT-86 (credentials on request and the call record), then the release DEC-0108 names.
+CT-86 (credentials on request and the call record, DEC-0111), then the contract's first release (DEC-0108, branch
+`agent/dec0108-release-policy-20261023`, merged last so its tag lands on the release's commit).
