@@ -7040,15 +7040,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   device (DEC-0094), so it gates what the node sends, but `records.repairs` is what the server sends, and nothing said
   when a server may send it: a node pinned before DEC-0101 refuses a response that carries it (the object is closed).
   DEC-0116 gated the credential members on each side's own list (CT-120, its reading).
-- **Decision:** a node sends `records.nodeSummary` and `records.repairResults` only to a server whose response
-  `protocols` lists `node-summary/1` and `repair-result/1`; a server sends `records.repairs` only to a node whose
+- **Decision:** a node sends `records.nodeSummary` only to a server whose response `protocols` lists `node-summary/1`,
+  and `records.repairResults` only to one that lists `repair-result/1`; a server sends `records.repairs` only to a node whose
   check-in `protocols` lists `repair-request/1`, which a node lists when it reads repairs and acts on them.
 - **Why:** each list then means what DEC-0067 and DEC-0094 say, and a server learns from the node what it can be sent.
 - **Alternatives considered:** keeping the node's guard on the server's list (a server that lists `repair-request/1`
   says it accepts one from the device, which no device sends).
 - **Compatibility:** a node that acted on a request only toward a server listing `repair-request/1` now lists it in
-  its own check-in instead; a server that sent repairs to any node it saw list `repair-result/1` checks the node's list.
+  its own check-in instead; a server that sent repairs to any node checks the node's list first.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/node-summary.md`, `devices.md`, `conformance.md` (the server's and
-  the node's rows), `credentials.md` (the gate's sentence); backlog CT-120 (that item done).
+  the node's rows), `credentials.md` (the gate's sentence), `versioning.md` (the sender's revision), the specification README;
+  backlog CT-120 (that item done), CT-83 (the owed duties).
 - **Source:** the product reading of PR #166 (DEC-0116), 2026-10-23.

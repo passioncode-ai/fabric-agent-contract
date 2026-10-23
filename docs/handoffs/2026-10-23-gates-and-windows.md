@@ -15,7 +15,8 @@ each check-in member, and the call record of a queued call.
   on the server's response list, a server's response members on the node's check-in list); a queued call has one
   record at the job's final state (`job-cancelled` for a cancelled job), and a lost job is `unknown` from the caller.
 - **DEC-0117**: `records.repairs` is sent only to a node whose check-in lists `repair-request/1`; a node sends a summary
-  or a result only to a server whose response lists `node-summary/1` or `repair-result/1`.
+  only to a server whose response lists `node-summary/1`, and a result only to one that lists `repair-result/1`. Its
+  product reading passed; its risks were fixed (the pair split, versioning.md's sender rule, CT-83's owed duties).
 
 ## Decisions taken here
 

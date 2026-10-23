@@ -11,8 +11,8 @@ documents and two rules; how a node gathers its harness, and how a server shows 
 
 `node-summary/1`, `repair-request/1` and `repair-result/1` are protocol revisions of their own (DEC-0067), each gated
 on the other side's own `protocols` list (DEC-0117, as DEC-0116 gates the credential members): a node sends a summary
-or a result only to a server whose response `protocols` (what it accepts from the device, DEC-0094) lists
-`node-summary/1` or `repair-result/1`, and a server sends `records.repairs` only to a node whose check-in `protocols`
+only to a server whose response `protocols` (what it accepts from the device, DEC-0094) lists `node-summary/1`, and a
+result only to one that lists `repair-result/1`, and a server sends `records.repairs` only to a node whose check-in `protocols`
 (what it reads, DEC-0067) lists `repair-request/1`; a node lists `repair-request/1` when it reads repairs and acts on
 them.
 
