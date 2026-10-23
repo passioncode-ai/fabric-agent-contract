@@ -1,0 +1,13 @@
+{
+  "description": "A directory whose source is neither estate nor organization (FAC-SEM-130).",
+  "kind": "agent-directory-view",
+  "expect": [
+    "FAC-SEM-130"
+  ],
+  "input": {
+    "source": "public",
+    "directory": {
+      "entries": []
+    }
+  }
+}

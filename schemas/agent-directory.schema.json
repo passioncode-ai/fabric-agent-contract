@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/agent-directory.schema.json",
+  "title": "agent-directory/1: the agents a viewer can discover (DEC-0104)",
+  "description": "A derived view, never authority: who may call an agent stays its grant. An estate's directory comes from its record's placements and is read by the owner's own sessions (T0, T1); an organization's comes from its active share registrations and its own machines, and its members read the listed entries. No person, machine, grant or capability is in it.",
+  "type": "object",
+  "required": [
+    "type",
+    "source",
+    "viewer",
+    "generatedAt",
+    "entries"
+  ],
+  "properties": {
+    "type": {
+      "const": "agent-directory/1"
+    },
+    "source": {
+      "enum": [
+        "estate",
+        "organization"
+      ],
+      "description": "estate: an owner's record; organization: an organization's registrations."
+    },
+    "viewer": {
+      "enum": [
+        "owner",
+        "admin",
+        "member"
+      ],
+      "description": "owner: the estate's owner (every placement, unlisted included); admin: the organization's administrator (every entry, unlisted included); member: a member of the organization (listed entries only)."
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "required": [
+          "agentRef",
+          "context",
+          "listed"
+        ],
+        "properties": {
+          "agentRef": {
+            "$ref": "fabric-package.schema.json#/$defs/agentRef"
+          },
+          "context": {
+            "$ref": "common.schema.json#/$defs/contextId"
+          },
+          "listed": {
+            "type": "boolean",
+            "description": "A discovery flag the publisher of the directory sets; an unlisted agent is still called by whoever holds its grant."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

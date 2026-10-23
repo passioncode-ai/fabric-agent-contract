@@ -1,0 +1,20 @@
+{
+  "jobs": [
+    {
+      "id": "job_7f3a2d",
+      "status": "working",
+      "createdAt": "2026-10-22T09:00:02Z",
+      "updatedAt": "2026-10-22T09:00:02Z",
+      "input": {
+        "text": "hello"
+      }
+    },
+    {
+      "id": "job_7f3a2c",
+      "status": "completed",
+      "createdAt": "2026-10-22T08:59:00Z",
+      "updatedAt": "2026-10-22T09:00:01Z"
+    }
+  ],
+  "nextCursor": "c-2"
+}

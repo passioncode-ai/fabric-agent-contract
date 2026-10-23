@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-load.schema.json",
+  "title": "service-load/1: a service's load per window and context (DEC-0104)",
+  "description": "Counts and durations only: no person, no caller, no prompt, no output, no job id. A context is the one the work ran in (personal or org:<orgId>); the report stays with the host that holds the descriptor token and is never sent to an organization server; an organization's view of an agent's load is not decided in this revision.",
+  "type": "object",
+  "required": [
+    "type",
+    "generatedAt",
+    "windowSeconds",
+    "windows"
+  ],
+  "properties": {
+    "type": {
+      "const": "service-load/1"
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "windowSeconds": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 86400
+    },
+    "windows": {
+      "type": "array",
+      "maxItems": 168,
+      "items": {
+        "type": "object",
+        "required": [
+          "start",
+          "byContext"
+        ],
+        "properties": {
+          "start": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          },
+          "byContext": {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+              "type": "object",
+              "required": [
+                "context",
+                "queued",
+                "running",
+                "completed",
+                "failed"
+              ],
+              "properties": {
+                "context": {
+                  "$ref": "common.schema.json#/$defs/contextId"
+                },
+                "queued": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Jobs waiting at the window's end."
+                },
+                "running": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Jobs running at the window's end."
+                },
+                "completed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Jobs that completed in the window."
+                },
+                "failed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Jobs that failed in the window (cancelled ones are not counted)."
+                },
+                "waitMs": {
+                  "type": "object",
+                  "required": [
+                    "p50",
+                    "p95"
+                  ],
+                  "properties": {
+                    "p50": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "p95": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false,
+                  "description": "Queue wait of the jobs that started in the window, in milliseconds; absent when none started."
+                },
+                "runMs": {
+                  "type": "object",
+                  "required": [
+                    "p50",
+                    "p95"
+                  ],
+                  "properties": {
+                    "p50": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "p95": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false,
+                  "description": "Run time of the jobs that ended (completed or failed) in the window, in milliseconds; absent when none ended."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

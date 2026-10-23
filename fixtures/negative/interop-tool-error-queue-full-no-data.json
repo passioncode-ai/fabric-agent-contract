@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "queue-full",
+    "message": "full"
+  }
+}

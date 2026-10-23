@@ -1,0 +1,13 @@
+{
+  "type": "agent-directory/1",
+  "source": "organization",
+  "viewer": "public",
+  "generatedAt": "2026-10-22T09:00:00Z",
+  "entries": [
+    {
+      "agentRef": "urn:fabric:agent:example:inbox-digest",
+      "context": "org:org_7kq2m4xw",
+      "listed": true
+    }
+  ]
+}

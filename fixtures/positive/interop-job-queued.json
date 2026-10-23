@@ -1,0 +1,9 @@
+{
+  "job": {
+    "id": "job_7f3a2e",
+    "status": "working",
+    "statusMessage": "queued 2 of 5",
+    "updatedAt": "2026-10-22T09:00:03Z",
+    "pollIntervalMs": 5000
+  }
+}

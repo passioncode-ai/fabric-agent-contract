@@ -38,6 +38,9 @@
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
 | SCN-031 | A job stops at a limit: the caller waits for the reset, resends under the same key, or hands it to a person | spend | P-02 | ST-013, FLW-10 | draft | not audited |
 | SCN-032 | See what an agent uses, follow the failing connection, or learn why its declaration is not shown | connections | P-02 | ST-026, FLW-21 | draft | not audited |
+| SCN-033 | Find an agent in my estate or my organization; an unlisted one is marked for its publisher and absent for a member | agent-network | P-02 | ST-027, FLW-22 | draft | not audited |
+| SCN-034 | A call to a busy agent waits with its place shown, or is refused with a time to start again | agent-network | P-02 | ST-028, FLW-23 | draft | not audited |
+| SCN-035 | See how busy an agent is, or learn why its load is not shown | agent-network | P-02 | ST-029, FLW-24 | draft | not audited |
 
 ## Personas
 
@@ -508,6 +511,68 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a declaration with a credential in a `reason` -> none of it is shown; the agent's author removes the credential from the text. A name that only looks like one (a long mixed model id in a purpose, a document link whose id is a long mixed run, a store target such as `sk-Prod-eu-west-1-db`) -> the same; the author removes the model id from the text or declares it as a model connection of its own whose `target` is the id, drops the link, or renames its own target.
 - **Status:** draft
 - **Coverage:** DEC-0096, `FAC-SEM-127`, `connectionsView` in `src/connections.ts`, `fixtures/vectors/connections.json`, `test/connections.test.ts`; Fabric Dashboards' SCN-073 is the host's own scenario
+- **Product:** unobserved
+
+## Agent network
+
+### SCN-033: Find an agent in my estate or my organization; an unlisted one is marked for its publisher and absent for a member
+
+- **Persona:** P-02
+- **Feature:** agent-network
+- **Traces:** ST-027, FLW-22 (JTBD-12, JRN-11/#1)
+- **Entry point:** the hub's directory in the owner's session; the organization's directory for a member or an administrator
+- **Preconditions:** `example-agent` runs on two of the owner's machines in `personal`, and is shared into `org:org_7kq2m4xw` by an active registration; `example-writer` runs on one of the owner's machines in `personal` and the owner unlisted it; the organization unlisted its own machine's `example-indexer`
+- **Steps:**
+  1. Owner opens the hub's directory -> `example-agent` once in `personal`, once in the organization, and `example-writer` marked unlisted.
+  2. A member opens the organization's directory -> `example-agent` only.
+  3. The organization's administrator opens it -> `example-agent` and `example-indexer` marked unlisted.
+- **Expected result:** each reader sees exactly what the directory's source derives for them; the list grants nothing, and a call still goes through the grant.
+- **Alt paths:** the owner's unlisting hides an agent from nobody in this revision (only the owner reads an estate's directory) and marks it in their own list; unlike an unlisted Project (SCN-027), it stays in the owner's view. A registration withdrawn, or outside its window -> absent.
+- **UI elements:** the directory rows, the unlisted mark.
+- **States covered:** success, empty
+- **Errors & recovery:** a directory that shows a member an unlisted agent, or drops one the owner should see -> `FAC-SEM-130` names it; the hub or the organization server derives it again with the reference.
+- **Status:** draft
+- **Coverage:** DEC-0104, `FAC-SEM-130`, `estateDirectory` and `organizationDirectory` in `src/agent-network.ts`, `fixtures/vectors/agent-network.json`, `test/agent-network.test.ts`
+- **Product:** unobserved
+
+### SCN-034: A call to a busy agent waits with its place shown, or is refused with a time to start again
+
+- **Persona:** P-02
+- **Feature:** agent-network
+- **Traces:** ST-028, FLW-23 (JTBD-12, JRN-11/#2)
+- **Entry point:** an agent calls `example-agent`'s job-backed capability and polls `fabric.job.get`
+- **Preconditions:** `example-agent` declares `concurrency: 2`, `perCaller: 2`, `queueMax: 3`; both slots run jobs of caller A
+- **Steps:**
+  1. Caller A starts a third job -> `working`, `queued 1 of 1`; it polls.
+  2. Caller B, with nothing running, starts a job -> it waits too, and since B will start first, A's job now reads `queued 2 of 2`.
+  3. One of A's jobs ends -> B's job starts first, though A's arrived earlier: B runs none, A still runs one.
+  4. The next slot frees -> A's third job starts and completes once.
+- **Expected result:** a burst of calls waits in line, each caller sees its place, and no caller holds the agent alone.
+- **Alt paths:** the queue already holds three -> the start is refused with `queue-full` and `retryAfterSeconds: 30`, nothing stored; the caller starts again after 30 seconds under the same key and, with room in the queue or a free slot, that start runs once. Through Fabric's hub before CO-376 the caller sees `product-error` instead, and the hub replays it under the key for 24 hours; and every caller the hub forwards counts as one caller under `perCaller`.
+- **UI elements:** the job's status message; the refusal's time to start again.
+- **States covered:** success, error
+- **Errors & recovery:** a job that `queue-full` ended -> malformed (`jobCallerAction` answers `invalid`); the caller reports it and starts nothing new under another key.
+- **Status:** draft
+- **Coverage:** DEC-0104, `FAC-SEM-131`, `nextQueuedJob`, `admitJob`, `readQueuePosition` in `src/agent-network.ts`; `interop-tool-error.schema.json`; `test/agent-network.test.ts`, `test/job-limits.test.ts`
+- **Product:** unobserved
+
+### SCN-035: See how busy an agent is, or learn why its load is not shown
+
+- **Persona:** P-02
+- **Feature:** agent-network
+- **Traces:** ST-029, FLW-24 (JTBD-12, JRN-11/#3)
+- **Entry point:** `example-agent`'s load panel in the host
+- **Preconditions:** `example-agent` declares the load extension with `windowSeconds: 3600`
+- **Steps:**
+  1. Operator opens the panel -> the last windows, per context: queued, running, completed, failed, wait and run time.
+  2. A window with jobs waiting in the organization's context -> it stands out, with its queued count and the p95 wait of the jobs that started in it.
+- **Expected result:** the operator sees the queued and running jobs at each window's end and the wait and run times, per context, with no person, caller or prompt shown; refused starts are not shown in this revision.
+- **Alt paths:** an agent that declares no load -> the panel says so. A declaration that is not its schema's -> the panel shows nothing of it and says why (`FAC-SEM-133`).
+- **UI elements:** the windows, the per-context rows, the limits.
+- **States covered:** success, empty, invalid
+- **Errors & recovery:** a report whose windows are out of order or a p50 above its p95 -> `FAC-SEM-132`; the service's author fixes the writer.
+- **Status:** draft
+- **Coverage:** DEC-0104, `FAC-SEM-132`, `FAC-SEM-133` in `src/agent-network.ts`, `service-load.schema.json`, `service-load-extension.schema.json`, `test/agent-network.test.ts`
 - **Product:** unobserved
 
 ## Embedded dashboard

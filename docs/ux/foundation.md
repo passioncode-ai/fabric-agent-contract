@@ -121,6 +121,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: an agent reports "degraded" with no word on what it depends on; pull: one map built from every agent's own declaration; anxiety: a map that shows a key or a password, or one built from a declaration that is wrong; habit: reading each agent's README and logs.
 - **Success metric:** every agent that declares its connections shows each one with its state, a connection whose id a `degraded[].source` names is marked failing, and an invalid declaration shows nothing of itself and says why.
 
+### JTBD-12: Find an agent I may call, and know when it is busy
+
+- **Statement:** When I or an agent of mine needs another agent, on my machines or in my organization, I want to find it and, once I call, to know whether my call waits and for how long, so I can find it without asking around and without a burst of calls failing for nothing.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: agents spread over machines and organizations nobody can list; one caller's batch blocks everyone; pull: one list derived from what already grants access, a queue that tells each caller roughly where it stands; anxiety: a list that shows another organization's or another person's agents, a queue that drops work; habit: asking on the board which agent does what.
+- **Success metric:** the owner's directory lists every agent once per context with unlisted ones marked, a member sees only the organization's listed agents, a waiting job reads its place, a full queue says when to start again, and a load panel shows waiting and running jobs per context.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -212,6 +220,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Look | opens an agent's connections in the host | Fabric Dashboards, the Connections tab | 3 | nothing says what an agent calls | one declaration per agent, read from its well-known document (priority 8) |
 | 2 | Trace | follows a failing connection to the agent or connector behind it | the Connections tab | 2 | a failure reported without its source | a `degraded[].source` equal to a connection's id marks it failing (priority 9) |
 | 3 | Distrust | opens an agent whose declaration is wrong | the Connections tab | 3 | half a map, or a key shown on screen | an invalid declaration shows none of itself, with its reasons; no member carries a credential (priority 8) |
+
+### JRN-11: Operator, finding and calling agents across machines and organizations (JTBD-12)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Find | looks for an agent in their estate or their organization | the hub's or the organization's directory | 3 | nobody can say which agents exist where | one directory per source, derived from placements and share registrations (priority 8) |
+| 2 | Wait | calls a busy agent | the job's status message | 2 | a call fails or hangs with no word on why | `queued <position> of <length>`, and `queue-full` with when to start again (priority 9) |
+| 3 | Watch | opens an agent's load | Fabric Dashboards' load panel | 3 | no sign that an agent is saturated | waiting, running, completed and failed jobs and their wait and run time per window and context (priority 7) |
 
 ## 4. User stories
 
@@ -524,6 +540,43 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given an agent whose well-known document declares its connections, when the host reads it, then each connection is shown with its kind, target and state.
   - Given a `degraded[]` entry whose `source` equals a connection's id, when the host reads the document, then that connection is marked failing; a source equal only to a target marks no connection (a host may show it as a failing part of its own).
   - Given a declaration that is invalid against its schema, names an id twice or carries a credential of a shape the connections page lists in any member, when the host reads it, then none of it is shown and the reasons are.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+
+### ST-027: Operator finds the agents of their estate and their organization
+
+- **Story:** As P-02, I want one list of the agents I may find, so that I find the right one without asking where it runs.
+- **Traces:** JTBD-12, JRN-11/#1
+- **Acceptance criteria:**
+  - Given an estate record with placements on two machines, when the hub derives the owner's directory, then each agent appears once per context and an agent the owner unlisted appears marked as unlisted.
+  - Given an organization with an active share registration and an agent on its own machine, when a member reads its directory, then both appear unless the organization unlisted one; an administrator sees the unlisted one marked.
+  - Given a registration that was withdrawn or whose window has not started or has ended, when the directory is derived, then that agent is absent.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-028: A caller learns its place in a busy agent's queue, or when to start again
+
+- **Story:** As P-02, I want a call to a busy agent to wait in line with an estimate of its place shown, or to be refused with a time to start again, so that a burst of calls neither fails for nothing nor runs twice.
+- **Traces:** JTBD-12, JRN-11/#2
+- **Acceptance criteria:**
+  - Given an agent at its concurrency limit, when a call starts, then the job is `working` with `queued <position> of <length>` and the caller polls it as any working job.
+  - Given two callers, one with several jobs running, when a slot frees, then the job of the caller running fewer starts.
+  - Given a queue at `queueMax` and no slot this job could take, when a call starts, then it is refused with `queue-full` and `retryAfterSeconds`, nothing stored, and a start under the same key after that time is admitted again by the same rule (on a direct call; through Fabric's hub before CO-376 the caller sees `product-error`).
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-029: Operator sees how busy an agent is
+
+- **Story:** As P-02, I want each agent's waiting and running jobs and their wait and run time per context, so that I see an agent that is saturated before its callers complain.
+- **Traces:** JTBD-12, JRN-11/#3
+- **Acceptance criteria:**
+  - Given a service that declares the load extension, when the host reads its report, then each window shows queued, running, completed and failed jobs per context with p50 and p95 times.
+  - Given a declaration that is not its schema's, when the host reads the well-known document, then it treats the load as not declared and says why.
+  - Given a report, then no person, caller, prompt, output or job id is in it.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

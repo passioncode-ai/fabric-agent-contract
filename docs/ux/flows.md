@@ -531,6 +531,77 @@ flowchart TD
 
 - **Screens traversed:** SCR-24 success; SCR-24 failing; SCR-24 invalid.
 
+### FLW-22: Operator finds an agent to call
+
+- **Traces:** ST-027 (JTBD-12, JRN-11/#1)
+- **Goal:** the operator finds an agent in their estate or their organization
+- **Entry points:** the hub's directory (the owner's sessions); the organization's directory (its members and administrator)
+- **Success exit:** the operator names the agent and its context; a call then goes through the hub, which resolves the agent and checks the grant that already allows it
+- **Task analysis:** the hub or the organization server derives the directory from placements or from active share registrations and its own machines → it drops what the reader may not see → the reader picks an entry → a call goes through the hub's resolution and the grant as before.
+- **Rejected shape:** a directory that grants access, rejected because who may call an agent stays its grant (DEC-0104).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  R[Reader asks for a directory] --> S{Source}
+  S -->|estate, the owner| E[Every placement once per context, unlisted marked]
+  S -->|organization| O{Reader}
+  O -->|administrator| A[Every entry, unlisted marked]
+  O -->|member| M[Listed entries only]
+  E --> C[Call through the grant]
+  A --> C
+  M --> C
+```
+
+- **Screens traversed:** SCR-25 success; SCR-25 empty.
+
+### FLW-23: A call waits in a busy agent's queue
+
+- **Traces:** ST-028 (JTBD-12, JRN-11/#2)
+- **Goal:** the caller's job runs once, after waiting in line or starting again after a refusal
+- **Entry points:** a call to a job-backed capability of a busy agent
+- **Success exit:** the job completes once
+- **Task analysis:** the node checks whether the job would start at once → if not, whether fewer than `queueMax` wait → it admits the job as `queued <position> of <length>`, or refuses with `queue-full` → it starts the job of the caller running fewest when a slot frees → the caller polls, or starts again after `retryAfterSeconds` under the same key.
+- **Rejected shape:** a new job state for a queued job, rejected because the job's states are the MCP Task states and a new one would cost a protocol revision (DEC-0104).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  C[Caller starts a job] --> N{Would it start at once?}
+  N -->|yes| D
+  N -->|no| Q{Fewer than queueMax waiting?}
+  Q -->|no| F[queue-full, retryAfterSeconds; nothing stored]
+  F --> W[Caller starts again later under the same key]
+  W --> N
+  Q -->|yes| P[working, queued position of length]
+  P --> S[Slot frees: caller running fewest starts]
+  S --> D[Job completes once]
+```
+
+- **Screens traversed:** SCR-27 queued; SCR-27 refused; SCR-27 success.
+
+### FLW-24: Operator reads an agent's load
+
+- **Traces:** ST-029 (JTBD-12, JRN-11/#3)
+- **Goal:** the operator sees waiting, running and finished jobs per window and context
+- **Entry points:** an agent's load panel in the host
+- **Success exit:** the operator names the context and window where jobs wait
+- **Task analysis:** the host reads the load key in the well-known document → it validates it → it reads the report at its path with the descriptor token → it draws each window per context.
+- **Rejected shape:** load inside the usage report, rejected because usage is money and load is time, and their readers differ (DEC-0104).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  H[Host reads the well-known document] --> K{Load key present?}
+  K -->|no| N[No load declared]
+  K -->|yes| V{Valid?}
+  V -->|no| R[Not declared, the reasons shown]
+  V -->|yes| L[Report read with the descriptor token]
+  L --> P[Windows drawn per context]
+```
+
+- **Screens traversed:** SCR-26 success; SCR-26 empty; SCR-26 invalid.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

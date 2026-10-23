@@ -106,6 +106,7 @@ function callerCases(): Json[] {
     ["failed, a message of 2001 characters: invalid", job("failed", { error: { code: "x-y", message: "m".repeat(2001) } }), NOW, { action: "invalid" }],
     ["failed, an error with another member: invalid", job("failed", { error: { code: "x-y", message: "m", hint: "h" } }), NOW, { action: "invalid" }],
     ["another code: failed", failed("upstream-error"), NOW, { action: "failed" }],
+    ["queue-full never ends a job (DEC-0104): invalid", failed("queue-full", { retryable: true, retryAfterSeconds: 30 }), NOW, { action: "invalid" }],
     ["an integer code: failed", failed(-32603), NOW, { action: "failed" }],
     ["a code of another form: invalid", failed("Quota_Exhausted"), NOW, { action: "invalid" }],
     ["failed without an error: invalid", job("failed"), NOW, { action: "invalid" }],

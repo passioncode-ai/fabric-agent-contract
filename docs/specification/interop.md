@@ -20,7 +20,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines five extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines six extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -29,6 +29,7 @@ The contract defines five extension keys, the constants in [`src/extensions.ts`]
 | `https://fabric.passioncode.ai/agent-contract/extensions/memory/0.1` | [memory and learning](memory-and-learning.md#wire-memory01) (DEC-0023) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1` | [embedded dashboard](embedded-dashboard.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` | [agent network](agent-network.md#load) (DEC-0104) |
 
 The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
@@ -123,7 +124,8 @@ interop extension block. Then:
 
 - if the request negotiated `io.modelcontextprotocol/tasks`, the server MAY return an MCP Task;
 - otherwise the tool returns, in `structuredContent`,
-  `{"job": {"id": "<opaque>", "status": "working"}}`, and the agent serves two tools:
+  `{"job": {"id": "<opaque>", "status": "working"}}`, and the agent serves two tools (a node that queues, a third,
+  `fabric.job.list`, DEC-0104):
   `fabric.job.get {id}` → `{"job": {id, status, statusMessage?, updatedAt, pollIntervalMs?,
   inputRequests?, result?, error?}}` and `fabric.job.cancel {id}` → the same shape.
 - `status` ∈ `working | input_required | completed | failed | cancelled` (the MCP Task states);
@@ -133,6 +135,11 @@ interop extension block. Then:
   wallMs}`) required: one shape, no subset (DEC-0017, OQ-0002; `interop-result.schema.json`).
 - A job id is stable across restarts of the agent; `fabric.job.get` for an unknown id answers
   `isError: true` with `unknown-job`, never a fresh job.
+- A node that queues calls (DEC-0104) writes a waiting job's `statusMessage` as `queued <position> of <length>`,
+  refuses a start that would wait past its queue (`admitJob`) with `queue-full` and `retryAfterSeconds` (an `isError` result with no
+  `structuredContent`, whose text content is JSON of [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json), as is its
+  `unknown-job`), and serves
+  `fabric.job.list` with the caller's own jobs; another caller's job id answers `unknown-job` ([agent network](agent-network.md#call-queue)).
 
 | Shape | Schema |
 |---|---|
@@ -142,6 +149,8 @@ interop extension block. Then:
 | The result envelope | [`interop-result.schema.json`](../../schemas/interop-result.schema.json) |
 | A job-backed tool's `structuredContent` | [`interop-job-tool-output.schema.json`](../../schemas/interop-job-tool-output.schema.json) |
 | `usage` | `common.schema.json#/$defs/usage` (also optional on the full [result](results-and-evidence.md)) |
+| `fabric.job.list` arguments and answer (DEC-0104) | [`interop-job-list-request.schema.json`](../../schemas/interop-job-list-request.schema.json), [`interop-job-list.schema.json`](../../schemas/interop-job-list.schema.json) |
+| At a node that queues, the text content's JSON of a `queue-full` refusal at start and of `unknown-job` (DEC-0104) | [`interop-tool-error.schema.json`](../../schemas/interop-tool-error.schema.json) |
 
 Derived constraints, from the MCP Tasks lifecycle rather than from new policy:
 
@@ -206,7 +215,7 @@ now)` does, `now` a UTC instant:
 | `failed`, `limit-reached` | `person`: its approval request reaches the operator (SCN-017); after the approval a resend under the same key |
 | `failed`, `outcome-unknown` | `reconcile`: observe whether the effect happened |
 | `failed`, any other code | `failed` |
-| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
+| `now` unreadable, no `{job}` with an id and a status, a `failed` job whose `error` is not `{code, message, data?}` with a non-empty message, `quota-exhausted` data that is not its schema's, a job that `queue-full` ended (a refusal at start, DEC-0104), a malformed pause | `invalid`: the caller sends nothing new; it keeps polling a `working` job and reports any other answer as malformed |
 
 It never answers "submit anew". After `outcome-unknown` a caller sends nothing under a new key until it has observed that
 the effect did not happen; a new attempt is then a new intent (a new `request`, below). `FAC-SEM-120` (kind
@@ -222,7 +231,8 @@ request (a task id, a message id) when one principal asks twice for the same inp
 with no RFC 8785 form.
 
 **The provider's answer to a repeated key.** A provider keeps a key per authenticated caller, so two callers that send
-the same input never share a job. A key whose job ended `quota-exhausted` admits the same intent again once the limit no
+the same input never share a job (a node that queues keys its callers with `jobCallerKey`, [agent
+network](agent-network.md#call-queue)). A key whose job ended `quota-exhausted` admits the same intent again once the limit no
 longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
 again and never runs a second time. Any other key whose job ended is answered with that job.
@@ -240,8 +250,9 @@ its request's `_meta.protocols` (DEC-0067's list, [`interop-request-meta.schema.
 and a provider writes `null` or `partial` only toward a caller that names `fabric-interop/0.2` (`readsNullUsage`).
 Toward any other caller it writes the lower bound it measured, as before; nothing goes to `notVerified`, so the result's
 `outcome` is the work's (`FAC-SEM-001`). Usage stays non-authoritative until reconciled, as it always was
-([results and evidence](results-and-evidence.md)). The `data` constraint binds only `quota-exhausted`, which no provider
-sent before. `contractVersion` stays `0.1.0`.
+([results and evidence](results-and-evidence.md)). The `data` constraint binds `quota-exhausted`, which no provider sent
+before, and since DEC-0104 `queue-full` (`queueFullData`), a code no job ends and that a node that queues answers at
+start ([agent network](agent-network.md#call-queue)). `contractVersion` stays `0.1.0`.
 
 Not decided here: whether `cancelled` asserts that no effect happened; a machine-readable scope for a limit; how the
 two codes and the pause travel on the MCP Task route (C3.2), so a provider that limits a job serves it through the job
