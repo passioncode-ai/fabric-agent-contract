@@ -27,7 +27,8 @@ each check-in member, and the call record of a queued call.
 - CT-120's remaining items (a personal slot frozen by a top sequence, a device with no `#kem`, per-call cost and
   activity.md, the digest key across a lost hub, `hubKeyCertified` in the credential check, a `view` machine and an
   organization's credentials, semantic fixtures held to their schema).
-- Tell Project Observatory (OBS-193) and the first organization server about DEC-0117 on the board.
+- Announced on board thread `b2511678` (message `5850292e`) to Project Observatory and the first organization server,
+  with DEC-0117's order of the move (the node lists `repair-request/1` first); their replies go into CT-83 and CT-117.
 
 ## Checks actually run
 
@@ -35,5 +36,7 @@ each check-in member, and the call record of a queued call.
 
 ## Next task
 
-Announce DEC-0115 to DEC-0117 on board thread `b2511678` to Project Observatory and the first organization server; then
-CT-120's next item.
+Record the replies on threads `b2511678` and `147a5538` in their adoption rows (CT-83, CT-110, CT-113 to CT-117). CT-120's
+remaining items need a design or the operator: a personal slot frozen by a top sequence, a device with no `#kem`,
+per-call cost as a person's data (activity.md), the digest key across a lost hub, a `view` machine and an
+organization's credentials.
