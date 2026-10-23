@@ -92,8 +92,9 @@ Two profiles, told apart by `context`:
 |---|---|---|
 | `context` | `org:<id>` | `personal` |
 | Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA`, inside its window on the target's own clock, as a policy and a repair are judged | the sending machine's `#sig`, `alg: ES256`, low-S |
-| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened nor a refusal has come | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a placed package declares on the target (that one is the secret envelope's); the estate's digest key only from the machine the record certifies a hub key for |
+| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened nor a refusal has come | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
 | Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it |
+| Travels | in a check-in response's `records.credentials`, after the decision that issued it | over the relay, as a message whose body is the envelope, addressed to the target's machine ([relay](relay.md#the-secret-envelope)) |
 | Lands in | the organization instance's vault slot for `agentRef` and `slot` | the personal vault slot for `agentRef` and `slot` |
 
 `checkCredentialEnvelope(envelope, context)` runs every check short of decryption, in this order; the first that fails
@@ -111,18 +112,19 @@ names the refusal:
 6. `bad-signature`.
 7. `sender-not-allowed` (personal) or `not-requested` (organization).
 8. `replayed` (a sequence below the target's mark for `(context, agentRef, slot)`, whoever sent it) and
-   `sequence-reused` (another envelope at the mark's sequence); the same envelope again passes, a repeat delivery. A
+   `sequence-reused` (another envelope at the mark's sequence); the same envelope again passes, a repeat delivery (in the personal profile; an organization's request is no longer
+   held once its envelope opened, so a repeat delivery there answers `not-requested` at step 7). A
    sealer keeps its last sequence for `(context, agentRef, slot)` durably, and one that lost it (a new hub after a
    move among them) starts at `max(last + 1, now)`, now in milliseconds, as the secret envelope's sealer does.
 9. `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (more than 24 hours), `expired`.
 10. `credential-expired`: `credentialExpiresAt` already past, more than 30 days after `iat`, or later than the end the
-    issued decision named (the request held open carries it; an end that does not read admits none).
+    issued decision named (the request held open carries it as `expiresAt`; an end that is absent or does not read admits none).
 
 `openCredential` then opens the ciphertext (`cannot-open` when it does not). The target writes the value and the mark
 `{context, agentRef, slot, sequence, digest}` in one transaction, and stores nothing after a refusal. `FAC-SEM-139`
 (kind `credential-envelope-check`) holds a target's answer to `checkCredentialEnvelope`'s. A sealer that cannot produce
 an envelope a target opens refuses before it signs (`sealCredential`: a shape the schema refuses, a life past 24 hours,
-a credential that ends before `iat` or more than 30 days after it, a signer of the other profile), so no sequence is
+a credential that ends before `iat` or more than 30 days after it, a signer or a signing key of the other profile), so no sequence is
 spent on it.
 
 An envelope never carries a value into the other context's vault: an organization's key cannot sign into the personal
@@ -136,8 +138,10 @@ by a key of the organization's current policy key set (as a [repair request](nod
 this organization's context) the node deletes the value and its mark. The issuer revokes the credential at its provider too;
 a credential the provider cannot revoke ends at its `credentialExpiresAt`. When a member leaves, the organization sends a revocation for every credential issued to the agents of their enrollment
 before it revokes their device's certificate, and a node deletes every credential of an organization's context when
-that enrollment ends for any reason (`organization-closed`, a certificate it ends the enrollment on, the person leaving):
-a value never outlives the enrollment it was issued into.
+that enrollment ends for any reason (`organization-closed`, the person leaving): a value never outlives the enrollment it
+was issued into. A node that an organization answers `certificate-revoked` deletes every credential of that
+organization's context and its marks at once, whatever it then decides about the rest of the enrollment (devices.md
+leaves that open): a machine that was offline when the revocations were sent loses the values at its first contact.
 
 ## The estate's digest key
 
@@ -149,8 +153,9 @@ once on the hub's machine and delivered from it to every other machine of the es
 machine holds no secret and compares no digest) by a personal envelope with
 `agentRef: urn:fabric:agent:fabric:estate`, `slot: ESTATE_DIGEST_KEY` and `provider: fabric`; a new key is a new sequence, and digests are
 compared only under the same `keyId`. A target accepts the key only from the machine the record certifies a hub key for,
-so one estate holds one key; after a hub move (DEC-0107) the new hub's machine sends it, and a newly enrolled machine
-gets it from the hub.
+and neither the record nor the delta revokes (`hub-key`), so one estate holds one key: the machine that becomes the hub
+already holds the key it received, never generates another, and after a hub move (DEC-0107) sends that key; a newly
+enrolled machine gets it from the hub. During the two revisions of a reachable move both hubs send the same key.
 
 ## The call record
 
@@ -187,14 +192,14 @@ and `recordedBy`.
 ## Compatibility
 
 Additive. Five new protocols in the register (`credential-request/1`, `credential-decision/1`,
-`fabric-credential-envelope/1`, `credential-revocation/1`, `call-record/1`) and five new members of a check-in's
+`fabric-credential-envelope/1`, `credential-revocation/1`, `call-record/1`) and six new members of a check-in's
 `records`. A server pinned before DEC-0111 refuses a check-in that carries the new request members, and a node pinned
 before it refuses a response with the new response members (both objects are closed), so each side sends them only to a
 peer that lists the protocol in its `protocols` (as `node-summary/1` and `repair-request/1` are gated, DEC-0101):
 `credential-request/1` gates `credentialRequests`, `credential-decision/1` gates `credentialDecisions`,
 `fabric-credential-envelope/1` gates `credentials`, `credential-revocation/1` gates `credentialRevocations`, and
 `call-record/1` gates `callRecords` and `callRecordsAccepted`. A check-in's own rules do not yet read these members
-(CT-91).
+(CT-119).
 `fabric-secret-envelope/1` is unchanged: a placed package's personal secret still moves by it. `contractVersion` stays
 `0.1.0`.
 
@@ -208,7 +213,7 @@ Each party moves at its next pin (CT-117).
 | Project Observatory's node | sends `credentialRequests` and `callRecords`; opens envelopes only as `checkCredentialEnvelope` allows, into the context's vault slot, and deletes at `credentialExpiresAt` or on a revocation that stands |
 | The first organization server | queues requests for the issuer, keeps the ledger by name, relays decisions, envelopes and revocations in check-in responses, and reads call records of its context under the notice's purpose (VES-CREDS-ISSUED) |
 | Fabric | the hub keeps the personal estate's call records and shows them in the network view (S7), generates and sends the estate's digest key from its machine; its nodes write call records for calls they answer, open personal envelopes (the digest key) as `checkCredentialEnvelope` allows, and hold credentials for an organization's instances as Project Observatory's node does |
-| Fabric Switchboard | reads a delivered OpenRouter key from its vault slot by name into the project's key slot, so one key is never issued twice (SB-167) |
+| Fabric Switchboard | reads a delivered OpenRouter key from its vault slot by name into the project's key slot, so one key is never issued twice (SB-167); a key issued into an organization's context goes only to a key slot of that organization's project, never to a personal one |
 
 ## Not decided here
 

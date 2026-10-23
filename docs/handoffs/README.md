@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-23 credentials on request and the call record](2026-10-23-credentials.md) | DEC-0111 (CT-86; CT-117 filed) | open |
+| [2026-10-23 credentials on request and the call record](2026-10-23-credentials.md) | DEC-0111 (CT-86; CT-117 to CT-120 filed) | open |
 | [2026-10-23 two asks from the project board](2026-10-23-board-asks.md) | DEC-0109, DEC-0110 (CT-114, CT-115, CT-116 filed) | merged, #155 `3222ae38` |
 | [2026-10-23 moving the hub, a lost passkey](2026-10-23-hub-move-recovery.md) | DEC-0107 (CT-89; CT-113 filed) | merged, #153 `cd5a2842` |
 | [2026-10-23 calls between machines](2026-10-23-machine-calls.md) | DEC-0106 (CT-85; CT-110, CT-111, CT-112 filed) | merged, #152 `87d384ff` |

@@ -82,7 +82,7 @@ function envelope(over: Json, signer: Signer, recipient: TestKey, label: string,
 const orgSigner: Signer = { org: POLICY, keyId: "org-7f3a.policy-2026-10" };
 const orgHeader = (over: Json = {}): Json => ({ alg: "EdDSA", recipient: "m-a#kem", signer: "org-7f3a.policy-2026-10", context: ORG_CONTEXT, requestId: REQUEST, credentialExpiresAt: UNTIL, ...over });
 const personalHeader = (over: Json = {}): Json => ({ alg: "ES256", recipient: "m-b#kem", signer: "m-a#sig", context: "personal", agentRef: ESTATE_AGENT, slot: "ESTATE_DIGEST_KEY", provider: "fabric", ...over });
-const orgCtx = (over: Json = {}): Json => ({ ownKemKid: "m-a#kem", at: AT, org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN" }] }, ...over });
+const orgCtx = (over: Json = {}): Json => ({ ownKemKid: "m-a#kem", at: AT, org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: UNTIL }] }, ...over });
 const personalCtx = (over: Json = {}, self = "m-b"): Json => ({ ownKemKid: `${self}#kem`, at: AT, personal: { applied: record(), self }, ...over });
 const digestOf = (env: Json) => `sha256:${sha256(rfc8785(env)).toString("hex")}`;
 
@@ -109,7 +109,7 @@ function checkCases(): Json[] {
     ["a key the policy key set does not list", envelope(orgHeader({ signer: "org-7f3a.policy-old" }), { org: POLICY, keyId: "org-7f3a.policy-old" }, K.aKem, "unlisted"), orgCtx(), no("bad-key")],
     ["a policy key not yet valid on the target's clock", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notBefore: "2026-10-24T00:00:00Z" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
     ["a policy key that ended before the target's clock, though valid at the iat the signer chose", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notAfter: "2026-10-23T09:59:30Z" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
-    ["the envelope delivered with its issued decision: the slot comes from the decision", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN" }] } }), ok(org)],
+    ["the envelope delivered with its issued decision: the slot comes from the decision", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: UNTIL }] } }), ok(org)],
     ["a signer that is no machine of the record", envelope(personalHeader({ signer: "m-z#sig" }), { machine: K.aSig, kid: "m-z#sig" }, K.bKem, "stranger"), personalCtx(), no("bad-key")],
     ["an enc that is no point of the curve", { ...org, header: { ...(org.header as Json), enc: Buffer.alloc(65, 4).toString("base64url") } }, orgCtx(), no("bad-key")],
     ["a policy key whose window does not read", org, orgCtx({ org: { id: ORG, keys: [{ ...KEYS[0], notBefore: "the first of October" }], requested: (orgCtx().org as Json).requested } }), no("bad-key")],
@@ -124,6 +124,9 @@ function checkCases(): Json[] {
     ["a view machine receives", envelope(personalHeader({ recipient: "m-v#kem" }), { machine: K.aSig, kid: "m-a#sig" }, K.vKem, "to-view"), personalCtx({}, "m-v"), no("sender-not-allowed")],
     ["the estate's digest key from a machine that holds no hub key", envelope(personalHeader({ signer: "m-b#sig", recipient: "m-a#kem" }), { machine: K.bSig, kid: "m-b#sig" }, K.aKem, "digest-from-member"), personalCtx({}, "m-a"), no("sender-not-allowed")],
     ["a slot a placed package declares is not filled by this envelope", envelope(personalHeader({ agentRef: AGENT, slot: "PLACED_TOKEN" }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "placed"), personalCtx({ personal: { applied: { ...record(), machines: (record().machines as Json[]).map((m) => (m.id === "m-b" ? { ...m, secrets: [{ agentRef: AGENT, slot: "PLACED_TOKEN", from: "m-a" }] } : m)) }, self: "m-b" } }), no("sender-not-allowed")],
+    ["a personal slot an organization's placement declares on this machine is not a personal placement", envelope(personalHeader({ agentRef: AGENT, slot: "PLACED_TOKEN" }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "placed-org"), personalCtx({ personal: { applied: { ...record(), machines: (record().machines as Json[]).map((m) => (m.id === "m-b" ? { ...m, secrets: [{ agentRef: AGENT, slot: "PLACED_TOKEN", from: "m-b", context: ORG_CONTEXT }] } : m)) }, self: "m-b" } }), ok(envelope(personalHeader({ agentRef: AGENT, slot: "PLACED_TOKEN" }), { machine: K.aSig, kid: "m-a#sig" }, K.bKem, "placed-org"))],
+    ["the estate's digest key from a hub key the delta revoked", personal, personalCtx({ personal: { applied: record(), self: "m-b", revocations: [{ kind: "hub-key", ref: "m-a#hub", revokedAt: "2026-10-23T08:00:00Z" }] } }), no("sender-not-allowed")],
+    ["the estate's digest key from a hub key the record revokes", personal, personalCtx({ personal: { applied: { ...record(), revocations: [{ kind: "hub-key", ref: "m-a#hub", revokedAt: "2026-10-22T08:00:00Z" }] }, self: "m-b" } }), no("sender-not-allowed")],
     ["a machine sends to itself", envelope(personalHeader({ recipient: "m-a#kem" }), { machine: K.aSig, kid: "m-a#sig" }, K.aKem, "to-self"), personalCtx({}, "m-a"), no("sender-not-allowed")],
     ["a credential nobody asked for", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [] } }), no("not-requested")],
     ["a request of another slot", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "OTHER_TOKEN" }] } }), no("not-requested")],
@@ -136,6 +139,8 @@ function checkCases(): Json[] {
     ["a credential that ends before it arrives", envelope(orgHeader({ credentialExpiresAt: "2026-10-23T09:59:30Z" }), orgSigner, K.aKem, "ended"), orgCtx(), no("credential-expired")],
     ["a credential that outlives the end its decision issued", envelope(orgHeader({ credentialExpiresAt: "2026-10-29T09:59:00Z" }), orgSigner, K.aKem, "past-decision"), orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "2026-10-28T09:59:00Z" }] } }), no("credential-expired")],
     ["an end its decision named that does not read", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN", expiresAt: "next week" }] } }), no("credential-expired")],
+    ["a held request that names no end admits none", org, orgCtx({ org: { id: ORG, keys: KEYS, requested: [{ requestId: REQUEST, agentRef: AGENT, slot: "CLOUDFLARE_API_TOKEN" }] } }), no("credential-expired")],
+    ["marks that do not read refuse before any later check", envelope(orgHeader({ alg: "ES256" }), orgSigner, K.aKem, "marks-first"), orgCtx({ marks: "x" }), no("malformed")],
     ["a credential issued for more than 30 days", envelope(orgHeader({ credentialExpiresAt: "2026-11-23T09:59:00Z" }), orgSigner, K.aKem, "too-long"), orgCtx(), no("credential-expired")]
   ];
   return cases.map(([name, env, context, expect]) => ({ name, envelope: env, context, expect }));

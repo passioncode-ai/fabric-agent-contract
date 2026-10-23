@@ -6835,7 +6835,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   anchor every node would have to pin); a call record inside the usage report (DL-22 keeps the chain out of it); the
   request as a profile on the delegation and grant records, as CT-86 first proposed (the request is the node's, and its
   only signed channel to the organization is the check-in).
-- **Compatibility:** additive. Five new protocols in the register and five new check-in members; each side sends them
+- **Compatibility:** additive. Five new protocols in the register and six new check-in members; each side sends them
   only to a peer that lists the protocol in its `protocols`, since the check-in objects are closed.
   `fabric-secret-envelope/1` is unchanged. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/credentials.md` (new), `devices.md` (the check-in members),
@@ -6844,6 +6844,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/protocol-revisions.ts`; schemas `credential-request`,
   `credential-decision`, `credential-envelope`, `credential-revocation`, `call-record` (new), `device-check-in`; vectors
   `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts`; tests
-  `test/credential-envelope.test.ts`; fixtures; the UX layer; backlog CT-86 done, CT-117 filed.
+  `test/credential-envelope.test.ts`; fixtures; the UX layer; backlog CT-86 done, CT-117 to CT-120 filed.
 - **Source:** board thread `ba63565c` items 5 and 6 (the first organization server, 2026-10-21), `b2511678` (S5, S6,
   and the addition of 2026-10-22), `21684886` (the estate's own credentials); Project Observatory OBS-191, OBS-194; CT-86.

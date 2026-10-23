@@ -334,7 +334,9 @@ credential of its context ([credentials](credentials.md#revocation), DEC-0111) (
 system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
 server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
 contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
-enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)). In [`verifyDeviceRequest`](../../src/http-signature.ts) a
+enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)), except that the node
+deletes every credential of that organization's context and its marks at once ([credentials](credentials.md#revocation),
+DEC-0111). In [`verifyDeviceRequest`](../../src/http-signature.ts) a
 certificate record with `organizationClosedAt` gives this answer, `status: 410` with `closedAt` (an unreadable one is the
 receiver's `context-invalid`); the share registration's sender gate answers `stop`
 ([share registration](share-registration.md)).

@@ -109,7 +109,7 @@ export function credentialEnvelopeShape(value: unknown): value is CredentialEnve
   if (!org && !personal) return false;
   // An organization's credential answers a request and ends; the personal profile names neither.
   if (org !== (h.requestId !== undefined) || org !== (h.credentialExpiresAt !== undefined)) return false;
-  return h.type === CREDENTIAL_ENVELOPE_TYPE && isString(h.alg) && h.alg.length <= 16 && JSON.stringify(h.suite) === JSON.stringify(ENVELOPE_SUITE)
+  return h.type === CREDENTIAL_ENVELOPE_TYPE && isString(h.alg) && [...h.alg].length <= 16 && JSON.stringify(h.suite) === JSON.stringify(ENVELOPE_SUITE)
     && isString(h.recipient) && KEM_KID.test(h.recipient) && isString(h.signer) && KEY_ID.test(h.signer.replace(/#sig$/, ""))
     && isString(h.agentRef) && h.agentRef.length <= 146 && AGENT_REF.test(h.agentRef) && isString(h.slot) && SLOT.test(h.slot)
     && isString(h.provider) && PROVIDER.test(h.provider) && (h.requestId === undefined || (isString(h.requestId) && UUID.test(h.requestId)))
@@ -145,6 +145,8 @@ export interface CredentialSealInput {
 /** Seals a credential (DEC-0111). Throws on an input no target would open, so no sequence is spent on it. */
 export function sealCredential(input: CredentialSealInput): CredentialEnvelope {
   const org = "keyId" in input.signer;
+  // An organization signs with Ed25519, a machine with ES256 (P-256): the other key signs nothing a target opens.
+  if (input.signer.privateKey.asymmetricKeyType !== (org ? "ed25519" : "ec")) throw new Error("bad-key: the signer's key is not of its profile");
   if (p256KeyRefusal(input.recipientKey) !== null) throw new Error("bad-key: the recipient key is not a valid P-256 key");
   const ephemeral = createECDH("prime256v1");
   if (input.ephemeralPrivateKey) ephemeral.setPrivateKey(input.ephemeralPrivateKey);
@@ -178,7 +180,7 @@ export interface CredentialCheckContext {
   ownKemKid: string;
   at: string; // the target's clock, RFC 3339
   // An organization the machine is enrolled in: its id, its current verified policy key set's keys, and the requests
-  // this machine holds open ({requestId, agentRef, slot, expiresAt?}: the slot and end from the issued decision).
+  // this machine holds open ({requestId, agentRef, slot, expiresAt}: the slot and end from the issued decision).
   org?: { id: string; keys: readonly JsonObject[]; requested: readonly JsonObject[] };
   // The personal context: the estate record the machine applied last, its own machine id and the delta's revocations.
   personal?: { applied: JsonObject; self: string; revocations?: readonly JsonObject[] };
@@ -199,7 +201,8 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
   const h = value.header;
   const org = h.context !== PERSONAL_CONTEXT;
   const at = when(ctx.at);
-  if (at === undefined) return no("malformed");
+  // Marks that do not read fail closed: a target that cannot read its marks opens nothing.
+  if (at === undefined || ctx.marks !== undefined && !Array.isArray(ctx.marks)) return no("malformed");
   if (h.alg !== (org ? ORG_ALG : PERSONAL_ALG)) return no("unsupported-alg");
   if (h.recipient !== ctx.ownKemKid) return no("wrong-recipient");
   if (org ? !isObject(ctx.org) || !isString(ctx.org.id) || h.context !== `${ORG_CONTEXT_PREFIX}${ctx.org.id}` : !isObject(ctx.personal) || !isObject(ctx.personal.applied)) return no("wrong-context");
@@ -227,15 +230,19 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
     const record = admission.held;
     if (sender === p.self || machineProfile(record, sender) !== "full" && machineProfile(record, sender) !== "member" || machineProfile(record, p.self) === "view" || machineProfile(record, p.self) === undefined) return no("sender-not-allowed");
     const machines = list(record.machines);
-    // The estate's digest key comes only from the machine the record certifies a hub key for, so one estate holds one key.
-    if (h.agentRef === ESTATE_AGENT_REF && h.slot === ESTATE_DIGEST_SLOT && !isObject(machines.find((m) => m.id === sender)?.hubKey)) return no("sender-not-allowed");
-    // A slot a placed package declares on this machine is filled by the secret envelope only (DEC-0047), never by this one.
+    // The estate's digest key comes only from a machine whose hub key the record certifies and neither the record nor the
+    // delta revokes (`hub-key`), so one estate holds one key.
+    if (h.agentRef === ESTATE_AGENT_REF && h.slot === ESTATE_DIGEST_SLOT) {
+      const hub = machines.find((m) => m.id === sender)?.hubKey;
+      const revoked = [...list(record.revocations), ...list(p.revocations)].some((r) => r.kind === "hub-key" && isObject(hub) && r.ref === hub.kid);
+      if (!isObject(hub) || revoked) return no("sender-not-allowed");
+    }
+    // A slot a placed package declares in a personal secret placement on this machine is filled by the secret envelope
+    // only (DEC-0047), never by this one; an organization's placement is its instance's, in another context.
     const self = machines.find((m) => m.id === p.self);
-    if (list(self?.secrets).some((secret) => secret.agentRef === h.agentRef && secret.slot === h.slot)) return no("sender-not-allowed");
+    if (list(self?.secrets).some((secret) => (secret.context === undefined || secret.context === PERSONAL_CONTEXT) && secret.agentRef === h.agentRef && secret.slot === h.slot)) return no("sender-not-allowed");
   }
   const digest = credentialEnvelopeDigest(value);
-  // Marks that do not read fail closed: a target that cannot read its marks opens nothing.
-  if (ctx.marks !== undefined && !Array.isArray(ctx.marks)) return no("malformed");
   const mark = list(ctx.marks).find((m) => m.context === h.context && m.agentRef === h.agentRef && m.slot === h.slot);
   if (mark !== undefined) {
     if (!counter(mark.sequence) || h.sequence < mark.sequence) return no("replayed");
@@ -250,7 +257,8 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
     // Never past the end the issued decision named: the request held open carries it (`expiresAt`).
     // An organization's envelope reached here only through a request held open (step 7), so `held` is that request.
     const held = list(ctx.org?.requested).find((r) => r.requestId === h.requestId && r.agentRef === h.agentRef && r.slot === h.slot) as JsonObject;
-    const issued = held.expiresAt === undefined ? Infinity : when(held.expiresAt) ?? -Infinity;
+    // An end that is absent or does not read admits none.
+    const issued = when(held.expiresAt) ?? -Infinity;
     if (until <= at || until - iat > MAX_CREDENTIAL_DAYS * DAY_MS || until > issued) return no("credential-expired");
   }
   return { ok: true, mark: { context: h.context, agentRef: h.agentRef, slot: h.slot, sequence: h.sequence, digest } };

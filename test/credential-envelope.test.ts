@@ -68,7 +68,7 @@ describe("sealCredential and openCredential round trip (DEC-0111)", () => {
     const env = sealCredential({ ...base, signer: { keyId: "k1", privateKey: policy }, context: "org:org-1", requestId: "5b1f0c4e-8a2d-4f3b-9c6e-1d7a2b3c4d5e", credentialExpiresAt: new Date("2026-10-30T10:00:00Z") });
     expect(env.header.type).toBe(CREDENTIAL_ENVELOPE_TYPE);
     expect(envelopeValid(env)).toBe(true);
-    const ctx: CredentialCheckContext = { ownKemKid: "m-a#kem", at: "2026-10-23T10:00:30Z", org: { id: "org-1", keys: [{ keyId: "k1", publicKey: policyPublic }], requested: [{ requestId: "5b1f0c4e-8a2d-4f3b-9c6e-1d7a2b3c4d5e", agentRef: base.agentRef, slot: base.slot }] } };
+    const ctx: CredentialCheckContext = { ownKemKid: "m-a#kem", at: "2026-10-23T10:00:30Z", org: { id: "org-1", keys: [{ keyId: "k1", publicKey: policyPublic }], requested: [{ requestId: "5b1f0c4e-8a2d-4f3b-9c6e-1d7a2b3c4d5e", agentRef: base.agentRef, slot: base.slot, expiresAt: "2026-10-30T10:00:00Z" }] } };
     const opened = openCredential(env, ctx, kemPrivate);
     expect(opened.ok && opened.secret.toString()).toBe("value");
     expect(opened.ok && opened.mark).toMatchObject({ context: "org:org-1", sequence: 3 });
@@ -244,6 +244,9 @@ describe("the unit reading of PR #156: boundaries the vectors did not reach", ()
     expect(() => sealCredential({ ...base, ...org, credentialExpiresAt: new Date("2026-10-23T09:00:00Z") })).toThrow(/credential-expired/);
     expect(() => sealCredential({ ...base, signer: { kid: "m-b", privateKey: machine }, context: "personal" })).toThrow(/bad-key/);
     expect(() => sealCredential({ ...base, ...org, signer: { keyId: "m-b#sig", privateKey: policy }, credentialExpiresAt: new Date("2026-10-30T10:00:00Z") })).toThrow(/bad-key/);
+    // A key of the other profile signs nothing a target opens: P-256 for an organization, Ed25519 for a machine.
+    expect(() => sealCredential({ ...base, ...org, signer: { keyId: "k1", privateKey: machine }, credentialExpiresAt: new Date("2026-10-30T10:00:00Z") })).toThrow(/bad-key/);
+    expect(() => sealCredential({ ...base, signer: { kid: "m-b#sig", privateKey: policy }, context: "personal" })).toThrow(/bad-key/);
   });
 
   it("reads a document's times with any offset, as the schemas admit, and an org id only as written", () => {

@@ -80,7 +80,7 @@ record's ([machines](estate-record.md#machines), [semantic rules](estate-record.
 **Secrets of an organization's instance stay on its machine.** A secret envelope (`fabric-secret-envelope/1`, DEC-0047)
 names an `agentRef` and a slot, never a context, so the target's open context (`estateEnvelopeContext`, relay.md's
 [open step 6](relay.md#the-secret-envelope)) reads only its personal secret placements: the personal instance's slot alone
-is filled by an envelope, and the answer does not depend on the order of the record's secret placements (the `placement`
+is filled by a secret envelope, and the answer does not depend on the order of the record's secret placements (the `placement`
 group of `fixtures/vectors/secret-envelope.json` lists an organization's placement first). An organization's instance fills its slot from its own machine's vault
 and never admits a secret envelope for it (`FAC-SEM-075`); a credential the organization issues to it arrives in a
 `fabric-credential-envelope/1`, which names the context and is signed by the organization's policy key

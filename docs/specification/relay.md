@@ -1,6 +1,6 @@
 # Relay `fabric-relay/0.1`
 
-A relay carries sessions, messages, sealed secret envelopes and package blobs between the machines it admits: one
+A relay carries sessions, messages, sealed secret and credential envelopes and package blobs between the machines it admits: one
 owner's estate (an organization's members once `org-authority/1`, Fabric D8, gives them a record). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
@@ -232,8 +232,9 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
     `exp` and refuses a second delivery as `replay`; it acks the duplicate without acting on it, or the relay redelivers
     it until its `ttl`. After `exp` the body is `expired` whatever the store holds, so the window is the message's signed
     life (at most 7 days) and a relay cannot push a replay past it.
-  - A payload that must stay secret from the relay carries a secret envelope, or, for a call between machines and its
-    answer, a sealed `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
+  - A payload that must stay secret from the relay carries a secret envelope, a personal `fabric-credential-envelope/1`
+    ([credentials](credentials.md#the-envelope), DEC-0111), or, for a call between machines and its answer, a sealed
+    `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 - **Presence**: `presence` frames `{kid, state: online | offline, lastSeen}` go only to machines of the same owner. An
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
@@ -300,7 +301,8 @@ an agent asks for, and one moved between one person's machines outside a placeme
   6. the latest estate-record revision this machine verified and applied places `(agentRef, slot)` on it from the
      sender's machine in a personal secret placement — one with no `context`, or `context: "personal"`
      ([estate record](estate-record.md), DEC-0055, DEC-0082). An envelope names no context: an organization's secret
-     placement is filled on its own machine and never admits an envelope, whatever its position among the machine's
+     placement is filled on its own machine and never admits a secret envelope (a credential its organization issues to it
+     arrives in a `fabric-credential-envelope/1`, which names the context, DEC-0111), whatever its position among the machine's
      secret placements ([contexts](contexts.md#one-instance-per-context-on-a-machine));
   7. `placement` is at least the revision from which that placement holds unchanged (the current placement run), and at
      most the latest revision this machine has applied. An envelope sealed under a placement since replaced, or placed

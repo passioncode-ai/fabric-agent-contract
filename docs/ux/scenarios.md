@@ -910,7 +910,7 @@ independent agent author and P-02 project operator.
   1. The administrator removes the member -> the server sends a signed `credential-revocation/1` for each, and the issuer revokes each at its provider.
   2. The member's node applies each revocation that stands -> it deletes the value and its mark.
 - **Expected result:** neither credential works at its provider nor stays on the machine.
-- **Alt paths:** the machine is offline -> the provider's revocation stops the credential at once, and the node deletes it at its next check-in or at `credentialExpiresAt`, whichever comes first. The member's enrollment ends (their certificate revoked, or the organization closed) before a revocation arrives -> the node deletes every credential of that organization's context with the enrollment. A revocation signed by a key outside the set -> refused, and the credential still ends at its expiry.
+- **Alt paths:** the machine is offline -> the provider's revocation stops the credential at once, and the node deletes it at its next check-in or at `credentialExpiresAt`, whichever comes first. The member's certificate is revoked or the organization closed before a revocation arrives -> at its first contact the node is answered `certificate-revoked` or `organization-closed` and deletes every credential of that organization's context. A revocation signed by a key outside the set -> refused, and the credential still ends at its expiry.
 - **UI elements:** "Revoke" on each row; the revoked state with its time and reason.
 - **States covered:** revoked
 - **Errors & recovery:** the provider cannot revoke a key -> it ends at its `credentialExpiresAt`, and the ledger says so.
