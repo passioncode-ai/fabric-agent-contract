@@ -33,6 +33,10 @@ the seam: seven documentation breaks fixed (the request's ends, the stored `requ
 the vector file's `about`, DEC-0111's annotation, `not-requested` before `replayed`); the narrowing against the
 released tag is recorded in DEC-0113's Compatibility.
 
+Round 2 (product): one break fixed, the request's end stated one way (a revocation that stands ends the request it
+names whether or not it deletes, revocations read before envelopes), with its risks (step 8's repeat, the personal
+revoked mark). The loop stops here.
+
 ## Checks actually run
 
 `pnpm run check` and `pnpm vectors:check` (output in the pull request).

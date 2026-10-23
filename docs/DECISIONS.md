@@ -6923,9 +6923,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. `credentialRevocationStands` takes `held`, the `requestId` the credential the node holds in that slot answers, and
      answers `{ok: true, deletes}`: `deletes` is true only when `held` is the revocation's `requestId`. A revocation that
      names no request is `malformed`.
-  3. When it deletes, the node ends the revoked request (it stops sending it, so a repeat delivery of the envelope
-     answers `not-requested` at step 7) and keeps the slot's mark with `revoked: true`; behind that, and in the personal
-     profile, `checkCredentialEnvelope` answers `replayed` for an envelope at or below a revoked mark's sequence. The
+  3. A revocation that stands ends the request it names, whether or not it deletes: the node stops sending it, so an
+     envelope for it (a repeat delivery, or one lost in transit and sealed again) answers `not-requested` at step 7, and
+     the node reads a response's revocations before its envelopes. When it deletes, the node also keeps the slot's mark
+     with `revoked: true`, behind which `checkCredentialEnvelope` answers `replayed` for an envelope at or below its
+     sequence; the function holds this in the personal profile too, where no flow writes a revoked mark today. The
      revoked envelope never opens again and a reissue (a new request, a higher sequence) still does. A mark's `revoked`
      is absent or `true`; anything else does not read.
   4. The node writes the value with the `requestId` it answers, which it passes as `held`. The issuer writes each

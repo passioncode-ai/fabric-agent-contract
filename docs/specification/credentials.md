@@ -92,7 +92,7 @@ Two profiles, told apart by `context`:
 |---|---|---|
 | `context` | `org:<id>` | `personal` |
 | Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA`, inside its window on the target's own clock, as a policy and a repair are judged | the sending machine's `#sig`, `alg: ES256`, low-S |
-| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened, nor a refusal has come, nor a revocation naming it has stood | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
+| Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened, nor a refusal has come, nor a revocation naming it has stood (the node reads a response's revocations before its envelopes) | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
 | Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it, or when the target becomes `view` |
 | Travels | in a check-in response's `records.credentials`, after the decision that issued it | over the relay, as the inner `payload` of a relay message body (`fabric-relay-message/1`), addressed to the target's machine ([relay](relay.md#the-secret-envelope)); a target refuses an envelope whose `signer` is not the `#sig` of the body's verified `from` |
 | Lands in | the organization instance's vault slot for `agentRef` and `slot` | the personal vault slot for `agentRef` and `slot` |
@@ -122,7 +122,7 @@ the first that fails names the refusal:
 7. `sender-not-allowed` (personal) or `not-requested` (organization).
 8. `replayed` (a sequence below the target's mark for `(context, agentRef, slot)`, whoever sent it, or at a revoked
    mark's sequence, DEC-0113) and
-   `sequence-reused` (another envelope at the mark's sequence); the same envelope again passes, a repeat delivery (in the personal profile; an organization's request is no longer
+   `sequence-reused` (another envelope at the mark's sequence); the same envelope again passes (unless its mark is revoked), a repeat delivery (in the personal profile; an organization's request is no longer
    held once its envelope opened, so a repeat delivery there answers `not-requested` at step 7). A
    sealer keeps its last sequence for `(context, agentRef, slot)` durably, and one that lost it (a new hub after a
    move among them) starts at `max(last + 1, now)`, now in milliseconds, as the secret envelope's sealer does.
@@ -148,9 +148,11 @@ by a key of the organization's current policy key set (as a [repair request](nod
 `credentialRevocationStands` accepts it (the signature, the key's window on the device's own clock, this device,
 this organization's context), the node deletes the value when the credential it holds in that slot answers the
 revocation's `requestId` (`held`; the answer's `deletes`, DEC-0113), and keeps the mark with `revoked: true`, so the same
-envelope delivered again opens nothing and a reissue, under a new request and a higher sequence, still opens. A revocation that stands and names the held request
-ends that request (the node stops sending it), so a repeat delivery answers `not-requested` at step 7; the revoked mark refuses
-it `replayed` at step 8 behind that, for a node that still holds the request and in the personal profile. A revocation whose request is not the one the slot's credential answers stands and deletes nothing: delivered
+envelope delivered again opens nothing and a reissue, under a new request and a higher sequence, still opens. A revocation that stands ends the request it names
+whether or not it deletes (the node stops sending it, and reads a response's revocations before its envelopes, so an
+envelope lost in transit and sealed again never opens), so a repeat delivery answers `not-requested` at step 7; the revoked mark refuses
+it `replayed` at step 8 behind that, for a node that still holds the request; the function holds it in the personal profile too, where no flow writes a
+revoked mark today. A revocation whose request is not the one the slot's credential answers stands and deletes nothing: delivered
 late, it never deletes a reissue. The issuer revokes the credential at its provider too;
 a credential the provider cannot revoke ends at its `credentialExpiresAt`. When a member leaves, the organization sends a revocation for every credential issued to the agents of their enrollment
 before it revokes their device's certificate, and a node deletes every credential of an organization's context when
