@@ -389,9 +389,9 @@ independent agent author and P-02 project operator.
   2. Operator confirms 40 USD with an auto-approve threshold of 2 USD -> the policy is recorded with its inputs and the run starts.
   3. A later run of the same project -> the launcher does not ask again.
 - **Expected result:** one recorded choice per project, its reasons kept beside it; nothing spent before it.
-- **Alt paths:** operator picks "no project limit" -> recorded as that choice; only the estate total (L0) stops spending.
+- **Alt paths:** operator picks "no project limit" -> recorded as that choice; only the estate total (L0) stops spending. A service in the window ran calls on a subscription -> the project's recent spend is unknown (`recentSpendUsd: null`), and while none of its calls is unpriced the offer's wording may name its cost including estimates as an upper bound, labelled so (DEC-0110).
 - **UI elements:** options, preselected option, inputs, threshold, confirm.
-- **States covered:** success, empty
+- **States covered:** success, empty, unknown
 - **Errors & recovery:** a threshold above the monthly limit -> refused (`FAC-SEM-047`) with the limit named; the operator lowers it.
 - **Status:** draft
 - **Coverage:** spend-policy specification, The spend policy; `spend-policy.schema.json`, `test/spend-policy.test.ts`

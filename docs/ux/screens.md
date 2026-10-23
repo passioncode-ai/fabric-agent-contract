@@ -190,7 +190,7 @@
 - **Used by:** FLW-10
 - **Purpose:** the operator chooses a project's spend limit once, at its first paid run.
 - **Elements:** the computed options (about the expected month, twice and four times it, "no project limit") with one preselected, the inputs they were computed from, the auto-approve threshold (primary action: confirm the preselected option).
-- **States:** success — the choice recorded with its inputs; empty — no usage history yet, so the options come from the agents' presets alone and say so.
+- **States:** success — the choice recorded with its inputs; empty — no usage history yet, so the options come from the agents' presets alone and say so; unknown — a service in the window ran calls on a subscription, so the project's recent spend is unknown (`recentSpendUsd: null`): the options come from the presets and the kind of work, and while none of its calls is unpriced the wording may name its cost including estimates as an upper bound, labelled as an estimate (DEC-0110).
 - **Coverage:** `spend-policy.schema.json`, `test/spend-policy.test.ts` (FAC-SEM-047)
 - **Scenarios:** SCN-016
 - **Resources:** spend-policy specification, The spend policy

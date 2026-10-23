@@ -265,7 +265,7 @@ flowchart TD
   M -->|no answer| W[Nothing spent; other work goes on]
 ```
 
-- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-11 success; SCR-11 error.
+- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-13 unknown; SCR-11 success; SCR-11 error.
 
 ### FLW-11: Operator approves one action for an outside caller
 
