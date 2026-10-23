@@ -609,8 +609,9 @@ what the organization expects the harness to be and which packages a repair may 
 `call-record/1` documents of that context while the acknowledged notice names agent calls; a check-in response MAY carry
 `records.credentialDecisions`, `records.credentials` (sealed `fabric-credential-envelope/1`),
 `records.credentialRevocations` and `records.callRecordsAccepted` (whether the notice names agent calls); a node sends
-`callRecords` only after a response that says `true`. Each side sends them only to a peer that lists the protocol in its `protocols`
-([credentials](credentials.md)).
+`callRecords` only after a response that says `true`. Each side sends them only to a peer that lists the protocol in its own `protocols`: a node's request members to a
+server whose response lists it (what it accepts), a server's response members to a node whose check-in lists it (what
+it reads), `call-record/1` for `callRecordsAccepted` ([credentials](credentials.md#compatibility), DEC-0116).
 
 ## Health
 
