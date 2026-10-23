@@ -206,6 +206,21 @@ function repairRule(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-129", instancePath: "/decision", message: want.decision === "run" ? "nothing refuses this repair" : `the node must refuse this repair: ${show(want.reason)}` }];
 }
 
+/**
+ * DEC-0114: a check-in's `records.nodeSummary` read with the check-in (kind `device-check-in`): FAC-SEM-128's clauses
+ * that need no policy, under the member's path, and the summary's `device.id` the checking-in device's.
+ */
+export function checkInSummaryFindings(checkIn: JsonObject): Finding[] {
+  const records = isObject(checkIn.records) ? checkIn.records : {};
+  if (!isObject(records.nodeSummary)) return [];
+  const summary = records.nodeSummary;
+  const findings = contentFindings(summary, "/records/nodeSummary");
+  const own = isObject(checkIn.device) ? checkIn.device.id : undefined;
+  const named = isObject(summary.device) ? summary.device.id : undefined;
+  if (named !== own) findings.push({ code: "FAC-SEM-128", instancePath: "/records/nodeSummary/device/id", message: "a check-in's node summary is the checking-in device's" });
+  return findings;
+}
+
 export function nodeSummaryRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "node-summary") return nodeSummaryRule(value);
   // DEC-0102: the summary read whole, as `pnpm validate` and the positive sweep read it: the clauses that need no policy.

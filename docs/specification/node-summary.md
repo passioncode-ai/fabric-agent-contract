@@ -92,7 +92,7 @@ reason. How the person is told, and the package's own run, are the node's.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-128"></a>`FAC-SEM-128` | `node-summary`, `node-summary-document` | `{summary, baseline?, org?}`: no string carries a credential, an e-mail address or a home path; no list names an item twice; `context` is `org:` and `org` as written; with a baseline (`{revision, items}`), `drift` names its revision and equals `harnessDrift`, without one there is no `drift`. Kind `node-summary-document` reads a summary alone with the first two clauses (DEC-0102) |
+| <a id="fac-sem-128"></a>`FAC-SEM-128` | `node-summary`, `node-summary-document`, `device-check-in` | `{summary, baseline?, org?}`: no string carries a credential, an e-mail address or a home path; no list names an item twice; `context` is `org:` and `org` as written; with a baseline (`{revision, items}`), `drift` names its revision and equals `harnessDrift`, without one there is no `drift`. Kind `node-summary-document` reads a summary alone with the first two clauses (DEC-0102); kind `device-check-in` reads a check-in's `records.nodeSummary` with them, under its member's path, and its `device.id` is the check-in's (DEC-0114) |
 | <a id="fac-sem-129"></a>`FAC-SEM-129` | `repair-run` | `{request, keys, device: {id, org, role?}, layers, at, notifiedAt?, declined?, answered?, decision, reason?}`: the node's decision and reason are exactly `repairDecision`'s |
 
 ## Not decided here

@@ -436,7 +436,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-125` | `device-rotation` | [devices](devices.md#semantic-rules) | SEM-0125 |
 | `FAC-SEM-126` | `support-quality-daily` | [support quality](support-quality.md#semantic-rules) | SEM-0126 |
 | `FAC-SEM-127` | `service-well-known` | [connections](connections.md#semantic-rules) | SEM-0127 |
-| `FAC-SEM-128` | `node-summary`, `node-summary-document` | [node summary](node-summary.md#semantic-rules) | SEM-0128 |
+| `FAC-SEM-128` | `node-summary`, `node-summary-document`, `device-check-in` | [node summary](node-summary.md#semantic-rules) | SEM-0128 |
 | `FAC-SEM-129` | `repair-run` | [node summary](node-summary.md#semantic-rules) | SEM-0129 |
 | `FAC-SEM-130` | `agent-directory-view` | [agent network](agent-network.md#semantic-rules) | SEM-0130 |
 | `FAC-SEM-131` | `job-queue` | [agent network](agent-network.md#semantic-rules) | SEM-0131 |

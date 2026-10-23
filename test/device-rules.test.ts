@@ -658,3 +658,20 @@ describe("FAC-SEM-077: a receiver answers a device request as the binding says",
     expect(evaluateSemanticRules("device-request-signature", { ...value, answer: "certificate-unknown" })).toEqual([]);
   });
 });
+
+describe("a check-in's records against the client certificate (DEC-0114)", () => {
+  const fixture = load("semantic/device-attribution-records-ok.json").input;
+  const paths = (value: unknown) => evaluateSemanticRules("device-attribution", value).map((f) => `${f.code} ${f.instancePath}`);
+  const records = (over: Json) => ({ ...fixture, checkIn: { ...fixture.checkIn, records: { ...fixture.checkIn.records, ...over } } });
+  it("names the certificate's device and organization in the summary, every request and every call record", () => {
+    expect(paths(fixture)).toEqual([]);
+    expect(paths(records({ nodeSummary: { ...fixture.checkIn.records.nodeSummary, device: "x" } }))).toEqual(["FAC-SEM-045 /checkIn/records/nodeSummary/device/id"]);
+    expect(paths(records({ credentialRequests: [7, { ...fixture.checkIn.records.credentialRequests[0], context: "org:ORG-7F3A" }] }))).toEqual(["FAC-SEM-045 /checkIn/records/credentialRequests/1/context"]);
+    expect(paths(records({ callRecords: "x", nodeSummary: "x" }))).toEqual([]);
+  });
+  it("matches no context for a certificate without a string org.id", () => {
+    const noOrg = { ...fixture, binding: { ...fixture.binding, org: { id: 7 } } };
+    expect(paths(noOrg)).toEqual(["FAC-SEM-045 /checkIn/records/nodeSummary/context", "FAC-SEM-045 /checkIn/records/credentialRequests/0/context", "FAC-SEM-045 /checkIn/records/callRecords/0/context"]);
+    expect(paths({ ...fixture, checkIn: 7 })).toEqual([]);
+  });
+});

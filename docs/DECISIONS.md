@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0114` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0115` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6948,3 +6948,30 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `tools/vectors/credential-envelope.ts` (`revocation`, `check`); the fixtures that carry a revocation; backlog CT-118
   done.
 - **Source:** CT-118 (the seam reading of PR #156, 2026-10-23).
+
+### DEC-0114: a check-in's node summary, credential requests and call records judged with the check-in and its certificate
+
+- **Status:** Accepted (2026-10-23). No wire change.
+- **Context:** a check-in's `records.nodeSummary` (DEC-0101) was judged only as its own document (`node-summary`,
+  `node-summary-document`), so a receiver that runs only the check-in's rules accepted a summary for another device or
+  organization (CT-91, the seam reading of 2026-10-22). DEC-0111's requests and call records name a context too, and
+  DEC-0112 held them to one context but not to the certificate's.
+- **Decision:**
+  1. Kind `device-check-in` reads `records.nodeSummary` with `FAC-SEM-128`'s clauses that need no policy (no
+     credential, e-mail address or home path; no item twice), under `/records/nodeSummary`, and its `device.id` is the
+     check-in's own (`FAC-SEM-128`).
+  2. Kind `device-attribution` (`FAC-SEM-045`) judges a check-in's records against the client certificate, as written:
+     the node summary's `device.id` is the certificate's device and its `context` is `org:` and the certificate's
+     `org.id`, and every `credentialRequests` and `callRecords` entry's `context` is that same `org:<org.id>`.
+- **Why:** the receiver holds the certificate when it attributes a check-in (`FAC-SEM-045`), so the comparison lives
+  there; the document's own clauses apply wherever the summary travels.
+- **Alternatives considered:** a new kind on `{checkIn, certificate}` (`device-attribution` already carries the
+  binding); comparing in `node-summary` only (a receiver judging the check-in would not run it).
+- **Compatibility:** narrower for a check-in that broke these rules: the two kinds now refuse it. No schema or byte
+  changes; `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/node-summary.ts` (`checkInSummaryFindings`), `src/credentials.ts`,
+  `src/device-rules.ts` (`attribution`); `docs/specification/devices.md` and `node-summary.md` (their rule rows),
+  `conformance.md` (the register); fixtures `fixtures/semantic/device-attribution-records-*`,
+  `fixtures/semantic/device-attribution-summary-*`, `fixtures/semantic/credential-check-in-summary-*`; tests
+  `test/device-rules.test.ts`, `test/credential-envelope.test.ts`; backlog CT-91 done.
+- **Source:** CT-91 (the seam reading of `bfa9a67..4a29fcb`, 2026-10-22).

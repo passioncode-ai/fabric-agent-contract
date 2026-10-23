@@ -303,9 +303,13 @@ describe("a check-in's credential members (DEC-0112)", () => {
     expect(at("device-check-in", withRecords(checkIn, { callRecords: [{ ...call, context: "org:org-9c1d" }] }))).toEqual(["FAC-SEM-138 /records"]);
     expect(at("device-check-in", withRecords(checkIn, { credentialRequests: [], callRecords: [call, { ...call, callId: "2c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f", context: "org:org-9c1d" }] }))).toEqual(["FAC-SEM-140 /records"]);
     // The node summary names the enrollment's context too.
-    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { context: "org:org-9c1d" } }))).toEqual(["FAC-SEM-138 /records"]);
-    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { context: "org:org-7f3a" } }))).toEqual([]);
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-9c1d" } }))).toEqual(["FAC-SEM-138 /records"]);
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-7f3a" } }))).toEqual([]);
     expect(at("device-check-in", withRecords(checkIn, { nodeSummary: "x" }))).toEqual([]);
+    // DEC-0114: the summary is the checking-in device's, read by FAC-SEM-128's clauses under its member's path.
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: "x", context: "org:org-7f3a" } }))).toEqual(["FAC-SEM-128 /records/nodeSummary/device/id"]);
+    expect(at("device-check-in", { ...withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-7f3a" } }), device: 7 })).toEqual(["FAC-SEM-128 /records/nodeSummary/device/id"]);
+    expect(at("device-check-in", withRecords(checkIn, { nodeSummary: { device: checkIn.device, context: "org:org-7f3a", services: [{ key: "a.b" }, { key: "a.b" }] } }))).toEqual(["FAC-SEM-128 /records/nodeSummary/services/1/key"]);
   });
 
   it("decides each request once and seals only an issued one", () => {
