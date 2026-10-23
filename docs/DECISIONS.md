@@ -6464,7 +6464,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      prompt, output or job id. `FAC-SEM-132` (kind `service-load`): windows in order one `windowSeconds` apart and none
      after `generatedAt`, one row per context, p50 at most p95, a run time only where a job ended. `FAC-SEM-133` (kind
      `service-well-known`): the declaration is valid against its schema, else a reader treats it as not declared. The
-     report stays with the host that holds the descriptor token and is never sent to an organization.
+     report is read with the descriptor token (by the host and by every MCP client configured with it) and is never
+     sent to an organization.
 - **Why:** a directory derived from what already grants access cannot widen access, and one derivation per source
   gives the hub and the organization server the same answer for the same facts. A queue position in `statusMessage`
   and a refusal at start fit the existing job lifecycle, so no protocol revision is needed and a caller changes for one

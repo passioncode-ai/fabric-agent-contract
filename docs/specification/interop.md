@@ -250,8 +250,9 @@ its request's `_meta.protocols` (DEC-0067's list, [`interop-request-meta.schema.
 and a provider writes `null` or `partial` only toward a caller that names `fabric-interop/0.2` (`readsNullUsage`).
 Toward any other caller it writes the lower bound it measured, as before; nothing goes to `notVerified`, so the result's
 `outcome` is the work's (`FAC-SEM-001`). Usage stays non-authoritative until reconciled, as it always was
-([results and evidence](results-and-evidence.md)). The `data` constraint binds only `quota-exhausted`, which no provider
-sent before. `contractVersion` stays `0.1.0`.
+([results and evidence](results-and-evidence.md)). The `data` constraint binds `quota-exhausted`, which no provider sent
+before, and since DEC-0104 `queue-full` (`queueFullData`), a code no job ends and that a node that queues answers at
+start ([agent network](agent-network.md#call-queue)). `contractVersion` stays `0.1.0`.
 
 Not decided here: whether `cancelled` asserts that no effect happened; a machine-readable scope for a limit; how the
 two codes and the pause travel on the MCP Task route (C3.2), so a provider that limits a job serves it through the job
