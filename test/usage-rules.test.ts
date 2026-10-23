@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { usageRules, utcDate } from "../src/usage-rules.js";
+import { usageRules, usageSpend, utcDate } from "../src/usage-rules.js";
 
 // DEC-0065: FAC-SEM-025 reads the usage report's 31-day window (F-A-024) and its project attribution (CON-OE-13).
 type Json = Record<string, any>;
@@ -136,5 +136,47 @@ describe("FAC-SEM-025: calls whose tokens are unknown (DEC-0091)", () => {
   it("refuses a day's unmeasuredCalls that is not the sum of its models', an absent one counting 0", () => {
     expect(paths(day({ unmeasuredCalls: 2 }, {}))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
     expect(paths(day({ unmeasuredCalls: undefined }, {}))).toEqual(["FAC-SEM-025 /days/1/unmeasuredCalls"]);
+  });
+});
+
+describe("usageSpend: money apart from a subscription's estimate (DEC-0110)", () => {
+  const row = (route: string | undefined, calls: number, costUsd: number | null, unpricedCalls = 0) => ({ provider: "p", model: "m", ...(route ? { route } : {}), calls, unpricedCalls, costUsd });
+
+  it("sums money over key, platform-metered and unstated rows, and the subscription's list price apart", () => {
+    // The finding of 2026-10-22 (thread ea2e4f3d): $140.47 on the subscription, $6.80 spent.
+    expect(usageSpend([row("subscription", 300, 140.47), row("key", 40, 4.8), row("platform-metered", 2, 1), row(undefined, 1, 1)])).toEqual({
+      calls: 343, moneyUsd: 6.8, moneyLowerBound: false, estimateUsd: 140.47, estimateLowerBound: false, subscriptionCalls: 300
+    });
+  });
+
+  it("answers 0 for a window spent only on a subscription, and null money only when no call off it is priced", () => {
+    expect(usageSpend([row("subscription", 5, 2)])).toMatchObject({ moneyUsd: 0, moneyLowerBound: false, estimateUsd: 2 });
+    expect(usageSpend([])).toMatchObject({ calls: 0, moneyUsd: 0, estimateUsd: 0, subscriptionCalls: 0 });
+    expect(usageSpend([row("key", 3, null, 3), row("subscription", 1, 0.5)])).toMatchObject({ moneyUsd: null, moneyLowerBound: false, estimateUsd: 0.5 });
+    expect(usageSpend([row("key", 3, null, 3), row("key", 2, 1.25, 1)])).toMatchObject({ moneyUsd: 1.25, moneyLowerBound: true });
+    expect(usageSpend([row("subscription", 3, null, 3)])).toMatchObject({ moneyUsd: 0, estimateUsd: null, estimateLowerBound: false });
+    expect(usageSpend([row("subscription", 3, 1, 1)])).toMatchObject({ estimateUsd: 1, estimateLowerBound: true });
+  });
+
+  it("refuses an unknown route and every row FAC-SEM-025 or the schema refuses, and never throws", () => {
+    for (const bad of [
+      [row("free", 1, 1)], [{ ...row("key", 1, 1), route: null }], [row("key", -1, 1)], [row("key", 1.5, 1)], [row("key", 1, -1)], [row("key", 1, Number.NaN)],
+      [row("key", 2, 1, 3)], [row("key", 2, null, 1)], [row("key", 2, 1, 2)], [null], [7], ["row"], [{ ...row("key", 1, 1), calls: { toString: 1 } }]
+    ]) expect(usageSpend(bad), JSON.stringify(bad)).toBeUndefined();
+    for (const bad of [undefined, null, {}, "rows", { length: 1 }]) expect(usageSpend(bad)).toBeUndefined();
+    expect(usageSpend([row("key", 0, null)])).toMatchObject({ calls: 0, moneyUsd: 0 });
+    // A row without calls prices no call: money stays unknown beside unpriced calls, and its cost still counts alone.
+    expect(usageSpend([row("key", 0, 0), row("key", 3, null, 3)])).toMatchObject({ moneyUsd: null, moneyLowerBound: false });
+    expect(usageSpend([row("subscription", 0, 0), row("subscription", 3, null, 3)])).toMatchObject({ estimateUsd: null, estimateLowerBound: false });
+    expect(usageSpend([row("key", 0, 5)])).toMatchObject({ moneyUsd: 5, moneyLowerBound: false });
+    expect(usageSpend([row("key", 0, 5), row("key", 1, 1)])).toMatchObject({ moneyUsd: 6 });
+    expect(usageSpend([{ ...row("key", 1, 1), unpricedCalls: null }])).toBeUndefined();
+    // A row without `unpricedCalls` has every call priced.
+    expect(usageSpend([{ provider: "p", model: "m", route: "key", calls: 2, costUsd: 0.5 }])).toMatchObject({ moneyUsd: 0.5, moneyLowerBound: false });
+  });
+
+  it("adds in a fixed order, so the same rows give the same sum in any order", () => {
+    const rows = [row("key", 1, 0.1), row("key", 1, 0.2), row("key", 1, 1e-7), row("key", 1, 3)];
+    expect(usageSpend([...rows].reverse())?.moneyUsd).toBe(usageSpend(rows)?.moneyUsd);
   });
 });

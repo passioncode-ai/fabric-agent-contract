@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0108` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0112` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -264,6 +264,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-02
 - **Status:** Accepted
+- **Annotated (2026-10-23):** the no-token `401` on the well-known route carries none of the service's data, and an identity proxy MAY answer it with its own page; the body is no longer required empty (DEC-0109).
 - **Decision:** A descriptor gains the optional field `placement`, `local` by default. A
   `remote` placement is an online agent or dashboard at an `https://<dns-name>[:<port>]` origin,
   supervised by its platform (`lifecycle.manager: "none"`, no launchd fields, `doctor` only). It
@@ -329,6 +330,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
+- **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -608,6 +610,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-07
 - **Status:** Accepted source change; consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-23):** a host counts only money against a budget or a limit, never a subscription's estimate (DEC-0110).
 - **Amends:** the `fabric-service/0.1` usage report of DEC-0021 (additive, DEC-0016 extension
   policy)
 - **Decision:** `service-usage.schema.json` gains an optional `budgets` array, at most 64
@@ -1999,6 +2002,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the adapter's kit implements `resolveModelProfile`, reads the catalogue and shows the slots; Project Observatory
   supplies prices and the tool-use probe, issues keys with the allow-list and meters by route; Fabric Dashboards shows
   each agent's configuration.
+- **Annotated (2026-10-23):** a `subscription` row's `costUsd` is an estimate at list price; a host sums money over the other routes only (DEC-0110).
 - **Annotated (2026-10-12):** a usage report's `route` admits `platform-metered` beside `subscription` and `key`, and a
   descriptor names its runner's credential kind, by DEC-0061.
 - **Annotated (2026-10-15):** amended by DEC-0083: the closed model classes gain `open-vendor` (seven classes), a model
@@ -6714,3 +6718,65 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   SCR-23); backlog
   CT-89 done, CT-113 filed.
 - **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.
+
+### DEC-0109: a remote service's 401 without a token may carry an identity proxy's page
+
+- **Status:** Accepted (2026-10-23). Consumer adoption pending: the Fabric Agent Adapter's `check_service.py`
+  (`well-known.requires-token` admits a `401` whose body neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`), as conformance's checker row says, CT-114).
+- **Context:** `service.md` *Remote placement* said that without the service token `GET /.well-known/fabric-service`
+  MUST answer `401` "with an empty body". Fabric Inbox runs on Cloudflare Workers behind Cloudflare Access: from 0.29.4
+  its protocol routes sit behind an Access application with Service Auth only, so a request without a token gets
+  Access's own `401` with its HTML page (37 794 bytes); the Worker never sees the request and cannot empty the body.
+  `check_service.py fabric-inbox` failed that one rule. The events and usage rules already accept any `401`. Fabric
+  Inbox asked for a decision (board thread `a1c375d2`, request `9ecc43cb`, row B-150; adapter thread `199b9549`).
+- **Decision:** without the token, or with a wrong one, the well-known route MUST answer `401` and its body MUST carry
+  none of the service's own data: no build, pid, status, tiles, identity or member of the document. The body SHOULD be
+  empty; an identity proxy in front of the service MAY answer that `401` with its own page. A host reads the status of
+  that `401` and never its body; a conformance checker admits a body that neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`).
+- **Why:** the rule exists so the document does not leak without a token, and a proxy's page leaks none of it; an empty
+  body is still what a service that answers the request itself writes. Reading only the status keeps a host's behaviour
+  the same for both bodies.
+- **Alternatives considered:** keep "empty body" and name services behind an identity proxy a known gap (the rule would
+  fail a service that discloses nothing, and push it to answer before its proxy, weakening the proxy); allow any body
+  (a service could put its status in it).
+- **Compatibility:** a widening: every answer the old rule admitted is still admitted. A checker pinned before this
+  decision fails such a service on that rule alone until it moves. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (*Remote placement*, the service), `conformance.md`
+  (the host and checker rows), the annotation on DEC-0019, CT-114.
+- **Source:** Fabric Inbox's request on board thread `a1c375d2` (2026-10-23).
+
+### DEC-0110: a host sums money over the usage rows not on a subscription
+
+- **Status:** Accepted (2026-10-23). No wire change. Consumer adoption: Fabric's spend tiles and view sum as below,
+  and the Fabric Agent Adapter's service kit counts only money in `budget.spentUsd` (CT-115); Fabric Dashboards already
+  sums money this way since 0.7.23 (its estimate side reads an unpriced subscription row as 0, CT-115) (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0). A per-project split by route is
+  CT-116.
+- **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
+  subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is
+  the sum of every row (`FAC-SEM-025`), and the report has no money-only total, so a host that summed `costUsd` showed
+  one service's $147.26 for the month where $6.80 had been spent (board thread `ea2e4f3d`, 2026-10-22). Fabric Dashboards
+  fixed its sum from DEC-0046's own words ("not metered") and asked the contract to write the host rule so every host
+  sums alike (message `76f420d9`, and `e99aa05f` on thread `f22685d2`).
+- **Decision:** money is the sum of `costUsd` over every row whose `route` is `key`, `platform-metered` or absent; a
+  `subscription` row's `costUsd` is an estimate, which a host MUST NOT add to money spent, to a budget, to a service's
+  spending limit or to a spend policy's level, and MAY show apart, labelled as an estimate. A window whose calls were all on a subscription spent `0`, never
+  `null`; money is a lower bound while any call off a subscription is unpriced and `null` only when none of them is
+  priced; calls and tokens count on every route. A day's `costUsd` stays the sum of every row, so it is money only while
+  no row is on a subscription, and so are `byProject`, `taskRuns` and `byGrant`'s, which carry no route: a host shows
+  them as cost including estimates and never counts them against a limit while a row of the window is on one; a project's money is then unknown, at most its `costUsd` while its `unpricedCalls` is 0 and with no bound otherwise. A host
+  reads `budget.spentUsd` and `budgets[]` as money, and a service SHOULD count only money there. `usageSpend(rows)`
+  (`src/usage-rules.ts`) is the reference sum over `days[].byModel[]` rows and refuses an unknown `route`.
+- **Why:** an operator reading "spend" reads money, and limits are money: an estimate in the sum trips a limit on calls
+  nobody paid for per call. A host rule changes no byte a service writes, so every report stays valid.
+- **Alternatives considered:** a money-only total in `service-usage.schema.json` (every service would write a new member
+  and every reader pinned before it would refuse the report; the `days[].byModel[]` rows already carry what the sum
+  needs, and a per-project split by route is CT-116); counting a row
+  with no `route` as an estimate (a report written before DEC-0046 would lose its money).
+- **Compatibility:** no wire change. A host that summed every row now shows less money for a report with subscription
+  rows, which is the correction. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (*Usage report*), `spend-policy.md` (the launcher's
+  recent spend), `conformance.md` (the host row), `CONTEXT.md`, `src/usage-rules.ts` (`usageSpend`),
+  `test/usage-rules.test.ts`, SCN-016, the descriptions in `service-usage.schema.json`; annotations on DEC-0021,
+  DEC-0027, DEC-0046; CT-115, CT-116.
+- **Source:** a service's finding and Fabric Dashboards' reply on board thread `ea2e4f3d`, and the request on thread
+  `f22685d2` (2026-10-22).

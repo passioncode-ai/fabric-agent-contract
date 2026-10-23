@@ -295,8 +295,9 @@ Schema: [`service-usage.schema.json`](../../schemas/service-usage.schema.json). 
 service that calls paid models or tools SHOULD offer it (DEC-0021).
 
 `GET <surfaces.usage.path>` (conventionally `/fabric/v1/usage`) MUST require the service token
-and answers what the service spent, self-reported from its own usage receipts, so a host can
-show every agent's spend beside its health without knowing any provider.
+and answers what the service's calls cost, self-reported from its own usage receipts (money, and a subscription's
+estimate apart by route, DEC-0110), so a host can show every agent's spend beside its health without knowing any
+provider.
 
 - `days` covers at most the last 31 UTC days, oldest first, one entry per date, today last if
   there was activity today. A day without calls MAY be omitted. There is no paging and no query. Every date exists,
@@ -321,6 +322,20 @@ show every agent's spend beside its health without knowing any provider.
   ([runners](runners.md#routes), DEC-0046). Absent, the route is not stated. A row's route SHOULD match the descriptor's
   `runner.credentialKind` of the same name, and a service whose kind is `none` makes no model calls to report; no rule
   checks this yet beyond FAC-SEM-087's refusal of `subscription` rows on an offered service (DEC-0061).
+- **Money is summed over the rows not on a subscription** (DEC-0110). A `subscription` row's `costUsd` is what its calls
+  would cost at list price: an estimate, not money spent. A host MUST NOT add it to money spent, to a budget, to a
+  service's spending limit or to a spend policy's level, and MAY show it apart, labelled as an estimate. Money is the sum of `costUsd` over every row whose
+  `route` is `key`, `platform-metered` or absent (a report written before DEC-0046 keeps its meaning); a window whose
+  calls were all on a subscription spent `0`, never `null`; money is a lower bound while any call off a subscription is
+  unpriced, and `null` only when none of them is priced. Calls and tokens count on every route. A day's `costUsd` sums
+  every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; so are a project's, a task run's
+  and a grant's `costUsd` (`byProject`, `taskRuns`, `byGrant`), which carry no route: a host shows them as cost
+  including estimates while any row of the window is on a subscription, and never counts them against a budget, a
+  service's spending limit or a spend policy's level then: a project's money is unknown, at most its `costUsd` while its `unpricedCalls` is 0 and with no bound otherwise (a
+  split by route is CT-116). A
+  host reads `budget.spentUsd` and each `budgets[]` entry as money, and a service SHOULD count only money there.
+  `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the reference sum over `days[].byModel[]`
+  rows: it refuses an unknown `route` rather than guess.
 - `budget` MAY state the service's own spending limit for the current day or UTC month and what
   it has spent against it; the service enforces its limit, the host only shows it.
 - `budgets` MAY list every spending limit the service applies, enforced or not ([Limits](#limits),
@@ -486,9 +501,14 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the process, it MUST refuse a request whose platform-set forwarded scheme is not `https`.
 - It MUST refuse a `Host` other than its origin's host (and port, where the origin names one),
   a foreign `Origin`, and `Sec-Fetch-Site: cross-site` on every protocol route.
-- `GET /.well-known/fabric-service` MUST require the service token. Without it — or with a
-  wrong one, compared in constant time — the answer MUST be `401` with an empty body: no build,
-  pid, status or tiles. With it, the document is the one this extension defines.
+- `GET /.well-known/fabric-service` MUST require the service token. Without it, or with a
+  wrong one compared in constant time, the answer MUST be `401`, and its body MUST carry none of
+  the service's own data: no build, pid, status, tiles, identity or member of the document. The
+  body SHOULD be empty; an identity proxy in front of the service (Cloudflare Access, an ingress)
+  MAY answer that `401` with its own page, which the service never sees (DEC-0109). A host reads
+  the status of that `401` and never its body; a conformance checker admits a body that
+  neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`). With the token, the document is the one this
+  extension defines.
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
   `SameSite=Strict` and `Path=/` and no `Domain`.

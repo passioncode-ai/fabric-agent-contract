@@ -137,7 +137,8 @@ a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers SHOULD emit 
 
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never
-to a caller (DEC-0065).
+to a caller (DEC-0065). Money is summed over its rows not on a subscription; a subscription row's cost is an
+estimate at list price, shown apart (DEC-0110, `usageSpend`).
 
 **Spending limit**: A cap a service applies to its own spend — per day or UTC month, per order, a velocity limit, or
 a rolling window of `windowSeconds` — each listed in its usage report, enforced or not (DEC-0021, DEC-0027);
