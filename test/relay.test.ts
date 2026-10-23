@@ -224,6 +224,19 @@ describe("relayAdmissionSet: admission only from a verified estate record (DEC-0
     expect(relayAdmissionSet({ pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "no-record" });
   });
 
+  it("refuses a held record whose revision is no positive integer, and admits no key of a machine whose id is no string, never throwing (CT-111)", () => {
+    for (const revision of [{ toString: 1 }, "1", 0, 1.5, -1, null, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(() => relayAdmissionSet({ held: { ...rev1, revision }, pinned, at: at1, schemaValid })).not.toThrow();
+      expect(relayAdmissionSet({ held: { ...rev1, revision }, pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "invalid" });
+    }
+    const { revision: _gone, ...noRevision } = rev1;
+    expect(relayAdmissionSet({ held: noRevision, pinned, at: at1, schemaValid })).toEqual({ ok: false, refusal: "invalid" });
+    const poisoned = { ...rev1, machines: rev1.machines.map((machine: Record<string, unknown>) => ({ ...machine, id: { toString: 1 } })) };
+    const result = relayAdmissionSet({ held: poisoned, pinned, at: at1, schemaValid });
+    expect(result.ok && [...result.set.keys()]).toEqual([]);
+    expect(result.ok && result.excluded).toEqual([]);
+  });
+
   it("drops a machine revoked while still listed, and reads a record without revocations", () => {
     const held = { ...rev1, revocations: [{ kind: "machine", ref: "m-4c1e", revokedAt: "2026-10-12T10:00:00Z" }] };
     const result = relayAdmissionSet({ held, pinned, at: at1, schemaValid });

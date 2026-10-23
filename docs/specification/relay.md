@@ -154,7 +154,9 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   passkeys when it is set up for the estate, the same act as a machine's enrollment pin. It applies a revision only
   when it is valid against `estate-record.schema.json` and `verifyEstateRecord` accepts it against the revision it
   holds (revision 1: against the pinned passkeys). A refused revision changes nothing. A relay never starts with a
-  configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets.
+  configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets. A held revision is read without
+  the schema, so `relayAdmissionSet` refuses it `invalid` when its `revision` is no positive integer and admits no key
+  of a machine whose `id` is no string; it answers every record with a typed result and never throws (CT-111).
 - **The schema check is the caller's to supply, and it MUST be the validator of
   [`estate-record.schema.json`](../../schemas/estate-record.schema.json).** `relayAdmissionSet` takes it as
   `schemaValid`; a relay that passes `() => true` is not conformant.
