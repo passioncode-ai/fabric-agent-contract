@@ -6697,7 +6697,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive with one narrowing: a record carrying `deltaAnchor` is refused by a reader pinned before
   this decision (the record object is closed), so Fabric writes none until its readers are pinned at or after it (as
   for DEC-0106's `profile`). `applyDelta` now accepts an overlapping page whose held entries were signed by a key no
-  longer certified, which it refused before. `contractVersion` stays `0.1.0`.
+  longer certified, which it refused before, and skips a copy of a held entry without checking the copy's signature
+  (the hash leaves `sig` out), where it answered `bad-signature` before. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/hub-move.ts` (new: `hubSilence`, `recoveryReady`, `hubMove`,
   `HUB_MOVE_HEARTBEAT_JUMP`), `src/revocation-delta.ts` (`anchorDelta`, `DeltaState.anchor`, the skip before the
   signer), `src/estate-record-rules.ts` (`deltaAnchorOf`, `FAC-SEM-137`), `schemas/estate-record.schema.json`
@@ -6705,7 +6706,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/revocation-delta.test.ts`; docs `ceremonies.md` (Create my network step 2, Move the hub, Recover a lost
   passkey), `revocation-delta.md` (the anchor, `FAC-SEM-137`, Not decided), `estate-record.md`, `machine-calls.md`,
   `conformance.md`, `relay.md` (the anchor), `delegation.md` (DL-15's lost-hub exception), `window-lease.md` (after a hub
-  move), README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-024, ST-032, FLW-20, FLW-27, SCN-029, SCN-038, SCN-039,
+  move), README, DOCMAP, CONTEXT; the UX layer (JRN-09 #4, ST-024, ST-032, FLW-20, FLW-27, SCN-029, SCN-030, SCN-037, SCN-038, SCN-039, ST-025,
   SCR-23); backlog
   CT-89 done, CT-113 filed.
 - **Source:** the ecosystem readiness review (board thread `b2511678`, message `c938af7d`, 2026-10-22); CT-89.

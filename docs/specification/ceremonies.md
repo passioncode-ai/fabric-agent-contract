@@ -248,7 +248,10 @@ The hub issues a revocation-delta entry for each revocation, so it reaches every
 entry names it — the same `kind` and `ref` — or a machine holding the entry refuses the revision (`FAC-SEM-084`), so
 Fabric's hub and its drafter write one form. The relay drops the machine from its admission set and
 ends its open sessions (DEC-0047, DEC-0066); a node that applied the revision answers `ownKeysDecision(record, id,
-held)` with `stop`, `removed`.
+held)` with `stop`, `removed`. **The hub's machine is removed by moving the hub** (DEC-0107): when the machine holds
+the hub key, "Remove" opens [Move the hub](#move-the-hub) instead (a lost machine: one revision with the new `hubKey`),
+so the estate never loses its hub to a removal; that revision anchors the delta like every revision that revokes a hub
+key.
 
 **Who revokes a solo estate's certificate.** A DEC-0031 device certificate exists only where an organization server
 enrolled the machine. In a personal estate with no organization server there is no certificate to revoke, so the
@@ -353,7 +356,9 @@ from the alert:
 6. **The switch.** The new hub's first heartbeat takes a sequence `HUB_MOVE_HEARTBEAT_JUMP` (2^20) past the highest it
    holds, so it never repeats a sequence the old hub may have signed while the new machine was not listening (HB-2), and
    it signs one right after each revision (DEC-0054). A hub whose key the newest revision revokes stops signing; a hub
-   back after downtime fetches the newest revision before it signs. A machine that applied the revision refuses
+   back after downtime fetches the newest revision before it signs; a hub's machine the revision removed is turned
+   away by the relay (`unauthenticated`, 4401, with no reason, [relay](relay.md#admission)), so nothing it signs reaches
+   a machine. A machine that applied the revision refuses
    anything the old key signs after it (`revoked-signer`, RD-7). A machine holding an old-hub entry the revision does
    not list refuses the revision as `unreconciled` and keeps its parent; Fabric watches check-ins
    (`records.estateRecord.revision`) after a move and drafts the revision that lists it. An entry the old hub signed at
@@ -465,7 +470,8 @@ For DEC-0107: **Fabric** alerts on `hubSilence`, offers the move only after reco
 (caught up first, the anchor only once every reader is pinned) and the revision that lists a straggler's entry, and
 offers a second passkey while `recoveryReady`'s `ready` is `false`; **every machine** (Fabric's nodes, Project
 Observatory's node) reads `hubSilence` and applies a revision's anchor (`anchorDelta`) after `reconcileRevision`;
-**the relay** applies the anchor of the revision it holds too, so it carries the chain from there, and answers a
+**the relay**, which admits by the revision alone, applies the anchor of the revision it holds after the revision,
+keeps its delta as it was and logs when `anchorDelta` refuses, so it carries the chain from the anchor, and answers a
 `delta-query` at or below its anchor from the anchor's next entry ([relay](relay.md#revocation-and-heartbeat)). Their
 row is CT-113.
 
@@ -473,7 +479,9 @@ The board rows are CT-53 and, for DEC-0107, CT-113.
 
 ## Compatibility
 
-`contractVersion` stays `0.1.0`.
+`contractVersion` stays `0.1.0`. The items below are DEC-0084's; DEC-0107's (the closed record refuses `deltaAnchor`
+before a reader moves, the overlapping page `applyDelta` now accepts) are in
+[its decision](../DECISIONS.md) and [the anchor](revocation-delta.md#the-anchor).
 
 1. **New schemas** (`pairing-message/1`, `enroll-token/1`), two new register types (`enroll-token/1`, `enroll-join/1`)
    and new functions are additive: nobody reads them before adopting this decision.

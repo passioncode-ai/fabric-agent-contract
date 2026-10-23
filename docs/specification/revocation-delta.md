@@ -117,7 +117,9 @@ before a refused one stay applied, since each is a valid revocation:
 | RD-9 | `gap` | the sequence is past the next one: the machine asks from its head with `delta-query` |
 | RD-10 | `broken-chain`, `fork` | a signed entry whose `prev` is not the head the machine holds, or that differs from the entry it holds at that sequence: a second signed history |
 
-An entry the machine already holds (the same hash at its sequence) is skipped, so a repeated page changes nothing.
+An entry the machine already holds (the same hash at its sequence) is skipped before its signature is checked
+(DEC-0107), so a repeated page changes nothing, whatever signature the copy carries: the hash covers everything but
+`sig`, and the held entry's own signature was verified when it was placed.
 Signatures are checked before the chain, so only a validly signed entry can mark a machine `broken`: an unsigned or
 altered entry is `bad-signature`, and a relay cannot break a machine by injecting one. On `broken-chain` and `fork` the
 machine becomes `broken` and keeps that entry's revocation in force (`forked`): revocation outranks addition.

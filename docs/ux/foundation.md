@@ -541,7 +541,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Story:** As P-02, I want to remove a machine I lost, or replace a machine's key, with one signed revision, so that the old machine or key is turned away everywhere within seconds.
 - **Traces:** JTBD-10, JRN-09/#3
 - **Acceptance criteria:**
-  - Given a machine I remove, when I sign, then the revision revokes the machine (and its hub key) and the relay turns it away.
+  - Given a machine I remove, when I sign, then the revision revokes the machine and the relay turns it away; given the hub's machine, "Remove" moves the hub first (ST-032).
   - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
   - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
 - **Priority:** should
@@ -553,9 +553,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Story:** As P-02, I want to hear when my machine has not heard from the hub for a day and move the hub, and to keep my network when I lose a passkey, so that no single machine or authenticator holds my network hostage.
 - **Traces:** JTBD-10, JRN-09/#4
 - **Acceptance criteria:**
-  - Given a record that certifies a hub key and a machine whose last heartbeat is more than 24 hours old (or none), then it tells me at once the hours since; past 72 hours it says calls between machines have stopped.
+  - Given a record that certifies a hub key and a machine whose last heartbeat is more than 24 hours old, then it tells me at once the hours since, and past 72 hours that calls between machines have stopped; given no readable heartbeat, it tells me that it has none and that calls between machines have stopped.
   - Given that alert, when the machine reconnects to the relay and the latest heartbeat it then holds is still more than 24 hours old (or none), then it offers to move the hub; given a hub machine I retire or replace, "Move the hub" on its row starts a planned move by DL-15.
-  - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta; given a reachable hub, two revisions follow DL-15.
+  - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta once every reader of the record is pinned at or after DEC-0107; given a reachable hub, two revisions follow DL-15.
   - Given two passkeys in my network and one lost, when I sign with the other, then the lost one is removed and revoked and a new one added; given one passkey, Fabric tells me before I create the network that losing it loses the network.
 - **Priority:** must
 - **Status:** draft

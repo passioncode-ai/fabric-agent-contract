@@ -802,12 +802,12 @@ independent agent author and P-02 project operator.
 - **Entry point:** the network's machine list in Fabric
 - **Preconditions:** the network has three machines; one was lost; another's keystore was reset
 - **Steps:**
-  1. Operator chooses "Remove" on the lost machine -> Fabric drafts a revision that revokes the machine and its hub key; the operator signs.
+  1. Operator chooses "Remove" on the lost machine -> Fabric drafts a revision that revokes the machine (and its device keys); the operator signs.
   2. The hub sends the revocations as delta entries -> within seconds the relay turns the lost machine away and ends its sessions.
   3. Operator chooses "Replace key" on the reset machine -> it pairs again under its id, the codes match, the operator signs a revision listing its new keys and revoking the old ones by reference.
   4. The machine holds the new keys -> it applies the revision; a session or envelope under the old key is refused.
 - **Expected result:** the lost machine is out; the re-keyed machine keeps its id and its agents.
-- **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself.
+- **Alt paths:** the network has one machine -> re-keying needs no pairing: the operator signs on the machine itself. The lost machine holds the hub key -> "Remove" opens "Move the hub" (SCN-038): one revision with a new hub key on a `full` machine, the lost one removed and revoked, so the network keeps a hub.
 - **UI elements:** "Remove", "Replace key", the comparison code, the passkey prompt.
 - **States covered:** error, success
 - **Errors & recovery:** a revision that drops a machine or key without revoking it is refused by every machine pinned at or after DEC-0084 (`FAC-SEM-114`; an older reader accepts it, ceremonies *Compatibility*); Fabric runs the rule before asking for the passkey. A stolen machine is removed, never re-keyed.
@@ -847,7 +847,7 @@ independent agent author and P-02 project operator.
   2. They pick `m-b`, which is always on -> its node makes a new hub key; Fabric fetches the delta from the relay and drafts one revision: `m-b`'s `hubKey`, `m-a`'s old key revoked as `hub-key`, `m-a` removed and revoked as `machine m-a`, the delta anchored at the head (once every reader of the record is pinned at or after DEC-0107).
   3. They sign with a passkey -> `m-b`'s hub signs a heartbeat; the alert clears on each machine once it holds that heartbeat.
 - **Expected result:** the network has a hub again before calls between machines stop at 72 hours, under a key that never left `m-b`.
-- **Alt paths:** `m-b` was only asleep and the hub is running -> after reconnecting it holds a fresh heartbeat, the alert clears and no move is offered. `m-a` is only switched off and can be turned on -> the person turns it on, the alert clears, and they choose "Move the hub" on `m-a`'s row (a planned move); it takes two revisions (DL-15): the new key certified and published, the switch, then the old key revoked and the delta anchored; `m-a` stays in the network. A machine added after the move -> it starts its chain at the anchor and never needs the old hub's entries; before the readers' pin gate opens the move carries no anchor, and Fabric anchors its first revision after the gate. `m-a` turns up after it was removed -> it fetches the newest revision, finds itself revoked and signs nothing; anything its old key signs is refused (`revoked-signer`), and it joins again under a new id (Add a machine). No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
+- **Alt paths:** `m-b` was only asleep and the hub is running -> after reconnecting it holds a fresh heartbeat, the alert clears and no move is offered. `m-a` is only switched off and can be turned on -> the person turns it on, the alert clears, and they choose "Move the hub" on `m-a`'s row (a planned move); it takes two revisions (DL-15): the new key certified and published, the switch, then the old key revoked and the delta anchored; `m-a` stays in the network. A machine added after the move -> it starts its chain at the anchor and never needs the old hub's entries; before the readers' pin gate opens the move carries no anchor, and Fabric anchors its first revision after the gate. `m-a` turns up after it was removed -> the relay turns it away (`unauthenticated`, 4401, with no reason) and Fabric on `m-a` shows the guidance for a machine the relay no longer admits; anything its old key signs is refused (`revoked-signer`), and it joins again under a new id (Add a machine). No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
 - **UI elements:** the alert with the hours since; "Move the hub"; the machine picker.
 - **States covered:** alert, success, error
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the alert stays; the old hub signed an entry at a sequence the new one also used -> a machine that saw both is `broken` (recovery from a fork is the revocation delta's open item).
@@ -869,7 +869,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the network was created with one passkey -> Fabric warned at creation and shows "Add a passkey" until a second is listed. Every passkey is lost -> no revision can be signed; the network expires with its applied revision (at most 30 days) and the person creates a new one and adds each machine again.
 - **UI elements:** the passkeys list; "Add a passkey"; the one-passkey warning.
 - **States covered:** alert, success, error
-- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again with the passkey left.
+- **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again with the passkey left. Whoever holds the lost passkey signs a competing revision first -> two revisions of one number exist; what a machine does with such a fork is open in the estate record (Not decided here), so the person acts at once.
 - **Status:** draft
 - **Coverage:** DEC-0107, `recoveryReady` in `src/hub-move.ts`, `fixtures/vectors/hub-move.json`, `test/hub-move.test.ts`; `verifyEstateRecord` (a parent's authority signs the next revision)
 - **Product:** unobserved

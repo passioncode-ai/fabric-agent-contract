@@ -51,6 +51,18 @@ hub's own machine and the first revision after the pin gate included), the alert
 key, ST-032 split into "told at once" and "offered after reconnecting"; risks fixed: the cache time on the lost key,
 `applyDelta`'s docstring and conformance's delta row name the skip.
 
+Round 5: unit pass (two risks); product five breaks, fixed: removing the hub's machine now moves the hub first
+(ceremonies Remove a machine, SCN-030, ST-025, FLW-20), a removed hub's machine is turned away by the relay (4401) rather
+than "finds itself revoked", ST-032 and FLW-27 name the readers' pin gate on the anchor, the network view shows a move
+only when the hub's machine changed, and the pull request's description is rewritten with the gate at its head; risks
+fixed: the no-heartbeat alert says calls stopped, the drafter of a lost hub's move, "Add a passkey" in FLW-27, the
+Compatibility section's two decisions, SCN-030 and SCN-037 in the decision's list. Seam two breaks, fixed: the
+post-move lease rule now in conformance's hub row and window-lease's Who adopts it, and CT-113 restated as DEC-0107
+item 3 words it (the lease rule, the relay's refusal branch); risks fixed: the skipped copy's signature in the decision's
+Compatibility and the delta's text, the check-in head under an anchor (devices.md), the relay's refusal branch in the
+ceremonies' adopters; shared vectors for the anchored `applyDelta` and `FAC-SEM-137` through `verifyEstateRecord` go to
+CT-113.
+
 ## Checks actually run
 
 `pnpm run check` and `pnpm vectors:check` (output in the pull request).
