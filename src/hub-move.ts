@@ -13,6 +13,12 @@ import { strictTime } from "./rfc3339.js";
 const isString = (value: unknown): value is string => typeof value === "string";
 const list = (value: unknown): JsonObject[] => (Array.isArray(value) ? value.filter(isObject) : []);
 
+/**
+ * How far a new hub's first heartbeat sequence jumps past the highest it holds (DEC-0107): far more than an old hub
+ * could sign while the new machine was not listening, so the two never sign one sequence (HB-2).
+ */
+export const HUB_MOVE_HEARTBEAT_JUMP = 2 ** 20;
+
 /** When a machine alerts the person: the hub let more than its daily interval pass (`HEARTBEAT_MAX_INTERVAL_SECONDS`). */
 export const HUB_SILENT_SECONDS = HEARTBEAT_MAX_INTERVAL_SECONDS;
 

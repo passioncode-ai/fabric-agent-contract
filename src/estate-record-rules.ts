@@ -190,7 +190,7 @@ export function verifyEstateRecord(record: unknown, trust: EstateRecordTrust): E
   if (at > validUntil) return { ok: false, problem: "expired" };
   // The record's own rules (FAC-SEM-072…076) hold too, so passing this function is enough to apply a revision.
   // With a parent, what the revision drops it revokes (FAC-SEM-114, DEC-0084): a removed machine, a replaced key.
-  const dropped = isObject(trust.parent) ? droppedFindings(trust.parent, record) : [];
+  const dropped = isObject(trust.parent) ? [...droppedFindings(trust.parent, record), ...anchorFindings(trust.parent, record)] : [];
   const codes = [...new Set([...recordFindings(record), ...dropped].map((finding) => finding.code))];
   if (codes.length > 0) return { ok: false, problem: "rule-violation", codes };
   return { ok: true, digest, revision: record.revision as number, signedBy: credential.credentialId, signCount: assertion.signCount };
@@ -610,12 +610,35 @@ function installation(value: JsonObject): Finding[] {
   return findings;
 }
 
+/** The anchor a record vouches for, or undefined when it names none or its shape is not the schema's. */
+export function deltaAnchorOf(record: unknown): { sequence: number; sha256: string } | undefined {
+  if (!isObject(record) || !isObject(record.deltaAnchor)) return undefined;
+  const { sequence, sha256 } = record.deltaAnchor;
+  return Number.isSafeInteger(sequence) && (sequence as number) >= 1 && isString(sha256) && /^[a-f0-9]{64}$/.test(sha256) ? { sequence: sequence as number, sha256 } : undefined;
+}
+
+/**
+ * FAC-SEM-137 across two revisions (DEC-0107): the delta anchor never moves back. A revision whose parent anchors the
+ * delta anchors it too, at the parent's sequence or later, with the parent's hash at the same sequence.
+ */
+function anchorFindings(parent: JsonObject, next: JsonObject): Finding[] {
+  const findings: Finding[] = [];
+  const flag = flagger(findings, "FAC-SEM-137");
+  const before = deltaAnchorOf(parent);
+  if (before === undefined) return findings;
+  const after = deltaAnchorOf(next);
+  if (after === undefined) flag("/next/deltaAnchor", `the parent anchors the delta at ${before.sequence}: a revision keeps an anchor once one is set`);
+  else if (after.sequence < before.sequence) flag("/next/deltaAnchor/sequence", `the anchor moves back from ${before.sequence} to ${after.sequence}`);
+  else if (after.sequence === before.sequence && after.sha256 !== before.sha256) flag("/next/deltaAnchor/sha256", `another hash at sequence ${after.sequence}: two delta histories`);
+  return findings;
+}
+
 export function estateRecordRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "estate-record") return recordFindings(value);
   if (kind === "estate-record-revision") {
     const parent = isObject(value.parent) ? value.parent : {};
     const next = isObject(value.next) ? value.next : {};
-    return [...revisionChain(value), ...droppedFindings(parent, next)];
+    return [...revisionChain(value), ...droppedFindings(parent, next), ...anchorFindings(parent, next)];
   }
   if (kind === "estate-placement") return installation(value);
   return undefined;

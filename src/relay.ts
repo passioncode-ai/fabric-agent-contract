@@ -328,7 +328,8 @@ export type AdmissionResult =
  * refuses), which `excluded` names for the relay's log; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
  * revision's window has ended the relay fails closed (`expired`): no new `auth` is admitted until a newer verified
  * revision arrives. The organization record has no reference yet (`org-authority/1`, Fabric D8), so an organization's
- * relay has no admission source of its own.
+ * relay has no admission source of its own. A held record whose `revision` is no positive integer is refused `invalid`,
+ * and a machine whose `id` is no string admits no key (CT-111): the function never throws on a JSON value.
  */
 export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   let record = input.held;
@@ -339,6 +340,10 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
     record = input.candidate as JsonObject;
   }
   if (!record) return { ok: false, refusal: "no-record" };
+  // A held record is applied without a schema check, so its revision is read only when it is a positive integer: any
+  // other member, `{toString: 1}` among them, is refused `invalid` rather than thrown on (CT-111).
+  const revision = record.revision;
+  if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "invalid" };
   const now = input.at.getTime();
   // The window is read by the parser verifyEstateRecord uses, so the relay judges it as the record's verifier did.
   const from = strictTime(record.issuedAt), until = strictTime(record.validUntil);
@@ -365,20 +370,26 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   const set = new Map<string, Uint8Array>();
   const excluded: ExcludedKey[] = [];
   for (const machine of list(record.machines)) {
+    // A machine whose id is no string has no kid of its own to admit (and `String` would throw on `{toString: 1}`):
+    // its `#sig` keys are named in `excluded`, as every key the set leaves out is.
+    if (typeof machine.id !== "string") {
+      for (const key of list(machine.deviceKeys)) if (key.use === "sig" && typeof key.kid === "string") excluded.push({ kid: key.kid, reason: "bad-key" });
+      continue;
+    }
     if (machines.has(machine.id)) continue;
     for (const key of list(machine.deviceKeys)) {
       // A `device-key` revocation names a kid or one key by its own reference (`deviceKeyRef`, DEC-0084): a delta entry
       // that revokes a replaced key leaves the next key under the same kid admitted.
       if (key.use === "sig" && typeof key.kid === "string" && key.kid.endsWith("#sig") && typeof key.publicKey === "string" && !keys.has(key.kid) && !keys.has(deviceKeyRef(key) ?? key.kid)) {
         const octets = new Uint8Array(Buffer.from(key.publicKey, "base64"));
-        if (key.kid !== `${String(machine.id)}#sig` || kids.get(key.kid) !== 1) excluded.push({ kid: key.kid, reason: "bad-key" });
+        if (key.kid !== `${machine.id}#sig` || kids.get(key.kid) !== 1) excluded.push({ kid: key.kid, reason: "bad-key" });
         else if (isEd25519Key(octets)) excluded.push({ kid: key.kid, reason: "unsupported-alg" });
         else if (p256KeyRefusal(octets) !== null) excluded.push({ kid: key.kid, reason: "bad-key" });
         else set.set(key.kid, octets);
       }
     }
   }
-  return { ok: true, held: record, revision: Number(record.revision), set, excluded, unread };
+  return { ok: true, held: record, revision, set, excluded, unread };
 }
 
 /** A proven session: the kid it authenticated as and the `#sig` key octets that signature verified under. */

@@ -220,7 +220,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Create | creates the network on a first machine | Fabric, "Create my network" | 3 | no record says which machines are mine | revision 1 signed by the passkey, the network's fingerprint shown (priority 7) |
 | 2 | Add | adds a second machine, nearby or from afar | Fabric on the trusted machine, the new machine's node | 2 | a code from one key's fingerprint can be brute-forced; a stranger slips in | commit before reveal and a six-digit code over both sides' keys, nonces and the network (priority 9) |
 | 3 | Remove or re-key | removes a lost machine, or replaces a machine's key | Fabric | 2 | a removed machine keeps being admitted | one revision that revokes what it drops, carried within seconds by the delta (priority 8) |
-| 4 | Recover | the hub's machine goes quiet, or a passkey is lost | every machine's alert, Fabric | 1 | calls between machines stop at 72 hours with no warning; one lost passkey loses the network | an alert after 24 hours, a hub moved by one revision, a second passkey from the start (priority 9) |
+| 4 | Recover | the hub's machine goes quiet, or a passkey is lost | every machine's alert, Fabric | 1 | calls between machines stop at 72 hours with no warning; one lost passkey loses the network | an alert after 24 hours, a hub moved by one revision when lost or two when reachable, a second passkey from the start (priority 9) |
 
 ### JRN-10: Operator, what my agents use (JTBD-11)
 
@@ -529,7 +529,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Story:** As P-02, I want to create my network on a first machine with my passkey, so that later machines can join it and every screen names it the same way.
 - **Traces:** JTBD-10, JRN-09/#1
 - **Acceptance criteria:**
-  - Given a first machine, when I create my network and sign with my passkey, then revision 1 lists my passkey and this machine, and the machine shows the network's fingerprint.
+  - Given a first machine, when I create my network and sign with my passkey, then revision 1 lists my passkeys (a second one on another authenticator, or one after Fabric tells me that losing it loses the network) and this machine, and the machine shows the network's fingerprint.
   - Given the always-on machine, when I create the network on it, then revision 1 also certifies its hub key; on another machine, the hub key comes with the revision that adds the always-on one.
   - Given a cancelled passkey prompt, then nothing is signed and no machine pins anything.
 - **Priority:** must
@@ -541,7 +541,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Story:** As P-02, I want to remove a machine I lost, or replace a machine's key, with one signed revision, so that the old machine or key is turned away everywhere within seconds.
 - **Traces:** JTBD-10, JRN-09/#3
 - **Acceptance criteria:**
-  - Given a machine I remove, when I sign, then the revision revokes the machine (and its hub key) and the relay turns it away.
+  - Given a machine I remove, when I sign, then the revision revokes the machine and the relay turns it away; given the hub's machine, "Remove" moves the hub first (ST-032).
   - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
   - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
 - **Priority:** should
@@ -550,11 +550,12 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-032: Operator moves the hub, or recovers from a lost passkey
 
-- **Story:** As P-02, I want to hear when my hub has gone quiet and move it with one revision, and to keep my network when I lose a passkey, so that no single machine or authenticator holds my network hostage.
+- **Story:** As P-02, I want to hear when my machine has not heard from the hub for a day and move the hub, and to keep my network when I lose a passkey, so that no single machine or authenticator holds my network hostage.
 - **Traces:** JTBD-10, JRN-09/#4
 - **Acceptance criteria:**
-  - Given a hub whose last heartbeat is more than 24 hours old, when a machine reads it, then it tells me the hours since and offers to move the hub; past 72 hours it says calls between machines have stopped.
-  - Given a `full` machine I choose as the new hub, when I sign, then the revision certifies its new hub key and revokes the old one, and the new hub's heartbeat follows.
+  - Given a record that certifies a hub key and a machine whose last heartbeat is more than 24 hours old, then it tells me at once the hours since, and past 72 hours that calls between machines have stopped; given no readable heartbeat, it tells me that it has none and that calls between machines have stopped; given a clock it cannot read, it says so and offers no move.
+  - Given that alert, when the machine reconnects to the relay and the latest heartbeat it then holds is still more than 24 hours old (or none), then it offers to move the hub; given a hub machine I retire or replace, "Move the hub" on its row starts a planned move by DL-15; given a hub machine I declare lost, "Remove" on its row moves the hub in one revision even while it still sends heartbeats.
+  - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta once every reader of the record is pinned at or after DEC-0107; given a reachable hub, two revisions follow DL-15.
   - Given two passkeys in my network and one lost, when I sign with the other, then the lost one is removed and revoked and a new one added; given one passkey, Fabric tells me before I create the network that losing it loses the network.
 - **Priority:** must
 - **Status:** draft

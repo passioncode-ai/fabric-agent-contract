@@ -45,30 +45,24 @@ export type RelayCaller =
  * (DEC-0106): T1 only when its delta is `current`, its clock reads, the estate revision it applied last gives an
  * admission set (`relayAdmissionSet`, with the revocations in force) that holds the node's own `<machine>#sig` and holds
  * `from`. It names the sender's machine, its profile (`null` when unreadable) and its `#kem` when that key is listed,
- * is a P-256 key and is revoked neither by kid nor by key reference. It never throws.
+ * is a P-256 key and is revoked neither by kid nor by key reference. It never throws on JSON values.
  */
 export function relayCallerTier(input: { applied: unknown; self: unknown; from: unknown; at: unknown; freshness: unknown; revocations?: unknown }): RelayCaller {
   if (input.freshness !== "current") return { ok: false, code: "unknown-state", detail: "not-current" };
   const t = isString(input.at) ? strictTime(input.at) : Number.NaN;
   if (!Number.isFinite(t)) return { ok: false, code: "unknown-state", detail: "no-clock" };
   const extra = list(input.revocations);
-  let admission: ReturnType<typeof relayAdmissionSet>;
-  try {
-    admission = relayAdmissionSet({ ...(isObject(input.applied) ? { held: input.applied } : {}), pinned: [], at: new Date(t), schemaValid: () => false, extraRevocations: extra });
-  } catch {
-    // `relayAdmissionSet` reads `revision` with `Number`, which throws on a member that is no primitive (CT-111).
-    return { ok: false, code: "unknown-state", detail: "no-estate" };
-  }
+  const admission = relayAdmissionSet({ ...(isObject(input.applied) ? { held: input.applied } : {}), pinned: [], at: new Date(t), schemaValid: () => false, extraRevocations: extra });
   if (!admission.ok) return { ok: false, code: "unknown-state", detail: "no-estate" };
   if (!isString(input.self) || !admission.set.has(`${input.self}#sig`)) return { ok: false, code: "unknown-state", detail: "self-not-admitted" };
   if (!isString(input.from) || !admission.set.has(input.from)) return { ok: false, code: "unauthenticated", detail: "not-t1" };
   const machine = input.from.slice(0, -"#sig".length);
   const record = admission.held;
   const revoked = new Set([...list(record.revocations), ...extra].filter((entry) => entry.kind === "device-key").map((entry) => entry.ref));
-  // A kid listed twice anywhere in the record names no key a sealer could resolve again unambiguously, so it names none
-  // (as the #sig path, F7, relay.ts).
-  const kemKeys = list(record.machines).flatMap((entry) => list(entry.deviceKeys)).filter((key) => key.kid === `${machine}#kem`);
-  const kemKey = kemKeys.length === 1 && kemKeys[0]?.use === "kem" ? kemKeys[0] : undefined;
+  // A kid listed twice anywhere in the record names no key a sealer could resolve again unambiguously, so it names none,
+  // and the one entry must sit under the sender's own machine (both, as the #sig path, F7, relay.ts; CT-112).
+  const kemKeys = list(record.machines).flatMap((entry) => list(entry.deviceKeys).filter((key) => key.kid === `${machine}#kem`).map((key) => ({ owner: entry.id, key })));
+  const kemKey = kemKeys.length === 1 && kemKeys[0]?.owner === machine && kemKeys[0].key.use === "kem" ? kemKeys[0].key : undefined;
   let kem: string | undefined;
   if (kemKey && canonicalBase64(kemKey.publicKey)) {
     const octets = new Uint8Array(Buffer.from(kemKey.publicKey as string, "base64"));

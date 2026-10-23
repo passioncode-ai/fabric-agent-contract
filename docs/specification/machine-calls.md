@@ -59,7 +59,8 @@ revocations?})`, in this order:
 5. **The sender is in it.** The body's verified `from` is a `#sig` kid in the set → otherwise `unauthenticated`
    (`not-t1`).
 6. **T1.** The answer names the sender's machine, its profile (`null` when unreadable) and its `#kem` when the record
-   lists one, it is a valid P-256 point, and neither its kid nor its key reference is revoked.
+   lists that kid once, under the sender's own machine (as F7 asks of a `#sig`, CT-112), it is a valid P-256 point, and
+   neither its kid nor its key reference is revoked.
 
 `unknown-state` is a denial (DL-19): the node refuses the call and does not fall back to T2. A sender that is not T1 is
 refused `unauthenticated`: this decision defines calls between machines of one estate, and a call from outside it over
@@ -170,7 +171,7 @@ Each party moves at its next pin (CT-110).
 
 - Which capabilities a `member` machine may call beyond the effect rule; per-agent token administration stays CT-84's.
 - An answer larger than the limit (a blob reference) and a streamed answer.
-- Calls between estates (DL, *Not decided here*), the hub moving to another machine and passkey recovery (CT-89),
-  credentials on request and the call record (CT-86).
+- Calls between estates (DL, *Not decided here*), credentials on request and the call record (CT-86). Moving the hub and
+  recovering a lost passkey are [ceremonies](ceremonies.md#move-the-hub) (DEC-0107).
 - What a machine shows its person about calls it received (CT-95).
 - Calls over the relay from outside the estate (T2), and how their answers are sealed.

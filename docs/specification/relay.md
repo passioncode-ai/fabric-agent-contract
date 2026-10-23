@@ -154,7 +154,10 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   passkeys when it is set up for the estate, the same act as a machine's enrollment pin. It applies a revision only
   when it is valid against `estate-record.schema.json` and `verifyEstateRecord` accepts it against the revision it
   holds (revision 1: against the pinned passkeys). A refused revision changes nothing. A relay never starts with a
-  configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets.
+  configured set. The keys come from `machines[].deviceKeys`, as base64 SEC 1 octets. A held revision is read without
+  the schema, so `relayAdmissionSet` refuses it `invalid` when its `revision` is no positive integer and admits no key
+  of a machine whose `id` is no string (naming its `#sig` keys in `excluded`); it answers every JSON record with a typed
+  result and never throws (CT-111).
 - **The schema check is the caller's to supply, and it MUST be the validator of
   [`estate-record.schema.json`](../../schemas/estate-record.schema.json).** `relayAdmissionSet` takes it as
   `schemaValid`; a relay that passes `() => true` is not conformant.
@@ -409,6 +412,14 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   `effectiveRevocations`) and leave the admission set like any other.
 - **Catching up.** A node behind the head asks with `delta-query` `{fromSeq}`, its applied head's sequence plus one, and
   is answered with `delta` pages carrying `replyTo`, and an empty page at the head.
+- **The anchor** (DEC-0107). When the revision the relay holds carries a `deltaAnchor`, the relay applies it with
+  `anchorDelta` after it applies the revision (admission stays the revision's alone, `relayAdmissionSet`, so a machine
+  the revision removes leaves at once), so a relay deployed or restored after a hub move carries the chain from the anchor
+  instead of refusing the old hub's entries as `revoked-signer` and the new hub's as `gap`. It answers a `delta-query`
+  whose `fromSeq` is at or below its anchor from the anchor's next entry; a machine that needs no entry below the anchor
+  holds a revision that carries it, and one that does not applies that revision first. When `anchorDelta` refuses
+  (`unreconciled`, `fork`, `malformed`), the relay keeps its delta as it was, logs the answer and carries the chain again
+  once a revision that reconciles arrives; unlike a machine, it does not refuse the revision.
 - **Delay is detected; forgery is impossible.** A relay that withholds an entry is detected by the heartbeat: its head
   is signed by a key the relay does not hold, and a node that has not applied up to it, or whose heartbeat is more than
   72 hours old, refuses what arrives from other machines ([the 72-hour rule](revocation-delta.md#the-72-hour-rule)). A
