@@ -29,7 +29,9 @@ the launcher computes the options for that project from:
 
 - the presets its agents declare;
 - its recent spend, from usage reports ([DEC-0021](service.md)): money only, summed over the rows not on a subscription
-  ([DEC-0110](service.md#usage-report)), never a project's `costUsd` while a row of the window is on one;
+  ([DEC-0110](service.md#usage-report)). While a row of the window is on a subscription a project's money is unknown,
+  at most its `costUsd` (`byProject`); the launcher then names that bound in `proposal.inputs` as an upper bound, never
+  as the project's spend (a split by route is CT-116);
 - the kind of work.
 
 It names these inputs in `proposal.inputs`. For example, it offers about the expected month, twice that,

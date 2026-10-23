@@ -173,8 +173,9 @@ const sum = (values: number[]) => values.sort((a, b) => a - b).reduce((n, x) => 
  * every row whose `route` is `key`, `platform-metered` or absent; a `subscription` row's `costUsd` is an estimate at list
  * price, summed apart and never into money. A window whose calls were all on a subscription spent 0, never null; money is
  * null only when it has calls off a subscription and none of them is priced (a row without calls never prices them),
- * and a lower bound while some are priced and some are not. An unknown `route` or a row whose counts or cost the schema refuses answers `undefined`, never a guess. It
- * never throws.
+ * and a lower bound while some are priced and some are not. A missing `unpricedCalls` reads as 0, as FAC-SEM-025's
+ * pricedRow reads it; an unknown `route`, or counts or a cost the schema refuses, answers `undefined`, never a guess. It
+ * never throws on a JSON value.
  */
 export function usageSpend(rows: unknown): UsageSpend | undefined {
   if (!Array.isArray(rows)) return undefined;

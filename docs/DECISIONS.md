@@ -6658,9 +6658,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0110: a host sums money over the usage rows not on a subscription
 
-- **Status:** Accepted (2026-10-23). Consumer adoption: Fabric's spend tiles and view sum as below (CT-115); Fabric
-  Dashboards already does since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0); every
-  service keeps its report unchanged.
+- **Status:** Accepted (2026-10-23). No wire change. Consumer adoption: Fabric's spend tiles and view sum as below,
+  and the Fabric Agent Adapter's service kit counts only money in `budget.spentUsd` (CT-115); Fabric Dashboards already
+  sums this way since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0). A per-project split by route is
+  CT-116.
 - **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
   subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is
   the sum of every row (`FAC-SEM-025`), and the report has no money-only total, so a host that summed `costUsd` showed
@@ -6673,14 +6674,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `null`; money is a lower bound while any call off a subscription is unpriced and `null` only when none of them is
   priced; calls and tokens count on every route. A day's `costUsd` stays the sum of every row, so it is money only while
   no row is on a subscription, and so are `byProject`, `taskRuns` and `byGrant`'s, which carry no route: a host shows
-  them as cost including estimates and never counts them against a limit while a row of the window is on one. A host
+  them as cost including estimates and never counts them against a limit while a row of the window is on one; a project's money is then unknown, at most its `costUsd`. A host
   reads `budget.spentUsd` and `budgets[]` as money, and a service SHOULD count only money there. `usageSpend(rows)`
   (`src/usage-rules.ts`) is the reference sum over `days[].byModel[]` rows and refuses an unknown `route`.
 - **Why:** an operator reading "spend" reads money, and limits are money: an estimate in the sum trips a limit on calls
   nobody paid for per call. A host rule changes no byte a service writes, so every report stays valid.
 - **Alternatives considered:** a money-only total in `service-usage.schema.json` (every service would write a new member
   and every reader pinned before it would refuse the report; the `days[].byModel[]` rows already carry what the sum
-  needs, and a per-project split by route is left to a later decision); counting a row
+  needs, and a per-project split by route is CT-116); counting a row
   with no `route` as an estimate (a report written before DEC-0046 would lose its money).
 - **Compatibility:** no wire change. A host that summed every row now shows less money for a report with subscription
   rows, which is the correction. `contractVersion` stays `0.1.0`.

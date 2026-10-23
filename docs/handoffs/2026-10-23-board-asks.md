@@ -24,7 +24,15 @@ service's finding and Fabric Dashboards' reply on thread `ea2e4f3d`, the request
 
 ## Open
 
-- CT-114 (the adapter), CT-115 (Fabric). Fabric Dashboards already sums this way (FD-88, 0.7.23).
+- CT-114 (the adapter's checker), CT-115 (Fabric's spend view and the adapter's service kit), CT-116 (money per project
+  by route). Fabric Dashboards already sums this way (FD-88, 0.7.23).
+
+## Readings
+
+Round 1: one unit break (money 0 with a lower bound beside only unpriced calls) and three product breaks (byProject and
+byGrant mixing routes, the annotations on DEC-0019/0021/0027/0046, the conformance host rows), fixed. Round 2: four
+product breaks (the adapter's kit writing an estimate into `budget.spentUsd`, a project's money in a window with a
+subscription row, the pull request's checks, `usageSpend`'s comment on a missing `unpricedCalls`), fixed; CT-116 filed.
 
 ## Checks actually run
 

@@ -322,14 +322,16 @@ show every agent's spend beside its health without knowing any provider.
   `runner.credentialKind` of the same name, and a service whose kind is `none` makes no model calls to report; no rule
   checks this yet beyond FAC-SEM-087's refusal of `subscription` rows on an offered service (DEC-0061).
 - **Money is summed over the rows not on a subscription** (DEC-0110). A `subscription` row's `costUsd` is what its calls
-  would cost at list price: an estimate, not money spent. A host MUST NOT add it to money spent, to a budget or to a
-  spending limit, and MAY show it apart, labelled as an estimate. Money is the sum of `costUsd` over every row whose
+  would cost at list price: an estimate, not money spent. A host MUST NOT add it to money spent, to a budget, to a
+  service's spending limit or to a spend policy's level, and MAY show it apart, labelled as an estimate. Money is the sum of `costUsd` over every row whose
   `route` is `key`, `platform-metered` or absent (a report written before DEC-0046 keeps its meaning); a window whose
   calls were all on a subscription spent `0`, never `null`; money is a lower bound while any call off a subscription is
   unpriced, and `null` only when none of them is priced. Calls and tokens count on every route. A day's `costUsd` sums
   every row (`FAC-SEM-025`), so it is money only while no row is on a subscription; so are a project's, a task run's
   and a grant's `costUsd` (`byProject`, `taskRuns`, `byGrant`), which carry no route: a host shows them as cost
-  including estimates while any row of the window is on a subscription, and never counts them against a limit then. A
+  including estimates while any row of the window is on a subscription, and never counts them against a budget, a
+  service's spending limit or a spend policy's level then: a project's money is unknown, at most its `costUsd` (a
+  split by route is CT-116). A
   host reads `budget.spentUsd` and each `budgets[]` entry as money, and a service SHOULD count only money there.
   `usageSpend(rows)` in [`src/usage-rules.ts`](../../src/usage-rules.ts) is the reference sum over `days[].byModel[]`
   rows: it refuses an unknown `route` rather than guess.
