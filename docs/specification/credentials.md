@@ -93,12 +93,19 @@ Two profiles, told apart by `context`:
 | `context` | `org:<id>` | `personal` |
 | Signed by | a key of the organization's current policy key set ([devices](devices.md#key-sets)), `alg: EdDSA`, inside its window on the target's own clock, as a policy and a repair are judged | the sending machine's `#sig`, `alg: ES256`, low-S |
 | Admitted when | the node holds that request open: it sent `requestId` for `agentRef`, an `issued` decision for it names `slot` (the node reads a response's decisions before its envelopes), and neither its envelope has opened nor a refusal has come | the sender is a machine of the estate record the target applied, not revoked by the record or the delta, neither machine is `view`, it is not the target itself, and the slot is no slot a personal secret placement declares on the target (that one is the secret envelope's); the estate's digest key only from a machine whose hub key the record certifies and does not revoke |
-| Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it |
+| Ends | at `credentialExpiresAt`, at most 30 days after `iat`; the node deletes the value then | when a later envelope replaces it, or when the target becomes `view` |
 | Travels | in a check-in response's `records.credentials`, after the decision that issued it | over the relay, as the inner `payload` of a relay message body (`fabric-relay-message/1`), addressed to the target's machine ([relay](relay.md#the-secret-envelope)); a target refuses an envelope whose `signer` is not the `#sig` of the body's verified `from` |
 | Lands in | the organization instance's vault slot for `agentRef` and `slot` | the personal vault slot for `agentRef` and `slot` |
 
-`checkCredentialEnvelope(envelope, context)` runs every check short of decryption, in this order; the first that fails
-names the refusal:
+**A personal envelope's order.** A target that takes one from the relay first verifies the message body
+(`verifyMessageBody`) and refuses a replay (`checkReplay`), then refuses `sender-not-allowed` when the envelope's
+`signer` is not the `#sig` of the body's verified `from`, then runs `checkCredentialEnvelope`. This order is the node's
+duty; no reference function composes it ([relay](relay.md#messages), as [machine calls](machine-calls.md#the-sealed-call)
+order theirs). An organization's envelope arrives in a check-in response the device's signed request already binds, and
+goes straight to `checkCredentialEnvelope`.
+
+`checkCredentialEnvelope(envelope, context)` runs every check of the envelope itself short of decryption, in this order;
+the first that fails names the refusal:
 
 1. `malformed`: not the schema's shape (`credentialEnvelopeShape`, held equal to the schema over every vector), a
    clock that does not read, or marks that do not read (a target that cannot read its marks opens nothing: each mark an
@@ -124,7 +131,7 @@ names the refusal:
 
 `openCredential` then opens the ciphertext (`cannot-open` when it does not). The target writes the value and the mark
 `{context, agentRef, slot, sequence, digest}` in one transaction, and stores nothing after a refusal. `FAC-SEM-139`
-(kind `credential-envelope-check`) holds a target's answer to `checkCredentialEnvelope`'s. A sealer that cannot produce
+(kind `credential-envelope-check`) holds a target's answer to the envelope's own checks equal to `checkCredentialEnvelope`'s. A sealer that cannot produce
 an envelope a target opens refuses before it signs (`sealCredential`: a shape the schema refuses, a life past 24 hours,
 a credential that ends before `iat` or more than 30 days after it, a signer or a signing key of the other profile), so no sequence is
 spent on it.
@@ -156,7 +163,7 @@ once on the hub's machine and delivered from it to every other machine of the es
 machine holds no secret and compares no digest) by a personal envelope with
 `agentRef: urn:fabric:agent:fabric:estate`, `slot: ESTATE_DIGEST_KEY` and `provider: fabric`; a new key is a new sequence, and digests are
 compared only under the same `keyId`. A machine that becomes `view` deletes the digest key and every personal credential
-it holds, in the revision that changes its profile. A target accepts the key only from the machine the record certifies a hub key for,
+it holds when it applies the revision that changes its profile. A target accepts the key only from the machine the record certifies a hub key for,
 and neither the record nor the delta revokes (`hub-key`), so one estate holds one key: the machine that becomes the hub
 already holds the key it received, never generates another, and after a hub move (DEC-0107) sends that key; a newly
 enrolled machine gets it from the hub. During the two revisions of a reachable move both hubs send the same key.

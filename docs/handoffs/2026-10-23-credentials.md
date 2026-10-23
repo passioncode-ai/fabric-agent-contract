@@ -17,7 +17,7 @@ one record per call between agents. Board threads `ba63565c` items 5 and 6, `b25
   `credentialRevocationStands`, `keyedDigest`, `estateDigestKeyId`, `callRecordFindings`, `credentialRules`.
 - Schemas `credential-request`, `credential-decision`, `credential-envelope`, `credential-revocation`, `call-record`;
   six members of a check-in's `records`; five protocols in the register.
-- Vectors `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts` (`check` 49, `open` 4,
+- Vectors `fixtures/vectors/credential-envelope.json` by `tools/vectors/credential-envelope.ts` (`check` 53, `open` 4,
   `digest` 4, `revocation` 7), built without the reference; `sealCredential` reproduces the organization's vector byte
   for byte. Fixtures: six positive, six negative, seven semantic.
 - Docs: devices (the check-in members), relay (the secret envelope's pointer), contexts, package, delegation (DL-22), machine calls,
@@ -72,6 +72,11 @@ one generator of the digest key (Fabric), the member profile's description in th
 Switchboard path bound to the organization, the PR body's counts; with the risks: a credential envelope's mark per
 triple in relay.md, deletion on `certificate-revoked` only under the current certificate, a machine made `view`
 deleting what envelopes gave it, `expiresAt` read as the decision's end, FLW-28. The rest is in CT-120.
+
+Round 4: unit clean; product two documentation breaks, fixed (the handoff's vector count; a personal envelope's order
+stated as the node's: body, replay, signer equal to the body's `from`, then `checkCredentialEnvelope`), with
+ceremonies.md's change to `view`, the personal "Ends" row and FLW-28's task analysis. The loop stops here: round 4's
+breaks were wording, the unit tier found nothing, and what blocks nothing is CT-120.
 
 ## Checks actually run
 

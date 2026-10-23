@@ -685,7 +685,7 @@ flowchart TD
 - **Goal:** the agent holds the credential it asked for, sealed in its organization's context, for no longer than issued
 - **Entry points:** an agent's need for a credential; the organization's credential queue; a member leaving
 - **Success exit:** the value in the organization instance's vault slot with its mark, the ledger naming it, and it deleted at its end or on revocation
-- **Task analysis:** the node sends `credential-request/1` at check-in → the server queues it → the policy or the administrator decides → the issuer issues at the provider and seals `fabric-credential-envelope/1` to the machine's `#kem` under the organization's policy key → the server hands the decision and the envelope back at check-in → the node checks it (`checkCredentialEnvelope`) and opens it into the context's slot → at `credentialExpiresAt`, or on a signed revocation, the node deletes it.
+- **Task analysis:** the node sends `credential-request/1` at check-in → the server queues it → the policy or the administrator decides → the issuer issues at the provider and seals `fabric-credential-envelope/1` to the machine's `#kem` under the organization's policy key → the server hands the decision and the envelope back at check-in → the node checks it (`checkCredentialEnvelope`) and opens it into the context's slot → at `credentialExpiresAt`, on a signed revocation, or when its organization answers `certificate-revoked` or `organization-closed`, the node deletes it.
 - **Rejected shape:** the value pasted into the agent's settings, or delivered into the person's own vault, rejected because it outlives its purpose and crosses the boundary between the person's and the organization's context (DEC-0111).
 - **Flow:**
 
