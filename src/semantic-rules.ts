@@ -38,6 +38,7 @@ import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
 import { machineCallRules } from "./machine-call.js";
+import { credentialRules } from "./credentials.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
 import { connectionsRules } from "./connections.js";
@@ -98,6 +99,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (network) return network;
   const machineCall = machineCallRules(kind, value);
   if (machineCall) return machineCall;
+  const credential = credentialRules(kind, value);
+  if (credential) return credential;
   const signing = signingRules(kind, value);
   if (signing) return signing;
   const attribution = attributionRules(kind, value);

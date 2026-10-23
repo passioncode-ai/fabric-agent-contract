@@ -1,0 +1,18 @@
+{
+  "type": "call-record/1",
+  "callId": "1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f",
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "caller": "urn:fabric:agent:passioncode:observatory",
+  "callee": "urn:fabric:agent:passioncode:dns-agent",
+  "context": "org:org-7f3a",
+  "capability": "dns.records.update",
+  "transport": "relay",
+  "startedAt": "2026-10-23T09:00:00Z",
+  "endedAt": "2026-10-23T09:00:02Z",
+  "outcome": "completed",
+  "cost": {
+    "usd": "0.0021",
+    "route": "key"
+  },
+  "recordedBy": "callee"
+}

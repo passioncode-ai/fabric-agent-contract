@@ -329,6 +329,22 @@
               "$ref": "node-summary.schema.json",
               "description": "DEC-0101: the node's summary of its harness for this enrollment's organization, when it changed or at least once a day."
             },
+            "credentialRequests": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "credential-request.schema.json"
+              },
+              "description": "DEC-0111: credentials the node's agents ask this organization for; a request is sent until a decision other than pending answers it."
+            },
+            "callRecords": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "$ref": "call-record.schema.json"
+              },
+              "description": "DEC-0111: call records of this organization's context, sent only while the acknowledged notice names agent calls; never another context's."
+            },
             "repairResults": {
               "type": "array",
               "maxItems": 64,
@@ -438,6 +454,30 @@
                 "$ref": "window-lease.schema.json",
                 "description": "A window lease (window-lease/1, DEC-0062), carried unchanged; the device's meter verifies it before it spends against it."
               }
+            },
+            "credentialDecisions": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "credential-decision.schema.json"
+              },
+              "description": "DEC-0111: the organization's decisions on this node's credential requests."
+            },
+            "credentials": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "credential-envelope.schema.json"
+              },
+              "description": "DEC-0111: issued credentials sealed to this node's #kem, each opened only as checkCredentialEnvelope allows."
+            },
+            "credentialRevocations": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "credential-revocation.schema.json"
+              },
+              "description": "DEC-0111: credentials the organization revoked on this node, each signed by a key of its current policy key set."
             },
             "repairs": {
               "type": "array",

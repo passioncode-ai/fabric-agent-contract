@@ -17,6 +17,7 @@ import * as agentNetwork from "./agent-network.js";
 import * as commsHold from "./comms-hold.js";
 import * as connections from "./connections.js";
 import * as contextRoute from "./context-route.js";
+import * as credentialEnvelope from "./credential-envelope.js";
 import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
 import * as folderAttribution from "./folder-attribution.js";
@@ -37,6 +38,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },
   { source: "connections.ts", build: one(connections.VECTOR_FILE, connections.buildConnectionsVectors) },
   { source: "context-route.ts", build: one(contextRoute.VECTOR_FILE, contextRoute.buildContextRouteVectors) },
+  { source: "credential-envelope.ts", build: one(credentialEnvelope.VECTOR_FILE, credentialEnvelope.buildCredentialVectors) },
   { source: "enroll-token.ts", build: one(enrollToken.VECTOR_FILE, enrollToken.buildEnrollTokenVectors) },
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },

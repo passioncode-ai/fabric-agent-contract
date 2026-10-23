@@ -958,5 +958,17 @@
   {"name": "agent-call-message-call", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-call.json", "valid": true},
   {"name": "agent-call-message-answer", "schema": "agent-call-message.schema.json", "path": "positive/agent-call-message-answer.json", "valid": true},
   {"name": "agent-call-message-unknown-call-member", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-unknown-call-member.json", "valid": false, "keyword": "oneOf"},
-  {"name": "agent-call-message-answer-without-reply", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-answer-without-reply.json", "valid": false, "keyword": "oneOf"}
+  {"name": "agent-call-message-answer-without-reply", "schema": "agent-call-message.schema.json", "path": "negative/agent-call-message-answer-without-reply.json", "valid": false, "keyword": "oneOf"},
+  {"name": "credential-request", "schema": "credential-request.schema.json", "path": "positive/credential-request.json", "valid": true},
+  {"name": "credential-decision", "schema": "credential-decision.schema.json", "path": "positive/credential-decision.json", "valid": true},
+  {"name": "credential-envelope-org", "schema": "credential-envelope.schema.json", "path": "positive/credential-envelope-org.json", "valid": true},
+  {"name": "credential-envelope-personal", "schema": "credential-envelope.schema.json", "path": "positive/credential-envelope-personal.json", "valid": true},
+  {"name": "credential-revocation", "schema": "credential-revocation.schema.json", "path": "positive/credential-revocation.json", "valid": true},
+  {"name": "call-record", "schema": "call-record.schema.json", "path": "positive/call-record.json", "valid": true},
+  {"name": "credential-request-reason-two-lines", "schema": "credential-request.schema.json", "path": "negative/credential-request-reason-two-lines.json", "valid": false, "keyword": "pattern"},
+  {"name": "credential-decision-pending-by", "schema": "credential-decision.schema.json", "path": "negative/credential-decision-pending-by.json", "valid": false, "keyword": "false schema"},
+  {"name": "credential-envelope-personal-request", "schema": "credential-envelope.schema.json", "path": "negative/credential-envelope-personal-request.json", "valid": false, "keyword": "false schema"},
+  {"name": "credential-envelope-org-no-end", "schema": "credential-envelope.schema.json", "path": "negative/credential-envelope-org-no-end.json", "valid": false, "keyword": "required"},
+  {"name": "credential-revocation-unsigned", "schema": "credential-revocation.schema.json", "path": "negative/credential-revocation-unsigned.json", "valid": false, "keyword": "required"},
+  {"name": "call-record-prompt", "schema": "call-record.schema.json", "path": "negative/call-record-prompt.json", "valid": false, "keyword": "additionalProperties"}
 ]
