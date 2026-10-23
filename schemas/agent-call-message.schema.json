@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/agent-call-message.schema.json",
+  "title": "The plaintext of a sealed call or answer (fabric-agent-call/1, DEC-0106)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/call"
+    },
+    {
+      "$ref": "#/$defs/answer"
+    }
+  ],
+  "$defs": {
+    "call": {
+      "type": "object",
+      "required": [
+        "type",
+        "kind",
+        "call"
+      ],
+      "properties": {
+        "type": {
+          "const": "fabric-agent-call/1"
+        },
+        "kind": {
+          "const": "call"
+        },
+        "call": {
+          "$ref": "interop-agent-call.schema.json"
+        },
+        "delegation": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 8192,
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+          "description": "The hub's delegation token for this call: its one place on the relay (DL-11 as DEC-0106 amends it); never in call.input."
+        },
+        "traceparent": {
+          "$ref": "interop-common.schema.json#/$defs/traceparent"
+        }
+      },
+      "additionalProperties": false
+    },
+    "answer": {
+      "type": "object",
+      "required": [
+        "type",
+        "kind",
+        "replyTo",
+        "answer"
+      ],
+      "properties": {
+        "type": {
+          "const": "fabric-agent-call/1"
+        },
+        "kind": {
+          "const": "answer"
+        },
+        "replyTo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The msgId of the call answered."
+        },
+        "answer": {
+          "type": "object",
+          "required": [
+            "isError"
+          ],
+          "properties": {
+            "isError": {
+              "type": "boolean"
+            },
+            "structuredContent": {
+              "type": "object"
+            },
+            "content": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "text"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "text"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 65536
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

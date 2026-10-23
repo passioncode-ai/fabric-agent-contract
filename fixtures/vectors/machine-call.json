@@ -1,0 +1,1544 @@
+{
+  "about": "Vectors for calls between machines of one estate over the relay (DEC-0106), written by tools/vectors/machine-call.ts, never by hand. Absent values are absent members; null is a JSON null. profile: machineProfile(record, machineId), null for none; a case without record reads the file's record. caller: relayCallerTier(input), input.applied the file's record unless the case names its own, every revocation in input.revocations a delta's. verdict: machineCallVerdict(input). open: openAgentCall(sealed, context) with schemaValid the agent-call-message schema; context.own.privateKey is the base64 P-256 scalar. seal: sealAgentCall(message, context), context.ephemeral the hex ephemeral scalar. A sealed call is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-agent-call/1, the additional data the RFC 8785 UTF-8 bytes of {type, kind, from, to, msgId, kem}, the plaintext the RFC 8785 form of the message; enc and ct are unpadded base64url. Every case holds in every time zone.",
+  "record": {
+    "schema": "estate-record/1",
+    "estate": "urn:fabric:estate:example",
+    "revision": 4,
+    "issuedAt": "2026-10-12T09:00:00Z",
+    "validUntil": "2026-11-11T09:00:00Z",
+    "machines": [
+      {
+        "id": "m-a",
+        "deviceKeys": [
+          {
+            "kid": "m-a#sig",
+            "use": "sig",
+            "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
+          },
+          {
+            "kid": "m-a#kem",
+            "use": "kem",
+            "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
+          }
+        ]
+      },
+      {
+        "id": "m-b",
+        "profile": "view",
+        "deviceKeys": [
+          {
+            "kid": "m-b#sig",
+            "use": "sig",
+            "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
+          },
+          {
+            "kid": "m-b#kem",
+            "use": "kem",
+            "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+          }
+        ]
+      },
+      {
+        "id": "m-c",
+        "profile": "member",
+        "deviceKeys": [
+          {
+            "kid": "m-c#sig",
+            "use": "sig",
+            "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
+          },
+          {
+            "kid": "m-c#kem",
+            "use": "kem",
+            "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
+          }
+        ]
+      },
+      {
+        "id": "m-d",
+        "profile": "member",
+        "deviceKeys": [
+          {
+            "kid": "m-d#sig",
+            "use": "sig",
+            "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
+          }
+        ]
+      },
+      {
+        "id": "m-e",
+        "profile": "owner",
+        "deviceKeys": [
+          {
+            "kid": "m-e#sig",
+            "use": "sig",
+            "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
+          }
+        ]
+      },
+      {
+        "id": "m-f",
+        "deviceKeys": [
+          {
+            "kid": "m-f#sig",
+            "use": "sig",
+            "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
+          },
+          {
+            "kid": "m-f#kem",
+            "use": "kem",
+            "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
+          }
+        ]
+      },
+      {
+        "id": "m-g",
+        "profile": "full",
+        "deviceKeys": [
+          {
+            "kid": "m-g#sig",
+            "use": "sig",
+            "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+          },
+          {
+            "kid": "m-g#kem",
+            "use": "kem",
+            "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+          }
+        ]
+      }
+    ],
+    "revocations": [
+      {
+        "kind": "device-key",
+        "ref": "m-c#kem",
+        "revokedAt": "2026-10-12T10:00:00Z"
+      }
+    ]
+  },
+  "profile": [
+    {
+      "name": "a machine with no profile is full",
+      "machineId": "m-a",
+      "expect": "full"
+    },
+    {
+      "name": "a view machine",
+      "machineId": "m-b",
+      "expect": "view"
+    },
+    {
+      "name": "a member machine",
+      "machineId": "m-c",
+      "expect": "member"
+    },
+    {
+      "name": "full written out",
+      "machineId": "m-g",
+      "expect": "full"
+    },
+    {
+      "name": "an unknown value reads as none",
+      "machineId": "m-e",
+      "expect": null
+    },
+    {
+      "name": "a machine the record does not list",
+      "machineId": "m-z",
+      "expect": null
+    },
+    {
+      "name": "a machine listed twice reads as none",
+      "record": {
+        "schema": "estate-record/1",
+        "estate": "urn:fabric:estate:example",
+        "revision": 4,
+        "issuedAt": "2026-10-12T09:00:00Z",
+        "validUntil": "2026-11-11T09:00:00Z",
+        "machines": [
+          {
+            "id": "m-a",
+            "deviceKeys": [
+              {
+                "kid": "m-a#sig",
+                "use": "sig",
+                "publicKey": "BLAuifgl4kFWreYI+KBe1qIcIdw/1QH9uQxxYM2qumJf3+jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOk="
+              },
+              {
+                "kid": "m-a#kem",
+                "use": "kem",
+                "publicKey": "BEThaKx1EG8kciVoTbMPBHvQj9RMy/S2c+NX3FF5pEsGcuhKUaff4x4J4oWcm1HxF3Ir6c8Jh4jX5Tmzom5tbLE="
+              }
+            ]
+          },
+          {
+            "id": "m-b",
+            "profile": "view",
+            "deviceKeys": [
+              {
+                "kid": "m-b#sig",
+                "use": "sig",
+                "publicKey": "BLELxyr7a425j9xQlPmLJnfZbk3G+njc2YTDgdCtvwgCOiw0oF3/uht/bEIFjqQN8VhlLzYR9rdY3JeoW4a7QFo="
+              },
+              {
+                "kid": "m-b#kem",
+                "use": "kem",
+                "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+              }
+            ]
+          },
+          {
+            "id": "m-c",
+            "profile": "member",
+            "deviceKeys": [
+              {
+                "kid": "m-c#sig",
+                "use": "sig",
+                "publicKey": "BL4HE6GnqLl111gi4T4D0MxLQlwkzrUhnp3IaggrJDceE4POhDszUJDe5xallzM1BN+5/6oTCLiCK17Z2yNe1Q4="
+              },
+              {
+                "kid": "m-c#kem",
+                "use": "kem",
+                "publicKey": "BKCg78eCVWaQ6Fya9a4mJIlaYRjk7TyXW+7jQIw5V7EFFVdTq1WQqT719r++dC0FvEfqzipMGclwLlh/WHvoeYY="
+              }
+            ]
+          },
+          {
+            "id": "m-d",
+            "profile": "member",
+            "deviceKeys": [
+              {
+                "kid": "m-d#sig",
+                "use": "sig",
+                "publicKey": "BLOg8dJrS7uwD1gY5GPr1eDj5kIePbDFnjvkW27/FdjAYmkSAp4JjnP+MsRf5NHNosdOb4z2LJP4TjrgkgTVDig="
+              }
+            ]
+          },
+          {
+            "id": "m-e",
+            "profile": "owner",
+            "deviceKeys": [
+              {
+                "kid": "m-e#sig",
+                "use": "sig",
+                "publicKey": "BMsnYcv29GIw967aAITkqyCOG4+WHXmT3IoU5M+Bm4VtadL6y+dKtBR6c3BgMs5JcUNXR7ws2ej5wIpgAHUZFTU="
+              }
+            ]
+          },
+          {
+            "id": "m-f",
+            "deviceKeys": [
+              {
+                "kid": "m-f#sig",
+                "use": "sig",
+                "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY8="
+              },
+              {
+                "kid": "m-f#kem",
+                "use": "kem",
+                "publicKey": "BGKmuQBAzyjJiXlETJ0mVTKUIS7FUqzTHsXpJZ65xyIme/rLgELV3VPxZPzCFt9BA68T/qgcxEuXLifxO8rhGY4="
+              }
+            ]
+          },
+          {
+            "id": "m-g",
+            "profile": "full",
+            "deviceKeys": [
+              {
+                "kid": "m-g#sig",
+                "use": "sig",
+                "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+              },
+              {
+                "kid": "m-g#kem",
+                "use": "kem",
+                "publicKey": "BIQFyPFaTQrKpTAjFGJOemzfd75MDAlkGvtOgC8D4DAvt4RaBVgIrG0EjAbCDoxoyG04n9z7Jgk3W26cTqf1cJw="
+              }
+            ]
+          },
+          {
+            "id": "m-a",
+            "deviceKeys": [
+              {
+                "kid": "m-a#sig",
+                "use": "sig",
+                "publicKey": "BOyf1lylYkph6ErRtw5TJL4a851w5Lv8nvBOpyEmygGhQhBCPdGc9krIOt3d4g0sIyaFmC6CGQhSn7Rre7/2yOw="
+              }
+            ]
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "device-key",
+            "ref": "m-c#kem",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "machineId": "m-a",
+      "expect": null
+    },
+    {
+      "name": "no record",
+      "record": null,
+      "machineId": "m-a",
+      "expect": null
+    },
+    {
+      "name": "no machine id",
+      "machineId": 7,
+      "expect": null
+    }
+  ],
+  "caller": [
+    {
+      "name": "a full machine with its #kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-a#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-a",
+        "profile": "full",
+        "kem": "m-a#kem"
+      }
+    },
+    {
+      "name": "a view machine with its #kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-b",
+        "profile": "view",
+        "kem": "m-b#kem"
+      }
+    },
+    {
+      "name": "a member machine whose #kem the record revokes: no kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-c#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-c",
+        "profile": "member"
+      }
+    },
+    {
+      "name": "a machine with no #kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-d#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-d",
+        "profile": "member"
+      }
+    },
+    {
+      "name": "an unreadable profile reads as null, the sender still T1",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-e#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-e",
+        "profile": null
+      }
+    },
+    {
+      "name": "a #kem that is no point of the curve: no kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-f#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-f",
+        "profile": "full"
+      }
+    },
+    {
+      "name": "full written out",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-g#sig"
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-g",
+        "profile": "full",
+        "kem": "m-g#kem"
+      }
+    },
+    {
+      "name": "a #kem a delta revokes by its key reference: no kem",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-g#sig",
+        "revocations": [
+          {
+            "kind": "device-key",
+            "ref": "m-g#kem@sha256:2bbc5b5f5cb47e5b8242fee818e29e9a7780770c265e54f4cc0e8bfc65c626f5",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ok": true,
+        "tier": "T1",
+        "machine": "m-g",
+        "profile": "full"
+      }
+    },
+    {
+      "name": "a #sig a delta revokes: not T1",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-d#sig",
+        "revocations": [
+          {
+            "kind": "device-key",
+            "ref": "m-d#sig",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "code": "unauthenticated",
+        "detail": "not-t1"
+      }
+    },
+    {
+      "name": "a machine a delta revokes: not T1",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig",
+        "revocations": [
+          {
+            "kind": "machine",
+            "ref": "m-b",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "code": "unauthenticated",
+        "detail": "not-t1"
+      }
+    },
+    {
+      "name": "a kid the record does not list: not T1",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-z#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unauthenticated",
+        "detail": "not-t1"
+      }
+    },
+    {
+      "name": "a #kem kid is no sender: not T1",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-a#kem"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unauthenticated",
+        "detail": "not-t1"
+      }
+    },
+    {
+      "name": "no sender",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": 7
+      },
+      "expect": {
+        "ok": false,
+        "code": "unauthenticated",
+        "detail": "not-t1"
+      }
+    },
+    {
+      "name": "a delta that is not current",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "stale",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "not-current"
+      }
+    },
+    {
+      "name": "no freshness",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "not-current"
+      }
+    },
+    {
+      "name": "a clock that does not read",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13 00:00:00",
+        "freshness": "current",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "no-clock"
+      }
+    },
+    {
+      "name": "the record's window ended",
+      "input": {
+        "self": "m-a",
+        "at": "2026-11-12T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "no-estate"
+      }
+    },
+    {
+      "name": "no record applied",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig",
+        "applied": null
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "no-estate"
+      }
+    },
+    {
+      "name": "the node's own #sig is not admitted",
+      "input": {
+        "self": "m-z",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig"
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "self-not-admitted"
+      }
+    },
+    {
+      "name": "the node's own #sig revoked by a delta",
+      "input": {
+        "self": "m-a",
+        "at": "2026-10-13T00:00:00Z",
+        "freshness": "current",
+        "from": "m-b#sig",
+        "revocations": [
+          {
+            "kind": "device-key",
+            "ref": "m-a#sig",
+            "revokedAt": "2026-10-12T10:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "code": "unknown-state",
+        "detail": "self-not-admitted"
+      }
+    }
+  ],
+  "verdict": [
+    {
+      "name": "full to full, an effect",
+      "input": {
+        "caller": "full",
+        "target": "full",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "member to full, an effect",
+      "input": {
+        "caller": "member",
+        "target": "full",
+        "capability": "files.write",
+        "effect": "external"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "full to member, an effect",
+      "input": {
+        "caller": "full",
+        "target": "member",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "member to member, an effect",
+      "input": {
+        "caller": "member",
+        "target": "member",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "full to view, a read",
+      "input": {
+        "caller": "full",
+        "target": "view",
+        "capability": "status.read",
+        "effect": "none"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "full to view, an effect",
+      "input": {
+        "caller": "full",
+        "target": "view",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "target-view"
+      }
+    },
+    {
+      "name": "full to view, no effect named",
+      "input": {
+        "caller": "full",
+        "target": "view",
+        "capability": "files.write"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "target-view"
+      }
+    },
+    {
+      "name": "full to view, an unknown effect",
+      "input": {
+        "caller": "full",
+        "target": "view",
+        "capability": "files.write",
+        "effect": "maybe"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "target-view"
+      }
+    },
+    {
+      "name": "view to full, a read",
+      "input": {
+        "caller": "view",
+        "target": "full",
+        "capability": "status.read",
+        "effect": "none"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "view to full, an effect",
+      "input": {
+        "caller": "view",
+        "target": "full",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "caller-view"
+      }
+    },
+    {
+      "name": "view to view, an effect: the target first",
+      "input": {
+        "caller": "view",
+        "target": "view",
+        "capability": "files.write",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "target-view"
+      }
+    },
+    {
+      "name": "view to view, a read",
+      "input": {
+        "caller": "view",
+        "target": "view",
+        "capability": "status.read",
+        "effect": "none"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "the job tools in every profile: get",
+      "input": {
+        "caller": "view",
+        "target": "view",
+        "capability": "fabric.job.get",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "the job tools in every profile: cancel",
+      "input": {
+        "caller": "full",
+        "target": "view",
+        "capability": "fabric.job.cancel",
+        "effect": "local"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "the job tools in every profile: list",
+      "input": {
+        "caller": "view",
+        "target": "member",
+        "capability": "fabric.job.list"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "a caller's profile unread",
+      "input": {
+        "caller": null,
+        "target": "full",
+        "capability": "status.read",
+        "effect": "none"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "profile-unreadable"
+      }
+    },
+    {
+      "name": "a target's profile unread",
+      "input": {
+        "caller": "full",
+        "target": "owner",
+        "capability": "fabric.job.get",
+        "effect": "none"
+      },
+      "expect": {
+        "ok": false,
+        "code": "profile-forbids",
+        "detail": "profile-unreadable"
+      }
+    }
+  ],
+  "open": [
+    {
+      "name": "a call opens",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": true,
+        "message": {
+          "type": "fabric-agent-call/1",
+          "kind": "call",
+          "call": {
+            "agentId": "urn:fabric:agent:example:inbox-digest",
+            "capability": "digest.summarise",
+            "input": {
+              "days": 7
+            },
+            "idempotencyKey": "call-1"
+          }
+        }
+      }
+    },
+    {
+      "name": "an answer opens",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "answer",
+        "kem": "m-b#kem",
+        "enc": "BH304GQBCeJQsPP_4Jol8yBuaT4PhbCv2WDTAqHlTevXfT9YznukE_8iKktduElFRcO_yaYa_REsPXErwR7Pfwg",
+        "ct": "rGbwDFnX17xw1ZJN71zon8kK1lCRZDWGiWzWQSi6sXLDgGZcqXeqfaexnCc7Wo5zBH1J4E1aXjm9PKPuA_SOzgKqI3VXPfntUmBxDOX7AsGhb3HB5p6OF8Kx3q6Ebq2KFUz1vdssENUR7SC5i66Tb8yF9il7I-ohxFgXmNm1B00bbQeV46OUQiMADRsUEdXn6rfxiL2anRX2nBuiGc-G5lQgHWDY25PMS3HTK_cjZoOU4dxo6NELTzT0J9rDB0g"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": true,
+        "message": {
+          "type": "fabric-agent-call/1",
+          "kind": "answer",
+          "replyTo": "msg-7f3a",
+          "answer": {
+            "isError": false,
+            "structuredContent": {
+              "items": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "three items"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "a call with the hub's token and a traceparent opens",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BF7dQOhCG4rrbOhIY2xtcIo-l18NY9jTPDIt41VDyKFIyQokHgyExFWjRgEjKmJLIeX0pgMecyJP_-zo3HsZ8fc",
+        "ct": "SK7KnUwGtzGiyZClLdk_scax6qt5tZiDQ6MlpzgPaZehiuMrRBryPrbRD8Ln98xIHCVqPeGbaZUih-rsm5Vt5vTBoYmqpFqR06G4-TvGEjj_LxL_yVLK19IJxaQwR5y7NbyKU4RpvI88yhPFCJDgPy2BzUpRY7_iVO6W9YVculr7iPQjuoOCfPjgfFvWg6dBP3RtX2Epmz40K8TAacB7KpQdcWfZko-q9h1rJhkQ7DYVMLnWzFiyhtsplHI2YpMaew02_mUfCopJtl7iWJd3Dz-7wRMMtVPMyx_oailSVd1sS_Yc4zUW9rIkXIuPu3j2806ZH5wiOHgDf-7-Sa1MJqu7kb9cdI0tRqOhDZ-4VL4qIhmBlf6JfBxnuLtyAYmU1J0F4tCQFD5wG-X0H1uwBeTRv81CxlWxw6lS0ssVCfag6MhCmk8FIZJuOjEd"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": true,
+        "message": {
+          "type": "fabric-agent-call/1",
+          "kind": "call",
+          "call": {
+            "agentId": "urn:fabric:agent:example:inbox-digest",
+            "capability": "digest.summarise",
+            "input": {
+              "days": 7
+            },
+            "idempotencyKey": "call-1"
+          },
+          "delegation": "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJleGFtcGxlIn0.c2ln",
+          "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+        }
+      }
+    },
+    {
+      "name": "another recipient's kem",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-c#kem",
+          "privateKey": "BqSWyHDmohENL7Rm5pQeTL0/EdmXvQFw0fIQrn4+TLA="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "wrong-recipient"
+      }
+    },
+    {
+      "name": "the right kid, another key: it does not open",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "BqSWyHDmohENL7Rm5pQeTL0/EdmXvQFw0fIQrn4+TLA="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "another msgId than the body's",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-other",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "another from than the body's",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-c#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "another to than the body's",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-c#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "the sealed kind changed",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "answer",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "one character of the ciphertext changed",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_OkAq0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "an enc that is no point of the curve",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BLAuifgl4kFWreYI-KBe1qIcIdw_1QH9uQxxYM2qumJf3-jCBB2S6TW963SPotobPI9j4K1QgHB8N8D9SFNtkOg",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a member more",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw",
+        "note": "x"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a member less",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "another type",
+      "sealed": {
+        "type": "fabric-agent-call/2",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a kem that is no #kem kid",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#sig",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a ciphertext with padding",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BEuiv1oF3S7QJEJLIj2P0xrS7oa7_90E3IHh5KRC1r5novD2vA-EaSNi9KSeAtzVedFaM3Fi05CTDNxNF3ZPRgw",
+        "ct": "hbwglJj_Ok_q0LCZwllafYR9MZAO0PdaaNQnxKaIr_-n-h-atMIGDyHib31EY9vBqgea4Jlt3BEnr990knXVrfxr6-BXxSSlnxqun-ZXGmkZCs_FiD6lio-_CqpyfCHQDcQhRobaKwDbx7hQgyULfPYlRWBKROJ3lFCa2fT8B9P-D3opcI8yCdy98jwwyorL-y01eMy7c9woW6OjGXE-l70r_5fmnBwWq8ET0Px5MzJ4d_revcN0n-a_lmNSN6tTnRneHw="
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "no sealed object",
+      "sealed": "sealed",
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a plaintext not in its RFC 8785 form",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BGFZPj7ITy0O71SWHsQ2hrzDq0gtZL4JO7m8eYAtoDg0yiSrmPGRManCf9xNs8YDSQGZF27xtE_0OaaX1TOej3I",
+        "ct": "iZ8je2pAre-CfDvLcZLOdinwCyMQsGE4NiUFKL-H47VoKY0CuYQbyZbasaR4jMd5jCfWgmy_F14T02yglDfOnh-1jdvDt8wxAa_ETlrrSW40KjLrsBn6E4FJ5JiVKLMh1HW71MRSH92rdrvbVFSB-FQPgdTwqf9_X2XkPl79fDwqYl1z7zrzoOBSLxbWHa58n3yXmqkOoqxZ0M_iQyLIOaAur2v059CX4qdDA5yccV-5N0L3q2bbxwOXGXTKoVuDZ0iY4deeyIxSTulofc1VBlNeMEl7mV1qhSuRN2jKLvemOcqDbfra7A"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a plaintext whose kind is not the sealed one",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "answer",
+        "kem": "m-b#kem",
+        "enc": "BL3Ay1HQp_wSCuU7031X3kFOss3R9XIi_5oYgSlWarMG3Uzypp7K57K8xLM2zxFaH85Z-TgtORWL-2jYF99210U",
+        "ct": "Fg5iNscWeqUgNxmACFYauC7GwYFYvZJ3XFujMg5UTPAxi1YbW7W3RfIWjAay4mKA1mWowIuYHAM5uyUBCeFPkjZFOW0Gx_38dvSgp4ZWiq9oCPs1nGNLD26cmQW8PrcMxZEb0vbGImmeYMh6q_xiQN9Oqc3p-lZT2eIEbux8Sybkf8-3DFwPqMLp-25v704kpjY130mtjRQ88z6eE218QYlrbMG_Hek3AaNExTFICladob1kA7MbYLBCcWI9uMly-Kvz7g"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a plaintext the schema refuses: a member the call does not know",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BFdaDDaGGSI12xEnvUHHUhShVs3gNp9ikigw6K7mdYmE8B3GWksBsHWTnhWluozxbTHlu8onRAKA2l-uQqlEaT0",
+        "ct": "jK9-O1hPpQElRasYBEcZU9WvEZ6vhvIccygZgXOgwKKcypCaN22nt7FrljTP0r7zmWGB3C_31RY9ap-kaAq-63KfHKyldBQEJpnSk73MzAT1cghx7FrmvLLycryq38-qBmxNVOyAe7F3Wx4xcfp9Y3Ay9bDyUKX13RQkO0npd9kBshFa4dKfLA4b0TXrSgFu_wABCb-JfSrt-QxZAmozxW5mRE_Fhj6CL8sqcCXa"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a plaintext that is not JSON",
+      "sealed": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "kem": "m-b#kem",
+        "enc": "BGFB_KvpbN6CS-1ckPW8C1abrbo2rJBzBhXz5w9P7jUfTkFBguoQxavUXxc2RHIIqSnApT1QoSlSWkB3cp-LAb4",
+        "ct": "wkx0pf3Yx6uqq3B3uuNp-GptS6KJ3xqr"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "own": {
+          "kid": "m-b#kem",
+          "privateKey": "z/M+Q1ymeNwn1tSJLJ4fOrnKqmdgiIm/PFJqwRo0S1A="
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    }
+  ],
+  "seal": [
+    {
+      "name": "a call",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "call": {
+          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": true,
+        "sealed": {
+          "type": "fabric-agent-call/1",
+          "kind": "call",
+          "kem": "m-b#kem",
+          "enc": "BFK2Gl9Bw4xUn9uCrU5lx0PlJk4Mx_JfCt_RngI8UHDgEpR0JtHw3h_c6vX7zxmpgdzXsxaG1lIAHAEVjatZW5s",
+          "ct": "V2bbQqCM9zAxK3_RhK3xacQmTOfQ-Qaix5jwE7hZ0AIv9r2tRVcEzQNCHUn7MgkmQ06p6ZjCgCI_M2aXw4BVjwqw3MtV-RgEAX3mKZIOX3XkDYMWpzkBFx0nC94HTQmJwOMn42lYjt-guxifXDmZZ3yH10OzcAjITZTWsJIeVgVhJXZ_xv44CX7qs45-5Bic9XHy6i97YvvLj_-ISZS3X-0yhLQfJHq_f6xgOCGHmA0fYUrtueG7H5G7-MzJJvtz7ecM6A"
+        }
+      }
+    },
+    {
+      "name": "an answer",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "answer",
+        "replyTo": "msg-7f3a",
+        "answer": {
+          "isError": false,
+          "structuredContent": {
+            "items": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "three items"
+            }
+          ]
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": true,
+        "sealed": {
+          "type": "fabric-agent-call/1",
+          "kind": "answer",
+          "kem": "m-b#kem",
+          "enc": "BFK2Gl9Bw4xUn9uCrU5lx0PlJk4Mx_JfCt_RngI8UHDgEpR0JtHw3h_c6vX7zxmpgdzXsxaG1lIAHAEVjatZW5s",
+          "ct": "V2bZTb-XsHhoM2WUgqzrVMVqAuef0BO61ZzqFfMAyBcg4ba8X1sIyQNBUwDjLx40SRS-r4XAnSVpbBeZgohWqxqr39ADulxfT2rqYtUOXyniG5oOtC4MJxdrU5kAXU7ey6468mJWhLb_8UfYUniTYn7OxFu9Mw_VSoTQsIRHBgRwMHwJk-t_Vj-7v8on5gnH9T6x8jopK_uF1OmMCdz8WqExkbgSfTa7e654OnPEidirzUPsGrzlgIPMmq76F4Q"
+        }
+      }
+    },
+    {
+      "name": "another type",
+      "message": {
+        "type": "fabric-agent-call/2",
+        "kind": "call",
+        "call": {
+          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "another kind",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "event",
+        "call": {
+          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a recipient kid that is no #kem",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "call": {
+          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#sig",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkU0="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "bad-key"
+      }
+    },
+    {
+      "name": "a recipient key that is no point of the curve",
+      "message": {
+        "type": "fabric-agent-call/1",
+        "kind": "call",
+        "call": {
+          "agentId": "urn:fabric:agent:example:inbox-digest",
+          "capability": "digest.summarise",
+          "input": {
+            "days": 7
+          },
+          "idempotencyKey": "call-1"
+        }
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-b#sig",
+        "msgId": "msg-7f3a",
+        "recipient": {
+          "kid": "m-b#kem",
+          "publicKey": "BA4BjxjRDVNFqK7pRfzuMQ3/JVdRJfF5U1lp8iZFeHu+V2rP+poRDAoAeDHQAGnTQsTr+G++Zpyd/Wcnt78QkUw="
+        },
+        "ephemeral": "5277b3d12e5f6080ff4fe23f44e78b96f3948ff4b285507148af90430ac1898a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "bad-key"
+      }
+    }
+  ]
+}

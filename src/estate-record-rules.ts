@@ -391,6 +391,51 @@ function secretReferences(value: JsonObject, flag: Flag): void {
   });
 }
 
+/** DEC-0106: what a machine of the estate may be. Absent is `full`, and a writer omits `full`. */
+export const MACHINE_PROFILES = ["full", "member", "view"] as const;
+export type MachineProfile = (typeof MACHINE_PROFILES)[number];
+const isProfile = (value: unknown): value is MachineProfile => typeof value === "string" && (MACHINE_PROFILES as readonly string[]).includes(value);
+
+/**
+ * A machine's profile in a record (DEC-0106): `full` when the machine is listed once with no `profile`, its value when
+ * that is one of the three, `undefined` otherwise (not listed, listed twice, an unreadable record or id, an unknown
+ * value). It never throws.
+ */
+export function machineProfile(record: unknown, machineId: unknown): MachineProfile | undefined {
+  if (!isObject(record) || !isString(machineId)) return undefined;
+  const found = list(record.machines).filter((machine) => machine.id === machineId);
+  if (found.length !== 1) return undefined;
+  const profile = (found[0] as JsonObject).profile;
+  if (profile === undefined) return "full";
+  return isProfile(profile) ? profile : undefined;
+}
+
+/**
+ * FAC-SEM-134 (DEC-0106): a profile, when present, is `full`, `member` or `view`; only a `full` machine carries a
+ * `hubKey`; a `view` machine has no placement and no secret placement, and no secret placement names it as `from`.
+ */
+function machineProfiles(value: JsonObject, flag: Flag): void {
+  const views = new Set<unknown>();
+  indexed(value.machines).forEach(([machine, m]) => {
+    if (machine.profile === undefined) return;
+    if (!isProfile(machine.profile)) {
+      flag(`/machines/${m}/profile`, `profile ${show(machine.profile)} is none of full, member, view`);
+      return;
+    }
+    if (machine.profile !== "full" && machine.hubKey !== undefined) flag(`/machines/${m}/hubKey`, `a ${machine.profile} machine is never the hub's: only a full machine carries a hub key`);
+    if (machine.profile === "view") {
+      views.add(machine.id);
+      if (list(machine.packages).length > 0) flag(`/machines/${m}/packages`, "a view machine runs no agent: it has no placement");
+      if (list(machine.secrets).length > 0) flag(`/machines/${m}/secrets`, "a view machine holds none of the estate's secrets");
+    }
+  });
+  indexed(value.machines).forEach(([machine, m]) => {
+    indexed(machine.secrets).forEach(([secret, s]) => {
+      if (views.has(secret.from)) flag(`/machines/${m}/secrets/${s}/from`, `machine ${show(secret.from)} is a view machine: it is the source of no secret`);
+    });
+  });
+}
+
 /**
  * FAC-SEM-111 (DEC-0082) for one placement: an instance placed in an organization's context runs under a share grant of
  * the same record — the placement names it in `grant`, matched by the normal form of the grant's id (DEC-0076); the
@@ -505,8 +550,8 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant and
- * FAC-SEM-111 on each placement (DEC-0082).
+ * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant,
+ * FAC-SEM-111 on each placement (DEC-0082) and FAC-SEM-134 on each machine's profile (DEC-0106).
  */
 function recordFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -518,6 +563,7 @@ function recordFindings(value: JsonObject): Finding[] {
   grantsAndRevocations(value, flagger(findings, "FAC-SEM-076"));
   indexed(value.shareGrants).forEach(([grant, index]) => findings.push(...grantContextFindings(grant, `/shareGrants/${index}`)));
   placementGrants(value, flagger(findings, "FAC-SEM-111"));
+  machineProfiles(value, flagger(findings, "FAC-SEM-134"));
   indexed(value.authorities).forEach(([authority, index]) => findings.push(...signingCredentialFindings(authority, `/authorities/${index}`)));
   return findings;
 }

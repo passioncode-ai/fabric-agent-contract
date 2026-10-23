@@ -393,6 +393,14 @@
             "additionalProperties": false
           },
           "description": "Secret placements: where a slot of a package placed here is filled from, for the instance of that agent in a context (DEC-0082). No member can hold a value."
+        },
+        "profile": {
+          "enum": [
+            "full",
+            "member",
+            "view"
+          ],
+          "description": "DEC-0106: what this machine may be. Absent means full, and a writer omits full. member: takes T1 calls, carries no hubKey, holds only the secret slots the record places on it, every placement by a revision. view: no hubKey, no placement, no secret placement and the source of none; a call it makes or receives only reads. Changed only by a revision the passkey signs (FAC-SEM-134)."
         }
       },
       "additionalProperties": false
