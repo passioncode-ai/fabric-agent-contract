@@ -443,11 +443,12 @@ describe("the first unit and product readings' cases (contract review 2026-10-21
 
   it("vendor data nested 5,000 deep is walked, not overflowed", () => {
     const manifest = json("positive/manifest-mcp.json");
-    let deep: Record<string, unknown> = {};
-    const top = deep;
-    for (let n = 0; n < 5000; n += 1) { const next = {}; deep.a = next; deep = next; }
-    manifest.provider.extensions = { "https://vendor.example/x": top };
-    expect(run(one("fabric-agent.json", manifest))).toEqual({ code: 0, out: "" });
+    manifest.provider.extensions = { "https://vendor.example/x": "DEEP" };
+    // Written as text: JSON.stringify of a value 5,000 deep overflows the stack on Node 22 and 24 (the nightly run of
+    // 2026-10-23), before the validator is reached.
+    const deep = `${'{"a":'.repeat(5000)}{}${"}".repeat(5000)}`;
+    const text = `${JSON.stringify(manifest, null, 2).replace('"DEEP"', deep)}\n`;
+    expect(run(one("fabric-agent.json", text))).toEqual({ code: 0, out: "" });
     // The walk takes about 0.4 s alone; under coverage instrumentation and the gate's load, past vitest's 5 s default.
   }, 30_000);
 
