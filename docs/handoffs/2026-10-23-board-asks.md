@@ -41,6 +41,9 @@ Round 4: three text breaks (a project's bound holds only while its `unpricedCall
 forbidden members against the well-known schema; "spent" in the usage report's opening), fixed; risks fixed: the host
 and checker sentence in service.md and the decision, one wording of where an estimate never goes, `recentSpendUsd`'s
 description.
+Round 5: unit pass; product one break (the SCN-016 alternative's state missing from SCR-13, FLW-10 and the scenario's
+states), fixed; risks fixed (the checker matches the document or the service's identity values, DEC-0109's adoption
+read as pending, Fabric Dashboards' estimate side in CT-115, the byProject description's sentence).
 
 ## Checks actually run
 
@@ -49,4 +52,5 @@ description.
 ## Next task
 
 CT-86 (credentials on request and the call record, DEC-0111), then the contract's first release (DEC-0108, branch
-`agent/dec0108-release-policy-20261023`, merged last so its tag lands on the release's commit).
+`agent/dec0108-release-policy-20261023`, pushed to origin with the release, merged last so its tag lands on the
+release's commit).

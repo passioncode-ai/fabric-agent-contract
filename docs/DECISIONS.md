@@ -6721,7 +6721,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0109: a remote service's 401 without a token may carry an identity proxy's page
 
-- **Status:** Accepted (2026-10-23). Consumer adoption: the Fabric Agent Adapter's `check_service.py`
+- **Status:** Accepted (2026-10-23). Consumer adoption pending: the Fabric Agent Adapter's `check_service.py`
   (`well-known.requires-token` takes any `401` whose body carries none of the service's data, CT-114).
 - **Context:** `service.md` *Remote placement* said that without the service token `GET /.well-known/fabric-service`
   MUST answer `401` "with an empty body". Fabric Inbox runs on Cloudflare Workers behind Cloudflare Access: from 0.29.4
@@ -6749,7 +6749,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Status:** Accepted (2026-10-23). No wire change. Consumer adoption: Fabric's spend tiles and view sum as below,
   and the Fabric Agent Adapter's service kit counts only money in `budget.spentUsd` (CT-115); Fabric Dashboards already
-  sums this way since 0.7.23 (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0). A per-project split by route is
+  sums money this way since 0.7.23 (its estimate side reads an unpriced subscription row as 0, CT-115) (FD-88, `@passioncode-ai/fabric-service-host` 0.6.0). A per-project split by route is
   CT-116.
 - **Context:** a usage report's rows carry `route: subscription | key | platform-metered` (DEC-0046, DEC-0061), and a
   subscription row's `costUsd` is the list-price value of calls the operator's own login paid for. A day's `costUsd` is

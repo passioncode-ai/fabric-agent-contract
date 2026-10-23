@@ -100,7 +100,7 @@
     "byProject": {
       "type": "array",
       "maxItems": 256,
-      "description": "DEC-0065 (CON-OE-13): cost in the report's window by the project, a subscription's estimate included (DEC-0110) the service ran it for, the service's own run attribution. It names no caller, session or person (DL-22). A call the service ran for no project is in no row. Sums and unknown costs: FAC-SEM-025.",
+      "description": "DEC-0065 (CON-OE-13): cost in the report's window by the project the service ran it for, a subscription's estimate included (DEC-0110), the service's own run attribution. It names no caller, session or person (DL-22). A call the service ran for no project is in no row. Sums and unknown costs: FAC-SEM-025.",
       "items": {
         "type": "object",
         "required": [
