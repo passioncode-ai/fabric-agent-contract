@@ -6517,8 +6517,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0105: the dash-encoded home path after any separator, and no "not shared" member in a node summary
 
-- **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory's node (its own stricter
-  check already runs; its default of summaries off per organization does not meet the at-least-daily duty of the
+- **Status:** Accepted source change (2026-10-23). Consumer adoption: Project Observatory's node (its port of
+  `hasHomePath`, its fixture-parity test, which now meets eight node-summary fixtures, and its copy of the
+  `activity-common` schema move at its next pin; its separate name filter is not a superset of the rule; its default of summaries off per organization does not meet the at-least-daily duty of the
   conformance node row; CT-92 may change that duty), the first organization server (its vendored `activity-rules.ts` and `activity-common`
   schema, as receiver of activity batches and summaries) and the relay's vendored `activity-common` schema, each at
   its next pin; any other port of `hasHomePath` or of the `sourceKey` pattern.
