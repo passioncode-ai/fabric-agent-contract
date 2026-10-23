@@ -6,6 +6,18 @@ import { type StreamState, asStreams, mergeStreams } from "./activity-rules.js";
 import { rfc8785, settingsCanonicalJson } from "./canonical.js";
 import { uncovered } from "./seq-ranges.js";
 import { embeddedProtocolsFindings } from "./protocol-revisions.js";
+import { strictTime } from "./rfc3339.js";
+
+/**
+ * Whether instant `t` (milliseconds) lies in a key's validity window (DEC-0115): an absent `notBefore` or `notAfter` is
+ * open, one that is not an RFC 3339 instant closes the window, both bounds inside. FAC-SEM-041, a repair's key and a
+ * credential's key are judged by it.
+ */
+export function keyWindowHolds(t: number, key: JsonObject): boolean {
+  const bound = (value: unknown, open: number) => (value === undefined ? open : strictTime(value));
+  const from = bound(key.notBefore, -Infinity), to = bound(key.notAfter, Infinity);
+  return Number.isFinite(t) && !Number.isNaN(from) && !Number.isNaN(to) && t >= from && t <= to;
+}
 
 // #region device-rules — docs: docs/specification/devices.md#semantic-rules
 /**
@@ -130,7 +142,7 @@ function policyUpdate(value: JsonObject): Finding[] {
     if (signature.keyId === value.rootKeyId) flag("/next/signature/keyId", "the root key signs key sets only, never a policy");
     else if (!key || typeof key.publicKey !== "string") flag("/next/signature/keyId", `no trusted key ${show(signature.keyId)}`);
     else if (Number.isNaN(at)) flag("/at", "a key's validity is judged when the device verifies; the input names that time");
-    else if ((typeof key.notBefore === "string" && at < Date.parse(key.notBefore)) || (typeof key.notAfter === "string" && at > Date.parse(key.notAfter))) flag("/next/signature/keyId", `key ${show(signature.keyId)} is outside its validity window when the device verifies`);
+    else if (!keyWindowHolds(at, key)) flag("/next/signature/keyId", `key ${show(signature.keyId)} is outside its validity window when the device verifies`);
     else if (!verifyPolicySignature(next, key.publicKey)) flag("/next/signature/value", "the signature does not verify: the policy was changed after signing or signed by another key");
   } else if (next.source === "server") {
     flag("/next/signature", "a server policy is signed");
@@ -450,8 +462,9 @@ function keySet(value: JsonObject): Finding[] {
     ids.add(key.keyId);
     if (key.keyId === root.keyId) flag(`/next/keys/${i}/keyId`, "the root key is never a policy signing key");
     if (typeof key.publicKey === "string" && isSmallOrderKey(Buffer.from(key.publicKey, "base64"))) flag(`/next/keys/${i}/publicKey`, "a key of small order verifies forged signatures and is never published (DEC-0045)");
-    const from = Date.parse(show(key.notBefore ?? "")), to = Date.parse(show(key.notAfter ?? ""));
-    if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts");
+    // DEC-0115: the bounds are read as keyWindowHolds reads them, so a device never holds a key it cannot use.
+    const from = strictTime(key.notBefore), to = strictTime(key.notAfter);
+    if (!(to > from)) flag(`/next/keys/${i}/notAfter`, "a key's window ends after it starts, both bounds RFC 3339 instants");
     if (at >= from && at <= to) validNow = true;
   });
   if (!validNow) flag("/next/keys", "a key set holds a key valid at its issuedAt, so a device is never left without one");
@@ -462,7 +475,7 @@ function keySet(value: JsonObject): Finding[] {
     const revoked = new Set(Array.isArray(next.revoked) ? next.revoked : []);
     const kept = new Map(keys.map((key) => [key.keyId, key]));
     (Array.isArray(current.keys) ? current.keys.filter(isObject) : []).forEach((key) => {
-      if (revoked.has(key.keyId) || Date.parse(show(key.notAfter ?? "")) <= at) return;
+      if (revoked.has(key.keyId) || strictTime(key.notAfter) <= at) return;
       const same = kept.get(key.keyId);
       if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${show(key.keyId)} is still valid until ${show(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
     });

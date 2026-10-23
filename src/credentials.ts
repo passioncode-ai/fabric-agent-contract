@@ -15,7 +15,7 @@ import { createECDH, createHash, createHmac, sign as nodeSign, type KeyObject } 
 import { hasHomePath } from "./activity-rules.js";
 import { rfc8785 } from "./canonical.js";
 import { ORG_CONTEXT_PREFIX, PERSONAL_CONTEXT } from "./context-route.js";
-import { policySigningInput, verifyWith } from "./device-rules.js";
+import { keyWindowHolds, policySigningInput, verifyWith } from "./device-rules.js";
 import { machineProfile } from "./estate-record-rules.js";
 import { checkInSummaryFindings } from "./node-summary.js";
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
@@ -65,11 +65,6 @@ const second = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, "Z");
 const when = (value: unknown): number | undefined => {
   const t = strictTime(value);
   return Number.isFinite(t) ? t : undefined;
-};
-/** Whether instant `t` lies in a key's window; an absent bound is open, an unreadable one closes the window (FAC-SEM-041). */
-const inKeyWindow = (t: number, key: JsonObject): boolean => {
-  const from = key.notBefore === undefined ? -Infinity : when(key.notBefore), to = key.notAfter === undefined ? Infinity : when(key.notAfter);
-  return from !== undefined && to !== undefined && t >= from && t <= to;
 };
 const sameMembers = (value: JsonObject, required: readonly string[], optional: readonly string[] = []) => {
   const keys = Object.keys(value);
@@ -231,7 +226,7 @@ export function checkCredentialEnvelope(value: unknown, ctx: CredentialCheckCont
     // A key of the organization's current policy key set, inside its window on the target's own clock, never at the
     // `iat` the signer chose (as a policy and a repair are judged, devices.md F-B-106).
     const key = list(o.keys).find((candidate) => candidate.keyId === h.signer);
-    if (key === undefined || (key.alg ?? "ed25519") !== "ed25519" || !inKeyWindow(at, key)) return no("bad-key");
+    if (key === undefined || (key.alg ?? "ed25519") !== "ed25519" || !keyWindowHolds(at, key)) return no("bad-key");
     if (!verifyWith(key, Buffer.from(bytes, "utf8"), Buffer.from(value.sig, "base64url").toString("base64"))) return no("bad-signature");
     if (!list(o.requested).some((r) => r.requestId === h.requestId && r.agentRef === h.agentRef && r.slot === h.slot)) return no("not-requested");
   } else {
@@ -318,7 +313,7 @@ export function credentialRevocationStands(input: unknown): { ok: true; deletes:
   } catch {
     signed = undefined;
   }
-  if (key === undefined || signed === undefined || at === undefined || !inKeyWindow(at, key) || !verifyWith(key, signed, signature.value)) return { ok: false, reason: "bad-signature" };
+  if (key === undefined || signed === undefined || at === undefined || !keyWindowHolds(at, key) || !verifyWith(key, signed, signature.value)) return { ok: false, reason: "bad-signature" };
   const device = isObject(value.device) ? value.device : {};
   const ownDevice = isObject(revocation.device) && revocation.device.id === device.id;
   const ownOrg = isObject(revocation.org) && revocation.org.id === device.org && revocation.context === `${ORG_CONTEXT_PREFIX}${show(device.org)}`;

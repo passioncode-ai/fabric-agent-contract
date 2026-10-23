@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { expectedDecision, policySigningInput, resolvePolicy, verifyWith } from "./device-rules.js";
+import { expectedDecision, keyWindowHolds, policySigningInput, resolvePolicy, verifyWith } from "./device-rules.js";
 import { hasHomePath } from "./activity-rules.js";
 import { secretValue } from "./secret-shape.js";
 
@@ -173,7 +173,7 @@ export function repairDecision(input: unknown): { decision: "run" | "refuse"; re
   const at = Date.parse(show(value.at ?? ""));
   const key = list(value.keys).find((candidate) => candidate.keyId === signature.keyId && (candidate.alg ?? "ed25519") === signature.alg);
   // DEC-0102: the key's validity window is judged at `at`, as FAC-SEM-041 judges a policy's (F-B-106).
-  const inWindow = (k: JsonObject) => !Number.isNaN(at) && !(typeof k.notBefore === "string" && at < Date.parse(k.notBefore)) && !(typeof k.notAfter === "string" && at > Date.parse(k.notAfter));
+  const inWindow = (k: JsonObject) => keyWindowHolds(at, k);
   // A request with no canonical form (a lone surrogate, a fraction) is refused, never thrown (DEC-0102).
   let signed: Buffer | undefined;
   try {

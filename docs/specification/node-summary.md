@@ -76,7 +76,7 @@ by `agentRef`, `version` and `digest`, one line the person reads (`task`), and a
 | Refused as | When |
 |---|---|
 | `already-answered` | this repair `id` was already answered: the node answers again with the stored result, runs nothing, and never sends this reason in a `repair-result/1`; an id is the issuing organization's, so a node keeps results by `org.id` and id, and a server asks again only under a new id (DEC-0102) |
-| `bad-signature` | no key of the current set with that `keyId` and algorithm, inside its `notBefore` and `notAfter` at that moment (as `FAC-SEM-041` judges a policy's), verifies the signature; a request with no canonical form is refused here, never thrown (DEC-0102) |
+| `bad-signature` | no key of the current set with that `keyId` and algorithm, inside its `notBefore` and `notAfter` at that moment (as `FAC-SEM-041` judges a policy's: an absent bound open, one that does not read closing the window, `keyWindowHolds`, DEC-0115), verifies the signature; a request with no canonical form is refused here, never thrown (DEC-0102) |
 | `wrong-device` | the request names another device or organization |
 | `expired` | outside `issuedAt` ≤ now < `expiresAt`, or a window longer than 7 days |
 | `policy-expired` | the policy expired: remote execution stops with it, exactly as `FAC-SEM-068` decides (a policy with no `expiresAt` does not expire, DEC-0102) |
