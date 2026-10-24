@@ -82,7 +82,8 @@ passed, with a GitHub release whose notes list the decisions since the previous 
 (DEC-0016) and the build metadata after `+` tells two releases of one version apart by day; SemVer gives build
 metadata no precedence (SemVer 2.0.0 §10), so a reader orders releases by the date, and more than one release on a day
 takes `.2`, `.3` after the date. A release changes no pin by itself: a consumer still pins the release's full commit in
-`fabric-contract.lock.json`. The first release is `v0.1.0+2026-10-23`.
+`fabric-contract.lock.json`. The first release is `v0.1.0+2026-10-23`; the second, `v0.1.0+2026-10-24`, carries DEC-0112 to DEC-0119 and lists
+what narrows in its notes, as DEC-0119 asks of a change to a revision nobody had adopted.
 
 Moving the pin is a compatibility change: the consumer reviews what changed between the
 two commits, updates the lock and every mention in one change, and releases. A consumer that vendors schemas copies
