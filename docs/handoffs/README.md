@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-24 the contract's own debts, the third release](2026-10-24-debts-and-third-release.md) | DEC-0120 (CT-104; CT-72, CT-74, CT-96, CT-100, CT-101, CT-109 closed; CT-123 filed) | this pull request; release `v0.1.0+2026-10-24.2` |
 | [2026-10-24 DEC-0118, the audit, the second release](2026-10-24-audit-and-release.md) | DEC-0118 (#170 `bf6bd918`), DEC-0119 (the audit) | merged, #173 `4e5440cf`; released `v0.1.0+2026-10-24` |
 | [2026-10-23 key windows, protocol gates, a queued call's record](2026-10-23-gates-and-windows.md) | DEC-0115, DEC-0116, DEC-0117 (CT-120) | merged, #165 `e999853f`, #166 `cd9f49e1`, #167 `68abd0f6` |
 | [2026-10-23 a check-in's records against its certificate](2026-10-23-check-in-summary.md) | DEC-0114 (CT-91; DEC-0115, a closed key window, rides in its handoff) | merged, #164 `baeb50f2` |
