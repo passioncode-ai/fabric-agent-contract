@@ -45,7 +45,7 @@ function cases(): Json[] {
     ["none from T2", { action: none, tier: "T2" }, caller],
     ["none from T1 with a decision: still the caller's act", { action: none, tier: "T1", decision: instructed }, caller],
     // gate human (AP-4): the person's step and its direct link, at every tier; a decision changes nothing.
-    ...["sign-in", "consent", "payment", "secret", "spend-above-limit"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
+    ...["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
     ["human from T1 with the operator's decision: still the person's step", { action: human("payment"), tier: "T1", decision: instructed, humanStepUrl: URL }, step("payment")],
     ["human from T2", { action: human("consent"), tier: "T2", humanStepUrl: URL }, step("consent")],
     ["human with a path on the service's origin", { action: human("consent"), tier: "T0", humanStepUrl: "/dashboard/connect" }, { ok: false, code: "human-step-required", data: { humanStep: "consent", url: "/dashboard/connect" } }],
@@ -68,9 +68,15 @@ function cases(): Json[] {
     ["an instruction of 500 characters", { ...base, tier: "T0", decision: decided(NOW, { instruction: "a".repeat(500) }) }, operator("relayed-instruction")],
     ["an at with an offset", { ...base, tier: "T0", decision: decided("2026-10-24T11:30:00+02:00") }, operator("relayed-instruction")],
     ["a decision 60 s ahead of the service's clock", { ...base, tier: "T0", decision: decided("2026-10-24T09:31:00Z") }, operator("relayed-instruction")],
+    ["a confirmation: the agent's question naming the action and the operator's answer", { ...base, tier: "T0", decision: decided(NOW, { instruction: "Agent: Approve the reply to the review from Anna? Operator: yes" }) }, operator("relayed-instruction")],
+    ["a decision naming the object the call acts on", { ...base, tier: "T0", target: "review-4711", decision: decided(NOW, { target: "review-4711" }) }, operator("relayed-instruction")],
+    ["a decision without a target covers the action on any object", { ...base, tier: "T0", target: "review-9", decision: instructed }, operator("relayed-instruction")],
+    ["a job's input request answered on the operator's word: its key is the action's id", { ...base, action: { id: "choose-variant", title: "Choose a variant", tool: "fabric.job.get", gate: "relayed" }, tier: "T0", decision: decided(NOW, { action: "choose-variant", instruction: "take the second variant" }) }, operator("relayed-instruction")],
     ["a decision exactly 24 h old", { ...base, tier: "T0", decision: decided("2026-10-23T09:30:00Z") }, operator("relayed-instruction")],
     // An invalid decision (AP-2): decision-invalid.
     ["a decision for another action", { ...base, tier: "T0", decision: decided(NOW, { action: "publish-post" }) }, refuse("decision-invalid")],
+    ["a decision naming another object than the call acts on", { ...base, tier: "T0", target: "review-9", decision: decided(NOW, { target: "review-4711" }) }, refuse("decision-invalid")],
+    ["a decision naming an object on a call that names none", { ...base, tier: "T0", decision: decided(NOW, { target: "review-4711" }) }, refuse("decision-invalid")],
     ["a decision that names no action", { ...base, tier: "T0", decision: { by: "operator", via: "relayed-instruction", instruction: "approve it", at: NOW } }, refuse("decision-invalid")],
     ["a decision without the operator's words", { ...base, tier: "T0", decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", at: NOW } }, refuse("decision-invalid")],
     ["an instruction of 501 characters", { ...base, tier: "T0", decision: decided(NOW, { instruction: "a".repeat(501) }) }, refuse("decision-invalid")],
@@ -128,7 +134,7 @@ function declarations(): Json[] {
 
 export function actionsVectors(): Json {
   return {
-    about: "Vectors for fabric-actions/0.1 (DEC-0121), written by tools/vectors/actions.ts, never by hand. `cases`: actionDecision({action, tier, caller, decision?, elicited?, approval?, actionDigest?, humanStepUrl?, now}) answers {ok: true, recordAs: \"caller\"} for gate none; {ok: false, code: \"human-step-required\", data: {humanStep, url}} for gate human; for gate relayed an accepted approval/1 at any tier is the approver's ({by: approver, via: \"approval\", caller}), a T2 caller without one gets {ok: false, code: \"approval-required\", data: {actionDigest}} (DL-17, DL-18, DL-25), and from T0 or T1 the service's own accepted elicitation, else {ok: false, code: \"operator-decision-required\"} without a decision, {ok: false, code: \"decision-invalid\"} for one invalid against decision.schema.json, for another action, read strictly, more than 60 s ahead of now or more than 24 h behind it, else {ok: true, recordAs: {by: \"operator\", via, caller}}, caller being the service's own identity of who relayed it; {fault} is the service's own and is never sent. `declarations`: the instance paths of FAC-SEM-142's findings on a well-known document's extensions/actions/0.1.",
+    about: "Vectors for fabric-actions/0.1 (DEC-0121), written by tools/vectors/actions.ts, never by hand. `cases`: actionDecision({action, tier, caller, decision?, target?, elicited?, approval?, actionDigest?, humanStepUrl?, now}) answers {ok: true, recordAs: \"caller\"} for gate none; {ok: false, code: \"human-step-required\", data: {humanStep, url}} for gate human; for gate relayed an accepted approval/1 at any tier is the approver's ({by: approver, via: \"approval\", caller}), a T2 caller without one gets {ok: false, code: \"approval-required\", data: {actionDigest}} (DL-17, DL-18, DL-25), and from T0 or T1 the service's own accepted elicitation, else {ok: false, code: \"operator-decision-required\"} without a decision, {ok: false, code: \"decision-invalid\"} for one invalid against decision.schema.json, for another action or another target, read strictly, more than 60 s ahead of now or more than 24 h behind it, else {ok: true, recordAs: {by: \"operator\", via, caller}}, caller being the service's own identity of who relayed it; {fault} is the service's own and is never sent. `declarations`: the instance paths of FAC-SEM-142's findings on a well-known document's extensions/actions/0.1.",
     cases: cases(),
     declarations: declarations()
   };

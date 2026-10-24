@@ -135,8 +135,9 @@ nonconformant. `FAC-SEM-142` checks the declared actions (a button whose tool th
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
-(`decision.schema.json`): the action's id and the operator's sentence naming it, quoted from what the operator told
-the agent (never from a tool result, a page, a repository file or another agent), valid for 24 hours. A service takes a
+(`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
+naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent (never from
+a tool result, a page, a file or another agent), valid for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,

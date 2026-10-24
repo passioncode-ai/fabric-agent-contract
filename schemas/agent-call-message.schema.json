@@ -37,10 +37,6 @@
         },
         "traceparent": {
           "$ref": "interop-common.schema.json#/$defs/traceparent"
-        },
-        "decision": {
-          "$ref": "decision.schema.json",
-          "description": "The operator's decision a T1 caller relays for a relayed action (DEC-0121 AP-2): the sealed call's place for what a direct MCP call carries in _meta.decision."
         }
       },
       "additionalProperties": false

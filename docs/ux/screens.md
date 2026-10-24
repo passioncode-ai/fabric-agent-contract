@@ -203,7 +203,7 @@
 - **Elements:** the callee, the action as the callee will take it, who asks (the caller and the person under the share grant), the approval's lifetime (primary action: approve this action once).
 - **States:** success — approved, and the approval returned to the caller; error — declined, or the callee later refuses the approval as invalid or reused.
 - **Coverage:** `approval.schema.json`, `test/delegation.test.ts`, `test/delegation-sealed.test.ts` (DL-17, DL-18)
-- **Scenarios:** SCN-018, SCN-043
+- **Scenarios:** SCN-018
 - **Resources:** delegation specification, Approval, Trust tiers
 - **Status:** proposed
 
@@ -370,4 +370,15 @@
 - **Coverage:** `src/credentials.ts` (`callRecordFindings`, `FAC-SEM-140`), `test/credential-envelope.test.ts`
 - **Scenarios:** SCN-042
 - **Resources:** credentials specification, The call record
+- **Status:** proposed
+
+### SCR-30: The operator's agent and the service's audit row
+
+- **Used by:** FLW-29
+- **Purpose:** the operator sees their instruction taken: the agent's reply in their chat and the service's audit row.
+- **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step); the audit row (decided by, via, relayed by the authenticated caller, when).
+- **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link.
+- **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`
+- **Scenarios:** SCN-043
+- **Resources:** service specification, Actions
 - **Status:** proposed

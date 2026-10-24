@@ -36,6 +36,7 @@ describe("actionDecision (DEC-0121 AP-2, AP-4)", () => {
       const call = { agentId: "reviews", capability: "reviews.approve", input: {}, decision: input.decision };
       expect(valid("interop-agent-call.schema.json", call), name).toBe(true);
       expect(valid("agent-call-message.schema.json", { type: "fabric-agent-call/1", kind: "call", call }), name).toBe(true);
+      expect(valid("agent-call-message.schema.json", { type: "fabric-agent-call/1", kind: "call", call, decision: input.decision }), name).toBe(false);
       expect(expected.recordAs.caller).toBe(input.caller);
     }
   });
@@ -108,5 +109,14 @@ describe("kind action-call (FAC-SEM-142)", () => {
   });
   it("answers nothing for another kind", () => {
     expect(actionRules("service-well-known", {})).toBeUndefined();
+  });
+});
+
+describe("delegation-refusal keeps DL-19's open data for every other code (DEC-0121)", () => {
+  it("admits any data.url on a refusal other than human-step-required", async () => {
+    const ajv2 = await createValidator();
+    const check = (error: unknown) => validateDocument(ajv2, `${SCHEMA_PREFIX}schemas/delegation-refusal.schema.json`, { error }).valid;
+    expect(check({ code: "no-grant", message: "no grant", data: { url: "http://127.0.0.1:8123/grant", humanStep: "approve" } })).toBe(true);
+    expect(check({ code: "human-step-required", message: "pay", data: { humanStep: "approve", url: "https://x.example" } })).toBe(false);
   });
 });

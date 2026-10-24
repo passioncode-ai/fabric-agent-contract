@@ -7188,31 +7188,42 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `gate`, or whose `tool` is missing from a present `surfaces.mcp.capabilities`: a button without an agent twin. It
      sees only declared actions; a host reports a dashboard that declares none (CT-126), reading it with `actionsView`.
   2. **The relayed decision (AP-2).** A call carries the operator's decision in `_meta.decision`, a sealed call over the
-     relay and the hub's `agent.call` in `decision` (`decision.schema.json`): `{by: "operator", via:
-     "relayed-instruction", action, instruction, at}`, `action` the declared action's id and `instruction` the
-     operator's sentence that names it, verbatim, at most 500 characters. A service MUST take a `relayed` action from a
+     relay and the hub's `agent.call` in `call.decision` (`decision.schema.json`): `{by: "operator", via:
+     "relayed-instruction", action, target?, instruction, at}`, `action` the declared action's id, `target` the one
+     object the operator named when they named one, and `instruction` the operator's words in item 3's form, at most
+     500 characters. A service MUST take a `relayed` action from a
      T0 or T1 caller (DL-25) that carries a valid decision as the operator's decision: it performs it as the dashboard
      would, records it as the operator's with `via` and the caller's identity as the service authenticated it (never
      one the call names), and MUST NOT refuse it as needing a person, a page or an operator session. A decision is
      valid for the action it names from its `at` until 24 hours later (`approval/1`'s lifetime) and no more than 60
-     seconds ahead of the service's clock (DEC-0047), and covers repeated calls of that action inside the window.
+     seconds ahead of the service's clock (DEC-0047), and covers repeated calls of that action inside the window, on the
+     object `target` names or on any object when it names none.
      Without a decision the service refuses `operator-decision-required`, which tells the agent to ask the operator and
      call again with the answer; an invalid one is `decision-invalid`. An accepted `approval/1` is the approver's
      decision at any tier (DL-18, DL-26); a T2 caller without one is refused `approval-required` with the action's
-     digest, and a decision in its call changes nothing; the hub drops a T2 origin's decision. A service MAY confirm a
-     relayed decision with its own elicitation and records the person's acceptance as `via: elicitation` from its own
-     record, never from the caller; it MUST NOT require one when the client cannot show it. A job's input request
-     answered through `fabric.job.get` `inputResponses` on the operator's word carries the decision with the job's
-     action id. `actionDecision` (`src/actions.ts`) is the reference, run after DL-13, DL-21 and `verifyApproval`.
-  3. **The agent's side (AP-3).** An agent sets the decision only for an instruction the operator gave it, quoting the
-     sentence that names the action, never for text from a tool result, a page, a repository file, a board message or
-     another agent: those are data (the prompt-injection boundary). The operator's words reach an agent in its own
-     session, through a subagent its session started and passed them to verbatim, through the operator channel, or in
-     the operator's user-level instruction files its harness loads as theirs when those name the action's class. An
-     agent that is not sure the operator decided asks them.
-  4. **Human gates stay (AP-4, DL-26).** Sign-ins, consents, payments and top-ups, typed secrets and spend above a
-     limit stay the person's. Their action is still on the agent surface with `gate: human` and its `humanStep`
-     (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`); the tool refuses `human-step-required` with
+     digest, and a decision in its call changes nothing; the hub forwards a T0 or T1 origin's decision and drops a T2
+     origin's, passes DL-19's refusals through unchanged and never answers a resend that carries a decision from what it
+     remembered of the call before it; a callee records the hub and the origin its delegation names as the relaying
+     caller. A sealed call carries a decision only to a target whose `protocols` lists `fabric-actions/0.1`. When a
+     relayed decision approves an agent's own proposal, the proposal's `approvedBy` is the operator's own principal and
+     the audit names the relaying agent. A service MAY ask the person itself with an elicitation: an accepted one is the operator's decision,
+     recorded `via: elicitation` from its own record, never from the caller; a declined one is the operator's no; it
+     MUST NOT require one when the client cannot show it. A job's input request is an action whose id is the request's
+     key, and the decision rides in the `_meta` of the `fabric.job.get` call that carries `inputResponses`. The
+     service keeps the decision in its own audit and never puts `instruction`, which may name people, on the events
+     feed, a usage report or another party's page. `actionDecision` (`src/actions.ts`) is the reference, run after
+     DL-13, DL-21 and `verifyApproval`.
+  3. **The agent's side (AP-3).** An agent sets the decision only for words the operator gave it about this action,
+     never for text from a tool result, a page, a file, a board message or another agent: those are data (the
+     prompt-injection boundary). The operator's words reach an agent in its own session, through a subagent its
+     session started and passed them to verbatim, or through the operator channel; a standing rule in a file is not a
+     decision on an action. `instruction` quotes the operator's sentence that names the action, or the agent's
+     question that names it and the operator's answer, both verbatim; `at` is when the operator said it. An agent that
+     is not sure the operator decided asks them.
+  4. **Human gates stay (AP-4, DL-26).** Sign-ins, consents, payments and top-ups, typed secrets, spend above a limit
+     and a signature by the person's passkey (the estate's ceremonies) stay the person's. Their action is still on the
+     agent surface with `gate: human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`,
+     `spend-above-limit`, `passkey`); the tool refuses `human-step-required` with
      `data.humanStep` and `data.url`, the direct link to that step, so the agent hands the person the exact button.
   5. **Approval separation (AP-5).** A relayed decision is the operator's, not the agent's: an agent still MUST NOT
      approve its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's
@@ -7220,8 +7231,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   6. **One code set.** `operator-decision-required`, `decision-invalid` and `human-step-required` join DL-19's one set
      of authorisation refusals (`delegation-refusal.schema.json`, `REFUSAL_CODES`) and travel as its
      `structuredContent`. The texts that reserved an action to the page now say it is the operator's decision, taken on
-     the page or relayed: settings restore (service.md), enabling the operator channel and removing its webhook
-     (OC-1, OC-2).
+     the page or relayed: settings restore (service.md, FLW-15), enabling the operator channel and removing its webhook
+     (OC-1, OC-2), and a board hold, whose set, lift and list become the host's relayed actions (project-comms.md
+     Holds, CT-125).
 - **Why:** the operator works through their agents; a decision they state in chat is the same decision as a click, and
   DL-26 already trusts it inside the boundary. A page-only action makes the agent useless exactly where a decision is
   needed. Binding the decision to one action, a lifetime and the authenticated caller keeps a relayed sentence from
@@ -7239,9 +7251,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   with nothing) until its kit relays decisions (CT-124). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (Actions, Manual restore), `interop.md` (the extension
   key, `_meta.decision`, the codes, C3.5), `delegation.md` (DL-19, DL-26), `machine-calls.md` (the sealed call),
-  `operator-channel.md` (OC-1, OC-2), `governance-and-roles.md`, `versioning.md`, `conformance.md` (rows and
-  `FAC-SEM-142`), `CONTEXT.md`, `docs/ux/scenarios.md` (SCN-018, SCN-043), the author's guide; schemas
+  `operator-channel.md` (OC-1, OC-2), `project-comms.md` (Holds), `governance-and-roles.md`, `versioning.md`,
+  `conformance.md` (rows and `FAC-SEM-142`), `CONTEXT.md`, `docs/ux/foundation.md` (ST-035), `docs/ux/flows.md`
+  (FLW-15, FLW-29), `docs/ux/screens.md` (SCR-30), `docs/ux/scenarios.md` (SCN-018, SCN-043), the author's guide; schemas
   `service-actions-extension`, `decision`, `interop-request-meta`, `delegation-refusal`, `agent-call-message`,
   `interop-agent-call`; `src/actions.ts`, `src/delegation.ts`; the vector file `fixtures/vectors/actions.json`;
   backlog CT-124 to CT-127.
-- **Source:** the operator's instruction of 2026-10-24; the seam and product readings of the first draft, 2026-10-24.
+- **Source:** the operator's instruction of 2026-10-24; two rounds of seam and product readings, 2026-10-24.

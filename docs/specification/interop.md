@@ -284,9 +284,10 @@ DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.
 A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
-"relayed-instruction", action, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
-unknown `_meta` member. An agent sets it only for an instruction the operator gave it, quoting the sentence that names
-the action (AP-3).
+"relayed-instruction", action, target?, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
+unknown `_meta` member. An agent sets it only for words the operator gave it about the action, in AP-3's form. A
+job's input request answered on the operator's word is an action whose id is the request's key: the
+`fabric.job.get` call that carries `inputResponses` carries the decision in its `_meta` (AP-2).
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:
@@ -294,12 +295,16 @@ each in the `structuredContent` of an `isError` tool result:
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision | the service | asks the operator and calls again with their answer in `_meta.decision` |
-| `decision-invalid` | the decision is not valid against its schema, names another action, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
-| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
+| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
 `_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
+
+When the operator makes the choice through their agent, the `fabric.job.get` call that carries `inputResponses`
+carries the operator's decision in `_meta.decision`, the request's key being the action's id
+([service](service.md#actions) AP-2, DEC-0121).
 
 ## C3.4 Trace
 
@@ -328,7 +333,7 @@ trace id is accepted but its span is recorded `incomplete`.
 ## C3.5 The hub
 
 Fabric's MCP is the only route between agents: an agent reaches another agent
-by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?}` (and
+by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?, decision?}` (and
 `fabric.job.get/cancel` for the job it returns). Fabric enforces the caller's MCP access binding
 (ADR-0026), mints the callee's credential itself, and journals one span per hop. Credentials
 travel over HTTP only in headers (`Authorization: Bearer <token>`), and over the relay only in a sealed call's
@@ -340,7 +345,11 @@ one estate the same arguments travel over the relay inside a sealed `fabric-agen
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond these and `decision`, so a credential cannot ride in
 the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
-forwards a T1 origin's unchanged and drops a T2 origin's, which would change nothing there (DEC-0121).
+forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's, which
+would change nothing there; it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
+`human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
+carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its
+delegation token names as the relaying caller (DEC-0121).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

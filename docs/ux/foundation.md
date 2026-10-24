@@ -676,6 +676,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-035: Operator tells their agent to take a step the dashboard offers
+
+- **Story:** As P-02, I want to tell my own agent "approve that" and have the service take it as my decision, so that I never have to open a dashboard for a step my agent can take for me.
+- **Traces:** JTBD-07, JRN-06/#3
+- **Acceptance criteria:**
+  - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
+  - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
+  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

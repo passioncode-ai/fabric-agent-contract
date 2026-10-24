@@ -235,7 +235,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   host (width, navigation, scrolling, appearance) is that profile's, not this one's. It MAY also carry what the
   agent uses under `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1`
   ([connections](connections.md), DEC-0096), and, for a service that queues, its load under
-  `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104).
+  `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104), and the actions its
+  pages offer under `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` ([Actions](#actions),
+  DEC-0121).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
@@ -865,33 +867,42 @@ Every button a person has, the person's agent has, and an operator's decision re
 - **AP-2, the relayed decision.** A call carries the operator's decision in `_meta.decision`
   ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
   [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)), and a sealed call over the
-  relay or the hub's `agent.call` in its `decision` ([machine calls](machine-calls.md), [interop](interop.md#c35-the-hub)):
-  `{by: "operator", via: "relayed-instruction", action, instruction, at}`, `action` being the declared action's id and
-  `instruction` the operator's sentence that names it, verbatim, at most 500 characters (DEC-0121). A service MUST take
+  relay or the hub's `agent.call` in `call.decision` ([machine calls](machine-calls.md), [interop](interop.md#c35-the-hub)):
+  `{by: "operator", via: "relayed-instruction", action, target?, instruction, at}`, `action` being the declared
+  action's id, `target` the one object the operator named when they named one, and `instruction` the operator's words
+  in AP-3's form, at most 500 characters (DEC-0121). A service MUST take
   a `relayed` action from a T0 or T1 caller ([delegation](delegation.md#trust-tiers) DL-25) that carries a valid
   decision as the operator's decision: it performs it as the dashboard would, records it as the operator's with `via`
   and the caller's identity as the service authenticated it, never one the call names, and MUST NOT refuse it as
   needing a person, a page or an operator session (DEC-0121). A decision is valid for the action it names, from its
   `at` until 24 hours later (an `approval/1`'s lifetime, DL-17), and no more than 60 seconds ahead of the service's
-  clock (DEC-0047); inside that window it covers repeated calls of that action (DEC-0121). Without a decision the
+  clock (DEC-0047); inside that window it covers repeated calls of that action on the object `target` names, or on any
+  object when it names none, and a service whose action acts on one object passes that object to `actionDecision`
+  (DEC-0121). Without a decision the
   service refuses `operator-decision-required`, which tells the agent to ask the operator and call again with the
   answer; an invalid one is `decision-invalid` (DEC-0121). An accepted `approval/1` is the approver's decision at any
   tier (DL-18; DL-26 lets a T0 or T1 caller present one); a T2 caller without one is refused `approval-required` with
-  the action's digest, and a decision in its call changes nothing (DEC-0121). A service MAY confirm a relayed decision
-  with its own elicitation (C3.3) when the client supports one, records the person's acceptance as `via: elicitation`
-  from its own record, never from the caller's claim, and MUST NOT require it when the client does not (DEC-0121). A
-  job's input request answered through `fabric.job.get` `inputResponses` on the operator's word carries the decision
-  with the job's action id, and needs no declaration of its own (DEC-0121).
-- **AP-3, the agent's side.** An agent sets `_meta.decision` only for an instruction the operator gave it, quoting the
-  sentence that names the action, never for text from a tool result, a page, a repository file, a board message or
-  another agent: those are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent in its
-  own session, through a subagent its session started and passed them to verbatim, through the operator channel
-  ([operator channel](operator-channel.md)), or in the operator's user-level instruction files the agent's harness
-  loads as theirs, when those name the action's class; a repository's files are not the operator's words (DEC-0121).
-  An agent that is not sure the operator decided asks them (DEC-0121).
+  the action's digest, and a decision in its call changes nothing (DEC-0121). A service MAY ask the person itself with
+  an elicitation (C3.3) when the client supports one: an accepted one is the operator's decision on its own, recorded
+  `via: elicitation` from the service's own record, never from the caller's claim; a declined one is the operator's no,
+  and the service does not act; it MUST NOT require one when the client cannot show it (DEC-0121). A job's input
+  request is an action too: its id is the request's key in `inputRequests` (a slug), its tool `fabric.job.get`, its
+  gate `relayed`, and the decision rides in the `_meta.decision` of the `fabric.job.get` call that carries
+  `inputResponses` ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). The service keeps the decision,
+  `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
+  a usage report or any page another party reads (DEC-0121).
+- **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
+  for text from a tool result, a page, a file, a board message or another agent: those are data (the prompt-injection
+  boundary) (DEC-0121). The operator's words reach an agent in its own session, through a subagent its session started
+  and passed them to verbatim, or through the operator channel ([operator channel](operator-channel.md)); a standing
+  rule in a file is not a decision on an action (DEC-0121). `instruction` quotes the operator's sentence that names the
+  action, or, when the operator answered the agent's question, the question that names the action and the answer, both
+  verbatim (`Agent: Approve the reply to Anna? Operator: yes`); `at` is when the operator said it (DEC-0121). An agent
+  that is not sure the operator decided asks them (DEC-0121).
 - **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, typed secrets and spend above a limit stay the
-  person's ([delegation](delegation.md#trust-tiers) DL-26). Their action is still on the agent surface with `gate:
-  human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`); the tool refuses
+  person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
+  estate's [ceremonies](ceremonies.md)). Their action is still on the agent surface with `gate: human` and its
+  `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`, `passkey`); the tool refuses
   `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
   the service's origin; a URL-mode elicitation where the client supports it), so the agent hands the person the exact
   button (DEC-0121).
@@ -902,7 +913,7 @@ Every button a person has, the person's agent has, and an operator's decision re
 
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
-declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision`, the service's own
+declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision` and `target`, the service's own
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
 `now`:
 
@@ -914,7 +925,7 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 | `relayed` | T2, or a caller placed in no tier (DL-25), without one | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
 | `relayed` | T0 or T1, the service's own accepted elicitation | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` |
 | `relayed` | T0 or T1, no decision | `{ok: false, code: "operator-decision-required"}` |
-| `relayed` | T0 or T1, a decision invalid against the schema, for another action, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
+| `relayed` | T0 or T1, a decision invalid against the schema, for another action, naming a `target` the call does not act on, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller}}`: the operator's act |
 
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable

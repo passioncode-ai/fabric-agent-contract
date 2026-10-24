@@ -19,7 +19,7 @@ export const HUMAN_STEP_REQUIRED = "human-step-required";
 export const APPROVAL_REQUIRED = "approval-required";
 
 export type ActionGate = "none" | "relayed" | "human";
-export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-above-limit";
+export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-above-limit" | "passkey";
 /** The caller's trust tier (delegation DL-25). Anything a callee cannot place in T0 or T1 is T2. */
 export type CallerTier = "T0" | "T1" | "T2";
 
@@ -33,8 +33,10 @@ export interface ActionDecisionInput {
   tier?: unknown;
   /** The service's authenticated identity of the caller: what it records as the relaying caller, never a claim in the call. */
   caller?: unknown;
-  /** The call's `_meta.decision` (or the sealed call's `decision`), as received. */
+  /** The call's `_meta.decision` (or `agent.call`'s `decision`), as received. */
   decision?: unknown;
+  /** The one object the call acts on, as the service identifies it, when the action acts on one. */
+  target?: unknown;
   /** The service's own record that its elicitation for this call was shown and the person accepted it (C3.3). */
   elicited?: unknown;
   /** The outcome of `verifyApproval` for an `approval/1` the call presented (DL-18), when it accepted one. */
@@ -89,12 +91,13 @@ function acceptedApproval(approval: unknown): approval is { ok: true; approver: 
  * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
  *   refused `approval-required` with the action's digest, whatever its call carries; the service's own record of an
  *   accepted elicitation is the operator's decision; without a decision `operator-decision-required`; a decision not
- *   valid against `decision.schema.json`, for another action, or whose `at` does not read strictly, lies more than
+ *   valid against `decision.schema.json`, for another action, naming a `target` the call does not act on, or whose
+ *   `at` does not read strictly, lies more than
  *   CLOCK_SKEW_SECONDS after `now` or more than DECISION_LIFETIME_SECONDS before it, `decision-invalid`; otherwise the
  *   operator's act. Every operator or approver record names `caller`, the service's own identity of who relayed it.
  */
 export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer {
-  const { action, tier, caller, decision, elicited, approval, actionDigest, humanStepUrl, now } = input;
+  const { action, tier, caller, decision, target, elicited, approval, actionDigest, humanStepUrl, now } = input;
   if (!readableAction(action)) return { fault: "action-invalid" };
   if (action.gate === "none") return { ok: true, recordAs: "caller" };
   if (action.gate === "human") {
@@ -113,8 +116,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
   decisionShape ??= schema("decision.schema.json");
   if (decisionShape(decision) !== true) return { ok: false, code: DECISION_INVALID };
-  const read = decision as { action: string; at: string };
-  if (read.action !== action.id) return { ok: false, code: DECISION_INVALID };
+  const read = decision as { action: string; target?: string; at: string };
+  if (read.action !== action.id || (read.target !== undefined && read.target !== target)) return { ok: false, code: DECISION_INVALID };
   const at = strictTime(read.at);
   if (Number.isNaN(at) || at > clock + CLOCK_SKEW_SECONDS * 1000 || at < clock - DECISION_LIFETIME_SECONDS * 1000) {
     return { ok: false, code: DECISION_INVALID };

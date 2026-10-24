@@ -75,8 +75,8 @@ product manager (`FAC-SEM-006`), two spellings of one project id being one proje
 
 An operator's decision an agent relays in `_meta.decision` is the operator's, not the agent's: an agent still MUST NOT
 approve its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's
-approval of it, which the service's audit records with the relaying caller ([service](service.md#actions) AP-5,
-DEC-0121).
+approval of it: the proposal's `approvedBy` is then the operator's own principal, never the agent's, and the service's
+audit records the relaying caller ([service](service.md#actions) AP-5, DEC-0121).
 
 ## Semantic rules
 

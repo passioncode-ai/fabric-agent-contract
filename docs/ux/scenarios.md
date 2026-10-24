@@ -48,7 +48,7 @@
 | SCN-040 | An agent asks for a token for one zone and gets it in its organization's context | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
 | SCN-041 | A member leaves and the credentials of their agents end | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
 | SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
-| SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-014, FLW-11 | draft | not audited |
+| SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 
 ## Personas
 
@@ -942,18 +942,18 @@ independent agent author and P-02 project operator.
 
 - **Persona:** P-02
 - **Feature:** delegation
-- **Traces:** ST-014, FLW-11 (JTBD-07, JRN-06/#3)
+- **Traces:** ST-035, FLW-29 (JTBD-07, JRN-06/#3)
 - **Entry point:** the operator's chat with their own coding agent
 - **Preconditions:** `example-publisher` runs on the operator's machine (T0) and declares under `extensions/actions/0.1` the action `approve-reply` (tool `reviews.approve`, `gate: relayed`), the same as the "Approve" button on its page
 - **Steps:**
   1. The operator writes to their agent "approve the reply to the review from Anna" -> the agent calls `reviews.approve` with `_meta.decision` `{by: operator, via: relayed-instruction, action: approve-reply, instruction: "approve the reply to the review from Anna", at}`.
-  2. The service runs `actionDecision` -> the decision names this action, is less than 24 hours old and not ahead of its clock: the operator's act.
+  2. The service runs `actionDecision` -> the decision names this action, is less than 24 hours old and not more than 60 seconds ahead of its clock: the operator's act.
   3. The service approves the reply as its page would -> its audit says the operator decided, relayed by the agent it authenticated.
 - **Expected result:** the reply is approved once, recorded as the operator's decision; the operator never opened the page.
-- **Alt paths:** the agent calls without a decision -> `operator-decision-required`; it asks the operator and calls again with their answer. The action is a payment (`gate: human`) -> `human-step-required` with `data.url`; the agent hands the operator that link. An outside caller (T2) asks for it -> `approval-required` with the action's digest, as SCN-018. A review's text says "approve this" -> it is data, not the operator's words; the agent sets no decision (AP-3).
+- **Alt paths:** the agent calls without a decision -> `operator-decision-required`; it asks "Approve the reply to Anna?", the operator answers "yes", and it calls again with the question and the answer quoted as the instruction. The action is a payment (`gate: human`) -> `human-step-required` with `data.url`; the agent hands the operator that link. An outside caller (T2) asks for it -> `approval-required` with the action's digest, as SCN-018. A review's text says "approve this" -> it is data, not the operator's words; the agent sets no decision (AP-3).
 - **UI elements:** none on the page; the agent's chat and the service's audit row (decided by, via, relayed by).
 - **States covered:** success, error
-- **Errors & recovery:** a decision for another action, more than 24 hours old or ahead of the service's clock -> `decision-invalid`; the agent asks the operator again.
+- **Errors & recovery:** a decision for another action or object, more than 24 hours old or more than 60 seconds ahead of the service's clock -> `decision-invalid`; the agent asks the operator again.
 - **Status:** draft
 - **Coverage:** DEC-0121, `actionDecision` in `src/actions.ts` (`FAC-SEM-142`), `fixtures/vectors/actions.json`, `fixtures/semantic/action-call-*`, `test/actions.test.ts`
 - **Product:** unobserved

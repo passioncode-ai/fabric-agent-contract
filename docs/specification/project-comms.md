@@ -555,8 +555,9 @@ scope with `held` and never refuses a call that settles, reports on or keeps ali
 A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says.
 
-- **Who sets it.** Only the operator, in the host. The contract defines no tool that sets, lifts or lists a hold, so an
-  agent can neither hold nor release work. A hold is not a grant change and not an authority revision: it never
+- **Who sets it.** Only the operator decides a hold: in the host, or through their agent, which relays the decision to
+  the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
+  host's tools are CT-125). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
   answers `authority_changed`, and it resets no cursor.
 - **Held work** is a request whose thread is held, whose target Project is held, or whose target (Project, capability)
   slot is held. The thread is the one the request was submitted in; the target is the request's `target`.

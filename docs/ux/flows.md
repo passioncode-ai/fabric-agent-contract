@@ -368,7 +368,7 @@ flowchart TD
 - **Entry points:** a service starting on a fresh database; the operator choosing a snapshot by hand
 - **Success exit:** the restore report: rows inserted, rows refused with their reasons, snapshots skipped
 - **Task analysis:** the service finds its snapshots → on a fresh database it restores the newest intact one with content → otherwise the operator opens a preview → the operator applies it → the report names what was inserted, dropped, defaulted and refused.
-- **Rejected shape:** a restore that replaces existing rows, or an agent applying a manual restore — rejected because restore adds and never overwrites, and applying it is the operator's action (service, Settings backup).
+- **Rejected shape:** a restore that replaces existing rows, or an agent applying a manual restore on its own account: rejected, because restore adds and never overwrites, and applying it is the operator's decision, taken on the page or relayed by their agent (service, Settings backup and Actions AP-2, DEC-0121).
 - **Flow:**
 
 ```mermaid
@@ -713,6 +713,32 @@ flowchart TD
 ```
 
 - **Screens traversed:** SCR-28 queue, issued, refused, revoked; SCR-29 the calls between agents.
+
+### FLW-29: The operator's word, relayed by their agent, to a service's action
+
+- **Traces:** ST-035 (JTBD-07, JRN-06/#3)
+- **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
+- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
+- **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
+- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  O[Operator tells the agent] --> C[Agent calls the tool with the decision]
+  C --> G{gate}
+  G -->|human| H[human-step-required with the link; the agent hands it over]
+  G -->|relayed| T{tier}
+  T -->|T2 without approval| A[approval-required with the digest]
+  T -->|T0 or T1| D{decision}
+  D -->|none| Q[operator-decision-required; the agent asks the operator]
+  Q --> O
+  D -->|invalid| I[decision-invalid; the agent asks again]
+  D -->|valid| R[Taken as the operator's; audited with the agent]
+```
+
+- **Screens traversed:** SCR-30 the operator's agent and the service's audit row.
 
 ## Practice compliance
 
