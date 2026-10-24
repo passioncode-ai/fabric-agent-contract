@@ -134,7 +134,7 @@ function policyUpdate(value: JsonObject): Finding[] {
   const next = isObject(value.next) ? value.next : {};
   const current = isObject(value.current) ? value.current : null;
   const keys = Array.isArray(value.trustedKeys) ? value.trustedKeys.filter(isObject) : [];
-  const at = Date.parse(show(value.at ?? ""));
+  const at = strictTime(value.at); // DEC-0115: the verifier's clock read as the key bounds are
   if (next.source === "user") flag("/next/source", "a user layer is set on the device; it is never delivered as an update");
   const signature = isObject(next.signature) ? next.signature : null;
   if (signature) {
@@ -475,7 +475,8 @@ function keySet(value: JsonObject): Finding[] {
     const revoked = new Set(Array.isArray(next.revoked) ? next.revoked : []);
     const kept = new Map(keys.map((key) => [key.keyId, key]));
     (Array.isArray(current.keys) ? current.keys.filter(isObject) : []).forEach((key) => {
-      if (revoked.has(key.keyId) || strictTime(key.notAfter) <= at) return;
+      // A key valid at `issuedAt` (both bounds inside, DEC-0115) stays; one whose end does not read is no valid key.
+      if (revoked.has(key.keyId) || !(strictTime(key.notAfter) >= at)) return;
       const same = kept.get(key.keyId);
       if (!same || same.publicKey !== key.publicKey) flag("/next/keys", `key ${show(key.keyId)} is still valid until ${show(key.notAfter)}; a rotation keeps it until then or revokes it by name`);
     });
@@ -589,8 +590,9 @@ function rootCertification(value: JsonObject): Finding[] {
   const subject = isObject(certification.subject) ? certification.subject : {};
   const algOf = (key: JsonObject) => key.alg ?? "ed25519";
   if (subject.keyId !== root.keyId || subject.publicKey !== root.publicKey || algOf(subject) !== algOf(root)) flag("/certification/subject", "the certification names another key than the organization's root key from enrollment");
-  const at = Date.parse(show(value.at ?? ""));
-  if (!(at <= Date.parse(show(certification.notAfter ?? "")) && at >= Date.parse(show(certification.issuedAt ?? "")))) flag("/certification/notAfter", "the certification is not valid at enrollment time");
+  // DEC-0115: the clock and every window bound read strictly, as keyWindowHolds reads a key's.
+  const at = strictTime(value.at);
+  if (!(at <= strictTime(certification.notAfter) && at >= strictTime(certification.issuedAt))) flag("/certification/notAfter", "the certification is not valid at enrollment time");
   const signature = isObject(certification.signature) ? certification.signature : {};
   const pinnedKey = (keyId: unknown) => pinned.find((key) => key.keyId === keyId);
   const delegation = isObject(certification.delegation) ? certification.delegation : null;
@@ -602,7 +604,7 @@ function rootCertification(value: JsonObject): Finding[] {
     const issuer = isObject(delegation.signature) ? delegation.signature : {};
     const offline = pinnedKey(issuer.keyId);
     if (!offline || algOf(offline) !== issuer.alg || !verifyWith(offline, certificationSigningInput(delegation), issuer.value)) flag("/certification/delegation/signature", "the delegation key's certificate is not signed by a pinned offline root key");
-    const from = Date.parse(show(delegation.notBefore ?? "")), to = Date.parse(show(delegation.notAfter ?? ""));
+    const from = strictTime(delegation.notBefore), to = strictTime(delegation.notAfter);
     if (!(to > from) || to - from > MAX_DELEGATION_DAYS * DAY_MS) flag("/certification/delegation/notAfter", `a delegation key's certificate lives at most ${MAX_DELEGATION_DAYS} days`);
     else if (!(at >= from && at <= to)) flag("/certification/delegation/notAfter", "the delegation key's certificate is not valid at enrollment time");
     const revocations = isObject(value.revocations) ? value.revocations : null;
@@ -610,7 +612,7 @@ function rootCertification(value: JsonObject): Finding[] {
     // with a stale one, a compromised delegation key could certify until its own certificate expires.
     if (!revocations) flag("/revocations", "a delegated certification carries the offline root's current revocation list");
     else {
-      const issued = Date.parse(show(revocations.issuedAt ?? ""));
+      const issued = strictTime(revocations.issuedAt);
       if (!(issued <= at) || at - issued > MAX_REVOCATION_LIST_AGE_DAYS * DAY_MS) flag("/revocations/issuedAt", `the revocation list was issued at most ${MAX_REVOCATION_LIST_AGE_DAYS} days before enrollment`);
     }
     if (revocations) {

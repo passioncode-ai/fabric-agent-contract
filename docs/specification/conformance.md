@@ -455,5 +455,7 @@ for became a fix of `FAC-SEM-006`.
 Contract `0.x` minor versions may add optional fields, new schemas and new
 profiles; consumers MUST ignore preserved extensions but need not accept unknown
 normative profile versions. Removing or changing required semantics requires a
-new major version. Provider revisions declare a supported contract-version range,
+new major version, or a new revision of the protocol (`name/2`), except for a revision no party has adopted
+yet: while the backlog records no party writing or reading it, a decision may change its required semantics under
+the same name, and the next release's notes list the change as narrowing (DEC-0119). Provider revisions declare a supported contract-version range,
 and a binding pins one exact negotiated version.

@@ -335,7 +335,7 @@
               "items": {
                 "$ref": "credential-request.schema.json"
               },
-              "description": "DEC-0111: credentials the node's agents ask this organization for; a request is sent in every check-in until its envelope opens or a refused decision answers it (credentials.md)."
+              "description": "DEC-0111: credentials the node's agents ask this organization for; a request is sent in every check-in until its envelope opens, a refused decision answers it, or a revocation naming it stands (credentials.md, DEC-0113)."
             },
             "callRecords": {
               "type": "array",

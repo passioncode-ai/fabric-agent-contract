@@ -18,7 +18,7 @@ import { ORG_CONTEXT_PREFIX, PERSONAL_CONTEXT } from "./context-route.js";
 import { keyWindowHolds, policySigningInput, verifyWith } from "./device-rules.js";
 import { machineProfile } from "./estate-record-rules.js";
 import { checkInSummaryFindings } from "./node-summary.js";
-import { type Finding, type JsonObject, isObject, show } from "./findings.js";
+import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { p256KeyRefusal, p256Point, signEs256, type P256Key } from "./p256.js";
 import { looksLikeCredential } from "./registry-rules.js";
 import { CLOCK_SKEW_SECONDS, instant, relayAdmissionSet, verifyEs256 } from "./relay.js";
@@ -466,7 +466,7 @@ export function checkInCredentialFindings(value: JsonObject): Finding[] {
   if (isString(summary)) contexts.add(summary);
   // DEC-0114: the summary is read with the check-in (FAC-SEM-128, node-summary.ts).
   findings.push(...checkInSummaryFindings(value));
-  if (contexts.size > 1) findings.push(flag(requests.length > 0 ? "FAC-SEM-138" : "FAC-SEM-140", "/records", "a check-in goes to one organization: its requests and call records name one context"));
+  if (contexts.size > 1) findings.push(flag(requests.length > 0 ? "FAC-SEM-138" : "FAC-SEM-140", "/records", "a check-in goes to one organization: its requests, call records and node summary name one context"));
   const decisions = indexed(records.credentialDecisions);
   once(decisions, "requestId", "FAC-SEM-138", "/records/credentialDecisions", "a response decides each request once");
   const unissued = new Set(decisions.filter(([d]) => d.outcome !== "issued").map(([d]) => d.requestId));
@@ -504,9 +504,6 @@ function exchangeRule(value: JsonObject): Finding[] {
   return findings;
 }
 
-/** The object entries of an array member with their indices; anything else is none. */
-const indexed = (value: unknown): Array<[JsonObject, number]> =>
-  Array.isArray(value) ? value.flatMap((entry, index): Array<[JsonObject, number]> => (isObject(entry) ? [[entry, index]] : [])) : [];
 
 export function credentialRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "credential-exchange") return exchangeRule(value);

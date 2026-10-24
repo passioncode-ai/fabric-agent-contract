@@ -2,6 +2,7 @@ import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { expectedDecision, keyWindowHolds, policySigningInput, resolvePolicy, verifyWith } from "./device-rules.js";
 import { hasHomePath } from "./activity-rules.js";
 import { secretValue } from "./secret-shape.js";
+import { strictTime } from "./rfc3339.js";
 
 // #region node-summary, docs: docs/specification/node-summary.md
 /**
@@ -170,7 +171,7 @@ export function repairDecision(input: unknown): { decision: "run" | "refuse"; re
   // DEC-0102: a repair id runs at most once; a redelivered request is answered with the stored result, not run again.
   if (value.answered === true) return refuse("already-answered");
   const signature = isObject(request.signature) ? request.signature : {};
-  const at = Date.parse(show(value.at ?? ""));
+  const at = strictTime(value.at); // DEC-0115: the clock read as the key bounds are
   const key = list(value.keys).find((candidate) => candidate.keyId === signature.keyId && (candidate.alg ?? "ed25519") === signature.alg);
   // DEC-0102: the key's validity window is judged at `at`, as FAC-SEM-041 judges a policy's (F-B-106).
   const inWindow = (k: JsonObject) => keyWindowHolds(at, k);
