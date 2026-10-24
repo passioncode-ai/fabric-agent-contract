@@ -8,7 +8,8 @@ export const EXTENSION_KEYS = {
   memory: `${EXTENSION_BASE}memory/0.1`,
   dashboard: `${EXTENSION_BASE}dashboard/0.1`,
   connections: `${EXTENSION_BASE}connections/0.1`,
-  load: `${EXTENSION_BASE}load/0.1`
+  load: `${EXTENSION_BASE}load/0.1`,
+  actions: `${EXTENSION_BASE}actions/0.1`
 } as const;
 
 const KNOWN = new Set<string>(Object.values(EXTENSION_KEYS));

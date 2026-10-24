@@ -128,6 +128,22 @@ fault (the meter: `principal-unproven`, with the detail in its reason) (delegati
 **Revocation delta** entries and **Heartbeats** (DEC-0054). In a personal estate it is the hub's own Ed25519 key on the
 always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084).
 
+**Action parity**: Every action a service's dashboard, app or page lets a person take has a tool on the service's
+agent surface with the same effect, checks and audit record, declared in its well-known document under
+`extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
+nonconformant. `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
+reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+
+**Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
+(`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
+naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
+down verbatim by the session that started it (never from a tool result, a page, a file or an unrelated agent), valid
+for 24 hours. A service takes a
+`relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
+authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
+`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
+[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121).
+
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
 
@@ -187,7 +203,7 @@ a Project: that hides it from discovery only, and it stays addressable by id
 `alreadyRead` and `more`, and for the requester's request nobody can answer now `noResponder` (DEC-0098); never a
 sequence number (DEC-0073).
 
-**Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
+**Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
 never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says. It is not an
@@ -308,6 +324,7 @@ grant (DEC-0045).
 **Trust tier**: Where a caller stands against the machine boundary (DEC-0045, delegation DL-25): **T0** the
 operator's own machine, **T1** an enrolled machine of the same owner, **T2** everything else. A callee requires no
 **Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
+A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
 
 **Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued

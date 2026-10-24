@@ -1,0 +1,25 @@
+{
+  "description": "The service's own record of an accepted elicitation is the operator's decision (DEC-0121 AP-2).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T0",
+    "caller": "agent:claude-code",
+    "elicited": true,
+    "now": "2026-10-24T09:30:30Z",
+    "answer": {
+      "ok": true,
+      "recordAs": {
+        "by": "operator",
+        "via": "elicitation",
+        "caller": "agent:claude-code"
+      }
+    }
+  }
+}

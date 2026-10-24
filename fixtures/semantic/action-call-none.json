@@ -1,0 +1,18 @@
+{
+  "description": "The caller's own act is recorded as the caller's (DEC-0121 AP-1).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "retry-job",
+      "title": "Retry",
+      "tool": "jobs.retry",
+      "gate": "none"
+    },
+    "tier": "T2",
+    "answer": {
+      "ok": true,
+      "recordAs": "caller"
+    }
+  }
+}

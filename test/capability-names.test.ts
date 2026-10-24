@@ -67,6 +67,7 @@ it("every name-bearing schema surface references the shared definition", async (
     "manifest.schema.json/properties/capabilities/items/properties/name",
     "manifest.schema.json/properties/costPresets/items/properties/capability",
     "pipeline.schema.json/$defs/stage/properties/capability",
+    "service-actions-extension.schema.json/$defs/action/properties/tool",
     "service-connections-extension.schema.json/$defs/connection/properties/capability",
     "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/capabilities/items",
     "spend-policy.schema.json/properties/credentialSources/items/oneOf/1/properties/capability"

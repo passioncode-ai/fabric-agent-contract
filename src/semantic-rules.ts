@@ -37,6 +37,7 @@ import { entitlementRules } from "./entitlement.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
+import { actionRules, actionsExtensionRules } from "./actions.js";
 import { machineCallRules } from "./machine-call.js";
 import { checkInCredentialFindings, credentialRules } from "./credentials.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
@@ -99,6 +100,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (network) return network;
   const machineCall = machineCallRules(kind, value);
   if (machineCall) return machineCall;
+  const action = actionRules(kind, value);
+  if (action) return action;
   // DEC-0112: a check-in's credential members beside its protocols (FAC-SEM-099).
   if (kind === "device-check-in") return [...checkInCredentialFindings(value), ...(protocolRules(kind, value) as Finding[])];
   const credential = credentialRules(kind, value);
@@ -173,6 +176,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-well-known") findings.push(...connectionsRules(value));
   if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
+  if (kind === "service-well-known") findings.push(...actionsExtensionRules(value));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));

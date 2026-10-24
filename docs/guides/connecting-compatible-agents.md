@@ -184,8 +184,10 @@ pnpm validate ./fabric/
 
 Read next: [services](../specification/service.md) (the token, the events feed, the usage report, lifecycle),
 [profiles](../specification/profiles.md), [interop](../specification/interop.md) when a capability runs as a job,
-and [embedded dashboard](../specification/embedded-dashboard.md) when the dashboard opens inside a host. The
-Fabric Agent Adapter's Python, Node and dashboard kits serve these documents for you.
+and [embedded dashboard](../specification/embedded-dashboard.md) when the dashboard opens inside a host. Every
+button the dashboard shows needs a tool on the MCP surface, declared in [actions](../specification/service.md#actions)
+(DEC-0121), so the operator's agent can take the same step on their word. The Fabric Agent Adapter's Python, Node and
+dashboard kits serve these documents for you.
 
 ## An agent that is not a service
 
@@ -498,6 +500,8 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] Results separate completed claims, proof and unverified claims.
 - [ ] Cancellation, timeout and partial results preserve useful artifacts.
 - [ ] No chain-of-thought, ambient environment or secret enters a contract field.
+- [ ] Every button the dashboard shows has a tool, declared in `extensions/actions/0.1`, and a `relayed` action takes
+  the operator's relayed decision (DEC-0121).
 
 ## Operator checklist
 

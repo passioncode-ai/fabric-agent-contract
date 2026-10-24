@@ -1,0 +1,20 @@
+{
+  "description": "A relayed action from a T0 caller without a decision: operator-decision-required (DEC-0121 AP-2).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T0",
+    "caller": "agent:claude-code",
+    "now": "2026-10-24T09:30:30Z",
+    "answer": {
+      "ok": false,
+      "code": "operator-decision-required"
+    }
+  }
+}

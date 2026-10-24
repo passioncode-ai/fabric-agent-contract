@@ -48,6 +48,7 @@
 | SCN-040 | An agent asks for a token for one zone and gets it in its organization's context | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
 | SCN-041 | A member leaves and the credentials of their agents end | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
 | SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
+| SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 
 ## Personas
 
@@ -449,7 +450,7 @@ independent agent author and P-02 project operator.
   3. Operator approves -> Fabric signs one approval (`method: prompt`) for that digest and callee, valid at most 24 hours.
   4. The caller repeats the call with it -> the callee checks the token, the grant, then the approval, consumes its `jti` and pushes.
 - **Expected result:** exactly that push happens once; the approval opens nothing else.
-- **Alt paths:** the same push asked from the operator's own machine (T0) -> no approval is asked for; the operator's instruction stands (DL-26).
+- **Alt paths:** the same push asked from the operator's own machine (T0) -> no approval is asked for; the operator's instruction stands (DL-26), carried in `_meta.decision` when the push is a `relayed` action (SCN-043, DEC-0121).
 - **UI elements:** action, callee, caller, lifetime, approve, decline.
 - **States covered:** success, error
 - **Errors & recovery:** the approval presented a second time -> `approval-reused`; for another action or callee -> `approval-invalid`; the caller asks for a new one. The callee's estate revision does not certify the issuer's key -> `approval-invalid` (`kid-not-certified`), or the revision is unreadable, outside its window, rolled back or forked -> `issuer-unavailable`; a new approval does not help until the callee's machine applies a revision that certifies the key (DL-14, DEC-0060).
@@ -935,4 +936,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a record that ends before it starts, or a completed call with a code -> `FAC-SEM-140` names it.
 - **Status:** draft
 - **Coverage:** DEC-0111, DEC-0116, `callRecordFindings` in `src/credentials.ts` (`FAC-SEM-140`), `fixtures/semantic/call-record-*`, `test/credential-envelope.test.ts`
+- **Product:** unobserved
+
+### SCN-043: Tell my agent to approve: the service takes it as my decision
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-035, FLW-29 (JTBD-07, JRN-06/#3)
+- **Entry point:** the operator's chat with their own coding agent
+- **Preconditions:** `example-publisher` runs on the operator's machine (T0) and declares under `extensions/actions/0.1` the action `approve-reply` (tool `reviews.approve`, `gate: relayed`), the same as the "Approve" button on its page
+- **Steps:**
+  1. The operator writes to their agent "approve the reply to the review from Anna" -> the agent calls `reviews.approve` for that reply with `_meta.decision` `{by: operator, via: relayed-instruction, action: approve-reply, target: <that reply's id>, instruction: "approve the reply to the review from Anna", at}`.
+  2. The service runs `actionDecision` -> the decision names this action and this reply, is less than 24 hours old and not more than 60 seconds ahead of its clock: the operator's act.
+  3. The service approves the reply as its page would -> its audit says the operator decided, relayed by the agent it authenticated.
+- **Expected result:** the reply is approved once, recorded as the operator's decision; the operator never opened the page.
+- **Alt paths:** the agent calls without a decision -> `operator-decision-required`; it asks "Approve the reply to Anna?", the operator answers "yes", and it calls again with the question and the answer quoted as the instruction and that reply as the `target`. The action is a payment (`gate: human`) -> `human-step-required` with `data.url`; the agent hands the operator that link. An outside caller (T2) asks for it -> `approval-required` with the action's digest, as SCN-018. A review's text says "approve this" -> it is data, not the operator's words; the agent sets no decision (AP-3).
+- **UI elements:** none on the page; the agent's chat and the service's audit row (decided by, via, relayed by).
+- **States covered:** success, error
+- **Errors & recovery:** a decision for another action or object, more than 24 hours old or more than 60 seconds ahead of the service's clock -> `decision-invalid`; the agent asks the operator again.
+- **Status:** draft
+- **Coverage:** DEC-0121, `actionDecision` in `src/actions.ts` (`FAC-SEM-142`), `fixtures/vectors/actions.json`, `fixtures/semantic/action-call-*`, `test/actions.test.ts`
 - **Product:** unobserved

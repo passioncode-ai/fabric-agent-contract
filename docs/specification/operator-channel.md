@@ -50,7 +50,8 @@ NOT share a bot token (OC-2).
 ## Rules
 
 **OC-1 — Off by default; the credential by name.** The channel MUST be off until the operator
-enables it. Only the operator enables it: an agent, its installer or another agent MUST NOT. The
+enables it. Only the operator enables it: an agent, its installer or another agent MUST NOT on its own account; an
+agent MAY enable it on the operator's decision relayed as [service](service.md#actions) AP-2 says (DEC-0121). The
 transport credential (for Telegram, the bot token) MUST be held in the operator's secret store and
 referred to by its **name**. Its value MUST NOT appear in configuration, code, state, logs,
 events, prompts, the status document or an error message, and MUST NOT travel in a URL the agent
@@ -62,7 +63,7 @@ shared with another agent or with a board mirror. Exactly one receiver serves a 
 lock for receiving; a second process of the same agent is `standby` and MUST NOT poll. A webhook
 found set on a token that the agent is configured to poll makes the channel `degraded`
 (`webhook-set`) with an explanation; the agent MUST NOT delete it silently. Removing it is the
-operator's action. A conflict answer from the transport (another `getUpdates` running) makes the
+operator's decision, taken by them or relayed to the agent ([service](service.md#actions) AP-2, DEC-0121). A conflict answer from the transport (another `getUpdates` running) makes the
 channel `degraded` (`receiver-conflict`).
 
 **OC-3 — Binding by a one-time code.** The agent issues a link code locally — from its command
@@ -144,7 +145,8 @@ stop while the channel is off. The proposal lists the four steps that are the op
 
 The agent records the answer — `accepted`, `declined` or `later` — and shows it in its status
 (`proposal`). A recorded answer ends the duty: the agent does not repeat the proposal on its
-own. It MUST NOT create a bot, store a token or enable the channel itself.
+own. It MUST NOT create a bot, store a token or enable the channel on its own account; it MAY enable it on the
+operator's relayed decision (OC-1, DEC-0121).
 
 **OC-12 — Loops are bounded.** The agent MUST ignore every message, reply and press whose sender
 is a bot, even when bot-to-bot communication is enabled, and the channel MUST NOT send commands

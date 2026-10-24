@@ -371,3 +371,14 @@
 - **Scenarios:** SCN-042
 - **Resources:** credentials specification, The call record
 - **Status:** proposed
+
+### SCR-30: The operator's agent and the service's audit row
+
+- **Used by:** FLW-29
+- **Purpose:** the operator sees their instruction taken: the agent's reply in their chat and the service's audit row.
+- **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step); the audit row (decided by, via, relayed by the authenticated caller, when).
+- **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link.
+- **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`
+- **Scenarios:** SCN-043
+- **Resources:** service specification, Actions
+- **Status:** proposed

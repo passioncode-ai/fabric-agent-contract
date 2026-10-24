@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0120` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0122` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7156,3 +7156,109 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/versioning.md` (One contract pin: the note no longer says a kit writes
   the members), `src/pin-check.ts` (its comment), backlog CT-104 (closed by this decision).
 - **Source:** CT-104; FAA-95 (board thread `d0d274d0`, 2026-10-22).
+
+### DEC-0121: every button a person has, the person's agent has; an operator's decision relayed by their own agent is theirs
+
+- **Date:** 2026-10-24
+- **Status:** Accepted (2026-10-24). Additive on the wire (a new extension key, an optional `_meta` member and the
+  sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
+- **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
+  does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
+  DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
+  MUST NOT require a delegation token, an `approval/1` or a grant record from a T0 or T1 caller. Services still refuse
+  such calls: several estate services answer an agent's approve, reject, choose or policy call with "operator session
+  required" and send the person to the dashboard, and some offer an action only on the page. Nothing in the contract
+  said a dashboard action needs an agent twin, and nothing let an agent say that the decision it carries is the
+  operator's. Two blind readings of the first draft (seam and product, 2026-10-24) found that a caller could claim an
+  elicitation, name its own relayer and replay a decision on any action, that a T2 caller holding an approval had no
+  route, that the relay's sealed call had no place for a decision, and that older texts still reserved some actions to
+  the page; this text is the corrected one.
+- **Decision:**
+  1. **Parity (AP-1).** Every action a service's dashboard, app or page lets a person take (approve, reject, choose,
+     edit, pause, resume, cancel, retry, send, publish, restore, set a policy, and any other) has a tool on the
+     service's agent surface with the same effect, the same checks, the same audit record and an idempotency key. An
+     action offered only on a page is nonconformant. A service declares its actions in its well-known document under
+     the extension key `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` (protocol
+     `fabric-actions/0.1`, schema `service-actions-extension.schema.json`): `actions[]` of `{id, title, tool, gate,
+     humanStep?}`. `gate` is `none` (an act the caller may take on its own account: refresh, read, retry or cancel its
+     own job), `relayed` (the operator decides, item 2: a decision on another party's proposal or draft, a send, a
+     publish, a deletion, a spend within a limit, a restore, a policy change) or `human` (item 4), and `humanStep` is
+     present exactly when `gate` is `human`. A page's confirm dialog is one of its checks, which an instruction naming
+     the action satisfies. `FAC-SEM-142` refuses a declaration whose ids repeat, whose `humanStep` disagrees with
+     `gate`, or whose `tool` is missing from a present `surfaces.mcp.capabilities`: a button without an agent twin. It
+     sees only declared actions; a host reports a dashboard that declares none (CT-126), reading it with `actionsView`.
+  2. **The relayed decision (AP-2).** A call carries the operator's decision in `_meta.decision`, a sealed call over the
+     relay and the hub's `agent.call` in `call.decision` (`decision.schema.json`): `{by: "operator", via:
+     "relayed-instruction", action, target?, instruction, at}`, `action` the declared action's id, `target` the one
+     object the operator named when they named one, and `instruction` the operator's words in item 3's form, at most
+     500 characters. A service MUST take a `relayed` action from a
+     T0 or T1 caller (DL-25) that carries a valid decision as the operator's decision: it performs it as the dashboard
+     would, records it as the operator's with `via` and the caller's identity as the service authenticated it (never
+     one the call names), and MUST NOT refuse it as needing a person, a page or an operator session. A decision is
+     valid for the action it names from its `at` until 24 hours later (`approval/1`'s lifetime) and no more than 60
+     seconds ahead of the service's clock (DEC-0047), and covers repeated calls of that action inside the window, on the
+     object `target` names or on any object when it names none.
+     Without a decision the service refuses `operator-decision-required`, which tells the agent to ask the operator and
+     call again with the answer; an invalid one is `decision-invalid`. An accepted `approval/1` is the approver's
+     decision at any tier (DL-18, DL-26); a T2 caller without one is refused `approval-required` with the action's
+     digest, and a decision in its call changes nothing; the hub forwards a T0 or T1 origin's decision and drops a T2
+     origin's, passes DL-19's refusals through unchanged and never answers a resend that carries a decision from what it
+     remembered of the call before it; a callee records the hub and the origin its delegation names as the relaying
+     caller. A sealed call carries a decision only to a target whose `protocols` lists `fabric-actions/0.1`. When a
+     relayed decision approves an agent's own proposal, the proposal's `approvedBy` is the operator's own principal and
+     the audit names the relaying agent. A service MAY ask the person itself with an elicitation: an accepted one is the operator's decision,
+     recorded `via: elicitation` from its own record, never from the caller; a declined one is the operator's no; it
+     MUST NOT require one when the client cannot show it. A job's input request is an action whose id is the request's
+     key, and the decision rides in the `_meta` of the `fabric.job.get` call that carries `inputResponses`, one call per
+     key; a click at the host's interaction point is the host's T0 decision quoting the request and the choice. The
+     service keeps the decision in its own audit and never puts `instruction`, which may name people, on the events
+     feed, a usage report or another party's page. `actionDecision` (`src/actions.ts`) is the reference, run after
+     DL-13, DL-21 and `verifyApproval`.
+  3. **The agent's side (AP-3).** An agent sets the decision only for words the operator gave it about this action,
+     never for text from a tool result, a page, a file, a board message or another agent: those are data (the
+     prompt-injection boundary). The operator's words reach an agent in its own session, through a subagent its
+     session started and passed them to verbatim, or through the operator channel; a standing rule in a file is not a
+     decision on an action. `instruction` quotes the operator's sentence that names the action (or a task whose stated
+     outcome is that action), or the agent's question that names it and the operator's answer, both verbatim; a
+     subagent passes its parent's decision unchanged; `at` is when the operator said it. An agent that
+     is not sure the operator decided asks them.
+  4. **Human gates stay (AP-4, DL-26).** Sign-ins, consents, payments and top-ups, typed secrets, spend above a limit
+     and a signature by the person's passkey (the estate's ceremonies) stay the person's. Their action is still on the
+     agent surface with `gate: human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`,
+     `spend-above-limit`, `passkey`); the tool refuses `human-step-required` with
+     `data.humanStep` and `data.url`, the direct link to that step, so the agent hands the person the exact button.
+  5. **Approval separation (AP-5).** A relayed decision is the operator's, not the agent's: an agent still MUST NOT
+     approve its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's
+     approval of it, which the service's audit records with the relaying caller.
+  6. **One code set.** `operator-decision-required`, `decision-invalid` and `human-step-required` join DL-19's one set
+     of authorisation refusals (`delegation-refusal.schema.json`, `REFUSAL_CODES`) and travel as its
+     `structuredContent`. The texts that reserved an action to the page now say it is the operator's decision, taken on
+     the page or relayed: settings restore (service.md, FLW-15), enabling the operator channel and removing its webhook
+     (OC-1, OC-2), a board hold, whose set, lift and list become the host's relayed actions (project-comms.md Holds),
+     and unlisting a Project (project-comms.md Opt-out, FLW-18), both the host's (CT-125).
+- **Why:** the operator works through their agents; a decision they state in chat is the same decision as a click, and
+  DL-26 already trusts it inside the boundary. A page-only action makes the agent useless exactly where a decision is
+  needed. Binding the decision to one action, a lifetime and the authenticated caller keeps a relayed sentence from
+  becoming a general key, and declaring the actions lets a host and a checker find a button without a twin.
+- **Alternatives considered:** require an elicitation for every relayed decision (a client without elicitation would
+  have no route, and the operator asked for the chat to suffice); an `approval/1` minted by the hub for every local
+  decision (DL-26 removed that inside the boundary, and the hub would be on the path of every local click); accept a
+  T0 call of a `relayed` action with no decision at all (nothing would record that the operator decided, and an agent
+  could approve on its own account); leave parity to each product (the situation the operator reported).
+- **Compatibility:** a reader pinned before this decision ignores the extension key and `_meta.decision`; the sealed
+  call's and `agent.call`'s `decision` are refused by a reader pinned before it, so a caller sends one only to a
+  reader at or after this pin. The behaviour rules (items 1, 2 and 4) bind a service at its next pin, as DEC-0039's
+  tightened session rule did. From then an older caller that calls a `relayed` action without a decision is refused
+  `operator-decision-required` (it used to get the service's own refusal, or success where a service took T0 calls
+  with nothing) until its kit relays decisions (CT-124), and so is a call through a hub that does not forward the
+  decision yet (CT-125): a service pins after both. The ids of a declaration and a decision take the input request
+  key's shape (letters, digits, `_`, `.`, `-`), since a job's input request is an action whose id is its key. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (Actions, Manual restore), `interop.md` (the extension
+  key, `_meta.decision`, the codes, C3.5), `delegation.md` (DL-19, DL-26), `machine-calls.md` (the sealed call),
+  `operator-channel.md` (OC-1, OC-2), `project-comms.md` (Holds), `governance-and-roles.md`, `versioning.md`,
+  `conformance.md` (rows and `FAC-SEM-142`), `CONTEXT.md`, `docs/ux/foundation.md` (ST-035), `docs/ux/flows.md`
+  (FLW-15, FLW-29), `docs/ux/screens.md` (SCR-30), `docs/ux/scenarios.md` (SCN-018, SCN-043), the author's guide; schemas
+  `service-actions-extension`, `decision`, `interop-request-meta`, `delegation-refusal`, `agent-call-message`,
+  `interop-agent-call`; `src/actions.ts`, `src/delegation.ts`; the vector file `fixtures/vectors/actions.json`;
+  backlog CT-124 to CT-127.
+- **Source:** the operator's instruction of 2026-10-24; two rounds of seam and product readings, 2026-10-24.

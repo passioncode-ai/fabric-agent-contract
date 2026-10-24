@@ -37,6 +37,10 @@
         {
           "if": { "properties": { "code": { "const": "approval-required" } }, "required": ["code"] },
           "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["actionDigest"], "properties": { "actionDigest": true } } } }
+        },
+        {
+          "if": { "properties": { "code": { "const": "human-step-required" } }, "required": ["code"] },
+          "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["humanStep", "url"], "properties": { "humanStep": { "enum": ["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey"], "description": "The person's step (DEC-0121 AP-4)." }, "url": { "type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^(https://|/)", "description": "The direct link to that step: an https URL or a path on the service's origin (DEC-0121 AP-4)." } } } } }
         }
       ]
     }
@@ -62,7 +66,10 @@
         "chain-too-deep",
         "profile-forbids",
         "issuer-unavailable",
-        "unknown-state"
+        "unknown-state",
+        "operator-decision-required",
+        "decision-invalid",
+        "human-step-required"
       ]
     }
   }

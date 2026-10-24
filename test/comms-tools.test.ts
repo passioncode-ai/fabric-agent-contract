@@ -183,7 +183,7 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
   it("states the directory's boundary: same estate and owner, no content, operator opt-out that is discovery only", () => {
     const section = spec.slice(spec.indexOf("## Project directory"), spec.indexOf("## Transport mirror")).replace(/\s+/g, " ");
     const phrases = [
-      "Never across estates", "Never content", "Opt-out", "no tool sets", "`not_authorized`",
+      "Never across estates", "Never content", "Opt-out", "never lists or unlists a Project on its own account", "`not_authorized`",
       "a managed session", "an enrolled session", "a viewer principal", "share-grant principal (T2)",
       "another owner's Project", "Unlisting is discovery only", "already knows its id", "survives a restore",
       "ordered by name and then id", "the restore epoch"

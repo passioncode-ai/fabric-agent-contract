@@ -1,0 +1,31 @@
+{
+  "description": "A T2 caller without an approval gets approval-required with the action's digest: its decision changes nothing (DEC-0121 AP-2, DL-17, DL-18).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T2",
+    "caller": "agent:claude-code",
+    "decision": {
+      "by": "operator",
+      "via": "relayed-instruction",
+      "action": "approve-reply",
+      "instruction": "approve the reply to the review from Anna",
+      "at": "2026-10-24T09:30:00Z"
+    },
+    "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+    "now": "2026-10-24T09:30:30Z",
+    "answer": {
+      "ok": false,
+      "code": "approval-required",
+      "data": {
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+      }
+    }
+  }
+}
