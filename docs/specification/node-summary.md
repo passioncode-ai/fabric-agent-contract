@@ -85,7 +85,10 @@ An organization asks a node to run one package with `repair-request.schema.json`
 ([key sets](devices.md#key-sets), `FAC-SEM-046`) over `policySigningInput`. It names the device, a `fabric-package/1`
 by `agentRef`, `version` and `digest`, one line the person reads (`task`), and a window of at most 7 days.
 
-`repairDecision` (`src/node-summary.ts`) is the node's decision, in this order (`FAC-SEM-129`):
+`repairDecision` (`src/node-summary.ts`) is the node's decision, in this order (`FAC-SEM-129`). A port runs the shared
+vectors [`fixtures/vectors/repair-decision.json`](../../fixtures/vectors/repair-decision.json) (written by
+`tools/vectors/repair-decision.ts`, never by hand): requests signed by an Ed25519 test key from a fixed seed, each case
+with the answer this table gives, covering the order, the key window and the `org-cloud` exception.
 
 | Refused as | When |
 |---|---|

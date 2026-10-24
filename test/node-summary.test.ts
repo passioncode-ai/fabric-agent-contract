@@ -6,6 +6,7 @@ import { projectRoot } from "../src/contract.js";
 import { policySigningInput, resolvePolicy } from "../src/device-rules.js";
 import { harnessBaseline, harnessDrift, repairDecision, signedPolicyValue, versionBelow } from "../src/node-summary.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { VECTOR_FILE as REPAIR_VECTORS, buildRepairDecisionVectors } from "../tools/vectors/repair-decision.js";
 
 // DEC-0101: node-summary/1, harnessDrift, and the node's decision on a repair (FAC-SEM-128, FAC-SEM-129).
 const root = projectRoot();
@@ -215,5 +216,23 @@ describe("repairDecision (FAC-SEM-129)", () => {
     expect(codes("repair-run", { ...base, keys: [], decision: "refuse", reason: "expired" })).toEqual(["FAC-SEM-129"]);
     expect(codes("repair-run", { ...base, decision: "refuse", reason: "person-declined" })).toEqual(["FAC-SEM-129"]);
     expect(codes("repair-run", { ...base, decision: "run", reason: "expired" })).toEqual(["FAC-SEM-129"]);
+  });
+});
+
+describe("the repair-decision vectors (fixtures/vectors/repair-decision.json, FAC-SEM-129)", () => {
+  const text = readFileSync(path.join(root, REPAIR_VECTORS), "utf8");
+  const vectors = JSON.parse(text) as { keys: { policy: { publicKey: string } }; signingInput: string; cases: Array<{ name: string; input: unknown; expect: unknown }> };
+  it("are exactly what the generator writes (tools/vectors/repair-decision.ts)", () => {
+    expect(text).toBe(buildRepairDecisionVectors());
+  });
+  it("name the signing input policySigningInput builds for the first case's request", () => {
+    const first = vectors.cases[0]?.input as { request: Record<string, unknown> };
+    expect(policySigningInput(first.request).toString("utf8")).toBe(vectors.signingInput);
+  });
+  it.each(vectors.cases)("$name", ({ input, expect: want }) => {
+    expect(repairDecision(input)).toEqual(want);
+    // FAC-SEM-129 holds a node to the same answer.
+    const decided = want as { decision: string; reason?: string };
+    if (input !== null) expect(codes("repair-run", { ...(input as object), ...decided })).toEqual([]);
   });
 });

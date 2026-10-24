@@ -34,6 +34,7 @@ function cases(): Json[] {
   const ghToken = ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1"].join("");
   const botSecret = "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawX";
   const botToken = ["bot", "123456789", ":", "AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawX"].join("");
+  const notionId = "1a2b3c4d5e6f708192a3b4c5d6e7f809";
   const jwt = ["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiJ4In0", "c2lnbmF0dXJl"].join(".");
   const list: Array<[string, unknown, Json]> = [
     ["no key: nothing declared", { extensions: {} }, NONE],
@@ -153,6 +154,12 @@ function cases(): Json[] {
     ["a run joined by = outside a URL is one run", doc({ connections: [{ ...model, label: `${"Ab1".repeat(7)}=${"Cd2".repeat(7)}` }] }), REPORTED],
     ["a slashed secret after an = in a URL path, read by secretUrl", doc({ connections: [{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}/docs` }] }), view([{ ...telegram, purpose: `reads https://h.example/a=${awsSecret}/docs`, failing: false }])],
     ["two glued URLs: the text before the first scheme only", doc({ connections: [{ ...telegram, purpose: "https://docs.example.com/API/v2/Reference/Connections/GetUpdates,https://b.example/" }] }), view([{ ...telegram, purpose: "https://docs.example.com/API/v2/Reference/Connections/GetUpdates,https://b.example/", failing: false }])],
+    // CT-74: a URL ends at any whitespace, so a slashed secret after it is a piece of its own whatever the separator.
+    ...([["a space", " "], ["a tab", "\t"], ["a no-break space", "\u00a0"]] as Array<[string, string]>).map(([what, gap]): [string, unknown, Json] => [`a slashed secret after a URL and ${what}`, doc({ connections: [{ ...telegram, purpose: `reads https://h.example/docs${gap}${awsSecret}` }] }), REPORTED]),
+    ["a config line NAME=value of 40 or more mixed characters is one long run", doc({ connections: [{ ...model, label: "FABRIC_LOG_LEVEL=verbose-output-for-release-2" }] }), REPORTED],
+    ["a config line NAME=value under 40 characters is declared", doc({ connections: [{ ...model, label: "FABRIC_LOG_LEVEL=verbose-for-release-2" }] }), view([{ ...model, label: "FABRIC_LOG_LEVEL=verbose-for-release-2", failing: false }])],
+    ["a bare Notion id (32 lower-case hex) is declared", doc({ connections: [{ ...telegram, purpose: `reads Notion page ${notionId}`, label: notionId }] }), view([{ ...telegram, purpose: `reads Notion page ${notionId}`, label: notionId, failing: false }])],
+    ["a Notion link whose segment joins the page title and its id", doc({ connections: [{ ...telegram, purpose: `reads https://www.notion.so/Weekly-Report-${notionId}` }] }), REPORTED],
     ["not an object", doc([notify]), REPORTED]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));
