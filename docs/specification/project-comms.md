@@ -504,8 +504,9 @@ The boundary:
   names who set it. Every object in the schema is closed, so a reader
   refuses an answer that carries more.
 - **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
-- **Opt-out.** A Project can be unlisted. Its operator sets this in the host, in Fabric per Project; no tool sets
-  it, so an agent cannot list or unlist a Project. An unlisted Project is absent from every page and every
+- **Opt-out.** A Project can be unlisted. Its operator decides it, in the host (in Fabric per Project) or through their
+  agent, which relays the decision to the host's list and unlist actions (`gate: relayed`, [service](service.md#actions)
+  AP-2, DEC-0121; the host's tools are CT-125); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
   capability filter.
 - **Unlisting is discovery only.** It does not hide the Project from a sender that already knows its id: that sender
   can still address it, because a listing is discovery, not authority. Unlisting refuses no message; whether a

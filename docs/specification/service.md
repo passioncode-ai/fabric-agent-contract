@@ -886,9 +886,11 @@ Every button a person has, the person's agent has, and an operator's decision re
   an elicitation (C3.3) when the client supports one: an accepted one is the operator's decision on its own, recorded
   `via: elicitation` from the service's own record, never from the caller's claim; a declined one is the operator's no,
   and the service does not act; it MUST NOT require one when the client cannot show it (DEC-0121). A job's input
-  request is an action too: its id is the request's key in `inputRequests` (a slug), its tool `fabric.job.get`, its
-  gate `relayed`, and the decision rides in the `_meta.decision` of the `fabric.job.get` call that carries
-  `inputResponses` ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). The service keeps the decision,
+  request is an action too: its id is the request's key in `inputRequests` (`requestKey`), its tool `fabric.job.get`,
+  its gate `relayed`, and the decision rides in the `_meta.decision` of the `fabric.job.get` call that carries
+  `inputResponses`, one call per key decided; a person's click at the host's interaction point travels the same way
+  ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). A `view` machine ([machine calls](machine-calls.md))
+  carries no decision: a decision is an effect its profile forbids (DEC-0121). The service keeps the decision,
   `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
   a usage report or any page another party reads (DEC-0121).
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
@@ -897,8 +899,12 @@ Every button a person has, the person's agent has, and an operator's decision re
   and passed them to verbatim, or through the operator channel ([operator channel](operator-channel.md)); a standing
   rule in a file is not a decision on an action (DEC-0121). `instruction` quotes the operator's sentence that names the
   action, or, when the operator answered the agent's question, the question that names the action and the answer, both
-  verbatim (`Agent: Approve the reply to Anna? Operator: yes`); `at` is when the operator said it (DEC-0121). An agent
-  that is not sure the operator decided asks them (DEC-0121).
+  verbatim (`Agent: Approve the reply to Anna? Operator: yes`), the agent keeping its question short enough for the
+  500 characters; a press in the operator channel quotes the message that offered the button and the button's label;
+  `at` is when the operator said it (DEC-0121). An instruction names an action when it names it, or names a task whose
+  stated outcome is that action ("release it" names publishing the release) (DEC-0121). A subagent relays only what
+  its parent passed it as the operator's, with the parent's `instruction`, `target` and `at` unchanged (DEC-0121). An
+  agent that is not sure the operator decided asks them (DEC-0121).
 - **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, typed secrets and spend above a limit stay the
   person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
   estate's [ceremonies](ceremonies.md)). Their action is still on the agent surface with `gate: human` and its

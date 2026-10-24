@@ -136,8 +136,9 @@ reports a dashboard that declares none (CT-126) ([service](docs/specification/se
 
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
 (`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
-naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent (never from
-a tool result, a page, a file or another agent), valid for 24 hours. A service takes a
+naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
+down verbatim by the session that started it (never from a tool result, a page, a file or an unrelated agent), valid
+for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
@@ -202,7 +203,7 @@ a Project: that hides it from discovery only, and it stays addressable by id
 `alreadyRead` and `more`, and for the requester's request nobody can answer now `noResponder` (DEC-0098); never a
 sequence number (DEC-0073).
 
-**Board hold**: The operator's hold, set in the host, on a thread, a Project or a (Project, capability) responder slot.
+**Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
 never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says. It is not an

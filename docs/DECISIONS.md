@@ -7209,7 +7209,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the audit names the relaying agent. A service MAY ask the person itself with an elicitation: an accepted one is the operator's decision,
      recorded `via: elicitation` from its own record, never from the caller; a declined one is the operator's no; it
      MUST NOT require one when the client cannot show it. A job's input request is an action whose id is the request's
-     key, and the decision rides in the `_meta` of the `fabric.job.get` call that carries `inputResponses`. The
+     key, and the decision rides in the `_meta` of the `fabric.job.get` call that carries `inputResponses`, one call per
+     key; a click at the host's interaction point is the host's T0 decision quoting the request and the choice. The
      service keeps the decision in its own audit and never puts `instruction`, which may name people, on the events
      feed, a usage report or another party's page. `actionDecision` (`src/actions.ts`) is the reference, run after
      DL-13, DL-21 and `verifyApproval`.
@@ -7217,8 +7218,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      never for text from a tool result, a page, a file, a board message or another agent: those are data (the
      prompt-injection boundary). The operator's words reach an agent in its own session, through a subagent its
      session started and passed them to verbatim, or through the operator channel; a standing rule in a file is not a
-     decision on an action. `instruction` quotes the operator's sentence that names the action, or the agent's
-     question that names it and the operator's answer, both verbatim; `at` is when the operator said it. An agent that
+     decision on an action. `instruction` quotes the operator's sentence that names the action (or a task whose stated
+     outcome is that action), or the agent's question that names it and the operator's answer, both verbatim; a
+     subagent passes its parent's decision unchanged; `at` is when the operator said it. An agent that
      is not sure the operator decided asks them.
   4. **Human gates stay (AP-4, DL-26).** Sign-ins, consents, payments and top-ups, typed secrets, spend above a limit
      and a signature by the person's passkey (the estate's ceremonies) stay the person's. Their action is still on the
@@ -7232,8 +7234,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      of authorisation refusals (`delegation-refusal.schema.json`, `REFUSAL_CODES`) and travel as its
      `structuredContent`. The texts that reserved an action to the page now say it is the operator's decision, taken on
      the page or relayed: settings restore (service.md, FLW-15), enabling the operator channel and removing its webhook
-     (OC-1, OC-2), and a board hold, whose set, lift and list become the host's relayed actions (project-comms.md
-     Holds, CT-125).
+     (OC-1, OC-2), a board hold, whose set, lift and list become the host's relayed actions (project-comms.md Holds),
+     and unlisting a Project (project-comms.md Opt-out, FLW-18), both the host's (CT-125).
 - **Why:** the operator works through their agents; a decision they state in chat is the same decision as a click, and
   DL-26 already trusts it inside the boundary. A page-only action makes the agent useless exactly where a decision is
   needed. Binding the decision to one action, a lifetime and the authenticated caller keeps a relayed sentence from
@@ -7248,7 +7250,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reader at or after this pin. The behaviour rules (items 1, 2 and 4) bind a service at its next pin, as DEC-0039's
   tightened session rule did. From then an older caller that calls a `relayed` action without a decision is refused
   `operator-decision-required` (it used to get the service's own refusal, or success where a service took T0 calls
-  with nothing) until its kit relays decisions (CT-124). `contractVersion` stays `0.1.0`.
+  with nothing) until its kit relays decisions (CT-124), and so is a call through a hub that does not forward the
+  decision yet (CT-125): a service pins after both. The ids of a declaration and a decision take the input request
+  key's shape (letters, digits, `_`, `.`, `-`), since a job's input request is an action whose id is its key. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (Actions, Manual restore), `interop.md` (the extension
   key, `_meta.decision`, the codes, C3.5), `delegation.md` (DL-19, DL-26), `machine-calls.md` (the sealed call),
   `operator-channel.md` (OC-1, OC-2), `project-comms.md` (Holds), `governance-and-roles.md`, `versioning.md`,

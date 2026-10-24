@@ -335,7 +335,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision; ask the operator and call again with it in `_meta.decision` ([service](service.md#actions) AP-2, DEC-0121) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action or time (AP-2, DEC-0121) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps

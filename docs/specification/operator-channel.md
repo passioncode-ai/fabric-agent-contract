@@ -145,7 +145,8 @@ stop while the channel is off. The proposal lists the four steps that are the op
 
 The agent records the answer — `accepted`, `declined` or `later` — and shows it in its status
 (`proposal`). A recorded answer ends the duty: the agent does not repeat the proposal on its
-own. It MUST NOT create a bot, store a token or enable the channel itself.
+own. It MUST NOT create a bot, store a token or enable the channel on its own account; it MAY enable it on the
+operator's relayed decision (OC-1, DEC-0121).
 
 **OC-12 — Loops are bounded.** The agent MUST ignore every message, reply and press whose sender
 is a bot, even when bot-to-bot communication is enabled, and the channel MUST NOT send commands

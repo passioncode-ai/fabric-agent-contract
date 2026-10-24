@@ -20,8 +20,8 @@
       "const": "relayed-instruction"
     },
     "action": {
-      "$ref": "common.schema.json#/$defs/slug",
-      "description": "The id of the declared action this decision is for (extensions/actions/0.1)."
+      "$ref": "interop-common.schema.json#/$defs/requestKey",
+      "description": "The id of the action this decision is for: a declared action's (extensions/actions/0.1), or a job input request's key (C3.3)."
     },
     "target": {
       "type": "string",

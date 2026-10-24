@@ -275,6 +275,13 @@ primitive fields, as MCP restricts it. FAC-SEM-018 reads each form field's name,
 description and format for the vocabulary of credentials (password, secret, API key,
 access token, private key, credential) and refuses the request.
 
+An input request is a `relayed` action whose id is its request key ([service](service.md#actions) AP-2, DEC-0121), so
+the `fabric.job.get` call that carries `inputResponses` carries the operator's decision in `_meta.decision`, one call
+per key decided. When their agent answers, the decision quotes the operator's words (AP-3). When the operator clicks a
+choice at Fabric's interaction point, the host is a T0 caller and its decision quotes the request and the choice the
+person pressed (`instruction`: the request's `message`, then `Choice:` and the chosen `title`), `at` being the press
+(DEC-0121). A declined or cancelled answer is the person's no and carries no decision.
+
 ## Actions and the operator's decision
 
 <a id="action-codes"></a>
@@ -285,9 +292,8 @@ A request's `_meta` MAY carry `decision`, the operator's decision on an action t
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
 "relayed-instruction", action, target?, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
-unknown `_meta` member. An agent sets it only for words the operator gave it about the action, in AP-3's form. A
-job's input request answered on the operator's word is an action whose id is the request's key: the
-`fabric.job.get` call that carries `inputResponses` carries the decision in its `_meta` (AP-2).
+unknown `_meta` member. An agent sets it only for words the operator gave it about the action, in AP-3's form; a job's
+input request is answered as [C3.3](#c33-awaiting-a-choice) says.
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:
@@ -301,10 +307,6 @@ each in the `structuredContent` of an `isError` tool result:
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
 `_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
-
-When the operator makes the choice through their agent, the `fabric.job.get` call that carries `inputResponses`
-carries the operator's decision in `_meta.decision`, the request's key being the action's id
-([service](service.md#actions) AP-2, DEC-0121).
 
 ## C3.4 Trace
 
@@ -349,7 +351,8 @@ forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchan
 would change nothing there; it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
 `human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
 carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its
-delegation token names as the relaying caller (DEC-0121).
+delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
+`_meta.decision` to the callee the same way (DEC-0121).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

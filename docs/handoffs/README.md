@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-24 every button has an agent twin](2026-10-24-action-parity.md) | DEC-0121 (CT-124 to CT-127 filed) | this pull request; release `v0.1.0+2026-10-24.3` |
+| [2026-10-24 every button has an agent twin](2026-10-24-action-parity.md) | DEC-0121 (CT-124 to CT-127 filed) | this pull request; release `v0.1.0+2026-10-25` |
 | [2026-10-24 the contract's own debts, the third release](2026-10-24-debts-and-third-release.md) | DEC-0120 (CT-104; CT-72, CT-74, CT-96, CT-100, CT-101, CT-109 closed; CT-123 filed) | merged, #180 `de8cec30`; released `v0.1.0+2026-10-24.2` |
 | [2026-10-24 DEC-0118, the audit, the second release](2026-10-24-audit-and-release.md) | DEC-0118 (#170 `bf6bd918`), DEC-0119 (the audit) | merged, #173 `4e5440cf`; released `v0.1.0+2026-10-24` |
 | [2026-10-23 key windows, protocol gates, a queued call's record](2026-10-23-gates-and-windows.md) | DEC-0115, DEC-0116, DEC-0117 (CT-120) | merged, #165 `e999853f`, #166 `cd9f49e1`, #167 `68abd0f6` |

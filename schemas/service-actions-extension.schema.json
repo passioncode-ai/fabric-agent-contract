@@ -30,8 +30,8 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "$ref": "common.schema.json#/$defs/slug",
-          "description": "The action's id, once in the list (FAC-SEM-142)."
+          "$ref": "interop-common.schema.json#/$defs/requestKey",
+          "description": "The action's id, once in the list (FAC-SEM-142): letters, digits, _ . - up to 64, the shape of an input request's key, which is a job's input action's id (DEC-0121)."
         },
         "title": {
           "type": "string",

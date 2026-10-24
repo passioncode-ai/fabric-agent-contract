@@ -500,6 +500,8 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] Results separate completed claims, proof and unverified claims.
 - [ ] Cancellation, timeout and partial results preserve useful artifacts.
 - [ ] No chain-of-thought, ambient environment or secret enters a contract field.
+- [ ] Every button the dashboard shows has a tool, declared in `extensions/actions/0.1`, and a `relayed` action takes
+  the operator's relayed decision (DEC-0121).
 
 ## Operator checklist
 

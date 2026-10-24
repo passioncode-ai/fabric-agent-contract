@@ -790,6 +790,64 @@
       }
     },
     {
+      "name": "a job's input request whose key is not a slug",
+      "input": {
+        "action": {
+          "id": "variant_choice",
+          "title": "Choose a variant",
+          "tool": "fabric.job.get",
+          "gate": "relayed"
+        },
+        "caller": "agent:claude-code",
+        "now": "2026-10-24T09:30:00Z",
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "variant_choice",
+          "instruction": "take the second variant",
+          "at": "2026-10-24T09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "a click at the host's interaction point, quoted by the host (T0)",
+      "input": {
+        "action": {
+          "id": "q1.answer",
+          "title": "Pick one",
+          "tool": "fabric.job.get",
+          "gate": "relayed"
+        },
+        "caller": "agent:claude-code",
+        "now": "2026-10-24T09:30:00Z",
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "q1.answer",
+          "instruction": "Which variant should ship? Choice: Second",
+          "at": "2026-10-24T09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
       "name": "a decision exactly 24 h old",
       "input": {
         "action": {

@@ -440,7 +440,7 @@ flowchart TD
 
 - **Traces:** ST-022 (JTBD-09, JRN-08/#4)
 - **Goal:** a Project the operator keeps to itself is absent from the project directory and still reachable by a sender that knows its id
-- **Entry points:** the host's Project settings (in Fabric, per Project); no tool sets it
+- **Entry points:** the host's Project settings (in Fabric, per Project); the operator's agent relaying their decision to the host's unlist action (DEC-0121)
 - **Success exit:** the Project absent from every directory page and capability filter; a request addressed to its id is queued as before
 - **Task analysis:** the operator turns the Project's listing off in the host → the next `com.directory` page of every session of the estate omits it → a sender that already knows its id submits a request → the board queues it as for any Project.
 - **Rejected shape:** unlisting as a block list that refuses messages — rejected because a listing is discovery, not authority (project comms, Project directory).
@@ -720,7 +720,7 @@ flowchart TD
 - **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
 - **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
 - **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
-- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
+- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
 - **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121).
 - **Flow:**
 

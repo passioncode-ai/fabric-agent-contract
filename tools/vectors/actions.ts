@@ -72,7 +72,9 @@ function cases(): Json[] {
     ["a decision naming the object the call acts on", { ...base, tier: "T0", target: "review-4711", decision: decided(NOW, { target: "review-4711" }) }, operator("relayed-instruction")],
     ["a decision without a target covers the action on any object", { ...base, tier: "T0", target: "review-9", decision: instructed }, operator("relayed-instruction")],
     ["a job's input request answered on the operator's word: its key is the action's id", { ...base, action: { id: "choose-variant", title: "Choose a variant", tool: "fabric.job.get", gate: "relayed" }, tier: "T0", decision: decided(NOW, { action: "choose-variant", instruction: "take the second variant" }) }, operator("relayed-instruction")],
-    ["a decision exactly 24 h old", { ...base, tier: "T0", decision: decided("2026-10-23T09:30:00Z") }, operator("relayed-instruction")],
+    ["a job's input request whose key is not a slug", { ...base, action: { id: "variant_choice", title: "Choose a variant", tool: "fabric.job.get", gate: "relayed" }, tier: "T0", decision: decided(NOW, { action: "variant_choice", instruction: "take the second variant" }) }, operator("relayed-instruction")],
+    ["a click at the host's interaction point, quoted by the host (T0)", { ...base, action: { id: "q1.answer", title: "Pick one", tool: "fabric.job.get", gate: "relayed" }, tier: "T0", decision: decided(NOW, { action: "q1.answer", instruction: "Which variant should ship? Choice: Second" }) }, operator("relayed-instruction")],
+        ["a decision exactly 24 h old", { ...base, tier: "T0", decision: decided("2026-10-23T09:30:00Z") }, operator("relayed-instruction")],
     // An invalid decision (AP-2): decision-invalid.
     ["a decision for another action", { ...base, tier: "T0", decision: decided(NOW, { action: "publish-post" }) }, refuse("decision-invalid")],
     ["a decision naming another object than the call acts on", { ...base, tier: "T0", target: "review-9", decision: decided(NOW, { target: "review-4711" }) }, refuse("decision-invalid")],
