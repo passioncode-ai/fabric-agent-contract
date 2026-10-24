@@ -12,7 +12,7 @@ import { createValidatorSync } from "./validator.js";
 // operator's when the call carries the operator's decision in `_meta.decision` (AP-2); a `human` action answers
 // `human-step-required` with its step (AP-4). `actionDecision` is the reference a service's tool runs before it acts.
 
-/** The three refusals DEC-0121 adds to the interop codes, and DL-17's refusal a T2 caller still gets. */
+/** The three refusals DEC-0121 adds to DL-19's one code set, and DL-17's refusal a T2 caller still gets. */
 export const OPERATOR_DECISION_REQUIRED = "operator-decision-required";
 export const DECISION_INVALID = "decision-invalid";
 export const HUMAN_STEP_REQUIRED = "human-step-required";
@@ -31,25 +31,43 @@ export interface ActionDecisionInput {
   action?: unknown;
   /** The caller's tier, as the callee placed it (DL-25). */
   tier?: unknown;
-  /** The call's `_meta.decision`, as received. */
+  /** The service's authenticated identity of the caller: what it records as the relaying caller, never a claim in the call. */
+  caller?: unknown;
+  /** The call's `_meta.decision` (or the sealed call's `decision`), as received. */
   decision?: unknown;
-  /** The service's clock, RFC 3339; with it, a decision dated more than CLOCK_SKEW_SECONDS later is invalid. */
+  /** The service's own record that its elicitation for this call was shown and the person accepted it (C3.3). */
+  elicited?: unknown;
+  /** The outcome of `verifyApproval` for an `approval/1` the call presented (DL-18), when it accepted one. */
+  approval?: unknown;
+  /** The action's digest (DL-18), sent with `approval-required` to a T2 caller that presented no approval. */
+  actionDigest?: unknown;
+  /** The direct link to the person's step of a `human` action (AP-4). */
+  humanStepUrl?: unknown;
+  /** The service's clock, RFC 3339 (required for a `relayed` action). */
   now?: unknown;
 }
 
-export type OperatorRecord = { by: "operator"; via: "relayed-instruction" | "elicitation"; relayedBy?: string };
+export type DecisionVia = "relayed-instruction" | "elicitation" | "approval";
+export type DecisionRecord = { by: string; via: DecisionVia; caller: string };
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
-  | { ok: true; recordAs: OperatorRecord }
-  | { ok: false; code: typeof HUMAN_STEP_REQUIRED; humanStep: HumanStep }
-  | { ok: false; code: typeof APPROVAL_REQUIRED | typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID }
-  /** The service's own fault, never sent to a caller: its declaration of the action, or its clock, is unreadable. */
-  | { fault: "action-invalid" | "now-unreadable" };
+  | { ok: true; recordAs: DecisionRecord }
+  | { ok: false; code: typeof HUMAN_STEP_REQUIRED; data: { humanStep: HumanStep; url: string } }
+  | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
+  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID }
+  /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
+  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" };
+
+/** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
+export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
 
 let actionShape: ValidateFunction | undefined;
 let extensionShape: ValidateFunction | undefined;
 let decisionShape: ValidateFunction | undefined;
 const schema = (name: string) => createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/${name}`) as ValidateFunction;
+const SHA256 = /^sha256:[0-9a-f]{64}$/;
+const STEP_URL = /^(https:\/\/|\/)/;
+const nonEmpty = (value: unknown): value is string => typeof value === "string" && value.length > 0;
 
 /** True when `action` is one valid `actions[]` entry whose `humanStep` is present exactly when `gate` is `human`. */
 function readableAction(action: unknown): action is DeclaredAction {
@@ -57,29 +75,69 @@ function readableAction(action: unknown): action is DeclaredAction {
   return actionShape(action) === true && ((action as DeclaredAction).gate === "human") === ((action as DeclaredAction).humanStep !== undefined);
 }
 
+/** An accepted `approval/1` outcome: `{ok: true, approver}` with a non-empty approver. */
+function acceptedApproval(approval: unknown): approval is { ok: true; approver: string } {
+  return isObject(approval) && approval.ok === true && nonEmpty(approval.approver);
+}
+
 /**
  * Whether a service takes a call of one declared action, and as whose act it records it (DEC-0121 AP-2, AP-4; DL-17,
- * DL-25, DL-26). `none` is the caller's own act. `human` is refused `human-step-required` with its step at every tier.
- * `relayed` from a T2 caller is refused `approval-required` whatever its `_meta` carries (DL-17); from a T0 or T1 caller
- * it needs a decision valid against `decision.schema.json`, whose `at` reads strictly (`strictTime`) and, given `now`, is
- * no more than CLOCK_SKEW_SECONDS ahead of it: without one `operator-decision-required`, with an invalid one
- * `decision-invalid`, with a valid one the operator's act, recorded with `via` and the relaying agent.
+ * DL-18, DL-25, DL-26). It runs after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval.
+ *
+ * - `none`: the caller's own act.
+ * - `human`: refused `human-step-required` with the step and its direct link, at every tier.
+ * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
+ *   refused `approval-required` with the action's digest, whatever its call carries; the service's own record of an
+ *   accepted elicitation is the operator's decision; without a decision `operator-decision-required`; a decision not
+ *   valid against `decision.schema.json`, for another action, or whose `at` does not read strictly, lies more than
+ *   CLOCK_SKEW_SECONDS after `now` or more than DECISION_LIFETIME_SECONDS before it, `decision-invalid`; otherwise the
+ *   operator's act. Every operator or approver record names `caller`, the service's own identity of who relayed it.
  */
 export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer {
-  const { action, tier, decision, now } = input;
+  const { action, tier, caller, decision, elicited, approval, actionDigest, humanStepUrl, now } = input;
   if (!readableAction(action)) return { fault: "action-invalid" };
   if (action.gate === "none") return { ok: true, recordAs: "caller" };
-  if (action.gate === "human") return { ok: false, code: HUMAN_STEP_REQUIRED, humanStep: action.humanStep as HumanStep };
-  if (tier !== "T0" && tier !== "T1") return { ok: false, code: APPROVAL_REQUIRED };
-  if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
-  const clock = now === undefined ? undefined : strictTime(now);
+  if (action.gate === "human") {
+    if (!nonEmpty(humanStepUrl) || !STEP_URL.test(humanStepUrl)) return { fault: "url-missing" };
+    return { ok: false, code: HUMAN_STEP_REQUIRED, data: { humanStep: action.humanStep as HumanStep, url: humanStepUrl } };
+  }
+  if (!nonEmpty(caller)) return { fault: "caller-missing" };
+  if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
+  if (tier !== "T0" && tier !== "T1") {
+    if (typeof actionDigest !== "string" || !SHA256.test(actionDigest)) return { fault: "digest-missing" };
+    return { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest } };
+  }
+  if (elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
+  const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+  if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
   decisionShape ??= schema("decision.schema.json");
   if (decisionShape(decision) !== true) return { ok: false, code: DECISION_INVALID };
-  const read = decision as { via: OperatorRecord["via"]; at: string; relayedBy?: string };
+  const read = decision as { action: string; at: string };
+  if (read.action !== action.id) return { ok: false, code: DECISION_INVALID };
   const at = strictTime(read.at);
-  if (Number.isNaN(at) || (clock !== undefined && at > clock + CLOCK_SKEW_SECONDS * 1000)) return { ok: false, code: DECISION_INVALID };
-  return { ok: true, recordAs: { by: "operator", via: read.via, ...(read.relayedBy === undefined ? {} : { relayedBy: read.relayedBy }) } };
+  if (Number.isNaN(at) || at > clock + CLOCK_SKEW_SECONDS * 1000 || at < clock - DECISION_LIFETIME_SECONDS * 1000) {
+    return { ok: false, code: DECISION_INVALID };
+  }
+  return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller } };
+}
+
+/** What a host reads of a well-known document's actions declaration: the actions, or why it is not declared. */
+export type ActionsView =
+  | { declared: false }
+  | { declared: true; valid: false; errors: string[] }
+  | { declared: true; valid: true; actions: DeclaredAction[] };
+
+/** The host reader of extensions/actions/0.1 (DEC-0121 AP-1), as `connectionsView` is for connections. */
+export function actionsView(wellKnown: unknown): ActionsView {
+  const extensions = isObject(wellKnown) && isObject(wellKnown.extensions) ? wellKnown.extensions : undefined;
+  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.actions)) return { declared: false };
+  extensionShape ??= schema("service-actions-extension.schema.json");
+  const value = extensions[EXTENSION_KEYS.actions];
+  if (extensionShape(value) !== true) {
+    return { declared: true, valid: false, errors: (extensionShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
+  }
+  return { declared: true, valid: true, actions: (value as { actions: DeclaredAction[] }).actions };
 }
 
 const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
@@ -93,20 +151,15 @@ const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-S
  * not list: a button without an agent twin (DEC-0121 AP-1).
  */
 export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
-  const extensions = isObject(wellKnown.extensions) ? wellKnown.extensions : undefined;
-  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.actions)) return [];
-  extensionShape ??= schema("service-actions-extension.schema.json");
-  const value = extensions[EXTENSION_KEYS.actions];
-  if (extensionShape(value) !== true) {
-    const why = (extensionShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`).join("; ");
-    return [flag(KEY_PATH, `the actions declaration is invalid (${why}); a reader treats it as not declared and reports it (DEC-0121)`)];
-  }
+  const view = actionsView(wellKnown);
+  if (!view.declared) return [];
+  if (!view.valid) return [flag(KEY_PATH, `the actions declaration is invalid (${view.errors.join("; ")}); a reader treats it as not declared and reports it (DEC-0121)`)];
   const surfaces = isObject(wellKnown.surfaces) ? wellKnown.surfaces : {};
   const mcp = isObject(surfaces.mcp) ? surfaces.mcp : {};
   const capabilities = Array.isArray(mcp.capabilities) ? (mcp.capabilities as unknown[]) : undefined;
   const findings: Finding[] = [];
   const seen = new Set<string>();
-  (value as { actions: DeclaredAction[] }).actions.forEach((action, i) => {
+  view.actions.forEach((action, i) => {
     const at = `${KEY_PATH}/actions/${i}`;
     if (seen.has(action.id)) findings.push(flag(`${at}/id`, `action ${action.id} is declared twice`));
     seen.add(action.id);
@@ -117,12 +170,13 @@ export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-142 on a service's answer to one action call (kind `action-call`, `{action, tier, decision?, now?, answer}`):
- * the answer is the one `actionDecision` gives for that action, tier, decision and clock.
+ * FAC-SEM-142 on a service's answer to one action call (kind `action-call`: the inputs of `actionDecision` and the
+ * service's `answer`): the answer is the one `actionDecision` gives for those inputs.
  */
 function actionCallRule(value: JsonObject): Finding[] {
-  const want = actionDecision({ action: value.action, tier: value.tier, decision: value.decision, now: value.now });
-  if (isDeepStrictEqual(value.answer, want)) return [];
+  const { answer, ...inputs } = value;
+  const want = actionDecision(inputs);
+  if (isDeepStrictEqual(answer, want)) return [];
   return [flag("/answer", `the service answers this call ${JSON.stringify(want)} (DEC-0121 AP-2, AP-4)`)];
 }
 

@@ -73,9 +73,10 @@ forms, so another spelling of the author's own id (`AGENT:x` for `agent:x`, `urn
 the author ([identifiers](identifiers.md), DEC-0076). Every project an active assignment scopes has exactly one active
 product manager (`FAC-SEM-006`), two spellings of one project id being one project.
 
-An operator's decision an agent relays in `_meta.decision` is the operator's, not the agent's, and changes none of
-this: an agent still MUST NOT approve its own promotion, grant, checker rule or policy change on its own account
-([service](service.md#actions) AP-5, DEC-0121).
+An operator's decision an agent relays in `_meta.decision` is the operator's, not the agent's: an agent still MUST NOT
+approve its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's
+approval of it, which the service's audit records with the relaying caller ([service](service.md#actions) AP-5,
+DEC-0121).
 
 ## Semantic rules
 

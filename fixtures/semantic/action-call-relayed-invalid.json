@@ -10,12 +10,14 @@
       "gate": "relayed"
     },
     "tier": "T1",
+    "caller": "agent:claude-code",
     "decision": {
       "by": "operator",
       "via": "relayed-instruction",
-      "at": "2026-10-24T09:30:00Z",
-      "relayedBy": "claude-code"
+      "action": "approve-reply",
+      "at": "2026-10-24T09:30:00Z"
     },
+    "now": "2026-10-24T09:30:30Z",
     "answer": {
       "ok": false,
       "code": "decision-invalid"

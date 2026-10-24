@@ -334,6 +334,9 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision; ask the operator and call again with it in `_meta.decision` ([service](service.md#actions) AP-2, DEC-0121) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action or time (AP-2, DEC-0121) | callee | 403 |
+| `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
 `hub-unavailable` → `issuer-unavailable`, `binding-revoked` → `grant-revoked`, and `access-required` and `needs-grant` → `no-grant`
@@ -464,7 +467,9 @@ bind — L0, the project's L1 and each provider key's own ceiling ([spend policy
 do the human gates: sign-ins, consents, payments and top-ups, secrets typed into hidden prompts. A credential
 source is never another agent's key or vault slot at any tier ([spend policy](spend-policy.md#grants) rule 1). A service takes a
 `relayed` action, one a person can take on its page, from a T0 or T1 caller that carries the operator's decision in
-`_meta.decision` as the operator's own ([service](service.md#actions) AP-2, DEC-0121).
+`_meta.decision` (or an accepted `approval/1`) as the operator's own, and refuses it without one
+`operator-decision-required`: inside the boundary the instruction is the authority, and the decision is how it travels
+([service](service.md#actions) AP-2, DEC-0121).
 
 ## The boundary
 

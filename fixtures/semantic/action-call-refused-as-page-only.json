@@ -12,11 +12,15 @@
       "gate": "relayed"
     },
     "tier": "T0",
+    "caller": "agent:claude-code",
     "decision": {
       "by": "operator",
-      "via": "elicitation",
+      "via": "relayed-instruction",
+      "action": "approve-reply",
+      "instruction": "approve the reply to the review from Anna",
       "at": "2026-10-24T09:30:00Z"
     },
+    "now": "2026-10-24T09:30:30Z",
     "answer": {
       "ok": false,
       "code": "operator-decision-required"

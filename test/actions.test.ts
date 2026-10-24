@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { actionDecision, actionRules, actionsExtensionRules } from "../src/actions.js";
+import { actionDecision, actionRules, actionsExtensionRules, actionsView } from "../src/actions.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -26,15 +26,31 @@ describe("actionDecision (DEC-0121 AP-2, AP-4)", () => {
     expect(actionDecision(input)).toEqual(expected);
   });
   it("covers every answer the reference gives", () => {
-    const answers = new Set(vectors.cases.map(({ expected }) => expected.code ?? expected.fault ?? (expected.recordAs === "caller" ? "caller" : "operator")));
-    expect([...answers].sort()).toEqual(["action-invalid", "approval-required", "caller", "decision-invalid", "human-step-required", "now-unreadable", "operator", "operator-decision-required"]);
+    const answers = new Set(vectors.cases.map(({ expected }) => expected.code ?? expected.fault ?? (expected.recordAs === "caller" ? "caller" : expected.recordAs.via)));
+    expect([...answers].sort()).toEqual(["action-invalid", "approval", "approval-required", "caller", "caller-missing", "decision-invalid", "digest-missing", "elicitation", "human-step-required", "now-unreadable", "operator-decision-required", "relayed-instruction", "url-missing"]);
   });
-  it("every decision a vector takes as the operator's is valid against decision.schema.json and travels in a request's _meta", () => {
-    for (const { name, input, expected } of vectors.cases.filter((c) => c.expected.ok === true && typeof c.expected.recordAs === "object")) {
+  it("every decision a vector takes as the operator's travels in a request's _meta, a sealed call and the hub's agent.call", () => {
+    for (const { name, input, expected } of vectors.cases.filter((c) => c.expected.recordAs?.via === "relayed-instruction")) {
       expect(valid("decision.schema.json", input.decision), name).toBe(true);
       expect(valid("interop-request-meta.schema.json", { traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", decision: input.decision }), name).toBe(true);
-      expect(expected.recordAs.via).toBe(input.decision.via);
+      const call = { agentId: "reviews", capability: "reviews.approve", input: {}, decision: input.decision };
+      expect(valid("interop-agent-call.schema.json", call), name).toBe(true);
+      expect(valid("agent-call-message.schema.json", { type: "fabric-agent-call/1", kind: "call", call }), name).toBe(true);
+      expect(expected.recordAs.caller).toBe(input.caller);
     }
+  });
+  it("records the service's own identity of the caller, never one the decision names", () => {
+    const decision = { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve it", at: "2026-10-24T09:30:00Z" };
+    const action = { id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" };
+    expect(actionDecision({ action, tier: "T0", caller: "agent:codex", decision, now: "2026-10-24T09:30:00Z" })).toEqual({ ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: "agent:codex" } });
+  });
+  it("every refusal a vector answers is a valid DL-19 refusal", () => {
+    for (const { name, expected } of vectors.cases.filter((c) => c.expected.ok === false)) {
+      const error = { code: expected.code, message: "refused", ...(expected.data ? { data: expected.data } : {}) };
+      expect(valid("delegation-refusal.schema.json", { error }), name).toBe(true);
+    }
+    expect(valid("delegation-refusal.schema.json", { error: { code: "human-step-required", message: "pay first" } })).toBe(false);
+    expect(valid("delegation-refusal.schema.json", { error: { code: "human-step-required", message: "pay first", data: { humanStep: "payment", url: "http://x.example" } } })).toBe(false);
   });
   it("every declared action a vector reads validates against the extension's schema", () => {
     for (const { name, input } of vectors.cases.filter((c) => c.expected.fault !== "action-invalid")) {
@@ -63,6 +79,13 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(valid("service-well-known.schema.json", positive)).toBe(true);
     expect(evaluateSemanticRules("service-well-known", positive)).toEqual([]);
   });
+  it("actionsView answers what a host reads", () => {
+    const value = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }] };
+    expect(actionsView({})).toEqual({ declared: false });
+    expect(actionsView(null)).toEqual({ declared: false });
+    expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: value } })).toEqual({ declared: true, valid: true, actions: value.actions });
+    expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ required"] });
+  });
   it("reads surfaces that are not objects as no capability list", () => {
     const value = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }] };
     expect(actionsExtensionRules({ surfaces: "x", extensions: { [EXTENSION_KEYS.actions]: value } })).toEqual([]);
@@ -80,7 +103,7 @@ describe("kind action-call (FAC-SEM-142)", () => {
     for (const fixture of fixtures) expect(evaluateSemanticRules(fixture.kind, fixture.input).map((f) => f.code), fixture.name).toEqual(fixture.expect);
   });
   it("names the answer the service owes", () => {
-    const [finding] = actionRules("action-call", { action: { id: "retry-job", title: "Retry", tool: "fabric.job.retry", gate: "none" }, tier: "T0", answer: { ok: false, code: "operator-decision-required" } }) ?? [];
+    const [finding] = actionRules("action-call", { action: { id: "retry-job", title: "Retry", tool: "jobs.retry", gate: "none" }, tier: "T0", answer: { ok: false, code: "operator-decision-required" } }) ?? [];
     expect(finding).toEqual({ code: "FAC-SEM-142", instancePath: "/answer", message: 'the service answers this call {"ok":true,"recordAs":"caller"} (DEC-0121 AP-2, AP-4)' });
   });
   it("answers nothing for another kind", () => {

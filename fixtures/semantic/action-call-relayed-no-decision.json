@@ -10,6 +10,8 @@
       "gate": "relayed"
     },
     "tier": "T0",
+    "caller": "agent:claude-code",
+    "now": "2026-10-24T09:30:30Z",
     "answer": {
       "ok": false,
       "code": "operator-decision-required"

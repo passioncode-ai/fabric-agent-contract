@@ -2,11 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/decision.schema.json",
   "title": "The operator's decision a call carries in _meta.decision (fabric-actions/0.1, DEC-0121 AP-2)",
-  "description": "The operator's decision on a relayed action, carried by a T0 or T1 caller in its request's _meta.decision. by is always operator: an agent sets it only for an instruction the operator gave in its own session (AP-3). via relayed-instruction: the agent passes on what the operator told it, quoting the operator's words in instruction. via elicitation: the person accepted the service's own elicitation in their client. A service also reads at strictly (RFC 3339 with T and an offset, a day that exists; src/rfc3339.ts strictTime) and answers decision-invalid otherwise. docs/specification/service.md#actions.",
+  "description": "The operator's decision on one relayed action, carried by a T0 or T1 caller in its request's _meta.decision (or the sealed call's decision over the relay). by is always operator and via is always relayed-instruction: an agent sets it only for an instruction the operator gave in its own session, quoting the operator's sentence that names the action (AP-3). A decision through an elicitation is the service's own record, never the caller's claim. action is the declared action's id and must be the called one. A service reads at strictly (src/rfc3339.ts strictTime) and refuses decision-invalid a decision more than 60 s after its clock or more than 24 h before it. docs/specification/service.md#actions.",
   "type": "object",
   "required": [
     "by",
     "via",
+    "action",
+    "instruction",
     "at"
   ],
   "additionalProperties": false,
@@ -15,48 +17,21 @@
       "const": "operator"
     },
     "via": {
-      "enum": [
-        "relayed-instruction",
-        "elicitation"
-      ]
+      "const": "relayed-instruction"
     },
-    "at": {
-      "$ref": "common.schema.json#/$defs/timestamp",
-      "description": "When the operator decided."
+    "action": {
+      "$ref": "common.schema.json#/$defs/slug",
+      "description": "The id of the declared action this decision is for (extensions/actions/0.1)."
     },
     "instruction": {
       "type": "string",
       "minLength": 1,
       "maxLength": 500,
-      "description": "The operator's words, verbatim; required with via relayed-instruction."
+      "description": "The operator's sentence that names this action, verbatim."
     },
-    "relayedBy": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 200,
-      "description": "The agent that relays the decision, as the service records it."
+    "at": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "When the operator decided."
     }
-  },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "via": {
-            "const": "relayed-instruction"
-          }
-        },
-        "required": [
-          "via"
-        ]
-      },
-      "then": {
-        "required": [
-          "instruction"
-        ],
-        "properties": {
-          "instruction": true
-        }
-      }
-    }
-  ]
+  }
 }

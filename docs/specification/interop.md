@@ -283,17 +283,19 @@ DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.
 
 A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
-[`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via, at,
-instruction?, relayedBy?}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any unknown `_meta` member.
-An agent sets it only for an instruction the operator gave in its own session, quoting it (AP-3).
+[`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
+"relayed-instruction", action, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
+unknown `_meta` member. An agent sets it only for an instruction the operator gave it, quoting the sentence that names
+the action (AP-3).
 
-DEC-0121 adds three codes to the interop error codes, each the `error.code` of an `isError` tool result:
+DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
+each in the `structuredContent` of an `isError` tool result:
 
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without `_meta.decision` | the service | asks the operator and calls again with their answer in `_meta.decision` |
-| `decision-invalid` | the `_meta.decision` is not valid against its schema, its `at` is not read strictly, or it is dated more than 60 s after the service's clock | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
-| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit | the service, with the direct link to the step (a URL-mode elicitation where the client supports it) | hands the person that link |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision | the service | asks the operator and calls again with their answer in `_meta.decision` |
+| `decision-invalid` | the decision is not valid against its schema, names another action, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
 `_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
@@ -336,8 +338,9 @@ Arguments: [`interop-agent-call.schema.json`](../../schemas/interop-agent-call.s
 one estate the same arguments travel over the relay inside a sealed `fabric-agent-call/1`
 ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
-`.instance`. The schema admits no field beyond the four, so a credential cannot ride in
-the arguments.
+`.instance`. The schema admits no field beyond these and `decision`, so a credential cannot ride in
+the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
+forwards a T1 origin's unchanged and drops a T2 origin's, which would change nothing there (DEC-0121).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

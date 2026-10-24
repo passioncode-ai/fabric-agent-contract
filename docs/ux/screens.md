@@ -203,7 +203,7 @@
 - **Elements:** the callee, the action as the callee will take it, who asks (the caller and the person under the share grant), the approval's lifetime (primary action: approve this action once).
 - **States:** success — approved, and the approval returned to the caller; error — declined, or the callee later refuses the approval as invalid or reused.
 - **Coverage:** `approval.schema.json`, `test/delegation.test.ts`, `test/delegation-sealed.test.ts` (DL-17, DL-18)
-- **Scenarios:** SCN-018
+- **Scenarios:** SCN-018, SCN-043
 - **Resources:** delegation specification, Approval, Trust tiers
 - **Status:** proposed
 

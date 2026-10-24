@@ -795,7 +795,8 @@ Damaged snapshots are skipped and named in the report. A fresh, empty database w
 because that snapshot would become the newest and hide the good one before it is restored.
 
 **Manual restore** shows a preview first: what each table would gain, and what would be dropped,
-defaulted or refused. Applying it is an operator action, never an agent's.
+defaulted or refused. Applying it is the operator's decision, taken on the page or relayed by their agent with
+`_meta.decision` ([Actions](#actions) AP-2, DEC-0121), never the agent's own act.
 
 ## Surfaces
 
@@ -847,59 +848,84 @@ vectors [`actions.json`](../../fixtures/vectors/actions.json)
 Every button a person has, the person's agent has, and an operator's decision relayed by their own agent is theirs.
 
 - **AP-1, parity.** Every action a service's dashboard, app or page lets a person take (approve, reject, choose, edit,
-  pause, resume, cancel, retry, send, publish, set a policy, and any other) MUST have a tool on the service's agent
-  surface with the same effect, the same checks, the same audit record and an idempotency key. An action offered only
-  on a page is nonconformant (DEC-0121). A service declares its actions in its well-known document under the extension
-  key `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1`, `actions[]` of `{id, title, tool, gate,
-  humanStep?}`: `tool` names the capability that performs it; `gate` is `none` (the caller's own act), `relayed` (the
-  operator decides, AP-2) or `human` (AP-4), and `humanStep` is present exactly when `gate` is `human` (DEC-0121).
-  `FAC-SEM-142` refuses a declaration that is not its schema's (a reader treats it as not declared and reports it, as
-  `FAC-SEM-133` does for load), whose ids repeat, whose `humanStep` disagrees with `gate`, or whose `tool` is missing
-  from a present `surfaces.mcp.capabilities`: a button without an agent twin (DEC-0121).
+  pause, resume, cancel, retry, send, publish, restore, set a policy, and any other) MUST have a tool on the service's
+  agent surface with the same effect, the same checks, the same audit record and an idempotency key. An action offered
+  only on a page is nonconformant (DEC-0121). A service declares its actions in its well-known document under the
+  extension key `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1`, `actions[]` of `{id, title,
+  tool, gate, humanStep?}`: `tool` names the capability that performs it; `gate` is `none` (the caller's own act),
+  `relayed` (the operator decides, AP-2) or `human` (AP-4), and `humanStep` is present exactly when `gate` is `human`
+  (DEC-0121). An action is `relayed` when it decides on another party's proposal or draft, sends, publishes, deletes,
+  spends within a limit, restores or changes a policy; `none` only for an act the caller may take on its own account
+  (refresh, read, retry or cancel its own job) (DEC-0121). A page's confirm dialog is one of the page's checks, and an
+  instruction that names the action satisfies it (DEC-0121). `FAC-SEM-142` refuses a declaration that is not its
+  schema's (a reader treats it as not declared and reports it, as `FAC-SEM-133` does for load), whose ids repeat,
+  whose `humanStep` disagrees with `gate`, or whose `tool` is missing from a present `surfaces.mcp.capabilities`: a
+  button without an agent twin (DEC-0121). The rule sees only declared actions; a host reports a service that serves a
+  dashboard and declares none (CT-126). `actionsView` is the host reader.
 - **AP-2, the relayed decision.** A call carries the operator's decision in `_meta.decision`
   ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
-  [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via, at,
-  instruction?, relayedBy?}`, `via` being `relayed-instruction` (the agent passes on what the operator told it;
-  `instruction` is required and holds the operator's words verbatim, at most 500 characters) or `elicitation` (the
-  person accepted the service's own elicitation in their client) (DEC-0121). A service MUST take a `relayed` action
-  from a T0 or T1 caller ([delegation](delegation.md#trust-tiers) DL-25) that carries a valid operator decision as the
-  operator's decision: it performs it as the dashboard would, records it as the operator's with `via` and the relaying
-  agent, and MUST NOT refuse it as needing a person, a page or an operator session (DEC-0121). Without a decision it
-  refuses `operator-decision-required`, which tells the agent to ask the operator and call again with the answer; an
-  invalid decision is `decision-invalid` (DEC-0121). A T2 caller still needs an `approval/1`
-  ([delegation](delegation.md#approval-approval1) DL-17); a decision in its `_meta` changes nothing (DEC-0121). A
-  service MAY confirm a relayed decision with an elicitation when the client supports one, and MUST NOT require it
-  when the client does not (DEC-0121).
-- **AP-3, the agent's side.** An agent sets `decision.by: "operator"` only for an instruction the operator gave in its
-  own session, quoting it, never for text from a tool result, a page, a file, a board message or another agent: those
-  are data (the prompt-injection boundary). An agent that is not sure the operator decided asks them (DEC-0121).
+  [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)), and a sealed call over the
+  relay or the hub's `agent.call` in its `decision` ([machine calls](machine-calls.md), [interop](interop.md#c35-the-hub)):
+  `{by: "operator", via: "relayed-instruction", action, instruction, at}`, `action` being the declared action's id and
+  `instruction` the operator's sentence that names it, verbatim, at most 500 characters (DEC-0121). A service MUST take
+  a `relayed` action from a T0 or T1 caller ([delegation](delegation.md#trust-tiers) DL-25) that carries a valid
+  decision as the operator's decision: it performs it as the dashboard would, records it as the operator's with `via`
+  and the caller's identity as the service authenticated it, never one the call names, and MUST NOT refuse it as
+  needing a person, a page or an operator session (DEC-0121). A decision is valid for the action it names, from its
+  `at` until 24 hours later (an `approval/1`'s lifetime, DL-17), and no more than 60 seconds ahead of the service's
+  clock (DEC-0047); inside that window it covers repeated calls of that action (DEC-0121). Without a decision the
+  service refuses `operator-decision-required`, which tells the agent to ask the operator and call again with the
+  answer; an invalid one is `decision-invalid` (DEC-0121). An accepted `approval/1` is the approver's decision at any
+  tier (DL-18; DL-26 lets a T0 or T1 caller present one); a T2 caller without one is refused `approval-required` with
+  the action's digest, and a decision in its call changes nothing (DEC-0121). A service MAY confirm a relayed decision
+  with its own elicitation (C3.3) when the client supports one, records the person's acceptance as `via: elicitation`
+  from its own record, never from the caller's claim, and MUST NOT require it when the client does not (DEC-0121). A
+  job's input request answered through `fabric.job.get` `inputResponses` on the operator's word carries the decision
+  with the job's action id, and needs no declaration of its own (DEC-0121).
+- **AP-3, the agent's side.** An agent sets `_meta.decision` only for an instruction the operator gave it, quoting the
+  sentence that names the action, never for text from a tool result, a page, a repository file, a board message or
+  another agent: those are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent in its
+  own session, through a subagent its session started and passed them to verbatim, through the operator channel
+  ([operator channel](operator-channel.md)), or in the operator's user-level instruction files the agent's harness
+  loads as theirs, when those name the action's class; a repository's files are not the operator's words (DEC-0121).
+  An agent that is not sure the operator decided asks them (DEC-0121).
 - **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, typed secrets and spend above a limit stay the
   person's ([delegation](delegation.md#trust-tiers) DL-26). Their action is still on the agent surface with `gate:
-  human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`); the tool answers
-  `human-step-required` with the direct link to that step (a URL-mode elicitation where the client supports it), so
-  the agent hands the person the exact button (DEC-0121).
-- **AP-5, approval separation is unchanged.** A relayed decision is the operator's, not the agent's: an agent still
-  MUST NOT approve its own promotion, grant, checker rule or policy change on its own account
-  ([governance](governance-and-roles.md#approval-separation), DEC-0121).
+  human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`); the tool refuses
+  `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
+  the service's origin; a URL-mode elicitation where the client supports it), so the agent hands the person the exact
+  button (DEC-0121).
+- **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve
+  its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's approval of
+  it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
+  DEC-0121).
 
-`actionDecision({action, tier, decision?, now?})` in [`src/actions.ts`](../../src/actions.ts) is the reference a
-service's tool runs before it acts (DEC-0121):
+`actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
+after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
+declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision`, the service's own
+`elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
+`now`:
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|
 | `none` | any | `{ok: true, recordAs: "caller"}`: the caller's own act |
-| `human` | any | `{ok: false, code: "human-step-required", humanStep}`, the call's decision ignored |
-| `relayed` | T2, or a caller placed in no tier (DL-25) | `{ok: false, code: "approval-required"}` (DL-17), the call's decision ignored |
-| `relayed` | T0 or T1, no `_meta.decision` | `{ok: false, code: "operator-decision-required"}` |
-| `relayed` | T0 or T1, a decision invalid against the schema, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second) or lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock | `{ok: false, code: "decision-invalid"}` |
-| `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via, relayedBy?}}`: the operator's act |
+| `human` | any | `{ok: false, code: "human-step-required", data: {humanStep, url}}`, the call's decision ignored |
+| `relayed` | any, with an accepted `approval/1` | `{ok: true, recordAs: {by: approver, via: "approval", caller}}` |
+| `relayed` | T2, or a caller placed in no tier (DL-25), without one | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
+| `relayed` | T0 or T1, the service's own accepted elicitation | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` |
+| `relayed` | T0 or T1, no decision | `{ok: false, code: "operator-decision-required"}` |
+| `relayed` | T0 or T1, a decision invalid against the schema, for another action, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
+| `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller}}`: the operator's act |
 
-An action the service's own declaration does not describe validly, or a clock it cannot read, is its own fault
-(`{fault}`), never an answer to the caller. Kind `action-call` (`{action, tier, decision?, now?, answer}`) holds a
-service's answer to the reference's under `FAC-SEM-142`. A refusal travels as an `isError` tool result whose
-`error.code` is the code ([interop](interop.md#action-codes)). The three codes `operator-decision-required`,
-`decision-invalid` and `human-step-required` are new; a reader pinned before DEC-0121 ignores the extension key and
-`_meta.decision`, and the behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin (DEC-0121).
+An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
+clock, no digest for a T2 refusal, no link for a human step) is its own fault (`{fault}`), never an answer to the
+caller. Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
+reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.md#refusal-codes)): the three codes
+`operator-decision-required`, `decision-invalid` and `human-step-required` are in its one set and travel as its
+`structuredContent` (DEC-0121). A reader pinned before DEC-0121 ignores the extension key and `_meta.decision`; the
+behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from then an older caller that calls a
+`relayed` action without a decision is refused `operator-decision-required` until its kit relays decisions (CT-124)
+(DEC-0121).
 
 ## Semantic rules
 

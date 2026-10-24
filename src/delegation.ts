@@ -36,7 +36,11 @@ export const REFUSAL_CODES = [
   // DEC-0106: a call outside the caller's or the target's machine profile; only a passkey-signed revision lifts it.
   "profile-forbids",
   "issuer-unavailable",
-  "unknown-state"
+  "unknown-state",
+  // DEC-0121: an action call's refusals (AP-2, AP-4), in the same one set (DL-19).
+  "operator-decision-required",
+  "decision-invalid",
+  "human-step-required"
 ] as const;
 export type RefusalCode = (typeof REFUSAL_CODES)[number];
 

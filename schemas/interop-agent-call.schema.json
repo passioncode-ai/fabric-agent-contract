@@ -22,6 +22,10 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 256
+    },
+    "decision": {
+      "$ref": "decision.schema.json",
+      "description": "The operator's decision the hub forwards unchanged for a T1 origin and drops for a T2 origin (DEC-0121 AP-2)."
     }
   },
   "additionalProperties": false

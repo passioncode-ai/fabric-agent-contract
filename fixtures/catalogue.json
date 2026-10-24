@@ -981,9 +981,10 @@
   {"name": "service-actions-extension-extra-member", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "service-actions-extension-unknown-step", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-unknown-step.json", "valid": false, "keyword": "enum"},
   {"name": "decision", "schema": "decision.schema.json", "path": "positive/decision.json", "valid": true},
-  {"name": "decision-elicitation", "schema": "decision.schema.json", "path": "positive/decision-elicitation.json", "valid": true},
   {"name": "decision-relayed-without-instruction", "schema": "decision.schema.json", "path": "negative/decision-relayed-without-instruction.json", "valid": false, "keyword": "required"},
   {"name": "decision-by-agent", "schema": "decision.schema.json", "path": "negative/decision-by-agent.json", "valid": false, "keyword": "const"},
   {"name": "decision-instruction-too-long", "schema": "decision.schema.json", "path": "negative/decision-instruction-too-long.json", "valid": false, "keyword": "maxLength"},
-  {"name": "decision-unknown-via", "schema": "decision.schema.json", "path": "negative/decision-unknown-via.json", "valid": false, "keyword": "enum"}
+  {"name": "decision-unknown-via", "schema": "decision.schema.json", "path": "negative/decision-unknown-via.json", "valid": false, "keyword": "const"},
+  {"name": "decision-without-action", "schema": "decision.schema.json", "path": "negative/decision-without-action.json", "valid": false, "keyword": "required"},
+  {"name": "decision-names-relayer", "schema": "decision.schema.json", "path": "negative/decision-names-relayer.json", "valid": false, "keyword": "additionalProperties"}
 ]

@@ -19,7 +19,9 @@
             "window": { "enum": ["total", "task", "project", "day", "week", "month", "call"], "description": "The window reached with limit-reached. DEC-0041: call is a grant's perCallMaxUsd exceeded, a refusal window rather than a grant limit window, at level L3." },
             "level": { "enum": ["L0", "L1", "L2", "L3"] },
             "actionDigest": { "$ref": "common.schema.json#/$defs/sha256" },
-            "approvalRequest": { "$ref": "common.schema.json#/$defs/uri" }
+            "approvalRequest": { "$ref": "common.schema.json#/$defs/uri" },
+            "humanStep": { "enum": ["sign-in", "consent", "payment", "secret", "spend-above-limit"], "description": "The person's step a human-step-required refusal names (DEC-0121 AP-4)." },
+            "url": { "type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^(https://|/)", "description": "The direct link to that step: an https URL or a path on the service's origin (DEC-0121 AP-4)." }
           },
           "additionalProperties": true
         }
@@ -37,6 +39,10 @@
         {
           "if": { "properties": { "code": { "const": "approval-required" } }, "required": ["code"] },
           "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["actionDigest"], "properties": { "actionDigest": true } } } }
+        },
+        {
+          "if": { "properties": { "code": { "const": "human-step-required" } }, "required": ["code"] },
+          "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["humanStep", "url"], "properties": { "humanStep": true, "url": true } } } }
         }
       ]
     }
@@ -62,7 +68,10 @@
         "chain-too-deep",
         "profile-forbids",
         "issuer-unavailable",
-        "unknown-state"
+        "unknown-state",
+        "operator-decision-required",
+        "decision-invalid",
+        "human-step-required"
       ]
     }
   }

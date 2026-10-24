@@ -47,7 +47,7 @@
         "transport": "streamable-http",
         "capabilities": [
           "reviews.approve",
-          "fabric.job.retry",
+          "jobs.retry",
           "accounts.connect"
         ]
       },
@@ -70,7 +70,7 @@
           {
             "id": "retry-job",
             "title": "Retry",
-            "tool": "fabric.job.retry",
+            "tool": "jobs.retry",
             "gate": "none"
           },
           {

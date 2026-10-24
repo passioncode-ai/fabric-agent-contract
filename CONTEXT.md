@@ -131,14 +131,16 @@ always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084)
 **Action parity**: Every action a service's dashboard, app or page lets a person take has a tool on the service's
 agent surface with the same effect, checks and audit record, declared in its well-known document under
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
-nonconformant (`FAC-SEM-142`) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+nonconformant. `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
+reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
-**Relayed decision**: The operator's decision an agent carries in a call's `_meta.decision` (`decision.schema.json`):
-`via: relayed-instruction` quotes the operator's own words from the agent's session, `via: elicitation` is the person's
-acceptance of the service's elicitation. A service takes a `relayed` action from a T0 or T1 caller that carries a valid
-one as the operator's act, refuses one without it `operator-decision-required` and an invalid one `decision-invalid`;
-a T2 caller still needs an `approval/1` (`actionDecision`, [service](docs/specification/service.md#actions) AP-2,
-DEC-0121).
+**Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
+(`decision.schema.json`): the action's id and the operator's sentence naming it, quoted from what the operator told
+the agent (never from a tool result, a page, a repository file or another agent), valid for 24 hours. A service takes a
+`relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
+authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
+`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
+[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
@@ -320,6 +322,7 @@ grant (DEC-0045).
 **Trust tier**: Where a caller stands against the machine boundary (DEC-0045, delegation DL-25): **T0** the
 operator's own machine, **T1** an enrolled machine of the same owner, **T2** everything else. A callee requires no
 **Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
+A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
 
 **Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued

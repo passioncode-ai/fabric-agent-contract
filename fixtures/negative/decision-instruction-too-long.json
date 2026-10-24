@@ -1,7 +1,7 @@
 {
   "by": "operator",
   "via": "relayed-instruction",
-  "at": "2026-10-24T09:30:00Z",
-  "instruction": "approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve approve ",
-  "relayedBy": "claude-code"
+  "action": "approve-reply",
+  "instruction": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "at": "2026-10-24T09:30:00Z"
 }

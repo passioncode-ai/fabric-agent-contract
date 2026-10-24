@@ -1,5 +1,5 @@
 {
-  "description": "A relayed action from a T1 caller with the operator's decision is the operator's act (DEC-0121 AP-2).",
+  "description": "A relayed action from a T1 caller with the operator's decision is the operator's act, recorded with the service's own identity of the caller (DEC-0121 AP-2).",
   "kind": "action-call",
   "expect": [],
   "input": {
@@ -10,12 +10,13 @@
       "gate": "relayed"
     },
     "tier": "T1",
+    "caller": "agent:claude-code",
     "decision": {
       "by": "operator",
       "via": "relayed-instruction",
-      "at": "2026-10-24T09:30:00Z",
+      "action": "approve-reply",
       "instruction": "approve the reply to the review from Anna",
-      "relayedBy": "claude-code"
+      "at": "2026-10-24T09:30:00Z"
     },
     "now": "2026-10-24T09:30:30Z",
     "answer": {
@@ -23,7 +24,7 @@
       "recordAs": {
         "by": "operator",
         "via": "relayed-instruction",
-        "relayedBy": "claude-code"
+        "caller": "agent:claude-code"
       }
     }
   }

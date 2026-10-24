@@ -1,0 +1,28 @@
+{
+  "description": "A T2 caller with an accepted approval/1 is the approver's decision (DEC-0121 AP-2, DL-18).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T2",
+    "caller": "agent:claude-code",
+    "approval": {
+      "ok": true,
+      "approver": "person:anna"
+    },
+    "now": "2026-10-24T09:30:30Z",
+    "answer": {
+      "ok": true,
+      "recordAs": {
+        "by": "person:anna",
+        "via": "approval",
+        "caller": "agent:claude-code"
+      }
+    }
+  }
+}
