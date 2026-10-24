@@ -17,8 +17,9 @@ documents, fix what the checks found, and release the result as `v0.1.0+2026-10-
   edge, the check-in schema's resend description, the context of a check-in's requests and call records in CONTEXT.md
   and contexts.md, the parties table in credentials.md, FLW-27's branches and FLW-28's revocation, the specification
   index's adoption rows, the repository named public, stale handoff entries, CT-83, CT-110, CT-113 and CT-120's status.
-- **The second release** `v0.1.0+2026-10-24`: see its GitHub release for the decisions since `v0.1.0+2026-10-23`
-  (DEC-0112 to DEC-0119) and what narrows.
+- **The second release** `v0.1.0+2026-10-24`: annotated tag on `4e5440cf` (the tree the gate passed on in #173,
+  8 606 tests, 18 vector files), [GitHub release](https://github.com/passioncode-ai/fabric-agent-contract/releases/tag/v0.1.0%2B2026-10-24)
+  listing DEC-0112 to DEC-0119 and what narrows; announced on board thread `147a5538`.
 
 ## Decisions taken here
 
