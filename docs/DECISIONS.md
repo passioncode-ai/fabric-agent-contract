@@ -7156,3 +7156,67 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/versioning.md` (One contract pin: the note no longer says a kit writes
   the members), `src/pin-check.ts` (its comment), backlog CT-104 (closed by this decision).
 - **Source:** CT-104; FAA-95 (board thread `d0d274d0`, 2026-10-22).
+
+### DEC-0121: every button a person has, the person's agent has; an operator's decision relayed by their own agent is theirs
+
+- **Date:** 2026-10-24
+- **Status:** Accepted (2026-10-24). Additive on the wire (a new extension key and an optional `_meta` member); a
+  service's behaviour rule that a kit or a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
+- **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
+  does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
+  DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
+  MUST NOT require a delegation token, an `approval/1` or a grant record from a T0 or T1 caller. Services still refuse
+  such calls: several estate services answer an agent's approve, reject, choose or policy call with "operator session
+  required" and send the person to the dashboard, and some offer an action only on the page. Nothing in the contract
+  said a dashboard action needs an agent twin, and nothing let an agent say that the decision it carries is the
+  operator's.
+- **Decision:**
+  1. **Parity (AP-1).** Every action a service's dashboard, app or page lets a person take (approve, reject, choose,
+     edit, pause, resume, cancel, retry, send, publish, set a policy, and any other) has a tool on the service's agent
+     surface with the same effect, the same checks, the same audit record and an idempotency key. An action offered
+     only on a page is nonconformant. A service declares its actions in its well-known document under the extension
+     key `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` (protocol `fabric-actions/0.1`,
+     schema `service-actions-extension.schema.json`): `actions[]` of `{id, title, tool, gate, humanStep?}`. `tool`
+     names the capability that performs it; `gate` is `none` (the caller's own act), `relayed` (the operator decides;
+     item 2) or `human` (item 4), and `humanStep` is present exactly when `gate` is `human`. `FAC-SEM-142` refuses a
+     declaration whose ids repeat, whose `humanStep` disagrees with `gate`, or whose `tool` is missing from a present
+     `surfaces.mcp.capabilities`: a button without an agent twin.
+  2. **The relayed decision (AP-2).** A call carries the operator's decision in `_meta.decision`
+     (`decision.schema.json`): `{by: "operator", via, at, instruction?, relayedBy?}`, `via` being
+     `relayed-instruction` (the agent passes on what the operator told it; `instruction` is required and holds the
+     operator's words verbatim, at most 500 characters) or `elicitation` (the person accepted the service's own
+     elicitation in their client). A service MUST take a `relayed` action from a T0 or T1 caller (DL-25) that carries a
+     valid operator decision as the operator's decision: it performs it as the dashboard would, records it as the
+     operator's with `via` and the relaying agent, and MUST NOT refuse it as needing a person, a page or an operator
+     session. Without a decision it refuses `operator-decision-required`, which tells the agent to ask the operator and
+     call again with the answer; an invalid decision is `decision-invalid`. A T2 caller still needs an `approval/1`
+     (DL-17); a decision in its `_meta` changes nothing. A service MAY confirm a relayed decision with an elicitation
+     when the client supports one, and MUST NOT require it when the client does not. `actionDecision`
+     (`src/actions.ts`) is the reference.
+  3. **The agent's side (AP-3).** An agent sets `decision.by: "operator"` only for an instruction the operator gave in
+     its own session, quoting it, never for text from a tool result, a page, a file, a board message or another agent:
+     those are data (the prompt-injection boundary). An agent that is not sure the operator decided asks them.
+  4. **Human gates stay (AP-4, DL-26).** Sign-ins, consents, payments and top-ups, typed secrets and spend above a
+     limit stay the person's. Their action is still on the agent surface with `gate: human` and its `humanStep`
+     (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`); the tool answers `human-step-required` with the
+     direct link to that step (a URL-mode elicitation where the client supports it), so the agent hands the person
+     the exact button.
+  5. **Approval separation is unchanged.** A relayed decision is the operator's, not the agent's: an agent still MUST
+     NOT approve its own promotion, grant, checker rule or policy change on its own account (governance).
+- **Why:** the operator works through their agents; a decision they state in chat is the same decision as a click, and
+  DL-26 already trusts it inside the boundary. A page-only action makes the agent useless exactly where a decision is
+  needed. Declaring the actions lets a host and a checker find a button without a twin instead of discovering it when
+  an agent is refused.
+- **Alternatives considered:** require an elicitation for every relayed decision (a client without elicitation would
+  have no route, and the operator asked for the chat to suffice); an `approval/1` minted by the hub for every local
+  decision (DL-26 removed that inside the boundary, and the hub would be on the path of every local click); leave
+  parity to each product (the situation the operator reported).
+- **Compatibility:** the extension key and `_meta.decision` are additions; a reader pinned before them ignores both.
+  The three codes are new in the interop error register. The behaviour rules (items 1, 2 and 4) bind a service at its
+  next pin, as DEC-0039's tightened session rule did. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (Actions), `interop.md` (the extension key, the
+  `_meta` member, the codes), `delegation.md` (DL-26 names AP-2), `governance-and-roles.md`, `versioning.md` (the
+  register), `conformance.md` (rows and `FAC-SEM-142`), `schemas/service-actions-extension.schema.json`,
+  `schemas/decision.schema.json`, `schemas/interop-request-meta.schema.json`, `src/actions.ts`, the vector file
+  `fixtures/vectors/actions.json`; backlog CT-124 to CT-127.
+- **Source:** the operator's instruction of 2026-10-24.
