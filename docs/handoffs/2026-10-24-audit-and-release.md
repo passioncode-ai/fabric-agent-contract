@@ -19,7 +19,9 @@ documents, fix what the checks found, and release the result as `v0.1.0+2026-10-
   index's adoption rows, the repository named public, stale handoff entries, CT-83, CT-110, CT-113 and CT-120's status.
 - **The second release** `v0.1.0+2026-10-24`: annotated tag on `4e5440cf` (the tree the gate passed on in #173,
   8 606 tests, 18 vector files), [GitHub release](https://github.com/passioncode-ai/fabric-agent-contract/releases/tag/v0.1.0%2B2026-10-24)
-  listing DEC-0112 to DEC-0119 and what narrows; announced on board thread `147a5538`.
+  listing DEC-0112 to DEC-0119 and what narrows. The board announcement on thread `147a5538` is pending: the
+  board was down on 2026-10-24 from about 01:40 UTC (Fabric's Docker engine not answering after the disk filled), and
+  every attempt was refused with nothing sent; send it under idempotency key `contract-release-v0.1.0-2026-10-24`.
 
 ## Decisions taken here
 
@@ -41,4 +43,4 @@ documents, fix what the checks found, and release the result as `v0.1.0+2026-10-
 
 ## Next task
 
-CT-122: the contract's text for a `kid` and an `iss` per context (CX-CON-06), due 2026-11-06.
+Send the release announcement once the board answers (above), then CT-122: the contract's text for a `kid` and an `iss` per context (CX-CON-06), due 2026-11-06.
