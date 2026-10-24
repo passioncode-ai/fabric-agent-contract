@@ -462,7 +462,9 @@ attribution and narrowing. A T2 caller takes the whole profile: a token per call
 each effect that needs one (DL-17), a grant with limits, an expiry and a payer. At every tier the money limits
 bind — L0, the project's L1 and each provider key's own ceiling ([spend policy](spend-policy.md#levels)) — and so
 do the human gates: sign-ins, consents, payments and top-ups, secrets typed into hidden prompts. A credential
-source is never another agent's key or vault slot at any tier ([spend policy](spend-policy.md#grants) rule 1).
+source is never another agent's key or vault slot at any tier ([spend policy](spend-policy.md#grants) rule 1). A service takes a
+`relayed` action, one a person can take on its page, from a T0 or T1 caller that carries the operator's decision in
+`_meta.decision` as the operator's own ([service](service.md#actions) AP-2, DEC-0121).
 
 ## The boundary
 

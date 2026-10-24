@@ -1,0 +1,1228 @@
+{
+  "about": "Vectors for fabric-actions/0.1 (DEC-0121), written by tools/vectors/actions.ts, never by hand. `cases`: actionDecision({action, tier, decision?, now?}) answers {ok: true, recordAs: \"caller\"} for gate none, {ok: false, code: \"human-step-required\", humanStep} for gate human, {ok: false, code: \"approval-required\"} for gate relayed from any tier but T0 and T1 (DL-17, DL-25), and from T0 or T1 {ok: false, code: \"operator-decision-required\"} without a decision, {ok: false, code: \"decision-invalid\"} for one invalid against decision.schema.json, read strictly or more than 60 s ahead of now, else {ok: true, recordAs: {by: \"operator\", via, relayedBy?}}; {fault} is the service's own and is never sent. `declarations`: the instance paths of FAC-SEM-142's findings on a well-known document's extensions/actions/0.1.",
+  "cases": [
+    {
+      "name": "none from T0",
+      "input": {
+        "action": {
+          "id": "retry-job",
+          "title": "Retry",
+          "tool": "fabric.job.retry",
+          "gate": "none"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": "caller"
+      }
+    },
+    {
+      "name": "none from T2",
+      "input": {
+        "action": {
+          "id": "retry-job",
+          "title": "Retry",
+          "tool": "fabric.job.retry",
+          "gate": "none"
+        },
+        "tier": "T2"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": "caller"
+      }
+    },
+    {
+      "name": "none from T1 with a decision: still the caller's act",
+      "input": {
+        "action": {
+          "id": "retry-job",
+          "title": "Retry",
+          "tool": "fabric.job.retry",
+          "gate": "none"
+        },
+        "tier": "T1",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": "caller"
+      }
+    },
+    {
+      "name": "human sign-in from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "sign-in"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "sign-in"
+      }
+    },
+    {
+      "name": "human consent from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "consent"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "consent"
+      }
+    },
+    {
+      "name": "human payment from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "payment"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "payment"
+      }
+    },
+    {
+      "name": "human secret from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "secret"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "secret"
+      }
+    },
+    {
+      "name": "human spend-above-limit from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "spend-above-limit"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "spend-above-limit"
+      }
+    },
+    {
+      "name": "human from T1 with the operator's decision: still the person's step",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "payment"
+        },
+        "tier": "T1",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "payment"
+      }
+    },
+    {
+      "name": "human from T2",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "consent"
+        },
+        "tier": "T2"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "humanStep": "consent"
+      }
+    },
+    {
+      "name": "relayed from T2 without a decision",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required"
+      }
+    },
+    {
+      "name": "relayed from T2 with a valid decision: the decision changes nothing",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required"
+      }
+    },
+    {
+      "name": "relayed from a caller placed nowhere is T2 (DL-25)",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T3",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required"
+      }
+    },
+    {
+      "name": "relayed with no tier is T2 (DL-25)",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required"
+      }
+    },
+    {
+      "name": "relayed from T0 without a decision",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "relayed from T1 without a decision",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "relayed from T0 with the operator's instruction",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction"
+        }
+      }
+    },
+    {
+      "name": "relayed from T1 with the operator's instruction and the relaying agent",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna",
+          "relayedBy": "claude-code"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "relayedBy": "claude-code"
+        }
+      }
+    },
+    {
+      "name": "relayed from T0 with an accepted elicitation",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "elicitation"
+        }
+      }
+    },
+    {
+      "name": "relayed from T0, an elicitation with the relaying agent",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z",
+          "relayedBy": "codex"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "elicitation",
+          "relayedBy": "codex"
+        }
+      }
+    },
+    {
+      "name": "an instruction of 500 characters",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction"
+        }
+      }
+    },
+    {
+      "name": "an at with an offset",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T11:30:00+02:00"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "elicitation"
+        }
+      }
+    },
+    {
+      "name": "a decision 60 s ahead of the service's clock",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z"
+        },
+        "now": "2026-10-24T09:29:00Z"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "elicitation"
+        }
+      }
+    },
+    {
+      "name": "a decision before the service's clock",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z"
+        },
+        "now": "2026-10-25T09:30:00Z"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "elicitation"
+        }
+      }
+    },
+    {
+      "name": "a relayed instruction without the operator's words",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an instruction of 501 characters",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an empty instruction",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": ""
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision by the agent",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "agent",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision through a page",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "page",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision with no time",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision with a member of its own",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z",
+          "approved": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision that is null",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": null
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision that is a string",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "decision": "the operator said yes"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an empty relayedBy",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z",
+          "relayedBy": ""
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an at with a space for T",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24 09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an at with a leap second",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-12-31T23:59:60Z"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an at on 30 February",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-02-30T09:30:00Z"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an at without an offset",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a decision 61 s ahead of the service's clock",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z"
+        },
+        "now": "2026-10-24T09:28:59Z"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a service clock it cannot read",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "elicitation",
+          "at": "2026-10-24T09:30:00Z"
+        },
+        "now": "yesterday"
+      },
+      "expected": {
+        "fault": "now-unreadable"
+      }
+    },
+    {
+      "name": "an action with an unknown gate",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "operator"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "fault": "action-invalid"
+      }
+    },
+    {
+      "name": "a human action that names no step",
+      "input": {
+        "action": {
+          "id": "retry-job",
+          "title": "Retry",
+          "tool": "fabric.job.retry",
+          "gate": "human"
+        },
+        "tier": "T0"
+      },
+      "expected": {
+        "fault": "action-invalid"
+      }
+    },
+    {
+      "name": "a relayed action that names a step",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed",
+          "humanStep": "consent"
+        },
+        "tier": "T0",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "at": "2026-10-24T09:30:00Z",
+          "instruction": "approve the reply to the review from Anna"
+        }
+      },
+      "expected": {
+        "fault": "action-invalid"
+      }
+    },
+    {
+      "name": "no action",
+      "input": {
+        "tier": "T0"
+      },
+      "expected": {
+        "fault": "action-invalid"
+      }
+    }
+  ],
+  "declarations": [
+    {
+      "name": "no key: nothing to check",
+      "input": {
+        "surfaces": {},
+        "extensions": {}
+      },
+      "findings": []
+    },
+    {
+      "name": "no extensions: nothing to check",
+      "input": {
+        "surfaces": {}
+      },
+      "findings": []
+    },
+    {
+      "name": "three actions, each tool served",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "retry-job",
+                "title": "Retry",
+                "tool": "fabric.job.retry",
+                "gate": "none"
+              },
+              {
+                "id": "approve-reply",
+                "title": "Approve the reply",
+                "tool": "reviews.approve",
+                "gate": "relayed"
+              },
+              {
+                "id": "connect-store",
+                "title": "Do it yourself",
+                "tool": "accounts.connect",
+                "gate": "human",
+                "humanStep": "sign-in"
+              }
+            ]
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "no capability list: tools are not compared",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http"
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "approve-reply",
+                "title": "Approve the reply",
+                "tool": "reviews.approve",
+                "gate": "relayed"
+              }
+            ]
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "an id declared twice",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "approve-reply",
+                "title": "Approve the reply",
+                "tool": "reviews.approve",
+                "gate": "relayed"
+              },
+              {
+                "id": "approve-reply",
+                "title": "Retry",
+                "tool": "fabric.job.retry",
+                "gate": "none"
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1/actions/1/id"
+      ]
+    },
+    {
+      "name": "a human action without its step",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "retry-job",
+                "title": "Retry",
+                "tool": "fabric.job.retry",
+                "gate": "human"
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1/actions/0/humanStep"
+      ]
+    },
+    {
+      "name": "a step on a relayed action",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "approve-reply",
+                "title": "Approve the reply",
+                "tool": "reviews.approve",
+                "gate": "relayed",
+                "humanStep": "consent"
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1/actions/0/humanStep"
+      ]
+    },
+    {
+      "name": "a tool the MCP surface does not serve: a button without an agent twin",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "approve-reply",
+                "title": "Approve the reply",
+                "tool": "reviews.approve",
+                "gate": "relayed"
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1/actions/0/tool"
+      ]
+    },
+    {
+      "name": "a value that is not the schema's: one finding at the key",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": []
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1"
+      ]
+    },
+    {
+      "name": "an action with no tool: one finding at the key",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": {
+            "actions": [
+              {
+                "id": "approve-reply",
+                "title": "Approve",
+                "gate": "relayed"
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1"
+      ]
+    },
+    {
+      "name": "a value that is not an object",
+      "input": {
+        "surfaces": {
+          "events": {
+            "path": "/fabric/v1/events"
+          },
+          "mcp": {
+            "path": "/mcp",
+            "transport": "streamable-http",
+            "capabilities": [
+              "fabric.job.retry",
+              "reviews.approve",
+              "accounts.connect"
+            ]
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1": [
+            {
+              "id": "approve-reply",
+              "title": "Approve the reply",
+              "tool": "reviews.approve",
+              "gate": "relayed"
+            }
+          ]
+        }
+      },
+      "findings": [
+        "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1actions~10.1"
+      ]
+    }
+  ]
+}

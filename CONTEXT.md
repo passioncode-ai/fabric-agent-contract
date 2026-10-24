@@ -128,6 +128,18 @@ fault (the meter: `principal-unproven`, with the detail in its reason) (delegati
 **Revocation delta** entries and **Heartbeats** (DEC-0054). In a personal estate it is the hub's own Ed25519 key on the
 always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084).
 
+**Action parity**: Every action a service's dashboard, app or page lets a person take has a tool on the service's
+agent surface with the same effect, checks and audit record, declared in its well-known document under
+`extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
+nonconformant (`FAC-SEM-142`) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+
+**Relayed decision**: The operator's decision an agent carries in a call's `_meta.decision` (`decision.schema.json`):
+`via: relayed-instruction` quotes the operator's own words from the agent's session, `via: elicitation` is the person's
+acceptance of the service's elicitation. A service takes a `relayed` action from a T0 or T1 caller that carries a valid
+one as the operator's act, refuses one without it `operator-decision-required` and an invalid one `decision-invalid`;
+a T2 caller still needs an `approval/1` (`actionDecision`, [service](docs/specification/service.md#actions) AP-2,
+DEC-0121).
+
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
 

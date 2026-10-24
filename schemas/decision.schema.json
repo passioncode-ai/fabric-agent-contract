@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/decision.schema.json",
+  "title": "The operator's decision a call carries in _meta.decision (fabric-actions/0.1, DEC-0121 AP-2)",
+  "description": "The operator's decision on a relayed action, carried by a T0 or T1 caller in its request's _meta.decision. by is always operator: an agent sets it only for an instruction the operator gave in its own session (AP-3). via relayed-instruction: the agent passes on what the operator told it, quoting the operator's words in instruction. via elicitation: the person accepted the service's own elicitation in their client. A service also reads at strictly (RFC 3339 with T and an offset, a day that exists; src/rfc3339.ts strictTime) and answers decision-invalid otherwise. docs/specification/service.md#actions.",
+  "type": "object",
+  "required": [
+    "by",
+    "via",
+    "at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "by": {
+      "const": "operator"
+    },
+    "via": {
+      "enum": [
+        "relayed-instruction",
+        "elicitation"
+      ]
+    },
+    "at": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "When the operator decided."
+    },
+    "instruction": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "The operator's words, verbatim; required with via relayed-instruction."
+    },
+    "relayedBy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "The agent that relays the decision, as the service records it."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "via": {
+            "const": "relayed-instruction"
+          }
+        },
+        "required": [
+          "via"
+        ]
+      },
+      "then": {
+        "required": [
+          "instruction"
+        ],
+        "properties": {
+          "instruction": true
+        }
+      }
+    }
+  ]
+}

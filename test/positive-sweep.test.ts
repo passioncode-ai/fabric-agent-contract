@@ -101,7 +101,11 @@ export const NOT_SWEPT: readonly string[] = [
   "interop-job-list-request.schema.json",
   "service-load-extension.schema.json",
   // A refusal that started nothing (DEC-0104): a shape only.
-  "interop-tool-error.schema.json"
+  "interop-tool-error.schema.json",
+  // Action parity (DEC-0121): the actions extension is checked inside a well-known document (FAC-SEM-142, kind
+  // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).
+  "service-actions-extension.schema.json",
+  "decision.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

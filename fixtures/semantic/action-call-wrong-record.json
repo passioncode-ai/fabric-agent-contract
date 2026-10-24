@@ -1,0 +1,25 @@
+{
+  "description": "A service that records the operator's relayed decision as the agent's own act (FAC-SEM-142, DEC-0121 AP-2).",
+  "kind": "action-call",
+  "expect": [
+    "FAC-SEM-142"
+  ],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T0",
+    "decision": {
+      "by": "operator",
+      "via": "elicitation",
+      "at": "2026-10-24T09:30:00Z"
+    },
+    "answer": {
+      "ok": true,
+      "recordAs": "caller"
+    }
+  }
+}

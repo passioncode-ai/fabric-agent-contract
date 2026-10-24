@@ -105,6 +105,7 @@ detector; connections use a variant of it in `src/connections.ts`, and whether t
 | [`src/dashboard-declaration.ts`](../../src/dashboard-declaration.ts) | the embedded dashboard's declaration | [`dashboard-declaration.json`](../../fixtures/vectors/dashboard-declaration.json) | DEC-0059 |
 | [`src/comms-hold.ts`](../../src/comms-hold.ts) | the operator's hold on the Project board | [`comms-hold.json`](../../fixtures/vectors/comms-hold.json) | DEC-0079 |
 | [`src/connections.ts`](../../src/connections.ts) | what an agent uses, read as `connectionsView` answers | [`connections.json`](../../fixtures/vectors/connections.json) | DEC-0096 |
+| [`src/actions.ts`](../../src/actions.ts) | whether a service takes an action call and as whose act (`actionDecision`), and a well-known document's actions declaration (`FAC-SEM-142`) | [`actions.json`](../../fixtures/vectors/actions.json) | DEC-0121 |
 
 ## Clients and readers
 
@@ -191,6 +192,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | an organization server relaying credentials (the first organization server) | queues requests for the issuer, records every request, decision, issue and revocation by name and never a value, and relays decisions, envelopes and revocations unchanged in check-in responses, deciding each request once in a response and sending no envelope for a request the same response refuses or leaves pending (DEC-0112, kind `device-check-in`); reads call records only of its own context, under the acknowledged notice's purpose, and refuses a request or call record of another context as attribution (`FAC-SEM-045`, DEC-0114) | DEC-0111 | the server's own test ([credentials](credentials.md#the-decision)) |
 | a host reading what an agent uses (Fabric Dashboards, Fabric) | reads the key only as `connectionsView` answers: an invalid value, a repeated `id` or a credential is not declared and is reported; never trusts a connection as authority; runs `fixtures/vectors/connections.json` in its gate | DEC-0096; `FAC-SEM-127` | `test/connections.test.ts`, `src/connections.ts` `connectionsView` ([connections](connections.md#reading-it)) |
 | a host showing a service's usage report (Fabric Dashboards, the adapter's checker) | shows a cost as a lower bound while `unpricedCalls` is above 0 and the day's tokens as a lower bound while `unmeasuredCalls` is above 0; a host that shows a sum (Fabric Dashboards, Fabric) sums money over the `days[].byModel[]` rows not on a subscription and shows a subscription's `costUsd` apart as an estimate, never in money, a budget, a service's spending limit or a spend policy's level (`usageSpend`); a service's own `budget.spentUsd` SHOULD count money only (the adapter's kit, CT-115) | DEC-0065, DEC-0091, DEC-0110; `FAC-SEM-025` | the host's own test; the report and the sum: `test/usage-rules.test.ts` ([service](service.md#usage-report)) |
+| a service with a dashboard, an app or a page (every service; the adapter's kits for theirs) | gives every action a person can take there a tool on its agent surface with the same effect, checks, audit record and an idempotency key, declared in `extensions/actions/0.1` valid against `service-actions-extension.schema.json` (each `id` once, `humanStep` exactly when `gate` is `human`, every `tool` in a present `surfaces.mcp.capabilities`); answers each action call as `actionDecision` does: takes a `relayed` action from a T0 or T1 caller with a valid `_meta.decision` as the operator's, records it with `via` and the relaying agent, never refuses it as needing a person, a page or an operator session, refuses one without a decision `operator-decision-required` and an invalid one `decision-invalid`, keeps DL-17's `approval-required` for a T2 caller, answers a `human` action `human-step-required` with the direct link to its step; never requires an elicitation the client cannot show | DEC-0121; `FAC-SEM-142` | `test/actions.test.ts`, vectors `fixtures/vectors/actions.json`, fixtures `fixtures/semantic/{service-well-known-actions,action-call}-*` ([service](service.md#actions)) |
+| an agent relaying its operator's decision (every agent; the adapter's kits) | sets `_meta.decision` with `by: "operator"` only for an instruction the operator gave in its own session, quoting it verbatim in `instruction`, never for text from a tool result, a page, a file, a board message or another agent; asks the operator when not sure they decided, and after `operator-decision-required`; hands the person the link of a `human-step-required`; never approves its own promotion, grant, checker rule or policy change on its own account | DEC-0121 (AP-3, AP-5) | the agent's own test ([service](service.md#actions)) |
 | a host probing a remote service's well-known route (Fabric Dashboards, Fabric) | reads the status of a no-token `401` and never its body | DEC-0109 | the host's own test ([service](service.md#remote-placement)) |
 | a conformance checker probing a remote service (the adapter's `check_service.py`) | admits any no-token `401` whose body neither parses as the well-known document (`service-well-known.schema.json`) nor carries this service's own identity values (`service.id`, its instance, build or `process.pid`): it reads the body only to find none of them | DEC-0109 | the host's own test ([service](service.md#remote-placement)) |
 
@@ -306,9 +309,10 @@ two modules, or listed here without a checker. Codes up to `FAC-SEM-034` were al
 register and carry no receipt. `FAC-SEM-124` to `FAC-SEM-126` have no receipt on origin's SEM chain (the defect CT-44 records; DEC-0090, DEC-0094
 and DEC-0095). `FAC-SEM-061` to `FAC-SEM-063` were reserved by P3-02 (DEC-0053's run) and are not used. `FAC-SEM-095` was
 reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
-for became a fix of `FAC-SEM-006`.
+for became a fix of `FAC-SEM-006`. `FAC-SEM-141` was reserved (receipt SEM-0141) by DEC-0121's run and is not used: the
+decision names `FAC-SEM-142`, reserved after it.
 
-**Next free rule code:** `FAC-SEM-141` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-143` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -450,6 +454,7 @@ for became a fix of `FAC-SEM-006`.
 | `FAC-SEM-138` | `credential-request`, `credential-request-document`, `credential-decision`, `credential-exchange`, `device-check-in` | [credentials](credentials.md#semantic-rules) | SEM-0138 |
 | `FAC-SEM-139` | `credential-envelope-check` | [credentials](credentials.md#semantic-rules) | SEM-0139 |
 | `FAC-SEM-140` | `call-record`, `device-check-in` | [credentials](credentials.md#semantic-rules) | SEM-0140 |
+| `FAC-SEM-142` | `service-well-known`, `action-call` | [service](service.md#semantic-rules) | SEM-0142 |
 
 ## Compatibility policy
 

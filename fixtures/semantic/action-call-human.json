@@ -1,0 +1,27 @@
+{
+  "description": "A human step answers human-step-required with its step, at every tier (DEC-0121 AP-4).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "connect-store",
+      "title": "Sign in to the store",
+      "tool": "accounts.connect",
+      "gate": "human",
+      "humanStep": "sign-in"
+    },
+    "tier": "T0",
+    "decision": {
+      "by": "operator",
+      "via": "relayed-instruction",
+      "at": "2026-10-24T09:30:00Z",
+      "instruction": "approve the reply to the review from Anna",
+      "relayedBy": "claude-code"
+    },
+    "answer": {
+      "ok": false,
+      "code": "human-step-required",
+      "humanStep": "sign-in"
+    }
+  }
+}

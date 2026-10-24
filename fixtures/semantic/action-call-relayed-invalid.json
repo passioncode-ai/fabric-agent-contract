@@ -1,0 +1,24 @@
+{
+  "description": "A relayed instruction without the operator's words: decision-invalid (DEC-0121 AP-2).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T1",
+    "decision": {
+      "by": "operator",
+      "via": "relayed-instruction",
+      "at": "2026-10-24T09:30:00Z",
+      "relayedBy": "claude-code"
+    },
+    "answer": {
+      "ok": false,
+      "code": "decision-invalid"
+    }
+  }
+}

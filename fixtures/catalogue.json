@@ -972,5 +972,18 @@
   {"name": "credential-revocation-unsigned", "schema": "credential-revocation.schema.json", "path": "negative/credential-revocation-unsigned.json", "valid": false, "keyword": "required"},
   {"name": "call-record-prompt", "schema": "call-record.schema.json", "path": "negative/call-record-prompt.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "device-check-in-credentials", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-credentials.json", "valid": true},
-  {"name": "device-check-in-response-credentials", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-response-credentials.json", "valid": true}
+  {"name": "device-check-in-response-credentials", "schema": "device-check-in.schema.json", "path": "positive/device-check-in-response-credentials.json", "valid": true},
+  {"name": "service-well-known-actions", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-actions.json", "valid": true},
+  {"name": "service-actions-extension", "schema": "service-actions-extension.schema.json", "path": "positive/service-actions-extension.json", "valid": true},
+  {"name": "service-actions-extension-empty", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-empty.json", "valid": false, "keyword": "minItems"},
+  {"name": "service-actions-extension-unknown-gate", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-unknown-gate.json", "valid": false, "keyword": "enum"},
+  {"name": "service-actions-extension-page-only", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-page-only.json", "valid": false, "keyword": "required"},
+  {"name": "service-actions-extension-extra-member", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "service-actions-extension-unknown-step", "schema": "service-actions-extension.schema.json", "path": "negative/service-actions-extension-unknown-step.json", "valid": false, "keyword": "enum"},
+  {"name": "decision", "schema": "decision.schema.json", "path": "positive/decision.json", "valid": true},
+  {"name": "decision-elicitation", "schema": "decision.schema.json", "path": "positive/decision-elicitation.json", "valid": true},
+  {"name": "decision-relayed-without-instruction", "schema": "decision.schema.json", "path": "negative/decision-relayed-without-instruction.json", "valid": false, "keyword": "required"},
+  {"name": "decision-by-agent", "schema": "decision.schema.json", "path": "negative/decision-by-agent.json", "valid": false, "keyword": "const"},
+  {"name": "decision-instruction-too-long", "schema": "decision.schema.json", "path": "negative/decision-instruction-too-long.json", "valid": false, "keyword": "maxLength"},
+  {"name": "decision-unknown-via", "schema": "decision.schema.json", "path": "negative/decision-unknown-via.json", "valid": false, "keyword": "enum"}
 ]

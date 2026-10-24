@@ -20,7 +20,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines six extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines seven extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -30,6 +30,7 @@ The contract defines six extension keys, the constants in [`src/extensions.ts`](
 | `https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1` | [embedded dashboard](embedded-dashboard.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` | [agent network](agent-network.md#load) (DEC-0104) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` | [service](service.md#actions) (DEC-0121) |
 
 The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
@@ -273,6 +274,30 @@ URL mode) and nothing else, and a form's `requestedSchema` is a flat object of
 primitive fields, as MCP restricts it. FAC-SEM-018 reads each form field's name, title,
 description and format for the vocabulary of credentials (password, secret, API key,
 access token, private key, credential) and refuses the request.
+
+## Actions and the operator's decision
+
+<a id="action-codes"></a>
+
+DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.md#actions)
+
+A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
+([`decision.schema.json`](../../schemas/decision.schema.json), a member of
+[`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via, at,
+instruction?, relayedBy?}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any unknown `_meta` member.
+An agent sets it only for an instruction the operator gave in its own session, quoting it (AP-3).
+
+DEC-0121 adds three codes to the interop error codes, each the `error.code` of an `isError` tool result:
+
+| Code | Meaning | Who answers | What the caller does |
+|---|---|---|---|
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without `_meta.decision` | the service | asks the operator and calls again with their answer in `_meta.decision` |
+| `decision-invalid` | the `_meta.decision` is not valid against its schema, its `at` is not read strictly, or it is dated more than 60 s after the service's clock | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit | the service, with the direct link to the step (a URL-mode elicitation where the client supports it) | hands the person that link |
+
+A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
+`_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
+the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
 
 ## C3.4 Trace
 
