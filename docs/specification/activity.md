@@ -279,6 +279,13 @@ kind, followed by a name. The forms it covers:
 `Users-guide`, `/Users-guide`, `feature/home-page` and `homework` have no such segment and are not
 refused.
 
+**Its scope** (CT-109): `HOME_PATH` is the value scanner of `FAC-SEM-037`, `FAC-SEM-040`, `FAC-SEM-128`
+([node summary](node-summary.md)) and `FAC-SEM-138`; it reads values that may hold ordinary words, so it refuses the
+dash form only after a character that is not an ASCII letter or digit and `my-users-list` passes, while a device's
+one-line `detail` refuses the dash form after any character ([devices](devices.md#check-in)) and `FAC-SEM-103` matches
+only a home folder that starts a path in slash form ([proposals](proposals.md)); the `sourceKey` pattern repeats its
+dash clause over the key's alphabet, and `test/activity-rules.test.ts` pins that the two refuse the same keys.
+
 **`HOME_PATH` is defence in depth, not the control.** A path wrapped in base64, hashed without a key,
 or encoded in any other way is undetectable by design; no pattern can find a name it cannot read. The
 control is the rule that **no field carries a path, and a path-derived key is `hmac-sha256:` under

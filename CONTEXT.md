@@ -201,6 +201,12 @@ its slot: observed only, with a required summary, never to `cancelled`; the requ
 which a board sends on nothing else ([project communication](docs/specification/project-comms.md#owner-settlement),
 DEC-0081).
 
+**`answered`**: A request state (DEC-0098): a participant's message of any kind but a request (never a responder's
+fenced message or progress note) from the request's target Project, whose `replyTo` is a `queued` request, moves it
+to `answered` (DEC-0102). It is not open: no responder claims it, its deadline no longer expires it, and only the
+requester's `com.cancel` moves it. It says the target answered, never that the asked work was done (`FAC-SEM-027`,
+[project communication](docs/specification/project-comms.md#request-lifecycle)).
+
 **Board finding**: A message of kind `finding` with a structured `finding`: a severity (`info`, `warning`,
 `blocking`), a consequence, 1–16 items it affects (a backlog row linked by repository, path and id, never copied, or a
 task) and a `dedupeKey`. The same sender Project and `dedupeKey` answer the standing finding's receipt with
@@ -229,6 +235,19 @@ every batch, check-in, rotation and share-registration request with its `#sig` k
 terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
+**`org-cloud`**: A device certificate binding's `role` (DEC-0099): the device is the organization's own cloud machine
+(its `org-cloud` or `enterprise-cloud` hosting), a VM no person uses, and the binding names no `user`. Only an
+`enrollment-token` whose record says `role: "org-cloud"` gives it, never an SSO sign-in (`FAC-SEM-044`). Such a machine
+derives no share registrations, and the organization's own signed repair request is its notice (DEC-0102)
+([devices](docs/specification/devices.md#enrollment)).
+
+**Renewal by the key on record**: `auth.method: "key-on-record"` (DEC-0100): a device on record, not revoked, enrolls
+again within 30 days of its last certificate's `notAfter` with a CSR from its key on record and no other proof; the
+certificate keeps the user and role on record, a new epoch is issued, the renewal is audited, and a server MAY refuse
+it by policy (`FAC-SEM-044`). The 30 days are judged by the server's clock (the new certificate's `notBefore`), never
+the device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
+with a new epoch (DEC-0102) ([devices](docs/specification/devices.md#enrollment)).
+
 **Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
 node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it
 ([devices](docs/specification/devices.md#organization-closed), DEC-0103).
@@ -237,6 +256,40 @@ node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-cl
 device management the earlier of that and the policy's deadline; the first acknowledgement, never moved by a later
 notice's (DEC-0102). Nothing that occurred before it is uploaded
 (`FAC-SEM-068`, DEC-0053).
+
+**`acknowledgedNoticeVersion`**: The check-in response member naming the latest notice version the device's person
+acknowledged, on every response once there is one (DEC-0102). A collector held by a `purpose` rejection sends that
+kind for that person again when it differs from the value it held at the rejection, absence at the rejection included;
+a value that becomes absent is no signal. A server sends it only to a node pinned at or after DEC-0102
+([devices](docs/specification/devices.md#check-in)).
+
+**`before-purpose`**: A batch acknowledgement's rejection reason (DEC-0102): the event occurred before its purpose was
+collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where the organization
+collects under it), and that purpose is collected now. A receiver may keep such an event; when it does not, it answers
+`before-purpose`, never `purpose`, and the event is consumed with nothing held. It is sent to every collector and is not
+GJ-4's `before-start`, a stored state of a `grant.usage`
+([activity](docs/specification/activity.md#batch-and-acknowledgement)).
+
+**Node summary**: `node-summary/1` (DEC-0101): a check-in record (`records.nodeSummary`) for one organization context,
+its enrollment's own `org:<org.id>` (DEC-0102): the coding agents by catalogue id, the MCP servers with source,
+transport and health, the skills and plugins with their digests and versions, the hook count, the agent services placed
+in that context, and the drift. It names no person, path, credential, argument, environment value, prompt, output or
+file content (`FAC-SEM-128`); how much of the harness it lists follows `machine.mode` (DEC-0118)
+([node summary](docs/specification/node-summary.md#the-summary)).
+
+**Harness baseline**: The policy key `harness.baseline` (DEC-0101): what an organization expects every machine to run,
+items by kind and name, signed with the policy and read from its `mdm` and `server` layers only; `minVersion` only for
+a coding agent or a plugin, `digest` only for a skill or a plugin (DEC-0102). A node summary's `drift` gives one state
+per item in its order, `missing`, `stopped`, `changed` or `outdated` (`FAC-SEM-128`,
+[node summary](docs/specification/node-summary.md#the-baseline-and-the-drift)).
+
+**Repair request**: `repair-request/1` (DEC-0101): an organization's ask that a node run one package by `agentRef`,
+version and digest, carried in a check-in response's `records.repairs`, signed like a policy layer by a key of the
+current policy key set, within a window of at most 7 days. The node runs it only as `repairDecision` answers
+(`FAC-SEM-129`): a verified signature, this device and organization, inside its window, an unexpired policy, a package
+`repair.packages` lists, and the person told before it started; a repair id runs at most once, and its one
+`repair-result/1` is sent again unchanged for a redelivered request (DEC-0102)
+([node summary](docs/specification/node-summary.md#repairs)).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
 every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling

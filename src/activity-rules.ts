@@ -49,6 +49,14 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * This is defence in depth, not the control: a path wrapped in base64, hashed without a key, or encoded any other way
  * is undetectable by design. The control is the rule that a path-derived key is `hmac-sha256:` under the device's
  * telemetry key (`pathSourceKey`) and that no field carries a path (DEC-0030).
+ *
+ * Scope (CT-109): the value scanner of FAC-SEM-037 and FAC-SEM-040 (`forbiddenKeys`), FAC-SEM-128 (`src/node-summary.ts`)
+ * and FAC-SEM-138 (`src/credentials.ts`). It reads values that may hold ordinary words, so it matches only the user-name
+ * segment form, and the dash form only after a character that is not an ASCII letter or digit: `my-users-list` passes.
+ * The `sourceKey` schema pattern (`activity-common`) repeats its dash clause over the key's alphabet, and a test in
+ * `test/activity-rules.test.ts` pins that the two refuse the same keys. Two other rules draw other boundaries: the
+ * device-common `detail` pattern refuses the dash form after any character (one line of free text with no path at all),
+ * and FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form. Changing any of the three is a decision.
  */
 const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [

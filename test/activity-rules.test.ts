@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createHash } from "node:crypto";
-import { activityEventId, contiguousAcks, forbiddenKeys, hashedBranch, keyWords, mergeStreams, pathSourceKey, tenantRef } from "../src/activity-rules.js";
+import { activityEventId, contiguousAcks, forbiddenKeys, hasHomePath, hashedBranch, keyWords, mergeStreams, pathSourceKey, tenantRef } from "../src/activity-rules.js";
 import { contiguousFrom, mergeRanges, uncovered } from "../src/seq-ranges.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -80,6 +80,49 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
       expect(forbiddenKeys({ v: value }, "", new Set()).map((f) => f.kind), value).toEqual(["path"]);
     }
     for (const value of ["feature/home-page", "homework-17", "users-guide", "req_011CT"]) expect(forbiddenKeys({ v: value }, "", new Set()), value).toEqual([]);
+  });
+
+  // CT-109: the sourceKey pattern copies HOME_PATH's dash clause by hand; over the key's own alphabet the schema refuses
+  // exactly the keys HOME_PATH matches, so a change to either copy alone fails here.
+  it("refuses in the sourceKey schema exactly what HOME_PATH matches, over the key's alphabet (CT-109)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas", "activity-common.schema.json"), "utf8")) as Json;
+    const pattern = schema.$defs.sourceKey.pattern as string;
+    // The alphabet the enumeration below draws from is the schema's own: pin it, so a wider alphabet fails here first.
+    expect(pattern.endsWith("[A-Za-z0-9][A-Za-z0-9._:~#-]{0,255})$")).toBe(true);
+    const sourceKey = validator.getSchema(`${SCHEMA_PREFIX}schemas/activity-common.schema.json#/$defs/sourceKey`);
+    if (!sourceKey) throw new Error("the sourceKey definition did not compile");
+    const shaped = /^[A-Za-z0-9][A-Za-z0-9._:~#-]{0,255}$/;
+    let checked = 0, refused = 0;
+    const agree = (key: string) => {
+      if (!shaped.test(key)) return;
+      checked += 1;
+      if (hasHomePath(key)) refused += 1;
+      expect(sourceKey(key), key).toBe(!hasHomePath(key));
+    };
+    // Exhaustive over tokens: every separator of the alphabet, letters and digits, and the home roots in each case,
+    // alone and in their dash form, so a separator, a root and the character after it fit in four tokens.
+    const tokens = ["a", "Z", "7", ".", ":", "~", "#", "-", "Users", "users", "home", "HOME", "uSERS", "-Users-", "-home-"];
+    const build = (prefix: string, depth: number) => {
+      agree(prefix);
+      if (depth === 0) return;
+      for (const token of tokens) build(prefix + token, depth - 1);
+    };
+    build("", 4);
+    // Seeded random keys over the whole alphabet, with the roots spliced in so the dash clause is reached often.
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:~#-";
+    const pieces = [...alphabet, "-Users-", "-users-", "-home-", "Users", "home"];
+    let seed = 0x109;
+    const next = () => { seed = (seed * 1103515245 + 12345) >>> 0; return seed / 2 ** 32; };
+    for (let i = 0; i < 20_000; i += 1) {
+      let key = "";
+      const length = 1 + Math.floor(next() * 24);
+      while (key.length < length) key += pieces[Math.floor(next() * pieces.length)];
+      agree(key);
+    }
+    // Both sides were reached: the comparison is not vacuous.
+    expect(checked).toBeGreaterThan(40_000);
+    expect(refused).toBeGreaterThan(1_000);
+    expect(checked - refused).toBeGreaterThan(1_000);
   });
 
   it("splits keys at camelCase, underscores, hyphens and dots", () => {
