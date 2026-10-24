@@ -39,6 +39,23 @@ describe("fabric-project-comms/0.1 semantic rules (DEC-0022, proposed)", () => {
     expect(leaving).toEqual(["cancel:cancelled"]);
   });
 
+  it("FAC-SEM-027 pins replace's and expire's rows by name, not by reading the table (CT-100)", () => {
+    // A replaced responder's claimed request goes back to the queue; its accepted one is held (DEC-0022).
+    expect(COMMS_TRANSITIONS.replace).toEqual([["claimed", "queued"], ["accepted", "accepted"]]);
+    expect(codes("comms-transition", { op: "replace", from: "claimed", to: "queued" })).toEqual([]);
+    expect(codes("comms-transition", { op: "replace", from: "accepted", to: "accepted" })).toEqual([]);
+    for (const [from, to] of [["claimed", "claimed"], ["claimed", "expired"], ["accepted", "queued"], ["queued", "queued"], ["in_progress", "queued"]]) {
+      expect(codes("comms-transition", { op: "replace", from, to }), `replace ${from}->${to}`).toEqual(["FAC-SEM-027"]);
+    }
+    // A request expires queued or claimed, never once accepted.
+    expect(COMMS_TRANSITIONS.expire).toEqual([["queued", "expired"], ["claimed", "expired"]]);
+    expect(codes("comms-transition", { op: "expire", from: "queued", to: "expired" })).toEqual([]);
+    expect(codes("comms-transition", { op: "expire", from: "claimed", to: "expired" })).toEqual([]);
+    for (const from of ["accepted", "in_progress", "answered", "outcome_unknown", "completed"]) {
+      expect(codes("comms-transition", { op: "expire", from, to: "expired" }), `expire ${from}`).toEqual(["FAC-SEM-027"]);
+    }
+  });
+
   it("FAC-SEM-027 settles a started effect only by an observed result", () => {
     expect(codes("comms-transition", { op: "complete", from: "in_progress", to: "completed", observed: false })).toContain("FAC-SEM-027");
     expect(codes("comms-transition", { op: "reconcile", from: "outcome_unknown", to: "failed_known" })).toContain("FAC-SEM-027");

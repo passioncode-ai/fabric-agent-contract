@@ -2,16 +2,19 @@ import { generateKeyPairSync, sign } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectRoot } from "../src/contract.js";
-import { policySigningInput, resolvePolicy } from "../src/device-rules.js";
+import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
+import { SIGNED_ONLY_KEYS, policySigningInput, resolvePolicy } from "../src/device-rules.js";
 import { harnessBaseline, harnessDrift, repairDecision, signedPolicyValue, versionBelow } from "../src/node-summary.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE as REPAIR_VECTORS, buildRepairDecisionVectors } from "../tools/vectors/repair-decision.js";
 
 // DEC-0101: node-summary/1, harnessDrift, and the node's decision on a repair (FAC-SEM-128, FAC-SEM-129).
 const root = projectRoot();
 const load = (file: string) => JSON.parse(readFileSync(path.join(root, "fixtures", file), "utf8"));
 const codes = (kind: string, value: unknown) => evaluateSemanticRules(kind, value).map((finding) => finding.code);
+const validator = await createValidator();
+const valid = (value: unknown, schema: string) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/${schema}`, value).valid;
 
 describe("node-summary semantic fixtures (FAC-SEM-128)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("node-summary-"));
@@ -152,6 +155,69 @@ describe("FAC-SEM-128 beyond the fixtures", () => {
   });
 });
 
+describe("the harness name shape, in every list that carries it (CT-100)", () => {
+  const summary = load("positive/node-summary.json");
+  const policy = load("positive/device-policy-harness-baseline.json");
+  // Each list's first name replaced by `name`: the four lists of a summary and a baseline item of each name-free kind.
+  const lists: Array<[string, (name: string) => boolean]> = [
+    ["mcpServers", (name) => valid({ ...summary, harness: { ...summary.harness, mcpServers: [{ ...summary.harness.mcpServers[0], name }] } }, "node-summary.schema.json")],
+    ["skills", (name) => valid({ ...summary, harness: { ...summary.harness, skills: [{ ...summary.harness.skills[0], name }] } }, "node-summary.schema.json")],
+    ["plugins", (name) => valid({ ...summary, harness: { ...summary.harness, plugins: [{ ...summary.harness.plugins[0], name }] } }, "node-summary.schema.json")],
+    ["drift", (name) => valid({ ...summary, drift: { ...summary.drift, items: [{ ...summary.drift.items[0], name }] } }, "node-summary.schema.json")],
+    ...(["skill", "plugin", "mcp-server"] as const).map((kind): [string, (name: string) => boolean] => [`baseline ${kind}`, (name) => valid({ ...policy, keys: { ...policy.keys, "harness.baseline": { value: { items: [{ kind, name }] } } } }, "device-policy.schema.json")])
+  ];
+  it.each(lists)("%s admits one @ suffix without a dot, and refuses a dotted suffix and a second @", (_list, admits) => {
+    expect(admits("switchboard@passioncode")).toBe(true);
+    expect(admits("plugin:switchboard:switchboard")).toBe(true);
+    expect(admits("Task.Pipeline+2")).toBe(true);
+    // A dotted suffix is an e-mail address's domain; a second @ hides one behind a marketplace (DEC-0102).
+    expect(admits("tool@example.com")).toBe(false);
+    expect(admits("tool@example.")).toBe(false);
+    expect(admits("task@pipe@line")).toBe(false);
+    expect(admits("tool@@passioncode")).toBe(false);
+    expect(admits("tool@")).toBe(false);
+    expect(admits("@passioncode")).toBe(false);
+  });
+  const item = (kind: string, name: string) => valid({ ...policy, keys: { ...policy.keys, "harness.baseline": { value: { items: [{ kind, name }] } } } }, "device-policy.schema.json");
+  it("a baseline coding agent's name is a slug, refused for more than a first capital", () => {
+    for (const name of ["claude-code", "codex", "c9"]) expect(item("coding-agent", name), name).toBe(true);
+    for (const name of ["Claude-Code", "claude_code", "claude.code", "claude-code@passioncode", "9claude", "-claude", "c", "claude code", "c".repeat(64)]) expect(item("coding-agent", name), name).toBe(false);
+    // The same names under a kind without the branch take the summary's shape: the branch is the coding agent's alone.
+    for (const name of ["Claude-Code", "claude_code", "claude.code"]) expect(item("plugin", name), name).toBe(true);
+  });
+  it("a baseline service's name is an id.instance key, refused for more than a first capital", () => {
+    for (const name of ["inbox-digest.main", "inbox-digest.0", `${"a".repeat(63)}.${"b".repeat(63)}`]) expect(item("service", name), name).toBe(true);
+    for (const name of ["Inbox-Digest.Main", "inbox-digest.Main", "inbox-digest", "inbox-digest.main.x", "i.main", "inbox_digest.main", "inbox-digest.-main", "inbox-digest.", "inbox-digest@main", `${"a".repeat(64)}.main`, `inbox.${"b".repeat(64)}`]) expect(item("service", name), name).toBe(false);
+    for (const name of ["Inbox-Digest.Main", "inbox_digest.main"]) expect(item("skill", name), name).toBe(true);
+  });
+});
+
+describe("the signed-only keys have one list (CT-100)", () => {
+  const source = readFileSync(path.join(root, "src/node-summary.ts"), "utf8");
+  it("SIGNED_ONLY_KEYS names every key the node reads from signed layers, and no other", () => {
+    // What signedPolicyValue and harnessBaseline read, by the literal keys in the source: a key read from signed layers
+    // that a user layer may still set would be resolved differently by resolvePolicy and by the node.
+    const read = new Set([
+      ...[...source.matchAll(/signedPolicyValue\([^,]+,\s*"([^"]+)"\)/g)].map((match) => match[1]),
+      ...[...source.matchAll(/resolvePolicy\(signed\)\["([^"]+)"\]/g)].map((match) => match[1])
+    ]);
+    expect([...read].sort()).toEqual([...SIGNED_ONLY_KEYS].sort());
+  });
+  it.each(SIGNED_ONLY_KEYS)("a user layer's %s is read by none of resolvePolicy, signedPolicyValue and harnessBaseline", (key) => {
+    const value = key === "harness.baseline" ? { items: [{ kind: "skill", name: "mine" }] } : [{ agentRef: "mine", digest: `sha256:${"d".repeat(64)}` }];
+    const user = { source: "user", revision: 1, keys: { [key]: { value }, "x-example.banner": { value: "mine" } } };
+    expect(resolvePolicy([user])[key]).toBeUndefined();
+    expect(resolvePolicy([user])["x-example.banner"]).toEqual({ value: "mine", from: "user" });
+    expect(signedPolicyValue([user], key)).toBeUndefined();
+    expect(harnessBaseline([user])).toBeUndefined();
+    // The same key from a signed layer is read by all three.
+    const server = { ...user, source: "server", revision: 7 };
+    expect(resolvePolicy([server])[key]).toEqual({ value, from: "server" });
+    expect(signedPolicyValue([server], key)).toEqual(value);
+    expect(harnessBaseline([server]) === undefined).toBe(key !== "harness.baseline");
+  });
+});
+
 describe("repairDecision (FAC-SEM-129)", () => {
   const { publicKey, privateKey } = generateKeyPairSync("ed25519");
   const raw = (publicKey.export({ format: "der", type: "spki" }) as Buffer).subarray(12).toString("base64");
@@ -209,6 +275,30 @@ describe("repairDecision (FAC-SEM-129)", () => {
     // DEC-0102: an org-cloud machine binds no person; the organization's signed request is its notice.
     expect(repairDecision({ ...base, notifiedAt: undefined, device: { ...base.device, role: "org-cloud" } })).toEqual({ decision: "run" });
     expect(repairDecision(null)).toEqual({ decision: "refuse", reason: "bad-signature" });
+  });
+  it("finds the key by its id and its algorithm, a key without alg being ed25519 (CT-100)", () => {
+    const why = (change: Record<string, unknown>) => repairDecision({ ...base, ...change }).reason;
+    const { alg: _alg, ...bare } = keys[0] as Record<string, unknown>;
+    expect(why({ keys: [bare] })).toBeUndefined();
+    expect(why({ keys: [{ ...keys[0], alg: "p256" }] })).toBe("bad-signature");
+    expect(why({ keys: [{ ...keys[0], alg: "Ed25519" }] })).toBe("bad-signature");
+    // The signature names its algorithm; the signing input leaves the signature out, so the value still verifies.
+    expect(why({ request: { ...request, signature: { ...request.signature, alg: "p256" } } })).toBe("bad-signature");
+    expect(why({ keys: [bare], request: { ...request, signature: { ...request.signature, alg: "p256" } } })).toBe("bad-signature");
+    const { alg: _unnamed, ...anonymous } = request.signature as Record<string, unknown>;
+    expect(why({ request: { ...request, signature: anonymous } })).toBe("bad-signature");
+    expect(why({ keys: [bare], request: { ...request, signature: anonymous } })).toBe("bad-signature");
+    // The matching key is found among others, by both its id and its algorithm.
+    expect(why({ keys: [{ ...keys[0], alg: "p256" }, { ...keys[0], keyId: "org-7f3a.other" }, keys[0]] })).toBeUndefined();
+  });
+  it("a repair answered once is answered again, and only answered: true says so (CT-100)", () => {
+    const why = (change: Record<string, unknown>) => repairDecision({ ...base, ...change }).reason;
+    for (const answered of ["true", 1, {}, [true], false, null]) expect(why({ answered }), JSON.stringify(answered)).toBeUndefined();
+    expect(codes("repair-run", { ...base, answered: true, decision: "refuse", reason: "already-answered" })).toEqual([]);
+    expect(codes("repair-run", { ...base, answered: true, decision: "run" })).toEqual(["FAC-SEM-129"]);
+    expect(codes("repair-run", { ...base, answered: true, decision: "refuse", reason: "bad-signature" })).toEqual(["FAC-SEM-129"]);
+    expect(codes("repair-run", { ...base, answered: "true", decision: "run" })).toEqual([]);
+    expect(codes("repair-run", { ...base, answered: "true", decision: "refuse", reason: "already-answered" })).toEqual(["FAC-SEM-129"]);
   });
   it("FAC-SEM-129 holds the node to that decision and its reason", () => {
     expect(codes("repair-run", { ...base, layers: [], decision: "run" })).toEqual(["FAC-SEM-129"]);
