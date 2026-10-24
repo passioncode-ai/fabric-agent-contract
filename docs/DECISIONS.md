@@ -7129,3 +7129,30 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `contexts.md`, `credentials.md` (the parties), the specification README, FLW-27, FLW-28, `adoption.md` and the
   product profile (the repository is public); backlog CT-83, CT-110, CT-113, CT-120; handoffs.
 - **Source:** the three readings of `2f020a69..9b0bdee4`, 2026-10-24.
+
+### DEC-0120: a contract pin stays four members, and a vendored kit's provenance lives outside it
+
+- **Date:** 2026-10-24
+- **Status:** Accepted (2026-10-24). No wire change.
+- **Context:** CT-104 asked whether `contract-pin.schema.json` should admit `adapter` and `kit`, filed on the premise
+  that fabric-agent-adapter 0.43.0 writes them into a consumer's lock (FAA-95 asked whether they were intended). The
+  adapter writes neither: its lock writer (`adapt_project.py`) emits the four pin members and `profile`, and no file of
+  the adapter at `c45944e` names `header_lines`. One consumer wrote both by hand on 2026-10-12 (a private agent's commit
+  `1cf4564`, recording the adapter tag it vendored a service kit from and the kit file's hash), and `pin:check` has
+  printed them as a note since 2026-10-21. Of the ten consumer locks on the operator's machine, that one carries them.
+- **Decision:** the pin keeps its members (`contract`, `version`, `repository`, `commit`, `profile`) and stays closed
+  (`additionalProperties: false`). `adapter` and `kit` are not members of a pin. A consumer that vendors code from the
+  adapter or any kit records where it came from in a file of its own (or the vendored file's header), never in
+  `fabric-contract.lock.json`, whose one job is the contract revision. `pin:check` keeps printing an unknown member as a
+  note and keeps not failing on it, so the one lock that carries them still passes.
+- **Why:** a lock that pins two products in one file has two owners and two update cadences; the adapter would have to
+  version a shape it does not write. Keeping the schema closed is the reversible choice: admitting the members later is
+  a widening any pinned reader can take, while admitting them now and removing them later would narrow.
+- **Alternatives considered:** admit an optional `adapter` `{repository, tag, commit}` and `kit` `{source, vendored,
+  header_lines, sha256}` (one consumer's hand-written shape, which no tool writes or reads besides that consumer's own
+  test); an open `extensions` member (nothing asks for it).
+- **Compatibility:** none: the schema and `pin:check` are unchanged. A validator run against the schema still refuses
+  that one lock, as it did before.
+- **Consequences / affects:** `docs/specification/versioning.md` (One contract pin: the note no longer says a kit writes
+  the members), `src/pin-check.ts` (its comment), backlog CT-104 (closed by this decision).
+- **Source:** CT-104; FAA-95 (board thread `d0d274d0`, 2026-10-22).

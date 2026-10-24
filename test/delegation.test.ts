@@ -46,8 +46,8 @@ const code = (result: { ok: boolean; code?: RefusalCode }) => (result.ok ? "ok" 
 describe("delegation token: the callee's offline check (DEC-0039, verifyDelegation)", () => {
   it("reads an actor carrying both sub and partner as an agent, in the chain and the meter's window (DEC-0090)", () => {
     const mixed = { sub: "example-media", act: { sub: "example-agent.default", partner: "org:acme_partners", session: "sess-0001" } };
-    const answer = verifyDelegation(token({ act: mixed }), call);
-    if (answer.ok) expect(answer.chain).toEqual(["example-media", "example-agent.default"]);
+    // Both at once, so a refusal fails here with its code in the diff instead of skipping the chain.
+    expect(verifyDelegation(token({ act: mixed }), call)).toMatchObject({ ok: true, chain: ["example-media", "example-agent.default"] });
     expect(taskWindowKey({ act: mixed as never, grant: ["g#1"] }, "g#1")).toBe("session:example-agent.default:sess-0001");
   });
   it("accepts a partner as the innermost actor and returns it in the chain, never outermost (DEC-0090)", () => {

@@ -51,14 +51,15 @@ No string member carries a credential or a URL with one. What counts is defined 
   `A-Z a-z 0-9 + / = _ -` that holds upper case, lower case and a digit, in a piece split at spaces and read whole
   (the shared `longSecret`). An AWS secret access key that holds all three (all but about one in a thousand)
   is one, with or without `/`, and so are a slug such as `Prod-Analytics-Warehouse-EU-West-1-Replica`, a long ticket
-  title holding a digit and a long mixed model id written in a purpose; a hex digest is lower case and is not. A
+  title holding a digit, a long mixed model id written in a purpose and a config line `NAME=value` of 40 or more such
+  characters; a hex digest, and a bare Notion id, are lower case and are not. A
   model's `target` is not checked for a long run outside a URL, and `id` and `capability` are lower case. In a piece
   that holds a URL, the text before its first scheme's `://` is read for a long run (whatever is glued to the scheme), and the URL
   as below;
 - any URL in the member, at its start or inside prose, that carries a credential as the shared `secretUrl` reads it
   (DEC-0044's detector: a password, a parameter such as `api_key` with a value, and its own shapes, without a word
   start or a case rule), plus the Telegram shape, which keeps its word start there. A URL runs from each scheme in a
-  piece to the next space; it is read without the brackets, quotes and punctuation that close a sentence, and with
+  piece to the next space (any whitespace: a tab or a no-break space ends it too); it is read without the brackets, quotes and punctuation that close a sentence, and with
   one of them put back, since `]` closes an IPv6 host. Inside a URL nothing is promised beyond what `secretUrl`
   finds: it reads a path between its separators, so a secret a `/` splits into short pieces can pass, and its gaps
   are CT-73's.

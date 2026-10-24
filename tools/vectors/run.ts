@@ -27,6 +27,7 @@ import * as machineCall from "./machine-call.js";
 import * as pairing from "./pairing.js";
 import * as partnerUsage from "./partner-usage.js";
 import * as relayCrypto from "./relay-crypto.js";
+import * as repairDecision from "./repair-decision.js";
 import * as shareRegistration from "./share-registration.js";
 
 /** One generator: its source in `tools/vectors/`, and the exact text of each file it writes, by repository path. */
@@ -49,6 +50,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "pairing.ts", build: one(pairing.VECTOR_FILE, pairing.buildPairingVectors) },
   { source: "partner-usage.ts", build: one(partnerUsage.VECTOR_FILE, partnerUsage.buildPartnerUsageVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },
+  { source: "repair-decision.ts", build: one(repairDecision.VECTOR_FILE, repairDecision.buildRepairDecisionVectors) },
   { source: "share-registration.ts", build: one(shareRegistration.VECTOR_FILE, shareRegistration.buildShareRegistrationVectors) }
 ];
 

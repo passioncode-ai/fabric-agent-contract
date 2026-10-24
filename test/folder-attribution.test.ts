@@ -258,11 +258,12 @@ describe("totality: every function answers and never throws", () => {
     const projects = Array.from({ length: 14 }, (_, n) => ({ id: `p:${n}`, folders: Array(10000).fill({ path: "/u/ana/work/s", commonDir: null }), sources: [] }));
     expect(attributeFolder({ folder: "/u/ana/work/s/x", home: "/u/ana", tempRoots: [], git: null, projects })).toEqual({ outcome: "ambiguous", rule: "folder", projects: projects.map((p) => p.id) });
   });
-  // Linear time, measured by growth rather than by the clock: four times the input may cost at most eight times as much
-  // (a quadratic row costs sixteen), the best of five runs each, plus 300 ms for a busy machine's pauses (the quadratic
-  // rows these tests were written against cost seconds at the larger size).
+  // Linear time, measured by growth rather than by the clock: `factor` times the input may cost at most `3 * factor` times
+  // as much (a quadratic row costs `factor * factor`), the best of five runs each. The slack is scaled from the small run,
+  // `factor * small`, with a 25 ms floor for the timer and the collector, so a quadratic cost hidden under a fixed allowance
+  // still fails (CT-72: the old 300 ms let a quadratic copy in the per-source map pass).
   // `build(n)` makes the input outside the timer and returns the call that is timed.
-  const linear = (build: (n: number) => () => void, n: number) => {
+  const linear = (build: (n: number) => () => void, n: number, factor = 4) => {
     const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => {
       const run = build(size);
       // CPU time, not wall time: preemption on a loaded machine inflates the longer run's wall time, not its CPU time.
@@ -271,16 +272,17 @@ describe("totality: every function answers and never throws", () => {
       run();
       return cpuMs() - started;
     }));
-    // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth (x16 for
-    // x4 input) fails every try.
+    const limit = (small: number) => 2 * factor * small + Math.max(factor * small, 25);
+    // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth fails
+    // every try.
     let small = 0;
     let large = 0;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       small = best(n);
-      large = best(4 * n);
-      if (large < 8 * small + 300) break;
+      large = best(factor * n);
+      if (large < limit(small)) break;
     }
-    expect(large, `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms`).toBeLessThan(8 * small + 300);
+    expect(large, `${n}: ${small.toFixed(1)} ms, ${factor * n}: ${large.toFixed(1)} ms`).toBeLessThan(limit(small));
   };
   it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
     const slashes = `a${"/".repeat(4094)}b`;
@@ -292,6 +294,16 @@ describe("totality: every function answers and never throws", () => {
       const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] };
       return () => attributeFolder(snapshot);
     }, 500);
+  }, 30_000);
+  it("copies sources in linear time: 20 Projects of up to 10000 short sources each (CT-72)", () => {
+    // Short sources keep trimming cheap, so a copy of the per-source list that grows with its length (a spread in a
+    // reduce) is most of the cost; sixteen times the input then costs about 160 times as much, against 48 allowed.
+    linear((n) => {
+      const sources = Array.from({ length: n }, (_, k) => `github.com/o${k}`);
+      const projects = Array.from({ length: 20 }, (_, k) => ({ id: `p:${k}`, folders: [], sources }));
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/x" });
+    }, 625, 16);
   }, 30_000);
   it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
     const at = (n: number) => {

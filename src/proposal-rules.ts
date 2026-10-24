@@ -43,6 +43,12 @@ function transitionFindings(value: JsonObject): Finding[] {
  * A path that names a home folder, which no proposal carries out of the estate: at the start, after `file://` (with or
  * without `localhost`), or after any character that cannot continue a path (a space, a quote, a backtick, a bracket, a
  * comma), so `docs/Users/x`, `src/home/page` and a folder in any script before `/home/` are not home folders.
+ *
+ * Scope (CT-109): FAC-SEM-103 only. Its boundary is the start of a path in slash form (`/Users/`, `/home/`, `~/`,
+ * `C:\Users\`): a repository-relative path passes, and there is no dash form, so `-Users-<name>-` is not refused here.
+ * It differs from `HOME_PATH` in `src/activity-rules.ts` (FAC-SEM-037, FAC-SEM-040, FAC-SEM-128 and FAC-SEM-138, which
+ * also match relative slash forms and the dash form after a character that is not an ASCII letter or digit) and from
+ * the device-common `detail` pattern (the dash form after any character). Changing any of the three is a decision.
  */
 const HOME_PATH = new RegExp(String.raw`(?:^|file:\/\/(?:localhost)?|[^\p{L}\p{N}_.\-\/~@+])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)`, "u");
 

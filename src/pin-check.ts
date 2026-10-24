@@ -159,7 +159,8 @@ export const exitCodeOf = (drift: PinDrift[], history: PinHistory): 0 | 1 | 2 =>
 /**
  * The lock's problems against `contract-pin.schema.json`, one line each; a commit of the wrong shape is `malformed`.
  * A member the schema does not define is not a problem here but a note (`lockExtras`): this command read locks
- * without their schema before 2026-10-21, and consumers' locks carry such members (`adapter`, `kit`).
+ * without their schema before 2026-10-21, and a consumer's lock carries such members (`adapter`, `kit`: not pin
+ * members, DEC-0120).
  */
 export async function lockProblems(lock: unknown): Promise<string[]> {
   const result = validateDocument(await createValidator(), PIN_SCHEMA, lock);
