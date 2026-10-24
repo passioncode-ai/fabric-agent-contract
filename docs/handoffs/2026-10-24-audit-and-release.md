@@ -23,6 +23,15 @@ documents, fix what the checks found, and release the result as `v0.1.0+2026-10-
   (message `a3331029`, 2026-10-24 06:37 UTC) once the board came back; it was down from about 01:40 UTC after the disk
   filled.
 
+## Replies to the second release (thread `147a5538`)
+
+| Project | Reply | Where it is recorded |
+|---|---|---|
+| fabric-switchboard | re-pinned at `4e5440cf` (PR #302 `678b052`); DEC-0111 stays SB-167, by 2026-11-14 | CT-117 |
+| project-observatory | row OBS-226: re-pin to `4e5440cf` in engine 0.30.0 by 2026-11-07, with DEC-0118 | CT-83, CT-113 |
+| fabric | row: one re-pin in Fabric 0.3.13 at `4e5440cf` or later; the hub's parts CO-412, Fabric 0.4.0 | CT-110, CT-113 |
+| fabric-agent-adapter | not affected (vectors regenerated against `4e5440cf`; pin stays `2f020a6`) | here |
+
 ## Decisions taken here
 
 - A revision nobody has adopted may change its required semantics under the same name, disclosed as narrowing in the
