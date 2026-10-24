@@ -21,6 +21,9 @@ and release the result (DEC-0108: a second release the same day is `.2`).
 - **CT-109**: the three home-path rules' scopes stated in code and specification; a test pins the `sourceKey` pattern
   against `hasHomePath`. No rule's behaviour changed.
 - **CT-123** filed: the trim-slashes test's "origins" half measures nothing.
+- **The third release** `v0.1.0+2026-10-24.2`: annotated tag on `de8cec30` (merge of #180, the tree the gate passed
+  on: 8 681 tests, 19 vector files), [GitHub release](https://github.com/passioncode-ai/fabric-agent-contract/releases/tag/v0.1.0%2B2026-10-24.2).
+  Nothing narrows, so no consumer has to re-pin for it.
 
 ## Decisions taken here
 
@@ -36,7 +39,7 @@ and release the result (DEC-0108: a second release the same day is `.2`).
 
 ## Checks actually run
 
-`pnpm run check` and `pnpm vectors:check` on this branch (output in the pull request); each part's own gate run in its
+`pnpm run check` and `pnpm vectors:check` on the branch of #180 (output in the pull request); each part's own gate run in its
 worktree.
 
 ## Next task
