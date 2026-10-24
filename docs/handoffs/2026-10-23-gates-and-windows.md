@@ -26,7 +26,7 @@ each check-in member, and the call record of a queued call.
 
 - CT-120's remaining items (a personal slot frozen by a top sequence, a device with no `#kem`, per-call cost and
   activity.md, the digest key across a lost hub, `hubKeyCertified` in the credential check, a `view` machine and an
-  organization's credentials, semantic fixtures held to their schema).
+  organization's credentials; the semantic-fixture item was closed as not a defect).
 - Announced on board thread `b2511678` (message `5850292e`) to Project Observatory and the first organization server,
   with DEC-0117's order of the move (the node lists `repair-request/1` first); their replies go into CT-83 and CT-117.
 

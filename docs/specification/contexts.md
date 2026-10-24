@@ -105,7 +105,8 @@ and a share registration carry their grant's own `org:<orgId>` (DEC-0086, amendi
 compares it with its certificate's `org.id` and refuses it when they differ, so the field adds a check and tells the
 receiver nothing it does not know ([share registration](share-registration.md#the-join)). A check-in's
 `node-summary/1` record carries its enrollment's own `org:<org.id>` the same way: the receiver compares it with the
-certificate's `org.id` as written and refuses it when they differ (DEC-0102, [node summary](node-summary.md)). What a device
+certificate's `org.id` as written and refuses it when they differ (DEC-0102, [node summary](node-summary.md)), and so
+do its `credentialRequests` and `callRecords` (DEC-0111, compared as attribution by `FAC-SEM-045`, DEC-0114). What a device
 sends, and to which organization server, is decided three ways:
 
 - **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per

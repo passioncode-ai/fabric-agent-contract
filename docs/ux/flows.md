@@ -662,10 +662,14 @@ flowchart TD
 ```mermaid
 flowchart TD
   A{What happened?} -->|the hub's machine is retired, replaced or changing profile| L[Move the hub on its row; pick a full machine]
+  A -->|Remove on the hub's machine| K{Lost or retired?}
+  K -->|retired, still reachable| L
+  K -->|lost| M
   L --> T[Two revisions, DL-15: certify and switch, then revoke and anchor]
   T --> S
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
+  C -->|yes, but the hub still answers elsewhere| L
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
   M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned]
   A -->|a passkey lost| P{Another passkey left?}
@@ -685,7 +689,7 @@ flowchart TD
 - **Goal:** the agent holds the credential it asked for, sealed in its organization's context, for no longer than issued
 - **Entry points:** an agent's need for a credential; the organization's credential queue; a member leaving
 - **Success exit:** the value in the organization instance's vault slot with its mark, the ledger naming it, and it deleted at its end or on revocation
-- **Task analysis:** the node sends `credential-request/1` at check-in → the server queues it → the policy or the administrator decides → the issuer issues at the provider and seals `fabric-credential-envelope/1` to the machine's `#kem` under the organization's policy key → the server hands the decision and the envelope back at check-in → the node checks it (`checkCredentialEnvelope`) and opens it into the context's slot → at `credentialExpiresAt`, on a signed revocation, or when its organization answers `certificate-revoked` or `organization-closed`, the node deletes it.
+- **Task analysis:** the node sends `credential-request/1` at check-in → the server queues it → the policy or the administrator decides → the issuer issues at the provider and seals `fabric-credential-envelope/1` to the machine's `#kem` under the organization's policy key → the server hands the decision and the envelope back at check-in → the node checks it (`checkCredentialEnvelope`) and opens it into the context's slot → at `credentialExpiresAt`, on a signed revocation that names the request the held credential answers (the mark kept as revoked, DEC-0113), or when its organization answers `certificate-revoked` or `organization-closed`, the node deletes it.
 - **Rejected shape:** the value pasted into the agent's settings, or delivered into the person's own vault, rejected because it outlives its purpose and crosses the boundary between the person's and the organization's context (DEC-0111).
 - **Flow:**
 
@@ -697,13 +701,15 @@ flowchart TD
   C -->|expired in transit| W
   D -->|issued| E[Sealed envelope in the check-in response]
   E --> C{checkCredentialEnvelope}
-  C -->|refused| L[Logged by its refusal; nothing stored; the request stays open]
+  C -->|refused| L[Logged by its refusal; nothing stored; the request stays open unless a revocation named it]
   L --> W
   C -->|ok| O[Opened into the organization instance's slot]
   O --> T{Ends or revoked?}
   T -->|credentialExpiresAt| Z[Deleted]
-  T -->|signed revocation| Z
+  T -->|a signed revocation naming the held request| Z
   T -->|certificate-revoked or organization-closed| Z
+  O --> V{A revocation naming another request?}
+  V -->|it stands| Y[That request ends; the held credential stays; a reissue is never deleted]
 ```
 
 - **Screens traversed:** SCR-28 queue, issued, refused, revoked; SCR-29 the calls between agents.

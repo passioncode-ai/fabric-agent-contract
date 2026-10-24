@@ -693,7 +693,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 |---|---|
 | Platform | web reading surface, local developer tooling |
 | Money model | none |
-| Distribution | private Git repository |
+| Distribution | public Git repository, pinned by release tag or commit |
 | Purchase surface | none |
 | Acquisition | none |
 | Forms present | no executable forms in v0.1 |

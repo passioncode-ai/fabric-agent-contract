@@ -42,5 +42,5 @@ bound open, an unreadable one closing it); `FAC-SEM-041`, `repairDecision` and t
 
 ## Next task
 
-CT-120's remaining items by priority: `callRecordsAccepted`'s gate (`call-record/1` in a list of what a node reads),
-then the call record of a queued `fabric.job.*` call.
+Done since: both items by DEC-0116. The current entry point is
+[2026-10-24 the audit and the second release](2026-10-24-audit-and-release.md).

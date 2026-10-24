@@ -693,6 +693,25 @@ describe("keyWindowHolds: a key's window (DEC-0115)", () => {
       expect(paths("device-key-set", { ...set, next })).toContain("FAC-SEM-046 /next/keys/0/notAfter");
     }
   });
+  it("reads the verifier's clock as strictly as the bounds (FAC-SEM-041)", () => {
+    const input = load("semantic/device-policy-update-ok.json").input;
+    expect(paths("device-policy-update", { ...input, at: "2026-02-30T00:00:00Z" })).toContain("FAC-SEM-041 /at");
+    expect(paths("device-policy-update", { ...input, at: "2026-10-07T09:00:00" })).toContain("FAC-SEM-041 /at");
+  });
+  it("lets a current key whose end does not read drop, and keeps one valid at issuedAt (FAC-SEM-046)", () => {
+    const set = load("semantic/device-key-set-ok.json").input;
+    const issuedAt = set.next.issuedAt;
+    const withCurrent = (key: Json) => ({ ...set, current: { ...set.current, keys: [...set.current.keys, key] } });
+    expect(paths("device-key-set", withCurrent({ ...set.current.keys[0], keyId: "legacy", notAfter: "2027-12-31T23:59:59+0100" }))).toEqual([]);
+    expect(paths("device-key-set", withCurrent({ ...set.current.keys[0], keyId: "edge", notAfter: issuedAt }))).toContain("FAC-SEM-046 /next/keys");
+  });
+  it("reads a root certification's and its delegation key's windows strictly (FAC-SEM-069, DEC-0119)", () => {
+    const input = load("semantic/device-root-certification-delegated.json").input;
+    const spaced = (t: string) => t.replace("T", " ");
+    const delegation = { ...input.certification.delegation, notAfter: spaced(input.certification.delegation.notAfter) };
+    expect(paths("device-root-certification", { ...input, certification: { ...input.certification, delegation } })).toContain("FAC-SEM-069 /certification/delegation/notAfter");
+    expect(paths("device-root-certification", { ...input, certification: { ...input.certification, notAfter: spaced(input.certification.notAfter) } })).toContain("FAC-SEM-069 /certification/notAfter");
+  });
   it("closes a delivered policy's key whose bound does not read (FAC-SEM-041)", () => {
     const input = load("semantic/device-policy-update-ok.json").input;
     const broken = { ...input, trustedKeys: input.trustedKeys.map((k: Json) => ({ ...k, notAfter: "the end of the year" })) };

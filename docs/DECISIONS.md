@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0119` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0120` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -6982,7 +6982,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Status:** Accepted (2026-10-23). No wire change.
 - **Context:** three checks judge a signing key's validity window at the verifier's clock: a delivered policy's key
-  (`FAC-SEM-041`), a repair's key (`repairDecision`, DEC-0102) and a credential's key (DEC-0111). The first two read a
+  (`FAC-SEM-041`), a repair's key (`repairDecision`, DEC-0102) and a credential's key (DEC-0111). Annotated (2026-10-24,
+  DEC-0119): a fourth, the root certification and its delegation key (`FAC-SEM-069`), and the verifier's clock itself
+  now read strictly too. The first two read a
   bound with `Date.parse` and skipped one that was not a string, so a bound that did not read left the window open,
   while the third closed it (CT-120, the seam reading of PR #156, round 2).
 - **Decision:** one reference, `keyWindowHolds(t, key)` in `src/device-rules.ts`: an absent `notBefore` or `notAfter`
@@ -7096,3 +7098,34 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`machine.mode`), `conformance.md` (the node's row); backlog CT-92 (its first half answered), CT-122.
 - **Source:** the first organization server's request on board thread `305f39c3` (request `a90c37b2`, 2026-10-23); the
   operator's D-R2; CT-92.
+
+### DEC-0119: the audit before the second release, and changing a revision nobody has adopted
+
+- **Date:** 2026-10-24
+- **Status:** Accepted (2026-10-24). No wire change beyond item 2's.
+- **Context:** three blind readings of everything merged since `v0.1.0+2026-10-23` (unit, seam, product) before the
+  second release found that DEC-0113 changed `credential-revocation/1`'s required semantics under the same name, which
+  the compatibility policy (conformance.md) reserves for a major version, and that DEC-0115 missed a fourth window
+  check (`FAC-SEM-069`) and left the verifier's clock read loosely in two checks.
+- **Decision:**
+  1. The compatibility policy admits one exception: a revision no party has adopted (the backlog records no party
+     writing or reading it) may change its required semantics under the same name by a decision, and the next
+     release's notes list the change as narrowing. DEC-0113 is such a change: no party writes or reads
+     `credential-revocation/1` (CT-117).
+  2. `FAC-SEM-069` reads the root certification's and the delegation key's windows and the revocation list's
+     `issuedAt` with `strictTime`, and `FAC-SEM-041` and `repairDecision` read the verifier's clock so, as DEC-0115
+     reads every key bound. The key set's rotation rule keeps a current key valid at the next set's `issuedAt` (both
+     bounds inside) and lets one whose end does not read drop.
+- **Why:** taking `/2` for a revision a day old that nobody runs would leave a `/1` nobody may use; the exception is
+  bounded by the backlog's record and disclosed in the release notes. A window rule that fails closed must fail closed
+  everywhere.
+- **Alternatives considered:** `credential-revocation/2` (a register entry and a type for a shape no one sent).
+- **Compatibility:** item 2 is narrower for a certification, delegation or clock that the schema's `date-time` admits
+  but strict RFC 3339 does not (`+0000`, a space for `T`), which no committed fixture carries. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:** `docs/specification/conformance.md` (Compatibility policy), `src/device-rules.ts`
+  (`rootCertification`, `policyUpdate`, `keySet`), `src/node-summary.ts` (`repairDecision`), `src/credentials.ts`
+  (the shared `indexed`, a message); `schemas/device-check-in.schema.json` (the resend description); `CONTEXT.md`,
+  `contexts.md`, `credentials.md` (the parties), the specification README, FLW-27, FLW-28, `adoption.md` and the
+  product profile (the repository is public); backlog CT-83, CT-110, CT-113, CT-120; handoffs.
+- **Source:** the three readings of `2f020a69..9b0bdee4`, 2026-10-24.

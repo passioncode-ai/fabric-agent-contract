@@ -36,7 +36,7 @@ A data file is vendored the same way: a consumer copies `catalogue/coding-agents
 
 ## Fabric consumer
 
-Fabric consumes this repository by canonical private Git URL and release/commit,
+Fabric consumes this repository by its canonical public Git URL and release/commit,
 not by copying normative text. Its glossary and architecture docs explain where
 the boundary sits; a new Fabric ADR records the product-manager rename and the
 external contract ownership.
