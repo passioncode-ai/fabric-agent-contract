@@ -7189,7 +7189,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      valid operator decision as the operator's decision: it performs it as the dashboard would, records it as the
      operator's with `via` and the relaying agent, and MUST NOT refuse it as needing a person, a page or an operator
      session. Without a decision it refuses `operator-decision-required`, which tells the agent to ask the operator and
-     call again with the answer; an invalid decision is `decision-invalid`. A T2 caller still needs an `approval/1`
+     call again with the answer; an invalid decision is `decision-invalid`, and so is one whose `at` does not read
+     as strict RFC 3339 or lies more than 60 seconds after the service's clock (DEC-0047's skew). A T2 caller still needs an `approval/1`
      (DL-17); a decision in its `_meta` changes nothing. A service MAY confirm a relayed decision with an elicitation
      when the client supports one, and MUST NOT require it when the client does not. `actionDecision`
      (`src/actions.ts`) is the reference.
