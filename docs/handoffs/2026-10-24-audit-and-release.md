@@ -52,4 +52,6 @@ documents, fix what the checks found, and release the result as `v0.1.0+2026-10-
 
 ## Next task
 
-Record the replies to the announcement (thread `147a5538`) in the adoption rows, then CT-122: the contract's text for a `kid` and an `iss` per context (CX-CON-06), due 2026-11-06.
+Record the replies to the announcement (thread `147a5538`) in the adoption rows, then CT-122: the contract's text for a `kid` and an `iss` per context (CX-CON-06), due 2026-11-06, from its scope
+([brief](../evidence/specs/2026-10-24-ct122-unlinkable/brief.md)): write the decision with the brief's defaults for the
+operator's seven questions, then the schema, rules, vectors and pages it lists.
