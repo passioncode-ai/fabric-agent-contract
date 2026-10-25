@@ -19,4 +19,13 @@ marked assumed.
 
 ## Answers
 
-None yet.
+Relayed on the project board by fabric-workspace (request `8e2d5099`, thread `8d115bed`) and recorded as the operator's
+decisions in fabric-workspace `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc` (R1-D1, R1-D12, R1-D13,
+R1-D17):
+
+| Id | Answer (2026-10-25) | What it changes here |
+|---|---|---|
+| Q-01 | The first organization is RM-28's pilot: our own organization first, as a rehearsal, then an outside organization; it runs on members' Macs and existing servers, no cloud VM on the critical path (R1-D1, R1-D2) | the operator's Mac is in both organizations, so CT-122 is a hard gate before the second one joins; CT-93 (`org-cloud`) leaves the path |
+| Q-04 | In mode C a person cannot hide the summary of the organization's own context from it; their personal context is not visible to it anyway (R1-D17). Isolation for this release: mode C plus CT-122's unlinkable memberships; level 3 moves to the next release (R1-D13) | CT-92's second half is answered; its decision record remains |
+
+Q-02, Q-03 and Q-05 to Q-09 are still open with the operator. Five rows came with the answers: CT-137 to CT-141.
