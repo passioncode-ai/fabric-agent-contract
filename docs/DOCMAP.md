@@ -100,6 +100,7 @@ and recorded as DEC-0001.
 | Releases: the tag `v<contractVersion>+<YYYY-MM-DD>` and its notes (DEC-0108) | `docs/specification/versioning.md#releases` |
 | Agent-registry run (AR-1) record and handoff | `docs/evidence/plans/2026-09-30-ar1-contract.md` |
 | The iteration of 2026-10-22's order and dates (CT-81 to CT-89, all merged) | `docs/evidence/plans/2026-10-22-next-iteration.md` |
+| The audit of 2026-10-25, the inventory of every open row by class and the proposed order to the first organization; its questions | `docs/evidence/plans/2026-10-25-first-organization.md`, `docs/evidence/specs/2026-10-25-first-organization-questions.md` |
 | A node's harness summary, the baseline and its drift, repairs; `FAC-SEM-128`, `FAC-SEM-129` | `docs/specification/node-summary.md`, `src/node-summary.ts`, `fixtures/vectors/repair-decision.json` written by `tools/vectors/repair-decision.ts` (DEC-0101) |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
 | Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |
