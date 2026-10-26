@@ -6087,6 +6087,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
   Annotated (2026-10-22): corrected by DEC-0102, items 9 (the answer transition, the pass over earlier requests, holds, `noResponder.message`).
+  Annotated (2026-10-26): DEC-0135 narrows items 4 and 5: `unread`, `read` and a thread's bulk mark are over the
+  messages delivered to the reader (project-comms.md, Who a message is delivered to).
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
      `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
@@ -8151,7 +8153,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `comms-reply.schema.json`, `comms-submit.schema.json`, `comms-message.schema.json`, `comms-list.schema.json` and
   `comms-status.schema.json` (`unread`); fixtures; `docs/specification/project-comms.md` (header, participants, reads,
   delivery, messages, `com.status`, transport mirror), `conformance.md` (the board's row), `CONTEXT.md` (Delivery),
-  `docs/DOCMAP.md`; backlog CT-154.
+  `docs/DOCMAP.md`; DEC-0098 annotated; backlog CT-154.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
 
