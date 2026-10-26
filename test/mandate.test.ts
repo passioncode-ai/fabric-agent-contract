@@ -41,6 +41,13 @@ describe("handing a mandate on (MD-2)", () => {
     expect(() => handOn(long, "example-fifth", "2026-10-26T10:08:00Z")).toThrow("mandate-malformed");
   });
 
+  it("keeps where the operator said the words down the chain (DEC-0126 OA-2, OA-6)", () => {
+    const source = { project: "example-dataroom", session: "example-session-7" };
+    const next = handOn({ ...leading, source }, "example-researcher", "2026-10-26T10:05:00Z");
+    expect(next.source).toEqual(source);
+    expect(mandateProblem(next)).toBeUndefined();
+  });
+
   it("holds the chain to a delegation chain's depth (DL-6)", () => {
     const schema = JSON.parse(read("schemas/mandate.schema.json")) as Json;
     expect(schema.properties.chain.maxItems).toBe(MAX_CHAIN_DEPTH);

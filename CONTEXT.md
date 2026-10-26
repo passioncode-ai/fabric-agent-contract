@@ -153,6 +153,13 @@ not cover, so the operator is asked again for that alone; a T2 caller's mandate 
 delegation token carries the authority (`mandateCovers`,
 [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 
+**Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
+relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
+and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
+machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
+not see. Its machine form is a mandate or a decision with `source`
+([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
+
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).
 

@@ -38,6 +38,10 @@
       "$ref": "common.schema.json#/$defs/timestamp",
       "description": "When the operator gave it."
     },
+    "source": {
+      "$ref": "#/$defs/source",
+      "description": "Where the operator said the words: the project, and the session or the board thread (DEC-0126 OA-2). The agent that first heard them sets it; it never changes down the chain (MD-2). Absent: the leading agent heard them in its own session."
+    },
     "expiresAt": {
       "$ref": "common.schema.json#/$defs/timestamp",
       "description": "When the mandate ends: after at and at most 7 days after it (FAC-SEM-144)."
@@ -131,6 +135,55 @@
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
           },
           "description": "The projects the task may act in, by id or slug; absent, any of the operator's."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Where the operator gave the words an agent relays (DEC-0126 OA-2): the operator's own project, and the session or the board thread in which he said them, or by which they reached the agent. A receiver records it as the reason it acted (OA-6).",
+      "required": [
+        "project"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "session"
+          ],
+          "properties": {
+            "session": true
+          }
+        },
+        {
+          "required": [
+            "thread"
+          ],
+          "properties": {
+            "thread": true
+          }
+        }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+          "description": "The operator's project whose agent heard the words, by id or slug."
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+          "description": "The session of that agent in which the operator said them, by the runner's session id."
+        },
+        "thread": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+          "description": "The project-board thread that carried them, by id."
         }
       }
     }

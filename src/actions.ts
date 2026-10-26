@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { mandateCovers } from "./mandate.js";
+import { type OperatorSource, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region actions (docs: docs/specification/service.md#actions)
@@ -64,7 +64,7 @@ export interface ActionDecisionInput {
 }
 
 export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate";
-export type DecisionRecord = { by: string; via: DecisionVia; caller: string; task?: string; chain?: string[] };
+export type DecisionRecord = { by: string; via: DecisionVia; caller: string; task?: string; chain?: string[]; source?: OperatorSource };
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
   | { ok: true; recordAs: DecisionRecord }
@@ -131,13 +131,14 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
   decisionShape ??= schema("decision.schema.json");
   if (decisionShape(decision) !== true) return { ok: false, code: DECISION_INVALID };
-  const read = decision as { action: string; target?: string; at: string };
+  const read = decision as { action: string; target?: string; at: string; source?: OperatorSource };
   if (read.action !== action.id || (read.target !== undefined && read.target !== target)) return { ok: false, code: DECISION_INVALID };
   const at = strictTime(read.at);
   if (Number.isNaN(at) || at > clock + CLOCK_SKEW_SECONDS * 1000 || at < clock - DECISION_LIFETIME_SECONDS * 1000) {
     return { ok: false, code: DECISION_INVALID };
   }
-  return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller } };
+  // A decision relayed from another of the operator's agents keeps where he said it (DEC-0126 OA-6).
+  return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: read.source } : {}) } };
 }
 
 /** A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. */

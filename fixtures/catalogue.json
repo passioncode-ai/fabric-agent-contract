@@ -992,5 +992,7 @@
   {"name": "decision-names-relayer", "schema": "decision.schema.json", "path": "negative/decision-names-relayer.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "mandate", "schema": "mandate.schema.json", "path": "positive/mandate.json", "valid": true},
   {"name": "mandate-no-instruction", "schema": "mandate.schema.json", "path": "negative/mandate-no-instruction.json", "valid": false, "keyword": "required"},
-  {"name": "mandate-not-the-operator", "schema": "mandate.schema.json", "path": "negative/mandate-not-the-operator.json", "valid": false, "keyword": "const"}
+  {"name": "mandate-not-the-operator", "schema": "mandate.schema.json", "path": "negative/mandate-not-the-operator.json", "valid": false, "keyword": "const"},
+  {"name": "mandate-relayed", "schema": "mandate.schema.json", "path": "positive/mandate-relayed.json", "valid": true},
+  {"name": "mandate-source-unplaced", "schema": "mandate.schema.json", "path": "negative/mandate-source-unplaced.json", "valid": false, "keyword": "anyOf"}
 ]

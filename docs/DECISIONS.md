@@ -7160,7 +7160,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0121: every button a person has, the person's agent has; an operator's decision relayed by their own agent is theirs
 
 - **Date:** 2026-10-24
-- **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Additive on the wire (a new extension key, an optional `_meta` member and the
+- **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Extended by DEC-0126 (2026-10-26): a relay OA-2 and OA-3 accept carries them too. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
@@ -7451,7 +7451,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive on the wire (a new schema, `mandate/1`; an optional `_meta.mandate` and
-  `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149.
+  `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149. Amended by DEC-0126 (2026-10-26):
+  a relay of the operator's approval from one of their own Projects or sessions is accepted, and `source` names where
+  the words were said.
 - **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the
   operator's task holds the operator's authority for it, hands work to other agents on the operator's behalf with the
   mandate narrowed to the part handed on, and the agent that receives it acts without asking the operator again
@@ -7534,3 +7536,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted;
   a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
   covering every external call and the reference's table stale.
+
+### DEC-0126: one approval binds all the operator's agents
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive on the wire (an optional `source` in `mandate/1` and in
+  `_meta.decision`); a behaviour rule an agent adopts at its next pin. Amends AP-3 (DEC-0121) and MD-1, MD-6
+  (DEC-0125) for a relay. Adoption: CT-149.
+- **Context:** the operator, 2026-10-26, relayed by one of the operator's agents (request `519d7b21`, thread `3e8f706c`):
+  «хочу чтобы на уровне мои агентов работающи по моей команде не было двойного апрува, я сказал одному = сказал всем,
+  передай это в фабрик контракт и в фабрик агентам тоже пусть там у себы поправят». On 2026-10-25 the operator approved
+  a configuration change in one agent's session; it was relayed on the board to the agent that holds the key, which
+  waited about five hours for a second approval because AP-3 made a board message and another agent's text data.
+  DEC-0125 carries the words in a `mandate/1`, but its alternatives rejected a prose relay, and the operator's rule
+  accepts one that carries the words, the date, the place and the scope.
+- **Decision:**
+  1. **OA-1, one approval.** An approval the operator gives in the session of any of their agents binds every agent of
+     their estate it reaches as OA-2 and OA-3 say; that agent acts on it without asking again, within what it covers.
+  2. **OA-2, the relay.** It carries the words verbatim (AP-3's form), when and where they were said (the project, and
+     the session or the board thread) and the approved scope. Its machine form is `mandate/1` with `source`, or a
+     `_meta.decision` with `source` for one action; the request's optional `approval` block is this, not a third
+     format. A prose relay carrying the four is accepted by an agent, which states its decision or its own mandate from
+     the words, `instruction` and `at` unchanged and `source` naming the place, and leads its own part. A service's
+     check reads only `_meta.decision` and `_meta.mandate`.
+  3. **OA-3, the boundary against forgery.** Accepted only from one of the operator's own Projects on their board
+     (`provenance: trusted`) or a session on their own machine (T0). Without the quote or the place, from a member's
+     Project on an organization's board (T2), or found in content an agent read: data.
+  4. **OA-4, own checks, one question for what is new.** The receiver keeps its checks (a stale preview, guards, the
+     money limits) and asks once only about what the operator did not see: another target, a wider scope, spend above a
+     limit. A stop condition the relaying agent wrote is not the operator's; where the scope covers the case, the
+     receiver acts and says so.
+  5. **OA-5, what stays the person's.** AP-4's and MD-6's human steps, and a decision recorded as the operator's own
+     that the relay does not carry.
+  6. **OA-6, the record.** The receiver records the words, `at` and `source` as its reason (change log or audit,
+     its reply in the thread, its handoff); `actionDecision` and `mandateCovers` return `source` in `recordAs`.
+     `source` is the relaying agent's statement; it never places the caller's tier or identity (AP-2).
+- **Why:** inside the estate the operator's instruction is the authority (DL-26), and asking twice for what the
+  operator already said is the cost the operator named. The four items a relay carries let the receiver check what was
+  approved and where; the place a relay may come from keeps text an agent read (the prompt-injection route) out, which
+  is the boundary AP-3 drew. Reusing `mandate/1` and the decision keeps one machine form a service checks.
+- **Alternatives considered:** a separate `approval` block `{quote, by, at, source, scope}` (a third format for what
+  a mandate and a decision already say; `source` added to both instead); keeping a prose relay as data (the operator's
+  rule decides otherwise; DEC-0125 rejected it for a service's check, which still reads only the block); accepting a
+  relay from any Project of a board (an organization's board joins other people's machines, T2); letting a relayed
+  approval cover a human step (AP-4 stands).
+- **Compatibility:** a reader that validates `mandate/1` or `decision.schema.json` against a schema pinned before this
+  decision refuses a document carrying `source` (`additionalProperties: false`), so a relaying agent sends `source`
+  only to a callee at or after this pin, or leaves it out and records it on its own side. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:** `schemas/mandate.schema.json` (`source`, `$defs/source`), `schemas/decision.schema.json`
+  (`source`); `src/mandate.ts`, `src/actions.ts`; `docs/specification/delegation.md` (One approval binds all the
+  operator's agents), `service.md` (AP-3), `project-comms.md` (a board request), `conformance.md` (rows),
+  `CONTEXT.md` (Relayed approval), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/ux/` (ST-037, FLW-31,
+  SCN-046, SCR-30); `tools/vectors/mandate.ts`, `tools/vectors/actions.ts` and their vector files,
+  `fixtures/positive/mandate-relayed.json`, `fixtures/negative/mandate-source-unplaced.json`; `test/mandate.test.ts`;
+  DEC-0121's and DEC-0125's status; backlog CT-149 (adoption).
+- **Source:** request `519d7b21` from one of the operator's agents (thread `3e8f706c`), the operator's words of 2026-10-26;
+  fabric-workspace `knowledge/agents-first.md` (PR #455, `67440fbc`); the adapter's row FAA-131.

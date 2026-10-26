@@ -38,6 +38,10 @@
     "at": {
       "$ref": "common.schema.json#/$defs/timestamp",
       "description": "When the operator decided."
+    },
+    "source": {
+      "$ref": "mandate.schema.json#/$defs/source",
+      "description": "Where the operator said the words, when they reached the deciding agent from another of the operator's agents (DEC-0126 OA-2); the service records it with the decision. Absent: the agent heard them itself (AP-3)."
     }
   }
 }
