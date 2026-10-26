@@ -93,12 +93,13 @@ one not delivered to it.
     The refusal names neither the Project nor the participants.
   `deliverTo` is accepted on a reply only; on any other kind it is refused `invalid_arguments` (the schema's `false`).
   A reply whose `replyTo` is a request is also delivered to the Project that sent the request, whatever `deliverTo`
-  says, unless that is the replier's own Project, so a target's reply that answers a request
+  says, unless that is the replier's own Project (or the board no longer holds the request, when the reply goes as
+  `thread`), so a target's reply that answers a request
   ([request lifecycle](#request-lifecycle), `answered`) always reaches the requester.
 - **DR-3, a responder's messages.** Every message a responder posts on a request's thread (its fenced reply, a
   progress note, the summary of `com.effect_begin` or of a replacement's checkpoint) is read as kind `reply` with
   `replyTo` the request (as Fabric stores them), is delivered to the Project that sent the request, and takes no
-  `deliverTo`; when that Project is the responder's own, as `thread`.
+  `deliverTo`; when that Project is the responder's own, or the board no longer holds the request, as `thread`.
 - **DR-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
   addressed to; a reply without one was delivered as `sender`, except one stored before its board adopted this
   decision, whose audience an absent `deliverTo` does not tell (Fabric delivered it to every participant before its
@@ -107,7 +108,8 @@ one not delivered to it.
   other arguments, an explicit `sender` against an absent `deliverTo` and a list in another order included, is
   `idempotency_conflict`; a retry resends its arguments byte for byte.
 - **DR-5, an older reader's count.** Delivery narrows `unread`, `com.status`'s count and `read` only for a reader pinned
-  at or after DEC-0135. A reader pinned before it is answered as the board's released versions answered: every
+  at or after DEC-0135. A reader pinned before it is answered as the board's released versions (Fabric v0.3.2 to
+  v0.3.12) answered: every
   message its Project did not send counts as delivered to it, so a reply addressed to another participant, or a
   responder's message, is still unread to it until it marks it. A host stages this as it stages `deliverTo`, by the
   reader's pin.

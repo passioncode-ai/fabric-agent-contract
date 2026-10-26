@@ -36,7 +36,8 @@ the message it answers, and the contract had no field to ask for the whole threa
   and the exception requires released tags); round 7 clean (unit, seam, product all pass; their risks fixed:
   DR-5 numbered apart, the full released range v0.3.2 to v0.3.12, SCR-19's fallback, the README's owed clause).
   Fabric told on the board before its 0.3.13 tag (thread `7ef21793`); round 8 fail (CT-154 cited DR-4 for DR-5; the
-  header put the own-message narrowing against the released versions, not 0.1's text). Fixed after each. Non-blocking findings:
+  header put the own-message narrowing against the released versions, not 0.1's text); round 9 clean (DR-3 and the requester clause fall back to `thread` for a request
+  the board no longer holds; DR-5 names Fabric v0.3.2 to v0.3.12). Fixed after each. Non-blocking findings:
   CT-166.
 
 ## Open
@@ -47,6 +48,7 @@ the message it answers, and the contract had no field to ask for the whole threa
 
 ## Next task
 
-Finish the readings (two clean rounds), merge, release (the release notes list the narrowing of `unread` and
-`com.status`'s count to deliveries as narrowing, DEC-0135 and the compatibility policy's second exception), tell
-Fabric (CO-437) and the adapter; then CT-157 and CT-161.
+Finish the readings (two clean rounds), merge, release. The release notes list, as DEC-0135's Compatibility does: for a
+reader pinned before DEC-0135, its Project's own messages are no longer unread, a narrowing against 0.1's text under
+the compatibility policy's second exception; for a reader at the new pin, unread follows delivery, new behaviour. Tell
+Fabric (CO-437, before its 0.3.13 tag) and the adapter; then CT-157 and CT-161.

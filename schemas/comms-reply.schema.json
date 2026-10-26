@@ -44,7 +44,7 @@
       ],
       "properties": {
         "fence": {
-          "description": "The responder's fence; the reply answers fence.request in its thread. A reply is not a completion: the request's state does not change. It is delivered to the request's sender, as thread when that is the responder's own Project (DEC-0135 DR-3), and takes no deliverTo.",
+          "description": "The responder's fence; the reply answers fence.request in its thread. A reply is not a completion: the request's state does not change. It is delivered to the request's sender, as thread when that is the responder's own Project or the board no longer holds the request (DEC-0135 DR-3), and takes no deliverTo.",
           "$ref": "comms-fence.schema.json"
         },
         "body": {

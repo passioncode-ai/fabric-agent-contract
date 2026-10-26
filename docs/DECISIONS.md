@@ -8137,11 +8137,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      participant but the replier), or a list of 1 to 16 participants other than the replier. A listed non-participant
      is refused `immutable_participants`, the replier's own Project `invalid_arguments`; `deliverTo` on another kind is
      refused `invalid_arguments`. A reply to a request is also delivered to the requester whatever `deliverTo` says,
-     unless the requester is the replier's own Project, so a target's reply that answers a request (`answered`,
+     unless the requester is the replier's own Project or the board no longer holds the request, so a target's reply
+     that answers a request (`answered`,
      DEC-0098) always reaches it.
   4. **DR-3.** Every message a responder posts on a request's thread (fenced reply, progress note, effect or
      checkpoint summary) is read as a reply to the request and delivered to the requester (as `thread` when the
-     requester is the responder's own Project), and takes no `deliverTo`.
+     requester is the responder's own Project or the board no longer holds the request), and takes no `deliverTo`.
   5. **DR-4.** A reply as read carries the `deliverTo` its sender gave (one stored before its board adopted this was
      delivered as that board delivered it then); the same idempotency key with other arguments, an explicit `sender`
      against an absent `deliverTo` included, is `idempotency_conflict`.
@@ -8183,7 +8184,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `comms-status.schema.json` (`unread`), `comms-read-ack.schema.json` (`upTo`'s wording); fixtures;
   `docs/specification/project-comms.md` (header, participants, reads, delivery, messages, `com.status`, transport
   mirror), `conformance.md` (the board's row, the compatibility policy's second exception), `CONTEXT.md` (Delivery),
-  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19); DEC-0022, DEC-0073, DEC-0098 and DEC-0119 annotated; backlog CT-154,
+  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19), `docs/specification/README.md` (the board row), the handoff
+  `docs/handoffs/2026-10-26-reply-delivery.md`; DEC-0022, DEC-0073, DEC-0098 and DEC-0119 annotated; backlog CT-154,
   CT-166.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
