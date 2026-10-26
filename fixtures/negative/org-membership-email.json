@@ -1,0 +1,20 @@
+{
+  "type": "org-membership/1",
+  "issuer": "https://orgs.example",
+  "org": "org:org-a",
+  "audience": "fabric-estate-5d0f1a",
+  "subject": "m-7f3a91c2",
+  "role": "member",
+  "external": false,
+  "status": "active",
+  "revision": 4,
+  "membershipEndsAt": null,
+  "issuedAt": "2026-10-25T11:00:00Z",
+  "notBefore": "2026-10-25T11:00:00Z",
+  "expiresAt": "2026-10-25T12:00:00Z",
+  "extensions": {},
+  "alg": "EdDSA",
+  "kid": "mem-2026-10",
+  "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw",
+  "email": "member@orgs.example"
+}

@@ -31,14 +31,14 @@ const vectors = load("vectors/signing-challenges.json");
 const estateVectors = load("vectors/estate-record.json");
 const conformance = readFileSync(path.join(root, "docs/specification/conformance.md"), "utf8");
 const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRules(kind, value).map((finding) => finding.code))];
-const DOCUMENT_TYPES = ["window-lease/1", "entitlement/1", "entitlement-key-set/1"];
+const DOCUMENT_TYPES = ["window-lease/1", "entitlement/1", "entitlement-key-set/1", "org-membership/1", "org-key-set/1"];
 const statement = (type: string) => (vectors.statements as Json[]).find((entry) => entry.type === type) as Json;
 
 describe("the register (DEC-0063)", () => {
   it("names v4 §7's four challenge types, the enroll token, the package statement and every typed statement a key signs", () => {
     expect([...SIGNING_STATEMENTS.keys()]).toEqual([
       "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1", "fabric-package-signature/1", "enroll-join/1", "window-lease/1", "relay-auth/1", "relay-blob/1",
-      "entitlement/1", "entitlement-key-set/1"
+      "entitlement/1", "entitlement-key-set/1", "org-membership/1", "org-key-set/1"
     ]);
     const passkey = [...SIGNING_STATEMENTS].filter(([, spec]) => spec.signer === "passkey").map(([type]) => type);
     // DEC-0084 adds enroll-token/1 (DV-CON-01's amendment of DV-05): a passkey signs it too.

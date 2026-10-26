@@ -1,0 +1,29 @@
+{
+  "type": "org-key-set/1",
+  "issuer": "https://orgs.example",
+  "org": "org:org-a",
+  "revision": 2,
+  "issuedAt": "2026-10-15T00:00:00Z",
+  "keys": [
+    {
+      "kid": "mem-2026-09",
+      "alg": "EdDSA",
+      "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+      "notBefore": "2026-09-01T00:00:00Z",
+      "notAfter": "2026-11-01T00:00:00Z"
+    },
+    {
+      "kid": "mem-2026-10",
+      "alg": "EdDSA",
+      "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+      "notBefore": "2026-10-15T00:00:00Z",
+      "notAfter": "2027-01-01T00:00:00Z"
+    }
+  ],
+  "revoked": [
+    "mem-2026-08"
+  ],
+  "alg": "EdDSA",
+  "kid": "root-org-a-1",
+  "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+}

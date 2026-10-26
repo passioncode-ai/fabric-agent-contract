@@ -36,6 +36,7 @@ import { sessionJoinRules } from "./session-join.js";
 import { feedDataRules } from "./feed-data.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
+import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
@@ -94,6 +95,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (lease) return lease;
   const entitlement = entitlementRules(kind, value);
   if (entitlement) return entitlement;
+  const membership = orgMembershipRules(kind, value);
+  if (membership) return membership;
   const folderAttribution = folderAttributionRules(kind, value);
   if (folderAttribution) return folderAttribution;
   const jobLimits = jobLimitRules(kind, value);

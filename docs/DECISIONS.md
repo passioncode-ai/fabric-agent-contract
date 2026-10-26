@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0127` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0128` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7611,3 +7611,70 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0121's and DEC-0125's status; backlog CT-149 (adoption).
 - **Source:** request `519d7b21` from one of the operator's agents (thread `3e8f706c`), the operator's words of 2026-10-26;
   fabric-workspace `knowledge/agents-first.md` (PR #455, `67440fbc`); the adapter's row FAA-131.
+
+### DEC-0127: membership attestation, any organization server issues it and the person pins the organization's root
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive: two new schemas (`org-membership/1`, `org-key-set/1`) and an optional
+  member of the estate record (`organizations`), which Fabric writes only once every reader of the record is pinned at
+  or after. Adoption: every organization server, Fabric and the products that read membership (CT-137).
+- **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
+  `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
+  membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
+  (`knowledge/integration.md` at `4c38d0b7`) makes that document an open contract any organization server speaks, the
+  first organization server being the source of truth only for an organization that connected it. R1-D12 keeps MC-13: a
+  project enters an organization by the person's own passkey, with no administrator's acceptance. Until now
+  contexts.md left membership to the organization server's record and only the device certificate followed it.
+- **Decision:**
+  1. **OM-1, the attestation.** `org-membership/1`: `issuer`, `org` (`org:<orgId>`), `audience` (the reader), a
+     `subject` pairwise per (organization, audience, person), `role` `owner`, `admin` or `member`, `external`, `status`
+     `active` or `ended`, a rising `revision`, `membershipEndsAt`, `issuedAt` ≤ `notBefore` < `expiresAt` with a life of
+     at most 24 hours, issuer-named `extensions` that grant nothing, and an Ed25519 signature over its RFC 8785 form
+     without `sig` (the register's `org-membership/1`). No member names a person.
+  2. **OM-2, the pin.** The person admits an organization by pinning `{org, issuer, root: {kid, x}, pinnedAt}` in the
+     estate record's `organizations`; the passkey's signature over that revision is the admission; no administrator
+     signs it. Unpinning ends every membership of it. `FAC-SEM-147`: each organization once, no root of small order.
+  3. **OM-3, the key set.** `org-key-set/1`, the organization's root signing only key sets, one root per organization
+     even on a server that hosts many; rotation, revocation and replay as `entitlement-key-set/1`.
+  4. **OM-4, the verifiers.** `verifyOrgKeySet` and `verifyOrgMembership` (`src/org-membership.ts`), offline, in the
+     OK and OM tables' order; no grace (`expired` at `expiresAt`); `ended` when stated or past `membershipEndsAt`;
+     `refreshDue` 15 minutes before expiry; one held record per (organization, audience, subject).
+  5. **OM-5, what ends with a membership.** An `ended` attestation, `organization-closed` (DEC-0103) or an unpin ends
+     it, and with it the context's share grants (revoked in the next revision), delegation tokens in the context, the
+     device enrollment and anything leaving for the organization.
+  6. **OM-6, suspended is not ended.** An expired or unverifiable attestation authorises nothing new; what runs keeps
+     its expiry. A refresh the issuer refuses for the membership is an end.
+  7. **OM-7, the allowlist.** Only check-ins of that enrollment, the context's session events, its grants' usage and
+     share registrations, the enrollment's node summary, credential requests and call records, and the membership
+     refresh leave a person's Fabric for an organization. A new row needs a decision.
+  8. **OM-8, the issuer's duties.** Rising revisions, a stated end, a pairwise opaque subject, roles mapped onto three,
+     one root per organization, overlapping rotation, a life of at most 24 hours.
+- **Why:** a verifier that trusts only what a key it pinned signs is the pattern the contract already runs for
+  entitlements and device policies, and pinning the root in the person's own estate record makes the admission the
+  person's act (R1-D12) and lets the organization move to another server without any server's permission (MD-9). A day
+  bounds how long an end the issuer could not deliver reads active, and the issuer may choose shorter; a reader that is
+  offline longer only stops authorising new things, which is what an unverifiable membership should do. A pairwise
+  subject keeps two readers from joining their records (CX-22).
+- **Alternatives considered:** the server's own compact JWS under a server-wide JWKS (a second signature form beside
+  the contract's one canonical form, and a key that is the server's rather than the organization's, so another server
+  could not take the organization over); trusting a well-known key URL on first use (a server compromise would
+  re-key every organization silently; the pin makes a new root a new act of the person); an administrator's admission
+  receipt (R1-D12 reversed it); a life of 7 days with a heartbeat (a member removed would keep reading active for a
+  week; a delta `member` kind can add a faster end later); the server's own role vocabulary in the attestation (every
+  reader would need every server's roles; a finer role rides in `extensions`); folding `org-authority/1`'s member list
+  into this decision (its entries are per-context keys, decided with CT-122).
+- **Compatibility:** the new schemas are new types; a reader that validates the estate record against a schema pinned
+  before refuses a record carrying `organizations`, so Fabric writes it only once every reader is pinned at or after (as
+  DEC-0106 and DEC-0107). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/org-membership.schema.json`, `schemas/org-key-set.schema.json` (new),
+  `schemas/estate-record.schema.json` (`organizations`, `$defs/organizationPin`); `src/org-membership.ts` (new),
+  `src/signing-challenges.ts` (two statements), `src/estate-record-rules.ts` (`FAC-SEM-147`), `src/semantic-rules.ts`,
+  `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (new), `estate-record.md`
+  (Organizations), `contexts.md` (Membership and its expiry), `conformance.md` (modules, rows, the two tables, codes,
+  the next free code), `README.md`, `docs/DOCMAP.md`, `CONTEXT.md`, `docs/ux/` (ST-038, FLW-32, SCN-047);
+  `tools/vectors/org-membership.ts`, `tools/vectors/run.ts`, `fixtures/vectors/org-membership.json`, positive, negative
+  and semantic fixtures; `test/org-membership.test.ts`, `test/signing-challenges.test.ts`,
+  `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`, `vitest.config.ts`; backlog CT-137 (closed by this
+  decision), CT-37 (narrowed to `org-authority/1`'s member list, with CT-122).
+- **Source:** CT-137; the organization train's TP-00, N-1, step 1.1 and X-6; MD-9; R1-D12; board request `8e2d5099`
+  (thread `8d115bed`); DEC-0031, DEC-0045, DEC-0063, DEC-0082, DEC-0085, DEC-0103.

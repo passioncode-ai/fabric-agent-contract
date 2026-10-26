@@ -186,7 +186,10 @@ at all. A purpose mark (CX-CON-10) is not in this slice.
 ## Membership and its expiry
 
 A person's membership in an organization, and its `external` and `expiresAt` attributes (CX-VES-03), are the
-organization server's record, not the contract's. Only the device certificate (DEC-0031) follows the membership by
+organization server's record. What a reader may trust of it is the contract's: the server states it in a signed
+`org-membership/1` for that reader, under the organization's root the person pinned in their estate record, and Fabric
+verifies it before it trusts the membership ([membership](membership.md), DEC-0127); what ends with a membership, and
+what leaves a person's Fabric for an organization, are [OM-5 and OM-7](membership.md#ending). Only the device certificate (DEC-0031) follows the membership by
 itself: the organization server stops renewing or revokes it. The share grant does not: it runs to its own `expiresAt`
 or to its `grant` revocation in the estate record (`FAC-SEM-076`, carried fast by the revocation delta, DEC-0054). So
 Fabric's share flow (CX-FAB-04) sets a share grant's `expiresAt` no later than the membership's expiry the organization

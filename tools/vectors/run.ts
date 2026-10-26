@@ -21,6 +21,7 @@ import * as contextRoute from "./context-route.js";
 import * as credentialEnvelope from "./credential-envelope.js";
 import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
+import * as orgMembership from "./org-membership.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
@@ -47,6 +48,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "credential-envelope.ts", build: one(credentialEnvelope.VECTOR_FILE, credentialEnvelope.buildCredentialVectors) },
   { source: "enroll-token.ts", build: one(enrollToken.VECTOR_FILE, enrollToken.buildEnrollTokenVectors) },
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
+  { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },

@@ -663,6 +663,13 @@ expires ([entitlement](docs/specification/entitlement.md)).
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
 installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
 
+**Membership attestation**: What an organization server states about one person's membership of one organization,
+for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
+`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127). Signed by a key of the organization's
+`org-key-set/1`, whose root the person pins in their estate record (`organizations`) when they join, with no
+administrator's acceptance. Any organization server issues it, so a reader works with any of them
+([membership](docs/specification/membership.md)).
+
 **Share grant id**: The `meta.id` of a share grant into an organization, `urn:fabric:share:` and 32 lower-case hex
 digits from a CSPRNG, which holds no person's name, address or estate id and is compared as written (`FAC-SEM-117`,
 DEC-0086, [share registration](docs/specification/share-registration.md#the-share-grant-id)).

@@ -140,6 +140,18 @@ not part of `verifyEstateRecord`, so a naming fault never locks an estate out of
 `effectCeiling`, `dataClasses`, `spend` and `expiresAt`: two share grants of one agent into two organizations with
 different values are two access levels ([access levels](contexts.md#access-levels)).
 
+## Organizations
+
+DEC-0127 · rule code `FAC-SEM-147` · [membership](membership.md#the-organizations-keys)
+
+`organizations` lists the organizations the person admitted into their estate, 0 to 64 `{org, issuer, root: {kid, x},
+pinnedAt}`: each organization's context, its server's origin and the root key that signs its `org-key-set/1`. The
+passkey's signature over the revision is the person's admission (R1-D12); no administrator signs it. It is the estate's
+half of the organization-to-estate mapping: a membership attestation verifies only under a key set whose root a pin
+names (OM-2, OM-4), and unpinning an organization ends every membership of it (OM-5). Each organization once, no root
+of small order (`FAC-SEM-147`). A reader pinned before DEC-0127 refuses the member, so Fabric writes it only once every
+reader of the record is pinned at or after.
+
 ## Revocations
 
 Each revocation names its `kind` — `authority`, `machine`, `device-key`, `hub-key`, `publisher-key`, `package` (a
