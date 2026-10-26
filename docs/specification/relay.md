@@ -1,7 +1,7 @@
 # Relay `fabric-relay/0.1`
 
 A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
-owner's estate (an organization's members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
+owner's estate (what an organization's relay carries between its members is not decided, CT-163; its members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
 its handshake is [the organization's relay](#the-organizations-relay), DEC-0134). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
@@ -145,8 +145,9 @@ no reason, by design. It tells the person, in this order: check that this machin
 (an `iat` more than 60 s old is refused the same way) and update the client, since a client that signs high-S or an
 old protocol is refused the same way too. On an organization's relay (DEC-0134) it
 says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
-waits for an administrator's signature, and a list expires), which one of the organization's administrators sees; then
-check the clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
+waits for an administrator's signature, and a list expires), which one of the organization's administrators sees by the
+enrollment's kid, which the node shows (a list entry names a pairwise subject, never who it is, OL-2); then check the
+clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
 it.
 
 **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
@@ -183,7 +184,9 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   machine so closed is refused on its next `auth` by the ordinary check. No new frame and no client re-authentication
   are needed.
 - **One context per origin.** A relay origin admits from one record: one estate, or on an organization's relay one organization's member list (DEC-0134). The estate is
-  compared inside `admit` and nowhere else (`AuthContext.estate`, the held record's). **A relay MUST NOT use the estate
+  compared inside `admit` and nowhere else (`AuthContext.estate`, the held record's; on an organization's relay the
+  organization's context id, which every member signs and its `welcome` names, so the rule below is about a person's
+  estate id). **A relay MUST NOT use the estate
   id as an identifier or key a connection can see or that is shared across a person's contexts** — not for a session,
   a mailbox, presence, a blob, or in a log line that leaves the relay: one person's contexts (an estate, an
   organization's enrollment) must not be linkable by any identifier the relay chooses, shows or logs. The link that
@@ -231,6 +234,9 @@ root route, its fingerprint compared out of band), and reads the key set (`GET .
 (`GET .../authority`, OX-6) from the organization's server at least every hour and when the server tells it of a new
 one; it authenticates to the server with a credential the server issues when it sets the relay up (the server's).
 Every document it applies is one `verifyOrgKeySet` and `orgRelayAdmissionSet` accept: the server's word adds nothing.
+A key set and a list it reads together it applies in one step: `orgRelayAdmissionSet` with the new key set, the held list
+and the new list as the candidate, so a set that drops the held list's signer meets the list another administrator
+signed (OL-5) and the admission set does not empty between the two.
 
 **OR-5, between members.** On an organization's relay every member is T2 to every other, two enrollments of one owner
 included: an enrollment's kid is never in an estate record (UE-1), so no recipient can place it in T1, and no text may
