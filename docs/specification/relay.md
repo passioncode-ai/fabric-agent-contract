@@ -487,7 +487,9 @@ a `machine-report/1` written at the call (its own `at`), or `null` while the nod
 calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
 opened report: the schema, `FAC-SEM-152`, `machine` equal to its own machine id (`wrong-machine` otherwise) and `at`
 after the report it holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
-leases and revision count under MR-5 like any machine's.
+leases and revision count under MR-5 like any machine's. A node that answers `unknown-method` (pinned before
+DEC-0132) has reported nothing: its leases count at their whole amounts, and it has applied no revision the hub can
+count, so the hub waits for it as for any machine that has not reported.
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
 to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`

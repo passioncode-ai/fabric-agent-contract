@@ -372,12 +372,13 @@ without moving either (DEC-0111).
 reports to its hub like any machine, DEC-0132); a
 call between machines over the relay that a profile does not allow is refused `profile-forbids` ([machine calls](docs/specification/machine-calls.md)).
 
-**Machine report**: What one machine of an estate tells its estate's hub machine (both of them during a hub move) over the relay (DEC-0132): the estate
-revision it applied, its heartbeat, its revocation-delta head and the window leases it holds with what it spent, by the
-check-in's own `records` names, sealed to the hub's `#kem` so the relay reads none of it (on the hub's own machine,
-read from the node's `machine.report` over the local channel instead). Never sent to an organization
-server (DEC-0128 UE-2). Not a **Node summary**, which goes to an organization
-([relay](docs/specification/relay.md#the-machines-report)).
+**Machine report**: What one machine of an estate tells its hub machines (DEC-0132): those of the revision it applied,
+both during a hub move, and the hub of a newer revision it refused. It carries the estate revision it applied, its
+heartbeat, its revocation-delta head and the window leases it holds, plus the newest expired lease of each slot until
+its window instance ends, each with what it spent, by the check-in's own `records` names, sealed to the hub's `#kem`
+over the relay so the relay reads none of it (on the hub's own machine, read from the node's `machine.report` over the
+local channel instead). Never sent to an organization server (DEC-0128 UE-2). Not a **Node summary**, which goes to an
+organization ([relay](docs/specification/relay.md#the-machines-report)).
 
 **Small-order key**: An Ed25519 public key whose point has order 1, 2, 4 or 8 — libsodium's seven encodings, sign bit
 ignored. Anyone can forge a signature under one, and Node 20 and 22 accept the forgery, so every Ed25519 check in

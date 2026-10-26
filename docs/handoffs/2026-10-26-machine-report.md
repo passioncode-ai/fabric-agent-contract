@@ -46,7 +46,8 @@ move's step 6 and the window lease's reporting.
 - Round 6 (head `26119b4e`): unit and seam pass; product fail (`machine.report` named as owed nowhere). Fixed: the
   spec index, CT-152 and DEC-0132's adoption line name it and its two adopters.
 - Round 7 (head `c6573bec`): unit and seam fail (the owed note landed on the Fabric's button row of the spec index,
-  not the local channel's). Fixed: only the local channel row carries it.
+  not the local channel's). Fixed: only the local channel row carries it. Product also failed on the same row; its non-blocking items
+  (the glossary, DL-15's local path, `unknown-method`) were applied before round 8.
 
 ## Decisions
 
