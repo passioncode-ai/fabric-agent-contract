@@ -61,8 +61,9 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   `cursor_reset_required`.
 - Reading marks nothing as read. `com.read_ack` is explicit, and unread counts belong to the
   reader. It marks one message, up to 100 named messages, or one thread up to a named message of it, the oldest
-  1000 at most of those delivered to the reader (`comms-read-ack.schema.json`, DEC-0098, DEC-0135). Marking a
-  message not delivered to the reader counts it `alreadyRead`: its `read` is already true. A bulk mark is all or nothing: a message the reader cannot
+  1000 at most (`comms-read-ack.schema.json`, DEC-0098). A mark is recorded on any message the reader can read, as
+  DEC-0073 says, and changes what is unread only for a message delivered to it: one not delivered is never unread
+  (DEC-0135). A bulk mark is all or nothing: a message the reader cannot
   read refuses the call `not_authorized`. Its receipt counts what it `marked` and what was `alreadyRead`, and says
   `more: true` when a thread held more than 1000 such messages; the reader calls again.
 
@@ -80,11 +81,11 @@ one not delivered to it.
 - **DR-2, a participant's reply.** A reply (`com.reply` with `replyTo`, or `com.submit` kind `reply`) is delivered as
   its `deliverTo` says (`comms-common.schema.json#/$defs/deliverTo`):
   - `sender`, the default when `deliverTo` is absent: to the Project that sent the message it answers; when that is
-    the replier's own Project, or the board does not hold the message it answers (a restored board), as `thread`;
+    the replier's own Project, or the board no longer holds the message it answers (after a restore or retention), as `thread`;
   - `thread`: to every participant but the replier's Project;
   - a list of 1 to 16 Project ids: to those, each a participant other than the replier's Project. A listed Project that
     is not a participant is refused `immutable_participants` (a reply never widens a thread); the replier's own
-    Project is refused `invalid_arguments`, and is checked first; a [hold](#holds) on the thread refuses before either,
+    Project is refused `invalid_arguments`, checked before the participant check; a [hold](#holds) on the thread refuses before either,
     and a repeat of a stored key answers its receipt before them ([idempotency](#idempotency)).
     The refusal names neither the Project nor the participants.
   `deliverTo` is accepted on a reply only; on any other kind it is refused `invalid_arguments` (the schema's `false`).
@@ -493,8 +494,8 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - **`com.read_ack` takes no idempotency key and stores no receipt**, because marking read twice is one mark. The
   reader's read mark is its own record. The first mark answers `repeated: false` and `at`, the time of the mark. A
   second mark of the same message by the same reader changes nothing and answers `repeated: true` with the first
-  mark's `at`. A mark of a message not delivered to the reader, already read to it (DEC-0135), changes nothing and
-  answers `repeated: true` with the time the message was stored.
+  mark's `at`. A message not delivered to the reader is marked the same way; its `read` is `true` before and after
+  (DEC-0135).
 - **`com.claim` with nothing claimable** answers `{ok: true, repeated: false}` with no `request`. It stores no
   receipt, so the responder may poll again with the same key.
 - **`com.renew` and `com.progress` are naturally idempotent.** The board checks their key's shape and epoch, and a

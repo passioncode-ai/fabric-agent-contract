@@ -12,27 +12,29 @@ the message it answers, and the contract had no field to ask for the whole threa
   transport mirror sends, never who reads: every participant reads every message of its thread (C2).
   - DR-1: a message, request, finding or announcement goes to every participant but the sender.
   - DR-2: a participant's reply goes as its optional `deliverTo` says: `sender` (the default, Fabric's behaviour),
-    `thread`, or a list of participants; a reply to a request also reaches the requester; the replier's own message or
-    a message the board does not hold falls back to `thread`.
+    `thread`, or a list of participants; a reply to a request also reaches the requester; a message from the replier's own
+    Project, or one the board no longer holds, falls back to `thread`.
   - DR-3: every message a responder posts on a request's thread is a reply to the request and reaches the requester.
   - DR-4: a reply as read carries its `deliverTo`; a host sends it only to readers pinned at or after DEC-0135.
 - Schemas: `$defs/deliverTo` in `comms-common`; `deliverTo` on `comms-reply`, `comms-submit` and `comms-message`;
-  `unread`, `read` and the read-mark receipt described over deliveries. Fixtures and eight mutant plants.
-- DEC-0022 and DEC-0098 annotated; conformance, CONTEXT (Delivery), DOCMAP, SCR-19.
+  `unread` and `read` described over deliveries; `com.read_ack` and its receipt unchanged. Fixtures and eight mutant plants.
+- DEC-0022, DEC-0073 and DEC-0098 annotated; the narrowing of `unread` recorded as an exception to the compatibility
+  policy (Fabric's released board counts unread over its deliveries, migration 107); conformance, CONTEXT (Delivery), DOCMAP, SCR-19.
 
 ## Checks actually run
 
-- `pnpm run check` after each round's fixes: exit 0 (106 files, up to 9 354 tests, UX lint, docs, markdownlint 0
+- `pnpm run check` after each round's fixes: exit 0 (106 files, 9 356 tests at the last round, UX lint, docs, markdownlint 0
   errors, privacy 0); `pnpm vectors:check`: 25 files match.
 - Blind readings: round 1 fail (the `unread` description; a list could answer a request without reaching its
   requester); round 2 fail (the message view's history; a responder's messages' kind); round 3 fail (the own-Project
-  exception in two descriptions; the read-mark receipt; SCR-19's wording). Fixed after each. Non-blocking findings:
+  exception in two descriptions; the read-mark receipt; SCR-19's wording); round 4 fail (the read-mark receipt changed
+  an adopted answer: reverted to DEC-0073, and the narrowing of `unread` recorded as an exception). Fixed after each. Non-blocking findings:
   CT-166.
 
 ## Open
 
 - Adoption (CT-154): Fabric's board stores and honours `deliverTo`, stages it by the reader's pin, keeps unread over
-  deliveries and marks a thread over deliveries only (CO-437); the adapter's kits and agents send `deliverTo: "thread"`
+  deliveries (CO-437); the adapter's kits and agents send `deliverTo: "thread"`
   when they mean the whole thread.
 
 ## Next task

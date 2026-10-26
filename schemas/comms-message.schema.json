@@ -127,7 +127,7 @@
       "$ref": "comms-common.schema.json#/$defs/finding"
     },
     "read": {
-      "description": "Present exactly on a page asked with unread or since (DEC-0098): true when the message is not unread to the reader's Project, that is when it marked it, sent it, or the message was not delivered to it (DEC-0135 DR-1 to DR-3).",
+      "description": "Present exactly on a page asked with unread or since (DEC-0098): true when the message is not unread to the reader's Project, that is when it marked it, sent it, or the message was not delivered to it (DEC-0135 DR-1 to DR-4).",
       "type": "boolean"
     }
   },

@@ -4142,6 +4142,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0079: `com.status` responders and directory capabilities gain an optional `held`, and the refusal codes gain `held`.
 - **Annotated (2026-10-13):** amended by DEC-0081: `com.reconcile` also answers the estate owner while no responder holds the slot (same arguments, the summary required for the owner); the receipt's and the message view's `request` gain an optional `settledBy: "owner"`, sent only on an owner settlement.
 - **Annotated (2026-10-13):** amended by DEC-0080: a finding's dedupe answers the standing finding's receipt with the existing `repeated: true`; `com.submit` and a message gain the optional `finding`.
+- **Annotated (2026-10-26):** unchanged by DEC-0135: item 3's `com.read_ack` answer holds for every message the reader can read, one not delivered to it included; such a message's `read` is `true` before and after the mark.
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
 - **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
@@ -6090,8 +6091,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
   Annotated (2026-10-22): corrected by DEC-0102, items 9 (the answer transition, the pass over earlier requests, holds, `noResponder.message`).
-  Annotated (2026-10-26): DEC-0135 narrows items 4 and 5: `unread`, `read` and a thread's bulk mark are over the
-  messages delivered to the reader (project-comms.md, Who a message is delivered to).
+  Annotated (2026-10-26): DEC-0135 narrows item 4: `unread` and `read` are over the messages delivered to the reader
+  (project-comms.md, Who a message is delivered to). Item 5's bulk marks and their counts are unchanged.
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
      `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
@@ -8115,8 +8116,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0135: a reply is delivered to the sender it answers, or to whom it names
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (2026-10-26). Additive: one optional member, `deliverTo`, on `com.reply`, `com.submit` and a
-  message; delivery rules for what is unread. Adoption: CT-154 (Fabric's board, CO-437).
+- **Status:** Accepted (2026-10-26). Additive for a writer: one optional member, `deliverTo`, on `com.reply`,
+  `com.submit` and a message. Narrowing for a reader: what is unread is over deliveries, a recorded exception
+  (Compatibility). Adoption: CT-154 (Fabric's board, CO-437).
 - **Context:** since Fabric's migration 124 (CO-370, schema 97) a reply on the board is delivered to the sender of the
   message it answers, not to every participant, and an unread count holds the reader's deliveries only. The contract
   fixed a thread's participants at creation and said nothing of a reply's audience, so no reply to everyone could be
@@ -8140,7 +8142,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. **DR-4.** A reply as read carries the `deliverTo` its sender gave (one stored before its board adopted this was
      delivered as that board delivered it then); the same idempotency key with other arguments, an explicit `sender`
      against an absent `deliverTo` included, is `idempotency_conflict`.
-- **Why:** replies to a broadcast were most of a board's deliveries (Fabric BD-4: 69 %), so the sender default stays;
+- **Why:** replies were most of a board's deliveries when each went to every participant (Fabric BD-4: 2,350 of 3,400,
+  1,293 of them replies to announcements), so the sender default stays;
   a person still needs to answer a whole thread, or the two Projects that asked the same thing, without opening a new
   thread, which would lose the context. Keeping delivery apart from reading keeps C2: a reply never widens or narrows
   who may read a thread.
@@ -8154,13 +8157,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   sends the member only to a reader pinned at or after DEC-0135 and omits it for an older one, as DEC-0079 staged
   `held`. `unread` and `com.status`'s count narrow to deliveries: a Project's own messages and replies delivered to
   others leave a reader's count on a board that counted them before, and `read` is `true` for them on a filtered
-  page. `contractVersion` stays `0.1.0`.
+  page. `fabric-project-comms/0.1` is adopted, so `conformance.md`'s compatibility policy would put this narrowing in
+  a new revision; it is made under the same name as a recorded exception (as DEC-0026 was), because it records what
+  the only board serving 0.1 already answers: its released versions (v0.3.10 to v0.3.12) count unread over their
+  deliveries (`board_status`, migration 107) and keep `read` true for a reader's own messages, the only ones they do
+  not deliver to it (`board_list_reader`, migration 120), and its migration 124 (CO-370, on its main) narrows a reply's
+  delivery to the sender, which DR-2's default records. No reader of a released board sees its count change by this
+  decision. `com.read_ack` and its receipt are
+  unchanged (DEC-0073, DEC-0098): a mark is recorded on any message the reader can read. The next release's notes list
+  the narrowing. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`, the `answered` description),
   `comms-reply.schema.json`, `comms-submit.schema.json`, `comms-message.schema.json`, `comms-list.schema.json` and
   `comms-status.schema.json` (`unread`); fixtures; `docs/specification/project-comms.md` (header, participants, reads,
   delivery, messages, `com.status`, transport mirror), `conformance.md` (the board's row), `CONTEXT.md` (Delivery),
-  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19), `comms-receipt.schema.json` (`repeated`, `at`, `marked`,
-  `alreadyRead`); DEC-0022 and DEC-0098 annotated; backlog CT-154, CT-166.
+  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19); DEC-0022, DEC-0073 and DEC-0098 annotated; backlog CT-154,
+  CT-166.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
 
