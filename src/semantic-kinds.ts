@@ -22,7 +22,7 @@ const wrap = (...members: string[]): SemanticKind => ({ input: "wrapper", member
 
 export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.freeze({
   "access-log-disclosure": wrap("log", "consents"),
-  "action-call": wrap("action", "tier", "caller", "decision", "target", "elicited", "approval", "actionDigest", "humanStepUrl", "now", "answer"),
+  "action-call": wrap("action", "tier", "caller", "decision", "target", "elicited", "approval", "actionDigest", "humanStepUrl", "now", "answer", "mandate", "self", "callerAgent", "effect", "spendUsd", "project"),
   "activity-ack": wrap("known", "batch", "ack"),
   "activity-batch": doc("activity-batch.schema.json"),
   "activity-summary": doc("activity-summary.schema.json"),
@@ -83,6 +83,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "lease-reservation": wrap("lease", "request", "decision"),
   "local-channel-session": wrap("requests"),
   "machine-call": wrap("caller", "target", "capability", "effect", "answer"),
+  "mandate": doc("mandate.schema.json"),
   manifest: doc("manifest.schema.json"),
   "model-catalogue": doc("registry-models.schema.json"),
   "model-profiles": doc("model-profile.schema.json"),

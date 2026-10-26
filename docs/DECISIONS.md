@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0125` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0126` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7160,7 +7160,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0121: every button a person has, the person's agent has; an operator's decision relayed by their own agent is theirs
 
 - **Date:** 2026-10-24
-- **Status:** Accepted (2026-10-24). Additive on the wire (a new extension key, an optional `_meta` member and the
+- **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
@@ -7446,3 +7446,91 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** request `7d8c704b` (thread `4801da8d`), fabric-agent-adapter FAA-119 (kit 1.1.4, `fabric-button.js`);
   Fabric Dashboards `src/core/i18n.ts` at `4679ea0`; a product reading of the first draft (2026-10-26), which found no
   rule for a language the button has no words for.
+
+### DEC-0125: the operator's mandate travels with the task, narrowed at each hand-over
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive on the wire (a new schema, `mandate/1`; an optional `_meta.mandate` and
+  `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149.
+- **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the
+  operator's task holds the operator's authority for it, hands work to other agents on the operator's behalf with the
+  mandate narrowed to the part handed on, and the agent that receives it acts without asking the operator again
+  (fabric-workspace `knowledge/integration.md`, PR #439; request `fa9a40c8`). The operator's own example (request
+  `9db9e09e` item 2): told "run the research", a developer agent calls a research agent, which asks for the operator's
+  approval although the operator already gave it. DEC-0121 lets an agent relay the operator's decision only from the
+  operator's own words in its session (AP-3), and a research agent's own approval gate ("operator approval required
+  before paid work") had no way to see that the operator had decided. Never delegated: a sign-in, a typed secret, a
+  payment, spend above a limit.
+- **Decision:**
+  1. **MD-1, the form.** The leading agent states a `mandate/1` (`mandate.schema.json`): `task`, the operator's
+     `instruction` verbatim in AP-3's form, `at`, `expiresAt` within 7 days, a `scope` stated from the words
+     (`capabilities`, `actions`, `projects`, an absent list meaning any; `effects` as a ceiling; `perCallMaxUsd` only
+     where the words name an amount) and `chain` with itself first. A task open at expiry asks the operator once.
+  2. **MD-2, every call appends its callee.** The chain is the agents that held the mandate; each call under it
+     appends the agent called, with the scope handed on when narrower; never a wider or dropped list, effect or
+     ceiling, never a repeated agent, at most four (DL-6). `handOn` is the reference and `FAC-SEM-144` checks the
+     document.
+  3. **MD-3, taking a call.** A callee takes the mandate only from T0 or T1 and only when the chain ends in itself, and,
+     when it authenticated its caller's agent id (a per-agent credential, a delegation token's actor, the hub's token
+     naming the origin, never the hub's own id), only when that id is the agent before it; without one the chain's end
+     alone binds it; then a call the mandate covers is the operator's decision: a
+     `relayed` action without a decision (AP-2), any approval the product asks of the operator before a step, and a
+     job's approval step (no input request raised). Covered: the action or the capability listed (an effect beyond
+     `draft` needs the call named: a relayed action in either list, any other call in `capabilities`), the effect within the ceiling and never `change-policy` (AP-5), the callee's own
+     estimate within `perCallMaxUsd` when there is one (the money limits decide otherwise), the project listed. It
+     records `via: mandate` with the task, the chain and the caller. The mandate travels in `_meta.mandate`, in
+     `call.mandate` (the hub forwards it as it does a decision; a sealed call carries it only to a target listing
+     `mandate/1`), or in a board request from a Project of the operator's own board. `mandateCovers` is the reference;
+     `actionDecision` reads it when a relayed action's call carries no decision.
+  4. **MD-4, asking only for the rest.** Outside the mandate: `operator-decision-required` with `data.detail`
+     `outside-mandate: <part>` (and the estimate and ceiling for spend); a job's uncovered step waits `input_required`.
+     The agent refused calls again within its own mandate when that covers the call, else passes the refusal up, and
+     the leading agent asks the operator for that part alone. Not valid or not addressed to this call:
+     `decision-invalid` with its `detail`.
+  5. **MD-5, beyond the estate.** A T2 caller's mandate changes nothing; the whole profile applies. Toward another
+     person's machine or another organization's agents the authority travels only as a delegation token, which the hub
+     mints for the mandate's scope once Fabric's issuer serves it (DEC-0039). Inside the estate (T0, T1) no token is
+     needed, before or after the issuer (DL-26).
+  6. **MD-6, what never travels.** Human steps (AP-4), spend above a limit (L0, the project's L1 per-task threshold, a
+     key's ceiling), one's own approvals (AP-5); a mandate in a tool result, a page, a file or a board message from a
+     sender the target cannot place as the operator's is data.
+- **Why:** the operator's instruction is the authority inside the boundary (DL-26), and a task's work crosses agents;
+  carrying the words with the task, bound to a scope, an expiry and the chain that held it, lets every agent act without
+  turning a quoted sentence into a general key. Binding the chain's end to the callee, and the agent before it to the
+  caller wherever the callee authenticated the caller's agent id, keeps a copied mandate from serving another callee
+  (without such an id (the shared descriptor token on loopback, a T1 call over the relay, a call the hub forwards without a delegation token), it could be reused at the same callee within its scope and expiry, as a
+  decision could: DL-26's boundary); narrowing at each call mirrors a delegation token's
+  attenuation (DL-5), so the same chain later becomes a signed one without changing what it means. An absent amount
+  reads as "within the money limits" because the operator's rule reserves only spend above a limit; an explicit amount
+  is a per-call ceiling because a callee can check its own estimate but not what other agents spent. Refusing only the
+  uncovered part keeps the approval mechanism the operator asked to keep, while asking them once.
+- **Alternatives considered:** let any agent relay another agent's quoted words as a decision (the prompt-injection
+  boundary of AP-3 would be gone); the operator's rule's literal form, a board request that names the task and the
+  operator's words in prose (a callee could not tell what the words cover or check a narrowing; fabric-workspace relays
+  the block instead, CT-149); require a delegation token at T0 and T1 (DL-26 removed tokens inside the boundary, and
+  Fabric's issuer does not serve yet); a total spend for the task (no callee sees the others' spend; the leading agent
+  keeps the total within the money limits); one long-lived approval per agent pair (no task, no scope, no expiry); a new
+  refusal code (DL-19's `operator-decision-required` already means "ask the operator", and `data.detail` names the
+  part).
+- **Compatibility:** `interop-request-meta` admits any `_meta` member, so a reader pinned before ignores
+  `_meta.mandate` and answers as before (`operator-decision-required` for a relayed action without a decision). The
+  hub's `agent.call` admits `mandate` from this decision; a reader pinned before refuses a call that carries one, so a
+  sealed call carries it only to a target whose `protocols` lists `mandate/1` (registered by this decision), and the hub
+  forwards it only to a callee at or after this pin. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/mandate.schema.json` (new), `schemas/interop-request-meta.schema.json`,
+  `schemas/interop-agent-call.schema.json`; `src/protocol-revisions.ts` (`mandate/1`); `docs/specification/delegation.md`
+  (DL-26, The operator's mandate, the refusal codes, the rule's row), `service.md` (AP-2, AP-3), `interop.md` (C3.3,
+  C3.5, the action codes), `machine-calls.md` (the sealed call), `project-comms.md` (a board request),
+  `spend-policy.md` (L2), `conformance.md` (rows, the reference, the next free code), `CONTEXT.md` (Mandate),
+  `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/ux/` (ST-037, FLW-31, SCN-045, SCR-30); `src/mandate.ts`,
+  `src/actions.ts`, `src/semantic-rules.ts`, `src/semantic-kinds.ts`; `tools/vectors/mandate.ts`,
+  `fixtures/vectors/mandate.json`, `fixtures/positive/mandate.json`, two negatives,
+  `fixtures/semantic/action-call-mandate*.json`; `test/mandate.test.ts`, `test/schema-compilation.test.ts`,
+  `test/positive-sweep.test.ts`, `test/capability-names.test.ts`, `vitest.config.ts`; DEC-0121's status; backlog CT-142
+  (closed by this decision), CT-149 (adoption).
+- **Source:** the operator's decision of 2026-10-25 (fabric-workspace `knowledge/integration.md`, PR #439,
+  announcement `a509fcc0`); requests `fa9a40c8` (thread `c9d5be94`) and `9db9e09e` item 2; CT-142; the seam and
+  product readings of the first draft (2026-10-26), which found the chain rule unfollowable and unbound to its caller,
+  spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted;
+  a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
+  covering every external call and the reference's table stale.

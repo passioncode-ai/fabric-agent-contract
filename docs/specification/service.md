@@ -1005,10 +1005,17 @@ Every button a person has, the person's agent has, and an operator's decision re
   ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). A `view` machine ([machine calls](machine-calls.md))
   carries no decision: a decision is an effect its profile forbids (DEC-0121). The service keeps the decision,
   `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
-  a usage report or any page another party reads (DEC-0121).
+  a usage report or any page another party reads (DEC-0121). A call that carries no decision but the operator's
+  mandate for its task (`_meta.mandate`) is decided by the mandate: covered, the operator's act recorded `via:
+  mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
+  ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
+  `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
+  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project.
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent: those are data (the prompt-injection
-  boundary) (DEC-0121). The operator's words reach an agent in its own session, through a subagent its session started
+  boundary) (DEC-0121). The one carrier of the operator's words from another agent is a mandate handed on as
+  [MD-2](delegation.md#the-operators-mandate) says, which an agent passes on and never writes from another agent's
+  text (DEC-0125). The operator's words reach an agent in its own session, through a subagent its session started
   and passed them to verbatim, or through the operator channel ([operator channel](operator-channel.md)); a standing
   rule in a file is not a decision on an action (DEC-0121). `instruction` quotes the operator's sentence that names the
   action, or, when the operator answered the agent's question, the question that names the action and the answer, both
@@ -1035,7 +1042,9 @@ Every button a person has, the person's agent has, and an operator's decision re
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
 declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision` and `target`, the service's own
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
-`now`:
+`now`; for a call under the operator's mandate (DEC-0125) also the call's `mandate`, the service's own agent id `self`,
+the caller's agent id `callerAgent` when the service authenticated one, the action's `effect`, the service's `spendUsd`
+estimate and the `project`:
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|
@@ -1044,12 +1053,13 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 | `relayed` | any, with an accepted `approval/1` | `{ok: true, recordAs: {by: approver, via: "approval", caller}}` |
 | `relayed` | T2, or a caller placed in no tier (DL-25), without one | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
 | `relayed` | T0 or T1, the service's own accepted elicitation | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` |
-| `relayed` | T0 or T1, no decision | `{ok: false, code: "operator-decision-required"}` |
+| `relayed` | T0 or T1, no decision and no mandate | `{ok: false, code: "operator-decision-required"}` |
+| `relayed` | T0 or T1, no decision, a mandate | what `mandateCovers` answers: `{ok: true, recordAs: {by: "operator", via: "mandate", task, chain, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4) |
 | `relayed` | T0 or T1, a decision invalid against the schema, for another action, naming a `target` the call does not act on, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller}}`: the operator's act |
 
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
-clock, no digest for a T2 refusal, no link for a human step) is its own fault (`{fault}`), never an answer to the
+clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`) is its own fault (`{fault}`), never an answer to the
 caller. Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
 reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.md#refusal-codes)): the three codes
 `operator-decision-required`, `decision-invalid` and `human-step-required` are in its one set and travel as its

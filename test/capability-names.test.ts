@@ -64,6 +64,7 @@ it("every name-bearing schema surface references the shared definition", async (
     "governance.schema.json/$defs/grant/properties/capabilities/items",
     "governance.schema.json/$defs/grant/properties/spend/properties/credentialSource/oneOf/1/properties/capability",
     "interop-agent-call.schema.json/properties/capability",
+    "mandate.schema.json/$defs/scope/properties/capabilities/items",
     "manifest.schema.json/properties/capabilities/items/properties/name",
     "manifest.schema.json/properties/costPresets/items/properties/capability",
     "pipeline.schema.json/$defs/stage/properties/capability",

@@ -4,6 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
+import { mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region actions (docs: docs/specification/service.md#actions)
@@ -47,18 +48,31 @@ export interface ActionDecisionInput {
   humanStepUrl?: unknown;
   /** The service's clock, RFC 3339 (required for a `relayed` action). */
   now?: unknown;
+  /** The call's `_meta.mandate` (or `call.mandate`), as received (DEC-0125); read only when the call carries no decision. */
+  mandate?: unknown;
+  /** The service's own agent id, which a mandate's chain must end in (DEC-0125 MD-3); required to read a mandate. */
+  self?: unknown;
+  /** The caller's agent id, when the service authenticated one (a per-agent credential, a delegation token's outermost
+   * actor, the hub's attested origin); a mandate's chain must then name it before `self`. */
+  callerAgent?: unknown;
+  /** The action's effect class, the service's own knowledge, required to read a mandate. */
+  effect?: unknown;
+  /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
+  spendUsd?: unknown;
+  /** The project the call acts in, to read a mandate's projects. */
+  project?: unknown;
 }
 
-export type DecisionVia = "relayed-instruction" | "elicitation" | "approval";
-export type DecisionRecord = { by: string; via: DecisionVia; caller: string };
+export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate";
+export type DecisionRecord = { by: string; via: DecisionVia; caller: string; task?: string; chain?: string[] };
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
   | { ok: true; recordAs: DecisionRecord }
   | { ok: false; code: typeof HUMAN_STEP_REQUIRED; data: { humanStep: HumanStep; url: string } }
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
-  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID }
+  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -113,6 +127,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+  if (decision === undefined && input.mandate !== undefined) return byMandate(input, action, caller);
   if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
   decisionShape ??= schema("decision.schema.json");
   if (decisionShape(decision) !== true) return { ok: false, code: DECISION_INVALID };
@@ -123,6 +138,21 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     return { ok: false, code: DECISION_INVALID };
   }
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller } };
+}
+
+/** A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. */
+function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer {
+  const { effect, spendUsd, project } = input;
+  if (typeof effect !== "string") return { fault: "effect-missing" };
+  if (typeof input.self !== "string") return { fault: "self-missing" };
+  const answer = mandateCovers({
+    mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
+    ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
+    call: { capability: action.tool, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
+  });
+  if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
+  // Never `ignored`: actionDecision reads the tier first, so a T2 call answered approval-required before (MD-5).
+  return answer as Exclude<typeof answer, { ignored: string }>;
 }
 
 /** What a host reads of a well-known document's actions declaration: the actions, or why it is not declared. */
