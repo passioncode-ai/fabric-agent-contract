@@ -26,6 +26,9 @@ rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
 - CT-157 closed; CT-167 filed (`docs:check` does not check a link's `#fragment`), CT-168 filed (a mandate against a
   product's protective approval); CT-149 carries the family's scenario and "issued for `personal`".
 - Readings: round 1 fail (DL-27's profiles read wider than DEC-0106; CT-167's link count); fixed with the round's risks.
+- Round 2 clean (unit, seam, product pass); its risks fixed: the conformance row and CONTEXT's Family carry the
+  credential source and the relay-only profiles, CT-168 named in Not decided here, relay.md's T2 bullet, CT-30's T1
+  wording. fabric-workspace `knowledge/authority.md` still says "enrolled in the agent network" for T1: asked of its owner.
 
 ## Checks actually run
 

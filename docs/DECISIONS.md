@@ -8168,8 +8168,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. **The agent network** links its directory (DEC-0104) and includes the family; NET-1's network of the operator is
      `personal`, while the family also counts agents placed on the estate's machines in an organization's context;
      DL-25's T1 row says "enrolment in the owner's estate" rather than "in the agent network".
-  6. **A service off the estate.** The operator's agents reach it as T2; its own owner's processes are that owner's T0
-     (an organization's cloud machine binds no person, DEC-0099, so they are T2 there too). The token they carry is issued for `personal`
+  6. **A service off the estate.** The operator's agents reach it as T2; its own owner's processes are that owner's T0 on its machine and T1 on its other enrolled machines
+     (an organization's cloud machine binds no person, DEC-0099, so the operator's agents are T2 there too). The token they carry is issued for `personal`
      by the estate's issuer `urn:fabric:estate:<id>` (a token names no context, DL-2, DL-14a), once Fabric's issuer
      serves (MD-5), and its scope is all they carry. The first consumer's token class `internal` is not service.md's
      data class of that name.
@@ -8179,8 +8179,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the decision and handoff records included, would break silently: `docs:check` does not check fragments, CT-167); leaving the items as backlog (they are cheap and each is a sentence
   a port reads).
 - **Compatibility:** text only. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/delegation.md` (header, DL-25's T1 row, the family section's intro,
+- **Consequences / affects:** `docs/specification/delegation.md` (header, DL-25's T1 and T2 rows, the family section's intro,
   DL-27 to DL-29), `conformance.md` (the family's row), `README.md` (the delegation row), `CONTEXT.md` (Family),
-  `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
+  `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form), `relay.md` (Trust tiers' T2); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
   (closed), CT-167 and CT-168 (filed).
 - **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.

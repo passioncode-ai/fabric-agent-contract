@@ -491,7 +491,7 @@ decided by it ([below](#the-operators-mandate), DEC-0125).
 
 ## The family and the agent network
 
-DEC-0130 (CT-143, the operator's task of 2026-10-25, board request `9db9e09e` item 1)
+DEC-0130 (CT-143, the operator's task of 2026-10-25, board request `9db9e09e` item 1), worded as DEC-0137 settles it (CT-157)
 
 The operator named two circles: the **family**, the agents the operator runs, trusted most and open to everything open
 to the operator; and the network of every agent reachable, each open to what its context was granted, here the
@@ -504,9 +504,11 @@ context. The contract already draws the line at the machine boundary, so neither
 placements, DEC-0055, DEC-0082) and the operator's own local sessions. A callee knows a family caller only by placing
 it in T0 or T1 (DL-25): the family is T0 and T1 named from the agents' side (T0 being any process the operator's OS
 account runs on that machine, one the owner did not install included, which the boundary treats as the operator's own,
-DEC-0045), and `personal` and `org:<orgId>` stay the only contexts. What DL-26 opens to a T0 or T1 caller is what is
+DEC-0045; so a callee treats every T0 process as the family, though the family the operator runs is its placed agents
+and sessions), and `personal` and `org:<orgId>` stay the only contexts. What DL-26 opens to a T0 or T1 caller is what is
 open to the family: everything open to the operator, in the context the call runs in (a call without a token runs in
-the context of the callee instance it reaches), with no token, approval or grant record; one approval of the operator
+the context of the callee instance it reaches, [contexts](contexts.md#one-instance-per-context-on-a-machine),
+DEC-0082), with no token, approval or grant record; one approval of the operator
 travels along the family's chain as a mandate (DEC-0125). What still binds the family: the money limits, the human
 gates, the credential source (never another agent's key or vault slot, DL-26), the contexts, the machine profiles on
 calls between the estate's machines over the relay (a `view` machine neither takes nor makes a call with an effect,
@@ -531,8 +533,8 @@ is the family whatever it serves; one placed in an organization's context or pub
 that context's routing and grants (DL-27). Outside the family a caller is T2 and is
 open to what its context was granted, a share grant, a partner grant or an organization's grant, with a delegation
 token per call (DL-8, DL-13). A service off the estate's machines (a platform the operator uses) has no caller of
-this operator's family: the operator's agents reach it as T2 (its own owner's processes on its own machines are that
-owner's T0; an organization's cloud machine binds no person, DEC-0099, so the operator's agents are T2 there too). The operator's agents reach it, once
+this operator's family: the operator's agents reach it as T2 (its own owner's processes on its machine are that
+owner's T0, and on that owner's other enrolled machines T1; an organization's cloud machine binds no person, DEC-0099, so the operator's agents are T2 there too). The operator's agents reach it, once
 Fabric's issuer serves (MD-5), with a token the operator's hub issues for `personal`: its issuer is the estate's,
 `urn:fabric:estate:<id>` (DL-2, DL-14a), since a token names no context of its own, and its scope is all they carry. A
 service that keeps its own token classes may map such a token onto a class of its own for the operator's account (the
@@ -706,6 +708,9 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 
 ## Not decided here
 
+- Whether the operator's mandate covers a product's own `approval/1` that the product requires as protection from a
+  hostile local process (DL-28, The boundary): MD-3 takes a covered mandate as any approval the product asks, and a
+  hostile T0 process can state one (CT-168).
 - A watcher that looks for a family agent turned against the operator (the operator's task of 2026-10-25, item 3): a
   running service, proposed to Fabric (board message `35b8301c`); the contract adds a signal format only when its owner
   asks (DEC-0130).
