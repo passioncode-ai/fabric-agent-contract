@@ -30,12 +30,19 @@ export interface MandateScope {
   perCallMaxUsd?: number;
   projects?: string[];
 }
+/** Where the operator said the words an agent relays (DEC-0126 OA-2): the project, and the session or the thread. */
+export interface OperatorSource {
+  project: string;
+  session?: string;
+  thread?: string;
+}
 export interface Mandate {
   kind: "mandate/1";
   by: "operator";
   task: string;
   instruction: string;
   at: string;
+  source?: OperatorSource;
   expiresAt: string;
   scope: MandateScope;
   chain: Array<{ agent: string; at: string; scope?: MandateScope }>;
@@ -58,7 +65,7 @@ export interface MandateCall {
 export type OutsideDetail = "outside-mandate: capability" | "outside-mandate: action" | "outside-mandate: effect" | "outside-mandate: spend" | "outside-mandate: project";
 export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call";
 export type MandateAnswer =
-  | { ok: true; recordAs: { by: "operator"; via: "mandate"; task: string; chain: string[] } }
+  | { ok: true; recordAs: { by: "operator"; via: "mandate"; task: string; chain: string[]; source?: OperatorSource } }
   | { ok: false; code: typeof OUTSIDE_MANDATE; data: { detail: OutsideDetail; estimateUsd?: number; perCallMaxUsd?: number } }
   | { ok: false; code: typeof MANDATE_INVALID; data: { detail: InvalidDetail } }
   /** A T2 caller's mandate changes nothing: the callee applies the whole profile as if it were absent (MD-5). */
@@ -151,7 +158,8 @@ export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unk
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
-  return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders } };
+  // Where the operator said it travels into the record, as the reason the callee acted (DEC-0126 OA-6).
+  return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
 /**

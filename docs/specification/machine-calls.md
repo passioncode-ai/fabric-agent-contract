@@ -108,7 +108,8 @@ reads neither ([`agent-call-sealed.schema.json`](../../schemas/agent-call-sealed
   rides in `call.decision`, its one place in the sealed call, sent only to a target whose `protocols` lists
   `fabric-actions/0.1`, since an older reader refuses the member ([service](service.md#actions) AP-2, DEC-0121); the
   operator's mandate rides in `call.mandate`, sent only to a target whose `protocols` lists `mandate/1`, for the same
-  reason ([delegation](delegation.md#the-operators-mandate), DEC-0125); an
+  reason ([delegation](delegation.md#the-operators-mandate), DEC-0125); either carries `source` only to a target whose
+  `protocols` lists `operator-source/1` ([OA-7](delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126); an
   `answer` carries `replyTo` (the call's `msgId`) and `answer`
   (`isError`, `structuredContent`, `content`). At most `MAX_AGENT_CALL_BYTES` (393 216 bytes), so the sealed call,
   base64url twice and signed, still fits a relay body.

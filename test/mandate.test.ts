@@ -41,6 +41,13 @@ describe("handing a mandate on (MD-2)", () => {
     expect(() => handOn(long, "example-fifth", "2026-10-26T10:08:00Z")).toThrow("mandate-malformed");
   });
 
+  it("keeps where the operator said the words down the chain (DEC-0126 OA-2, OA-6)", () => {
+    const source = { project: "example-analyst", session: "example-session-7" };
+    const next = handOn({ ...leading, source }, "example-researcher", "2026-10-26T10:05:00Z");
+    expect(next.source).toEqual(source);
+    expect(mandateProblem(next)).toBeUndefined();
+  });
+
   it("holds the chain to a delegation chain's depth (DL-6)", () => {
     const schema = JSON.parse(read("schemas/mandate.schema.json")) as Json;
     expect(schema.properties.chain.maxItems).toBe(MAX_CHAIN_DEPTH);
@@ -65,6 +72,11 @@ describe("a relayed action under a mandate (MD-3, DEC-0121 AP-2)", () => {
     expect(actionDecision({ ...call, project: undefined, spendUsd: "3" })).toEqual(actionDecision(call));
     // The shared descriptor token on loopback names no agent: the chain's end binds the mandate.
     expect(actionDecision({ ...call, callerAgent: undefined })).toEqual(actionDecision(call));
+    // DEC-0126 OA-6: where the operator said the words travels into the record, as a copy.
+    const source = { project: "example-analyst", session: "example-session-7" };
+    const relayed = actionDecision({ ...call, mandate: { ...mandate, source } });
+    expect(relayed).toEqual({ ok: true, recordAs: { by: "operator", via: "mandate", task: base.task, chain: ["example-developer", "example-researcher"], source, caller: "agent:claude-code" } });
+    expect((relayed as { recordAs: { source: object } }).recordAs.source).not.toBe(source);
   });
 
   it("refuses what the mandate does not cover, names an invalid one, and owes the action's effect", () => {

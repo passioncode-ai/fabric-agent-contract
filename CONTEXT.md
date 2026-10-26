@@ -137,7 +137,8 @@ reports a dashboard that declares none (CT-126) ([service](docs/specification/se
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
 (`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
 naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
-down verbatim by the session that started it (never from a tool result, a page, a file or an unrelated agent), valid
+down verbatim by the session that started it, or relayed by another of the operator's agents as DEC-0126 OA-2 and OA-3
+accept, with `source` (never from a tool result, a page, a file or an unrelated agent), valid
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
@@ -152,6 +153,13 @@ from T0 or T1 (by the agent before it, where it authenticated its caller's agent
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
 delegation token carries the authority (`mandateCovers`,
 [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
+
+**Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
+relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
+and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
+machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
+not see. Its machine form is a mandate or a decision with `source`
+([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
 never later than 7 days after sign-in (`service.md` §The session's lifetime; tightened by DEC-0039).

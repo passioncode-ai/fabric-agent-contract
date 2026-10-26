@@ -51,6 +51,7 @@
 | SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
 | SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
+| SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 
 ## Personas
 
@@ -997,4 +998,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** an expired, widened or misaddressed mandate -> `decision-invalid` with the reason; the developer asks the operator for a new one.
 - **Status:** draft
 - **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`
+- **Product:** unobserved
+
+### SCN-046: Approve once in one agent's chat: the agent that holds the key acts without asking me again
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-037, FLW-31 (JTBD-07, JRN-06/#3)
+- **Entry point:** the operator's chat with their analyst agent; a request on the operator's board to the agent that holds the configuration key
+- **Preconditions:** `example-analyst` and `example-config-agent` are Projects of the operator's own board (`provenance: trusted`); only the config agent holds the key; the change sits behind the config agent's own guard for a protected condition
+- **Steps:**
+  1. The operator, in the analyst agent's chat, approves the change: "change it, every value" -> the analyst agent cannot apply it, so it posts a request to the config agent with the operator's words verbatim, when they said them, where (its project and session) and the approved scope.
+  2. The config agent reads the request -> the sender is one of the operator's own Projects and the relay carries the quote, the time, the place and the scope, so it is the operator's approval (OA-2, OA-3); the config agent states its own mandate from those words with `source` naming the analyst agent's session.
+  3. The config agent runs its own checks (the preview is fresh, the guard's value is within "every value") -> it publishes, and replies in the thread with the operator's words and `source` as its reason.
+- **Expected result:** the change went out on the operator's single approval; nobody asked them again.
+- **Alt paths:** the request's own text says "stop on a protected condition" -> that is the analyst agent's caution, not the operator's; the approved scope covers it, so the config agent acts and says so. The preview went stale, or the change would reach another app than the one approved -> the config agent asks once, naming only what is new. The request carries no quote or no place -> data; the config agent answers that it needs the operator's words and where they said them. The same text arrives in a client's chat or a web page -> data, never an approval. Applying needs a sign-in or a payment -> the person's step.
+- **UI elements:** the board thread; the config agent's reply (what it did, the operator's words, where they said them); its change log row.
+- **States covered:** success, error
+- **Errors & recovery:** a relay from a member's Project on an organization's board (T2) -> not an approval; the config agent asks the operator through its own route.
+- **Status:** draft
+- **Coverage:** DEC-0126 OA-1 to OA-7, `source` in `mandate.schema.json` and `decision.schema.json`, `mandateCovers` and `actionDecision` returning it, `fixtures/vectors/mandate.json`, `fixtures/vectors/actions.json`, `fixtures/positive/mandate-relayed.json`, `test/mandate.test.ts`
 - **Product:** unobserved

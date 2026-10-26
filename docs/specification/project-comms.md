@@ -79,7 +79,12 @@ sender (`provenance: trusted`) and the sending Project is the operator's own: a 
 board, never a member's Project on an organization's board, whose machine is another person's (T2). It then reads the
 mandate as [delegation](delegation.md#the-operators-mandate) MD-3 says, the sending Project's agent being the caller.
 The board's participants are the operator's own Projects, so the operator's words in the block reach no other party
-(AP-2). A board message is otherwise data, never a decision.
+(AP-2). A message from such a Project that relays the operator's approval, with their words verbatim, when and where they
+said them, and the scope, is that approval for the agent that reads it ([delegation](delegation.md#one-approval-binds-all-the-operators-agents)
+OA-1 to OA-3, DEC-0126): one approval binds all of the operator's agents. A Project declares no `protocols`, so the
+block carries the mandate without `source` and the message's text names where the operator said the words beside it
+(OA-7). A board message is otherwise data, never a
+decision.
 
 A request's target must be a participant of a new thread (`FAC-SEM-026`).
 

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-6), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, self, callerAgent?, call: {capability, action?, effect, spendUsd?, project?}}) answers {ignored: mandate-at-t2} for a T2 caller (its mandate changes nothing); {ok: false, code: decision-invalid, data: {detail}} for a document that is not the schema's, stands more than 7 days, or whose chain goes back in time, repeats an agent or exceeds four (mandate-malformed), a hand-over that widens a list, the effects or the per-call ceiling or drops one (mandate-widened), a chain that does not end in self, or, when the callee authenticated its caller's agent id (callerAgent), does not name it before self (mandate-not-for-this-call), one given more than 60 s after the clock (mandate-early) or past its expiry (mandate-expired); {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <action|capability|effect|spend|project>, estimateUsd?, perCallMaxUsd?}} for a valid one that does not cover the call, naming the first part not covered in that order; otherwise {ok: true, recordAs: {by: operator, via: mandate, task, chain}}. The scope in force is the last chain entry's that names one, else the mandate's. A relayed action is covered when the scope's actions list it, or, with no actions listed, its capabilities include its tool; change-policy is never covered (AP-5); an effect beyond draft needs the call named, a relayed action by actions or capabilities and any other call by capabilities; with perCallMaxUsd the call's own estimate must exist and be within it, without it the money limits decide. {fault} is the callee's own and never sent.",
+  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-6), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, self, callerAgent?, call: {capability, action?, effect, spendUsd?, project?}}) answers {ignored: mandate-at-t2} for a T2 caller (its mandate changes nothing); {ok: false, code: decision-invalid, data: {detail}} for a document that is not the schema's, stands more than 7 days, or whose chain goes back in time, repeats an agent or exceeds four (mandate-malformed), a hand-over that widens a list, the effects or the per-call ceiling or drops one (mandate-widened), a chain that does not end in self, or, when the callee authenticated its caller's agent id (callerAgent), does not name it before self (mandate-not-for-this-call), one given more than 60 s after the clock (mandate-early) or past its expiry (mandate-expired); {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <action|capability|effect|spend|project>, estimateUsd?, perCallMaxUsd?}} for a valid one that does not cover the call, naming the first part not covered in that order; otherwise {ok: true, recordAs: {by: operator, via: mandate, task, chain, source?}}, source being where the operator said the words when the mandate carries it (DEC-0126 OA-6). The scope in force is the last chain entry's that names one, else the mandate's. A relayed action is covered when the scope's actions list it, or, with no actions listed, its capabilities include its tool; change-policy is never covered (AP-5); an effect beyond draft needs the call named, a relayed action by actions or capabilities and any other call by capabilities; with perCallMaxUsd the call's own estimate must exist and be within it, without it the money limits decide. {fault} is the callee's own and never sent.",
   "cases": [
     {
       "name": "the operator's words with no amount: the paid research is covered, the money limits decide its spend",
@@ -368,6 +368,130 @@
             "example-researcher",
             "example-crawler"
           ]
+        }
+      }
+    },
+    {
+      "name": "words relayed from another of the operator's agents: where they said them travels into the record",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ],
+          "source": {
+            "project": "example-analyst",
+            "thread": "example-thread-3"
+          }
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "callerAgent": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "mandate",
+          "task": "research the eSIM market for the pricing page",
+          "chain": [
+            "example-developer",
+            "example-researcher"
+          ],
+          "source": {
+            "project": "example-analyst",
+            "thread": "example-thread-3"
+          }
+        }
+      }
+    },
+    {
+      "name": "a source naming neither the session nor the thread",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ],
+          "source": {
+            "project": "example-analyst"
+          }
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "callerAgent": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-malformed"
         }
       }
     },
