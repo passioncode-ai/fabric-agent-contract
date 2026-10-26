@@ -323,7 +323,7 @@ alert:
    holds no readable heartbeat answers `unknown` (`no-heartbeat`) and refuses those calls too. In each case it tells
    its person, with the hours since, that *this machine* has not heard from the hub. A machine whose own clock does not
    read (`unknown`, `no-clock`) says that instead and offers no move: reconnecting cannot repair a clock. Before it offers "Move the hub" it
-   reconnects to the relay (`welcome` carries the delta's head and the latest heartbeat, `delta-query` fetches what it
+   reconnects to the estate's relay (`welcome` carries the delta's head and the latest heartbeat, `delta-query` fetches what it
    lacks) and reads `hubSilence` again over the latest heartbeat it then holds: it offers the move only while that is
    still `silent`, `stale` or `unknown` for lack of a heartbeat, so a machine that was only asleep does not move a running hub.
 2. **The new hub.** An always-on `full` machine of the estate ([machine calls](machine-calls.md#machine-profiles));

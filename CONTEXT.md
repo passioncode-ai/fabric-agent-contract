@@ -656,7 +656,9 @@ effect; every effectful stage has one on every path from the start.
 version and commit a consuming repository builds against.
 
 **Relay**: A server that admits machines on their device keys and carries their messages,
-sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
+sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047): an estate's relay, one estate's
+machines; an organization's relay admits its members from the signed member list (DEC-0134), and what it carries
+between them is not decided (CT-163). It holds no
 authority: it reads nothing it carries, decides no trust tier and never reports a queued command done, and until a
 caller's signature is proven it tells it nothing it holds (DEC-0066).
 
@@ -665,11 +667,12 @@ applied only after `verifyEstateRecord`, minus revoked machines and keys (and th
 entries), minus keys that could never verify; none once the record's window ends, when open sessions close too. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
 organization's relay takes its set from the organization's member list (`org-authority/1`, DEC-0129) instead, verified
-under the organization's key set; it runs once its handshake is decided (CT-37).
+under the organization's key set, and its handshake names the organization in `auth` and the list in `welcome`
+(DEC-0134).
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
-`{sequence, sha256}`: what a machine reports to its hub and a **Relay**'s `welcome` carries. A revision issued after an entry
+`{sequence, sha256}`: what a machine reports to its hub and an estate's **Relay** carries in its `welcome` (an organization's relay does not, DEC-0134 OR-2). A revision issued after an entry
 lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
 **Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):

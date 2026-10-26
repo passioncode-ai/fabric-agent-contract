@@ -40,7 +40,7 @@
           "$ref": "common.schema.json#/$defs/sha256Hex"
         }
       },
-      "description": "A head of the revocation delta: the sequence of its last entry (0 before any) and the hex SHA-256 of that entry's RFC 8785 form without sig (the estate's genesis at 0), or a delta anchor's sequence and hash when no entry is held after it (deltaHead, DEC-0107). The shape of a device check-in's records.revocationDelta (DEC-0053) and a relay's welcome.deltaHead (DEC-0047)."
+      "description": "A head of the revocation delta: the sequence of its last entry (0 before any) and the hex SHA-256 of that entry's RFC 8785 form without sig (the estate's genesis at 0), or a delta anchor's sequence and hash when no entry is held after it (deltaHead, DEC-0107). The shape of a device check-in's records.revocationDelta (DEC-0053) and an estate relay's welcome.deltaHead (DEC-0047)."
     },
     "entry": {
       "type": "object",
