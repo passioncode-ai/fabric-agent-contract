@@ -2,9 +2,13 @@
 
 DEC-0127, DEC-0129, DEC-0131 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
-[`org-authority`](../../schemas/org-authority.schema.json) and the estate record's `organizations`
+[`org-authority`](../../schemas/org-authority.schema.json), the exchange's
+[`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
+[`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
+[`org-root-registration`](../../schemas/org-root-registration.schema.json), and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts),
-[`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`) · vectors
+[`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
+[`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
 [`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts)
 
@@ -351,7 +355,8 @@ once, for at most 15 minutes (`MAX_CLAIM_SECONDS`). The claim is a bearer secret
 (a copy from that page is enough), and it never travels in a URL or a link, so never by an open link (DEC-0123 links
 carry none). The owner's Fabric creates the root and a signing credential for this organization alone (OM-3) and
 POSTs `org-root-registration/1` `{type, org, issuer, root: {kid, x}, administrator, claim}` to `.../root`. The server
-checks it as `verifyRootRegistration` does: the shape, its organization and issuer (`422`), no first set accepted yet
+checks it as `verifyRootRegistration` does: the shape, with the root's kid and the administrator credential exactly as
+the first set must carry them (`422`), its organization and issuer (`422`), no first set accepted yet
 (`409 root-registered`), a root not of small order and a usable administrator credential (`422`), and last the claim
 (`403 claim-invalid`). The check never uses the claim up; on success the server uses it up and records the
 registration in one transaction, and until the first set is accepted a newer registration replaces an older one. The

@@ -22,6 +22,10 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
   product fail (the claim by an open link carries a secret DEC-0123 links never carry; the root and the owner's
   credential arrived after the draft that names them; OM-2 still left the root's serving to Fabric). Fixed: the root
   is registered first, the claim is a secret checked last, member lists are private, OM-2 names the route.
+- Round 2 (head `d2165354`): seam fail (the registration admitted an administrator credential and a root kid the first
+  set can never carry, after which the claim is spent), product fail (the glossary and the module header still called
+  every draft public). Fixed: the registration checks the credential with `administratorOk` and the kid as an opaque
+  id; both texts scope public reads to key sets.
 
 ## Decisions
 

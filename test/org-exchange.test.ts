@@ -132,7 +132,11 @@ describe("verifyRootRegistration (OX-2)", () => {
   });
 
   it("refuses a malformed body before anything else", () => {
-    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, administrator: "a" }, { ...REG, claim: 1 }, { ...REG, claim: "short" }]) {
+    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, root: { ...REG.root, kid: "bad kid!" } }, { ...REG, administrator: "a" },
+      // The administrator exactly as the first set's administrators must carry it, or the claim would buy a set that never verifies.
+      strip(REG, "administrator"), { ...REG, administrator: strip(REG.administrator, "credentialId") }, { ...REG, administrator: { ...REG.administrator, origins: [] } },
+      { ...REG, administrator: { ...REG.administrator, extra: 1 } }, { ...REG, administrator: { ...REG.administrator, publicKey: { ...REG.administrator.publicKey, d: "x" } } },
+      { ...REG, administrator: { ...REG.administrator, origins: ["https://sign.orgs.example", "https://sign.orgs.example"] } }, { ...REG, claim: 1 }, { ...REG, claim: "short" }]) {
       expect(verifyRootRegistration(body, ctx), JSON.stringify(body)?.slice(0, 50)).toEqual({ ok: false, problem: "malformed" });
     }
   });
@@ -144,7 +148,7 @@ describe("verifyRootRegistration (OX-2)", () => {
     expect(verifyRootRegistration({ ...REG, root: { ...REG.root, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }, ctx)).toEqual({ ok: false, problem: "small-order-key" });
     expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, rpId: "orgs.example" } }, ctx)).toEqual({ ok: false, problem: "unusable-key" });
     expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, publicKey: { ...REG.administrator.publicKey, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } } }, ctx)).toEqual({ ok: false, problem: "small-order-key" });
-    expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, alg: 7 } }, ctx)).toEqual({ ok: false, problem: "unusable-key" });
+    expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, alg: 7 } }, ctx)).toEqual({ ok: false, problem: "malformed" });
     // The claim is checked last and never consumed on a refusal: a body refused for its keys leaves the claim usable.
     let checked = 0;
     const counting = { ...ctx, claimValid: () => { checked += 1; return true; } };

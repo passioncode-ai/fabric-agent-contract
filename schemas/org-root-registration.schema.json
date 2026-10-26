@@ -46,7 +46,7 @@
     "claim": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{43}$",
-      "description": "The one-time claim, a bearer secret: 32 random bytes, base64url, that the server showed the owner on its signed-in page for this organization and the owner gave their Fabric. Never in a URL or a link (FAC-SEM-143's rule); used up only by a registration the server accepts."
+      "description": "The one-time claim, a bearer secret: 32 random bytes, base64url, that the server showed the owner on its signed-in page for this organization and the owner gave their Fabric. Never in a URL or a link (OX-2: an open link carries no secret, DEC-0123); used up only by a registration the server accepts."
     }
   },
   "additionalProperties": false
