@@ -201,8 +201,8 @@ organization.
 
 - It raises `revision` with every attestation for an (organization, audience, subject) and never signs one revision
   with other bytes.
-- It states an end: an `ended` attestation with a higher revision when the membership ends, and a refused refresh after
-  it, never silence alone.
+- It states an end: an `ended` attestation with a higher revision when the membership ends, a refused refresh after
+  it, never silence alone, and it revokes the device certificate of that membership's enrollment (DEC-0031).
 - It keeps the subject pairwise and opaque, and puts no person's name, address or email in any member.
 - It maps its own roles onto `owner`, `admin` and `member`; a finer role goes in `extensions`, which grant nothing.
 - It holds one membership root per organization, distinct from the `policyRootKey`, signs only `org-key-set/1` with

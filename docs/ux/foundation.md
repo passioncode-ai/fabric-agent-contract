@@ -721,7 +721,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given I join an organization, when my Fabric shows me its server and root key and I confirm with my passkey, then the organization is pinned in my estate record and no administrator's acceptance is asked (`FAC-SEM-147`, DEC-0127 OM-2).
   - Given the organization's server sends my Fabric a membership attestation, when it verifies under the pinned root's key set, for my organization and my audience, then my Fabric trusts the role it states; a forged, revoked-key, other-organization or expired one is refused with the reason (`verifyOrgMembership`, OM-4).
-  - Given my membership ends, then my Fabric revokes the share grants of that organization's context and sends nothing more to it; given only the attestation expired, it authorises nothing new until a fresh one arrives (OM-5, OM-6).
+  - Given my membership ends, then my Fabric drafts the revision that revokes the share grants of that organization's context and drops its pin, and once my passkey signs it my device's enrollment ends, the organization's locks lift and nothing more is sent; given only the attestation expired, it authorises nothing new until a fresh one arrives (OM-5, OM-6).
   - Given any of my work, then only what OM-7 lists ever leaves my Fabric for the organization.
 - **Priority:** must
 - **Status:** draft

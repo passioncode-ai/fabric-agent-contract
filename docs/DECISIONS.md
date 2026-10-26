@@ -6355,9 +6355,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0103: `organization-closed`, a final transport refusal for an organization that ended (CT-105)
 
-- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105. Annotated (2026-10-26): item 4's "one
-  event" amended by DEC-0127, whose OM-5 makes a membership's end, read from the revision that unpins the organization,
-  a second event that ends a `server` layer's locks; `certificate-revoked` keeps its meaning.
+- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105.
+- **Annotated (2026-10-26):** item 4's "one event" amended by DEC-0127, whose OM-5 makes a membership's end, read
+  from the revision that unpins the organization, a second event that ends a `server` layer's locks;
+  `certificate-revoked` keeps its meaning.
 - **Context:** the first organization server closes organizations (its organization export and termination, live on
   2026-10-22): at the end of the notice period it revokes every machine certificate, then deletes the organization. Its
   machines then meet `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`. Project Observatory's
