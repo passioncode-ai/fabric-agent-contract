@@ -12,7 +12,7 @@ import { buildMandateVectors } from "../tools/vectors/mandate.js";
 type Json = Record<string, any>;
 const root = projectRoot();
 const read = (relative: string) => readFileSync(path.join(root, relative), "utf8");
-const vectors = JSON.parse(read("fixtures/vectors/mandate.json")) as { cases: Array<{ name: string; input: Json; expected: Json }> };
+const vectors = JSON.parse(read("fixtures/vectors/mandate.json")) as { cases: Array<{ name: string; input: Json; expected: Json }>; handOn: Array<{ name: string; input: Json; expected: Json }> };
 const base = vectors.cases[0]?.input.mandate as Mandate;
 const leading: Mandate = { ...base, chain: [base.chain[0] as Mandate["chain"][number]] };
 
@@ -23,6 +23,18 @@ describe("the mandate vectors (DEC-0125)", () => {
 
   it.each(vectors.cases.map((vector) => [vector.name, vector] as const))("mandateCovers: %s", (_name, vector) => {
     expect(mandateCovers(vector.input as Parameters<typeof mandateCovers>[0])).toEqual(vector.expected);
+  });
+
+  it.each(vectors.handOn.map((vector) => [vector.name, vector] as const))("handOn: %s", (_name, vector) => {
+    const { mandate, callee, at, narrower } = vector.input;
+    let answer: Json;
+    try {
+      answer = { mandate: handOn(mandate as Mandate, callee, at, narrower) };
+    } catch (error) {
+      answer = { refused: /: (mandate-[a-z]+)$/.exec((error as Error).message)?.[1] };
+    }
+    expect(answer).toEqual(vector.expected);
+    if ("mandate" in answer) expect(mandateProblem(answer.mandate)).toBeUndefined();
   });
 });
 
