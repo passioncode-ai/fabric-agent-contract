@@ -64,7 +64,15 @@ Every run had typecheck clean, UX lint passed, docs:check `0 error(s)`, privacy 
 | CT-124 and CT-125 (DEC-0121 relays) | the adapter (0.50.0) and Fabric's hub | 2026-10-30 and later |
 | CT-145, CT-147, DEC-0124 adoption | the adapter, Fabric Dashboards, Fabric | their next pins |
 
+## Released
+
+`v0.1.0+2026-10-26` (DEC-0108), an annotated tag on `a3a66eb0` (the merge of #189), after the gate on that commit
+(8 915 tests) and `pnpm vectors:check` (21 files); the
+[GitHub release](https://github.com/passioncode-ai/fabric-agent-contract/releases/tag/v0.1.0%2B2026-10-26) lists what
+narrows.
+
 ## Next task
 
-Release `v0.1.0+2026-10-26` on the merge of this pull request (DEC-0108): an annotated tag and a GitHub release
-listing DEC-0122 to DEC-0124. Then CT-142's decision, due 2026-11-01.
+CT-142, due 2026-11-01: a decision over DEC-0121 for the operator's mandate along the chain operator, leading agent,
+executor (the mandate's form, narrowing at each hand-over as ADR-0144's P2, the T0 check without a token, a signed
+token between machines). Sources: requests `fa9a40c8` and `9db9e09e` item 2 (thread `c9d5be94`); backlog CT-142.
