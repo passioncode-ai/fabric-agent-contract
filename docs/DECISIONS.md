@@ -7496,8 +7496,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sender the target cannot place as the operator's is data.
 - **Why:** the operator's instruction is the authority inside the boundary (DL-26), and a task's work crosses agents;
   carrying the words with the task, bound to a scope, an expiry and the chain that held it, lets every agent act without
-  turning a quoted sentence into a general key. Binding the chain's last two agents to the callee and the authenticated
-  caller keeps a copied mandate from serving another call; narrowing at each call mirrors a delegation token's
+  turning a quoted sentence into a general key. Binding the chain's end to the callee, and the agent before it to the
+  caller wherever the callee authenticated the caller's agent id, keeps a copied mandate from serving another callee
+  (on loopback with the shared descriptor token, a local process could reuse it at the same callee within its scope
+  and expiry, as it could a decision: DL-26's boundary); narrowing at each call mirrors a delegation token's
   attenuation (DL-5), so the same chain later becomes a signed one without changing what it means. An absent amount
   reads as "within the money limits" because the operator's rule reserves only spend above a limit; an explicit amount
   is a per-call ceiling because a callee can check its own estimate but not what other agents spent. Refusing only the

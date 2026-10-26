@@ -539,8 +539,9 @@ it reaches acts on them without asking, within what they cover.
   own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
   board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
   stands: a hostile local process could write a mandate as it could a decision, and a product that needs protection
-  from one adds an approval (DL-17); binding the mandate to its caller and callee keeps a copied one from serving
-  another call.
+  from one adds an approval (DL-17). Binding the mandate to its callee, and to its caller where the callee authenticated
+  the caller's agent id, keeps a copied one from serving another callee; on loopback with the shared descriptor token a
+  local process could reuse one at the same callee within its scope and expiry, as it could reuse a decision.
 
 ## The boundary
 
