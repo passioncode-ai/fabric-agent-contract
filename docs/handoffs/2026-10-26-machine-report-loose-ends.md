@@ -37,10 +37,9 @@ question to CT-172.
 
 ## Open
 
-- Rounds 1 to 4 each failed on one tier; round 5 passed on all three (unit, seam, product), its non-blocking findings
-  filed in CT-172. A sixth clean round is the finish line.
+- Rounds 1 to 4 each failed on one tier; rounds 5 and 6 passed on all three (unit, seam, product), the finish line.
+  Their non-blocking findings are CT-172 rows.
 
-- Readings: rounds 1 to 2 or more until two clean rounds in a row.
 - Merge after DEC-0138 (PR #212). Merging `origin/main` in once #212 lands conflicts in `docs/DECISIONS.md` (DEC-0138
   before DEC-0139), `docs/backlog.md` (CT-169, CT-171, CT-172 in id order) and `docs/handoffs/README.md` (DEC-0139's row
   above DEC-0138's); then run the gate again.
@@ -59,7 +58,8 @@ Finish the readings, merge after #212, and release. Then tell CT-152's adopters 
 - Fabric's hub (CO-452) reads with `openMachineReport` then `acceptMachineReport`, its own node's `machine.report` with
   `acceptMachineReport`, and names an unusable `#kem` in its own health;
 - every sender (Fabric's nodes, Project Observatory's OBS-253) drops a send refused `unknown-recipient`,
-  `mailbox-full` or `rate-limited` for the next report, after `retryAfter`;
+  `mailbox-full` or `rate-limited` for the next report (after `rate-limited`, not before its `retryAfter`), and may
+  resend under the same `msgId` a send answered `internal` or never accepted;
 - a local-channel node answers `unknown-method` for a `NODE_METHODS` method it does not serve.
 - four window-lease vector cases were renamed from "received" to "written" (answers unchanged): a port that keys on
   case names must follow.
