@@ -6091,8 +6091,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
   Annotated (2026-10-22): corrected by DEC-0102, items 9 (the answer transition, the pass over earlier requests, holds, `noResponder.message`).
-  Annotated (2026-10-26): DEC-0135 narrows item 4: `unread` and `read` are over the messages delivered to the reader
-  (project-comms.md, Who a message is delivered to). Item 5's bulk marks and their counts are unchanged; a thread's mark covers the messages the reader's
+  Annotated (2026-10-26): DEC-0135 narrows item 4: for a reader pinned at or after it, `unread` and `read` are over the
+  messages delivered to the reader; an older reader's are over every message its Project did not send (DR-4). Item 5's bulk marks and their counts are unchanged; a thread's mark covers the messages the reader's
   Project did not send, as before, and its schema text now says so rather than "delivered".
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
@@ -8119,8 +8119,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive for a writer: one optional member, `deliverTo`, on `com.reply`,
-  `com.submit` and a message. Narrowing for a reader: what is unread is over deliveries, a recorded exception
-  (Compatibility). Adoption: CT-154 (Fabric's board, CO-437).
+  `com.submit` and a message. For a reader: what is unread is over deliveries for a reader pinned at or after it, and
+  as before for an older one, except its Project's own messages (the policy's second exception, Compatibility). Adoption: CT-154 (Fabric's board, CO-437).
 - **Context:** since Fabric's migration 124 (CO-370, schema 97) a reply on the board is delivered to the sender of the
   message it answers, not to every participant, and an unread count holds the reader's deliveries only. The contract
   fixed a thread's participants at creation and said nothing of a reply's audience, so no reply to everyone could be
@@ -8143,7 +8143,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      requester is the responder's own Project), and takes no `deliverTo`.
   5. **DR-4.** A reply as read carries the `deliverTo` its sender gave (one stored before its board adopted this was
      delivered as that board delivered it then); the same idempotency key with other arguments, an explicit `sender`
-     against an absent `deliverTo` included, is `idempotency_conflict`.
+     against an absent `deliverTo` included, is `idempotency_conflict`. A reader pinned before this decision is
+     answered as the board's released versions answered: every message its Project did not send counts as delivered
+     to it for `unread`, `com.status`'s count and `read`; a host stages this by the reader's pin, as it stages
+     `deliverTo`.
 - **Why:** replies were most of a board's deliveries when each went to every participant (Fabric BD-4: 2,350 of 3,400,
   1,293 of them replies to announcements), so the sender default stays;
   a person still needs to answer a whole thread, or the two Projects that asked the same thing, without opening a new
@@ -8151,21 +8154,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   who may read a thread.
 - **Alternatives considered:** a boolean `toAll` (Fabric's first suggestion; a list covers it and the two-Project case);
   delivery to every participant by default (the fan-out CO-370 removed); narrowing who may read a reply (a second
-  audience inside a thread, against C2 and the fixed participants).
+  audience inside a thread, against C2 and the fixed participants); narrowing an older reader's count to DR-2's
+  delivery under the same name, on the ground that Fabric has merged it for its next release (a server's unreleased
+  change would then license any narrowing a server ships first); a new revision for the count (heavier than staging
+  by the pin, which `deliverTo` needs anyway).
 - **Compatibility:** additive for a writer: a reply without `deliverTo` is unchanged and is delivered as Fabric
   delivers it now. A board pinned before this refuses `deliverTo` as an unknown member (`invalid_arguments`); a writer
   that gets that refusal and still means the thread says so in a new message rather than dropping the member. A
   reader pinned before this would refuse a message that carries `deliverTo` (`comms-message` is closed), so a host
   sends the member only to a reader pinned at or after DEC-0135 and omits it for an older one, as DEC-0079 staged
-  `held`. `unread` and `com.status`'s count narrow to deliveries: a Project's own messages and replies delivered to
-  others leave a reader's count on a board that counted them before, and `read` is `true` for them on a filtered
-  page. `fabric-project-comms/0.1` is adopted, so `conformance.md`'s compatibility policy would put this narrowing in
-  a new revision; it is made under the same name as a second exception, now named in that policy, because it records what
-  the only board serving 0.1 already answers: its released versions (v0.3.10 to v0.3.12) count unread over their
-  deliveries (`board_status`, migration 107) and keep `read` true for a reader's own messages, the only ones they do
-  not deliver to it (`board_list_reader`, migration 120), and its migration 124 (CO-370, on its main) narrows a reply's
-  delivery to the sender, which DR-2's default records. No reader of a released board sees its count change by this
-  decision. `com.read_ack` and its receipt are
+  `held`. For a reader pinned at or after DEC-0135, `unread`, `com.status`'s count and `read` follow delivery (new
+  behaviour behind a new pin). An older reader keeps the count the board's released versions gave it (DR-4), with
+  one narrowing against 0.1's text, which kept every message not marked read: its Project's own messages are not
+  unread to it. `fabric-project-comms/0.1` is adopted, so that narrowing is made under the policy's second exception,
+  now named in `conformance.md`: the only board serving 0.1, Fabric, answers it in every released version (v0.3.10 to
+  v0.3.12: `board_status`, migration 107, counts deliveries, which went to every participant but the sender;
+  `board_list_reader`, migration 120, keeps `read` true for a reader's own messages), so no reader of a released
+  board sees its count change. Fabric's migration 124 (CO-370, on its main, for 0.3.13) narrows a reply's delivery to
+  the sender; serving it to a reader pinned before DEC-0135 would narrow that reader's count, so Fabric answers such
+  a reader as v0.3.12 did (CT-154). `com.read_ack` and its receipt are
   unchanged (DEC-0073, DEC-0098): a mark is recorded on any message the reader can read. The next release's notes list
   the narrowing. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`, the `answered` description),

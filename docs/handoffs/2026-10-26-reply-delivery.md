@@ -15,7 +15,9 @@ the message it answers, and the contract had no field to ask for the whole threa
     `thread`, or a list of participants; a reply to a request also reaches the requester; a message from the replier's own
     Project, or one the board no longer holds, falls back to `thread`.
   - DR-3: every message a responder posts on a request's thread is a reply to the request and reaches the requester.
-  - DR-4: a reply as read carries its `deliverTo`; a host sends it only to readers pinned at or after DEC-0135.
+  - DR-4: a reply as read carries its `deliverTo`; a host sends it only to readers pinned at or after DEC-0135, and
+    answers an older reader's `unread`, count and `read` as its released versions did (every message its Project did
+    not send).
 - Schemas: `$defs/deliverTo` in `comms-common`; `deliverTo` on `comms-reply`, `comms-submit` and `comms-message`;
   `unread` and `read` described over deliveries; `com.read_ack` and its receipt unchanged. Fixtures and eight mutant plants.
 - DEC-0022, DEC-0073 and DEC-0098 annotated; the narrowing of `unread` recorded as an exception to the compatibility
@@ -29,14 +31,15 @@ the message it answers, and the contract had no field to ask for the whole threa
   requester); round 2 fail (the message view's history; a responder's messages' kind); round 3 fail (the own-Project
   exception in two descriptions; the read-mark receipt; SCR-19's wording); round 4 fail (the read-mark receipt changed
   an adopted answer: reverted to DEC-0073, and the narrowing of `unread` recorded as an exception); round 5 fail (the
-  compatibility policy named only DEC-0119's exception: the second exception is now in `conformance.md`). Fixed after
-  each. Non-blocking findings:
+  compatibility policy named only DEC-0119's exception: the second exception is now in `conformance.md`); round 6 fail
+  (the reply default rested on Fabric's unreleased migration 124: an older reader's count is now staged by its pin,
+  and the exception requires released tags). Fixed after each. Non-blocking findings:
   CT-166.
 
 ## Open
 
-- Adoption (CT-154): Fabric's board stores and honours `deliverTo`, stages it by the reader's pin, keeps unread over
-  deliveries (CO-437); the adapter's kits and agents send `deliverTo: "thread"`
+- Adoption (CT-154): Fabric's board stores and honours `deliverTo`, stages it and the narrowed count by the reader's
+  pin (its 0.3.13 ships migration 124 while pinned before DEC-0135) (CO-437); the adapter's kits and agents send `deliverTo: "thread"`
   when they mean the whole thread.
 
 ## Next task

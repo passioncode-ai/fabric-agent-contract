@@ -18,7 +18,8 @@ optional member to `com.submit` and to a message, and changes no existing field.
 **Amended by DEC-0135 (2026-10-26):** [who a message is delivered to](#who-a-message-is-delivered-to): a reply goes to
 the sender of the message it answers unless its optional `deliverTo` names the thread or a list of participants;
 delivery decides what is unread, never who reads. It adds one optional member to `com.reply`, `com.submit` and a
-message, and narrows what `unread` and `com.status`'s count hold to the messages delivered to the reader.
+message. For a reader pinned at or after DEC-0135 it narrows what `unread`, `com.status`'s count and the `read` of a
+filtered page hold to the messages delivered to it; an older reader is answered as before (DR-4).
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -103,6 +104,11 @@ one not delivered to it.
   (as DEC-0079 staged `held`), so only such a reader sees it. `deliverTo` is part of the message: the same key with
   other arguments, an explicit `sender` against an absent `deliverTo` and a list in another order included, is
   `idempotency_conflict`; a retry resends its arguments byte for byte.
+- **DR-4, an older reader's count.** Delivery narrows `unread`, `com.status`'s count and `read` only for a reader pinned
+  at or after DEC-0135. A reader pinned before it is answered as the board's released versions answered: every
+  message its Project did not send counts as delivered to it, so a reply addressed to another participant, or a
+  responder's message, is still unread to it until it marks it. A host stages this as it stages `deliverTo`, by the
+  reader's pin.
 
 A reply to an announcement with `reaction` is delivered to the announcer by default, and every participant still reads
 it (DEC-0098).

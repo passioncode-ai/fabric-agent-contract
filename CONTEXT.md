@@ -213,7 +213,8 @@ to (DEC-0135): every participant but the sender for a message, request, finding 
 sender of what it answers by default (the whole thread when that is the replier's own Project or the board no
 longer holds it), or the whole thread or named participants by its `deliverTo`, and always the
 requester of a request it answers unless that is the replier's own Project; every message a responder posts on a request's thread (fenced reply, progress note, effect and checkpoint
-summaries) to the requester, or the whole thread when that is the responder's own Project. Never who reads:
+summaries) to the requester, or the whole thread when that is the responder's own Project. A reader pinned before
+DEC-0135 counts every message its Project did not send as delivered to it. Never who reads:
 every participant reads every message of its thread.
 
 **Project directory**: What `com.directory` answers: the addressable Projects of the caller's estate, each with its
