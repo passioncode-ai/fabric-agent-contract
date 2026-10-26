@@ -3701,6 +3701,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   mark with its vault and checks replays (CT-34); every relay client signs low-S.
 - **Annotated (2026-10-26):** DEC-0129 decides `org-authority/1` and an organization relay's admission set (CON-023's
   source); the organization relay's handshake and how one relay serves several contexts stay open (CT-37, RLY-08).
+- **Annotated (2026-10-26, DEC-0134):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5);
+  how one relay serves several contexts stays RLY-08 (one context per origin until then).
 - **Amends:** DEC-0047 items 2, 3, 4, 5, 7, 8 and 9, in place: nothing is deployed (the hosted relay's RLY-05 is
   open, and no envelope exists outside tests). Folds in DEC-0047's 2026-10-12 annotation of the blob request. Also
   amends the window of DEC-0055 (ER-10) and DEC-0060 (DL-14), each annotated. Closes the relay audit's CON-001…CON-017,
@@ -8078,6 +8080,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
   `membership.md` (OL-4, OL-6, OX-6, Not decided), `conformance.md`, `CONTEXT.md` (Admission set),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` (What stays linkable), `docs/ux/scenarios.md`
-  (SCN-049); DEC-0047, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
+  (SCN-049); DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
   CT-37, CT-162, CT-163.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.

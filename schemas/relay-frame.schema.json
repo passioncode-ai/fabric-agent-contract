@@ -128,7 +128,7 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "the revision (1 or more) of the verified estate record the relay admits from; a relay with none admits nobody, so a welcome always carries it"
+          "description": "the revision (1 or more) of the verified estate record the relay admits from; a relay with none admits nobody, so an estate's welcome always carries it"
         },
         "deltaHead": {
           "$ref": "revocation-delta.schema.json#/$defs/head",

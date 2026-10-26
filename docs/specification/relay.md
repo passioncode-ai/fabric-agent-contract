@@ -142,9 +142,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 no reason, by design. It tells the person, in this order: check that this machine is in the estate's current revision
 (not revoked, its device key the one the record lists) — the estate's owner sees that in the hub; then update the client,
 since a client that signs high-S or an old protocol is refused the same way. On an organization's relay (DEC-0134) it
-says instead that this machine's enrollment is not on the organization's current signed member list: a new join waits
-for an administrator's signature, or the list expired, so the person asks one of the organization's administrators;
-then update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
+says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
+waits for an administrator's signature, and a list expires), which one of the organization's administrators sees; then
+check the clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
 it.
 
 **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
@@ -212,7 +212,9 @@ the same order, the same one `unauthenticated` answer for every unproven caller,
 
 **OR-2, welcome.** The relay answers `welcome` with `{session, list: {org, revision, digest}, limits?}`: the member list
 it admits from. It carries no `estateRevision`, `deltaHead` or `heartbeat`, which an organization does not have in this
-release; a member's node reads no estate record from an organization's relay.
+release; a member's node reads no estate record from an organization's relay. A client tells the two welcomes apart by
+`estateRevision` (present on an estate's, forbidden on an organization's), never by `list`: an estate's welcome ignores
+any `list`, and an organization's ignores a `deltaHead` or `heartbeat` it should not carry.
 
 **OR-3, open sessions.** An open session stands only while `sessionStands` answers `ok` under the list's admission set.
 When the relay applies a newer list (or a key set that changes which administrators the root certifies), it ends every
@@ -233,7 +235,10 @@ one organization (one context per origin, above). A member's node holds no membe
 administrators and the relay only), so it has no key to verify another member's message body under: what an
 organization's relay carries between members, and where a recipient gets a member's enrollment key, is not decided
 (CT-163). An operator that runs both a person's estate relay and an organization's relay sees one machine's two
-connections; that link stays ([devices](devices.md#unlinkable-enrollments), What stays linkable).
+connections; that link stays ([devices](devices.md#unlinkable-enrollments), What stays linkable). One disclosure is
+named, not closed: `unknown-recipient` (a `send`, and a blob PUT's step 7) tells a member whether an enrollment kid it
+holds, for instance from a `deliver` frame's `from`, is on the current list, which OX-6 otherwise keeps from members;
+whether an organization's relay answers it differently is part of CT-163.
 
 ## Messages
 
@@ -290,7 +295,7 @@ connections; that link stays ([devices](devices.md#unlinkable-enrollments), What
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
   [kid]}`: every asked kid appears exactly once, and `unknown` holds a kid outside the asker's owner and a kid never
-  seen, alike, so nothing leaks across owners.
+  seen, alike, so nothing leaks across owners. On an organization's relay every other member's kid is `unknown` (OR-5).
 - **A relay never reports a command done.** A queued message stays queued with its `seq`. Only the recipient's own
   signed message back reports an outcome (Fabric ADR-0088's offline rule).
 
@@ -302,8 +307,7 @@ connections; that link stays ([devices](devices.md#unlinkable-enrollments), What
   - **T1** is an enrolled machine of the recipient's **same owner** (DL-25), listed in the current record and not
     revoked: `relayCallerTier` places it, and `machineCallVerdict` judges its call by the two machines' profiles
     ([machine calls](machine-calls.md), DEC-0106). DL-26 applies.
-  - **T2** is anything else. That includes a machine listed only in an organization record, to a recipient of another
-    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
+  - **T2** is anything else. That includes every member of an organization to every other, on its relay (OR-5), and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
     relay from outside the estate are not decided ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 
 ## The secret envelope
@@ -437,8 +441,8 @@ an agent asks for, and one moved between one person's machines outside a placeme
   only on its own request's bytes. An admitted, proven non-recipient learns nothing by a GET, and nothing by a PUT
   without the bytes (422 whatever the state). A PUT with the exact bytes learns whether a blob of those bytes is held
   under another list (409): holding the bytes is holding the content, and a content-addressed store reveals this to
-  whoever holds it. Which kids are admitted (step 7) is told only to a proven machine of the same owner, which presence
-  already tells. The relay's log keeps the real reason of every step-6 and step-10 refusal, never the header or a
+  whoever holds it. On an estate's relay, which kids are admitted (step 7) is told only to a proven machine of the same
+  owner, which presence already tells; on an organization's relay it is told to any member (OR-5). The relay's log keeps the real reason of every step-6 and step-10 refusal, never the header or a
   signature. A GET signature reused within its 60 s fetches the same blob for the same machine again, which reveals
   nothing new.
 - **Retention.** A relay keeps a blob until every stored recipient fetched it (counted per kid), or until 7 days pass,
