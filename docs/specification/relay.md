@@ -1,7 +1,8 @@
 # Relay `fabric-relay/0.1`
 
 A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
-owner's estate, or one organization's members, from its signed member list (`org-authority/1`, DEC-0129). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
+owner's estate (an organization's members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
+an organization relay's handshake is not decided, CT-37). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
@@ -183,9 +184,11 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   per-context key; a relay that serves several contexts tells them apart by a pseudonymous per-context id (the
   enrollment key's thumbprint, or an id derived per context that the relay cannot invert), never by the estate (relay
   RLY-08).
-- **An organization's member list.** An organization's relay admits from the organization's member list
+- **An organization's member list.** An organization's admission set comes from its member list
   (`orgRelayAdmissionSet`, [membership](membership.md#the-organizations-member-list) OL-4, DEC-0129), under the
-  organization's root it pinned at setup and the key set it applied, and admits nobody on any refusal.
+  organization's root the relay pins at setup and the key set it applied, and is empty on any refusal. The handshake
+  above is still the estate's: what a member signs in `estate` and what `welcome` carries on an organization's relay
+  wait on the organization's heartbeat and delta (CT-37).
 
 ## Messages
 

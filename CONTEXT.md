@@ -344,6 +344,12 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
 
+**Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
+The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
+person chose and their requests to the organization's administrators, leaves for that organization (OM-7, DEC-0129,
+[membership](docs/specification/membership.md#what-leaves-a-persons-fabric)). A project's entry is the estate revision
+the person's passkey signs, never part of the plan that leaves.
+
 **Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued
 by the organization's issuer from an account its door holds and delivered sealed into that organization's context on
 the agent's machine (`fabric-credential-envelope/1`), ending at most 30 days after it was issued (DEC-0111).

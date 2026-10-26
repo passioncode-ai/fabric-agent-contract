@@ -3,7 +3,7 @@ import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, isSigningRpId, originWithin, signingStatement } from "./signing-challenges.js";
-import { ASSERTION_ALGORITHMS } from "./webauthn.js";
+import { ASSERTION_ALGORITHMS, credentialKey } from "./webauthn.js";
 
 // #region org-membership, docs: docs/specification/membership.md
 /**
@@ -118,7 +118,11 @@ function validAtIssue(set: JsonObject): boolean {
   return indexed(set.keys).some(([key]) => time(key.notBefore) <= issuedAt && issuedAt < time(key.notAfter));
 }
 
-/** The members of a passkey credential (the estate record's `authority`, DEC-0055), in shape: the key itself is read at verification. */
+/**
+ * The members of a passkey credential (the estate record's `authority`, DEC-0055), in shape. The key, the RP ID and the
+ * origins are FAC-SEM-146's and the schema's, and a credential that fails them fails closed when it signs (`unusable-key`,
+ * `wrong-rp`, `wrong-origin`).
+ */
 const AUTHORITY_FIELDS = ["credentialId", "alg", "publicKey", "rpId", "origins"];
 const B64URL = /^[A-Za-z0-9_-]+$/;
 function administratorOk(value: unknown): boolean {
@@ -350,8 +354,9 @@ function membershipDocument(value: JsonObject, flag: Flag): void {
 
 /**
  * FAC-SEM-146 on one key set: each kid once, never the root's kid, every window positive, a key valid at the set's
- * `issuedAt`, no revoked kid among the keys, no key of small order, and each administrator's credential once, under a
- * signing RP with every origin within it (DEC-0129, as FAC-SEM-092 says of a signing credential).
+ * `issuedAt`, no revoked kid among the keys, no key of small order, and each administrator's credential once, with a
+ * usable key, under a signing RP with every origin within it (DEC-0129, as FAC-SEM-073 and FAC-SEM-092 say of an
+ * estate's authority).
  */
 function keySetDocument(value: JsonObject, flag: Flag): void {
   const revoked = list(value.revoked);
@@ -374,6 +379,8 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
     const id = show(admin.credentialId);
     if (credentials.has(id)) flag(`${at}/credentialId`, `credential ${id} is listed twice`);
     credentials.add(id);
+    // As FAC-SEM-073 flags an estate's authority: a key no verifier can use certifies an administrator who can never sign.
+    if (ASSERTION_ALGORITHMS.includes(admin.alg as string) && "problem" in credentialKey(admin.publicKey, admin.alg as string)) flag(`${at}/publicKey`, "an administrator's key is a usable key of its algorithm, never of small order");
     if (!isSigningRpId(admin.rpId)) flag(`${at}/rpId`, "an administrator signs only under a dedicated signing RP, sign.<domain> (DEC-0063)");
     else list(admin.origins).forEach((origin, n) => {
       if (!originWithin(origin, admin.rpId as string)) flag(`${at}/origins/${n}`, `a signing ceremony runs only on ${show(admin.rpId)} or a host under it, over https without a port`);

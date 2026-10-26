@@ -61,6 +61,9 @@ SHA-256 of the UTF-8 RFC 8785 form of `{type, ...fields}` (`signingChallenge`). 
   with which a machine without a screen joins an estate, for at most 900 s, purpose `agent-host`, one use (DEC-0084,
   [ceremonies](ceremonies.md#a-headless-machine)). `ceiling` is `null` for none, so the field list stays one list. The
   joining machine proves its `#sig` key with the key-signed `enroll-join/1` `{digest, nonce}` over that token.
+- **`org-authority/1`** `{digest}`: an administrator's signature of the organization's member list by its digest, as
+  `estate-revision/1` signs an estate revision; the administrator's credential is one the organization's root lists in
+  `org-key-set/1`'s `administrators` (DEC-0129, [membership](membership.md#the-organizations-member-list)).
 - **`limits/1`** `{scope, digest}`: approval of a limits document, the estate's (`estate:<id>`) or an organization's
   (`organization:<id>`), by its `sha256:` digest over RFC 8785. The document's shape — an estate's windows, an
   organization's levels and allowances — is not decided here; the approval binds whatever document the digest names.

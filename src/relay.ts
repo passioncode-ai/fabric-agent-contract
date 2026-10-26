@@ -423,12 +423,16 @@ export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResu
   if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
   const doc = offered ? input.candidate : input.held;
   if (doc === undefined) return { ok: false, refusal: "no-record" };
+  // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused, never treated as none:
+  // dropping it would drop the rollback guard (as relayAdmissionSet refuses such a record, CT-111).
   let held: { revision: number; digest: string } | undefined;
-  if (offered && isObject(input.held)) {
+  if (offered && input.held !== undefined) {
+    const revision = isObject(input.held) ? input.held.revision : undefined;
+    if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "invalid" };
     try {
-      held = { revision: input.held.revision as number, digest: orgAuthorityDigest(input.held) };
+      held = { revision, digest: orgAuthorityDigest(input.held as JsonObject) };
     } catch {
-      held = undefined;
+      return { ok: false, refusal: "invalid" };
     }
   }
   const verdict = verifyOrgAuthority(doc, { now: input.at, org: input.org, keySet: input.keySet, ...(held ? { held } : {}) });
@@ -436,12 +440,10 @@ export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResu
     if (verdict.problem === "expired" || verdict.problem === "not-yet-valid") return { ok: false, refusal: verdict.problem };
     return { ok: false, refusal: "unverified", problem: verdict.problem };
   }
+  // FAC-SEM-150 held for the verified list: every member's keys are 1 to 8 objects, each a #sig kid with a P-256 key.
   const set = new Map<string, Uint8Array>();
   for (const member of verdict.members) {
-    for (const key of Array.isArray(member.keys) ? member.keys : []) {
-      const octets = isObject(key) && typeof key.kid === "string" ? memberKeyOctets(key.publicKey) : undefined;
-      if (octets) set.set((key as JsonObject).kid as string, octets);
-    }
+    for (const key of member.keys as JsonObject[]) set.set(key.kid as string, memberKeyOctets(key.publicKey) as Uint8Array);
   }
   return { ok: true, held: doc as JsonObject, revision: verdict.revision, set };
 }

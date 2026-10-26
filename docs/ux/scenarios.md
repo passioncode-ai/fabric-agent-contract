@@ -54,6 +54,7 @@
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-049 | As an administrator, I sign who my organization's relay admits; no server can | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1028,14 +1029,14 @@ independent agent author and P-02 project operator.
 - **Feature:** membership
 - **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
 - **Entry point:** the member's join in Fabric
-- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric and every reader of the estate record are pinned at or after DEC-0128
+- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which serves the organization's key sets (their root held by the owner's Fabric, DEC-0129); the member's Fabric and every reader of the estate record are pinned at or after DEC-0128
 - **Steps:**
-  1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint (what the member compares it with is pending Fabric's D8).
+  1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server, the root's `kid` and its fingerprint, which the member compares with the fingerprint in the administrator's invitation, received by a second channel (Fabric ADR-0178 point 6).
   2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, iss, root, pinnedAt}` (`iss` the context's opaque issuer Fabric generates) is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
 - **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and the member's personal work never leaves for the organization.
-- **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric drafts the next revision, which revokes the context's share grants and drops the organization's pin, and the member's passkey signs it; the device's enrollment then ends and the organization's locks lift, nothing more is sent, and rejoining takes a new pin. The member has not signed that revision yet -> the server already refuses the device's revoked certificate and the hub mints nothing in the context, while the contract lifts the organization's locks only on the signed revision (a node's own end on `certificate-revoked` is not decided); Fabric shows the signature as pending. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
+- **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric drafts the next revision, which revokes the context's share grants and drops the organization's pin, and the member's passkey signs it; the device's enrollment then ends and the organization's locks lift, nothing more is sent, and rejoining takes a new pin. The member has not signed that revision yet -> the server already refuses the device's revoked certificate and the hub mints nothing in the context, while the contract lifts the organization's locks only on the signed revision (a node's own end on `certificate-revoked` is not decided); Fabric shows the signature as pending. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). The fingerprint does not match the invitation's, or the invitation carries none -> nothing is pinned and Fabric says why. A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
 - **UI elements:** SCR-31: the organization, the server, the root's fingerprint, the passkey prompt; each membership's role and state.
 - **States covered:** success, error
 - **Errors & recovery:** a refused attestation -> its reason is shown; the member can retry or leave the organization.
@@ -1061,4 +1062,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a node that would send an estate record -> its own check (`FAC-SEM-149`) refuses before sending.
 - **Status:** draft
 - **Coverage:** DEC-0128 UE-1 to UE-3 and DL-14a, `src/node-enrollments.ts`, `hubKeyCertified` with a context, `test/context-keys.test.ts`, `fixtures/semantic/node-enrollments-*`, `check-in-*-outbound-*`
+- **Product:** unobserved
+
+### SCN-049: As an administrator, I sign who my organization's relay admits; no server can
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the administrator's Fabric shows a member list the organization server drafted
+- **Preconditions:** the organization's key set, signed by the root the owner's Fabric holds, lists the administrator's signing passkey in `administrators`; the relay serving the organization pinned the root at setup
+- **Steps:**
+  1. A member joins, or an enrollment's key changes -> the server drafts the next `org-authority/1` revision: each member's pairwise subject, role, context issuer and enrollment `#sig` keys, valid at most 7 days.
+  2. The administrator's Fabric shows the change against the list it signed last -> the administrator confirms with their passkey over the register's `org-authority/1` challenge.
+  3. The relay applies the signed list -> its admission set holds exactly the listed keys (`orgRelayAdmissionSet`).
+- **Expected result:** who the organization's relay admits is decided by an administrator's passkey, which the organization's root certified; the server only drafts.
+- **Alt paths:** nobody signs before `expiresAt` -> the relay's admission set is empty and nobody is admitted until a newer list verifies; Fabric reminds the administrators a day before. A membership ends -> the next list drops the member. The root's next key set drops the administrator's passkey -> every list it signed stops verifying at once, and another administrator signs a fresh one. A list signed by a passkey the set does not list, or under a sign-in RP -> refused (`unknown-administrator`, `wrong-rp`).
+- **UI elements:** SCR-31: the drafted list's changes, the passkey prompt, the list's expiry.
+- **States covered:** success, error
+- **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until that one expires.
+- **Status:** draft
+- **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/relay.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is not decided (CT-37)
 - **Product:** unobserved

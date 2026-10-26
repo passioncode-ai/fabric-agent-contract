@@ -86,7 +86,11 @@ describe("FAC-SEM-150", () => {
     ["a subject twice", { members: [two[0], { ...two[1], subject: two[0]?.subject }] }, ["/members/1/subject"]],
     ["an iss twice", { members: [two[0], { ...two[1], iss: two[0]?.iss }] }, ["/members/1/iss"]],
     ["a kid twice across members", { members: [two[0], { ...two[1], keys: [{ ...two[1]?.keys[0], kid: two[0]?.keys[0].kid }] }] }, ["/members/1/keys/0/kid"]],
-    ["a key off the curve", { members: [{ ...two[0], keys: [{ kid: "en-1#sig", publicKey: `B${"A".repeat(85)}A=` }] }] }, ["/members/0/keys/0/publicKey"]]
+    ["a key off the curve", { members: [{ ...two[0], keys: [{ kid: "en-1#sig", publicKey: `B${"A".repeat(85)}A=` }] }] }, ["/members/0/keys/0/publicKey"]],
+    ["a time with four fraction digits", { expiresAt: "2026-11-02T00:00:00.0001Z" }, ["/expiresAt"]],
+    ["a kid that is not #sig", { members: [{ ...two[0], keys: [{ ...two[0]?.keys[0], kid: "en-1#kem" }] }] }, ["/members/0/keys/0/kid"]],
+    ["a member with no key", { members: [{ ...two[0], keys: [] }] }, ["/members/0/keys"]],
+    ["a member with nine keys", { members: [{ ...two[0], keys: Array.from({ length: 9 }, (_v, i) => ({ ...two[0]?.keys[0], kid: `en-${i}#sig` })) }] }, ["/members/0/keys"]]
   ];
   it.each(cases)("refuses %s", (_name, change, paths) => {
     const findings = orgAuthorityFindings({ ...BASE, ...change });
@@ -94,10 +98,12 @@ describe("FAC-SEM-150", () => {
     expect(findings.every((finding) => finding.code === "FAC-SEM-150")).toBe(true);
   });
 
-  it("reads the window only when both ends are readable, and a key only when it is a string", () => {
+  it("reads the window only when both ends are readable, and refuses a key that is no object or no P-256 point", () => {
     expect(orgAuthorityFindings({ ...BASE, issuedAt: 1, expiresAt: "2030-01-01T00:00:00Z" }).map((f) => f.instancePath)).toEqual(["/issuedAt"]);
-    expect(orgAuthorityFindings({ ...BASE, members: [{ subject: "s", iss: "i", keys: [{ kid: "k#sig", publicKey: 1 }] }] })).toEqual([]);
+    expect(orgAuthorityFindings({ ...BASE, members: [{ subject: "s", iss: "i", keys: [{ kid: "k#sig", publicKey: 1 }, "k"] }] }).map((f) => f.instancePath)).toEqual(["/members/0/keys/1", "/members/0/keys/0/publicKey"]);
+    expect(orgAuthorityFindings({ ...BASE, members: [{ subject: "s", iss: "i", keys: "none" }] }).map((f) => f.instancePath)).toEqual(["/members/0/keys"]);
     expect(orgAuthorityFindings({ ...BASE, members: "none" })).toEqual([]);
+    expect(orgAuthorityFindings({ ...BASE, members: Array.from({ length: 1025 }, (_v, i) => ({ ...BASE.members[0], subject: `s-${i}`, iss: `i-${i}`, keys: [] })) })[0]?.instancePath).toBe("/members");
     expect(orgAuthorityRules("org-key-set", BASE)).toBeUndefined();
   });
 
@@ -116,6 +122,8 @@ describe("org-key-set/1's administrators (DEC-0129, FAC-SEM-146)", () => {
     expect(flagged([{ ...ADMIN, rpId: "orgs.example" }])).toEqual([["FAC-SEM-146", "/administrators/0/rpId"]]);
     expect(flagged([{ ...ADMIN, origins: ["https://evil.example"] }])).toEqual([["FAC-SEM-146", "/administrators/0/origins/0"]]);
     expect(flagged([{ ...ADMIN, origins: "x" }])).toEqual([]);
+    expect(flagged([{ ...ADMIN, publicKey: { ...ADMIN.publicKey, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }])).toEqual([["FAC-SEM-146", "/administrators/0/publicKey"]]);
+    expect(flagged([{ ...ADMIN, alg: "RS256" }])).toEqual([]);
   });
 
   it("is required, at most 16, each a credential in shape, or the set is malformed", () => {
@@ -143,7 +151,7 @@ describe("verifyOrgAuthority (DEC-0129)", () => {
   });
 
   it("refuses a malformed document before any key is used", () => {
-    for (const value of [null, { ...BASE, type: "org-authority/2" }, { ...BASE, digest: 1 }, { ...BASE, revision: "3" }, { ...BASE, revision: 0 }, { ...BASE, members: {} }, { ...BASE, signature: "s" }, { ...BASE, signature: { ...BASE.signature, format: "jws" } }, { ...BASE, signature: { ...BASE.signature, credentialId: 1 } }, { ...BASE, extra: Number.NaN }]) {
+    for (const value of [null, { ...BASE, type: "org-authority/2" }, { ...BASE, digest: 1 }, { ...BASE, revision: "3" }, { ...BASE, revision: 0 }, { ...BASE, members: {} }, { ...BASE, signature: "s" }, { ...BASE, signature: { ...BASE.signature, format: "jws" } }, { ...BASE, signature: { ...BASE.signature, credentialId: 1 } }, { ...BASE, issuer: "https://other.example", signature: { format: "webauthn-assertion", credentialId: BASE.signature.credentialId } }, { ...BASE, extra: Number.NaN }]) {
       expect(problem(value), JSON.stringify(value)?.slice(0, 60)).toBe("malformed");
     }
   });
@@ -218,10 +226,12 @@ describe("orgRelayAdmissionSet: an organization's relay admits from its member l
   });
 
   it("reads a held list that was never schema-checked without throwing, and admits only usable keys", () => {
-    expect(admit({ held: { ...BASE, revision: Number.NaN }, candidate: BASE }).ok).toBe(true);
-    expect(admit({ held: "x", candidate: BASE }).ok).toBe(true);
-    const odd = resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#sig", publicKey: 1 }, "k", { kid: 1, publicKey: BASE.members[0].keys[0].publicKey }] }, { ...BASE.members[1], keys: "none" }] });
-    const result = admit({ held: odd });
-    expect(result.ok && result.set.size).toBe(0);
+    // A held list it cannot read back keeps its rollback guard: the candidate is refused, never applied as if none were held.
+    for (const held of [{ ...BASE, revision: Number.NaN }, { ...BASE, revision: "9" }, "x", { ...BASE, revision: 9, members: [{ subject: "\ud800" }] }]) {
+      expect(admit({ held, candidate: BASE }), JSON.stringify(held).slice(0, 40)).toEqual({ ok: false, refusal: "invalid" });
+    }
+    // A held list is verified again, and FAC-SEM-150 refuses what is not a member's key; were it ever admitted, only #sig kids with a P-256 key count.
+    expect(admit({ held: resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#enc", publicKey: BASE.members[0].keys[0].publicKey }] }] }) })).toEqual({ ok: false, refusal: "unverified", problem: "rule-violation" });
+    expect(admit({ held: resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#sig", publicKey: 1 }] }, { ...BASE.members[1], keys: "none" }] }) })).toEqual({ ok: false, refusal: "unverified", problem: "rule-violation" });
   });
 });

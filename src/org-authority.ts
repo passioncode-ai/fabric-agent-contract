@@ -26,7 +26,13 @@ export { CLOCK_SKEW_SECONDS };
 const isString = (value: unknown): value is string => typeof value === "string";
 const SHA256 = /^sha256:[a-f0-9]{64}$/;
 const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
-const time = strictTime;
+const SIG_KID = /^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#sig$/;
+/** At most three fraction digits, as every signed record's times (DEC-0085): every port compares the same instants. */
+const MILLISECONDS = /:[0-9]{2}(?:\.[0-9]{1,3})?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})$/;
+const time = (value: unknown) => (isString(value) && MILLISECONDS.test(value) ? strictTime(value) : Number.NaN);
+/** Whether a kid is a `#sig` kid (DEC-0053): the only keys a relay session authenticates with. */
+export const isSigKid = (value: unknown): value is string => isString(value) && SIG_KID.test(value);
+const ASSERTION_MEMBERS = ["credentialId", "alg", "authenticatorData", "clientDataJSON", "sig"];
 
 /** SHA-256 over the RFC 8785 form of the list without `digest` and `signature`, as an estate record's (DEC-0043). */
 export function orgAuthorityDigest(doc: JsonObject): string {
@@ -44,19 +50,21 @@ export function memberKeyOctets(publicKey: unknown): Uint8Array | undefined {
 // ---- Rules -------------------------------------------------------------------------------------------------------
 
 /**
- * FAC-SEM-150 on one list: the window is two strict instants, `expiresAt` after `issuedAt` and at most 7 days after
- * it; each subject, each `iss` and each kid once across the list; every key a P-256 point SEC 1 accepts.
+ * FAC-SEM-150 on one list: the window is two strict instants with at most three fraction digits, `expiresAt` after
+ * `issuedAt` and at most 7 days after it; at most 1024 members of 1 to 8 keys; each subject, each `iss` and each kid
+ * once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts.
  */
 export function orgAuthorityFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-150", instancePath, message });
   const issuedAt = time(value.issuedAt);
   const expiresAt = time(value.expiresAt);
-  if (!Number.isFinite(issuedAt)) flag("/issuedAt", "issuedAt is an RFC 3339 date-time with an offset, on a day that exists");
-  if (!Number.isFinite(expiresAt)) flag("/expiresAt", "expiresAt is an RFC 3339 date-time with an offset, on a day that exists");
+  if (!Number.isFinite(issuedAt)) flag("/issuedAt", "issuedAt is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits");
+  if (!Number.isFinite(expiresAt)) flag("/expiresAt", "expiresAt is an RFC 3339 date-time with an offset, on a day that exists, with at most three fraction digits");
   else if (Number.isFinite(issuedAt) && (expiresAt <= issuedAt || expiresAt - issuedAt > MAX_AUTHORITY_SECONDS * 1000)) {
     flag("/expiresAt", "a member list expires after it is issued and at most 7 days after (v4 §7)");
   }
+  if (Array.isArray(value.members) && value.members.length > MAX_MEMBERS) flag("/members", `a member list holds at most ${MAX_MEMBERS} members`);
   const subjects = new Set<string>(), issuers = new Set<string>(), kids = new Set<string>();
   for (const [member, index] of indexed(value.members)) {
     const at = `/members/${index}`;
@@ -65,11 +73,17 @@ export function orgAuthorityFindings(value: JsonObject): Finding[] {
     subjects.add(subject);
     if (issuers.has(iss)) flag(`${at}/iss`, "a context issuer is one member's: two members never share an iss (DEC-0128)");
     issuers.add(iss);
+    const count = Array.isArray(member.keys) ? member.keys.length : 0;
+    if (count < 1 || count > MAX_MEMBER_KEYS) flag(`${at}/keys`, `a member has 1 to ${MAX_MEMBER_KEYS} keys`);
+    (Array.isArray(member.keys) ? member.keys : []).forEach((key, n) => {
+      if (!isObject(key)) flag(`${at}/keys/${n}`, "a member's key is an object {kid, publicKey}");
+    });
     for (const [key, n] of indexed(member.keys)) {
       const kid = show(key.kid);
+      if (!isSigKid(key.kid)) flag(`${at}/keys/${n}/kid`, "a member's kid is <enrollment id>#sig (DEC-0053)");
       if (kids.has(kid)) flag(`${at}/keys/${n}/kid`, `kid ${kid} is listed twice: a relay session names one key by it`);
       kids.add(kid);
-      if (isString(key.publicKey) && memberKeyOctets(key.publicKey) === undefined) flag(`${at}/keys/${n}/publicKey`, "a member's key is a P-256 point SEC 1 accepts (DEC-0047)");
+      if (memberKeyOctets(key.publicKey) === undefined) flag(`${at}/keys/${n}/publicKey`, "a member's key is a P-256 point SEC 1 accepts (DEC-0047)");
     }
   }
   return findings;
@@ -135,7 +149,7 @@ export function verifyOrgAuthority(value: unknown, trust: OrgAuthorityTrust): Or
     return { ok: false, problem: "malformed" };
   }
   const signature = value.signature;
-  if (signature.format !== "webauthn-assertion" || !isString(signature.credentialId)) return { ok: false, problem: "malformed" };
+  if (signature.format !== "webauthn-assertion" || !ASSERTION_MEMBERS.every((name) => isString(signature[name]))) return { ok: false, problem: "malformed" };
   let digest: string;
   try {
     digest = orgAuthorityDigest(value);

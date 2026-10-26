@@ -100,10 +100,13 @@ record's `authority` shape `{credentialId, alg, publicKey, rpId, origins}`, whic
 Only they sign the organization's member list ([OL-2](#the-organizations-member-list)), in Fabric or a pinned page, never
 on a server (Fabric ADR-0178 point 2); a signing key of `keys` never signs it, and an administrator's passkey never
 signs an attestation. Each credential is listed once, under a signing RP (`sign.<domain>`, DEC-0063) with every origin
-within it (`FAC-SEM-146`). A credential a later set drops signs nothing from that set on. ADR-0178 takes the owner's two
-passkeys as the organization's root in R1 (its D8-b); here the root that signs key sets stays DEC-0127's Ed25519 key, so
-the owner's passkeys enter as the first set's administrators, and the root is held by the owner's Fabric, never by a
-server (A-3). A passkey that signs key sets itself would be a new pin form, a later decision.
+within it (`FAC-SEM-146`). A credential a later set drops signs nothing from that set on. Who holds the root (DEC-0129): the organization owner's Fabric, never a
+server (A-3: the platform never holds an organization root); the server generates the signing keys, drafts each key set
+and serves the sets and the attestations, and the owner's Fabric signs each set it drafted, so no server can certify an
+administrator. ADR-0178 takes the owner's two passkeys as the organization's root in R1 (its D8-b); here the root that
+signs key sets stays DEC-0127's Ed25519 key, so the owner's passkeys enter as the first set's administrators. A passkey
+that signs key sets itself would be a new pin form, and an administrator's device binding (ADR-0178 point 2) is not
+checked: both later decisions.
 
 Rotation, revocation and replay are `entitlement-key-set/1`'s ([entitlement](entitlement.md#issuer-keys)): a new key
 overlaps the old one, an old key stays listed until what it signed is past `expiresAt` (here a day), a revoked kid
@@ -202,6 +205,7 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
 | `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |
 | `credentialRequests`, `callRecords` | the enrollment's own | DEC-0111 |
+| the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
 | a membership refresh | the audience and the subject the issuer gave | this decision |
 
@@ -224,9 +228,10 @@ and until a node adopts it they still link one machine across organizations ([co
   it, never silence alone, and it revokes every device certificate of the person's enrollments in that organization (DEC-0031).
 - It keeps the subject pairwise and opaque, and puts no person's name, address or email in any member.
 - It maps its own roles onto `owner`, `admin` and `member`; a finer role goes in `extensions`, which grant nothing.
-- It holds one membership root per organization, distinct from the `policyRootKey`, signs only `org-key-set/1` with
-  it, lists each signing key in one organization's set, rotates signing keys with overlapping windows, and re-issues
-  under a listed key before it revokes one.
+- It uses one membership root per organization, distinct from the `policyRootKey`, which signs only `org-key-set/1`;
+  since DEC-0129 the root is held by the organization owner's Fabric, never by the server, which drafts each set for
+  it to sign. It lists each signing key in one organization's set, rotates signing keys with overlapping windows, and
+  re-issues under a listed key before it revokes one.
 - It issues attestations with a life of at most 24 hours; a short life (an hour) bounds how long an end it could not
   deliver still reads active.
 
@@ -243,7 +248,7 @@ administrator signs it (Fabric ADR-0178 points 2 and 3).
 | `type` | `org-authority/1` |
 | `issuer`, `org` | the organization server that drafted it and the organization, as the organization's key set names them |
 | `revision` | rises with every list an administrator signs |
-| `issuedAt`, `expiresAt` | strict RFC 3339 instants, `expiresAt` after `issuedAt` and at most 7 days after it (v4 §7, an organization's records) |
+| `issuedAt`, `expiresAt` | strict RFC 3339 instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it (v4 §7, an organization's records) |
 | `members` | 0 to 1024 `{subject, role, iss, keys}`: `subject` the member as `org-membership/1` names it to the relay's audience, pairwise and opaque; `role` `owner`, `admin` or `member`; `iss` the issuer of the member's tokens in this organization's context, as the member's estate pins it (DEC-0128); `keys` 1 to 8 `{kid, publicKey}`, the `<enrollment id>#sig` P-256 keys of the member's enrollments in the organization (UE-1). Each subject, each `iss` and each kid once across the list |
 | `digest` | `sha256:` and the hex SHA-256 of the RFC 8785 form of the list without `digest` and `signature` (`orgAuthorityDigest`) |
 | `signature` | a WebAuthn assertion, the estate record's shape, by an administrator's passkey |
@@ -263,7 +268,7 @@ checks the list against the schema first, as a relay does an estate record:
 | Row | Problem | When |
 |---|---|---|
 | OL-a | `context-invalid`, `no-clock` | the context is not an object; then `now` is not a readable time; then `org` is not an organization's context id, `keySet` not a well-formed set of `org`, or `held` not `{revision, digest}` |
-| OL-b | `malformed`, `digest-mismatch` | not an object, another `type`, no `digest`, a revision that is no positive integer, `members` no array, no WebAuthn assertion, or a value with no RFC 8785 form; then `digest` is not the list's |
+| OL-b | `malformed`, `digest-mismatch` | not an object, another `type`, no `digest`, a revision that is no positive integer, `members` no array, a `signature` that is not a WebAuthn assertion with its five string members, or a value with no RFC 8785 form; then `digest` is not the list's |
 | OL-c | `wrong-issuer`, `wrong-org` | `issuer` is not the key set's; `org` is not the reader's |
 | OL-d | `unknown-administrator` | the signing credential is not among the key set's `administrators` |
 | OL-e | the assertion's problem | `verifySigningAssertion` refuses it: `wrong-rp` under an RP ID that is not a signing RP, `wrong-origin`, `bad-signature` and the rest of WebAuthn Level 3 §7.2 |
@@ -275,9 +280,13 @@ checks the list against the schema first, as a relay does an estate record:
 estate's relay pins the estate's first passkeys, applies key sets under it, and admits from the list it holds:
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
 SEC 1 octets, or a refusal, and then admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify
-against the held list; without one the held list is verified again under the key set applied now, so a list past its
+against the held list, and a held list that cannot be read back (no positive revision, no RFC 8785 form) refuses it
+`invalid`; without one the held list is verified again under the key set applied now, so a list past its
 window, or one whose signer a later set dropped, admits nobody until a newer list verifies. A refused candidate changes
-nothing.
+nothing. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
+DEC-0128) and what an organization relay's `welcome` carries in place of the estate's revision, delta head and
+heartbeat wait on the organization's own heartbeat and delta ([revocation delta](revocation-delta.md#not-decided-here)),
+so no organization relay runs on this release (CT-37).
 
 **OL-5, the duties.** The server drafts a new revision whenever a member joins, ends (OM-5) or changes an enrollment's
 key, and well before `expiresAt`; an administrator signs it. Ending a membership drops the member from the next list, so
@@ -288,14 +297,14 @@ the relay stops admitting their enrollments once that list is signed and applied
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
-| <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, under a signing RP with every origin within it (DEC-0129) |
-| <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants, `expiresAt` after `issuedAt` and at most 7 days after it; each subject, each `iss` and each kid once across the list; every key a P-256 point SEC 1 accepts (DEC-0129) |
+| <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, with a usable key of its algorithm (never of small order), under a signing RP with every origin within it (DEC-0129) |
+| <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
 
-- **Every organization server** (MD-9 path (a)) issues attestations: a root per organization that signs key sets only,
-  signing keys online, a life of at most 24 hours, every duty of OM-8, and runs `fixtures/vectors/org-membership.json`.
+- **Every organization server** (MD-9 path (a)) issues attestations: a root per organization that signs key sets only
+  (held by the owner's Fabric since DEC-0129), signing keys online, a life of at most 24 hours, every duty of OM-8, and runs `fixtures/vectors/org-membership.json`.
   The first organization server is one of them; its own extensions go under its own domain.
 - **Fabric** pins an organization's root in the estate record at the person's join (OM-2), applies key sets with
   `verifyOrgKeySet`, verifies attestations with `verifyOrgMembership` before it trusts a membership, keeps the held
@@ -324,6 +333,9 @@ grants, until per-context relay sessions (CT-122's question 3).
 
 ## Not decided here
 
+- The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
+- Whether a reader checks an attestation's `role` or `status` against the latest signed member list; until then the
+  list's role grants nothing anywhere but its own document.
 - Beyond the member list (DEC-0129): a quorum or a delay of administrators' signatures (Fabric ADR-0178 D8-c, R2); the
   `org-countersign/1` verifier; the organization's heartbeat and revocation delta; organization windows; members'
   allowances; a passkey root that signs key sets itself.

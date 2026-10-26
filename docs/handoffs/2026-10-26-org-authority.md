@@ -12,13 +12,18 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
     most 7 days, `FAC-SEM-150`.
   - **Signer.** An administrator's signing passkey that the root lists in `org-key-set/1`'s new `administrators`
     (`FAC-SEM-146` widened); the register's `org-authority/1` challenge.
-  - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (`src/relay.ts`).
-  - **OM-7.** A row for an adaptation plan's organization part (TP-03).
-- CT-37: adoption only.
+  - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (`src/relay.ts`), the admission
+    set only: an organization relay's handshake waits on the organization's heartbeat and delta (CT-37 keeps it).
+  - **The root's holder.** The organization owner's Fabric, never a server (A-3); OM-8 annotated.
+  - **OM-7.** Rows for the member list's `iss` and for an adaptation plan's organization part (TP-03).
+  - **UX.** SCN-047 takes ADR-0178's fingerprint check; SCN-049, the administrator signs the list.
+- CT-37 stays open for the relay's handshake. CT-153 filed (member-list vectors, the D8 sweep).
 
 ## Checks actually run
 
-- `pnpm run check`: 104 files, 9 180 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
+- `pnpm run check`: 104 files, 9 184 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
+- Blind readings, round 1: unit pass (five risks, fixed); seam fail (the relay's handshake, narrowed); product fail
+  (the root's holder, the `iss` row, the passkey type list, DEC-0051 and DEC-0063, scenarios; fixed).
 
 ## Decisions
 
