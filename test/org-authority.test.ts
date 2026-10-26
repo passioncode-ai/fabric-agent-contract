@@ -1,10 +1,11 @@
-import { createHash, createPrivateKey, sign } from "node:crypto";
+import { createHash, createPrivateKey, generateKeyPairSync, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { MAX_AUTHORITY_SECONDS, ORG_AUTHORITY_TYPE, memberKeyOctets, orgAuthorityDigest, orgAuthorityFindings, orgAuthorityRules, orgRelayAdmissionSet, verifyOrgAuthority } from "../src/org-authority.js";
 import { orgKeySetWellFormed } from "../src/org-membership.js";
+import { RELAY_ALG, RELAY_PROTOCOL, admit as relayAdmit, relayAuthSigningInput, sessionStands } from "../src/relay.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { SIGNING_STATEMENTS, signingChallenge } from "../src/signing-challenges.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -241,5 +242,67 @@ describe("orgRelayAdmissionSet: an organization's relay admits from its member l
     // A held list is verified again, and FAC-SEM-150 refuses what is not a member's key; were it ever admitted, only #sig kids with a P-256 key count.
     expect(admit({ held: resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#enc", publicKey: BASE.members[0].keys[0].publicKey }] }] }) })).toEqual({ ok: false, refusal: "unverified", problem: "rule-violation" });
     expect(admit({ held: resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#sig", publicKey: 1 }] }, { ...BASE.members[1], keys: "none" }] }) })).toEqual({ ok: false, refusal: "unverified", problem: "rule-violation" });
+  });
+});
+
+describe("the organization relay's handshake (DEC-0134)", () => {
+  const schemaValid = (doc: unknown) => valid(doc, "org-authority");
+  const admission = (change: Json) => orgRelayAdmissionSet({ org: ORG, keySet: KEY_SET, at: AT, schemaValid, ...change } as never);
+  // A member's enrollment key for this organization: its #sig key in the list, and the private half that signs `auth`.
+  const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+  const octets = publicKey.export({ format: "der", type: "spki" }).subarray(-65);
+  const KID = "en-5f2a7c10#sig";
+  const LIST = resign({ ...BASE, revision: 4, members: [...BASE.members, { subject: "r-9a1b2c3d", role: "member", iss: "urn:fabric:context:w3e5r7t9y1u2i4o6", keys: [{ kid: KID, publicKey: octets.toString("base64") }] }] });
+  const RELAY = "https://relay.orgs.example";
+  const NONCE = "n".repeat(43);
+  const frame = (estate: string) => {
+    const iat = AT.toISOString();
+    const raw = sign("sha256", Buffer.from(relayAuthSigningInput({ relay: RELAY, nonce: NONCE, estate, kid: KID, iat }), "utf8"), { key: privateKey, dsaEncoding: "ieee-p1363" });
+    // The relay takes only low-S signatures (DEC-0047): fold a high S into n - s, the same signature's other form.
+    const n = BigInt("0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
+    const s = BigInt(`0x${raw.subarray(32).toString("hex")}`);
+    const low = s > n / 2n ? Buffer.concat([raw.subarray(0, 32), Buffer.from((n - s).toString(16).padStart(64, "0"), "hex")]) : raw;
+    return { v: 1 as const, type: "auth" as const, id: "a1", protocol: RELAY_PROTOCOL, alg: RELAY_ALG, estate, kid: KID, iat, sig: low.toString("base64url") };
+  };
+
+  it("admits a listed member whose auth names the organization's context, never an estate", () => {
+    const set = admission({ held: BASE, candidate: LIST });
+    expect(set.ok).toBe(true);
+    const ctx = { relay: RELAY, estate: ORG, nonce: NONCE, nonceUsed: false, now: AT, admittedKey: (kid: string) => (set.ok ? set.set.get(kid) : undefined) };
+    expect(relayAdmit(frame(ORG), ctx)).toEqual({ ok: true, kid: KID });
+    // A member's estate id is never the record an organization's relay admits from (DEC-0128): the same one answer.
+    expect(relayAdmit(frame("urn:fabric:estate:5d0f1a"), ctx)).toEqual({ ok: false, code: "unauthenticated" });
+    expect(relayAdmit(frame(ORG), { ...ctx, admittedKey: () => undefined })).toEqual({ ok: false, code: "unauthenticated" });
+  });
+
+  it("ends a member's session when a newer list drops it or the held list's window ends, and keeps it otherwise", () => {
+    const session = { kid: KID, key: new Uint8Array(octets) };
+    const held = admission({ held: BASE, candidate: LIST });
+    expect(sessionStands(session, held)).toEqual({ ok: true });
+    expect(sessionStands(session, admission({ held: LIST, candidate: resign({ ...LIST, revision: 5, members: BASE.members }) }))).toEqual({ ok: false, code: "not-admitted" });
+    expect(sessionStands(session, admission({ held: LIST, at: new Date("2026-11-03T00:00:00Z") }))).toEqual({ ok: false, code: "expired" });
+    // A refused candidate leaves the held list: the relay reads the held list again, without the candidate, for its sessions.
+    expect(admission({ held: LIST, candidate: { ...LIST, revision: 9 } }).ok).toBe(false);
+    expect(sessionStands(session, admission({ held: LIST }))).toEqual({ ok: true });
+  });
+
+  it("fails closed when a key set drops the held list's signer and no other administrator's list verifies (OR-4, OL-5)", () => {
+    const session = { kid: KID, key: new Uint8Array(octets) };
+    const dropped = { ...KEY_SET, administrators: [] };
+    // The key set is applied even though the list read with it is refused; the held list, re-read under it, admits nobody.
+    expect(admission({ keySet: dropped, held: LIST, candidate: resign({ ...LIST, revision: 5 }) })).toEqual({ ok: false, refusal: "unverified", problem: "unknown-administrator" });
+    expect(admission({ keySet: dropped, held: LIST })).toEqual({ ok: false, refusal: "unverified", problem: "unknown-administrator" });
+    expect(sessionStands(session, admission({ keySet: dropped, held: LIST }))).toEqual({ ok: false, code: "not-admitted" });
+  });
+
+  it("welcomes with the member list it admits from, in place of an estate's revision, delta head and heartbeat", () => {
+    const frameValid = (value: unknown) => valid(value, "relay-frame");
+    const list = { org: ORG, revision: 4, digest: LIST.digest };
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list })).toBe(true);
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list, estateRevision: 3 })).toBe(false);
+    // Unknown members are ignored (relay.md), so an organization's heartbeat and delta can join later.
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list, later: 1 })).toBe(true);
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list: { ...list, org: "personal" } })).toBe(false);
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", estateRevision: 3, deltaHead: { sequence: 0, sha256: "0".repeat(64) }, heartbeat: null })).toBe(true);
   });
 });

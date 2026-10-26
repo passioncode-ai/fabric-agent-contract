@@ -1,18 +1,20 @@
 # Relay `fabric-relay/0.1`
 
 A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
-owner's estate (an organization's members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
-an organization relay's handshake is not decided, CT-37). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
+owner's estate (what an organization's relay carries between its members is not decided, CT-163; its members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
+its handshake is [the organization's relay](#the-organizations-relay), DEC-0134). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
 
-The reference code is in five files:
+The reference code is in six files:
 - [`src/relay.ts`](../../src/relay.ts): admission, blob requests, message bodies and the close codes;
 - [`src/secret-envelope.ts`](../../src/secret-envelope.ts): the envelope;
 - [`src/p256.ts`](../../src/p256.ts): key validation and the low-S rule;
 - [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors));
-- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132).
+- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132);
+- [`src/org-authority.ts`](../../src/org-authority.ts): an organization's relay's admission set from its member list
+  (`orgRelayAdmissionSet`, DEC-0129, DEC-0134).
 
 Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`, `machine-report.json`).
 
@@ -99,7 +101,7 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   | any refusal of `auth` (`unauthenticated`, `replay`, `not-yet-valid`, `unsupported-alg`, `protocol-unsupported`) | yes | 4401 |
   | no `auth` within 10 s | `unauthenticated` | 4401 |
   | a proven session whose kid left the admission set, or now names another key than the one it was proven under (`sessionStands`, DEC-0084; see [Admission](#admission)) | `not-admitted` | 4403 |
-  | the held estate record expired | `expired` | 4403 |
+  | the held estate record expired, or on an organization's relay the held member list's window ended (DEC-0134) | `expired` | 4403 |
   | a frame over 1 MiB | `too-large` | 1009 |
   | a binary frame | none | 1003 |
   | 90 s of silence; the relay shutting down | none | 1001 |
@@ -130,21 +132,29 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
      the kid or the estate differs, and apply the low-S rule after that verification (`admit` and `verifyBlobRequest`
      do; `test/relay-constant-work.test.ts` counts the verifications).
 
-   Then it answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat, limits?}`.
+   Then an estate's relay answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat,
+   limits?}`, and an organization's relay with `{session, list, limits?}` and none of the other three (OR-2).
    `deltaHead` has the shape of a device check-in's `records.revocationDelta` (DEC-0054's head), so a node passes it on
    unchanged; `heartbeat` is the latest `heartbeat/1` the relay holds, or `null`; `estateRevision` is the verified
-   revision (1 or more) the relay admits from, always present; `limits` is what the relay enforces (see
+   revision (1 or more) the relay admits from, always present on an estate's relay; `limits` is what the relay enforces (see
    [Messages](#messages)). Otherwise it answers `error` with the refusal's code and closes 4401. The message is fixed per
    code; the reason (no record, expired, unverified, another estate) goes to the relay's log, never to the client.
 4. The relay attributes every later frame on the connection to the admitted `kid`, and to nothing a frame claims.
 
 **A reasonless 4401, seen from the client.** A node or a surface refused with `unauthenticated` and close 4401 learns
 no reason, by design. It tells the person, in this order: check that this machine is in the estate's current revision
-(not revoked, its device key the one the record lists) — the estate's owner sees that in the hub; then update the client,
-since a client that signs high-S or an old protocol is refused the same way. It retries no more often than its backoff,
-and never asks the person to re-enter a secret for it.
+(not revoked, its device key the one the record lists), which the estate's owner sees in the hub; then check the clock
+(an `iat` more than 60 s old is refused the same way) and update the client, since a client that signs high-S or an
+old protocol is refused the same way too. On an organization's relay (DEC-0134) it
+says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
+waits for an administrator's signature, a list expires, and a list whose signer the key set no longer lists admits
+nobody until another administrator signs one, OR-4), which one of the organization's administrators sees by the
+enrollment's kid, which the node shows (a list entry names a pairwise subject, never who it is, OL-2); then check the
+clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
+it.
 
-**The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
+**The admission set** of an estate's relay (an organization's is its member list's, below and OR-3) is the set of
+`#sig` keys of the machines in the estate record the relay holds, minus revoked
 machines and keys — a `device-key` revocation names a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084); the set
 subtracts a key either names, and reports in `unread` a delta revocation whose ref holds `@` but is no key reference —
 minus a `#sig` key listed under a kid other than its own machine's `<id>#sig`, and every key of a kid listed twice (F7,
@@ -177,20 +187,78 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   is not delivered. When the held revision's window ends it ends every session with `error expired` and close 4403. A
   machine so closed is refused on its next `auth` by the ordinary check. No new frame and no client re-authentication
   are needed.
-- **One context per origin.** A relay origin admits from one record: in this release, one estate. The estate is
-  compared inside `admit` and nowhere else (`AuthContext.estate`, the held record's). **A relay MUST NOT use the estate
+- **One context per origin.** A relay origin admits from one record: one estate, or on an organization's relay one organization's member list (DEC-0134). The estate is
+  compared inside `admit` and nowhere else (`AuthContext.estate`, the held record's; on an organization's relay the
+  organization's context id, which every member signs and its `welcome` names, so the rule below is about a person's
+  estate id). **A relay MUST NOT use the estate
   id as an identifier or key a connection can see or that is shared across a person's contexts** — not for a session,
-  a mailbox, presence, a blob, or in a log line that leaves the relay: one person's contexts (an estate, later an
-  organization's enrollment) must not be linkable by the relay's operator. A relay keys its own state by its own
+  a mailbox, presence, a blob, or in a log line that leaves the relay: one person's contexts (an estate, an
+  organization's enrollment) must not be linkable by any identifier the relay chooses, shows or logs. The link that
+  stays is the connection itself: an operator running two of a machine's relays sees its two connections (OR-5,
+  [devices](devices.md#unlinkable-enrollments), What stays linkable). A relay keys its own state by its own
   per-context key; a relay that serves several contexts tells them apart by a pseudonymous per-context id (the
   enrollment key's thumbprint, or an id derived per context that the relay cannot invert), never by the estate (relay
   RLY-08).
 - **An organization's member list.** An organization's admission set comes from its member list
   (`orgRelayAdmissionSet`, [membership](membership.md#the-organizations-member-list) OL-4, DEC-0129), under the
-  organization's root the relay pins at setup and the key set it applied. A refused candidate leaves the held list's set
-in force; a refused held list, or none, admits nobody. The handshake
-  above is still the estate's: what a member signs in `estate` and what `welcome` carries on an organization's relay
-  wait on the organization's heartbeat and delta (CT-37).
+  organization's root the relay pins at setup and the key set it applied. A refused candidate leaves the held list, which
+  the relay re-reads under the key set it applied now (OR-3, OR-4); a refused held list, or none, admits nobody. Its handshake is
+  [the organization's relay](#the-organizations-relay) (DEC-0134).
+
+## The organization's relay
+
+DEC-0134 (CT-37) · code [`src/org-authority.ts`](../../src/org-authority.ts) (`orgRelayAdmissionSet`) and the reference
+[`src/relay.ts`](../../src/relay.ts) (`admit`, `sessionStands`) · schema [`relay-frame`](../../schemas/relay-frame.schema.json) (the organization's
+`welcome`)
+
+An organization's relay admits the enrollments its signed member list names (OL-4) by the same handshake as an
+estate's, with the list in place of the estate record. The list's window (at most 7 days) and the server's duty to draft
+a new list when a membership ends (OL-5) bound how long an ended member stays admitted, so the handshake needs no
+organization heartbeat or delta.
+
+**OR-1, auth.** A member's node sends the same `auth` frame, signed by an enrollment's `#sig` key the list names, with
+`estate` the organization's context id `org:<orgId>`, never the member's estate id (DEC-0128). The relay admits it as
+`admit` does, with the organization as the record it admits from (`AuthContext.estate`) and the list's admission set:
+the same order, the same one `unauthenticated` answer for every unproven caller, the same one signature's work.
+
+**OR-2, welcome.** The relay answers `welcome` with `{session, list: {org, revision, digest}, limits?}`: the member list
+it admits from. It carries no `estateRevision`, `deltaHead` or `heartbeat`, which an organization does not have in this
+release; a member's node reads no estate record from an organization's relay. A client tells the two welcomes apart by
+`estateRevision` (present on an estate's, forbidden on an organization's), never by `list`: an estate's welcome ignores
+any `list`, and an organization's ignores a `deltaHead` or `heartbeat` it should not carry.
+
+**OR-3, open sessions.** An open session stands only while `sessionStands` answers `ok` under the list's admission set.
+When the relay applies a newer list (or a key set that changes which administrators the root certifies), it ends every
+session whose kid left the set or now names another key (`not-admitted`, close 4403); when the held list's window ends
+it ends every session (`expired`, close 4403) and admits nobody until a newer list verifies. A candidate it refuses
+leaves the held list: it reads the held list again, without the candidate, for its sessions.
+
+**OR-4, where the relay reads the list.** The relay pins the organization's root when it is set up for it (OM-2's
+root route, its fingerprint compared out of band), and reads the key set (`GET .../key-set`) and the member list
+(`GET .../authority`, OX-6) from the organization's server at least every hour and when the server tells it of a new
+one; it authenticates to the server with a credential the server issues when it sets the relay up (the server's).
+Every document it applies is one `verifyOrgKeySet` and `orgRelayAdmissionSet` accept: the server's word adds nothing.
+A key set and a list it reads together it applies in one step: `orgRelayAdmissionSet` with the new key set, the held list
+and the new list as the candidate, so a set that drops the held list's signer meets the list another administrator
+signed (OL-5) and the admission set does not empty between the two. A key set the root signed is applied even when
+the list read with it is refused: the relay then re-reads the held list under the new set (OR-3), so when the root
+removed the held list's signer and no other administrator's list verifies yet, it admits nobody until one does (OL-5)
+and fails closed rather than keep a removed administrator's list. It never checks a list under a key set older than the
+newest it verified, and it reads the key set with every list it reads: it passes the key set it holds (its
+`{revision, digest}`) to `verifyOrgKeySet` as `held`, and keeps it across a restart, so an older set the root signed is
+`stale-revision`.
+
+**OR-5, between members.** On an organization's relay every member is T2 to every other, two enrollments of one owner
+included: an enrollment's kid is never in an estate record (UE-1), so no recipient can place it in T1, and no text may
+link it to an estate to try. The relay sends no presence from one member to another (DEC-0047). One relay origin serves
+one organization (one context per origin, above). A member's node holds no member list (OX-6 serves it to
+administrators and the relay only), so it has no key to verify another member's message body under: what an
+organization's relay carries between members, and where a recipient gets a member's enrollment key, is not decided
+(CT-163). An operator that runs both a person's estate relay and an organization's relay sees one machine's two
+connections; that link stays ([devices](devices.md#unlinkable-enrollments), What stays linkable). One disclosure is
+named, not closed: `unknown-recipient` (a `send`, and a blob PUT's step 7) tells a member whether an enrollment kid it
+holds, for instance from a `deliver` frame's `from`, is on the current list, which OX-6 otherwise keeps from members;
+whether an organization's relay answers it differently is part of CT-163.
 
 ## Messages
 
@@ -247,7 +315,7 @@ in force; a refused held list, or none, admits nobody. The handshake
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
   [kid]}`: every asked kid appears exactly once, and `unknown` holds a kid outside the asker's owner and a kid never
-  seen, alike, so nothing leaks across owners.
+  seen, alike, so nothing leaks across owners. On an organization's relay every other member's kid is `unknown` (OR-5).
 - **A relay never reports a command done.** A queued message stays queued with its `seq`. Only the recipient's own
   signed message back reports an outcome (Fabric ADR-0088's offline rule).
 
@@ -259,8 +327,7 @@ in force; a refused held list, or none, admits nobody. The handshake
   - **T1** is an enrolled machine of the recipient's **same owner** (DL-25), listed in the current record and not
     revoked: `relayCallerTier` places it, and `machineCallVerdict` judges its call by the two machines' profiles
     ([machine calls](machine-calls.md), DEC-0106). DL-26 applies.
-  - **T2** is anything else. That includes a machine listed only in an organization record, to a recipient of another
-    owner, and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
+  - **T2** is anything else. That includes every member of an organization to every other, on its relay (OR-5), and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
     relay from outside the estate are not decided ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 
 ## The secret envelope
@@ -394,8 +461,8 @@ an agent asks for, and one moved between one person's machines outside a placeme
   only on its own request's bytes. An admitted, proven non-recipient learns nothing by a GET, and nothing by a PUT
   without the bytes (422 whatever the state). A PUT with the exact bytes learns whether a blob of those bytes is held
   under another list (409): holding the bytes is holding the content, and a content-addressed store reveals this to
-  whoever holds it. Which kids are admitted (step 7) is told only to a proven machine of the same owner, which presence
-  already tells. The relay's log keeps the real reason of every step-6 and step-10 refusal, never the header or a
+  whoever holds it. On an estate's relay, which kids are admitted (step 7) is told only to a proven machine of the same
+  owner, which presence already tells; on an organization's relay it is told to any member (OR-5). The relay's log keeps the real reason of every step-6 and step-10 refusal, never the header or a
   signature. A GET signature reused within its 60 s fetches the same blob for the same machine again, which reveals
   nothing new.
 - **Retention.** A relay keeps a blob until every stored recipient fetched it (counted per kid), or until 7 days pass,
@@ -409,8 +476,9 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
 
 - **What the relay carries.** It carries them unchanged: a page of entries (`{head, entries}`, at most 256) in a `delta`
   frame, a heartbeat in a `heartbeat` frame (both typed by [`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)
-  against DEC-0054's schemas). On `welcome` it sends its `deltaHead` and its latest heartbeat (or `null`), and it pushes
-  each new one to every connected machine of the estate the object names.
+  against DEC-0054's schemas). On an estate's relay `welcome` sends its `deltaHead` and its latest heartbeat (or
+  `null`), and the relay pushes each new one to every connected machine of the estate the object names; an
+  organization's relay sends neither (OR-2).
 - **Where the relay gets them** (DEC-0066). An admitted hub machine sends `delta` and `heartbeat` frames on its own
   session. The relay accepts one only when it verifies under the record it holds, by DEC-0054's own rules: an entry or
   heartbeat signed by an estate key — the `hubKey` the held revision certifies for exactly one machine, as DL-14's
@@ -566,7 +634,10 @@ Every refusal of the relay family is data a port runs, not only a test in this r
 - Hardware attestation formats (OQ-0010 a).
 - Grants for the same bytes to a second recipient set: this release keeps 409 `recipients-mismatch`, never merged;
   grants (one record holding several `{recipients, fetched, expiresAt}`) are the next revision's question.
+- What an organization's relay answers to a member's `delta-query`, `delta` or `heartbeat` frame: it holds no estate record to verify them under, and an organization has no delta or heartbeat in this release (DEC-0134).
 - How a relay serves several contexts (the pseudonymous per-context id of relay RLY-08, with Fabric D8).
+- What an organization's relay carries between members, where a recipient gets a member's enrollment key, and whether
+  `unknown-recipient` keeps telling a member which kids are listed (CT-163).
 - Whether a self-hosted relay federates with the hosted one.
 - The frame types that open, join and close a pairing rendezvous (DEC-0084 fixes what it carries, how long it lives and
   when it burns).

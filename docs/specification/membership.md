@@ -307,15 +307,16 @@ checks the list against the schema first, as a relay does an estate record:
 **OL-4, the relay.** An organization's relay pins the organization's root when it is set up for the organization, as an
 estate's relay pins the estate's first passkeys, applies key sets under it, and admits from the list it holds:
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
-SEC 1 octets, or a refusal. A refused candidate leaves the held list's set in force: a candidate that fails the schema
+SEC 1 octets, or a refusal. A refused candidate leaves the held list, which the relay re-reads under the key set it applied now (relay.md OR-3,
+OR-4): a candidate that fails the schema
 answers `invalid`, one that fails verification `unverified` with its problem, its window included. A refused held
 list, or none, admits nobody (DEC-0047, fail closed): `expired` and `not-yet-valid` name only the held list's own
 window, and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused
 `held-invalid`, with or without a candidate, so a caller tells it from a refused candidate; without one the held list is verified again under the key set applied now, so a list past its
-window, or one whose signer a later set dropped, admits nobody until a newer list verifies. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
-DEC-0128) and what an organization relay's `welcome` carries in place of the estate's revision, delta head and
-heartbeat wait on the organization's own heartbeat and delta ([revocation delta](revocation-delta.md#not-decided-here)),
-so no organization relay runs on this release (CT-37).
+window, or one whose signer a later set dropped, admits nobody until a newer list verifies. The handshake is
+[the organization's relay](relay.md#the-organizations-relay) (DEC-0134): a member's `auth` signs the organization's
+context id in `estate` (never the member's estate id, DEC-0128), `welcome` carries the list's `{org, revision,
+digest}`, and open sessions stand under the list's admission set.
 
 **OL-5, the duties.** The server drafts a new revision whenever a member joins, ends (OM-5) or changes an enrollment's
 key, and well before `expiresAt`; an administrator signs it. Before it asks the root to sign a key set that drops an
@@ -328,7 +329,7 @@ for display and routing, never as authority to sign or release anything; what el
 stays the reader's. No reader checks an attestation's role against the member list. Only the organization's relay could
 match an attestation to the list at all, since the list's subjects are pairwise to the relay's audience (OL-1) and an
 attestation's to its own reader (CX-22); whether the relay checks status from both, the stricter answer winning, as
-Fabric ADR-0180 point 4 proposes, is part of its handshake and not decided (CT-37).
+Fabric ADR-0180 point 4 proposes, is not decided (CT-162): the relay's handshake (DEC-0134) admits from the list alone.
 
 ## The draft exchange
 
@@ -403,7 +404,7 @@ POSTs the signed list; the server accepts it only as `acceptSignedAuthority` doe
 set and is the draft). A relay reads the signed list from `GET .../authority`. A list names every member's pairwise
 subject, role, `iss` and keys, so unlike a key set it is not public: the server answers the two authority GETs only to
 a caller it authenticates as one of the organization's administrators or its relay, and `404` to anyone else; how it
-authenticates them is the server's until CT-37 names the relay's registration. A POST still needs no credential: only
+authenticates them is the server's (DEC-0134 OR-4: a credential it issues when it sets the relay up). A POST still needs no credential: only
 an administrator's passkey makes a list that passes.
 
 ## Semantic rules
@@ -431,14 +432,19 @@ an administrator's passkey makes a list that passes.
   and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning. Until every reader is pinned
   at or after DEC-0128 no revision carries `organizations`, so a node ends an enrollment as DEC-0103 and its own
   adoption already do.
-- **Every organization server** also drafts the organization's member list (OL-5) and lists the administrators'
+- **Every organization server** also issues its organization's relay the credential it reads the list with and tells it
+  of a new list (relay.md OR-4), drafts the organization's member list (OL-5) and lists the administrators'
   passkeys in its key sets, which the root signs; it signs no list itself.
 - **The organization owner's Fabric** holds the membership root and signs each key set the server drafts, only after
   the owner confirms its changes (OM-3, DEC-0129).
 - **An administrator's Fabric** (or a pinned page) registers a signing credential for that organization alone (never
   an estate authority, never another organization's), shows a drafted list's changes against the last signed list, and
   signs it with that passkey (OM-3, OL-2). The owner's Fabric registers such a credential for the first key set.
-- **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4).
+- **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4), with the handshake of
+  relay.md OR-1 to OR-5 (DEC-0134).
+- **A member's node** signs `auth` with an enrollment's `#sig` key and the organization's context id in `estate`, reads
+  the organization's `welcome`, told from an estate's by `estateRevision`, for its `list`, and expects no estate record
+  from that relay (relay.md OR-1, OR-2).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
@@ -465,12 +471,12 @@ its relay (OX-6).
   their shapes, and how a recovery key reaches a pin, since the root's answer
   (`org-root`) is closed (CT-160).
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
-  carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
+  carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-162).
 - What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
   TP-03 defines it with Fabric.
-- The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37),
-  and whether the relay checks a member's attestation status against the list, the stricter answer winning (Fabric
-  ADR-0180 point 4; OL-6).
+- How a member's node learns its organization relay's origin (an estate's relay's origin is configuration today too).
+- Whether an organization's relay checks a member's attestation status against the list, the stricter answer winning
+  (Fabric ADR-0180 point 4; OL-6), which needs the relay registered as an attestation audience (CT-162).
 - Beyond the member list (DEC-0129): a quorum or a delay of administrators' signatures (Fabric ADR-0178 D8-c, R2); the
   `org-countersign/1` verifier; the organization's heartbeat and revocation delta; organization windows; members'
   allowances; a passkey root that signs key sets itself.
