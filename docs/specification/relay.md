@@ -140,8 +140,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 
 **A reasonless 4401, seen from the client.** A node or a surface refused with `unauthenticated` and close 4401 learns
 no reason, by design. It tells the person, in this order: check that this machine is in the estate's current revision
-(not revoked, its device key the one the record lists) — the estate's owner sees that in the hub; then update the client,
-since a client that signs high-S or an old protocol is refused the same way. On an organization's relay (DEC-0134) it
+(not revoked, its device key the one the record lists), which the estate's owner sees in the hub; then check the clock
+(an `iat` more than 60 s off is refused the same way) and update the client, since a client that signs high-S or an
+old protocol is refused the same way too. On an organization's relay (DEC-0134) it
 says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
 waits for an administrator's signature, and a list expires), which one of the organization's administrators sees; then
 check the clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
@@ -183,8 +184,10 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
 - **One context per origin.** A relay origin admits from one record: one estate, or on an organization's relay one organization's member list (DEC-0134). The estate is
   compared inside `admit` and nowhere else (`AuthContext.estate`, the held record's). **A relay MUST NOT use the estate
   id as an identifier or key a connection can see or that is shared across a person's contexts** — not for a session,
-  a mailbox, presence, a blob, or in a log line that leaves the relay: one person's contexts (an estate, later an
-  organization's enrollment) must not be linkable by the relay's operator. A relay keys its own state by its own
+  a mailbox, presence, a blob, or in a log line that leaves the relay: one person's contexts (an estate, an
+  organization's enrollment) must not be linkable by any identifier the relay chooses, shows or logs. The link that
+  stays is the connection itself: an operator running two of a machine's relays sees its two connections (OR-5,
+  [devices](devices.md#unlinkable-enrollments), What stays linkable). A relay keys its own state by its own
   per-context key; a relay that serves several contexts tells them apart by a pseudonymous per-context id (the
   enrollment key's thumbprint, or an id derived per context that the relay cannot invert), never by the estate (relay
   RLY-08).
@@ -615,6 +618,8 @@ Every refusal of the relay family is data a port runs, not only a test in this r
   grants (one record holding several `{recipients, fetched, expiresAt}`) are the next revision's question.
 - What an organization's relay answers to a member's `delta-query`, `delta` or `heartbeat` frame: it holds no estate record to verify them under, and an organization has no delta or heartbeat in this release (DEC-0134).
 - How a relay serves several contexts (the pseudonymous per-context id of relay RLY-08, with Fabric D8).
+- What an organization's relay carries between members, where a recipient gets a member's enrollment key, and whether
+  `unknown-recipient` keeps telling a member which kids are listed (CT-163).
 - Whether a self-hosted relay federates with the hosted one.
 - The frame types that open, join and close a pairing rendezvous (DEC-0084 fixes what it carries, how long it lives and
   when it burns).
