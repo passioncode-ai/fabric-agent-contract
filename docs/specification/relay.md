@@ -130,10 +130,11 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
      the kid or the estate differs, and apply the low-S rule after that verification (`admit` and `verifyBlobRequest`
      do; `test/relay-constant-work.test.ts` counts the verifications).
 
-   Then it answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat, limits?}`.
+   Then an estate's relay answers `welcome` with `{session, estateRevision, deltaHead: {sequence, sha256}, heartbeat,
+   limits?}`, and an organization's relay with `{session, list, limits?}` and none of the other three (OR-2).
    `deltaHead` has the shape of a device check-in's `records.revocationDelta` (DEC-0054's head), so a node passes it on
    unchanged; `heartbeat` is the latest `heartbeat/1` the relay holds, or `null`; `estateRevision` is the verified
-   revision (1 or more) the relay admits from, always present on an estate's relay (an organization's relay welcomes with its member list instead, OR-2); `limits` is what the relay enforces (see
+   revision (1 or more) the relay admits from, always present on an estate's relay; `limits` is what the relay enforces (see
    [Messages](#messages)). Otherwise it answers `error` with the refusal's code and closes 4401. The message is fixed per
    code; the reason (no record, expired, unverified, another estate) goes to the relay's log, never to the client.
 4. The relay attributes every later frame on the connection to the admitted `kid`, and to nothing a frame claims.

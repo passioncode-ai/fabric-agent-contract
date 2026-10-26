@@ -7,7 +7,7 @@ vectors [`fixtures/vectors/revocation-delta.json`](../../fixtures/vectors/revoca
 
 The [estate record](estate-record.md) keeps every revocation and is the durable state, but a revision is a whole record
 signed by a passkey, and machines fetch it hourly. The **revocation delta** is its fast path: an append-only chain of
-signed entries, one revocation each, that the relay pushes to every machine within seconds
+signed entries, one revocation each, that the estate's relay pushes to every machine within seconds
 ([relay](relay.md#revocation-and-heartbeat), DEC-0047). The **timestamp heartbeat** is a signed commitment to the
 delta's head and to the estate revision, so a relay that withholds an entry is caught: it can delay revocation, never
 forge or hide it for long. A machine reports the head it applied and the heartbeat it holds to its hub over the relay (DEC-0132; never in a check-in
@@ -70,7 +70,7 @@ An **entry** (`$defs/entry` of [`revocation-delta`](../../schemas/revocation-del
 - **The genesis** is the hex SHA-256 of the RFC 8785 form of `{type: "revocation-delta/1", estate, sequence: 0}`
   (`deltaGenesis`), so one estate's chain cannot be spliced onto another's.
 - **The head** is `{sequence, sha256}`: the last entry's sequence and hash, or `{0, genesis}` before any (`deltaHead`).
-  It is the shape of a check-in's `records.revocationDelta` (DEC-0053) and of a relay's `welcome.deltaHead` (DEC-0047),
+  It is the shape of a check-in's `records.revocationDelta` (DEC-0053) and of an estate relay's `welcome.deltaHead` (DEC-0047),
   so a node reports what it holds (to its hub over the relay, DEC-0132; never in a check-in to an organization server,
   DEC-0128 UE-2), and passes on what it was handed, unchanged.
 - **A page** is `{head, entries}` (the schema's root): consecutive entries, oldest first, at most 256, so a relay frame
@@ -228,12 +228,14 @@ over the relay (DEC-0132).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
   the heartbeat (to its hub over the relay, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2), refuses what arrives from other machines unless `current`, refuses an unreconciled
   revision (CT-20, CT-34), and applies each revision's delta anchor with `anchorDelta` (DEC-0107, CT-113).
-- **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
+- **An estate's relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
   holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them
   unchanged in `delta`, `heartbeat` and `welcome` frames, answers `delta-query`, subtracts the revocations in force from
   its admission set and closes the sessions they revoke (DEC-0047, DEC-0066), applies a revision's delta anchor
   after the revision (`anchorDelta`, DEC-0107), keeping its delta as it was when `anchorDelta` refuses, since it admits
-  by the revision alone ([relay](relay.md#revocation-and-heartbeat)); it never signs one.
+  by the revision alone ([relay](relay.md#revocation-and-heartbeat)); it never signs one. An organization's relay
+  carries none of them in its `welcome` and has no estate record to verify them under (relay.md OR-2); what it answers
+  to a `delta-query`, `delta` or `heartbeat` frame is not decided ([relay](relay.md#not-decided-here)).
 
 ## Privacy
 
