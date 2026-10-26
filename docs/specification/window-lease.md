@@ -2,7 +2,8 @@
 
 DEC-0062 · rule codes `FAC-SEM-089`…`FAC-SEM-091` · schema
 [`window-lease`](../../schemas/window-lease.schema.json) and `records.leases` in the
-[`device-check-in`](../../schemas/device-check-in.schema.json) · code
+[`device-check-in`](../../schemas/device-check-in.schema.json) and the
+[`machine-report`](../../schemas/machine-report.schema.json) (DEC-0132) · code
 [`src/window-lease.ts`](../../src/window-lease.ts) · vectors
 [`fixtures/vectors/window-lease.json`](../../fixtures/vectors/window-lease.json)
 
@@ -26,7 +27,7 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | Field | Rule |
 |---|---|
 | `type` | `window-lease/1` |
-| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) |
+| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) |
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |
@@ -104,19 +105,23 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 
 ## Reporting
 
-A meter reports each lease it holds to its hub, `records.leases[]` (in a report over the relay, never in a check-in to an
-organization server, DEC-0128 UE-2; the report message is CT-152): `{leaseId, expiresAt, spent}` (DEC-0053's
+A meter reports each lease it holds, and the newest expired lease of each slot until its window instance ends (MR-1),
+to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
+relay, DEC-0132, or on the hub's own machine through the local channel's `machine.report`; never in a check-in to an
+organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
 What a meter has not reported counts as spent. After a hub move the new hub holds none of the old hub's division, so it
 issues no lease of a window instance the old hub divided until that instance ends or every machine holding one of the
-old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub)). The hub
+old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
+whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-5). The hub
 counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
-- an expired lease counts the `spent` of a report received at or after its expiry, under it or a later lease of the
-  same slot (`spent` covers the whole instance); without such a report it counts its whole `amount`.
+- an expired lease counts the `spent` of a report written at or after its expiry (the report's own `at`, never its
+  delivery, which a relay may delay by days: DEC-0132 MR-5), under it or a later lease of the same slot (`spent`
+  covers the whole instance); without such a report it counts its whole `amount`.
 
 A late report is credited at the hub's next division, as a refund: the expired lease stops counting its amount and
 counts what was spent. A machine's own earlier leases are what its new lease replaces, so the remainder the hub may
@@ -124,7 +129,7 @@ lease a machine is the window's limit less what every **other** machine holds; a
 once the larger lease expires or is reported.
 
 A lease reaches its machine unchanged: the relay carries it from the hub's machine as a message (DEC-0047). An estate's
-lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after CT-152); a check-in response's `records.leases`, whose items
+lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after DEC-0132); a check-in response's `records.leases`, whose items
 are this schema, carries an organization's own leases once organization windows exist. The transport adds
 nothing and decides nothing.
 
@@ -165,7 +170,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-089"></a>`FAC-SEM-089` | `window-lease` | a lease's period is an instance of its window that exists, its times are strict RFC 3339, its life is positive and at most 24 hours and ends no later than its window instance, and its amount is a decimal string |
-| <a id="fac-sem-090"></a>`FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports received before it |
+| <a id="fac-sem-090"></a>`FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports written before it (their `at`, DEC-0132 MR-5) |
 | <a id="fac-sem-091"></a>`FAC-SEM-091` | `lease-reservation` | a meter's decision (`{lease, request, decision}`, `reserve` or `refuse`) is the one `mayReserve` gives |
 
 ## Who adopts it
@@ -175,11 +180,11 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided
   until that instance ends or every machine holding one of the old hub's leases has reported it after the revocation
-  (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
-  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
+  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, or through `machine.report` on the hub's own machine, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on a decision beyond the member list `org-authority/1` (DEC-0129).
 
@@ -195,8 +200,8 @@ machine.
 - v4's static split of each estate window per machine in the estate record (§6 Path 5): no field of `estate-record/1`
   carries it. The hub's leases are the split; past a lease's expiry with the hub asleep, a meter reserves nothing in
   that window, as the meter's owner agreed, instead of falling back to a passkey-signed share.
-- How a lease reaches a machine from an estate's hub, and how the hub receives a meter's report, beyond the check-in's
-  fields and the relay's message carriage (DEC-0047).
+- How a lease reaches a machine from an estate's hub, beyond the check-in's fields and the relay's message carriage
+  (DEC-0047). The meter's report is DEC-0132's ([the machines' report](relay.md#the-machines-report)).
 - Where an estate's window limits are signed (`limits/1`, [signing challenges](conformance.md#signing-challenges)):
   until a document carries them, a meter's `remainderUsd` is its configured limit.
 - Organization windows, member allowances and their leases (beyond DEC-0129's member list); `ES256` hub keys (Fabric's D2).

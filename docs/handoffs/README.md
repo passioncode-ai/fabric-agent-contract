@@ -4,8 +4,9 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-26 the exchange's vectors, a role is no authority](2026-10-26-exchange-vectors.md) | DEC-0133 (CT-158 in part; CT-159, CT-160 filed from Fabric ADR-0180) | pending |
-| [2026-10-26 the draft exchange](2026-10-26-draft-exchange.md) | DEC-0131 (CT-156) | pending |
+| [2026-10-26 the machines' report](2026-10-26-machine-report.md) | DEC-0132 (CT-152) | pending |
+| [2026-10-26 the exchange's vectors, a role is no authority](2026-10-26-exchange-vectors.md) | DEC-0133 (CT-158 in part; CT-159, CT-160 filed from Fabric ADR-0180) | merged, #201 `609437fe`; released `v0.1.0+2026-10-26.7` |
+| [2026-10-26 the draft exchange](2026-10-26-draft-exchange.md) | DEC-0131 (CT-156; CT-158 filed) | merged, #200 `366a062a`; released `v0.1.0+2026-10-26.6` |
 | [2026-10-26 the family](2026-10-26-family.md) | DEC-0130 (CT-143; CT-149 widened; CT-154, CT-157 filed) | merged, #199 `aa6c1a83`; released `v0.1.0+2026-10-26.5` |
 | [2026-10-26 the organization's member list](2026-10-26-org-authority.md) | DEC-0129 (CT-37 open for the relay's handshake; OM-7's rows; CT-153, CT-155 filed) | merged, #198 `a2c5d018`; released `v0.1.0+2026-10-26.4` |
 | [2026-10-26 membership attestation, unlinkable memberships](2026-10-26-membership.md) | DEC-0127 (CT-137; CT-37 narrowed, CT-151 filed), DEC-0128 (CT-122; CT-152 filed) | merged, #194 `b79bd14c`, #196 `6f3abaa5`; released `v0.1.0+2026-10-26.4` |

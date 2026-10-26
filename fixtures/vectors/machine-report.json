@@ -1,0 +1,295 @@
+{
+  "description": "Vectors for a machine's report to its estate's hub over the relay (DEC-0132), written by tools/vectors/machine-report.ts, never by hand. seal: sealMachineReport(report, context), context.ephemeral the hex ephemeral scalar; recipient.publicKey is the base64 uncompressed P-256 point. open: openMachineReport(sealed, context) with schemaValid the machine-report schema; context.own.privateKey is the base64 P-256 scalar; context.sender is the machine relayCallerTier named; context.held, when present, the report the hub holds for that machine; a case with findings expects the opened report to carry those FAC-SEM codes, and an ok case without report opens the case's own report. A sealed report is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-machine-report/1, the additional data the RFC 8785 UTF-8 bytes of {type, from, to, msgId, kem}, the plaintext the RFC 8785 form of the report; enc and ct are unpadded base64url.",
+  "report": {
+    "type": "machine-report/1",
+    "machine": "m-a",
+    "at": "2026-10-27T08:00:00Z",
+    "records": {
+      "estateRecord": {
+        "revision": 7,
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "heartbeat": {
+        "sequence": 12,
+        "at": "2026-10-27T07:00:00Z"
+      },
+      "revocationDelta": {
+        "sequence": 3,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "leases": [
+        {
+          "leaseId": "lease-1",
+          "expiresAt": "2026-10-27T20:00:00Z",
+          "spent": "1.25"
+        }
+      ]
+    }
+  },
+  "seal": {
+    "context": {
+      "from": "m-a#sig",
+      "to": "m-hub#sig",
+      "msgId": "report-0001",
+      "recipient": {
+        "kid": "m-hub#kem",
+        "publicKey": "BFFOSor9DNqRrdLZKWZpRT272YgUXmxPupyvIpP+u35mov9gVL+PbXTSMJrzDtRRpyOkqxr3qy+G/nTWK1mWOPM="
+      },
+      "ephemeral": "bf01ea9dc3d33cd410d14e87ceb5cf4b49b19464716c675df813fa654ddf0f11"
+    },
+    "aad": "{\"from\":\"m-a#sig\",\"kem\":\"m-hub#kem\",\"msgId\":\"report-0001\",\"to\":\"m-hub#sig\",\"type\":\"fabric-machine-report/1\"}",
+    "expect": {
+      "ok": true,
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      }
+    }
+  },
+  "open": [
+    {
+      "name": "the hub opens the report of the machine that sent it",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": true,
+        "report": {
+          "type": "machine-report/1",
+          "machine": "m-a",
+          "at": "2026-10-27T08:00:00Z",
+          "records": {
+            "estateRecord": {
+              "revision": 7,
+              "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "heartbeat": {
+              "sequence": 12,
+              "at": "2026-10-27T07:00:00Z"
+            },
+            "revocationDelta": {
+              "sequence": 3,
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            },
+            "leases": [
+              {
+                "leaseId": "lease-1",
+                "expiresAt": "2026-10-27T20:00:00Z",
+                "spent": "1.25"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "a report newer than the one held replaces it",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a",
+        "held": {
+          "at": "2026-10-27T07:59:59Z"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "report": {
+          "type": "machine-report/1",
+          "machine": "m-a",
+          "at": "2026-10-27T08:00:00Z",
+          "records": {
+            "estateRecord": {
+              "revision": 7,
+              "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "heartbeat": {
+              "sequence": 12,
+              "at": "2026-10-27T07:00:00Z"
+            },
+            "revocationDelta": {
+              "sequence": 3,
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            },
+            "leases": [
+              {
+                "leaseId": "lease-1",
+                "expiresAt": "2026-10-27T20:00:00Z",
+                "spent": "1.25"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "a report not after the one held is stale",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a",
+        "held": {
+          "at": "2026-10-27T08:00:00Z"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "stale"
+      }
+    },
+    {
+      "name": "a report naming another machine than the sender",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-b"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "wrong-machine"
+      }
+    },
+    {
+      "name": "sealed to another kem",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-other#kem",
+        "enc": "BK_TmPyV92AHZDVsomzdyA5vU7eYo8xfpqH9nxaTtRtm15TU-B2Vfkv7-OcO0ysakfhUCk0fikj-oT6j0ihje8A",
+        "ct": "2MOj9OKyeWGTL4ijGnrfuok5BjGhhKWBNLD2ahX2jhDB6MVMewKzYid4X_HP4WXo3jv3cNY0sMXrT3S91GUIfrdFd1Ww2HxrXtyMrbonvcjhYcZiAE10k6m4nyJVT6CIGFuk9z0y_mWwnHjJ6CTESty7D4gQbk6p5GYY_J67rtMpsAuaN1R0oCMGKHDtpn71ir-MNCCvbHrh3MUY92pP7YMSARiViGOe1DPUClJgXmrZtGf9DayCaWQj6DTEoGbZMjlcdWQDknKg8NcUqAXIuieLAeiwyst_SxaTAbz8a_dKzw0kmDCP_LW81RdfZjnI06HIiaXR-pquQc17V0wZPHsEekGslITO6RiW_VbZiBb4cKPHBhj-Dk2UcTK_EG8NULhLZa42R5ICVzFEoUXWp1jsIgzcUvLd88gvINdpRomxMwJUPPrCS75KoIJAUlraXEppqYwfgLn2VAzwmsQqQfqTgxEKRpjFme5XYwgIQIPVZwfiN-4dVuUPut-yAV4QL9illG2e4oBiRoNsLNEEXWsAOkzoaDRcgdRgvyELn_wlwaNAY2cZmbOc7Iq_0kafmFI8aIXYrhHLNUOBo94SunOZ4yaq6OBot8kYTA"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "wrong-recipient"
+      }
+    },
+    {
+      "name": "copied into another body (another msgId)",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BBr5XNygqB0EqqKuD6gqCL60xzeLChRRSTHAnbKkUkEA8aVl1ZRyt1xalCaRPJOkuHlKf2R0hfnczCur1F1el6U",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0002",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "a plaintext that is no report",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BOnVqslP1FFTA0XWCstfbU1Klb5nREy8J535bBhrelq6rDRvEengGXs7aX5kBXkjpsk8uEE6sxqS33FS86KQT4U",
+        "ct": "SVfA12XA3uSLhXDL6iKN_l4CAJ6W7goYBLf-1pGkZJASwVvmdERvehaTLplujZQ1NS4Hx4hichijF3s"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a lease named twice is a semantic finding, not a refusal of the seal",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BGQcc9WEYKpApHG6PT5aCh-hescDbiUQz4mT0BSXM0VOxdRvhqmsqxMMSE8e7B3Vd05NV308OwsOz5ebcMYVCoU",
+        "ct": "iDnHQuD9MHDJQoYvY_C3XDfg7V0bgRsmz0gxg4a5bPCKnzgK1cfDHBWp9qid1nsze2UvHJT9LCt__-xthk6gJmiHk12cWNqDrvWw_HvQoIWGIm1o1gWkB6HSLkyv64AiD3SAa0MuM_dJ7tcG7GSwxhJrG1yfoUjLx4RXK1eSYwpNmAOsQ3gKC1H3rZAQuL_3pdoheFJvLeVf_ExbcZcvA5COAy0EBw0Zf2EBFYGHnmFUy_Bx77cmCaw1Nv9AjnMePMp5zCC41W3vYVip2xT0sxZQtdqwEKoN_CWkoMtYKmmvdYGszUwwNUPx9k-n3fAdscoShYkVdFujbKa6vdqB_Ug_dEsc0PF7guedyMiw0O8NPlKArfnbHGwhLrWFM3by0dFxUKYwaeVBcRgpAe-6VjcbgkodhEemBCAWLWz8vl57eo6HJfiNWif6qvbCDUjMxxX9SO3Cct53CDTggiCjGcefG9_XgJvD473YNTBv86VXBBSgyN93fe1Cxp60pAWVkRRXhVSQdwRf1hgdVsQPWqCleOS-OcbIrZgTm6GTaFYiJowPVBzPOR-gQJUVKoMQXgM_P8bc5PNwaqFADwqvYUujIgrRZl5_dGlMNSdFmA1Y59qt2z5nsei03UQ50QfUmvyR7y5p1-Qt3ilrFcACo7E-vcX9wg"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": true
+      },
+      "findings": [
+        "FAC-SEM-152"
+      ]
+    }
+  ]
+}

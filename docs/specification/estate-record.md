@@ -12,7 +12,7 @@ record** is its signed state, one revision at a time. It lists the passkeys that
 with their device keys and a certificate of each machine's hub key, the packages placed on each machine in each context
 (DEC-0082), where each secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
 signs it; every machine of the estate applies the latest revision it can verify and reports its number, and optionally
-its digest, to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
+its digest, to its hub over the relay (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
 
 Sources: the first organization server's target architecture v4 (commit `9c6a780`) — §2 rule 6 (three signed records)
 and rule 12 (algorithms by role), §3 (the nouns *Passkey*, *Estate*, *Machine*, *Device key*, *Signing key*, *Estate
@@ -275,7 +275,7 @@ keys are DEC-0053's.
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107), refusing the revision and keeping its parent when either refuses it; installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
-  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision to its hub over the relay (CT-152, DEC-0128 UE-2) as
+  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision to its hub over the relay (DEC-0132, DEC-0128 UE-2) as
   `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
@@ -303,8 +303,8 @@ records no use. A credential's id is an opaque handle.
   and its administrators' signing passkeys (DEC-0127, DEC-0129), such as the organization network's hub key (Fabric
   ADR-0178 point 1), stay open.
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
-  whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
-  (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is
+  whose `parent` is the digest it holds, and its report to its hub may carry that revision's `digest` beside the number
+  (`records.estateRecord.digest`, DEC-0056; the machines' report, DEC-0132), so a receiver tells the two apart; what a receiver does on seeing a fork is
   not decided here.
 - The ceiling within which a later version of a placed agent installs without a new revision (v4 Path 2 places an agent
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract

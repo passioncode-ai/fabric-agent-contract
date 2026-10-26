@@ -367,8 +367,10 @@ alert:
    away by the relay (`unauthenticated`, 4401, with no reason, [relay](relay.md#admission)), so nothing it signs reaches
    a machine. A machine that applied the revision refuses
    anything the old key signs after it (`revoked-signer`, RD-7). A machine holding an old-hub entry the revision does
-   not list refuses the revision as `unreconciled` and keeps its parent; Fabric watches its machines' reports
-   (`records.estateRecord.revision`, over the relay, never an organization's check-ins, DEC-0128; CT-152) after a move and drafts the revision that lists it. An entry the old hub signed at
+   not list refuses the revision as `unreconciled` and keeps its parent; it still reports to the new hub that revision
+   certifies (MR-2), so Fabric watches its machines' reports (`records.estateRecord.revision`, in the
+   [machines' report](relay.md#the-machines-report) over the relay, never an organization's check-ins, DEC-0128,
+   DEC-0132) after a move and drafts the revision that lists it. An entry the old hub signed at
    a sequence the new hub also used, before a machine applied the revision, is a second signed history (`fork`):
    recovery from a fork is still the revocation delta's open item.
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
@@ -376,7 +378,7 @@ alert:
    and the hub's tokens on calls between machines. Callers mint again from the new hub. The new hub holds none of the old
    hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
    machine holding one of the old hub's leases has reported it after the revocation
-   ([window lease](window-lease.md#reporting)); how a meter orders a new hub's lease after an old hub's (`superseded`)
+   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)); how a meter orders a new hub's lease after an old hub's (`superseded`)
    is CT-113's.
 
 A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that

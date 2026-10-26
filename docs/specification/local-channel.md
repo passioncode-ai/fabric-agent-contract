@@ -54,9 +54,12 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `FAC-SEM-106`, kind `local-channel-session`). A hello refuses a missing `client` or a capability other than
    `consent.ui` (`invalid-params`), and a second hello is `invalid-request` and changes nothing.
 2. **The node's methods** (`NODE_METHODS`): `channel.hello`; `health` → `{status, version, protocols, degraded[]}` (an
-   empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`. The client's method (`CLIENT_METHODS`)
-   is `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`. Payload methods (`node.lifecycle.*`, `grant.check`, …) are added by their
-   owners' decisions, in this envelope.
+   empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`; `machine.report` (DEC-0132) →
+   `{report}`: the node's whole state as `machine-report/1` written at the call, or `null` while it applies no estate
+   records; the hub on the same machine reads it in place of a relayed report
+   ([the machines' report](relay.md#the-machines-report), MR-2). The client's method (`CLIENT_METHODS`) is
+   `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`. Other payload methods
+   (`node.lifecycle.*`, `grant.check`, …) are added by their owners' decisions, in this envelope.
 3. **Consent, the other way.** After hello the channel is bidirectional. A client that declares `capabilities:
    ["consent.ui"]` may receive the node's `consent.prompt {promptId, purposeId, noticeVersion, deadline}` and answers
    `{state: given | denied, at}` — `at` required for `given`, the receipt evidence (DEC-0052). The deadline is at most

@@ -66,7 +66,7 @@ describe("FAC-SEM-106: hello first", () => {
 
 describe("methods, codes and consent outcomes", () => {
   it("keeps the node's methods and the client's apart", () => {
-    expect([...NODE_METHODS]).toEqual(["channel.hello", "health", "enroll.status"]);
+    expect([...NODE_METHODS]).toEqual(["channel.hello", "health", "enroll.status", "machine.report"]);
     expect([...CLIENT_METHODS]).toEqual([["consent.prompt", "consent.ui"]]);
   });
   it("maps every code to one JSON-RPC integer", () => {
@@ -185,6 +185,12 @@ describe("the message definitions validate what they name", () => {
     expect(def("health", { status: "ready", version: "1", protocols: [LOCAL_CHANNEL_PROTOCOL] })).toBe(false);
     expect(def("enrollStatus", { enrolled: true, org: "org-1" })).toBe(true);
     expect(def("enrollStatus", {})).toBe(false);
+    // DEC-0132: the hub on the same machine reads the node's report here, never over the relay.
+    const report = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/machine-report.json"), "utf8"));
+    expect(def("machineReport", { report })).toBe(true);
+    expect(def("machineReport", { report: null })).toBe(true);
+    expect(def("machineReport", { report: { ...report, records: {} } })).toBe(false);
+    expect(def("machineReport", {})).toBe(false);
     expect(def("consentResult", { state: "given", at: "2026-10-12T10:00:00Z" })).toBe(true);
     expect(def("consentResult", { state: "given" })).toBe(false);
     expect(def("consentResult", { state: "denied" })).toBe(true);

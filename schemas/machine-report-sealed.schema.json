@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/machine-report-sealed.schema.json",
+  "title": "A sealed machine report (fabric-machine-report/1, DEC-0132)",
+  "description": "The payload member of a fabric-relay-message/1 body a machine sends to its estate's hub machine. HPKE (RFC 9180) base mode, suite [16, 1, 1], to the hub machine's #kem key; info the ASCII bytes fabric-machine-report/1; additional data the RFC 8785 bytes of {type, from, to, msgId, kem}, from, to and msgId being the enclosing body's signed members. The plaintext is the RFC 8785 bytes, at most 65536, of a machine-report/1 document. The relay reads none of it. docs/specification/relay.md#the-machines-report.",
+  "type": "object",
+  "required": [
+    "type",
+    "kem",
+    "enc",
+    "ct"
+  ],
+  "properties": {
+    "type": {
+      "const": "fabric-machine-report/1"
+    },
+    "kem": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#kem$",
+      "description": "The hub machine's key-agreement key id."
+    },
+    "enc": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{87}$",
+      "description": "The encapsulated key: an uncompressed P-256 point (65 bytes), base64url."
+    },
+    "ct": {
+      "type": "string",
+      "minLength": 22,
+      "maxLength": 87403,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Ciphertext and tag, base64url: at most 65536 + 16 bytes."
+    }
+  },
+  "additionalProperties": false
+}

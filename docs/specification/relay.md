@@ -7,13 +7,14 @@ A compromised relay can delay, drop or count traffic. It cannot read a secret, f
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
 
-The reference code is in four files:
+The reference code is in five files:
 - [`src/relay.ts`](../../src/relay.ts): admission, blob requests, message bodies and the close codes;
 - [`src/secret-envelope.ts`](../../src/secret-envelope.ts): the envelope;
 - [`src/p256.ts`](../../src/p256.ts): key validation and the low-S rule;
-- [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors)).
+- [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors));
+- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132).
 
-Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`).
+Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`, `machine-report.json`).
 
 ## Roles
 
@@ -240,7 +241,8 @@ in force; a refused held list, or none, admits nobody. The handshake
     life (at most 7 days) and a relay cannot push a replay past it.
   - A payload that must stay secret from the relay carries a secret envelope, a personal `fabric-credential-envelope/1`
     ([credentials](credentials.md#the-envelope), DEC-0111), or, for a call between machines and its answer, a sealed
-    `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
+    `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106), or, for a machine's report to
+    its hub, a sealed `fabric-machine-report/1` ([the machines' report](#the-machines-report), DEC-0132).
 - **Presence**: `presence` frames `{kid, state: online | offline, lastSeen}` go only to machines of the same owner. An
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
@@ -440,6 +442,82 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   sessions closed 4403 (see [Admission](#admission)), within one push rather than at the next revision.
 - The window lease is DEC-0062's.
 
+## The machines' report
+
+DEC-0132 (CT-152) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
+[`machine-report-sealed`](../../schemas/machine-report-sealed.schema.json) · code
+[`src/machine-report.ts`](../../src/machine-report.ts) · vectors
+[`fixtures/vectors/machine-report.json`](../../fixtures/vectors/machine-report.json), written by
+[`tools/vectors/machine-report.ts`](../../tools/vectors/machine-report.ts) · rule `FAC-SEM-152`
+
+Each machine tells its estate's hub what it applied and what it spent. A check-in to an organization server carries
+none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it. Three readers
+depend on it: the hub's key rotation (DL-15), the hub move's step 6 ([ceremonies](ceremonies.md#move-the-hub)) and the
+window lease's [reporting](window-lease.md#reporting).
+
+**MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
+estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes
+(DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
+`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`): every lease the machine holds,
+and the newest expired lease of each slot whose window instance has not ended, each with its latest `spent` (optional
+as in the check-in; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
+[reporting](window-lease.md#reporting)). `estateRecord` is required; each lease is named once (`FAC-SEM-152`). A
+report therefore holds the machine's whole state, and the newest report alone tells the hub everything.
+
+**MR-2, to whom and when.** Every machine of the estate sends a report to each **hub machine**, a machine other than
+itself whose `hubKey` one of these revisions certifies:
+- the revision it applied (during a planned move its first revision certifies two machines, the old hub and the new
+  one: both get the report);
+- and a newer revision it verified but refused (`unreconciled`, or a delta anchor it could not apply), so a machine
+  left on its parent after a move still reaches the new hub that drafts the revision it needs (the hub move's
+  [step 6](ceremonies.md#move-the-hub)). A send the relay refuses (`unknown-recipient`, a removed machine) is dropped.
+
+It sends one:
+- after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
+  for the next report);
+- once at or after each of its leases' `expiresAt`, so the lease's final `spent` reaches the hub soon (later reports
+  keep naming it until its window instance ends, MR-1);
+- and at least every 24 hours (`MACHINE_REPORT_INTERVAL_SECONDS`) while it holds a lease or applies the estate's
+  records.
+
+A report is never answered. A lost one is replaced by the next, since each report carries the whole state, never a
+change. On the hub machine itself the hub reads its own node's report over the [local channel](local-channel.md),
+never the relay: it calls the node's `machine.report` (no params), which answers `{report}`, the node's whole state as
+a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records. The hub
+calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
+opened report: the schema, `FAC-SEM-152`, `machine` equal to its own machine id (`wrong-machine` otherwise) and `at`
+after the report it holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
+leases and revision count under MR-5 like any machine's. A node that answers `unknown-method` (pinned before
+DEC-0132) has reported nothing: its leases count at their whole amounts, and it has applied no revision the hub can
+count, so the hub waits for it as for any machine that has not reported.
+
+**MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
+to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
+(the [secret envelope](#the-secret-envelope)'s), `info` the ASCII `fabric-machine-report/1`, the additional data the
+RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` and `msgId`, so a sealed report copied
+into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
+(`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
+machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
+reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report.
+
+**MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
+hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then
+`openMachineReport` refuses, in this order: `malformed` (the sealed object is not the schema's), `wrong-recipient`
+(another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
+that is not a report in its own RFC 8785 form, or that the schema refuses), `wrong-machine` (the report names another
+machine than the one `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that
+machine). The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
+it seals the report, never after the body's signed `iat`, so the body's 60-second bound on `iat` bounds `at` too.
+
+**MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is
+that revision's or above (and, when the report carries `digest` for that same revision, the digest is that revision's).
+A lease's final `spent` is the one in a report whose own `at` is at or after the lease's `expiresAt`, never one judged by
+its delivery: a relay may deliver a report written before the expiry days later, while the meter could still spend.
+The time the [window lease's reporting](window-lease.md#reporting) and `windowRemainder` take for a report is its `at`;
+a holder has reported "after the revocation" of a hub move when its newest report's `estateRecord.revision` is at or
+above the revision that revokes the old hub's key (never by time: a machine that refused that revision still reports
+to the new hub, MR-2, and still spends under the old hub's leases).
+
 ## The pairing rendezvous
 
 When a machine joins an estate from afar, the trusted machine opens a **one-time rendezvous** on its relay session and
@@ -480,6 +558,7 @@ Every refusal of the relay family is data a port runs, not only a test in this r
 |---|---|---|
 | <a id="fac-sem-070"></a>`FAC-SEM-070` | `secret-envelope` | sealed to a `#kem` key by a `#sig` key under `alg` `ES256`, with the one admitted suite, a life of more than zero and at most 24 hours between real instants, and an encapsulated key that is a valid uncompressed P-256 point |
 | <a id="fac-sem-071"></a>`FAC-SEM-071` | `relay-frame` | `auth` names a `#sig` key, `alg` `ES256` and `fabric-relay/0.1`; `send` addresses a `#sig` key, with a `ttl` of 1 s to 7 days and a body of at most 765 KiB decoded |
+| <a id="fac-sem-152"></a>`FAC-SEM-152` | `machine-report` | a machine's report names each lease once (DEC-0132) |
 
 ## Not decided here
 
