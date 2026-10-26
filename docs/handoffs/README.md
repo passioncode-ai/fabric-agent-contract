@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-26 the A2A Agent Card, links to a service's pages, Fabric's button in the page's language](2026-10-26-a2a-open-link-button.md) | DEC-0122 (CT-131), DEC-0123 (CT-130), DEC-0124 (CT-148); CT-135, CT-144 closed; CT-145 to CT-147 filed | merged, #187 `7044eb0a`, #188 `9efcc222`, and the pull request that adds this entry |
 | [2026-10-24 every button has an agent twin](2026-10-24-action-parity.md) | DEC-0121 (CT-124 to CT-128 filed) | merged, #182 `52c7d798`; released `v0.1.0+2026-10-25` |
 | [2026-10-24 the contract's own debts, the third release](2026-10-24-debts-and-third-release.md) | DEC-0120 (CT-104; CT-72, CT-74, CT-96, CT-100, CT-101, CT-109 closed; CT-123 filed) | merged, #180 `de8cec30`; released `v0.1.0+2026-10-24.2` |
 | [2026-10-24 DEC-0118, the audit, the second release](2026-10-24-audit-and-release.md) | DEC-0118 (#170 `bf6bd918`), DEC-0119 (the audit) | merged, #173 `4e5440cf`; released `v0.1.0+2026-10-24` |

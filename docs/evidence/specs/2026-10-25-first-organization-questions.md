@@ -28,4 +28,19 @@ R1-D17):
 | Q-01 | The first organization is RM-28's pilot: our own organization first, as a rehearsal, then an outside organization; it runs on members' Macs and existing servers, no cloud VM on the critical path (R1-D1, R1-D2) | the operator's Mac is in both organizations, so CT-122 is a hard gate before the second one joins; CT-93 (`org-cloud`) leaves the path |
 | Q-04 | In mode C a person cannot hide the summary of the organization's own context from it; their personal context is not visible to it anyway (R1-D17). Isolation for this release: mode C plus CT-122's unlinkable memberships; level 3 moves to the next release (R1-D13) | CT-92's second half is answered; its decision record remains |
 
-Q-02, Q-03 and Q-05 to Q-09 are still open with the operator. Five rows came with the answers: CT-137 to CT-141.
+Five rows came with the answers: CT-137 to CT-141.
+
+On 2026-10-26 fabric-workspace, which takes these questions for the operator under the mandate of 2026-10-25
+(announcement `a509fcc0`), closed the rest (message `418da12a` on thread `c9d5be94`; its record MD-6 in
+fabric-workspace `knowledge/integration.md` at `4c38d0b7`). It answered by the recommendations above:
+
+| Id | Answer (2026-10-26) | What it changes here |
+|---|---|---|
+| Q-02 | a dated tag now; `0.2.0` with the D5 protocol revision | releases stay `v0.1.0+<date>` (DEC-0108) |
+| Q-03 | assumed: close class G here once each row names its consumer row, and track adoption on one page. MD-6 queues a "Q-03" for the operator, but that is Fabric Dashboards' Q-03 (a passkey sign-in), not this one | a later cut of the backlog closes class G rows with their consumer ids |
+| Q-05 | CT-122's seven defaults | CT-122's decision text by 2026-11-06 takes the brief's defaults |
+| Q-06 | wait for the limit to reset | CT-128 reads DEC-0121 after 2026-10-30 |
+| Q-07 | D5 after the first organization, as one protocol revision | wave 5 unchanged |
+| Q-08 | clear the long-expired foreign leases | on 2026-10-26 `agent_sync.py reap --long-expired` found none expired 7 days or more (`residue`: 17 refs, the oldest expired 32 h before); they are cleared once they pass that age |
+| Q-09 | accept the `fs` record plane while one machine works here | unchanged |
+
