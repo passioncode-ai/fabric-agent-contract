@@ -7951,13 +7951,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `verifyOrgKeySet` and the schema read an issuer.
   4. **OX-1's public material** names the administrators' public credentials, the owner's among them, never the claim.
   5. **OL-6, a role is no authority.** An attestation's role never proves an administrator; the applied key set's
-     `administrators` does. No reader checks an attestation's role or status against the member list; only the relay
-     could match its subjects (CT-37).
+     `administrators` does. No reader checks an attestation's role against the member list. Whether the relay checks
+     status from both, the stricter answer winning (ADR-0180 point 4), is left to its handshake (CT-37), since only the
+     relay can match the list's pairwise subjects.
 - **Why:** a port of the exchange is checked by bytes, not by reading TypeScript; the root's answer is what a member
   pins, so it gets a schema; and a role that proved authority would let an issuer's online keys certify an
   administrator, which DEC-0129 keeps with the root.
-- **Alternatives considered:** a `type` member on the root's answer (DEC-0131 fixed its shape without one, and a server
-  already answers it); reading a role against the list in Fabric (subjects are pairwise, CX-22).
+- **Alternatives considered:** a `type` member on the root's answer (DEC-0131 fixed its shape without one); reading a
+  role against the list in Fabric (subjects are pairwise, CX-22); taking ADR-0180 point 4's relay status rule now
+  (the relay's handshake, where it belongs, is still CT-37's).
 - **Compatibility:** additive but for item 3, which narrows a check no server runs yet (the first organization server's
   N-3 is unmerged). `contractVersion` stays `0.1.0`. Fabric ADR-0180's release statement and root succession are
   CT-159 and CT-160.

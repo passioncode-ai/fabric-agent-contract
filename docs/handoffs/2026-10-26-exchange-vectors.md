@@ -17,7 +17,12 @@ take in Fabric ADR-0180's answers to DEC-0129's open questions (thread `115ef7fb
 
 ## Checks actually run
 
-- See the pull request for the gate and the blind readings on its head.
+- `pnpm run check`: 105 files, 9 254 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
+  files match.
+- Blind readings, round 1 (head `455687ca`): unit and seam pass; product fail (OL-6 closed the relay's status check
+  against ADR-0180 point 4; the conformance rows named the vectors for duties no vector exercises). Fixed: OL-6 limits
+  itself to roles and leaves the relay's status rule to CT-37 (now in its row and Not decided); each row names the
+  adopter's own test beside the vectors.
 
 ## Decisions
 

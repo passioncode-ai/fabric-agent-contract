@@ -1,6 +1,6 @@
 # Membership: `org-membership/1`, `org-key-set/1` and `org-authority/1`
 
-DEC-0127, DEC-0129, DEC-0131 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151` · schemas
+DEC-0127, DEC-0129, DEC-0131, DEC-0133 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
@@ -324,9 +324,11 @@ the relay stops admitting their enrollments once that list is signed and applied
 
 **OL-6, a role is no authority** (DEC-0133, Fabric ADR-0180). An attestation's role never proves an administrator; the
 applied key set's `administrators` does. A reader reads an attestation's `owner` or `admin` as the issuer's statement,
-for display and routing, never as authority to sign or release anything. No reader checks an attestation's `role` or
-`status` against the member list: the list's subjects are pairwise to the relay's audience (OL-1) and an attestation's
-to its own reader (CX-22), so only the relay could match them, and how it does is the relay's handshake (CT-37).
+for display and routing, never as authority to sign or release anything; what else a role lets a reader show or route
+stays the reader's. No reader checks an attestation's role against the member list. Only the organization's relay could
+match an attestation to the list at all, since the list's subjects are pairwise to the relay's audience (OL-1) and an
+attestation's to its own reader (CX-22); whether the relay checks status from both, the stricter answer winning, as
+Fabric ADR-0180 point 4 proposes, is part of its handshake and not decided (CT-37).
 
 ## The draft exchange
 
@@ -417,7 +419,8 @@ an administrator's passkey makes a list that passes.
 ## Who adopts it
 
 - **Every organization server** (MD-9 path (a)) issues attestations: a root per organization that signs key sets only
-  (held by the owner's Fabric since DEC-0129), signing keys online, a life of at most 24 hours, every duty of OM-8, and runs `fixtures/vectors/org-membership.json`.
+  (held by the owner's Fabric since DEC-0129), signing keys online, a life of at most 24 hours, every duty of OM-8, and runs `fixtures/vectors/org-membership.json` and, serving the draft exchange,
+  `fixtures/vectors/org-exchange.json` (DEC-0133).
   The first organization server is one of them; its own extensions go under its own domain.
 - **Fabric** pins an organization's root in the estate record at the person's join (OM-2), applies key sets with
   `verifyOrgKeySet`, verifies attestations with `verifyOrgMembership` before it trusts a membership, keeps the held
@@ -464,7 +467,9 @@ its relay (OX-6).
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
 - What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
   TP-03 defines it with Fabric.
-- The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
+- The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37),
+  and whether the relay checks a member's attestation status against the list, the stricter answer winning (Fabric
+  ADR-0180 point 4; OL-6).
 - Beyond the member list (DEC-0129): a quorum or a delay of administrators' signatures (Fabric ADR-0178 D8-c, R2); the
   `org-countersign/1` verifier; the organization's heartbeat and revocation delta; organization windows; members'
   allowances; a passkey root that signs key sets itself.
@@ -474,7 +479,7 @@ its relay (OX-6).
 - How attestations reach a reader (a push, a fetch) and how a reader authenticates to the issuer to fetch one: the
   issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.
-- What each role may do in a reader: the reader's. An administrator's signature to release a project from an
+- What each role may do in a reader beyond OL-6 (display and routing, never authority): the reader's. An administrator's signature to release a project from an
   organization (MC-13) is not an attestation, and never a signature inside the member's estate. Fabric ADR-0180
   proposes a release statement an administrator's listed credential signs over a register challenge (as OL-2 signs a
   list), naming the organization, the project by the reference it came in with and a rising revision; the member's
