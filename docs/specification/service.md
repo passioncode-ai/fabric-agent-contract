@@ -471,8 +471,11 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   service origin. `<id>` and `<instance>` are the service's own descriptor's (never guessed from a project name or a
   port). The grammar is Fabric Dashboards' (its ADR-0005, [sources](../evidence/sources.md)): one trailing slash is the
   same link, and the link carries no parameter but `path`, nothing after the key, no token, no login code and never
-  the login-code route ([FL-7](fabric-button.md#the-link-back)). `dashboardsLink` builds it as the host's own
-  `serviceLink` does and `parseDashboardsLink` reads it.
+  the login-code route ([FL-7](fabric-button.md#the-link-back)). `dashboardsLink` builds exactly what the host's own
+  `serviceLink` builds, and `parseDashboardsLink` refuses whatever the host's reader refuses (an empty `path`; a
+  backslash or a control character anywhere in the path; a path over 2048 characters). The contract is stricter than
+  the host in three places, each refused by both: whitespace in the path (`originPath`), the login-code route, and a
+  credential in the path's query or fragment.
 - **PL-2, no browser of its own.** A service and an agent MUST NOT open a browser on a service's page themselves,
   except as PL-3 allows. An agent opens the open_link through the host (Fabric Dashboards' `open`, with no browser
   fallback).

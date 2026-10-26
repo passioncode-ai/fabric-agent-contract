@@ -47,10 +47,11 @@ describe("open_link round trip and edges (DEC-0123 PL-1)", () => {
     }
   });
 
-  it("refuses an overlong link and an overlong build", () => {
-    const long = `/${"a".repeat(2100)}`;
-    expect(parseDashboardsLink(`fabric-dashboards://service/example-agent.default?path=${long}`)).toEqual({ ok: false, problems: ["an open_link is at most 2048 characters"] });
-    expect(() => dashboardsLink("example-agent", "default", long)).toThrow("at most 2048");
+  it("bounds the path as the host does, at 2048 characters, and the link only to keep reading finite", () => {
+    const edge = `/${"a".repeat(2047)}`;
+    expect(parseDashboardsLink(dashboardsLink("example-agent", "default", edge))).toEqual({ ok: true, service: "example-agent", instance: "default", path: edge });
+    expect(() => dashboardsLink("example-agent", "default", `${edge}a`)).toThrow("the path is at most 2048 characters");
+    expect(parseDashboardsLink(`fabric-dashboards://service/example-agent.default?path=${"%2F".repeat(3000)}`)).toEqual({ ok: false, problems: ["an open_link is at most 8192 characters"] });
   });
 
   it("names every problem of a link at once", () => {

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. The grammar is Fabric Dashboards' (its ADR-0005): `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>, with ?path=<path> encoded as URLSearchParams encodes it when a page is named (a null path names none: the dashboard itself), or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, a backslash a resolver reads as another host included, the login-code route however its dot segments or letter case hide it, a query or fragment, a hash route's own query included, that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a local host as WHATWG URL writes it (127.0.0.0/8, [::1], [::ffff:127.x.y.z], localhost and names under it, a trailing dot ignored, and the unspecified 0.0.0.0 and [::] of a wildcard bind) and for a fabric-dashboards: link outside that grammar, which carries no parameter but one path, nothing after the key but one slash; any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
+  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. The grammar is Fabric Dashboards' (its ADR-0005): `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>, with ?path=<path> encoded as URLSearchParams encodes it when a page is named (a null path names none: the dashboard itself), or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, a backslash a resolver reads as another host included, the login-code route however its dot segments or letter case hide it, a query or fragment, a hash route's own query included, that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a local host as WHATWG URL writes it (127.0.0.0/8, [::1], [::ffff:127.x.y.z], localhost and names under it, a trailing dot ignored, and the unspecified 0.0.0.0 and [::] of a wildcard bind) and for a fabric-dashboards: link outside that grammar, which carries no parameter but one non-empty path, nothing after the key but one slash, and a path the host's safePath accepts (no backslash or control character anywhere, at most 2048 characters) with no whitespace (originPath, stricter than the host); any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
   "builds": [
     {
       "name": "the dashboard itself, no path",
@@ -128,6 +128,33 @@
       "expected": null
     },
     {
+      "name": "a backslash inside the path (the host's safePath refuses it anywhere)",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/a\\b"
+      },
+      "expected": null
+    },
+    {
+      "name": "a control character inside the path",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/a\u0001b"
+      },
+      "expected": null
+    },
+    {
+      "name": "a space in the path (the contract keeps originPath's no-whitespace, stricter than the host)",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/a b"
+      },
+      "expected": null
+    },
+    {
       "name": "a hash route without a credential",
       "input": {
         "service": "example-agent",
@@ -158,6 +185,49 @@
         "url": "fabric-dashboards://service/example-agent.default/"
       },
       "expected": []
+    },
+    {
+      "name": "the host's verb in upper case",
+      "input": {
+        "url": "fabric-dashboards://SERVICE/example-agent.default?path=%2Fdashboard"
+      },
+      "expected": []
+    },
+    {
+      "name": "an empty path",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path="
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a path parameter with no value",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a backslash inside the path",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Fa%5Cb"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a control character inside the path",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Fa%01b"
+      },
+      "expected": [
+        "/url"
+      ]
     },
     {
       "name": "a page after the key instead of in path",

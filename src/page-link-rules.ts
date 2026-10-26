@@ -12,13 +12,17 @@ import { credentialName, rawValues, secretValue } from "./secret-shape.js";
 /** A service id and an instance, as `service-common.schema.json` defines them. */
 export const SERVICE_ID = /^[a-z][a-z0-9-]{1,62}$/;
 export const INSTANCE = /^[a-z][a-z0-9-]{0,31}$/;
+/** A path on the service origin, as `service-common.schema.json` `originPath` writes it: no whitespace. */
+export const ORIGIN_PATH = /^\/(?!\/)\S*$/;
 /**
- * A path on the service origin: `service-common.schema.json` `originPath`, and no backslash after the first slash, which a
- * WHATWG resolver reads as a second slash and so as another host (`/\\evil.example` resolves to `http://evil.example/`).
+ * What the host's `safePath` refuses anywhere in a path: a backslash (a WHATWG resolver reads `/\\evil.example` as
+ * `http://evil.example/`) and a C0 or DEL control character.
  */
-export const ORIGIN_PATH = /^\/(?![/\\])\S*$/;
+const HOST_REFUSED = /[\\\u0000-\u001f\u007f]/;
+/** The host's limit on a path; the link around it is bounded only to keep a reader's work finite. */
+export const MAX_PAGE_PATH_LENGTH = 2048;
+export const MAX_PAGE_LINK_LENGTH = 8192;
 const BASE = "http://origin.invalid";
-export const MAX_PAGE_LINK_LENGTH = 2048;
 
 export type DashboardsLink = { service: string; instance: string; path?: string };
 export type ParsedDashboardsLink = ({ ok: true } & DashboardsLink) | { ok: false; problems: string[] };
@@ -31,9 +35,7 @@ export function dashboardsLink(service: string, instance: string, path?: string)
   const problems = linkProblems(service, instance, path);
   if (problems.length) throw new Error(problems.join("; "));
   const base = `fabric-dashboards://service/${service}.${instance}`;
-  const link = path === undefined || path === "" ? base : `${base}?${new URLSearchParams({ path }).toString()}`;
-  if (link.length > MAX_PAGE_LINK_LENGTH) throw new Error(`an open_link is at most ${MAX_PAGE_LINK_LENGTH} characters`);
-  return link;
+  return path === undefined || path === "" ? base : `${base}?${new URLSearchParams({ path }).toString()}`;
 }
 
 const SHAPE = /^fabric-dashboards:\/\/service\/([^/?#]+)\/?(?:\?([^#]*))?$/;
@@ -41,7 +43,8 @@ const SHAPE = /^fabric-dashboards:\/\/service\/([^/?#]+)\/?(?:\?([^#]*))?$/;
 /** Read an open_link: the service key (`id.instance`) and, when it names a page, one `path` on the service origin. */
 export function parseDashboardsLink(url: string): ParsedDashboardsLink {
   if (url.length > MAX_PAGE_LINK_LENGTH) return { ok: false, problems: [`an open_link is at most ${MAX_PAGE_LINK_LENGTH} characters`] };
-  const match = SHAPE.exec(url.replace(/^fabric-dashboards:/i, "fabric-dashboards:"));
+  // The scheme and the host's verb are read without regard to case, as the host reads them.
+  const match = SHAPE.exec(url.replace(/^fabric-dashboards:\/\/service\//i, "fabric-dashboards://service/"));
   if (!match) return { ok: false, problems: ["not fabric-dashboards://service/<id>.<instance>[?path=<path>]"] };
   const key = match[1] as string;
   const dot = key.indexOf(".");
@@ -56,6 +59,7 @@ export function parseDashboardsLink(url: string): ParsedDashboardsLink {
   if (paths.length !== 1) return { ok: false, problems: [paths.length ? "path is given more than once" : "an open_link names its path"] };
   if ([...query.keys()].some((name) => name !== "path")) return { ok: false, problems: ["an open_link carries its path and nothing else"] };
   const path = paths[0] as string;
+  if (path === "") return { ok: false, problems: ["the path is empty; a link to the dashboard itself names no path"] };
   const problems = linkProblems(service, instance, path);
   return problems.length ? { ok: false, problems } : { ok: true, service, instance, path };
 }
@@ -65,7 +69,8 @@ function linkProblems(service: string, instance: string, path?: string): string[
   if (!SERVICE_ID.test(service)) problems.push("the service is not a service id");
   if (!INSTANCE.test(instance)) problems.push("the instance is not an instance name");
   if (path === undefined || path === "") return problems;
-  if (!ORIGIN_PATH.test(path) || new URL(path, BASE).origin !== BASE) problems.push("the path is not a path on the service origin");
+  if (path.length > MAX_PAGE_PATH_LENGTH) problems.push(`the path is at most ${MAX_PAGE_PATH_LENGTH} characters`);
+  else if (!ORIGIN_PATH.test(path) || HOST_REFUSED.test(path) || new URL(path, BASE).origin !== BASE) problems.push("the path is not a path on the service origin");
   else if (pathCarriesCredential(path)) problems.push("the path could carry a token or a login code; signing in is the host's");
   return problems;
 }
