@@ -49,6 +49,7 @@ move's step 6 and the window lease's reporting.
   not the local channel's). Fixed: only the local channel row carries it. Product also failed on the same row; its non-blocking items
   (the glossary, DL-15's local path, `unknown-method`) were applied before round 8.
 - Round 8 (head `473668ee`): unit, seam and product pass. Their non-blocking findings are in CT-161.
+- Round 9 (head `3a3cd12b`): unit, seam and product pass. Two clean rounds in a row; their findings are in CT-161.
 
 ## Decisions
 
@@ -62,4 +63,4 @@ move's step 6 and the window lease's reporting.
 
 ## Next task
 
-Merge after the readings, release, then the next row on the board.
+Merged and released; tell Fabric and Project Observatory's node, then the next row on the board.
