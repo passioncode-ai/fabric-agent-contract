@@ -24,8 +24,8 @@ answered it, every message its Project did not send (DR-5); against 0.1's text, 
 read, that leaves out its own messages, a narrowing made under the compatibility policy's second exception.
 **Amended by DEC-0140 (2026-10-26):** the reserved capability `project.work`, a Project's
 [primary responder](#the-primary-responder); the operator's [move of a slot](#the-operator-moves-a-slot) to another
-session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no tool, no
-argument and no field to any tool's schema, and reserves one capability name no service may serve or declare, a
+session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no board tool, no
+argument and no field to any tool's schema (the move is a host control), and reserves one capability name no service may serve or declare, a
 narrowing under the compatibility policy's second exception.
 
 This extension is how agents exchange information and requests through a **board** that a
@@ -704,31 +704,25 @@ constraint (`comms-refusal.schema.json`).
 **PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
 settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
-session of that Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
-(`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
-`com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
+session of that Project, in the host's operator controls. An agent never moves a slot, on its own account or as a
+relay: the move's agent twin ([service](service.md#actions) AP-1) is owed with the board's other operator controls
+(CT-125), and before a host offers it the twin's decision must bind the slot, the generation and the receiving
+session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (MD-6). Until then a host
+offers the move in its controls only. `com.responder_replace` still takes a slot for its own caller only: its closed
+arguments name no session.
 
 - **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
   showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
-  a replacement. A relayed move is one call: the decision's `target` names the slot, that generation and the receiving
-  session, in the form the host's move tool publishes (at most 200 characters, `decision.schema.json`; a host whose plain form
-  would be longer publishes a compact reference that binds the slot, that generation and the receiving session, such
-  as a digest of the three, never the slot alone), so a new call
-  under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. A relayed
-  decision that names no `target`, or one that does not bind those three, is refused `decision-invalid`: the host
-  checks this itself before `actionDecision`, which alone lets a decision without a target cover the action on any
-  object (CT-181). A stored result answers a retry only while the decision is still valid (AP-2's 24 hours). A retry of the
-  same call with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every board
-  write that stores a receipt; the move keeps its keys in the Project's own namespace, a family of its own), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
+  a replacement. A retry of the same move with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every
+  board write that stores a receipt; the move keeps its keys in the Project's own namespace, a family of its own), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
   `outcome_unknown` (`lost_result`); an `accepted` one is kept (C4). The move transfers no request, since a transfer
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
-  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The move tool answers the board's refusals
-  in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says, and on the relayed path DL-19's codes as
-  `structuredContent` (AP-2). An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
+  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The move answers the board's refusals
+  in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says. An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
@@ -753,8 +747,8 @@ session of that Project: in the host's operator controls, or through their agent
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
   (`in_progress` to `outcome_unknown`) (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
-  before (generation, lease, `provenance`), and no tool's answer gains a member. The host's move action is one of its
-  tools for the operator's controls (CT-125).
+  before (generation, lease, `provenance`), and no tool's answer gains a member. The move is one of the host's
+  operator controls; its agent twin is CT-125's.
 
 ## A session's role and branch
 

@@ -35,6 +35,7 @@
 | SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-28 | Credentials issued into an organization | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
 | SCR-29 | Calls between agents | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
+| SCR-32 | A Project's sessions and its main one | FLW-16 | disabled | proposed | `test/comms-hold.test.ts` |
 
 ## Design system
 

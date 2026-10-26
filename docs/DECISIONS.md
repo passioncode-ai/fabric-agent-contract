@@ -8300,12 +8300,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      service serves or declares it.
   2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
      capability) slot to another live, authorized session of that Project than its holder, in
-     the host's controls or by a relayed decision (`gate: relayed`), never an agent on its own account; from the
+     the host's controls only (its agent twin, whose decision must bind slot, generation and receiving session and which
+     no mandate covers, is owed with CT-125), never by an agent; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
      make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
      the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
      state, showing when the holder is no longer the chosen session and offering the move again while the chosen
-     session is live. The receiving
+     session is live and the slot occupied, and showing the choice as ended once it has ended; an `absent` slot is
+     refused `invalid_transition`. The receiving
      session continues accepted work by its own replacement with a transfer, or the requester cancels it.
   3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
      host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
@@ -8328,6 +8330,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022 and DEC-0081 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179 and CT-181 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022 and DEC-0081 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176 and CT-179 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
