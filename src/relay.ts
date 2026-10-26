@@ -17,6 +17,7 @@ import { P256_CURVE, isEd25519Key, isLowS, p256KeyRefusal, type P256Key } from "
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { KEY_REFERENCE, deviceKeyRef, verifyEstateRecord, type EstateRecordProblem } from "./estate-record-rules.js";
 import { isObject, type JsonObject } from "./findings.js";
+import { type OrgAuthorityProblem, memberKeyOctets, orgAuthorityDigest, verifyOrgAuthority } from "./org-authority.js";
 
 export const RELAY_PROTOCOL = "fabric-relay/0.1";
 export const RELAY_SUBPROTOCOL = "fabric-relay.v1";
@@ -327,8 +328,7 @@ export type AdmissionResult =
  * machines and keys, and minus every key that could never verify a relay signature (an Ed25519 key, or one SEC 1
  * refuses), which `excluded` names for the relay's log; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
  * revision's window has ended the relay fails closed (`expired`): no new `auth` is admitted until a newer verified
- * revision arrives. The organization record has no reference yet (`org-authority/1`, decided with CT-122, CT-37), so an organization's
- * relay has no admission source of its own. A held record whose `revision` is no positive integer is refused `invalid`,
+ * revision arrives. An organization's relay admits from its member list instead (`orgRelayAdmissionSet`, DEC-0129). A held record whose `revision` is no positive integer is refused `invalid`,
  * and a machine whose `id` is no string admits no key (CT-111): the function never throws on a JSON value.
  */
 export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
@@ -390,6 +390,60 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
     }
   }
   return { ok: true, held: record, revision, set, excluded, unread };
+}
+
+/**
+ * What an organization's relay admits from (DEC-0129, CT-37): the organization's member list (`org-authority/1`) it
+ * holds, under the organization's key set it applied (`verifyOrgKeySet` under the root it pinned when it was set up for
+ * the organization, as an estate's relay pins the estate's first passkeys).
+ */
+export interface OrgAdmissionInput {
+  held?: JsonObject; // the list the relay verified and applied last, if any
+  candidate?: unknown; // a newer list offered to it
+  org: string; // the organization the relay serves, `org:<orgId>`
+  keySet: JsonObject; // the organization's key set the relay applied
+  at: Date;
+  schemaValid: (doc: unknown) => boolean;
+}
+
+export type OrgAdmissionResult =
+  | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array> }
+  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "not-yet-valid" | "expired"; problem?: OrgAuthorityProblem };
+
+/**
+ * An organization relay's admission set, kid → `#sig` key as SEC 1 octets, from its member list; or why there is none,
+ * and then the relay admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify against the held
+ * list's revision; without one, the held list is verified again under the key set applied now, so a list whose window
+ * ended, or whose signer the root no longer certifies, admits nobody until a newer list verifies. A refused candidate
+ * changes nothing: the caller keeps `held`. FAC-SEM-150 holds for every verified list, so every listed key is a P-256
+ * point, each kid once.
+ */
+export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResult {
+  const offered = input.candidate !== undefined;
+  if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
+  const doc = offered ? input.candidate : input.held;
+  if (doc === undefined) return { ok: false, refusal: "no-record" };
+  let held: { revision: number; digest: string } | undefined;
+  if (offered && isObject(input.held)) {
+    try {
+      held = { revision: input.held.revision as number, digest: orgAuthorityDigest(input.held) };
+    } catch {
+      held = undefined;
+    }
+  }
+  const verdict = verifyOrgAuthority(doc, { now: input.at, org: input.org, keySet: input.keySet, ...(held ? { held } : {}) });
+  if (!verdict.ok) {
+    if (verdict.problem === "expired" || verdict.problem === "not-yet-valid") return { ok: false, refusal: verdict.problem };
+    return { ok: false, refusal: "unverified", problem: verdict.problem };
+  }
+  const set = new Map<string, Uint8Array>();
+  for (const member of verdict.members) {
+    for (const key of Array.isArray(member.keys) ? member.keys : []) {
+      const octets = isObject(key) && typeof key.kid === "string" ? memberKeyOctets(key.publicKey) : undefined;
+      if (octets) set.set((key as JsonObject).kid as string, octets);
+    }
+  }
+  return { ok: true, held: doc as JsonObject, revision: verdict.revision, set };
 }
 
 /** A proven session: the kid it authenticated as and the `#sig` key octets that signature verified under. */

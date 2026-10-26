@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0129` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0130` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7625,6 +7625,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Fabric and the products that read membership (CT-137).
 - **Annotated (2026-10-26):** DEC-0128 makes `organizationPin.iss` required, a narrowing of this unadopted member
   (DEC-0119); the release that carries both lists it as a narrowing.
+- **Annotated (2026-10-26):** DEC-0129 adds the required member `administrators` to `org-key-set/1` before any tag
+  carried it; a reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set that lists it, and the release
+  that carries DEC-0127 to DEC-0129 lists it as a narrowing (DEC-0119).
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7743,3 +7746,63 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `vitest.config.ts`; backlog CT-122.
 - **Source:** CT-122; the brief and plan above; NET-2 (DEC-0084); the first organization server's request on board
   thread `305f39c3`.
+
+### DEC-0129: the organization's member list, `org-authority/1`, signed by an administrator's passkey
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). A new schema (`org-authority/1`), a new register statement, a new rule
+  (`FAC-SEM-150`) and a relay admission source; `org-key-set/1` gains the required `administrators` before any tag
+  carried the type (DEC-0127's annotation: the release lists it as a narrowing, DEC-0119). Adoption: CT-37 (every
+  organization server drafts, an administrator's Fabric signs, an organization's relay admits).
+- **Context:** DEC-0127 left the organization's list of admitted members for its relay to be decided with CT-122,
+  because its entries are the members' keys per context; DEC-0128 gave each enrollment its own keys and each context its
+  own issuer. Fabric ADR-0178 (D8, fabric `cf99c32f`, 2026-10-26) settled who signs: an administrator's device-bound
+  passkey certified by the organization's root signs the organization's record, a server drafts it and signs nothing of
+  it (points 2 and 3). The plan (`docs/evidence/plans/2026-10-26-ct122-org-authority.md`) had the key set's signing
+  keys sign the list; ADR-0178 replaces that.
+- **Decision:**
+  1. **OL-1, the document.** `org-authority/1`: `issuer`, `org`, `revision`, `issuedAt`, `expiresAt` (at most 7 days,
+     v4 §7), `members` (0 to 1024 `{subject, role, iss, keys}`: the subject pairwise to the relay's audience, a role,
+     the context's token issuer the member's estate pins, 1 to 8 `<enrollment id>#sig` P-256 keys), `digest` and a
+     WebAuthn `signature`. Each subject, `iss` and kid once, every key on the curve (`FAC-SEM-150`, kind
+     `org-authority`).
+  2. **OL-2, who signs.** An administrator's signing passkey, listed in the applied `org-key-set/1`'s new
+     `administrators` (0 to 16, the estate record's `authority` shape, each once under a signing RP, `FAC-SEM-146`),
+     over the register's `org-authority/1` challenge `{type, digest}`; no server, the drafting one included. A
+     credential a later set drops signs nothing from that set on.
+  3. **OL-3, the verifier** `verifyOrgAuthority` in `src/org-authority.ts`, in the order of membership.md's OL table.
+  4. **OL-4, the relay.** `orgRelayAdmissionSet` in `src/relay.ts`: an organization's relay pins the organization's root
+     at setup, applies key sets under it, and admits the listed `#sig` keys of a list that verifies; on any refusal it
+     admits nobody (DEC-0047). Without a candidate the held list is verified again under the current key set.
+  5. **OL-5, the duties.** The server drafts a revision on every join, end and key change and before expiry; an ended
+     membership leaves the next list.
+  6. **OM-7 gains a row:** an adaptation plan's organization part (TP-03): what the person chose to bring into that
+     organization, by reference, and the person's requests to its administrators; never the plan's draft, its inventory
+     or anything not chosen. A project's entry is the estate revision its person's passkey signs (R1-D12, ADR-0178
+     point 7) and never leaves.
+- **Why:** an administrator's passkey keeps the organization's members out of any server's sole control, as A-3 and
+  ADR-0178 require, while the relay still checks one signed document offline. Listing administrators in the key set
+  the root already signs reuses the person's pin (OM-2) as the only trust anchor and needs no new pin form. A 7-day
+  life bounds how long an ended member stays admitted if the server stops drafting, and re-verifying the held list
+  under the current key set lets a root revoke an administrator at once.
+- **Alternatives considered:** the key set's signing keys signing the list (the plan's; ADR-0178 point 2 refuses any
+  server signature over the organization's record); a separate `org-admin-set/1` document for administrators (a second
+  root-signed document beside the key set for no gain); the owner's passkeys as the root itself (ADR-0178 D8-b; the pin
+  of DEC-0127 is an Ed25519 key, so the owner's passkeys enter as the first set's administrators and a passkey root is a
+  later pin form); a member's estate record carrying its organization keys for the relay (the relay of an organization
+  would read every member's estate, which DEC-0128 keeps from it); roles that grant at the relay (the relay admits, it
+  does not authorise).
+- **Compatibility:** `org-authority/1` is a new type; `administrators` is a narrowing of `org-key-set/1` before its
+  first tag (DEC-0127's annotation). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/org-authority.schema.json` (new), `schemas/org-key-set.schema.json`
+  (`administrators`); `src/org-authority.ts` (new), `src/org-membership.ts` (`administrators`, `FAC-SEM-146`),
+  `src/relay.ts` (`orgRelayAdmissionSet`), `src/signing-challenges.ts` (`org-authority/1`, `ORG_KEY_SET_FIELDS`),
+  `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (the
+  member list OL-1 to OL-5, OM-2's fingerprint, OM-3's administrators, OM-7's row, the rules), `relay.md`, `signing.md`,
+  `revocation-delta.md`, `window-lease.md`, `estate-record.md`, `conformance.md` (module, rows, the two tables, the
+  code, the next free code), `README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Member list); `tools/vectors/org-membership.ts`,
+  `fixtures/vectors/org-membership.json`, positive and negative fixtures; `test/org-authority.test.ts`,
+  `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+  `vitest.config.ts`; backlog CT-37.
+- **Source:** CT-37; Fabric ADR-0178 (fabric `cf99c32f`); board request `d5cbabfd` (thread `8d115bed`, TP-03's
+  organization part); DEC-0047, DEC-0055, DEC-0063, DEC-0127, DEC-0128; v4 §7.

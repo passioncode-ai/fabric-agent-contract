@@ -63,8 +63,8 @@ export const ORG_MEMBERSHIP_FIELDS = [
   "issuer", "org", "audience", "subject", "role", "external", "status", "revision", "membershipEndsAt", "issuedAt", "notBefore", "expiresAt", "extensions", "alg", "kid"
 ] as const;
 
-/** An organization key set's members beside `type`: the set without `sig` (DEC-0127). */
-export const ORG_KEY_SET_FIELDS = ["issuer", "org", "revision", "issuedAt", "keys", "revoked", "alg", "kid"] as const;
+/** An organization key set's members beside `type`: the set without `sig` (DEC-0127; `administrators`, DEC-0129). */
+export const ORG_KEY_SET_FIELDS = ["issuer", "org", "revision", "issuedAt", "keys", "revoked", "administrators", "alg", "kid"] as const;
 
 /** A Map, so a type named like an Object.prototype member reads nothing. */
 export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<string, StatementSpec>([
@@ -111,7 +111,9 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ["entitlement/1", { signer: "key", fields: ENTITLEMENT_FIELDS, decision: "DEC-0085" }],
   ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }],
   ["org-membership/1", { signer: "key", fields: ORG_MEMBERSHIP_FIELDS, decision: "DEC-0127" }],
-  ["org-key-set/1", { signer: "key", fields: ORG_KEY_SET_FIELDS, decision: "DEC-0127" }]
+  ["org-key-set/1", { signer: "key", fields: ORG_KEY_SET_FIELDS, decision: "DEC-0127" }],
+  // DEC-0129: an administrator's passkey signs the organization's member list by its digest, as estate-revision/1 does a record.
+  ["org-authority/1", { signer: "passkey", fields: ["digest"], decision: "DEC-0129", check: (f) => matches(SHA256, f.digest) }]
 ]);
 
 /**

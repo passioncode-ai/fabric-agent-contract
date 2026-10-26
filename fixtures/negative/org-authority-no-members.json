@@ -1,0 +1,17 @@
+{
+  "type": "org-authority/1",
+  "issuer": "https://orgs.example",
+  "org": "org:org-a",
+  "revision": 3,
+  "issuedAt": "2026-10-26T00:00:00Z",
+  "expiresAt": "2026-11-02T00:00:00Z",
+  "digest": "sha256:61b515e495d1bd83b910ba4c4b04904d7c1d084274d55773569884b76388cce9",
+  "signature": {
+    "format": "webauthn-assertion",
+    "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+    "alg": "EdDSA",
+    "authenticatorData": "JMV95xbqKXy-8KWwKkVCXOLazZs_KZeeDzupYIlM54sFAAAAAA",
+    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSDB4QUxoakdnckh4MkRMNjhGQWVtcF9pdkhOYW1mN3JKMGFXUk1TSTNUUSIsIm9yaWdpbiI6Imh0dHBzOi8vc2lnbi5vcmdzLmV4YW1wbGUifQ",
+    "sig": "FNMaQuNOyME0xctnu3-Th5QNpLdL8DashrUQf8vGiDrYVYaxJ0uHIKLXs7DJkEeIeXtXgpxsJhaMDdL8_o53BA"
+  }
+}

@@ -1,7 +1,7 @@
 # Relay `fabric-relay/0.1`
 
 A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
-owner's estate (an organization's members once `org-authority/1`, decided with CT-122 (CT-37), gives them a record). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
+owner's estate, or one organization's members, from its signed member list (`org-authority/1`, DEC-0129). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
@@ -183,8 +183,9 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   per-context key; a relay that serves several contexts tells them apart by a pseudonymous per-context id (the
   enrollment key's thumbprint, or an id derived per context that the relay cannot invert), never by the estate (relay
   RLY-08).
-- **No organization record yet.** An organization's relay has no admission source of its own until
-  `org-authority/1` is decided (with CT-122, CT-37).
+- **An organization's member list.** An organization's relay admits from the organization's member list
+  (`orgRelayAdmissionSet`, [membership](membership.md#the-organizations-member-list) OL-4, DEC-0129), under the
+  organization's root it pinned at setup and the key set it applied, and admits nobody on any refusal.
 
 ## Messages
 

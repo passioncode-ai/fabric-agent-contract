@@ -1000,5 +1000,7 @@
   {"name": "org-membership-unknown-role", "schema": "org-membership.schema.json", "path": "negative/org-membership-unknown-role.json", "valid": false, "keyword": "enum"},
   {"name": "org-membership-email", "schema": "org-membership.schema.json", "path": "negative/org-membership-email.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "org-key-set", "schema": "org-key-set.schema.json", "path": "positive/org-key-set.json", "valid": true},
-  {"name": "org-key-set-no-org", "schema": "org-key-set.schema.json", "path": "negative/org-key-set-no-org.json", "valid": false, "keyword": "required"}
+  {"name": "org-key-set-no-org", "schema": "org-key-set.schema.json", "path": "negative/org-key-set-no-org.json", "valid": false, "keyword": "required"},
+  {"name": "org-authority", "schema": "org-authority.schema.json", "path": "positive/org-authority.json", "valid": true},
+  {"name": "org-authority-no-members", "schema": "org-authority.schema.json", "path": "negative/org-authority-no-members.json", "valid": false, "keyword": "required"}
 ]

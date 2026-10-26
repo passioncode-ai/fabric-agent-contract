@@ -214,8 +214,8 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 
 - **Attestation:** an assertion carries none; how the passkey was created is not checked.
 - **The authenticator's provenance:** no AAGUID allow-list and no device binding. A personal estate may use a synced
-  passkey (v4 §7), so BE and BS are read only for consistency. Device-bound credentials for administrators are
-  `org-authority/1`'s.
+  passkey (v4 §7), so BE and BS are read only for consistency. An administrator's device binding is not
+  decided: DEC-0129 lists administrators' signing passkeys in `org-key-set/1`, not how they were created.
 - **The signature counter:** `verifyEstateRecord` returns `signCount` but checks no monotonicity, since a synced
   passkey's counter is often 0 and machines share no counter.
 - **Extension outputs** are ignored.
@@ -299,7 +299,8 @@ records no use. A credential's id is an opaque handle.
   signs every revision, the hub holds a private key of its own — an Ed25519 hub key certified as `hubKey`, not the
   machine's `#sig` key — and every machine keeps its own device keys. The hub key stays Ed25519 until Fabric's D2. The
   estate's fingerprint and the enrollment ceremonies are [ceremonies](ceremonies.md)'s. An organization's own keys beyond its membership root
-  (DEC-0127) and a context's hub keys (DEC-0128) stay open (Fabric D8, `org-authority/1`).
+  and its administrators' signing passkeys (DEC-0127, DEC-0129), such as the organization network's hub key (Fabric
+  ADR-0178 point 1), stay open.
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
   whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
   (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is

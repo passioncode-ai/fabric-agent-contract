@@ -101,15 +101,17 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
 - **Project Observatory's node** (CT-20) verifies estate revisions under signing credentials only (`verifyEstateRecord`,
   which now refuses a sign-in credential); a node that later verifies a countersignature or a share-grant binding uses
   `verifySigningAssertion` with the register's type.
-- **The first organization server** pins its administrators' and finance approvers' signing credentials under its
-  `sign.` RP ID in `org-authority/1` and never serves a signing page.
+- **The first organization server** lists its administrators' signing credentials under its `sign.` RP ID in the
+  `administrators` of its `org-key-set/1`, which the organization's root signs (DEC-0129), and never serves a signing
+  page; where a finance approver's are pinned is not decided.
 
 ## Not decided here
 
-- Where an administrator's and a finance approver's signing credentials are pinned and certified, their quorum, delay
-  and device binding (`org-authority/1`). Until then `org-countersign/1` is registered but no verifier reads it, and the
-  package's organization countersignature stays DEC-0051's detached signature; replacing it with the passkey assertion is
-  a breaking change for organization countersignatures, stated by the decision that defines `org-authority/1`.
+- Where a finance approver's signing credentials are pinned and certified, and administrators' quorum, delay and
+  device binding (DEC-0129 pins administrators' signing passkeys for the member list only). Until then
+  `org-countersign/1` is registered but no verifier reads it, and the package's organization countersignature stays
+  DEC-0051's detached signature; replacing it with the passkey assertion is a breaking change for organization
+  countersignatures, stated by the decision that defines its verifier.
 - The shape of a limits document and where approved limits are stored.
 - How the outside person's key is first registered and shown to the owner (the relay's OAuth page and its 6-digit
   code, v4 Path 7), beyond the binding `share-grant/1` signs.

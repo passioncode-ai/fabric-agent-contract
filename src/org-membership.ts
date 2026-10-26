@@ -2,7 +2,8 @@ import { createHash, createPublicKey, verify as verifySignature } from "node:cry
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingStatement } from "./signing-challenges.js";
+import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, isSigningRpId, originWithin, signingStatement } from "./signing-challenges.js";
+import { ASSERTION_ALGORITHMS } from "./webauthn.js";
 
 // #region org-membership, docs: docs/specification/membership.md
 /**
@@ -11,7 +12,8 @@ import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingStatement } from "./s
  * `admin` and `member`, whether the membership is `active` or `ended`, and its revision, for at most 24 hours. Any
  * organization server issues it (MD-9 path (a)); the organization's root, which the person's estate pins (the estate
  * record's `organizations`), signs an `org-key-set/1` whose keys sign the attestations. No name, address or email of a
- * person appears anywhere.
+ * person appears anywhere. The set also certifies the administrators' signing passkeys, which sign the organization's
+ * member list (`org-authority/1`, DEC-0129, `src/org-authority.ts`).
  */
 export const ORG_MEMBERSHIP_TYPE = "org-membership/1";
 export const ORG_KEY_SET_TYPE = "org-key-set/1";
@@ -29,6 +31,8 @@ export const MAX_EXTENSIONS = 16;
 /** The most signing keys, and revoked kids, one key set lists. */
 export const MAX_KEYS = 32;
 export const MAX_REVOKED = 256;
+/** The most administrators' signing passkeys one key set certifies (DEC-0129). */
+export const MAX_ADMINISTRATORS = 16;
 export { CLOCK_SKEW_SECONDS };
 
 const isString = (value: unknown): value is string => typeof value === "string";
@@ -114,10 +118,27 @@ function validAtIssue(set: JsonObject): boolean {
   return indexed(set.keys).some(([key]) => time(key.notBefore) <= issuedAt && issuedAt < time(key.notAfter));
 }
 
+/** The members of a passkey credential (the estate record's `authority`, DEC-0055), in shape: the key itself is read at verification. */
+const AUTHORITY_FIELDS = ["credentialId", "alg", "publicKey", "rpId", "origins"];
+const B64URL = /^[A-Za-z0-9_-]+$/;
+function administratorOk(value: unknown): boolean {
+  return (
+    isObject(value) && exactly(value, AUTHORITY_FIELDS) && isString(value.credentialId) && value.credentialId.length <= 1366 && B64URL.test(value.credentialId) &&
+    ASSERTION_ALGORITHMS.includes(value.alg as string) && isObject(value.publicKey) && isString(value.rpId) &&
+    Array.isArray(value.origins) && value.origins.every(isString)
+  );
+}
+
+/** Whether a key set's administrators are 0 to 16 credentials in shape, each credentialId once (DEC-0129). */
+function administratorsOk(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length > MAX_ADMINISTRATORS || !value.every(administratorOk)) return false;
+  return new Set(value.map((entry: JsonObject) => entry.credentialId)).size === value.length;
+}
+
 /**
  * Whether a key set's members have the schema's shapes and FAC-SEM-146's structure (each kid once, the root's kid not
- * among the keys, every window positive, a key valid at its `issuedAt`, no revoked kid among the keys); algorithms and
- * small-order keys aside.
+ * among the keys, every window positive, a key valid at its `issuedAt`, no revoked kid among the keys, each
+ * administrator's credentialId once); algorithms, small-order keys and signing RP IDs aside.
  */
 export function orgKeySetWellFormed(set: JsonObject): boolean {
   const keys = set.keys;
@@ -127,7 +148,7 @@ export function orgKeySetWellFormed(set: JsonObject): boolean {
       issuerOk(set.issuer) && matches(ORG, set.org) && positive(set.revision) && readable(set.issuedAt) &&
       Array.isArray(keys) && keys.length >= 1 && keys.length <= MAX_KEYS &&
       Array.isArray(revoked) && revoked.length <= MAX_REVOKED && revoked.every(opaque) && new Set(revoked).size === revoked.length &&
-      isString(set.alg) && opaque(set.kid) && matches(SIG, set.sig))
+      administratorsOk(set.administrators) && isString(set.alg) && opaque(set.kid) && matches(SIG, set.sig))
   ) return false;
   const kids = new Set<unknown>();
   for (const key of keys) {
@@ -329,7 +350,8 @@ function membershipDocument(value: JsonObject, flag: Flag): void {
 
 /**
  * FAC-SEM-146 on one key set: each kid once, never the root's kid, every window positive, a key valid at the set's
- * `issuedAt`, no revoked kid among the keys, and no key of small order.
+ * `issuedAt`, no revoked kid among the keys, no key of small order, and each administrator's credential once, under a
+ * signing RP with every origin within it (DEC-0129, as FAC-SEM-092 says of a signing credential).
  */
 function keySetDocument(value: JsonObject, flag: Flag): void {
   const revoked = list(value.revoked);
@@ -346,6 +368,17 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
     if (matches(X, key.x) && isSmallOrderKey(rawKey(key.x as string))) flag(`${at}/x`, "a key of small order lets anyone forge a signature (DEC-0045)");
   }
   if (readable(value.issuedAt) && !validAtIssue(value)) flag("/keys", "a key set holds at least one key valid at its issuedAt");
+  const credentials = new Set<string>();
+  for (const [admin, index] of indexed(value.administrators)) {
+    const at = `/administrators/${index}`;
+    const id = show(admin.credentialId);
+    if (credentials.has(id)) flag(`${at}/credentialId`, `credential ${id} is listed twice`);
+    credentials.add(id);
+    if (!isSigningRpId(admin.rpId)) flag(`${at}/rpId`, "an administrator signs only under a dedicated signing RP, sign.<domain> (DEC-0063)");
+    else list(admin.origins).forEach((origin, n) => {
+      if (!originWithin(origin, admin.rpId as string)) flag(`${at}/origins/${n}`, `a signing ceremony runs only on ${show(admin.rpId)} or a host under it, over https without a port`);
+    });
+  }
 }
 
 export function orgMembershipRules(kind: string, value: JsonObject): Finding[] | undefined {
