@@ -7620,7 +7620,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive: two new schemas (`org-membership/1`, `org-key-set/1`) and an optional
   member of the estate record (`organizations`), which Fabric writes only once every reader of the record is pinned at
-  or after: every machine of the person and the relay that holds the record. Adoption: every organization server,
+  or after: every machine of the person and the relay that holds the record, and the node ends an enrollment on the
+  unpinning revision as measured (CT-137). Adoption: every organization server,
   Fabric and the products that read membership (CT-137).
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
@@ -7656,7 +7657,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      activity events, proposals, check-ins of that enrollment, the context's session events, its grants' usage and
      share registrations, the enrollment's node summary, credential requests and call records, and the membership
      refresh leave a person's Fabric for an organization. A new row needs a decision.
-  8. **OM-8, the issuer's duties.** Rising revisions, a stated end, a pairwise opaque subject, roles mapped onto three,
+  8. **OM-8, the issuer's duties.** Rising revisions, a stated end, the ended enrollment's device certificate revoked, a pairwise opaque subject, roles mapped onto three,
      one root per organization, overlapping rotation, a life of at most 24 hours.
 - **Why:** a verifier that trusts only what a key it pinned signs is the pattern the contract already runs for
   entitlements and device policies, and pinning the root in the person's own estate record makes the admission the
