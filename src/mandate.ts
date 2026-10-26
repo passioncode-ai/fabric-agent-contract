@@ -92,9 +92,9 @@ const ceilingWithin = (child: number | undefined, parent: number | undefined) =>
 
 /**
  * A naming list (`capabilities`, `actions`) left out is "any" for a read or a draft but names no call for an external
- * effect or a relayed action (MD-3), so adding one where the scope in force has none would cover calls it did not
+ * effect or a relayed action (MD-3), so adding one where the scope in force has none could cover calls it did not
  * (DEC-0136 MD-2a). `actions` may be added where `capabilities` is listed: it then narrows the relayed actions those
- * name.
+ * name. The line is drawn at the list: `capabilities` added under `actions` alone is refused even within `draft`.
  */
 const namingWithin = (child: MandateScope, parent: MandateScope) =>
   (parent.capabilities === undefined ? child.capabilities === undefined : listWithin(child.capabilities, parent.capabilities))

@@ -7468,11 +7468,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-26). Additive on the wire (a new schema, `mandate/1`; an optional `_meta.mandate` and
   `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149. Amended by DEC-0126 (2026-10-26):
   a relay of the operator's approval from one of their own Projects or sessions is accepted, and `source` names where
-  the words were said. Amended by DEC-0136 (2026-10-26): a hand-over adds no naming list the scope in force leaves out.
-- **Annotated (2026-10-26, CT-149):** `fixtures/vectors/mandate.json` gains a `handOn` group (28 cases): the mandate an
+  the words were said. Amended by DEC-0136 (2026-10-26): a hand-over adds no naming list the scope in force leaves out
+  (MD-2a: no `capabilities` or `actions` list, except `actions` under listed `capabilities`).
+- **Annotated (2026-10-26, CT-149):** `fixtures/vectors/mandate.json` gains a `handOn` group (29 cases): the mandate an
   agent sends when it calls the next one, or the first problem that stops it, so a leading agent's port (the adapter's
-  kits, FAA-131) checks MD-2 as a callee checks MD-3 to MD-5. Amended by DEC-0136 (2026-10-26): a hand-over adds no
-  naming list the scope in force leaves out (MD-2a), with one more `cases` vector for it.
+  kits, FAA-131) checks MD-2 as a callee checks MD-3 to MD-5. Amended by DEC-0136 (2026-10-26): MD-2a, with one more
+  `cases` vector for it.
 - **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the
   operator's task holds the operator's authority for it, hands work to other agents on the operator's behalf with the
   mandate narrowed to the part handed on, and the agent that receives it acts without asking the operator again
