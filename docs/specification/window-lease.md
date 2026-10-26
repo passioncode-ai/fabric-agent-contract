@@ -124,7 +124,7 @@ lease a machine is the window's limit less what every **other** machine holds; a
 once the larger lease expires or is reported.
 
 A lease reaches its machine unchanged: the relay carries it from the hub's machine as a message (DEC-0047). An estate's
-lease never travels through an organization server (DEC-0128 UE-2); a check-in response's `records.leases`, whose items
+lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after CT-152); a check-in response's `records.leases`, whose items
 are this schema, carries an organization's own leases once organization windows exist. The transport adds
 nothing and decides nothing.
 
