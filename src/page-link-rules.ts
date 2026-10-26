@@ -19,9 +19,12 @@ export const ORIGIN_PATH = /^\/(?!\/)\S*$/;
  * `http://evil.example/`) and a C0 or DEL control character.
  */
 const HOST_REFUSED = /[\\\u0000-\u001f\u007f]/;
-/** The host's limit on a path; the link around it is bounded only to keep a reader's work finite. */
+/**
+ * The host's limit on a path. The link around it is bounded only to keep a reader's work finite, above the longest
+ * link a 2048-character path encodes to (up to 9 characters per path character, plus the key).
+ */
 export const MAX_PAGE_PATH_LENGTH = 2048;
-export const MAX_PAGE_LINK_LENGTH = 8192;
+export const MAX_PAGE_LINK_LENGTH = 20_000;
 const BASE = "http://origin.invalid";
 
 export type DashboardsLink = { service: string; instance: string; path?: string };
@@ -44,7 +47,8 @@ const SHAPE = /^fabric-dashboards:\/\/service\/([^/?#]+)\/?(?:\?([^#]*))?$/;
 export function parseDashboardsLink(url: string): ParsedDashboardsLink {
   if (url.length > MAX_PAGE_LINK_LENGTH) return { ok: false, problems: [`an open_link is at most ${MAX_PAGE_LINK_LENGTH} characters`] };
   // The scheme and the host's verb are read without regard to case, as the host reads them.
-  const match = SHAPE.exec(url.replace(/^fabric-dashboards:\/\/service\//i, "fabric-dashboards://service/"));
+  const link = url.replace(/^fabric-dashboards:\/\/service\//i, "fabric-dashboards://service/");
+  const match = SHAPE.exec(link);
   if (!match) return { ok: false, problems: ["not fabric-dashboards://service/<id>.<instance>[?path=<path>]"] };
   const key = match[1] as string;
   const dot = key.indexOf(".");
@@ -54,7 +58,9 @@ export function parseDashboardsLink(url: string): ParsedDashboardsLink {
     const problems = linkProblems(service, instance);
     return problems.length ? { ok: false, problems } : { ok: true, service, instance };
   }
-  const query = new URLSearchParams(match[2]);
+  // The parameters as the host's URL parser reads them: a second `?` stays part of a name, and the query is
+  // percent-encoded before it is decoded.
+  const query = new URL(link).searchParams;
   const paths = query.getAll("path");
   if (paths.length !== 1) return { ok: false, problems: [paths.length ? "path is given more than once" : "an open_link names its path"] };
   if ([...query.keys()].some((name) => name !== "path")) return { ok: false, problems: ["an open_link carries its path and nothing else"] };
@@ -109,8 +115,11 @@ export function isLoopbackPageUrl(url: string): boolean {
 export function pageLinkFindings(url: unknown, instancePath: string, label: string): Finding[] {
   if (typeof url !== "string") return [];
   if (isLoopbackPageUrl(url)) return [{ code: "FAC-SEM-143", instancePath, message: `${label} hands a person a raw local address; give Fabric Dashboards' open_link (DEC-0123 PL-1)` }];
+  // Only what a URL parser strips around a URL: C0 controls and space.
+  const bare = url.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, "");
+  // Recognised behind any whitespace, read as the URL parser would see it: a no-break space before it stays and fails.
   if (/^\s*fabric-dashboards:/i.test(url)) {
-    const parsed = parseDashboardsLink(url.trim());
+    const parsed = parseDashboardsLink(bare);
     if (!parsed.ok) return [{ code: "FAC-SEM-143", instancePath, message: `${label} is not an open_link: ${parsed.problems.join("; ")} (DEC-0123 PL-1)` }];
   }
   return [];

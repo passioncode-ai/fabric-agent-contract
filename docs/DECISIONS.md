@@ -7353,8 +7353,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      dashboard itself with `?path=<path>` for one page, as Fabric Dashboards' ADR-0005 defines it (one trailing slash
      the same link, no other parameter), with the service's own `id` and `instance`; it carries no token or login code
      and never names the login-code route. `dashboardsLink` and `parseDashboardsLink` (`src/page-link-rules.ts`) are
-     the reference: they build and refuse what the host's `serviceLink` and reader do, and are stricter in three
-     places (whitespace in the path, the login-code route, a credential), checked against the host at `a98d1ae`.
+     the reference: they build and refuse what the host's `serviceLink` and reader do, and are stricter in four
+     places (whitespace in the path, the login-code route, a credential, a link read as written rather than as a URL
+     parser normalises it), checked against the host at `a98d1ae` by a differential over 420 494 built links.
   2. **PL-2.** A service and an agent never open a browser on a service's page themselves, except as PL-3 allows; an
      agent opens the open_link through the host with no browser fallback.
   3. **PL-3.** The raw address MAY accompany the open_link as a labelled diagnostic and is the action only where Fabric
@@ -7402,4 +7403,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the first draft (2026-10-26), which found a second parameter, a backslash path and the IPv4-mapped and trailing-dot
   loopback forms passing; its product reading, which found the host's own path-less link refused, PL-2 against PL-3,
   no route on a system the host does not ship for, and no scenario; a second product reading, which found the path
-  set wider than the host's `safePath` (an empty path, a backslash or a control character inside it).
+  set wider than the host's `safePath` (an empty path, a backslash or a control character inside it); and a third
+  unit reading, which found a second `?` read as `path` and a link limit its own builder could exceed.
