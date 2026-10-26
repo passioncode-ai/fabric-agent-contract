@@ -532,6 +532,10 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
   });
 }
 
+/** A machine's context hub keys that are objects, with their indexes, each with the context it is certified for. */
+const contextKeys = (machine: JsonObject): Array<[JsonObject, number, unknown]> =>
+  indexed(machine.contextHubKeys).filter(([entry]) => isObject(entry.key)).map(([entry, c]) => [entry.key as JsonObject, c, entry.context]);
+
 /**
  * FAC-SEM-114 across two revisions (DEC-0084): what a revision drops, it revokes in the same revision.
  * - A machine of the parent that `next` does not list is revoked as `machine <id>`, and its hub key, when it had one, as
@@ -543,10 +547,6 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
  *   `hub-key <old kid>`; FAC-SEM-076 then refuses that kid on any later key, so a re-certified hub key has a new kid.
  * Revocations are matched exactly, as `isRevoked` matches every kind but `grant`.
  */
-/** A machine's context hub keys that are objects, with their indexes. */
-const contextKeys = (machine: JsonObject): Array<[JsonObject, number]> =>
-  indexed(machine.contextHubKeys).filter(([entry]) => isObject(entry.key)).map(([entry, c]) => [entry.key as JsonObject, c]);
-
 function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = flagger(findings, "FAC-SEM-114");
@@ -576,9 +576,10 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
       flag(`${at}/hubKey/kid`, `the hub key ${show(hub.kid)} is no longer certified as it was: the same revision revokes hub-key ${show(hub.kid)}, and a re-certified hub key takes a new kid`);
     }
     // DEC-0128: a context's hub key dropped (its context unpinned, OM-5, or the key replaced) is revoked the same way.
-    const keptContext = new Set(contextKeys(kept).map(([key]) => `${show(key.kid)} ${show(key.x)}`));
-    contextKeys(machine).forEach(([key, c]) => {
-      if (!keptContext.has(`${show(key.kid)} ${show(key.x)}`) && !revoked("hub-key", key.kid)) {
+    // A key is kept only in its own context: one moved to another organization is a key that organization must not inherit.
+    const keptContext = new Set(contextKeys(kept).map(([key, , context]) => `${show(context)} ${show(key.kid)} ${show(key.x)}`));
+    contextKeys(machine).forEach(([key, c, context]) => {
+      if (!keptContext.has(`${show(context)} ${show(key.kid)} ${show(key.x)}`) && !revoked("hub-key", key.kid)) {
         flag(`${at}/contextHubKeys/${c}/key/kid`, `the context hub key ${show(key.kid)} is no longer certified as it was: the same revision revokes hub-key ${show(key.kid)} (DEC-0128)`);
       }
     });
@@ -600,9 +601,13 @@ function organizationPins(value: JsonObject, flag: (instancePath: string, messag
     if (seen.has(org)) flag(`${at}/org`, `organization ${org} is pinned twice`);
     seen.add(org);
     // DEC-0128: a context's issuer is its own and names no estate, so two organizations' tokens share nothing.
-    if (issuers.has(pin.iss)) flag(`${at}/iss`, `context issuer ${show(pin.iss)} is used by two organizations`);
-    issuers.add(pin.iss);
-    if (typeof pin.iss === "string" && typeof value.estate === "string" && value.estate.length > 0 && pin.iss.includes(value.estate)) {
+    if (typeof pin.iss === "string") {
+      if (issuers.has(pin.iss)) flag(`${at}/iss`, `context issuer ${show(pin.iss)} is used by two organizations`);
+      issuers.add(pin.iss);
+    }
+    // Only the opaque part is the pin's own: the fixed prefix would match a short estate id by chance.
+    const opaquePart = typeof pin.iss === "string" ? pin.iss.replace(/^urn:fabric:context:/, "").toLowerCase() : "";
+    if (typeof value.estate === "string" && value.estate.length > 0 && opaquePart.includes(value.estate.toLowerCase())) {
       flag(`${at}/iss`, "a context issuer never contains the estate id (DEC-0128)");
     }
     const x = isObject(pin.root) ? pin.root.x : undefined;

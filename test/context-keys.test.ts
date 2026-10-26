@@ -30,6 +30,8 @@ describe("context hub keys in DL-14 (DEC-0128)", () => {
   it("never lets the personal key sign an organization's token", () => {
     expect(hubKeyCertified(RECORD, PERSONAL_KEY.kid, PERSONAL_KEY.x, AT)).toMatchObject({ certified: true });
     expect(hubKeyCertified(RECORD, PERSONAL_KEY.kid, PERSONAL_KEY.x, AT, undefined, { context: ORG })).toMatchObject({ certified: false, detail: "kid-not-certified" });
+    // A context that is neither personal nor an organization's fails closed.
+    for (const context of ["org:", "Org:org_3fh9p1zc", "team:x"]) expect(hubKeyCertified(RECORD, PERSONAL_KEY.kid, PERSONAL_KEY.x, AT, undefined, { context })).toMatchObject({ detail: "kid-not-certified" });
   });
 
   it("refuses a context key whose organization is unpinned, revoked, or whose public key differs", () => {
@@ -53,6 +55,11 @@ describe("context hub keys in DL-14 (DEC-0128)", () => {
 });
 
 describe("context hub keys in the record's rules (DEC-0128)", () => {
+  it("reads only a context issuer's opaque part for the estate id (FAC-SEM-147)", () => {
+    expect(codes("estate-record", redigest({ ...RECORD, estate: "e" }))).not.toContain("FAC-SEM-147");
+    expect(codes("estate-record", redigest({ ...RECORD, estate: "C7D2A91F" }))).toContain("FAC-SEM-147");
+  });
+
   it("keeps a context key off a machine that is not full (FAC-SEM-134)", () => {
     const { hubKey: _drop, ...noHub } = hubMachine;
     const record = redigest({ ...RECORD, machines: (RECORD.machines as Json[]).map((machine) => (machine.id === hubMachine.id ? { ...noHub, profile: "member" } : machine)) });
@@ -83,6 +90,8 @@ describe("context hub keys in the record's rules (DEC-0128)", () => {
     expect(dropped((machine) => ({ ...machine, contextHubKeys: [] }))).toEqual(["FAC-SEM-114"]);
     expect(dropped((machine) => ({ ...machine, contextHubKeys: [] }), [{ kind: "hub-key", ref: CONTEXT_KEY.kid, revokedAt: parent.issuedAt }])).toEqual([]);
     expect(dropped((machine) => machine)).toEqual([]);
+    // Relabelled to the other pinned organization, the same kid and key: a key that leaves its context is revoked.
+    expect(dropped((machine) => ({ ...machine, contextHubKeys: [{ context: "org:org_7kq2m4xw", key: CONTEXT_KEY }] }))).toEqual(["FAC-SEM-114"]);
     const removed = redigest({
       ...parent,
       revision: parent.revision + 1,
@@ -104,7 +113,7 @@ describe("unlinkable enrollments (DEC-0128 FAC-SEM-148, FAC-SEM-149)", () => {
     const two = { org: "org:org-b", deviceId: "d-2", kids: ["d-2#sig"], publicKeys: ["k-2"], telemetryKeyId: "t-2", collectorIds: ["c-2"] };
     expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, two] })).toBe(false);
     expect(enrollmentsLinkable("registry")).toBe(false);
-    for (const shared of [{ org: "org:org-a" }, { deviceId: "d-1" }, { kids: ["d-1#sig"] }, { publicKeys: ["k-1"] }, { telemetryKeyId: "t-1" }, { collectorIds: ["c-1"] }, { deviceId: "m-1" }]) {
+    for (const shared of [{ org: "org:org-a" }, { deviceId: "d-1" }, { kids: ["d-1#sig"] }, { publicKeys: ["k-1"] }, { telemetryKeyId: "t-1" }, { collectorIds: ["c-1"] }, { deviceId: "m-1" }, { kids: ["m-1#sig"] }, { publicKeys: ["m-1"] }, { telemetryKeyId: "m-1" }, { collectorIds: ["m-1"] }, { collectorIds: ["t-1"] }]) {
       expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, { ...two, ...shared }] }), JSON.stringify(shared)).toBe(true);
     }
     // Shapes the registry does not hold are read as absent, never as a match.

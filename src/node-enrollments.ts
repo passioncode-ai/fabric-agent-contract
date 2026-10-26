@@ -16,30 +16,32 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
 
 /**
  * FAC-SEM-148 on a node's local registry, `{estateMachineId?, enrollments: [{org, deviceId, kids, publicKeys,
- * telemetryKeyId, collectorIds}]}`: one enrollment per organization, and no two enrollments share a device id, a kid, a
- * public key, a telemetry key or a collector id; no enrollment's device id is the machine's estate id.
+ * telemetryKeyId, collectorIds}]}`: one enrollment per organization, no identifier (device id, kid, public key,
+ * telemetry key, collector id) shared by two enrollments in any field, and none the machine's estate id or its device kids.
  */
 function enrollmentFindings(value: JsonObject, flag: Flag): void {
-  const seen = new Map<string, Map<string, number>>();
-  const once = (field: string, item: unknown, at: string, index: number, what: string) => {
+  const estate = typeof value.estateMachineId === "string" ? value.estateMachineId : undefined;
+  // The estate's own identifiers: its machine id and its device kids (FAC-SEM-073's <id>#sig, <id>#kem).
+  const estateIds = new Set(estate === undefined ? [] : [estate, `${estate}#sig`, `${estate}#kem`]);
+  // One set across every identifier field: a value one enrollment uses as a telemetry key and another as a collector
+  // id links them as surely as a shared device id. The organization is its own field.
+  const identifiers = new Map<string, number>();
+  const orgs = new Map<string, number>();
+  const once = (seen: Map<string, number>, item: unknown, at: string, index: number, what: string) => {
     if (typeof item !== "string") return;
-    const byField = seen.get(field) ?? new Map<string, number>();
-    seen.set(field, byField);
-    const first = byField.get(item);
+    if (seen === identifiers && estateIds.has(item)) flag(at, `${what} ${show(item)} is the machine's estate identity: an enrollment's is its own (DEC-0128)`);
+    const first = seen.get(item);
     if (first !== undefined && first !== index) flag(at, `${what} ${show(item)} is shared with enrollment ${first}: each enrollment's is its own (DEC-0128)`);
-    else byField.set(item, index);
+    else seen.set(item, index);
   };
   for (const [enrollment, index] of indexed(value.enrollments)) {
     const at = `/enrollments/${index}`;
-    once("org", enrollment.org, `${at}/org`, index, "organization");
-    once("deviceId", enrollment.deviceId, `${at}/deviceId`, index, "device id");
-    if (typeof value.estateMachineId === "string" && enrollment.deviceId === value.estateMachineId) {
-      flag(`${at}/deviceId`, "an enrollment's device id is never the machine's estate id (DEC-0128)");
-    }
-    strings(enrollment.kids).forEach((kid, k) => once("kid", kid, `${at}/kids/${k}`, index, "kid"));
-    strings(enrollment.publicKeys).forEach((key, k) => once("publicKey", key, `${at}/publicKeys/${k}`, index, "public key"));
-    once("telemetryKeyId", enrollment.telemetryKeyId, `${at}/telemetryKeyId`, index, "telemetry key");
-    strings(enrollment.collectorIds).forEach((id, k) => once("collectorId", id, `${at}/collectorIds/${k}`, index, "collector id"));
+    once(orgs, enrollment.org, `${at}/org`, index, "organization");
+    once(identifiers, enrollment.deviceId, `${at}/deviceId`, index, "device id");
+    strings(enrollment.kids).forEach((kid, k) => once(identifiers, kid, `${at}/kids/${k}`, index, "kid"));
+    strings(enrollment.publicKeys).forEach((key, k) => once(identifiers, key, `${at}/publicKeys/${k}`, index, "public key"));
+    once(identifiers, enrollment.telemetryKeyId, `${at}/telemetryKeyId`, index, "telemetry key");
+    strings(enrollment.collectorIds).forEach((id, k) => once(identifiers, id, `${at}/collectorIds/${k}`, index, "collector id"));
   }
 }
 

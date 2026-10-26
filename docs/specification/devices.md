@@ -575,8 +575,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   `#sig` and `#kem` keys and kids, its own telemetry key ([activity](activity.md#event-id)), its own `collector.id` and
   stream counters, and its own `sequence` in a node summary. A hardware attestation SHOULD NOT carry a hardware-unique
   identifier in an organization enrollment (OQ-0010 decides formats). `FAC-SEM-148` checks the node's local registry
-  (kind `node-enrollments`): one enrollment per organization, and no device id, kid, public key, telemetry key or
-  collector id shared or equal to the estate id. The node keeps that registry and never sends it.
+  (kind `node-enrollments`): one enrollment per organization, and no identifier (device id, kid, public key, telemetry
+  key, collector id) shared by two enrollments in any field, nor equal to the machine's estate id or its device kids. The node keeps that registry and never sends it.
 - **UE-2, nothing of the estate's.** A check-in to an organization server carries none of the estate's records in
   `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and its answer carries none of the estate's
   documents, each of which names the estate. `FAC-SEM-149` is the sender's duty: a node checks what it is about to send

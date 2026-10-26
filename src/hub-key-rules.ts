@@ -73,7 +73,8 @@ const clock = (at: unknown): number => (at instanceof Date ? at.getTime() : type
  *
  * With `options.context` an organization's context (DEC-0128), step 5 reads that context's hub keys instead: a kid is
  * certified only when exactly one machine lists it in `contextHubKeys` for that context, with that key, and the revision
- * pins the organization. A context that is not a context id, or `personal` given as written, reads the personal keys.
+ * pins the organization. `personal` reads the personal keys; any other context that is not an organization's context id
+ * is `kid-not-certified`, so a misconfigured callee fails closed.
  *
  * Otherwise the key is certified, for that machine, by that revision. Never throws.
  */
@@ -102,6 +103,8 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
   if (!isString(kid) || revokes("hub-key", kid)) return refused("token", "kid-not-certified");
   const context = options?.context;
   const inOrg = isString(context) && ORG_CONTEXT.test(context);
+  // A context that is neither personal nor an organization's names no key: a misconfigured callee fails closed.
+  if (context !== undefined && context !== "personal" && !inOrg) return refused("token", "kid-not-certified");
   // DEC-0128: an organization's token verifies only under that context's key, and only while the record pins it.
   if (inOrg && !(record.organizations === undefined ? [] : Array.isArray(record.organizations) ? record.organizations : []).some((pin) => isObject(pin) && pin.org === context)) return refused("token", "kid-not-certified");
   const keyOf = (machine: JsonObject): JsonObject | undefined => {
