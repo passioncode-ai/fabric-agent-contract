@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0123` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0124` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7333,3 +7333,76 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** CT-131; board thread `2587bdd2` (2026-10-25); A2A 1.0.0 specification, checked 2026-10-26; seam and
   product readings of the first draft (2026-10-26), which found the descriptor token offered to peers and the
   unchecked fixtures.
+
+### DEC-0123: a person opens a service's page through Fabric Dashboards' `open_link`; a raw loopback address is a diagnostic
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). A behaviour rule for every service and agent from its next pin, a checker rule
+  (`FAC-SEM-143`) and a reference; no schema changes.
+- **Context:** the operator ruled on 2026-10-24 that every page of their agents and local Fabric services opens in
+  Fabric Dashboards, not in a browser, including links in chat and notifications. An estate agent asked the contract
+  for that rule (request `886c9b4d`, thread `67961610`, deadline 2026-10-31; backlog CT-130): a MUST in
+  `fabric-service/0.1` and `fabric-interop/0.1`, the same for members such as `open_link` and `dashboard_url` in tool
+  answers, a checker rule, and one decision the adapter and Fabric Dashboards cite. The adapter's
+  `building-fabric-services/references/dashboard-links.md` already describes the steps, but as a skill's reference, and
+  agents kept opening pages in a browser. FL-7 said Fabric opens the service's own address in the browser "otherwise",
+  which did not separate a missing host from one that failed.
+- **Decision:**
+  1. **PL-1.** Wherever a service, its CLI, its tools or a completion message hand a person one of the service's own
+     pages, the action MUST be Fabric Dashboards' `open_link`, `fabric-dashboards://service/<id>.<instance>` for the
+     dashboard itself with `?path=<path>` for one page, as Fabric Dashboards' ADR-0005 defines it (one trailing slash
+     the same link, no other parameter), with the service's own `id` and `instance`; it carries no token or login code
+     and never names the login-code route. `dashboardsLink` and `parseDashboardsLink` (`src/page-link-rules.ts`) are
+     the reference: they build and refuse what the host's `serviceLink` and reader do, and are stricter in four
+     places (whitespace in the path, the login-code route, a credential, a link read as written rather than as a URL
+     parser normalises it), checked against the host at `a98d1ae` by a differential of the builder, the reader and the check (seeds 7 and 99).
+  2. **PL-2.** A service and an agent never open a browser on a service's page themselves, except as PL-3 allows; an
+     agent opens the open_link through the host with no browser fallback.
+  3. **PL-3.** The raw address MAY accompany the open_link as a labelled diagnostic and is the action only where Fabric
+     Dashboards cannot show the page on that computer: `not_installed`, or `unsupported` on a system it does not ship
+     for (macOS only today). There the agent or the host opens the page's own address from the service's descriptor
+     (`origin` plus the path). An installed host that did not open the page is reported, not replaced. FL-7 says the
+     same of Fabric.
+  4. **PL-4.** A tool answer MUST carry the page in `open_link`, with any raw address (`http_url`, or an existing
+     `dashboard_url`) as the diagnostic; an event's `link` stays a path the host turns into the open_link;
+     `human-step-required`'s `data.url` stays a path on the service origin or another party's `https` page, as its
+     schema already requires; a URL-mode input request on the service's own page MUST carry the open_link as `url`;
+     an operator-channel message, read on a phone, names the page and says it opens in Fabric Dashboards on the
+     computer (OC-10).
+  5. **`FAC-SEM-143`** refuses a raw `http` or `https` address on a local host (`127.0.0.0/8`, `[::1]`,
+     `[::ffff:127.x.y.z]`, `localhost` and names under it, the unspecified `0.0.0.0` and `[::]`), and a
+     `fabric-dashboards:` link outside the grammar (a second parameter, a path that leaves the origin, a credential), in a URL-mode input request (kind `interop-input-requests`) and in any link a checker is given
+     (new kind `page-link`, `{url}`). Whether the host is installed is known only at run time, so the checker refuses
+     the raw address wherever a person receives it; PL-3's fallback is the runtime's. A remote placement's own `https`
+     page cannot be told from another party's by its form and stays the service's own test.
+- **Why:** the host signs the person in and shows the page with its controls; a browser has no session, so the person
+  meets a login wall or a page outside the estate. One rule in the contract lets the adapter's kits, Fabric Dashboards
+  and every agent cite one place instead of a skill's reference. A checker rule catches the raw address before it
+  ships, which is where the request came from.
+- **Alternatives considered:** a warning instead of a refusal (the request allowed either; a person who gets the raw
+  address meets the failure the rule exists to prevent); a new schema member for tool answers (each capability's answer
+  is its own schema, so the member's name is fixed by rule and checked through `page-link`); requiring
+  `fabric-dashboards://` in `human-step-required`'s `data.url` (a path on the service origin already lets the agent
+  build the open_link, and a third party's step is not a Fabric page).
+- **Compatibility:** no schema changes; `contractVersion` stays `0.1.0`. `interop-input-requests` gains a refusal: a
+  URL-mode request with a raw loopback `url` that used to pass now fails `FAC-SEM-143`, so a service adopts the rule
+  at its next pin, as DEC-0121's behaviour rules did. The new kind `page-link` is refused by a checker pinned before
+  this decision, which does not know it.
+- **Consequences / affects:** `docs/specification/service.md` (Links to a service's pages, PL-1 to PL-4; the
+  semantic-rules row; the Events feed's `link`; AP-4), `docs/specification/fabric-button.md` (the intro, the diagram,
+  FL-7), `docs/specification/interop.md` (C3.3, the rule's pointer), `docs/specification/README.md` (not adopted yet),
+  `CONTEXT.md` (open_link), `docs/evidence/sources.md` (Fabric Dashboards' ADR-0005 at `a98d1ae`), `docs/ux/`
+  (ST-036, FLW-30, SCN-044, SCR-30),
+  `docs/specification/conformance.md` (the rule's row, the reference's row, two behaviour rows, the next free code),
+  `docs/DOCMAP.md`; `src/page-link-rules.ts`, `src/semantic-rules.ts`, `src/interop-rules.ts`,
+  `src/semantic-kinds.ts`; `tools/vectors/page-links.ts`, `tools/vectors/run.ts`, `fixtures/vectors/page-links.json`;
+  `test/page-links.test.ts`, `vitest.config.ts` (its branch floor); backlog CT-130 (closed by this decision), CT-147
+  (adoption). Consumers: the adapter (its kits and
+  `dashboard-links.md`, `check_dashboard_link.py`), Fabric Dashboards, Fabric, every service that answers with a page.
+- **Source:** the operator's rule of 2026-10-24; request `886c9b4d` (thread `67961610`); CT-130; the unit reading of
+  the first draft (2026-10-26), which found a second parameter, a backslash path and the IPv4-mapped and trailing-dot
+  loopback forms passing; its product reading, which found the host's own path-less link refused, PL-2 against PL-3,
+  no route on a system the host does not ship for, and no scenario; a second product reading, which found the path
+  set wider than the host's `safePath` (an empty path, a backslash or a control character inside it); and a third
+  unit reading, which found a second `?` read as `path` and a link limit its own builder could exceed; and a fourth,
+  which found a link with a control character or a tab inside its scheme passing the check unrecognised.

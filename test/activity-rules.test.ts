@@ -84,6 +84,7 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
 
   // CT-109: the sourceKey pattern copies HOME_PATH's dash clause by hand; over the key's own alphabet the schema refuses
   // exactly the keys HOME_PATH matches, so a change to either copy alone fails here.
+  // 74 241 keys built (15 tokens to depth 4, then 20 000 random): under load they took 7.6 s against the default 5 s (CT-144).
   it("refuses in the sourceKey schema exactly what HOME_PATH matches, over the key's alphabet (CT-109)", () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas", "activity-common.schema.json"), "utf8")) as Json;
     const pattern = schema.$defs.sourceKey.pattern as string;
@@ -123,7 +124,7 @@ describe("FAC-SEM-037: no content, no person, no home path", () => {
     expect(checked).toBeGreaterThan(40_000);
     expect(refused).toBeGreaterThan(1_000);
     expect(checked - refused).toBeGreaterThan(1_000);
-  });
+  }, 30_000);
 
   it("splits keys at camelCase, underscores, hyphens and dots", () => {
     expect(keyWords("displayName")).toEqual(["display", "name"]);

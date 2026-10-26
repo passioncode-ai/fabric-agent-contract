@@ -405,6 +405,10 @@ a **Fabric link**, and says how to get Fabric when it is not installed (DEC-0040
 runner by id. Following one opens a view in Fabric and nothing else; it never carries a secret
 (DEC-0040).
 
+**open_link**: Fabric Dashboards' `fabric-dashboards://service/<id>.<instance>[?path=<path>]`, the action that hands a
+person a service's page inside the host, signed in by it. Not a Fabric link, which opens Fabric; a raw local address
+is only its diagnostic, or the action where the host cannot run (DEC-0123, [service](docs/specification/service.md#page-links)).
+
 **Service**: A long-running agent process following the `fabric-service/0.1`
 extension — on the operator's own computer, supervised by the operating system
 (a **local placement**), or online at an `https` origin, supervised by its

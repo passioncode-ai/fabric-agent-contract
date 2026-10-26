@@ -1,5 +1,6 @@
 // #region interop-rules — docs: docs/specification/interop.md#semantic-rules
 import { type Finding, type JsonObject, isObject, jsonEqual, show } from "./findings.js";
+import { inputRequestLinkFindings } from "./page-link-rules.js";
 
 /** C3.1: the tool annotations a capability's declared effect and idempotency imply. */
 export function expectedAnnotations(effect: unknown, idempotency: unknown): Record<string, true> {
@@ -128,7 +129,7 @@ export function interopRules(kind: string, value: JsonObject): Finding[] | undef
     const tools = Array.isArray(value.tools) ? value.tools.filter(isObject) : [];
     return tools.flatMap((served, index) => objectRootFinding(served, `/tools/${index}`) ?? []);
   }
-  if (kind === "interop-input-requests") return formSecretFindings(value);
+  if (kind === "interop-input-requests") return [...formSecretFindings(value), ...inputRequestLinkFindings(value)];
   if (kind === "interop-job-trace") return traceFindings(value);
   if (kind === "interop-result-trace") return resultTraceFindings(value.result, value.meta, "the result", "/result");
   return undefined;

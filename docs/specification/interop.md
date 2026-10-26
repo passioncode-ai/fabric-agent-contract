@@ -265,7 +265,9 @@ A job or call that needs a person returns `input_required` with MCP
 elicitation `inputRequests` in **form mode**; a choice is a single-select enum with titles
 (`oneOf: [{const, title}]`). Fabric maps it to an interaction point (ADR-0017) and answers with
 `tasks/update` (Task) or `fabric.job.get` + `inputResponses` (job handle). **FAC-SEM-018** form
-mode never requests a secret (MCP rule); secrets use URL mode.
+mode never requests a secret (MCP rule); secrets use URL mode. A URL-mode request on the service's own page MUST carry
+its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
+DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.
 
 `inputRequests` is the MCP map of request key to `elicitation/create` request;
 `inputResponses` maps the same keys to `{action: accept | decline | cancel, content?}`.
@@ -384,6 +386,9 @@ The field is in [`service-well-known.schema.json`](../../schemas/service-well-kn
 | <a id="fac-sem-022"></a>`FAC-SEM-022` | `interop-job-trace`, `interop-result-trace` | the answer's `_meta.traceparent`, where present, agrees with the envelope's trace |
 | <a id="fac-sem-119"></a>`FAC-SEM-119` | `interop-job`, `usage`, `result` | a `working` job's `statusMessage` that starts `quota-exhausted` follows the pause grammar, its instant UTC on a day that exists; `quota-exhausted`'s `resetsAt` names a day that exists; a `usage` (its own, a job result's, a result's) with a `null` number is not `partial: false` |
 | <a id="fac-sem-120"></a>`FAC-SEM-120` | `job-caller` | a caller's act on a job answer at `now` equals `jobCallerAction`'s |
+
+Kind `interop-input-requests` is also read by `FAC-SEM-143` (a URL-mode request's `url`), which
+[service](service.md#fac-sem-143) defines and [`test/page-links.test.ts`](../../test/page-links.test.ts) tests (DEC-0123).
 
 Fixtures: every `interop-*` entry of [`fixtures/catalogue.json`](../../fixtures/catalogue.json),
 `fixtures/semantic/job-limits-*` and the vectors [`fixtures/vectors/job-limits.json`](../../fixtures/vectors/job-limits.json);
