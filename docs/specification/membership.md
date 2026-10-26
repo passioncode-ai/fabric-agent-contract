@@ -445,7 +445,8 @@ organization (DEC-0128's unlinkability). Fabric keeps the `ref` it drew for an i
 revision to that organization that names the item, after a withdrawal too, so a decision bound to a request that names it (AD-5) and a later release that names the project
 by it (CT-159) still find it. A request `id` is drawn the same way, per organization, and kept while the request
 stands. `label`, `resource`, `note` and `purpose` are what the person typed for the organization; Fabric never fills
-them from the estate. Text the person types into two organizations' plans is the person's to repeat, and can link
+them from the estate. They hold no control character but tab and line feed (no U+0000 to U+0008, U+000B to U+001F or
+U+007F), so a server can keep them where U+0000 cannot go; a plan with one is `malformed` (AD-4). Text the person types into two organizations' plans is the person's to repeat, and can link
 them ([contexts](contexts.md#linkability)). A project's own entry into the organization is the estate revision its
 person's passkey signs (R1-D12), which never leaves; a `ref` only lets the person and the administrators talk about it.
 

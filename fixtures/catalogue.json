@@ -1038,6 +1038,7 @@
   {"name": "org-adaptation-kind-inventory", "schema": "org-adaptation.schema.json", "path": "negative/org-adaptation-kind-inventory.json", "valid": false, "keyword": "enum"},
   {"name": "org-adaptation-spend-zero", "schema": "org-adaptation.schema.json", "path": "negative/org-adaptation-spend-zero.json", "valid": false, "keyword": "minimum"},
   {"name": "org-adaptation-revision-zero", "schema": "org-adaptation.schema.json", "path": "negative/org-adaptation-revision-zero.json", "valid": false, "keyword": "minimum"},
+  {"name": "org-adaptation-label-nul", "schema": "org-adaptation.schema.json", "path": "negative/org-adaptation-label-nul.json", "valid": false, "keyword": "pattern"},
   {"name": "org-adaptation-receipt-state", "schema": "org-adaptation-receipt.schema.json", "path": "negative/org-adaptation-receipt-state.json", "valid": false, "keyword": "enum"},
   {"name": "org-adaptation-receipt-pending-at", "schema": "org-adaptation-receipt.schema.json", "path": "negative/org-adaptation-receipt-pending-at.json", "valid": false, "keyword": "false schema"},
   {"name": "org-adaptation-receipt-granted-no-at", "schema": "org-adaptation-receipt.schema.json", "path": "negative/org-adaptation-receipt-granted-no-at.json", "valid": false, "keyword": "required"}

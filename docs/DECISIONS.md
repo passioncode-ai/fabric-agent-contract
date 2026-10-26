@@ -8290,7 +8290,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
   2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128); a
      `ref` is kept for its item across revisions and withdrawals to that organization, an `id` while its request
-     stands; `label`, `resource`, `note` and `purpose` are typed by the person.
+     stands; `label`, `resource`, `note` and `purpose` are typed by the person and hold no control character but tab
+     and line feed (the first server stores them where U+0000 cannot go, its objection in `0fee99ae`).
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
      Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx`; another `404`, or

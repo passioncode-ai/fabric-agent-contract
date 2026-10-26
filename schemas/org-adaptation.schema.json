@@ -70,7 +70,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 80,
-          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "pattern": "^(?![\\s\\S]*[\\u0000-\\u0008\\u000b-\\u001f\\u007f])\\S(?:[\\s\\S]*\\S)?$",
           "description": "A name the person typed for the organization; Fabric never fills it from the estate."
         }
       },
@@ -106,14 +106,14 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 120,
-          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "pattern": "^(?![\\s\\S]*[\\u0000-\\u0008\\u000b-\\u001f\\u007f])\\S(?:[\\s\\S]*\\S)?$",
           "description": "access: the organization's own name of the account, environment or credential asked for, typed by the person."
         },
         "note": {
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "pattern": "^(?![\\s\\S]*[\\u0000-\\u0008\\u000b-\\u001f\\u007f])\\S(?:[\\s\\S]*\\S)?$",
           "description": "access: why, typed by the person; never filled from the estate."
         },
         "amountUsd": {
@@ -133,7 +133,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "pattern": "^(?![\\s\\S]*[\\u0000-\\u0008\\u000b-\\u001f\\u007f])\\S(?:[\\s\\S]*\\S)?$",
           "description": "spend: what it is for, typed by the person; never filled from the estate."
         },
         "role": {

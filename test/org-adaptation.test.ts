@@ -85,6 +85,18 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(adaptationFindings(null as never)).toEqual([]);
   });
 
+  it("takes tab and line feed in typed text and refuses every other control character", () => {
+    const plan = read("fixtures/positive/org-adaptation.json");
+    const withText = (text: string) => ({
+      ...plan,
+      requests: plan.requests.map((r: { kind: string }) => (r.kind === "access" ? { ...r, note: text } : r)),
+    });
+    expect(valid(withText("read-only,\tthen\nwrite"), "org-adaptation")).toBe(true);
+    for (const c of ["\u0000", "\u0008", "\u000b", "\r", "\u001f", "\u007f"]) {
+      expect(valid(withText(`read${c}only`), "org-adaptation"), JSON.stringify(c)).toBe(false);
+    }
+  });
+
   it("states its limits and route as the schema and the spec do", () => {
     const schema = read("schemas/org-adaptation.schema.json");
     expect(schema.properties.items.maxItems).toBe(MAX_ITEMS);
