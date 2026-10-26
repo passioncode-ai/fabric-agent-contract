@@ -513,7 +513,7 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
 
 ## The machines' report
 
-DEC-0132 (CT-152) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
+DEC-0132 (CT-152), DEC-0139 (CT-161) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
 [`machine-report-sealed`](../../schemas/machine-report-sealed.schema.json) · code
 [`src/machine-report.ts`](../../src/machine-report.ts) · vectors
 [`fixtures/vectors/machine-report.json`](../../fixtures/vectors/machine-report.json), written by
@@ -541,7 +541,8 @@ itself whose `hubKey` one of these revisions certifies:
   left on its parent after a move still reaches the new hub that drafts the revision it needs (the hub move's
   [step 6](ceremonies.md#move-the-hub)). A send the relay refuses is dropped, never resent as such: `unknown-recipient`
   (a removed machine), `mailbox-full` and `rate-limited` alike, the next report carrying the whole state in its place
-  (after `rate-limited`, not before its `retryAfter`; DEC-0139).
+  (after `rate-limited`, not before its `retryAfter`; DEC-0139). A send answered `internal`, or whose `accepted` never
+  came, may go again under the same `msgId`, which the relay's tombstone keeps one message.
 
 It sends one:
 - after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
@@ -572,8 +573,9 @@ into another body does not open), the plaintext the report's RFC 8785 form, at m
 (`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
 machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
 reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report; a hub whose own `#kem` the revision
-it applied does not list, or whose private half it cannot read, names that in the `degraded` of its own service's
-health ([service](service.md#descriptor), `fabric-service/0.1`), so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
+it applied does not list, or whose private half it cannot read, names that in its own health: the `degraded` of its
+[well-known document](service.md#well-known-document) where it serves `fabric-service/0.1`, otherwise the surface on
+which it shows the operator its state, so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
 not yet on DEC-0132 does with a body whose payload it does not know is not decided here (CT-172); the machine hears
 nothing back either way, since a report is never answered.
 

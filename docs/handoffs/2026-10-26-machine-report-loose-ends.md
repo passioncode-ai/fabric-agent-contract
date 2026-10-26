@@ -17,7 +17,7 @@ question to CT-172.
     changes.
   - MR-2 to MR-4 and local-channel.md:
     - a send refused `unknown-recipient`, `mailbox-full` or `rate-limited` is dropped, and the next report replaces it;
-    - a hub whose own `#kem` is unusable says so in its own service's `degraded`;
+    - a hub whose own `#kem` is unusable says so in its own health (its well-known `degraded` where it serves `fabric-service/0.1`);
     - any error answer to `machine.report`, or none before the hub's own deadline, means no report;
     - an unserved node method answers `unknown-method`;
     - `machine.report` stays inside the same-user trust boundary.
@@ -53,7 +53,9 @@ question to CT-172.
 
 Finish the readings, merge after #212, and release. Then tell CT-152's adopters on board thread `41a9b0cb`:
 - Fabric's hub (CO-452) reads with `openMachineReport` then `acceptMachineReport`, its own node's `machine.report` with
-  `acceptMachineReport`, and names an unusable `#kem` in its own service's `degraded`;
+  `acceptMachineReport`, and names an unusable `#kem` in its own health;
 - every sender (Fabric's nodes, Project Observatory's OBS-253) drops a send refused `unknown-recipient`,
   `mailbox-full` or `rate-limited` for the next report, after `retryAfter`;
 - a local-channel node answers `unknown-method` for a `NODE_METHODS` method it does not serve.
+- four window-lease vector cases were renamed from "received" to "written" (answers unchanged): a port that keys on
+  case names must follow.

@@ -8294,7 +8294,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      dropped; the next report, which carries the whole state, replaces it (after `rate-limited`, not before its
      `retryAfter`).
   3. **A hub that cannot read reports** (its own `#kem` not listed in the revision it applied, or its private half
-     unreadable) names it in the `degraded` of its own service's health (`fabric-service/0.1`), so a key rotation, a move's step 6 and a division do not
+     unreadable) names it in its own health (its well-known document's `degraded` where it serves
+     `fabric-service/0.1`, otherwise the surface on which it shows the operator its state), so a key rotation, a move's step 6 and a division do not
      wait in silence. What a hub not yet on DEC-0132 does with a report is not decided here (CT-172).
   4. **The local channel.** A method of `NODE_METHODS` a node does not serve answers `unknown-method`; a hub reads
      any error answer to `machine.report`, or none before a deadline of its own, as no report, since a node pinned before DEC-0132 was promised no
@@ -8305,8 +8306,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** keeping `stale` for an unreadable `at` (it depended on whether a report was held, so the
   same bytes got two answers); having `openMachineReport` itself refuse a `FAC-SEM-152` finding (it would change a
   vector adopters run; the second function keeps the first's answers).
-- **Compatibility:** additive for senders and for a node; a narrowing for the hub's reading of reports no conforming
-  machine writes; no earlier vector's answer changes. `contractVersion` stays `0.1.0`.
+- **Compatibility:** a narrowing for senders that resent a report the relay refused (the next report replaces it);
+  additive for a node; a narrowing for the hub's reading of reports no conforming machine writes; no earlier vector's
+  answer changes. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-report.ts` (`acceptMachineReport`, `MACHINE_REPORT_ACCEPT_REFUSALS`, the
   `at` check), `fixtures/vectors/machine-report.json` (open: the off-curve `enc`, the leap second, the space; accept),
   `test/machine-report.test.ts`, `tools/vectors/machine-report.ts`; `relay.md` (MR-2 to MR-4), `local-channel.md` (the
@@ -8314,7 +8316,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   lease), `schemas/machine-report.schema.json` (description), `src/window-lease.ts` (`receivedAt`'s comment),
   `schemas/heartbeat.schema.json` and `schemas/window-lease.schema.json` (descriptions), `fixtures/vectors/window-lease.json`
   and `test/window-lease.test.ts` (case names say "written"), `docs/ux/flows.md` (FLW-27), `docs/ux/scenarios.md`
-  (SCN-038); DEC-0132 annotated; backlog CT-152 (its adopters' reading), CT-161 (closed), CT-172 (filed), CT-122 and
+  (SCN-038), `docs/specification/window-lease.md` (Reporting), `docs/specification/README.md` and `docs/DOCMAP.md` (their
+  rows); DEC-0132 annotated; backlog CT-152 (its adopters' reading), CT-161 (closed), CT-172 (filed), CT-122 and
   CT-154 notes (the latter from the board: Fabric `7ef21793`, the adapter `aa86a675`); the handoff
-  `docs/handoffs/2026-10-26-machine-report-loose-ends.md`.
+  `docs/handoffs/2026-10-26-machine-report-loose-ends.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-161; DEC-0132's readings.

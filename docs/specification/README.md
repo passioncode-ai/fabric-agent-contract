@@ -73,7 +73,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 |---|---|---|
 | [project communication](project-comms.md) | `fabric-project-comms/0.1`: the Project board | adopted by Fabric (server) and the Fabric Agent Adapter (client); owed: DEC-0135's delivery (`deliverTo`, the count staged by the reader's pin) by both (CT-154) |
 | [operator channel](operator-channel.md) | `fabric-operator-channel/0.1` and its status document | the status document (DEC-0058): specified, no consumer yet; the channel itself not measured |
-| [local channel](local-channel.md) | `fabric-local-channel/0.1`: the local channel to the node | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter; owed: `machine.report` (DEC-0132), served by Project Observatory's node and called by Fabric's hub (CT-152) |
+| [local channel](local-channel.md) | `fabric-local-channel/0.1`: the local channel to the node | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter; owed: `machine.report` (DEC-0132), served by Project Observatory's node and called by Fabric's hub, and `unknown-method` for a node method a node does not serve (DEC-0139) (CT-152) |
 | [coordination](coordination.md) | multi-agent coordination and Git integration | not measured |
 
 ## Telemetry and usage

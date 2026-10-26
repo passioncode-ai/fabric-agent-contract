@@ -85,6 +85,7 @@ function machineReportVectors(): Json {
       { name: "a lease named twice is a semantic finding, not a refusal of the seal", sealed: seal("twice", TWICE), context: ctx(), expect: { ok: true }, findings: ["FAC-SEM-152"] },
       { name: "an enc that is not a point on P-256", sealed: { ...sealed, enc: Buffer.concat([Buffer.from([4]), Buffer.alloc(64, 1)]).toString("base64url") }, context: ctx(), expect: { ok: false, refusal: "malformed" } },
       { name: "an at with a leap second, which the schema's date-time takes and RFC 3339 as strictTime reads does not", sealed: seal("leap", { ...REPORT, at: "2026-12-31T23:59:60Z" }), context: ctx(), expect: { ok: false, refusal: "malformed" } },
+      { name: "an at strictTime cannot read is malformed before the machine is compared", sealed: seal("leap-other", { ...REPORT, at: "2026-12-31T23:59:60Z" }), context: ctx({ sender: "m-b" }), expect: { ok: false, refusal: "malformed" } },
       { name: "an at with a space for T, held or not", sealed: seal("space", { ...REPORT, at: "2026-10-27 08:00:00Z" }), context: ctx({ held: { at: "2026-10-27T07:00:00Z" } }), expect: { ok: false, refusal: "malformed" } }
     ],
     accept: [
@@ -93,6 +94,7 @@ function machineReportVectors(): Json {
       { name: "a report the schema refuses", report: { type: "machine-report/1", machine: "m-hub" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
       { name: "an at with a space for T", report: { ...REPORT, machine: "m-hub", at: "2026-10-27 08:00:00Z" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
       { name: "an at strictTime cannot read", report: { ...REPORT, machine: "m-hub", at: "2026-12-31T23:59:60Z" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
+      { name: "an unreadable at from another machine is malformed, not wrong-machine", report: { ...REPORT, at: "2026-12-31T23:59:60Z" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
       { name: "a node that answers another machine's report", report: REPORT, context: { machine: "m-hub" }, expect: { ok: false, refusal: "wrong-machine" } },
       { name: "a report not after the one held", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T08:00:00Z" } }, expect: { ok: false, refusal: "stale" } },
       { name: "a report after the one held replaces it", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T07:59:59Z" } }, expect: { ok: true } }

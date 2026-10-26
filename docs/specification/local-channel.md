@@ -1,6 +1,6 @@
 # The local channel to the node — `fabric-local-channel/0.1`
 
-DEC-0075 · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
+DEC-0075, DEC-0132 (`machine.report`), DEC-0139 (`unknown-method`, its callers) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
 [`src/local-channel.ts`](../../src/local-channel.ts)
 
 How Fabric, Fabric Switchboard and Fabric Dashboards talk to Project Observatory's node on the same machine: the
