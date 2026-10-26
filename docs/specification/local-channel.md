@@ -58,8 +58,12 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `{report}`: the node's whole state as `machine-report/1` written at the call, or `null` while it applies no estate
    records; the hub on the same machine reads it in place of a relayed report
    ([the machines' report](relay.md#the-machines-report), MR-2). The client's method (`CLIENT_METHODS`) is
-   `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`. Other payload methods
-   (`node.lifecycle.*`, `grant.check`, …) are added by their owners' decisions, in this envelope.
+   `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`, and so does a method
+   of `NODE_METHODS` that this node does not serve (a node pinned before DEC-0132 answers `machine.report` so, and its
+   hub reads that as no report, relay.md MR-2; DEC-0139). Other payload methods (`node.lifecycle.*`, `grant.check`, …)
+   are added by their owners' decisions, in this envelope. `machine.report` answers any client of the channel: a
+   process of the node's own user, inside the trust boundary below, may read the machine's leases and what they spent,
+   as it may read the node's files; a node keeps it from no such process (DEC-0139).
 3. **Consent, the other way.** After hello the channel is bidirectional. A client that declares `capabilities:
    ["consent.ui"]` may receive the node's `consent.prompt {promptId, purposeId, noticeVersion, deadline}` and answers
    `{state: given | denied, at}` — `at` required for `given`, the receipt evidence (DEC-0052). The deadline is at most

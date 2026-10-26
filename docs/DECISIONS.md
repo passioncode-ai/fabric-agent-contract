@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0139` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0140` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7974,6 +7974,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
   Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
   leases then count at their whole amounts until it reports.
+- **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, a pre-DEC-0132 hub and `machine.report`'s callers.
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
   leases with `spent`) off every check-in to an organization server, and left the message that carries them to the hub
   open (CT-152). Three readers wait on it: the hub's key rotation (DL-15), the hub move's step 6 and the window lease's
@@ -8267,3 +8268,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form), `relay.md` (Trust tiers' T2); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
   (closed), CT-167 and CT-168 (filed).
 - **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.
+
+### DEC-0139: the machines' report, its readings' loose ends settled
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). A narrowing on the hub's side only: a relayed report whose `at` RFC 3339 as
+  `strictTime` reads does not, or that carries a `FAC-SEM-152` finding, is now `malformed` (before, the first read
+  `stale` when a report was held and was accepted otherwise, and the second was accepted with a finding). No machine
+  that follows MR-1 sends either. Everything else is text. Adoption: Fabric's hub (CT-152's adopter).
+- **Context:** DEC-0132's blind readings left non-blocking findings (CT-161): rules a sender keeps by duty with no
+  reader's check, refusals the text did not name, a local read with no reference function, and stale names.
+- **Decision:** [relay](specification/relay.md#the-machines-report) MR-2 to MR-4 and
+  [local channel](specification/local-channel.md#the-session).
+  1. **The hub's reading.** After `openMachineReport`, the hub reads the report as `acceptMachineReport` does, as it
+     reads its own node's `machine.report`: `malformed` (not a report, the schema refuses it, a `FAC-SEM-152` finding,
+     an `at` `strictTime` cannot read, a leap second or a space for `T`), `wrong-machine`, `stale`. `openMachineReport`
+     itself refuses that `at` as `malformed`.
+  2. **Refused sends.** A report the relay refuses with `unknown-recipient`, `mailbox-full` or `rate-limited` is
+     dropped; the next report, which carries the whole state, replaces it (after `rate-limited`, not before its
+     `retryAfter`).
+  3. **A hub that cannot read reports** (its own `#kem` not listed in the revision it applied, or its private half
+     unreadable) names it in its node's `health` `degraded`, so a key rotation, a move's step 6 and a division do not
+     wait in silence. A hub not yet on DEC-0132 acknowledges a report's delivery and acts on nothing.
+  4. **The local channel.** A method of `NODE_METHODS` a node does not serve answers `unknown-method`; `machine.report`
+     answers any client of the channel, a process of the node's own user being inside its trust boundary.
+- **Why:** each item is a sentence a careful implementer could have read two ways; the two narrowings close a gap
+  where a relayed report was read more loosely than the same report read locally.
+- **Alternatives considered:** keeping `stale` for an unreadable `at` (it depended on whether a report was held, so the
+  same bytes got two answers); having `openMachineReport` itself refuse a `FAC-SEM-152` finding (it would change a
+  vector adopters run; the second function keeps the first's answers).
+- **Compatibility:** additive for senders; a narrowing for the hub's reading of reports no conforming machine writes.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/machine-report.ts` (`acceptMachineReport`, `MACHINE_REPORT_ACCEPT_REFUSALS`, the
+  `at` check), `fixtures/vectors/machine-report.json` (open: the off-curve `enc`, the leap second, the space; accept),
+  `test/machine-report.test.ts`, `tools/vectors/machine-report.ts`; `relay.md` (MR-2 to MR-4), `local-channel.md` (the
+  node's methods), `devices.md`, `conformance.md` (the module row and the reporter and hub rows), `CONTEXT.md` (Window
+  lease), `schemas/machine-report.schema.json` (description), `src/window-lease.ts` (`receivedAt`'s comment),
+  `docs/ux/flows.md` (FLW-27); DEC-0132 annotated; backlog CT-161 (closed), CT-172 (filed), CT-122 and CT-154 notes.
+- **Source:** CT-161; DEC-0132's readings.

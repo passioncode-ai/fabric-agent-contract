@@ -1,5 +1,5 @@
 {
-  "description": "Vectors for a machine's report to its estate's hub over the relay (DEC-0132), written by tools/vectors/machine-report.ts, never by hand. seal: sealMachineReport(report, context), context.ephemeral the hex ephemeral scalar; recipient.publicKey is the base64 uncompressed P-256 point. open: openMachineReport(sealed, context) with schemaValid the machine-report schema; context.own.privateKey is the base64 P-256 scalar; context.sender is the machine relayCallerTier named; context.held, when present, the report the hub holds for that machine; a case with findings expects the opened report to carry those FAC-SEM codes, and an ok case without report opens the case's own report. A sealed report is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-machine-report/1, the additional data the RFC 8785 UTF-8 bytes of {type, from, to, msgId, kem}, the plaintext the RFC 8785 form of the report; enc and ct are unpadded base64url.",
+  "description": "Vectors for a machine's report to its estate's hub over the relay (DEC-0132), written by tools/vectors/machine-report.ts, never by hand. seal: sealMachineReport(report, context), context.ephemeral the hex ephemeral scalar; recipient.publicKey is the base64 uncompressed P-256 point. open: openMachineReport(sealed, context) with schemaValid the machine-report schema; context.own.privateKey is the base64 P-256 scalar; context.sender is the machine relayCallerTier named; context.held, when present, the report the hub holds for that machine; a case with findings expects the opened report to carry those FAC-SEM codes, and an ok case without report opens the case's own report. accept: acceptMachineReport(report, context) with schemaValid the machine-report schema, the hub's reading of a report it opened or its own node answered over the local channel (MR-2, MR-4); context.machine is the sender relayCallerTier named or the hub's own machine id; an ok case expects the case's own report. A sealed report is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-machine-report/1, the additional data the RFC 8785 UTF-8 bytes of {type, from, to, msgId, kem}, the plaintext the RFC 8785 form of the report; enc and ct are unpadded base64url.",
   "report": {
     "type": "machine-report/1",
     "machine": "m-a",
@@ -290,6 +290,317 @@
       "findings": [
         "FAC-SEM-152"
       ]
+    },
+    {
+      "name": "an enc that is not a point on P-256",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",
+        "ct": "BXcr0pdRsKsyILRqcCgRL8DnO5USPE3ARMAZcepC96-FYasgn312wncaDok88cbx4hCHXacf_s-QcDLnAADm605aQo6_4_nC9P4HhxqS-34rBeRFMIMdCuT6eR05fMm5iTR-GM_XIkGE9EB-8cSWNzrinv1G42pni6nZB_tr3laZ5GRahJ6b7zJ0sCPOHMQNoYkUkze6ixc-gAIbomKtshuOl7cPDzLJ77Am_1a34baOQ5JI8JqHHCmZ7qau0bb-wwuQ37KzgBU6tegZNpO4nloyJ6ca3Z-xQXS_Ee9IEXzA9LqRsinCcYtYvvg1vfeObepNkyi32Z2c_n-C6slfsb4KObudha7VIJCnvdfQIemyyCYvlJj3DxpqxmHwyedx0AtStcDUpSQXHq3DnstL7pdn-Ozr0Ljb9wgMu2aI-i8VVBtSgIY4OBjx6SyCkoGE5KkHkC_BOZp2Bx6f7t7AmlyS9cz5G3rv6upLcdPaR2X1APaB5EZ-H-sSUDFQpktxTr7JWmWJ9ZfW74ACE3cQm_7TbYE4Iv7of_LDK2tZvPqfWYrR_hNY0pBjxx2a3CGEREWMFTgPbvoXCXJVV93DetcoyHzjSLKSptWtaw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "an at with a leap second, which the schema's date-time takes and RFC 3339 as strictTime reads does not",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BAthYNn3uQjsNvoBivbT6IHomMCqOuu4Ske8k0058xF3vQIaQWJfNAEtWjhDSF_2fhAT4nl-ybBy6t7_BkD-uwM",
+        "ct": "SmAzN0C1YD6IfDQzdAcIxUFtGuwIr9_HLpPOU3-nQ6aXNQFlR6ySrXt9Mv7Y-EEK0IYqcMJkQ22oqNBQF79JR0Orb4ZT4vlxgdajZXUF-QXOZkXNKhj7HOUmJmTrc2K01u7s5wuAiQyl4x6rD54-UWe0phkMQrERuXSTOxcV4rAVAo1t2OFYhU07akxFd4V5zPrR_SxbnZQPtAOonEh15RWQZKZO-V3gjWs2ly8E5iprc9aLzhrWEe3n7SWNN6BW6NHDUpLuawHwmXeSDx6QeN2rNg2oOvMnmat8GVu77PkXwI2Mw4Q485cTn_VeYi2xs2AIzHLMnAOMVXLR6W-SaXmwjZ4AAZKSn-qElUbjbRDhSweLOkrsju4I62qe8ciVNfiGyGaJjcXjVyMiNEImAb3Ksqaadqm9hDOSCGYQG0yWPl9jNId3qnLm5Qoe3KHJIrCALgx6aIY6EckB3FevCTuKuiMks-rvM_mqUxW-b_W91tVwpW6cXVfVSDXWA1mIZ3URMi1lDj1xjyZBOhZcJxUbxVT-jfNnibyYyEJ7huyAK1ecgd9KZOr0EkUKEIM-Uux8559yy2wh1L0i2dwfxRjLuIzvTiP-T6Uicw"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "an at with a space for T, held or not",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BGy8An9_a37DNWS9ZJCkKRQTMekb-IUBsSstKWBr_wOWahT9bzeWt1fVzKBq4lj1lwdSdsAauKniRasGPP7H_Vc",
+        "ct": "qDGBrCIX59-WSI8Qit1OhvB7m-u0YnlTMbCHg0nRURFHZAmttZRNSmhrYgBidiRH52_VSYz6w8INOOPgUzRV4W1RJLRBkr2tRV2jJwd5OFFIhBST1KaP_z67D8pn4gethQtHwKXx9kyKT5iG7LyqQ6yT0vcEo1zOlM8MsJ_y02-HhabYcEwb8ROVtXs5DMnSiwU_FQC5XepLdKUhBxNCvVbZ-Zwyap-PeJSup5aQEspv35kzqu-LrNQS_jqkK6q0w9_ptRXCW0YCHivhZvcnEPQ-ARjcclu81froJrFXBl-8zaANQ6L8LqYshKr7bkGsynDHJgvK2jS_XaI5IAK9uPS3D_o_ezcxouMdTtIQVEtw7NOVYQINBqmi83-MGKZHCZJjxLbX2W20Ek42vUUXluklIz4Mhx1kSit2W4fdImgI_OIOq9_fk-6Md9QM79Pp9ESG-nu3K5CAjQZo246idiTmPhYyci1gzfJ50vFLqj_Ut39bZorYW-kK_1CCdxYI8GpWk0pf3v_cd8VNja-fvqdPbNBcqYmkc682en6L19IGCMpN-nNUaZ_dBrU1KTCjNtK3o4A5CrRqFgEJLm4GbAm9NdllbS3dNVpc4g"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a",
+        "held": {
+          "at": "2026-10-27T07:00:00Z"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    }
+  ],
+  "accept": [
+    {
+      "name": "the hub's own node answers its report",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "an opened report whose lease is named twice is dropped",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-a",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z"
+            },
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T21:00:00Z"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-a"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a report the schema refuses",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub"
+      },
+      "context": {
+        "machine": "m-hub"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "an at strictTime cannot read",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-12-31T23:59:60Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a node that answers another machine's report",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-a",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "wrong-machine"
+      }
+    },
+    {
+      "name": "a report not after the one held",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub",
+        "held": {
+          "at": "2026-10-27T08:00:00Z"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "stale"
+      }
+    },
+    {
+      "name": "a report after the one held replaces it",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub",
+        "held": {
+          "at": "2026-10-27T07:59:59Z"
+        }
+      },
+      "expect": {
+        "ok": true
+      }
     }
   ]
 }

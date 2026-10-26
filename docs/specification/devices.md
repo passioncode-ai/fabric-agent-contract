@@ -567,7 +567,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   unchanged, and a check-in response carried a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. An estate relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
   DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node that has not adopted UE-2 sends (one pinned before DEC-0128, or before DEC-0132's report
-  over the relay exists),
+  over the relay),
   and the estate's records travel to and from its hub over the relay (DEC-0132).
 
 <a id="unlinkable-enrollments"></a>

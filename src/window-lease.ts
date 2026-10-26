@@ -328,7 +328,8 @@ export interface LeaseReport {
   spent?: string;
   /**
    * The report's time: for a machine's report over the relay, its own `at` (DEC-0132 MR-5), never its delivery, since a
-   * relay may deliver a report written before the lease's expiry after it.
+   * relay may deliver a report written before the lease's expiry after it. The member keeps DEC-0107's name so a vendored
+   * caller does not break; it holds the report's `at` (DEC-0139).
    */
   receivedAt: string;
 }

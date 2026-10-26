@@ -688,7 +688,8 @@ lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
 **Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):
 the meter spends within the smaller of its own remainder and the lease's, fails closed at expiry, and reports `spent`
-to its hub over the relay ([window lease](docs/specification/window-lease.md)).
+to its hub over the relay, or on the hub's own machine through the node's `machine.report` on the local channel
+([window lease](docs/specification/window-lease.md)).
 
 **Entitlement**: The issuer's signed record of what one order entitles one subject to (an organization,
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
