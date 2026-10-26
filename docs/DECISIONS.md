@@ -7868,6 +7868,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   derived view, never authority, DEC-0104).
 - **Compatibility:** text and callee rules only; nothing a reader validates changes. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/delegation.md` (The family and the agent network, DL-27 to DL-29; Not
-  decided here), `conformance.md` (a row), `CONTEXT.md` (Family); backlog CT-143 (closed).
+  decided here), `conformance.md` (a row), `README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Family); backlog CT-143 (closed),
+  CT-149 (adoption), CT-157 (filed).
 - **Source:** CT-143; board request `9db9e09e` item 1 and reply `550ebf96`; DEC-0045, DEC-0055, DEC-0082, DEC-0084
   (NET-1), DEC-0090, DEC-0104, DEC-0106, DEC-0121, DEC-0125.
