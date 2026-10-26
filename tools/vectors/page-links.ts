@@ -1,0 +1,85 @@
+/**
+ * The generator of the page-link vectors (DEC-0123): `fixtures/vectors/page-links.json`, shared by every service and
+ * kit that hands a person a service's page and every checker that reads one.
+ *
+ *   tsx tools/vectors/page-links.ts --check   compare the committed file with what this writes (exit 1 on a difference)
+ *   tsx tools/vectors/page-links.ts --write   write it
+ *
+ * Every vector change is made here and written by `--write`, never by hand. Each expected answer is written below by
+ * hand from DEC-0123; nothing here imports `src/page-link-rules.ts`, so the gate checks that the reference agrees.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { projectRoot } from "../../src/contract.js";
+
+type Json = Record<string, any>;
+export const VECTOR_FILE = "fixtures/vectors/page-links.json";
+
+/** dashboardsLink(service, instance, path): the open_link, or null where the grammar refuses the input. */
+const builds: Array<[string, [string, string, string], string | null]> = [
+  ["the dashboard's root", ["example-agent", "default", "/dashboard"], "fabric-dashboards://service/example-agent.default?path=%2Fdashboard"],
+  ["a job page with a query", ["example-agent", "default", "/dashboard/job_1?tab=log"], "fabric-dashboards://service/example-agent.default?path=%2Fdashboard%2Fjob_1%3Ftab%3Dlog"],
+  ["another instance", ["example-agent", "work", "/"], "fabric-dashboards://service/example-agent.work?path=%2F"],
+  ["a service id with an upper-case letter", ["Example-Agent", "default", "/dashboard"], null],
+  ["a missing instance", ["example-agent", "", "/dashboard"], null],
+  ["a full URL instead of a path", ["example-agent", "default", "http://127.0.0.1:4100/dashboard"], null],
+  ["a path that starts with two slashes", ["example-agent", "default", "//evil.example/x"], null],
+  ["the login-code route", ["example-agent", "default", "/fabric/v1/login?code=abcdefghijklmnop"], null],
+  ["a token in the query", ["example-agent", "default", `/dashboard?token=${["sk", "-", "A1".repeat(12)].join("")}`], null]
+];
+
+/** The kind `page-link` ({url}): the FAC-SEM-143 instance paths it reports. */
+const links: Array<[string, string, string[]]> = [
+  ["an open_link", "fabric-dashboards://service/example-agent.default?path=%2Fdashboard", []],
+  ["the scheme in upper case", "FABRIC-DASHBOARDS://service/example-agent.default?path=%2Fdashboard", []],
+  ["a remote service's https page", "https://agents.example/dashboard", []],
+  ["another party's page (a payment step)", "https://pay.example/checkout/123", []],
+  ["a raw loopback address", "http://127.0.0.1:4100/dashboard", ["/url"]],
+  ["localhost", "http://localhost:4100/dashboard", ["/url"]],
+  ["a name under localhost", "http://example-agent.localhost:4100/", ["/url"]],
+  ["the IPv6 loopback", "http://[::1]:4100/dashboard", ["/url"]],
+  ["https on a loopback host", "https://127.0.0.1:4443/dashboard", ["/url"]],
+  ["another loopback address", "http://127.1.2.3/", ["/url"]],
+  ["an open_link without its instance", "fabric-dashboards://service/example-agent?path=%2Fdashboard", ["/url"]],
+  ["an open_link without its path", "fabric-dashboards://service/example-agent.default?tab=1", ["/url"]],
+  ["an open_link with two paths", "fabric-dashboards://service/example-agent.default?path=%2Fa&path=%2Fb", ["/url"]],
+  ["an open_link to the login-code route", "fabric-dashboards://service/example-agent.default?path=%2Ffabric%2Fv1%2Flogin%3Fcode%3Dabcdefghijklmnop", ["/url"]],
+  ["an open_link of another form", "fabric-dashboards://open?service=example-agent.default", ["/url"]],
+  ["not a URL", "dashboard", []]
+];
+
+/** The kind `interop-input-requests`: an input request in URL mode is a link a person opens. */
+const requests: Array<[string, Json, string[]]> = [
+  ["URL mode on the service's own page, as its open_link", { approve: { method: "elicitation/create", params: { mode: "url", message: "Approve the draft", url: "fabric-dashboards://service/example-agent.default?path=%2Fdashboard%2Fdrafts%2F7" } } }, []],
+  ["URL mode on another party's sign-in page", { connect: { method: "elicitation/create", params: { mode: "url", message: "Sign in to the store", url: "https://store.example/connect" } } }, []],
+  ["URL mode on a raw loopback address", { approve: { method: "elicitation/create", params: { mode: "url", message: "Approve the draft", url: "http://127.0.0.1:4100/dashboard/drafts/7" } } }, ["/inputRequests/approve/params/url"]],
+  ["form mode carries no link", { pick: { method: "elicitation/create", params: { message: "Pick one", requestedSchema: { type: "object", properties: { choice: { type: "string" } } } } } }, []]
+];
+
+export function pageLinkVectors(): Json {
+  return {
+    about: "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>, or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, the login-code route, a query that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a loopback host (127.0.0.0/8, [::1], localhost, *.localhost) and for a fabric-dashboards: link outside that grammar; any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
+    builds: builds.map(([name, [service, instance, page], expected]) => ({ name, input: { service, instance, path: page }, expected })),
+    links: links.map(([name, url, expected]) => ({ name, input: { url }, expected })),
+    requests: requests.map(([name, inputRequests, expected]) => ({ name, input: { inputRequests }, expected }))
+  };
+}
+
+export function buildPageLinkVectors(): string {
+  return `${JSON.stringify(pageLinkVectors(), null, 2)}\n`;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const target = path.join(projectRoot(), VECTOR_FILE);
+  const built = buildPageLinkVectors();
+  if (process.argv.includes("--write")) {
+    writeFileSync(target, built);
+    console.log(`wrote ${VECTOR_FILE}`);
+  } else if (readFileSync(target, "utf8") !== built) {
+    console.error(`stale vector file (run with --write): ${VECTOR_FILE}`);
+    process.exitCode = 1;
+  } else {
+    console.log("vector file matches the generator");
+  }
+}

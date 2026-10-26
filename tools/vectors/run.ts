@@ -25,6 +25,7 @@ import * as folderAttribution from "./folder-attribution.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
 import * as machineCall from "./machine-call.js";
+import * as pageLinks from "./page-links.js";
 import * as pairing from "./pairing.js";
 import * as partnerUsage from "./partner-usage.js";
 import * as relayCrypto from "./relay-crypto.js";
@@ -49,6 +50,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
   { source: "machine-call.ts", build: one(machineCall.VECTOR_FILE, machineCall.buildMachineCallVectors) },
+  { source: "page-links.ts", build: one(pageLinks.VECTOR_FILE, pageLinks.buildPageLinkVectors) },
   { source: "pairing.ts", build: one(pairing.VECTOR_FILE, pairing.buildPairingVectors) },
   { source: "partner-usage.ts", build: one(partnerUsage.VECTOR_FILE, partnerUsage.buildPartnerUsageVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },

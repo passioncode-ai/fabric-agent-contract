@@ -18,6 +18,7 @@ import { deviceRules } from "./device-rules.js";
 import { deviceTransportRules } from "./device-transport-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
+import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
@@ -70,6 +71,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   const delta = revocationDeltaRules(kind, value);
   if (delta) return delta;
   if (kind === "deep-link") return deepLinkRules(value);
+  const pageLink = pageLinkRules(kind, value);
+  if (pageLink) return pageLink;
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
   if (kind === "windows-token-file") return windowsTokenRules(value);
   const profiles = profileRules(kind, value);

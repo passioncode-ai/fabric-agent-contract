@@ -1,0 +1,296 @@
+{
+  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>, or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, the login-code route, a query that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a loopback host (127.0.0.0/8, [::1], localhost, *.localhost) and for a fabric-dashboards: link outside that grammar; any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
+  "builds": [
+    {
+      "name": "the dashboard's root",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/dashboard"
+      },
+      "expected": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard"
+    },
+    {
+      "name": "a job page with a query",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/dashboard/job_1?tab=log"
+      },
+      "expected": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard%2Fjob_1%3Ftab%3Dlog"
+    },
+    {
+      "name": "another instance",
+      "input": {
+        "service": "example-agent",
+        "instance": "work",
+        "path": "/"
+      },
+      "expected": "fabric-dashboards://service/example-agent.work?path=%2F"
+    },
+    {
+      "name": "a service id with an upper-case letter",
+      "input": {
+        "service": "Example-Agent",
+        "instance": "default",
+        "path": "/dashboard"
+      },
+      "expected": null
+    },
+    {
+      "name": "a missing instance",
+      "input": {
+        "service": "example-agent",
+        "instance": "",
+        "path": "/dashboard"
+      },
+      "expected": null
+    },
+    {
+      "name": "a full URL instead of a path",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "http://127.0.0.1:4100/dashboard"
+      },
+      "expected": null
+    },
+    {
+      "name": "a path that starts with two slashes",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "//evil.example/x"
+      },
+      "expected": null
+    },
+    {
+      "name": "the login-code route",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/fabric/v1/login?code=abcdefghijklmnop"
+      },
+      "expected": null
+    },
+    {
+      "name": "a token in the query",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/dashboard?token=sk-A1A1A1A1A1A1A1A1A1A1A1A1"
+      },
+      "expected": null
+    }
+  ],
+  "links": [
+    {
+      "name": "an open_link",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard"
+      },
+      "expected": []
+    },
+    {
+      "name": "the scheme in upper case",
+      "input": {
+        "url": "FABRIC-DASHBOARDS://service/example-agent.default?path=%2Fdashboard"
+      },
+      "expected": []
+    },
+    {
+      "name": "a remote service's https page",
+      "input": {
+        "url": "https://agents.example/dashboard"
+      },
+      "expected": []
+    },
+    {
+      "name": "another party's page (a payment step)",
+      "input": {
+        "url": "https://pay.example/checkout/123"
+      },
+      "expected": []
+    },
+    {
+      "name": "a raw loopback address",
+      "input": {
+        "url": "http://127.0.0.1:4100/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "localhost",
+      "input": {
+        "url": "http://localhost:4100/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a name under localhost",
+      "input": {
+        "url": "http://example-agent.localhost:4100/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "the IPv6 loopback",
+      "input": {
+        "url": "http://[::1]:4100/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "https on a loopback host",
+      "input": {
+        "url": "https://127.0.0.1:4443/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "another loopback address",
+      "input": {
+        "url": "http://127.1.2.3/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link without its instance",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent?path=%2Fdashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link without its path",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?tab=1"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link with two paths",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Fa&path=%2Fb"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link to the login-code route",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Ffabric%2Fv1%2Flogin%3Fcode%3Dabcdefghijklmnop"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link of another form",
+      "input": {
+        "url": "fabric-dashboards://open?service=example-agent.default"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "not a URL",
+      "input": {
+        "url": "dashboard"
+      },
+      "expected": []
+    }
+  ],
+  "requests": [
+    {
+      "name": "URL mode on the service's own page, as its open_link",
+      "input": {
+        "inputRequests": {
+          "approve": {
+            "method": "elicitation/create",
+            "params": {
+              "mode": "url",
+              "message": "Approve the draft",
+              "url": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard%2Fdrafts%2F7"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "name": "URL mode on another party's sign-in page",
+      "input": {
+        "inputRequests": {
+          "connect": {
+            "method": "elicitation/create",
+            "params": {
+              "mode": "url",
+              "message": "Sign in to the store",
+              "url": "https://store.example/connect"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "name": "URL mode on a raw loopback address",
+      "input": {
+        "inputRequests": {
+          "approve": {
+            "method": "elicitation/create",
+            "params": {
+              "mode": "url",
+              "message": "Approve the draft",
+              "url": "http://127.0.0.1:4100/dashboard/drafts/7"
+            }
+          }
+        }
+      },
+      "expected": [
+        "/inputRequests/approve/params/url"
+      ]
+    },
+    {
+      "name": "form mode carries no link",
+      "input": {
+        "inputRequests": {
+          "pick": {
+            "method": "elicitation/create",
+            "params": {
+              "message": "Pick one",
+              "requestedSchema": {
+                "type": "object",
+                "properties": {
+                  "choice": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "expected": []
+    }
+  ]
+}

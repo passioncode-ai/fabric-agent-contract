@@ -265,7 +265,9 @@ A job or call that needs a person returns `input_required` with MCP
 elicitation `inputRequests` in **form mode**; a choice is a single-select enum with titles
 (`oneOf: [{const, title}]`). Fabric maps it to an interaction point (ADR-0017) and answers with
 `tasks/update` (Task) or `fabric.job.get` + `inputResponses` (job handle). **FAC-SEM-018** form
-mode never requests a secret (MCP rule); secrets use URL mode.
+mode never requests a secret (MCP rule); secrets use URL mode. A URL-mode request on the service's own page carries
+its open_link as `url`, never a raw loopback address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
+DEC-0123); a tool answer that names a page for a person carries it in `open_link`.
 
 `inputRequests` is the MCP map of request key to `elicitation/create` request;
 `inputResponses` maps the same keys to `{action: accept | decline | cancel, content?}`.

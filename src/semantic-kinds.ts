@@ -41,6 +41,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "comms-transition": doc(),
   coordination: doc("coordination.schema.json"),
   "deep-link": wrap("url"),
+  "page-link": wrap("url"),
   "delegation-claims": doc("delegation-token.schema.json"),
   "delegation-hub-key": wrap("record", "kid", "x", "at", "answer", "applied"),
   "delegation-mint": wrap("grant", "token", "parent", "meter"),

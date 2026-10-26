@@ -176,9 +176,10 @@ when the action does not define the parameter (`FAC-SEM-052`), when:
 
 **FL-7 — Fabric opens a product's page** through Fabric Dashboards when it is installed:
 `fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>`, the `open_link` that Fabric
-Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, signed in by the host. Otherwise
-Fabric opens the service's own address — its `https` origin, or `http://127.0.0.1:<port>`, with the path — in
-the browser. Neither carries a token or a login code: signing in is the host's
+Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, signed in by the host. Only when
+Fabric Dashboards is confirmed absent on that computer (`not_installed`) does Fabric open the service's own address
+(its `https` origin, or `http://127.0.0.1:<port>`, with the path) in the browser; an installed host that did not open
+the page is reported, not replaced ([service](service.md#page-links) PL-3, DEC-0123). Neither carries a token or a login code: signing in is the host's
 ([Operator login](service.md#operator-login)). The `fabric-dashboards://` grammar is Fabric Dashboards'; this
 profile only uses it.
 

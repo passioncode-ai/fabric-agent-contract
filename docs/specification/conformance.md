@@ -106,6 +106,7 @@ detector; connections use a variant of it in `src/connections.ts`, and whether t
 | [`src/comms-hold.ts`](../../src/comms-hold.ts) | the operator's hold on the Project board | [`comms-hold.json`](../../fixtures/vectors/comms-hold.json) | DEC-0079 |
 | [`src/connections.ts`](../../src/connections.ts) | what an agent uses, read as `connectionsView` answers | [`connections.json`](../../fixtures/vectors/connections.json) | DEC-0096 |
 | [`src/actions.ts`](../../src/actions.ts) | whether a service takes an action call and as whose act (`actionDecision`), and a well-known document's actions declaration (`FAC-SEM-142`) | [`actions.json`](../../fixtures/vectors/actions.json) | DEC-0121 |
+| [`src/page-link-rules.ts`](../../src/page-link-rules.ts) | the open_link for a service's page (`dashboardsLink`, `parseDashboardsLink`) and a link handed to a person (`FAC-SEM-143`) | [`page-links.json`](../../fixtures/vectors/page-links.json) | DEC-0123 |
 
 ## Clients and readers
 
@@ -198,6 +199,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | a conformance checker probing a remote service (the adapter's `check_service.py`) | admits any no-token `401` whose body neither parses as the well-known document (`service-well-known.schema.json`) nor carries this service's own identity values (`service.id`, its instance, build or `process.pid`): it reads the body only to find none of them | DEC-0109 | the host's own test ([service](service.md#remote-placement)) |
 | a service that answers A2A peers (any service; the adapter's kits, FAA-10) | names its Agent Card in `surfaces.a2a` (SHOULD) valid against `service-well-known.schema.json`; serves the public card without authentication on a local placement and with no secret and no member of the well-known document about the running process on any placement; never accepts the descriptor's token on an A2A interface or names it in `securitySchemes`, authenticating peers with its own credentials or the estate's delegation tokens, the extended card included; declares a Fabric extension in the card with `required: false` | DEC-0122 | `fixtures/positive/service-well-known-a2a.json`, `fixtures/negative/service-well-known-a2a-*.json` in [`catalogue.json`](../../fixtures/catalogue.json); the service's own test ([service](service.md#a2a-agent-card)) |
 | a host or a probe reading a service's A2A surface (Fabric Dashboards, the adapter's `check_service.py`) | never calls an A2A interface with the descriptor's token and never reports its refusal as nonconformance | DEC-0122 | the host's own test ([service](service.md#a2a-agent-card)) |
+| a service, its CLI and its tools handing a person one of its pages (every service; the adapter's kits) | presents Fabric Dashboards' `open_link` built as `dashboardsLink` builds it, in a tool answer's `open_link`; never opens a browser itself; a raw address only beside it as a diagnostic; an event's `link` stays a path | DEC-0123; `FAC-SEM-143` | [`page-links.json`](../../fixtures/vectors/page-links.json); the service's own test ([service](service.md#page-links)) |
+| an agent handing a person a service's page (every agent; the adapter's skills) | presents the `open_link` and opens it through Fabric Dashboards with no browser fallback; uses the browser only where the host answers `not_installed`, and reports an installed host that did not open the page | DEC-0123 PL-2, PL-3 | the agent's own test ([service](service.md#page-links)) |
 
 A client that fails `FAC-SEM-036` breaks without an error: the service refuses every poll, and
 the client shows an empty feed and drops every `notify: true` event.
@@ -314,7 +317,7 @@ reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`. `FAC-SEM-141` was reserved (receipt SEM-0141) by DEC-0121's run and is not used: the
 decision names `FAC-SEM-142`, reserved after it.
 
-**Next free rule code:** `FAC-SEM-143` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-144` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -457,6 +460,7 @@ decision names `FAC-SEM-142`, reserved after it.
 | `FAC-SEM-139` | `credential-envelope-check` | [credentials](credentials.md#semantic-rules) | SEM-0139 |
 | `FAC-SEM-140` | `call-record`, `device-check-in` | [credentials](credentials.md#semantic-rules) | SEM-0140 |
 | `FAC-SEM-142` | `service-well-known`, `action-call` | [service](service.md#semantic-rules) | SEM-0142 |
+| `FAC-SEM-143` | `page-link`, `interop-input-requests` | [service](service.md#semantic-rules) | SEM-0143 |
 
 ## Compatibility policy
 
