@@ -5,6 +5,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | Handoff | Decisions | Merge |
 |---|---|---|
 | [2026-10-26 a reply's delivery on the board](2026-10-26-reply-delivery.md) | DEC-0135 (CT-154; CT-166 filed) | pending |
+| [2026-10-26 the family's wording settled](2026-10-26-family-wording.md) | DEC-0137 (CT-157 closed; CT-167, CT-168, CT-170 filed) | merged, #209 `471978ec`; released `v0.1.0+2026-10-26.11` |
 | [2026-10-26 the organization's relay](2026-10-26-org-relay.md) | DEC-0134 (CT-37; CT-162, CT-163, CT-164 filed) | merged, #205 `8a733416`; released `v0.1.0+2026-10-26.10` |
 | [2026-10-26 the mandate's hand-over vectors and MD-2a](2026-10-26-mandate-handon.md) | DEC-0136 (CT-149 in part; CT-165 filed) | merged, #204 `b0cd1dc4`; released `v0.1.0+2026-10-26.9` |
 | [2026-10-26 the machines' report](2026-10-26-machine-report.md) | DEC-0132 (CT-152; CT-161 filed) | merged, #202 `d2718eff`; released `v0.1.0+2026-10-26.8` |

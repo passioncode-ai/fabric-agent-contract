@@ -37,7 +37,7 @@ the message it answers, and the contract had no field to ask for the whole threa
   DR-5 numbered apart, the full released range v0.3.2 to v0.3.12, SCR-19's fallback, the README's owed clause).
   Fabric told on the board before its 0.3.13 tag (thread `7ef21793`); round 8 fail (CT-154 cited DR-4 for DR-5; the
   header put the own-message narrowing against the released versions, not 0.1's text); round 9 clean (DR-3 and the requester clause fall back to `thread` for a request
-  the board no longer holds; DR-5 names Fabric v0.3.2 to v0.3.12). Fixed after each. Non-blocking findings:
+  the board no longer holds; DR-5 names Fabric v0.3.2 to v0.3.12). round 10 clean: two clean rounds (9, 10); round 10's risks filed in CT-166. Fixed after each. Non-blocking findings:
   CT-166.
 
 ## Open
