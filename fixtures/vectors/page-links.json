@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. The grammar is Fabric Dashboards' (its ADR-0005): `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>, with ?path=<path> encoded as URLSearchParams encodes it when a page is named (a null path names none: the dashboard itself), or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, a backslash a resolver reads as another host included, the login-code route however its dot segments or letter case hide it, a query or fragment, a hash route's own query included, that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a local host as WHATWG URL writes it (127.0.0.0/8, [::1], [::ffff:127.x.y.z], localhost and names under it, a trailing dot ignored, and the unspecified 0.0.0.0 and [::] of a wildcard bind) and for a fabric-dashboards: link outside that grammar, which carries no parameter but one non-empty path, nothing after the key but one slash, and a path the host's safePath accepts (no backslash or control character anywhere, at most 2048 characters) with no whitespace (originPath, stricter than the host), read as written rather than as a URL parser normalises it (a dot segment, an empty port or user part, a tab, an empty fragment are refused); its parameters are read as the host's URL parser reads them (a second ? stays part of the name); any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
+  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. The grammar is Fabric Dashboards' (its ADR-0005): `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>, with ?path=<path> encoded as URLSearchParams encodes it when a page is named (a null path names none: the dashboard itself), or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, a backslash a resolver reads as another host included, the login-code route however its dot segments or letter case hide it, a query or fragment, a hash route's own query included, that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a local host as WHATWG URL writes it (127.0.0.0/8, [::1], [::ffff:127.x.y.z], localhost and names under it, a trailing dot ignored, and the unspecified 0.0.0.0 and [::] of a wildcard bind) and for a fabric-dashboards: link outside that grammar, which carries no parameter but one non-empty path, nothing after the key but one slash, and a path the host's safePath accepts (no backslash or control character anywhere, at most 2048 characters) with no whitespace (originPath, stricter than the host), read as written rather than as a URL parser normalises it (a dot segment, an empty port or user part, a tab or newline before the query, an empty fragment are refused, and a link a URL parser reads as fabric-dashboards: after dropping such characters is still checked); its path holds no lone surrogate; its parameters are read as the host's URL parser reads them (a second ? stays part of the name); any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
   "builds": [
     {
       "name": "the dashboard itself, no path",
@@ -146,6 +146,15 @@
       "expected": null
     },
     {
+      "name": "a lone surrogate, which no encoding carries faithfully",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/\ud800"
+      },
+      "expected": null
+    },
+    {
       "name": "a space in the path (the contract keeps originPath's no-whitespace, stricter than the host)",
       "input": {
         "service": "example-agent",
@@ -215,6 +224,33 @@
       "name": "a dot segment before the key (read as written, not as a URL parser normalises it)",
       "input": {
         "url": "fabric-dashboards://service/./example-agent.default"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a control character before the scheme, which a URL parser drops",
+      "input": {
+        "url": "\u0001fabric-dashboards://service/example-agent.default?path=%2Ffabric%2Fv1%2Flogin%3Fcode%3D123456"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a tab inside the scheme, which a URL parser drops",
+      "input": {
+        "url": "fabric-\tdashboards://service/example-agent.default?path=%2Fdashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a newline after the scheme name",
+      "input": {
+        "url": "fabric-dashboards\n://service/example-agent.default?path=%2Fx%3Ftoken%3Dabc"
       },
       "expected": [
         "/url"

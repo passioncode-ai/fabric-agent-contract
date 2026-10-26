@@ -26,6 +26,8 @@ const HOST_REFUSED = /[\\\u0000-\u001f\u007f]/;
 export const MAX_PAGE_PATH_LENGTH = 2048;
 export const MAX_PAGE_LINK_LENGTH = 20_000;
 const BASE = "http://origin.invalid";
+/** A UTF-16 surrogate without its pair, which no encoding carries faithfully: it would read back as U+FFFD. */
+const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
 export type DashboardsLink = { service: string; instance: string; path?: string };
 export type ParsedDashboardsLink = ({ ok: true } & DashboardsLink) | { ok: false; problems: string[] };
@@ -76,7 +78,7 @@ function linkProblems(service: string, instance: string, path?: string): string[
   if (!INSTANCE.test(instance)) problems.push("the instance is not an instance name");
   if (path === undefined || path === "") return problems;
   if (path.length > MAX_PAGE_PATH_LENGTH) problems.push(`the path is at most ${MAX_PAGE_PATH_LENGTH} characters`);
-  else if (!ORIGIN_PATH.test(path) || HOST_REFUSED.test(path) || new URL(path, BASE).origin !== BASE) problems.push("the path is not a path on the service origin");
+  else if (!ORIGIN_PATH.test(path) || HOST_REFUSED.test(path) || LONE_SURROGATE.test(path) || new URL(path, BASE).origin !== BASE) problems.push("the path is not a path on the service origin");
   else if (pathCarriesCredential(path)) problems.push("the path could carry a token or a login code; signing in is the host's");
   return problems;
 }
@@ -117,12 +119,21 @@ export function pageLinkFindings(url: unknown, instancePath: string, label: stri
   if (isLoopbackPageUrl(url)) return [{ code: "FAC-SEM-143", instancePath, message: `${label} hands a person a raw local address; give Fabric Dashboards' open_link (DEC-0123 PL-1)` }];
   // Only what a URL parser strips around a URL: C0 controls and space.
   const bare = url.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, "");
-  // Recognised behind any whitespace, read as the URL parser would see it: a no-break space before it stays and fails.
-  if (/^\s*fabric-dashboards:/i.test(url)) {
+  // Recognised behind any whitespace, or as a URL parser sees it (which drops C0 around it and a tab or newline inside
+  // the scheme); read as written, so such a link and a no-break space before it fail.
+  if (/^\s*fabric-dashboards:/i.test(url) || parsesAsDashboards(url)) {
     const parsed = parseDashboardsLink(bare);
     if (!parsed.ok) return [{ code: "FAC-SEM-143", instancePath, message: `${label} is not an open_link: ${parsed.problems.join("; ")} (DEC-0123 PL-1)` }];
   }
   return [];
+}
+
+function parsesAsDashboards(url: string): boolean {
+  try {
+    return new URL(url).protocol === "fabric-dashboards:";
+  } catch {
+    return false;
+  }
 }
 
 /** FAC-SEM-143 on an input request in URL mode (kind `interop-input-requests`): its `url` is a link a person opens. */

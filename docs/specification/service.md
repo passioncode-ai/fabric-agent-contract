@@ -476,8 +476,9 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   backslash or a control character anywhere in the path; a path over 2048 characters; a second `?`, which stays part
   of the parameter's name). The contract is stricter than the host in four places: whitespace in the path
   (`originPath`), the login-code route, a credential in the path's query or fragment, and a link read as written rather
-  than as a URL parser normalises it (a dot segment, an empty port, user part or fragment, a stray `&`, a tab or a
-  space are refused). `dashboardsLink` never builds any of these.
+  than as a URL parser normalises it (a dot segment, an empty port, user part or fragment, a stray `&`, a tab, a
+  newline or a space before the query are refused, and so is a lone surrogate in the path). `dashboardsLink` never
+  builds any of these.
 - **PL-2, no browser of its own.** A service and an agent MUST NOT open a browser on a service's page themselves,
   except as PL-3 allows. An agent opens the open_link through the host (Fabric Dashboards' `open`, with no browser
   fallback).
