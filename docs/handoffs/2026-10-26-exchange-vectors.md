@@ -23,6 +23,7 @@ take in Fabric ADR-0180's answers to DEC-0129's open questions (thread `115ef7fb
   against ADR-0180 point 4; the conformance rows named the vectors for duties no vector exercises). Fixed: OL-6 limits
   itself to roles and leaves the relay's status rule to CT-37 (now in its row and Not decided); each row names the
   adopter's own test beside the vectors.
+- Round 2 (head `8a727e40`): unit, seam and product pass. Their non-blocking findings are in CT-158 and CT-160.
 
 ## Decisions
 

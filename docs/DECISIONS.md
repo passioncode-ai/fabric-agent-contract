@@ -7945,7 +7945,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:**
   1. **Vectors.** `fixtures/vectors/org-exchange.json`, written by `tools/vectors/org-exchange.ts`: draft digests,
      `FAC-SEM-151`, accepting a signed key set and member list, and the root's registration, with whether the claim may
-     be checked at all. Every server of the exchange and every Fabric that registers a root runs it.
+     be checked at all. Every server of the exchange runs it; a Fabric that drafts nothing runs its digest cases and
+     builds its registration bodies like the vectors'.
   2. **The root's answer** `GET .../root` is `org-root.schema.json`: `{org, issuer, root: {kid, x}}`.
   3. **The issuer's cap.** `verifyRootRegistration` refuses an issuer over 261 characters as `malformed`, as
      `verifyOrgKeySet` and the schema read an issuer.
@@ -7966,6 +7967,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/org-root.schema.json` (new); `src/org-exchange.ts`; `tools/vectors/org-exchange.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/org-exchange.json`; `docs/specification/membership.md` (header, the
   exchange's header and routes, OX-1, OL-6, Not decided), `conformance.md`, `docs/DOCMAP.md`; fixtures;
-  `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`; backlog CT-158, CT-159,
-  CT-160.
+  `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
+  `docs/specification/README.md`; backlog CT-37, CT-158, CT-159, CT-160; `docs/handoffs/README.md`.
 - **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.

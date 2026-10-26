@@ -462,7 +462,8 @@ its relay (OX-6).
 - Losing the root: the owner's Fabric holds it, so its loss means a new pin by every member (OM-3), and every key set
   waits on that Fabric being reachable. Fabric ADR-0180 proposes a planned successor named in a key set the old root
   signs and an optional second `recovery` key in the pin that signs only a successor statement; the contract decides
-  their shapes (CT-160).
+  their shapes, and how a recovery key reaches a pin, since the root's answer
+  (`org-root`) is closed (CT-160).
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
 - What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
